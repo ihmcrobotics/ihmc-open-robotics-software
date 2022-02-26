@@ -1,6 +1,7 @@
 package us.ihmc.gdx.ui.yo;
 
 import imgui.extension.implot.ImPlot;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.gdx.ui.tools.ImPlotTools;
 
 import java.text.DecimalFormat;
@@ -13,7 +14,12 @@ public class ImPlotDoublePlotLine implements ImPlotPlotLine
    private final String variableName;
    private String labelID;
    private static final DecimalFormat decimal5DPrintFormatter = new DecimalFormat("0.00000");
-   private int bufferSize = 1000;
+   private double history = 3.0;
+   private Stopwatch stopwatch = new Stopwatch();
+   private int bufferSize = 100;
+   private double timeForOneBufferEntry = history / bufferSize;
+   private long lastTickIndex = 0;
+   private long tickIndex = 0;
    private final Integer[] xValues = ImPlotTools.createIndex(bufferSize);
    private final Double[] yValuesA = ImPlotTools.newNaNFilledBuffer(bufferSize);
    private final Double[] yValuesB = ImPlotTools.newNaNFilledBuffer(bufferSize);
@@ -32,23 +38,62 @@ public class ImPlotDoublePlotLine implements ImPlotPlotLine
    {
       labelID = variableNameBase + decimal5DPrintFormatter.format(value) + variableNamePostfix;
 
-      if (filledIndex < bufferSize)
-      {
-         yValuesA[filledIndex] = value;
-         ++filledIndex;
+      int numberOfTicksToAdvance = 0;
 
-         if (filledIndex == bufferSize)
-         {
-            System.arraycopy(yValuesA, 0, yValuesB, 0, bufferSize);
-         }
+      double totalElapsed = stopwatch.totalElapsed();
+      if (Double.isNaN(totalElapsed))
+      {
+         stopwatch.start();
       }
       else
       {
-         Double[] previousValues = isA ? yValuesB : yValuesA;
-         Double[] updatedValues = isA ? yValuesA : yValuesB;
-         System.arraycopy(previousValues, 1, updatedValues, 0, bufferSize - 1);
-         isA = !isA;
-         updatedValues[bufferSize - 1] = value;
+         tickIndex = (long) (totalElapsed / timeForOneBufferEntry);
+         numberOfTicksToAdvance = (int) (tickIndex - lastTickIndex);
+         lastTickIndex = tickIndex;
+      }
+
+      int numberOfTicksToAdvanceBeforeFilling = Math.min(bufferSize, filledIndex + numberOfTicksToAdvance) - filledIndex;
+      int numberOfTicksToAdvanceAfterFilling = numberOfTicksToAdvance - numberOfTicksToAdvanceBeforeFilling;
+      if (filledIndex < bufferSize)
+      {
+         if (numberOfTicksToAdvanceBeforeFilling == 0)
+         {
+            yValuesA[filledIndex] = value;
+         }
+         else
+         {
+            for (int i = 0; i < numberOfTicksToAdvanceBeforeFilling && filledIndex < bufferSize; i++)
+            {
+               ++filledIndex;
+               if (filledIndex < bufferSize)
+                  yValuesA[filledIndex] = value;
+            }
+
+            if (filledIndex == bufferSize)
+            {
+               System.arraycopy(yValuesA, 0, yValuesB, 0, bufferSize); // copy A to B when we fill up the first time
+            }
+         }
+      }
+
+      if (filledIndex == bufferSize)
+      {
+         Double[] previousValues = isA ? yValuesA : yValuesB;
+         Double[] updatedValues = isA ? yValuesB : yValuesA;
+         if (numberOfTicksToAdvanceAfterFilling > 0)
+         {
+            System.arraycopy(previousValues, numberOfTicksToAdvanceAfterFilling, updatedValues, 0, bufferSize - numberOfTicksToAdvanceAfterFilling);
+            isA = !isA;
+
+            for (int i = 0; i < numberOfTicksToAdvanceAfterFilling; i++)
+            {
+               updatedValues[bufferSize - 1 - i] = value;
+            }
+         }
+         else
+         {
+            previousValues[bufferSize - 1] = value;
+         }
       }
    }
 
