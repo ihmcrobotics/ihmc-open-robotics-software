@@ -83,10 +83,17 @@ public final class ImPlotTools
       return output;
    }
 
-   public static Double[] newNaNFilledBuffer(int bufferSize)
+   public static Double[] newNaNFilledDoubleBuffer(int bufferSize)
    {
       Double[] buffer = new Double[bufferSize];
       Arrays.fill(buffer, Double.NaN);
+      return buffer;
+   }
+
+   public static Integer[] newZeroFilledIntegerBuffer(int bufferSize)
+   {
+      Integer[] buffer = new Integer[bufferSize];
+      Arrays.fill(buffer, 0);
       return buffer;
    }
 

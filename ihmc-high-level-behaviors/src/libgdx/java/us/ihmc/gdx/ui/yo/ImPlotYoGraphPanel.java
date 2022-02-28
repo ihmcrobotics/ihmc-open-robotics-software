@@ -216,7 +216,7 @@ public class ImPlotYoGraphPanel
 
       YoDoubleClientHelper yoDoubleHelper = yoClientHelper.subscribeToYoDouble(yoVariableName);
       LogTools.info("Setting up graph for variable: {}", yoDoubleHelper.getFullName());
-      Double[] values = ImPlotTools.newNaNFilledBuffer(bufferSize);
+      Double[] values = ImPlotTools.newNaNFilledDoubleBuffer(bufferSize);
       synchronized (graphs)
       {
          ArrayList<ImPlotYoGraph> graphsForServer = graphs.computeIfAbsent(serverName, key -> new ArrayList<>());
