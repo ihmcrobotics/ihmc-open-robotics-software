@@ -37,6 +37,23 @@ public class GDXBulletPhysicsManager
    private ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean simulate = new ImBoolean(false);
    private ImFloat simulationRate = new ImFloat(1.0f);
+   private final int worldTicksPerSecond = 240;
+   /**
+    * The simulation dt of the bullet world in bullet world time. This is always constant and for us, in
+    * a robotics setting, rather than a gaming setting, want higher accuracy, so we set this to 250 Hz
+    * rather than maybe a typical setting of 60 Hz for simple games.
+    */
+   private final float fixedTimeStep = (float) UnitConversions.hertzToSeconds(worldTicksPerSecond);
+   /**
+    * Say we call bullet simulate and wait around for a while before calling it again.
+    * The next time we call Bullet, it is going to try to catch back up by performing
+    * several simulation ticks. If we wait like, 5 minutes, we surely don't want Bullet
+    * to try and to 5 minutes of simulation in one tick. We probably never want it to do
+    * more than like 1/4 of a second.
+    */
+   private final double longestTimeWedEverWantToLetBulletSimulate = 0.25;
+   private final int maxSubSteps = (int) Math.round(worldTicksPerSecond * longestTimeWedEverWantToLetBulletSimulate);
+
    private GDXBulletPhysicsDebugger debugger;
 
    public void create()
@@ -117,15 +134,19 @@ public class GDXBulletPhysicsManager
       multiBodyDynamicsWorld.removeMultiBodyConstraint(constraint);
    }
 
-   public void simulate(float timeStep)
+   /**
+    * See the Bullet wiki article on this:
+    * https://web.archive.org/web/20170708145909/http://bulletphysics.org/mediawiki-1.5.8/index.php/Stepping_the_World
+    */
+   public void simulate(float timePassedSinceThisWasCalledLast)
    {
       debugger.update();
       if (simulate.get())
       {
-         timeStep *= simulationRate.get();
-         int maxSubSteps = 1000; // 0 means use variable time step
-         float fixedTimeStep = (float) UnitConversions.hertzToSeconds(240); // value not used for variable time step
-         multiBodyDynamicsWorld.stepSimulation(timeStep, maxSubSteps, fixedTimeStep); // FIXME: Sometimes EXCEPTION_ACCESS_VIOLATION
+         // We can simulate slower or faster in real world time by gaming the first parameter.
+         // Bullet will think it needs to catch up more, or it will not do as much.
+         timePassedSinceThisWasCalledLast *= simulationRate.get();
+         multiBodyDynamicsWorld.stepSimulation(timePassedSinceThisWasCalledLast, maxSubSteps, fixedTimeStep); // FIXME: Sometimes EXCEPTION_ACCESS_VIOLATION
       }
    }
 
