@@ -12,19 +12,15 @@
 // ====
 // + ELIMINATE DUPLICATE CODE BTW LIFT & SWING STATES
 //   + Do we need a LIFT state?
-// + I have some controller state that is not rewindable - need to fix
-//   + YoVariables
-//   + check out YoMatrix
+// + Converted all state to YoVariables but still not rewindable - need to fix
 // + Make human-readable var names
-// + IMPROVE LOGGING SO CAN DEBUG BETTER
+// + Improve logging for debugging:
 //   + Q: How well hitting desired TD?
 //   + Q: How well hitting prescribed timing?
-// + General cleanup
 // + Predictive TDLO
 //   + Add full pole-placement to TDLO: convert from continuous -> discrete
 // + Better ground-speed matching at TD?
 // + Get away from z-cubic-spline for SWING
-// + Learn how to use Yo-variables
 // + More learning of SCS plotting/video tools
 // + Can we fix .getCurrentState() for these state machines?
 //   + (get rid of inLiftState flag)
@@ -78,7 +74,7 @@ public class LIPMWalkerControllerGMN implements RobotController
 
    private final SideDependentList<StateMachine<States, State>> stateMachines;
 
-   private final double grav  = 9.81;
+   private final double grav = 9.81;
    private final double desiredBodyHeight = 0.8;
    private final double stepTime = 0.65;
    private final double lipTipFreq = Math.sqrt(grav/desiredBodyHeight);
