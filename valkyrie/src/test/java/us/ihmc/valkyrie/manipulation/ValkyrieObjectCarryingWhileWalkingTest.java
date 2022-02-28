@@ -1,7 +1,9 @@
 package us.ihmc.valkyrie.manipulation;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static us.ihmc.robotics.Assert.assertTrue;
 
+import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,24 +14,30 @@ import controller_msgs.msg.dds.HandWrenchTrajectoryMessage;
 import controller_msgs.msg.dds.PrepareForLocomotionMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.manipulation.HumanoidObjectCarryingWhileWalkingTest;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
+import us.ihmc.commonWalkingControlModules.capturePoint.WalkingTrajectoryPath;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.EuclidCoreMissingTools;
+import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.definition.robot.ExternalWrenchPointDefinition;
@@ -42,6 +50,7 @@ import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
 import us.ihmc.scs2.simulation.robot.Robot;
+import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimFloatingJointBasics;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimJointBasics;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimRigidBodyBasics;
 import us.ihmc.scs2.simulation.robot.trackers.ExternalWrenchPoint;
@@ -53,13 +62,18 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.yoVariables.euclid.YoVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoLong;
 
-public class ValkyrieObjectCarryingWhileWalkingTest extends HumanoidObjectCarryingWhileWalkingTest
+public class ValkyrieObjectCarryingWhileWalkingTest
 {
    private static final boolean ADD_PENDULUM = true;
+   private static final RobotSide HAND_SIDE = RobotSide.LEFT;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private SimulationTestingParameters simulationTestingParameters;
    private SCS2AvatarTestingSimulation simulationTestHelper;
+   private DRCRobotModel robotModel;
+   private PendulumAttachmentController pendulumAttachmentController;
 
    @BeforeEach
    public void setup()
@@ -80,17 +94,31 @@ public class ValkyrieObjectCarryingWhileWalkingTest extends HumanoidObjectCarryi
       }
 
       simulationTestingParameters = null;
+
+      robotModel = null;
+      pendulumAttachmentController = null;
    }
 
-   @Override
    public DRCRobotModel getRobotModel()
    {
-      return new ValkyrieRobotModel(RobotTarget.SCS);
+      if (robotModel == null)
+         robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
+      return robotModel;
    }
 
    public String getHandName()
    {
-      return getRobotModel().getJointMap().getHandName(RobotSide.LEFT);
+      return getRobotModel().getJointMap().getHandName(HAND_SIDE);
+   }
+
+   public RigidBodyTransformReadOnly getPendulumOffsetInHand()
+   {
+      return getRobotModel().getJointMap().getHandControlFrameToWristTransform(HAND_SIDE);
+   }
+
+   public Pose3DReadOnly getHandDesiredPoseInChestFrame()
+   {
+      return new Pose3D(new Point3D(0.55, 0.35, -0.25), new Quaternion());
    }
 
    @Test
@@ -101,34 +129,24 @@ public class ValkyrieObjectCarryingWhileWalkingTest extends HumanoidObjectCarryi
                                                                                                                          simulationTestingParameters);
       simulationTestHelper = factory.createAvatarTestingSimulation();
 
-      RigidBodyTransform controlFrameOffset = robotModel.getJointMap().getHandControlFrameToWristTransform(RobotSide.LEFT);
-
-      SimRigidBodyBasics leftHand = simulationTestHelper.getRobot().getRigidBody(robotModel.getJointMap().getHandName(RobotSide.LEFT));
-
-      ExternalWrenchPoint robotAttachmentPoint = leftHand.getParentJoint().getAuxialiryData()
-                                                         .addExternalWrenchPoint(new ExternalWrenchPointDefinition("robotAttachmentPoint", controlFrameOffset));
-      simulationTestHelper.getRobot().updateFrames();
-
-      FreeFloatingPendulumRobotDefinition pendulumRobotDefinition = new FreeFloatingPendulumRobotDefinition();
-      pendulumRobotDefinition.rootJoint.setInitialJointState(new SixDoFJointState(null,
-                                                                                  leftHand.getParentJoint().getFrameAfterJoint().getTransformToRoot()
-                                                                                          .getTranslation()));
-      Robot pendulumRobot = simulationTestHelper.getSimulationSession().addRobot(pendulumRobotDefinition);
-
-      Controller attachmentController = createAttachmentController(robotAttachmentPoint, pendulumRobot);
-      pendulumRobot.getControllerManager().addController(attachmentController);
+      FreeFloatingPendulumRobotDefinition pendulumRobotDefinition = setupPendulum();
 
       simulationTestHelper.start();
 
-      prepareHand(pendulumRobotDefinition);
+      prepareHand(getHandName(), pendulumRobotDefinition);
 
       FullHumanoidRobotModel controllerFullRobotModel = simulationTestHelper.getControllerFullRobotModel();
 
-      FootstepDataListMessage stepsInPlace = EndToEndTestTools.generateStepsInPlace(controllerFullRobotModel, 10);
+      FootstepDataListMessage stepsInPlace = EndToEndTestTools.generateStepsInPlace(controllerFullRobotModel, 4);
       simulationTestHelper.publishToController(stepsInPlace);
 
-      assertTrue(simulationTestHelper.simulateAndWait(2.0
-            + EndToEndTestTools.computeWalkingDuration(stepsInPlace, robotModel.getWalkingControllerParameters())));
+      pendulumAttachmentController.oscillationCalculator.clear();
+      pendulumAttachmentController.rootJoint.getJointTwist().setToZero();
+
+      assertTrue(simulationTestHelper.simulateAndWait(2.0));
+      assertCorrectControlMode();
+      assertTrue(simulationTestHelper.simulateAndWait(EndToEndTestTools.computeWalkingDuration(stepsInPlace, robotModel.getWalkingControllerParameters())));
+      assertTrue(pendulumAttachmentController.angleStandardDeviation.getValue() < 0.03);
    }
 
    @Test
@@ -139,46 +157,33 @@ public class ValkyrieObjectCarryingWhileWalkingTest extends HumanoidObjectCarryi
                                                                                                                          simulationTestingParameters);
       simulationTestHelper = factory.createAvatarTestingSimulation();
 
-      RigidBodyTransform controlFrameOffset = robotModel.getJointMap().getHandControlFrameToWristTransform(RobotSide.LEFT);
-
-      SimRigidBodyBasics leftHand = simulationTestHelper.getRobot().getRigidBody(robotModel.getJointMap().getHandName(RobotSide.LEFT));
-
-      ExternalWrenchPoint robotAttachmentPoint = leftHand.getParentJoint().getAuxialiryData()
-                                                         .addExternalWrenchPoint(new ExternalWrenchPointDefinition("robotAttachmentPoint", controlFrameOffset));
-      simulationTestHelper.getRobot().updateFrames();
-
-      FreeFloatingPendulumRobotDefinition pendulumRobotDefinition = new FreeFloatingPendulumRobotDefinition();
-      pendulumRobotDefinition.rootJoint.setInitialJointState(new SixDoFJointState(null,
-                                                                                  leftHand.getParentJoint().getFrameAfterJoint().getTransformToRoot()
-                                                                                          .getTranslation()));
-
-      if (ADD_PENDULUM)
-      {
-         Robot pendulumRobot = simulationTestHelper.getSimulationSession().addRobot(pendulumRobotDefinition);
-
-         Controller attachmentController = createAttachmentController(robotAttachmentPoint, pendulumRobot);
-         pendulumRobot.getControllerManager().addController(attachmentController);
-      }
+      FreeFloatingPendulumRobotDefinition pendulumRobotDefinition = setupPendulum();
 
       simulationTestHelper.start();
 
-      prepareHand(pendulumRobotDefinition);
+      prepareHand(getHandName(), pendulumRobotDefinition);
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
       FramePose3D startPose = new FramePose3D(simulationTestHelper.getReferenceFrames().getMidFootZUpGroundFrame());
       startPose.changeFrame(worldFrame);
-      FootstepDataListMessage stepsInPlace = EndToEndTestTools.forwardSteps(RobotSide.LEFT,
-                                                                            8,
-                                                                            a -> steppingParameters.getDefaultStepLength(),
-                                                                            steppingParameters.getInPlaceWidth(),
-                                                                            0.75,
-                                                                            0.25,
-                                                                            startPose,
-                                                                            true);
-      simulationTestHelper.publishToController(stepsInPlace);
+      FootstepDataListMessage steps = EndToEndTestTools.forwardSteps(RobotSide.LEFT,
+                                                                     6,
+                                                                     a -> steppingParameters.getDefaultStepLength(),
+                                                                     steppingParameters.getInPlaceWidth(),
+                                                                     0.75,
+                                                                     0.25,
+                                                                     startPose,
+                                                                     true);
+      simulationTestHelper.publishToController(steps);
 
-      assertTrue(simulationTestHelper.simulateAndWait(2.0 + EndToEndTestTools.computeWalkingDuration(stepsInPlace, walkingControllerParameters)));
+      pendulumAttachmentController.oscillationCalculator.clear();
+      pendulumAttachmentController.rootJoint.getJointTwist().setToZero();
+
+      assertTrue(simulationTestHelper.simulateAndWait(2.0));
+      assertCorrectControlMode();
+      assertTrue(simulationTestHelper.simulateAndWait(EndToEndTestTools.computeWalkingDuration(steps, robotModel.getWalkingControllerParameters())));
+      assertTrue(pendulumAttachmentController.angleStandardDeviation.getValue() < 0.03);
    }
 
    @Test
@@ -190,36 +195,17 @@ public class ValkyrieObjectCarryingWhileWalkingTest extends HumanoidObjectCarryi
                                                                                                                          simulationTestingParameters);
       simulationTestHelper = factory.createAvatarTestingSimulation();
 
-      RigidBodyTransform controlFrameOffset = robotModel.getJointMap().getHandControlFrameToWristTransform(RobotSide.LEFT);
-
-      SimRigidBodyBasics leftHand = simulationTestHelper.getRobot().getRigidBody(robotModel.getJointMap().getHandName(RobotSide.LEFT));
-
-      ExternalWrenchPoint robotAttachmentPoint = leftHand.getParentJoint().getAuxialiryData()
-                                                         .addExternalWrenchPoint(new ExternalWrenchPointDefinition("robotAttachmentPoint", controlFrameOffset));
-      simulationTestHelper.getRobot().updateFrames();
-
-      FreeFloatingPendulumRobotDefinition pendulumRobotDefinition = new FreeFloatingPendulumRobotDefinition();
-      pendulumRobotDefinition.rootJoint.setInitialJointState(new SixDoFJointState(null,
-                                                                                  leftHand.getParentJoint().getFrameAfterJoint().getTransformToRoot()
-                                                                                          .getTranslation()));
-
-      if (ADD_PENDULUM)
-      {
-         Robot pendulumRobot = simulationTestHelper.getSimulationSession().addRobot(pendulumRobotDefinition);
-
-         Controller attachmentController = createAttachmentController(robotAttachmentPoint, pendulumRobot);
-         pendulumRobot.getControllerManager().addController(attachmentController);
-      }
+      FreeFloatingPendulumRobotDefinition pendulumRobotDefinition = setupPendulum();
 
       simulationTestHelper.start();
 
-      prepareHand(pendulumRobotDefinition);
+      prepareHand(getHandName(), pendulumRobotDefinition);
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
       FramePose3D startPose = new FramePose3D(simulationTestHelper.getReferenceFrames().getMidFootZUpGroundFrame());
       startPose.changeFrame(worldFrame);
-      FootstepDataListMessage stepsInPlace = EndToEndTestTools.circleSteps(RobotSide.LEFT,
+      FootstepDataListMessage steps = EndToEndTestTools.circleSteps(RobotSide.LEFT,
                                                                            20,
                                                                            a -> steppingParameters.getDefaultStepLength(),
                                                                            steppingParameters.getInPlaceWidth(),
@@ -229,36 +215,54 @@ public class ValkyrieObjectCarryingWhileWalkingTest extends HumanoidObjectCarryi
                                                                            true,
                                                                            RobotSide.RIGHT,
                                                                            1.0);
-      simulationTestHelper.publishToController(stepsInPlace);
+      simulationTestHelper.publishToController(steps);
 
-      assertTrue(simulationTestHelper.simulateAndWait(2.0 + EndToEndTestTools.computeWalkingDuration(stepsInPlace, walkingControllerParameters)));
+      pendulumAttachmentController.oscillationCalculator.clear();
+      pendulumAttachmentController.rootJoint.getJointTwist().setToZero();
+
+      assertTrue(simulationTestHelper.simulateAndWait(2.0));
+      assertCorrectControlMode();
+      assertTrue(simulationTestHelper.simulateAndWait(EndToEndTestTools.computeWalkingDuration(steps, robotModel.getWalkingControllerParameters())));
+      assertTrue(pendulumAttachmentController.angleStandardDeviation.getValue() < 0.04);
    }
 
-   private void prepareHand(FreeFloatingPendulumRobotDefinition pendulumRobotDefinition)
+   private FreeFloatingPendulumRobotDefinition setupPendulum()
+   {
+      SimRigidBodyBasics hand = simulationTestHelper.getRobot().getRigidBody(getHandName());
+      SimJointBasics lastWristJoint = hand.getParentJoint();
+
+      ExternalWrenchPoint robotAttachmentPoint = lastWristJoint.getAuxialiryData()
+                                                               .addExternalWrenchPoint(new ExternalWrenchPointDefinition("robotAttachmentPoint",
+                                                                                                                         getPendulumOffsetInHand()));
+      simulationTestHelper.getRobot().updateFrames();
+
+      FreeFloatingPendulumRobotDefinition pendulumRobotDefinition = new FreeFloatingPendulumRobotDefinition();
+      pendulumRobotDefinition.rootJoint.setInitialJointState(new SixDoFJointState(null,
+                                                                                  lastWristJoint.getFrameAfterJoint().getTransformToRoot().getTranslation()));
+
+      if (ADD_PENDULUM)
+      {
+         Robot pendulumRobot = simulationTestHelper.getSimulationSession().addRobot(pendulumRobotDefinition);
+
+         pendulumAttachmentController = new PendulumAttachmentController(robotAttachmentPoint, pendulumRobot);
+         pendulumRobot.getControllerManager().addController(pendulumAttachmentController);
+      }
+
+      return pendulumRobotDefinition;
+   }
+
+   private void prepareHand(String handName, FreeFloatingPendulumRobotDefinition pendulumRobotDefinition)
    {
       assertTrue(simulationTestHelper.simulateAndWait(0.5));
 
-      simulationTestHelper.findVariable("leftPalmTaskspaceUseBaseFrameForControl").setValueFromDouble(1.0);
+      simulationTestHelper.findVariable(handName + "TaskspaceUseBaseFrameForControl").setValueFromDouble(1.0);
 
       PrepareForLocomotionMessage prepareForLocomotionMessage = new PrepareForLocomotionMessage();
       prepareForLocomotionMessage.setPrepareManipulation(false);
       simulationTestHelper.publishToController(prepareForLocomotionMessage);
 
-      CommonHumanoidReferenceFrames referenceFrames = simulationTestHelper.getReferenceFrames();
-//            MovingReferenceFrame trajectoryFrame = referenceFrames.getMidFeetUnderPelvisFrame();
-      MovingReferenceFrame trajectoryFrame = simulationTestHelper.getHighLevelHumanoidControllerFactory().getHighLevelHumanoidControllerToolbox()
-                                                                 .getWalkingTrajectoryPath().getWalkingTrajectoryPathFrame();
-      FullHumanoidRobotModel controllerFullRobotModel = simulationTestHelper.getControllerFullRobotModel();
-      FramePose3D handPose = new FramePose3D(controllerFullRobotModel.getChest().getBodyFixedFrame());
-      handPose.appendTranslation(0.55, 0.35, -0.25);
-      handPose.changeFrame(trajectoryFrame);
-      HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(RobotSide.LEFT, 4.0, handPose, trajectoryFrame);
-      simulationTestHelper.publishToController(handTrajectoryMessage);
-
       if (ADD_PENDULUM)
       {
-         assertTrue(simulationTestHelper.simulateAndWait(5.0));
-
          HandWrenchTrajectoryMessage handWrenchTrajectoryMessage = new HandWrenchTrajectoryMessage();
          handWrenchTrajectoryMessage.setRobotSide(RobotSide.LEFT.toByte());
          Vector3D gravityComp = new Vector3D(0.0, 0.0, pendulumRobotDefinition.mass * 9.81);
@@ -268,76 +272,113 @@ public class ValkyrieObjectCarryingWhileWalkingTest extends HumanoidObjectCarryi
                                     .set(HumanoidMessageTools.createWrenchTrajectoryPointMessage(1000.0, null, gravityComp));
          handWrenchTrajectoryMessage.getWrenchTrajectory().getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.hashCode());
          simulationTestHelper.publishToController(handWrenchTrajectoryMessage);
+      }
 
-         assertTrue(simulationTestHelper.simulateAndWait(5.0));
-      }
-      else
-      {
-         assertTrue(simulationTestHelper.simulateAndWait(0.5));
-      }
+      CommonHumanoidReferenceFrames referenceFrames = simulationTestHelper.getReferenceFrames();
+      FullHumanoidRobotModel controllerFullRobotModel = simulationTestHelper.getControllerFullRobotModel();
+      MovingReferenceFrame chestFrame = controllerFullRobotModel.getChest().getBodyFixedFrame();
+      FramePose3D handPose = new FramePose3D(chestFrame, getHandDesiredPoseInChestFrame());
+      handPose.changeFrame(referenceFrames.getMidFeetZUpFrame());
+      HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(RobotSide.LEFT,
+                                                                                                     2.0,
+                                                                                                     handPose,
+                                                                                                     WalkingTrajectoryPath.WALKING_TRAJECTORY_FRAME_ID);
+      simulationTestHelper.publishToController(handTrajectoryMessage);
+
+      assertTrue(simulationTestHelper.simulateAndWait(2.5));
    }
 
-   private final Controller createAttachmentController(ExternalWrenchPoint robotAttachmentPoint, Robot pendulumRobot)
+   @SuppressWarnings("unchecked")
+   private void assertCorrectControlMode()
    {
-      SimJointBasics rootJoint = pendulumRobot.getJoint(FreeFloatingPendulumRobotDefinition.rootJointName);
-      SimRigidBodyBasics pendulumBody = rootJoint.getSuccessor();
-      ExternalWrenchPoint pendulumAttachmentPoint = rootJoint.getAuxialiryData().getExternalWrenchPoints().get(0);
-      ReferenceFrame rootFrame = robotAttachmentPoint.getFrame().getRootFrame();
+      assertEquals(RigidBodyControlMode.TASKSPACE,
+                   ((YoEnum<RigidBodyControlMode>) simulationTestHelper.findVariable(getHandName() + "Manager",
+                                                                                     getHandName() + "ManagerCurrentState")).getValue());
+      long expectedFrameIndex = simulationTestHelper.getHighLevelHumanoidControllerFactory().getHighLevelHumanoidControllerToolbox().getWalkingTrajectoryPath()
+                                                    .getWalkingTrajectoryPathFrame().getFrameIndex();
+      long actualFrameIndex = ((YoLong) simulationTestHelper.findVariable(getHandName() + MultipleWaypointsPositionTrajectoryGenerator.class.getSimpleName(),
+                                                                          getHandName() + "CurrentPositionFrame")).getValue();
+      assertEquals(expectedFrameIndex, actualFrameIndex);
+   }
 
-      return new Controller()
+   private static class PendulumAttachmentController implements Controller
+   {
+      private final YoRegistry registry = new YoRegistry("AttachmentController");
+      private final YoDouble kp = new YoDouble("kp", registry);
+      private final YoDouble kd = new YoDouble("kd", registry);
+      private final YoVector3D errorPosition = new YoVector3D("errorPosition", registry);
+      private final YoVector3D errorVelocity = new YoVector3D("errorVelocity", registry);
+      private final YoVector3D gravityCompensation = new YoVector3D("gravityCompensation", registry);
+
+      private final StandardDeviation oscillationCalculator = new StandardDeviation(true);
+      private final YoDouble currentAngle = new YoDouble("pendulumCurrentAngle", registry);
+      private final YoDouble angleStandardDeviation = new YoDouble("pendulumAngleStandardDeviation", registry);
+
+      private final ExternalWrenchPoint robotAttachmentPoint;
+      private final SimFloatingJointBasics rootJoint;
+      private final SimRigidBodyBasics pendulumBody;
+      private final ExternalWrenchPoint pendulumAttachmentPoint;
+      private final ReferenceFrame rootFrame;
+
+      public PendulumAttachmentController(ExternalWrenchPoint robotAttachmentPoint, Robot pendulumRobot)
       {
-         private final YoRegistry registry = new YoRegistry("AttachmentController");
-         private final YoDouble kp = new YoDouble("kp", registry);
-         private final YoDouble kd = new YoDouble("kd", registry);
-         private final YoVector3D errorPosition = new YoVector3D("errorPosition", registry);
-         private final YoVector3D errorVelocity = new YoVector3D("errorVelocity", registry);
-         private final YoVector3D gravityCompensation = new YoVector3D("gravityCompensation", registry);
+         this.robotAttachmentPoint = robotAttachmentPoint;
+         rootJoint = (SimFloatingJointBasics) pendulumRobot.getJoint(FreeFloatingPendulumRobotDefinition.rootJointName);
+         pendulumBody = rootJoint.getSuccessor();
+         pendulumAttachmentPoint = rootJoint.getAuxialiryData().getExternalWrenchPoints().get(0);
+         rootFrame = robotAttachmentPoint.getFrame().getRootFrame();
 
-         {
-            kp.set(500.0);
-            kd.set(50.0);
-         }
+         kp.set(500.0);
+         kd.set(50.0);
+      }
 
-         private final FramePoint3D positionA = new FramePoint3D();
-         private final FramePoint3D positionB = new FramePoint3D();
-         private final FrameVector3D velocityA = new FrameVector3D();
-         private final FrameVector3D velocityB = new FrameVector3D();
-         private final FrameVector3D force = new FrameVector3D();
+      private final FramePoint3D positionA = new FramePoint3D();
+      private final FramePoint3D positionB = new FramePoint3D();
+      private final FrameVector3D velocityA = new FrameVector3D();
+      private final FrameVector3D velocityB = new FrameVector3D();
+      private final FrameVector3D force = new FrameVector3D();
 
-         @Override
-         public void doControl()
-         {
-            MultiBodySystemTools.getRootBody(robotAttachmentPoint.getParentJoint().getPredecessor()).updateFramesRecursively();
-            positionA.setToZero(robotAttachmentPoint.getFrame());
-            positionA.changeFrame(rootFrame);
-            positionB.setToZero(pendulumAttachmentPoint.getFrame());
-            positionB.changeFrame(rootFrame);
-            errorPosition.sub(positionB, positionA);
+      @Override
+      public void doControl()
+      {
+         MultiBodySystemTools.getRootBody(robotAttachmentPoint.getParentJoint().getPredecessor()).updateFramesRecursively();
+         positionA.setToZero(robotAttachmentPoint.getFrame());
+         positionA.changeFrame(rootFrame);
+         positionB.setToZero(pendulumAttachmentPoint.getFrame());
+         positionB.changeFrame(rootFrame);
+         errorPosition.sub(positionB, positionA);
 
-            velocityA.setIncludingFrame(robotAttachmentPoint.getFrame().getTwistOfFrame().getLinearPart());
-            velocityA.changeFrame(rootFrame);
-            velocityB.setIncludingFrame(pendulumAttachmentPoint.getFrame().getTwistOfFrame().getLinearPart());
-            velocityB.changeFrame(rootFrame);
-            errorVelocity.sub(velocityB, velocityA);
+         velocityA.setIncludingFrame(robotAttachmentPoint.getFrame().getTwistOfFrame().getLinearPart());
+         velocityA.changeFrame(rootFrame);
+         velocityB.setIncludingFrame(pendulumAttachmentPoint.getFrame().getTwistOfFrame().getLinearPart());
+         velocityB.changeFrame(rootFrame);
+         errorVelocity.sub(velocityB, velocityA);
 
-            force.setToZero(rootFrame);
-            force.setAndScale(kp.getValue(), errorPosition);
-            force.scaleAdd(kd.getValue(), errorVelocity, force);
+         force.setToZero(rootFrame);
+         force.setAndScale(kp.getValue(), errorPosition);
+         force.scaleAdd(kd.getValue(), errorVelocity, force);
 
-            gravityCompensation.setAndScale(-9.81 * pendulumBody.getInertia().getMass(), Axis3D.Z);
-            force.add(gravityCompensation);
+         gravityCompensation.setAndScale(-9.81 * pendulumBody.getInertia().getMass(), Axis3D.Z);
+         force.add(gravityCompensation);
 
-            robotAttachmentPoint.getWrench().getLinearPart().setMatchingFrame(force);
-            pendulumAttachmentPoint.getWrench().getLinearPart().setMatchingFrame(force);
-            pendulumAttachmentPoint.getWrench().getLinearPart().negate();
-         }
+         robotAttachmentPoint.getWrench().getLinearPart().setMatchingFrame(force);
+         pendulumAttachmentPoint.getWrench().getLinearPart().setMatchingFrame(force);
+         pendulumAttachmentPoint.getWrench().getLinearPart().negate();
 
-         @Override
-         public YoRegistry getYoRegistry()
-         {
-            return registry;
-         }
-      };
+         FrameVector3D zUp = new FrameVector3D(pendulumAttachmentPoint.getFrame(), Axis3D.Z);
+         zUp.changeFrame(rootFrame);
+
+         double angle = EuclidCoreMissingTools.angleFromFirstToSecondVector3D(zUp, Axis3D.Z);
+         currentAngle.set(angle);
+         oscillationCalculator.increment(angle);
+         angleStandardDeviation.set(oscillationCalculator.getResult());
+      }
+
+      @Override
+      public YoRegistry getYoRegistry()
+      {
+         return registry;
+      }
    }
 
    private static class FreeFloatingPendulumRobotDefinition extends RobotDefinition
