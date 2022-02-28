@@ -20,4 +20,10 @@ public class ImPlotDoublePlotLine extends ImPlotPlotLineBasics
       doubleSwapBuffer.addValue(value);
       super.addValue(decimal5DPrintFormatter.format(value));
    }
+
+   @Override
+   public String getValueString(int bufferIndex)
+   {
+      return decimal5DPrintFormatter.format(doubleSwapBuffer.getValue(bufferIndex));
+   }
 }

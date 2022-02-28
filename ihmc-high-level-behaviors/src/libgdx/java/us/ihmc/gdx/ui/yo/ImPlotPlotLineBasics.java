@@ -4,7 +4,7 @@ import imgui.extension.implot.ImPlot;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.gdx.ui.tools.ImPlotTools;
 
-public class ImPlotPlotLineBasics implements ImPlotPlotLine
+public abstract class ImPlotPlotLineBasics implements ImPlotPlotLine
 {
    private Runnable legendPopupImGuiRenderer;
    private final String variableNameBase;
@@ -116,5 +116,11 @@ public class ImPlotPlotLineBasics implements ImPlotPlotLine
    public void setLegendPopupImGuiRenderer(Runnable legendPopupImGuiRenderer)
    {
       this.legendPopupImGuiRenderer = legendPopupImGuiRenderer;
+   }
+
+   @Override
+   public String getVariableName()
+   {
+      return variableName;
    }
 }

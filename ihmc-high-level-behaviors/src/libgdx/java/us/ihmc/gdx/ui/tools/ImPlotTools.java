@@ -12,6 +12,8 @@ import java.util.Objects;
 
 public final class ImPlotTools
 {
+   public static final int IMPLOT_AUTO = -1;
+
    private static ImPlotContext context = null;
 
    /**

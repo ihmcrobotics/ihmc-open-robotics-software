@@ -2,6 +2,7 @@ package us.ihmc.gdx.ui.yo;
 
 import imgui.ImVec2;
 import imgui.extension.implot.ImPlot;
+import imgui.extension.implot.ImPlotPoint;
 import imgui.extension.implot.flag.*;
 import imgui.internal.ImGui;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
@@ -77,6 +78,22 @@ public class ImPlotPlot
          for (ImPlotPlotLine plotLine : plotLines)
          {
             showingLegendPopup |= plotLine.render();
+         }
+
+         if (!plotLines.isEmpty() && ImPlot.isPlotHovered())
+         {
+            ImPlotPoint plotMousePosition = ImPlot.getPlotMousePos(ImPlotTools.IMPLOT_AUTO);
+            int bufferIndex = (int) Math.round(plotMousePosition.getX());
+
+            String tooltipText = "";
+            for (ImPlotPlotLine plotLine : plotLines)
+            {
+               tooltipText += plotLine.getVariableName() + ": " + plotLine.getValueString(bufferIndex) + "\n";
+            }
+            tooltipText.trim();
+            ImGui.setTooltip(tooltipText);
+
+            plotMousePosition.destroy();
          }
 
          if (popupContextWindowImGuiRenderer != null && !showingLegendPopup && ImGui.beginPopupContextWindow())
