@@ -55,7 +55,7 @@ public abstract class ImPlotPlotLineBasics implements ImPlotPlotLine
       }
 
       int numberOfTicksToAdvanceBeforeFilling = Math.min(bufferSize, filledIndex + numberOfTicksToAdvance) - filledIndex;
-      int numberOfTicksToAdvanceAfterFilling = numberOfTicksToAdvance - numberOfTicksToAdvanceBeforeFilling;
+      int numberOfTicksToAdvanceAfterFilling = Math.min(bufferSize, numberOfTicksToAdvance - numberOfTicksToAdvanceBeforeFilling);
       if (filledIndex < bufferSize)
       {
          if (numberOfTicksToAdvanceBeforeFilling == 0)
