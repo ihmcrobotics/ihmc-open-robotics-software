@@ -29,11 +29,14 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -81,7 +84,6 @@ public class ValkyrieWalkingTrajectoryPathFrameEndToEndTest
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-      simulationTestingParameters.setKeepSCSUp(true);
    }
 
    @AfterEach
@@ -145,10 +147,32 @@ public class ValkyrieWalkingTrajectoryPathFrameEndToEndTest
       pendulumAttachmentController.oscillationCalculator.clear();
       pendulumAttachmentController.rootJoint.getJointTwist().setToZero();
 
+      assertWalkingFrameMatchMidFeetZUpFrame();
       assertTrue(simulationTestHelper.simulateAndWait(2.0));
       assertCorrectControlMode();
       assertTrue(simulationTestHelper.simulateAndWait(EndToEndTestTools.computeWalkingDuration(stepsInPlace, robotModel.getWalkingControllerParameters())));
       assertTrue(pendulumAttachmentController.angleStandardDeviation.getValue() < 0.03);
+      assertWalkingFrameMatchMidFeetZUpFrame();
+   }
+
+   private void assertWalkingFrameMatchMidFeetZUpFrame()
+   {
+      RigidBodyTransform midFeetZUpFrameTransform = simulationTestHelper.getReferenceFrames().getMidFeetZUpFrame().getTransformToRoot();
+      RigidBodyTransform walkingTrajectoryPathFrameTransform = simulationTestHelper.getHighLevelHumanoidControllerFactory()
+                                                                                   .getHighLevelHumanoidControllerToolbox().getWalkingTrajectoryPath()
+                                                                                   .getWalkingTrajectoryPathFrame().getTransformToRoot();
+
+      //      Vector3D diff = new Vector3D();
+      //      diff.sub(midFeetZUpFrameTransform.getTranslation(), walkingTrajectoryPathFrameTransform.getTranslation());
+      //      LogTools.info("Difference w.r.t. mid feet zup frame: angle= "
+      //            + midFeetZUpFrameTransform.getRotation().distance(walkingTrajectoryPathFrameTransform.getRotation()) + ", distance= " + diff.length());
+      // It doesn't match the mid feet zup yaw. 
+      //      EuclidCoreTestTools.assertRotationMatrixGeometricallyEquals(midFeetZUpFrameTransform.getRotation(),
+      //                                                                  walkingTrajectoryPathFrameTransform.getRotation(),
+      //                                                                  1.0e-3);
+      EuclidCoreTestTools.assertVector3DGeometricallyEquals(midFeetZUpFrameTransform.getTranslation(),
+                                                            walkingTrajectoryPathFrameTransform.getTranslation(),
+                                                            1.0e-5);
    }
 
    @Tag("controller-api-2")
@@ -183,10 +207,12 @@ public class ValkyrieWalkingTrajectoryPathFrameEndToEndTest
       pendulumAttachmentController.oscillationCalculator.clear();
       pendulumAttachmentController.rootJoint.getJointTwist().setToZero();
 
+      assertWalkingFrameMatchMidFeetZUpFrame();
       assertTrue(simulationTestHelper.simulateAndWait(2.0));
       assertCorrectControlMode();
       assertTrue(simulationTestHelper.simulateAndWait(EndToEndTestTools.computeWalkingDuration(steps, robotModel.getWalkingControllerParameters())));
       assertTrue(pendulumAttachmentController.angleStandardDeviation.getValue() < 0.03);
+      assertWalkingFrameMatchMidFeetZUpFrame();
    }
 
    @Tag("controller-api-2")
@@ -210,7 +236,7 @@ public class ValkyrieWalkingTrajectoryPathFrameEndToEndTest
       FramePose3D startPose = new FramePose3D(simulationTestHelper.getReferenceFrames().getMidFootZUpGroundFrame());
       startPose.changeFrame(worldFrame);
       FootstepDataListMessage steps = EndToEndTestTools.circleSteps(RobotSide.LEFT,
-                                                                    20,
+                                                                    10,
                                                                     a -> steppingParameters.getDefaultStepLength(),
                                                                     steppingParameters.getInPlaceWidth(),
                                                                     0.75,
@@ -224,10 +250,12 @@ public class ValkyrieWalkingTrajectoryPathFrameEndToEndTest
       pendulumAttachmentController.oscillationCalculator.clear();
       pendulumAttachmentController.rootJoint.getJointTwist().setToZero();
 
+      assertWalkingFrameMatchMidFeetZUpFrame();
       assertTrue(simulationTestHelper.simulateAndWait(2.0));
       assertCorrectControlMode();
       assertTrue(simulationTestHelper.simulateAndWait(EndToEndTestTools.computeWalkingDuration(steps, robotModel.getWalkingControllerParameters())));
       assertTrue(pendulumAttachmentController.angleStandardDeviation.getValue() < 0.04);
+      assertWalkingFrameMatchMidFeetZUpFrame();
    }
 
    private FreeFloatingPendulumRobotDefinition setupPendulum()

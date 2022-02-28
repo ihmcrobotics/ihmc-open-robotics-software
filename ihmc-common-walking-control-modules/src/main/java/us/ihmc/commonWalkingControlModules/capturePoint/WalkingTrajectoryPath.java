@@ -36,7 +36,6 @@ import us.ihmc.robotics.math.trajectories.generators.MultiCubicSpline1DSolver;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
@@ -47,17 +46,14 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 /**
- * This class sets up a trajectory that aims providing a reference frame that similar to
- * {@link CommonHumanoidReferenceFrames#getMidFeetZUpFrame()} follows the robot as it walks, but
- * while following a smooth trajectory. {@link WalkingTrajectoryPath} will be used in the controller
+ * This class sets up a trajectory that aims at providing a reference frame that follows the robot
+ * as it walks, while following a smooth trajectory.
  * <p>
  * The reference frame satisfies the following:
  * <ul>
  * <li>It is a z-up frame.
- * <li>It tends to be between the feet at ground height.
- * <li>It is a smooth trajectory.
- * <li>It is equivalent to {@link CommonHumanoidReferenceFrames#getMidFeetZUpFrame()} when the robot
- * is standing.
+ * <li>When the robot is standing, its position and yaw angle are computed as the average of the
+ * soles position and yaw angles.
  * <li>It can be used in trajectory commands by providing {@value #WALKING_TRAJECTORY_FRAME_ID} as
  * the reference frame ID.
  * </ul>
