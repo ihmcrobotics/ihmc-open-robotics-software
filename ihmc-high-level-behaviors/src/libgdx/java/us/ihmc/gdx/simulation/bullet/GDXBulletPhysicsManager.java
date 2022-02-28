@@ -3,19 +3,22 @@ package us.ihmc.gdx.simulation.bullet;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.physics.bullet.Bullet;
 import com.badlogic.gdx.physics.bullet.collision.*;
 import com.badlogic.gdx.physics.bullet.dynamics.*;
-import com.badlogic.gdx.physics.bullet.linearmath.LinearMath;
 import com.badlogic.gdx.physics.bullet.linearmath.btMotionState;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.gdx.ui.yo.ImPlotYoPlot;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.UnitConversions;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
 
@@ -23,8 +26,7 @@ public class GDXBulletPhysicsManager
 {
    static
    {
-      Bullet.init();
-      LogTools.info("Loaded Bullet version {}", LinearMath.btGetVersion());
+      GDXBulletTools.ensureBulletInitialized();
    }
    private btCollisionConfiguration collisionConfiguration;
    private btCollisionDispatcher collisionDispatcher;
@@ -34,9 +36,9 @@ public class GDXBulletPhysicsManager
    private final ArrayList<btRigidBody> rigidBodies = new ArrayList<>();
    private final ArrayList<btMultiBody> multiBodies = new ArrayList<>();
    private final ArrayList<btCollisionObject> collisionObjects = new ArrayList<>(); // static, massless
-   private ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean simulate = new ImBoolean(false);
-   private ImFloat simulationRate = new ImFloat(1.0f);
+   private final ImFloat simulationRate = new ImFloat(1.0f);
    private final int worldTicksPerSecond = 240;
    /**
     * The simulation dt of the bullet world in bullet world time. This is always constant and for us, in
@@ -53,6 +55,14 @@ public class GDXBulletPhysicsManager
     */
    private final double longestTimeWedEverWantToLetBulletSimulate = 0.25;
    private final int maxSubSteps = (int) Math.round(worldTicksPerSecond * longestTimeWedEverWantToLetBulletSimulate);
+   private final ArrayList<Runnable> postTickRunnables = new ArrayList<>();
+   private final YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
+   private final YoInteger ticksSimulated = new YoInteger("ticksSimulated", yoRegistry);
+   private final Stopwatch timeSpentInSteppingStopwatch = new Stopwatch();
+   private final YoDouble timeSpentInStepping = new YoDouble("timeSpentInStepping", yoRegistry);
+   private final YoDouble timeSpentPerTick = new YoDouble("timeSpentPerTick", yoRegistry);
+   private final ImPlotYoPlot ticksSimulatedPlot = new ImPlotYoPlot(ticksSimulated);
+   private final ImPlotYoPlot timeSpentInSteppingPlot = new ImPlotYoPlot(timeSpentInStepping, timeSpentPerTick);
 
    private GDXBulletPhysicsDebugger debugger;
 
@@ -66,6 +76,20 @@ public class GDXBulletPhysicsManager
       Vector3 gravity = new Vector3(0.0f, 0.0f, -9.81f);
       multiBodyDynamicsWorld.setGravity(gravity);
       debugger = new GDXBulletPhysicsDebugger(multiBodyDynamicsWorld);
+
+      // Note: Apparently you can't have both pre and post tick callbacks, so we'll just do with post
+      new InternalTickCallback(multiBodyDynamicsWorld, false)
+      {
+         @Override
+         public void onInternalTick(btDynamicsWorld dynamicsWorld, float timeStep)
+         {
+            super.onInternalTick(dynamicsWorld, timeStep);
+            for (Runnable postTickRunnable : postTickRunnables)
+            {
+               postTickRunnable.run();
+            }
+         }
+      };
    }
 
    public btCollisionObject addStaticObject(btCollisionShape collisionShape, Matrix4 transformToWorld)
@@ -134,6 +158,11 @@ public class GDXBulletPhysicsManager
       multiBodyDynamicsWorld.removeMultiBodyConstraint(constraint);
    }
 
+   public void addPostTickRunnable(Runnable postTickRunnable)
+   {
+      postTickRunnables.add(postTickRunnable);
+   }
+
    /**
     * See the Bullet wiki article on this:
     * https://web.archive.org/web/20170708145909/http://bulletphysics.org/mediawiki-1.5.8/index.php/Stepping_the_World
@@ -141,12 +170,27 @@ public class GDXBulletPhysicsManager
    public void simulate(float timePassedSinceThisWasCalledLast)
    {
       debugger.update();
+
+      ticksSimulated.set(0);
+      timeSpentInStepping.set(0.0);
       if (simulate.get())
       {
          // We can simulate slower or faster in real world time by gaming the first parameter.
          // Bullet will think it needs to catch up more, or it will not do as much.
          timePassedSinceThisWasCalledLast *= simulationRate.get();
-         multiBodyDynamicsWorld.stepSimulation(timePassedSinceThisWasCalledLast, maxSubSteps, fixedTimeStep); // FIXME: Sometimes EXCEPTION_ACCESS_VIOLATION
+         timeSpentInSteppingStopwatch.start();
+         // FIXME: May sometimes cause EXCEPTION_ACCESS_VIOLATION
+         ticksSimulated.set(multiBodyDynamicsWorld.stepSimulation(timePassedSinceThisWasCalledLast, maxSubSteps, fixedTimeStep));
+         timeSpentInStepping.set(timeSpentInSteppingStopwatch.totalElapsed());
+         if (ticksSimulated.getValue() > 0)
+            timeSpentPerTick.set(timeSpentInStepping.getValue() / ticksSimulated.getValue());
+         else
+            timeSpentPerTick.set(0);
+
+         if (timeSpentInStepping.getValue() > ticksSimulated.getValue() * fixedTimeStep)
+         {
+            LogTools.warn("Bullet simulating slower than realtime!");
+         }
       }
    }
 
@@ -178,8 +222,11 @@ public class GDXBulletPhysicsManager
 
    public void renderImGuiWidgets()
    {
-      ImGui.checkbox(labels.get("Simulate with Bullet"), simulate);
+      ImGui.text("Bullet simulation @ " + worldTicksPerSecond + " Hz dt");
+      ImGui.checkbox(labels.get("Simulate"), simulate);
       ImGui.sliderFloat(labels.get("Simulation rate"), simulationRate.getData(), 0.001f, 1.0f);
+      ticksSimulatedPlot.render(simulate.get());
+      timeSpentInSteppingPlot.render(simulate.get());
       debugger.renderImGuiWidgets();
    }
 
@@ -190,6 +237,7 @@ public class GDXBulletPhysicsManager
 
    public void destroy()
    {
+      postTickRunnables.clear();
       for (btCollisionObject collisionObject : collisionObjects)
       {
          multiBodyDynamicsWorld.removeCollisionObject(collisionObject);
