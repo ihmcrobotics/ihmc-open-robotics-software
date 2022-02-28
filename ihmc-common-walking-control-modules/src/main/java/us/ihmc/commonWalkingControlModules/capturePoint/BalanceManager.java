@@ -249,8 +249,7 @@ public class BalanceManager
                                                             controllerToolbox,
                                                             controllerToolbox.getReferenceFrames().getSoleFrames(),
                                                             SettableContactStateProvider::new,
-                                                            registry,
-                                                            yoGraphicsListRegistry);
+                                                            registry, yoGraphicsListRegistry);
 
       icpErrorThresholdToAdjustTime.set(walkingControllerParameters.getICPErrorThresholdToSpeedUpSwing());
 
@@ -280,24 +279,13 @@ public class BalanceManager
 
       distanceToShrinkSupportPolygonWhenHoldingCurrent.set(0.08);
 
-      maxICPErrorBeforeSingleSupportForwardX = new DoubleParameter("maxICPErrorBeforeSingleSupportForwardX",
-                                                                   registry,
-                                                                   walkingControllerParameters.getMaxICPErrorBeforeSingleSupportForwardX());
-      maxICPErrorBeforeSingleSupportBackwardX = new DoubleParameter("maxICPErrorBeforeSingleSupportBackwardX",
-                                                                    registry,
-                                                                    walkingControllerParameters.getMaxICPErrorBeforeSingleSupportBackwardX());
-      maxICPErrorBeforeSingleSupportInnerY = new DoubleParameter("maxICPErrorBeforeSingleSupportInnerY",
-                                                                 registry,
-                                                                 walkingControllerParameters.getMaxICPErrorBeforeSingleSupportInnerY());
-      maxICPErrorBeforeSingleSupportOuterY = new DoubleParameter("maxICPErrorBeforeSingleSupportOuterY",
-                                                                 registry,
-                                                                 walkingControllerParameters.getMaxICPErrorBeforeSingleSupportOuterY());
+      maxICPErrorBeforeSingleSupportForwardX = new DoubleParameter("maxICPErrorBeforeSingleSupportForwardX", registry, walkingControllerParameters.getMaxICPErrorBeforeSingleSupportForwardX());
+      maxICPErrorBeforeSingleSupportBackwardX = new DoubleParameter("maxICPErrorBeforeSingleSupportBackwardX", registry, walkingControllerParameters.getMaxICPErrorBeforeSingleSupportBackwardX());
+      maxICPErrorBeforeSingleSupportInnerY = new DoubleParameter("maxICPErrorBeforeSingleSupportInnerY", registry, walkingControllerParameters.getMaxICPErrorBeforeSingleSupportInnerY());
+      maxICPErrorBeforeSingleSupportOuterY = new DoubleParameter("maxICPErrorBeforeSingleSupportOuterY", registry, walkingControllerParameters.getMaxICPErrorBeforeSingleSupportOuterY());
 
       double pelvisTranslationICPSupportPolygonSafeMargin = walkingControllerParameters.getPelvisTranslationICPSupportPolygonSafeMargin();
-      pelvisICPBasedTranslationManager = new PelvisICPBasedTranslationManager(controllerToolbox,
-                                                                              pelvisTranslationICPSupportPolygonSafeMargin,
-                                                                              bipedSupportPolygons,
-                                                                              registry);
+      pelvisICPBasedTranslationManager = new PelvisICPBasedTranslationManager(controllerToolbox, pelvisTranslationICPSupportPolygonSafeMargin, bipedSupportPolygons, registry);
 
       FrameConvexPolygon2D defaultSupportPolygon = controllerToolbox.getDefaultFootPolygons().get(RobotSide.LEFT);
       soleFrames = controllerToolbox.getReferenceFrames().getSoleFrames();
@@ -306,9 +294,7 @@ public class BalanceManager
       maintainInitialCoMVelocityContinuitySingleSupport = new BooleanParameter("maintainInitialCoMVelocityContinuitySingleSupport", registry, true);
       maintainInitialCoMVelocityContinuityTransfer = new BooleanParameter("maintainInitialCoMVelocityContinuityTransfer", registry, true);
       comTrajectoryPlanner = new CoMTrajectoryPlanner(controllerToolbox.getGravityZ(), controllerToolbox.getOmega0Provider(), registry);
-      comTrajectoryPlanner.setComContinuityCalculator(new CoMContinuousContinuityCalculator(controllerToolbox.getGravityZ(),
-                                                                                            controllerToolbox.getOmega0Provider(),
-                                                                                            registry));
+      comTrajectoryPlanner.setComContinuityCalculator(new CoMContinuousContinuityCalculator(controllerToolbox.getGravityZ(), controllerToolbox.getOmega0Provider(), registry));
       copTrajectoryState = new CoPTrajectoryGeneratorState(registry, maxNumberOfStepsToConsider);
       copTrajectoryState.registerStateToSave(copTrajectoryParameters);
       copTrajectory = new WalkingCoPTrajectoryGenerator(copTrajectoryParameters, splitFractionParameters, defaultSupportPolygon, registry);
@@ -352,32 +338,16 @@ public class BalanceManager
          }
 
          // TODO Don't merge to develop as is
-         //         comTrajectoryPlanner.setCornerPointViewer(new CornerPointViewer(true, false, registry, yoGraphicsListRegistry));
-         //         copTrajectory.setWaypointViewer(new CoPPointViewer(registry, yoGraphicsListRegistry));
+//         comTrajectoryPlanner.setCornerPointViewer(new CornerPointViewer(true, false, registry, yoGraphicsListRegistry));
+//         copTrajectory.setWaypointViewer(new CoPPointViewer(registry, yoGraphicsListRegistry));
 
-         YoGraphicPosition desiredCapturePointViz = new YoGraphicPosition("Desired Capture Point",
-                                                                          yoDesiredCapturePoint,
-                                                                          0.01,
-                                                                          Yellow(),
-                                                                          GraphicType.BALL_WITH_ROTATED_CROSS);
-         YoGraphicPosition finalDesiredCapturePointViz = new YoGraphicPosition("Final Desired Capture Point",
-                                                                               yoFinalDesiredICP,
-                                                                               0.01,
-                                                                               Beige(),
-                                                                               GraphicType.BALL_WITH_ROTATED_CROSS);
-         YoGraphicPosition finalDesiredCoMViz = new YoGraphicPosition("Final Desired CoM",
-                                                                      yoFinalDesiredCoM,
-                                                                      0.01,
-                                                                      Black(),
-                                                                      GraphicType.BALL_WITH_ROTATED_CROSS);
+         YoGraphicPosition desiredCapturePointViz = new YoGraphicPosition("Desired Capture Point", yoDesiredCapturePoint, 0.01, Yellow(), GraphicType.BALL_WITH_ROTATED_CROSS);
+         YoGraphicPosition finalDesiredCapturePointViz = new YoGraphicPosition("Final Desired Capture Point", yoFinalDesiredICP, 0.01, Beige(), GraphicType.BALL_WITH_ROTATED_CROSS);
+         YoGraphicPosition finalDesiredCoMViz = new YoGraphicPosition("Final Desired CoM", yoFinalDesiredCoM, 0.01, Black(), GraphicType.BALL_WITH_ROTATED_CROSS);
          YoGraphicPosition perfectCMPViz = new YoGraphicPosition("Perfect CMP", yoPerfectCMP, 0.002, BlueViolet());
          YoGraphicPosition perfectCoPViz = new YoGraphicPosition("Perfect CoP", yoPerfectCoP, 0.002, DarkViolet(), GraphicType.BALL_WITH_CROSS);
 
-         YoGraphicPosition adjustedDesiredCapturePointViz = new YoGraphicPosition("Adjusted Desired Capture Point",
-                                                                                  yoAdjustedDesiredCapturePoint,
-                                                                                  0.005,
-                                                                                  Yellow(),
-                                                                                  GraphicType.DIAMOND);
+         YoGraphicPosition adjustedDesiredCapturePointViz = new YoGraphicPosition("Adjusted Desired Capture Point", yoAdjustedDesiredCapturePoint, 0.005, Yellow(), GraphicType.DIAMOND);
          yoGraphicsListRegistry.registerArtifact(graphicListName, adjustedDesiredCapturePointViz.createArtifact());
 
          yoGraphicsListRegistry.registerArtifact(graphicListName, desiredCapturePointViz.createArtifact());
@@ -471,9 +441,7 @@ public class BalanceManager
       this.supportSide = supportSide;
    }
 
-   public void compute(RobotSide supportLeg,
-                       FeedbackControlCommand<?> heightControlCommand,
-                       boolean keepCoPInsideSupportPolygon,
+   public void compute(RobotSide supportLeg, FeedbackControlCommand<?> heightControlCommand, boolean keepCoPInsideSupportPolygon,
                        boolean controlHeightWithMomentum)
    {
       desiredCapturePoint2d.set(comTrajectoryPlanner.getDesiredDCMPosition());
@@ -614,7 +582,9 @@ public class BalanceManager
       {
          if (comTrajectoryPlanner.hasTrajectories())
          {
-            angularMomentumHandler.solveForAngularMomentumTrajectory(copTrajectoryState, contactStateProviders, comTrajectoryPlanner.getCoMTrajectory());
+            angularMomentumHandler.solveForAngularMomentumTrajectory(copTrajectoryState,
+                                                                     contactStateProviders,
+                                                                     comTrajectoryPlanner.getCoMTrajectory());
             contactStateProviders = angularMomentumHandler.computeECMPTrajectory(contactStateProviders);
          }
          else
@@ -754,7 +724,7 @@ public class BalanceManager
    {
       return yoFinalDesiredCoMVelocity;
    }
-
+   
    public FrameVector3DReadOnly getFinalDesiredCoMAcceleration()
    {
       return yoFinalDesiredCoMAcceleration;
@@ -926,12 +896,9 @@ public class BalanceManager
       ReferenceFrame leadingSoleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(transferToSide);
       icpError2d.changeFrame(leadingSoleZUpFrame);
       boolean isICPErrorToTheInside = transferToSide == RobotSide.RIGHT ? icpError2d.getY() > 0.0 : icpError2d.getY() < 0.0;
-      double maxICPErrorBeforeSingleSupportX = icpError2d.getX() > 0.0 ? maxICPErrorBeforeSingleSupportForwardX.getValue()
-            : maxICPErrorBeforeSingleSupportBackwardX.getValue();
-      double maxICPErrorBeforeSingleSupportY = isICPErrorToTheInside ? maxICPErrorBeforeSingleSupportInnerY.getValue()
-            : maxICPErrorBeforeSingleSupportOuterY.getValue();
-      normalizedICPError.set(MathTools.square(icpError2d.getX() / maxICPErrorBeforeSingleSupportX)
-            + MathTools.square(icpError2d.getY() / maxICPErrorBeforeSingleSupportY));
+      double maxICPErrorBeforeSingleSupportX = icpError2d.getX() > 0.0 ? maxICPErrorBeforeSingleSupportForwardX.getValue() : maxICPErrorBeforeSingleSupportBackwardX.getValue();
+      double maxICPErrorBeforeSingleSupportY = isICPErrorToTheInside ? maxICPErrorBeforeSingleSupportInnerY.getValue() : maxICPErrorBeforeSingleSupportOuterY.getValue();
+      normalizedICPError.set(MathTools.square(icpError2d.getX() / maxICPErrorBeforeSingleSupportX) + MathTools.square(icpError2d.getY() / maxICPErrorBeforeSingleSupportY));
    }
 
    public double getNormalizedEllipticICPError()
@@ -986,9 +953,7 @@ public class BalanceManager
       centerOfMassPosition.setToZero(centerOfMassFrame);
 
       FrameConvexPolygon2DReadOnly supportPolygonInMidFeetZUp = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
-      convexPolygonShrinker.scaleConvexPolygon(supportPolygonInMidFeetZUp,
-                                               distanceToShrinkSupportPolygonWhenHoldingCurrent.getDoubleValue(),
-                                               shrunkSupportPolygon);
+      convexPolygonShrinker.scaleConvexPolygon(supportPolygonInMidFeetZUp, distanceToShrinkSupportPolygonWhenHoldingCurrent.getDoubleValue(), shrunkSupportPolygon);
 
       centerOfMassPosition.changeFrame(shrunkSupportPolygon.getReferenceFrame());
       centerOfMassPosition2d.setIncludingFrame(centerOfMassPosition);
