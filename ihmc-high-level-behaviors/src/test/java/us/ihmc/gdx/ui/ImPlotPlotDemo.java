@@ -17,16 +17,16 @@ public class ImPlotPlotDemo
                                                               "ihmc-open-robotics-software",
                                                               "ihmc-high-level-behaviors/src/test/resources");
    private ImPlotPlotPanel plotPanel = new ImPlotPlotPanel("Plot Panel");
-   private ImPlotPlot trigPlot = new ImPlotPlot("ImPlot 1");
+   private ImPlotPlot trigPlot = new ImPlotPlot();
    private final ImPlotDoublePlotLine sineLine = new ImPlotDoublePlotLine("Sine");
    private final ImPlotDoublePlotLine cosineLine = new ImPlotDoublePlotLine("Cosine");
-   private ImPlotPlot fpsPlot = new ImPlotPlot("Frames per second");
+   private ImPlotPlot fpsPlot = new ImPlotPlot();
    private final ImPlotDoublePlotLine fpsPlotLine = new ImPlotDoublePlotLine("Frames per second");
-   private ImPlotPlot timePlot = new ImPlotPlot("Time");
+   private ImPlotPlot timePlot = new ImPlotPlot();
    private final ImPlotDoublePlotLine timeLine = new ImPlotDoublePlotLine("Time");
    private Stopwatch stopwatch = new Stopwatch().start();
    private FrequencyCalculator fpsCalculator = new FrequencyCalculator();
-   private ImPlotPlot randomIntPlot = new ImPlotPlot("Random integer");
+   private ImPlotPlot randomIntPlot = new ImPlotPlot();
    private final ImPlotIntegerPlotLine randomIntLine = new ImPlotIntegerPlotLine("Random integer");
    private final Random random = new Random();
 
