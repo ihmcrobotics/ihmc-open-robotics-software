@@ -3,10 +3,13 @@ package us.ihmc.gdx.ui;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.gdx.imgui.ImGuiGlfwWindow;
+import us.ihmc.gdx.ui.yo.ImPlotIntegerPlotLine;
 import us.ihmc.gdx.ui.yo.ImPlotPlot;
 import us.ihmc.gdx.ui.yo.ImPlotDoublePlotLine;
 import us.ihmc.gdx.ui.yo.ImPlotPlotPanel;
 import us.ihmc.tools.time.FrequencyCalculator;
+
+import java.util.Random;
 
 public class ImPlotPlotDemo
 {
@@ -23,6 +26,9 @@ public class ImPlotPlotDemo
    private final ImPlotDoublePlotLine timeLine = new ImPlotDoublePlotLine("Time");
    private Stopwatch stopwatch = new Stopwatch().start();
    private FrequencyCalculator fpsCalculator = new FrequencyCalculator();
+   private ImPlotPlot randomIntPlot = new ImPlotPlot("Random integer");
+   private final ImPlotIntegerPlotLine randomIntLine = new ImPlotIntegerPlotLine("Random integer");
+   private final Random random = new Random();
 
    public ImPlotPlotDemo()
    {
@@ -30,9 +36,12 @@ public class ImPlotPlotDemo
       trigPlot.getPlotLines().add(cosineLine);
       fpsPlot.getPlotLines().add(fpsPlotLine);
       timePlot.getPlotLines().add(timeLine);
+      randomIntPlot.getPlotLines().add(randomIntLine);
       plotPanel.getPlots().add(trigPlot);
       plotPanel.getPlots().add(fpsPlot);
       plotPanel.getPlots().add(timePlot);
+      plotPanel.getPlots().add(randomIntPlot);
+
 
       baseUI.getImGuiDockSystem().getPanelManager().addPanel(plotPanel);
       ThreadTools.startAThread(() ->
@@ -48,12 +57,7 @@ public class ImPlotPlotDemo
       fpsCalculator.ping();
       fpsPlotLine.addValue(fpsCalculator.getFrequency());
       timeLine.addValue(stopwatch.totalElapsed());
-   }
-
-   private void renderImGuiWidgets()
-   {
-      trigPlot.render();
-      fpsPlot.render();
+      randomIntLine.addValue(random.nextInt(100));
    }
 
    public static void main(String[] args)
