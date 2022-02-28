@@ -164,11 +164,7 @@ public class HighLevelControlManagerFactory
       if (!hasMomentumOptimizationSettings(BalanceManager.class))
          return null;
 
-      balanceManager = new BalanceManager(controllerToolbox,
-                                          walkingControllerParameters,
-                                          copTrajectoryParameters,
-                                          splitFractionParameters,
-                                          registry);
+      balanceManager = new BalanceManager(controllerToolbox, walkingControllerParameters, copTrajectoryParameters, splitFractionParameters, registry);
       return balanceManager;
    }
 
