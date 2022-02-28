@@ -76,4 +76,9 @@ public class ImPlotPlotLineDoubleSwapBuffer implements ImPlotPlotLineSwapBuffer
    {
       ImPlot.plotLine(labelID, xValues, isA ? yValuesA : yValuesB, offset);
    }
+
+   public double getValue(int bufferIndex)
+   {
+      return isA ? yValuesA[bufferIndex] : yValuesB[bufferIndex];
+   }
 }

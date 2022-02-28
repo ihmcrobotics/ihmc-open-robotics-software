@@ -17,4 +17,10 @@ public class ImPlotIntegerPlotLine extends ImPlotPlotLineBasics
       integerSwapBuffer.addValue(value);
       super.addValue(String.valueOf(value));
    }
+
+   @Override
+   public String getValueString(int bufferIndex)
+   {
+      return String.valueOf(integerSwapBuffer.getValue(bufferIndex));
+   }
 }
