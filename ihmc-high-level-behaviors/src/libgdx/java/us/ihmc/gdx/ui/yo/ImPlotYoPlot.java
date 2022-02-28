@@ -1,20 +1,32 @@
 package us.ihmc.gdx.ui.yo;
 
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class ImPlotYoPlot
 {
    private final ImPlotPlot imPlotPlot;
-   private final YoDouble[] variablesToPlot;
+   private final YoVariable[] variablesToPlot;
 
-   public ImPlotYoPlot(String label, YoDouble... variablesToPlot)
+   public ImPlotYoPlot(YoVariable... variablesToPlot)
    {
-      imPlotPlot = new ImPlotPlot(label);
+      imPlotPlot = new ImPlotPlot();
       this.variablesToPlot = variablesToPlot;
-      for (YoDouble yoDouble : variablesToPlot)
+      for (YoVariable yoVariable : variablesToPlot)
       {
-         ImPlotDoublePlotLine plotLine = new ImPlotDoublePlotLine(yoDouble.getName());
-         imPlotPlot.getPlotLines().add(plotLine);
+         if (yoVariable instanceof YoDouble)
+         {
+            YoDouble yoDouble = (YoDouble) yoVariable;
+            ImPlotDoublePlotLine plotLine = new ImPlotDoublePlotLine(yoDouble.getName());
+            imPlotPlot.getPlotLines().add(plotLine);
+         }
+         else if (yoVariable instanceof YoInteger)
+         {
+            YoInteger yoInteger = (YoInteger) yoVariable;
+            ImPlotIntegerPlotLine plotLine = new ImPlotIntegerPlotLine(yoInteger.getName());
+            imPlotPlot.getPlotLines().add(plotLine);
+         }
       }
    }
 
@@ -36,9 +48,19 @@ public class ImPlotYoPlot
       {
          for (int i = 0; i < variablesToPlot.length; i++)
          {
-            YoDouble yoDouble = variablesToPlot[i];
-            ImPlotDoublePlotLine doublePlotLine = (ImPlotDoublePlotLine) imPlotPlot.getPlotLines().get(i);
-            doublePlotLine.addValue(yoDouble.getValue());
+            YoVariable yoVariable = variablesToPlot[i];
+            if (yoVariable instanceof YoDouble)
+            {
+               YoDouble yoDouble = (YoDouble) yoVariable;
+               ImPlotDoublePlotLine doublePlotLine = (ImPlotDoublePlotLine) imPlotPlot.getPlotLines().get(i);
+               doublePlotLine.addValue(yoDouble.getValue());
+            }
+            else if (yoVariable instanceof YoInteger)
+            {
+               YoInteger yoInteger = (YoInteger) yoVariable;
+               ImPlotIntegerPlotLine integerPlotLine = (ImPlotIntegerPlotLine) imPlotPlot.getPlotLines().get(i);
+               integerPlotLine.addValue(yoInteger.getValue());
+            }
          }
       }
    }

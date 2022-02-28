@@ -4,6 +4,7 @@ import imgui.ImVec2;
 import imgui.extension.implot.ImPlot;
 import imgui.extension.implot.flag.*;
 import imgui.internal.ImGui;
+import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.ui.tools.ImPlotTools;
 
 import java.util.ArrayList;
@@ -11,12 +12,12 @@ import java.util.function.Consumer;
 
 public class ImPlotPlot
 {
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private Consumer<String> dragAndDropPayloadConsumer;
    private Runnable popupContextWindowImGuiRenderer;
    private final ArrayList<ImPlotPlotLine> plotLines = new ArrayList<>();
    private final String xLabel;
    private final String yLabel;
-   private final String label;
    private float graphHeight;
    private float graphWidth;
    private int flags;
@@ -24,14 +25,13 @@ public class ImPlotPlot
    private int yFlags;
    private final ImVec2 outerBoundsDimensionsPixels;
 
-   public ImPlotPlot(String label)
+   public ImPlotPlot()
    {
-      this(label, 60);
+      this(60);
    }
 
-   public ImPlotPlot(String label, float plotHeight)
+   public ImPlotPlot(float plotHeight)
    {
-      this.label = label;
       ImPlotTools.ensureImPlotInitialized();
       ImPlotTools.setSCSStyle();
 
@@ -68,7 +68,7 @@ public class ImPlotPlot
    {
       outerBoundsDimensionsPixels.x = plotWidth;
       outerBoundsDimensionsPixels.y = plotHeight;
-      if (ImPlot.beginPlot(label, xLabel, yLabel, outerBoundsDimensionsPixels, flags, xFlags, yFlags))
+      if (ImPlot.beginPlot(labels.get("Plot"), xLabel, yLabel, outerBoundsDimensionsPixels, flags, xFlags, yFlags))
       {
          boolean outside = true;
          ImPlot.setLegendLocation(ImPlotLocation.SouthWest, ImPlotOrientation.Horizontal, outside);
