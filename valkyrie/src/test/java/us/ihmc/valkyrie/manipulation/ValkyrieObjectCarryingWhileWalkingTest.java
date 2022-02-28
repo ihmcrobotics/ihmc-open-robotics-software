@@ -6,6 +6,7 @@ import static us.ihmc.robotics.Assert.assertTrue;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -121,6 +122,7 @@ public class ValkyrieObjectCarryingWhileWalkingTest
       return new Pose3D(new Point3D(0.55, 0.35, -0.25), new Quaternion());
    }
 
+   @Tag("controller-api-2")
    @Test
    public void testWalkingInPlace()
    {
@@ -149,6 +151,7 @@ public class ValkyrieObjectCarryingWhileWalkingTest
       assertTrue(pendulumAttachmentController.angleStandardDeviation.getValue() < 0.03);
    }
 
+   @Tag("controller-api-2")
    @Test
    public void testWalkingForward()
    {
@@ -186,6 +189,7 @@ public class ValkyrieObjectCarryingWhileWalkingTest
       assertTrue(pendulumAttachmentController.angleStandardDeviation.getValue() < 0.03);
    }
 
+   @Tag("controller-api-2")
    @Test
    public void testWalkingCircle()
    {
@@ -206,15 +210,15 @@ public class ValkyrieObjectCarryingWhileWalkingTest
       FramePose3D startPose = new FramePose3D(simulationTestHelper.getReferenceFrames().getMidFootZUpGroundFrame());
       startPose.changeFrame(worldFrame);
       FootstepDataListMessage steps = EndToEndTestTools.circleSteps(RobotSide.LEFT,
-                                                                           20,
-                                                                           a -> steppingParameters.getDefaultStepLength(),
-                                                                           steppingParameters.getInPlaceWidth(),
-                                                                           0.75,
-                                                                           0.25,
-                                                                           startPose,
-                                                                           true,
-                                                                           RobotSide.RIGHT,
-                                                                           1.0);
+                                                                    20,
+                                                                    a -> steppingParameters.getDefaultStepLength(),
+                                                                    steppingParameters.getInPlaceWidth(),
+                                                                    0.75,
+                                                                    0.25,
+                                                                    startPose,
+                                                                    true,
+                                                                    RobotSide.RIGHT,
+                                                                    1.0);
       simulationTestHelper.publishToController(steps);
 
       pendulumAttachmentController.oscillationCalculator.clear();
