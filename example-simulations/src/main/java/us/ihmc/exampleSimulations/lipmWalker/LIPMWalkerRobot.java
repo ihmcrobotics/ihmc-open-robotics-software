@@ -103,10 +103,10 @@ public class LIPMWalkerRobot
       LogTools.info("Robot: {}", robot.toString());
    }
    
-   public double getTime()
-   {
-      return robot.getTime();  // GMN: Why do I need to do this??
-   }
+//   public double getTime()
+//   {
+//      return robot.getTime();  // GMN: Why do I need to do this??
+//   }
    
    public double getMass()
    {
@@ -249,7 +249,7 @@ public class LIPMWalkerRobot
    private void setupInitialConditions()
    {
       bodyJoint.setCartesianPosition(0.0, 0.8);
-      bodyJoint.setCartesianVelocity(0.2, 0.0);
+      bodyJoint.setCartesianVelocity(0.3, 0.0);
       bodyJoint.setRotation(0.0);
 
       leftHipJoint.setQ(0.0);
