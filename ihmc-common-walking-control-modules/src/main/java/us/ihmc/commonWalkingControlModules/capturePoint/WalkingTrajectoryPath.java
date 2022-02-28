@@ -32,11 +32,11 @@ import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.lists.YoPreallocatedList;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.trajectories.core.Polynomial;
 import us.ihmc.robotics.math.trajectories.generators.MultiCubicSpline1DSolver;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
@@ -79,7 +79,7 @@ public class WalkingTrajectoryPath
    private final String namePrefix = "walkingTrajectoryPath";
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-   private final TrajectoryManager trajectoryManager = new MultiCubicSplineBasedTrajectoryManager();
+   private final TrajectoryManager trajectoryManager = new TrajectoryManager();
 
    private final YoPreallocatedList<WaypointData> waypoints;
 
@@ -546,20 +546,7 @@ public class WalkingTrajectoryPath
       }
    }
 
-   private static interface TrajectoryManager
-   {
-      void initialize(Vector3DReadOnly initialLinearVelocity, double initialYawRate, YoPreallocatedList<WaypointData> waypoints, boolean isLastWaypointOpen);
-
-      void computePosition(double time, Tuple3DBasics positionToPack);
-
-      double computeYaw(double time);
-
-      void computeLinearVelocity(double time, Tuple3DBasics velocityToPack);
-
-      double computeYawRate(double time);
-   }
-
-   static class MultiCubicSplineBasedTrajectoryManager implements TrajectoryManager
+   private static class TrajectoryManager
    {
       private final DMatrixRMaj[] linearSolutions = {new DMatrixRMaj(1, 1), new DMatrixRMaj(1, 1), new DMatrixRMaj(1, 1)};
       private final DMatrixRMaj yawSolution = new DMatrixRMaj(1, 1);
@@ -567,7 +554,6 @@ public class WalkingTrajectoryPath
       private final MultiCubicSpline1DSolver yawSolver = new MultiCubicSpline1DSolver();
       private double totalDuration;
 
-      @Override
       public void initialize(Vector3DReadOnly initialLinearVelocity,
                              double initialYawRate,
                              YoPreallocatedList<WaypointData> waypoints,
@@ -613,7 +599,6 @@ public class WalkingTrajectoryPath
          yawSolver.solve(yawSolution);
       }
 
-      @Override
       public void computePosition(double time, Tuple3DBasics positionToPack)
       {
          positionToPack.setX(linearSolvers[0].computePosition(time / totalDuration, linearSolutions[0]));
@@ -621,13 +606,11 @@ public class WalkingTrajectoryPath
          positionToPack.setZ(linearSolvers[2].computePosition(time / totalDuration, linearSolutions[2]));
       }
 
-      @Override
       public double computeYaw(double time)
       {
          return yawSolver.computePosition(time / totalDuration, yawSolution);
       }
 
-      @Override
       public void computeLinearVelocity(double time, Tuple3DBasics velocityToPack)
       {
          velocityToPack.setX(linearSolvers[0].computeVelocity(time / totalDuration, linearSolutions[0]));
@@ -636,111 +619,9 @@ public class WalkingTrajectoryPath
          velocityToPack.scale(1.0 / totalDuration);
       }
 
-      @Override
       public double computeYawRate(double time)
       {
          return yawSolver.computeVelocity(time / totalDuration, yawSolution) / totalDuration;
-      }
-   }
-
-   static class PolynomialBasedTrajectoryManager implements TrajectoryManager
-   {
-      private final Polynomial[] linearPolynomials = {new Polynomial(MAX_NUMBER_OF_FOOTSTEPS + 1 + 2), new Polynomial(MAX_NUMBER_OF_FOOTSTEPS + 1 + 2),
-            new Polynomial(MAX_NUMBER_OF_FOOTSTEPS + 1 + 2)};
-      private final Polynomial yawPolynomial = new Polynomial(MAX_NUMBER_OF_FOOTSTEPS + 1 + 2);
-      private double totalDuration;
-
-      @Override
-      public void initialize(Vector3DReadOnly initialLinearVelocity,
-                             double initialYawRate,
-                             YoPreallocatedList<WaypointData> waypoints,
-                             boolean isLastWaypointOpen)
-      {
-         WaypointData lastWaypoint = waypoints.getLast();
-         totalDuration = lastWaypoint.time.getValue();
-
-         if (waypoints.size() == 1)
-         {
-            for (Axis3D axis : Axis3D.values)
-            {
-               Polynomial polynomial = linearPolynomials[axis.ordinal()];
-               polynomial.setConstant(waypoints.getFirst().getPosition(axis));
-            }
-
-            yawPolynomial.setConstant(waypoints.getFirst().yaw.getValue());
-         }
-         else
-         {
-            for (Axis3D axis : Axis3D.values)
-            {
-               Polynomial polynomial = linearPolynomials[axis.ordinal()];
-               polynomial.setTime(0, totalDuration);
-               polynomial.reshape(waypoints.size() + 2);
-               int row = 0;
-
-               polynomial.setPositionRow(row++, 0.0, waypoints.getFirst().getPosition(axis));
-               polynomial.setVelocityRow(row++, 0.0, initialLinearVelocity.getElement(axis));
-
-               for (int i = 1; i < waypoints.size(); i++)
-               {
-                  polynomial.setPositionRow(row++, waypoints.get(i).time.getValue(), waypoints.get(i).getPosition(axis));
-               }
-               polynomial.setVelocityRow(row++, totalDuration, 0.0);
-               polynomial.setIsConstraintMatrixUpToDate(true);
-               polynomial.initialize();
-            }
-
-            yawPolynomial.setTime(0, totalDuration);
-            yawPolynomial.reshape(waypoints.size() + 2);
-            int row = 0;
-
-            yawPolynomial.setPositionRow(row++, 0.0, waypoints.getFirst().yaw.getValue());
-            yawPolynomial.setVelocityRow(row++, 0.0, initialYawRate);
-
-            for (int i = 1; i < waypoints.size(); i++)
-            {
-               yawPolynomial.setPositionRow(row++, waypoints.get(i).time.getValue(), waypoints.get(i).yaw.getValue());
-            }
-            yawPolynomial.setVelocityRow(row++, totalDuration, 0.0);
-            yawPolynomial.setIsConstraintMatrixUpToDate(true);
-            yawPolynomial.initialize();
-         }
-      }
-
-      @Override
-      public void computePosition(double time, Tuple3DBasics positionToPack)
-      {
-         for (Axis3D axis : Axis3D.values)
-            linearPolynomials[axis.ordinal()].compute(time);
-
-         positionToPack.setX(linearPolynomials[0].getValue());
-         positionToPack.setY(linearPolynomials[1].getValue());
-         positionToPack.setZ(linearPolynomials[2].getValue());
-      }
-
-      @Override
-      public double computeYaw(double time)
-      {
-         yawPolynomial.compute(time);
-         return yawPolynomial.getValue();
-      }
-
-      @Override
-      public void computeLinearVelocity(double time, Tuple3DBasics velocityToPack)
-      {
-         for (Axis3D axis : Axis3D.values)
-            linearPolynomials[axis.ordinal()].compute(time);
-
-         velocityToPack.setX(linearPolynomials[0].getVelocity());
-         velocityToPack.setY(linearPolynomials[1].getVelocity());
-         velocityToPack.setZ(linearPolynomials[2].getVelocity());
-      }
-
-      @Override
-      public double computeYawRate(double time)
-      {
-         yawPolynomial.compute(time);
-         return yawPolynomial.getVelocity();
       }
    }
 
