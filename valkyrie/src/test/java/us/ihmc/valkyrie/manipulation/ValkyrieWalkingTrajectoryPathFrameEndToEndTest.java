@@ -66,7 +66,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoLong;
 
-public class ValkyrieObjectCarryingWhileWalkingTest
+public class ValkyrieWalkingTrajectoryPathFrameEndToEndTest
 {
    private static final boolean ADD_PENDULUM = true;
    private static final RobotSide HAND_SIDE = RobotSide.LEFT;
