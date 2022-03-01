@@ -1,6 +1,7 @@
 package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoGraphicTrajectory3D;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoGraphicTrajectory3D.TrajectoryColorType;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -20,7 +21,7 @@ public class BlendedPositionTrajectoryGeneratorVisualizer
    }
 
    public BlendedPositionTrajectoryGeneratorVisualizer(String namePrefix,
-                                                       BlendedPositionTrajectoryGenerator trajectory,
+                                                       FixedFramePositionTrajectoryGenerator trajectory,
                                                        DoubleProvider swingDuration,
                                                        YoRegistry registry,
                                                        YoGraphicsListRegistry graphicsListRegistry)

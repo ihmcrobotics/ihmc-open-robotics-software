@@ -1,38 +1,38 @@
 package us.ihmc.robotics.math.trajectories;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class BlendedPositionTrajectoryGenerator implements FixedFramePositionTrajectoryGenerator
+public class BlendedWaypointPositionTrajectoryGenerator implements FixedFramePositionTrajectoryGenerator
 {
    private final FixedFramePositionTrajectoryGenerator trajectory;
    private final ReferenceFrame trajectoryFrame;
-   private final YoPolynomial3D initialConstraintPolynomial;
-   private final YoPolynomial3D finalConstraintPolynomial;
-   private final YoDouble initialBlendTimeOffset;
-   private final YoDouble initialBlendStartTime;
-   private final YoDouble initialBlendEndTime;
-   private final YoDouble finalBlendTimeOffset;
-   private final YoDouble finalBlendStartTime;
-   private final YoDouble finalBlendEndTime;
 
-   private final Vector3D initialConstraintPositionError = new Vector3D();
+   private final Point3D initialConstraintPositionError = new Point3D();
    private final Vector3D initialConstraintVelocityError = new Vector3D();
 
-   private final Vector3D finalConstraintPositionError = new Vector3D();
+   private final Point3D finalConstraintPositionError = new Point3D();
    private final Vector3D finalConstraintVelocityError = new Vector3D();
 
+   private final Point3D constraintPositionError = new Point3D();
+   private final Vector3D constraintVelocityError = new Vector3D();
+
+   private final Point3DReadOnly zeroPoint = new Point3D();
    private final Vector3DReadOnly zeroVector = new Vector3D();
 
    private final FramePoint3D position = new FramePoint3D();
@@ -41,29 +41,24 @@ public class BlendedPositionTrajectoryGenerator implements FixedFramePositionTra
    private final FramePoint3D tempPosition = new FramePoint3D();
    private final FrameVector3D tempVelocity = new FrameVector3D();
 
-   public BlendedPositionTrajectoryGenerator(String prefix,
-                                             FixedFramePositionTrajectoryGenerator trajectory,
-                                             ReferenceFrame trajectoryFrame,
-                                             YoRegistry parentRegistry)
+   private final MultipleWaypointsPositionTrajectoryGenerator blendTrajectory;
+
+   public BlendedWaypointPositionTrajectoryGenerator(String prefix,
+                                                     FixedFramePositionTrajectoryGenerator trajectory,
+                                                     ReferenceFrame trajectoryFrame,
+                                                     YoRegistry parentRegistry)
    {
       this.trajectory = trajectory;
       this.trajectoryFrame = trajectoryFrame;
 
-      this.initialConstraintPolynomial = new YoPolynomial3D(prefix + "InitialConstraintPolynomial", 6, parentRegistry);
-      this.finalConstraintPolynomial = new YoPolynomial3D(prefix + "FinalConstraintPolynomial", 6, parentRegistry);
-
-      this.initialBlendTimeOffset = new YoDouble(prefix + "InitialBlendTimeOffset", parentRegistry);
-      this.initialBlendStartTime = new YoDouble(prefix + "InitialBlendStartTime", parentRegistry);
-      this.initialBlendEndTime = new YoDouble(prefix + "InitialBlendEndTime", parentRegistry);
-      this.finalBlendTimeOffset = new YoDouble(prefix + "FinalBlendTimeOffset", parentRegistry);
-      this.finalBlendStartTime = new YoDouble(prefix + "FinalBlendStartTime", parentRegistry);
-      this.finalBlendEndTime = new YoDouble(prefix + "FinalBlendEndTime", parentRegistry);
+      blendTrajectory = new MultipleWaypointsPositionTrajectoryGenerator(prefix + "BlendTrajectory", 4, trajectoryFrame, parentRegistry);
 
       this.position.changeFrame(trajectoryFrame);
       this.velocity.changeFrame(trajectoryFrame);
       this.acceleration.changeFrame(trajectoryFrame);
       this.tempPosition.changeFrame(trajectoryFrame);
       this.tempVelocity.changeFrame(trajectoryFrame);
+
       clear();
    }
 
@@ -71,20 +66,19 @@ public class BlendedPositionTrajectoryGenerator implements FixedFramePositionTra
    {
       clearInitialConstraint();
       clearFinalConstraint();
+      blendTrajectory.clear();
    }
 
    public void clearInitialConstraint()
    {
       initialConstraintPositionError.setToZero();
       initialConstraintVelocityError.setToZero();
-      initialConstraintPolynomial.setZero();
    }
 
    public void clearFinalConstraint()
    {
       finalConstraintPositionError.setToZero();
       finalConstraintVelocityError.setToZero();
-      finalConstraintPolynomial.setZero();
    }
 
    public void blendInitialConstraint(FramePoint3DReadOnly initialPosition, double initialTime, double blendDuration)
@@ -115,9 +109,27 @@ public class BlendedPositionTrajectoryGenerator implements FixedFramePositionTra
       computeFinalConstraintPolynomial(finalTime, blendDuration);
    }
 
+   public void addBlendWaypoint(FramePoint3DReadOnly desiredPosition, double time)
+   {
+      computeConstraintPositionError(desiredPosition, time, constraintPositionError);
+      blendTrajectory.appendWaypoint(time, constraintPositionError, zeroVector);
+   }
+
+   public void addBlendWaypoint(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly desiredVelocity, double time)
+   {
+      computeConstraintPositionError(desiredPosition, time, constraintPositionError);
+      computeConstraintVelocityError(desiredVelocity, constraintVelocityError);
+      blendTrajectory.appendWaypoint(time, constraintPositionError, constraintVelocityError);
+   }
+
    public void initializeTrajectory()
    {
       trajectory.initialize();
+   }
+
+   public void initializeBlendingTrajectory()
+   {
+      blendTrajectory.initialize();
    }
 
    @Override
@@ -174,15 +186,13 @@ public class BlendedPositionTrajectoryGenerator implements FixedFramePositionTra
       velocity.changeFrame(trajectoryFrame);
       acceleration.changeFrame(trajectoryFrame);
 
-      computeInitialConstraintOffset(time);
-      position.add(initialConstraintPolynomial.getPosition());
-      velocity.add(initialConstraintPolynomial.getVelocity());
-      acceleration.add(initialConstraintPolynomial.getAcceleration());
-
-      computeFinalConstraintOffset(time);
-      position.add(finalConstraintPolynomial.getPosition());
-      velocity.add(finalConstraintPolynomial.getVelocity());
-      acceleration.add(finalConstraintPolynomial.getAcceleration());
+      if (!blendTrajectory.isEmpty())
+      {
+         blendTrajectory.compute(time);
+         position.add(blendTrajectory.getPosition());
+         velocity.add(blendTrajectory.getVelocity());
+         acceleration.add(blendTrajectory.getAcceleration());
+      }
    }
 
    @Override
@@ -196,13 +206,11 @@ public class BlendedPositionTrajectoryGenerator implements FixedFramePositionTra
       computeConstraintPositionError(initialPosition, initialTime, initialConstraintPositionError);
    }
 
-
    private void computeInitialConstraintStartingError(FramePoint3DReadOnly initialPosition, FrameVector3DReadOnly initialVelocity, double initialTime)
    {
       computeInitialConstraintStartingError(initialPosition, initialTime);
       computeConstraintVelocityError(initialVelocity, initialConstraintVelocityError);
    }
-
 
    private void computeFinalConstraintEndingError(FramePoint3DReadOnly finalPosition, double finalTime)
    {
@@ -215,7 +223,7 @@ public class BlendedPositionTrajectoryGenerator implements FixedFramePositionTra
       computeConstraintVelocityError(finalVelocity, finalConstraintVelocityError);
    }
 
-   private void computeConstraintPositionError(FramePoint3DReadOnly desiredPosition, double time, Vector3DBasics positionErrorToPack)
+   private void computeConstraintPositionError(FramePoint3DReadOnly desiredPosition, double time, Point3DBasics positionErrorToPack)
    {
       trajectory.compute(time);
       trajectoryFrame.checkReferenceFrameMatch(desiredPosition.getReferenceFrame());
@@ -236,47 +244,15 @@ public class BlendedPositionTrajectoryGenerator implements FixedFramePositionTra
 
    private void computeInitialConstraintPolynomial(double initialTime, double blendDuration)
    {
-      initialBlendTimeOffset.set(initialTime);
-      initialBlendStartTime.set(0.0);
-      initialBlendEndTime.set(blendDuration);
-
-      initialConstraintPolynomial.setQuinticWithZeroTerminalAcceleration(initialBlendStartTime.getDoubleValue(),
-                                                                         initialBlendEndTime.getDoubleValue(),
-                                                                         initialConstraintPositionError,
-                                                                         initialConstraintVelocityError,
-                                                                         zeroVector,
-                                                                         zeroVector);
+      blendTrajectory.appendWaypoint(initialTime, initialConstraintPositionError, initialConstraintVelocityError);
+      blendTrajectory.appendWaypoint(initialTime + blendDuration, zeroPoint, zeroVector);
+      blendTrajectory.initialize();
    }
 
    private void computeFinalConstraintPolynomial(double finalTime, double blendDuration)
    {
-      finalBlendTimeOffset.set(finalTime);
-      finalBlendStartTime.set(-blendDuration);
-      finalBlendEndTime.set(0.0);
-
-      finalConstraintPolynomial.setQuinticWithZeroTerminalAcceleration(finalBlendStartTime.getDoubleValue(),
-                                                                       finalBlendEndTime.getDoubleValue(),
-                                                                       zeroVector,
-                                                                       zeroVector,
-                                                                       finalConstraintPositionError,
-                                                                       finalConstraintVelocityError);
-   }
-
-   private void computeInitialConstraintOffset(double time)
-   {
-      double startTime = initialBlendStartTime.getDoubleValue();
-      double endTime = initialBlendEndTime.getDoubleValue();
-      time = MathTools.clamp(time - initialBlendTimeOffset.getValue(), startTime, endTime);
-
-      initialConstraintPolynomial.compute(time);
-   }
-
-   private void computeFinalConstraintOffset(double time)
-   {
-      double startTime = finalBlendStartTime.getDoubleValue();
-      double endTime = finalBlendEndTime.getDoubleValue();
-      time = MathTools.clamp(time - finalBlendTimeOffset.getValue(), startTime, endTime);
-
-      finalConstraintPolynomial.compute(time);
+      blendTrajectory.appendWaypoint(finalTime - blendDuration, zeroPoint, zeroVector);
+      blendTrajectory.appendWaypoint(finalTime, finalConstraintPositionError, finalConstraintVelocityError);
+      blendTrajectory.initialize();
    }
 }
