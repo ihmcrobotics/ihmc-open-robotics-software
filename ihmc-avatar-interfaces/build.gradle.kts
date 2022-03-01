@@ -18,7 +18,7 @@ mainDependencies {
    api("org.ejml:ejml-core:0.39")
    api("org.ejml:ejml-ddense:0.39")
    api("org.boofcv:boofcv-geo:0.36")
-   api("org.jfree:jfreechart:1.0.17")
+   api("org.jfree:jfreechart:1.0.19")
    api("com.github.quickhull3d:quickhull3d:1.0.0")
    api("com.github.wendykierp:JTransforms:3.1")
    api("org.reflections:reflections:0.9.10")
