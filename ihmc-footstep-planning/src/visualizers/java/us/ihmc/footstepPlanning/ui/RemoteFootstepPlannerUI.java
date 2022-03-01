@@ -1,10 +1,10 @@
 package us.ihmc.footstepPlanning.ui;
 
-import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.javafx.ApplicationNoModule;
 import us.ihmc.pubsub.DomainFactory;
 
 /**
@@ -12,7 +12,7 @@ import us.ihmc.pubsub.DomainFactory;
  * It allows users to view the resulting plans calculated by the toolbox. It also allows the user to tune
  * the planner parameters, and request a new plan from the planning toolbox.
  */
-public class RemoteFootstepPlannerUI extends Application
+public class RemoteFootstepPlannerUI extends ApplicationNoModule
 {
 
    private SharedMemoryJavaFXMessager messager;
