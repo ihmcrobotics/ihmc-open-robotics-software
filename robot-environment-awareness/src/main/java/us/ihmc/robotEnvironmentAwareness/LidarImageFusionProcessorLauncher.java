@@ -1,17 +1,17 @@
 package us.ihmc.robotEnvironmentAwareness;
 
-import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.javafx.ApplicationNoModule;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
 import us.ihmc.robotEnvironmentAwareness.fusion.LidarImageFusionProcessorCommunicationModule;
 import us.ihmc.robotEnvironmentAwareness.fusion.LidarImageFusionProcessorUI;
 import us.ihmc.ros2.ROS2Node;
 
-public class LidarImageFusionProcessorLauncher extends Application
+public class LidarImageFusionProcessorLauncher extends ApplicationNoModule
 {
    private SharedMemoryJavaFXMessager messager;
 

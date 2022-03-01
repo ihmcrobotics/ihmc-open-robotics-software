@@ -9,7 +9,6 @@ import java.util.Objects;
 import org.apache.commons.io.FilenameUtils;
 import org.junit.jupiter.api.Test;
 
-import javafx.application.Application;
 import us.ihmc.avatar.AvatarFlatGroundFastWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -18,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.javafx.ApplicationNoModule;
 import us.ihmc.parameterTuner.guiElements.main.ParameterGuiInterface;
 import us.ihmc.parameterTuner.guiElements.main.ParameterTuningApplication;
 import us.ihmc.parameterTuner.offline.FileInputManager;
@@ -136,7 +136,7 @@ public class ValkyrieFlatGroundFastWalkingTest extends AvatarFlatGroundFastWalki
 
    public static void main(String[] args)
    {
-      Application.launch(ValkyrieFastWalkingTunerOffline.class, args);
+      ApplicationNoModule.launch(ValkyrieFastWalkingTunerOffline.class, args);
    }
 
    public static class ValkyrieFastWalkingTunerOffline extends ParameterTuningApplication
