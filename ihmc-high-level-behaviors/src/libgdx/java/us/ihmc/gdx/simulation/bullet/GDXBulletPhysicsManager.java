@@ -61,8 +61,10 @@ public class GDXBulletPhysicsManager
    private final Stopwatch timeSpentInSteppingStopwatch = new Stopwatch();
    private final YoDouble timeSpentInStepping = new YoDouble("timeSpentInStepping", yoRegistry);
    private final YoDouble timeSpentPerTick = new YoDouble("timeSpentPerTick", yoRegistry);
+   private final YoDouble realtimePerformance = new YoDouble("realtimePerformance", yoRegistry);
    private final ImPlotYoPlot ticksSimulatedPlot = new ImPlotYoPlot(ticksSimulated);
    private final ImPlotYoPlot timeSpentInSteppingPlot = new ImPlotYoPlot(timeSpentInStepping, timeSpentPerTick);
+   private final ImPlotYoPlot realtimePerformancePlot = new ImPlotYoPlot(realtimePerformance);
 
    private GDXBulletPhysicsDebugger debugger;
 
@@ -187,10 +189,7 @@ public class GDXBulletPhysicsManager
          else
             timeSpentPerTick.set(0);
 
-         if (timeSpentInStepping.getValue() > ticksSimulated.getValue() * fixedTimeStep)
-         {
-            LogTools.warn("Bullet simulating slower than realtime!");
-         }
+         realtimePerformance.set((ticksSimulated.getValue() * fixedTimeStep) / timeSpentInStepping.getValue());
       }
    }
 
@@ -227,6 +226,7 @@ public class GDXBulletPhysicsManager
       ImGui.sliderFloat(labels.get("Simulation rate"), simulationRate.getData(), 0.001f, 1.0f);
       ticksSimulatedPlot.render(simulate.get());
       timeSpentInSteppingPlot.render(simulate.get());
+      realtimePerformancePlot.render(simulate.get());
       debugger.renderImGuiWidgets();
    }
 
@@ -260,5 +260,10 @@ public class GDXBulletPhysicsManager
    public btMultiBodyDynamicsWorld getMultiBodyDynamicsWorld()
    {
       return multiBodyDynamicsWorld;
+   }
+
+   public ImFloat getSimulationRate()
+   {
+      return simulationRate;
    }
 }
