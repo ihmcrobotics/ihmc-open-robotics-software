@@ -18,11 +18,11 @@ import java.util.function.IntFunction;
 
 public class HeightMapPlanarRegionCalculator
 {
-   private static final double distanceEpsilon0 = 0.015;
-   private static final double angularEpsilon0 = Math.toRadians(30.0);
+   private static final double distanceEpsilon0 = 0.055;
+   private static final double angularEpsilon0 = Math.toRadians(70.0);
 
-   private static final double distanceEpsilon1 = 0.04;
-   private static final double angularEpsilon1 = Math.toRadians(73.0);
+   private static final double distanceEpsilon1 = 0.065;
+   private static final double angularEpsilon1 = Math.toRadians(75.0);
 
    private static final int minRegionSize = 10;
    private static final int noRegionId = -1;
