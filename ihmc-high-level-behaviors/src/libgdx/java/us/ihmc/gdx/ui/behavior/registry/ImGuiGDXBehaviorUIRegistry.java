@@ -8,7 +8,7 @@ import java.util.TreeSet;
 
 public class ImGuiGDXBehaviorUIRegistry extends BehaviorRegistry
 {
-   public static final ImGuiGDXBehaviorUIRegistry DEFAULT_BEHAVIORS = new ImGuiGDXBehaviorUIRegistry(ImGuiGDXHeightMapNavigationBehaviorUI.DEFINITION);
+   public static final ImGuiGDXBehaviorUIRegistry DEFAULT_BEHAVIORS = new ImGuiGDXBehaviorUIRegistry(ImGuiGDXLookAndStepBehaviorUI.DEFINITION);
    static
    {
       DEFAULT_BEHAVIORS.register(ImGuiGDXTargetFollowingBehaviorUI.DEFINITION);
@@ -16,7 +16,6 @@ public class ImGuiGDXBehaviorUIRegistry extends BehaviorRegistry
       DEFAULT_BEHAVIORS.register(ImGuiGDXBuildingExplorationBehaviorUI.DEFINITION);
       DEFAULT_BEHAVIORS.register(ImGuiGDXDoorBehaviorUI.DEFINITION);
       DEFAULT_BEHAVIORS.register(ImGuiGDXTraverseStairsBehaviorUI.DEFINITION);
-      DEFAULT_BEHAVIORS.register(ImGuiGDXHeightMapNavigationBehaviorUI.DEFINITION);
    }
 
    private final TreeSet<ImGuiGDXBehaviorUIDefinition> uiDefinitionEntries = new TreeSet<>(Comparator.comparing(ImGuiGDXBehaviorUIDefinition::getName));

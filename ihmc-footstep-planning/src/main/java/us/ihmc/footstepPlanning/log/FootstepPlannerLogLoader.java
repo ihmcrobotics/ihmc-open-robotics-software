@@ -543,37 +543,8 @@ public class FootstepPlannerLogLoader
 
    public static void main(String[] args) throws IOException
    {
-//      FootstepPlannerLogLoader logLoader = new FootstepPlannerLogLoader();
-//      LoadResult loadResult = logLoader.load();
-//      if (loadResult != LoadResult.LOADED)
-//      {
-//         return;
-//      }
-//
-//      FootstepPlannerLog log = logLoader.getLog();
-//      FootstepPlanningRequestPacket requestPacket = log.getRequestPacket();
-//      Pose3D startPose = new Pose3D();
-//      Pose3D goalPose = new Pose3D();
-//      startPose.interpolate(requestPacket.getStartLeftFootPose(), requestPacket.getStartRightFootPose(), 0.5);
-//      goalPose.interpolate(requestPacket.getGoalLeftFootPose(), requestPacket.getGoalRightFootPose(), 0.5);
-//
-//      String dataSetName = "20210419_111333_GPUCinders1";
-//      PlanarRegionsListMessage planarRegionsMessage = requestPacket.getPlanarRegionsListMessage();
-//      PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsMessage);
-//
-//      DataSet dataSet = new DataSet(dataSetName, planarRegionsList);
-//
-//      PlannerInput plannerInput = new PlannerInput();
-//      plannerInput.setStartPosition(startPose.getPosition());
-//      plannerInput.setStartYaw(startPose.getYaw());
-//      plannerInput.setGoalPosition(goalPose.getPosition());
-//      plannerInput.setGoalYaw(goalPose.getYaw());
-//      dataSet.setPlannerInput(plannerInput);
-//
-//      DataSetIOTools.exportDataSet(dataSet);
-
       FootstepPlannerLogLoader logLoader = new FootstepPlannerLogLoader();
-      LoadResult loadResult = logLoader.load();
+      logLoader.load();
 
       FootstepPlannerLog log = logLoader.getLog();
       HeightMapMessage heightMapMessage = log.getRequestPacket().getHeightMapMessage();

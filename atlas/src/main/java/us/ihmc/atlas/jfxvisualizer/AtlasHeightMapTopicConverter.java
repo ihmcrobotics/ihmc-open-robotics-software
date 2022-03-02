@@ -23,7 +23,6 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.updaters.GPUPlanarRegionUpdater;
@@ -41,15 +40,15 @@ import java.net.URISyntaxException;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * ROS Node to publish necessary inputs to the ETH elevation mapping package
+ * Class for various ROS1 topic management related to height maps.
  */
-public class IHMCToETHLidarNode
+public class AtlasHeightMapTopicConverter
 {
    private static boolean debug = false;
    private static final String atlasPelvisFrame = "pelvis";
    private static final String atlasOusterFrame = "ouster";
 
-   public IHMCToETHLidarNode() throws URISyntaxException
+   public AtlasHeightMapTopicConverter() throws URISyntaxException
    {
       URI rosuri = NetworkParameters.getROSURI();
       System.out.println("ROS MASTER URI " + rosuri);
@@ -255,6 +254,6 @@ public class IHMCToETHLidarNode
 
    public static void main(String[] args) throws URISyntaxException
    {
-      new IHMCToETHLidarNode();
+      new AtlasHeightMapTopicConverter();
    }
 }

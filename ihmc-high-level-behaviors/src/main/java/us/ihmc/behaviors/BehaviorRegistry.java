@@ -2,7 +2,6 @@ package us.ihmc.behaviors;
 
 import us.ihmc.behaviors.exploreArea.ExploreAreaBehavior;
 import us.ihmc.behaviors.fancyPoses.FancyPosesBehavior;
-import us.ihmc.behaviors.heightMapNavigation.HeightMapNavigationBehavior;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.navigation.NavigationBehavior;
 import us.ihmc.behaviors.patrol.PatrolBehavior;
@@ -25,7 +24,6 @@ public class BehaviorRegistry
    {
       DEFAULT_BEHAVIORS.register(LookAndStepBehavior.DEFINITION);
       DEFAULT_BEHAVIORS.register(TraverseStairsBehavior.DEFINITION);
-      DEFAULT_BEHAVIORS.register(HeightMapNavigationBehavior.DEFINITION);
 
       ARCHIVED_BEHAVIORS.register(StepInPlaceBehavior.DEFINITION);
       ARCHIVED_BEHAVIORS.register(PatrolBehavior.DEFINITION);
