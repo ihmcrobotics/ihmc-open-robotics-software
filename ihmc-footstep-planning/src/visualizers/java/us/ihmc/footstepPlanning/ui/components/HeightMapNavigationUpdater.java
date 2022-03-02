@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.HeightMapMessage;
 import javafx.animation.AnimationTimer;
 import map_sense.RawGPUPlanarRegionList;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
@@ -266,7 +267,7 @@ public class HeightMapNavigationUpdater extends AnimationTimer
          bodyPathUnsmoothed.clear();
          bodyPathUnsmoothed.addAll(output.getBodyPathUnsmoothed());
 
-         messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathData, request.getBodyPathWaypoints());
+         messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathData, Pair.of(request.getBodyPathWaypoints(), null));
          currentState.set(State.PLAN_A_STEP);
          setStartFootPosesToCurrent();
          stopwatch.start();

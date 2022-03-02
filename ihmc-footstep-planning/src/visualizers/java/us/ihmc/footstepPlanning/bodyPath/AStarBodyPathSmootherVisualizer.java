@@ -35,49 +35,28 @@ import java.util.stream.Collectors;
 
 import static us.ihmc.pathPlanning.HeightMapDataSetName.*;
 
-public class AStarBodyPathSmootherTest
+public class AStarBodyPathSmootherVisualizer
 {
-   private boolean visualize = true;
    private AStarBodyPathSmoother smoother;
    private SimulationConstructionSet scs;
 
    public void setup(HeightMapData heightMapData)
    {
-      visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+      scs = new SimulationConstructionSet(new Robot("Dummy"));
+      YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
+      smoother = new AStarBodyPathSmoother(scs, graphicsListRegistry, scs.getRootRegistry());
 
-      if (visualize)
+      if (heightMapData != null)
       {
-         scs = new SimulationConstructionSet(new Robot("Dummy"));
-         YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-         smoother = new AStarBodyPathSmoother(scs, graphicsListRegistry, scs.getRootRegistry());
-
-         if (heightMapData != null)
-         {
-            scs.addStaticLinkGraphics(buildHeightMapGraphics(heightMapData));
-            scs.setGroundVisible(false);
-         }
-
-         scs.addYoGraphicsListRegistry(graphicsListRegistry);
-         scs.startOnAThread();
+         scs.addStaticLinkGraphics(buildHeightMapGraphics(heightMapData));
+         scs.setGroundVisible(false);
       }
-      else
-      {
-         smoother = new AStarBodyPathSmoother();
-      }
+
+      scs.addYoGraphicsListRegistry(graphicsListRegistry);
+      scs.startOnAThread();
    }
 
-   @AfterEach
-   public void after()
-   {
-      if (visualize)
-      {
-         scs.cropBuffer();
-         ThreadTools.sleepForever();
-      }
-   }
-
-   @Test
-   public void testSimpleSmoothing0()
+   public void visualizeSimpleSmoothing0()
    {
       List<BodyPathLatticePoint> bodyPathLatticePoints = new ArrayList<>();
       bodyPathLatticePoints.add(new BodyPathLatticePoint(0, 0));
@@ -89,10 +68,10 @@ public class AStarBodyPathSmootherTest
       setup(null);
 
       smoother.doSmoothing(bodyPath, null);
+      scs.cropBuffer();
    }
 
-   @Test
-   public void testSimpleSmoothing1()
+   public void visualizeSimpleSmoothing1()
    {
       List<BodyPathLatticePoint> bodyPathLatticePoints = new ArrayList<>();
       for (int i = 0; i < 11; i++)
@@ -126,10 +105,10 @@ public class AStarBodyPathSmootherTest
       setup(heightMapData);
       List<Point3D> bodyPath = bodyPathLatticePoints.stream().map(p -> new Point3D(p.getX(), p.getY(), 0.0)).collect(Collectors.toList());
       smoother.doSmoothing(bodyPath, heightMapData);
+      scs.cropBuffer();
    }
 
-   @Test
-   public void testSimpleSmoothing2()
+   public void visualizeSimpleSmoothing2()
    {
       List<BodyPathLatticePoint> bodyPathLatticePoints = new ArrayList<>();
       for (int i = 0; i < 11; i++)
@@ -163,10 +142,10 @@ public class AStarBodyPathSmootherTest
       setup(heightMapData);
       List<Point3D> bodyPath = bodyPathLatticePoints.stream().map(p -> new Point3D(p.getX(), p.getY(), 0.0)).collect(Collectors.toList());
       smoother.doSmoothing(bodyPath, heightMapData);
+      scs.cropBuffer();
    }
 
-   @Test
-   public void testSimpleSmoothing3()
+   public void visualizeSimpleSmoothing3()
    {
       List<BodyPathLatticePoint> bodyPathLatticePoints = new ArrayList<>();
       for (int i = 0; i < 11; i++)
@@ -200,76 +179,65 @@ public class AStarBodyPathSmootherTest
       setup(heightMapData);
       List<Point3D> bodyPath = bodyPathLatticePoints.stream().map(p -> new Point3D(p.getX(), p.getY(), 0.0)).collect(Collectors.toList());
       smoother.doSmoothing(bodyPath, heightMapData);
+      scs.cropBuffer();
    }
 
-   @Test
-   public void testCinders1()
+   public void visualizeCinders1()
    {
       runDataset("cinders_1");
    }
 
-   @Test
-   public void testCinders2()
+   public void visualizeCinders2()
    {
       runDataset("cinders_2");
    }
 
-   @Test
-   public void testObstacles1()
+   public void visualizeObstacles1()
    {
       runDataset("obstacles_1");
    }
 
-   @Test
-   public void testObstacles2()
+   public void visualizeObstacles2()
    {
       runDataset("obstacles_2");
    }
 
-   @Test
-   public void testRamp()
+   public void visualizeRamp()
    {
       runDataset("ramp");
    }
 
-   @Test
-   public void testRamp2()
+   public void visualizeRamp2()
    {
       runDataset("ramp_2");
    }
 
-   @Test
-   public void testRampAtAnAngle()
+   public void visualizeRampAtAnAngle()
    {
       runDataset("ramp_at_an_angle");
    }
 
-   @Test
-   public void testStairs1()
+   public void visualizeStairs1()
    {
       runDataset("stairs_1");
    }
 
-   @Test
-   public void testStairs2()
+   public void visualizeStairs2()
    {
       runDataset("stairs_2");
    }
 
-   @Test
-   public void testStairsHuggingEdge()
+   public void visualizeStairsHuggingEdge()
    {
       runDataset("stairs_hugging_edge");
    }
 
-   @Test
-   public void testSteppingStones3()
+   public void visualizeSteppingStones3()
    {
       runDataset("stepping_stones_3");
    }
 
-   @Test
-   public void testSteppingStones4()
+   public void visualizeSteppingStones4()
    {
       runDataset("stepping_stones_4");
    }
@@ -278,7 +246,7 @@ public class AStarBodyPathSmootherTest
    {
       FootstepPlannerLogLoader loader = new FootstepPlannerLogLoader();
 
-      File file = new File(System.getProperty("user.home") + File.separator + "heightMapDatasets" + File.separator + name);
+      File file = new File(System.getProperty("user.home") + File.separator + "heightMapPaper" + File.separator + name);
       loader.load(file);
       FootstepPlannerLog log = loader.getLog();
 
@@ -298,14 +266,13 @@ public class AStarBodyPathSmootherTest
       {
          e.printStackTrace();
       }
+
+      scs.cropBuffer();
    }
 
-   @Test
    public void runTimingTest()
    {
-      visualize = false;
-
-      HeightMapDataSetName[] datasets = new HeightMapDataSetName[]{Stairs_1, Cinders_2, Ramp, Obstacles_1};
+      HeightMapDataSetName[] datasets = new HeightMapDataSetName[]{Obstacle_Course};
       FootstepPlannerRequest[] requests = new FootstepPlannerRequest[datasets.length];
       HeightMapData[] heightMapData = new HeightMapData[datasets.length];
       FootstepPlannerOutput output = new FootstepPlannerOutput();
@@ -335,8 +302,7 @@ public class AStarBodyPathSmootherTest
          }
       }
 
-
-      int iterations = 10;
+      int iterations = 5;
       long initialPlanTime = 0;
       long smoothTime = 0;
 
@@ -344,8 +310,8 @@ public class AStarBodyPathSmootherTest
       {
          for (int j = 0; j < datasets.length; j++)
          {
-            long t0 = System.currentTimeMillis();
             planner.setHeightMapData(heightMapData[j]);
+            long t0 = System.currentTimeMillis();
             planner.handleRequest(requests[j], output);
             long t1 = System.currentTimeMillis();
             smoother.doSmoothing(output.getBodyPath().stream().map(Pose3D::getPosition).collect(Collectors.toList()), heightMapData[j]);
@@ -402,5 +368,26 @@ public class AStarBodyPathSmootherTest
       }
 
       return graphics3DObject;
+   }
+
+   public static void main(String[] args)
+   {
+//      new AStarBodyPathSmootherVisualizer().visualizeSimpleSmoothing0();
+//      new AStarBodyPathSmootherVisualizer().visualizeSimpleSmoothing1();
+//      new AStarBodyPathSmootherVisualizer().visualizeSimpleSmoothing2();
+//      new AStarBodyPathSmootherVisualizer().visualizeSimpleSmoothing3();
+//      new AStarBodyPathSmootherVisualizer().visualizeCinders1();
+//      new AStarBodyPathSmootherVisualizer().visualizeCinders2();
+//      new AStarBodyPathSmootherVisualizer().visualizeObstacles1();
+//      new AStarBodyPathSmootherVisualizer().visualizeObstacles2();
+//      new AStarBodyPathSmootherVisualizer().visualizeRamp();
+//      new AStarBodyPathSmootherVisualizer().visualizeRamp2();
+      new AStarBodyPathSmootherVisualizer().visualizeRampAtAnAngle();
+//      new AStarBodyPathSmootherVisualizer().visualizeStairs1();
+//      new AStarBodyPathSmootherVisualizer().visualizeStairs2();
+//      new AStarBodyPathSmootherVisualizer().visualizeStairsHuggingEdge();
+//      new AStarBodyPathSmootherVisualizer().visualizeSteppingStones3();
+//      new AStarBodyPathSmootherVisualizer().visualizeSteppingStones4();
+//      new AStarBodyPathSmootherVisualizer().runTimingTest();
    }
 }

@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.bodyPath;
 
 import gnu.trove.list.array.TIntArrayList;
 import org.apache.commons.lang3.tuple.Pair;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
@@ -17,10 +18,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class AStarBodyPathSmoother
@@ -28,15 +26,19 @@ public class AStarBodyPathSmoother
    static final double collisionWeight = 700.0;
    static final double smoothnessWeight = 0.7;
    static final double equalSpacingWeight = 2.0;
-   static final double rollWeight = 70.0;
+   static final double rollWeight = 20.0;
    static final double displacementWeight = 0.0;
    static final double traversibilityWeight = 20.0;
    static final double flatGroundWeight = 4.0;
 
    private static final int maxPoints = 80;
    private static final double gradientEpsilon = 1e-6;
-   private static final double hillClimbGain = 3e-4;
+   private static final double hillClimbGain = 1e-3;
    private static final double minCurvatureToPenalize = Math.toRadians(5.0);
+
+   private static final int minIterations = 20;
+   private static final double gradientMagnitudeToTerminate = 0.9;
+   private static final double gradientMagnitudeToTerminateSq = EuclidCoreTools.square(gradientMagnitudeToTerminate);
 
    static final double halfStanceWidthTraversibility = 0.18;
    static final double yOffsetTraversibilityNominalWindow = 0.27;
@@ -44,7 +46,7 @@ public class AStarBodyPathSmoother
    static final double traversibilitySampleWindowX = 0.2;
    static final double traversibilitySampleWindowY = 0.14;
 
-   private static final int iterations = 300;
+   private static final int iterations = 180;
 
    private static final int turnPointIteration = 12;
    private final TIntArrayList turnPointIndices = new TIntArrayList();
@@ -210,6 +212,17 @@ public class AStarBodyPathSmoother
                   }
                }
             }
+
+            double gradientMagnitudeSq = 0.0;
+            for (int i = 0; i < gradients.length; i++)
+            {
+               gradientMagnitudeSq += EuclidCoreTools.normSquared(gradients[i].getX(), gradients[i].getY());
+            }
+
+            if (gradientMagnitudeSq < gradientMagnitudeToTerminate && iteration.getValue() > minIterations)
+            {
+               break;
+            }
          }
 
          for (int j = 1; j < pathSize - 1; j++)
@@ -225,7 +238,7 @@ public class AStarBodyPathSmoother
 
          if (iteration.getValue() == turnPointIteration)
          {
-//            computeTurnPoints();
+            computeTurnPoints();
          }
 
          if (visualize) // && this.iteration.getValue() % 100 == 0)
@@ -257,7 +270,7 @@ public class AStarBodyPathSmoother
       /* Equal spacing gradient */
       double spacingGradientX = -4.0 * equalSpacingWeight * (x2 - 2.0 * x1 + x0);
       double spacingGradientY = -4.0 * equalSpacingWeight * (y2 - 2.0 * y1 + y0);
-      double alphaTurnPoint = isTurnPoint ? 0.1 : 0.0;
+      double alphaTurnPoint = isTurnPoint ?  0.1 : 1.0;
       gradientToSet.setX(alphaTurnPoint * spacingGradientX);
       gradientToSet.setY(alphaTurnPoint * spacingGradientY);
 

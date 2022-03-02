@@ -139,7 +139,7 @@ public class BodyPathRANSACTraversibilityCalculator
       double maxHeight = Math.min(oppositeHeight, nominalHeight) + heightWindow;
       double averageHeight = 0.5 * (nominalHeight + oppositeHeight);
 
-      double lowestNonGroundAlpha = 1.0;
+      double lowestNonGroundAlpha = 0.85;
       double heightAboveGround = Math.abs(averageHeight - heightMapData.getEstimatedGroundHeight());
       double nonGroundAlpha = 1.0;
       double groundProximity = 0.07;
@@ -170,7 +170,7 @@ public class BodyPathRANSACTraversibilityCalculator
          {
             numberOfTraversibleCells++;
 
-            double heightDeadband = 0.03;
+            double heightDeadband = 0.1;
             double deltaHeight = Math.max(0.0, Math.abs(averageHeight - heightQuery) - heightDeadband);
             double cellPercentage = 1.0 - deltaHeight / heightWindow;
             double nonGroundDiscount = 1.0;
