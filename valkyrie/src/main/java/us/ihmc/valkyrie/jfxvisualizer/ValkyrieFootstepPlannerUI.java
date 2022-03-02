@@ -55,7 +55,8 @@ public class ValkyrieFootstepPlannerUI extends Application
                                       model.getJointMap(),
                                       model.getContactPointParameters(),
                                       model.getWalkingControllerParameters(),
-                                      new ValkyrieUIAuxiliaryData());
+                                      new ValkyrieUIAuxiliaryData(),
+                                      model.getCollisionBoxProvider());
       ui.show();
 
       if(!ValkyrieNetworkProcessor.isFootstepPlanningModuleStarted())

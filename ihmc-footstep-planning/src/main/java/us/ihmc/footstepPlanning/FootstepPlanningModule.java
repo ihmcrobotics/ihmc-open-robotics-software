@@ -176,6 +176,9 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       output.setRequestId(request.getRequestId());
       bodyPathPlanHolder.getPlan().clear();
 
+      aStarFootstepPlanner.clearLoggedData();
+      bodyPathPlanner.clearLoggedData();
+
       boolean heightMapAvailable = request.getHeightMapMessage() != null && !request.getHeightMapMessage().getHeights().isEmpty();
       boolean planarRegionsAvailable = request.getPlanarRegionsList() == null || request.getPlanarRegionsList().isEmpty();
 

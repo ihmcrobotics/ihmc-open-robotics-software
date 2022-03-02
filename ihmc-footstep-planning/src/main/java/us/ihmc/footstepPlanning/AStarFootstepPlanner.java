@@ -292,6 +292,12 @@ public class AStarFootstepPlanner
       statusCallbacks.forEach(callback -> callback.accept(outputToPack));
    }
 
+   public void clearLoggedData()
+   {
+      edgeDataMap.clear();
+      iterationData.clear();
+   }
+
    private void markSolutionEdges()
    {
       edgeDataMap.values().forEach(data -> data.setSolutionEdge(false));

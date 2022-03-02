@@ -14,7 +14,7 @@ public class HeightMapManager
    /*  From HeightMapMessage.msg  */
    public static final int maxCellCount = 30000;
 
-   private double maxHeight = Double.MAX_VALUE;
+   private double maxHeight = 0.4;
    private final double gridResolutionXY;
    private final int centerIndex;
    private final int cellsPerAxis;
