@@ -1,15 +1,13 @@
 package us.ihmc.gdx.simulation;
 
-import com.badlogic.gdx.physics.bullet.Bullet;
-import com.badlogic.gdx.physics.bullet.linearmath.LinearMath;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.gdx.simulation.bullet.GDXBulletTools;
 import us.ihmc.gdx.simulation.environment.GDXEnvironmentBuilder;
 import us.ihmc.gdx.simulation.environment.object.objects.GDXLabFloorObject;
 import us.ihmc.gdx.simulation.environment.object.objects.GDXMultiBodySnakeObject;
 import us.ihmc.gdx.simulation.environment.object.objects.door.GDXDoorObject;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.log.LogTools;
 
 public class GDXPhysicsEnvironmentDemo
 {
@@ -20,8 +18,7 @@ public class GDXPhysicsEnvironmentDemo
 
    public GDXPhysicsEnvironmentDemo()
    {
-      Bullet.init();
-      LogTools.info("Loaded Bullet version {}", LinearMath.btGetVersion());
+      GDXBulletTools.ensureBulletInitialized();
 
       baseUI.launchGDXApplication(new Lwjgl3ApplicationAdapter()
       {

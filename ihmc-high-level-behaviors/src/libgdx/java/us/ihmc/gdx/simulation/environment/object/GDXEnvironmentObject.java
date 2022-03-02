@@ -33,7 +33,6 @@ import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.gizmo.StepCheckIsPointInsideAlgorithm;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -102,6 +101,16 @@ public class GDXEnvironmentObject
    {
       if (btMultiBody != null)
          copyBulletTransformToThis(btMultiBody.getBaseWorldTransform());
+   }
+
+   public void update(GDXBulletPhysicsManager bulletPhysicsManager)
+   {
+
+   }
+
+   public void afterSimulate(GDXBulletPhysicsManager bulletPhysicsManager)
+   {
+
    }
 
    public void copyThisTransformToBulletMultiBody()
@@ -470,5 +479,10 @@ public class GDXEnvironmentObject
    public ReferenceFrame getBulletCollisionSpecificationFrame()
    {
       return bulletCollisionSpecificationFrame;
+   }
+
+   public GDXBulletPhysicsManager getBulletPhysicsManager()
+   {
+      return bulletPhysicsManager;
    }
 }

@@ -54,22 +54,21 @@ public class GDXModelLoader
             LogTools.debug("Loading {}", modelFileName);
             try
             {
-               Model loadedModel;
                if (modelFileName.endsWith(".g3dj"))
                {
                   FileHandle fileHandle = Gdx.files.internal(modelFileName);
-                  loadedModel = new G3dModelLoader(new JsonReader()).loadModel(fileHandle);
+                  model = new G3dModelLoader(new JsonReader()).loadModel(fileHandle);
                }
                else if (modelFileName.endsWith(".g3db"))
                {
                   FileHandle fileHandle = Gdx.files.internal(modelFileName);
-                  loadedModel = new G3dModelLoader(new UBJsonReader()).loadModel(fileHandle);
+                  model = new G3dModelLoader(new UBJsonReader()).loadModel(fileHandle);
                }
                else
                {
-                  loadedModel = new GDXAssimpModelLoader(modelFileName).load();
+                  model = new GDXAssimpModelLoader(modelFileName).load();
                }
-               for (Material material : loadedModel.materials)
+               for (Material material : model.materials)
                {
                   if (!material.has(TextureAttribute.Diffuse))
                   {
@@ -86,15 +85,16 @@ public class GDXModelLoader
                   }
                }
 
-               loadedModels.put(modelFileName, loadedModel);
-               return loadedModel;
+               loadedModels.put(modelFileName, model);
             }
             catch (SerializationException | NullPointerException e)
             {
-               return null;
+               LogTools.error("Failed to load {}", modelFileName);
+               e.printStackTrace();
             }
          }
       }
+
       return model;
    }
 
