@@ -71,7 +71,7 @@ public class RosTools
    public static final String L515_DEPTH_CAMERA_INFO = "/chest_l515/depth/camera_info";
    public static final String MAPSENSE_DEPTH_IMAGE = L515_DEPTH;
    public static final String MAPSENSE_DEPTH_CAMERA_INFO = L515_DEPTH_CAMERA_INFO;
-   public static final String MAPSENSE_REGIONS = "/map/regions/test";
+   public static final String MAPSENSE_REGIONS = "/mapsense/planar_regions";
    public static final String MAPSENSE_CONFIGURATION = "/map/config";
    // See https://www.stereolabs.com/docs/ros/zed-node/
    public static final String ZED2_LEFT_EYE_VIDEO_COMPRESSED = "/zed/zed_node/left/image_rect_color/compressed";

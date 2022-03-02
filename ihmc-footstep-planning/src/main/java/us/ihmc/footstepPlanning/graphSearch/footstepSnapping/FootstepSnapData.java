@@ -17,7 +17,7 @@ public class FootstepSnapData implements FootstepSnapDataReadOnly
    private int regionIndex = -1;
    private double achievedInsideDelta = Double.NaN;
    private double rmsErrorHeightMap = Double.NaN;
-   private double area = Double.NaN;
+   private double heightMapSnapArea = Double.NaN;
    private boolean snappedFootstepTransformIncludesWiggleTransform = false;
 
    public FootstepSnapData()
@@ -109,12 +109,12 @@ public class FootstepSnapData implements FootstepSnapDataReadOnly
 
    public void setHeightMapArea(double area)
    {
-      this.area = area;
+      this.heightMapSnapArea = area;
    }
 
    public double getHeightMapArea()
    {
-      return area;
+      return heightMapSnapArea;
    }
 
    @Override
@@ -147,7 +147,7 @@ public class FootstepSnapData implements FootstepSnapDataReadOnly
       this.achievedInsideDelta = other.achievedInsideDelta;
       this.snappedFootstepTransformIncludesWiggleTransform = other.snappedFootstepTransformIncludesWiggleTransform;
 
-      this.area = other.area;
+      this.heightMapSnapArea = other.heightMapSnapArea;
       this.rmsErrorHeightMap = other.rmsErrorHeightMap;
    }
 

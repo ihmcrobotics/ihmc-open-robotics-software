@@ -23,7 +23,6 @@ import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
-import us.ihmc.footstepPlanning.ui.components.collision.CollidingScanRegionFilter;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.ihmcPerception.depthData.CollisionShapeTester;
@@ -103,8 +102,6 @@ public class HeightMapNavigationUpdater extends AnimationTimer
    private final ReferenceFrame steppingFrame;
    private final SideDependentList<ConvexPolygon2D> footPolygons;
 
-   private CollidingScanRegionFilter collisionFilter;
-
    private enum State
    {
       WAITING_TO_START,
@@ -162,7 +159,6 @@ public class HeightMapNavigationUpdater extends AnimationTimer
          MultiBodySystemTools.collectJointPath(fullHumanoidRobotModel.getPelvis(), shin, joints);
          joints.forEach(joint -> shapeTester.addJoint(collisionBoxProvider, joint));
       }
-      collisionFilter = new CollidingScanRegionFilter(shapeTester);
    }
 
    public static AbstractRosTopicSubscriber<RawGPUPlanarRegionList> createROS1Callback(String topic, RosNodeInterface ros1Node, Consumer<RawGPUPlanarRegionList> callback)
@@ -185,10 +181,6 @@ public class HeightMapNavigationUpdater extends AnimationTimer
       zForwardXRightToZUpXForward.appendPitchRotation(Math.PI / 2.0);
       zForwardXRightToZUpXForward.appendYawRotation(-Math.PI / 2.0);
    }
-
-   private final AtomicBoolean isProcessingRegions = new AtomicBoolean();
-   private int uiUpdateCounter = 0;
-   private final int uiUpdateRate = 40;
 
    @Override
    public void handle(long l)

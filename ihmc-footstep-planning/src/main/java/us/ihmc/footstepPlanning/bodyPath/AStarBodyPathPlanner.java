@@ -47,7 +47,7 @@ public class AStarBodyPathPlanner
    private static final boolean computeSurfaceNormalCost = true;
    private static final boolean useRANSACTraversibility = true;
    private static final double rollCostWeight = 3.5;
-   private static final double inclineCostWeight = 3.0;
+   private static final double inclineCostWeight = 0.0;
    private static final double inclineCostDeadband = Math.toRadians(3.0);
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -576,18 +576,6 @@ public class AStarBodyPathPlanner
       neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 2, latticePoint.getYIndex() - 1));
    }
 
-   private static Pair<Integer, Integer> rotate(int xOff, int yOff, int i)
-   {
-      if (i == 0)
-         return Pair.of(xOff, yOff);
-      else if (i == 1)
-         return Pair.of(-yOff, xOff);
-      else if (i == 2)
-         return Pair.of(-xOff, -yOff);
-      else
-         return Pair.of(yOff, -xOff);
-   }
-
    private double snap(BodyPathLatticePoint latticePoint)
    {
       if (gridHeightMap.containsKey(latticePoint))
@@ -648,40 +636,6 @@ public class AStarBodyPathPlanner
    private double heuristics(BodyPathLatticePoint node)
    {
       return xyDistance(node, goalNode);
-   }
-
-   /**
-    * For debugging
-    */
-   private static List<Pose3DReadOnly> straightLine(Pose3D startPose, Pose3D goalPose)
-   {
-      List<Pose3DReadOnly> poses = new ArrayList<>();
-
-      poses.add(startPose);
-
-      double angleEpsilon = 0.3;
-      if (!EuclidCoreTools.angleGeometricallyEquals(startPose.getYaw(), goalPose.getYaw(), angleEpsilon))
-      {
-         poses.add(new Pose3D(startPose.getPosition(), goalPose.getOrientation()));
-      }
-
-      boolean addFinal = !EuclidCoreTools.angleGeometricallyEquals(Math.atan2(goalPose.getY() - startPose.getY(), goalPose.getX() - startPose.getX()),
-                                                                   goalPose.getYaw(),
-                                                                   angleEpsilon);
-      int nInterpolate = 10;
-
-      for (int i = 1; i < nInterpolate; i++)
-      {
-         if (i != nInterpolate - 1 || addFinal)
-         {
-            Pose3D pose = new Pose3D(goalPose);
-            pose.getPosition().interpolate(startPose.getPosition(), goalPose.getPosition(), ((double) i) / (nInterpolate - 1));
-            poses.add(pose);
-         }
-      }
-
-      poses.add(goalPose);
-      return poses;
    }
 
    public void setStatusCallbacks(List<Consumer<FootstepPlannerOutput>> statusCallbacks)

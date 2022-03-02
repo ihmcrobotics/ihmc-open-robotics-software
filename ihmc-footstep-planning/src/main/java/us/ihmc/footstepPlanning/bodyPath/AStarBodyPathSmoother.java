@@ -241,7 +241,7 @@ public class AStarBodyPathSmoother
             computeTurnPoints();
          }
 
-         if (visualize) // && this.iteration.getValue() % 100 == 0)
+         if (visualize)
          {
             tickAndUpdatable.tickAndUpdate();
          }
@@ -308,7 +308,8 @@ public class AStarBodyPathSmoother
 
    private void computeTurnPoints()
    {
-      if (pathSize < 5)
+      int minPathSizeForTurnPoints = 5;
+      if (pathSize < minPathSizeForTurnPoints)
       {
          return;
       }
