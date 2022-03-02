@@ -181,7 +181,6 @@ public class FootstepPlannerMessagerAPI
    // Height map navigation
    public static final Topic<Boolean> StartHeightMapNavigation = topic("StartHeightMapNavigation");
    public static final Topic<Boolean> StopHeightMapNavigation = topic("StopHeightMapNavigation");
-   public static final Topic<PlanarRegionsList> GPUREARegions = topic("GPUREARegions");
 
    // Logging
    public static final Topic<Boolean> RequestGenerateLog = topic("RequestGenerateLog");

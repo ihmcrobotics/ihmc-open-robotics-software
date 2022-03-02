@@ -205,9 +205,6 @@ public class RemoteUIMessageConverter
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepStatusMessage.class, ROS2Tools.getControllerOutputTopic(robotName),
                                            s -> messager.submitMessage(FootstepPlannerMessagerAPI.FootstepStatusMessage, s.takeNextData()));
 
-      ROS2Topic<PlanarRegionsListMessage> mapsenseRegions = ROS2Tools.MAPSENSE_REGIONS;
-      new ROS2Callback<>(ros2Node, mapsenseRegions, p -> messager.submitMessage(FootstepPlannerMessagerAPI.GPUREARegions, PlanarRegionMessageConverter.convertToPlanarRegionsList(p)));
-
       ROS2Topic<HeightMapMessage> heightMapOutput = ROS2Tools.HEIGHT_MAP_OUTPUT;
       new ROS2Callback<>(ros2Node, heightMapOutput, m -> messager.submitMessage(FootstepPlannerMessagerAPI.HeightMapData, m));
 

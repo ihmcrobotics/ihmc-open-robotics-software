@@ -29,6 +29,7 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.ui.components.*;
 import us.ihmc.footstepPlanning.ui.controllers.*;
 import us.ihmc.footstepPlanning.ui.viewers.*;
+import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXToolkit.shapes.JavaFXCoordinateSystem;
@@ -61,6 +62,9 @@ import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.
  */
 public class FootstepPlannerUI
 {
+   private static final boolean ENABLE_HEIGHT_MAP_VIZ = true;
+   private static final boolean SETUP_HEIGHT_MAP_NAV = false;
+
    private final JavaFXMessager messager;
    private final Stage primaryStage;
    private final BorderPane mainPane;
@@ -147,7 +151,8 @@ public class FootstepPlannerUI
            walkingControllerParameters,
            null,
            showTestDashboard,
-           defaultContactPoints);
+           defaultContactPoints,
+           null);
    }
 
    public FootstepPlannerUI(Stage primaryStage,
@@ -161,7 +166,8 @@ public class FootstepPlannerUI
                             WalkingControllerParameters walkingControllerParameters,
                             UIAuxiliaryRobotData auxiliaryRobotData,
                             boolean showTestDashboard,
-                            SideDependentList<List<Point2D>> defaultContactPoints)
+                            SideDependentList<List<Point2D>> defaultContactPoints,
+                            CollisionBoxProvider collisionBoxProvider)
          throws Exception
    {
       this.primaryStage = primaryStage;
@@ -196,7 +202,11 @@ public class FootstepPlannerUI
       footstepPlannerLogVisualizerController.attachMessager(messager);
       visibilityGraphsUIController.attachMessager(messager);
       robotOperationTabController.attachMessager(messager);
-      messager.registerTopicListener(HeightMapData, heightMapVisualizer::update);
+
+      if (ENABLE_HEIGHT_MAP_VIZ)
+      {
+         messager.registerTopicListener(HeightMapData, heightMapVisualizer::update);
+      }
 
       footstepPlannerMenuUIController.setMainWindow(primaryStage);
 
@@ -277,16 +287,16 @@ public class FootstepPlannerUI
          messager.registerTopicListener(ShowRobot, show -> robotVisualizer.getRootNode().setVisible(show));
       }
 
-      if (previewModelFactory == null)
-      {
+//      if (previewModelFactory == null)
+//      {
          robotIKVisualizer = null;
-      }
-      else
-      {
-         robotIKVisualizer = new RobotIKVisualizer(previewModelFactory, jointMap, messager);
-         messager.registerTopicListener(RobotConfigurationData, robotIKVisualizer::submitNewConfiguration);
-         view3dFactory.addNodeToView(robotIKVisualizer.getRootNode());
-      }
+//      }
+//      else
+//      {
+//         robotIKVisualizer = new RobotIKVisualizer(previewModelFactory, jointMap, messager);
+//         messager.registerTopicListener(RobotConfigurationData, robotIKVisualizer::submitNewConfiguration);
+//         view3dFactory.addNodeToView(robotIKVisualizer.getRootNode());
+//      }
 
       if (walkingControllerParameters != null)
       {
@@ -320,9 +330,9 @@ public class FootstepPlannerUI
       new FootPoseFromMidFootUpdater(messager).start();
       new FootstepCompletionListener(messager).start();
 
-      if (robotVisualizer != null)
+      if (robotVisualizer != null && SETUP_HEIGHT_MAP_NAV)
       {
-         heightMapNavigationUpdater = new HeightMapNavigationUpdater(messager, walkingControllerParameters, defaultContactPoints, robotVisualizer.getFullRobotModel());
+         heightMapNavigationUpdater = new HeightMapNavigationUpdater(messager, plannerParameters, walkingControllerParameters, defaultContactPoints, robotVisualizer.getFullRobotModel(), collisionBoxProvider);
          heightMapNavigationUpdater.start();
       }
       else
@@ -381,7 +391,9 @@ public class FootstepPlannerUI
             robotRootJoint.getRotation().setYawPitchRoll(dataSet.getPlannerInput().getStartYaw(), 0.0, 0.0);
             robotRootJoint.getTranslation().sub(auxiliaryRobotData.getRootJointToMidFootOffset());
             robotVisualizer.submitNewConfiguration(robotRootJoint, auxiliaryRobotData.getDefaultJointAngleMap());
-            robotIKVisualizer.submitNewConfiguration(robotRootJoint, auxiliaryRobotData.getDefaultJointAngleMap());
+
+            if (robotIKVisualizer != null)
+               robotIKVisualizer.submitNewConfiguration(robotRootJoint, auxiliaryRobotData.getDefaultJointAngleMap());
 
             messager.submitMessage(GoalMidFootPosition, dataSet.getPlannerInput().getGoalPosition());
             messager.submitMessage(GoalMidFootOrientation, new Quaternion(dataSet.getPlannerInput().getGoalYaw(), 0.0, 0.0));
@@ -400,7 +412,9 @@ public class FootstepPlannerUI
          robotRootJoint.getRotation().setYawPitchRoll(dataSetName.getStart().getYaw(), 0.0, 0.0);
          robotRootJoint.getTranslation().sub(auxiliaryRobotData.getRootJointToMidFootOffset());
          robotVisualizer.submitNewConfiguration(robotRootJoint, auxiliaryRobotData.getDefaultJointAngleMap());
-         robotIKVisualizer.submitNewConfiguration(robotRootJoint, auxiliaryRobotData.getDefaultJointAngleMap());
+
+         if (robotIKVisualizer != null)
+            robotIKVisualizer.submitNewConfiguration(robotRootJoint, auxiliaryRobotData.getDefaultJointAngleMap());
 
          messager.submitMessage(GoalMidFootPosition, dataSetName.getGoal().getPosition());
          messager.submitMessage(GoalMidFootOrientation, new Quaternion(dataSetName.getGoal().getYaw(), 0.0, 0.0));
@@ -454,7 +468,10 @@ public class FootstepPlannerUI
       heightMapVisualizer.stop();
 
       if (heightMapNavigationUpdater != null)
+      {
+         heightMapNavigationUpdater.destroy();
          heightMapNavigationUpdater.stop();
+      }
 
       if (robotVisualizer != null)
          robotVisualizer.stop();
@@ -489,7 +506,8 @@ public class FootstepPlannerUI
                                             HumanoidJointNameMap jointMap,
                                             RobotContactPointParameters<RobotSide> contactPointParameters,
                                             WalkingControllerParameters walkingControllerParameters,
-                                            UIAuxiliaryRobotData auxiliaryRobotData)
+                                            UIAuxiliaryRobotData auxiliaryRobotData,
+                                            CollisionBoxProvider collisionBoxProvider)
          throws Exception
    {
       SideDependentList<List<Point2D>> defaultContactPoints = new SideDependentList<>();
@@ -509,6 +527,7 @@ public class FootstepPlannerUI
                                    walkingControllerParameters,
                                    auxiliaryRobotData,
                                    false,
-                                   defaultContactPoints);
+                                   defaultContactPoints,
+                                   collisionBoxProvider);
    }
 }

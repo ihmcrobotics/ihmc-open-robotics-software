@@ -49,5 +49,6 @@ visualizersDependencies {
    api("us.ihmc:ihmc-graphics-jmonkeyengine:source")
    api("us.ihmc:ihmc-whole-body-controller:source")
    api("us.ihmc:ihmc-common-walking-control-modules-test:source")
+   api("us.ihmc:ihmc-perception:source")
 
 }

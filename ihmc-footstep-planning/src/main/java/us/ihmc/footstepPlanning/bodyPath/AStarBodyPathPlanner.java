@@ -25,6 +25,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.graph.structure.NodeComparator;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.heightMap.HeightMapData;
@@ -192,6 +193,7 @@ public class AStarBodyPathPlanner
          }
       }
    }
+
 
    private enum RejectionReason
    {
@@ -446,12 +448,30 @@ public class AStarBodyPathPlanner
          for (int i = 0; i < bodyPath.size(); i++)
          {
             Pose3D waypoint = new Pose3D(smoothedPath.get(i));
+
+            if (i == 0)
+            {
+               double yaw = AngleTools.interpolateAngle(request.getStartFootPoses().get(RobotSide.LEFT).getYaw(), request.getStartFootPoses().get(RobotSide.RIGHT).getYaw(), 0.5);
+               waypoint.getOrientation().setYawPitchRoll(yaw, 0.0, 0.0);
+            }
+            else if (i == bodyPath.size() - 1)
+            {
+               double yaw = AngleTools.interpolateAngle(request.getGoalFootPoses().get(RobotSide.LEFT).getYaw(), request.getGoalFootPoses().get(RobotSide.RIGHT).getYaw(), 0.5);
+               waypoint.getOrientation().setYawPitchRoll(yaw, 0.0, 0.0);
+            }
+
             outputToPack.getBodyPath().add(waypoint);
          }
       }
 
       markSolutionEdges(terminalNode);
       statusCallbacks.forEach(callback -> callback.accept(outputToPack));
+   }
+
+   public void clearLoggedData()
+   {
+      edgeDataMap.clear();
+      iterationData.clear();
    }
 
    private boolean publishStatus(FootstepPlannerRequest request)
