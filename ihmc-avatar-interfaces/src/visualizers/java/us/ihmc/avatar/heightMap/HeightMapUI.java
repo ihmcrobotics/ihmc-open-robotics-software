@@ -12,7 +12,6 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.tuple.Pair;
-import org.ros.internal.message.Message;
 import sensor_msgs.PointCloud2;
 import tf2_msgs.TFMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -21,7 +20,6 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.ui.viewers.HeightMapVisualizer;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
@@ -135,9 +133,9 @@ public abstract class HeightMapUI extends Application
          heightMapVisualizer = new HeightMapVisualizer();
          messager.registerTopicListener(HeightMapMessagerAPI.HeightMapData, heightMapVisualizer::update);
          messager.registerTopicListener(HeightMapMessagerAPI.MaxHeight, heightMapVisualizer::setMaxHeight);
-         messager.registerTopicListener(HeightMapMessagerAPI.xPosition, v -> heightMapVisualizer.setPosition(0, v));
-         messager.registerTopicListener(HeightMapMessagerAPI.yPosition, v -> heightMapVisualizer.setPosition(1, v));
-         messager.registerTopicListener(HeightMapMessagerAPI.zPosition, v -> heightMapVisualizer.setPosition(2, v));
+         messager.registerTopicListener(HeightMapMessagerAPI.xPosition, v -> heightMapVisualizer.setDebugPosition(0, v));
+         messager.registerTopicListener(HeightMapMessagerAPI.yPosition, v -> heightMapVisualizer.setDebugPosition(1, v));
+         messager.registerTopicListener(HeightMapMessagerAPI.zPosition, v -> heightMapVisualizer.setDebugPosition(2, v));
          view3dFactory.addNodeToView(heightMapVisualizer.getRoot());
          heightMapVisualizer.start();
       }

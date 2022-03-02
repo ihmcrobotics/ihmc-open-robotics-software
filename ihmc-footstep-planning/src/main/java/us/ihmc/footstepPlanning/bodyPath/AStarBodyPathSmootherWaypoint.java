@@ -428,7 +428,7 @@ public class AStarBodyPathSmootherWaypoint
          tempVector.setIncludingFrame(waypointFrame, Axis3D.Y);
          tempVector.changeFrame(ReferenceFrame.getWorldFrame());
          double rollDotY = tempVector.dot(surfaceNormal);
-         alphaRoll.set(Math.signum(rollDotY) * MathTools.square(rollDotY));
+         alphaRoll.set(rollDotY);
          tempVector.scale(alphaRoll.getValue());
 
          AStarBodyPathSmootherWaypoint previous = waypoints[Math.max(0, waypointIndex - 1)];
@@ -437,7 +437,7 @@ public class AStarBodyPathSmootherWaypoint
          double incline = Math.atan2(next.getPosition().getZ() - previous.getPosition().getZ(), next.getPosition().distanceXY(previous.getPosition()));
          elevationIncline.set(incline);
 
-         double inclineClipped = EuclidCoreTools.clamp((Math.abs(incline) - Math.toRadians(10.0)) / Math.toRadians(20.0), 0.0, 1.0);
+         double inclineClipped = EuclidCoreTools.clamp((Math.abs(incline) - Math.toRadians(2.0)) / Math.toRadians(7.0), 0.0, 1.0);
          rollDelta.set(rollWeight * inclineClipped * tempVector.getX(), rollWeight * inclineClipped * tempVector.getY());
 
          sampledLSNormalHeight.set(leastSquaresSurfaceNormalCalculator.getSampledHeight(key));
@@ -523,7 +523,7 @@ public class AStarBodyPathSmootherWaypoint
          yoGroundPlaneCells.get(side).set(0);
       }
 
-      double heightThresholdForGround = 0.01;
+      double heightThresholdForGround = 0.015;
       double currentHeightAboveGroundPlane = waypoint.getZ() - heightMapData.getEstimatedGroundHeight();
       double nextHeightAboveGroundPlane = getNeighbor(waypointIndex + 1).getPosition().getZ() - heightMapData.getEstimatedGroundHeight();
 

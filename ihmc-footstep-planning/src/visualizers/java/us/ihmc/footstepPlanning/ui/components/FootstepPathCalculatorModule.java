@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.ui.components;
 
 import controller_msgs.msg.dds.FootstepPlanningTimingsMessage;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -176,7 +177,7 @@ public class FootstepPathCalculatorModule
          messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponse,
                                 FootstepDataMessageConverter.createFootstepDataListFromPlan(output.getFootstepPlan(), -1.0, -1.0));
          messager.submitMessage(FootstepPlannerMessagerAPI.ReceivedPlanId, output.getRequestId());
-         messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathData, output.getBodyPath());
+         messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathData, Pair.of(output.getBodyPath(), output.getBodyPathUnsmoothed()));
 
          if (output.getGoalPose() != null)
          {

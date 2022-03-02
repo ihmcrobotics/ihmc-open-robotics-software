@@ -70,6 +70,8 @@ public class AStarBodyPathPlanner
    private final YoDouble rollCost = new YoDouble("rollCost", registry);
    private final YoDouble nominalIncline = new YoDouble("nominalIncline", registry);
    private final YoFrameVector3D leastSqNormal = new YoFrameVector3D("leastSqNormal", ReferenceFrame.getWorldFrame(), registry);
+   private final YoDouble heuristicCost = new YoDouble("heuristicCost", registry);
+   private final YoDouble totalCost = new YoDouble("totalCost", registry);
 
    private final HashMap<BodyPathLatticePoint, Double> rollMap = new HashMap<>();
 
@@ -110,7 +112,7 @@ public class AStarBodyPathPlanner
    static final double groundClearance = 0.3;
    static final double maxIncline = Math.toRadians(55.0);
    static final double snapRadius = 0.15;
-   static final double boxSizeY = 1.0;
+   static final double boxSizeY = 1.2;
    static final double boxSizeX = 0.35;
 
    public AStarBodyPathPlanner(FootstepPlannerParametersReadOnly parameters, SideDependentList<ConvexPolygon2D> footPolygons)
@@ -152,6 +154,8 @@ public class AStarBodyPathPlanner
                                          leastSqNormal.setToZero();
                                          roll.set(0.0);
                                          incline.set(0.0);
+                                         heuristicCost.setToNaN();
+                                         totalCost.setToNaN();
                                          ransacTraversibilityCalculator.clearVariables();
                                       });
 
@@ -295,6 +299,8 @@ public class AStarBodyPathPlanner
             BodyPathLatticePoint neighbor = neighbors.get(i);
 
             this.snapHeight.set(snap(neighbor));
+            heuristicCost.set(xyDistance(neighbor, goalNode));
+
             if (Double.isNaN(snapHeight.getDoubleValue()))
             {
                rejectionReason.set(RejectionReason.INVALID_SNAP);
@@ -383,6 +389,7 @@ public class AStarBodyPathPlanner
                throw new RuntimeException("Negative edge cost!");
             }
 
+            totalCost.set(heuristicCost.getValue() + edgeCost.getValue());
             graph.checkAndSetEdge(node, neighbor, edgeCost.getValue());
             stack.add(neighbor);
 
@@ -442,7 +449,7 @@ public class AStarBodyPathPlanner
 
          rollMap.put(neighbor, roll.getValue());
          double inclineScale = EuclidCoreTools.clamp(Math.abs(incline.getValue()) / Math.toRadians(7.0), 0.0, 1.0);
-         double rollDeadband = Math.toRadians(2.0);
+         double rollDeadband = Math.toRadians(1.5);
          double rollAngleDeadbanded = Math.max(0.0, Math.abs(effectiveRoll) - rollDeadband);
          rollCost.set(rollCostWeight * inclineScale * rollAngleDeadbanded);
          edgeCost.add(rollCost);

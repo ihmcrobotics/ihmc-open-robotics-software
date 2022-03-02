@@ -9,6 +9,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.BodyPathPlanningResult;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
@@ -148,7 +149,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<GoHomeMessage> GoHomeTopic = topic("GoHome");
 
    // Body path planner output
-   public static final Topic<List<? extends Pose3DReadOnly>> BodyPathData = topic("BodyPathData");
+   public static final Topic<Pair<List<? extends Pose3DReadOnly>, List<? extends Point3DReadOnly>>> BodyPathData = topic("BodyPathData");
    public static final Topic<List<VisibilityMapWithNavigableRegion>> VisibilityMapWithNavigableRegionData = topic("VisibilityMapWithNavigableRegionData");
    public static final Topic<VisibilityMapHolder> StartVisibilityMap = topic("StartVisibilityMap");
    public static final Topic<VisibilityMapHolder> GoalVisibilityMap = topic("GoalVisibilityMap");

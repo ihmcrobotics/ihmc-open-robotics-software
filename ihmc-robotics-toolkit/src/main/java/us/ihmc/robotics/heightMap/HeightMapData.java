@@ -189,4 +189,10 @@ public class HeightMapData
    {
       return occupiedCells.get(i);
    }
+
+   public void markGroundCell(int i)
+   {
+      heights[occupiedCells.get(i)] = Double.NaN;
+      occupiedCells.remove(i);
+   }
 }

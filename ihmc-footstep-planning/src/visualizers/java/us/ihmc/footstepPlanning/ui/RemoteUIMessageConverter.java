@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.ui;
 
 import controller_msgs.msg.dds.*;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -9,6 +10,7 @@ import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.BodyPathPlanningResult;
 import us.ihmc.footstepPlanning.FootstepPlannerRequestedAction;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
@@ -19,6 +21,7 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.idl.IDLSequence;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
@@ -178,8 +181,6 @@ public class RemoteUIMessageConverter
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPlanningRequestPacket.class,
                                                     FootstepPlannerAPI.inputTopic(robotName),
                                            s -> processFootstepPlanningRequestPacket(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, BodyPathPlanMessage.class, FootstepPlannerAPI.outputTopic(robotName),
-                                           s -> processBodyPathPlanMessage(s.takeNextData()));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPlanningToolboxOutputStatus.class,
                                                     FootstepPlannerAPI.outputTopic(robotName),
                                            s -> processFootstepPlanningOutputStatus(s.takeNextData()));
@@ -316,21 +317,6 @@ public class RemoteUIMessageConverter
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLength, horizonLength);
    }
 
-   private void processBodyPathPlanMessage(BodyPathPlanMessage packet)
-   {
-      PlanarRegionsListMessage planarRegionsListMessage = packet.getPlanarRegionsList();
-      PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
-      FootstepPlanningResult result = FootstepPlanningResult.fromByte(packet.getFootstepPlanningResult());
-      List<? extends Pose3DReadOnly> bodyPath = packet.getBodyPath();
-
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, planarRegionsList);
-      messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanningResultTopic, result);
-      messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathData, bodyPath);
-
-      if (verbose)
-         LogTools.info("Received a body path planning result from the toolbox.");
-   }
-
    private void processFootstepPlanningOutputStatus(FootstepPlanningToolboxOutputStatus packet)
    {
       FootstepDataListMessage footstepDataListMessage = packet.getFootstepDataList();
@@ -338,6 +324,7 @@ public class RemoteUIMessageConverter
       BodyPathPlanningResult bodyPathPlanningResult = BodyPathPlanningResult.fromByte(packet.getBodyPathPlanningResult());
       FootstepPlanningResult footstepPlanningResult = FootstepPlanningResult.fromByte(packet.getFootstepPlanningResult());
       List<? extends Pose3DReadOnly> bodyPath = packet.getBodyPath();
+      List<? extends Point3D> bodyPathUnsmoothed = packet.getBodyPathUnsmoothed();
       Pose3D lowLevelGoal = packet.getGoalPose();
 
       if (plannerRequestId > currentPlanRequestId.get())
@@ -349,7 +336,8 @@ public class RemoteUIMessageConverter
       messager.submitMessage(FootstepPlannerMessagerAPI.ReceivedPlanId, plannerRequestId);
       messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathPlanningResultTopic, bodyPathPlanningResult);
       messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanningResultTopic, footstepPlanningResult);
-      messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathData, bodyPath);
+      messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathData, Pair.of(bodyPath, bodyPathUnsmoothed));
+
       if (lowLevelGoal != null)
       {
          messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalPosition, lowLevelGoal.getPosition());
