@@ -170,12 +170,14 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
    public void update()
    {
       bulletPhysicsManager.simulate(Gdx.graphics.getDeltaTime());
-      if (bulletPhysicsManager.getSimulate().get())
+      for (GDXEnvironmentObject allObject : allObjects)
       {
-         for (GDXEnvironmentObject allObject : allObjects)
+         if (bulletPhysicsManager.getSimulate().get())
          {
             allObject.copyBulletTransformToThisMultiBody();
+            allObject.afterSimulate(bulletPhysicsManager);
          }
+         allObject.update(bulletPhysicsManager);
       }
    }
 
@@ -450,5 +452,10 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
    public String getWindowName()
    {
       return WINDOW_NAME;
+   }
+
+   public GDXBulletPhysicsManager getBulletPhysicsManager()
+   {
+      return bulletPhysicsManager;
    }
 }

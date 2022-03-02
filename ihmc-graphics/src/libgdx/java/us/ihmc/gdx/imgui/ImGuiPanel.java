@@ -142,4 +142,9 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
    {
       return panelName;
    }
+
+   public TreeSet<ImGuiPanel> getChildren()
+   {
+      return children;
+   }
 }

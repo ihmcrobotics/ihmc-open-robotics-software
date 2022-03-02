@@ -20,12 +20,16 @@ import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.definition.geometry.ModelFileGeometryDefinition;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.definition.visual.VisualDefinition;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,12 +88,26 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
          GDXRobotCollisionLink collisionLink = new GDXRobotCollisionLink(collidable, GDXTools.toGDX(red));
          environmentCollisionLinks.add(collisionLink);
 
+         RobotDefinition robotDefinition = robotModel.getRobotDefinition();
+         ModelFileGeometryDefinition modelFileGeometryDefinition = null;
+         for (VisualDefinition visualDefinition : robotDefinition.getRigidBodyDefinition(collidable.getRigidBody().getName()).getVisualDefinitions())
+         {
+            if (visualDefinition.getGeometryDefinition() instanceof ModelFileGeometryDefinition)
+            {
+               modelFileGeometryDefinition = (ModelFileGeometryDefinition) visualDefinition.getGeometryDefinition();
+            }
+         }
+         if (modelFileGeometryDefinition == null)
+         {
+            LogTools.error("Interactables need a model file or implementation of shape visuals");
+         }
+
          if (collidable.getRigidBody().getName().equals("pelvis"))
          {
             pelvisInteractable = new GDXLiveRobotPartInteractable();
             pelvisInteractable.create(collisionLink,
                                       syncedRobot.getReferenceFrames().getPelvisFrame(),
-                                      "pelvis.g3dj",
+                                      modelFileGeometryDefinition.getFileName(),
                                       baseUI.get3DSceneManager().getCamera3D());
             pelvisInteractable.setOnSpacePressed(() ->
             {
@@ -99,13 +117,13 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
          for (RobotSide side : RobotSide.values)
          {
             String robotSidePrefix = (side == RobotSide.LEFT) ? "l_" : "r_";
-            if (collidable.getRigidBody().getName().equals(side.getSideNameFirstLowerCaseLetter() + "_foot"))
+            if (collidable.getRigidBody().getName().equals(robotSidePrefix + "foot"))
             {
                GDXLiveRobotPartInteractable interactableFoot = new GDXLiveRobotPartInteractable();
-               String modelFileName = robotSidePrefix + "foot.g3dj";
+//               String modelFileName = robotSidePrefix + "foot.g3dj";
                interactableFoot.create(collisionLink,
                                        syncedRobot.getFullRobotModel().getFrameAfterLegJoint(side, LegJointName.ANKLE_ROLL),
-                                       modelFileName,
+                                       modelFileGeometryDefinition.getFileName(),
                                        baseUI.get3DSceneManager().getCamera3D());
                interactableFoot.setOnSpacePressed(() ->
                {
@@ -113,7 +131,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
                });
                footInteractables.put(side, interactableFoot);
             }
-            if (collidable.getRigidBody().getName().equals(side.getSideNameFirstLowerCaseLetter() + "_hand"))
+            if (collidable.getRigidBody().getName().equals(robotSidePrefix + "hand"))
             {
                ReferenceFrame handFrame = syncedRobot.getFullRobotModel().getEndEffectorFrame(side, LimbName.ARM);
                ReferenceFrame collisionFrame = handFrame;
@@ -132,7 +150,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
                                        handGraphicFrame,
                                        collisionFrame,
                                        handControlFrame,
-                                       (side == RobotSide.LEFT) ? "palm.g3dj" : "palmRight.g3dj",
+                                       modelFileGeometryDefinition.getFileName(),
                                        baseUI.get3DSceneManager().getCamera3D());
                interactableHand.setOnSpacePressed(() ->
                {

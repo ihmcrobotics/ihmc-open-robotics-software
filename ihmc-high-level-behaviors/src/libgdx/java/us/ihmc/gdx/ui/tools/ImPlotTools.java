@@ -1,5 +1,10 @@
 package us.ihmc.gdx.ui.tools;
 
+import imgui.ImVec2;
+import imgui.extension.implot.ImPlot;
+import imgui.extension.implot.ImPlotContext;
+import imgui.extension.implot.ImPlotStyle;
+
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,6 +12,38 @@ import java.util.Objects;
 
 public final class ImPlotTools
 {
+   public static final int IMPLOT_AUTO = -1;
+
+   private static ImPlotContext context = null;
+
+   /**
+    * We are assuming we don't ever need more than one context.
+    */
+   public static ImPlotContext ensureImPlotInitialized()
+   {
+      if (context == null)
+      {
+         context = ImPlot.createContext();
+         ImPlot.setCurrentContext(context);
+      }
+      return context;
+   }
+
+   public static ImPlotContext getContext()
+   {
+      return context;
+   }
+
+   public static void setSCSStyle()
+   {
+      ImPlotStyle style = ImPlot.getStyle();
+      style.setPlotPadding(new ImVec2(0, 0));
+      style.setLabelPadding(new ImVec2(3, 0));
+      style.setLegendPadding(new ImVec2(0, 0));
+      style.setLegendInnerPadding(new ImVec2(5, 0));
+      style.setAntiAliasedLines(true);
+   }
+
    //Despite being identical code-wise, these need different methods because of casts from different primitive types
    public static Double[] convertArray(int[] array)
    {
@@ -48,10 +85,17 @@ public final class ImPlotTools
       return output;
    }
 
-   public static Double[] newNaNFilledBuffer(int bufferSize)
+   public static Double[] newNaNFilledDoubleBuffer(int bufferSize)
    {
       Double[] buffer = new Double[bufferSize];
       Arrays.fill(buffer, Double.NaN);
+      return buffer;
+   }
+
+   public static Integer[] newZeroFilledIntegerBuffer(int bufferSize)
+   {
+      Integer[] buffer = new Integer[bufferSize];
+      Arrays.fill(buffer, 0);
       return buffer;
    }
 
@@ -69,6 +113,17 @@ public final class ImPlotTools
       }
 
       return output;
+   }
+
+   public static Integer[] createIndex(int bufferSize)
+   {
+      Integer[] index = new Integer[bufferSize];
+      for (int i = 0; i < bufferSize; i++)
+      {
+         index[i] = i;
+      }
+
+      return index;
    }
 
    /** @deprecated THIS METHOD IS SUPER EXPENSIVE, DON'T USE */
