@@ -69,6 +69,7 @@ import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.session.tools.SCS1GraphicConversionTools;
 import us.ihmc.scs2.simulation.SimulationSession;
+import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletBasedPhysicsEngine;
 import us.ihmc.scs2.simulation.parameters.ContactPointBasedContactParameters;
 import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngineFactory;
 import us.ihmc.scs2.simulation.physicsEngine.contactPointBased.ContactPointBasedPhysicsEngine;
@@ -116,6 +117,7 @@ public class SCS2AvatarSimulationFactory
    private final OptionalFactoryField<Boolean> automaticallyStartSimulation = new OptionalFactoryField<>("automaticallyStartSimulation", false);
 
    private final OptionalFactoryField<Boolean> useImpulseBasePhysicsEngine = new OptionalFactoryField<>("useImpulseBasePhysicsEngine", false);
+   private final OptionalFactoryField<Boolean> useBulletPhysicsEngine = new OptionalFactoryField<>("useBulletPhysicsEngine", false);
    private final OptionalFactoryField<Boolean> enableSimulatedRobotDamping = new OptionalFactoryField<>("enableSimulatedRobotDamping", true);
    private final OptionalFactoryField<List<Robot>> secondaryRobots = new OptionalFactoryField<>("secondaryRobots", new ArrayList<>());
 
@@ -202,6 +204,10 @@ public class SCS2AvatarSimulationFactory
       if (useImpulseBasePhysicsEngine.hasValue() && useImpulseBasePhysicsEngine.get())
       {
          physicsEngineFactory = (inertialFrame, rootRegistry) -> new ImpulseBasedPhysicsEngine(inertialFrame, rootRegistry);
+      }
+      else if (useBulletPhysicsEngine.hasValue() && useBulletPhysicsEngine.get())
+      {
+         physicsEngineFactory = (inertialFrame, rootRegistry) -> new BulletBasedPhysicsEngine(inertialFrame, rootRegistry);
       }
       else
       {
@@ -653,6 +659,11 @@ public class SCS2AvatarSimulationFactory
    public void setUseImpulseBasedPhysicsEngine(boolean useImpulseBasePhysicsEngine)
    {
       this.useImpulseBasePhysicsEngine.set(useImpulseBasePhysicsEngine);
+   }
+
+   public void setUseBulletPhysicsEngine(boolean useBulletPhysicsEngine)
+   {
+      this.useBulletPhysicsEngine.set(useBulletPhysicsEngine);
    }
 
    public void setEnableSimulatedRobotDamping(boolean enableSimulatedRobotDamping)
