@@ -25,5 +25,5 @@ $GRADLE --no-build-cache clean
 $GRADLE --no-build-cache compositeTask -PtaskName=publishToMavenLocal -PcompositeSearchHeight=0 -PpublishMode=LOCAL
 cd valkyrie
 $GRADLE --no-build-cache clean
-$GRADLE --no-build-cache deploy
+$GRADLE --no-build-cache deploy deployLocal
 cd ..
