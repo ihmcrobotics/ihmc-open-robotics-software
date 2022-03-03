@@ -12,6 +12,7 @@
 // ====
 // + ELIMINATE DUPLICATE CODE BTW LIFT & SWING STATES
 //   + Do we need a LIFT state?
+//   + Switch over to a "global" state machine (not sided): left_stance, right_stance
 // + Converted all state to YoVariables but still not rewindable - need to fix
 // + Make human-readable var names
 // + Improve logging for debugging:
