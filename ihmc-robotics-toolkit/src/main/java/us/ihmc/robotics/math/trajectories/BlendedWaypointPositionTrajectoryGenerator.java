@@ -6,6 +6,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
@@ -32,8 +33,8 @@ public class BlendedWaypointPositionTrajectoryGenerator implements FixedFramePos
    private final Point3D constraintPositionError = new Point3D();
    private final Vector3D constraintVelocityError = new Vector3D();
 
-   private final Point3DReadOnly zeroPoint = new Point3D();
-   private final Vector3DReadOnly zeroVector = new Vector3D();
+   private static final Point3DReadOnly zeroPoint = EuclidCoreTools.origin3D;
+   private static final Vector3DReadOnly zeroVector = EuclidCoreTools.zeroVector3D;
 
    private final FramePoint3D position = new FramePoint3D();
    private final FrameVector3D velocity = new FrameVector3D();

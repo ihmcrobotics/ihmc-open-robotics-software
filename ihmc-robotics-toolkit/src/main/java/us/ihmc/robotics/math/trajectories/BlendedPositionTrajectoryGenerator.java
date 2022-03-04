@@ -5,6 +5,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
@@ -33,7 +34,7 @@ public class BlendedPositionTrajectoryGenerator implements FixedFramePositionTra
    private final Vector3D finalConstraintPositionError = new Vector3D();
    private final Vector3D finalConstraintVelocityError = new Vector3D();
 
-   private final Vector3DReadOnly zeroVector = new Vector3D();
+   private static final Vector3DReadOnly zeroVector = EuclidCoreTools.zeroVector3D;
 
    private final FramePoint3D position = new FramePoint3D();
    private final FrameVector3D velocity = new FrameVector3D();
