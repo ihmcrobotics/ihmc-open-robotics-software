@@ -254,7 +254,7 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
                                                      allowableAreaForCoP);
 
       if (nextFootstep != null)
-         twoStepCaptureRegionCalculator.computeFromStepGoal(nextFootstepTiming.getStepTime(), nextFootstep, omega0, captureRegionCalculator.getCaptureRegion());
+         twoStepCaptureRegionCalculator.computeFromStepGoal(nextFootstepTiming.getStepTime(), nextFootstep, allowableAreaForCoP.getCentroid(), omega0, captureRegionCalculator.getCaptureRegion());
       //      else
       //         inverseCaptureRegionCalculator.reset();
 
