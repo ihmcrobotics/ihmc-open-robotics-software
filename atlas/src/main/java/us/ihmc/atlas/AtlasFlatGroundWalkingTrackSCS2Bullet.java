@@ -44,6 +44,9 @@ public class AtlasFlatGroundWalkingTrackSCS2Bullet
       SCS2AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
 
       avatarSimulation.start();
+
+      avatarSimulation.getSessionVisualizerControls().setCameraFocusPosition(0.3, 0.0, 1.0);
+      avatarSimulation.getSessionVisualizerControls().setCameraPosition(7.0, 4.0, 3.0);
    }
 
    public static void main(String[] args)
