@@ -90,28 +90,28 @@ public class BlendedPositionTrajectoryGenerator implements FixedFramePositionTra
    public void blendInitialConstraint(FramePoint3DReadOnly initialPosition, double initialTime, double blendDuration)
    {
       clearInitialConstraint();
-      computeInitialConstraintStartingError(initialPosition, initialTime);
+      computeInitialConstraintError(initialPosition, initialTime);
       computeInitialConstraintPolynomial(initialTime, blendDuration);
    }
 
    public void blendInitialConstraint(FramePoint3DReadOnly initialPosition, FrameVector3DReadOnly initialVelocity, double initialTime, double blendDuration)
    {
       clearInitialConstraint();
-      computeInitialConstraintStartingError(initialPosition, initialVelocity, initialTime);
+      computeInitialConstraintError(initialPosition, initialVelocity, initialTime);
       computeInitialConstraintPolynomial(initialTime, blendDuration);
    }
 
    public void blendFinalConstraint(FramePoint3DReadOnly finalPosition, FrameVector3DReadOnly finalVelocity, double finalTime, double blendDuration)
    {
       clearFinalConstraint();
-      computeFinalConstraintEndingError(finalPosition, finalVelocity, finalTime);
+      computeFinalConstraintError(finalPosition, finalVelocity, finalTime);
       computeFinalConstraintPolynomial(finalTime, blendDuration);
    }
 
    public void blendFinalConstraint(FramePoint3DReadOnly finalPosition, double finalTime, double blendDuration)
    {
       clearFinalConstraint();
-      computeFinalConstraintEndingError(finalPosition, finalTime);
+      computeFinalConstraintError(finalPosition, finalTime);
       computeFinalConstraintPolynomial(finalTime, blendDuration);
    }
 
@@ -191,27 +191,27 @@ public class BlendedPositionTrajectoryGenerator implements FixedFramePositionTra
       return trajectory.isDone();
    }
 
-   private void computeInitialConstraintStartingError(FramePoint3DReadOnly initialPosition, double initialTime)
+   private void computeInitialConstraintError(FramePoint3DReadOnly initialPosition, double initialTime)
    {
       computeConstraintPositionError(initialPosition, initialTime, initialConstraintPositionError);
    }
 
 
-   private void computeInitialConstraintStartingError(FramePoint3DReadOnly initialPosition, FrameVector3DReadOnly initialVelocity, double initialTime)
+   private void computeInitialConstraintError(FramePoint3DReadOnly initialPosition, FrameVector3DReadOnly initialVelocity, double initialTime)
    {
-      computeInitialConstraintStartingError(initialPosition, initialTime);
+      computeInitialConstraintError(initialPosition, initialTime);
       computeConstraintVelocityError(initialVelocity, initialConstraintVelocityError);
    }
 
 
-   private void computeFinalConstraintEndingError(FramePoint3DReadOnly finalPosition, double finalTime)
+   private void computeFinalConstraintError(FramePoint3DReadOnly finalPosition, double finalTime)
    {
       computeConstraintPositionError(finalPosition, finalTime, finalConstraintPositionError);
    }
 
-   private void computeFinalConstraintEndingError(FramePoint3DReadOnly finalPosition, FrameVector3DReadOnly finalVelocity, double finalTime)
+   private void computeFinalConstraintError(FramePoint3DReadOnly finalPosition, FrameVector3DReadOnly finalVelocity, double finalTime)
    {
-      computeFinalConstraintEndingError(finalPosition, finalTime);
+      computeFinalConstraintError(finalPosition, finalTime);
       computeConstraintVelocityError(finalVelocity, finalConstraintVelocityError);
    }
 
