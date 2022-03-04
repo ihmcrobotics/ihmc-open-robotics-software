@@ -51,6 +51,8 @@ public class OneStepCaptureRegionCalculator
 
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
 
+   private static boolean useInternalReachableRegions = false;
+
    public OneStepCaptureRegionCalculator(CommonHumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters,
          YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -142,7 +144,7 @@ public class OneStepCaptureRegionCalculator
    }
 
    // variables for the capture region calculation
-   private static final int APPROXIMATION_MULTIPLIER = 100;
+   private static final int APPROXIMATION_MULTIPLIER = 1;
    private final FrameConvexPolygon2D supportFootPolygon = new FrameConvexPolygon2D();
    private final FramePoint2D footCentroid = new FramePoint2D(worldFrame);
    private final FramePoint2D predictedICP = new FramePoint2D(worldFrame);
@@ -233,12 +235,20 @@ public class OneStepCaptureRegionCalculator
       // 6. Intersect the capture region with the reachable region
       if (!rawCaptureRegion.isEmpty())
       {
-         // This causes the capture region to always be null if it is null once.
-         // This assumes that once there is no capture region the robot will fall for sure.
          rawCaptureRegion.update();
-         rawCaptureRegion.checkReferenceFrameMatch(reachableRegion);
-         captureRegionPolygon.clear(rawCaptureRegion.getReferenceFrame());
-         convexPolygonTools.computeIntersectionOfPolygons(rawCaptureRegion, reachableRegion, captureRegionPolygon);
+
+         if (useInternalReachableRegions)
+         {
+            // This causes the capture region to always be null if it is null once.
+            // This assumes that once there is no capture region the robot will fall for sure.
+            rawCaptureRegion.checkReferenceFrameMatch(reachableRegion);
+            captureRegionPolygon.clear(rawCaptureRegion.getReferenceFrame());
+            convexPolygonTools.computeIntersectionOfPolygons(rawCaptureRegion, reachableRegion, captureRegionPolygon);
+         }
+         else
+         {
+            captureRegionPolygon.setIncludingFrame(rawCaptureRegion);
+         }
       }
 
       captureRegionPolygon.update();
