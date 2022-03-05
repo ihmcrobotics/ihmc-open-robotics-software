@@ -1,10 +1,12 @@
 package us.ihmc.atlas;
 
+import us.ihmc.avatar.factory.RobotDefinitionTools;
 import us.ihmc.avatar.factory.TerrainObjectDefinitionTools;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.physics.CollidableHelper;
+import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
 import us.ihmc.scs2.definition.geometry.Box3DDefinition;
 import us.ihmc.scs2.definition.geometry.GeometryDefinition;
@@ -22,6 +24,8 @@ import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
+
+import java.util.Set;
 
 public class AtlasFallingOnGroundSCS2Bullet
 {
@@ -45,9 +49,19 @@ public class AtlasFallingOnGroundSCS2Bullet
 //      initialJointState.setPosition(new Point3D(0.0, 0.0, 1.0));
 //      sixDoFJointDefinition.setInitialJointState(initialJointState);
 
-      Robot robot = new Robot(robotDefinition, SimulationSession.DEFAULT_INERTIAL_FRAME);
-      robot.updateFrames();
-      simulationSession.addRobot(robot);
+      CollidableHelper collidableHelper = new CollidableHelper();
+      RobotCollisionModel collisionModel = robotModel.getSimulationRobotCollisionModel(collidableHelper, "robot", "terrain");
+      if (collisionModel != null)
+         RobotDefinitionTools.addCollisionsToRobotDefinition(collisionModel.getRobotCollidables(robotModel.createFullRobotModel().getElevator()),
+                                                             robotDefinition);
+//      robotInitialSetup.initializeRobotDefinition(robotDefinition);
+      Set<String> lastSimulatedJoints = robotModel.getJointMap().getLastSimulatedJoints();
+      lastSimulatedJoints.forEach(robotDefinition::addSubtreeJointsToIgnore);
+
+//      Robot robot = new Robot(robotDefinition, SimulationSession.DEFAULT_INERTIAL_FRAME);
+//      robot.updateFrames();
+//      simulationSession.addRobot(robot);
+      simulationSession.addRobot(robotDefinition);
 
       FlatGroundEnvironment environment = new FlatGroundEnvironment();
 //      simulationSession.addTerrainObject(TerrainObjectDefinitionTools.toTerrainObjectDefinition(environment,
