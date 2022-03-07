@@ -266,6 +266,9 @@ public class RobotDefinitionLoader
 
          JointDefinition jointDefinition = robotDefinition.getJointDefinition(jointName);
 
+         if (jointDefinition == null) // In the case there are no joints of that name
+            continue;
+
          jointDefinition.addGroundContactPointDefinition(groundContactPoint);
          jointDefinition.addExternalWrenchPointDefinition(externalWrenchPoint);
 
