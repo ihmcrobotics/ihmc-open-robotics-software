@@ -353,7 +353,12 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                                                      omega0,
                                                      allowableAreaForCoP);
       if (nextFootstep != null)
-         twoStepCaptureRegionCalculator.computeFromStepGoal(nextFootstepTiming.getStepTime(), nextFootstep, allowableAreaForCoP.getCentroid(), omega0, captureRegionCalculator.getCaptureRegion());
+         twoStepCaptureRegionCalculator.computeFromStepGoal(nextFootstepTiming.getStepTime(),
+                                                            nextFootstep,
+                                                            currentICP,
+                                                            allowableAreaForCoP.getCentroid(),
+                                                            omega0,
+                                                            captureRegionCalculator.getCaptureRegion());
 
       if (!useStepAdjustment.getBooleanValue())
          return;

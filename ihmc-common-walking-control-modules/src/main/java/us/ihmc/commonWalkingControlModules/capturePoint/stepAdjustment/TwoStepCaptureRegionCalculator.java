@@ -1,22 +1,16 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLine2d;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLine2D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLineSegment2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -86,7 +80,7 @@ public class TwoStepCaptureRegionCalculator
                                                                      yoSaferVisibleVertices.get(i),
                                                                      0.005,
                                                                      YoAppearance.Teal(),
-                                                                     YoGraphicPosition.GraphicType.BALL);
+                                                                     YoGraphicPosition.GraphicType.SOLID_BALL);
                yoGraphicsListRegistry.registerArtifact(getClass().getSimpleName(), saferVertex.createArtifact());
             }
          }
@@ -97,7 +91,7 @@ public class TwoStepCaptureRegionCalculator
 
    private final FramePoint2D inversePoint = new FramePoint2D();
    private final FramePoint2D inverseGoal = new FramePoint2D();
-   private final FramePoint2D stepPosition = new FramePoint2D();
+   private final FramePoint2D stepPositionAfterCurrentStep = new FramePoint2D();
    private final FramePoint2D touchdownPoint = new FramePoint2D();
 
    public void reset()
@@ -114,7 +108,8 @@ public class TwoStepCaptureRegionCalculator
       }
    }
 
-   public void computeFromStepGoal(double minSwingAndTransferTime, SimpleFootstep stepGoal, FramePoint2DReadOnly stancePosition,
+   public void computeFromStepGoal(double minSwingAndTransferTime, SimpleFootstep stepGoalAfterCurrentStep, FramePoint2DReadOnly currentICP,
+                                   FramePoint2DReadOnly stancePosition,
                                    double omega, FrameConvexPolygon2DReadOnly oneStepCaptureRegion)
    {
       hasTwoStepRegion.set(true);
@@ -123,21 +118,24 @@ public class TwoStepCaptureRegionCalculator
 //      twoStepRegion.setMatchingFrame(oneStepCaptureRegion, false);
 //      twoStepRegion.changeFrame(ReferenceFrame.getWorldFrame());
 
-      stepPosition.setIncludingFrame(stepGoal.getSoleFramePose().getPosition());
-      stepPosition.changeFrameAndProjectToXYPlane(oneStepCaptureRegion.getReferenceFrame());
+      stepPositionAfterCurrentStep.setIncludingFrame(stepGoalAfterCurrentStep.getSoleFramePose().getPosition());
+      stepPositionAfterCurrentStep.changeFrameAndProjectToXYPlane(oneStepCaptureRegion.getReferenceFrame());
 
-      if (!computeVisibiltyOfVerticesFromGoal(oneStepCaptureRegion, stepPosition))
+      if (!computeVisibiltyOfVerticesFromGoal(oneStepCaptureRegion, stepPositionAfterCurrentStep))
       {
          for (int i = 0; i < oneStepCaptureRegion.getNumberOfVertices(); i++)
             visibleVertices.add().setIncludingFrame(oneStepCaptureRegion.getVertex(i));
       }
-      computeMiddleOfTheCaptureRegionLine(stancePosition, oneStepCaptureRegion);
-      projectVisibibleVerticesTowardsTheMiddle(0.05);
+      lineOfMinimalAction.setIncludingFrame(stancePosition, currentICP);
+      yoLineOfMinimalAction.setMatchingFrame(lineOfMinimalAction);
+
+      lineOfMinimalAction.changeFrame(oneStepCaptureRegion.getReferenceFrame());
+      projectVerticesFacingTheGoalTowardsTheMiddle(0.15);
 
       double minExponential = Math.exp(-omega * minSwingAndTransferTime);
       double radical = 1.0 / (1.0 - minExponential);
 
-      inverseGoal.setIncludingFrame(stepPosition);
+      inverseGoal.setIncludingFrame(stepPositionAfterCurrentStep);
       inverseGoal.scale(minExponential);
 
       for (int i = 0; i < visibleVertices.size(); i++)
@@ -238,33 +236,27 @@ public class TwoStepCaptureRegionCalculator
       return true;
    }
 
-   private final FramePoint2D stanceFootCenterInStanceFrame = new FramePoint2D();
-   private final FramePoint2D closestCapturePointToStance = new FramePoint2D();
-
    private final FrameLine2D lineOfMinimalAction = new FrameLine2D();
 
-   private void computeMiddleOfTheCaptureRegionLine(FramePoint2DReadOnly stanceFoot, FrameConvexPolygon2DReadOnly captureRegion)
-   {
-      stanceFootCenterInStanceFrame.setIncludingFrame(stanceFoot);
-      stanceFootCenterInStanceFrame.changeFrame(captureRegion.getReferenceFrame());
-      closestCapturePointToStance.setReferenceFrame(captureRegion.getReferenceFrame());
-
-      captureRegion.orthogonalProjection(stanceFootCenterInStanceFrame, closestCapturePointToStance);
-
-      lineOfMinimalAction.setIncludingFrame(stanceFootCenterInStanceFrame, closestCapturePointToStance);
-      yoLineOfMinimalAction.setMatchingFrame(lineOfMinimalAction);
-   }
 
    private final FramePoint2D projectedPoint = new FramePoint2D();
    private final RecyclingArrayList<FramePoint2D> saferVisibleVertices = new RecyclingArrayList<>(FramePoint2D::new);
 
-   private void projectVisibibleVerticesTowardsTheMiddle(double maxDistanceToProject)
+   private void projectVerticesFacingTheGoalTowardsTheMiddle(double maxDistanceToProject)
    {
       saferVisibleVertices.clear();
       projectedPoint.setReferenceFrame(lineOfMinimalAction.getReferenceFrame());
 
+      boolean goalIsOnTheLeft = lineOfMinimalAction.isPointOnLeftSideOfLine(stepPositionAfterCurrentStep);
+
       for (int i = 0; i < visibleVertices.size(); i++)
       {
+         if (goalIsOnTheLeft != lineOfMinimalAction.isPointOnLeftSideOfLine(visibleVertices.get(i)))
+         {
+            saferVisibleVertices.add().setIncludingFrame(visibleVertices.get(i));
+            continue;
+         }
+
          lineOfMinimalAction.orthogonalProjection(visibleVertices.get(i), projectedPoint);
 
          FramePoint2DBasics safeVertex = saferVisibleVertices.add();
@@ -275,7 +267,22 @@ public class TwoStepCaptureRegionCalculator
          if (projectionDistance < maxDistanceToProject)
             safeVertex.set(projectedPoint);
          else
-            safeVertex.interpolate(visibleVertices.get(i), projectedPoint, projectionDistance / maxDistanceToProject);
+            safeVertex.interpolate(visibleVertices.get(i), projectedPoint, maxDistanceToProject / projectionDistance);
+      }
+
+
+      for (int i = 0; i < invisibleVertices.size(); i++)
+      {
+         if (goalIsOnTheLeft != lineOfMinimalAction.isPointOnLeftSideOfLine(invisibleVertices.get(i)))
+            continue;
+
+         lineOfMinimalAction.orthogonalProjection(invisibleVertices.get(i), projectedPoint);
+
+         double projectionDistance = invisibleVertices.get(i).distance(projectedPoint);
+         if (projectionDistance < maxDistanceToProject)
+            invisibleVertices.get(i).set(projectedPoint);
+         else
+            invisibleVertices.get(i).interpolate(projectedPoint, maxDistanceToProject / projectionDistance);
       }
 
       int i = 0;
