@@ -312,7 +312,7 @@ public class WalkingTrajectoryPath
       updateFootstepsInternal();
    }
 
-   public void computeTrajectory(ConstraintType leftFootConstraintType, ConstraintType rightFootConstraintType)
+   public void updateTrajectory(ConstraintType leftFootConstraintType, ConstraintType rightFootConstraintType)
    {
       timer.startMeasurement();
 
