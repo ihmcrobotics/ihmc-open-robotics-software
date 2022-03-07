@@ -31,7 +31,6 @@ public class StepAdjustmentReachabilityConstraint
 
    private static final int numberOfVertices = 9;
    private static final double SUFFICIENTLY_LARGE = 5.0;
-   private static final double nominalWidth = 0.2;
 
    private final SideDependentList<List<YoFramePoint2D>> reachabilityVertices = new SideDependentList<>();
    private final SideDependentList<YoFrameConvexPolygon2D> reachabilityPolygons = new SideDependentList<>();
@@ -49,6 +48,7 @@ public class StepAdjustmentReachabilityConstraint
    private final DoubleProvider lengthBackLimit;
    private final DoubleProvider innerLimit;
    private final DoubleProvider outerLimit;
+   private final DoubleProvider inPlaceWidth;
 
    private final DoubleProvider forwardAdjustmentLimit;
    private final DoubleProvider backwardAdjustmentLimit;
@@ -67,6 +67,7 @@ public class StepAdjustmentReachabilityConstraint
            new DoubleParameter(yoNamePrefix + "MaxReachabilityBackwardLength", registry, steppingParameters.getMaxBackwardStepLength()),
            new DoubleParameter(yoNamePrefix + "MinReachabilityWidth", registry, steppingParameters.getMinStepWidth()),
            new DoubleParameter(yoNamePrefix + "MaxReachabilityWidth", registry, steppingParameters.getMaxStepWidth()),
+           new DoubleParameter(yoNamePrefix + "InPlaceWidth", registry, steppingParameters.getInPlaceWidth()),
            yoNamePrefix,
            visualize,
            registry,
@@ -78,6 +79,7 @@ public class StepAdjustmentReachabilityConstraint
                                                DoubleProvider lengthBackLimit,
                                                DoubleProvider innerLimit,
                                                DoubleProvider outerLimit,
+                                               DoubleProvider inPlaceWidth,
                                                String yoNamePrefix,
                                                boolean visualize,
                                                YoRegistry registry,
@@ -87,6 +89,7 @@ public class StepAdjustmentReachabilityConstraint
       this.lengthBackLimit = lengthBackLimit;
       this.innerLimit = innerLimit;
       this.outerLimit = outerLimit;
+      this.inPlaceWidth = inPlaceWidth;
 
       forwardAdjustmentLimit = new DoubleParameter(yoNamePrefix + "ForwardAdjustmentLimit", registry,
                                                    Math.min(SUFFICIENTLY_LARGE, icpOptimizationParameters.getMaximumStepAdjustmentForward()));
@@ -192,8 +195,8 @@ public class StepAdjustmentReachabilityConstraint
       YoFrameConvexPolygon2D polygon = reachabilityPolygons.get(supportSide);
 
       // create an ellipsoid around the center of the forward and backward reachable limits
-      double innerRadius = nominalWidth - innerLimit.getValue();
-      double outerRadius = outerLimit.getValue() - nominalWidth;
+      double innerRadius = inPlaceWidth.getValue() - innerLimit.getValue();
+      double outerRadius = outerLimit.getValue() - inPlaceWidth.getValue();
 
       // compute the vertices on the edge of the ellipsoid
       for (int vertexIdx = 0; vertexIdx < vertices.size(); vertexIdx++)
@@ -203,22 +206,22 @@ public class StepAdjustmentReachabilityConstraint
          if (angle < Math.PI / 2.0)
          {
             x = lengthLimit.getValue() * Math.cos(angle);
-            y = supportSide.negateIfLeftSide(nominalWidth - innerRadius * Math.sin(angle));
+            y = supportSide.negateIfLeftSide(inPlaceWidth.getValue() - innerRadius * Math.sin(angle));
          }
          else if (angle < Math.PI)
          {
             x = lengthBackLimit.getValue() * Math.cos(angle);
-            y = supportSide.negateIfLeftSide(nominalWidth - innerRadius * Math.sin(angle));
+            y = supportSide.negateIfLeftSide(inPlaceWidth.getValue() - innerRadius * Math.sin(angle));
          }
          else if (angle < 1.5 * Math.PI)
          {
             x = lengthBackLimit.getValue() * Math.cos(angle);
-            y = supportSide.negateIfLeftSide(nominalWidth - outerRadius * Math.sin(angle));
+            y = supportSide.negateIfLeftSide(inPlaceWidth.getValue() - outerRadius * Math.sin(angle));
          }
          else
          {
             x = lengthLimit.getValue() * Math.cos(angle);
-            y = supportSide.negateIfLeftSide(nominalWidth - outerRadius * Math.sin(angle));
+            y = supportSide.negateIfLeftSide(inPlaceWidth.getValue() - outerRadius * Math.sin(angle));
          }
 
          FixedFramePoint2DBasics vertex = vertices.get(vertexIdx);
