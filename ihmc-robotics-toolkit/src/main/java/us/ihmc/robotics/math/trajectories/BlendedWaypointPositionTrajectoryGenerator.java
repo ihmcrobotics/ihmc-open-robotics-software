@@ -76,6 +76,11 @@ public class BlendedWaypointPositionTrajectoryGenerator implements FixedFramePos
       initialConstraintVelocityError.setToZero();
    }
 
+   public MultipleWaypointsPositionTrajectoryGenerator getBlendTrajectory()
+   {
+      return blendTrajectory;
+   }
+
    public void clearFinalConstraint()
    {
       finalConstraintPositionError.setToZero();
