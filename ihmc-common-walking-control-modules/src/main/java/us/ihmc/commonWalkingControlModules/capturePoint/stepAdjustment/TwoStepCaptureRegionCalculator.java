@@ -78,7 +78,7 @@ public class TwoStepCaptureRegionCalculator
       inverseGoal.setIncludingFrame(stepPosition);
       inverseGoal.scale(minExponential);
 
-      for (int i = 1; i < visibleVertices.size() - 1; i++)
+      for (int i = 0; i < visibleVertices.size(); i++)
       {
          twoStepRegion.addVertex(visibleVertices.get(i));
       }
@@ -195,6 +195,7 @@ public class TwoStepCaptureRegionCalculator
       saferVisibleVertices.clear();
       projectedPoint.setReferenceFrame(midRegionLine.getReferenceFrame());
 
+      saferVisibleVertices.add().setIncludingFrame(visibleVertices.get(0));
       for (int i = 1; i < visibleVertices.size() - 1; i++)
       {
          midRegionLine.orthogonalProjection(visibleVertices.get(i), projectedPoint);
@@ -208,8 +209,8 @@ public class TwoStepCaptureRegionCalculator
             safeVertex.set(projectedPoint);
          else
             safeVertex.interpolate(visibleVertices.get(i), projectedPoint, maxDistanceToProject / projectionDistance);
-
       }
+      saferVisibleVertices.add().setIncludingFrame(visibleVertices.getLast());
    }
 
 }
