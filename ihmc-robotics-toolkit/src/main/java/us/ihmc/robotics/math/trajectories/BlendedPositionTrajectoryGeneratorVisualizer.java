@@ -33,9 +33,12 @@ public class BlendedPositionTrajectoryGeneratorVisualizer
                                                 25,
                                                 8,
                                                 registry);
-      graphicsListRegistry.registerYoGraphic(namePrefix + "Trajectory", trajectoryViz);
+      
+      trajectoryViz.addDirtyGraphicsTrigger(trajectory.getYoTime());
+      
+      graphicsListRegistry.registerYoGraphic(namePrefix + "BlendedTrajectory", trajectoryViz);
 
-      trajectoryViz.setColorType(TrajectoryColorType.ACCELERATION_BASED);
+      trajectoryViz.setColorType(TrajectoryColorType.ACCELERATION_BASED); 
    }
 
    public void visualize()

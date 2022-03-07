@@ -151,6 +151,11 @@ public class YoGraphicTrajectory3D extends YoGraphic implements RemoteYoGraphic,
    {
       getVariablesDefiningGraphic().forEach(variable -> variable.addListener(v -> dirtyGraphic.set(true)));
    }
+   
+   public void addDirtyGraphicsTrigger(YoVariable variable)
+   {
+      variable.addListener(v -> dirtyGraphic.set(true));
+   }
 
    /**
     * Changes the current coloring used for the trajectory, see {@link TrajectoryColorType}.
@@ -371,6 +376,8 @@ public class YoGraphicTrajectory3D extends YoGraphic implements RemoteYoGraphic,
          graphicVariables.add(poseToWorldFrame.getYoQz());
          graphicVariables.add(poseToWorldFrame.getYoQs());
       }
+      
+//      trajectoryGenerator
 
       graphicVariables.add(currentGraphicType);
       graphicVariables.add(currentColorType);

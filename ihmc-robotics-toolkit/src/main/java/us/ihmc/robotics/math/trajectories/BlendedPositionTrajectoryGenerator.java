@@ -27,6 +27,8 @@ public class BlendedPositionTrajectoryGenerator implements FixedFramePositionTra
    private final YoDouble finalBlendTimeOffset;
    private final YoDouble finalBlendStartTime;
    private final YoDouble finalBlendEndTime;
+   
+   private final YoDouble time;
 
    private final Vector3D initialConstraintPositionError = new Vector3D();
    private final Vector3D initialConstraintVelocityError = new Vector3D();
@@ -51,6 +53,8 @@ public class BlendedPositionTrajectoryGenerator implements FixedFramePositionTra
 
       this.initialConstraintPolynomial = new YoPolynomial3D(prefix + "InitialConstraintPolynomial", 6, parentRegistry);
       this.finalConstraintPolynomial = new YoPolynomial3D(prefix + "FinalConstraintPolynomial", 6, parentRegistry);
+      
+      this.time = new YoDouble(prefix + "time", parentRegistry);
 
       this.initialBlendTimeOffset = new YoDouble(prefix + "InitialBlendTimeOffset", parentRegistry);
       this.initialBlendStartTime = new YoDouble(prefix + "InitialBlendStartTime", parentRegistry);
@@ -165,6 +169,8 @@ public class BlendedPositionTrajectoryGenerator implements FixedFramePositionTra
    @Override
    public void compute(double time)
    {
+      this.time.set(time);
+      
       trajectory.compute(time);
       position.setIncludingFrame(trajectory.getPosition());
       velocity.setIncludingFrame(trajectory.getVelocity());
@@ -295,5 +301,10 @@ public class BlendedPositionTrajectoryGenerator implements FixedFramePositionTra
       time = MathTools.clamp(time - finalBlendTimeOffset.getValue(), startTime, endTime);
 
       finalConstraintPolynomial.compute(time);
+   }
+   
+   public YoDouble getYoTime()
+   {
+      return time;
    }
 }
