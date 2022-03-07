@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameConvexPolygon2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -28,8 +29,9 @@ public class StepAdjustmentReachabilityConstraint
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static final int numberOfVertices = 5;
+   private static final int numberOfVertices = 9;
    private static final double SUFFICIENTLY_LARGE = 5.0;
+   private static final double nominalWidth = 0.2;
 
    private final SideDependentList<List<YoFramePoint2D>> reachabilityVertices = new SideDependentList<>();
    private final SideDependentList<YoFrameConvexPolygon2D> reachabilityPolygons = new SideDependentList<>();
@@ -97,6 +99,7 @@ public class StepAdjustmentReachabilityConstraint
 
       for (RobotSide robotSide : RobotSide.values)
       {
+
          ReferenceFrame supportSoleFrame = soleZUpFrames.get(robotSide);
 
          YoInteger yoNumberOfReachabilityVertices = new YoInteger(robotSide.getLowerCaseName() + "NumberOfReachabilityVertices", registry);
@@ -189,19 +192,39 @@ public class StepAdjustmentReachabilityConstraint
       YoFrameConvexPolygon2D polygon = reachabilityPolygons.get(supportSide);
 
       // create an ellipsoid around the center of the forward and backward reachable limits
-      double xRadius = 0.5 * (lengthLimit.getValue() + lengthBackLimit.getValue());
-      double yRadius = outerLimit.getValue() - innerLimit.getValue();
-      double centerX = lengthLimit.getValue() - xRadius;
-      double centerY = innerLimit.getValue();
+      double innerRadius = nominalWidth - innerLimit.getValue();
+      double outerRadius = outerLimit.getValue() - nominalWidth;
 
       // compute the vertices on the edge of the ellipsoid
       for (int vertexIdx = 0; vertexIdx < vertices.size(); vertexIdx++)
       {
-         double angle = Math.PI * vertexIdx / (vertices.size() - 1);
-         double x = centerX + xRadius * Math.cos(angle);
-         double y = centerY + yRadius * Math.sin(angle);
-         vertices.get(vertexIdx).set(x, supportSide.negateIfLeftSide(y));
+         double angle = 2.0 * Math.PI * vertexIdx / (vertices.size() - 1);
+         double x, y;
+         if (angle < Math.PI / 2.0)
+         {
+            x = lengthLimit.getValue() * Math.cos(angle);
+            y = supportSide.negateIfLeftSide(nominalWidth - innerRadius * Math.sin(angle));
+         }
+         else if (angle < Math.PI)
+         {
+            x = lengthBackLimit.getValue() * Math.cos(angle);
+            y = supportSide.negateIfLeftSide(nominalWidth - innerRadius * Math.sin(angle));
+         }
+         else if (angle < 1.5 * Math.PI)
+         {
+            x = lengthBackLimit.getValue() * Math.cos(angle);
+            y = supportSide.negateIfLeftSide(nominalWidth - outerRadius * Math.sin(angle));
+         }
+         else
+         {
+            x = lengthLimit.getValue() * Math.cos(angle);
+            y = supportSide.negateIfLeftSide(nominalWidth - outerRadius * Math.sin(angle));
+         }
+
+         FixedFramePoint2DBasics vertex = vertices.get(vertexIdx);
+         vertex.set(x, y);
       }
+
 
       polygon.notifyVerticesChanged();
       polygon.update();
