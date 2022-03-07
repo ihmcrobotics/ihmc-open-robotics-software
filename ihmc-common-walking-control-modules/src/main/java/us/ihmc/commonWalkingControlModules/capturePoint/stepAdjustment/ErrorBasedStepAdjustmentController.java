@@ -191,6 +191,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       DoubleProvider lengthBackLimit = new DoubleParameter(yoNamePrefix + "MaxReachabilityBackwardLength", registry, steppingParameters.getMaxBackwardStepLength());
       DoubleProvider innerLimit = new DoubleParameter(yoNamePrefix + "MinReachabilityWidth", registry, steppingParameters.getMinStepWidth());
       DoubleProvider outerLimit = new DoubleParameter(yoNamePrefix + "MaxReachabilityWidth", registry, steppingParameters.getMaxStepWidth());
+      DoubleProvider inPlaceWidth = new DoubleParameter(yoNamePrefix + "InPlaceWidth", registry, steppingParameters.getInPlaceWidth());
 
       useActualErrorInsteadOfResidual = new BooleanParameter("useActualErrorInsteadOfResidual", registry, false);
       considerErrorInAdjustment = new BooleanParameter(yoNamePrefix + "considerErrorInAdjustment", registry, false);
@@ -200,6 +201,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                                                                                lengthBackLimit,
                                                                                innerLimit,
                                                                                outerLimit,
+                                                                               inPlaceWidth,
                                                                                yoNamePrefix,
                                                                                VISUALIZE,
                                                                                registry,
