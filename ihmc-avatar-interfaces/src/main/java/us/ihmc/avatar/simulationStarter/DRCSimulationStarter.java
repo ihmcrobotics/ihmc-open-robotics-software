@@ -31,6 +31,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidControllerPluginFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -119,6 +120,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    private final List<HighLevelControllerStateFactory> highLevelControllerFactories = new ArrayList<>();
    private final List<ControllerStateTransitionFactory<HighLevelControllerName>> controllerTransitionFactories = new ArrayList<>();
    private final ArrayList<ControllerFailureListener> controllerFailureListeners = new ArrayList<>();
+   private final List<HighLevelHumanoidControllerPluginFactory> highLevelControllerPluginFactories = new ArrayList<>();
 
    private final ConcurrentLinkedQueue<Command<?, ?>> controllerCommands = new ConcurrentLinkedQueue<>();
 
@@ -193,6 +195,17 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    {
       checkIfSimulationIsAlreadyCreated();
       this.controllerTransitionFactories.add(controllerStateTransitionFactory);
+   }
+
+   /**
+    * Registers a plugin to be created. A plugin is a module that is ran alongside the controller.
+    * 
+    * @param pluginFactory a factory to create the plugin.
+    */
+   public void registerHighLevelControllerPlugin(HighLevelHumanoidControllerPluginFactory pluginFactory)
+   {
+      checkIfSimulationIsAlreadyCreated();
+      this.highLevelControllerPluginFactories.add(pluginFactory);
    }
 
    /**
@@ -506,19 +519,21 @@ public class DRCSimulationStarter implements SimulationStarterInterface
          controllerFactory.addCustomControlState(highLevelControllerFactories.get(i));
       for (int i = 0; i < controllerTransitionFactories.size(); i++)
          controllerFactory.addCustomStateTransition(controllerTransitionFactories.get(i));
+      for (int i = 0; i < highLevelControllerPluginFactories.size(); i++)
+         controllerFactory.addControllerPlugin(highLevelControllerPluginFactories.get(i));
 
       controllerFactory.setInitialState(initialStateEnum);
 
       controllerFactory.createQueuedControllerCommandGenerator(controllerCommands);
 
-      controllerFactory.setHeadingAndVelocityEvaluationScriptParameters(walkingScriptParameters);
-
       controllerFactory.createUserDesiredControllerCommandGenerator();
 
       if (addFootstepMessageGenerator && cheatWithGroundHeightAtForFootstep)
-         controllerFactory.createComponentBasedFootstepDataMessageGenerator(useHeadingAndVelocityScript, scsInitialSetup.getHeightMap());
+         controllerFactory.createComponentBasedFootstepDataMessageGenerator(useHeadingAndVelocityScript,
+                                                                            scsInitialSetup.getHeightMap(),
+                                                                            walkingScriptParameters);
       else if (addFootstepMessageGenerator)
-         controllerFactory.createComponentBasedFootstepDataMessageGenerator(useHeadingAndVelocityScript);
+         controllerFactory.createComponentBasedFootstepDataMessageGenerator(useHeadingAndVelocityScript, walkingScriptParameters);
 
       AvatarSimulationFactory avatarSimulationFactory = new AvatarSimulationFactory();
       avatarSimulationFactory.setRobotModel(robotModel);

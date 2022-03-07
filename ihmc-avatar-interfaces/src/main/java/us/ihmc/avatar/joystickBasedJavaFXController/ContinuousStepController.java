@@ -1,20 +1,20 @@
 package us.ihmc.avatar.joystickBasedJavaFXController;
 
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.PauseWalkingMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.joystickBasedJavaFXController.JoystickStepParametersProperty.JoystickStepParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.DesiredTurningVelocityProvider;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.DesiredVelocityProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootPoseProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepMessenger;
-import us.ihmc.commons.MathTools;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.StopWalkingMessenger;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -24,6 +24,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.collision.BoundingBoxCollisionDetector;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep;
@@ -36,7 +37,6 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -61,7 +61,6 @@ public class ContinuousStepController
    private final YoBoolean isLeftFootInSupport = new YoBoolean("isLeftFootInSupport", registry);
    private final YoBoolean isRightFootInSupport = new YoBoolean("isRightFootInSupport", registry);
    private final SideDependentList<YoBoolean> isFootInSupport = new SideDependentList<>(isLeftFootInSupport, isRightFootInSupport);
-   private final DoubleProvider stepTime = () -> joystickStepParameters.getSwingDuration() + joystickStepParameters.getTransferDuration();
    private final BoundingBoxCollisionDetector collisionDetector;
    private final SteppingParameters steppingParameters;
    private final SnapAndWiggleSingleStepParameters snapAndWiggleParameters = new SnapAndWiggleSingleStepParameters();
@@ -76,7 +75,7 @@ public class ContinuousStepController
 
    private final AtomicReference<Boolean> walkingRequest = new AtomicReference<>(null);
 
-   private Consumer<PauseWalkingMessage> pauseWalkingPublisher;
+   private StopWalkingMessenger stopWalkingMessenger;
    private FootPoseProvider footPoseProvider;
 
    public ContinuousStepController(WalkingControllerParameters walkingControllerParameters)
@@ -88,8 +87,35 @@ public class ContinuousStepController
 
       continuousStepGenerator.setNumberOfTicksBeforeSubmittingFootsteps(0);
       continuousStepGenerator.setNumberOfFootstepsToPlan(10);
-      continuousStepGenerator.setDesiredTurningVelocityProvider(() -> turningVelocity.getValue());
-      continuousStepGenerator.setDesiredVelocityProvider(() -> new Vector2D(forwardVelocity.getValue(), lateralVelocity.getValue()));
+      continuousStepGenerator.setWalkInputProvider(isWalking);
+      continuousStepGenerator.setDesiredTurningVelocityProvider(new DesiredTurningVelocityProvider()
+      {
+         @Override
+         public double getTurningVelocity()
+         {
+            return forwardVelocity.getValue() < -1e-10 ? -turningVelocity.getValue() : turningVelocity.getValue();
+         }
+
+         @Override
+         public boolean isUnitVelocity()
+         {
+            return true;
+         }
+      });
+      continuousStepGenerator.setDesiredVelocityProvider(new DesiredVelocityProvider()
+      {
+         @Override
+         public Vector2DReadOnly getDesiredVelocity()
+         {
+            return new Vector2D(forwardVelocity.getValue(), lateralVelocity.getValue());
+         }
+
+         @Override
+         public boolean isUnitVelocity()
+         {
+            return true;
+         }
+      });
       continuousStepGenerator.configureWith(walkingControllerParameters);
       continuousStepGenerator.setFootstepAdjustment(this::adjustFootstep);
       continuousStepGenerator.setFootPoseProvider(robotSide -> lastSupportFootPoses.get(robotSide));
@@ -121,9 +147,10 @@ public class ContinuousStepController
       continuousStepGenerator.setFootstepMessenger(footstepMessenger);
    }
 
-   public void setPauseWalkingPublisher(Consumer<PauseWalkingMessage> pauseWalkingPublisher)
+   public void setPauseWalkingPublisher(StopWalkingMessenger stopWalkingMessenger)
    {
-      this.pauseWalkingPublisher = pauseWalkingPublisher;
+      this.stopWalkingMessenger = stopWalkingMessenger;
+      continuousStepGenerator.setStopWalkingMessenger(stopWalkingMessenger);
    }
 
    public void setFootPoseProviders(FootPoseProvider footPoseProvider)
@@ -208,7 +235,7 @@ public class ContinuousStepController
       if (!isWalking.getValue() && !hasSuccessfullyStoppedWalking.getValue())
       {
          // Only send pause request if we think the command has not been executed yet. This is to be more robust in case packets are dropped.
-         sendPauseMessage();
+         stopWalkingMessenger.submitStopWalkingRequest();
       }
    }
 
@@ -229,22 +256,17 @@ public class ContinuousStepController
 
    public void updateForwardVelocity(double alpha)
    {
-      double minMaxVelocity = joystickStepParameters.getMaxStepLength() / stepTime.getValue();
-      forwardVelocity.set(minMaxVelocity * MathTools.clamp(alpha, 1.0));
+      forwardVelocity.set(alpha);
    }
 
    public void updateLateralVelocity(double alpha)
    {
-      double minMaxVelocity = joystickStepParameters.getMaxStepWidth() / stepTime.getValue();
-      lateralVelocity.set(minMaxVelocity * MathTools.clamp(alpha, 1.0));
+      lateralVelocity.set(alpha);
    }
 
    public void updateTurningVelocity(double alpha)
    {
-      double minMaxVelocity = (joystickStepParameters.getTurnMaxAngleOutward() - joystickStepParameters.getTurnMaxAngleInward()) / stepTime.getValue();
-      if (forwardVelocity.getValue() < -1.0e-10)
-         alpha = -alpha;
-      turningVelocity.set(minMaxVelocity * MathTools.clamp(alpha, 1.0));
+      turningVelocity.set(alpha);
    }
 
    public void startWalking(boolean confirm)
@@ -252,7 +274,6 @@ public class ContinuousStepController
       if (confirm)
       {
          isWalking.set(true);
-         continuousStepGenerator.startWalking();
          hasSuccessfullyStoppedWalking.set(false);
       }
    }
@@ -263,16 +284,7 @@ public class ContinuousStepController
       {
          isWalking.set(false);
          footstepsToSendReference.set(null);
-         continuousStepGenerator.stopWalking();
-         sendPauseMessage();
       }
-   }
-
-   private void sendPauseMessage()
-   {
-      PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
-      pauseWalkingMessage.setPause(true);
-      pauseWalkingPublisher.accept(pauseWalkingMessage);
    }
 
    public void consumeFootstepStatus(FootstepStatusMessage footstepStatus)
