@@ -17,6 +17,8 @@ import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
+import us.ihmc.simulationconstructionset.FloatingJoint;
+import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.RobotController;
@@ -96,9 +98,21 @@ public class AvatarSimulation
          joint.setTau(0.0);
       }
 
-      humanoidFloatingRootJointRobot.getRootJoint().setAngularVelocityInBody(new Vector3D());
-      humanoidFloatingRootJointRobot.getRootJoint().setVelocity(0, 0, 0);
-
+      FloatingJoint rootJoint = humanoidFloatingRootJointRobot.getRootJoint();
+      
+      rootJoint.setVelocity(new Vector3D());
+      rootJoint.setAcceleration(new Vector3D());
+      rootJoint.setAngularVelocityInBody(new Vector3D());
+      rootJoint.setAngularAccelerationInBody(new Vector3D());
+      
+      
+      List<GroundContactPoint> contactPoints = humanoidFloatingRootJointRobot.getAllGroundContactPoints();
+      
+      for (GroundContactPoint cp : contactPoints)
+      {
+         cp.setNotInContact();
+      }
+      
       robotInitialSetup.initializeRobot(humanoidFloatingRootJointRobot);
       AvatarSimulationFactory.initializeEstimator(humanoidFloatingRootJointRobot, stateEstimationThread);
       controllerThread.initialize();
