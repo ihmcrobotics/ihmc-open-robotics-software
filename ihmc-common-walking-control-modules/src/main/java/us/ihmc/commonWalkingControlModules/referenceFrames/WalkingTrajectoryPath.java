@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.capturePoint;
+package us.ihmc.commonWalkingControlModules.referenceFrames;
 
 import org.ejml.data.DMatrixRMaj;
 
