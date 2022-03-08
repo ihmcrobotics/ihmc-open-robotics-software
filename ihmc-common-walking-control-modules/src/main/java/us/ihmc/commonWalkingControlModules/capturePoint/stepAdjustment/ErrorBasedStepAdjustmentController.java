@@ -210,6 +210,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       captureRegionCalculator = new OneStepCaptureRegionCalculator(steppingParameters.getFootWidth(),
                                                                    lengthLimit,
                                                                    soleZUpFrames,
+                                                                   false,
                                                                    yoNamePrefix,
                                                                    registry,
                                                                    yoGraphicsListRegistry);
