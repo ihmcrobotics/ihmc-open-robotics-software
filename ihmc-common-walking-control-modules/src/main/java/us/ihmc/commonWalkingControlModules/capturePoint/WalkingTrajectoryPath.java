@@ -465,7 +465,7 @@ public class WalkingTrajectoryPath
       return walkingTrajectoryPathFrame;
    }
 
-   public static class WaypointData
+   private static class WaypointData
    {
       private final String name;
       private final YoDouble time;
