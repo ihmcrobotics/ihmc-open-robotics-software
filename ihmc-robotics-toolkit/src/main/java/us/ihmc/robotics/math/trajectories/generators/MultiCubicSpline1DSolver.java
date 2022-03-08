@@ -4,10 +4,10 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
 import gnu.trove.list.array.TDoubleArrayList;
-import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
-import org.ejml.interfaces.linsol.LinearSolverDense;
+import us.ihmc.commons.MathTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeCommonOps;
+import us.ihmc.matrixlib.NativeMatrix;
 
 /**
  * This solver allows to compute coefficients for concatenated 1D cubic splines such that:
@@ -36,8 +36,6 @@ import us.ihmc.matrixlib.NativeCommonOps;
  */
 public class MultiCubicSpline1DSolver
 {
-   private final boolean useNativeCommonOps;
-
    public static final int coefficients = 4;
    private static final double regularizationWeight = 1E-10;
 
@@ -96,22 +94,13 @@ public class MultiCubicSpline1DSolver
    private final DMatrixRMaj ATranspose = new DMatrixRMaj(1, 1);
    private final DMatrixRMaj b = new DMatrixRMaj(1, 1);
 
-   private final DMatrixRMaj E = new DMatrixRMaj(1, 1);
-   private final DMatrixRMaj d = new DMatrixRMaj(1, 1);
-
-   private final LinearSolverDense<DMatrixRMaj> solver = LinearSolverFactory_DDRM.linear(0);
-
-   private final DMatrixRMaj solutionTranspose = new DMatrixRMaj(1, 1);
-   private final DMatrixRMaj tempMatrix = new DMatrixRMaj(1, 1);
+   private int lastSize = 1; // E.getNumRows() is rather expensive, keeping track of it size will allow to avoid the method call.
+   private final NativeMatrix E = new NativeMatrix(1, 1);
+   private final NativeMatrix d = new NativeMatrix(1, 1);
+   private final NativeMatrix solution = new NativeMatrix(1, 1);
 
    public MultiCubicSpline1DSolver()
    {
-      this(true);
-   }
-
-   public MultiCubicSpline1DSolver(boolean useNativeCommonOps)
-   {
-      this.useNativeCommonOps = useNativeCommonOps;
       clearWeights();
    }
 
@@ -180,7 +169,7 @@ public class MultiCubicSpline1DSolver
    {
       xi.reset();
       ti.reset();
-      wi.clear();
+      wi.reset();
    }
 
    /**
@@ -227,18 +216,28 @@ public class MultiCubicSpline1DSolver
    }
 
    /**
-    * Solves for the coefficients of the cubic splines and returns the acceleration integrated over the
-    * time <tt>[0, 1]</tt>.
-    * <p>
-    * The
-    * </p>
+    * Solves for the coefficients of the cubic splines.
     * 
     * @param solutionToPack the matrix used to store the cubic spline coefficients as column vector.
     *                       There is 4 coefficients per spline, for each spline they are sorted from
     *                       highest to lowest order. Modified.
     * @return the acceleration integrated over the time <tt>[0, 1]</tt>
     */
-   public double solve(DMatrixRMaj solutionToPack)
+   public double solveAndComputeCost(DMatrixRMaj solutionToPack)
+   {
+      solve(solutionToPack);
+      return computeCost(solutionToPack);
+   }
+
+   /**
+    * Solves for the coefficients of the cubic splines and returns the acceleration integrated over the
+    * time <tt>[0, 1]</tt>.
+    * 
+    * @param solutionToPack the matrix used to store the cubic spline coefficients as column vector.
+    *                       There is 4 coefficients per spline, for each spline they are sorted from
+    *                       highest to lowest order. Modified.
+    */
+   public void solve(DMatrixRMaj solutionToPack)
    {
       buildCostFunction(H_minAccel, H, f);
       buildKnotEqualityConstraints(A, b);
@@ -249,43 +248,33 @@ public class MultiCubicSpline1DSolver
       // min 0.5*x'*H*x + f'*x
       // s.t. A*x == b
       int size = subProblemSize + constraints;
-      E.reshape(size, size);
-      d.reshape(size, 1);
 
-      CommonOps_DDRM.fill(E, 0.0);
-      CommonOps_DDRM.insert(H, E, 0, 0);
-      CommonOps_DDRM.insert(A, E, subProblemSize, 0);
+      if (lastSize != size)
+      {
+         E.reshape(size, size);
+         d.reshape(size, 1);
+         E.zero();
+         lastSize = size;
+      }
+
+      E.insert(H, 0, 0);
+      E.insert(A, subProblemSize, 0);
       ATranspose.reshape(A.getNumCols(), A.getNumRows());
       CommonOps_DDRM.transpose(A, ATranspose);
-      CommonOps_DDRM.insert(ATranspose, E, 0, subProblemSize);
+      E.insert(ATranspose, 0, subProblemSize);
       CommonOps_DDRM.scale(-1.0, f);
-      CommonOps_DDRM.insert(f, d, 0, 0);
-      CommonOps_DDRM.insert(b, d, subProblemSize, 0);
+      d.insert(f, 0, 0);
+      d.insert(b, subProblemSize, 0);
 
-      if (useNativeCommonOps)
-      {
-         NativeCommonOps.solve(E, d, solutionToPack);
-         solutionToPack.reshape(subProblemSize, 1);
-         NativeCommonOps.multQuad(solutionToPack, H, b);
+      solution.solve(E, d);
+      solution.reshape(subProblemSize, 1);
+      solution.get(solutionToPack);
+   }
 
-         // b = x^T H x
-         NativeCommonOps.multQuad(solutionToPack, H_minAccel, b);
-      }
-      else
-      {
-         solver.setA(E);
-         solver.solve(d, solutionToPack);
-
-         solutionToPack.reshape(subProblemSize, 1);
-         //      NativeCommonOps.multQuad(solutionToPack, H, b);
-
-         // b = x^T H x
-         solutionTranspose.reshape(solutionToPack.getNumCols(), solutionToPack.getNumRows());
-         CommonOps_DDRM.transpose(solutionToPack, solutionTranspose);
-         CommonOps_DDRM.mult(solutionTranspose, H, tempMatrix);
-         CommonOps_DDRM.mult(tempMatrix, solutionToPack, b);
-      }
-
+   public double computeCost(DMatrixRMaj solution)
+   {
+      // b = x^T H x
+      NativeCommonOps.multQuad(solution, H_minAccel, b);
       return 0.5 * b.get(0, 0);
    }
 
@@ -450,6 +439,54 @@ public class MultiCubicSpline1DSolver
          addPositionObjective(1.0, x1, w1, offset, offset, H, f);
       if (wd1 != Double.POSITIVE_INFINITY)
          addVelocityObjective(1.0, xd1, wd1, offset, offset, H, f);
+   }
+
+   public double computePosition(double time, DMatrixRMaj solution)
+   {
+      if (time <= 0.0)
+         return x0;
+      if (time >= 1.0)
+         return x1;
+
+      int index = findSolutionOffsetIndex(time, solution);
+      return MathTools.cube(time) * solution.get(index++) + MathTools.square(time) * solution.get(index++) + time * solution.get(index++) + solution.get(index);
+   }
+
+   public double computeVelocity(double time, DMatrixRMaj solution)
+   {
+      if (time <= 0.0)
+         return xd0;
+      if (time >= 1.0)
+         return xd1;
+
+      int index = findSolutionOffsetIndex(time, solution);
+      return 3.0 * MathTools.square(time) * solution.get(index++) + 2.0 * time * solution.get(index++) + solution.get(index);
+   }
+
+   public double computeAcceleration(double time, DMatrixRMaj solution)
+   {
+      if (time < 0.0)
+         return 0.0;
+      if (time > 1.0)
+         return 0.0;
+
+      int index = findSolutionOffsetIndex(time, solution);
+      return 6.0 * time * solution.get(index++) + 2.0 * solution.get(index);
+   }
+
+   private int findSolutionOffsetIndex(double time, DMatrixRMaj solution)
+   {
+      int index = 0;
+
+      while (index < ti.size() && time > ti.get(index))
+         index++;
+
+      return index * coefficients;
+   }
+
+   public double computeWaypointVelocityFromSolution(int waypointIndex, DMatrixRMaj solution)
+   {
+      return computeVelocity(ti.get(waypointIndex), solution);
    }
 
    /**

@@ -9,7 +9,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import us.ihmc.avatar.AvatarFlatGroundFastWalkingTest;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -209,14 +208,7 @@ public abstract class HumanoidFootFallDisturbanceRecoveryTest implements MultiRo
                                                        Pose3DReadOnly startPose,
                                                        boolean squareUp)
    {
-      return AvatarFlatGroundFastWalkingTest.forwardSteps(initialStepSide,
-                                                          numberOfSteps,
-                                                          i -> stepLength,
-                                                          stepWidth,
-                                                          swingTime,
-                                                          transferTime,
-                                                          startPose,
-                                                          squareUp);
+      return EndToEndTestTools.forwardSteps(initialStepSide, numberOfSteps, i -> stepLength, stepWidth, swingTime, transferTime, startPose, squareUp);
    }
 
    private static class FlatGroundWithHoleEnvironment implements CommonAvatarEnvironmentInterface

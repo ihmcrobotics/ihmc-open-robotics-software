@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectio
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
+import us.ihmc.commonWalkingControlModules.referenceFrames.WalkingTrajectoryPath;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -159,6 +160,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    private final YoFramePoint2D yoCenterOfPressure = new YoFramePoint2D("CenterOfPressure", worldFrame, registry);
 
    private WalkingMessageHandler walkingMessageHandler;
+   private WalkingTrajectoryPath walkingTrajectoryPath;
 
    private final YoBoolean controllerFailed = new YoBoolean("controllerFailed", registry);
 
@@ -187,7 +189,9 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       this.footSwitches = new SideDependentList<>(footSwitches);
       this.wristForceSensors = wristForceSensors;
 
+      walkingTrajectoryPath = new WalkingTrajectoryPath(yoTime, controlDT, fullRobotModel.getSoleFrames(), yoGraphicsListRegistry, registry);
       referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver(fullRobotModel, referenceFrames);
+      referenceFrameHashCodeResolver.put(walkingTrajectoryPath.getWalkingTrajectoryPathFrame());
 
       capturePointCalculator = new CapturePointCalculator(centerOfMassStateProvider);
 
@@ -1026,6 +1030,11 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    public void getAngularMomentum(FrameVector3D upperBodyAngularMomentumToPack)
    {
       upperBodyAngularMomentumToPack.setIncludingFrame(angularMomentum);
+   }
+
+   public WalkingTrajectoryPath getWalkingTrajectoryPath()
+   {
+      return walkingTrajectoryPath;
    }
 
    public ReferenceFrameHashCodeResolver getReferenceFrameHashCodeResolver()
