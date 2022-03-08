@@ -64,20 +64,20 @@ public class AtlasFallingOnGroundSCS2Bullet
       Set<String> lastSimulatedJoints = robotModel.getJointMap().getLastSimulatedJoints();
       lastSimulatedJoints.forEach(robotDefinition::addSubtreeJointsToIgnore);
 
-      RigidBodyDefinition pelvisRigidBody = robotDefinition.getRigidBodyDefinition("pelvis");
-      pelvisRigidBody.setMass(1.0);
-//      pelvisRigidBody.getInertiaPose().setToZero();
-      List<CollisionShapeDefinition> pelvisCollisions = pelvisRigidBody.getCollisionShapeDefinitions();
-      pelvisCollisions.clear();
-      CollisionShapeDefinition pelvisBoxCollisionDefinition = new CollisionShapeDefinition();
-      pelvisBoxCollisionDefinition.setGeometryDefinition(new Box3DDefinition(0.3, 0.3, 0.3));
-      pelvisBoxCollisionDefinition.setOriginPose(new RigidBodyTransform());
-      pelvisCollisions.add(pelvisBoxCollisionDefinition);
-      pelvisRigidBody.setMomentOfInertia(MomentOfInertiaFactory.fromMassAndRadiiOfGyration(pelvisRigidBody.getMass(),
-                                                                                     0.8 * 0.3,
-                                                                                     0.8 * 0.3,
-                                                                                     0.8 * 0.3));
-      robotDefinition.getRootJointDefinitions().get(0).setInitialJointState(new SixDoFJointState(new YawPitchRoll(0.1, 0.1, 0.1), new Point3D(1.5, 0.0, 0.0)));
+//      RigidBodyDefinition pelvisRigidBody = robotDefinition.getRigidBodyDefinition("pelvis");
+//      pelvisRigidBody.setMass(1.0);
+////      pelvisRigidBody.getInertiaPose().setToZero();
+//      List<CollisionShapeDefinition> pelvisCollisions = pelvisRigidBody.getCollisionShapeDefinitions();
+//      pelvisCollisions.clear();
+//      CollisionShapeDefinition pelvisBoxCollisionDefinition = new CollisionShapeDefinition();
+//      pelvisBoxCollisionDefinition.setGeometryDefinition(new Box3DDefinition(0.3, 0.3, 0.3));
+//      pelvisBoxCollisionDefinition.setOriginPose(new RigidBodyTransform());
+//      pelvisCollisions.add(pelvisBoxCollisionDefinition);
+//      pelvisRigidBody.setMomentOfInertia(MomentOfInertiaFactory.fromMassAndRadiiOfGyration(pelvisRigidBody.getMass(),
+//                                                                                     0.8 * 0.3,
+//                                                                                     0.8 * 0.3,
+//                                                                                     0.8 * 0.3));
+//      robotDefinition.getRootJointDefinitions().get(0).setInitialJointState(new SixDoFJointState(new YawPitchRoll(0.1, 0.1, 0.1), new Point3D(1.5, 0.0, 0.0)));
 
 //      Robot robot = new Robot(robotDefinition, SimulationSession.DEFAULT_INERTIAL_FRAME);
 //      robot.updateFrames();
@@ -115,6 +115,8 @@ public class AtlasFallingOnGroundSCS2Bullet
       rootJointDefinition.setSuccessor(rigidBody1);
       boxRobotDefinition.setRootBodyDefinition(rootBodyDefinition);
 //      simulationSession.addRobot(boxRobotDefinition);
+
+      simulationSession.initializeBufferSize(24000);
 
       SessionVisualizerControls sessionVisualizerControls = SessionVisualizer.startSessionVisualizer(simulationSession);
       sessionVisualizerControls.setCameraFocusPosition(0.3, 0.0, 1.0);
