@@ -117,7 +117,7 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
                                                                                registry,
                                                                                yoGraphicsListRegistry);
 
-      captureRegionCalculator = new OneStepCaptureRegionCalculator(soleZUpFrames, walkingControllerParameters, yoNamePrefix, registry, yoGraphicsListRegistry);
+      captureRegionCalculator = new OneStepCaptureRegionCalculator(soleZUpFrames, walkingControllerParameters, false, yoNamePrefix, registry, yoGraphicsListRegistry);
       twoStepCaptureRegionCalculator = new TwoStepCaptureRegionCalculator(registry, yoGraphicsListRegistry);
 
       if (walkingControllerParameters != null)

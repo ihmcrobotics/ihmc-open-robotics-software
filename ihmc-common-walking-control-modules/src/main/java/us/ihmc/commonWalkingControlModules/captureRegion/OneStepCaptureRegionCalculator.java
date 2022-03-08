@@ -51,7 +51,7 @@ public class OneStepCaptureRegionCalculator
 
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
 
-   private static boolean useInternalReachableRegions = false;
+   private final boolean useInternalReachableRegions;
 
    public OneStepCaptureRegionCalculator(CommonHumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters,
          YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -81,6 +81,15 @@ public class OneStepCaptureRegionCalculator
               soleZUpFrames, suffix, parentRegistry, yoGraphicsListRegistry);
    }
 
+   public OneStepCaptureRegionCalculator(SideDependentList<? extends ReferenceFrame> soleZUpFrames, WalkingControllerParameters walkingControllerParameters,
+                                         boolean useInternalReachableRegions,
+                                         String suffix, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      this(walkingControllerParameters.getSteppingParameters().getFootWidth(), walkingControllerParameters.getSteppingParameters().getMaxStepLength(),
+           soleZUpFrames, useInternalReachableRegions, suffix, parentRegistry, yoGraphicsListRegistry);
+   }
+
+
    public OneStepCaptureRegionCalculator(double footWidth, double kinematicStepRange,
                                          SideDependentList<? extends ReferenceFrame> soleZUpFrames, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -103,13 +112,42 @@ public class OneStepCaptureRegionCalculator
    }
 
    public OneStepCaptureRegionCalculator(double footWidth,
+                                         double kinematicStepRange,
+                                         SideDependentList<? extends ReferenceFrame> soleZUpFrames,
+                                         boolean useInternalReachableRegions,
+                                         String suffix,
+                                         YoRegistry parentRegistry,
+                                         YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      this(footWidth,
+           () -> kinematicStepRange,
+           soleZUpFrames,
+           useInternalReachableRegions,
+           suffix,
+           parentRegistry,
+           yoGraphicsListRegistry);
+   }
+
+   public OneStepCaptureRegionCalculator(double footWidth,
                                          DoubleProvider kinematicStepRange,
                                          SideDependentList<? extends ReferenceFrame> soleZUpFrames,
+                                         String suffix,
+                                         YoRegistry parentRegistry,
+                                         YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      this(footWidth, kinematicStepRange, soleZUpFrames, true, suffix, parentRegistry, yoGraphicsListRegistry);
+   }
+
+   public OneStepCaptureRegionCalculator(double footWidth,
+                                         DoubleProvider kinematicStepRange,
+                                         SideDependentList<? extends ReferenceFrame> soleZUpFrames,
+                                         boolean useInternalReachableRegions,
                                          String suffix, YoRegistry parentRegistry,
                                          YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.kinematicStepRange = kinematicStepRange;
       this.soleZUpFrames = soleZUpFrames;
+      this.useInternalReachableRegions = useInternalReachableRegions;
 //      this.midFootAnkleXOffset = midFootAnkleXOffset;
       this.footWidth = footWidth;
 
