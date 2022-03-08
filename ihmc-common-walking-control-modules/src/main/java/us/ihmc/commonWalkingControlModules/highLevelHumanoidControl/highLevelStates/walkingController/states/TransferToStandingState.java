@@ -12,9 +12,8 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.TouchdownErrorCompensator;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commonWalkingControlModules.referenceFrames.WalkingTrajectoryPath;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -25,8 +24,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class TransferToStandingState extends WalkingState
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
    private final YoDouble maxICPErrorToSwitchToStanding = new YoDouble("maxICPErrorToSwitchToStanding", registry);
 
    private final YoBoolean doFootExplorationInTransferToStanding = new YoBoolean("doFootExplorationInTransferToStanding", registry);
@@ -42,13 +39,14 @@ public class TransferToStandingState extends WalkingState
    private final FeetManager feetManager;
    private final LegConfigurationManager legConfigurationManager;
 
-   private final FramePoint3D actualFootPositionInWorld = new FramePoint3D();
-
    private final Point3D midFootPosition = new Point3D();
 
-   public TransferToStandingState(WalkingMessageHandler walkingMessageHandler, TouchdownErrorCompensator touchdownErrorCompensator,
-                                  HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
-                                  WalkingFailureDetectionControlModule failureDetectionControlModule, YoRegistry parentRegistry)
+   public TransferToStandingState(WalkingMessageHandler walkingMessageHandler,
+                                  TouchdownErrorCompensator touchdownErrorCompensator,
+                                  HighLevelHumanoidControllerToolbox controllerToolbox,
+                                  HighLevelControlManagerFactory managerFactory,
+                                  WalkingFailureDetectionControlModule failureDetectionControlModule,
+                                  YoRegistry parentRegistry)
    {
       super(WalkingStateEnum.TO_STANDING, parentRegistry);
       maxICPErrorToSwitchToStanding.set(0.025);
@@ -71,6 +69,8 @@ public class TransferToStandingState extends WalkingState
    public void doAction(double timeInState)
    {
       balanceManager.computeICPPlan();
+      controllerToolbox.getWalkingTrajectoryPath().updateTrajectory(feetManager.getCurrentConstraintType(RobotSide.LEFT),
+                                                                     feetManager.getCurrentConstraintType(RobotSide.RIGHT));
 
       switchToPointToeOffIfAlreadyInLine();
 
@@ -88,12 +88,13 @@ public class TransferToStandingState extends WalkingState
          return;
 
       // switch to point toe off from line toe off
-      if (feetManager.getCurrentConstraintType(sideOnToes) == FootControlModule.ConstraintType.TOES && !feetManager.isUsingPointContactInToeOff(sideOnToes) && !feetManager.useToeLineContactInTransfer())
-        {
-           FramePoint3DReadOnly trailingFootExitCMP = balanceManager.getFirstExitCMPForToeOff(true);
-            controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(sideOnToes), filteredDesiredCoP);
-            feetManager.requestPointToeOff(sideOnToes, trailingFootExitCMP, filteredDesiredCoP);
-         }
+      if (feetManager.getCurrentConstraintType(sideOnToes) == FootControlModule.ConstraintType.TOES && !feetManager.isUsingPointContactInToeOff(sideOnToes)
+            && !feetManager.useToeLineContactInTransfer())
+      {
+         FramePoint3DReadOnly trailingFootExitCMP = balanceManager.getFirstExitCMPForToeOff(true);
+         controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(sideOnToes), filteredDesiredCoP);
+         feetManager.requestPointToeOff(sideOnToes, trailingFootExitCMP, filteredDesiredCoP);
+      }
    }
 
    private RobotSide getSideThatCouldBeOnToes()
@@ -120,16 +121,15 @@ public class TransferToStandingState extends WalkingState
       RobotSide mostSupportingSide = null;
       boolean leftStepLower = leftFootstep.getZ() <= rightFootstep.getZ();
       boolean rightStepLower = leftFootstep.getZ() > rightFootstep.getZ();
-      if(previousWalkingState.isSingleSupport() && leftStepLower)
+      if (previousWalkingState.isSingleSupport() && leftStepLower)
          mostSupportingSide = RobotSide.LEFT;
-      else if(previousWalkingState.isSingleSupport() && rightStepLower)
+      else if (previousWalkingState.isSingleSupport() && rightStepLower)
          mostSupportingSide = RobotSide.RIGHT;
       else if (previousWalkingState.getTransferToSide() != null)
          mostSupportingSide = previousWalkingState.getTransferToSide().getOppositeSide();
 
       return mostSupportingSide;
    }
-
 
    @Override
    public boolean isDone(double timeInState)
@@ -143,12 +143,13 @@ public class TransferToStandingState extends WalkingState
    @Override
    public void onEntry()
    {
+      initializeWalkingTrajectoryPath();
       balanceManager.clearICPPlan();
       balanceManager.clearSwingFootTrajectory();
 
       WalkingStateEnum previousStateEnum = getPreviousWalkingStateEnum();
 
-      if(previousStateEnum != null && previousStateEnum.isSingleSupport())
+      if (previousStateEnum != null && previousStateEnum.isSingleSupport())
          balanceManager.setHoldSplitFractions(true);
 
       // This can happen if walking is paused or aborted while the robot is on its toes already. In that case
@@ -187,8 +188,7 @@ public class TransferToStandingState extends WalkingState
       if (feetManager.getCurrentConstraintType(supportingSide.getOppositeSide()) == FootControlModule.ConstraintType.TOES)
          extraToeOffHeight = feetManager.getToeOffManager().getExtraCoMMaxHeightWithToes();
 
-      TransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport = walkingMessageHandler
-            .createTransferToAndNextFootstepDataForDoubleSupport(supportingSide);
+      TransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport = walkingMessageHandler.createTransferToAndNextFootstepDataForDoubleSupport(supportingSide);
       comHeightManager.setSupportLeg(supportingSide);
       comHeightManager.initialize(transferToAndNextFootstepsDataForDoubleSupport, extraToeOffHeight);
 
@@ -217,6 +217,13 @@ public class TransferToStandingState extends WalkingState
             legConfigurationManager.setStraight(robotSide);
          }
       }
+   }
+
+   private void initializeWalkingTrajectoryPath()
+   {
+      WalkingTrajectoryPath walkingTrajectoryPath = controllerToolbox.getWalkingTrajectoryPath();
+      walkingTrajectoryPath.clearFootsteps();
+      walkingTrajectoryPath.initializeDoubleSupport();
    }
 
    @Override
