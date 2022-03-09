@@ -543,6 +543,7 @@ public class SwingState extends AbstractFootControlState
    {
       setAdjustedFootstepAndTime(adjustedFootstep, null, null, swingTime);
    }
+
    public void setAdjustedFootstepAndTime(Footstep adjustedFootstep, FrameVector3DReadOnly finalCoMVelocity, FrameVector3DReadOnly finalCoMAcceleration, double swingTime)
    {
       replanTrajectory.set(true);
