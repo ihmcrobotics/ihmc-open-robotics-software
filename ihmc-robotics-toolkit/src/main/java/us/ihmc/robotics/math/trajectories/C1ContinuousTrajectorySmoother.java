@@ -38,6 +38,8 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
    private final DMatrixRMaj scaledClosedLoopStateMatrix = new DMatrixRMaj(2, 2);
    private final DMatrixRMaj stateTransitionMatrix = new DMatrixRMaj(2, 2);
 
+   private boolean hasDriftDynamicsMatrixBeenSet = false;
+
    public C1ContinuousTrajectorySmoother(String namePrefix, FixedFramePositionTrajectoryGenerator trajectoryToTrack, YoRegistry parentRegistry)
    {
       this.trajectoryToTrack = trajectoryToTrack;
@@ -46,6 +48,9 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
 
       trackingStiffness = new DoubleParameter(namePrefix + "TrackingStiffness", registry, 200.0);
       trackingZeta = new DoubleParameter(namePrefix + "TrackingZeta", registry, 0.8);
+
+      trackingStiffness.addListener((v) -> updateClosedLoopDriftDynamicsMatrix());
+      trackingZeta.addListener((v) -> updateClosedLoopDriftDynamicsMatrix());
 
       timeToStartErrorCancellation = new YoDouble(namePrefix + "TimeWhenStartingErrorCancellation", registry);
       desiredPositionError = new YoFrameVector3D(namePrefix + "PositionErrorWhenStartingCancellation", trajectoryToTrack.getReferenceFrame(), registry);
@@ -59,13 +64,29 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
       desiredVelocity = new FrameVector3D(trajectoryToTrack.getReferenceFrame());
       desiredAcceleration = new FrameVector3D(trajectoryToTrack.getReferenceFrame());
 
-//      closedLoopStateMatrix.set(0, 1, 1.0);
-//      closedLoopStateMatrix.set(1, 0, trackingStiffness.getValue());
-//      closedLoopStateMatrix.set(1, 1, trackingDamping.getValue());
-
       parentRegistry.addChild(registry);
    }
 
+   private void updateClosedLoopDriftDynamicsMatrix()
+   {
+      hasDriftDynamicsMatrixBeenSet = true;
+
+      closedLoopStateMatrix.set(0, 1, 1.0);
+      closedLoopStateMatrix.set(1, 0, -trackingStiffness.getValue());
+      closedLoopStateMatrix.set(1, 1, -GainCalculator.computeDerivativeGain(trackingStiffness.getValue(), trackingZeta.getValue()));
+   }
+
+   public void updateErrorDynamicsAtTime(double time, FramePoint3DReadOnly desiredPositionAtTime, FrameVector3DReadOnly desiredVelocityAtTime)
+   {
+      trajectoryToTrack.compute(time);
+
+      desiredPositionError.sub(desiredPositionAtTime, trajectoryToTrack.getPosition());
+      desiredVelocityError.sub(desiredVelocityAtTime, trajectoryToTrack.getVelocity());
+
+      timeToStartErrorCancellation.set(time);
+   }
+
+   @Override
    public void initialize()
    {
       desiredPositionError.setToZero();
@@ -73,24 +94,12 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
       timeToStartErrorCancellation.set(0.0);
    }
 
-   public void updateErrorDynamicsAtTime(double time, FramePoint3DReadOnly desiredPositionAtTime, FrameVector3DReadOnly desiredVelocityAtTime)
-   {
-      closedLoopStateMatrix.set(0, 1, 1.0);
-      closedLoopStateMatrix.set(1, 0, -trackingStiffness.getValue());
-      closedLoopStateMatrix.set(1, 1, -GainCalculator.computeDerivativeGain(trackingStiffness.getValue(), trackingZeta.getValue()));
-
-      trajectoryToTrack.compute(time);
-
-      desiredPositionError.sub(desiredPositionAtTime, trajectoryToTrack.getPosition());
-//      desiredVelocityError.setToZero();
-      desiredVelocityError.sub(desiredVelocityAtTime, trajectoryToTrack.getVelocity());
-
-      timeToStartErrorCancellation.set(time);
-   }
-
    @Override
    public void compute(double time)
    {
+      if (!hasDriftDynamicsMatrixBeenSet)
+         updateClosedLoopDriftDynamicsMatrix();
+
       double relativeTime = time - timeToStartErrorCancellation.getDoubleValue();
       CommonOps_DDRM.scale(relativeTime, closedLoopStateMatrix, scaledClosedLoopStateMatrix);
 
@@ -149,15 +158,5 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
    public void hideVisualization()
    {
 
-   }
-
-   FrameVector3DReadOnly getReferenceTrackingPositionError()
-   {
-      return desiredPositionError;
-   }
-
-   FrameVector3DReadOnly getReferenceTrackingVelocityError()
-   {
-      return desiredVelocityError;
    }
 }
