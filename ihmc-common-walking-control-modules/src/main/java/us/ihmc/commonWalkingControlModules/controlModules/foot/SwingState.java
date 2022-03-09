@@ -89,7 +89,7 @@ public class SwingState extends AbstractFootControlState
    private final YoBoolean isSwingSpeedUpEnabled;
    private final YoDouble currentTime;
    private final YoDouble currentTimeWithSwingSpeedUp;
-   private final YoDouble timeRemainingWhenAdjusted;
+   private final YoDouble timeWhenAdjusted;
    private final YoFramePoint3D desiredPositionWhenAdjusted;
    private final YoFrameVector3D desiredVelocityWhenAdjusted;
 
@@ -209,7 +209,7 @@ public class SwingState extends AbstractFootControlState
       swingDuration = new YoDouble(namePrefix + "Duration", registry);
       desiredPositionWhenAdjusted = new YoFramePoint3D(namePrefix + "DesiredPositionWhenAdjusted", worldFrame, registry);
       desiredVelocityWhenAdjusted = new YoFrameVector3D(namePrefix + "DesiredVelocityWhenAdjusted", worldFrame, registry);
-      timeRemainingWhenAdjusted = new YoDouble(namePrefix + "TimeRemainingWhenStepAdjusted", registry);
+      timeWhenAdjusted = new YoDouble(namePrefix + "TimeWhenStepAdjusted", registry);
       swingTrajectoryCalculator = footControlHelper.getSwingTrajectoryCalculator();
       blendedSwingTrajectory = new MultipleWaypointsBlendedPoseTrajectoryGenerator(namePrefix, swingTrajectoryCalculator.getSwingTrajectory(), worldFrame, registry);
       swingTrajectorySmoother = new C1ContinuousTrajectorySmoother(namePrefix, blendedSwingTrajectory, registry);
@@ -345,7 +345,7 @@ public class SwingState extends AbstractFootControlState
       footstepWasAdjusted.set(false);
       desiredPositionWhenAdjusted.setToNaN();
       desiredVelocityWhenAdjusted.setToNaN();
-      timeRemainingWhenAdjusted.setToNaN();;
+      timeWhenAdjusted.setToNaN();;
    }
 
    @Override
@@ -568,9 +568,12 @@ public class SwingState extends AbstractFootControlState
    {
       replanTrajectory.set(true);
       footstepWasAdjusted.set(true);
-      desiredPositionWhenAdjusted.set(yoDesiredSolePosition);
-      desiredVelocityWhenAdjusted.setAndScale(1.0 / swingTimeSpeedUpFactor.getValue(), yoDesiredSoleLinearVelocity);
-      timeRemainingWhenAdjusted.set(Math.max(0.05, swingTime - currentTime.getValue()));
+
+      timeWhenAdjusted.set(currentTime.getValue());
+      swingTrajectorySmoother.compute(currentTime.getDoubleValue());
+
+      desiredPositionWhenAdjusted.set(swingTrajectorySmoother.getPosition());
+      desiredVelocityWhenAdjusted.set(swingTrajectorySmoother.getVelocity());
 
       adjustedFootstepPose.setIncludingFrame(adjustedFootstep.getFootstepPose());
 
@@ -637,7 +640,7 @@ public class SwingState extends AbstractFootControlState
             adjustedWaypoint.changeFrame(footstepFrame);
             adjustedWaypoint.setReferenceFrame(adjustedFootstepFrame);
             adjustedWaypoint.changeFrame(worldFrame);
-            blendedSwingTrajectory.blendFinalConstraint(adjustedWaypoint, swingDuration, timeRemainingWhenAdjusted.getDoubleValue());
+            blendedSwingTrajectory.blendFinalConstraint(adjustedWaypoint, swingDuration, swingDuration - timeWhenAdjusted.getValue());
             touchdownTrajectory.setLinearTrajectory(swingDuration,
                                                     adjustedWaypoint.getPosition(), touchdownDesiredLinearVelocity,
                                                     touchdownDesiredLinearAcceleration);
@@ -653,8 +656,10 @@ public class SwingState extends AbstractFootControlState
             positionTrajectory.addBlendWaypoint(swingTrajectoryCalculator.getSwingTrajectory().getPositionTrajectory().getWaypoint(0).getPosition(), 0.0);
             //            positionTrajectory.addBlendWaypoint(desiredPositionWhenAdjusted, swingDuration - timeRemainingWhenAdjusted.getValue());
             positionTrajectory.addBlendWaypoint(rateLimitedAdjustedPose.getPosition(), touchdownDesiredLinearVelocity, swingDuration);
-            swingTrajectorySmoother.updateErrorDynamicsAtTime(swingDuration - timeRemainingWhenAdjusted.getValue(), desiredPositionWhenAdjusted, desiredVelocityWhenAdjusted);
+            swingTrajectorySmoother.updateErrorDynamicsAtTime(timeWhenAdjusted.getDoubleValue(), desiredPositionWhenAdjusted, desiredVelocityWhenAdjusted);
             positionTrajectory.initializeBlendingTrajectory();
+
+            swingTrajectorySmoother.updateErrorDynamicsAtTime(timeWhenAdjusted.getDoubleValue(), desiredPositionWhenAdjusted, desiredVelocityWhenAdjusted);
 
             touchdownTrajectory.setLinearTrajectory(swingDuration,
                                                     rateLimitedAdjustedPose.getPosition(),

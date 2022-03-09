@@ -44,8 +44,8 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
 
       YoRegistry registry = new YoRegistry(namePrefix + getClass().getSimpleName());
 
-      trackingStiffness = new DoubleParameter(namePrefix + "TrackingStiffness", registry, 25.0);
-      trackingZeta = new DoubleParameter(namePrefix + "TrackingZeta", registry, 0.7);
+      trackingStiffness = new DoubleParameter(namePrefix + "TrackingStiffness", registry, 200.0);
+      trackingZeta = new DoubleParameter(namePrefix + "TrackingZeta", registry, 0.8);
 
       timeToStartErrorCancellation = new YoDouble(namePrefix + "TimeWhenStartingErrorCancellation", registry);
       desiredPositionError = new YoFrameVector3D(namePrefix + "PositionErrorWhenStartingCancellation", trajectoryToTrack.getReferenceFrame(), registry);
@@ -82,6 +82,7 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
       trajectoryToTrack.compute(time);
 
       desiredPositionError.sub(desiredPositionAtTime, trajectoryToTrack.getPosition());
+//      desiredVelocityError.setToZero();
       desiredVelocityError.sub(desiredVelocityAtTime, trajectoryToTrack.getVelocity());
 
       timeToStartErrorCancellation.set(time);
@@ -104,7 +105,7 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
                            stateTransitionMatrix.get(1, 1) * desiredVelocityError.getElement(element);
          referencePositionError.setElement(element, position);
          referenceVelocityError.setElement(element, velocity);
-         referenceAccelerationError.setElement(element, trackingStiffness.getValue() * position + dampingGain * velocity);
+         referenceAccelerationError.setElement(element, -trackingStiffness.getValue() * position - dampingGain * velocity);
       }
 
       trajectoryToTrack.compute(time);
