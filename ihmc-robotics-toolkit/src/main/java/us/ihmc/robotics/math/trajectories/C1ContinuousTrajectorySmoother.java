@@ -6,9 +6,9 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
 import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -20,11 +20,6 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
 
    private final YoFrameVector3D desiredPositionError;
    private final YoFrameVector3D desiredVelocityError;
-   private final YoFrameVector3D desiredErrorAcceleration;
-
-   private final YoFramePoint3D desiredPositionState;
-   private final YoFrameVector3D desiredVelocityState;
-   private final YoFrameVector3D desiredAccelerationState;
 
    private final FramePoint3D desiredPosition;
    private final FrameVector3D desiredVelocity;
@@ -32,7 +27,7 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
 
    private final YoDouble timeLastTick;
    private final DoubleParameter trackingStiffness;
-   private final DoubleParameter trackingDamping;
+   private final DoubleParameter trackingZeta;
 
    private final MatrixExponentialCalculator matrixExponentialCalculator = new MatrixExponentialCalculator(2);
    private final DMatrixRMaj closedLoopStateMatrix = new DMatrixRMaj(2, 2);
@@ -45,17 +40,12 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
 
       YoRegistry registry = new YoRegistry(namePrefix + getClass().getSimpleName());
 
-      trackingStiffness = new DoubleParameter(namePrefix + "TrackingStiffness", registry, 10.0);
-      trackingDamping = new DoubleParameter(namePrefix + "TrackingDamping", registry, 2.0);
+      trackingStiffness = new DoubleParameter(namePrefix + "TrackingStiffness", registry, 25.0);
+      trackingZeta = new DoubleParameter(namePrefix + "TrackingZeta", registry, 0.7);
 
       timeLastTick = new YoDouble(namePrefix + "TimeLastTick", registry);
       desiredPositionError = new YoFrameVector3D(namePrefix + "DesiredPositionError", trajectoryToTrack.getReferenceFrame(), registry);
       desiredVelocityError = new YoFrameVector3D(namePrefix + "DesiredVelocityError", trajectoryToTrack.getReferenceFrame(), registry);
-      desiredErrorAcceleration = new YoFrameVector3D(namePrefix + "DesiredErrorAcceleration", trajectoryToTrack.getReferenceFrame(), registry);
-
-      desiredPositionState = new YoFramePoint3D(namePrefix + "DesiredPositionState", trajectoryToTrack.getReferenceFrame(), registry);
-      desiredVelocityState = new YoFrameVector3D(namePrefix + "DesiredVelocityState", trajectoryToTrack.getReferenceFrame(), registry);
-      desiredAccelerationState = new YoFrameVector3D(namePrefix + "DesiredAccelerationState", trajectoryToTrack.getReferenceFrame(), registry);
 
       desiredPosition = new FramePoint3D(trajectoryToTrack.getReferenceFrame());
       desiredVelocity = new FrameVector3D(trajectoryToTrack.getReferenceFrame());
@@ -75,35 +65,18 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
       timeLastTick.set(0.0);
    }
 
-   public void updateUsingCurrentErrorAtTime(double time)
+   public void updateErrorDynamicsAtTime(double time, FramePoint3DReadOnly desiredPositionAtTime, FrameVector3DReadOnly desiredVelocityAtTime)
    {
-      double dt = time - timeLastTick.getDoubleValue();
-
-      // integrate to get the new desired value
-      desiredPositionState.scaleAdd(dt, desiredVelocityState, desiredPositionState);
-      desiredPositionState.scaleAdd(0.5 * dt * dt, desiredAccelerationState, desiredPositionState);
-
-      desiredVelocityState.scaleAdd(dt, desiredAccelerationState, desiredVelocityState);
+      closedLoopStateMatrix.set(0, 1, 1.0);
+      closedLoopStateMatrix.set(1, 0, -trackingStiffness.getValue());
+      closedLoopStateMatrix.set(1, 1, -GainCalculator.computeDerivativeGain(trackingStiffness.getValue(), trackingZeta.getValue()));
 
       trajectoryToTrack.compute(time);
 
-      desiredPositionError.sub(desiredPositionState, trajectoryToTrack.getPosition());
-      desiredVelocityError.sub(desiredVelocityState, trajectoryToTrack.getVelocity());
-
-      desiredErrorAcceleration.setAndScale(trackingStiffness.getValue(), desiredPositionError);
-      desiredErrorAcceleration.scaleAdd(trackingDamping.getValue(), desiredVelocityError, desiredErrorAcceleration);
-
-      desiredAccelerationState.add(desiredErrorAcceleration, trajectoryToTrack.getAcceleration());
-
-      desiredPosition.set(desiredPositionState);
-      desiredVelocity.set(desiredVelocityState);
-      desiredAcceleration.set(desiredAccelerationState);
+      desiredPositionError.sub(desiredPositionAtTime, trajectoryToTrack.getPosition());
+      desiredPositionError.sub(desiredVelocityAtTime, trajectoryToTrack.getVelocity());
 
       timeLastTick.set(time);
-
-      closedLoopStateMatrix.set(0, 1, 1.0);
-      closedLoopStateMatrix.set(1, 0, trackingStiffness.getValue());
-      closedLoopStateMatrix.set(1, 1, trackingDamping.getValue());
    }
 
    private final FrameVector3D instantaneousPositionErrorSolution = new FrameVector3D();
@@ -118,6 +91,7 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
 
       matrixExponentialCalculator.compute(stateTransitionMatrix, scaledClosedLoopStateMatrix);
 
+      double dampingGain = GainCalculator.computeDerivativeGain(trackingStiffness.getValue(), trackingZeta.getValue());
       for (int element = 0; element < 3; element++)
       {
          double position = stateTransitionMatrix.get(0, 0) * desiredPositionError.getElement(element) +
@@ -126,7 +100,7 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
                            stateTransitionMatrix.get(1, 1) * desiredVelocityError.getElement(element);
          instantaneousPositionErrorSolution.setElement(element, position);
          instantaneousVelocityErrorSolution.setElement(element, velocity);
-         instantaneousErrorAccelerationSolution.setElement(element, trackingStiffness.getValue() * position + trackingDamping.getValue() * velocity);
+         instantaneousErrorAccelerationSolution.setElement(element, trackingStiffness.getValue() * position + dampingGain * velocity);
       }
 
       trajectoryToTrack.compute(time);
@@ -145,19 +119,19 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
    @Override
    public FramePoint3DReadOnly getPosition()
    {
-      return desiredPositionState;
+      return desiredPosition;
    }
 
    @Override
    public FrameVector3DReadOnly getVelocity()
    {
-      return desiredVelocityState;
+      return desiredVelocity;
    }
 
    @Override
    public FrameVector3DReadOnly getAcceleration()
    {
-      return desiredAccelerationState;
+      return desiredAcceleration;
    }
 
    @Override
