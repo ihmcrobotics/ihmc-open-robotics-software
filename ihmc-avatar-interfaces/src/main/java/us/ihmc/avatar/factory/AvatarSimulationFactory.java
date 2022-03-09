@@ -645,6 +645,7 @@ public class AvatarSimulationFactory
       avatarSimulation.setHumanoidFloatingRootJointRobot(humanoidFloatingRootJointRobot);
       avatarSimulation.setSimulatedRobotTimeProvider(simulatedRobotTimeProvider);
       avatarSimulation.setFullHumanoidRobotModel(controllerThread.getFullRobotModel());
+      avatarSimulation.setMasterContext(masterContext);
 
       FactoryTools.disposeFactory(this);
 
