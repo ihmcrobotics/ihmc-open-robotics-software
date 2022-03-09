@@ -103,7 +103,6 @@ public class SwingState extends AbstractFootControlState
 
    private final RigidBodyTransform transformFromToeToAnkle = new RigidBodyTransform();
 
-   private final FramePoint3D unadjustedPosition = new FramePoint3D(worldFrame);
 
    private final FramePose3D adjustedFootstepPose = new FramePose3D();
    private final RateLimitedYoFramePose rateLimitedAdjustedPose;
@@ -430,18 +429,12 @@ public class SwingState extends AbstractFootControlState
       else
          activeTrajectory = blendedSwingTrajectory;
 
-      if (replanTrajectory.getBooleanValue())
-      {
-         activeTrajectory.compute(time); // compute to get the current unadjusted position
-         unadjustedPosition.setIncludingFrame(activeTrajectory.getPosition());
-      }
-
       if (swingTrajectoryCalculator.getActiveTrajectoryType() != TrajectoryType.WAYPOINTS && swingTrajectoryCalculator.doOptimizationUpdate())
       { // haven't finished original planning
          fillAndInitializeTrajectories(false);
 
       }
-      else if (replanTrajectory.getBooleanValue()) // need to update the beginning and end blending
+      else if (replanTrajectory.getBooleanValue()) // need to update the swing trajectory to account for the end position moving
          fillAndInitializeBlendedTrajectories();
 
       replanTrajectory.set(false);
@@ -452,11 +445,12 @@ public class SwingState extends AbstractFootControlState
 
       leapOfFaithModule.compute(time);
 
+      // set the reference values to get the ones coming from the trajectory
       yoReferenceSolePosition.setMatchingFrame(desiredPosition);
       yoReferenceSoleLinearVelocity.setMatchingFrame(desiredLinearVelocity);
 
       if (!isInTouchdown)
-      {
+      { // we're still in swing, so update the desired setpoints using the smoother
          swingTrajectorySmoother.compute(time);
          swingTrajectorySmoother.getLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
       }
