@@ -29,7 +29,7 @@ public class StaticEquilibriumSolverInputExamples
 
    public static StaticEquilibriumSolverInput createTriangleTiltedOutALot()
    {
-      double angle = Math.toRadians(40.0);
+      double angle = Math.toRadians(50.0);
       return createTriangleInput(angle, angle, angle);
    }
 
@@ -126,7 +126,7 @@ public class StaticEquilibriumSolverInputExamples
       return input;
    }
 
-   public static StaticEquilibriumSolverInput createBipedFeetWithHandhold()
+   public static StaticEquilibriumSolverInput createBipedFeetWithSingleHandhold()
    {
       StaticEquilibriumSolverInput input = new StaticEquilibriumSolverInput();
 
@@ -160,9 +160,57 @@ public class StaticEquilibriumSolverInputExamples
       }
 
       FramePose3D handPose = new FramePose3D();
-      handPose.getPosition().set(0.8, 0.0, 0.5);
+      handPose.getPosition().set(0.8, 0.0, 0.85);
       handPose.getOrientation().setToPitchOrientation(Math.toRadians(-90.0));
       addContactPoint(contactPointFrame, handPose, input, null);
+
+      return input;
+   }
+
+
+   public static StaticEquilibriumSolverInput createBipedFeetWithTwoHandholds()
+   {
+      StaticEquilibriumSolverInput input = new StaticEquilibriumSolverInput();
+
+      double footWidth = 0.1;
+      double footLength = 0.2;
+      ConvexPolygon2D footPolygon = new ConvexPolygon2D();
+      footPolygon.addVertex(0.5 * footLength, 0.5 * footWidth);
+      footPolygon.addVertex(0.5 * footLength, -0.5 * footWidth);
+      footPolygon.addVertex(-0.5 * footLength, 0.5 * footWidth);
+      footPolygon.addVertex(-0.5 * footLength, -0.5 * footWidth);
+      footPolygon.update();
+
+      FramePose3D leftFootPose = new FramePose3D();
+      FramePose3D rightFootPose = new FramePose3D();
+
+      leftFootPose.getPosition().set(0.0, 0.25, 0.0);
+      leftFootPose.getOrientation().setToRollOrientation(Math.toRadians(30.0));
+
+      rightFootPose.getPosition().set(0.0, -0.25, -0.1);
+      rightFootPose.getOrientation().setYawPitchRoll(Math.toRadians(-20.0), Math.toRadians(20.0), 0.0);
+
+      SideDependentList<FramePose3D> footPoses = new SideDependentList<>(leftFootPose, rightFootPose);
+      PoseReferenceFrame contactPointFrame = new PoseReferenceFrame("contactPointFrame", ReferenceFrame.getWorldFrame());
+
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         for (int i = 0; i < footPolygon.getNumberOfVertices(); i++)
+         {
+            addContactPoint(contactPointFrame, footPoses.get(robotSide), input, new Point3D(footPolygon.getVertex(i)));
+         }
+      }
+
+      FramePose3D leftHandPose = new FramePose3D();
+      leftHandPose.getPosition().set(0.8, -0.1, 0.9);
+      leftHandPose.getOrientation().setToPitchOrientation(Math.toRadians(-90.0));
+      addContactPoint(contactPointFrame, leftHandPose, input, null);
+
+      FramePose3D rightHandPose = new FramePose3D();
+      rightHandPose.getPosition().set(0.0, 0.5, 1.0);
+      rightHandPose.getOrientation().setToRollOrientation(Math.toRadians(20.0));
+      rightHandPose.getOrientation().appendPitchRotation(Math.toRadians(5.0));
+      addContactPoint(contactPointFrame, rightHandPose, input, null);
 
       return input;
    }
