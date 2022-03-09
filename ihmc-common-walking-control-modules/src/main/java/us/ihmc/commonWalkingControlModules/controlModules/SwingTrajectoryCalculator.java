@@ -65,8 +65,6 @@ public class SwingTrajectoryCalculator
    private final FrameQuaternion finalOrientation = new FrameQuaternion();
    private final FrameVector3D finalAngularVelocity = new FrameVector3D();
 
-   private final FrameVector3D finalCoMVelocity = new FrameVector3D();
-
    private final FramePoint3D stanceFootPosition = new FramePoint3D();
 
    private final FrameQuaternion tmpOrientation = new FrameQuaternion();
@@ -183,7 +181,7 @@ public class SwingTrajectoryCalculator
       finalPosition.changeFrame(worldFrame);
       finalOrientation.changeFrame(worldFrame);
       finalPosition.addZ(swingTrajectoryParameters.getDesiredTouchdownHeightOffset());
-      finalCoMVelocity.setToNaN();
+      finalLinearVelocity.set(swingTrajectoryParameters.getDesiredTouchdownVelocity());
 
       if (footstep.getTrajectoryType() == null)
       {
@@ -222,9 +220,9 @@ public class SwingTrajectoryCalculator
     * 
     * @param finalCoMVelocity the predicted center of mass velocity at touchdown. Not modified.
     */
-   public void setFinalCoMVelocity(FrameVector3DReadOnly finalCoMVelocity)
+   public void setFinalLinearVelocity(FrameVector3DReadOnly finalLinearVelocity)
    {
-      this.finalCoMVelocity.set(finalCoMVelocity);
+      this.finalLinearVelocity.set(finalLinearVelocity);
    }
 
    public void setSwingDuration(double swingDuration)
@@ -269,13 +267,6 @@ public class SwingTrajectoryCalculator
    {
       finalLinearVelocity.setIncludingFrame(swingTrajectoryParameters.getDesiredTouchdownVelocity());
       finalAngularVelocity.setToZero(worldFrame);
-
-      if (!finalCoMVelocity.containsNaN())
-      {
-         double injectionRatio = swingTrajectoryParameters.getFinalCoMVelocityInjectionRatio();
-         finalLinearVelocity.setX(injectionRatio * finalCoMVelocity.getX());
-         finalLinearVelocity.setY(injectionRatio * finalCoMVelocity.getY());
-      }
 
       // append current pose as initial trajectory point
       swingTrajectory.clear(worldFrame);
