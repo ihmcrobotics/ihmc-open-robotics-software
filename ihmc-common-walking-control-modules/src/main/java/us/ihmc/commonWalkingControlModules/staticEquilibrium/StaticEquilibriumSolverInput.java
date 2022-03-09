@@ -2,13 +2,12 @@ package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Input to the solver {@link StaticEquilibriumSolver}
+ * Input to the solver {@link StaticSupportRegionSolver}
  *
  * {@see http://lall.stanford.edu/papers/bretl_eqmcut_ieee_tro_projection_2008_08_01_01/pubdata/entry.pdf}
  */
