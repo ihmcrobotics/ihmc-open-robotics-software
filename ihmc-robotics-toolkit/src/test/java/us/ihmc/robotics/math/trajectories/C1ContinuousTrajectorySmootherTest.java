@@ -20,10 +20,12 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import static us.ihmc.robotics.Assert.assertTrue;
+
 public class C1ContinuousTrajectorySmootherTest
 {
    private static final double epsilon = 1e-3;
-   private static final boolean visualize = true;
+   private static final boolean visualize = false;
 
    private SimulationConstructionSet scs;
    private FramePolynomial3D trajectory;
@@ -138,9 +140,9 @@ public class C1ContinuousTrajectorySmootherTest
 
          String failure = " Failed at time " + time;
 
-//         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals("position" + failure, trajectory.getPosition(), smoothedTrajectory.getPosition(), epsilon);
-//         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("velocity" + failure, trajectory.getVelocity(), smoothedTrajectory.getVelocity(), epsilon);
-//         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("acceleration" + failure, trajectory.getAcceleration(), smoothedTrajectory.getAcceleration(), epsilon);
+         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals("position" + failure, trajectory.getPosition(), smoothedTrajectory.getPosition(), epsilon);
+         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("velocity" + failure, trajectory.getVelocity(), smoothedTrajectory.getVelocity(), epsilon);
+         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("acceleration" + failure, trajectory.getAcceleration(), smoothedTrajectory.getAcceleration(), epsilon);
       }
       LogTools.info("updating the trajectory");
 
@@ -159,8 +161,11 @@ public class C1ContinuousTrajectorySmootherTest
             scs.simulateOneRecordStep();
             ThreadTools.sleepSeconds(0.1);
          }
-//         ThreadTools.sleepForever();
+         ThreadTools.sleepForever();
       }
+
+      FrameVector3D positionErrorWhenChanged = new FrameVector3D(smoothedTrajectory.getPositionErrorWhenStartingCancellation());
+      FrameVector3D velocityErrorWhenChanged = new FrameVector3D(smoothedTrajectory.getVelocityErrorWhenStartingCancellation());
 
 
       for (; time <= duration; time += 0.001)
@@ -170,6 +175,12 @@ public class C1ContinuousTrajectorySmootherTest
 
          String failure = " Failed at time " + time;
 
+         FrameVector3D positionError = new FrameVector3D();
+         positionError.sub(smoothedTrajectory.getPosition(), trajectory.getPosition());
+
+         EuclidFrameTestTools.assertFrameTuple3DEquals(failure, positionError, smoothedTrajectory.getReferencePositionError(), 1e-5);
+         assertTrue(failure + ", error should decrease from " + positionErrorWhenChanged.length() + ", but increased to " + positionError.length(),
+                    positionError.length() < positionErrorWhenChanged.length() + 1e-3);
 //         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals("position" + failure, trajectory.getPosition(), smoothedTrajectory.getPosition(), epsilon);
 //         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("velocity" + failure, trajectory.getVelocity(), smoothedTrajectory.getVelocity(), epsilon);
 //         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("acceleration" + failure, trajectory.getAcceleration(), smoothedTrajectory.getAcceleration(), epsilon);

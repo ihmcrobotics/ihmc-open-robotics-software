@@ -18,8 +18,8 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
 {
    private final FixedFramePositionTrajectoryGenerator trajectoryToTrack;
 
-   private final YoFrameVector3D desiredPositionError;
-   private final YoFrameVector3D desiredVelocityError;
+   private final YoFrameVector3D positionErrorWhenStartingCancellation;
+   private final YoFrameVector3D velocityErrorWhenStartingCancellation;
 
    private final YoFrameVector3D referencePositionError;
    private final YoFrameVector3D referenceVelocityError;
@@ -39,6 +39,7 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
    private final DMatrixRMaj stateTransitionMatrix = new DMatrixRMaj(2, 2);
 
    private boolean hasDriftDynamicsMatrixBeenSet = false;
+   private boolean loaded = false;
 
    public C1ContinuousTrajectorySmoother(String namePrefix, FixedFramePositionTrajectoryGenerator trajectoryToTrack, YoRegistry parentRegistry)
    {
@@ -53,8 +54,8 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
       trackingZeta.addListener((v) -> updateClosedLoopDriftDynamicsMatrix());
 
       timeToStartErrorCancellation = new YoDouble(namePrefix + "TimeWhenStartingErrorCancellation", registry);
-      desiredPositionError = new YoFrameVector3D(namePrefix + "PositionErrorWhenStartingCancellation", trajectoryToTrack.getReferenceFrame(), registry);
-      desiredVelocityError = new YoFrameVector3D(namePrefix + "VelocityErrorWhenStartingCancellation", trajectoryToTrack.getReferenceFrame(), registry);
+      positionErrorWhenStartingCancellation = new YoFrameVector3D(namePrefix + "PositionErrorWhenStartingCancellation", trajectoryToTrack.getReferenceFrame(), registry);
+      velocityErrorWhenStartingCancellation = new YoFrameVector3D(namePrefix + "VelocityErrorWhenStartingCancellation", trajectoryToTrack.getReferenceFrame(), registry);
 
       referencePositionError = new YoFrameVector3D(namePrefix + "ReferencePositionError", trajectoryToTrack.getReferenceFrame(), registry);
       referenceVelocityError = new YoFrameVector3D(namePrefix + "ReferenceVelocityError", trajectoryToTrack.getReferenceFrame(), registry);
@@ -69,6 +70,9 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
 
    private void updateClosedLoopDriftDynamicsMatrix()
    {
+      if (!loaded)
+         return;
+
       hasDriftDynamicsMatrixBeenSet = true;
 
       closedLoopStateMatrix.set(0, 1, 1.0);
@@ -80,8 +84,8 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
    {
       trajectoryToTrack.compute(time);
 
-      desiredPositionError.sub(desiredPositionAtTime, trajectoryToTrack.getPosition());
-      desiredVelocityError.sub(desiredVelocityAtTime, trajectoryToTrack.getVelocity());
+      positionErrorWhenStartingCancellation.sub(desiredPositionAtTime, trajectoryToTrack.getPosition());
+      velocityErrorWhenStartingCancellation.sub(desiredVelocityAtTime, trajectoryToTrack.getVelocity());
 
       timeToStartErrorCancellation.set(time);
    }
@@ -89,14 +93,17 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
    @Override
    public void initialize()
    {
-      desiredPositionError.setToZero();
-      desiredVelocityError.setToZero();
+      positionErrorWhenStartingCancellation.setToZero();
+      velocityErrorWhenStartingCancellation.setToZero();
       timeToStartErrorCancellation.set(0.0);
    }
 
    @Override
    public void compute(double time)
    {
+      if (!loaded)
+         loaded = true;
+
       if (!hasDriftDynamicsMatrixBeenSet)
          updateClosedLoopDriftDynamicsMatrix();
 
@@ -108,10 +115,10 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
       double dampingGain = GainCalculator.computeDerivativeGain(trackingStiffness.getValue(), trackingZeta.getValue());
       for (int element = 0; element < 3; element++)
       {
-         double position = stateTransitionMatrix.get(0, 0) * desiredPositionError.getElement(element) +
-                           stateTransitionMatrix.get(0, 1) * desiredVelocityError.getElement(element);
-         double velocity = stateTransitionMatrix.get(1, 0) * desiredPositionError.getElement(element) +
-                           stateTransitionMatrix.get(1, 1) * desiredVelocityError.getElement(element);
+         double position = stateTransitionMatrix.get(0, 0) * positionErrorWhenStartingCancellation.getElement(element) +
+                           stateTransitionMatrix.get(0, 1) * velocityErrorWhenStartingCancellation.getElement(element);
+         double velocity = stateTransitionMatrix.get(1, 0) * positionErrorWhenStartingCancellation.getElement(element) +
+                           stateTransitionMatrix.get(1, 1) * velocityErrorWhenStartingCancellation.getElement(element);
          referencePositionError.setElement(element, position);
          referenceVelocityError.setElement(element, velocity);
          referenceAccelerationError.setElement(element, -trackingStiffness.getValue() * position - dampingGain * velocity);
@@ -157,6 +164,25 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
    @Override
    public void hideVisualization()
    {
+   }
 
+   FrameVector3DReadOnly getPositionErrorWhenStartingCancellation()
+   {
+      return positionErrorWhenStartingCancellation;
+   }
+
+   FrameVector3DReadOnly getVelocityErrorWhenStartingCancellation()
+   {
+      return velocityErrorWhenStartingCancellation;
+   }
+
+   FrameVector3DReadOnly getReferencePositionError()
+   {
+      return referencePositionError;
+   }
+
+   FrameVector3DReadOnly getReferenceVelocityError()
+   {
+      return referenceVelocityError;
    }
 }
