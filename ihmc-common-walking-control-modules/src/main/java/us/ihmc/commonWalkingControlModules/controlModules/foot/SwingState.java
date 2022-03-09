@@ -501,7 +501,7 @@ public class SwingState extends AbstractFootControlState
          touchdownDesiredLinearVelocity.setX(injectionRatio * finalCoMVelocity.getX());
          touchdownDesiredLinearVelocity.setY(injectionRatio * finalCoMVelocity.getY());
       }
-      swingTrajectoryCalculator.setFinalLinearVelocity(finalCoMVelocity);
+      swingTrajectoryCalculator.setFinalLinearVelocity(touchdownDesiredLinearVelocity);
 
       touchdownDesiredLinearAcceleration.set(swingTrajectoryParameters.getDesiredTouchdownAcceleration());
       if (finalCoMAcceleration != null)
