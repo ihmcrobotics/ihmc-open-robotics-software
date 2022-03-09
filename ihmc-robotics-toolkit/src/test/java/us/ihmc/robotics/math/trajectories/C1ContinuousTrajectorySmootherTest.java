@@ -159,10 +159,11 @@ public class C1ContinuousTrajectorySmootherTest
             scs.simulateOneRecordStep();
             ThreadTools.sleepSeconds(0.1);
          }
-         ThreadTools.sleepForever();
+//         ThreadTools.sleepForever();
       }
 
-      for (; time <= 0.5 * duration; time += 0.001)
+
+      for (; time <= duration; time += 0.001)
       {
          trajectory.compute(time);
          smoothedTrajectory.compute(time);
@@ -173,6 +174,14 @@ public class C1ContinuousTrajectorySmootherTest
 //         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("velocity" + failure, trajectory.getVelocity(), smoothedTrajectory.getVelocity(), epsilon);
 //         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("acceleration" + failure, trajectory.getAcceleration(), smoothedTrajectory.getAcceleration(), epsilon);
       }
+
+      trajectory.compute(duration);
+      smoothedTrajectory.compute(duration);
+
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals("Final position", trajectory.getPosition(), smoothedTrajectory.getPosition(), epsilon);
+      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("Final velocity", trajectory.getVelocity(), smoothedTrajectory.getVelocity(), epsilon);
+      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("Final acceleration", trajectory.getAcceleration(), smoothedTrajectory.getAcceleration(), epsilon);
+
    }
 
    private static class VisualizerController implements RobotController

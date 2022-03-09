@@ -25,7 +25,7 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
    private final FrameVector3D desiredVelocity;
    private final FrameVector3D desiredAcceleration;
 
-   private final YoDouble timeLastTick;
+   private final YoDouble timeToStartErrorCancellation;
    private final DoubleParameter trackingStiffness;
    private final DoubleParameter trackingZeta;
 
@@ -43,9 +43,9 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
       trackingStiffness = new DoubleParameter(namePrefix + "TrackingStiffness", registry, 25.0);
       trackingZeta = new DoubleParameter(namePrefix + "TrackingZeta", registry, 0.7);
 
-      timeLastTick = new YoDouble(namePrefix + "TimeLastTick", registry);
-      desiredPositionError = new YoFrameVector3D(namePrefix + "DesiredPositionError", trajectoryToTrack.getReferenceFrame(), registry);
-      desiredVelocityError = new YoFrameVector3D(namePrefix + "DesiredVelocityError", trajectoryToTrack.getReferenceFrame(), registry);
+      timeToStartErrorCancellation = new YoDouble(namePrefix + "TimeWhenStartingErrorCancellation", registry);
+      desiredPositionError = new YoFrameVector3D(namePrefix + "PositionErrorWhenStartingCancellation", trajectoryToTrack.getReferenceFrame(), registry);
+      desiredVelocityError = new YoFrameVector3D(namePrefix + "VelocityErrorWhenStartingCancellation", trajectoryToTrack.getReferenceFrame(), registry);
 
       desiredPosition = new FramePoint3D(trajectoryToTrack.getReferenceFrame());
       desiredVelocity = new FrameVector3D(trajectoryToTrack.getReferenceFrame());
@@ -62,7 +62,7 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
    {
       desiredPositionError.setToZero();
       desiredVelocityError.setToZero();
-      timeLastTick.set(0.0);
+      timeToStartErrorCancellation.set(0.0);
    }
 
    public void updateErrorDynamicsAtTime(double time, FramePoint3DReadOnly desiredPositionAtTime, FrameVector3DReadOnly desiredVelocityAtTime)
@@ -74,9 +74,9 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
       trajectoryToTrack.compute(time);
 
       desiredPositionError.sub(desiredPositionAtTime, trajectoryToTrack.getPosition());
-      desiredPositionError.sub(desiredVelocityAtTime, trajectoryToTrack.getVelocity());
+      desiredVelocityError.sub(desiredVelocityAtTime, trajectoryToTrack.getVelocity());
 
-      timeLastTick.set(time);
+      timeToStartErrorCancellation.set(time);
    }
 
    private final FrameVector3D instantaneousPositionErrorSolution = new FrameVector3D();
@@ -86,7 +86,7 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
    @Override
    public void compute(double time)
    {
-      double relativeTime = time - timeLastTick.getDoubleValue();
+      double relativeTime = time - timeToStartErrorCancellation.getDoubleValue();
       CommonOps_DDRM.scale(relativeTime, closedLoopStateMatrix, scaledClosedLoopStateMatrix);
 
       matrixExponentialCalculator.compute(stateTransitionMatrix, scaledClosedLoopStateMatrix);
@@ -146,4 +146,13 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
 
    }
 
+   FrameVector3DReadOnly getReferenceTrackingPositionError()
+   {
+      return desiredPositionError;
+   }
+
+   FrameVector3DReadOnly getReferenceTrackingVelocityError()
+   {
+      return desiredVelocityError;
+   }
 }
