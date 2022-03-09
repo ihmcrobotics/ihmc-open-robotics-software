@@ -183,6 +183,10 @@ public class WalkingSingleSupportState extends SingleSupportState
          double swingTimeRemaining = requestSwingSpeedUpIfNeeded();
          balanceManager.updateSwingTimeRemaining(swingTimeRemaining);
       }
+      else
+      {
+         balanceManager.updateSwingTimeRemaining(balanceManager.getTimeRemainingInCurrentState());
+      }
       boolean feetAreWellPositioned = legConfigurationManager.areFeetWellPositionedForCollapse(swingSide.getOppositeSide(),
                                                                                                nextFootstep.getSoleReferenceFrame());
 
