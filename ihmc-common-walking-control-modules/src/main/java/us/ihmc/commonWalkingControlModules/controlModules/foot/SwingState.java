@@ -292,6 +292,7 @@ public class SwingState extends AbstractFootControlState
 
       swingTrajectoryCalculator.setInitialConditionsToCurrent();
 
+      swingTrajectorySmoother.initialize();
       fillAndInitializeTrajectories(true);
    }
 
@@ -474,20 +475,20 @@ public class SwingState extends AbstractFootControlState
          desiredAngularAcceleration.scale(speedUpFactorSquared);
       }
 
-      if (footstepWasAdjusted)
-      {
-         adjustmentVelocityCorrection.set(desiredPosition);
-         adjustmentVelocityCorrection.sub(unadjustedPosition);
-         adjustmentVelocityCorrection.scale(1.0 / controlDT);
-         adjustmentVelocityCorrection.setZ(0.0);
-         adjustmentVelocityCorrection.scale(swingTrajectoryParameters.getSwingFootVelocityAdjustmentDamping());
-
-         desiredLinearVelocity.add(adjustmentVelocityCorrection);
-      }
-      else
-      {
+//      if (footstepWasAdjusted)
+//      {
+//         adjustmentVelocityCorrection.set(desiredPosition);
+//         adjustmentVelocityCorrection.sub(unadjustedPosition);
+//         adjustmentVelocityCorrection.scale(1.0 / controlDT);
+//         adjustmentVelocityCorrection.setZ(0.0);
+//         adjustmentVelocityCorrection.scale(swingTrajectoryParameters.getSwingFootVelocityAdjustmentDamping());
+//
+//         desiredLinearVelocity.add(adjustmentVelocityCorrection);
+//      }
+//      else
+//      {
          adjustmentVelocityCorrection.setToZero();
-      }
+//      }
 
 
       yoDesiredSolePosition.setMatchingFrame(desiredPosition);
@@ -568,7 +569,7 @@ public class SwingState extends AbstractFootControlState
       replanTrajectory.set(true);
       footstepWasAdjusted.set(true);
       desiredPositionWhenAdjusted.set(yoDesiredSolePosition);
-      desiredVelocityWhenAdjusted.set(yoDesiredSoleLinearVelocity);
+      desiredVelocityWhenAdjusted.setAndScale(1.0 / swingTimeSpeedUpFactor.getValue(), yoDesiredSoleLinearVelocity);
       timeRemainingWhenAdjusted.set(Math.max(0.05, swingTime - currentTime.getValue()));
 
       adjustedFootstepPose.setIncludingFrame(adjustedFootstep.getFootstepPose());
@@ -665,10 +666,10 @@ public class SwingState extends AbstractFootControlState
       }
       else
       {
-         swingTrajectorySmoother.initialize();
+//         swingTrajectorySmoother.initialize();
       }
       blendedSwingTrajectory.initialize();
-      swingTrajectorySmoother.initialize();
+//      swingTrajectorySmoother.initialize();
       touchdownTrajectory.initialize();
       if (swingVisualizer != null)
          swingVisualizer.visualize();

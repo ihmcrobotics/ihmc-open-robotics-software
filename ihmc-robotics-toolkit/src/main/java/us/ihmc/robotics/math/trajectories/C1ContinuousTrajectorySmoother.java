@@ -21,6 +21,10 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
    private final YoFrameVector3D desiredPositionError;
    private final YoFrameVector3D desiredVelocityError;
 
+   private final YoFrameVector3D referencePositionError;
+   private final YoFrameVector3D referenceVelocityError;
+   private final YoFrameVector3D referenceAccelerationError;
+
    private final FramePoint3D desiredPosition;
    private final FrameVector3D desiredVelocity;
    private final FrameVector3D desiredAcceleration;
@@ -46,6 +50,10 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
       timeToStartErrorCancellation = new YoDouble(namePrefix + "TimeWhenStartingErrorCancellation", registry);
       desiredPositionError = new YoFrameVector3D(namePrefix + "PositionErrorWhenStartingCancellation", trajectoryToTrack.getReferenceFrame(), registry);
       desiredVelocityError = new YoFrameVector3D(namePrefix + "VelocityErrorWhenStartingCancellation", trajectoryToTrack.getReferenceFrame(), registry);
+
+      referencePositionError = new YoFrameVector3D(namePrefix + "ReferencePositionError", trajectoryToTrack.getReferenceFrame(), registry);
+      referenceVelocityError = new YoFrameVector3D(namePrefix + "ReferenceVelocityError", trajectoryToTrack.getReferenceFrame(), registry);
+      referenceAccelerationError = new YoFrameVector3D(namePrefix + "ReferenceAccelerationError", trajectoryToTrack.getReferenceFrame(), registry);
 
       desiredPosition = new FramePoint3D(trajectoryToTrack.getReferenceFrame());
       desiredVelocity = new FrameVector3D(trajectoryToTrack.getReferenceFrame());
@@ -79,10 +87,6 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
       timeToStartErrorCancellation.set(time);
    }
 
-   private final FrameVector3D instantaneousPositionErrorSolution = new FrameVector3D();
-   private final FrameVector3D instantaneousVelocityErrorSolution = new FrameVector3D();
-   private final FrameVector3D instantaneousErrorAccelerationSolution = new FrameVector3D();
-
    @Override
    public void compute(double time)
    {
@@ -98,16 +102,16 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
                            stateTransitionMatrix.get(0, 1) * desiredVelocityError.getElement(element);
          double velocity = stateTransitionMatrix.get(1, 0) * desiredPositionError.getElement(element) +
                            stateTransitionMatrix.get(1, 1) * desiredVelocityError.getElement(element);
-         instantaneousPositionErrorSolution.setElement(element, position);
-         instantaneousVelocityErrorSolution.setElement(element, velocity);
-         instantaneousErrorAccelerationSolution.setElement(element, trackingStiffness.getValue() * position + dampingGain * velocity);
+         referencePositionError.setElement(element, position);
+         referenceVelocityError.setElement(element, velocity);
+         referenceAccelerationError.setElement(element, trackingStiffness.getValue() * position + dampingGain * velocity);
       }
 
       trajectoryToTrack.compute(time);
 
-      desiredPosition.add(trajectoryToTrack.getPosition(), instantaneousPositionErrorSolution);
-      desiredVelocity.add(trajectoryToTrack.getVelocity(), instantaneousVelocityErrorSolution);
-      desiredAcceleration.add(trajectoryToTrack.getAcceleration(), instantaneousErrorAccelerationSolution);
+      desiredPosition.add(trajectoryToTrack.getPosition(), referencePositionError);
+      desiredVelocity.add(trajectoryToTrack.getVelocity(), referenceVelocityError);
+      desiredAcceleration.add(trajectoryToTrack.getAcceleration(), referenceAccelerationError);
    }
 
    @Override
