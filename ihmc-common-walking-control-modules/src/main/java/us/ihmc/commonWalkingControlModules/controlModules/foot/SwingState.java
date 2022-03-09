@@ -43,7 +43,6 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameSE3Tr
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
-import us.ihmc.yoVariables.euclid.YoVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -77,7 +76,7 @@ public class SwingState extends AbstractFootControlState
 
    private final FootLeapOfFaithModule leapOfFaithModule;
 
-   private final YoFrameVector3D actualDesiredTouchdownVelocity;
+   private final YoFrameVector3D touchdownDesiredLinearVelocity;
 
    private final FramePose3D initialPose = new FramePose3D();
    private final FrameVector3DReadOnly finalAngularVelocity = new FrameVector3D(worldFrame);
@@ -182,7 +181,7 @@ public class SwingState extends AbstractFootControlState
       anklePoseInFoot.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
       changeControlFrame(anklePoseInFoot);
 
-      actualDesiredTouchdownVelocity = new YoFrameVector3D(namePrefix + "ActualDesiredTouchdownVelocity", worldFrame, registry);
+      touchdownDesiredLinearVelocity = new YoFrameVector3D(namePrefix + "TouchdownDesiredLinearVelocity", worldFrame, registry);
 
       controlDT = footControlHelper.getHighLevelHumanoidControllerToolbox().getControlDT();
 
@@ -494,17 +493,15 @@ public class SwingState extends AbstractFootControlState
    {
       swingTrajectoryCalculator.setFootstep(footstep);
 
+      touchdownDesiredLinearVelocity.set(swingTrajectoryParameters.getDesiredTouchdownVelocity());
       if (finalCoMVelocity != null)
-         swingTrajectoryCalculator.setFinalCoMVelocity(finalCoMVelocity);
-
-      actualDesiredTouchdownVelocity.set(swingTrajectoryCalculator.getFinalLinearVelocity());
-      if (!finalCoMVelocity.containsNaN())
       {
-         actualDesiredTouchdownVelocity.checkReferenceFrameMatch(finalCoMVelocity);
+         touchdownDesiredLinearVelocity.checkReferenceFrameMatch(finalCoMVelocity);
          double injectionRatio = swingTrajectoryParameters.getFinalCoMVelocityInjectionRatio();
-         actualDesiredTouchdownVelocity.setX(injectionRatio * finalCoMVelocity.getX());
-         actualDesiredTouchdownVelocity.setY(injectionRatio * finalCoMVelocity.getY());
+         touchdownDesiredLinearVelocity.setX(injectionRatio * finalCoMVelocity.getX());
+         touchdownDesiredLinearVelocity.setY(injectionRatio * finalCoMVelocity.getY());
       }
+      swingTrajectoryCalculator.setFinalLinearVelocity(finalCoMVelocity);
 
       touchdownDesiredLinearAcceleration.set(swingTrajectoryParameters.getDesiredTouchdownAcceleration());
       if (finalCoMAcceleration != null)
@@ -544,6 +541,10 @@ public class SwingState extends AbstractFootControlState
 
    public void setAdjustedFootstepAndTime(Footstep adjustedFootstep, double swingTime)
    {
+      setAdjustedFootstepAndTime(adjustedFootstep, null, null, swingTime);
+   }
+   public void setAdjustedFootstepAndTime(Footstep adjustedFootstep, FrameVector3DReadOnly finalCoMVelocity, FrameVector3DReadOnly finalCoMAcceleration, double swingTime)
+   {
       replanTrajectory.set(true);
       footstepWasAdjusted.set(true);
       desiredPositionWhenAdjusted.set(yoDesiredSolePosition);
@@ -551,6 +552,22 @@ public class SwingState extends AbstractFootControlState
       timeRemainingWhenAdjusted.set(Math.max(0.05, swingTime - currentTime.getValue()));
 
       adjustedFootstepPose.setIncludingFrame(adjustedFootstep.getFootstepPose());
+
+      if (finalCoMVelocity != null)
+      {
+         touchdownDesiredLinearVelocity.checkReferenceFrameMatch(finalCoMVelocity);
+         double injectionRatio = swingTrajectoryParameters.getFinalCoMVelocityInjectionRatio();
+         touchdownDesiredLinearVelocity.setX(injectionRatio * finalCoMVelocity.getX());
+         touchdownDesiredLinearVelocity.setY(injectionRatio * finalCoMVelocity.getY());
+      }
+
+      if (finalCoMAcceleration != null)
+      {
+         touchdownDesiredLinearAcceleration.checkReferenceFrameMatch(finalCoMAcceleration);
+         double injectionRatio = swingTrajectoryParameters.getFinalCoMAccelerationInjectionRatio();
+         touchdownDesiredLinearAcceleration.addX(injectionRatio * finalCoMAcceleration.getX());
+         touchdownDesiredLinearAcceleration.addY(injectionRatio * finalCoMAcceleration.getY());
+      }
 
       setFootstepDurationInternal(swingTime);
    }
@@ -560,10 +577,9 @@ public class SwingState extends AbstractFootControlState
       swingTrajectoryCalculator.initializeTrajectoryWaypoints(initializeOptimizer);
 
       // Setup touchdown trajectory.
-      actualDesiredTouchdownVelocity.set(swingTrajectoryCalculator.getFinalLinearVelocity());
       touchdownTrajectory.setLinearTrajectory(swingDuration.getDoubleValue(),
                                               footstepPose.getPosition(),
-                                              actualDesiredTouchdownVelocity,
+                                              touchdownDesiredLinearVelocity,
                                               touchdownDesiredLinearAcceleration);
       touchdownTrajectory.setOrientation(footstepPose.getOrientation(), finalAngularVelocity);
 
@@ -600,8 +616,7 @@ public class SwingState extends AbstractFootControlState
             adjustedWaypoint.changeFrame(worldFrame);
             blendedSwingTrajectory.blendFinalConstraint(adjustedWaypoint, swingDuration, timeRemainingWhenAdjusted.getDoubleValue());
             touchdownTrajectory.setLinearTrajectory(swingDuration,
-                                                    adjustedWaypoint.getPosition(),
-                                                    actualDesiredTouchdownVelocity,
+                                                    adjustedWaypoint.getPosition(), touchdownDesiredLinearVelocity,
                                                     touchdownDesiredLinearAcceleration);
             touchdownTrajectory.setOrientation(adjustedWaypoint.getOrientation());
          }
@@ -613,13 +628,12 @@ public class SwingState extends AbstractFootControlState
 
             positionTrajectory.clear();
             positionTrajectory.addBlendWaypoint(swingTrajectoryCalculator.getSwingTrajectory().getPositionTrajectory().getWaypoint(0).getPosition(), 0.0);
-//            positionTrajectory.addBlendWaypoint(desiredPositionWhenAdjusted, desiredVelocityWhenAdjusted, swingDuration - timeRemainingWhenAdjusted.getValue());
-            positionTrajectory.addBlendWaypoint(rateLimitedAdjustedPose.getPosition(), swingTrajectoryCalculator.getFinalLinearVelocity(), swingDuration);
+            positionTrajectory.addBlendWaypoint(rateLimitedAdjustedPose.getPosition(), touchdownDesiredLinearVelocity, swingDuration);
             positionTrajectory.initializeBlendingTrajectory();
 
             touchdownTrajectory.setLinearTrajectory(swingDuration,
                                                     rateLimitedAdjustedPose.getPosition(),
-                                                    actualDesiredTouchdownVelocity,
+                                                    touchdownDesiredLinearVelocity,
                                                     touchdownDesiredLinearAcceleration);
             touchdownTrajectory.setOrientation(rateLimitedAdjustedPose.getOrientation());
          }
