@@ -41,7 +41,7 @@ public class AtlasFallingOnGroundSCS2Bullet
 
       SimulationSession simulationSession = new SimulationSession(BulletPhysicsEngine::new);
 
-      RobotDefinition robotDefinition = robotModel.getRobotDefinition();
+      RobotDefinition robotDefinition = robotModel.createRobotDefinition(null, false);
       double initialYaw = 0.3;
       double groundHeight = 0.1;
       RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(groundHeight, initialYaw);
@@ -55,11 +55,11 @@ public class AtlasFallingOnGroundSCS2Bullet
 //      initialJointState.setPosition(new Point3D(0.0, 0.0, 1.0));
 //      sixDoFJointDefinition.setInitialJointState(initialJointState);
 
-      CollidableHelper collidableHelper = new CollidableHelper();
-      RobotCollisionModel collisionModel = robotModel.getSimulationRobotCollisionModel(collidableHelper, "robot", "terrain");
-      if (collisionModel != null)
-         RobotDefinitionTools.addCollisionsToRobotDefinition(collisionModel.getRobotCollidables(robotModel.createFullRobotModel().getElevator()),
-                                                             robotDefinition);
+//      CollidableHelper collidableHelper = new CollidableHelper();
+//      RobotCollisionModel collisionModel = robotModel.getSimulationRobotCollisionModel(collidableHelper, "robot", "terrain");
+//      if (collisionModel != null)
+//         RobotDefinitionTools.addCollisionsToRobotDefinition(collisionModel.getRobotCollidables(robotModel.createFullRobotModel().getElevator()),
+//                                                             robotDefinition);
 //      robotInitialSetup.initializeRobotDefinition(robotDefinition);
       Set<String> lastSimulatedJoints = robotModel.getJointMap().getLastSimulatedJoints();
       lastSimulatedJoints.forEach(robotDefinition::addSubtreeJointsToIgnore);
