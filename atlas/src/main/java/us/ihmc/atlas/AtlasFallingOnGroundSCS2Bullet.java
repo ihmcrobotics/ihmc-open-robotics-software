@@ -125,6 +125,7 @@ public class AtlasFallingOnGroundSCS2Bullet
 
       sessionVisualizer.getSessionVisualizerControls().setCameraFocusPosition(0.3, 0.0, 1.0);
       sessionVisualizer.getSessionVisualizerControls().setCameraPosition(7.0, 4.0, 3.0);
+      sessionVisualizer.getToolkit().getSession().runTick();
    }
 
    public static RigidBodyDefinition newBoxRigidBody(String rigidBodyName, Tuple3DReadOnly size, double mass, double radiusOfGyrationPercent,
