@@ -36,15 +36,11 @@ public class MultiStepCaptureRegionCalculator
    private final FrameVector2D displacementOfVertex = new FrameVector2D();
    private final FrameLine2D line = new FrameLine2D();
 
-   public void setStepsInQueue(int stepsInQueue)
-   {
-      this.stepsInQueue.set(stepsInQueue);
-   }
-
    public void compute(RobotSide currentStanceSide, FrameConvexPolygon2DReadOnly oneStepCaptureRegion, double stepDuration, double omega, int stepsInQueue)
    {
       multiStepRegion.clear(oneStepCaptureRegion.getReferenceFrame());
       stepsConsideringForRecovery.set(Math.min(stepsInQueue, maxStepsToConsider.getValue()));
+      this.stepsInQueue.set(stepsInQueue);
 
       FrameVector2D distanceToExtrudePreviousNode = null;
       for (int i = 0; i < oneStepCaptureRegion.getNumberOfVertices(); i++)
@@ -72,6 +68,11 @@ public class MultiStepCaptureRegionCalculator
 
       multiStepRegion.update();
       yoMultiStepRegion.setMatchingFrame(multiStepRegion, false);
+   }
+
+   public FrameConvexPolygon2DReadOnly getCaptureRegion()
+   {
+      return yoMultiStepRegion;
    }
 
    private static void combineTwoExtrusionsToGetOneDisplacement(FrameVector2DReadOnly extrusionA,
