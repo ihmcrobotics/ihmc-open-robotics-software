@@ -28,6 +28,7 @@ public class CaptureRegionSafetyHeuristics
    private final DoubleParameter extraDistanceToStepFromStanceFoot = new DoubleParameter("extraDistanceToStepFromStanceFoot", registry, 0.05);
 
    private final List<FixedFramePoint2DBasics> verticesVisibleFromStance = new ArrayList<>();
+   private final FramePoint2D stancePosition = new FramePoint2D();
 
    private final FrameVector2D vectorToVertex = new FrameVector2D();
    private final FramePoint2D projectedPoint = new FramePoint2D();
@@ -44,33 +45,35 @@ public class CaptureRegionSafetyHeuristics
                                                         FramePoint2DReadOnly stancePosition,
                                                         FrameConvexPolygon2DReadOnly oneStepCaptureRegion)
    {
-      saferCaptureRegion.clear(oneStepCaptureRegion.getReferenceFrame());
+      saferCaptureRegion.setIncludingFrame(oneStepCaptureRegion);
 
       lineOfMinimalAction.setIncludingFrame(stancePosition, capturePoint);
       lineOfMinimalAction.changeFrame(oneStepCaptureRegion.getReferenceFrame());
       yoLineOfMinimalAction.setMatchingFrame(lineOfMinimalAction);
 
-      if (computeVisibiltyOfVerticesFromStance(saferCaptureRegion, stancePosition))
+      this.stancePosition.setIncludingFrame(stancePosition);
+      this.stancePosition.changeFrame(oneStepCaptureRegion.getReferenceFrame());
+
+      if (computeVisibiltyOfVerticesFromStance(saferCaptureRegion))
       {
-         projectVerticesVisibleToStanceInward(stancePosition);
+         projectVerticesVisibleToStanceInward();
       }
 
       projectVerticesFacingTheGoalTowardsTheMiddle();
 
 
       saferCaptureRegion.update();
-      saferCaptureRegion.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
 
-      yoSafetyBiasedCaptureRegion.set(saferCaptureRegion);
+      yoSafetyBiasedCaptureRegion.setMatchingFrame(saferCaptureRegion, false);
    }
 
-   private boolean computeVisibiltyOfVerticesFromStance(FrameConvexPolygon2DBasics oneStepCaptureRegion, FramePoint2DReadOnly stepPosition)
+   private boolean computeVisibiltyOfVerticesFromStance(FrameConvexPolygon2DBasics oneStepCaptureRegion)
    {
       verticesVisibleFromStance.clear();
 
-      oneStepCaptureRegion.checkReferenceFrameMatch(stepPosition);
-      int lineOfSightStartIndex = oneStepCaptureRegion.lineOfSightStartIndex(stepPosition);
-      int lineOfSightEndIndex = oneStepCaptureRegion.lineOfSightEndIndex(stepPosition);
+      oneStepCaptureRegion.checkReferenceFrameMatch(stancePosition);
+      int lineOfSightStartIndex = oneStepCaptureRegion.lineOfSightStartIndex(stancePosition);
+      int lineOfSightEndIndex = oneStepCaptureRegion.lineOfSightEndIndex(stancePosition);
       if (lineOfSightStartIndex == -1 || lineOfSightEndIndex == -1)
          return false;
 
@@ -90,12 +93,17 @@ public class CaptureRegionSafetyHeuristics
       return true;
    }
 
-   private void projectVerticesVisibleToStanceInward(FramePoint2DReadOnly stancePosition)
+   private void projectVerticesVisibleToStanceInward()
    {
+      vectorToVertex.setReferenceFrame(stancePosition.getReferenceFrame());
+
       for (int i = 0; i < verticesVisibleFromStance.size(); i++)
       {
          FixedFramePoint2DBasics vertexToProject = verticesVisibleFromStance.get(i);
          vectorToVertex.sub(vertexToProject, stancePosition);
+
+         if (vectorToVertex.length() > reachabilityLimit.getValue() - extraDistanceToStepFromStanceFoot.getValue())
+            continue;
 
          double maxProjectionDistance = findMaximumProjectionDistance(vectorToVertex.length(),
                                                                       reachabilityLimit.getValue(),
@@ -108,12 +116,12 @@ public class CaptureRegionSafetyHeuristics
    private static double findMaximumProjectionDistance(double distanceToPointToProject, double maxDistanceToProjectedPoint, double projectionAngle)
    {
       double A = maxDistanceToProjectedPoint;
-      double a = projectionAngle;
+      double a = Math.PI - Math.abs(projectionAngle);
       double B = distanceToPointToProject;
       double b = Math.asin(B * Math.sin(a) / A);
       double c = Math.PI - b - a;
 
-      return Math.sqrt(A * A + B * B - 2 * A * B * Math.cos(c));
+      return Math.sqrt(A * A + B * B - 2.0 * A * B * Math.cos(c));
    }
 
    private void projectVerticesFacingTheGoalTowardsTheMiddle()
@@ -136,6 +144,6 @@ public class CaptureRegionSafetyHeuristics
 
    public FrameConvexPolygon2DReadOnly getCaptureRegionWithSafetyMargin()
    {
-      return yoSafetyBiasedCaptureRegion;
+      return saferCaptureRegion;
    }
 }
