@@ -3,6 +3,7 @@ package us.ihmc.atlas;
 import us.ihmc.avatar.factory.RobotDefinitionTools;
 import us.ihmc.avatar.factory.TerrainObjectDefinitionTools;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
+import us.ihmc.avatar.scs2.SCS2BulletSimulationTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -120,11 +121,10 @@ public class AtlasFallingOnGroundSCS2Bullet
       boxRobotDefinition.setRootBodyDefinition(rootBodyDefinition);
 //      simulationSession.addRobot(boxRobotDefinition);
 
-      simulationSession.initializeBufferSize(24000);
+      SessionVisualizer sessionVisualizer = SCS2BulletSimulationTools.startSessionVisualizerWithDebugDrawing(simulationSession);
 
-      SessionVisualizerControls sessionVisualizerControls = SessionVisualizer.startSessionVisualizer(simulationSession);
-      sessionVisualizerControls.setCameraFocusPosition(0.3, 0.0, 1.0);
-      sessionVisualizerControls.setCameraPosition(7.0, 4.0, 3.0);
+      sessionVisualizer.getSessionVisualizerControls().setCameraFocusPosition(0.3, 0.0, 1.0);
+      sessionVisualizer.getSessionVisualizerControls().setCameraPosition(7.0, 4.0, 3.0);
    }
 
    public static RigidBodyDefinition newBoxRigidBody(String rigidBodyName, Tuple3DReadOnly size, double mass, double radiusOfGyrationPercent,
