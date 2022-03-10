@@ -2,12 +2,15 @@ package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLine2D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,7 +40,23 @@ public class CaptureRegionSafetyHeuristics
 
    public CaptureRegionSafetyHeuristics(DoubleProvider reachabilityLimit, YoRegistry parentRegistry)
    {
+      this(reachabilityLimit, parentRegistry, null);
+   }
+
+   public CaptureRegionSafetyHeuristics(DoubleProvider reachabilityLimit, YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   {
       this.reachabilityLimit = reachabilityLimit;
+
+      if (graphicsListRegistry != null)
+      {
+         YoArtifactPolygon safePolygonArtifact = new YoArtifactPolygon("Safety Biased Capture Region",
+                                                                       yoSafetyBiasedCaptureRegion,
+                                                                       Color.GREEN,
+                                                                       false,
+                                                                       true);
+         graphicsListRegistry.registerArtifact(getClass().getSimpleName(), safePolygonArtifact);
+      }
+
       parentRegistry.addChild(registry);
    }
 

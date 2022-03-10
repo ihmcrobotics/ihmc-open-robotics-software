@@ -262,4 +262,9 @@ public class StepAdjustmentReachabilityConstraint
    {
       return contractedReachabilityPolygon;
    }
+
+   public FrameConvexPolygon2DReadOnly getReachabilityPolygonInFootFrame(RobotSide robotSide)
+   {
+      return reachabilityPolygons.get(robotSide);
+   }
 }
