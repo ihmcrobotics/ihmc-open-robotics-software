@@ -25,7 +25,7 @@ public class GDXSCS2BulletPhysicsDoorDemo
             baseUI.create();
 
             RobotDefinition robotDefinition = SCS2Tools.singleBodyRobot(new DoorFrameDefinition());
-            SCS2Tools.setInitialPoseOfRobot(robotDefinition, new YawPitchRoll(), new Point3D(0.0, 0.0, 2.0));
+            SCS2Tools.setInitialPoseOfRobot(robotDefinition, new YawPitchRoll(0.1, 0.1, 0.1), new Point3D(0.0, 0.0, 0.5));
             physicsSimulator.addRobot(robotDefinition);
 
             physicsSimulator.addTerrainObject(new LabFloorDefinition());
