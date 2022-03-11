@@ -1,0 +1,7 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "Physics Simulator" : true,
+    "VR Thread Debugger" : false
+  }
+}
