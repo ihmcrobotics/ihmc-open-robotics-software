@@ -364,6 +364,14 @@ public class GDXTools
       gdxColor.a = (float) colorDefinition.getAlpha();
    }
 
+   public static void toGDX(Vector3 bulletColor, Color gdxColor)
+   {
+      gdxColor.r = bulletColor.x;
+      gdxColor.g = bulletColor.y;
+      gdxColor.b = bulletColor.z;
+      gdxColor.a = 1.0f;
+   }
+
    public static Color toGDX(double red, double green, double blue, double alpha)
    {
       return new Color((float) red, (float) green, (float) blue, (float) alpha);

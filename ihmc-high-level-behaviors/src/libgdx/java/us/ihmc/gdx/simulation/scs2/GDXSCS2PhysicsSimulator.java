@@ -8,11 +8,13 @@ import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
+import us.ihmc.gdx.simulation.bullet.GDXBulletPhysicsAsyncDebugger;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.session.SessionMode;
 import us.ihmc.scs2.simulation.SimulationSession;
+import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
 
 import java.util.ArrayList;
 
@@ -25,12 +27,20 @@ public class GDXSCS2PhysicsSimulator
    private final GDXYoManager yoManager = new GDXYoManager();
    private final ArrayList<GDXSimulatedRobot> robots = new ArrayList<>();
    private final ArrayList<GDXSimulatedTerrainObject> terrainObjects = new ArrayList<>();
+   private final GDXBulletPhysicsAsyncDebugger bulletPhysicsDebugger;
 
    public GDXSCS2PhysicsSimulator()
    {
-      simulationSession = new SimulationSession();
+      simulationSession = new SimulationSession(BulletPhysicsEngine::new);
+      BulletPhysicsEngine bulletPhysicsEngine = (BulletPhysicsEngine) simulationSession.getPhysicsEngine();
+      bulletPhysicsDebugger = new GDXBulletPhysicsAsyncDebugger(bulletPhysicsEngine.getBulletMultiBodyDynamicsWorld());
       runAtRealtimeRate = new ImBoolean(simulationSession.getRunAtRealTimeRate());
       playbackRealtimeRate = new ImDouble(simulationSession.getPlaybackRealTimeRate());
+
+      simulationSession.addAfterPhysicsCallback(time ->
+      {
+         bulletPhysicsDebugger.drawBulletDebugDrawings();
+      });
    }
 
    public void addRobot(RobotDefinition robotDefinition)
@@ -73,6 +83,7 @@ public class GDXSCS2PhysicsSimulator
       {
          robot.update();
       }
+      bulletPhysicsDebugger.update();
    }
 
    public void getRealRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
@@ -85,6 +96,7 @@ public class GDXSCS2PhysicsSimulator
       {
          terrainObject.getRealRenderables(renderables, pool);
       }
+      bulletPhysicsDebugger.getVirtualRenderables(renderables, pool);
    }
 
    private void renderImGuiWidgets()
@@ -113,6 +125,7 @@ public class GDXSCS2PhysicsSimulator
          simulationSession.submitPlaybackRealTimeRate(playbackRealtimeRate.get());
       }
       ImGui.popItemWidth();
+      bulletPhysicsDebugger.renderImGuiWidgets();
    }
 
    public SimulationSession getSession()
