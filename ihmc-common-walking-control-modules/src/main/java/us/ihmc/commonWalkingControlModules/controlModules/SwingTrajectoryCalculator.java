@@ -211,14 +211,11 @@ public class SwingTrajectoryCalculator
    }
 
    /**
-    * Invoke this setter after {@link #setFootstep(Footstep)} to register the center of mass velocity
-    * predicted at the end of swing.
-    * <p>
-    * The x and y components of the CoM velocity are added to the desired swing final velocity. The
+    * Invoke this setter after {@link #setFootstep(Footstep)} to register what the final velocity is
+    * predicted at the end of swing, mainly to account for non-zero com velocity. The
     * objective is to increase robustness to late touchdown.
-    * </p>
-    * 
-    * @param finalCoMVelocity the predicted center of mass velocity at touchdown. Not modified.
+    *
+    * @param finalLinearVelocity the final velocity at touchdown to use. Not modified.
     */
    public void setFinalLinearVelocity(FrameVector3DReadOnly finalLinearVelocity)
    {
