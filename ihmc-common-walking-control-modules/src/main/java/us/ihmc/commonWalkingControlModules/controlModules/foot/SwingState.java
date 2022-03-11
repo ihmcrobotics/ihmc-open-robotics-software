@@ -578,6 +578,8 @@ public class SwingState extends AbstractFootControlState
       swingTrajectoryCalculator.initializeTrajectoryWaypoints(initializeOptimizer);
 
       // Setup touchdown trajectory.
+      touchdownDesiredLinearVelocity.set(swingTrajectoryCalculator.getFinalLinearVelocity());
+
       touchdownTrajectory.setLinearTrajectory(swingDuration.getDoubleValue(),
                                               footstepPose.getPosition(),
                                               touchdownDesiredLinearVelocity,
