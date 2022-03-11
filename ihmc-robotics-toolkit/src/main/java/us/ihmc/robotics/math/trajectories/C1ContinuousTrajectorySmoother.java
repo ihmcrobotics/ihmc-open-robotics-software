@@ -14,6 +14,16 @@ import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+/**
+ * This class is designed to provide an interface for smoothing a base trajectory that may be changing. When the base trajectory is changed, the reference
+ * values that are output by it are likely to yield insufficient feedforward velocities and accelerations to produce good tracking on the robot. This is
+ * achieved by defining an internal PD control law that drives the reference error to zero. This means that the base trajectory can be shifted, and this
+ * trajectory will compute more accurate feedforward velocities and accelerations to reach the goal.
+ *
+ * The base trajectory is passed in at construction time. Whenever the base trajectory is changed (e.g. the footstep getting adjusted), the method
+ * {@link #updateErrorDynamicsAtTime(double, FramePoint3DReadOnly, FrameVector3DReadOnly)} should be called with the CURRENT reference values, i.e. the desired
+ * values BEFORE the trajectory was updated.
+ */
 public class C1ContinuousTrajectorySmoother implements FixedFramePositionTrajectoryGenerator
 {
    private final FixedFramePositionTrajectoryGenerator trajectoryToTrack;
