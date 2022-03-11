@@ -59,9 +59,20 @@ public class GDXSimulatedRobot
    {
       for (GDXRigidBody rigidBody : rootBody.subtreeIterable())
       {
-         if (rigidBody.getGraphics() != null)
+         if (rigidBody.getVisualGraphicsNode() != null)
          {
-            rigidBody.getGraphics().getRealRenderables(renderables, pool);
+            rigidBody.getVisualGraphicsNode().getRenderables(renderables, pool);
+         }
+      }
+   }
+
+   public void getCollisionMeshRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      for (GDXRigidBody rigidBody : rootBody.subtreeIterable())
+      {
+         if (rigidBody.getCollisionGraphicsNode() != null)
+         {
+            rigidBody.getCollisionGraphicsNode().getRenderables(renderables, pool);
          }
       }
    }

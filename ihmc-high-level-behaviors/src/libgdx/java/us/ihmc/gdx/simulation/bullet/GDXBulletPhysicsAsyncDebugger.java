@@ -11,6 +11,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.log.LogTools;
@@ -28,6 +29,7 @@ public class GDXBulletPhysicsAsyncDebugger
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean updateDebugDrawings = new ImBoolean(false);
    private final ImBoolean showDebugDrawings = new ImBoolean(true);
+   private final Notification newDebugDrawingsAvailable = new Notification();
 
    public GDXBulletPhysicsAsyncDebugger(btMultiBodyDynamicsWorld multiBodyDynamicsWorld)
    {
@@ -96,14 +98,18 @@ public class GDXBulletPhysicsAsyncDebugger
    {
       synchronized (this)
       {
-         lineSegmentsToDraw.clear();
-         multiBodyDynamicsWorld.debugDrawWorld();
+         if (updateDebugDrawings.get())
+         {
+            lineSegmentsToDraw.clear();
+            multiBodyDynamicsWorld.debugDrawWorld();
+            newDebugDrawingsAvailable.set();
+         }
       }
    }
 
    public void update()
    {
-      if (updateDebugDrawings.get())
+      if (updateDebugDrawings.get() && newDebugDrawingsAvailable.poll())
       {
          models.clear();
          lineDraws = 0;

@@ -27,11 +27,12 @@ public class GDXSCS2PhysicsSimulator
    private final SimulationSession simulationSession;
    private final ImBoolean runAtRealtimeRate = new ImBoolean(true);
    private final ImDouble playbackRealtimeRate = new ImDouble(1.0);
-   private final ImGuiPanel controlPanel = new ImGuiPanel("Physics Simulator", this::renderImGuiWidgets);
+   private final ImGuiPanel controlPanel = new ImGuiPanel("SCS 2 Physics Simulator", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImInt bufferIndex = new ImInt();
    private final ImInt dtHz = new ImInt(240);
    private final ImFloat bufferLength = new ImFloat(5.0f);
+   private final ImBoolean showCollisionMeshes = new ImBoolean(false);
    private final GDXYoManager yoManager = new GDXYoManager();
    private final ArrayList<GDXSimulatedRobot> robots = new ArrayList<>();
    private final ArrayList<GDXSimulatedTerrainObject> terrainObjects = new ArrayList<>();
@@ -89,8 +90,8 @@ public class GDXSCS2PhysicsSimulator
 
       simulationSession.startSessionThread(); // TODO: Need start/stop controls?
 
-
       baseUI.get3DSceneManager().addRenderableProvider(this::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
+      baseUI.get3DSceneManager().addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
    }
 
    public void update()
@@ -113,15 +114,32 @@ public class GDXSCS2PhysicsSimulator
       {
          terrainObject.getRealRenderables(renderables, pool);
       }
+   }
+
+   public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      if (showCollisionMeshes.get())
+      {
+         for (GDXSimulatedRobot robot : robots)
+         {
+            robot.getCollisionMeshRenderables(renderables, pool);
+         }
+         for (GDXSimulatedTerrainObject terrainObject : terrainObjects)
+         {
+            terrainObject.getCollisionRenderables(renderables, pool);
+         }
+      }
       bulletPhysicsDebugger.getVirtualRenderables(renderables, pool);
    }
 
    private void renderImGuiWidgets()
    {
+      ImGui.pushItemWidth(110);
       if (ImGui.inputInt("Bullet simulation dt (Hz)", dtHz))
       {
          changeDT();
       }
+      ImGui.popItemWidth();
       if (ImGui.radioButton("Simulate", simulationSession.getActiveMode() == SessionMode.RUNNING))
       {
          simulationSession.setSessionMode(SessionMode.RUNNING);
@@ -135,6 +153,10 @@ public class GDXSCS2PhysicsSimulator
       if (ImGui.radioButton("Playback", simulationSession.getActiveMode() == SessionMode.PLAYBACK))
       {
          simulationSession.setSessionMode(SessionMode.PLAYBACK);
+      }
+      if (ImGui.button(labels.get("Simulate 1 tick")))
+      {
+         simulationSession.runTick();
       }
       if (ImGui.inputFloat(labels.get("Buffer length (s)"), bufferLength))
       {
@@ -158,6 +180,7 @@ public class GDXSCS2PhysicsSimulator
          simulationSession.submitPlaybackRealTimeRate(playbackRealtimeRate.get());
       }
       ImGui.popItemWidth();
+      ImGui.checkbox(labels.get("Show collision meshes"), showCollisionMeshes);
       bulletPhysicsDebugger.renderImGuiWidgets();
    }
 

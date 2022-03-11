@@ -13,7 +13,8 @@ import java.util.stream.Stream;
 public class GDXRigidBody implements RigidBodyBasics
 {
    private final RigidBodyBasics rigidBody;
-   private FrameGDXNode node;
+   private FrameGDXGraphicsNode visualGraphicsNode;
+   private FrameGDXGraphicsNode collisionGraphicsNode;
 
    public GDXRigidBody(RigidBodyBasics rigidBody)
    {
@@ -30,19 +31,31 @@ public class GDXRigidBody implements RigidBodyBasics
 
    public void updateGraphics()
    {
-      if (node != null)
-         node.updatePose();
+      if (visualGraphicsNode != null)
+         visualGraphicsNode.updatePose();
+      if (collisionGraphicsNode != null)
+         collisionGraphicsNode.updatePose();
    }
 
-   public void setGraphics(FrameGDXNode graphics)
+   public void setVisualGraphics(FrameGDXGraphicsNode visualGraphicsNode)
    {
-      this.node = graphics;
+      this.visualGraphicsNode = visualGraphicsNode;
       // TODO: Set node ids to reflect the name of this rigid-body
    }
 
-   public FrameGDXNode getGraphics()
+   public void setCollisionGraphics(FrameGDXGraphicsNode collisionGraphicsNode)
    {
-      return node;
+      this.collisionGraphicsNode = collisionGraphicsNode;
+   }
+
+   public FrameGDXGraphicsNode getVisualGraphicsNode()
+   {
+      return visualGraphicsNode;
+   }
+
+   public FrameGDXGraphicsNode getCollisionGraphicsNode()
+   {
+      return collisionGraphicsNode;
    }
 
    @Override

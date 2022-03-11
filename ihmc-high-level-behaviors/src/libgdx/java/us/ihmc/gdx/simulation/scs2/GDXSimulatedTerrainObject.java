@@ -13,7 +13,8 @@ import java.util.ArrayList;
 public class GDXSimulatedTerrainObject
 {
    private final TerrainObjectDefinition terrainObjectDefinition;
-   private final ArrayList<ModelInstance> modelInstances = new ArrayList<>();
+   private final ArrayList<ModelInstance> visualModelInstances = new ArrayList<>();
+   private final ArrayList<ModelInstance> collisionModelInstances = new ArrayList<>();
 
    public GDXSimulatedTerrainObject(TerrainObjectDefinition terrainObjectDefinition)
    {
@@ -25,14 +26,28 @@ public class GDXSimulatedTerrainObject
       for (DynamicGDXModel terrainModelPart : GDXVisualTools.collectNodes(terrainObjectDefinition.getVisualDefinitions()))
       {
          ModelInstance modelInstance = terrainModelPart.getOrCreateModelInstance();
-         modelInstances.add(modelInstance);
+         visualModelInstances.add(modelInstance);
          GDXTools.toGDX(terrainModelPart.getLocalTransform(), modelInstance.transform);
+      }
+      for (DynamicGDXModel terrainCollisionModelPart : GDXVisualTools.collectCollisionNodes(terrainObjectDefinition.getCollisionShapeDefinitions()))
+      {
+         ModelInstance modelInstance = terrainCollisionModelPart.getOrCreateModelInstance();
+         collisionModelInstances.add(modelInstance);
+         GDXTools.toGDX(terrainCollisionModelPart.getLocalTransform(), modelInstance.transform);
       }
    }
 
    public void getRealRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      for (ModelInstance modelInstance : modelInstances)
+      for (ModelInstance modelInstance : visualModelInstances)
+      {
+         modelInstance.getRenderables(renderables, pool);
+      }
+   }
+
+   public void getCollisionRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      for (ModelInstance modelInstance : collisionModelInstances)
       {
          modelInstance.getRenderables(renderables, pool);
       }
