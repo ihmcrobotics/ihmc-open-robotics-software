@@ -1,6 +1,8 @@
 package us.ihmc.gdx.simulation.environment.object.objects.door;
 
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.mecano.tools.MomentOfInertiaFactory;
 import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
 import us.ihmc.scs2.definition.geometry.Box3DDefinition;
@@ -34,10 +36,36 @@ public class DoorFrameDefinition extends RigidBodyDefinition
       frameModelVisualDefinition.setGeometryDefinition(geometryDefinition);
       addVisualDefinition(frameModelVisualDefinition);
 
+      Point3D latchSidePostOffset = new Point3D();
+      latchSidePostOffset.add(0.0, -0.006064, 0.0);
+      latchSidePostOffset.add(0.0, -0.0889 / 2.0, 2.159 / 2.0);
+      addCollisionShape(sizeX, sizeY, sizeZ, latchSidePostOffset);
+
+      Point3D latchSideSupportBoardOffset = new Point3D();
+      latchSideSupportBoardOffset.add(0.0, -0.006064, 0.0);
+      latchSideSupportBoardOffset.add(0.0, -0.0889, 0.0);
+      latchSideSupportBoardOffset.add(0.0, -0.0381 / 2.0, 0.0889 / 2.0f);
+      addCollisionShape(1.016, 0.0381, 0.0889, latchSideSupportBoardOffset);
+
+      Point3D hingeSidePostOffset = new Point3D();
+      hingeSidePostOffset.add(0.0, 0.93415, 0.0);
+      hingeSidePostOffset.add(0.0, 0.0889 / 2.0, 2.159 / 2.0);
+      addCollisionShape(sizeX, sizeY, sizeZ, hingeSidePostOffset);
+
+      Point3D hingeSideSupportBoardOffset = new Point3D();
+      hingeSideSupportBoardOffset.add(0.0, 0.93415, 0.0);
+      hingeSideSupportBoardOffset.add(0.0, 0.0889, 0.0);
+      hingeSideSupportBoardOffset.add(0.0, 0.0381 / 2.0, 0.0889 / 2.0f);
+      addCollisionShape(1.016, 0.0381, 0.0889, hingeSideSupportBoardOffset);
+   }
+
+   private void addCollisionShape(double sizeX, double sizeY, double sizeZ, Point3D offset)
+   {
       CollisionShapeDefinition collisionShapeDefinition = new CollisionShapeDefinition();
       Box3DDefinition boxCollisionDefinition = new Box3DDefinition();
       boxCollisionDefinition.setSize(sizeX, sizeY, sizeZ);
       collisionShapeDefinition.setGeometryDefinition(boxCollisionDefinition);
+      collisionShapeDefinition.getOriginPose().set(new YawPitchRoll(), offset);
       addCollisionShapeDefinition(collisionShapeDefinition);
    }
 }
