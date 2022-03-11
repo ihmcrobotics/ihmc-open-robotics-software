@@ -11,13 +11,13 @@ import us.ihmc.gdx.ui.gizmo.DynamicGDXModel;
 
 import java.util.ArrayList;
 
-public class FrameGDXNode
+public class FrameGDXGraphicsNode
 {
    private final ReferenceFrame referenceFrame;
    private final ModelInstance coordinateFrame;
    private final ArrayList<FrameGDXNodePart> parts = new ArrayList<>();
 
-   public FrameGDXNode(ReferenceFrame referenceFrame)
+   public FrameGDXGraphicsNode(ReferenceFrame referenceFrame)
    {
       this.referenceFrame = referenceFrame;
       coordinateFrame = GDXModelPrimitives.createCoordinateFrameInstance(0.15);
@@ -38,7 +38,7 @@ public class FrameGDXNode
       GDXTools.toGDX(referenceFrame.getTransformToRoot(), coordinateFrame.transform);
    }
 
-   public void getRealRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       for (FrameGDXNodePart part : parts)
       {

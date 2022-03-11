@@ -1,7 +1,7 @@
 {
   "dockspacePanels" : { },
   "windows" : {
-    "Physics Simulator" : true,
+    "SCS 2 Physics Simulator" : true,
     "VR Thread Debugger" : false
   }
 }
