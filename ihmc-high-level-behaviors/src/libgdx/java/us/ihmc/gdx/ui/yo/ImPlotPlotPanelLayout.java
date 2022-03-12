@@ -22,17 +22,18 @@ public class ImPlotPlotPanelLayout
       this.sizeSupplier = sizeSupplier;
    }
 
-   public void render()
+   public void renderLayoutMenu()
    {
-      ImGui.beginMenuBar();
-      if (ImGui.beginMenu(labels.get("Plots")))
+      if (ImGui.beginMenu(labels.get("Layout")))
       {
          ImGui.inputInt(labels.get("Number of columns"), numberOfColumns);
          ImGui.inputInt(labels.get("Plot height"), plotHeight);
          ImGui.endMenu();
       }
-      ImGui.endMenuBar();
+   }
 
+   public void renderPlots()
+   {
       int numberOfColumnsLocal = numberOfColumns.get();
       plotWidth = ImGui.getColumnWidth() / numberOfColumnsLocal;
 
