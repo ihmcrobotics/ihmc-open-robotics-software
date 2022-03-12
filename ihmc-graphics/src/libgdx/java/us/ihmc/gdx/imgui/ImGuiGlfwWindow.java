@@ -54,8 +54,8 @@ public class ImGuiGlfwWindow
       {
          windowSettingsFile = new HybridFile(updatedPerspectiveDirectory, "WindowSettings.json");
          imGuiWindowAndDockSystem.setDirectory(updatedPerspectiveDirectory);
-      },
-      loadConfigurationLocation ->
+      });
+      perspectiveManager.getLoadListeners().add(loadConfigurationLocation ->
       {
          imGuiWindowAndDockSystem.loadConfiguration(loadConfigurationLocation);
          Path libGDXFile = loadConfigurationLocation == ImGuiConfigurationLocation.VERSION_CONTROL
@@ -66,8 +66,8 @@ public class ImGuiGlfwWindow
             int height = jsonNode.get("windowHeight").asInt();
             glfwWindowForImGui.setWindowSize(width, height);
          });
-      },
-      saveConfigurationLocation ->
+      });
+      perspectiveManager.getSaveListeners().add(saveConfigurationLocation ->
       {
          saveApplicationSettings(saveConfigurationLocation);
       });

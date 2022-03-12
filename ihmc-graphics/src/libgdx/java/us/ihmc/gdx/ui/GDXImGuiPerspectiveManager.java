@@ -10,12 +10,12 @@ import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.HybridDirectory;
 import us.ihmc.tools.io.HybridResourceMode;
-import us.ihmc.tools.io.resources.ResourceTools;
 
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.TreeSet;
 import java.util.function.Consumer;
@@ -29,8 +29,8 @@ public class GDXImGuiPerspectiveManager
    private final String configurationExtraPath;
    private final HybridDirectory configurationBaseDirectory;
    private final Consumer<HybridDirectory> perspectiveDirectoryUpdated;
-   private final Consumer<ImGuiConfigurationLocation> load;
-   private final Consumer<ImGuiConfigurationLocation> save;
+   private final ArrayList<Consumer<ImGuiConfigurationLocation>> loadListeners = new ArrayList<>();
+   private final ArrayList<Consumer<ImGuiConfigurationLocation>> saveListeners = new ArrayList<>();
    private HybridDirectory perspectiveDirectory;
    private boolean needToReindexPerspectives = true;
    private boolean firstReindex = true;
@@ -47,9 +47,7 @@ public class GDXImGuiPerspectiveManager
                                      String subsequentPathToResourceFolder,
                                      String configurationExtraPath,
                                      HybridDirectory configurationBaseDirectory,
-                                     Consumer<HybridDirectory> perspectiveDirectoryUpdated,
-                                     Consumer<ImGuiConfigurationLocation> load,
-                                     Consumer<ImGuiConfigurationLocation> save)
+                                     Consumer<HybridDirectory> perspectiveDirectoryUpdated)
    {
       this.classForLoading = classForLoading;
       this.directoryNameToAssumePresent = directoryNameToAssumePresent;
@@ -57,8 +55,6 @@ public class GDXImGuiPerspectiveManager
       this.configurationExtraPath = configurationExtraPath;
       this.configurationBaseDirectory = configurationBaseDirectory;
       this.perspectiveDirectoryUpdated = perspectiveDirectoryUpdated;
-      this.load = load;
-      this.save = save;
 
       applyPerspectiveDirectory();
    }
@@ -165,14 +161,20 @@ public class GDXImGuiPerspectiveManager
             currentPerspectiveName = perspective;
             currentConfigurationLocation = configurationLocation;
             applyPerspectiveDirectory();
-            load.accept(configurationLocation);
+            for (Consumer<ImGuiConfigurationLocation> loadListener : loadListeners)
+            {
+               loadListener.accept(configurationLocation);
+            }
          }
          if (currentPerspectiveName.equals(perspective))
          {
             ImGui.sameLine();
             if (ImGui.button(labels.get("Save", configurationLocation.name(), 0)))
             {
-               save.accept(configurationLocation);
+               for (Consumer<ImGuiConfigurationLocation> saveListener : saveListeners)
+               {
+                  saveListener.accept(configurationLocation);
+               }
             }
          }
       }
@@ -191,7 +193,10 @@ public class GDXImGuiPerspectiveManager
             currentPerspectiveName = sanitizedName;
             applyPerspectiveDirectory();
             perspectiveNameToSave.clear();
-            save.accept(configurationLocation);
+            for (Consumer<ImGuiConfigurationLocation> saveListener : saveListeners)
+            {
+               saveListener.accept(configurationLocation);
+            }
          }
       }
    }
@@ -214,7 +219,20 @@ public class GDXImGuiPerspectiveManager
             ? perspectiveDirectory.getWorkspaceDirectory() : perspectiveDirectory.getExternalDirectory();
       if (Files.exists(directory))
       {
-         load.accept(currentConfigurationLocation);
+         for (Consumer<ImGuiConfigurationLocation> loadListener : loadListeners)
+         {
+            loadListener.accept(currentConfigurationLocation);
+         }
       }
+   }
+
+   public ArrayList<Consumer<ImGuiConfigurationLocation>> getSaveListeners()
+   {
+      return saveListeners;
+   }
+
+   public ArrayList<Consumer<ImGuiConfigurationLocation>> getLoadListeners()
+   {
+      return loadListeners;
    }
 }
