@@ -90,8 +90,8 @@ public class GDXImGuiBasedUI
       {
          libGDXSettingsFile = new HybridFile(updatedPerspectiveDirectory, "GDXSettings.json");
          imGuiWindowAndDockSystem.setDirectory(updatedPerspectiveDirectory);
-      },
-      loadConfigurationLocation ->
+      });
+      perspectiveManager.getLoadListeners().add(loadConfigurationLocation ->
       {
          imGuiWindowAndDockSystem.loadConfiguration(loadConfigurationLocation);
          Path libGDXFile = loadConfigurationLocation == ImGuiConfigurationLocation.VERSION_CONTROL
@@ -102,8 +102,8 @@ public class GDXImGuiBasedUI
             int height = jsonNode.get("windowHeight").asInt();
             Gdx.graphics.setWindowedMode(width, height);
          });
-      },
-      saveConfigurationLocation ->
+      });
+      perspectiveManager.getSaveListeners().add(saveConfigurationLocation ->
       {
          saveApplicationSettings(saveConfigurationLocation);
       });
@@ -368,5 +368,10 @@ public class GDXImGuiBasedUI
    public GDXImGuiWindowAndDockSystem getImGuiWindowAndDockSystem()
    {
       return imGuiWindowAndDockSystem;
+   }
+
+   public HybridDirectory getConfigurationBaseDirectory()
+   {
+      return configurationBaseDirectory;
    }
 }
