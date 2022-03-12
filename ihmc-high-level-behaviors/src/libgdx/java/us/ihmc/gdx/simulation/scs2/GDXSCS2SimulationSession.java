@@ -22,12 +22,12 @@ import us.ihmc.tools.UnitConversions;
 
 import java.util.ArrayList;
 
-public class GDXSCS2PhysicsSimulator
+public class GDXSCS2SimulationSession
 {
    private final SimulationSession simulationSession;
    private final ImBoolean runAtRealtimeRate = new ImBoolean(true);
    private final ImDouble playbackRealtimeRate = new ImDouble(1.0);
-   private final ImGuiPanel controlPanel = new ImGuiPanel("SCS 2 Physics Simulator", this::renderImGuiWidgets);
+   private final ImGuiPanel controlPanel = new ImGuiPanel("SCS 2 Simulation Session", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImInt bufferIndex = new ImInt();
    private final ImInt dtHz = new ImInt(240);
@@ -38,7 +38,7 @@ public class GDXSCS2PhysicsSimulator
    private final ArrayList<GDXSimulatedTerrainObject> terrainObjects = new ArrayList<>();
    private final GDXBulletPhysicsAsyncDebugger bulletPhysicsDebugger;
 
-   public GDXSCS2PhysicsSimulator()
+   public GDXSCS2SimulationSession()
    {
       simulationSession = new SimulationSession(BulletPhysicsEngine::new);
       BulletPhysicsEngine bulletPhysicsEngine = (BulletPhysicsEngine) simulationSession.getPhysicsEngine();
