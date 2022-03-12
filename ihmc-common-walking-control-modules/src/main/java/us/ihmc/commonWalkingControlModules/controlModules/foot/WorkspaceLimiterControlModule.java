@@ -548,14 +548,13 @@ public class WorkspaceLimiterControlModule
                                                                            pelvisLinearVelocity.getZ(),
                                                                            alphaSwingSingularityAvoidanceForFoot.getDoubleValue());
       desiredFootLinearAcceleration.interpolate(EuclidCoreTools.zeroVector3D, alphaSwingSingularityAvoidanceForFoot.getDoubleValue());
-//      double desiredLinearAccelerationZ = InterpolationTools.linearInterpolate(desiredFootLinearAcceleration.getZ(),
-//                                                                               0.0,
-//                                                                               alphaSwingSingularityAvoidanceForFoot.getDoubleValue());
+      double desiredLinearAccelerationZ = InterpolationTools.linearInterpolate(desiredFootLinearAcceleration.getZ(),
+                                                                               0.0,
+                                                                               alphaSwingSingularityAvoidanceForFoot.getDoubleValue());
 
       desiredFootPosition.setZ(desiredFootPositionInAxisFrame);
-
       desiredFootLinearVelocity.setZ(desiredLinearVelocityZ);
-//      desiredFootLinearAcceleration.setZ(desiredLinearAccelerationZ);
+      desiredFootLinearAcceleration.setZ(desiredLinearAccelerationZ);
 
 
       desiredFootPositionToCorrect.setMatchingFrame(desiredFootPosition);
