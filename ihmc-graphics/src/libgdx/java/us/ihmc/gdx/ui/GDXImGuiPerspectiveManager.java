@@ -32,8 +32,8 @@ public class GDXImGuiPerspectiveManager
    private final ArrayList<Consumer<ImGuiConfigurationLocation>> loadListeners = new ArrayList<>();
    private final ArrayList<Consumer<ImGuiConfigurationLocation>> saveListeners = new ArrayList<>();
    private HybridDirectory perspectiveDirectory;
-   private boolean needToReindexPerspectives = true;
-   private boolean firstReindex = true;
+   private boolean needToReindexPerspectives = false;
+   private boolean firstIndex = true;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImString userHomePerspectiveNameToSave = new ImString("", 100);
    private final ImString versionControlPerspectiveNameToSave = new ImString("", 100);
@@ -53,6 +53,7 @@ public class GDXImGuiPerspectiveManager
       this.subsequentPathToResourceFolder = subsequentPathToResourceFolder;
       this.configurationExtraPath = configurationExtraPath;
       this.configurationBaseDirectory = configurationBaseDirectory;
+      indexPerspectives();
    }
 
    public void renderImGuiPerspectiveMenu()
@@ -60,16 +61,7 @@ public class GDXImGuiPerspectiveManager
       if (needToReindexPerspectives)
       {
          needToReindexPerspectives = false;
-         reindexPerspectives(versionControlPerspectives, HybridResourceMode.WORKSPACE, true);
-         reindexPerspectives(userHomePerspectives, HybridResourceMode.EXTERNAL, false);
-         if (firstReindex)
-         {
-            firstReindex = false;
-            if (versionControlPerspectives.contains("Main"))
-               currentConfigurationLocation = ImGuiConfigurationLocation.VERSION_CONTROL;
-            if (userHomePerspectives.contains("Main"))
-               currentConfigurationLocation = ImGuiConfigurationLocation.USER_HOME;
-         }
+         indexPerspectives();
       }
 
       if (ImGui.beginMenu(labels.get("Perspective")))
@@ -90,7 +82,21 @@ public class GDXImGuiPerspectiveManager
       }
    }
 
-   private void reindexPerspectives(TreeSet<String> perspectives, HybridResourceMode resourceMode, boolean addMainEvenIfItsNotThere)
+   private void indexPerspectives()
+   {
+      indexPerspectives(versionControlPerspectives, HybridResourceMode.WORKSPACE, true);
+      indexPerspectives(userHomePerspectives, HybridResourceMode.EXTERNAL, false);
+      if (firstIndex)
+      {
+         firstIndex = false;
+         if (versionControlPerspectives.contains("Main"))
+            currentConfigurationLocation = ImGuiConfigurationLocation.VERSION_CONTROL;
+         if (userHomePerspectives.contains("Main"))
+            currentConfigurationLocation = ImGuiConfigurationLocation.USER_HOME;
+      }
+   }
+
+   private void indexPerspectives(TreeSet<String> perspectives, HybridResourceMode resourceMode, boolean addMainEvenIfItsNotThere)
    {
       perspectives.clear();
       if (addMainEvenIfItsNotThere)
@@ -223,6 +229,16 @@ public class GDXImGuiPerspectiveManager
             loadListener.accept(currentConfigurationLocation);
          }
       }
+   }
+
+   public ImGuiConfigurationLocation getCurrentConfigurationLocation()
+   {
+      return currentConfigurationLocation;
+   }
+
+   public HybridDirectory getPerspectiveDirectory()
+   {
+      return perspectiveDirectory;
    }
 
    public ArrayList<Consumer<HybridDirectory>> getPerspectiveDirectoryUpdatedListeners()
