@@ -66,7 +66,9 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
       if (isTogglable() && isShowing.get())
       {
          handleSizeBeforeBegin();
-         int windowFlags = hasMenuBar ? ImGuiWindowFlags.MenuBar : ImGuiWindowFlags.None;
+         int windowFlags = ImGuiWindowFlags.None;
+         if (hasMenuBar)
+            windowFlags |= ImGuiWindowFlags.MenuBar;
          ImGui.begin(panelName, isShowing, windowFlags);
          handleSizeAfterBegin();
 
