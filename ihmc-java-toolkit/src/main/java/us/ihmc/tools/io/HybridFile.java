@@ -1,5 +1,11 @@
 package us.ihmc.tools.io;
 
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.commons.nio.FileTools;
+
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Path;
@@ -58,6 +64,13 @@ public class HybridFile
    public Path getFileForWriting()
    {
       return mode == HybridResourceMode.WORKSPACE ? workspaceFile : externalFile;
+   }
+
+   public InputStream getInputStream()
+   {
+      return mode == HybridResourceMode.WORKSPACE ?
+            getClasspathResourceAsStream() :
+            ExceptionTools.handle(() -> new FileInputStream(externalFile.toFile()), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
    }
 
    public InputStream getClasspathResourceAsStream()

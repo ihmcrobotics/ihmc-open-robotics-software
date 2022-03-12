@@ -28,7 +28,7 @@ public class GDXImGuiPerspectiveManager
    private final String subsequentPathToResourceFolder;
    private final String configurationExtraPath;
    private final HybridDirectory configurationBaseDirectory;
-   private final Consumer<HybridDirectory> perspectiveDirectoryUpdated;
+   private final ArrayList<Consumer<HybridDirectory>> perspectiveDirectoryUpdatedListeners = new ArrayList<>();
    private final ArrayList<Consumer<ImGuiConfigurationLocation>> loadListeners = new ArrayList<>();
    private final ArrayList<Consumer<ImGuiConfigurationLocation>> saveListeners = new ArrayList<>();
    private HybridDirectory perspectiveDirectory;
@@ -46,17 +46,13 @@ public class GDXImGuiPerspectiveManager
                                      String directoryNameToAssumePresent,
                                      String subsequentPathToResourceFolder,
                                      String configurationExtraPath,
-                                     HybridDirectory configurationBaseDirectory,
-                                     Consumer<HybridDirectory> perspectiveDirectoryUpdated)
+                                     HybridDirectory configurationBaseDirectory)
    {
       this.classForLoading = classForLoading;
       this.directoryNameToAssumePresent = directoryNameToAssumePresent;
       this.subsequentPathToResourceFolder = subsequentPathToResourceFolder;
       this.configurationExtraPath = configurationExtraPath;
       this.configurationBaseDirectory = configurationBaseDirectory;
-      this.perspectiveDirectoryUpdated = perspectiveDirectoryUpdated;
-
-      applyPerspectiveDirectory();
    }
 
    public void renderImGuiPerspectiveMenu()
@@ -108,7 +104,7 @@ public class GDXImGuiPerspectiveManager
             if (pathType == BasicPathVisitor.PathType.DIRECTORY)
                directoryNames.add(path);
             else
-               fileNames.add(path);;
+               fileNames.add(path);
          });
       }
       else
@@ -201,7 +197,7 @@ public class GDXImGuiPerspectiveManager
       }
    }
 
-   private void applyPerspectiveDirectory()
+   public void applyPerspectiveDirectory()
    {
       perspectiveDirectory = new HybridDirectory(dotIHMCDirectory,
                                                  directoryNameToAssumePresent,
@@ -209,7 +205,10 @@ public class GDXImGuiPerspectiveManager
                                                  classForLoading,
                                                  configurationExtraPath + (currentPerspectiveName.equals("Main") ? "" : "/" + currentPerspectiveName
                                                                                                                         + "Perspective"));
-      perspectiveDirectoryUpdated.accept(perspectiveDirectory);
+      for (Consumer<HybridDirectory> perspectiveDirectoryUpdatedListener : perspectiveDirectoryUpdatedListeners)
+      {
+         perspectiveDirectoryUpdatedListener.accept(perspectiveDirectory);
+      }
    }
 
    public void reloadPerspective()
@@ -224,6 +223,11 @@ public class GDXImGuiPerspectiveManager
             loadListener.accept(currentConfigurationLocation);
          }
       }
+   }
+
+   public ArrayList<Consumer<HybridDirectory>> getPerspectiveDirectoryUpdatedListeners()
+   {
+      return perspectiveDirectoryUpdatedListeners;
    }
 
    public ArrayList<Consumer<ImGuiConfigurationLocation>> getSaveListeners()
