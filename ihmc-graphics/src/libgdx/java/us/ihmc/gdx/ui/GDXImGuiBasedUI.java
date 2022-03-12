@@ -85,28 +85,25 @@ public class GDXImGuiBasedUI
                                                           directoryNameToAssumePresent,
                                                           subsequentPathToResourceFolder,
                                                           configurationExtraPath,
-                                                          configurationBaseDirectory,
-      updatedPerspectiveDirectory ->
+                                                          configurationBaseDirectory);
+      perspectiveManager.getPerspectiveDirectoryUpdatedListeners().add(imGuiWindowAndDockSystem::setDirectory);
+      perspectiveManager.getPerspectiveDirectoryUpdatedListeners().add(updatedPerspectiveDirectory ->
       {
          libGDXSettingsFile = new HybridFile(updatedPerspectiveDirectory, "GDXSettings.json");
-         imGuiWindowAndDockSystem.setDirectory(updatedPerspectiveDirectory);
       });
+      perspectiveManager.getLoadListeners().add(imGuiWindowAndDockSystem::loadConfiguration);
       perspectiveManager.getLoadListeners().add(loadConfigurationLocation ->
       {
-         imGuiWindowAndDockSystem.loadConfiguration(loadConfigurationLocation);
-         Path libGDXFile = loadConfigurationLocation == ImGuiConfigurationLocation.VERSION_CONTROL
-               ? libGDXSettingsFile.getWorkspaceFile() : libGDXSettingsFile.getExternalFile();
-         JSONFileTools.load(libGDXFile, jsonNode ->
+         libGDXSettingsFile.setMode(loadConfigurationLocation.toHybridResourceMode());
+         JSONFileTools.load(libGDXSettingsFile.getInputStream(), jsonNode ->
          {
             int width = jsonNode.get("windowWidth").asInt();
             int height = jsonNode.get("windowHeight").asInt();
             Gdx.graphics.setWindowedMode(width, height);
          });
       });
-      perspectiveManager.getSaveListeners().add(saveConfigurationLocation ->
-      {
-         saveApplicationSettings(saveConfigurationLocation);
-      });
+      perspectiveManager.getSaveListeners().add(this::saveApplicationSettings);
+      perspectiveManager.applyPerspectiveDirectory();
 
 //      guiRecorder = new GDXLinuxGUIRecorder(24, 0.8f, getClass().getSimpleName());
 //      onCloseRequestListeners.add(guiRecorder::stop);
