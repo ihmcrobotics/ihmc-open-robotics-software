@@ -18,7 +18,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 public class GDXSimulatedRobot
 {
    private final RobotDefinition robotDefinition;
-   private final YoRegistry mirroredBoxRegistry;
+   private final YoRegistry mirroredRobotRegistry;
    private final RigidBodyBasics originalRigidBody;
    private GDXRigidBody rootBody;
    private LinkedYoRegistry robotLinkedYoRegistry;
@@ -27,7 +27,7 @@ public class GDXSimulatedRobot
    public GDXSimulatedRobot(RobotDefinition robotDefinition)
    {
       this.robotDefinition = robotDefinition;
-      mirroredBoxRegistry = SharedMemoryTools.newRegistryFromNamespace(SimulationSession.ROOT_REGISTRY_NAME, robotDefinition.getName());
+      mirroredRobotRegistry = SharedMemoryTools.newRegistryFromNamespace(SimulationSession.ROOT_REGISTRY_NAME, robotDefinition.getName());
       originalRigidBody = robotDefinition.newInstance(ReferenceFrameTools.constructARootFrame("dummy"));
    }
 
@@ -36,11 +36,11 @@ public class GDXSimulatedRobot
       rootBody = GDXMultiBodySystemFactories.toYoGDXMultiBodySystem(originalRigidBody,
                                                                     ReferenceFrame.getWorldFrame(),
                                                                     robotDefinition,
-                                                                    mirroredBoxRegistry);
-      robotLinkedYoRegistry = yoManager.newLinkedYoRegistry(mirroredBoxRegistry);
-      mirroredBoxRegistry.getVariables().forEach(var ->
+                                                                    mirroredRobotRegistry);
+      robotLinkedYoRegistry = yoManager.newLinkedYoRegistry(mirroredRobotRegistry);
+      mirroredRobotRegistry.getVariables().forEach(yoVariable ->
       {
-         LinkedYoVariable<YoVariable> linkYoVariable = robotLinkedYoRegistry.linkYoVariable(var);
+         LinkedYoVariable<YoVariable> linkYoVariable = robotLinkedYoRegistry.linkYoVariable(yoVariable);
          linkYoVariable.addUser(this);
       });
    }

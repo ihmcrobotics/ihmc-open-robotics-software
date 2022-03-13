@@ -35,7 +35,8 @@ public class GDXSCS2BulletPhysicsDoorDemo
             baseUI.getImGuiPanelManager().addPanel(scs2SimulationSession.getControlPanel());
 
 
-            scs2PlotManager.create(baseUI.getPerspectiveManager(), scs2SimulationSession.getYoManager());
+            scs2PlotManager.create(baseUI.getPerspectiveManager(),
+                                   scs2SimulationSession.getYoManager());
             baseUI.getImGuiPanelManager().addPanel(scs2PlotManager.getPanel());
          }
 

@@ -1,5 +1,27 @@
 {
   "panels" : [ {
-    "name" : "Hinge Data"
+    "name" : "Hinge Data",
+    "plots" : [ {
+      "variables" : [ {
+        "variableName" : "root.door.q_doorHingeJoint"
+      } ]
+    } ]
+  }, {
+    "name" : "Hinge Joint Data",
+    "plots" : [ {
+      "variables" : [ {
+        "variableName" : "root.door.q_doorHingeJoint"
+      }, {
+        "variableName" : "root.door.q_min_doorHingeJoint"
+      } ]
+    }, {
+      "variables" : [ {
+        "variableName" : "root.door.qd_doorHingeJoint"
+      } ]
+    }, {
+      "variables" : [ {
+        "variableName" : "root.door.qdd_doorHingeJoint"
+      } ]
+    } ]
   } ]
 }
