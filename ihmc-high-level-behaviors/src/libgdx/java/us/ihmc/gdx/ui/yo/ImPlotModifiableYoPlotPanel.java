@@ -6,6 +6,7 @@ import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.simulation.scs2.GDXYoManager;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 public class ImPlotModifiableYoPlotPanel extends ImGuiPanel
 {
@@ -15,12 +16,17 @@ public class ImPlotModifiableYoPlotPanel extends ImGuiPanel
    private final ImGuiYoVariableSearchPanel yoVariableSearchPanel;
    private final GDXYoManager yoManager;
    private boolean update = false;
+   private final Consumer<ImPlotModifiableYoPlotPanel> removeSelf;
 
-   public ImPlotModifiableYoPlotPanel(String panelName, ImGuiYoVariableSearchPanel yoVariableSearchPanel, GDXYoManager yoManager)
+   public ImPlotModifiableYoPlotPanel(String panelName,
+                                      ImGuiYoVariableSearchPanel yoVariableSearchPanel,
+                                      GDXYoManager yoManager,
+                                      Consumer<ImPlotModifiableYoPlotPanel> removeSelf)
    {
       super(panelName, null, false, true);
       this.yoVariableSearchPanel = yoVariableSearchPanel;
       this.yoManager = yoManager;
+      this.removeSelf = removeSelf;
       setRenderMethod(this::render);
       layout.setPlotRenderer(this::renderPlot, yoPlots::size);
    }
@@ -36,9 +42,13 @@ public class ImPlotModifiableYoPlotPanel extends ImGuiPanel
       layout.renderLayoutMenu();
       if (ImGui.beginMenu(labels.get("Plots")))
       {
-         if (ImGui.button("Add Plot"))
+         if (ImGui.menuItem("Add Plot"))
          {
             addPlot();
+         }
+         if (ImGui.menuItem(labels.get("Remove this panel")))
+         {
+            removeSelf.accept(this);
          }
          ImGui.endMenu();
       }
@@ -55,9 +65,14 @@ public class ImPlotModifiableYoPlotPanel extends ImGuiPanel
 
    public ImPlotModifiableYoPlot addPlot()
    {
-      ImPlotModifiableYoPlot imPlotModifiableYoPlot = new ImPlotModifiableYoPlot(yoVariableSearchPanel, this, yoManager);
+      ImPlotModifiableYoPlot imPlotModifiableYoPlot = new ImPlotModifiableYoPlot(yoVariableSearchPanel, this, yoManager, this::removePlot);
       yoPlots.add(imPlotModifiableYoPlot);
       return imPlotModifiableYoPlot;
+   }
+
+   private void removePlot(ImPlotModifiableYoPlot plot)
+   {
+      yoPlots.remove(plot);
    }
 
    public ArrayList<ImPlotModifiableYoPlot> getYoPlots()

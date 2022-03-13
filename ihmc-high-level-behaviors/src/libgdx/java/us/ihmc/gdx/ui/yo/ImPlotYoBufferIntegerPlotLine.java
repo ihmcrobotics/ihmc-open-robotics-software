@@ -5,6 +5,9 @@ import us.ihmc.gdx.ui.tools.ImPlotTools;
 import us.ihmc.scs2.sharedMemory.BufferSample;
 import us.ihmc.scs2.sharedMemory.LinkedYoVariable;
 import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoVariable;
+
+import java.util.function.Consumer;
 
 public class ImPlotYoBufferIntegerPlotLine extends ImPlotYoBufferPlotLineBasics
 {
@@ -12,9 +15,9 @@ public class ImPlotYoBufferIntegerPlotLine extends ImPlotYoBufferPlotLineBasics
    private Integer[] xValues = ImPlotTools.createIndex(1);
    private Integer[] plotData = ImPlotTools.newZeroFilledIntegerBuffer(1);
 
-   public ImPlotYoBufferIntegerPlotLine(LinkedYoVariable<YoInteger> linkedYoIntegerVariable)
+   public ImPlotYoBufferIntegerPlotLine(LinkedYoVariable<YoInteger> linkedYoIntegerVariable, Consumer<YoVariable> removeSelf)
    {
-      super(linkedYoIntegerVariable.getLinkedYoVariable().getName(), "0");
+      super(linkedYoIntegerVariable.getLinkedYoVariable(), "0", removeSelf);
       this.linkedYoIntegerVariable = linkedYoIntegerVariable;
       linkedYoIntegerVariable.addUser(this);
    }

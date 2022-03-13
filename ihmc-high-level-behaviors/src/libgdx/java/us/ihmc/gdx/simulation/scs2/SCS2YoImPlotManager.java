@@ -27,20 +27,21 @@ import java.util.Iterator;
 
 public class SCS2YoImPlotManager
 {
-   private final ImGuiPanel panel = new ImGuiPanel("SCS 2 Plot Manager", this::renderImGuiWidgets);
    private final ArrayList<ImPlotModifiableYoPlotPanel> plotPanels = new ArrayList<>();
    private GDXYoManager yoManager;
    private ImGuiYoVariableSearchPanel yoVariableSearchPanel;
+   private ImGuiPanel parentPanel;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImString panelToCreateName = new ImString("", 100);
    private HybridFile configurationFile;
 
-   public void create(GDXImGuiPerspectiveManager perspectiveManager, GDXYoManager yoManager)
+   public void create(GDXImGuiPerspectiveManager perspectiveManager, GDXYoManager yoManager, ImGuiPanel parentPanel)
    {
       this.yoManager = yoManager;
+      this.parentPanel = parentPanel;
 
       yoVariableSearchPanel = new ImGuiYoVariableSearchPanel(yoManager.getRootRegistry());
-      panel.addChild(yoVariableSearchPanel.getPanel());
+      parentPanel.addChild(yoVariableSearchPanel.getPanel());
 
       perspectiveManager.getPerspectiveDirectoryUpdatedListeners().add(this::updateConfigurationFile);
       perspectiveManager.getLoadListeners().add(this::loadConfiguration);
@@ -108,34 +109,32 @@ public class SCS2YoImPlotManager
       }
    }
 
-   private void renderImGuiWidgets()
+   public void renderImGuiWidgets()
    {
+      ImGui.pushItemWidth(150);
       int flags = ImGuiInputTextFlags.None;
       flags += ImGuiInputTextFlags.CallbackResize;
-      ImGui.inputText(labels.getHidden("panelToCreateName"), panelToCreateName, flags);
+      ImGui.inputText(labels.get("Panel name"), panelToCreateName, flags);
+      ImGui.popItemWidth();
       ImGui.sameLine();
-      if (ImGui.button("Add Panel") && !panelToCreateName.get().isEmpty())
+      if (ImGui.button("Add Plot Panel") && !panelToCreateName.get().isEmpty())
       {
          addPlotPanel(panelToCreateName.get());
-      }
-
-      for (ImPlotModifiableYoPlotPanel plotPanel : plotPanels)
-      {
-
       }
    }
 
    private ImPlotModifiableYoPlotPanel addPlotPanel(String name)
    {
-      ImPlotModifiableYoPlotPanel plotPanel = new ImPlotModifiableYoPlotPanel(name, yoVariableSearchPanel, yoManager);
+      ImPlotModifiableYoPlotPanel plotPanel = new ImPlotModifiableYoPlotPanel(name, yoVariableSearchPanel, yoManager, this::removePlotPanel);
       plotPanel.getIsShowing().set(true);
-      panel.addChild(plotPanel);
+      parentPanel.addChild(plotPanel);
       plotPanels.add(plotPanel);
       return plotPanel;
    }
 
-   public ImGuiPanel getPanel()
+   private void removePlotPanel(ImPlotModifiableYoPlotPanel plotPanel)
    {
-      return panel;
+      plotPanels.remove(plotPanel);
+      parentPanel.queueRemoveChild(plotPanel);
    }
 }

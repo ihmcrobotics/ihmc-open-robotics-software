@@ -13,7 +13,6 @@ public class GDXSCS2BulletPhysicsDoorDemo
                                                               "ihmc-open-robotics-software",
                                                               "ihmc-high-level-behaviors/src/test/resources");
    private final GDXSCS2SimulationSession scs2SimulationSession = new GDXSCS2SimulationSession();
-   private final SCS2YoImPlotManager scs2PlotManager = new SCS2YoImPlotManager();
 
    public GDXSCS2BulletPhysicsDoorDemo()
    {
@@ -33,11 +32,6 @@ public class GDXSCS2BulletPhysicsDoorDemo
 
             scs2SimulationSession.create(baseUI);
             baseUI.getImGuiPanelManager().addPanel(scs2SimulationSession.getControlPanel());
-
-
-            scs2PlotManager.create(baseUI.getPerspectiveManager(),
-                                   scs2SimulationSession.getYoManager());
-            baseUI.getImGuiPanelManager().addPanel(scs2PlotManager.getPanel());
          }
 
          @Override

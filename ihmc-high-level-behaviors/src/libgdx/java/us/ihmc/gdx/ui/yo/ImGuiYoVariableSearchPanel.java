@@ -34,9 +34,9 @@ public class ImGuiYoVariableSearchPanel
    {
       ImGui.inputText(labels.get("Search"), searchBar);
 
-      ImGui.sameLine();
       if (searchRequested)
       {
+         ImGui.sameLine();
          if (ImGui.button("Cancel"))
          {
             searchRequested = false;

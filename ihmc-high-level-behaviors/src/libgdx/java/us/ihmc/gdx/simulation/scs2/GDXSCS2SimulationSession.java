@@ -37,6 +37,7 @@ public class GDXSCS2SimulationSession
    private final ArrayList<GDXSimulatedRobot> robots = new ArrayList<>();
    private final ArrayList<GDXSimulatedTerrainObject> terrainObjects = new ArrayList<>();
    private final GDXBulletPhysicsAsyncDebugger bulletPhysicsDebugger;
+   private final SCS2YoImPlotManager plotManager = new SCS2YoImPlotManager();
 
    public GDXSCS2SimulationSession()
    {
@@ -92,6 +93,8 @@ public class GDXSCS2SimulationSession
 
       baseUI.get3DSceneManager().addRenderableProvider(this::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
       baseUI.get3DSceneManager().addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+
+      plotManager.create(baseUI.getPerspectiveManager(), yoManager, controlPanel);
    }
 
    public void update()
@@ -182,6 +185,7 @@ public class GDXSCS2SimulationSession
       ImGui.popItemWidth();
       ImGui.checkbox(labels.get("Show collision meshes"), showCollisionMeshes);
       bulletPhysicsDebugger.renderImGuiWidgets();
+      plotManager.renderImGuiWidgets();
    }
 
    private void changeBufferLength()
