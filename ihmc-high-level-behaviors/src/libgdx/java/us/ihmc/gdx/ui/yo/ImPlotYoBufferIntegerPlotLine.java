@@ -1,6 +1,7 @@
 package us.ihmc.gdx.ui.yo;
 
 import imgui.extension.implot.ImPlot;
+import us.ihmc.gdx.simulation.scs2.GDXYoManager;
 import us.ihmc.gdx.ui.tools.ImPlotTools;
 import us.ihmc.scs2.sharedMemory.BufferSample;
 import us.ihmc.scs2.sharedMemory.LinkedYoVariable;
@@ -11,39 +12,52 @@ import java.util.function.Consumer;
 
 public class ImPlotYoBufferIntegerPlotLine extends ImPlotYoBufferPlotLineBasics
 {
-   private final LinkedYoVariable<YoInteger> linkedYoIntegerVariable;
+   private final YoInteger yoInteger;
+   private LinkedYoVariable<YoInteger> linkedYoIntegerVariable;
    private Integer[] xValues = ImPlotTools.createIndex(1);
    private Integer[] plotData = ImPlotTools.newZeroFilledIntegerBuffer(1);
 
-   public ImPlotYoBufferIntegerPlotLine(LinkedYoVariable<YoInteger> linkedYoIntegerVariable, Consumer<YoVariable> removeSelf)
+   public ImPlotYoBufferIntegerPlotLine(YoInteger yoInteger, Consumer<YoVariable> removeSelf)
    {
-      super(linkedYoIntegerVariable.getLinkedYoVariable(), "0", removeSelf);
-      this.linkedYoIntegerVariable = linkedYoIntegerVariable;
-      linkedYoIntegerVariable.addUser(this);
+      super(yoInteger, "0", removeSelf);
+      this.yoInteger = yoInteger;
+   }
+
+   @Override
+   public void setupLinkedVariable(GDXYoManager yoManager)
+   {
+      if (linkedYoIntegerVariable == null)
+      {
+         linkedYoIntegerVariable = (LinkedYoVariable<YoInteger>) yoManager.newLinkedYoVariable(yoInteger);
+         linkedYoIntegerVariable.addUser(this);
+      }
    }
 
    @Override
    public void update()
    {
-      linkedYoIntegerVariable.pull();
-
-      if (linkedYoIntegerVariable.isRequestedBufferSampleAvailable())
+      if (linkedYoIntegerVariable != null)
       {
-         BufferSample<int[]> bufferSample = linkedYoIntegerVariable.pollRequestedBufferSample();
-         int[] buffer = bufferSample.getSample();
-         int activeBufferLength = bufferSample.getBufferProperties().getActiveBufferLength();
-         if (plotData.length != activeBufferLength)
-         {
-            xValues = ImPlotTools.createIndex(activeBufferLength);
-            plotData = ImPlotTools.newZeroFilledIntegerBuffer(activeBufferLength);
-         }
-         for (int i = 0; i < bufferSample.getBufferProperties().getSize(); i++)
-         {
-            plotData[i] = buffer[i];
-         }
-      }
+         linkedYoIntegerVariable.pull();
 
-      linkedYoIntegerVariable.requestEntireBuffer();
+         if (linkedYoIntegerVariable.isRequestedBufferSampleAvailable())
+         {
+            BufferSample<int[]> bufferSample = linkedYoIntegerVariable.pollRequestedBufferSample();
+            int[] buffer = bufferSample.getSample();
+            int sampleLength = bufferSample.getSampleLength();
+            if (plotData.length != sampleLength)
+            {
+               xValues = ImPlotTools.createIndex(sampleLength);
+               plotData = ImPlotTools.newZeroFilledIntegerBuffer(sampleLength);
+            }
+            for (int i = 0; i < bufferSample.getBufferProperties().getActiveBufferLength(); i++)
+            {
+               plotData[i] = buffer[i];
+            }
+         }
+
+         linkedYoIntegerVariable.requestEntireBuffer();
+      }
    }
 
    @Override

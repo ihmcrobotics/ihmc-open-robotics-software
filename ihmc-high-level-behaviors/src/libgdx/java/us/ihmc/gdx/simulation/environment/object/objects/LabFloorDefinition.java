@@ -1,6 +1,8 @@
 package us.ihmc.gdx.simulation.environment.object.objects;
 
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.scs2.definition.AffineTransformDefinition;
 import us.ihmc.scs2.definition.YawPitchRollTransformDefinition;
 import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
 import us.ihmc.scs2.definition.geometry.Box3DDefinition;
@@ -12,6 +14,9 @@ import us.ihmc.scs2.definition.visual.VisualDefinition;
 
 public class LabFloorDefinition extends TerrainObjectDefinition
 {
+   private final AffineTransformDefinition originTransform;
+   private final YawPitchRollTransformDefinition originPose;
+
    public LabFloorDefinition()
    {
       double sizeX = 20.0;
@@ -22,9 +27,15 @@ public class LabFloorDefinition extends TerrainObjectDefinition
       box3DDefinition.setSize(sizeX, sizeY, sizeZ);
 
       ModelFileGeometryDefinition modelFileGeometryDefinition = new ModelFileGeometryDefinition("environmentObjects/labFloor/LabFloor.g3dj");
-      Point3D originPosition = new Point3D(0.0, 0.0, 0.0);
-      getVisualDefinitions().add(new VisualDefinition(originPosition, modelFileGeometryDefinition, new MaterialDefinition(ColorDefinitions.White())));
-      YawPitchRollTransformDefinition originPose = new YawPitchRollTransformDefinition(0.0, 0.0, -sizeZ / 2.0);
+      originTransform = new AffineTransformDefinition(new YawPitchRoll(), new Point3D());
+      getVisualDefinitions().add(new VisualDefinition(originTransform, modelFileGeometryDefinition, new MaterialDefinition(ColorDefinitions.White())));
+      originPose = new YawPitchRollTransformDefinition(0.0, 0.0, -sizeZ / 2.0);
       getCollisionShapeDefinitions().add(new CollisionShapeDefinition(originPose, box3DDefinition));
+   }
+
+   public void translate(double x, double y, double z)
+   {
+      originTransform.getTranslation().add(x, y, z);
+      originPose.getTranslation().add(x, y, z);
    }
 }
