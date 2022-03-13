@@ -1,21 +1,28 @@
 package us.ihmc.gdx.ui.yo;
 
 import imgui.extension.implot.ImPlot;
+import imgui.internal.ImGui;
+import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.yoVariables.variable.YoVariable;
+
+import java.util.function.Consumer;
 
 public abstract class ImPlotYoBufferPlotLineBasics implements ImPlotPlotLine
 {
-   private Runnable legendPopupImGuiRenderer;
+   private final YoVariable yoVariable;
    private final String variableNameBase;
    private final String variableNamePostfix;
-   private final String variableName;
    private final String labelID;
+   private final Consumer<YoVariable> removeSelf;
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
-   public ImPlotYoBufferPlotLineBasics(String variableName, String initialValueString)
+   public ImPlotYoBufferPlotLineBasics(YoVariable yoVariable, String initialValueString, Consumer<YoVariable> removeSelf)
    {
-      this.variableName = variableName;
-      variableNameBase = variableName + " ";
-      variableNamePostfix = "###" + variableName;
+      this.yoVariable = yoVariable;
+      variableNameBase = yoVariable.getName() + " ";
+      variableNamePostfix = "###" + yoVariable.getFullNameString();
       labelID = variableNameBase + initialValueString + variableNamePostfix;
+      this.removeSelf = removeSelf;
    }
 
    protected abstract void plot(String labelID);
@@ -29,23 +36,27 @@ public abstract class ImPlotYoBufferPlotLineBasics implements ImPlotPlotLine
       plot(labelID);
 
       boolean showingLegendPopup = false;
-      if (legendPopupImGuiRenderer != null && ImPlot.beginLegendPopup(labelID))
+      if (ImPlot.beginLegendPopup(labelID))
       {
          showingLegendPopup = true;
-         legendPopupImGuiRenderer.run();
+         ImGui.text(yoVariable.getFullNameString());
+         if (yoVariable.getDescription() != null && !yoVariable.getDescription().isEmpty())
+         {
+            ImGui.textWrapped(yoVariable.getDescription());
+         }
+         ImGui.separator();
+         if (ImGui.menuItem(labels.get("Remove variable from plot")))
+         {
+            removeSelf.accept(yoVariable);
+         }
          ImPlot.endLegendPopup();
       }
       return showingLegendPopup;
    }
 
-   public void setLegendPopupImGuiRenderer(Runnable legendPopupImGuiRenderer)
-   {
-      this.legendPopupImGuiRenderer = legendPopupImGuiRenderer;
-   }
-
    @Override
    public String getVariableName()
    {
-      return variableName;
+      return yoVariable.getName();
    }
 }

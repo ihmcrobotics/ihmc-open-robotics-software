@@ -3,6 +3,7 @@ package us.ihmc.gdx.ui.yo;
 import imgui.internal.ImGui;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.simulation.scs2.GDXYoManager;
 import us.ihmc.scs2.sharedMemory.LinkedYoVariable;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -11,6 +12,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.function.Consumer;
 
 public class ImPlotModifiableYoPlot
 {
@@ -19,16 +21,20 @@ public class ImPlotModifiableYoPlot
    private final ArrayList<Pair<YoVariable, ImPlotPlotLine>> variablePlotLinePairList = new ArrayList<>();
    private final ImGuiYoVariableSearchPanel imGuiYoVariableSearchPanel;
    private final ImPlotModifiableYoPlotPanel imPlotModifiableYoPlotPanel;
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final GDXYoManager yoManager;
    private boolean requestedVariable = false;
+   private final Consumer<ImPlotModifiableYoPlot> removeSelf;
 
    public ImPlotModifiableYoPlot(ImGuiYoVariableSearchPanel imGuiYoVariableSearchPanel,
                                  ImPlotModifiableYoPlotPanel imPlotModifiableYoPlotPanel,
-                                 GDXYoManager yoManager)
+                                 GDXYoManager yoManager,
+                                 Consumer<ImPlotModifiableYoPlot> removeSelf)
    {
       this.imGuiYoVariableSearchPanel = imGuiYoVariableSearchPanel;
       this.imPlotModifiableYoPlotPanel = imPlotModifiableYoPlotPanel;
       this.yoManager = yoManager;
+      this.removeSelf = removeSelf;
       imPlotPlot = new ImPlotPlot();
       imPlotPlot.setPopupContextWindowImGuiRenderer(this::renderPopupContextWindow);
    }
@@ -48,7 +54,7 @@ public class ImPlotModifiableYoPlot
       {
          YoDouble yoDouble = (YoDouble) yoVariable;
          LinkedYoVariable<YoDouble> linkedYoDoubleVariable = (LinkedYoVariable<YoDouble>) yoManager.newLinkedYoVariable(yoDouble);
-         ImPlotYoBufferDoublePlotLine doublePlotLine = new ImPlotYoBufferDoublePlotLine(linkedYoDoubleVariable);
+         ImPlotYoBufferDoublePlotLine doublePlotLine = new ImPlotYoBufferDoublePlotLine(linkedYoDoubleVariable, this::removeVariable);
          plotLine = doublePlotLine;
          imPlotPlot.getPlotLines().add(doublePlotLine);
       }
@@ -56,7 +62,7 @@ public class ImPlotModifiableYoPlot
       {
          YoInteger yoInteger = (YoInteger) yoVariable;
          LinkedYoVariable<YoInteger> linkedYoIntegerVariable = (LinkedYoVariable<YoInteger>) yoManager.newLinkedYoVariable(yoInteger);
-         ImPlotYoBufferIntegerPlotLine integerPlotLine = new ImPlotYoBufferIntegerPlotLine(linkedYoIntegerVariable);
+         ImPlotYoBufferIntegerPlotLine integerPlotLine = new ImPlotYoBufferIntegerPlotLine(linkedYoIntegerVariable, this::removeVariable);
          plotLine = integerPlotLine;
          imPlotPlot.getPlotLines().add(integerPlotLine);
       }
@@ -70,7 +76,7 @@ public class ImPlotModifiableYoPlot
 
    public void removeVariable(YoVariable yoVariable)
    {
-      imPlotPlot.getPlotLines().remove(variablePlotLineMap.get(yoVariable));
+      imPlotPlot.queueRemovePlotLine(variablePlotLineMap.get(yoVariable));
       variablePlotLineMap.remove(yoVariable);
       int indexToRemove = -1;
       for (int i = 0; i < variablePlotLinePairList.size(); i++)
@@ -105,10 +111,15 @@ public class ImPlotModifiableYoPlot
 
    private void renderPopupContextWindow()
    {
-      if (ImGui.button("Add Variable"))
+      if (ImGui.menuItem(labels.get("Add Variable")))
       {
          imGuiYoVariableSearchPanel.setSearchRequested(true);
          requestedVariable = true;
+         ImGui.closeCurrentPopup();
+      }
+      if (ImGui.menuItem(labels.get("Remove this plot")))
+      {
+         removeSelf.accept(this);
          ImGui.closeCurrentPopup();
       }
    }

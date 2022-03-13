@@ -5,8 +5,10 @@ import us.ihmc.gdx.ui.tools.ImPlotTools;
 import us.ihmc.scs2.sharedMemory.BufferSample;
 import us.ihmc.scs2.sharedMemory.LinkedYoVariable;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.text.DecimalFormat;
+import java.util.function.Consumer;
 
 public class ImPlotYoBufferDoublePlotLine extends ImPlotYoBufferPlotLineBasics
 {
@@ -15,9 +17,9 @@ public class ImPlotYoBufferDoublePlotLine extends ImPlotYoBufferPlotLineBasics
    private Integer[] xValues = ImPlotTools.createIndex(1);
    private Double[] plotData = ImPlotTools.newNaNFilledDoubleBuffer(1);
 
-   public ImPlotYoBufferDoublePlotLine(LinkedYoVariable<YoDouble> linkedYoDoubleVariable)
+   public ImPlotYoBufferDoublePlotLine(LinkedYoVariable<YoDouble> linkedYoDoubleVariable, Consumer<YoVariable> removeSelf)
    {
-      super(linkedYoDoubleVariable.getLinkedYoVariable().getName(), "NaN");
+      super(linkedYoDoubleVariable.getLinkedYoVariable(), "NaN", removeSelf);
       this.linkedYoDoubleVariable = linkedYoDoubleVariable;
       linkedYoDoubleVariable.addUser(this);
    }
