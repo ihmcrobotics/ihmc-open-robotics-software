@@ -3,6 +3,7 @@ package us.ihmc.gdx.sceneManager;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.lwjgl.opengl.GL41;
@@ -10,9 +11,12 @@ import us.ihmc.gdx.input.GDXInputMode;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.log.LogTools;
 
+import java.util.ArrayList;
+
 public class GDX2DSceneManager
 {
-   private final GDX2DSceneBasics sceneBasics = new GDX2DSceneBasics();
+   private final ArrayList<GDX2DSprite> sprites = new ArrayList<>();
+   private SpriteBatch spriteBatch;
 
    private InputMultiplexer inputMultiplexer;
    private GDX2DOrthographicCamera orthographicCamera;
@@ -47,7 +51,7 @@ public class GDX2DSceneManager
          inputMultiplexer.addProcessor(orthographicCamera.setInputForLibGDX());
       }
 
-      sceneBasics.create();
+      spriteBatch = new SpriteBatch();
 
       viewport = new ScreenViewport(orthographicCamera);
       viewport.setUnitsPerPixel(1.0f); // TODO: Is this relevant for high DPI displays?
@@ -59,8 +63,11 @@ public class GDX2DSceneManager
    public void render()
    {
       preRender();
-      sceneBasics.render();
-      sceneBasics.postRender(orthographicCamera, GDXSceneLevel.VIRTUAL);
+      for (GDX2DSprite sprite : sprites)
+      {
+         sprite.draw(spriteBatch);
+      }
+      spriteBatch.end();
 
       if (GDXTools.ENABLE_OPENGL_DEBUGGER)
          glProfiler.reset();
@@ -81,7 +88,7 @@ public class GDX2DSceneManager
 
       viewport.update(width, height);
 
-      sceneBasics.preRender(orthographicCamera);
+      spriteBatch.begin();
 
       GL41.glViewport(x, y, width, height);
       GDX3DSceneTools.glClearGray();
@@ -89,7 +96,7 @@ public class GDX2DSceneManager
 
    public void dispose()
    {
-      sceneBasics.dispose();
+
    }
    // End render public API
 
@@ -146,8 +153,8 @@ public class GDX2DSceneManager
       this.onCreate = onCreate;
    }
 
-   public GDX2DSceneBasics getSceneBasics()
+   public ArrayList<GDX2DSprite> getSprites()
    {
-      return sceneBasics;
+      return sprites;
    }
 }
