@@ -11,16 +11,14 @@ import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.ui.GDXImGuiPerspectiveManager;
 import us.ihmc.gdx.ui.ImGuiConfigurationLocation;
-import us.ihmc.gdx.ui.yo.ImGuiYoVariableSearchPanel;
-import us.ihmc.gdx.ui.yo.ImPlotModifiableYoPlot;
-import us.ihmc.gdx.ui.yo.ImPlotModifiableYoPlotPanel;
-import us.ihmc.gdx.ui.yo.ImPlotPlotLine;
+import us.ihmc.gdx.ui.yo.*;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.HybridDirectory;
 import us.ihmc.tools.io.HybridFile;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.yoVariables.variable.YoVariable;
 
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -58,25 +56,29 @@ public class SCS2YoImPlotManager
    private void loadConfiguration(ImGuiConfigurationLocation configurationLocation)
    {
       configurationFile.setMode(configurationLocation.toHybridResourceMode());
-      JSONFileTools.load(configurationFile.getInputStream(), node ->
+      InputStream inputStream = configurationFile.getInputStream();
+      if (inputStream != null)
       {
-         for (Iterator<JsonNode> panelNodeIterator = node.withArray("panels").elements(); panelNodeIterator.hasNext(); )
+         JSONFileTools.load(inputStream, node ->
          {
-            JsonNode panelNode = panelNodeIterator.next();
-            String panelName = panelNode.get("name").asText();
-            ImPlotModifiableYoPlotPanel plotPanel = addPlotPanel(panelName);
-            for (Iterator<JsonNode> plotsNodeInterator = panelNode.withArray("plots").elements(); plotsNodeInterator.hasNext(); )
+            for (Iterator<JsonNode> panelNodeIterator = node.withArray("panels").elements(); panelNodeIterator.hasNext(); )
             {
-               JsonNode plotNode = plotsNodeInterator.next();
-               ImPlotModifiableYoPlot imPlotModifiableYoPlot = plotPanel.addPlot();
-               for (Iterator<JsonNode> variablesNodeInterator = plotNode.withArray("variables").elements(); variablesNodeInterator.hasNext(); )
+               JsonNode panelNode = panelNodeIterator.next();
+               String panelName = panelNode.get("name").asText();
+               ImPlotModifiableYoPlotPanel plotPanel = addPlotPanel(panelName);
+               for (Iterator<JsonNode> plotsNodeInterator = panelNode.withArray("plots").elements(); plotsNodeInterator.hasNext(); )
                {
-                  JsonNode variableNode = variablesNodeInterator.next();
-                  imPlotModifiableYoPlot.addVariable(yoManager.getRootRegistry().findVariable(variableNode.get("variableName").asText()));
+                  JsonNode plotNode = plotsNodeInterator.next();
+                  ImPlotModifiableYoPlot imPlotModifiableYoPlot = plotPanel.addPlot();
+                  for (Iterator<JsonNode> variablesNodeInterator = plotNode.withArray("variables").elements(); variablesNodeInterator.hasNext(); )
+                  {
+                     JsonNode variableNode = variablesNodeInterator.next();
+                     imPlotModifiableYoPlot.addVariable(yoManager.getRootRegistry().findVariable(variableNode.get("variableName").asText()), false);
+                  }
                }
             }
-         }
-      });
+         });
+      }
    }
 
    private void saveConfiguration(ImGuiConfigurationLocation configurationLocation)
@@ -98,7 +100,7 @@ public class SCS2YoImPlotManager
                {
                   ObjectNode plotNode = plotArrayNode.addObject();
                   ArrayNode variableArrayNode = plotNode.putArray("variables");
-                  for (Pair<YoVariable, ImPlotPlotLine> yoVariableImPlotPlotLinePair : yoPlot.getVariablePlotLinePairList())
+                  for (Pair<YoVariable, ImPlotYoBufferPlotLineBasics> yoVariableImPlotPlotLinePair : yoPlot.getVariablePlotLinePairList())
                   {
                      ObjectNode variableNode = variableArrayNode.addObject();
                      variableNode.put("variableName", yoVariableImPlotPlotLinePair.getLeft().getFullNameString());
@@ -106,6 +108,20 @@ public class SCS2YoImPlotManager
                }
             }
          });
+      }
+   }
+
+   public void initializeLinkedVariables()
+   {
+      for (ImPlotModifiableYoPlotPanel plotPanel : plotPanels)
+      {
+         for (ImPlotModifiableYoPlot yoPlot : plotPanel.getYoPlots())
+         {
+            for (Pair<YoVariable, ImPlotYoBufferPlotLineBasics> yoVariableImPlotPlotLinePair : yoPlot.getVariablePlotLinePairList())
+            {
+               yoVariableImPlotPlotLinePair.getRight().setupLinkedVariable(yoManager);
+            }
+         }
       }
    }
 

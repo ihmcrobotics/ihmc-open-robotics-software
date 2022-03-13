@@ -3,6 +3,7 @@ package us.ihmc.gdx.ui.yo;
 import imgui.extension.implot.ImPlot;
 import imgui.internal.ImGui;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.gdx.simulation.scs2.GDXYoManager;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.util.function.Consumer;
@@ -12,7 +13,7 @@ public abstract class ImPlotYoBufferPlotLineBasics implements ImPlotPlotLine
    private final YoVariable yoVariable;
    private final String variableNameBase;
    private final String variableNamePostfix;
-   private final String labelID;
+   private String labelID;
    private final Consumer<YoVariable> removeSelf;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
@@ -25,6 +26,8 @@ public abstract class ImPlotYoBufferPlotLineBasics implements ImPlotPlotLine
       this.removeSelf = removeSelf;
    }
 
+   public abstract void setupLinkedVariable(GDXYoManager yoManager);
+
    protected abstract void plot(String labelID);
 
    protected abstract void update();
@@ -33,6 +36,7 @@ public abstract class ImPlotYoBufferPlotLineBasics implements ImPlotPlotLine
    public boolean render()
    {
       update();
+      labelID = variableNameBase + yoVariable.getValueAsString() + variableNamePostfix;
       plot(labelID);
 
       boolean showingLegendPopup = false;

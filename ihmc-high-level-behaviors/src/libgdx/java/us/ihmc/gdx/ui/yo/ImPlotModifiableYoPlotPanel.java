@@ -15,7 +15,6 @@ public class ImPlotModifiableYoPlotPanel extends ImGuiPanel
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiYoVariableSearchPanel yoVariableSearchPanel;
    private final GDXYoManager yoManager;
-   private boolean update = false;
    private final Consumer<ImPlotModifiableYoPlotPanel> removeSelf;
 
    public ImPlotModifiableYoPlotPanel(String panelName,
@@ -33,7 +32,7 @@ public class ImPlotModifiableYoPlotPanel extends ImGuiPanel
 
    private void renderPlot(int i)
    {
-      yoPlots.get(i).render(layout.getPlotWidth(), layout.getPlotHeight(), update);
+      yoPlots.get(i).render(layout.getPlotWidth(), layout.getPlotHeight());
    }
 
    public void render()
@@ -56,11 +55,6 @@ public class ImPlotModifiableYoPlotPanel extends ImGuiPanel
       ImGui.endMenuBar();
 
       layout.renderPlots();
-   }
-
-   public void setUpdate(boolean update)
-   {
-      this.update = update;
    }
 
    public ImPlotModifiableYoPlot addPlot()

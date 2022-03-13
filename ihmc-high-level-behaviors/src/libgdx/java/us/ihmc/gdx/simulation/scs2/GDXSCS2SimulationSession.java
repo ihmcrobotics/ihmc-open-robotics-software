@@ -8,11 +8,13 @@ import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.bullet.GDXBulletPhysicsAsyncDebugger;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.log.LogTools;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.session.SessionMode;
@@ -38,6 +40,7 @@ public class GDXSCS2SimulationSession
    private final ArrayList<GDXSimulatedTerrainObject> terrainObjects = new ArrayList<>();
    private final GDXBulletPhysicsAsyncDebugger bulletPhysicsDebugger;
    private final SCS2YoImPlotManager plotManager = new SCS2YoImPlotManager();
+   private boolean sessionStartedHandled = false;
 
    public GDXSCS2SimulationSession()
    {
@@ -99,6 +102,13 @@ public class GDXSCS2SimulationSession
 
    public void update()
    {
+      if (!sessionStartedHandled && simulationSession.hasSessionStarted())
+      {
+         sessionStartedHandled = true;
+         LogTools.info("Session started.");
+         plotManager.initializeLinkedVariables();
+      }
+
       yoManager.update();
       for (GDXSimulatedRobot robot : robots)
       {
