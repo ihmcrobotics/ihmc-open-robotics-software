@@ -26,8 +26,10 @@ public class ImPlotPlotPanelLayout
    {
       if (ImGui.beginMenu(labels.get("Layout")))
       {
+         ImGui.pushItemWidth(100);
          ImGui.inputInt(labels.get("Number of columns"), numberOfColumns);
          ImGui.inputInt(labels.get("Plot height"), plotHeight);
+         ImGui.popItemWidth();
          ImGui.endMenu();
       }
    }

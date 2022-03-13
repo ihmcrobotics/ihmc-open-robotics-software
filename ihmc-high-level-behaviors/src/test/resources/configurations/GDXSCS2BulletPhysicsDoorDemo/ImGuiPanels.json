@@ -2,7 +2,8 @@
   "dockspacePanels" : { },
   "windows" : {
     "SCS 2 Plot Manager" : true,
-    "Hinge Data" : true,
+    "Hinge Data" : false,
+    "Hinge Joint Data" : true,
     "YoVariable Search" : false,
     "SCS 2 Simulation Session" : true,
     "VR Thread Debugger" : false

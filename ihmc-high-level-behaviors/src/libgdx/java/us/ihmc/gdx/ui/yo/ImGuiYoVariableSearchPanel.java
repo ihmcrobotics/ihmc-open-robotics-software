@@ -4,6 +4,7 @@ import imgui.ImGui;
 import imgui.type.ImString;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.scs2.sessionVisualizer.jfx.controllers.RegularExpression;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -15,13 +16,15 @@ public class ImGuiYoVariableSearchPanel
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImString searchBar = new ImString();
    private final YoRegistry yoRegistry;
-   private final ArrayList<String> variableNames;
+   private final ArrayList<YoVariable> allVariables = new ArrayList<>();
+   private boolean searchRequested = false;
+   private YoVariable selectedVariable = null;
 
    public ImGuiYoVariableSearchPanel(YoRegistry yoRegistry)
    {
       this.yoRegistry = yoRegistry;
 
-      variableNames = getVariableNames();
+      addAllVariableNamesRecursively(yoRegistry);
 
       panel.setFirstTimeWidth(800);
       panel.setFirstTimeHeight(800);
@@ -30,36 +33,94 @@ public class ImGuiYoVariableSearchPanel
    private void renderImGuiWidgets()
    {
       ImGui.inputText(labels.get("Search"), searchBar);
-      ImGui.text(variableNames.size() + " variables");
-      ImGui.sameLine();
-      if (ImGui.button("Cancel"))
-      {
 
+      ImGui.sameLine();
+      if (searchRequested)
+      {
+         if (ImGui.button("Cancel"))
+         {
+            searchRequested = false;
+            panel.getIsShowing().set(false);
+         }
+      }
+
+      ImGui.text("Registry contains " + allVariables.size() + " variables.");
+      ImGui.separator();
+
+
+      if (ImGui.beginListBox("##YoVariables", ImGui.getColumnWidth(), ImGui.getWindowSizeY() - 100))
+      {
+         for (YoVariable yoVariable : allVariables)
+         {
+            if (!RegularExpression.check(yoVariable.getFullNameString(), searchBar.get()))
+               continue;
+
+            ImGui.selectable(yoVariable.getFullNameString() + " (" + yoVariable.getClass().getSimpleName() + ": " + yoVariable.getValueAsString() + ")");
+            if (ImGui.isItemClicked())
+            {
+               selectedVariable = yoVariable;
+               searchRequested = false;
+               panel.getIsShowing().set(false);
+            }
+
+            if (ImGui.beginPopupContextItem())
+            {
+               if (ImGui.button("Copy name"))
+               {
+                  ImGui.setClipboardText(yoVariable.getName());
+                  ImGui.closeCurrentPopup();
+               }
+               if (ImGui.button("Copy full name"))
+               {
+                  ImGui.setClipboardText(yoVariable.getFullNameString());
+                  ImGui.closeCurrentPopup();
+               }
+
+               ImGui.endPopup();
+            }
+         }
+         ImGui.endListBox();
       }
    }
 
-   public ArrayList<String> getVariableNames()
-   {
-      ArrayList<String> variableNames = new ArrayList<>();
-      getAllVariableNamesRecursively(yoRegistry, variableNames);
-      return variableNames;
-   }
-
-   private void getAllVariableNamesRecursively(YoRegistry registry, ArrayList<String> variableNames)
+   private void addAllVariableNamesRecursively(YoRegistry registry)
    {
       for (YoVariable variable : registry.getVariables())
       {
-         variableNames.add(variable.getName());
+         allVariables.add(variable);
       }
 
       for (YoRegistry child : registry.getChildren())
       {
-         getAllVariableNamesRecursively(child, variableNames);
+         addAllVariableNamesRecursively(child);
       }
    }
 
    public ImGuiPanel getPanel()
    {
       return panel;
+   }
+
+   public void setSearchRequested(boolean searchRequested)
+   {
+      if (searchRequested)
+         panel.getIsShowing().set(true);
+
+      this.searchRequested = searchRequested;
+   }
+
+   public boolean getSearchRequested()
+   {
+      return searchRequested;
+   }
+
+   public YoVariable getSelectedVariable()
+   {
+      return selectedVariable;
+   }
+
+   public void setSelectedVariable(YoVariable selectedVariable)
+   {
+      this.selectedVariable = selectedVariable;
    }
 }

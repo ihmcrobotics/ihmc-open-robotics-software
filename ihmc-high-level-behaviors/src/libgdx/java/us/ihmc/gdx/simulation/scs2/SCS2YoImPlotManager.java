@@ -6,16 +6,20 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.internal.ImGui;
 import imgui.type.ImString;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.ui.GDXImGuiPerspectiveManager;
 import us.ihmc.gdx.ui.ImGuiConfigurationLocation;
 import us.ihmc.gdx.ui.yo.ImGuiYoVariableSearchPanel;
-import us.ihmc.gdx.ui.yo.ImPlotYoPlotPanel;
+import us.ihmc.gdx.ui.yo.ImPlotModifiableYoPlot;
+import us.ihmc.gdx.ui.yo.ImPlotModifiableYoPlotPanel;
+import us.ihmc.gdx.ui.yo.ImPlotPlotLine;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.HybridDirectory;
 import us.ihmc.tools.io.HybridFile;
 import us.ihmc.tools.io.JSONFileTools;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -24,7 +28,7 @@ import java.util.Iterator;
 public class SCS2YoImPlotManager
 {
    private final ImGuiPanel panel = new ImGuiPanel("SCS 2 Plot Manager", this::renderImGuiWidgets);
-   private final ArrayList<ImPlotYoPlotPanel> plotPanels = new ArrayList<>();
+   private final ArrayList<ImPlotModifiableYoPlotPanel> plotPanels = new ArrayList<>();
    private GDXYoManager yoManager;
    private ImGuiYoVariableSearchPanel yoVariableSearchPanel;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -55,11 +59,21 @@ public class SCS2YoImPlotManager
       configurationFile.setMode(configurationLocation.toHybridResourceMode());
       JSONFileTools.load(configurationFile.getInputStream(), node ->
       {
-         for (Iterator<JsonNode> it = node.withArray("panels").elements(); it.hasNext(); )
+         for (Iterator<JsonNode> panelNodeIterator = node.withArray("panels").elements(); panelNodeIterator.hasNext(); )
          {
-            JsonNode objectNode = it.next();
-            String panelName = objectNode.get("name").asText();
-            addPlotPanel(panelName);
+            JsonNode panelNode = panelNodeIterator.next();
+            String panelName = panelNode.get("name").asText();
+            ImPlotModifiableYoPlotPanel plotPanel = addPlotPanel(panelName);
+            for (Iterator<JsonNode> plotsNodeInterator = panelNode.withArray("plots").elements(); plotsNodeInterator.hasNext(); )
+            {
+               JsonNode plotNode = plotsNodeInterator.next();
+               ImPlotModifiableYoPlot imPlotModifiableYoPlot = plotPanel.addPlot();
+               for (Iterator<JsonNode> variablesNodeInterator = plotNode.withArray("variables").elements(); variablesNodeInterator.hasNext(); )
+               {
+                  JsonNode variableNode = variablesNodeInterator.next();
+                  imPlotModifiableYoPlot.addVariable(yoManager.getRootRegistry().findVariable(variableNode.get("variableName").asText()));
+               }
+            }
          }
       });
    }
@@ -73,11 +87,22 @@ public class SCS2YoImPlotManager
          LogTools.info("Saving plot panels to {}", fileForWriting.toAbsolutePath().normalize().toString());
          JSONFileTools.save(fileForWriting, rootNode ->
          {
-            ArrayNode arrayNode = rootNode.putArray("panels");
-            for (ImPlotYoPlotPanel plotPanel : plotPanels)
+            ArrayNode panelArrayNode = rootNode.putArray("panels");
+            for (ImPlotModifiableYoPlotPanel plotPanel : plotPanels)
             {
-               ObjectNode node = arrayNode.addObject();
-               node.put("name", plotPanel.getPanelName());
+               ObjectNode panelNode = panelArrayNode.addObject();
+               panelNode.put("name", plotPanel.getPanelName());
+               ArrayNode plotArrayNode = panelNode.putArray("plots");
+               for (ImPlotModifiableYoPlot yoPlot : plotPanel.getYoPlots())
+               {
+                  ObjectNode plotNode = plotArrayNode.addObject();
+                  ArrayNode variableArrayNode = plotNode.putArray("variables");
+                  for (Pair<YoVariable, ImPlotPlotLine> yoVariableImPlotPlotLinePair : yoPlot.getVariablePlotLinePairList())
+                  {
+                     ObjectNode variableNode = variableArrayNode.addObject();
+                     variableNode.put("variableName", yoVariableImPlotPlotLinePair.getLeft().getFullNameString());
+                  }
+               }
             }
          });
       }
@@ -93,14 +118,20 @@ public class SCS2YoImPlotManager
       {
          addPlotPanel(panelToCreateName.get());
       }
+
+      for (ImPlotModifiableYoPlotPanel plotPanel : plotPanels)
+      {
+
+      }
    }
 
-   private void addPlotPanel(String name)
+   private ImPlotModifiableYoPlotPanel addPlotPanel(String name)
    {
-      ImPlotYoPlotPanel plotPanel = new ImPlotYoPlotPanel(name);
+      ImPlotModifiableYoPlotPanel plotPanel = new ImPlotModifiableYoPlotPanel(name, yoVariableSearchPanel, yoManager);
       plotPanel.getIsShowing().set(true);
       panel.addChild(plotPanel);
       plotPanels.add(plotPanel);
+      return plotPanel;
    }
 
    public ImGuiPanel getPanel()
