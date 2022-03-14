@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.captureRegion;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentReachabilityConstraint;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -27,6 +28,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.SimulationOverheadPlotter;
+import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;
@@ -114,7 +116,7 @@ public class MultiStepCaptureRegionCalculatorTest
       captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, icp, omega0, supportFootPolygon);
       FrameConvexPolygon2D captureRegion = captureRegionCalculator.getCaptureRegion();
 
-      multiStepRegionCalculator.compute(RobotSide.LEFT, captureRegion, 0.6, omega0, 3);
+//      multiStepRegionCalculator.compute(RobotSide.LEFT, captureRegion, 0.6, omega0, 3);
 
 //      for (int i = 0; i < multiStepRegionCalculator.getCaptureRegionWithSafetyMargin().getNumberOfVertices(); i++)
 //      {
@@ -126,20 +128,71 @@ public class MultiStepCaptureRegionCalculatorTest
 
       if (PLOT_RESULTS)
       {
-         FrameGeometryTestFrame testFrame = new FrameGeometryTestFrame(-5, 5, -5, 5);
-         FrameGeometry2dPlotter plotter = testFrame.getFrameGeometry2dPlotter();
-         plotter.setDrawPointsLarge();
-         plotter.addPolygon(supportFootPolygon, Color.black);
-         plotter.addPolygon(captureRegion, Color.green);
-         plotter.addFramePoint2d(icp, Color.blue);
-         plotter.addPolygon(multiStepRegionCalculator.getCaptureRegion(), Color.red);
+         YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
+         YoFrameConvexPolygon2D yoOneStepRegion = new YoFrameConvexPolygon2D("oneStepRegion", worldFrame, 10, registry);
+         YoFrameConvexPolygon2D yoTwoStepRegion = new YoFrameConvexPolygon2D("twoStepRegion", worldFrame, 20, registry);
+         YoFrameConvexPolygon2D yoThreeStepRegion = new YoFrameConvexPolygon2D("threeStepRegion", worldFrame, 20, registry);
+         YoFrameConvexPolygon2D yoFourStepRegion = new YoFrameConvexPolygon2D("fourStepRegion", worldFrame, 20, registry);
+         YoFrameConvexPolygon2D yoFiveStepRegion = new YoFrameConvexPolygon2D("fiveStepRegion", worldFrame, 20, registry);
+         YoFrameConvexPolygon2D yoSixStepRegion = new YoFrameConvexPolygon2D("sixStepRegion", worldFrame, 20, registry);
 
-         for (int i = 0; i < captureRegion.getNumberOfVertices(); i++)
-            plotter.addFramePoint2d(captureRegion.getVertex(i), Color.green);
-         for (int i = 0; i < multiStepRegionCalculator.getCaptureRegion().getNumberOfVertices(); i++)
-            plotter.addFramePoint2d(multiStepRegionCalculator.getCaptureRegion().getVertex(i), Color.red);
+         YoArtifactPolygon oneStepRegionGraphic = new YoArtifactPolygon("oneStepRegion", yoOneStepRegion, Color.green, false);
+         YoArtifactPolygon twoStepRegionGraphic = new YoArtifactPolygon("twoStepRegion", yoTwoStepRegion, Color.blue, false);
+         YoArtifactPolygon threeStepRegionGraphic = new YoArtifactPolygon("threeStepRegion", yoThreeStepRegion, Color.red, false);
+         YoArtifactPolygon fourStepRegionGraphic = new YoArtifactPolygon("fourStepRegion", yoFourStepRegion, Color.green, false);
+         YoArtifactPolygon fiveStepRegionGraphic = new YoArtifactPolygon("fiveStepRegion", yoFiveStepRegion, Color.blue, false);
+         YoArtifactPolygon sixStepRegionGraphic = new YoArtifactPolygon("sixStepRegion", yoSixStepRegion, Color.red, false);
 
-         waitForButtonOrPause(testFrame);
+         graphicsListRegistry.registerArtifact("test", oneStepRegionGraphic);
+         graphicsListRegistry.registerArtifact("test", twoStepRegionGraphic);
+         graphicsListRegistry.registerArtifact("test", threeStepRegionGraphic);
+         graphicsListRegistry.registerArtifact("test", fourStepRegionGraphic);
+         graphicsListRegistry.registerArtifact("test", fiveStepRegionGraphic);
+         graphicsListRegistry.registerArtifact("test", sixStepRegionGraphic);
+
+         Robot robot = new Robot("test");
+         robot.getRobotsYoRegistry().addChild(registry);
+
+         SimulationConstructionSet scs = new SimulationConstructionSet(robot);
+
+
+         MultiStepCaptureRegionVisualizer visualizer = new MultiStepCaptureRegionVisualizer(multiStepRegionCalculator,
+                                                                                            () -> scs.tickAndUpdate(),
+                                                                                            registry,
+                                                                                            graphicsListRegistry);
+
+         scs.addYoGraphicsListRegistry(graphicsListRegistry);
+
+         SimulationOverheadPlotterFactory plotterFactory = scs.createSimulationOverheadPlotterFactory();
+         plotterFactory.addYoGraphicsListRegistries(graphicsListRegistry);
+         plotterFactory.createOverheadPlotter();
+
+         multiStepRegionCalculator.attachVisualizer(visualizer);
+
+
+         scs.startOnAThread();
+
+         yoOneStepRegion.setMatchingFrame(captureRegion, false);
+
+         multiStepRegionCalculator.compute(RobotSide.LEFT, captureRegion, 0.6, omega0, 2);
+         yoTwoStepRegion.setMatchingFrame(multiStepRegionCalculator.getCaptureRegion(), false);
+
+         multiStepRegionCalculator.compute(RobotSide.LEFT, captureRegion, 0.6, omega0, 3);
+         yoThreeStepRegion.setMatchingFrame(multiStepRegionCalculator.getCaptureRegion(), false);
+
+         multiStepRegionCalculator.compute(RobotSide.LEFT, captureRegion, 0.6, omega0, 4);
+         yoFourStepRegion.setMatchingFrame(multiStepRegionCalculator.getCaptureRegion(), false);
+
+         multiStepRegionCalculator.compute(RobotSide.LEFT, captureRegion, 0.6, omega0, 5);
+         yoFiveStepRegion.setMatchingFrame(multiStepRegionCalculator.getCaptureRegion(), false);
+
+         multiStepRegionCalculator.compute(RobotSide.LEFT, captureRegion, 0.6, omega0, 6);
+         yoSixStepRegion.setMatchingFrame(multiStepRegionCalculator.getCaptureRegion(), false);
+
+         scs.tickAndUpdate();
+
+         ThreadTools.sleepForever();
+
       }
 
    }

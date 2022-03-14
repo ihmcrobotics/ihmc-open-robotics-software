@@ -1,10 +1,14 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentReachabilityConstraint;
+import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
-import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.parameters.IntegerParameter;
@@ -17,12 +21,16 @@ public class MultiStepCaptureRegionCalculator
 
    private final YoInteger stepsInQueue = new YoInteger("stepsInQueue", registry);
    private final YoInteger stepsConsideringForRecovery = new YoInteger("stepsConsideringForRecovery", registry);
-   private final IntegerParameter maxStepsToConsider = new IntegerParameter("maxStepsToConsiderForRecovery", registry, 3);
+   private final IntegerParameter maxStepsToConsider = new IntegerParameter("maxStepsToConsiderForRecovery", registry, 10);
 
    private final FrameConvexPolygon2D multiStepRegion = new FrameConvexPolygon2D();
    private final YoFrameConvexPolygon2D yoMultiStepRegion = new YoFrameConvexPolygon2D("multiStepCaptureRegion", ReferenceFrame.getWorldFrame(), 30, registry);
 
    private final StepAdjustmentReachabilityConstraint reachabilityConstraint;
+
+   private MultiStepCaptureRegionVisualizer visualizer = null;
+
+   private static final double theoreticalMaxLength = 1.0;
 
    public MultiStepCaptureRegionCalculator(StepAdjustmentReachabilityConstraint reachabilityConstraint, YoRegistry parentRegistry)
    {
@@ -31,39 +39,62 @@ public class MultiStepCaptureRegionCalculator
       parentRegistry.addChild(registry);
    }
 
-   private final FrameVector2D globalPreviousNormal = new FrameVector2D();
-   private final FrameVector2D globalThisNormal = new FrameVector2D();
-   private final FrameVector2D displacementOfVertex = new FrameVector2D();
-   private final FrameLine2D line = new FrameLine2D();
+   final FrameVector2D displacementOfVertex = new FrameVector2D();
+   final FramePoint2D firstPointToAdd = new FramePoint2D();
+   final FramePoint2D secondPointToAdd = new FramePoint2D();
+   private final FrameLineSegment2D edgeToExtrude = new FrameLineSegment2D();
+   private final FrameVector2D perp = new FrameVector2D();
+
+   public void attachVisualizer(MultiStepCaptureRegionVisualizer visualizer)
+   {
+      this.visualizer = visualizer;
+   }
 
    public void compute(RobotSide currentStanceSide, FrameConvexPolygon2DReadOnly oneStepCaptureRegion, double stepDuration, double omega, int stepsInQueue)
    {
       multiStepRegion.clear(oneStepCaptureRegion.getReferenceFrame());
+      displacementOfVertex.setReferenceFrame(oneStepCaptureRegion.getReferenceFrame());
+
       stepsConsideringForRecovery.set(Math.min(stepsInQueue, maxStepsToConsider.getValue()));
       this.stepsInQueue.set(stepsInQueue);
 
-      FrameVector2D distanceToExtrudePreviousNode = null;
+      // The -1 at the end is because you've already taken the first step
+      int stepsToTakeWithCurrentSupportSide = (int) Math.floor((stepsConsideringForRecovery.getIntegerValue() + 1) / 2) - 1;
+      int stepsToTakeWithOppositeSupportSide = (int) Math.floor(stepsConsideringForRecovery.getIntegerValue() / 2);
+
+      double stepExponential = Math.exp(-omega * stepDuration);
+      double stepExponentialSquared = stepExponential * stepExponential;
+
+      double currentSupportMultiplier = 0.0;
+      double oppositeSupportMultiplier = 0.0;
+      for (int step = 1; step <= stepsToTakeWithCurrentSupportSide; step++)
+         currentSupportMultiplier = stepExponentialSquared * currentSupportMultiplier + stepExponentialSquared;
+      for (int step = 1; step <= stepsToTakeWithOppositeSupportSide; step++)
+         oppositeSupportMultiplier = stepExponentialSquared * oppositeSupportMultiplier + stepExponential;
+
+      if (!oneStepCaptureRegion.isClockwiseOrdered())
+         throw new RuntimeException("Does't work for counter clockwise yet");
       for (int i = 0; i < oneStepCaptureRegion.getNumberOfVertices(); i++)
       {
-         if (distanceToExtrudePreviousNode == null)
-         {
-            line.setIncludingFrame(oneStepCaptureRegion.getPreviousVertex(i), oneStepCaptureRegion.getVertex(i));
-            globalPreviousNormal.setIncludingFrame(line.perpendicularVector());
-            computeNStepExpansionAlongStep(currentStanceSide, globalPreviousNormal, globalPreviousNormal, stepDuration, omega);
-            distanceToExtrudePreviousNode = globalPreviousNormal;
-         }
+         edgeToExtrude.setIncludingFrame(oneStepCaptureRegion.getVertex(i), oneStepCaptureRegion.getNextVertex(i));
+         edgeToExtrude.perpendicular(true, perp);
+         computeNStepExpansionAlongStep(currentStanceSide,
+                                        edgeToExtrude,
+                                        displacementOfVertex,
+                                        currentSupportMultiplier,
+                                        oppositeSupportMultiplier);
 
-         line.setIncludingFrame(oneStepCaptureRegion.getVertex(i), oneStepCaptureRegion.getNextVertex(i));
-         globalThisNormal.setIncludingFrame(line.perpendicularVector());
+         firstPointToAdd.setIncludingFrame(oneStepCaptureRegion.getVertex(i));
+         firstPointToAdd.add(displacementOfVertex);
 
-         computeNStepExpansionAlongStep(currentStanceSide, globalThisNormal, globalThisNormal, stepDuration, omega);
+         secondPointToAdd.setIncludingFrame(oneStepCaptureRegion.getNextVertex(i));
+         secondPointToAdd.add(displacementOfVertex);
 
-         combineTwoExtrusionsToGetOneDisplacement(distanceToExtrudePreviousNode, globalThisNormal, displacementOfVertex);
+         if (visualizer != null)
+            visualizer.visualizeProcess(firstPointToAdd, secondPointToAdd, edgeToExtrude, oneStepCaptureRegion, i);
 
-         multiStepRegion.addVertex(oneStepCaptureRegion.getVertex(i));
-         multiStepRegion.getVertexUnsafe(i).add(displacementOfVertex);
-
-         distanceToExtrudePreviousNode = globalThisNormal;
+         multiStepRegion.addVertex(firstPointToAdd);
+         multiStepRegion.addVertex(secondPointToAdd);
       }
 
       multiStepRegion.update();
@@ -75,64 +106,76 @@ public class MultiStepCaptureRegionCalculator
       return yoMultiStepRegion;
    }
 
-   private static void combineTwoExtrusionsToGetOneDisplacement(FrameVector2DReadOnly extrusionA,
-                                                                FrameVector2DReadOnly extrusionB,
-                                                                FrameVector2DBasics combinedExtrusion)
-   {
-      double crossProduct = extrusionB.cross(extrusionA);
-      double lengthA = extrusionA.length();
-      double lengthB = extrusionB.length();
-
-      combinedExtrusion.setReferenceFrame(extrusionA.getReferenceFrame());
-      combinedExtrusion.setX(extrusionA.getY() * lengthB - extrusionB.getY() * lengthA);
-      combinedExtrusion.setY(extrusionB.getX() * lengthA - extrusionA.getX() * lengthB);
-      combinedExtrusion.scale(1.0 / crossProduct);
-   }
-
-   private final FrameConvexPolygon2D reachabilityPolygon = new FrameConvexPolygon2D();
-   private final FrameLine2D stepDirection = new FrameLine2D();
-   private final FramePoint2D intersectionOne = new FramePoint2D();
-   private final FramePoint2D intersectionTwo = new FramePoint2D();
    private final FramePoint2D origin = new FramePoint2D();
+   private final FrameVector2D bestStepForStance = new FrameVector2D();
+   private final FrameVector2D bestStepForSwing = new FrameVector2D();
 
    private void computeNStepExpansionAlongStep(RobotSide currentStanceSide,
-                                               FrameVector2DReadOnly directionToExpand,
+                                               FrameLineSegment2DReadOnly edgeToExtrude,
                                                FrameVector2DBasics expansionToPack,
-                                               double stepDuration,
-                                               double omega)
+                                               double currentSupportMultiplier,
+                                               double oppositeSupportMultiplier)
    {
-      double stepExponential = Math.exp(-omega * stepDuration);
 
-      double maxLengthAlongDistance = 0.0;
-      stepDirection.setToZero(directionToExpand.getReferenceFrame());
-      stepDirection.getDirection().set(directionToExpand);
-      origin.setToZero(directionToExpand.getReferenceFrame());
+      origin.setToZero(edgeToExtrude.getReferenceFrame());
+      bestStepForStance.setReferenceFrame(edgeToExtrude.getReferenceFrame());
+      bestStepForSwing.setReferenceFrame(edgeToExtrude.getReferenceFrame());
 
-      for (int step = 1; step < stepsConsideringForRecovery.getIntegerValue(); step++)
+      getBestStepForSide(currentStanceSide, edgeToExtrude, bestStepForStance);
+      getBestStepForSide(currentStanceSide.getOppositeSide(), edgeToExtrude, bestStepForSwing);
+
+      expansionToPack.setAndScale(currentSupportMultiplier, bestStepForStance);
+      expansionToPack.scaleAdd(oppositeSupportMultiplier, bestStepForSwing, expansionToPack);
+   }
+
+   private final ConvexPolygon2D reachabilityPolygon = new ConvexPolygon2D();
+   private final Point2D stancePosition = new Point2D();
+
+   private final RigidBodyTransform transform = new RigidBodyTransform();
+   
+   private void getBestStepForSide(RobotSide supportSide, FrameLineSegment2DReadOnly edgeToExtrude, FrameVector2DBasics stepToPack)
+   {
+      stancePosition.setToZero();
+      reachabilityPolygon.set(reachabilityConstraint.getReachabilityPolygonInFootFrame(supportSide));
+      reachabilityPolygon.addVertex(stancePosition);
+      reachabilityPolygon.update();
+
+      edgeToExtrude.perpendicular(true, perp);
+      perp.scale(3.0);
+      transform.getTranslation().set(edgeToExtrude.midpoint());
+      transform.getTranslation().add(perp.getX(), perp.getY(), 0.0);
+
+      reachabilityPolygon.applyTransform(transform);
+      stancePosition.applyTransform(transform);
+
+      int closestIndex = -1;
+      int altClosestIndex = -1;
+      double closestDistance = Double.POSITIVE_INFINITY;
+      for (int i = 0; i < reachabilityPolygon.getNumberOfVertices(); i++)
       {
-         reachabilityPolygon.setIncludingFrame(reachabilityConstraint.getReachabilityPolygonInFootFrame(currentStanceSide));
-         reachabilityPolygon.changeFrameAndProjectToXYPlane(directionToExpand.getReferenceFrame());
-
-         double lengthAlongDistance;
-         int numberOfIntersections = reachabilityPolygon.intersectionWithRay(stepDirection, intersectionOne, intersectionTwo);
-
-         if (numberOfIntersections == 0)
+         double distance = edgeToExtrude.distanceSquared(reachabilityPolygon.getVertex(i));
+         if (distance < closestDistance)
          {
-            lengthAlongDistance = -reachabilityPolygon.distance(origin);
+            closestDistance = distance;
+            closestIndex = i;
+            altClosestIndex = -1;
          }
-         else if (numberOfIntersections == 1)
+         else if (MathTools.epsilonEquals(distance, closestDistance, 1e-4))
          {
-            lengthAlongDistance = intersectionOne.distanceFromOrigin();
+            altClosestIndex = i;
          }
-         else
-         {
-            lengthAlongDistance = intersectionTwo.distanceFromOrigin();
-         }
-
-         maxLengthAlongDistance += (maxLengthAlongDistance + lengthAlongDistance) * stepExponential;
       }
 
-      expansionToPack.set(directionToExpand);
-      expansionToPack.scale(maxLengthAlongDistance / expansionToPack.length());
+      if (altClosestIndex == -1)
+      {
+         stepToPack.sub(stancePosition, reachabilityPolygon.getVertex(closestIndex));
+      }
+      else
+      {
+         EuclidGeometryTools.orthogonalProjectionOnLineSegment2D(stancePosition, reachabilityPolygon.getVertex(closestIndex),
+                                                                 reachabilityPolygon.getVertex(altClosestIndex),
+                                                                 origin);
+         stepToPack.sub(stancePosition, origin);
+      }
    }
 }
