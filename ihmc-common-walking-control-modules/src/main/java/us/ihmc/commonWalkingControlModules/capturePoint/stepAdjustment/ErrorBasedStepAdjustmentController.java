@@ -4,6 +4,8 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.captureRegion.CaptureRegionSafetyHeuristics;
+import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepCaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -118,7 +120,9 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
    private final StepAdjustmentReachabilityConstraint reachabilityConstraintHandler;
    private final OneStepCaptureRegionCalculator captureRegionCalculator;
-   private final TwoStepCaptureRegionCalculator twoStepCaptureRegionCalculator;
+//   private final TwoStepCaptureRegionCalculator twoStepCaptureRegionCalculator;
+   private final CaptureRegionSafetyHeuristics oneStepSafetyHeuristics;
+   private final MultiStepCaptureRegionCalculator multiStepCaptureRegionCalculator;
    private final EnvironmentConstraintHandler environmentConstraintProvider;
 
    private final ConvexPolygonTools polygonTools = new ConvexPolygonTools();
@@ -214,7 +218,9 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                                                                    yoNamePrefix,
                                                                    registry,
                                                                    yoGraphicsListRegistry);
-      twoStepCaptureRegionCalculator = new TwoStepCaptureRegionCalculator(registry, yoGraphicsListRegistry);
+//      twoStepCaptureRegionCalculator = new TwoStepCaptureRegionCalculator(registry, yoGraphicsListRegistry);
+      oneStepSafetyHeuristics = new CaptureRegionSafetyHeuristics(lengthLimit, registry, yoGraphicsListRegistry);
+      multiStepCaptureRegionCalculator = new MultiStepCaptureRegionCalculator(reachabilityConstraintHandler, registry, yoGraphicsListRegistry);
       environmentConstraintProvider = new EnvironmentConstraintHandler(icpControlPlane, contactableFeet, yoNamePrefix, registry, yoGraphicsListRegistry);
 
       if (walkingControllerParameters != null)
@@ -253,7 +259,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       footstepWasAdjusted.set(false);
       hasPlanarRegionBeenAssigned.set(false);
       captureRegionCalculator.hideCaptureRegion();
-      twoStepCaptureRegionCalculator.reset();
+//      twoStepCaptureRegionCalculator.reset();
       environmentConstraintProvider.reset();
       nextFootstep = null;
       nextFootstepTiming = null;
@@ -352,13 +358,19 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                                                      currentICP,
                                                      omega0,
                                                      allowableAreaForCoP);
-      if (nextFootstep != null)
-         twoStepCaptureRegionCalculator.computeFromStepGoal(nextFootstepTiming.getStepTime(),
-                                                            nextFootstep,
-                                                            currentICP,
-                                                            allowableAreaForCoP.getCentroid(),
-                                                            omega0,
-                                                            captureRegionCalculator.getCaptureRegion());
+      oneStepSafetyHeuristics.computeCaptureRegionWithSafetyHeuristics(currentICP, allowableAreaForCoP.getCentroid(), captureRegionCalculator.getCaptureRegion());
+      multiStepCaptureRegionCalculator.compute(upcomingFootstepSide.getEnumValue().getOppositeSide(),
+                                               oneStepSafetyHeuristics.getCaptureRegionWithSafetyMargin(),
+                                               nextFootstepTiming.getStepTime(),
+                                               omega0,
+                                               nextFootstep == null ? 1 : 2); // fixme hardcoded.
+//      if (nextFootstep != null)
+//         twoStepCaptureRegionCalculator.computeFromStepGoal(nextFootstepTiming.getStepTime(),
+//                                                            nextFootstep,
+//                                                            currentICP,
+//                                                            allowableAreaForCoP.getCentroid(),
+//                                                            omega0,
+//                                                            captureRegionCalculator.getCaptureRegion());
 
       if (!useStepAdjustment.getBooleanValue())
          return;
@@ -442,13 +454,16 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       adjustedSolutionInControlPlane.set(referencePositionInControlPlane);
       adjustedSolutionInControlPlane.add(footstepAdjustmentFromErrorInControlPlane);
 
-      if (nextFootstep != null)
-         captureRegionInWorld.setIncludingFrame(twoStepCaptureRegionCalculator.getCaptureRegionWithSafetyMargin());
-      else
-      {
-         captureRegionInWorld.setIncludingFrame(captureRegionCalculator.getCaptureRegion());
-         captureRegionInWorld.changeFrameAndProjectToXYPlane(worldFrame);
-      }
+//      if (nextFootstep != null)
+//         captureRegionInWorld.setIncludingFrame(twoStepCaptureRegionCalculator.getCaptureRegionWithSafetyMargin());
+//      else
+//      {
+//         captureRegionInWorld.setIncludingFrame(captureRegionCalculator.getCaptureRegion());
+//         captureRegionInWorld.changeFrameAndProjectToXYPlane(worldFrame);
+//      }
+
+      captureRegionInWorld.setIncludingFrame(multiStepCaptureRegionCalculator.getCaptureRegion());
+      captureRegionInWorld.changeFrameAndProjectToXYPlane(worldFrame);
 
       boolean intersect = polygonTools.computeIntersectionOfPolygons(captureRegionInWorld, reachabilityConstraintHandler.getReachabilityConstraint(), reachableCaptureRegion);
 
