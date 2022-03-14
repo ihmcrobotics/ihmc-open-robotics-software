@@ -8,7 +8,6 @@ import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
@@ -21,6 +20,9 @@ import us.ihmc.scs2.session.SessionMode;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
 import us.ihmc.tools.UnitConversions;
+import us.ihmc.tools.time.DurationCalculator;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
 
@@ -34,7 +36,11 @@ public class GDXSCS2SimulationSession
    private final ImInt bufferIndex = new ImInt();
    private final ImInt dtHz = new ImInt(240);
    private final ImFloat bufferLength = new ImFloat(5.0f);
+   private final ImBoolean pauseAtEndOfBuffer = new ImBoolean(true);
    private final ImBoolean showCollisionMeshes = new ImBoolean(false);
+   private final YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
+   private final DurationCalculator simulationDurationCalculator = new DurationCalculator();
+   private final YoDouble simulationRealtimeRate = new YoDouble("simulationRealtimeRate", yoRegistry);
    private final GDXYoManager yoManager = new GDXYoManager();
    private final ArrayList<GDXSimulatedRobot> robots = new ArrayList<>();
    private final ArrayList<GDXSimulatedTerrainObject> terrainObjects = new ArrayList<>();
@@ -52,10 +58,14 @@ public class GDXSCS2SimulationSession
       {
          bulletPhysicsDebugger.drawBulletDebugDrawings();
 
-         if (simulationSession.getBuffer().getProperties().getCurrentIndex() == simulationSession.getBuffer().getProperties().getSize() - 1)
+         if (pauseAtEndOfBuffer.get()
+         && simulationSession.getBuffer().getProperties().getCurrentIndex() == simulationSession.getBuffer().getProperties().getSize() - 1)
          {
             simulationSession.setSessionMode(SessionMode.PAUSE);
          }
+
+         simulationDurationCalculator.ping();
+         simulationRealtimeRate.set(UnitConversions.hertzToSeconds(dtHz.get()) / simulationDurationCalculator.getDuration());
       });
    }
 
@@ -87,6 +97,8 @@ public class GDXSCS2SimulationSession
          simulatedTerrainObject.create();
       }
 
+      simulationSession.getRootRegistry().addChild(yoRegistry);
+
       changeBufferLength();
       changeDT();
       simulationSession.submitPlaybackRealTimeRate(playbackRealtimeRate.get());
@@ -107,6 +119,11 @@ public class GDXSCS2SimulationSession
          sessionStartedHandled = true;
          LogTools.info("Session started.");
          plotManager.initializeLinkedVariables();
+      }
+
+      if (simulationSession.getActiveMode() != SessionMode.RUNNING)
+      {
+         simulationDurationCalculator.pause();
       }
 
       yoManager.update();
@@ -153,8 +170,9 @@ public class GDXSCS2SimulationSession
          changeDT();
       }
       ImGui.popItemWidth();
-      if (ImGui.radioButton("Simulate", simulationSession.getActiveMode() == SessionMode.RUNNING))
+      if (ImGui.radioButton("Run", simulationSession.getActiveMode() == SessionMode.RUNNING))
       {
+         simulationSession.submitBufferIndexRequest(simulationSession.getBuffer().getProperties().getOutPoint());
          simulationSession.setSessionMode(SessionMode.RUNNING);
       }
       ImGui.sameLine();
@@ -167,10 +185,17 @@ public class GDXSCS2SimulationSession
       {
          simulationSession.setSessionMode(SessionMode.PLAYBACK);
       }
-      if (ImGui.button(labels.get("Simulate 1 tick")))
+      if (ImGui.button(labels.get("Run 1 tick")))
       {
          simulationSession.runTick();
       }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Go to Out Point")))
+      {
+         simulationSession.submitBufferIndexRequest(simulationSession.getBuffer().getProperties().getOutPoint());
+      }
+      ImGui.sameLine();
+      ImGui.text("Out point: " + simulationSession.getBuffer().getProperties().getOutPoint());
       if (ImGui.inputFloat(labels.get("Buffer length (s)"), bufferLength))
       {
          changeBufferLength();
@@ -183,6 +208,7 @@ public class GDXSCS2SimulationSession
       {
          bufferIndex.set(simulationSession.getBuffer().getProperties().getCurrentIndex());
       }
+      ImGui.checkbox(labels.get("Pause and end of buffer"), pauseAtEndOfBuffer);
       if (ImGui.checkbox("Run at real-time rate", runAtRealtimeRate))
       {
          simulationSession.submitRunAtRealTimeRate(runAtRealtimeRate.get());
