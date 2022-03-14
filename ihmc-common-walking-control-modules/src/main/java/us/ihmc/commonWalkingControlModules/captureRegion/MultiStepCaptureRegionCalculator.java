@@ -9,11 +9,15 @@ import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import java.awt.*;
 
 public class MultiStepCaptureRegionCalculator
 {
@@ -34,7 +38,22 @@ public class MultiStepCaptureRegionCalculator
 
    public MultiStepCaptureRegionCalculator(StepAdjustmentReachabilityConstraint reachabilityConstraint, YoRegistry parentRegistry)
    {
+      this(reachabilityConstraint, parentRegistry, null);
+   }
+
+   public MultiStepCaptureRegionCalculator(StepAdjustmentReachabilityConstraint reachabilityConstraint, YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   {
       this.reachabilityConstraint = reachabilityConstraint;
+
+      if (graphicsListRegistry != null)
+      {
+         YoArtifactPolygon safePolygonArtifact = new YoArtifactPolygon("Multi Step Capture Region",
+                                                                       yoMultiStepRegion,
+                                                                       Color.YELLOW,
+                                                                       false,
+                                                                       false);
+         graphicsListRegistry.registerArtifact(getClass().getSimpleName(), safePolygonArtifact);
+      }
 
       parentRegistry.addChild(registry);
    }
