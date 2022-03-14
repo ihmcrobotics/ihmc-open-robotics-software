@@ -85,18 +85,35 @@ public class MultiStepCaptureRegionCalculatorTest
       double outerLimit = 0.6;
       double width = 0.3;
 
+      YoDouble yoForwardLimit = new YoDouble("forwardLimit", registry);
+      YoDouble yoBackwardLimit = new YoDouble("backwardLimit", registry);
+      YoDouble yoInnerLimit = new YoDouble("innerLimit", registry);
+      YoDouble yoOuterLimit = new YoDouble("outerLimit", registry);
+      YoDouble yoNominalWidth = new YoDouble("nominalWidth", registry);
+      YoDouble yoSwingDuration = new YoDouble("swingDuration", registry);
+
+      yoForwardLimit.set(forwardLimit);
+      yoBackwardLimit.set(backwardLimit);
+      yoInnerLimit.set(innerLimit);
+      yoOuterLimit.set(outerLimit);
+      yoNominalWidth.set(width);
+      yoSwingDuration.set(0.6);
+
       RobotSide swingSide = RobotSide.RIGHT;
       double swingTimeRemaining = 0.1;
       double omega0 = 3.0;
 
-      OneStepCaptureRegionCalculator captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth, kinematicStepRange,
-            ankleZUpFrames, registry, null);
+      OneStepCaptureRegionCalculator captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth,
+                                                                                                  kinematicStepRange,
+                                                                                                  ankleZUpFrames,
+                                                                                                  registry,
+                                                                                                  null);
       StepAdjustmentReachabilityConstraint reachabilityConstraint = new StepAdjustmentReachabilityConstraint(ankleZUpFrames,
-                                                                                                             () -> forwardLimit,
-                                                                                                             () -> backwardLimit,
-                                                                                                             () -> innerLimit,
-                                                                                                             () -> outerLimit,
-                                                                                                             () -> width,
+                                                                                                             yoForwardLimit,
+                                                                                                             yoBackwardLimit,
+                                                                                                             yoInnerLimit,
+                                                                                                             yoOuterLimit,
+                                                                                                             yoNominalWidth,
                                                                                                              "name",
                                                                                                              false,
                                                                                                              registry,
@@ -116,15 +133,14 @@ public class MultiStepCaptureRegionCalculatorTest
       captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, icp, omega0, supportFootPolygon);
       FrameConvexPolygon2D captureRegion = captureRegionCalculator.getCaptureRegion();
 
-//      multiStepRegionCalculator.compute(RobotSide.LEFT, captureRegion, 0.6, omega0, 3);
+      //      multiStepRegionCalculator.compute(RobotSide.LEFT, captureRegion, 0.6, omega0, 3);
 
-//      for (int i = 0; i < multiStepRegionCalculator.getCaptureRegionWithSafetyMargin().getNumberOfVertices(); i++)
-//      {
-//         FramePoint2DReadOnly vertex = multiStepRegionCalculator.getCaptureRegionWithSafetyMargin().getVertex(i);
-//         if (!captureRegion.isPointInside(vertex))
-//            assertEquals(vertex.distanceFromOrigin(), kinematicStepRange, 1e-2);
-//      }
-
+      //      for (int i = 0; i < multiStepRegionCalculator.getCaptureRegionWithSafetyMargin().getNumberOfVertices(); i++)
+      //      {
+      //         FramePoint2DReadOnly vertex = multiStepRegionCalculator.getCaptureRegionWithSafetyMargin().getVertex(i);
+      //         if (!captureRegion.isPointInside(vertex))
+      //            assertEquals(vertex.distanceFromOrigin(), kinematicStepRange, 1e-2);
+      //      }
 
       if (PLOT_RESULTS)
       {
@@ -155,7 +171,6 @@ public class MultiStepCaptureRegionCalculatorTest
 
          SimulationConstructionSet scs = new SimulationConstructionSet(robot);
 
-
          MultiStepCaptureRegionVisualizer visualizer = new MultiStepCaptureRegionVisualizer(multiStepRegionCalculator,
                                                                                             () -> scs.tickAndUpdate(),
                                                                                             registry,
@@ -167,36 +182,63 @@ public class MultiStepCaptureRegionCalculatorTest
          plotterFactory.addYoGraphicsListRegistries(graphicsListRegistry);
          plotterFactory.createOverheadPlotter();
 
-         multiStepRegionCalculator.attachVisualizer(visualizer);
-
+         //         multiStepRegionCalculator.attachVisualizer(visualizer);
 
          scs.startOnAThread();
 
          yoOneStepRegion.setMatchingFrame(captureRegion, false);
 
-         multiStepRegionCalculator.compute(RobotSide.LEFT, captureRegion, 0.6, omega0, 2);
-         yoTwoStepRegion.setMatchingFrame(multiStepRegionCalculator.getCaptureRegion(), false);
+         updateRegions(yoSwingDuration.getDoubleValue(),
+                       multiStepRegionCalculator,
+                       captureRegion,
+                       omega0,
+                       yoTwoStepRegion,
+                       yoThreeStepRegion,
+                       yoFourStepRegion,
+                       yoFiveStepRegion,
+                       yoSixStepRegion);
 
-         multiStepRegionCalculator.compute(RobotSide.LEFT, captureRegion, 0.6, omega0, 3);
-         yoThreeStepRegion.setMatchingFrame(multiStepRegionCalculator.getCaptureRegion(), false);
+         YoVariableChangedListener updatedListener = v ->
+         {
+            updateRegions(yoSwingDuration.getDoubleValue(),
+                          multiStepRegionCalculator,
+                          captureRegion,
+                          omega0,
+                          yoTwoStepRegion,
+                          yoThreeStepRegion,
+                          yoFourStepRegion,
+                          yoFiveStepRegion,
+                          yoSixStepRegion);
+            scs.tickAndUpdate();
+         };
 
-         multiStepRegionCalculator.compute(RobotSide.LEFT, captureRegion, 0.6, omega0, 4);
-         yoFourStepRegion.setMatchingFrame(multiStepRegionCalculator.getCaptureRegion(), false);
-
-         multiStepRegionCalculator.compute(RobotSide.LEFT, captureRegion, 0.6, omega0, 5);
-         yoFiveStepRegion.setMatchingFrame(multiStepRegionCalculator.getCaptureRegion(), false);
-
-         multiStepRegionCalculator.compute(RobotSide.LEFT, captureRegion, 0.6, omega0, 6);
-         yoSixStepRegion.setMatchingFrame(multiStepRegionCalculator.getCaptureRegion(), false);
+         yoForwardLimit.addListener(updatedListener);
+         yoBackwardLimit.addListener(updatedListener);
+         yoInnerLimit.addListener(updatedListener);
+         yoOuterLimit.addListener(updatedListener);
+         yoNominalWidth.addListener(updatedListener);
+         yoSwingDuration.addListener(updatedListener);
 
          scs.tickAndUpdate();
 
          ThreadTools.sleepForever();
-
       }
-
    }
 
+   private void updateRegions(double swingDuration,
+                              MultiStepCaptureRegionCalculator calculator,
+                              FrameConvexPolygon2DReadOnly captureRegion,
+                              double omega,
+                              YoFrameConvexPolygon2D... polygons)
+   {
+      int i = 1;
+      for (YoFrameConvexPolygon2D polygon : polygons)
+      {
+         i++;
+         calculator.compute(RobotSide.LEFT, captureRegion, swingDuration, omega, i);
+         polygon.setMatchingFrame(calculator.getCaptureRegion(), false);
+      }
+   }
 
    private static class SimpleAnkleZUpReferenceFrame extends ReferenceFrame
    {
@@ -269,8 +311,11 @@ public class MultiStepCaptureRegionCalculatorTest
          footConvexPolygon2d.update();
          footPolygons.put(robotSide, footConvexPolygon2d);
 
-         YoFrameConvexPolygon2D yoFootPolygon = new YoFrameConvexPolygon2D(robotSide.getCamelCaseNameForStartOfExpression() + "Foot", "", worldFrame, 4,
-               registry);
+         YoFrameConvexPolygon2D yoFootPolygon = new YoFrameConvexPolygon2D(robotSide.getCamelCaseNameForStartOfExpression() + "Foot",
+                                                                           "",
+                                                                           worldFrame,
+                                                                           4,
+                                                                           registry);
          footConvexPolygon2d.changeFrame(worldFrame);
          yoFootPolygon.set(footConvexPolygon2d);
          footConvexPolygon2d.changeFrame(ankleZUpFrame);
@@ -285,7 +330,10 @@ public class MultiStepCaptureRegionCalculatorTest
          footArtifacts.put(robotSide, footArtifact);
       }
       final OneStepCaptureRegionCalculator oneStepCaptureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth,
-            kinematicStepRange, ankleZUpFrames, registry, null);
+                                                                                                               kinematicStepRange,
+                                                                                                               ankleZUpFrames,
+                                                                                                               registry,
+                                                                                                               null);
 
       final YoFrameConvexPolygon2D yoCaptureRegion = new YoFrameConvexPolygon2D("captureRegion", "", worldFrame, 50, registry);
       YoArtifactPolygon captureRegionArtifact = new YoArtifactPolygon("CaptureRegion", yoCaptureRegion, Color.BLACK, false);
@@ -308,8 +356,11 @@ public class MultiStepCaptureRegionCalculatorTest
             footPolygons.get(supportSide).changeFrame(worldFrame);
             yoFootPolygons.get(supportSide).set(footPolygons.get(supportSide));
             footPolygons.get(supportSide).changeFrame(ankleZUpFrames.get(supportSide));
-            oneStepCaptureRegionCalculator.calculateCaptureRegion(supportSide.getOppositeSide(), swingTimeRemaining.getDoubleValue(), icp, omega0,
-                  footPolygons.get(supportSide));
+            oneStepCaptureRegionCalculator.calculateCaptureRegion(supportSide.getOppositeSide(),
+                                                                  swingTimeRemaining.getDoubleValue(),
+                                                                  icp,
+                                                                  omega0,
+                                                                  footPolygons.get(supportSide));
 
             FrameConvexPolygon2D frameConvexPolygon2d = new FrameConvexPolygon2D();
             frameConvexPolygon2d.setIncludingFrame(oneStepCaptureRegionCalculator.getCaptureRegion());
