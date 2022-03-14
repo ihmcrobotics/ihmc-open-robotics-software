@@ -231,10 +231,10 @@
         </inertia>
       </inertial>
       <collision name='mtorso_collision'>
-        <pose>0 0 -0.02 0 -0 0</pose>
+        <pose>0 0 -0.012 0 -0 0</pose>
         <geometry>
           <cylinder>
-            <length>0.15</length>
+            <length>0.06</length>
             <radius>0.02</radius>
           </cylinder>
         </geometry>
@@ -1781,10 +1781,10 @@
         </inertia>
       </inertial>
       <collision name='hokuyo_link_collision'>
-        <pose>0.01885 0 -0.02119 0 -0 0</pose>
+        <pose>0.023 0.002 -0.0109 0 -0 0</pose>
         <geometry>
           <box>
-            <size>0.08 0.06 0.04238</size>
+            <size>0.08 0.06 0.02</size>
           </box>
         </geometry>
         <surface>
@@ -2865,7 +2865,7 @@
         <pose>0.0115 0 0 -2.65359e-06 1.57079 -2.65359e-06</pose>
         <geometry>
           <cylinder>
-            <length>0.144</length>
+            <length>0.12</length>
             <radius>0.02</radius>
           </cylinder>
         </geometry>
@@ -3021,7 +3021,7 @@
         <pose>-0.007 -0.053 -0.052 0 -0 0</pose>
         <geometry>
           <box>
-            <size>0.07 0.038 0.15</size>
+            <size>0.07 0.038 0.09</size>
           </box>
         </geometry>
         <surface>
@@ -3559,7 +3559,7 @@
         <pose>0.0105 0 0 -2.65359e-06 1.57079 -2.65359e-06</pose>
         <geometry>
           <cylinder>
-            <length>0.142</length>
+            <length>0.12</length>
             <radius>0.02</radius>
           </cylinder>
         </geometry>
@@ -3715,7 +3715,7 @@
         <pose>-0.007 0.053 -0.052 0 -0 0</pose>
         <geometry>
           <box>
-            <size>0.07 0.038 0.15</size>
+            <size>0.07 0.038 0.09</size>
           </box>
         </geometry>
         <surface>
