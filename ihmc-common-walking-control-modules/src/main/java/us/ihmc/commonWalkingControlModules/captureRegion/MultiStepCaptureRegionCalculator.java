@@ -132,7 +132,7 @@ public class MultiStepCaptureRegionCalculator
    private final Point2D stancePosition = new Point2D();
 
    private final RigidBodyTransform transform = new RigidBodyTransform();
-   
+
    private void getBestStepForSide(RobotSide supportSide, FrameLineSegment2DReadOnly edgeToExtrude, FrameVector2DBasics stepToPack)
    {
       stancePosition.setToZero();
