@@ -3,7 +3,6 @@ package us.ihmc.gdx.sceneManager;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import us.ihmc.euclid.transform.AffineTransform;
 
 public class GDX2DSprite
 {
@@ -52,6 +51,16 @@ public class GDX2DSprite
                        srcHeight,
                        flipX,
                        flipY);
+   }
+
+   public void setX(double x)
+   {
+      sprite.setX((float) x);
+   }
+
+   public void setY(double y)
+   {
+      sprite.setY((float) y);
    }
 
    public void setScale(float scale)

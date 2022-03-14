@@ -11,11 +11,13 @@ import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 public class GDX2DSceneManager
 {
    private final ArrayList<GDX2DSprite> sprites = new ArrayList<>();
    private SpriteBatch spriteBatch;
+   private final ArrayList<Consumer<ArrayList<GDX2DSprite>>> spriteRenderableProviders = new ArrayList<>();
 
    private InputMultiplexer inputMultiplexer;
    private GDX2DOrthographicCamera orthographicCamera;
@@ -73,6 +75,12 @@ public class GDX2DSceneManager
       spriteBatch.setProjectionMatrix(orthographicCamera.combined);
       spriteBatch.begin();
 
+      sprites.clear();
+      for (Consumer<ArrayList<GDX2DSprite>> spriteRenderableProvider : spriteRenderableProviders)
+      {
+         spriteRenderableProvider.accept(sprites);
+      }
+
       for (GDX2DSprite sprite : sprites)
       {
          sprite.draw(spriteBatch);
@@ -84,13 +92,6 @@ public class GDX2DSceneManager
          glProfiler.reset();
    }
 
-   public void dispose()
-   {
-      for (GDX2DSprite sprite : sprites)
-      {
-         sprite.getTexture().dispose();
-      }
-   }
    // End render public API
 
    public boolean closeRequested()
@@ -129,8 +130,8 @@ public class GDX2DSceneManager
       this.onCreate = onCreate;
    }
 
-   public ArrayList<GDX2DSprite> getSprites()
+   public void addSpriteRenderableProvider(Consumer<ArrayList<GDX2DSprite>> spriteRenderableProvider)
    {
-      return sprites;
+      spriteRenderableProviders.add(spriteRenderableProvider);
    }
 }
