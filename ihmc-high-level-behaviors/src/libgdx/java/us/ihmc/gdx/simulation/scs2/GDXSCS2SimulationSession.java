@@ -235,6 +235,12 @@ public class GDXSCS2SimulationSession
       simulationSession.setSessionDTSeconds(UnitConversions.hertzToSeconds(dtHz.get()));
    }
 
+   public void setDT(double dt)
+   {
+      dtHz.set((int) UnitConversions.secondsToHertz(dt));
+      changeDT();
+   }
+
    public SimulationSession getSession()
    {
       return simulationSession;
