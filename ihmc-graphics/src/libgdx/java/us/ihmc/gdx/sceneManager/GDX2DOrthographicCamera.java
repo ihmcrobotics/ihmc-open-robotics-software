@@ -15,6 +15,7 @@ public class GDX2DOrthographicCamera extends OrthographicCamera
    private final double zoomSpeedFactor = 0.1;
    private final double mouseTranslateSpeedFactor = 2.0;
    private final double keyboardTranslateSpeedFactor = 1000.0;
+   private final double maxTranslation = 5000.0;
 
    private boolean libGDXInputMode = false;
    private boolean isWPressed = false;
@@ -89,7 +90,7 @@ public class GDX2DOrthographicCamera extends OrthographicCamera
 
    private void mouseDragged(float deltaX, float deltaY)
    {
-      translate((float) -mouseTranslateSpeedFactor * deltaX, (float) mouseTranslateSpeedFactor * deltaY);
+      translate((float) -mouseTranslateSpeedFactor * zoom * deltaX, (float) mouseTranslateSpeedFactor * zoom * deltaY);
    }
 
    private void scrolled(float amountY)
@@ -129,6 +130,9 @@ public class GDX2DOrthographicCamera extends OrthographicCamera
       {
          translate((float) getKeyboardTranslateSpeedFactor() * tpf, 0.0f);
       }
+
+      position.x = (float) MathTools.clamp(position.x, maxTranslation);
+      position.y = (float) MathTools.clamp(position.y, maxTranslation);
 
       update(true);
    }
