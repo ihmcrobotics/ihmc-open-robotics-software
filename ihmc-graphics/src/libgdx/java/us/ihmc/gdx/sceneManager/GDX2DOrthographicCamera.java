@@ -9,13 +9,12 @@ import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import us.ihmc.commons.MathTools;
 import us.ihmc.gdx.input.ImGui2DViewInput;
-import us.ihmc.gdx.input.ImGui3DViewInput;
 
 public class GDX2DOrthographicCamera extends OrthographicCamera
 {
-   private double zoomSpeedFactor = 0.1;
-   private double mouseTranslateSpeedFactor = 0.005;
-   private double keyboardTranslateSpeedFactor = 0.5;
+   private final double zoomSpeedFactor = 0.1;
+   private final double mouseTranslateSpeedFactor = 2.0;
+   private final double keyboardTranslateSpeedFactor = 1000.0;
 
    private boolean libGDXInputMode = false;
    private boolean isWPressed = false;
@@ -27,10 +26,7 @@ public class GDX2DOrthographicCamera extends OrthographicCamera
    {
       viewportWidth = Gdx.graphics.getWidth();
       viewportHeight = Gdx.graphics.getHeight();
-      near = 0.05f;
-      far = 2000.0f;
 
-      updateCameraPose();
       update(true);
    }
 
@@ -73,11 +69,6 @@ public class GDX2DOrthographicCamera extends OrthographicCamera
       };
    }
 
-   private void updateCameraPose()
-   {
-      zoom = (float) MathTools.clamp(zoom, 0.1, 100.0);
-   }
-
    public void processImGuiInput(ImGui2DViewInput input)
    {
       isWPressed = input.isWindowHovered() && ImGui.isKeyDown('W');
@@ -98,12 +89,13 @@ public class GDX2DOrthographicCamera extends OrthographicCamera
 
    private void mouseDragged(float deltaX, float deltaY)
    {
-      translate((float) mouseTranslateSpeedFactor * deltaX, (float) mouseTranslateSpeedFactor * deltaY);
+      translate((float) -mouseTranslateSpeedFactor * deltaX, (float) mouseTranslateSpeedFactor * deltaY);
    }
 
    private void scrolled(float amountY)
    {
       zoom = (float) (zoom + Math.signum(amountY) * zoom * zoomSpeedFactor);
+      zoom = (float) MathTools.clamp(zoom, 0.1, 10.0);
    }
 
    // Taken from GDX PerspectiveCamera
@@ -123,22 +115,20 @@ public class GDX2DOrthographicCamera extends OrthographicCamera
 
       if (isWPressed)
       {
-         translate((float) getKeyboardTranslateSpeedFactor() * tpf, 0.0f);
+         translate(0.0f, (float) getKeyboardTranslateSpeedFactor() * tpf);
       }
       if (isSPressed)
       {
-         translate((float) -getKeyboardTranslateSpeedFactor() * tpf, 0.0f);
+         translate(0.0f, (float) -getKeyboardTranslateSpeedFactor() * tpf);
       }
       if (isAPressed)
       {
-         translate(0.0f, (float) getKeyboardTranslateSpeedFactor() * tpf);
+         translate((float) -getKeyboardTranslateSpeedFactor() * tpf, 0.0f);
       }
       if (isDPressed)
       {
-         translate(0.0f, (float) -getKeyboardTranslateSpeedFactor() * tpf);
+         translate((float) getKeyboardTranslateSpeedFactor() * tpf, 0.0f);
       }
-
-      updateCameraPose();
 
       update(true);
    }
