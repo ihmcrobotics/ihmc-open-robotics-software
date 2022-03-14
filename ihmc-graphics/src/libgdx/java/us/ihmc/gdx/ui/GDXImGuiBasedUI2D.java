@@ -19,7 +19,6 @@ import us.ihmc.gdx.imgui.ImGuiPanelSizeHandler;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.GDXInputMode;
 import us.ihmc.gdx.input.ImGui2DViewInput;
-import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.sceneManager.GDX2DSceneManager;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
 import us.ihmc.gdx.tools.GDXTools;
@@ -266,7 +265,6 @@ public class GDXImGuiBasedUI2D
    public void dispose()
    {
       imGuiWindowAndDockSystem.dispose();
-      sceneManager.dispose();
    }
 
    public void addOnCloseRequestListener(Runnable onCloseRequest)
