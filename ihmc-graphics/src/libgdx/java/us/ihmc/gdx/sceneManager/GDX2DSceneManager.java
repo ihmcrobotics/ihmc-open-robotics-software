@@ -6,7 +6,6 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import org.lwjgl.opengl.GL41;
 import us.ihmc.gdx.input.GDXInputMode;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.log.LogTools;
@@ -22,8 +21,6 @@ public class GDX2DSceneManager
    private GDX2DOrthographicCamera orthographicCamera;
    private ScreenViewport viewport;
 
-   private int x = 0;
-   private int y = 0;
    private int width = -1;
    private int height = -1;
    private boolean firstRenderStarted = false;
@@ -42,6 +39,8 @@ public class GDX2DSceneManager
 
       GDXTools.syncLogLevelWithLogTools();
 
+      spriteBatch = new SpriteBatch();
+
       orthographicCamera = new GDX2DOrthographicCamera();
       if (inputMode == GDXInputMode.libGDX)
       {
@@ -51,10 +50,9 @@ public class GDX2DSceneManager
          inputMultiplexer.addProcessor(orthographicCamera.setInputForLibGDX());
       }
 
-      spriteBatch = new SpriteBatch();
-
       viewport = new ScreenViewport(orthographicCamera);
       viewport.setUnitsPerPixel(1.0f); // TODO: Is this relevant for high DPI displays?
+      viewport.apply();
 
       if (onCreate != null)
          onCreate.run();
@@ -62,41 +60,36 @@ public class GDX2DSceneManager
 
    public void render()
    {
-      preRender();
-      for (GDX2DSprite sprite : sprites)
-      {
-         sprite.draw(spriteBatch);
-      }
-      spriteBatch.end();
-
-      if (GDXTools.ENABLE_OPENGL_DEBUGGER)
-         glProfiler.reset();
-   }
-
-   private void preRender()
-   {
       if (!firstRenderStarted)
       {
          firstRenderStarted = true;
          LogTools.info("Starting first render.");
       }
 
-      if (width < 0)
-         width = getCurrentWindowWidth();
-      if (height < 0)
-         height = getCurrentWindowHeight();
-
       viewport.update(width, height);
 
+      GDX3DSceneTools.glClearGray();
+
+      spriteBatch.setProjectionMatrix(orthographicCamera.combined);
       spriteBatch.begin();
 
-      GL41.glViewport(x, y, width, height);
-      GDX3DSceneTools.glClearGray();
+      for (GDX2DSprite sprite : sprites)
+      {
+         sprite.draw(spriteBatch);
+      }
+
+      spriteBatch.end();
+
+      if (GDXTools.ENABLE_OPENGL_DEBUGGER)
+         glProfiler.reset();
    }
 
    public void dispose()
    {
-
+      for (GDX2DSprite sprite : sprites)
+      {
+         sprite.getTexture().dispose();
+      }
    }
    // End render public API
 
@@ -105,30 +98,13 @@ public class GDX2DSceneManager
       return true;
    }
 
-   public void setViewportBoundsToWindow()
-   {
-      setViewportBounds(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-   }
-
    /**
     * Coordinates in xy bottom left
     */
-   public void setViewportBounds(int x, int y, int width, int height)
+   public void setViewportBounds(int width, int height)
    {
-      this.x = x;
-      this.y = y;
       this.width = width;
       this.height = height;
-   }
-
-   public int getCurrentWindowWidth()
-   {
-      return Gdx.graphics.getWidth();
-   }
-
-   public int getCurrentWindowHeight()
-   {
-      return Gdx.graphics.getHeight();
    }
 
    public GDX2DOrthographicCamera getOrthographicCamera()

@@ -218,7 +218,7 @@ public class GDXImGuiBasedUI2D
          frameBuffer = frameBufferBuilder.build();
       }
 
-      sceneManager.setViewportBounds(0, 0, (int) renderSizeX, (int) renderSizeY);
+      sceneManager.setViewportBounds((int) renderSizeX, (int) renderSizeY);
 
       frameBuffer.begin();
       sceneManager.render();
