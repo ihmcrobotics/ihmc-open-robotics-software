@@ -21,6 +21,7 @@ public class AtlasFlatGroundWalkingTrackSCS2Bullet
    public AtlasFlatGroundWalkingTrackSCS2Bullet()
    {
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS);
+      robotModel.setUseSDFCollisions(true);
       FlatGroundEnvironment environment = new FlatGroundEnvironment();
 
       int recordFrequency = (int) Math.max(1.0, Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT()));
@@ -40,8 +41,10 @@ public class AtlasFlatGroundWalkingTrackSCS2Bullet
       avatarSimulationFactory.setSimulationDataRecordTickPeriod(recordFrequency);
       avatarSimulationFactory.setCreateYoVariableServer(createYoVariableServer);
       avatarSimulationFactory.setUseBulletPhysicsEngine(true);
+      avatarSimulationFactory.setUseDescriptionCollisions(true);
 
       SCS2AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
+      avatarSimulation.getSimulationSession().setSessionDTSeconds(robotModel.getEstimatorDT());
 
       avatarSimulation.start();
 
