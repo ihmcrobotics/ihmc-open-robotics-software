@@ -321,7 +321,6 @@ public class StepAdjustmentReachabilityConstraint
 
    public FrameConvexPolygon2DReadOnly getReachabilityPolygonInFootFrame(RobotSide robotSide)
    {
-      updateReachabilityPolygon(robotSide);
       return reachabilityPolygons.get(robotSide);
    }
 }
