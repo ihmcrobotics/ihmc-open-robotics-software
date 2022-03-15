@@ -200,12 +200,11 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
    }
 
    @Override
-   public void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeForSwing)
+   public void submitSwingSpeedUpUnderDisturbance(double swingSpeedUp)
    {
-      if (swingSpeedUpEnabled.getBooleanValue() && remainingTimeForSwing < timeRemainingInState.getDoubleValue())
+      if (swingSpeedUpEnabled.getBooleanValue() && swingSpeedUp > speedUpTime.getDoubleValue())
       {
-         double speedUpTime = timeRemainingInState.getDoubleValue() - remainingTimeForSwing;
-         this.speedUpTime.add(speedUpTime);
+         this.speedUpTime.add(swingSpeedUp);
       }
    }
 

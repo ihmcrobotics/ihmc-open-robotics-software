@@ -297,12 +297,11 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    }
 
    @Override
-   public void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeForSwing)
+   public void submitSwingSpeedUpUnderDisturbance(double swingSpeedUp)
    {
-      if (swingSpeedUpEnabled.getBooleanValue() && remainingTimeForSwing < timeRemainingInState.getDoubleValue())
+      if (swingSpeedUpEnabled.getBooleanValue() && swingSpeedUp > speedUpTime.getValue())
       {
-         double speedUpTime = timeRemainingInState.getDoubleValue() - remainingTimeForSwing;
-         this.speedUpTime.add(speedUpTime);
+         this.speedUpTime.add(swingSpeedUp);
       }
    }
 
