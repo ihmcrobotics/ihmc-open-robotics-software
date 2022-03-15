@@ -14,7 +14,7 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:euclid:0.17.0")
+   api("us.ihmc:euclid:0.17.2")
    api("us.ihmc:ihmc-yovariables:0.9.11")
    api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.8")
    api("us.ihmc:ihmc-java-toolkit:source")

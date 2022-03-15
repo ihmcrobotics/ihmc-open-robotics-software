@@ -16,7 +16,7 @@ mainDependencies {
    api("org.ejml:ejml-core:0.39")
    api("org.ejml:ejml-ddense:0.39")
 
-   api("us.ihmc:euclid:0.17.0")
+   api("us.ihmc:euclid:0.17.2")
    api("us.ihmc:ihmc-yovariables:0.9.11")
    api("us.ihmc:ihmc-graphics-description:0.19.4")
    api("us.ihmc:ihmc-robotics-toolkit:source")
