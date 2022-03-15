@@ -119,6 +119,7 @@ public class SCS2AvatarSimulationFactory
    private final OptionalFactoryField<Boolean> useImpulseBasePhysicsEngine = new OptionalFactoryField<>("useImpulseBasePhysicsEngine", false);
    private final OptionalFactoryField<Boolean> useBulletPhysicsEngine = new OptionalFactoryField<>("useBulletPhysicsEngine", false);
    private final OptionalFactoryField<Boolean> enableSimulatedRobotDamping = new OptionalFactoryField<>("enableSimulatedRobotDamping", true);
+   private final OptionalFactoryField<Boolean> useDescriptionCollisions = new OptionalFactoryField<>("useDescriptionCollisions", false);
    private final OptionalFactoryField<List<Robot>> secondaryRobots = new OptionalFactoryField<>("secondaryRobots", new ArrayList<>());
 
    // TO CONSTRUCT
@@ -191,10 +192,14 @@ public class SCS2AvatarSimulationFactory
          }
       }
 
-      RobotCollisionModel collisionModel = robotModel.getSimulationRobotCollisionModel(collidableHelper, robotCollisionName, terrainCollisionName);
-      if (collisionModel != null)
-         RobotDefinitionTools.addCollisionsToRobotDefinition(collisionModel.getRobotCollidables(robotModel.createFullRobotModel().getElevator()),
-                                                             robotDefinition);
+      if (!useDescriptionCollisions.get())
+      {
+         RobotCollisionModel collisionModel = robotModel.getSimulationRobotCollisionModel(collidableHelper, robotCollisionName, terrainCollisionName);
+         if (collisionModel != null)
+            RobotDefinitionTools.addCollisionsToRobotDefinition(collisionModel.getRobotCollidables(robotModel.createFullRobotModel().getElevator()),
+                                                                robotDefinition);
+      }
+
       robotInitialSetup.get().initializeRobotDefinition(robotDefinition);
       Set<String> lastSimulatedJoints = robotModel.getJointMap().getLastSimulatedJoints();
       lastSimulatedJoints.forEach(lastSimulatedJoint -> robotDefinition.addSubtreeJointsToIgnore(lastSimulatedJoint));
@@ -669,6 +674,11 @@ public class SCS2AvatarSimulationFactory
    public void setEnableSimulatedRobotDamping(boolean enableSimulatedRobotDamping)
    {
       this.enableSimulatedRobotDamping.set(enableSimulatedRobotDamping);
+   }
+
+   public void setUseDescriptionCollisions(boolean useDescriptionCollisions)
+   {
+      this.useDescriptionCollisions.set(useDescriptionCollisions);
    }
 
    public void addSecondaryRobot(Robot secondaryRobot)

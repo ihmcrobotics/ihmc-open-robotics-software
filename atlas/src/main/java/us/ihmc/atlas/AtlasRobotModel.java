@@ -114,6 +114,7 @@ public class AtlasRobotModel implements DRCRobotModel
    private RobotDefinition robotDefinition, robotDefinitionWithSDFCollision;
    private String simpleRobotName = "Atlas";
    private StepReachabilityData stepReachabilityData = null;
+   private boolean useSDFCollisions = false;
 
    public AtlasRobotModel(AtlasRobotVersion atlasVersion)
    {
@@ -216,7 +217,7 @@ public class AtlasRobotModel implements DRCRobotModel
 
    public RobotDefinition createRobotDefinition(MaterialDefinition materialDefinition)
    {
-      return createRobotDefinition(materialDefinition, true);
+      return createRobotDefinition(materialDefinition, !useSDFCollisions);
    }
 
    public RobotDefinition createRobotDefinition(MaterialDefinition materialDefinition, boolean removeCollisions)
@@ -655,5 +656,10 @@ public class AtlasRobotModel implements DRCRobotModel
    public RobotLowLevelMessenger newRobotLowLevelMessenger(ROS2NodeInterface ros2Node)
    {
       return new AtlasDirectRobotInterface(ros2Node, this);
+   }
+
+   public void setUseSDFCollisions(boolean useSDFCollisions)
+   {
+      this.useSDFCollisions = useSDFCollisions;
    }
 }
