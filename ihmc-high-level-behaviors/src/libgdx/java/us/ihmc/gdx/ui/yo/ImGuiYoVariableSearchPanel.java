@@ -24,8 +24,6 @@ public class ImGuiYoVariableSearchPanel
    {
       this.yoRegistry = yoRegistry;
 
-      addAllVariableNamesRecursively(yoRegistry);
-
       panel.setFirstTimeWidth(800);
       panel.setFirstTimeHeight(800);
    }
@@ -81,6 +79,11 @@ public class ImGuiYoVariableSearchPanel
          }
          ImGui.endListBox();
       }
+   }
+
+   public void initializeYoVariablesAfterSessionStart()
+   {
+      addAllVariableNamesRecursively(yoRegistry);
    }
 
    private void addAllVariableNamesRecursively(YoRegistry registry)
