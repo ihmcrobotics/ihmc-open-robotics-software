@@ -5,9 +5,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.simulation.scs2.GDXYoManager;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.yoVariables.variable.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,6 +56,33 @@ public class ImPlotModifiableYoPlot
             integerPlotLine.setupLinkedVariable(yoManager);
          plotLine = integerPlotLine;
          imPlotPlot.getPlotLines().add(integerPlotLine);
+      }
+      else if (yoVariable instanceof YoLong)
+      {
+         YoLong yoInteger = (YoLong) yoVariable;
+         ImPlotYoBufferLongPlotLine longPlotLine = new ImPlotYoBufferLongPlotLine(yoInteger, this::removeVariable);
+         if (initializeLinkedVariable)
+            longPlotLine.setupLinkedVariable(yoManager);
+         plotLine = longPlotLine;
+         imPlotPlot.getPlotLines().add(longPlotLine);
+      }
+      else if (yoVariable instanceof YoEnum)
+      {
+         YoEnum yoEnum = (YoEnum) yoVariable;
+         ImPlotYoBufferEnumPlotLine enumPlotLine = new ImPlotYoBufferEnumPlotLine(yoEnum, this::removeVariable);
+         if (initializeLinkedVariable)
+            enumPlotLine.setupLinkedVariable(yoManager);
+         plotLine = enumPlotLine;
+         imPlotPlot.getPlotLines().add(enumPlotLine);
+      }
+      else if (yoVariable instanceof YoBoolean)
+      {
+         YoBoolean yoBoolean = (YoBoolean) yoVariable;
+         ImPlotYoBufferBooleanPlotLine booleanPlotLine = new ImPlotYoBufferBooleanPlotLine(yoBoolean, this::removeVariable);
+         if (initializeLinkedVariable)
+            booleanPlotLine.setupLinkedVariable(yoManager);
+         plotLine = booleanPlotLine;
+         imPlotPlot.getPlotLines().add(booleanPlotLine);
       }
       else
       {
