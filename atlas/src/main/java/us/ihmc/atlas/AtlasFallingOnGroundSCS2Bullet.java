@@ -1,8 +1,6 @@
 package us.ihmc.atlas;
 
 import us.ihmc.avatar.factory.RobotDefinitionTools;
-import us.ihmc.avatar.factory.TerrainObjectDefinitionTools;
-import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.scs2.SCS2BulletSimulationTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -23,13 +21,8 @@ import us.ihmc.scs2.definition.state.SixDoFJointState;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.definition.visual.*;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizer;
-import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizerControls;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
-import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
-
-import java.util.List;
 import java.util.Set;
 
 public class AtlasFallingOnGroundSCS2Bullet
@@ -37,63 +30,31 @@ public class AtlasFallingOnGroundSCS2Bullet
    public AtlasFallingOnGroundSCS2Bullet()
    {
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS);
-      robotModel.setRobotDefinitionMutator(robotDefinition -> {});
-
-      SimulationSession simulationSession = new SimulationSession(BulletPhysicsEngine::new);
+      robotModel.setRobotDefinitionMutator(robotDefinition ->
+      {
+      });
 
       boolean removeCollisions = false;
       MaterialDefinition materialDefinition = null; // default material
       RobotDefinition robotDefinition = robotModel.createRobotDefinition(materialDefinition, removeCollisions);
-      double initialYaw = 0.3;
-      double groundHeight = 0.1;
-      RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(groundHeight, initialYaw);
-//      robotInitialSetup.initializeRobotDefinition(robotDefinition);
-
-//      RigidBodyTransform transformToWorld = new RigidBodyTransform();
-////      transformToWorld.getTranslation().setZ(2.0);
-//      robotDefinition.getRootJointDefinitions().get(0).setTransformToParent(transformToWorld);
-//      SixDoFJointDefinition sixDoFJointDefinition = (SixDoFJointDefinition) robotDefinition.getRootJointDefinitions().get(0);
-//      SixDoFJointState initialJointState = new SixDoFJointState();
-//      initialJointState.setPosition(new Point3D(0.0, 0.0, 1.0));
-//      sixDoFJointDefinition.setInitialJointState(initialJointState);
 
       if (removeCollisions)
       {
-         CollidableHelper collidableHelper = new CollidableHelper();
-         RobotCollisionModel collisionModel = robotModel.getSimulationRobotCollisionModel(collidableHelper, "robot", "terrain");
+         RobotCollisionModel collisionModel = robotModel.getHumanoidRobotKinematicsCollisionModel();
          if (collisionModel != null)
             RobotDefinitionTools.addCollisionsToRobotDefinition(collisionModel.getRobotCollidables(robotModel.createFullRobotModel().getElevator()),
                                                                 robotDefinition);
       }
-//      robotInitialSetup.initializeRobotDefinition(robotDefinition);
+      else
+      {
+         setCollisionMasks(robotDefinition);
+      }
+
       Set<String> lastSimulatedJoints = robotModel.getJointMap().getLastSimulatedJoints();
       lastSimulatedJoints.forEach(robotDefinition::addSubtreeJointsToIgnore);
 
-//      RigidBodyDefinition pelvisRigidBody = robotDefinition.getRigidBodyDefinition("pelvis");
-//      pelvisRigidBody.setMass(1.0);
-////      pelvisRigidBody.getInertiaPose().setToZero();
-//      List<CollisionShapeDefinition> pelvisCollisions = pelvisRigidBody.getCollisionShapeDefinitions();
-//      pelvisCollisions.clear();
-//      CollisionShapeDefinition pelvisBoxCollisionDefinition = new CollisionShapeDefinition();
-//      pelvisBoxCollisionDefinition.setGeometryDefinition(new Box3DDefinition(0.3, 0.3, 0.3));
-//      pelvisBoxCollisionDefinition.setOriginPose(new RigidBodyTransform());
-//      pelvisCollisions.add(pelvisBoxCollisionDefinition);
-//      pelvisRigidBody.setMomentOfInertia(MomentOfInertiaFactory.fromMassAndRadiiOfGyration(pelvisRigidBody.getMass(),
-//                                                                                     0.8 * 0.3,
-//                                                                                     0.8 * 0.3,
-//                                                                                     0.8 * 0.3));
-//      robotDefinition.getRootJointDefinitions().get(0).setInitialJointState(new SixDoFJointState(new YawPitchRoll(0.1, 0.1, 0.1), new Point3D(1.5, 0.0, 0.0)));
-
-//      Robot robot = new Robot(robotDefinition, SimulationSession.DEFAULT_INERTIAL_FRAME);
-//      robot.updateFrames();
-//      simulationSession.addRobot(robot);
+      SimulationSession simulationSession = new SimulationSession(BulletPhysicsEngine::new);
       simulationSession.addRobot(robotDefinition);
-
-      FlatGroundEnvironment environment = new FlatGroundEnvironment();
-//      simulationSession.addTerrainObject(TerrainObjectDefinitionTools.toTerrainObjectDefinition(environment,
-//                                                                                                new CollidableHelper(),
-//                                                                                                "terrain",
-//                                                                                                "robot"));
 
       double groundWidth = 10.0;
       double groundLength = 10.0;
@@ -119,7 +80,7 @@ public class AtlasFallingOnGroundSCS2Bullet
       rigidBody1.addCollisionShapeDefinition(new CollisionShapeDefinition(new Box3DDefinition(boxSize1)));
       rootJointDefinition.setSuccessor(rigidBody1);
       boxRobotDefinition.setRootBodyDefinition(rootBodyDefinition);
-//      simulationSession.addRobot(boxRobotDefinition);
+      //simulationSession.addRobot(boxRobotDefinition);
 
       SessionVisualizer sessionVisualizer = SCS2BulletSimulationTools.startSessionVisualizerWithDebugDrawing(simulationSession);
 
@@ -128,20 +89,91 @@ public class AtlasFallingOnGroundSCS2Bullet
       sessionVisualizer.getToolkit().getSession().runTick();
    }
 
-   public static RigidBodyDefinition newBoxRigidBody(String rigidBodyName, Tuple3DReadOnly size, double mass, double radiusOfGyrationPercent,
+   private void setCollisionMasks(RobotDefinition robotDefinition)
+   {
+      String bodyName = "Body";
+      String pelvis = "Pelvis";
+      String glut = "Glut";
+      String upperRightLeg = "UpperRightLeg";
+      String upperLeftLeg = "UpperLeftLeg";
+      long collisionMask;
+      long collisionGroup;
+
+      CollidableHelper helper = new CollidableHelper();
+
+      for (RigidBodyDefinition rigidBodyDefinition : robotDefinition.getAllRigidBodies())
+      {
+         for (CollisionShapeDefinition shapeDefinition : rigidBodyDefinition.getCollisionShapeDefinitions())
+         {
+            if (shapeDefinition.getName().equals("pelvis_collision"))
+            {
+               collisionMask = helper.getCollisionMask(pelvis);
+               collisionGroup = helper.createCollisionGroup(upperRightLeg, upperLeftLeg);
+               shapeDefinition.setCollisionGroup(collisionGroup);
+               shapeDefinition.setCollisionMask(collisionMask);
+            }
+            else if (shapeDefinition.getName().equals("l_uglut_collision") || shapeDefinition.getName().equals("l_lglut_collision")
+                  || shapeDefinition.getName().equals("r_uglut_collision") || shapeDefinition.getName().equals("r_lglut_collision"))
+            {
+               collisionMask = helper.getCollisionMask(glut);
+               collisionGroup = helper.createCollisionGroup(bodyName, upperRightLeg, upperLeftLeg);
+               shapeDefinition.setCollisionGroup(collisionGroup);
+               shapeDefinition.setCollisionMask(collisionMask);
+            }
+
+            else if (shapeDefinition.getName().equals("mtorso_collision") || shapeDefinition.getName().equals("utorso_collision")
+                  || shapeDefinition.getName().equals("hokuyo_link_collision") || shapeDefinition.getName().equals("head_collision"))
+            {
+               collisionMask = helper.getCollisionMask(bodyName);
+               collisionGroup = helper.createCollisionGroup(glut, upperRightLeg, upperLeftLeg);
+               shapeDefinition.setCollisionGroup(collisionGroup);
+               shapeDefinition.setCollisionMask(collisionMask);
+            }
+            else if (shapeDefinition.getName().equals("l_uleg_collision"))
+            {
+               collisionMask = helper.getCollisionMask(upperLeftLeg);
+               collisionGroup = helper.createCollisionGroup(pelvis, bodyName, upperRightLeg);
+               shapeDefinition.setCollisionGroup(collisionGroup);
+               shapeDefinition.setCollisionMask(collisionMask);
+            }
+            else if (shapeDefinition.getName().equals("r_uleg_collision"))
+            {
+               collisionMask = helper.getCollisionMask(upperRightLeg);
+               collisionGroup = helper.createCollisionGroup(pelvis, bodyName, upperLeftLeg);
+               shapeDefinition.setCollisionGroup(collisionGroup);
+               shapeDefinition.setCollisionMask(collisionMask);
+            }
+         }
+      }
+   }
+
+   public static RigidBodyDefinition newBoxRigidBody(String rigidBodyName,
+                                                     Tuple3DReadOnly size,
+                                                     double mass,
+                                                     double radiusOfGyrationPercent,
                                                      ColorDefinition color)
    {
       return newBoxRigidBody(rigidBodyName, size, mass, radiusOfGyrationPercent, null, color);
    }
 
-   public static RigidBodyDefinition newBoxRigidBody(String rigidBodyName, Tuple3DReadOnly size, double mass, double radiusOfGyrationPercent,
-                                                     Vector3DReadOnly offsetFromParent, ColorDefinition color)
+   public static RigidBodyDefinition newBoxRigidBody(String rigidBodyName,
+                                                     Tuple3DReadOnly size,
+                                                     double mass,
+                                                     double radiusOfGyrationPercent,
+                                                     Vector3DReadOnly offsetFromParent,
+                                                     ColorDefinition color)
    {
       return newBoxRigidBody(rigidBodyName, size.getX(), size.getY(), size.getZ(), mass, radiusOfGyrationPercent, offsetFromParent, color);
    }
 
-   public static RigidBodyDefinition newBoxRigidBody(String rigidBodyName, double sizeX, double sizeY, double sizeZ, double mass,
-                                                     double radiusOfGyrationPercent, Vector3DReadOnly offsetFromParentJoint, ColorDefinition color)
+   public static RigidBodyDefinition newBoxRigidBody(String rigidBodyName,
+                                                     double sizeX,
+                                                     double sizeY,
+                                                     double sizeZ,
+                                                     double mass,
+                                                     double radiusOfGyrationPercent,
+                                                     Vector3DReadOnly offsetFromParentJoint,
+                                                     ColorDefinition color)
    {
       RigidBodyDefinition rigidBody = new RigidBodyDefinition(rigidBodyName);
       rigidBody.setMass(mass);
