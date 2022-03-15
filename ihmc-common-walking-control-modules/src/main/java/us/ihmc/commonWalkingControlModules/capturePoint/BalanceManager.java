@@ -115,6 +115,8 @@ public class BalanceManager
 
    private final TimeAdjustmentCalculator timeAdjustmentCalculator = new TimeAdjustmentCalculator();
 
+   private final YoDouble swingSpeedUpForStepAdjustment = new YoDouble("swingSpeedUpForStepAdjustment", registry);
+
    /** CoP position according to the ICP planner */
    private final YoFramePoint3D yoPerfectCoP = new YoFramePoint3D("perfectCoP", worldFrame, registry);
    private final YoFrameVector2D yoPerfectCoPVelocity = new YoFrameVector2D("perfectCoPVelocity", worldFrame, registry);
@@ -408,8 +410,8 @@ public class BalanceManager
       icpControlPlane.setOmega0(omega0);
       icpControlPolygons.updateUsingContactStateCommand(contactStateCommands);
 
-      if (!Double.isNaN(timeRemainingInSwing) && timeRemainingInSwing > 0.0)
-         stepAdjustmentController.submitRemainingTimeInSwingUnderDisturbance(timeRemainingInSwing);
+      if (!swingSpeedUpForStepAdjustment.isNaN() && swingSpeedUpForStepAdjustment.getValue() > 0.0)
+         stepAdjustmentController.submitSwingSpeedUpUnderDisturbance(swingSpeedUpForStepAdjustment.getValue());
       if (stepConstraintRegionHandler != null && stepConstraintRegionHandler.hasNewStepConstraintRegion())
          stepAdjustmentController.setStepConstraintRegion(stepConstraintRegionHandler.pollHasNewStepConstraintRegion());
 
@@ -818,6 +820,7 @@ public class BalanceManager
       stepAdjustmentController.initialize(yoTime.getDoubleValue(), supportSide);
 
       contactStateManager.initializeForSingleSupport(transferTime, swingTime);
+      swingSpeedUpForStepAdjustment.setToNaN();
 
       comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(maintainInitialCoMVelocityContinuitySingleSupport.getValue());
       initializeOnStateChange = true;
@@ -838,6 +841,7 @@ public class BalanceManager
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
       comTrajectoryPlanner.initializeTrajectory(yoDesiredCoMPosition, Double.POSITIVE_INFINITY);
+      swingSpeedUpForStepAdjustment.setToNaN();
 
       initializeOnStateChange = true;
       comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(true);
@@ -857,6 +861,7 @@ public class BalanceManager
       copTrajectoryState.setInitialCoP(yoPerfectCoP);
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
+      swingSpeedUpForStepAdjustment.setToNaN();
 
 
       contactStateManager.initializeForTransferToStanding(copTrajectoryState.getFinalTransferDuration());
@@ -884,6 +889,7 @@ public class BalanceManager
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
 
       contactStateManager.initializeForTransfer(footstepTimings.get(0).getTransferTime(), footstepTimings.get(0).getSwingTime());
+      swingSpeedUpForStepAdjustment.setToNaN();
 
       comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(maintainInitialCoMVelocityContinuityTransfer.getValue());
 
@@ -990,7 +996,7 @@ public class BalanceManager
 
    public void updateSwingTimeRemaining(double timeRemainingInSwing)
    {
-      this.timeRemainingInSwing = timeRemainingInSwing;
+      swingSpeedUpForStepAdjustment.set(contactStateManager.getTimeRemainingInCurrentSupportSequence() - timeRemainingInSwing);
    }
 
    @Deprecated
