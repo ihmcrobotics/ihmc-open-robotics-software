@@ -363,7 +363,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       multiStepCaptureRegionCalculator.compute(upcomingFootstepSide.getEnumValue().getOppositeSide(),
                                                oneStepSafetyHeuristics.getCaptureRegionWithSafetyMargin(),
 //                                               captureRegionCalculator.getCaptureRegion(),
-                                               nextFootstepTiming.getStepTime(),
+                                               nextFootstepTiming == null ? Double.NaN : nextFootstepTiming.getStepTime(),
                                                omega0,
                                                nextFootstep == null ? 1 : 2); // fixme hardcoded.
 
