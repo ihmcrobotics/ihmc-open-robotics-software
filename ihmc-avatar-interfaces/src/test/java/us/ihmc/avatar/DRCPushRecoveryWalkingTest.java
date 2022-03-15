@@ -87,6 +87,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
    @Test
    public void testPushLeftEarlySwing() throws SimulationExceededMaximumTimeException
    {
+      simulationTestingParameters.setKeepSCSUp(true);
       setupTest();
 
       // setup all parameters

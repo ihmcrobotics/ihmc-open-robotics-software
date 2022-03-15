@@ -6,6 +6,7 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameConvexPolygon2DBasics;
@@ -34,6 +35,8 @@ public class StepAdjustmentReachabilityConstraint
 
    private final SideDependentList<List<YoFramePoint2D>> reachabilityVertices = new SideDependentList<>();
    private final SideDependentList<YoFrameConvexPolygon2D> reachabilityPolygons = new SideDependentList<>();
+   private final SideDependentList<YoFrameConvexPolygon2D> forwardReachabilityPolygons = new SideDependentList<>();
+   private final SideDependentList<YoFrameConvexPolygon2D> backwardReachabilityPolygons = new SideDependentList<>();
 
    private final SideDependentList<List<YoFramePoint2D>> adjustmentVertices = new SideDependentList<>();
    private final SideDependentList<PoseReferenceFrame> stepFrames = new SideDependentList<>();
@@ -43,6 +46,13 @@ public class StepAdjustmentReachabilityConstraint
    private final FixedFrameConvexPolygon2DBasics reachabilityPolygon = new FrameConvexPolygon2D(worldFrame);
 
    private final YoFrameConvexPolygon2D contractedReachabilityPolygon;
+   private final YoFrameConvexPolygon2D forwardCrossOverReachability;
+   private final YoFrameConvexPolygon2D backwardCrossOverReachability;
+
+   private final DoubleProvider forwardCrossOverDistance;
+   private final DoubleProvider forwardCrossOverClearanceAngle;
+   private final DoubleProvider backwardCrossOverDistance;
+   private final DoubleProvider backwardCrossOverClearanceAngle;
 
    private final DoubleProvider lengthLimit;
    private final DoubleProvider lengthBackLimit;
@@ -145,6 +155,11 @@ public class StepAdjustmentReachabilityConstraint
       this.inwardAdjustmentLimit = inwardAdjustmentLimit;
       this.outwardAdjustmentLimit = outwardAdjustmentLimit;
 
+      this.forwardCrossOverDistance = new DoubleParameter("forwardCrossOverDistance", registry, 0.2);
+      this.backwardCrossOverDistance = new DoubleParameter("backwardCrossOverDistance", registry, 0.15);
+      this.forwardCrossOverClearanceAngle = new DoubleParameter("forwardCrossOverClearanceAngle", registry, Math.toRadians(25));
+      this.backwardCrossOverClearanceAngle = new DoubleParameter("backwardCrossOverClearanceAngle", registry, Math.toRadians(45));
+
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -167,6 +182,11 @@ public class StepAdjustmentReachabilityConstraint
          this.reachabilityVertices.put(robotSide, reachabilityVertices);
          this.reachabilityPolygons.put(robotSide, reachabilityPolygon);
 
+         YoFrameConvexPolygon2D forwardReachabilityPolygon = new YoFrameConvexPolygon2D(prefix + "ForwardReachability", supportSoleFrame, numberOfVertices, registry);
+         YoFrameConvexPolygon2D backwardReachabilityPolygon = new YoFrameConvexPolygon2D(prefix + "BackwardReachability", supportSoleFrame, numberOfVertices, registry);
+         forwardReachabilityPolygons.put(robotSide, forwardReachabilityPolygon);
+         backwardReachabilityPolygons.put(robotSide, backwardReachabilityPolygon);
+
          PoseReferenceFrame adjustmentFrame = new PoseReferenceFrame(prefix + "AdjustmentFrame", worldFrame);
 
          YoInteger yoNumberOfAdjustmentVertices = new YoInteger(robotSide.getLowerCaseName() + "NumberOfAdjustmentVertices", registry);
@@ -188,14 +208,22 @@ public class StepAdjustmentReachabilityConstraint
       }
 
       contractedReachabilityPolygon = new YoFrameConvexPolygon2D(yoNamePrefix + "ReachabilityRegion", "", worldFrame, 12, registry);
+      forwardCrossOverReachability = new YoFrameConvexPolygon2D(yoNamePrefix + "ForwardReachabilityRegion", "", worldFrame, 12, registry);
+      backwardCrossOverReachability = new YoFrameConvexPolygon2D(yoNamePrefix + "BackwardReachabilityRegion", "", worldFrame, 12, registry);
 
       if (yoGraphicsListRegistry != null)
       {
          YoArtifactPolygon reachabilityGraphic = new YoArtifactPolygon("ReachabilityRegionViz", contractedReachabilityPolygon, Color.BLUE, false);
+         YoArtifactPolygon forwardReachabilityGraphic = new YoArtifactPolygon("ForwardReachabilityRegionViz", forwardCrossOverReachability, Color.BLUE, false);
+         YoArtifactPolygon backwardReachabilityGraphic = new YoArtifactPolygon("BackwardReachabilityRegionViz", backwardCrossOverReachability, Color.BLUE, false);
 
          reachabilityGraphic.setVisible(visualize);
+         forwardReachabilityGraphic.setVisible(visualize);
+         backwardReachabilityGraphic.setVisible(visualize);
 
          yoGraphicsListRegistry.registerArtifact(getClass().getSimpleName(), reachabilityGraphic);
+         yoGraphicsListRegistry.registerArtifact(getClass().getSimpleName(), forwardReachabilityGraphic);
+         yoGraphicsListRegistry.registerArtifact(getClass().getSimpleName(), backwardReachabilityGraphic);
       }
    }
 
@@ -221,6 +249,7 @@ public class StepAdjustmentReachabilityConstraint
       reachabilityPolygon.setMatchingFrame(updateReachabilityPolygon(supportSide), false);
       updateReachabilityPolygon(supportSide.getOppositeSide());
       FrameConvexPolygon2DReadOnly adjustmentPolygon = getAdjustmentPolygon(supportSide.getOppositeSide(), footstepPose);
+      updateCrossOverPolygon(supportSide);
 
       contractedReachabilityPolygon.checkReferenceFrameMatch(reachabilityPolygon);
       if (adjustmentPolygon != null)
@@ -287,6 +316,61 @@ public class StepAdjustmentReachabilityConstraint
       polygon.update();
 
       return polygon;
+   }
+
+   private void updateCrossOverPolygon(RobotSide supportSide)
+   {
+      YoFrameConvexPolygon2D forwardPolygon = forwardReachabilityPolygons.get(supportSide);
+      YoFrameConvexPolygon2D backwardPolygon = backwardReachabilityPolygons.get(supportSide);
+
+      double forwardInnerRadius = inPlaceWidth.getValue() + forwardCrossOverDistance.getValue();
+      double backwardInnerRadius = inPlaceWidth.getValue() + backwardCrossOverDistance.getValue();
+      double outerRadius = outerLimit.getValue() - inPlaceWidth.getValue();
+
+      forwardPolygon.clear();
+      backwardPolygon.clear();
+
+      for (int vertexIdx = 0; vertexIdx < forwardPolygon.getNumberOfVertices(); vertexIdx++)
+      {
+         double angle = (Math.PI - forwardCrossOverClearanceAngle.getValue()) * vertexIdx / (forwardPolygon.getNumberOfVertices() - 1) + forwardCrossOverClearanceAngle.getValue() - Math.PI / 2.0;
+         double x, y;
+         if (angle < Math.PI / 2.0)
+         {
+            x = lengthLimit.getValue() * Math.cos(angle);
+            y = supportSide.negateIfLeftSide(inPlaceWidth.getValue() - forwardInnerRadius * Math.sin(angle));
+         }
+         else
+         {
+            x = lengthLimit.getValue() * Math.cos(angle);
+            y = supportSide.negateIfLeftSide(inPlaceWidth.getValue() - outerRadius * Math.sin(angle));
+         }
+
+         forwardPolygon.addVertex(x, y);
+      }
+
+      for (int vertexIdx = 0; vertexIdx < forwardPolygon.getNumberOfVertices(); vertexIdx++)
+      {
+         double angle = (Math.PI - backwardCrossOverClearanceAngle.getValue()) * vertexIdx / (forwardPolygon.getNumberOfVertices() - 1) + backwardCrossOverClearanceAngle.getValue() - Math.PI / 2.0;
+         double x, y;
+         if (angle < Math.PI / 2.0)
+         {
+            x = lengthLimit.getValue() * Math.cos(angle);
+            y = supportSide.negateIfLeftSide(inPlaceWidth.getValue() - backwardInnerRadius * Math.sin(angle));
+         }
+         else
+         {
+            x = lengthLimit.getValue() * Math.cos(angle);
+            y = supportSide.negateIfLeftSide(inPlaceWidth.getValue() - outerRadius * Math.sin(angle));
+         }
+
+         backwardPolygon.addVertex(x, y);
+      }
+
+      forwardPolygon.update();
+      backwardPolygon.update();
+
+      forwardCrossOverReachability.set(forwardPolygon);
+      backwardCrossOverReachability.set(backwardPolygon);
    }
 
    private FrameConvexPolygon2DReadOnly getAdjustmentPolygon(RobotSide swingSide, FramePose3DReadOnly footstepPose)
