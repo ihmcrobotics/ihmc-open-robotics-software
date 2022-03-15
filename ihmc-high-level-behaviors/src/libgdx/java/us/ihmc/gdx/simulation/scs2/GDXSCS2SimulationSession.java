@@ -50,7 +50,13 @@ public class GDXSCS2SimulationSession
 
    public GDXSCS2SimulationSession()
    {
-      simulationSession = new SimulationSession(BulletPhysicsEngine::new);
+      this(new SimulationSession(BulletPhysicsEngine::new));
+   }
+
+   public GDXSCS2SimulationSession(SimulationSession simulationSession)
+   {
+      this.simulationSession = simulationSession;
+
       BulletPhysicsEngine bulletPhysicsEngine = (BulletPhysicsEngine) simulationSession.getPhysicsEngine();
       bulletPhysicsDebugger = new GDXBulletPhysicsAsyncDebugger(bulletPhysicsEngine.getBulletMultiBodyDynamicsWorld());
 
@@ -58,8 +64,7 @@ public class GDXSCS2SimulationSession
       {
          bulletPhysicsDebugger.drawBulletDebugDrawings();
 
-         if (pauseAtEndOfBuffer.get()
-         && simulationSession.getBuffer().getProperties().getCurrentIndex() == simulationSession.getBuffer().getProperties().getSize() - 1)
+         if (pauseAtEndOfBuffer.get() && yoManager.getCurrentIndex() == yoManager.getBufferSize() - 2)
          {
             simulationSession.setSessionMode(SessionMode.PAUSE);
          }
@@ -71,8 +76,6 @@ public class GDXSCS2SimulationSession
 
    public void addRobot(RobotDefinition robotDefinition)
    {
-      GDXSimulatedRobot robot = new GDXSimulatedRobot(robotDefinition);
-      robots.add(robot);
       simulationSession.addRobot(robotDefinition);
    }
 
@@ -85,8 +88,10 @@ public class GDXSCS2SimulationSession
    {
       yoManager.startSession(simulationSession); // TODO: Add to controls?
 
-      for (GDXSimulatedRobot robot : robots)
+      for (RobotDefinition robotDefinition : simulationSession.getRobotDefinitions())
       {
+         GDXSimulatedRobot robot = new GDXSimulatedRobot(robotDefinition);
+         robots.add(robot);
          robot.create(yoManager);
       }
 
@@ -114,6 +119,8 @@ public class GDXSCS2SimulationSession
 
    public void update()
    {
+      yoManager.update();
+
       if (!sessionStartedHandled && simulationSession.hasSessionStarted())
       {
          sessionStartedHandled = true;
@@ -126,7 +133,6 @@ public class GDXSCS2SimulationSession
          simulationDurationCalculator.pause();
       }
 
-      yoManager.update();
       for (GDXSimulatedRobot robot : robots)
       {
          robot.update();
@@ -172,7 +178,7 @@ public class GDXSCS2SimulationSession
       ImGui.popItemWidth();
       if (ImGui.radioButton("Run", simulationSession.getActiveMode() == SessionMode.RUNNING))
       {
-         simulationSession.submitBufferIndexRequest(simulationSession.getBuffer().getProperties().getOutPoint());
+         simulationSession.submitBufferIndexRequest(yoManager.getOutPoint());
          simulationSession.setSessionMode(SessionMode.RUNNING);
       }
       ImGui.sameLine();
@@ -192,21 +198,21 @@ public class GDXSCS2SimulationSession
       ImGui.sameLine();
       if (ImGui.button(labels.get("Go to Out Point")))
       {
-         simulationSession.submitBufferIndexRequest(simulationSession.getBuffer().getProperties().getOutPoint());
+         simulationSession.submitBufferIndexRequest(yoManager.getOutPoint());
       }
       ImGui.sameLine();
-      ImGui.text("Out point: " + simulationSession.getBuffer().getProperties().getOutPoint());
+      ImGui.text("Out point: " + yoManager.getOutPoint());
       if (ImGui.inputFloat(labels.get("Buffer length (s)"), bufferLength))
       {
          changeBufferLength();
       }
-      if (ImGui.sliderInt(labels.get("Buffer"), bufferIndex.getData(), 0, simulationSession.getBuffer().getProperties().getSize()))
+      if (ImGui.sliderInt(labels.get("Buffer"), bufferIndex.getData(), 0, yoManager.getBufferSize()))
       {
          simulationSession.submitBufferIndexRequest(bufferIndex.get());
       }
       else
       {
-         bufferIndex.set(simulationSession.getBuffer().getProperties().getCurrentIndex());
+         bufferIndex.set(yoManager.getCurrentIndex());
       }
       ImGui.checkbox(labels.get("Pause and end of buffer"), pauseAtEndOfBuffer);
       if (ImGui.checkbox("Run at real-time rate", runAtRealtimeRate))

@@ -113,6 +113,7 @@ public class SCS2YoImPlotManager
 
    public void initializeLinkedVariables()
    {
+      yoVariableSearchPanel.initializeYoVariablesAfterSessionStart();
       for (ImPlotModifiableYoPlotPanel plotPanel : plotPanels)
       {
          for (ImPlotModifiableYoPlot yoPlot : plotPanel.getYoPlots())
