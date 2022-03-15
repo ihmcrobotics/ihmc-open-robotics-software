@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.captureRegion;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLine2d;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLine2D;
@@ -27,8 +28,8 @@ public class CaptureRegionSafetyHeuristics
                                                                                                  30,
                                                                                                  registry);
 
-   private final DoubleParameter distanceToProjectIntoCaptureRegion = new DoubleParameter("distanceToProjectIntoCaptureRegion", registry, 0.08);
-   private final DoubleParameter extraDistanceToStepFromStanceFoot = new DoubleParameter("extraDistanceToStepFromStanceFoot", registry, 0.05);
+   private final DoubleParameter distanceToProjectIntoCaptureRegion = new DoubleParameter("distanceToProjectIntoCaptureRegion", registry, 0.01);
+   private final DoubleParameter extraDistanceToStepFromStanceFoot = new DoubleParameter("extraDistanceToStepFromStanceFoot", registry, 0.01);
 
    private final List<FixedFramePoint2DBasics> verticesVisibleFromStance = new ArrayList<>();
    private final FramePoint2D stancePosition = new FramePoint2D();
@@ -49,37 +50,40 @@ public class CaptureRegionSafetyHeuristics
 
       if (graphicsListRegistry != null)
       {
-         YoArtifactPolygon safePolygonArtifact = new YoArtifactPolygon("Safety Biased Capture Region",
-                                                                       yoSafetyBiasedCaptureRegion,
-                                                                       Color.GREEN,
-                                                                       false,
-                                                                       true);
+         YoArtifactPolygon safePolygonArtifact = new YoArtifactPolygon("Safety Biased Capture Region", yoSafetyBiasedCaptureRegion, Color.GREEN, false, true);
          graphicsListRegistry.registerArtifact(getClass().getSimpleName(), safePolygonArtifact);
       }
 
       parentRegistry.addChild(registry);
    }
 
+   public void reset()
+   {
+      yoSafetyBiasedCaptureRegion.clear();
+   }
+
    public void computeCaptureRegionWithSafetyHeuristics(FramePoint2DReadOnly capturePoint,
                                                         FramePoint2DReadOnly stancePosition,
-                                                        FrameConvexPolygon2DReadOnly oneStepCaptureRegion)
+                                                        FrameConvexPolygon2DReadOnly captureRegion)
    {
-      saferCaptureRegion.setIncludingFrame(oneStepCaptureRegion);
+      saferCaptureRegion.setIncludingFrame(captureRegion);
 
       lineOfMinimalAction.setIncludingFrame(stancePosition, capturePoint);
-      lineOfMinimalAction.changeFrame(oneStepCaptureRegion.getReferenceFrame());
+      lineOfMinimalAction.changeFrame(captureRegion.getReferenceFrame());
       yoLineOfMinimalAction.setMatchingFrame(lineOfMinimalAction);
 
       this.stancePosition.setIncludingFrame(stancePosition);
-      this.stancePosition.changeFrame(oneStepCaptureRegion.getReferenceFrame());
+      this.stancePosition.changeFrame(captureRegion.getReferenceFrame());
 
       if (computeVisibiltyOfVerticesFromStance(saferCaptureRegion))
       {
          projectVerticesVisibleToStanceInward();
       }
 
-      projectVerticesFacingTheGoalTowardsTheMiddle();
+      projectVerticesFacingTheGoalTowardsTheMiddle(captureRegion);
 
+      if (computeVisibiltyOfVerticesFromStance(saferCaptureRegion))
+         projectVerticesVisibleToStanceInward();
 
       saferCaptureRegion.update();
 
@@ -114,6 +118,9 @@ public class CaptureRegionSafetyHeuristics
 
    private void projectVerticesVisibleToStanceInward()
    {
+      if (extraDistanceToStepFromStanceFoot.getValue() <= 0.0)
+         return;
+
       vectorToVertex.setReferenceFrame(stancePosition.getReferenceFrame());
 
       for (int i = 0; i < verticesVisibleFromStance.size(); i++)
@@ -124,11 +131,13 @@ public class CaptureRegionSafetyHeuristics
          if (vectorToVertex.length() > reachabilityLimit.getValue() - extraDistanceToStepFromStanceFoot.getValue())
             continue;
 
-         double maxProjectionDistance = findMaximumProjectionDistance(vectorToVertex.length(),
-                                                                      reachabilityLimit.getValue(),
-                                                                      vectorToVertex.angle(lineOfMinimalAction.getDirection()));
+         double maxProjectionDistance = Math.max(findMaximumProjectionDistance(vectorToVertex.length(),
+                                                                               reachabilityLimit.getValue(),
+                                                                               vectorToVertex.angle(lineOfMinimalAction.getDirection())), 0.0);
 
-         vertexToProject.scaleAdd(Math.min(maxProjectionDistance, extraDistanceToStepFromStanceFoot.getValue()), lineOfMinimalAction.getDirection(), vertexToProject);
+         vertexToProject.scaleAdd(Math.min(maxProjectionDistance, extraDistanceToStepFromStanceFoot.getValue()),
+                                  lineOfMinimalAction.getDirection(),
+                                  vertexToProject);
       }
    }
 
@@ -143,8 +152,11 @@ public class CaptureRegionSafetyHeuristics
       return Math.sqrt(A * A + B * B - 2.0 * A * B * Math.cos(c));
    }
 
-   private void projectVerticesFacingTheGoalTowardsTheMiddle()
+   private void projectVerticesFacingTheGoalTowardsTheMiddle(FrameConvexPolygon2DReadOnly originalCaptureRegion)
    {
+      if (distanceToProjectIntoCaptureRegion.getValue() <= 0.0)
+         return;
+
       projectedPoint.setReferenceFrame(lineOfMinimalAction.getReferenceFrame());
 
       for (int i = 0; i < saferCaptureRegion.getNumberOfVertices(); i++)
@@ -158,11 +170,14 @@ public class CaptureRegionSafetyHeuristics
             safeVertex.set(projectedPoint);
          else
             safeVertex.interpolate(saferCaptureRegion.getVertex(i), projectedPoint, distanceToProjectIntoCaptureRegion.getValue() / projectionDistance);
+
+         if (!originalCaptureRegion.isPointInside(safeVertex))
+            originalCaptureRegion.orthogonalProjection(safeVertex);
       }
    }
 
    public FrameConvexPolygon2DReadOnly getCaptureRegionWithSafetyMargin()
    {
-      return saferCaptureRegion;
+      return yoSafetyBiasedCaptureRegion;
    }
 }

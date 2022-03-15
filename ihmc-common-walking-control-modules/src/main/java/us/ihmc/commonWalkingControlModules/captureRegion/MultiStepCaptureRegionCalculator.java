@@ -34,8 +34,6 @@ public class MultiStepCaptureRegionCalculator
 
    private MultiStepCaptureRegionVisualizer visualizer = null;
 
-   private static final double theoreticalMaxLength = 1.0;
-
    public MultiStepCaptureRegionCalculator(StepAdjustmentReachabilityConstraint reachabilityConstraint, YoRegistry parentRegistry)
    {
       this(reachabilityConstraint, parentRegistry, null);
@@ -67,6 +65,11 @@ public class MultiStepCaptureRegionCalculator
    public void attachVisualizer(MultiStepCaptureRegionVisualizer visualizer)
    {
       this.visualizer = visualizer;
+   }
+
+   public void reset()
+   {
+      yoMultiStepRegion.clear();
    }
 
    public void compute(RobotSide currentStanceSide, FrameConvexPolygon2DReadOnly oneStepCaptureRegion, double stepDuration, double omega, int stepsInQueue)
