@@ -38,7 +38,7 @@ public class CaptureRegionMathTools
       normalizedB.setAndNormalize(directionB);
 
       rotatedFromA.interpolate(normalizedA, normalizedB, alpha);
-      rotatedFromA.scale(radius);
+      rotatedFromA.scale(radius / rotatedFromA.length());
 
       pointToPack.setIncludingFrame(rotatedFromA);
       pointToPack.add(centerOfCircle);
