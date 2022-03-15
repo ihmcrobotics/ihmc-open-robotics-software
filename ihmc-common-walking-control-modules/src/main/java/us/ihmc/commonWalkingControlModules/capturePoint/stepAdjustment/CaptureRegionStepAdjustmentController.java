@@ -117,7 +117,7 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
                                                                                registry,
                                                                                yoGraphicsListRegistry);
 
-      captureRegionCalculator = new OneStepCaptureRegionCalculator(soleZUpFrames, walkingControllerParameters, yoNamePrefix, registry, yoGraphicsListRegistry);
+      captureRegionCalculator = new OneStepCaptureRegionCalculator(soleZUpFrames, walkingControllerParameters, false, yoNamePrefix, registry, yoGraphicsListRegistry);
       twoStepCaptureRegionCalculator = new TwoStepCaptureRegionCalculator(registry, yoGraphicsListRegistry);
 
       if (walkingControllerParameters != null)
@@ -254,7 +254,12 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
                                                      allowableAreaForCoP);
 
       if (nextFootstep != null)
-         twoStepCaptureRegionCalculator.computeFromStepGoal(nextFootstepTiming.getStepTime(), nextFootstep, omega0, captureRegionCalculator.getCaptureRegion());
+         twoStepCaptureRegionCalculator.computeFromStepGoal(nextFootstepTiming.getStepTime(),
+                                                            nextFootstep,
+                                                            currentICP,
+                                                            allowableAreaForCoP.getCentroid(),
+                                                            omega0,
+                                                            captureRegionCalculator.getCaptureRegion());
       //      else
       //         inverseCaptureRegionCalculator.reset();
 

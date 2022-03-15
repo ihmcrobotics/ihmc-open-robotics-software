@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameConvexPolygon2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -28,7 +29,7 @@ public class StepAdjustmentReachabilityConstraint
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static final int numberOfVertices = 5;
+   private static final int numberOfVertices = 9;
    private static final double SUFFICIENTLY_LARGE = 5.0;
 
    private final SideDependentList<List<YoFramePoint2D>> reachabilityVertices = new SideDependentList<>();
@@ -47,6 +48,7 @@ public class StepAdjustmentReachabilityConstraint
    private final DoubleProvider lengthBackLimit;
    private final DoubleProvider innerLimit;
    private final DoubleProvider outerLimit;
+   private final DoubleProvider inPlaceWidth;
 
    private final DoubleProvider forwardAdjustmentLimit;
    private final DoubleProvider backwardAdjustmentLimit;
@@ -65,6 +67,7 @@ public class StepAdjustmentReachabilityConstraint
            new DoubleParameter(yoNamePrefix + "MaxReachabilityBackwardLength", registry, steppingParameters.getMaxBackwardStepLength()),
            new DoubleParameter(yoNamePrefix + "MinReachabilityWidth", registry, steppingParameters.getMinStepWidth()),
            new DoubleParameter(yoNamePrefix + "MaxReachabilityWidth", registry, steppingParameters.getMaxStepWidth()),
+           new DoubleParameter(yoNamePrefix + "InPlaceWidth", registry, steppingParameters.getInPlaceWidth()),
            yoNamePrefix,
            visualize,
            registry,
@@ -76,6 +79,7 @@ public class StepAdjustmentReachabilityConstraint
                                                DoubleProvider lengthBackLimit,
                                                DoubleProvider innerLimit,
                                                DoubleProvider outerLimit,
+                                               DoubleProvider inPlaceWidth,
                                                String yoNamePrefix,
                                                boolean visualize,
                                                YoRegistry registry,
@@ -85,6 +89,7 @@ public class StepAdjustmentReachabilityConstraint
       this.lengthBackLimit = lengthBackLimit;
       this.innerLimit = innerLimit;
       this.outerLimit = outerLimit;
+      this.inPlaceWidth = inPlaceWidth;
 
       forwardAdjustmentLimit = new DoubleParameter(yoNamePrefix + "ForwardAdjustmentLimit", registry,
                                                    Math.min(SUFFICIENTLY_LARGE, icpOptimizationParameters.getMaximumStepAdjustmentForward()));
@@ -97,6 +102,7 @@ public class StepAdjustmentReachabilityConstraint
 
       for (RobotSide robotSide : RobotSide.values)
       {
+
          ReferenceFrame supportSoleFrame = soleZUpFrames.get(robotSide);
 
          YoInteger yoNumberOfReachabilityVertices = new YoInteger(robotSide.getLowerCaseName() + "NumberOfReachabilityVertices", registry);
@@ -189,19 +195,39 @@ public class StepAdjustmentReachabilityConstraint
       YoFrameConvexPolygon2D polygon = reachabilityPolygons.get(supportSide);
 
       // create an ellipsoid around the center of the forward and backward reachable limits
-      double xRadius = 0.5 * (lengthLimit.getValue() + lengthBackLimit.getValue());
-      double yRadius = outerLimit.getValue() - innerLimit.getValue();
-      double centerX = lengthLimit.getValue() - xRadius;
-      double centerY = innerLimit.getValue();
+      double innerRadius = inPlaceWidth.getValue() - innerLimit.getValue();
+      double outerRadius = outerLimit.getValue() - inPlaceWidth.getValue();
 
       // compute the vertices on the edge of the ellipsoid
       for (int vertexIdx = 0; vertexIdx < vertices.size(); vertexIdx++)
       {
-         double angle = Math.PI * vertexIdx / (vertices.size() - 1);
-         double x = centerX + xRadius * Math.cos(angle);
-         double y = centerY + yRadius * Math.sin(angle);
-         vertices.get(vertexIdx).set(x, supportSide.negateIfLeftSide(y));
+         double angle = 2.0 * Math.PI * vertexIdx / (vertices.size() - 1);
+         double x, y;
+         if (angle < Math.PI / 2.0)
+         {
+            x = lengthLimit.getValue() * Math.cos(angle);
+            y = supportSide.negateIfLeftSide(inPlaceWidth.getValue() - innerRadius * Math.sin(angle));
+         }
+         else if (angle < Math.PI)
+         {
+            x = lengthBackLimit.getValue() * Math.cos(angle);
+            y = supportSide.negateIfLeftSide(inPlaceWidth.getValue() - innerRadius * Math.sin(angle));
+         }
+         else if (angle < 1.5 * Math.PI)
+         {
+            x = lengthBackLimit.getValue() * Math.cos(angle);
+            y = supportSide.negateIfLeftSide(inPlaceWidth.getValue() - outerRadius * Math.sin(angle));
+         }
+         else
+         {
+            x = lengthLimit.getValue() * Math.cos(angle);
+            y = supportSide.negateIfLeftSide(inPlaceWidth.getValue() - outerRadius * Math.sin(angle));
+         }
+
+         FixedFramePoint2DBasics vertex = vertices.get(vertexIdx);
+         vertex.set(x, y);
       }
+
 
       polygon.notifyVerticesChanged();
       polygon.update();
