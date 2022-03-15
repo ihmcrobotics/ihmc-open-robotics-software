@@ -13,52 +13,45 @@ import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 
 public class StaticEquilibriumSolverTest
 {
-   private static final boolean VISUALIZE = Boolean.parseBoolean(System.getProperty("visualize", "true"));
+   private static final boolean VISUALIZE = false; //  Boolean.parseBoolean(System.getProperty("visualize", "true"));
    private static final double marginToTest = 0.02;
 
-   @Disabled
    @Test
    public void testTriangleFlat()
    {
       runTest(StaticEquilibriumSolverInputExamples.createTriangleFlatGround());
    }
 
-   @Disabled
    @Test
    public void testTriangleLowAngle()
    {
       runTest(StaticEquilibriumSolverInputExamples.createTriangleTiltedOutSlightly());
    }
 
-   @Disabled
    @Test
    public void testTriangleHighAngle()
    {
       runTest(StaticEquilibriumSolverInputExamples.createTriangleTiltedOutALot());
    }
 
-   @Disabled
    @Test
    public void testFlatSquare()
    {
       runTest(StaticEquilibriumSolverInputExamples.createFlatSquare());
    }
 
-   @Disabled
    @Test
    public void testBipedFeet()
    {
       runTest(StaticEquilibriumSolverInputExamples.createBipedFeet());
    }
 
-   @Disabled
    @Test
    public void testBipedFeetWithHandhold()
    {
-      runTest(StaticEquilibriumSolverInputExamples.createBipedFeetWithHandhold());
+      runTest(StaticEquilibriumSolverInputExamples.createBipedFeetWithSingleHandhold());
    }
 
-   @Disabled
    @Test
    public void testMatricesForFlatGround()
    {
@@ -66,7 +59,7 @@ public class StaticEquilibriumSolverTest
       double comY = -0.5;
 
       StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createFlatSquare();
-      StaticEquilibriumSolver solver = new StaticEquilibriumSolver();
+      StaticSupportRegionSolver solver = new StaticSupportRegionSolver();
       solver.initialize(input);
 
       DMatrixRMaj Aeq = solver.getAeq();
@@ -77,7 +70,7 @@ public class StaticEquilibriumSolverTest
       int numberOfVariables = input.getNumberOfContacts() * 4 + 2;
       solution.reshape(numberOfVariables, 1);
 
-      double verticalForce = StaticEquilibriumSolver.mass * input.getGravityMagnitude();
+      double verticalForce = StaticSupportRegionSolver.mass * input.getGravityMagnitude();
       input.getSurfaceNormals().get(0).changeFrame(ReferenceFrame.getWorldFrame());
       double mu = input.getCoefficientOfFriction();
       double betaZ = 1.0 / Math.sqrt(MathTools.square(mu) + 1.0);
@@ -103,66 +96,70 @@ public class StaticEquilibriumSolverTest
 
    private void runTest(StaticEquilibriumSolverInput input)
    {
-      StaticEquilibriumSolver solver = new StaticEquilibriumSolver();
+      StaticSupportRegionSolver solver = new StaticSupportRegionSolver();
       solver.initialize(input);
       solver.solve();
 
       ConvexPolygon2D supportPolygon = solver.getSupportRegion();
-
       StaticEquilibriumForceOptimizer forceOptimizer = new StaticEquilibriumForceOptimizer();
 
-      // test the vertices are valid
-      for (int i = 0; i < supportPolygon.getNumberOfVertices(); i++)
-      {
-         Point2DReadOnly vertex = supportPolygon.getVertex(i);
-         System.out.println("testing vertex is valid:   " + vertex.getX() + "," + vertex.getY());
-         boolean succeeded = forceOptimizer.solve(input, vertex);
-         Assertions.assertTrue(succeeded);
-//         System.out.println(succeeded ? "pass" : "fail");
-      }
-
-      System.out.println();
       ConvexPolygonScaler scaler = new ConvexPolygonScaler();
-      ConvexPolygon2D scaledPolygon = new ConvexPolygon2D();
-      scaler.scaleConvexPolygon(supportPolygon, -marginToTest, scaledPolygon);
+      ConvexPolygon2D innerPolygon = new ConvexPolygon2D();
+      ConvexPolygon2D outerPolygon = new ConvexPolygon2D();
+      scaler.scaleConvexPolygon(supportPolygon, marginToTest, innerPolygon);
+      scaler.scaleConvexPolygon(supportPolygon, -marginToTest, outerPolygon);
 
-      // test outside the vertices by a margin aren't valid
-      for (int i = 0; i < scaledPolygon.getNumberOfVertices(); i++)
+      for (int i = 0; i < innerPolygon.getNumberOfVertices(); i++)
       {
-         Point2DReadOnly vertex = scaledPolygon.getVertex(i);
-         System.out.println("testing vertex is invalid: " + vertex);
-         boolean succeeded = forceOptimizer.solve(input, vertex);
-         Assertions.assertFalse(succeeded);
-//         System.out.println(!succeeded ? "pass" : "fail");
+         Point2DReadOnly innerVertex = innerPolygon.getVertex(i);
+         boolean innerSucceed = forceOptimizer.solve(input, innerVertex);
+         Assertions.assertTrue(innerSucceed);
+
+         Point2DReadOnly outerVertex = outerPolygon.getVertex(i);
+         boolean outerSucceed = forceOptimizer.solve(input, outerVertex);
+
+         Assertions.assertFalse(outerSucceed);
       }
    }
 
    private static void runTimingTest()
    {
-      StaticEquilibriumSolver solver = new StaticEquilibriumSolver();
+      StaticSupportRegionSolver solver = new StaticSupportRegionSolver();
 
       StaticEquilibriumSolverInput input0 = StaticEquilibriumSolverInputExamples.createTriangleTiltedOutSlightly();
       StaticEquilibriumSolverInput input1 = StaticEquilibriumSolverInputExamples.createTriangleOneTiltedFullyIn();
       StaticEquilibriumSolverInput input2 = StaticEquilibriumSolverInputExamples.createBipedFeet();
-      StaticEquilibriumSolverInput input3 = StaticEquilibriumSolverInputExamples.createBipedFeetWithHandhold();
+      StaticEquilibriumSolverInput input3 = StaticEquilibriumSolverInputExamples.createBipedFeetWithSingleHandhold();
+      StaticEquilibriumSolverInput input4 = StaticEquilibriumSolverInputExamples.createBipedFeetWithTwoHandholds();
+
+      StaticEquilibriumSolverInput[] inputs = new StaticEquilibriumSolverInput[]{input0, input1, input2, input3, input4};
 
       // warm up
-      for (int i = 0; i < 10; i++)
+      int warmups = 10;
+      for (int i = 0; i < warmups; i++)
       {
          solver.initialize(input0);
          solver.solve();
       }
 
       // do timing test
+      int iterations = 10;
       long start = System.currentTimeMillis();
 
-      solver.initialize(input3);
+      for (int i = 0; i < iterations; i++)
+      {
+         for (int j = 0; j < inputs.length; j++)
+         {
+            solver.initialize(inputs[j]);
+         }
+      }
+
       solver.solve();
 
       long stop = System.currentTimeMillis();
 
       long diff = stop - start;
-      System.out.println("Solver time: " + diff + "milli-seconds") ;
+      System.out.println("Solver time: " + (diff / (iterations * inputs.length)) + "ms") ;
    }
 
    public static void main(String[] args)

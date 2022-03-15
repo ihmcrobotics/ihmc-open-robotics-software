@@ -1,0 +1,49 @@
+#ifndef __controller_msgs__msg__ContinuousStepGeneratorParametersMessage__idl__
+#define __controller_msgs__msg__ContinuousStepGeneratorParametersMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * Message for the ContinuousStepGenerator to configure the module's parameters.
+       * This module is used for controlling the walking gait using a joystick controller.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::ContinuousStepGeneratorParametersMessage_")
+      struct ContinuousStepGeneratorParametersMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        @defaultValue(value=-1)
+        long number_of_footsteps_to_plan;
+        @defaultValue(value=-1)
+        long number_of_fixed_footsteps;
+        @defaultValue(value=-1.0)
+        double swing_height;
+        @defaultValue(value=-1.0)
+        double swing_duration;
+        @defaultValue(value=-1.0)
+        double transfer_duration;
+        @defaultValue(value=-1.0)
+        double max_step_length;
+        @defaultValue(value=-1.0)
+        double default_step_width;
+        @defaultValue(value=-1.0)
+        double min_step_width;
+        @defaultValue(value=-1.0)
+        double max_step_width;
+        @defaultValue(value=-1.0)
+        double turn_max_angle_inward;
+        @defaultValue(value=-1.0)
+        double turn_max_angle_outward;
+      };
+    };
+  };
+};
+
+#endif

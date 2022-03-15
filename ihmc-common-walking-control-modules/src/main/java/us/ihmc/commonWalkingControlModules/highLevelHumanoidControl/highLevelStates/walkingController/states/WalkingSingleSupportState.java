@@ -147,7 +147,11 @@ public class WalkingSingleSupportState extends SingleSupportState
             failureDetectionControlModule.setNextFootstep(nextFootstep);
             updateFootstepParameters();
 
-            feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
+            feetManager.adjustSwingTrajectory(swingSide,
+                                              nextFootstep,
+                                              balanceManager.getFinalDesiredCoMVelocity(),
+                                              balanceManager.getFinalDesiredCoMAcceleration(),
+                                              swingTime);
 
             balanceManager.adjustFootstep(nextFootstep);
             balanceManager.computeICPPlan();
@@ -166,7 +170,11 @@ public class WalkingSingleSupportState extends SingleSupportState
             failureDetectionControlModule.setNextFootstep(nextFootstep);
             updateFootstepParameters();
 
-            feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
+            feetManager.adjustSwingTrajectory(swingSide,
+                                              nextFootstep,
+                                              balanceManager.getFinalDesiredCoMVelocity(),
+                                              balanceManager.getFinalDesiredCoMAcceleration(),
+                                              swingTime);
 
             balanceManager.adjustFootstep(nextFootstep);
             balanceManager.computeICPPlan();
@@ -266,7 +274,9 @@ public class WalkingSingleSupportState extends SingleSupportState
       if (feetManager.adjustHeightIfNeeded(nextFootstep))
       {
          walkingMessageHandler.updateVisualizationAfterFootstepAdjustement(nextFootstep);
-         feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
+         feetManager.adjustSwingTrajectory(swingSide,
+                                           nextFootstep,
+                                           swingTime);
       }
 
       balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));

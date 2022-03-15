@@ -65,8 +65,6 @@ public class SwingTrajectoryCalculator
    private final FrameQuaternion finalOrientation = new FrameQuaternion();
    private final FrameVector3D finalAngularVelocity = new FrameVector3D();
 
-   private final FrameVector3D finalCoMVelocity = new FrameVector3D();
-
    private final FramePoint3D stanceFootPosition = new FramePoint3D();
 
    private final FrameQuaternion tmpOrientation = new FrameQuaternion();
@@ -183,7 +181,8 @@ public class SwingTrajectoryCalculator
       finalPosition.changeFrame(worldFrame);
       finalOrientation.changeFrame(worldFrame);
       finalPosition.addZ(swingTrajectoryParameters.getDesiredTouchdownHeightOffset());
-      finalCoMVelocity.setToNaN();
+      finalLinearVelocity.set(swingTrajectoryParameters.getDesiredTouchdownVelocity());
+      finalAngularVelocity.setToZero(worldFrame);
 
       if (footstep.getTrajectoryType() == null)
       {
@@ -213,18 +212,15 @@ public class SwingTrajectoryCalculator
    }
 
    /**
-    * Invoke this setter after {@link #setFootstep(Footstep)} to register the center of mass velocity
-    * predicted at the end of swing.
-    * <p>
-    * The x and y components of the CoM velocity are added to the desired swing final velocity. The
+    * Invoke this setter after {@link #setFootstep(Footstep)} to register what the final velocity is
+    * predicted at the end of swing, mainly to account for non-zero com velocity. The
     * objective is to increase robustness to late touchdown.
-    * </p>
-    * 
-    * @param finalCoMVelocity the predicted center of mass velocity at touchdown. Not modified.
+    *
+    * @param finalLinearVelocity the final velocity at touchdown to use. Not modified.
     */
-   public void setFinalCoMVelocity(FrameVector3DReadOnly finalCoMVelocity)
+   public void setFinalLinearVelocity(FrameVector3DReadOnly finalLinearVelocity)
    {
-      this.finalCoMVelocity.set(finalCoMVelocity);
+      this.finalLinearVelocity.set(finalLinearVelocity);
    }
 
    public void setSwingDuration(double swingDuration)
@@ -267,15 +263,7 @@ public class SwingTrajectoryCalculator
     */
    public void initializeTrajectoryWaypoints(boolean initializeOptimizer)
    {
-      finalLinearVelocity.setIncludingFrame(swingTrajectoryParameters.getDesiredTouchdownVelocity());
       finalAngularVelocity.setToZero(worldFrame);
-
-      if (!finalCoMVelocity.containsNaN())
-      {
-         double injectionRatio = swingTrajectoryParameters.getFinalCoMVelocityInjectionRatio();
-         finalLinearVelocity.setX(injectionRatio * finalCoMVelocity.getX());
-         finalLinearVelocity.setY(injectionRatio * finalCoMVelocity.getY());
-      }
 
       // append current pose as initial trajectory point
       swingTrajectory.clear(worldFrame);
