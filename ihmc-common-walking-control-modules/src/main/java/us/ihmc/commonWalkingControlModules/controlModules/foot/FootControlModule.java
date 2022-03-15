@@ -254,7 +254,12 @@ public class FootControlModule
 
    public void setAdjustedFootstepAndTime(Footstep adjustedFootstep, double swingTime)
    {
-      swingState.setAdjustedFootstepAndTime(adjustedFootstep, swingTime);
+      setAdjustedFootstepAndTime(adjustedFootstep, null, null, swingTime);
+   }
+
+   public void setAdjustedFootstepAndTime(Footstep adjustedFootstep, FrameVector3DReadOnly finalCoMVelocity, FrameVector3DReadOnly finalCoMAcceleration, double swingTime)
+   {
+      swingState.setAdjustedFootstepAndTime(adjustedFootstep,finalCoMVelocity, finalCoMAcceleration, swingTime);
    }
 
    public void requestTouchdownForDisturbanceRecovery()

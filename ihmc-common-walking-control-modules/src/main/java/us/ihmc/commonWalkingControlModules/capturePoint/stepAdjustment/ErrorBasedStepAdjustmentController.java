@@ -191,6 +191,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       DoubleProvider lengthBackLimit = new DoubleParameter(yoNamePrefix + "MaxReachabilityBackwardLength", registry, steppingParameters.getMaxBackwardStepLength());
       DoubleProvider innerLimit = new DoubleParameter(yoNamePrefix + "MinReachabilityWidth", registry, steppingParameters.getMinStepWidth());
       DoubleProvider outerLimit = new DoubleParameter(yoNamePrefix + "MaxReachabilityWidth", registry, steppingParameters.getMaxStepWidth());
+      DoubleProvider inPlaceWidth = new DoubleParameter(yoNamePrefix + "InPlaceWidth", registry, steppingParameters.getInPlaceWidth());
 
       useActualErrorInsteadOfResidual = new BooleanParameter("useActualErrorInsteadOfResidual", registry, false);
       considerErrorInAdjustment = new BooleanParameter(yoNamePrefix + "considerErrorInAdjustment", registry, false);
@@ -200,6 +201,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                                                                                lengthBackLimit,
                                                                                innerLimit,
                                                                                outerLimit,
+                                                                               inPlaceWidth,
                                                                                yoNamePrefix,
                                                                                VISUALIZE,
                                                                                registry,
@@ -208,6 +210,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       captureRegionCalculator = new OneStepCaptureRegionCalculator(steppingParameters.getFootWidth(),
                                                                    lengthLimit,
                                                                    soleZUpFrames,
+                                                                   false,
                                                                    yoNamePrefix,
                                                                    registry,
                                                                    yoGraphicsListRegistry);
@@ -351,7 +354,12 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                                                      omega0,
                                                      allowableAreaForCoP);
       if (nextFootstep != null)
-         twoStepCaptureRegionCalculator.computeFromStepGoal(nextFootstepTiming.getStepTime(), nextFootstep, omega0, captureRegionCalculator.getCaptureRegion());
+         twoStepCaptureRegionCalculator.computeFromStepGoal(nextFootstepTiming.getStepTime(),
+                                                            nextFootstep,
+                                                            currentICP,
+                                                            allowableAreaForCoP.getCentroid(),
+                                                            omega0,
+                                                            captureRegionCalculator.getCaptureRegion());
 
       if (!useStepAdjustment.getBooleanValue())
          return;
@@ -436,7 +444,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       adjustedSolutionInControlPlane.add(footstepAdjustmentFromErrorInControlPlane);
 
       if (nextFootstep != null)
-         captureRegionInWorld.setIncludingFrame(twoStepCaptureRegionCalculator.getCaptureRegion());
+         captureRegionInWorld.setIncludingFrame(twoStepCaptureRegionCalculator.getCaptureRegionWithSafetyMargin());
       else
       {
          captureRegionInWorld.setIncludingFrame(captureRegionCalculator.getCaptureRegion());
