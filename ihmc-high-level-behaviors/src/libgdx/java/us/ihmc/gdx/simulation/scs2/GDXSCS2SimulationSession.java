@@ -1,6 +1,7 @@
 package us.ihmc.gdx.simulation.scs2;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
@@ -47,6 +48,8 @@ public class GDXSCS2SimulationSession
    private final GDXBulletPhysicsAsyncDebugger bulletPhysicsDebugger;
    private final SCS2YoImPlotManager plotManager = new SCS2YoImPlotManager();
    private boolean sessionStartedHandled = false;
+   private final RenderableProvider getRealRenderables = this::getRealRenderables;
+   private final RenderableProvider getVirtualRenderables = this::getVirtualRenderables;
 
    public GDXSCS2SimulationSession()
    {
@@ -111,8 +114,8 @@ public class GDXSCS2SimulationSession
 
       simulationSession.startSessionThread(); // TODO: Need start/stop controls?
 
-      baseUI.get3DSceneManager().addRenderableProvider(this::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
-      baseUI.get3DSceneManager().addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+      baseUI.get3DSceneManager().addRenderableProvider(getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
+      baseUI.get3DSceneManager().addRenderableProvider(getVirtualRenderables, GDXSceneLevel.VIRTUAL);
 
       plotManager.create(baseUI.getPerspectiveManager(), yoManager, controlPanel);
    }
@@ -245,6 +248,12 @@ public class GDXSCS2SimulationSession
    {
       dtHz.set((int) UnitConversions.secondsToHertz(dt));
       changeDT();
+   }
+
+   public void destroy(GDXImGuiBasedUI baseUI)
+   {
+      baseUI.get3DSceneManager().getSceneBasics().removeRenderableProvider(getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
+      baseUI.get3DSceneManager().getSceneBasics().removeRenderableProvider(getVirtualRenderables, GDXSceneLevel.VIRTUAL);
    }
 
    public SimulationSession getSession()

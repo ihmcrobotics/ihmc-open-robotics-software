@@ -46,7 +46,7 @@ public class SCS2AvatarSimulation
 
    public void start()
    {
-      beforeSesionThreadStart();
+      beforeSessionThreadStart();
 
       simulationSession.setSessionState(SessionState.ACTIVE);
 
@@ -61,7 +61,7 @@ public class SCS2AvatarSimulation
       afterSessionThreadStart();
    }
 
-   public void beforeSesionThreadStart()
+   public void beforeSessionThreadStart()
    {
       if (intraprocessYoVariableLogger != null)
       {
