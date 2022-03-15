@@ -7,6 +7,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
@@ -118,6 +119,8 @@ public class MultiStepCaptureRegionCalculatorTest
                                                                                                              false,
                                                                                                              registry,
                                                                                                              null);
+      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT, new FramePose3D());
+      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT, new FramePose3D());
       MultiStepCaptureRegionCalculator multiStepRegionCalculator = new MultiStepCaptureRegionCalculator(reachabilityConstraint, registry);
 
       new DefaultParameterReader().readParametersInRegistry(registry);
@@ -200,6 +203,9 @@ public class MultiStepCaptureRegionCalculatorTest
 
          YoVariableChangedListener updatedListener = v ->
          {
+            reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT, new FramePose3D());
+            reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT, new FramePose3D());
+
             updateRegions(yoSwingDuration.getDoubleValue(),
                           multiStepRegionCalculator,
                           captureRegion,
