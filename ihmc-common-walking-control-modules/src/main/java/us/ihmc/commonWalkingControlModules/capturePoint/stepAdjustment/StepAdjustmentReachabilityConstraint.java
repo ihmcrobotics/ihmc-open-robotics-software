@@ -218,7 +218,8 @@ public class StepAdjustmentReachabilityConstraint
     */
    public FrameConvexPolygon2DReadOnly initializeReachabilityConstraint(RobotSide supportSide, FramePose3DReadOnly footstepPose)
    {
-      FrameConvexPolygon2DReadOnly reachabilityPolygon = updateReachabilityPolygon(supportSide);
+      reachabilityPolygon.setMatchingFrame(updateReachabilityPolygon(supportSide), false);
+      updateReachabilityPolygon(supportSide.getOppositeSide());
       FrameConvexPolygon2DReadOnly adjustmentPolygon = getAdjustmentPolygon(supportSide.getOppositeSide(), footstepPose);
 
       contractedReachabilityPolygon.checkReferenceFrameMatch(reachabilityPolygon);
@@ -285,8 +286,7 @@ public class StepAdjustmentReachabilityConstraint
       polygon.notifyVerticesChanged();
       polygon.update();
 
-      reachabilityPolygon.setMatchingFrame(polygon, false);
-      return reachabilityPolygon;
+      return polygon;
    }
 
    private FrameConvexPolygon2DReadOnly getAdjustmentPolygon(RobotSide swingSide, FramePose3DReadOnly footstepPose)
