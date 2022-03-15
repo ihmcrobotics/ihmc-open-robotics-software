@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.heightPlanning.CoMHeightTimeDerivativ
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
+import us.ihmc.communication.net.Vector3DSerializer;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -16,7 +17,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DBasics;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -310,13 +313,13 @@ public class WorkspaceLimiterControlModule
          yoGraphicsListRegistry.registerYoGraphic("SingularityCollapseAvoidance", virtualLegTangentialFrameAnkleCenteredGraphics);
 
          yoDesiredFootLinearVelocityGraphic = new YoGraphicVector(namePrefix + "DesiredFootLinearVelocity",
-                                                                  yoCurrentFootPosition,
+                                                                  yoDesiredFootPosition,
                                                                   yoDesiredFootLinearVelocity,
                                                                   0.2,
                                                                   YoAppearance.Red());
          yoGraphicsListRegistry.registerYoGraphic("SingularityCollapseAvoidance", yoDesiredFootLinearVelocityGraphic);
          yoCorrectedDesiredFootLinearVelocityGraphic = new YoGraphicVector(namePrefix + "CorrectedDesiredFootLinearVelocity",
-                                                                           yoCurrentFootPosition,
+                                                                           yoCorrectedDesiredFootPosition,
                                                                            yoCorrectedDesiredFootLinearVelocity,
                                                                            0.2,
                                                                            YoAppearance.Green());
@@ -400,8 +403,8 @@ public class WorkspaceLimiterControlModule
       desiredFootLinearAcceleration.setIncludingFrame(desiredFootLinearAccelerationToCorrect);
 
       desiredFootPosition.changeFrame(virtualLegTangentialFrameHipCentered);
-      desiredFootLinearVelocity.changeFrame(virtualLegTangentialFrameHipCentered);
-      desiredFootLinearAcceleration.changeFrame(virtualLegTangentialFrameHipCentered);
+      desiredFootLinearVelocity.changeFrame(virtualLegTangentialFrameAnkleCentered);
+      desiredFootLinearAcceleration.changeFrame(virtualLegTangentialFrameAnkleCentered);
 
       desiredLegLength.set(-desiredFootPosition.getZ());
       desiredPercentOfLegLength.set(desiredLegLength.getDoubleValue() / maximumLegLength.getDoubleValue());
@@ -536,23 +539,21 @@ public class WorkspaceLimiterControlModule
                                                    FixedFrameVector3DBasics desiredFootLinearVelocityToCorrect,
                                                    FixedFrameVector3DBasics desiredFootLinearAccelerationToCorrect)
    {
-      double desiredLinearVelocityX = desiredFootLinearVelocity.getX();
-      double desiredLinearVelocityY = desiredFootLinearVelocity.getY();
+      desiredFootLinearVelocity.checkReferenceFrameMatch(virtualLegTangentialFrameAnkleCentered);
+      desiredFootLinearAcceleration.checkReferenceFrameMatch(virtualLegTangentialFrameAnkleCentered);
+      pelvisLinearVelocity.checkReferenceFrameMatch(virtualLegTangentialFrameAnkleCentered);
+
       // Mix the desired leg extension velocity to progressively follow the pelvis velocity as the the leg is more straight
       double desiredLinearVelocityZ = InterpolationTools.linearInterpolate(desiredFootLinearVelocity.getZ(),
                                                                            pelvisLinearVelocity.getZ(),
                                                                            alphaSwingSingularityAvoidanceForFoot.getDoubleValue());
+      desiredFootLinearAcceleration.interpolate(EuclidCoreTools.zeroVector3D, alphaSwingSingularityAvoidanceForFoot.getDoubleValue());
       double desiredLinearAccelerationZ = InterpolationTools.linearInterpolate(desiredFootLinearAcceleration.getZ(),
                                                                                0.0,
                                                                                alphaSwingSingularityAvoidanceForFoot.getDoubleValue());
 
       desiredFootPosition.setZ(desiredFootPositionInAxisFrame);
-
-      desiredFootLinearVelocity.setIncludingFrame(virtualLegTangentialFrameAnkleCentered,
-                                                  desiredLinearVelocityX,
-                                                  desiredLinearVelocityY,
-                                                  desiredLinearVelocityZ);
-
+      desiredFootLinearVelocity.setZ(desiredLinearVelocityZ);
       desiredFootLinearAcceleration.setZ(desiredLinearAccelerationZ);
 
 

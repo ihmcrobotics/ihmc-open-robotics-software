@@ -36,8 +36,6 @@ public class StepGeneratorParametersPaneController
    @FXML
    private Spinner<Integer> numberOfFixedFootstepsSpinner;
    @FXML
-   private Spinner<Double> turnStepWidthSpinner;
-   @FXML
    private Spinner<Double> turnMaxAngleInwardSpinner;
    @FXML
    private Spinner<Double> turnMaxAngleOutwardSpinner;
@@ -116,7 +114,6 @@ public class StepGeneratorParametersPaneController
       stepParametersProperty.set(initialParameters);
 
       numberOfFixedFootstepsSpinner.setValueFactory(new IntegerSpinnerValueFactory(0, 4, initialParameters.getNumberOfFixedFootsteps()));
-      turnStepWidthSpinner.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0, initialParameters.getTurnStepWidth(), 0.05));
       turnMaxAngleInwardSpinner.setValueFactory(newAngleSpinnerValueFactory(-Math.PI / 4.0,
                                                                             Math.PI / 2.0,
                                                                             initialParameters.getTurnMaxAngleInward(),
@@ -134,7 +131,6 @@ public class StepGeneratorParametersPaneController
       swingHeightSlider.setLabelFormatter(StringConverterTools.metersToRoundedCentimeters());
 
       stepParametersProperty.bindBidirectionalNumberOfFixedFootsteps(numberOfFixedFootstepsSpinner.getValueFactory().valueProperty());
-      stepParametersProperty.bindBidirectionalTurnStepWidth(turnStepWidthSpinner.getValueFactory().valueProperty());
       stepParametersProperty.bindBidirectionalTurnMaxAngleInward(turnMaxAngleInwardSpinner.getValueFactory().valueProperty());
       stepParametersProperty.bindBidirectionalTurnMaxAngleOutward(turnMaxAngleOutwardSpinner.getValueFactory().valueProperty());
 
