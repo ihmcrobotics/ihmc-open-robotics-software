@@ -259,7 +259,8 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       footstepWasAdjusted.set(false);
       hasPlanarRegionBeenAssigned.set(false);
       captureRegionCalculator.hideCaptureRegion();
-//      twoStepCaptureRegionCalculator.reset();
+      oneStepSafetyHeuristics.reset();
+      multiStepCaptureRegionCalculator.reset();
       environmentConstraintProvider.reset();
       nextFootstep = null;
       nextFootstepTiming = null;
@@ -361,16 +362,10 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       oneStepSafetyHeuristics.computeCaptureRegionWithSafetyHeuristics(currentICP, allowableAreaForCoP.getCentroid(), captureRegionCalculator.getCaptureRegion());
       multiStepCaptureRegionCalculator.compute(upcomingFootstepSide.getEnumValue().getOppositeSide(),
                                                oneStepSafetyHeuristics.getCaptureRegionWithSafetyMargin(),
+//                                               captureRegionCalculator.getCaptureRegion(),
                                                nextFootstepTiming.getStepTime(),
                                                omega0,
                                                nextFootstep == null ? 1 : 2); // fixme hardcoded.
-//      if (nextFootstep != null)
-//         twoStepCaptureRegionCalculator.computeFromStepGoal(nextFootstepTiming.getStepTime(),
-//                                                            nextFootstep,
-//                                                            currentICP,
-//                                                            allowableAreaForCoP.getCentroid(),
-//                                                            omega0,
-//                                                            captureRegionCalculator.getCaptureRegion());
 
       if (!useStepAdjustment.getBooleanValue())
          return;
