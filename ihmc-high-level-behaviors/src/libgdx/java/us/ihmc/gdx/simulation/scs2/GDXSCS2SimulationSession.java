@@ -89,6 +89,11 @@ public class GDXSCS2SimulationSession
 
    public void create(GDXImGuiBasedUI baseUI)
    {
+      create(baseUI, controlPanel);
+   }
+
+   public void create(GDXImGuiBasedUI baseUI, ImGuiPanel panel)
+   {
       yoManager.startSession(simulationSession); // TODO: Add to controls?
 
       for (RobotDefinition robotDefinition : simulationSession.getRobotDefinitions())
@@ -117,7 +122,7 @@ public class GDXSCS2SimulationSession
       baseUI.get3DSceneManager().addRenderableProvider(getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
       baseUI.get3DSceneManager().addRenderableProvider(getVirtualRenderables, GDXSceneLevel.VIRTUAL);
 
-      plotManager.create(baseUI.getPerspectiveManager(), yoManager, controlPanel);
+      plotManager.create(baseUI.getPerspectiveManager(), yoManager, panel);
    }
 
    public void update()
@@ -171,7 +176,7 @@ public class GDXSCS2SimulationSession
       bulletPhysicsDebugger.getVirtualRenderables(renderables, pool);
    }
 
-   private void renderImGuiWidgets()
+   public void renderImGuiWidgets()
    {
       ImGui.pushItemWidth(110);
       if (ImGui.inputInt("Bullet simulation dt (Hz)", dtHz))
