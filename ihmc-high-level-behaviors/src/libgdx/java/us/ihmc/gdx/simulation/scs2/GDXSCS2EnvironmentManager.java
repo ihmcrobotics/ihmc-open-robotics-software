@@ -6,11 +6,11 @@ import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.scs2.SCS2AvatarSimulation;
 import us.ihmc.avatar.scs2.SCS2AvatarSimulationFactory;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
+import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.simulation.environment.object.objects.FlatGroundDefinition;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 
@@ -26,13 +26,16 @@ public class GDXSCS2EnvironmentManager
    private GDXImGuiBasedUI baseUI;
    private int recordFrequency;
    private DRCRobotModel robotModel;
+   private CommunicationMode ros2CommunicationMode;
 
-   public void create(GDXImGuiBasedUI baseUI, DRCRobotModel robotModel)
+   public void create(GDXImGuiBasedUI baseUI, DRCRobotModel robotModel, CommunicationMode ros2CommunicationMode)
    {
       this.baseUI = baseUI;
       this.robotModel = robotModel;
+      this.ros2CommunicationMode = ros2CommunicationMode;
 
-      recordFrequency = (int) Math.max(1.0, Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT()));
+      //      recordFrequency = (int) Math.max(1.0, Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT()));
+      recordFrequency = 1;
 
       useVelocityAndHeadingScript = true;
       walkingScriptParameters = new HeadingAndVelocityEvaluationScriptParameters();
@@ -60,7 +63,7 @@ public class GDXSCS2EnvironmentManager
          destroy(baseUI);
       }
 
-      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.INTRAPROCESS,
+      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(ros2CommunicationMode.getPubSubImplementation(),
                                                           "flat_ground_walking_track_simulation");
 
       SCS2AvatarSimulationFactory avatarSimulationFactory = new SCS2AvatarSimulationFactory();
@@ -70,7 +73,7 @@ public class GDXSCS2EnvironmentManager
       avatarSimulationFactory.setTerrainObjectDefinition(new FlatGroundDefinition());
       avatarSimulationFactory.setRobotInitialSetup(robotInitialSetup);
       avatarSimulationFactory.setSimulationDataRecordTickPeriod(recordFrequency);
-      avatarSimulationFactory.setCreateYoVariableServer(false);
+      avatarSimulationFactory.setCreateYoVariableServer(true);
       avatarSimulationFactory.setUseBulletPhysicsEngine(true);
       avatarSimulationFactory.setUseDescriptionCollisions(true);
       avatarSimulationFactory.setShowGUI(false);

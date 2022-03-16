@@ -36,7 +36,8 @@ public class GDXSCS2SimulationSession
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImInt bufferIndex = new ImInt();
    private final ImInt dtHz = new ImInt(240);
-   private final ImFloat bufferLength = new ImFloat(5.0f);
+   private final ImInt bufferRecordTickPeriod = new ImInt(1);
+   private final ImFloat bufferDuration = new ImFloat(5.0f);
    private final ImBoolean pauseAtEndOfBuffer = new ImBoolean(true);
    private final ImBoolean showCollisionMeshes = new ImBoolean(false);
    private final YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
@@ -112,7 +113,8 @@ public class GDXSCS2SimulationSession
 
       simulationSession.getRootRegistry().addChild(yoRegistry);
 
-      changeBufferLength();
+      bufferRecordTickPeriod.set(simulationSession.getBufferRecordTickPeriod());
+      changeBufferDuration();
       changeDT();
       simulationSession.submitPlaybackRealTimeRate(playbackRealtimeRate.get());
       simulationSession.submitRunAtRealTimeRate(runAtRealtimeRate.get());
@@ -183,6 +185,10 @@ public class GDXSCS2SimulationSession
       {
          changeDT();
       }
+      else
+      {
+         dtHz.set((int) UnitConversions.secondsToHertz(simulationSession.getSessionDTSeconds()));
+      }
       ImGui.popItemWidth();
       if (ImGui.radioButton("Run", simulationSession.getActiveMode() == SessionMode.RUNNING))
       {
@@ -210,9 +216,18 @@ public class GDXSCS2SimulationSession
       }
       ImGui.sameLine();
       ImGui.text("Out point: " + yoManager.getOutPoint());
-      if (ImGui.inputFloat(labels.get("Buffer length (s)"), bufferLength))
+      if (ImGui.inputInt(labels.get("Buffer record tick period"), bufferRecordTickPeriod))
       {
-         changeBufferLength();
+         simulationSession.submitBufferRecordTickPeriod(bufferRecordTickPeriod.get());
+         changeBufferDuration();
+      }
+      else
+      {
+         bufferRecordTickPeriod.set(simulationSession.getBufferRecordTickPeriod());
+      }
+      if (ImGui.inputFloat(labels.get("Buffer duration (s)"), bufferDuration))
+      {
+         changeBufferDuration();
       }
       if (ImGui.sliderInt(labels.get("Buffer"), bufferIndex.getData(), 0, yoManager.getBufferSize()))
       {
@@ -238,9 +253,9 @@ public class GDXSCS2SimulationSession
       plotManager.renderImGuiWidgets();
    }
 
-   private void changeBufferLength()
+   private void changeBufferDuration()
    {
-      int bufferSizeRequest = (int) (bufferLength.get() / UnitConversions.hertzToSeconds(dtHz.get()));
+      int bufferSizeRequest = (int) (bufferDuration.get() / UnitConversions.hertzToSeconds(dtHz.get()) / bufferRecordTickPeriod.get());
       simulationSession.submitBufferSizeRequest(bufferSizeRequest);
    }
 
