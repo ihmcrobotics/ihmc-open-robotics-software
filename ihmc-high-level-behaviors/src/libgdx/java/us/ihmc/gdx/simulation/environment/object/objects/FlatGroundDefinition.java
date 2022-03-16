@@ -23,7 +23,8 @@ public class FlatGroundDefinition extends TerrainObjectDefinition
       Box3DDefinition box3DDefinition = new Box3DDefinition();
       box3DDefinition.setSize(sizeX, sizeY, sizeZ);
 
-      ModelFileGeometryDefinition modelFileGeometryDefinition = new ModelFileGeometryDefinition("environmentObjects/flatGround/FlatGround.obj");
+//      ModelFileGeometryDefinition modelFileGeometryDefinition = new ModelFileGeometryDefinition("environmentObjects/flatGround/FlatGround.obj");
+      ModelFileGeometryDefinition modelFileGeometryDefinition = new ModelFileGeometryDefinition("environmentObjects/flatGround/FlatGround.g3dj");
       AffineTransformDefinition originTransform = new AffineTransformDefinition(new YawPitchRoll(), new Point3D());
       getVisualDefinitions().add(new VisualDefinition(originTransform, modelFileGeometryDefinition, new MaterialDefinition(ColorDefinitions.White())));
       YawPitchRollTransformDefinition originPose = new YawPitchRollTransformDefinition(0.0, 0.0, -sizeZ / 2.0);
