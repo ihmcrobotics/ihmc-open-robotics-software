@@ -13,14 +13,19 @@ import java.util.ArrayList;
 
 public class FrameGDXGraphicsNode
 {
+   private static final boolean ENABLE_REFERENCE_FRAME_GRAPHICS
+         = Boolean.parseBoolean(System.getProperty("frameGDXGraphicsNodeEnableReferenceFrameGraphics", "false"));
+
    private final ReferenceFrame referenceFrame;
-   private final ModelInstance coordinateFrame;
+   private ModelInstance coordinateFrame;
    private final ArrayList<FrameGDXNodePart> parts = new ArrayList<>();
 
    public FrameGDXGraphicsNode(ReferenceFrame referenceFrame)
    {
       this.referenceFrame = referenceFrame;
-      coordinateFrame = GDXModelPrimitives.createCoordinateFrameInstance(0.15);
+
+      if (ENABLE_REFERENCE_FRAME_GRAPHICS)
+         coordinateFrame = GDXModelPrimitives.createCoordinateFrameInstance(0.15);
    }
 
    public void addModelPart(DynamicGDXModel model, String name)
@@ -35,7 +40,8 @@ public class FrameGDXGraphicsNode
          part.update();
       }
 
-      GDXTools.toGDX(referenceFrame.getTransformToRoot(), coordinateFrame.transform);
+      if (ENABLE_REFERENCE_FRAME_GRAPHICS)
+         GDXTools.toGDX(referenceFrame.getTransformToRoot(), coordinateFrame.transform);
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
@@ -45,6 +51,7 @@ public class FrameGDXGraphicsNode
          part.getRenderables(renderables, pool);
       }
 
-      coordinateFrame.getRenderables(renderables, pool);
+      if (ENABLE_REFERENCE_FRAME_GRAPHICS)
+         coordinateFrame.getRenderables(renderables, pool);
    }
 }
