@@ -428,7 +428,8 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
       if (!pointCloudExecutor.isExecuting())
       {
          ros2PointsToPublish.clear();
-         for (int i = 0; i < depthSensorSimulator.getNumberOfPoints() && i < depthSensorSimulator.getPointCloudBuffer().limit(); i++)
+         for (int i = 0; i < depthSensorSimulator.getNumberOfPoints()
+                         && (Float.BYTES * 8 * i + 2) < depthSensorSimulator.getPointCloudBuffer().limit(); i++)
          {
             float x = depthSensorSimulator.getPointCloudBuffer().get(Float.BYTES * 8 * i);
             float y = depthSensorSimulator.getPointCloudBuffer().get(Float.BYTES * 8 * i + 1);
