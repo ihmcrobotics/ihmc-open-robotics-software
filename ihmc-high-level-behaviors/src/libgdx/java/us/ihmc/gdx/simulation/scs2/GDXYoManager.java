@@ -81,6 +81,13 @@ public class GDXYoManager
       return linkedBufferProperties.peekCurrentBufferProperties().getSize();
    }
 
+   public int getInPoint()
+   {
+      if (linkedBufferProperties == null || linkedBufferProperties.peekCurrentBufferProperties() == null)
+         return -1;
+      return linkedBufferProperties.peekCurrentBufferProperties().getInPoint();
+   }
+
    public int getOutPoint()
    {
       if (linkedBufferProperties == null || linkedBufferProperties.peekCurrentBufferProperties() == null)
@@ -93,5 +100,12 @@ public class GDXYoManager
       if (linkedBufferProperties == null || linkedBufferProperties.peekCurrentBufferProperties() == null)
          return -1;
       return linkedBufferProperties.peekCurrentBufferProperties().getCurrentIndex();
+   }
+
+   public int getActiveBufferLength()
+   {
+      if (linkedBufferProperties == null || linkedBufferProperties.peekCurrentBufferProperties() == null)
+         return -1;
+      return linkedBufferProperties.peekCurrentBufferProperties().getActiveBufferLength();
    }
 }

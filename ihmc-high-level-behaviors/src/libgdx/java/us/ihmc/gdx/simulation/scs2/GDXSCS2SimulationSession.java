@@ -18,8 +18,10 @@ import us.ihmc.log.LogTools;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.session.SessionMode;
+import us.ihmc.scs2.sharedMemory.CropBufferRequest;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
+import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngine;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.time.DurationCalculator;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -46,11 +48,12 @@ public class GDXSCS2SimulationSession
    private final GDXYoManager yoManager = new GDXYoManager();
    private final ArrayList<GDXSimulatedRobot> robots = new ArrayList<>();
    private final ArrayList<GDXSimulatedTerrainObject> terrainObjects = new ArrayList<>();
-   private final GDXBulletPhysicsAsyncDebugger bulletPhysicsDebugger;
+   private GDXBulletPhysicsAsyncDebugger bulletPhysicsDebugger;
    private final SCS2YoImPlotManager plotManager = new SCS2YoImPlotManager();
    private boolean sessionStartedHandled = false;
    private final RenderableProvider getRealRenderables = this::getRealRenderables;
    private final RenderableProvider getVirtualRenderables = this::getVirtualRenderables;
+   private PhysicsEngine physicsEngine;
 
    public GDXSCS2SimulationSession()
    {
@@ -61,12 +64,17 @@ public class GDXSCS2SimulationSession
    {
       this.simulationSession = simulationSession;
 
-      BulletPhysicsEngine bulletPhysicsEngine = (BulletPhysicsEngine) simulationSession.getPhysicsEngine();
-      bulletPhysicsDebugger = new GDXBulletPhysicsAsyncDebugger(bulletPhysicsEngine.getBulletMultiBodyDynamicsWorld());
+      physicsEngine = simulationSession.getPhysicsEngine();
+      if (physicsEngine instanceof BulletPhysicsEngine)
+      {
+         BulletPhysicsEngine bulletPhysicsEngine = (BulletPhysicsEngine) physicsEngine;
+         bulletPhysicsDebugger = new GDXBulletPhysicsAsyncDebugger(bulletPhysicsEngine.getBulletMultiBodyDynamicsWorld());
+      }
 
       simulationSession.addAfterPhysicsCallback(time ->
       {
-         bulletPhysicsDebugger.drawBulletDebugDrawings();
+         if (physicsEngine instanceof BulletPhysicsEngine)
+            bulletPhysicsDebugger.drawBulletDebugDrawings();
 
          if (pauseAtEndOfBuffer.get() && yoManager.getCurrentIndex() == yoManager.getBufferSize() - 2)
          {
@@ -147,7 +155,8 @@ public class GDXSCS2SimulationSession
       {
          robot.update();
       }
-      bulletPhysicsDebugger.update();
+      if (physicsEngine instanceof BulletPhysicsEngine)
+         bulletPhysicsDebugger.update();
    }
 
    public void getRealRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
@@ -175,7 +184,8 @@ public class GDXSCS2SimulationSession
             terrainObject.getCollisionRenderables(renderables, pool);
          }
       }
-      bulletPhysicsDebugger.getVirtualRenderables(renderables, pool);
+      if (physicsEngine instanceof BulletPhysicsEngine)
+         bulletPhysicsDebugger.getVirtualRenderables(renderables, pool);
    }
 
    public void renderImGuiWidgets()
@@ -216,6 +226,11 @@ public class GDXSCS2SimulationSession
       }
       ImGui.sameLine();
       ImGui.text("Out point: " + yoManager.getOutPoint());
+      if (ImGui.button(labels.get("Crop to In Out")))
+      {
+         CropBufferRequest cropBufferRequest = new CropBufferRequest(yoManager.getInPoint(), yoManager.getOutPoint());
+         simulationSession.submitCropBufferRequest(cropBufferRequest);
+      }
       if (ImGui.inputInt(labels.get("Buffer record tick period"), bufferRecordTickPeriod))
       {
          simulationSession.submitBufferRecordTickPeriod(bufferRecordTickPeriod.get());
@@ -249,7 +264,8 @@ public class GDXSCS2SimulationSession
       }
       ImGui.popItemWidth();
       ImGui.checkbox(labels.get("Show collision meshes"), showCollisionMeshes);
-      bulletPhysicsDebugger.renderImGuiWidgets();
+      if (physicsEngine instanceof BulletPhysicsEngine)
+         bulletPhysicsDebugger.renderImGuiWidgets();
       plotManager.renderImGuiWidgets();
    }
 
