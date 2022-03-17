@@ -114,10 +114,10 @@ public class SimpleTwoLeggedRobotDefinition extends RobotDefinition
 
          RigidBodyDefinition footBody = new RigidBodyDefinition(robotSide.getShortLowerCaseName() + "_" + footBodyName);
          footBody.setMass(footMass);
-         footBody.setCenterOfMassOffset(0.0, 0.0, -0.5 * footSize.getZ());
+         footBody.setCenterOfMassOffset(0.25*footSize.getX(), 0.0, -0.5 * footSize.getZ());
          footBody.setMomentOfInertia(MomentOfInertiaFactory.solidBox(footMass, footSize));
          footBody.getVisualDefinitions()
-                 .add(new VisualDefinition(new Vector3D(0, 0, -0.5 * footSize.getZ()),
+                 .add(new VisualDefinition(new Vector3D(0.25*footSize.getX(), 0, -0.5 * footSize.getZ()),
                                            new Box3DDefinition(footSize),
                                            new MaterialDefinition(ColorDefinitions.BlueViolet())));
 
@@ -126,7 +126,7 @@ public class SimpleTwoLeggedRobotDefinition extends RobotDefinition
             double x = ((i & 1) == 0 ? -1.0 : 1.0) * 0.5 * footSize.getX();
             double y = ((i & 2) == 0 ? -1.0 : 1.0) * 0.5 * footSize.getY();
             double z = -footSize.getZ();
-            Vector3D gcOffset = new Vector3D(x, y, z);
+            Vector3D gcOffset = new Vector3D(x+0.25*footSize.getX(), y, z);
             anklePitchJoint.addGroundContactPointDefinition(new GroundContactPointDefinition("gc_" + i + "_" +robotSide.getShortLowerCaseName(), gcOffset));
             footBody.getVisualDefinitions()
                     .add(new VisualDefinition(gcOffset, new Sphere3DDefinition(0.01), new MaterialDefinition(ColorDefinitions.Orange())));
