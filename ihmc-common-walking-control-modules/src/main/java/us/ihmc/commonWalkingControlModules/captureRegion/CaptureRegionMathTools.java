@@ -34,6 +34,7 @@ public class CaptureRegionMathTools
       double angleBetweenDirections = Math.abs(directionA.angle(directionB));
       double angleBetweenDirectionsToSetLine = -angleBetweenDirections * alpha;
 
+      rotatedFromA.setReferenceFrame(directionA.getReferenceFrame());
       rotation.setToYawOrientation(angleBetweenDirectionsToSetLine);
       rotation.transform(directionA, rotatedFromA);
 
