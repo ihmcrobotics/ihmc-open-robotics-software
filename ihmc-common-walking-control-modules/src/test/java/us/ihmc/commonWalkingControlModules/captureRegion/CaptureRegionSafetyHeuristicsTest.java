@@ -52,8 +52,8 @@ public class CaptureRegionSafetyHeuristicsTest
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final ReferenceFrame leftAnkleZUpFrame = new SimpleAnkleZUpReferenceFrame("leftAnkleZUp");
-   private final ReferenceFrame rightAnkleZUpFrame = new SimpleAnkleZUpReferenceFrame("rightAnkleZUp");
+   private final ReferenceFrame leftAnkleZUpFrame = new SimpleAnkleZUpReferenceFrame("leftAnkleZUp", 0.1);
+   private final ReferenceFrame rightAnkleZUpFrame = new SimpleAnkleZUpReferenceFrame("rightAnkleZUp", -0.1);
    private final SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<>(leftAnkleZUpFrame, rightAnkleZUpFrame);
 
    private final YoRegistry registry = new YoRegistry("CaptureRegionCalculatorTest");
@@ -75,13 +75,13 @@ public class CaptureRegionSafetyHeuristicsTest
    }
 
    @Test
-   public void testPointsInsideCaptureRegion()
+   public void testPointsToTheLeftOfRightStance()
    {
       double footWidth = 0.1;
       double footLength = 0.2;
       double kinematicStepRange = 1.0;
 
-      RobotSide swingSide = RobotSide.RIGHT;
+      RobotSide swingSide = RobotSide.LEFT;
       double swingTimeRemaining = 0.1;
       double omega0 = 3.0;
 
@@ -96,21 +96,26 @@ public class CaptureRegionSafetyHeuristicsTest
       listOfPoints.add(new Point2D(-footLength / 2.0, footWidth / 2.0));
       listOfPoints.add(new Point2D(footLength / 2.0, -footWidth / 2.0));
       listOfPoints.add(new Point2D(footLength / 2.0, footWidth / 2.0));
-      FrameConvexPolygon2D supportFootPolygon = new FrameConvexPolygon2D(worldFrame, Vertex2DSupplier.asVertex2DSupplier(listOfPoints));
+      FrameConvexPolygon2D supportFootPolygon = new FrameConvexPolygon2D(ankleZUpFrames.get(swingSide.getOppositeSide()), Vertex2DSupplier.asVertex2DSupplier(listOfPoints));
+      supportFootPolygon.changeFrameAndProjectToXYPlane(worldFrame);
 
-      FramePoint2D icp = new FramePoint2D(worldFrame, 0.3, -0.2);
+      FramePoint2D icp = new FramePoint2D(ankleZUpFrames.get(swingSide.getOppositeSide()), 0.0, 0.08);
+      icp.changeFrameAndProjectToXYPlane(worldFrame);
       captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, icp, omega0, supportFootPolygon);
       FrameConvexPolygon2D captureRegion = captureRegionCalculator.getCaptureRegion();
 
-      heuristics.computeCaptureRegionWithSafetyHeuristics(icp, supportFootPolygon.getCentroid(), captureRegion);
+      heuristics.computeCaptureRegionWithSafetyHeuristics(swingSide.getOppositeSide(),
+                                                          icp, supportFootPolygon.getCentroid(), captureRegion);
 
       for (int i = 0; i < heuristics.getCaptureRegionWithSafetyMargin().getNumberOfVertices(); i++)
       {
-         FramePoint2DReadOnly vertex = heuristics.getCaptureRegionWithSafetyMargin().getVertex(i);
+         FramePoint2D vertex = new FramePoint2D(heuristics.getCaptureRegionWithSafetyMargin().getVertex(i));
+         vertex.changeFrameAndProjectToXYPlane(captureRegion.getReferenceFrame());
          if (!captureRegion.isPointInside(vertex))
             assertEquals(vertex.distanceFromOrigin(), kinematicStepRange, 1e-2);
       }
 
+      assertTheShrunkenRegionIsInTheUnshrunkenRegion(captureRegion, heuristics.getCaptureRegionWithSafetyMargin(), 1e-5);
 
       if (PLOT_RESULTS)
       {
@@ -131,6 +136,117 @@ public class CaptureRegionSafetyHeuristicsTest
       }
 
    }
+
+   @Test
+   public void testPointsInsideCaptureRegion()
+   {
+      double footWidth = 0.1;
+      double footLength = 0.2;
+      double kinematicStepRange = 1.0;
+
+      RobotSide swingSide = RobotSide.RIGHT;
+      double swingTimeRemaining = 0.1;
+      double omega0 = 3.0;
+
+      OneStepCaptureRegionCalculator captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth, kinematicStepRange,
+                                                                                                  ankleZUpFrames, registry, null);
+      CaptureRegionSafetyHeuristics heuristics = new CaptureRegionSafetyHeuristics(() -> kinematicStepRange, registry);
+
+      new DefaultParameterReader().readParametersInRegistry(registry);
+
+      ArrayList<Point2D> listOfPoints = new ArrayList<Point2D>();
+      listOfPoints.add(new Point2D(-footLength / 2.0, -footWidth / 2.0));
+      listOfPoints.add(new Point2D(-footLength / 2.0, footWidth / 2.0));
+      listOfPoints.add(new Point2D(footLength / 2.0, -footWidth / 2.0));
+      listOfPoints.add(new Point2D(footLength / 2.0, footWidth / 2.0));
+      FrameConvexPolygon2D supportFootPolygon = new FrameConvexPolygon2D(ankleZUpFrames.get(swingSide.getOppositeSide()), Vertex2DSupplier.asVertex2DSupplier(listOfPoints));
+      supportFootPolygon.changeFrameAndProjectToXYPlane(worldFrame);
+
+      FramePoint2D icp = new FramePoint2D(worldFrame, 0.3, -0.2);
+      captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, icp, omega0, supportFootPolygon);
+      FrameConvexPolygon2D captureRegion = captureRegionCalculator.getCaptureRegion();
+
+      heuristics.computeCaptureRegionWithSafetyHeuristics(swingSide.getOppositeSide(),
+                                                          icp, supportFootPolygon.getCentroid(), captureRegion);
+
+      assertTheShrunkenRegionIsInTheUnshrunkenRegion(captureRegion, heuristics.getCaptureRegionWithSafetyMargin(), 1e-5);
+
+      if (PLOT_RESULTS)
+      {
+         FrameGeometryTestFrame testFrame = new FrameGeometryTestFrame(-5, 5, -5, 5);
+         FrameGeometry2dPlotter plotter = testFrame.getFrameGeometry2dPlotter();
+         plotter.setDrawPointsLarge();
+         plotter.addPolygon(supportFootPolygon, Color.black);
+         plotter.addPolygon(captureRegion, Color.green);
+         plotter.addFramePoint2d(icp, Color.blue);
+         plotter.addPolygon(heuristics.getCaptureRegionWithSafetyMargin(), Color.red);
+
+         for (int i = 0; i < captureRegion.getNumberOfVertices(); i++)
+            plotter.addFramePoint2d(captureRegion.getVertex(i), Color.green);
+         for (int i = 0; i < heuristics.getCaptureRegionWithSafetyMargin().getNumberOfVertices(); i++)
+            plotter.addFramePoint2d(heuristics.getCaptureRegionWithSafetyMargin().getVertex(i), Color.red);
+
+         waitForButtonOrPause(testFrame);
+      }
+
+   }
+
+   @Test
+   public void testPointNearFoot()
+   {
+      double footWidth = 0.03;
+      double footLength = 0.13;
+      double kinematicStepRange = 1.0;
+
+      RobotSide swingSide = RobotSide.RIGHT;
+      double swingTimeRemaining = 0.564;
+      double omega0 = 3.0;
+
+      OneStepCaptureRegionCalculator captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth, kinematicStepRange,
+                                                                                                  ankleZUpFrames, registry, null);
+      CaptureRegionSafetyHeuristics heuristics = new CaptureRegionSafetyHeuristics(() -> kinematicStepRange, registry);
+
+      new DefaultParameterReader().readParametersInRegistry(registry);
+
+      ArrayList<Point2D> listOfPoints = new ArrayList<Point2D>();
+      listOfPoints.add(new Point2D(-footLength / 2.0, -footWidth / 2.0));
+      listOfPoints.add(new Point2D(-footLength / 2.0, footWidth / 2.0));
+      listOfPoints.add(new Point2D(footLength / 2.0, -footWidth / 2.0));
+      listOfPoints.add(new Point2D(footLength / 2.0, footWidth / 2.0));
+      FrameConvexPolygon2D supportFootPolygon = new FrameConvexPolygon2D(ankleZUpFrames.get(swingSide.getOppositeSide()), Vertex2DSupplier.asVertex2DSupplier(listOfPoints));
+      supportFootPolygon.changeFrameAndProjectToXYPlane(worldFrame);
+
+      FramePoint2D icp = new FramePoint2D(ankleZUpFrames.get(swingSide.getOppositeSide()), 0.05, -0.06);
+      icp.changeFrameAndProjectToXYPlane(worldFrame);
+
+      captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, icp, omega0, supportFootPolygon);
+      FrameConvexPolygon2D captureRegion = captureRegionCalculator.getCaptureRegion();
+
+      heuristics.computeCaptureRegionWithSafetyHeuristics(swingSide.getOppositeSide(),
+                                                          icp, supportFootPolygon.getCentroid(), captureRegion);
+
+      assertTheShrunkenRegionIsInTheUnshrunkenRegion(captureRegion, heuristics.getCaptureRegionWithSafetyMargin(), 1e-5);
+
+      if (PLOT_RESULTS)
+      {
+         FrameGeometryTestFrame testFrame = new FrameGeometryTestFrame(-5, 5, -5, 5);
+         FrameGeometry2dPlotter plotter = testFrame.getFrameGeometry2dPlotter();
+         plotter.setDrawPointsLarge();
+         plotter.addPolygon(supportFootPolygon, Color.black);
+         plotter.addPolygon(captureRegion, Color.green);
+         plotter.addFramePoint2d(icp, Color.blue);
+         plotter.addPolygon(heuristics.getCaptureRegionWithSafetyMargin(), Color.red);
+
+         for (int i = 0; i < captureRegion.getNumberOfVertices(); i++)
+            plotter.addFramePoint2d(captureRegion.getVertex(i), Color.green);
+         for (int i = 0; i < heuristics.getCaptureRegionWithSafetyMargin().getNumberOfVertices(); i++)
+            plotter.addFramePoint2d(heuristics.getCaptureRegionWithSafetyMargin().getVertex(i), Color.red);
+
+         waitForButtonOrPause(testFrame);
+      }
+
+   }
+
 
    @Test
    public void testProjectedFootCorners()
@@ -157,14 +273,15 @@ public class CaptureRegionSafetyHeuristicsTest
       listOfPoints.add(new Point2D(-footLength / 2.0, footWidth / 2.0));
       listOfPoints.add(new Point2D(footLength / 2.0, -footWidth / 2.0));
       listOfPoints.add(new Point2D(footLength / 2.0, footWidth / 2.0));
-      FrameConvexPolygon2D supportFootPolygon = new FrameConvexPolygon2D(worldFrame, Vertex2DSupplier.asVertex2DSupplier(listOfPoints));
+      FrameConvexPolygon2D supportFootPolygon = new FrameConvexPolygon2D(ankleZUpFrames.get(swingSide.getOppositeSide()), Vertex2DSupplier.asVertex2DSupplier(listOfPoints));
+      supportFootPolygon.changeFrameAndProjectToXYPlane(worldFrame);
 
       FramePoint2D icp = new FramePoint2D(worldFrame, 0.6, -0.5);
       captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, icp, omega0, supportFootPolygon);
       FrameConvexPolygon2D captureRegion = captureRegionCalculator.getCaptureRegion();
 
-      heuristics.computeCaptureRegionWithSafetyHeuristics(icp, supportFootPolygon.getCentroid(), captureRegion);
-      FrameConvexPolygon2DReadOnly shrunkenRegion = heuristics.getCaptureRegionWithSafetyMargin();
+      heuristics.computeCaptureRegionWithSafetyHeuristics(swingSide.getOppositeSide(), icp, supportFootPolygon.getCentroid(), captureRegion);
+      FrameConvexPolygon2D shrunkenRegion = new FrameConvexPolygon2D(heuristics.getCaptureRegionWithSafetyMargin());
 
 
       ArrayList<FramePoint2D> expectedPointsOnBorder = new ArrayList<FramePoint2D>();
@@ -178,12 +295,16 @@ public class CaptureRegionSafetyHeuristicsTest
       for (int i = 0; i < expectedPointsOnBorder.size(); i++)
       {
          FramePoint2DBasics closestVertex = captureRegion.getClosestVertexCopy(expectedPointsOnBorder.get(i));
+         shrunkenRegion.changeFrame(closestVertex.getReferenceFrame());
+
          closestVertex.checkReferenceFrameMatch(expectedPointsOnBorder.get(i));
          EuclidCoreTestTools.assertTuple2DEquals(closestVertex, expectedPointsOnBorder.get(i), 1.0e-6);
          assertTrue(closestVertex.epsilonEquals(expectedPointsOnBorder.get(i), 10e-7));
 
          assertFalse(shrunkenRegion.pointIsOnPerimeter(expectedPointsOnBorder.get(i)));
       }
+
+      assertTheShrunkenRegionIsInTheUnshrunkenRegion(captureRegion, heuristics.getCaptureRegionWithSafetyMargin(), 1e-5);
 
       if (PLOT_RESULTS)
       {
@@ -204,11 +325,20 @@ public class CaptureRegionSafetyHeuristicsTest
       }
    }
 
+   private static void assertTheShrunkenRegionIsInTheUnshrunkenRegion(FrameConvexPolygon2DReadOnly unshrunkenRegion, FrameConvexPolygon2DReadOnly shrunkenRegion, double epsilon)
+   {
+      FrameConvexPolygon2D regionToCheck = new FrameConvexPolygon2D(shrunkenRegion);
+      regionToCheck.changeFrame(unshrunkenRegion.getReferenceFrame());
+
+      for (int i = 0; i < shrunkenRegion.getNumberOfVertices(); i++)
+         assertTrue(unshrunkenRegion.isPointInside(regionToCheck.getVertex(i), epsilon));
+   }
+
    private static class SimpleAnkleZUpReferenceFrame extends ReferenceFrame
    {
       private final Vector3D offset = new Vector3D();
 
-      public SimpleAnkleZUpReferenceFrame(String name)
+      public SimpleAnkleZUpReferenceFrame(String name, double yOffset)
       {
          super(name, ReferenceFrame.getWorldFrame());
       }
