@@ -12,10 +12,15 @@ import us.ihmc.gdx.input.ImGui2DViewInput;
 
 public class GDX2DOrthographicCamera extends OrthographicCamera
 {
-   private final double zoomSpeedFactor = 0.1;
-   private final double mouseTranslateSpeedFactor = 2.0;
-   private final double keyboardTranslateSpeedFactor = 1000.0;
-   private final double maxTranslation = 5000.0;
+   private double zoomSpeedFactor = 0.1;
+   private double mouseTranslateSpeedFactor = 0.02;
+   private double keyboardTranslateSpeedFactor = 10.0;
+   private double minTranslationX = -100.0;
+   private double minTranslationY = -100.0;
+   private double maxTranslationX = 100.0;
+   private double maxTranslationY = 100.0;
+   private double maxZoom = 2.0;
+   private double minZoom = 0.1;
 
    private boolean libGDXInputMode = false;
    private boolean isWPressed = false;
@@ -96,7 +101,7 @@ public class GDX2DOrthographicCamera extends OrthographicCamera
    private void scrolled(float amountY)
    {
       zoom = (float) (zoom + Math.signum(amountY) * zoom * zoomSpeedFactor);
-      zoom = (float) MathTools.clamp(zoom, 0.001, 1.0);
+      zoom = (float) MathTools.clamp(zoom, minZoom, maxZoom);
    }
 
    // Taken from GDX PerspectiveCamera
@@ -131,8 +136,8 @@ public class GDX2DOrthographicCamera extends OrthographicCamera
          translate((float) getKeyboardTranslateSpeedFactor() * tpf, 0.0f);
       }
 
-      position.x = (float) MathTools.clamp(position.x, maxTranslation);
-      position.y = (float) MathTools.clamp(position.y, maxTranslation);
+      position.x = (float) MathTools.clamp(position.x, minTranslationX, maxTranslationX);
+      position.y = (float) MathTools.clamp(position.y, minTranslationY, maxTranslationY);
 
       update(true);
    }
@@ -140,5 +145,85 @@ public class GDX2DOrthographicCamera extends OrthographicCamera
    private double getKeyboardTranslateSpeedFactor()
    {
       return keyboardTranslateSpeedFactor * zoom;
+   }
+
+   public double getMinZoom()
+   {
+      return minZoom;
+   }
+
+   public void setMinZoom(double minZoom)
+   {
+      this.minZoom = minZoom;
+   }
+
+   public double getMaxZoom()
+   {
+      return maxZoom;
+   }
+
+   public void setMaxZoom(double maxZoom)
+   {
+      this.maxZoom = maxZoom;
+   }
+
+   public double getMinTranslationX()
+   {
+      return minTranslationX;
+   }
+
+   public void setMinTranslationX(double minTranslationX)
+   {
+      this.minTranslationX = minTranslationX;
+   }
+
+   public double getMaxTranslationX()
+   {
+      return maxTranslationX;
+   }
+
+   public void setMaxTranslationX(double maxTranslationX)
+   {
+      this.maxTranslationX = maxTranslationX;
+   }
+
+   public double getMinTranslationY()
+   {
+      return minTranslationY;
+   }
+
+   public void setMinTranslationY(double minTranslationY)
+   {
+      this.minTranslationY = minTranslationY;
+   }
+
+   public double getMaxTranslationY()
+   {
+      return maxTranslationY;
+   }
+
+   public void setMaxTranslationY(double maxTranslationY)
+   {
+      this.maxTranslationY = maxTranslationY;
+   }
+
+   public double getZoomSpeedFactor()
+   {
+      return zoomSpeedFactor;
+   }
+
+   public void setZoomSpeedFactor(double zoomSpeedFactor)
+   {
+      this.zoomSpeedFactor = zoomSpeedFactor;
+   }
+
+   public double getMouseTranslateSpeedFactor()
+   {
+      return mouseTranslateSpeedFactor;
+   }
+
+   public void setKeyboardTranslateSpeedFactor(double keyboardTranslateSpeedFactor)
+   {
+      this.keyboardTranslateSpeedFactor = keyboardTranslateSpeedFactor;
    }
 }

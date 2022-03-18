@@ -13,8 +13,9 @@ public class GDX2DSprite
    private final Sprite sprite;
    private final Texture texture;
    private double orientation;
-   private float scale = 1.0f;
    private boolean visible = true;
+   private boolean flipX = false;
+   private boolean flipY = false;
 
    public GDX2DSprite(String imageName)
    {
@@ -35,21 +36,19 @@ public class GDX2DSprite
 
    public void draw(SpriteBatch spriteBatch)
    {
-      float x = (float) sprite.getX();
-      float y = (float) sprite.getY();
+      float x = sprite.getX();
+      float y = sprite.getY();
       float originX = 0.0f;
       float originY = 0.0f;
-      float width = (float) sprite.getWidth();
-      float height = (float) sprite.getHeight();
-      float scaleX = scale;
-      float scaleY = scale;
+      float width = sprite.getWidth();
+      float height = sprite.getHeight();
+      float scaleX = sprite.getScaleX();
+      float scaleY = sprite.getScaleY();
       float rotation = (float) orientation;
       int srcX = 0;
       int srcY = 0;
-      int srcWidth = (int) sprite.getWidth(); // TODO: Check
-      int srcHeight = (int) sprite.getHeight(); // TODO: Check
-      boolean flipX = false;
-      boolean flipY = false;
+      int srcWidth = texture.getWidth();
+      int srcHeight = texture.getHeight();
       spriteBatch.draw(sprite.getTexture(),
                        x,
                        y,
@@ -78,14 +77,12 @@ public class GDX2DSprite
       sprite.setY((float) y);
    }
 
-   public void setScale(float scale)
+   public void setHeightPreserveScale(double height)
    {
-      this.scale = scale;
-   }
-
-   public float getScale()
-   {
-      return scale;
+      float heightToWidthRatio = texture.getHeight() / texture.getWidth();
+      float newWidth = (float) height / heightToWidthRatio;
+      float newHeight = (float) height;
+      sprite.setSize(newWidth, newHeight);
    }
 
    public Sprite getSprite()
@@ -99,6 +96,16 @@ public class GDX2DSprite
       {
          sprites.add(this);
       }
+   }
+
+   public double getPositionX()
+   {
+      return sprite.getX();
+
+   }
+   public double getPositionY()
+   {
+      return sprite.getY();
    }
 
    public void setOrientation(double orientation)
@@ -134,5 +141,25 @@ public class GDX2DSprite
    public boolean isVisible()
    {
       return visible;
+   }
+
+   public boolean getFlipX()
+   {
+      return flipX;
+   }
+
+   public void setFlipX(boolean flipX)
+   {
+      this.flipX = flipX;
+   }
+
+   public boolean getFlipY()
+   {
+      return flipY;
+   }
+
+   public void setFlipY(boolean flipY)
+   {
+      this.flipY = flipY;
    }
 }
