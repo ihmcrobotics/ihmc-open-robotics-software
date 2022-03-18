@@ -21,7 +21,7 @@ public class GDX2DSceneManager
 
    private InputMultiplexer inputMultiplexer;
    private GDX2DOrthographicCamera orthographicCamera;
-   private ScreenViewport viewport;
+   private ScreenViewport screenViewport;
 
    private int width = -1;
    private int height = -1;
@@ -52,9 +52,9 @@ public class GDX2DSceneManager
          inputMultiplexer.addProcessor(orthographicCamera.setInputForLibGDX());
       }
 
-      viewport = new ScreenViewport(orthographicCamera);
-      viewport.setUnitsPerPixel(1.0f); // TODO: Is this relevant for high DPI displays?
-      viewport.apply();
+      screenViewport = new ScreenViewport(orthographicCamera);
+      screenViewport.setUnitsPerPixel(1.0f); // TODO: Is this relevant for high DPI displays?
+      screenViewport.apply();
 
       if (onCreate != null)
          onCreate.run();
@@ -68,7 +68,7 @@ public class GDX2DSceneManager
          LogTools.info("Starting first render.");
       }
 
-      viewport.update(width, height);
+      screenViewport.update(width, height);
 
       GDX3DSceneTools.glClearGray();
 
@@ -111,6 +111,11 @@ public class GDX2DSceneManager
    public GDX2DOrthographicCamera getOrthographicCamera()
    {
       return orthographicCamera;
+   }
+
+   public ScreenViewport getScreenViewport()
+   {
+      return screenViewport;
    }
 
    public void addLibGDXInputProcessor(InputProcessor inputProcessor)
