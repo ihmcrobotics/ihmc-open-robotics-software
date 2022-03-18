@@ -30,6 +30,7 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.factory.RobotDefinitionTools;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
+import us.ihmc.avatar.kinematicsSimulation.SimulatedHandKinematicController;
 import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.avatar.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.avatar.reachabilityMap.footstep.StepReachabilityIOHelper;
@@ -63,6 +64,7 @@ import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotiq.model.RobotiqHandModel;
+import us.ihmc.robotiq.simulatedHand.SimulatedRobotiqHandKinematicController;
 import us.ihmc.robotiq.simulatedHand.SimulatedRobotiqHandsControlThread;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -78,6 +80,7 @@ import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.UIParameters;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class AtlasRobotModel implements DRCRobotModel
 {
@@ -516,6 +519,20 @@ public class AtlasRobotModel implements DRCRobotModel
                                                           ROS2Tools.getControllerOutputTopic(getSimpleRobotName()),
                                                           ROS2Tools.getControllerInputTopic(getSimpleRobotName()));
 
+         default:
+            return null;
+      }
+   }
+
+   @Override
+   public SimulatedHandKinematicController createSimulatedHandKinematicController(FullHumanoidRobotModel fullHumanoidRobotModel,
+                                                                                  RealtimeROS2Node realtimeROS2Node,
+                                                                                  YoDouble controllerTime)
+   {
+      switch (selectedVersion.getHandModel())
+      {
+         case ROBOTIQ:
+            return new SimulatedRobotiqHandKinematicController(getSimpleRobotName(), fullHumanoidRobotModel, realtimeROS2Node, controllerTime);
          default:
             return null;
       }
