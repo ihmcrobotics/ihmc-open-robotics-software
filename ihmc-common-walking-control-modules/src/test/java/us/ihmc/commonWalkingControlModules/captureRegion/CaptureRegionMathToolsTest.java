@@ -35,10 +35,10 @@ public class CaptureRegionMathToolsTest
       CaptureRegionMathTools captureRegionMathTools = new CaptureRegionMathTools();
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       RotationMatrix rotationMatrix = new RotationMatrix();
-      
+
       double radius = RandomNumbers.nextDouble(random, 0.1, 10.0);
       FramePoint2D center = EuclidFrameRandomTools.nextFramePoint2D(random, worldFrame, -10.0, 10.0, -10.0, 10.0);
-      
+
       FrameVector2D directionToExpectedPoint = EuclidFrameRandomTools.nextFrameVector2D(random, worldFrame);
       directionToExpectedPoint.normalize();
       FramePoint2D expectedPoint = new FramePoint2D();
@@ -54,18 +54,7 @@ public class CaptureRegionMathToolsTest
       rotationMatrix.setToYawOrientation(angleFromExpectedToB);
       directionB.applyTransform(new RigidBodyTransform(rotationMatrix, new Vector3D()));
 
-      FrameVector2D normalizedDirection = new FrameVector2D(directionToExpectedPoint);
-      FrameVector2D normalizedA = new FrameVector2D(directionA);
-      FrameVector2D normalizedB = new FrameVector2D(directionB);
-      normalizedDirection.normalize();
-      normalizedA.normalize();
-      normalizedB.normalize();
-      double alpha = RandomNumbers.nextDouble(random, 0.0, 1.0);
-      directionToExpectedPoint.interpolate(normalizedA, normalizedB, alpha);
-      directionToExpectedPoint.normalize();
-      expectedPoint.scaleAdd(radius, directionToExpectedPoint, center);
-
-      //      double alpha = Math.abs(angleFromExpectedToA / (angleFromExpectedToA - angleFromExpectedToB));
+      double alpha = Math.abs(angleFromExpectedToA / (angleFromExpectedToA - angleFromExpectedToB));
 
       FramePoint2D actualPoint = new FramePoint2D();
       captureRegionMathTools.getPointBetweenVectorsAtDistanceFromOriginCircular(directionA, directionB, alpha, radius, center, actualPoint);
