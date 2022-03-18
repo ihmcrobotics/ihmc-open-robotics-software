@@ -346,8 +346,8 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       computeTimeInCurrentState(currentTime);
       computeTimeRemainingInState();
 
-      if (timeRemainingInState.getValue() < minimumTimeForStepAdjustment.getValue())
-         return;
+//      if (timeRemainingInState.getValue() < minimumTimeForStepAdjustment.getValue())
+//         return;
 
       computeLimitedAreaForCoP();
       RobotSide swingSide = upcomingFootstepSide.getEnumValue();
