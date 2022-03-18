@@ -169,7 +169,7 @@ public class CaptureRegionSafetyHeuristicsTest
       heuristics.computeCaptureRegionWithSafetyHeuristics(swingSide.getOppositeSide(),
                                                           icp, supportFootPolygon.getCentroid(), captureRegion);
 
-      assertTheShrunkenRegionIsInTheUnshrunkenRegion(captureRegion, heuristics.getCaptureRegionWithSafetyMargin(), 1e-5);
+      assertTheShrunkenRegionIsInTheUnshrunkenRegion(captureRegion, heuristics.getCaptureRegionWithSafetyMargin(), 5e-3);
 
       if (PLOT_RESULTS)
       {
@@ -225,7 +225,7 @@ public class CaptureRegionSafetyHeuristicsTest
       heuristics.computeCaptureRegionWithSafetyHeuristics(swingSide.getOppositeSide(),
                                                           icp, supportFootPolygon.getCentroid(), captureRegion);
 
-      assertTheShrunkenRegionIsInTheUnshrunkenRegion(captureRegion, heuristics.getCaptureRegionWithSafetyMargin(), 1e-5);
+      assertTheShrunkenRegionIsInTheUnshrunkenRegion(captureRegion, heuristics.getCaptureRegionWithSafetyMargin(), 5e-3);
 
       if (PLOT_RESULTS)
       {
@@ -304,7 +304,7 @@ public class CaptureRegionSafetyHeuristicsTest
          assertFalse(shrunkenRegion.pointIsOnPerimeter(expectedPointsOnBorder.get(i)));
       }
 
-      assertTheShrunkenRegionIsInTheUnshrunkenRegion(captureRegion, heuristics.getCaptureRegionWithSafetyMargin(), 1e-5);
+      assertTheShrunkenRegionIsInTheUnshrunkenRegion(captureRegion, heuristics.getCaptureRegionWithSafetyMargin(), 1e-2);
 
       if (PLOT_RESULTS)
       {
