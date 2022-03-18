@@ -354,13 +354,18 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
          return;
 
       computeLimitedAreaForCoP();
-      captureRegionCalculator.calculateCaptureRegion(upcomingFootstepSide.getEnumValue(),
+      RobotSide swingSide = upcomingFootstepSide.getEnumValue();
+      RobotSide stanceSide = swingSide.getOppositeSide();
+      captureRegionCalculator.calculateCaptureRegion(swingSide,
                                                      timeRemainingInState.getDoubleValue() / timeRemainingSafetyFactor.getValue(),
                                                      currentICP,
                                                      omega0,
                                                      allowableAreaForCoP);
-      oneStepSafetyHeuristics.computeCaptureRegionWithSafetyHeuristics(currentICP, allowableAreaForCoP.getCentroid(), captureRegionCalculator.getCaptureRegion());
-      multiStepCaptureRegionCalculator.compute(upcomingFootstepSide.getEnumValue().getOppositeSide(),
+      oneStepSafetyHeuristics.computeCaptureRegionWithSafetyHeuristics(stanceSide,
+                                                                       currentICP,
+                                                                       allowableAreaForCoP.getCentroid(),
+                                                                       captureRegionCalculator.getCaptureRegion());
+      multiStepCaptureRegionCalculator.compute(stanceSide,
                                                oneStepSafetyHeuristics.getCaptureRegionWithSafetyMargin(),
 //                                               captureRegionCalculator.getCaptureRegion(),
                                                nextFootstepTiming == null ? Double.NaN : nextFootstepTiming.getStepTime(),

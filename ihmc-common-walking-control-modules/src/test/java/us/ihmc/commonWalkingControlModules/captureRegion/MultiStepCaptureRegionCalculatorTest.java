@@ -49,7 +49,7 @@ import static us.ihmc.robotics.Assert.*;
 
 public class MultiStepCaptureRegionCalculatorTest
 {
-   private static final boolean PLOT_RESULTS = true;
+   private static final boolean PLOT_RESULTS = false;
    private static final boolean WAIT_FOR_BUTTON_PUSH = true;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
