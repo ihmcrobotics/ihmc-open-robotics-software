@@ -1,18 +1,19 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple4D.Quaternion;
 
 public class CaptureRegionMathTools
 {
+   private final RotationMatrix rotation = new RotationMatrix();
    private final FrameVector2D rotatedFromA = new FrameVector2D();
-   private final FrameVector2D normalizedA = new FrameVector2D();
-   private final FrameVector2D normalizedB = new FrameVector2D();
 
    /**
    * Will return a point on a circle around the origin. The point will be in between the given directions and at
@@ -30,14 +31,12 @@ public class CaptureRegionMathTools
       directionA.checkReferenceFrameMatch(centerOfCircle.getReferenceFrame());
       alpha = MathTools.clamp(alpha, 0.0, 1.0);
 
-      normalizedA.setReferenceFrame(directionA.getReferenceFrame());
-      normalizedB.setReferenceFrame(directionA.getReferenceFrame());
-      rotatedFromA.setReferenceFrame(directionA.getReferenceFrame());
+      double angleBetweenDirections = Math.abs(directionA.angle(directionB));
+      double angleBetweenDirectionsToSetLine = -angleBetweenDirections * alpha;
 
-      normalizedA.setAndNormalize(directionA);
-      normalizedB.setAndNormalize(directionB);
+      rotation.setToYawOrientation(angleBetweenDirectionsToSetLine);
+      rotation.transform(directionA, rotatedFromA);
 
-      rotatedFromA.interpolate(normalizedA, normalizedB, alpha);
       rotatedFromA.scale(radius / rotatedFromA.length());
 
       pointToPack.setIncludingFrame(rotatedFromA);
