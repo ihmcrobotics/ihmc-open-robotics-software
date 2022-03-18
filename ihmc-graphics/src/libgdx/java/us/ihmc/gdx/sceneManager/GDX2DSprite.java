@@ -1,19 +1,34 @@
 package us.ihmc.gdx.sceneManager;
 
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
+import java.util.ArrayList;
+
 public class GDX2DSprite
 {
-   Sprite sprite;
-   double orientation;
-   Texture texture;
-   float scale = 1.0f;
+   private final Sprite sprite;
+   private final Texture texture;
+   private double orientation;
+   private float scale = 1.0f;
+   private boolean visible = true;
 
    public GDX2DSprite(String imageName)
    {
-      texture = new Texture(imageName);
+      this(new Texture(imageName));
+
+   }
+
+   public GDX2DSprite(Pixmap pixmap)
+   {
+      this(new Texture(pixmap));
+   }
+
+   public GDX2DSprite(Texture texture)
+   {
+      this.texture = texture;
       sprite = new Sprite(texture);
       orientation = 0.0;
    }
@@ -78,6 +93,19 @@ public class GDX2DSprite
       return sprite;
    }
 
+   public void getSpriteRenderables(ArrayList<GDX2DSprite> sprites)
+   {
+      if (visible)
+      {
+         sprites.add(this);
+      }
+   }
+
+   public void setOrientation(double orientation)
+   {
+      this.orientation = orientation;
+   }
+
    public double getOrientation()
    {
       return orientation;
@@ -86,5 +114,25 @@ public class GDX2DSprite
    public Texture getTexture()
    {
       return texture;
+   }
+
+   public void hide()
+   {
+      this.visible = false;
+   }
+
+   public void show()
+   {
+      this.visible = true;
+   }
+
+   public void setVisible(boolean visible)
+   {
+      this.visible = visible;
+   }
+
+   public boolean isVisible()
+   {
+      return visible;
    }
 }
