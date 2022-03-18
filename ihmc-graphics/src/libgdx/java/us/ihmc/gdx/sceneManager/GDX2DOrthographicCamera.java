@@ -96,7 +96,7 @@ public class GDX2DOrthographicCamera extends OrthographicCamera
    private void scrolled(float amountY)
    {
       zoom = (float) (zoom + Math.signum(amountY) * zoom * zoomSpeedFactor);
-      zoom = (float) MathTools.clamp(zoom, 0.1, 10.0);
+      zoom = (float) MathTools.clamp(zoom, 0.001, 1.0);
    }
 
    // Taken from GDX PerspectiveCamera
