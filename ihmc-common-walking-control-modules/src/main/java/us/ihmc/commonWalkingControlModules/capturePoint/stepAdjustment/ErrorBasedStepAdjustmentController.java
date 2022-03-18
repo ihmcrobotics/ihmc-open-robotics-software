@@ -62,7 +62,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    private final BooleanProvider allowStepAdjustment;
    private final DoubleProvider footstepDeadband;
    private final DoubleProvider transferDurationSplitFraction;
-   private final DoubleProvider timeRemainingSafetyFactor;
 
    private final DoubleProvider minimumFootstepMultiplier;
    private final DoubleProvider minICPErrorForStepAdjustment;
@@ -120,7 +119,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
    private final StepAdjustmentReachabilityConstraint reachabilityConstraintHandler;
    private final OneStepCaptureRegionCalculator captureRegionCalculator;
-//   private final TwoStepCaptureRegionCalculator twoStepCaptureRegionCalculator;
    private final CaptureRegionSafetyHeuristics oneStepSafetyHeuristics;
    private final MultiStepCaptureRegionCalculator multiStepCaptureRegionCalculator;
    private final EnvironmentConstraintHandler environmentConstraintProvider;
@@ -186,7 +184,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       transferDurationSplitFraction = new DoubleParameter(yoNamePrefix + "TransferDurationSplitFraction",
                                                           registry,
                                                           icpOptimizationParameters.getTransferSplitFraction());
-      timeRemainingSafetyFactor = new DoubleParameter(yoNamePrefix + "TimeRemainingSafetyFactor", registry, 1.1);
 
       footstepDeadband = new DoubleParameter(yoNamePrefix + "FootstepDeadband", registry, icpOptimizationParameters.getAdjustmentDeadband());
 
@@ -218,7 +215,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                                                                    yoNamePrefix,
                                                                    registry,
                                                                    yoGraphicsListRegistry);
-//      twoStepCaptureRegionCalculator = new TwoStepCaptureRegionCalculator(registry, yoGraphicsListRegistry);
       oneStepSafetyHeuristics = new CaptureRegionSafetyHeuristics(lengthLimit, registry, yoGraphicsListRegistry);
       multiStepCaptureRegionCalculator = new MultiStepCaptureRegionCalculator(reachabilityConstraintHandler, registry, yoGraphicsListRegistry);
       environmentConstraintProvider = new EnvironmentConstraintHandler(icpControlPlane, contactableFeet, yoNamePrefix, registry, yoGraphicsListRegistry);
@@ -357,7 +353,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       RobotSide swingSide = upcomingFootstepSide.getEnumValue();
       RobotSide stanceSide = swingSide.getOppositeSide();
       captureRegionCalculator.calculateCaptureRegion(swingSide,
-                                                     timeRemainingInState.getDoubleValue() / timeRemainingSafetyFactor.getValue(),
+                                                     timeRemainingInState.getDoubleValue(),
                                                      currentICP,
                                                      omega0,
                                                      allowableAreaForCoP);
@@ -453,14 +449,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    {
       adjustedSolutionInControlPlane.set(referencePositionInControlPlane);
       adjustedSolutionInControlPlane.add(footstepAdjustmentFromErrorInControlPlane);
-
-//      if (nextFootstep != null)
-//         captureRegionInWorld.setIncludingFrame(twoStepCaptureRegionCalculator.getCaptureRegionWithSafetyMargin());
-//      else
-//      {
-//         captureRegionInWorld.setIncludingFrame(captureRegionCalculator.getCaptureRegion());
-//         captureRegionInWorld.changeFrameAndProjectToXYPlane(worldFrame);
-//      }
 
       captureRegionInWorld.setIncludingFrame(multiStepCaptureRegionCalculator.getCaptureRegion());
       captureRegionInWorld.changeFrameAndProjectToXYPlane(worldFrame);
