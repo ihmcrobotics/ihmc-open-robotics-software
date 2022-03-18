@@ -68,6 +68,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    private final DoubleProvider maximumTimeFromTransfer;
    private final BooleanProvider useActualErrorInsteadOfResidual;
    private final BooleanProvider considerErrorInAdjustment;
+   private final BooleanProvider allowCrossOverSteps;
 
    private SimpleFootstep nextFootstep;
    private FootstepTiming nextFootstepTiming;
@@ -126,6 +127,8 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    private final ConvexPolygonTools polygonTools = new ConvexPolygonTools();
    private final FrameConvexPolygon2D captureRegionInWorld = new FrameConvexPolygon2D();
    private final FrameConvexPolygon2D reachableCaptureRegion = new FrameConvexPolygon2D();
+   private final FrameConvexPolygon2D forwardCrossOverReachableCaptureRegion = new FrameConvexPolygon2D();
+   private final FrameConvexPolygon2D backwardCrossOverReachableCaptureRegion = new FrameConvexPolygon2D();
 
    private final ICPControlPlane icpControlPlane;
    private final BipedSupportPolygons bipedSupportPolygons;
@@ -186,6 +189,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                                                           icpOptimizationParameters.getTransferSplitFraction());
 
       footstepDeadband = new DoubleParameter(yoNamePrefix + "FootstepDeadband", registry, icpOptimizationParameters.getAdjustmentDeadband());
+      allowCrossOverSteps = new BooleanParameter(yoNamePrefix + "AllowCrossOverSteps", registry, true);
 
       SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
       DoubleProvider lengthLimit = new DoubleParameter(yoNamePrefix + "MaxReachabilityLength", registry, steppingParameters.getMaxStepLength());
@@ -454,6 +458,15 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       captureRegionInWorld.changeFrameAndProjectToXYPlane(worldFrame);
 
       boolean intersect = polygonTools.computeIntersectionOfPolygons(captureRegionInWorld, reachabilityConstraintHandler.getReachabilityConstraint(), reachableCaptureRegion);
+      if (allowCrossOverSteps.getValue())
+      {
+         intersect |= polygonTools.computeIntersectionOfPolygons(captureRegionInWorld,
+                                                                 reachabilityConstraintHandler.getForwardCrossOverPolygon(),
+                                                                 forwardCrossOverReachableCaptureRegion);
+         intersect |= polygonTools.computeIntersectionOfPolygons(captureRegionInWorld,
+                                                                 reachabilityConstraintHandler.getBackwardCrossOverPolygon(),
+                                                                 backwardCrossOverReachableCaptureRegion);
+      }
 
       if (!intersect)
       {
@@ -462,11 +475,43 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       }
       else
       {
-         reachableCaptureRegion.orthogonalProjection(adjustedSolutionInControlPlane);
+         getReachabilityWithMostOverlap().orthogonalProjection(adjustedSolutionInControlPlane);
       }
 
       footstepAdjustmentInControlPlane.set(adjustedSolutionInControlPlane);
       footstepAdjustmentInControlPlane.sub(referencePositionInControlPlane.getX(), referencePositionInControlPlane.getY());
+   }
+
+   private FrameConvexPolygon2DReadOnly getReachabilityWithMostOverlap()
+   {
+      if (!allowCrossOverSteps.getValue())
+         return reachableCaptureRegion;
+
+      double forwardArea = forwardCrossOverReachableCaptureRegion.getArea();
+      double backwardArea = backwardCrossOverReachableCaptureRegion.getArea();
+      double reachableArea = reachableCaptureRegion.getArea();
+
+      forwardArea = Double.isNaN(forwardArea) ? Double.NEGATIVE_INFINITY : forwardArea;
+      backwardArea = Double.isNaN(backwardArea) ? Double.NEGATIVE_INFINITY : backwardArea;
+      reachableArea = Double.isNaN(reachableArea) ? Double.NEGATIVE_INFINITY : reachableArea;
+
+      boolean forwardIsLargestCrossoverArea = forwardArea > backwardArea;
+
+      if (forwardIsLargestCrossoverArea)
+      {
+         if (forwardArea > 2.0 * reachableArea)
+            return forwardCrossOverReachableCaptureRegion;
+         else
+            return reachableCaptureRegion;
+      }
+      else if (backwardArea > 2.0 * reachableArea)
+      {
+         return backwardCrossOverReachableCaptureRegion;
+      }
+      else
+      {
+         return reachableCaptureRegion;
+      }
    }
 
    private boolean deadbandAndApplyStepAdjustment()

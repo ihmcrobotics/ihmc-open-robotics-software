@@ -236,6 +236,8 @@ public class StepAdjustmentReachabilityConstraint
    public void reset()
    {
       contractedReachabilityPolygon.clear();
+      forwardCrossOverReachability.clear();
+      backwardCrossOverReachability.clear();
    }
 
    /**
@@ -408,8 +410,28 @@ public class StepAdjustmentReachabilityConstraint
       return contractedReachabilityPolygon;
    }
 
+   public FrameConvexPolygon2DReadOnly getForwardCrossOverPolygon()
+   {
+      return forwardCrossOverReachability;
+   }
+
+   public FrameConvexPolygon2DReadOnly getBackwardCrossOverPolygon()
+   {
+      return backwardCrossOverReachability;
+   }
+
    public FrameConvexPolygon2DReadOnly getReachabilityPolygonInFootFrame(RobotSide robotSide)
    {
       return reachabilityPolygons.get(robotSide);
+   }
+
+   public FrameConvexPolygon2DReadOnly getForwardCrossOverPolygonInFootFrame(RobotSide robotSide)
+   {
+      return forwardReachabilityPolygons.get(robotSide);
+   }
+
+   public FrameConvexPolygon2DReadOnly getBackwardCrossOverPolygonInFootFrame(RobotSide robotSide)
+   {
+      return backwardReachabilityPolygons.get(robotSide);
    }
 }
