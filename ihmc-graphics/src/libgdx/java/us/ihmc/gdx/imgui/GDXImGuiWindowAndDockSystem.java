@@ -40,6 +40,7 @@ public class GDXImGuiWindowAndDockSystem
    private final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
    private String glslVersion; // TODO: ?
    private long windowHandle;
+   private int fontSizeLevel = 1;
    private ImFont imFont;
    private int dockspaceId;
    private final ImString newDockPanelName = new ImString("", 100);
@@ -107,7 +108,7 @@ public class GDXImGuiWindowAndDockSystem
 
       if (!Boolean.parseBoolean(System.getProperty("imgui.dark")))
          ImGui.styleColorsLight();
-      imFont = ImGuiTools.setupFonts(io);
+      imFont = ImGuiTools.setupFonts(io, fontSizeLevel);
 
       // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
       if (io.hasConfigFlags(ImGuiConfigFlags.ViewportsEnable))
@@ -329,6 +330,11 @@ public class GDXImGuiWindowAndDockSystem
    public ImGuiPanelManager getPanelManager()
    {
       return panelManager;
+   }
+
+   public void setFontSizeLevel(int fontSizeLevel)
+   {
+      this.fontSizeLevel = fontSizeLevel;
    }
 
    public ImFont getImFont()
