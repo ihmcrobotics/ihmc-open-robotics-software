@@ -6,6 +6,7 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
+import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -330,37 +331,41 @@ public class StepAdjustmentReachabilityConstraint
       forwardPolygon.clear();
       backwardPolygon.clear();
 
-      for (int vertexIdx = 0; vertexIdx < forwardPolygon.getNumberOfVertices(); vertexIdx++)
+      forwardPolygon.addVertex(0.0, supportSide.negateIfLeftSide(inPlaceWidth.getValue()));
+      backwardPolygon.addVertex(0.0, supportSide.negateIfLeftSide(inPlaceWidth.getValue()));
+      for (int vertexIdx = 0; vertexIdx < forwardPolygon.getMaxNumberOfVertices() - 1; vertexIdx++)
       {
-         double angle = (Math.PI - forwardCrossOverClearanceAngle.getValue()) * vertexIdx / (forwardPolygon.getNumberOfVertices() - 1) + forwardCrossOverClearanceAngle.getValue() - Math.PI / 2.0;
+         double alpha = (double) vertexIdx / (forwardPolygon.getMaxNumberOfVertices() - 2);
+         double angle = InterpolationTools.linearInterpolate(-Math.PI / 2.0 + forwardCrossOverClearanceAngle.getValue(), Math.PI / 2.0, alpha);
          double x, y;
-         if (angle < Math.PI / 2.0)
+         if (angle < 0)
          {
             x = lengthLimit.getValue() * Math.cos(angle);
-            y = supportSide.negateIfLeftSide(inPlaceWidth.getValue() - forwardInnerRadius * Math.sin(angle));
+            y = supportSide.negateIfLeftSide(inPlaceWidth.getValue() + forwardInnerRadius * Math.sin(angle));
          }
          else
          {
             x = lengthLimit.getValue() * Math.cos(angle);
-            y = supportSide.negateIfLeftSide(inPlaceWidth.getValue() - outerRadius * Math.sin(angle));
+            y = supportSide.negateIfLeftSide(inPlaceWidth.getValue() + outerRadius * Math.sin(angle));
          }
 
          forwardPolygon.addVertex(x, y);
       }
 
-      for (int vertexIdx = 0; vertexIdx < forwardPolygon.getNumberOfVertices(); vertexIdx++)
+      for (int vertexIdx = 0; vertexIdx < backwardPolygon.getMaxNumberOfVertices() - 1; vertexIdx++)
       {
-         double angle = (Math.PI - backwardCrossOverClearanceAngle.getValue()) * vertexIdx / (forwardPolygon.getNumberOfVertices() - 1) + backwardCrossOverClearanceAngle.getValue() - Math.PI / 2.0;
+         double alpha = (double) vertexIdx / (forwardPolygon.getMaxNumberOfVertices() - 2);
+         double angle = InterpolationTools.linearInterpolate(-Math.PI / 2.0 + backwardCrossOverClearanceAngle.getValue(), Math.PI / 2.0, alpha);
          double x, y;
-         if (angle < Math.PI / 2.0)
+         if (angle < 0)
          {
-            x = lengthLimit.getValue() * Math.cos(angle);
-            y = supportSide.negateIfLeftSide(inPlaceWidth.getValue() - backwardInnerRadius * Math.sin(angle));
+            x = -lengthBackLimit.getValue() * Math.cos(angle);
+            y = supportSide.negateIfLeftSide(inPlaceWidth.getValue() + backwardInnerRadius * Math.sin(angle));
          }
          else
          {
-            x = lengthLimit.getValue() * Math.cos(angle);
-            y = supportSide.negateIfLeftSide(inPlaceWidth.getValue() - outerRadius * Math.sin(angle));
+            x = -lengthBackLimit.getValue() * Math.cos(angle);
+            y = supportSide.negateIfLeftSide(inPlaceWidth.getValue() + outerRadius * Math.sin(angle));
          }
 
          backwardPolygon.addVertex(x, y);
@@ -369,8 +374,8 @@ public class StepAdjustmentReachabilityConstraint
       forwardPolygon.update();
       backwardPolygon.update();
 
-      forwardCrossOverReachability.set(forwardPolygon);
-      backwardCrossOverReachability.set(backwardPolygon);
+      forwardCrossOverReachability.setMatchingFrame(forwardPolygon, false);
+      backwardCrossOverReachability.setMatchingFrame(backwardPolygon, false);
    }
 
    private FrameConvexPolygon2DReadOnly getAdjustmentPolygon(RobotSide swingSide, FramePose3DReadOnly footstepPose)
