@@ -18,6 +18,8 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
+import static us.ihmc.robotics.Assert.assertEquals;
+
 public class CaptureRegionMathToolsTest
 {
    @AfterEach
@@ -52,10 +54,25 @@ public class CaptureRegionMathToolsTest
       rotationMatrix.setToYawOrientation(angleFromExpectedToB);
       directionB.applyTransform(new RigidBodyTransform(rotationMatrix, new Vector3D()));
 
-      double alpha = Math.abs(angleFromExpectedToA / (angleFromExpectedToA - angleFromExpectedToB));
+      FrameVector2D normalizedDirection = new FrameVector2D(directionToExpectedPoint);
+      FrameVector2D normalizedA = new FrameVector2D(directionA);
+      FrameVector2D normalizedB = new FrameVector2D(directionB);
+      normalizedDirection.normalize();
+      normalizedA.normalize();
+      normalizedB.normalize();
+      double alpha = RandomNumbers.nextDouble(random, 0.0, 1.0);
+      directionToExpectedPoint.interpolate(normalizedA, normalizedB, alpha);
+      directionToExpectedPoint.normalize();
+      expectedPoint.scaleAdd(radius, directionToExpectedPoint, center);
+
+      //      double alpha = Math.abs(angleFromExpectedToA / (angleFromExpectedToA - angleFromExpectedToB));
 
       FramePoint2D actualPoint = new FramePoint2D();
       captureRegionMathTools.getPointBetweenVectorsAtDistanceFromOriginCircular(directionA, directionB, alpha, radius, center, actualPoint);
+
+      FrameVector2D actualRadius = new FrameVector2D();
+      actualRadius.sub(actualPoint, center);
+      assertEquals(radius, actualRadius.length(), 1e-8);
 
       EuclidCoreTestTools.assertTuple2DEquals(expectedPoint, actualPoint, 1.0e-12);
    }
