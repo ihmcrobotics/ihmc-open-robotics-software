@@ -1,5 +1,6 @@
 package us.ihmc.gdx.sceneManager;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -17,8 +18,7 @@ public class GDX2DSprite
 
    public GDX2DSprite(String imageName)
    {
-      this(new Texture(imageName));
-
+      this(new Texture(Gdx.files.internal(imageName), Pixmap.Format.RGBA8888, false));
    }
 
    public GDX2DSprite(Pixmap pixmap)
