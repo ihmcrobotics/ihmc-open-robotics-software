@@ -67,12 +67,14 @@ public class JSONFileTools
          settingsStream = hybridFile.getClasspathResourceAsStream();
          if (settingsStream == null)
          {
-            LogTools.warn("Defaults not found. Please save to {}. Not loading anything.", hybridFile.getWorkspaceFile().toString());
+            LogTools.warn("Defaults not found. Please save to {}. Not loading anything.", hybridFile.getPathForResourceLoadingPathFiltered());
             return;
          }
          else
          {
-            LogTools.info("{} not found. Loading defaults from {}", hybridFile.getExternalFile().toString(), hybridFile.getWorkspaceFile().toString());
+            LogTools.info("{} not found. Loading defaults from {}",
+                          hybridFile.getExternalFile().toString(),
+                          hybridFile.getPathForResourceLoadingPathFiltered());
          }
       }
       else
