@@ -456,11 +456,11 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       if (!isTheCaptureRegionReachable())
       {
          captureRegionInWorld.orthogonalProjection(adjustedSolutionInControlPlane);
-         reachabilityConstraintHandler.getReachabilityConstraint().orthogonalProjection(adjustedSolutionInControlPlane);
+         getBestReachabilityConstraintToUseWhenNotIntersecting().orthogonalProjection(adjustedSolutionInControlPlane);
       }
       else
       {
-         getReachabilityConstraintToUse().orthogonalProjection(adjustedSolutionInControlPlane);
+         getBestReachabilityConstraintToUseWhenIntersecting().orthogonalProjection(adjustedSolutionInControlPlane);
       }
 
       footstepAdjustmentInControlPlane.set(adjustedSolutionInControlPlane);
@@ -483,7 +483,35 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       return intersect;
    }
 
-   private FrameConvexPolygon2DReadOnly getReachabilityConstraintToUse()
+   private FrameConvexPolygon2DReadOnly getBestReachabilityConstraintToUseWhenNotIntersecting()
+   {
+      if (!allowCrossOverSteps.getValue())
+         return reachableCaptureRegion;
+
+      double distanceToForward = reachabilityConstraintHandler.getForwardCrossOverPolygon().distance(adjustedSolutionInControlPlane);
+      double distanceToBackward = reachabilityConstraintHandler.getBackwardCrossOverPolygon().distance(adjustedSolutionInControlPlane);
+      double distanceToNominal = reachabilityConstraintHandler.getReachabilityConstraint().distance(adjustedSolutionInControlPlane);
+
+      boolean forwardIsCloser = distanceToForward < distanceToBackward;
+
+      if (forwardIsCloser)
+      {
+         if (distanceToNominal < distanceToForward)
+            return reachabilityConstraintHandler.getReachabilityConstraint();
+         else
+            return reachabilityConstraintHandler.getForwardCrossOverPolygon();
+      }
+      else if (distanceToNominal < distanceToBackward)
+      {
+         return reachabilityConstraintHandler.getReachabilityConstraint();
+      }
+      else
+      {
+         return reachabilityConstraintHandler.getBackwardCrossOverPolygon();
+      }
+   }
+
+   private FrameConvexPolygon2DReadOnly getBestReachabilityConstraintToUseWhenIntersecting()
    {
       if (!allowCrossOverSteps.getValue())
          return reachableCaptureRegion;
