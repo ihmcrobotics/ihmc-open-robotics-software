@@ -197,7 +197,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       useActualErrorInsteadOfResidual = new BooleanParameter("useActualErrorInsteadOfResidual", registry, false);
       considerErrorInAdjustment = new BooleanParameter(yoNamePrefix + "considerErrorInAdjustment", registry, false);
       reachabilityConstraintHandler = new StepAdjustmentReachabilityConstraint(soleZUpFrames,
-                                                                               icpOptimizationParameters,
                                                                                lengthLimit,
                                                                                lengthBackLimit,
                                                                                innerLimit,

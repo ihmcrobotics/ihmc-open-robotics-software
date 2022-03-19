@@ -33,7 +33,6 @@ public class StepAdjustmentReachabilityConstraint
 
    private static final int numberOfVertices = 9;
    private static final int numberOfCrossOverVertices = 8;
-   private static final double SUFFICIENTLY_LARGE = 5.0;
 
    private final SideDependentList<List<YoFramePoint2D>> reachabilityVertices = new SideDependentList<>();
    private final SideDependentList<YoFrameConvexPolygon2D> reachabilityPolygons = new SideDependentList<>();
@@ -41,14 +40,7 @@ public class StepAdjustmentReachabilityConstraint
    private final SideDependentList<YoFrameConvexPolygon2D> backwardReachabilityPolygons = new SideDependentList<>();
    private final SideDependentList<FrameConvexPolygon2D> totalReachabilityHulls = new SideDependentList<>();
 
-   private final SideDependentList<List<YoFramePoint2D>> adjustmentVertices = new SideDependentList<>();
-   private final SideDependentList<PoseReferenceFrame> stepFrames = new SideDependentList<>();
-   private final SideDependentList<YoFrameConvexPolygon2D> adjustmentPolygons = new SideDependentList<>();
-
-   private final FixedFrameConvexPolygon2DBasics adjustmentPolygon = new FrameConvexPolygon2D(worldFrame);
-   private final FixedFrameConvexPolygon2DBasics reachabilityPolygon = new FrameConvexPolygon2D(worldFrame);
-
-   private final YoFrameConvexPolygon2D contractedReachabilityPolygon;
+   private final YoFrameConvexPolygon2D reachabilityPolygon;
    private final YoFrameConvexPolygon2D forwardCrossOverReachability;
    private final YoFrameConvexPolygon2D backwardCrossOverReachability;
 
@@ -63,19 +55,14 @@ public class StepAdjustmentReachabilityConstraint
    private final DoubleProvider outerLimit;
    private final DoubleProvider inPlaceWidth;
 
-   private final DoubleProvider forwardAdjustmentLimit;
-   private final DoubleProvider backwardAdjustmentLimit;
-   private final DoubleProvider inwardAdjustmentLimit;
-   private final DoubleProvider outwardAdjustmentLimit;
-
-   private final ConvexPolygonTools polygonTools = new ConvexPolygonTools();
-
-   public StepAdjustmentReachabilityConstraint(SideDependentList<? extends ReferenceFrame> soleZUpFrames, ICPOptimizationParameters icpOptimizationParameters,
-                                               SteppingParameters steppingParameters, String yoNamePrefix, boolean visualize,
-                                               YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public StepAdjustmentReachabilityConstraint(SideDependentList<? extends ReferenceFrame> soleZUpFrames,
+                                               SteppingParameters steppingParameters,
+                                               String yoNamePrefix,
+                                               boolean visualize,
+                                               YoRegistry registry,
+                                               YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(soleZUpFrames,
-           icpOptimizationParameters,
            new DoubleParameter(yoNamePrefix + "MaxReachabilityLength", registry, steppingParameters.getMaxStepLength()),
            new DoubleParameter(yoNamePrefix + "MaxReachabilityBackwardLength", registry, steppingParameters.getMaxBackwardStepLength()),
            new DoubleParameter(yoNamePrefix + "MinReachabilityWidth", registry, steppingParameters.getMinStepWidth()),
@@ -88,61 +75,11 @@ public class StepAdjustmentReachabilityConstraint
    }
 
    public StepAdjustmentReachabilityConstraint(SideDependentList<? extends ReferenceFrame> soleZUpFrames,
-                                               ICPOptimizationParameters icpOptimizationParameters,
                                                DoubleProvider lengthLimit,
                                                DoubleProvider lengthBackLimit,
                                                DoubleProvider innerLimit,
                                                DoubleProvider outerLimit,
                                                DoubleProvider inPlaceWidth,
-                                               String yoNamePrefix,
-                                               boolean visualize,
-                                               YoRegistry registry,
-                                               YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-      this(soleZUpFrames,
-           lengthLimit,
-           lengthBackLimit,
-           innerLimit,
-           outerLimit,
-           inPlaceWidth,
-           new DoubleParameter(yoNamePrefix + "ForwardAdjustmentLimit", registry,
-                               Math.min(SUFFICIENTLY_LARGE, icpOptimizationParameters.getMaximumStepAdjustmentForward())),
-           new DoubleParameter(yoNamePrefix + "BackwardAdjustmentLimit", registry,
-                               Math.min(SUFFICIENTLY_LARGE, icpOptimizationParameters.getMaximumStepAdjustmentBackward())),
-           new DoubleParameter(yoNamePrefix + "InwardAdjustmentLimit", registry,
-                               Math.min(SUFFICIENTLY_LARGE, icpOptimizationParameters.getMaximumStepAdjustmentInward())),
-           new DoubleParameter(yoNamePrefix + "OutwardAdjustmentLimit", registry,
-                               Math.min(SUFFICIENTLY_LARGE, icpOptimizationParameters.getMaximumStepAdjustmentOutward())),
-           yoNamePrefix,
-           visualize,
-           registry,
-           yoGraphicsListRegistry);
-   }
-
-   public StepAdjustmentReachabilityConstraint(SideDependentList<? extends ReferenceFrame> soleZUpFrames,
-                                               DoubleProvider lengthLimit,
-                                               DoubleProvider lengthBackLimit,
-                                               DoubleProvider innerLimit,
-                                               DoubleProvider outerLimit,
-                                               DoubleProvider inPlaceWidth,
-                                               String yoNamePrefix,
-                                               boolean visualize,
-                                               YoRegistry registry,
-                                               YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-      this(soleZUpFrames, lengthLimit, lengthBackLimit, innerLimit, outerLimit, inPlaceWidth, null, null, null, null, yoNamePrefix, visualize, registry, yoGraphicsListRegistry);
-   }
-
-   public StepAdjustmentReachabilityConstraint(SideDependentList<? extends ReferenceFrame> soleZUpFrames,
-                                               DoubleProvider lengthLimit,
-                                               DoubleProvider lengthBackLimit,
-                                               DoubleProvider innerLimit,
-                                               DoubleProvider outerLimit,
-                                               DoubleProvider inPlaceWidth,
-                                               DoubleProvider forwardAdjustmentLimit,
-                                               DoubleProvider backwardAdjustmentLimit,
-                                               DoubleProvider inwardAdjustmentLimit,
-                                               DoubleProvider outwardAdjustmentLimit,
                                                String yoNamePrefix,
                                                boolean visualize,
                                                YoRegistry registry,
@@ -153,10 +90,6 @@ public class StepAdjustmentReachabilityConstraint
       this.innerLimit = innerLimit;
       this.outerLimit = outerLimit;
       this.inPlaceWidth = inPlaceWidth;
-      this.forwardAdjustmentLimit = forwardAdjustmentLimit;
-      this.backwardAdjustmentLimit = backwardAdjustmentLimit;
-      this.inwardAdjustmentLimit = inwardAdjustmentLimit;
-      this.outwardAdjustmentLimit = outwardAdjustmentLimit;
 
       this.forwardCrossOverDistance = new DoubleParameter("forwardCrossOverDistance", registry, 0.2);
       this.backwardCrossOverDistance = new DoubleParameter("backwardCrossOverDistance", registry, 0.15);
@@ -190,33 +123,15 @@ public class StepAdjustmentReachabilityConstraint
          forwardReachabilityPolygons.put(robotSide, forwardReachabilityPolygon);
          backwardReachabilityPolygons.put(robotSide, backwardReachabilityPolygon);
          totalReachabilityHulls.put(robotSide, new FrameConvexPolygon2D(supportSoleFrame));
-
-         PoseReferenceFrame adjustmentFrame = new PoseReferenceFrame(prefix + "AdjustmentFrame", worldFrame);
-
-         YoInteger yoNumberOfAdjustmentVertices = new YoInteger(robotSide.getLowerCaseName() + "NumberOfAdjustmentVertices", registry);
-         yoNumberOfAdjustmentVertices.set(4);
-
-         List<YoFramePoint2D> adjustmentVertices = new ArrayList<>();
-         for (int i = 0; i < 4; i++)
-         {
-            YoFramePoint2D adjustmentVertex = new YoFramePoint2D(prefix + "AdjustmentVertex" + i, adjustmentFrame, registry);
-            adjustmentVertices.add(adjustmentVertex);
-         }
-
-         YoFrameConvexPolygon2D adjustmentPolygon = new YoFrameConvexPolygon2D(adjustmentVertices, yoNumberOfAdjustmentVertices, adjustmentFrame);
-
-         this.stepFrames.put(robotSide, adjustmentFrame);
-         this.adjustmentVertices.put(robotSide, adjustmentVertices);
-         this.adjustmentPolygons.put(robotSide, adjustmentPolygon);
       }
 
-      contractedReachabilityPolygon = new YoFrameConvexPolygon2D(yoNamePrefix + "ReachabilityRegion", "", worldFrame, numberOfVertices, registry);
+      reachabilityPolygon = new YoFrameConvexPolygon2D(yoNamePrefix + "ReachabilityRegion", "", worldFrame, numberOfVertices, registry);
       forwardCrossOverReachability = new YoFrameConvexPolygon2D(yoNamePrefix + "ForwardReachabilityRegion", "", worldFrame, numberOfCrossOverVertices, registry);
       backwardCrossOverReachability = new YoFrameConvexPolygon2D(yoNamePrefix + "BackwardReachabilityRegion", "", worldFrame, numberOfCrossOverVertices, registry);
 
       if (yoGraphicsListRegistry != null)
       {
-         YoArtifactPolygon reachabilityGraphic = new YoArtifactPolygon("ReachabilityRegionViz", contractedReachabilityPolygon, Color.BLUE, false);
+         YoArtifactPolygon reachabilityGraphic = new YoArtifactPolygon("ReachabilityRegionViz", reachabilityPolygon, Color.BLUE, false);
          YoArtifactPolygon forwardReachabilityGraphic = new YoArtifactPolygon("ForwardReachabilityRegionViz", forwardCrossOverReachability, Color.BLUE, false);
          YoArtifactPolygon backwardReachabilityGraphic = new YoArtifactPolygon("BackwardReachabilityRegionViz", backwardCrossOverReachability, Color.BLUE, false);
 
@@ -237,7 +152,7 @@ public class StepAdjustmentReachabilityConstraint
     */
    public void reset()
    {
-      contractedReachabilityPolygon.clear();
+      reachabilityPolygon.clear();
       forwardCrossOverReachability.clear();
       backwardCrossOverReachability.clear();
    }
@@ -261,27 +176,7 @@ public class StepAdjustmentReachabilityConstraint
       updateBackwardCrossOverPolygon(supportSide.getOppositeSide());
       updateTotalReachability(supportSide.getOppositeSide());
 
-      FrameConvexPolygon2DReadOnly adjustmentPolygon = getAdjustmentPolygon(supportSide.getOppositeSide(), footstepPose);
-
-      contractedReachabilityPolygon.checkReferenceFrameMatch(reachabilityPolygon);
-      if (adjustmentPolygon != null)
-      {
-         contractedReachabilityPolygon.checkReferenceFrameMatch(adjustmentPolygon);
-
-         if (polygonTools.computeIntersectionOfPolygons(reachabilityPolygon, adjustmentPolygon, contractedReachabilityPolygon))
-            return contractedReachabilityPolygon;
-
-         // there is no intersection, make the reachability only a single point.
-         contractedReachabilityPolygon.clear();
-         contractedReachabilityPolygon.addVertex(footstepPose.getPosition());
-         contractedReachabilityPolygon.update();
-      }
-      else
-      {
-         contractedReachabilityPolygon.setMatchingFrame(reachabilityPolygon, false);
-      }
-
-      return contractedReachabilityPolygon;
+      return reachabilityPolygon;
    }
 
    private FrameConvexPolygon2DReadOnly updateReachabilityPolygon(RobotSide supportSide)
@@ -411,35 +306,12 @@ public class StepAdjustmentReachabilityConstraint
       totalReachabilityHull.update();
    }
 
-
-   private FrameConvexPolygon2DReadOnly getAdjustmentPolygon(RobotSide swingSide, FramePose3DReadOnly footstepPose)
-   {
-      if (forwardAdjustmentLimit == null || backwardAdjustmentLimit == null || outwardAdjustmentLimit == null || inwardAdjustmentLimit == null)
-         return null;
-
-      stepFrames.get(swingSide).setPoseAndUpdate(footstepPose);
-
-      List<YoFramePoint2D> vertices = adjustmentVertices.get(swingSide);
-      YoFrameConvexPolygon2D polygon = adjustmentPolygons.get(swingSide);
-
-      vertices.get(0).set(forwardAdjustmentLimit.getValue(), swingSide.negateIfRightSide(outwardAdjustmentLimit.getValue()));
-      vertices.get(1).set(forwardAdjustmentLimit.getValue(), swingSide.negateIfLeftSide(inwardAdjustmentLimit.getValue()));
-      vertices.get(2).set(-backwardAdjustmentLimit.getValue(), swingSide.negateIfRightSide(outwardAdjustmentLimit.getValue()));
-      vertices.get(3).set(-backwardAdjustmentLimit.getValue(), swingSide.negateIfLeftSide(inwardAdjustmentLimit.getValue()));
-
-      polygon.notifyVerticesChanged();
-      polygon.update();
-
-      adjustmentPolygon.setMatchingFrame(polygon, false);
-      return adjustmentPolygon;
-   }
-
    /**
     * Get the polygon that describes the reachable region for the step position.
     */
    public FrameConvexPolygon2DReadOnly getReachabilityConstraint()
    {
-      return contractedReachabilityPolygon;
+      return reachabilityPolygon;
    }
 
    public FrameConvexPolygon2DReadOnly getForwardCrossOverPolygon()
