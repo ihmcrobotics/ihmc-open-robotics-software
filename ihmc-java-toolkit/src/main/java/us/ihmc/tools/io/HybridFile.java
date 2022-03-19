@@ -88,6 +88,20 @@ public class HybridFile
       return isInputStreamAvailable;
    }
 
+   public boolean isWritingAvailable()
+   {
+      boolean isWritingAvailable;
+      if (mode == HybridResourceMode.WORKSPACE)
+      {
+         isWritingAvailable = isWorkspaceWritingAvailable();
+      }
+      else
+      {
+         isWritingAvailable = true; // Can always write externally
+      }
+      return isWritingAvailable;
+   }
+
    public String getLocationOfResourceForReading()
    {
       if (mode == HybridResourceMode.WORKSPACE)

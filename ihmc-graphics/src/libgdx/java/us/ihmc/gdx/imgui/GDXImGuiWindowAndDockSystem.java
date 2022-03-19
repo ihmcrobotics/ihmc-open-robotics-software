@@ -209,6 +209,7 @@ public class GDXImGuiWindowAndDockSystem
          success = true;
 
          panelsFile.setMode(configurationLocation.toHybridResourceMode());
+         LogTools.info("Loading ImGui panels settings from {}", panelsFile.getLocationOfResourceForReading());
          JSONFileTools.load(panelsFile.getInputStream(), jsonNode ->
          {
             JsonNode dockspacePanelsNode = jsonNode.get("dockspacePanels");
@@ -243,8 +244,8 @@ public class GDXImGuiWindowAndDockSystem
 
    public void saveConfiguration(ImGuiConfigurationLocation saveConfigurationLocation)
    {
-      Path saveFile = saveConfigurationLocation == ImGuiConfigurationLocation.VERSION_CONTROL
-            ? imGuiSettingsFile.getWorkspaceFile() : imGuiSettingsFile.getExternalFile();
+      imGuiSettingsFile.setMode(saveConfigurationLocation.toHybridResourceMode());
+      Path saveFile = imGuiSettingsFile.getFileForWriting();
       String settingsPathString = saveFile.toString();
       LogTools.info("Saving ImGui settings to {}", settingsPathString);
       FileTools.ensureDirectoryExists(saveFile.getParent(), DefaultExceptionHandler.PRINT_STACKTRACE);
@@ -260,15 +261,10 @@ public class GDXImGuiWindowAndDockSystem
 
          panelManager.saveConfiguration(root);
       };
-      if (saveConfigurationLocation == ImGuiConfigurationLocation.VERSION_CONTROL)
-      {
-         JSONFileTools.save(panelsFile.getWorkspaceFile(), rootConsumer);
-      }
-      else
-      {
-         LogTools.info("Saving ImGui windows settings to {}", panelsFile.getExternalFile().toString());
-         JSONFileTools.save(panelsFile.getExternalFile(), rootConsumer);
-      }
+
+      panelsFile.setMode(saveConfigurationLocation.toHybridResourceMode());
+      LogTools.info("Saving ImGui panel settings to {}", panelsFile.getFileForWriting().toString());
+      JSONFileTools.save(panelsFile.getFileForWriting(), rootConsumer);
    }
 
    public void afterWindowManagement()
