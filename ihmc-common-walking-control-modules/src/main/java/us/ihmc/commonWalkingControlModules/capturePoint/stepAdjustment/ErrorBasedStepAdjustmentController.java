@@ -24,7 +24,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
@@ -34,7 +33,6 @@ import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
@@ -46,8 +44,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-
-import java.awt.*;
 
 public class ErrorBasedStepAdjustmentController implements StepAdjustmentController
 {
@@ -220,7 +216,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                                                                    registry,
                                                                    yoGraphicsListRegistry);
       oneStepSafetyHeuristics = new CaptureRegionSafetyHeuristics(lengthLimit, registry, yoGraphicsListRegistry);
-      multiStepCaptureRegionCalculator = new MultiStepCaptureRegionCalculator(reachabilityConstraintHandler, registry, yoGraphicsListRegistry);
+      multiStepCaptureRegionCalculator = new MultiStepCaptureRegionCalculator(reachabilityConstraintHandler, allowCrossOverSteps, registry, yoGraphicsListRegistry);
       environmentConstraintProvider = new EnvironmentConstraintHandler(icpControlPlane, contactableFeet, yoNamePrefix, registry, yoGraphicsListRegistry);
 
       if (walkingControllerParameters != null)
@@ -457,6 +453,22 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       captureRegionInWorld.setIncludingFrame(multiStepCaptureRegionCalculator.getCaptureRegion());
       captureRegionInWorld.changeFrameAndProjectToXYPlane(worldFrame);
 
+      if (!isTheCaptureRegionReachable())
+      {
+         captureRegionInWorld.orthogonalProjection(adjustedSolutionInControlPlane);
+         reachabilityConstraintHandler.getReachabilityConstraint().orthogonalProjection(adjustedSolutionInControlPlane);
+      }
+      else
+      {
+         getReachabilityConstraintToUse().orthogonalProjection(adjustedSolutionInControlPlane);
+      }
+
+      footstepAdjustmentInControlPlane.set(adjustedSolutionInControlPlane);
+      footstepAdjustmentInControlPlane.sub(referencePositionInControlPlane.getX(), referencePositionInControlPlane.getY());
+   }
+
+   private boolean isTheCaptureRegionReachable()
+   {
       boolean intersect = polygonTools.computeIntersectionOfPolygons(captureRegionInWorld, reachabilityConstraintHandler.getReachabilityConstraint(), reachableCaptureRegion);
       if (allowCrossOverSteps.getValue())
       {
@@ -468,21 +480,10 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                                                                  backwardCrossOverReachableCaptureRegion);
       }
 
-      if (!intersect)
-      {
-         captureRegionInWorld.orthogonalProjection(adjustedSolutionInControlPlane);
-         reachabilityConstraintHandler.getReachabilityConstraint().orthogonalProjection(adjustedSolutionInControlPlane);
-      }
-      else
-      {
-         getReachabilityWithMostOverlap().orthogonalProjection(adjustedSolutionInControlPlane);
-      }
-
-      footstepAdjustmentInControlPlane.set(adjustedSolutionInControlPlane);
-      footstepAdjustmentInControlPlane.sub(referencePositionInControlPlane.getX(), referencePositionInControlPlane.getY());
+      return intersect;
    }
 
-   private FrameConvexPolygon2DReadOnly getReachabilityWithMostOverlap()
+   private FrameConvexPolygon2DReadOnly getReachabilityConstraintToUse()
    {
       if (!allowCrossOverSteps.getValue())
          return reachableCaptureRegion;

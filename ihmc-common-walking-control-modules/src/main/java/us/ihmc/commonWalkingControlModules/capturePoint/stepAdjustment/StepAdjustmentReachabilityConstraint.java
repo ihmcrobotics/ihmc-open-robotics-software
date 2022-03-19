@@ -32,12 +32,14 @@ public class StepAdjustmentReachabilityConstraint
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final int numberOfVertices = 9;
+   private static final int numberOfCrossOverVertices = 8;
    private static final double SUFFICIENTLY_LARGE = 5.0;
 
    private final SideDependentList<List<YoFramePoint2D>> reachabilityVertices = new SideDependentList<>();
    private final SideDependentList<YoFrameConvexPolygon2D> reachabilityPolygons = new SideDependentList<>();
    private final SideDependentList<YoFrameConvexPolygon2D> forwardReachabilityPolygons = new SideDependentList<>();
    private final SideDependentList<YoFrameConvexPolygon2D> backwardReachabilityPolygons = new SideDependentList<>();
+   private final SideDependentList<FrameConvexPolygon2D> totalReachabilityHulls = new SideDependentList<>();
 
    private final SideDependentList<List<YoFramePoint2D>> adjustmentVertices = new SideDependentList<>();
    private final SideDependentList<PoseReferenceFrame> stepFrames = new SideDependentList<>();
@@ -183,10 +185,11 @@ public class StepAdjustmentReachabilityConstraint
          this.reachabilityVertices.put(robotSide, reachabilityVertices);
          this.reachabilityPolygons.put(robotSide, reachabilityPolygon);
 
-         YoFrameConvexPolygon2D forwardReachabilityPolygon = new YoFrameConvexPolygon2D(prefix + "ForwardReachability", supportSoleFrame, numberOfVertices, registry);
-         YoFrameConvexPolygon2D backwardReachabilityPolygon = new YoFrameConvexPolygon2D(prefix + "BackwardReachability", supportSoleFrame, numberOfVertices, registry);
+         YoFrameConvexPolygon2D forwardReachabilityPolygon = new YoFrameConvexPolygon2D(prefix + "ForwardReachability", supportSoleFrame, numberOfCrossOverVertices, registry);
+         YoFrameConvexPolygon2D backwardReachabilityPolygon = new YoFrameConvexPolygon2D(prefix + "BackwardReachability", supportSoleFrame, numberOfCrossOverVertices, registry);
          forwardReachabilityPolygons.put(robotSide, forwardReachabilityPolygon);
          backwardReachabilityPolygons.put(robotSide, backwardReachabilityPolygon);
+         totalReachabilityHulls.put(robotSide, new FrameConvexPolygon2D(supportSoleFrame));
 
          PoseReferenceFrame adjustmentFrame = new PoseReferenceFrame(prefix + "AdjustmentFrame", worldFrame);
 
@@ -205,12 +208,11 @@ public class StepAdjustmentReachabilityConstraint
          this.stepFrames.put(robotSide, adjustmentFrame);
          this.adjustmentVertices.put(robotSide, adjustmentVertices);
          this.adjustmentPolygons.put(robotSide, adjustmentPolygon);
-
       }
 
-      contractedReachabilityPolygon = new YoFrameConvexPolygon2D(yoNamePrefix + "ReachabilityRegion", "", worldFrame, 12, registry);
-      forwardCrossOverReachability = new YoFrameConvexPolygon2D(yoNamePrefix + "ForwardReachabilityRegion", "", worldFrame, 12, registry);
-      backwardCrossOverReachability = new YoFrameConvexPolygon2D(yoNamePrefix + "BackwardReachabilityRegion", "", worldFrame, 12, registry);
+      contractedReachabilityPolygon = new YoFrameConvexPolygon2D(yoNamePrefix + "ReachabilityRegion", "", worldFrame, numberOfVertices, registry);
+      forwardCrossOverReachability = new YoFrameConvexPolygon2D(yoNamePrefix + "ForwardReachabilityRegion", "", worldFrame, numberOfCrossOverVertices, registry);
+      backwardCrossOverReachability = new YoFrameConvexPolygon2D(yoNamePrefix + "BackwardReachabilityRegion", "", worldFrame, numberOfCrossOverVertices, registry);
 
       if (yoGraphicsListRegistry != null)
       {
@@ -253,6 +255,9 @@ public class StepAdjustmentReachabilityConstraint
       updateReachabilityPolygon(supportSide.getOppositeSide());
       FrameConvexPolygon2DReadOnly adjustmentPolygon = getAdjustmentPolygon(supportSide.getOppositeSide(), footstepPose);
       updateCrossOverPolygon(supportSide);
+      updateCrossOverPolygon(supportSide.getOppositeSide());
+      updateTotalReachability(supportSide);
+      updateTotalReachability(supportSide.getOppositeSide());
 
       contractedReachabilityPolygon.checkReferenceFrameMatch(reachabilityPolygon);
       if (adjustmentPolygon != null)
@@ -356,7 +361,7 @@ public class StepAdjustmentReachabilityConstraint
 
       for (int vertexIdx = 0; vertexIdx < backwardPolygon.getMaxNumberOfVertices() - 1; vertexIdx++)
       {
-         double alpha = (double) vertexIdx / (forwardPolygon.getMaxNumberOfVertices() - 2);
+         double alpha = (double) vertexIdx / (backwardPolygon.getMaxNumberOfVertices() - 2);
          double angle = InterpolationTools.linearInterpolate(-Math.PI / 2.0 + backwardCrossOverClearanceAngle.getValue(), Math.PI / 2.0, alpha);
          double x, y;
          if (angle < 0)
@@ -379,6 +384,17 @@ public class StepAdjustmentReachabilityConstraint
       forwardCrossOverReachability.setMatchingFrame(forwardPolygon, false);
       backwardCrossOverReachability.setMatchingFrame(backwardPolygon, false);
    }
+
+   private void updateTotalReachability(RobotSide supportSide)
+   {
+      FrameConvexPolygon2D totalReachabilityHull = totalReachabilityHulls.get(supportSide);
+      totalReachabilityHull.clear();
+      totalReachabilityHull.addVertices(reachabilityPolygons.get(supportSide));
+      totalReachabilityHull.addVertices(forwardReachabilityPolygons.get(supportSide));
+      totalReachabilityHull.addVertices(backwardReachabilityPolygons.get(supportSide));
+      totalReachabilityHull.update();
+   }
+
 
    private FrameConvexPolygon2DReadOnly getAdjustmentPolygon(RobotSide swingSide, FramePose3DReadOnly footstepPose)
    {
@@ -433,5 +449,10 @@ public class StepAdjustmentReachabilityConstraint
    public FrameConvexPolygon2DReadOnly getBackwardCrossOverPolygonInFootFrame(RobotSide robotSide)
    {
       return backwardReachabilityPolygons.get(robotSide);
+   }
+
+   public FrameConvexPolygon2DReadOnly getTotalReachabilityHull(RobotSide supportSide)
+   {
+      return totalReachabilityHulls.get(supportSide);
    }
 }
