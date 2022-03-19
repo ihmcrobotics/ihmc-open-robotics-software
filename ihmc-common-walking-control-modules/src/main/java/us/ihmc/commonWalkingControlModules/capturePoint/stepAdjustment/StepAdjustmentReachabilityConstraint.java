@@ -91,8 +91,8 @@ public class StepAdjustmentReachabilityConstraint
       this.outerLimit = outerLimit;
       this.inPlaceWidth = inPlaceWidth;
 
-      this.forwardCrossOverDistance = new DoubleParameter("forwardCrossOverDistance", registry, 0.2);
-      this.backwardCrossOverDistance = new DoubleParameter("backwardCrossOverDistance", registry, 0.15);
+      this.forwardCrossOverDistance = new DoubleParameter("forwardCrossOverDistance", registry, 0.05);
+      this.backwardCrossOverDistance = new DoubleParameter("backwardCrossOverDistance", registry, -0.05);
       this.forwardCrossOverClearanceAngle = new DoubleParameter("forwardCrossOverClearanceAngle", registry, Math.toRadians(25));
       this.backwardCrossOverClearanceAngle = new DoubleParameter("backwardCrossOverClearanceAngle", registry, Math.toRadians(45));
 
