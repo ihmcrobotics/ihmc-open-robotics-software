@@ -48,6 +48,7 @@ mainDependencies {
 testDependencies {
    api("org.jfree:jfreechart:1.0.17")
    api("org.jfree:jcommon:1.0.21")
+   api("us.ihmc:simulation-construction-set:0.21.16")
 
    api("us.ihmc:ihmc-matrix-library-test:0.18.5")
    api("us.ihmc:ihmc-commons-testing:0.30.5")
