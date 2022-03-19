@@ -3,7 +3,7 @@ package us.ihmc.valkyrie.pushRecovery;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.avatar.DRCPushRecoveryWalkingTest;
+import us.ihmc.avatar.pushRecovery.AvatarPushRecoveryWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
@@ -14,7 +14,7 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.parameters.ValkyrieSteppingParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
 
-public class ValkyriePushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
+public class ValkyriePushRecoveryWalkingTest extends AvatarPushRecoveryWalkingTest
 {
    @Override
    public DRCRobotModel getRobotModel()
