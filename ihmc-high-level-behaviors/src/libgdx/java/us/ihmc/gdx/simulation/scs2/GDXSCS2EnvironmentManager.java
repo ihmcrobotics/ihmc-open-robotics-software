@@ -12,7 +12,12 @@ import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.simulation.environment.object.objects.FlatGroundDefinition;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.simulation.SimulationSession;
+import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
+
+import java.util.ArrayList;
 
 public class GDXSCS2EnvironmentManager
 {
@@ -27,6 +32,7 @@ public class GDXSCS2EnvironmentManager
    private int recordFrequency;
    private DRCRobotModel robotModel;
    private CommunicationMode ros2CommunicationMode;
+   private final ArrayList<Robot> secondaryRobots = new ArrayList<>();
 
    public void create(GDXImGuiBasedUI baseUI, DRCRobotModel robotModel, CommunicationMode ros2CommunicationMode)
    {
@@ -71,6 +77,10 @@ public class GDXSCS2EnvironmentManager
       avatarSimulationFactory.setRealtimeROS2Node(realtimeROS2Node);
       avatarSimulationFactory.setDefaultHighLevelHumanoidControllerFactory(useVelocityAndHeadingScript, walkingScriptParameters);
       avatarSimulationFactory.setTerrainObjectDefinition(new FlatGroundDefinition());
+      for (Robot secondaryRobot : secondaryRobots)
+      {
+         avatarSimulationFactory.addSecondaryRobot(secondaryRobot);
+      }
       avatarSimulationFactory.setRobotInitialSetup(robotInitialSetup);
       avatarSimulationFactory.setSimulationDataRecordTickPeriod(recordFrequency);
       avatarSimulationFactory.setCreateYoVariableServer(true);
@@ -103,6 +113,12 @@ public class GDXSCS2EnvironmentManager
    {
       avatarSimulation.destroy();
       scs2SimulationSession.destroy(baseUI);
+   }
+
+   public void addSecondaryRobot(RobotDefinition robotDefinition)
+   {
+      Robot robot = new Robot(robotDefinition, SimulationSession.DEFAULT_INERTIAL_FRAME);
+      secondaryRobots.add(robot);
    }
 
    public GDXSCS2SimulationSession getSCS2SimulationSession()
