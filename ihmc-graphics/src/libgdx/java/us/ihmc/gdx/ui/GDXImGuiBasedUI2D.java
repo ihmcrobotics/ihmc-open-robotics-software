@@ -37,7 +37,7 @@ public class GDXImGuiBasedUI2D
 {
    public static final int ANTI_ALIASING = 2;
 
-   private static final String VIEW_3D_WINDOW_NAME = "2D View";
+   private static final String VIEW_2D_WINDOW_NAME = "2D View";
 
    private final GDX2DSceneManager sceneManager = new GDX2DSceneManager();
    private final GDXImGuiWindowAndDockSystem imGuiWindowAndDockSystem;
@@ -100,7 +100,7 @@ public class GDXImGuiBasedUI2D
       perspectiveManager.getSaveListeners().add(this::saveApplicationSettings);
       perspectiveManager.applyPerspectiveDirectory();
 
-      imGuiWindowAndDockSystem.getPanelManager().addPrimaryPanel(VIEW_3D_WINDOW_NAME);
+      imGuiWindowAndDockSystem.getPanelManager().addPrimaryPanel(VIEW_2D_WINDOW_NAME);
    }
 
    public void launchGDXApplication(Lwjgl3ApplicationAdapter applicationAdapter)
@@ -186,7 +186,7 @@ public class GDXImGuiBasedUI2D
       view2DPanelSizeHandler.handleSizeBeforeBegin();
       ImGui.pushStyleVar(ImGuiStyleVar.WindowPadding, 0.0f, 0.0f);
       int flags = ImGuiWindowFlags.None;
-      ImGui.begin(VIEW_3D_WINDOW_NAME, flags);
+      ImGui.begin(VIEW_2D_WINDOW_NAME, flags);
       view2DPanelSizeHandler.handleSizeAfterBegin();
 
       float posX = ImGui.getWindowPosX();
