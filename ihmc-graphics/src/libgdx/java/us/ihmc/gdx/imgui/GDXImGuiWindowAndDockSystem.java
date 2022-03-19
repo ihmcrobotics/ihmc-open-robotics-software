@@ -14,7 +14,6 @@ import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.system.Callback;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
-import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.ImGuiConfigurationLocation;
 import us.ihmc.log.LogTools;
@@ -23,7 +22,6 @@ import us.ihmc.tools.io.HybridFile;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.resources.ResourceTools;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -130,7 +128,7 @@ public class GDXImGuiWindowAndDockSystem
          loadUserConfigurationWithDefaultFallback();
       }
 
-      GDX3DSceneTools.glClearGray(0.3f);
+      ImGuiTools.glClearDarkGray();
       imGuiGlfw.newFrame();
       ImGui.newFrame();
 
@@ -305,9 +303,6 @@ public class GDXImGuiWindowAndDockSystem
          imgui.ImGui.renderPlatformWindowsDefault();
          glfwMakeContextCurrent(backupWindowPtr);
       }
-
-      glfwSwapBuffers(windowHandle);
-      glfwPollEvents();
 
       isFirstRenderCall = false;
    }

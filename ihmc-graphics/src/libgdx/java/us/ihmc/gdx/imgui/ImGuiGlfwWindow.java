@@ -2,6 +2,7 @@ package us.ihmc.gdx.imgui;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.internal.ImGui;
+import org.lwjgl.glfw.GLFW;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
@@ -90,8 +91,6 @@ public class ImGuiGlfwWindow
 
       while (!glfwWindowShouldClose(windowHandle))
       {
-         ImGuiTools.glClearDarkGray();
-
          if (configure != null)
          {
             configure.run();
@@ -103,6 +102,8 @@ public class ImGuiGlfwWindow
          render.run();
 
          imGuiWindowAndDockSystem.afterWindowManagement();
+         GLFW.glfwSwapBuffers(windowHandle);
+         GLFW.glfwPollEvents();
       }
 
       dispose.run();
