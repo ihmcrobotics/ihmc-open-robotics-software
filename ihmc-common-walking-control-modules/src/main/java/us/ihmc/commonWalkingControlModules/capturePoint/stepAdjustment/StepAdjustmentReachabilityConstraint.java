@@ -252,12 +252,16 @@ public class StepAdjustmentReachabilityConstraint
    public FrameConvexPolygon2DReadOnly initializeReachabilityConstraint(RobotSide supportSide, FramePose3DReadOnly footstepPose)
    {
       reachabilityPolygon.setMatchingFrame(updateReachabilityPolygon(supportSide), false);
-      updateReachabilityPolygon(supportSide.getOppositeSide());
-      FrameConvexPolygon2DReadOnly adjustmentPolygon = getAdjustmentPolygon(supportSide.getOppositeSide(), footstepPose);
-      updateCrossOverPolygon(supportSide);
-      updateCrossOverPolygon(supportSide.getOppositeSide());
+      forwardCrossOverReachability.setMatchingFrame(updateForwardCrossOverPolygon(supportSide), false);
+      backwardCrossOverReachability.setMatchingFrame(updateBackwardCrossOverPolygon(supportSide), false);
       updateTotalReachability(supportSide);
+      
+      updateReachabilityPolygon(supportSide.getOppositeSide());
+      updateForwardCrossOverPolygon(supportSide.getOppositeSide());
+      updateBackwardCrossOverPolygon(supportSide.getOppositeSide());
       updateTotalReachability(supportSide.getOppositeSide());
+
+      FrameConvexPolygon2DReadOnly adjustmentPolygon = getAdjustmentPolygon(supportSide.getOppositeSide(), footstepPose);
 
       contractedReachabilityPolygon.checkReferenceFrameMatch(reachabilityPolygon);
       if (adjustmentPolygon != null)
@@ -326,20 +330,16 @@ public class StepAdjustmentReachabilityConstraint
       return polygon;
    }
 
-   private void updateCrossOverPolygon(RobotSide supportSide)
+   private FrameConvexPolygon2DReadOnly updateForwardCrossOverPolygon(RobotSide supportSide)
    {
       YoFrameConvexPolygon2D forwardPolygon = forwardReachabilityPolygons.get(supportSide);
-      YoFrameConvexPolygon2D backwardPolygon = backwardReachabilityPolygons.get(supportSide);
 
       double forwardInnerRadius = inPlaceWidth.getValue() + forwardCrossOverDistance.getValue();
-      double backwardInnerRadius = inPlaceWidth.getValue() + backwardCrossOverDistance.getValue();
       double outerRadius = outerLimit.getValue() - inPlaceWidth.getValue();
 
       forwardPolygon.clear();
-      backwardPolygon.clear();
 
       forwardPolygon.addVertex(0.0, supportSide.negateIfLeftSide(inPlaceWidth.getValue()));
-      backwardPolygon.addVertex(0.0, supportSide.negateIfLeftSide(inPlaceWidth.getValue()));
       for (int vertexIdx = 0; vertexIdx < forwardPolygon.getMaxNumberOfVertices() - 1; vertexIdx++)
       {
          double alpha = (double) vertexIdx / (forwardPolygon.getMaxNumberOfVertices() - 2);
@@ -358,6 +358,23 @@ public class StepAdjustmentReachabilityConstraint
 
          forwardPolygon.addVertex(x, y);
       }
+
+      forwardPolygon.update();
+
+      return forwardPolygon;
+   }
+
+   private FrameConvexPolygon2DReadOnly updateBackwardCrossOverPolygon(RobotSide supportSide)
+   {
+      YoFrameConvexPolygon2D backwardPolygon = backwardReachabilityPolygons.get(supportSide);
+
+      double backwardInnerRadius = inPlaceWidth.getValue() + backwardCrossOverDistance.getValue();
+      double outerRadius = outerLimit.getValue() - inPlaceWidth.getValue();
+
+      backwardPolygon.clear();
+
+      backwardPolygon.addVertex(0.0, supportSide.negateIfLeftSide(inPlaceWidth.getValue()));
+
 
       for (int vertexIdx = 0; vertexIdx < backwardPolygon.getMaxNumberOfVertices() - 1; vertexIdx++)
       {
@@ -378,11 +395,10 @@ public class StepAdjustmentReachabilityConstraint
          backwardPolygon.addVertex(x, y);
       }
 
-      forwardPolygon.update();
       backwardPolygon.update();
 
-      forwardCrossOverReachability.setMatchingFrame(forwardPolygon, false);
-      backwardCrossOverReachability.setMatchingFrame(backwardPolygon, false);
+      return backwardPolygon;
+
    }
 
    private void updateTotalReachability(RobotSide supportSide)
