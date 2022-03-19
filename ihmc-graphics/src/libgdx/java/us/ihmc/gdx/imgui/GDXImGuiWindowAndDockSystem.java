@@ -21,6 +21,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.HybridDirectory;
 import us.ihmc.tools.io.HybridFile;
 import us.ihmc.tools.io.JSONFileTools;
+import us.ihmc.tools.io.resources.ResourceTools;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -201,17 +202,16 @@ public class GDXImGuiWindowAndDockSystem
    public boolean loadConfiguration(ImGuiConfigurationLocation configurationLocation)
    {
       boolean success = false;
-      Path file = configurationLocation == ImGuiConfigurationLocation.VERSION_CONTROL
-            ? imGuiSettingsFile.getWorkspaceFile() : imGuiSettingsFile.getExternalFile();
-      if (Files.exists(file))
+      imGuiSettingsFile.setMode(configurationLocation.toHybridResourceMode());
+      if (imGuiSettingsFile.isInputStreamAvailable())
       {
-         LogTools.info("Loading ImGui settings from {}", file.toString());
-         ImGui.loadIniSettingsFromDisk(file.toString());
+         LogTools.info("Loading ImGui settings from {}", imGuiSettingsFile.getLocationOfResourceForReading());
+         String iniContentsAsString = ResourceTools.readResourceToString(imGuiSettingsFile.getClasspathResourceAsStream());
+         ImGui.loadIniSettingsFromMemory(iniContentsAsString);
          success = true;
 
-         Path fileForDockspacePanels = configurationLocation == ImGuiConfigurationLocation.VERSION_CONTROL
-               ? panelsFile.getWorkspaceFile() : panelsFile.getExternalFile();
-         JSONFileTools.load(fileForDockspacePanels, jsonNode ->
+         panelsFile.setMode(configurationLocation.toHybridResourceMode());
+         JSONFileTools.load(panelsFile.getInputStream(), jsonNode ->
          {
             JsonNode dockspacePanelsNode = jsonNode.get("dockspacePanels");
             if (dockspacePanelsNode != null)

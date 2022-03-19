@@ -86,6 +86,7 @@ public class ImGuiTools
    public static ImFont setupFonts(ImGuiIO io, int fontSizeLevel)
    {
       final ImFontConfig fontConfig = new ImFontConfig(); // Natively allocated object, should be explicitly destroyed
+      final ImFontConfig mediumFontConfig = new ImFontConfig();
       final ImFontConfig bigFontConfig = new ImFontConfig();
       final ImFontConfig nodeFontConfig = new ImFontConfig();
 
@@ -103,6 +104,7 @@ public class ImGuiTools
 //      fontConfig.setRasterizerMultiply(2.0f);
 //      fontConfig.setPixelSnapH(true);
       fontConfig.setFontBuilderFlags(fontsFlags);
+      mediumFontConfig.setFontBuilderFlags(fontsFlags);
       bigFontConfig.setFontBuilderFlags(fontsFlags);
       nodeFontConfig.setFontBuilderFlags(fontsFlags);
 
@@ -123,7 +125,7 @@ public class ImGuiTools
          smallFont = io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), 16.0f, fontConfig);
 
          fontConfig.setName("segoeui.ttf, 20px");
-         mediumFont = io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), 20.0f, fontConfig);
+         mediumFont = io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), 20.0f, mediumFontConfig);
 
          bigFontConfig.setName("segoeui.ttf, 38px");
          bigFont = io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), 38.0f, bigFontConfig);
@@ -137,7 +139,7 @@ public class ImGuiTools
          smallFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 13.0f, fontConfig);
 
          fontConfig.setName("DejaVuSans.ttf, 17px");
-         mediumFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 17.0f, fontConfig);
+         mediumFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 17.0f, mediumFontConfig);
 
          bigFontConfig.setName("DejaVuSans.ttf, 32px");
          bigFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 32.0f, bigFontConfig);
@@ -158,7 +160,7 @@ public class ImGuiTools
       ImGui.getIO().getFonts().build();
 
       fontConfig.destroy(); // After all fonts were added we don't need this config more
-      mediumFont.destroy();
+      mediumFontConfig.destroy();
       bigFontConfig.destroy();
       nodeFontConfig.destroy();
 
