@@ -5,13 +5,13 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.avatar.DRCPushRecoveryWalkingTest;
+import us.ihmc.avatar.pushRecovery.AvatarPushRecoveryWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
-public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
+public class AtlasPushRecoveryWalkingTest extends AvatarPushRecoveryWalkingTest
 {
    @Override
    public DRCRobotModel getRobotModel()
