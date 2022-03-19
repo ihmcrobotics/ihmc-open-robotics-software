@@ -155,6 +155,8 @@ public class GDXImGuiPerspectiveManager
 
    private void renderPerspectiveManager(TreeSet<String> perspectives, ImGuiConfigurationLocation configurationLocation, ImString perspectiveNameToSave)
    {
+      boolean enableSaving = configurationLocation == ImGuiConfigurationLocation.USER_HOME
+                         || (configurationLocation == ImGuiConfigurationLocation.VERSION_CONTROL && configurationBaseDirectory.isWorkspaceWritingAvailable());
       for (String perspective : perspectives)
       {
          if (ImGui.radioButton(labels.get(perspective, configurationLocation.name()),
@@ -168,7 +170,7 @@ public class GDXImGuiPerspectiveManager
                loadListener.accept(configurationLocation);
             }
          }
-         if (currentPerspectiveName.equals(perspective))
+         if (enableSaving && currentPerspectiveName.equals(perspective))
          {
             ImGui.sameLine();
             if (ImGui.button(labels.get("Save", configurationLocation.name(), 0)))
@@ -181,23 +183,26 @@ public class GDXImGuiPerspectiveManager
          }
       }
 
-      ImGui.text("Save as:");
-      ImGui.sameLine();
-      ImGui.inputText(labels.getHidden("NewSaveName" + configurationLocation.name()), perspectiveNameToSave, ImGuiInputTextFlags.CallbackResize);
-      String perpectiveNameToCreateString = perspectiveNameToSave.get();
-      if (!perpectiveNameToCreateString.isEmpty())
+      if (enableSaving)
       {
+         ImGui.text("Save as:");
          ImGui.sameLine();
-         if (ImGui.button(labels.get("Save", configurationLocation.name(), 1)))
+         ImGui.inputText(labels.getHidden("NewSaveName" + configurationLocation.name()), perspectiveNameToSave, ImGuiInputTextFlags.CallbackResize);
+         String perpectiveNameToCreateString = perspectiveNameToSave.get();
+         if (!perpectiveNameToCreateString.isEmpty())
          {
-            String sanitizedName = perpectiveNameToCreateString.replaceAll(" ", "");
-            perspectives.add(sanitizedName);
-            currentPerspectiveName = sanitizedName;
-            applyPerspectiveDirectory();
-            perspectiveNameToSave.clear();
-            for (Consumer<ImGuiConfigurationLocation> saveListener : saveListeners)
+            ImGui.sameLine();
+            if (ImGui.button(labels.get("Save", configurationLocation.name(), 1)))
             {
-               saveListener.accept(configurationLocation);
+               String sanitizedName = perpectiveNameToCreateString.replaceAll(" ", "");
+               perspectives.add(sanitizedName);
+               currentPerspectiveName = sanitizedName;
+               applyPerspectiveDirectory();
+               perspectiveNameToSave.clear();
+               for (Consumer<ImGuiConfigurationLocation> saveListener : saveListeners)
+               {
+                  saveListener.accept(configurationLocation);
+               }
             }
          }
       }

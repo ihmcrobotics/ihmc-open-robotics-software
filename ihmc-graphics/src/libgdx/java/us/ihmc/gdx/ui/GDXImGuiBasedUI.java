@@ -95,6 +95,7 @@ public class GDXImGuiBasedUI
       perspectiveManager.getLoadListeners().add(loadConfigurationLocation ->
       {
          libGDXSettingsFile.setMode(loadConfigurationLocation.toHybridResourceMode());
+         LogTools.info("Loading libGDX settings from {}", libGDXSettingsFile.getLocationOfResourceForReading());
          JSONFileTools.load(libGDXSettingsFile.getInputStream(), jsonNode ->
          {
             int width = jsonNode.get("windowWidth").asInt();
