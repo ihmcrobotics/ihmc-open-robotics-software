@@ -29,18 +29,6 @@ public class ValkyrieICPOptimizationPushRecoveryBTest extends AvatarICPOptimizat
       return 0.9;
    }
 
-   @Override
-   public double getSlowSwingDuration()
-   {
-      return 1.2;
-   }
-
-   @Override
-   public double getSlowTransferDuration()
-   {
-      return 0.8;
-   }
-
    @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
@@ -67,15 +55,6 @@ public class ValkyrieICPOptimizationPushRecoveryBTest extends AvatarICPOptimizat
    public void testPushICPOptimizationNoPush() throws Exception
    {
       super.testPushICPOptimizationNoPush();
-   }
-
-   @Tag("humanoid-push-recovery-slow")
-   @Override
-   @Test
-   public void testPushICPOptimizationOutwardPushInSlowSwing() throws Exception
-   {
-      percentWeight = 0.4;
-      super.testPushICPOptimizationOutwardPushInSlowSwing();
    }
 
    @Tag("humanoid-push-recovery")

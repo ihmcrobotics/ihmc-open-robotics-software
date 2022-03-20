@@ -77,26 +77,6 @@ public abstract class AvatarICPOptimizationPushRecoveryATest extends AvatarICPOp
    }
 
    @Test
-   public void testPushICPOptimizationForwardPushInSlowSwing() throws Exception
-   {
-      FootstepDataListMessage footsteps = createSlowForwardWalkingFootstepMessage();
-      setupAndRunTest(footsteps);
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-
-      // push timing:
-      StateTransitionCondition pushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
-      double delay = 0.5 * swingTime;
-
-      // push parameters:
-      Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
-      double magnitude = percentWeight * totalMass * 9.81;
-      double duration = 0.1;
-      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-
-      validateTest(footsteps);
-   }
-
-   @Test
    public void testPushICPOptimizationBackwardPushInSwing() throws Exception
    {
       FootstepDataListMessage footsteps = createForwardWalkingFootstepMessage();

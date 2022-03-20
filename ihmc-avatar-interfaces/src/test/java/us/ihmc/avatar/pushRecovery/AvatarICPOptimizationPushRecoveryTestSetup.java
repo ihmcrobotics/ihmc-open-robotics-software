@@ -57,10 +57,6 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
 
    public abstract double getNominalHeight();
 
-   public abstract double getSlowTransferDuration();
-
-   public abstract double getSlowSwingDuration();
-
    @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
@@ -207,48 +203,6 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
       message.getFootstepDataList().add().set(message6);
 
       message.setAreFootstepsAdjustable(true);
-
-      return message;
-   }
-
-   protected FootstepDataListMessage createSlowForwardWalkingFootstepMessage()
-   {
-      double scale = getSizeScale();
-
-      FramePoint3D step1Location = new FramePoint3D(worldFrame, 0.3, -0.125, 0.0);
-      FramePoint3D step2Location = new FramePoint3D(worldFrame, 0.6,  0.125, 0.0);
-      FramePoint3D step3Location = new FramePoint3D(worldFrame, 0.9, -0.125, 0.0);
-      FramePoint3D step4Location = new FramePoint3D(worldFrame, 1.2,  0.125, 0.0);
-      FramePoint3D step5Location = new FramePoint3D(worldFrame, 1.5, -0.125, 0.0);
-      FramePoint3D step6Location = new FramePoint3D(worldFrame, 1.8,  0.125, 0.0);
-
-      step1Location.scale(scale);
-      step2Location.scale(scale);
-      step3Location.scale(scale);
-      step4Location.scale(scale);
-      step5Location.scale(scale);
-      step6Location.scale(scale);
-
-      FootstepDataMessage message1 = createFootstepDataMessage(RobotSide.RIGHT, step1Location);
-      FootstepDataMessage message2 = createFootstepDataMessage(RobotSide.LEFT, step2Location);
-      FootstepDataMessage message3 = createFootstepDataMessage(RobotSide.RIGHT, step3Location);
-      FootstepDataMessage message4 = createFootstepDataMessage(RobotSide.LEFT, step4Location);
-      FootstepDataMessage message5 = createFootstepDataMessage(RobotSide.RIGHT, step5Location);
-      FootstepDataMessage message6 = createFootstepDataMessage(RobotSide.LEFT, step6Location);
-
-      swingTime = getSlowSwingDuration();
-      transferTime = getSlowTransferDuration();
-
-      FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
-      message.getFootstepDataList().add().set(message1);
-      message.getFootstepDataList().add().set(message2);
-      message.getFootstepDataList().add().set(message3);
-      message.getFootstepDataList().add().set(message4);
-      message.getFootstepDataList().add().set(message5);
-      message.getFootstepDataList().add().set(message6);
-
-      message.setAreFootstepsAdjustable(true);
-
 
       return message;
    }
