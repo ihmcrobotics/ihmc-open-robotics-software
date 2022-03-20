@@ -12,26 +12,6 @@ import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 public abstract class AvatarICPOptimizationPushRecoveryATest extends AvatarICPOptimizationPushRecoveryTestSetup
 {
    @Test
-   public void testPushICPOptimizationLongInwardPushInSwing() throws Exception
-   {
-      FootstepDataListMessage footsteps = createForwardWalkingFootstepMessage();
-      setupAndRunTest(footsteps);
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-
-      // push timing:
-      StateTransitionCondition pushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
-      double delay = 0.1 * swingTime;
-
-      // push parameters:
-      Vector3D forceDirection = new Vector3D(0.0, 1.0, 0.0);
-      double magnitude = percentWeight * totalMass * 9.81;
-      double duration = 0.8 * swingTime;
-      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-
-      validateTest(footsteps);
-   }
-
-   @Test
    public void testPushICPOptimizationOutwardPushInTransfer() throws Exception
    {
       FootstepDataListMessage footsteps = createForwardWalkingFootstepMessage();

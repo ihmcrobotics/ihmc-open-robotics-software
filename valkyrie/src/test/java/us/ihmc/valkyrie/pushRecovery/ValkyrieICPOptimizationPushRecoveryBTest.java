@@ -59,23 +59,6 @@ public class ValkyrieICPOptimizationPushRecoveryBTest extends AvatarICPOptimizat
       super.testPushICPOptimizationDiagonalYawingOutwardPushInSwing();
    }
 
-   @Tag("humanoid-push-recovery-slow")
-   @Override
-   @Test
-   public void testPushICPOptimizationLongBackwardPushInSwing() throws Exception
-   {
-      percentWeight = 0.10;
-      super.testPushICPOptimizationLongBackwardPushInSwing();
-   }
-
-   @Tag("humanoid-push-recovery")
-   @Override
-   @Test
-   public void testPushICPOptimizationLongForwardPushInSwing() throws Exception
-   {
-      percentWeight = 0.1;
-      super.testPushICPOptimizationLongForwardPushInSwing();
-   }
 
    @Disabled // This test is covered by flat ground track and so many other tests that it is not really useful anymore.
    @Tag("humanoid-push-recovery")

@@ -79,15 +79,6 @@ public class ValkyrieICPOptimizationPushRecoveryATest extends AvatarICPOptimizat
    @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
-   public void testPushICPOptimizationLongInwardPushInSwing() throws Exception
-   {
-      percentWeight = 0.05;
-      super.testPushICPOptimizationLongInwardPushInSwing();
-   }
-
-   @Tag("humanoid-push-recovery-slow")
-   @Override
-   @Test
    public void testPushICPOptimizationOutwardPushInTransfer() throws Exception
    {
       percentWeight = 0.25;
