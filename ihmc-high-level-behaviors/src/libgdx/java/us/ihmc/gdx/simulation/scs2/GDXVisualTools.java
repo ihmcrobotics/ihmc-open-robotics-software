@@ -87,6 +87,19 @@ public class GDXVisualTools
             return null;
 
          gdxModel.setModel(GDXModelLoader.loadG3DModel(modelFileName));
+
+         if (materialDefinition != null && materialDefinition.getDiffuseColor() != null)
+         {
+            for (Material material : gdxModel.getModel().materials)
+            {
+               Color color = toColor(materialDefinition.getDiffuseColor(), Color.WHITE);
+               material.set(ColorAttribute.createDiffuse(color));
+               if (materialDefinition.getDiffuseColor().getAlpha() < 1.0)
+               {
+                  material.set(new BlendingAttribute(true, (float) materialDefinition.getDiffuseColor().getAlpha()));
+               }
+            }
+         }
       }
       else
       {
