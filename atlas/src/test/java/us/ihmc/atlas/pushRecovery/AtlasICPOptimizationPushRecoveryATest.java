@@ -60,18 +60,6 @@ public class AtlasICPOptimizationPushRecoveryATest extends AvatarICPOptimization
       return 1.0;
    }
 
-   @Override
-   public double getSlowSwingDuration()
-   {
-      return 1.2;
-   }
-
-   @Override
-   public double getSlowTransferDuration()
-   {
-      return 0.8;
-   }
-
    @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
@@ -79,15 +67,6 @@ public class AtlasICPOptimizationPushRecoveryATest extends AvatarICPOptimization
    {
       percentWeight = 0.5;
       super.testPushICPOptimizationBackwardPushInSwing();
-   }
-
-   @Tag("humanoid-push-recovery-slow")
-   @Override
-   @Test
-   public void testPushICPOptimizationForwardPushInSlowSwing() throws Exception
-   {
-      percentWeight = 0.6;
-      super.testPushICPOptimizationForwardPushInSlowSwing();
    }
 
    @Tag("humanoid-push-recovery")
