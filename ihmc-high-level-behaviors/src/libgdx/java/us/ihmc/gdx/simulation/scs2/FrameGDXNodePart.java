@@ -39,4 +39,9 @@ public class FrameGDXNodePart
    {
       modelInstance.getRenderables(renderables, pool);
    }
+
+   public void dispose()
+   {
+      model.dispose();
+   }
 }
