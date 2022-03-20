@@ -6,10 +6,10 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.gdx.simulation.scs2.GDXMultiBodySystemFactories;
 import us.ihmc.gdx.simulation.scs2.GDXRigidBody;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.tools.thread.Activator;
@@ -24,16 +24,31 @@ public class GDXMultiBodyGraphic extends ImGuiGDXVisualizer implements Renderabl
       super(title);
    }
 
-   public void loadRobotModelAndGraphics(RobotDefinition robotDefinition, RigidBodyBasics rootBody)
+   public void loadRobotModelAndGraphics(RobotDefinition robotDefinition, RigidBodyBasics originalRootBody)
    {
       if (multiBody != null)
          multiBody.destroy();
 
       ThreadTools.startAsDaemon(() ->
       {
-         multiBody = GDXMultiBodySystemFactories.toGDXMultiBodySystem(rootBody, ReferenceFrame.getWorldFrame(), robotDefinition, Gdx.app::postRunnable);
+         multiBody = loadRigidBody(originalRootBody, robotDefinition);
          robotLoadedActivator.activate();
       }, getClass().getSimpleName() + "Loading");
+   }
+
+   private GDXRigidBody loadRigidBody(RigidBodyBasics rigidBody, RobotDefinition robotDefinition)
+   {
+      GDXRigidBody gdxRigidBody = GDXMultiBodySystemFactories.toGDXRigidBody(rigidBody,
+                                                                             robotDefinition.getRigidBodyDefinition(rigidBody.getName()),
+                                                                             Gdx.app::postRunnable,
+                                                                             robotDefinition.getResourceClassLoader());
+
+      for (JointBasics childrenJoint : rigidBody.getChildrenJoints())
+      {
+         childrenJoint.setSuccessor(loadRigidBody(childrenJoint.getSuccessor(), robotDefinition));
+      }
+
+      return gdxRigidBody;
    }
 
    @Override
@@ -42,7 +57,7 @@ public class GDXMultiBodyGraphic extends ImGuiGDXVisualizer implements Renderabl
       super.update();
       if (robotLoadedActivator.poll())
       {
-         // multiBody.updateFramesRecursively(); // It is expected that these are updated before this; but TODO find out for sure
+         // multiBody.updateFramesRecursively(); // It is expected that these are updated before this
          multiBody.updateSubtreeGraphics();
       }
    }
