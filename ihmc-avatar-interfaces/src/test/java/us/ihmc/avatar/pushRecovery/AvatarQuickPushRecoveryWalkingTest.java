@@ -34,9 +34,12 @@ import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-public abstract class AvatarPushRecoveryWalkingTest implements MultiRobotTestInterface
+public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTestInterface
 {
+   private static final double pushDuration = 0.05;
+
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
+
    static
    {
       simulationTestingParameters.setRunMultiThreaded(false);
@@ -44,10 +47,11 @@ public abstract class AvatarPushRecoveryWalkingTest implements MultiRobotTestInt
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   private double swingTime = 0.6;
-   private double transferTime = 0.25;
+   private double swingTime;
+   private double transferTime;
 
-   private Double pushMagnitude;
+   private Double pushChangeInVelocity;
+   private double mass;
 
    private SideDependentList<StateTransitionCondition> swingStartConditions = new SideDependentList<>();
    private SideDependentList<StateTransitionCondition> swingFinishConditions = new SideDependentList<>();
@@ -56,7 +60,7 @@ public abstract class AvatarPushRecoveryWalkingTest implements MultiRobotTestInt
    @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
-      pushMagnitude = null;
+      pushChangeInVelocity = null;
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 
@@ -75,14 +79,14 @@ public abstract class AvatarPushRecoveryWalkingTest implements MultiRobotTestInt
          drcSimulationTestHelper = null;
       }
 
-      pushMagnitude = null;
+      pushChangeInVelocity = null;
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   public void setPushMagnitude(double pushMagnitude)
+   public void setPushChangeInVelocity(double pushChangeInVelocity)
    {
-      this.pushMagnitude = pushMagnitude;
+      this.pushChangeInVelocity = pushChangeInVelocity;
    }
 
    @Test
@@ -92,13 +96,11 @@ public abstract class AvatarPushRecoveryWalkingTest implements MultiRobotTestInt
 
       // setup all parameters
       Vector3D forceDirection = new Vector3D(0.0, 1.0, 0.0);
-      double magnitude = pushMagnitude;
-      double duration = 0.04;
       double percentInSwing = 0.2;
       RobotSide side = RobotSide.LEFT;
 
       // apply the push
-      testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
+      testPush(forceDirection, pushChangeInVelocity, percentInSwing, side, swingStartConditions, swingTime);
    }
 
    @Test
@@ -108,13 +110,11 @@ public abstract class AvatarPushRecoveryWalkingTest implements MultiRobotTestInt
 
       // setup all parameters
       Vector3D forceDirection = new Vector3D(0.0, 1.0, 0.0);
-      double magnitude = pushMagnitude;
-      double duration = 0.05;
       double percentInSwing = 0.5;
       RobotSide side = RobotSide.LEFT;
 
       // apply the push
-      testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
+      testPush(forceDirection, pushChangeInVelocity, percentInSwing, side, swingStartConditions, swingTime);
    }
 
    @Test
@@ -124,22 +124,18 @@ public abstract class AvatarPushRecoveryWalkingTest implements MultiRobotTestInt
 
       // setup all parameters
       Vector3D forceDirection = new Vector3D(0.0, -1.0, 0.0);
-      double magnitude = pushMagnitude;
-      double duration = 0.05;
       double percentInSwing = 0.4;
       RobotSide side = RobotSide.RIGHT;
 
       // apply the push
-      testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
+      testPush(forceDirection, pushChangeInVelocity, percentInSwing, side, swingStartConditions, swingTime);
 
       // push the robot again with new parameters
       forceDirection = new Vector3D(-1.0, 0.0, 0.0);
-      magnitude = pushMagnitude;
-      duration = 0.05;
       side = RobotSide.LEFT;
 
       // apply the push
-      testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
+      testPush(forceDirection, pushChangeInVelocity, percentInSwing, side, swingStartConditions, swingTime);
    }
 
    @Test
@@ -149,13 +145,11 @@ public abstract class AvatarPushRecoveryWalkingTest implements MultiRobotTestInt
 
       // setup all parameters
       Vector3D forceDirection = new Vector3D(-0.5, 1.0, 0.0);
-      double magnitude = pushMagnitude;
-      double duration = 0.05;
       double percentInSwing = 0.2;
       RobotSide side = RobotSide.LEFT;
 
       // apply the push
-      testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
+      testPush(forceDirection, pushChangeInVelocity, percentInSwing, side, swingStartConditions, swingTime);
    }
 
    @Test
@@ -165,13 +159,11 @@ public abstract class AvatarPushRecoveryWalkingTest implements MultiRobotTestInt
 
       // setup all parameters
       Vector3D forceDirection = new Vector3D(0.5, 1.0, 0.0);
-      double magnitude = pushMagnitude;
-      double duration = 0.05;
       double percentInSwing = 0.4;
       RobotSide side = RobotSide.LEFT;
 
       // apply the push
-      testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
+      testPush(forceDirection, pushChangeInVelocity, percentInSwing, side, swingStartConditions, swingTime);
    }
 
    @Test
@@ -181,23 +173,19 @@ public abstract class AvatarPushRecoveryWalkingTest implements MultiRobotTestInt
 
       // setup all parameters
       Vector3D forceDirection = new Vector3D(0.0, -1.0, 0.0);
-      double magnitude = pushMagnitude;
-      double duration = 0.05;
       double percentInTransferState = 0.5;
       RobotSide side = RobotSide.LEFT;
 
       // apply the push
-      testPush(forceDirection, magnitude, duration, percentInTransferState, side, swingFinishConditions, transferTime);
+      testPush(forceDirection, pushChangeInVelocity, percentInTransferState, side, swingFinishConditions, transferTime);
 
       // push the robot again with new parameters
       forceDirection = new Vector3D(0.5, -1.0, 0.0);
-      magnitude = pushMagnitude;
-      duration = 0.05;
       double percentInSwing = 0.4;
       side = RobotSide.RIGHT;
 
       // apply the push
-      testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
+      testPush(forceDirection, pushChangeInVelocity, percentInSwing, side, swingStartConditions, swingTime);
    }
 
    @Test
@@ -207,23 +195,19 @@ public abstract class AvatarPushRecoveryWalkingTest implements MultiRobotTestInt
 
       // setup all parameters
       Vector3D forceDirection = new Vector3D(0.0, -1.0, 0.0);
-      double magnitude = pushMagnitude;
-      double duration = 0.05;
       double percentInTransferState = 0.5;
       RobotSide side = RobotSide.LEFT;
 
       // apply the push
-      testPush(forceDirection, magnitude, duration, percentInTransferState, side, swingFinishConditions, transferTime);
+      testPush(forceDirection, pushChangeInVelocity, percentInTransferState, side, swingFinishConditions, transferTime);
 
       // push the robot again with new parameters
       forceDirection = new Vector3D(0.0, 1.0, 0.0);
-      magnitude = pushMagnitude;
-      duration = 0.05;
       double percentInSwing = 0.4;
       side = RobotSide.LEFT;
 
       // apply the push
-      testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
+      testPush(forceDirection, pushChangeInVelocity, percentInSwing, side, swingStartConditions, swingTime);
    }
 
    @Test
@@ -233,22 +217,22 @@ public abstract class AvatarPushRecoveryWalkingTest implements MultiRobotTestInt
 
       // setup all parameters
       Vector3D forceDirection = new Vector3D(0.0, -1.0, 0.0);
-      double magnitude = pushMagnitude;
-      double duration = 0.05;
 
       // This doesn't work for 0.5 or higher. We need to do more development to get this working better. So for now, just stick with 0.4.
       // 0.9 * Math.random();
       double percentInTransferState = 0.4;
-      LogTools.info("percentInTransferState = " + percentInTransferState);
       RobotSide side = RobotSide.LEFT;
 
       // apply the push
-      testPush(forceDirection, magnitude, duration, percentInTransferState, side, swingFinishConditions, transferTime);
+      testPush(forceDirection, pushChangeInVelocity, percentInTransferState, side, swingFinishConditions, transferTime);
    }
 
    private void setupTest() throws SimulationExceededMaximumTimeException
    {
       DRCRobotModel robotModel = getRobotModel();
+      swingTime = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
+      transferTime = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
+      
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, flatGround);
       drcSimulationTestHelper.createSimulation("DRCSimpleFlatGroundScriptTest");
@@ -264,18 +248,18 @@ public abstract class AvatarPushRecoveryWalkingTest implements MultiRobotTestInt
       {
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          String footPrefix = sidePrefix + "Foot";
-         @SuppressWarnings("unchecked")
-         final YoEnum<ConstraintType> footConstraintType = (YoEnum<ConstraintType>) scs.findVariable(sidePrefix + "FootControlModule",
-                                                                                                     footPrefix + "CurrentState");
-         @SuppressWarnings("unchecked")
-         final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.findVariable("WalkingHighLevelHumanoidController", "walkingCurrentState");
+         @SuppressWarnings("unchecked") final YoEnum<ConstraintType> footConstraintType = (YoEnum<ConstraintType>) scs.findVariable(
+               sidePrefix + "FootControlModule", footPrefix + "CurrentState");
+         @SuppressWarnings("unchecked") final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.findVariable(
+               "WalkingHighLevelHumanoidController",
+               "walkingCurrentState");
          swingStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType));
          swingFinishConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
       }
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
-//      YoBoolean enable = (YoBoolean) scs.findVariable("PushRecoveryControlModule", "enablePushRecovery");
-//      enable.set(true);
+      //      YoBoolean enable = (YoBoolean) scs.findVariable("PushRecoveryControlModule", "enablePushRecovery");
+      //      enable.set(true);
    }
 
    private void walkForward() throws SimulationExceededMaximumTimeException
@@ -286,7 +270,7 @@ public abstract class AvatarPushRecoveryWalkingTest implements MultiRobotTestInt
 
       ReferenceFrame pelvisFrame = drcSimulationTestHelper.getControllerFullRobotModel().getPelvis().getBodyFixedFrame();
 
-      FootstepDataListMessage footsteps = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
+      FootstepDataListMessage footsteps = HumanoidMessageTools.createFootstepDataListMessage();
       for (int i = 1; i <= steps; i++)
       {
          RobotSide robotSide = i % 2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
@@ -305,17 +289,24 @@ public abstract class AvatarPushRecoveryWalkingTest implements MultiRobotTestInt
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
    }
 
-   private void testPush(Vector3D forceDirection, double magnitude, double duration, double percentInState, RobotSide side,
-                         SideDependentList<StateTransitionCondition> condition, double stateTime)
-         throws SimulationExceededMaximumTimeException
+   private void testPush(Vector3D forceDirection,
+                         double velocityChange,
+                         double percentInState,
+                         RobotSide side,
+                         SideDependentList<StateTransitionCondition> condition,
+                         double stateTime) throws SimulationExceededMaximumTimeException
    {
       walkForward();
+
+      double totalMass = getRobotModel().createFullRobotModel().getTotalMass();
+      double pushMagnitude = velocityChange / pushDuration * totalMass;
+
       double delay = stateTime * percentInState;
-      pushRobotController.applyForceDelayed(condition.get(side), delay, forceDirection, magnitude, duration);
+      pushRobotController.applyForceDelayed(condition.get(side), delay, forceDirection, pushMagnitude, pushDuration);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0));
    }
 
-   private class SingleSupportStartCondition implements StateTransitionCondition
+   private static class SingleSupportStartCondition implements StateTransitionCondition
    {
       private final YoEnum<ConstraintType> footConstraintType;
 
@@ -331,7 +322,7 @@ public abstract class AvatarPushRecoveryWalkingTest implements MultiRobotTestInt
       }
    }
 
-   private class DoubleSupportStartCondition implements StateTransitionCondition
+   private static class DoubleSupportStartCondition implements StateTransitionCondition
    {
       private final YoEnum<WalkingStateEnum> walkingState;
 
