@@ -44,7 +44,7 @@ public class GDX2DSprite
       float height = sprite.getHeight();
       float scaleX = sprite.getScaleX();
       float scaleY = sprite.getScaleY();
-      float rotation = (float) orientation;
+      float rotation = (float) Math.toDegrees(orientation);
       int srcX = 0;
       int srcY = 0;
       int srcWidth = texture.getWidth();
