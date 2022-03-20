@@ -486,7 +486,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    private FrameConvexPolygon2DReadOnly getBestReachabilityConstraintToUseWhenNotIntersecting()
    {
       if (!allowCrossOverSteps.getValue())
-         return reachableCaptureRegion;
+         return reachabilityConstraintHandler.getReachabilityConstraint();
 
       double distanceToForward = reachabilityConstraintHandler.getForwardCrossOverPolygon().distance(adjustedSolutionInControlPlane);
       double distanceToBackward = reachabilityConstraintHandler.getBackwardCrossOverPolygon().distance(adjustedSolutionInControlPlane);
