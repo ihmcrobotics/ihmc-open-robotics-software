@@ -9,6 +9,7 @@ import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
@@ -26,8 +27,10 @@ import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.time.DurationCalculator;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class GDXSCS2SimulationSession
 {
@@ -41,6 +44,10 @@ public class GDXSCS2SimulationSession
    private final ImInt bufferRecordTickPeriod = new ImInt(1);
    private final ImFloat bufferDuration = new ImFloat(5.0f);
    private final ImBoolean pauseAtEndOfBuffer = new ImBoolean(true);
+   private final ArrayList<Pair<ImBoolean, String>> showRobotPairs = new ArrayList<>();
+   private final HashMap<String, ImBoolean> showRobotMap = new HashMap<>();
+   private final ImBoolean showTerrain = new ImBoolean(true);
+   private final ImBoolean showVirtualRenderables = new ImBoolean(true);
    private final ImBoolean showCollisionMeshes = new ImBoolean(false);
    private final YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
    private final DurationCalculator simulationDurationCalculator = new DurationCalculator();
@@ -127,6 +134,13 @@ public class GDXSCS2SimulationSession
       simulationSession.submitPlaybackRealTimeRate(playbackRealtimeRate.get());
       simulationSession.submitRunAtRealTimeRate(runAtRealtimeRate.get());
 
+      for (RobotDefinition robotDefinition : simulationSession.getRobotDefinitions())
+      {
+         ImBoolean imBoolean = new ImBoolean(true);
+         showRobotPairs.add(ImmutablePair.of(imBoolean, robotDefinition.getName()));
+         showRobotMap.put(robotDefinition.getName(), imBoolean);
+      }
+
       simulationSession.startSessionThread(); // TODO: Need start/stop controls?
 
       baseUI.get3DSceneManager().addRenderableProvider(getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
@@ -163,11 +177,17 @@ public class GDXSCS2SimulationSession
    {
       for (GDXSimulatedRobot robot : robots)
       {
-         robot.getRealRenderables(renderables, pool);
+         if (showRobotMap.get(robot.getRobotDefinition().getName()).get())
+         {
+            robot.getRealRenderables(renderables, pool);
+         }
       }
-      for (GDXSimulatedTerrainObject terrainObject : terrainObjects)
+      if (showTerrain.get())
       {
-         terrainObject.getRealRenderables(renderables, pool);
+         for (GDXSimulatedTerrainObject terrainObject : terrainObjects)
+         {
+            terrainObject.getRealRenderables(renderables, pool);
+         }
       }
    }
 
@@ -263,6 +283,12 @@ public class GDXSCS2SimulationSession
          simulationSession.submitPlaybackRealTimeRate(playbackRealtimeRate.get());
       }
       ImGui.popItemWidth();
+      for (Pair<ImBoolean, String> showRobotPair : showRobotPairs)
+      {
+         ImGui.checkbox(labels.get("Show " + showRobotPair.getRight()), showRobotPair.getLeft());
+      }
+      ImGui.checkbox(labels.get("Show terrain"), showTerrain);
+      ImGui.checkbox(labels.get("Show virtual renderables"), showVirtualRenderables);
       ImGui.checkbox(labels.get("Show collision meshes"), showCollisionMeshes);
       if (physicsEngine instanceof BulletPhysicsEngine)
          bulletPhysicsDebugger.renderImGuiWidgets();
@@ -290,6 +316,9 @@ public class GDXSCS2SimulationSession
    {
       baseUI.get3DSceneManager().getSceneBasics().removeRenderableProvider(getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
       baseUI.get3DSceneManager().getSceneBasics().removeRenderableProvider(getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+
+      showRobotMap.clear();
+      showRobotPairs.clear();
    }
 
    public SimulationSession getSession()
@@ -305,5 +334,20 @@ public class GDXSCS2SimulationSession
    public GDXYoManager getYoManager()
    {
       return yoManager;
+   }
+
+   public HashMap<String, ImBoolean> getShowRobotMap()
+   {
+      return showRobotMap;
+   }
+
+   public ImBoolean getShowTerrain()
+   {
+      return showTerrain;
+   }
+
+   public ImBoolean getShowVirtualRenderables()
+   {
+      return showVirtualRenderables;
    }
 }

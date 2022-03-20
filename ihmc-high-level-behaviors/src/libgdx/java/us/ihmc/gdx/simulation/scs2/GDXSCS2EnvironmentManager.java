@@ -33,6 +33,7 @@ public class GDXSCS2EnvironmentManager
    private DRCRobotModel robotModel;
    private CommunicationMode ros2CommunicationMode;
    private final ArrayList<Robot> secondaryRobots = new ArrayList<>();
+   private final ArrayList<String> robotsToHide = new ArrayList<>();
 
    public void create(GDXImGuiBasedUI baseUI, DRCRobotModel robotModel, CommunicationMode ros2CommunicationMode)
    {
@@ -98,6 +99,11 @@ public class GDXSCS2EnvironmentManager
       scs2SimulationSession.setDT(robotModel.getEstimatorDT());
       scs2SimulationSession.create(baseUI, managerPanel);
 
+      for (String robotToHide : robotsToHide)
+      {
+         scs2SimulationSession.getShowRobotMap().get(robotToHide).set(false);
+      }
+
       avatarSimulation.afterSessionThreadStart();
 
       scs2SimulationSession.getControlPanel().getIsShowing().set(true);
@@ -124,5 +130,10 @@ public class GDXSCS2EnvironmentManager
    public GDXSCS2SimulationSession getSCS2SimulationSession()
    {
       return scs2SimulationSession;
+   }
+
+   public ArrayList<String> getRobotsToHide()
+   {
+      return robotsToHide;
    }
 }
