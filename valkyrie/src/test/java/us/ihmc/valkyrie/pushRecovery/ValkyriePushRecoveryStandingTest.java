@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.pushRecovery.DRCPushRecoveryTest;
+import us.ihmc.avatar.pushRecovery.AvatarPushRecoveryStandingTest;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -14,7 +14,7 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.parameters.ValkyrieSteppingParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
 
-public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
+public class ValkyriePushRecoveryStandingTest extends AvatarPushRecoveryStandingTest
 {
    @Override
    public double getAngledPushMagnitude()
@@ -90,22 +90,6 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
       super.testLongForwardPushWhileStandingAfterControllerFailureKickedIn();
    }
 
-   @Tag("humanoid-push-recovery")
-   @Override
-   @Test
-   public void testPushWhileInSwing() throws SimulationExceededMaximumTimeException
-   {
-      super.testPushWhileInSwing();
-   }
-
-   @Tag("humanoid-push-recovery")
-   @Override
-   @Test
-   public void testPushWhileInTransfer() throws SimulationExceededMaximumTimeException
-   {
-      super.testPushWhileInTransfer();
-   }
-
    @Disabled
    @Test
    public void testFailureAfterRecoveryStep() throws SimulationExceededMaximumTimeException
@@ -146,24 +130,8 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    @Tag("humanoid-push-recovery")
    @Override
    @Test
-   public void testRecoveringWithSwingSpeedUpWhileInSwing() throws SimulationExceededMaximumTimeException
-   {
-      super.testRecoveringWithSwingSpeedUpWhileInSwing();
-   }
-
-   @Tag("humanoid-push-recovery")
-   @Override
-   @Test
    public void testRecoveryWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
    {
       super.testRecoveryWhileInFlamingoStance();
-   }
-
-   @Tag("humanoid-push-recovery-slow")
-   @Override
-   @Test
-   public void testPushICPOptimiWhileInSwing() throws SimulationExceededMaximumTimeException
-   {
-      super.testPushICPOptimiWhileInSwing();
    }
 }

@@ -7,10 +7,10 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.pushRecovery.DRCPushRecoveryTest;
+import us.ihmc.avatar.pushRecovery.AvatarPushRecoveryStandingTest;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
-public class AtlasPushRecoveryTest extends DRCPushRecoveryTest
+public class AtlasPushRecoveryStandingTest extends AvatarPushRecoveryStandingTest
 {
    @Override
    public double getAngledPushMagnitude()
@@ -64,30 +64,6 @@ public class AtlasPushRecoveryTest extends DRCPushRecoveryTest
       super.testLongForwardPushWhileStandingAfterControllerFailureKickedIn();
    }
 
-   @Tag("humanoid-push-recovery-slow")
-   @Override
-   @Test
-   public void testPushICPOptimiWhileInSwing() throws SimulationExceededMaximumTimeException
-   {
-      super.testPushICPOptimiWhileInSwing();
-   }
-
-   @Tag("humanoid-push-recovery")
-   @Override
-   @Test
-   public void testPushWhileInSwing() throws SimulationExceededMaximumTimeException
-   {
-      super.testPushWhileInSwing();
-   }
-
-   @Tag("humanoid-push-recovery")
-   @Override
-   @Test
-   public void testPushWhileInTransfer() throws SimulationExceededMaximumTimeException
-   {
-      super.testPushWhileInTransfer();
-   }
-
    @Tag("humanoid-push-recovery")
    @Override
    @Test
@@ -104,13 +80,6 @@ public class AtlasPushRecoveryTest extends DRCPushRecoveryTest
       super.testPushWhileStandingRecoveringAfterControllerFailureKickedIn();
    }
 
-   @Tag("humanoid-push-recovery")
-   @Override
-   @Test
-   public void testRecoveringWithSwingSpeedUpWhileInSwing() throws SimulationExceededMaximumTimeException
-   {
-      super.testRecoveringWithSwingSpeedUpWhileInSwing();
-   }
 
    @Tag("humanoid-push-recovery")
    @Override
