@@ -52,72 +52,63 @@ public class ValkyrieQuickPushRecoveryWalkingTest extends AvatarQuickPushRecover
    @Tag("humanoid-push-recovery")
    @Override
    @Test
-   public void testPushLeftEarlySwing() throws SimulationExceededMaximumTimeException
+   public void testOutwardPushLeftEarlySwing() throws SimulationExceededMaximumTimeException
    {
       setPushChangeInVelocity(1500.0);
-      super.testPushLeftEarlySwing();
+      super.testOutwardPushLeftEarlySwing();
    }
 
    @Tag("humanoid-push-recovery")
    @Override
    @Test
-   public void testPushLeftInitialTransferState() throws SimulationExceededMaximumTimeException
+   public void testOutwardPushInitialTransferToLeftStateAndLeftMidSwing() throws SimulationExceededMaximumTimeException
    {
       setPushChangeInVelocity(1000.0);
-      super.testPushLeftInitialTransferState();
+      super.testOutwardPushInitialTransferToLeftStateAndLeftMidSwing();
    }
 
    @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
-   public void testPushRightInitialTransferState() throws SimulationExceededMaximumTimeException
-   {
-      setPushChangeInVelocity(1100.0);
-      super.testPushRightInitialTransferState();
-   }
-
-   @Tag("humanoid-push-recovery-slow")
-   @Override
-   @Test
-   public void testPushRightLateSwing() throws SimulationExceededMaximumTimeException
+   public void testOutwardPushMidLeftSwing() throws SimulationExceededMaximumTimeException
    {
       setPushChangeInVelocity(1500.0);
-      super.testPushRightLateSwing();
+      super.testOutwardPushMidLeftSwing();
    }
 
    @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
-   public void testPushRightThenLeftMidSwing() throws SimulationExceededMaximumTimeException
+   public void testPushOutwardInRightThenLeftMidSwing() throws SimulationExceededMaximumTimeException
    {
       setPushChangeInVelocity(1500.0);
-      super.testPushRightThenLeftMidSwing();
+      super.testPushOutwardInRightThenLeftMidSwing();
    }
 
    @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
-   public void testPushRightTransferState() throws SimulationExceededMaximumTimeException
+   public void testOutwardPushTransferToLeftState() throws SimulationExceededMaximumTimeException
    {
       setPushChangeInVelocity(1300.0);
-      super.testPushRightTransferState();
+      super.testOutwardPushTransferToLeftState();
    }
 
    @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
-   public void testBackwardPushInSwing() throws SimulationExceededMaximumTimeException
+   public void testBackwardPushInLeftSwing() throws SimulationExceededMaximumTimeException
    {
       setPushChangeInVelocity(1500.0);
-      super.testBackwardPushInSwing();
+      super.testBackwardPushInLeftSwing();
    }
 
    @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
-   public void testForwardPushInSwing() throws SimulationExceededMaximumTimeException
+   public void testForwardPushInLeftSwing() throws SimulationExceededMaximumTimeException
    {
       setPushChangeInVelocity(1500.0);
-      super.testForwardPushInSwing();
+      super.testForwardPushInLeftSwing();
    }
 }
