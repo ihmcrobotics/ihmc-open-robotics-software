@@ -11,6 +11,7 @@ import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
 public class GDX2DSceneManager
@@ -18,6 +19,7 @@ public class GDX2DSceneManager
    private final ArrayList<GDX2DSprite> sprites = new ArrayList<>();
    private SpriteBatch spriteBatch;
    private final ArrayList<Consumer<ArrayList<GDX2DSprite>>> spriteRenderableProviders = new ArrayList<>();
+   private final ConcurrentLinkedQueue<Consumer<ArrayList<GDX2DSprite>>> spriteRenderableRemovalQueue = new ConcurrentLinkedQueue();
 
    private InputMultiplexer inputMultiplexer;
    private GDX2DOrthographicCamera orthographicCamera;
@@ -67,6 +69,9 @@ public class GDX2DSceneManager
          firstRenderStarted = true;
          LogTools.info("Starting first render.");
       }
+
+      while (!spriteRenderableRemovalQueue.isEmpty())
+         spriteRenderableProviders.remove(spriteRenderableRemovalQueue.poll());
 
       screenViewport.update(width, height);
 
@@ -138,5 +143,10 @@ public class GDX2DSceneManager
    public void addSpriteRenderableProvider(Consumer<ArrayList<GDX2DSprite>> spriteRenderableProvider)
    {
       spriteRenderableProviders.add(spriteRenderableProvider);
+   }
+
+   public void queueRemoveSpriteRenderableProvider(Consumer<ArrayList<GDX2DSprite>> spriteRenderableProvider)
+   {
+      spriteRenderableRemovalQueue.add(spriteRenderableProvider);
    }
 }
