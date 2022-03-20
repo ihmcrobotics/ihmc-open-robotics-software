@@ -25,12 +25,35 @@ public class AtlasLongPushRecoveryWalkingTest extends AvatarLongPushRecoveryWalk
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 
+   @Override
+   public double getForwardPushDelta()
+   {
+      return 0.6;
+   }
+
+   @Override
+   public double getOutwardPushDelta()
+   {
+      return 0.5;
+   }
+
+   @Override
+   public double getBackwardPushDelta()
+   {
+      return 0.6;
+   }
+
+   @Override
+   public double getInwardPushDelta()
+   {
+      return 0.3;
+   }
+
    @Tag("humanoid-push-recovery")
    @Override
    @Test
    public void testInwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
-      setPushChangeInVelocity(0.3);
       super.testInwardPushInSwing();
    }
 
@@ -39,7 +62,6 @@ public class AtlasLongPushRecoveryWalkingTest extends AvatarLongPushRecoveryWalk
    @Test
    public void testOutwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
-      setPushChangeInVelocity(0.5);
       super.testOutwardPushInSwing();
    }
 
@@ -48,7 +70,6 @@ public class AtlasLongPushRecoveryWalkingTest extends AvatarLongPushRecoveryWalk
    @Test
    public void testForwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
-      setPushChangeInVelocity(0.6);
       super.testForwardPushInSwing();
    }
 
@@ -57,7 +78,6 @@ public class AtlasLongPushRecoveryWalkingTest extends AvatarLongPushRecoveryWalk
    @Test
    public void testBackwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
-      setPushChangeInVelocity(0.6);
       super.testBackwardPushInSwing();
    }
 }

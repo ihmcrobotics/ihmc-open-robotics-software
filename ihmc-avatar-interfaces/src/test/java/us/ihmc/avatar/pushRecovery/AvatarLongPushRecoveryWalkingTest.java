@@ -11,11 +11,13 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
@@ -50,8 +52,6 @@ public abstract class AvatarLongPushRecoveryWalkingTest implements MultiRobotTes
    private double swingTime;
    private double transferTime;
 
-   private Double pushChangeInVelocity;
-
    private SideDependentList<AtomicInteger> footstepsCompletedPerSide;
    private SideDependentList<StateTransitionCondition> swingStartConditions = new SideDependentList<>();
    private SideDependentList<StateTransitionCondition> swingFinishConditions = new SideDependentList<>();
@@ -60,7 +60,6 @@ public abstract class AvatarLongPushRecoveryWalkingTest implements MultiRobotTes
    @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
-      pushChangeInVelocity = null;
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 
@@ -79,15 +78,16 @@ public abstract class AvatarLongPushRecoveryWalkingTest implements MultiRobotTes
          drcSimulationTestHelper = null;
       }
 
-      pushChangeInVelocity = null;
-
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   public void setPushChangeInVelocity(double pushChangeInVelocity)
-   {
-      this.pushChangeInVelocity = pushChangeInVelocity;
-   }
+   public abstract double getForwardPushDelta();
+
+   public abstract double getOutwardPushDelta();
+
+   public abstract double getBackwardPushDelta();
+
+   public abstract double getInwardPushDelta();
 
    @Test
    public void testInwardPushInSwing() throws SimulationExceededMaximumTimeException
@@ -103,7 +103,7 @@ public abstract class AvatarLongPushRecoveryWalkingTest implements MultiRobotTes
       StateTransitionCondition condition = (time) -> swingStartConditions.get(side).testCondition(time) && footstepsCompletedPerSide.get(side).get() > 1;
 
       // apply the push
-      testPush(forceDirection, pushChangeInVelocity, percentInSwing, pushDuration, condition, swingTime, 8);
+      testPush(forceDirection, getPushDelta(forceDirection, side), percentInSwing, pushDuration, condition, swingTime, 8);
    }
 
    @Test
@@ -120,7 +120,7 @@ public abstract class AvatarLongPushRecoveryWalkingTest implements MultiRobotTes
       StateTransitionCondition condition = (time) -> swingStartConditions.get(side).testCondition(time) && footstepsCompletedPerSide.get(side).get() > 1;
 
       // apply the push
-      testPush(forceDirection, pushChangeInVelocity, percentInSwing, pushDuration, condition, swingTime, 8);
+      testPush(forceDirection, getPushDelta(forceDirection, side), percentInSwing, pushDuration, condition, swingTime, 8);
    }
 
    @Test
@@ -137,7 +137,7 @@ public abstract class AvatarLongPushRecoveryWalkingTest implements MultiRobotTes
       StateTransitionCondition condition = (time) -> swingStartConditions.get(side).testCondition(time) && footstepsCompletedPerSide.get(side).get() > 1;
 
       // apply the push
-      testPush(forceDirection, pushChangeInVelocity, percentInSwing, pushDuration, condition, swingTime, 8);
+      testPush(forceDirection, getPushDelta(forceDirection, side), percentInSwing, pushDuration, condition, swingTime, 8);
    }
 
    @Test
@@ -154,7 +154,7 @@ public abstract class AvatarLongPushRecoveryWalkingTest implements MultiRobotTes
       StateTransitionCondition condition = (time) -> swingStartConditions.get(side).testCondition(time) && footstepsCompletedPerSide.get(side).get() > 1;
 
       // apply the push
-      testPush(forceDirection, pushChangeInVelocity, percentInSwing, pushDuration, condition, swingTime, 8);
+      testPush(forceDirection, getPushDelta(forceDirection, side), percentInSwing, pushDuration, condition, swingTime, 8);
    }
 
 
@@ -247,6 +247,27 @@ public abstract class AvatarLongPushRecoveryWalkingTest implements MultiRobotTes
       double simulationDuration = getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime() + swingTime
             + (stepsToSimulate - 1) * (swingTime + transferTime);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationDuration));
+   }
+
+   private double getPushDelta(Vector3DReadOnly pushDirection, RobotSide pushSide)
+   {
+      Vector3D direction = new Vector3D(pushDirection);
+      direction.normalize();
+
+      double xMax;
+      double yMax;
+      if (direction.getX() > 0.0)
+         xMax = getForwardPushDelta();
+      else
+         xMax = getBackwardPushDelta();
+      if (pushSide.negateIfRightSide(direction.getY()) > 0.0)
+         yMax = getOutwardPushDelta();
+      else
+         yMax = getInwardPushDelta();
+
+      double denom = MathTools.square(direction.getX() / xMax) + MathTools.square(direction.getY() / yMax);
+
+      return Math.sqrt(1.0 / denom);
    }
 
    private static class SingleSupportStartCondition implements StateTransitionCondition
