@@ -107,6 +107,23 @@ public abstract class AvatarLongPushRecoveryWalkingTest implements MultiRobotTes
    }
 
    @Test
+   public void testOutwardPushInSwing() throws SimulationExceededMaximumTimeException
+   {
+      setupTest();
+
+      // setup all parameters
+      Vector3D forceDirection = new Vector3D(0.0, -1.0, 0.0);
+      double pushDuration = 0.8 * swingTime;
+      double percentInSwing = 0.1;
+      RobotSide side = RobotSide.RIGHT;
+
+      StateTransitionCondition condition = (time) -> swingStartConditions.get(side).testCondition(time) && footstepsCompletedPerSide.get(side).get() > 1;
+
+      // apply the push
+      testPush(forceDirection, pushChangeInVelocity, percentInSwing, pushDuration, condition, swingTime, 8);
+   }
+
+   @Test
    public void testForwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
       setupTest();
