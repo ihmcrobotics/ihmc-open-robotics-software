@@ -69,12 +69,12 @@ public class GDX2DSprite
 
    public void setX(double x)
    {
-      sprite.setX((float) x);
+      sprite.setCenterX((float) x);
    }
 
    public void setY(double y)
    {
-      sprite.setY((float) y);
+      sprite.setCenterY((float) y);
    }
 
    public void setHeightPreserveScale(double height)
@@ -100,12 +100,12 @@ public class GDX2DSprite
 
    public double getPositionX()
    {
-      return sprite.getX();
+      return sprite.getX() + sprite.getWidth() / 2.0;
 
    }
    public double getPositionY()
    {
-      return sprite.getY();
+      return sprite.getY() + sprite.getHeight() / 2.0;
    }
 
    public void setOrientation(double orientation)
