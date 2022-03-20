@@ -54,4 +54,12 @@ public class FrameGDXGraphicsNode
       if (ENABLE_REFERENCE_FRAME_GRAPHICS)
          coordinateFrame.getRenderables(renderables, pool);
    }
+
+   public void dispose()
+   {
+      for (FrameGDXNodePart part : parts)
+      {
+         part.dispose();
+      }
+   }
 }

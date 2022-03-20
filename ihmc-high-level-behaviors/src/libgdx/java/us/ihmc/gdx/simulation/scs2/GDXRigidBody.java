@@ -1,5 +1,8 @@
 package us.ihmc.gdx.simulation.scs2;
 
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -56,6 +59,43 @@ public class GDXRigidBody implements RigidBodyBasics
    public FrameGDXGraphicsNode getCollisionGraphicsNode()
    {
       return collisionGraphicsNode;
+   }
+
+   public void getVisualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      for (GDXRigidBody rigidBody : subtreeIterable())
+      {
+         if (rigidBody.getVisualGraphicsNode() != null)
+         {
+            rigidBody.getVisualGraphicsNode().getRenderables(renderables, pool);
+         }
+      }
+   }
+
+   public void getCollisionMeshRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      for (GDXRigidBody rigidBody : subtreeIterable())
+      {
+         if (rigidBody.getCollisionGraphicsNode() != null)
+         {
+            rigidBody.getCollisionGraphicsNode().getRenderables(renderables, pool);
+         }
+      }
+   }
+
+   public void destroy()
+   {
+      for (GDXRigidBody rigidBody : subtreeIterable())
+      {
+         if (rigidBody.getVisualGraphicsNode() != null)
+         {
+            rigidBody.getVisualGraphicsNode().dispose();
+         }
+         if (rigidBody.getCollisionGraphicsNode() != null)
+         {
+            rigidBody.getCollisionGraphicsNode().dispose();
+         }
+      }
    }
 
    @Override

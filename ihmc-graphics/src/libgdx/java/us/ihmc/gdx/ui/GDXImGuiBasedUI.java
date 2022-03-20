@@ -63,6 +63,7 @@ public class GDXImGuiBasedUI
    private final ImBoolean shadows = new ImBoolean(false);
    private final ImInt libGDXLogLevel = new ImInt(GDXTools.toGDX(LogTools.getLevel()));
    private final GDXImGuiPerspectiveManager perspectiveManager;
+   private long renderIndex = 0;
 
    public GDXImGuiBasedUI(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
    {
@@ -170,6 +171,7 @@ public class GDXImGuiBasedUI
    public void renderEnd()
    {
       imGuiWindowAndDockSystem.afterWindowManagement();
+      ++renderIndex;
    }
 
    private void renderMenuBar()
@@ -371,5 +373,10 @@ public class GDXImGuiBasedUI
    public HybridDirectory getConfigurationBaseDirectory()
    {
       return configurationBaseDirectory;
+   }
+
+   public long getRenderIndex()
+   {
+      return renderIndex;
    }
 }
