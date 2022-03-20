@@ -5,13 +5,13 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.avatar.pushRecovery.AvatarPushRecoveryWalkingTest;
+import us.ihmc.avatar.pushRecovery.AvatarQuickPushRecoveryWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
-public class AtlasPushRecoveryWalkingTest extends AvatarPushRecoveryWalkingTest
+public class AtlasQuickPushRecoveryWalkingTest extends AvatarQuickPushRecoveryWalkingTest
 {
    @Override
    public DRCRobotModel getRobotModel()
@@ -30,7 +30,7 @@ public class AtlasPushRecoveryWalkingTest extends AvatarPushRecoveryWalkingTest
    @Test
    public void testPushLeftEarlySwing() throws SimulationExceededMaximumTimeException
    {
-      setPushMagnitude(1500.0);
+      setPushChangeInVelocity(1500.0);
       super.testPushLeftEarlySwing();
    }
 
@@ -40,7 +40,7 @@ public class AtlasPushRecoveryWalkingTest extends AvatarPushRecoveryWalkingTest
    @Test
    public void testPushLeftInitialTransferState() throws SimulationExceededMaximumTimeException
    {
-      setPushMagnitude(1500.0);
+      setPushChangeInVelocity(1500.0);
       super.testPushLeftInitialTransferState();
    }
 
@@ -49,7 +49,7 @@ public class AtlasPushRecoveryWalkingTest extends AvatarPushRecoveryWalkingTest
    @Test
    public void testPushRightInitialTransferState() throws SimulationExceededMaximumTimeException
    {
-      setPushMagnitude(1500.0);
+      setPushChangeInVelocity(1500.0);
       super.testPushRightInitialTransferState();
    }
 
@@ -58,7 +58,7 @@ public class AtlasPushRecoveryWalkingTest extends AvatarPushRecoveryWalkingTest
    @Test
    public void testPushRightLateSwing() throws SimulationExceededMaximumTimeException
    {
-      setPushMagnitude(1500.0);
+      setPushChangeInVelocity(1500.0);
       super.testPushRightLateSwing();
    }
 
@@ -67,7 +67,7 @@ public class AtlasPushRecoveryWalkingTest extends AvatarPushRecoveryWalkingTest
    @Test
    public void testPushRightThenLeftMidSwing() throws SimulationExceededMaximumTimeException
    {
-      setPushMagnitude(1500.0);
+      setPushChangeInVelocity(1500.0);
       super.testPushRightThenLeftMidSwing();
    }
 
@@ -76,7 +76,7 @@ public class AtlasPushRecoveryWalkingTest extends AvatarPushRecoveryWalkingTest
    @Test
    public void testPushRightTransferState() throws SimulationExceededMaximumTimeException
    {
-      setPushMagnitude(1500.0);
+      setPushChangeInVelocity(1500.0);
       super.testPushRightTransferState();
    }
 
@@ -85,7 +85,7 @@ public class AtlasPushRecoveryWalkingTest extends AvatarPushRecoveryWalkingTest
    @Test
    public void testPushTowardsTheBack() throws SimulationExceededMaximumTimeException
    {
-      setPushMagnitude(1500.0);
+      setPushChangeInVelocity(1500.0);
       super.testPushTowardsTheBack();
    }
 
@@ -94,7 +94,7 @@ public class AtlasPushRecoveryWalkingTest extends AvatarPushRecoveryWalkingTest
    @Test
    public void testPushTowardsTheFront() throws SimulationExceededMaximumTimeException
    {
-      setPushMagnitude(1500.0);
+      setPushChangeInVelocity(1500.0);
       super.testPushTowardsTheFront();
    }
 }

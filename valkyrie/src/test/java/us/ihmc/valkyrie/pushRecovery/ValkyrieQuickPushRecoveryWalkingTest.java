@@ -3,7 +3,7 @@ package us.ihmc.valkyrie.pushRecovery;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.avatar.pushRecovery.AvatarPushRecoveryWalkingTest;
+import us.ihmc.avatar.pushRecovery.AvatarQuickPushRecoveryWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
@@ -14,7 +14,7 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.parameters.ValkyrieSteppingParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
 
-public class ValkyriePushRecoveryWalkingTest extends AvatarPushRecoveryWalkingTest
+public class ValkyrieQuickPushRecoveryWalkingTest extends AvatarQuickPushRecoveryWalkingTest
 {
    @Override
    public DRCRobotModel getRobotModel()
@@ -54,7 +54,7 @@ public class ValkyriePushRecoveryWalkingTest extends AvatarPushRecoveryWalkingTe
    @Test
    public void testPushLeftEarlySwing() throws SimulationExceededMaximumTimeException
    {
-      setPushMagnitude(1500.0);
+      setPushChangeInVelocity(1500.0);
       super.testPushLeftEarlySwing();
    }
 
@@ -63,7 +63,7 @@ public class ValkyriePushRecoveryWalkingTest extends AvatarPushRecoveryWalkingTe
    @Test
    public void testPushLeftInitialTransferState() throws SimulationExceededMaximumTimeException
    {
-      setPushMagnitude(1000.0);
+      setPushChangeInVelocity(1000.0);
       super.testPushLeftInitialTransferState();
    }
 
@@ -72,7 +72,7 @@ public class ValkyriePushRecoveryWalkingTest extends AvatarPushRecoveryWalkingTe
    @Test
    public void testPushRightInitialTransferState() throws SimulationExceededMaximumTimeException
    {
-      setPushMagnitude(1100.0);
+      setPushChangeInVelocity(1100.0);
       super.testPushRightInitialTransferState();
    }
 
@@ -81,7 +81,7 @@ public class ValkyriePushRecoveryWalkingTest extends AvatarPushRecoveryWalkingTe
    @Test
    public void testPushRightLateSwing() throws SimulationExceededMaximumTimeException
    {
-      setPushMagnitude(1500.0);
+      setPushChangeInVelocity(1500.0);
       super.testPushRightLateSwing();
    }
 
@@ -90,7 +90,7 @@ public class ValkyriePushRecoveryWalkingTest extends AvatarPushRecoveryWalkingTe
    @Test
    public void testPushRightThenLeftMidSwing() throws SimulationExceededMaximumTimeException
    {
-      setPushMagnitude(1500.0);
+      setPushChangeInVelocity(1500.0);
       super.testPushRightThenLeftMidSwing();
    }
 
@@ -99,7 +99,7 @@ public class ValkyriePushRecoveryWalkingTest extends AvatarPushRecoveryWalkingTe
    @Test
    public void testPushRightTransferState() throws SimulationExceededMaximumTimeException
    {
-      setPushMagnitude(1300.0);
+      setPushChangeInVelocity(1300.0);
       super.testPushRightTransferState();
    }
 
@@ -108,7 +108,7 @@ public class ValkyriePushRecoveryWalkingTest extends AvatarPushRecoveryWalkingTe
    @Test
    public void testPushTowardsTheBack() throws SimulationExceededMaximumTimeException
    {
-      setPushMagnitude(1500.0);
+      setPushChangeInVelocity(1500.0);
       super.testPushTowardsTheBack();
    }
 
@@ -117,7 +117,7 @@ public class ValkyriePushRecoveryWalkingTest extends AvatarPushRecoveryWalkingTe
    @Test
    public void testPushTowardsTheFront() throws SimulationExceededMaximumTimeException
    {
-      setPushMagnitude(1500.0);
+      setPushChangeInVelocity(1500.0);
       super.testPushTowardsTheFront();
    }
 }
