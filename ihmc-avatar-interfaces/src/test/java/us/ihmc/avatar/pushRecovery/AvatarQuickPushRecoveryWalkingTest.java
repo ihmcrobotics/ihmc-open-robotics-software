@@ -2,6 +2,7 @@ package us.ihmc.avatar.pushRecovery;
 
 import static us.ihmc.robotics.Assert.assertTrue;
 
+import controller_msgs.msg.dds.FootstepStatusMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.log.LogTools;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -33,6 +34,8 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTestInterface
 {
@@ -53,6 +56,7 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
    private Double pushChangeInVelocity;
    private double mass;
 
+   private SideDependentList<AtomicInteger> footstepsCompletedPerSide;
    private SideDependentList<StateTransitionCondition> swingStartConditions = new SideDependentList<>();
    private SideDependentList<StateTransitionCondition> swingFinishConditions = new SideDependentList<>();
    private PushRobotController pushRobotController;
@@ -100,7 +104,7 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
       RobotSide side = RobotSide.LEFT;
 
       // apply the push
-      testPush(forceDirection, pushChangeInVelocity, percentInSwing, side, swingStartConditions, swingTime);
+      testPush(forceDirection, pushChangeInVelocity, percentInSwing, swingStartConditions.get(side), swingTime, 8);
    }
 
    @Test
@@ -114,7 +118,7 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
       RobotSide side = RobotSide.LEFT;
 
       // apply the push
-      testPush(forceDirection, pushChangeInVelocity, percentInSwing, side, swingStartConditions, swingTime);
+      testPush(forceDirection, pushChangeInVelocity, percentInSwing, swingStartConditions.get(side), swingTime, 8);
    }
 
    @Test
@@ -128,18 +132,18 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
       RobotSide side = RobotSide.RIGHT;
 
       // apply the push
-      testPush(forceDirection, pushChangeInVelocity, percentInSwing, side, swingStartConditions, swingTime);
+      testPush(forceDirection, pushChangeInVelocity, percentInSwing, swingStartConditions.get(side), swingTime, 6);
 
       // push the robot again with new parameters
       forceDirection = new Vector3D(-1.0, 0.0, 0.0);
       side = RobotSide.LEFT;
 
       // apply the push
-      testPush(forceDirection, pushChangeInVelocity, percentInSwing, side, swingStartConditions, swingTime);
+      testPush(forceDirection, pushChangeInVelocity, percentInSwing, swingStartConditions.get(side), swingTime, 8);
    }
 
    @Test
-   public void testPushTowardsTheBack() throws SimulationExceededMaximumTimeException
+   public void testBackwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
       setupTest();
 
@@ -149,21 +153,23 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
       RobotSide side = RobotSide.LEFT;
 
       // apply the push
-      testPush(forceDirection, pushChangeInVelocity, percentInSwing, side, swingStartConditions, swingTime);
+      testPush(forceDirection, pushChangeInVelocity, percentInSwing, swingStartConditions.get(side), swingTime, 8);
    }
 
    @Test
-   public void testPushTowardsTheFront() throws SimulationExceededMaximumTimeException
+   public void testForwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
       setupTest();
 
       // setup all parameters
-      Vector3D forceDirection = new Vector3D(0.5, 1.0, 0.0);
+      Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
       double percentInSwing = 0.4;
       RobotSide side = RobotSide.LEFT;
 
+      StateTransitionCondition condition = time -> swingStartConditions.get(side).testCondition(time) && footstepsCompletedPerSide.get(side).get() > 1;
+
       // apply the push
-      testPush(forceDirection, pushChangeInVelocity, percentInSwing, side, swingStartConditions, swingTime);
+      testPush(forceDirection, pushChangeInVelocity, percentInSwing, condition, swingTime, 8);
    }
 
    @Test
@@ -177,7 +183,7 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
       RobotSide side = RobotSide.LEFT;
 
       // apply the push
-      testPush(forceDirection, pushChangeInVelocity, percentInTransferState, side, swingFinishConditions, transferTime);
+      testPush(forceDirection, pushChangeInVelocity, percentInTransferState, swingFinishConditions.get(side), transferTime, 6);
 
       // push the robot again with new parameters
       forceDirection = new Vector3D(0.5, -1.0, 0.0);
@@ -185,7 +191,7 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
       side = RobotSide.RIGHT;
 
       // apply the push
-      testPush(forceDirection, pushChangeInVelocity, percentInSwing, side, swingStartConditions, swingTime);
+      testPush(forceDirection, pushChangeInVelocity, percentInSwing, swingStartConditions.get(side), swingTime, 8);
    }
 
    @Test
@@ -199,7 +205,7 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
       RobotSide side = RobotSide.LEFT;
 
       // apply the push
-      testPush(forceDirection, pushChangeInVelocity, percentInTransferState, side, swingFinishConditions, transferTime);
+      testPush(forceDirection, pushChangeInVelocity, percentInTransferState, swingFinishConditions.get(side), transferTime, 6);
 
       // push the robot again with new parameters
       forceDirection = new Vector3D(0.0, 1.0, 0.0);
@@ -207,7 +213,7 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
       side = RobotSide.LEFT;
 
       // apply the push
-      testPush(forceDirection, pushChangeInVelocity, percentInSwing, side, swingStartConditions, swingTime);
+      testPush(forceDirection, pushChangeInVelocity, percentInSwing, swingStartConditions.get(side), swingTime, 8);
    }
 
    @Test
@@ -224,7 +230,7 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
       RobotSide side = RobotSide.LEFT;
 
       // apply the push
-      testPush(forceDirection, pushChangeInVelocity, percentInTransferState, side, swingFinishConditions, transferTime);
+      testPush(forceDirection, pushChangeInVelocity, percentInTransferState, swingFinishConditions.get(side), transferTime, 8);
    }
 
    private void setupTest() throws SimulationExceededMaximumTimeException
@@ -232,7 +238,7 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
       DRCRobotModel robotModel = getRobotModel();
       swingTime = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
       transferTime = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
-      
+
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, flatGround);
       drcSimulationTestHelper.createSimulation("DRCSimpleFlatGroundScriptTest");
@@ -242,6 +248,15 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       scs.addYoGraphic(pushRobotController.getForceVisualizer());
       drcSimulationTestHelper.setupCameraForUnitTest(new Point3D(0.6, 0.0, 0.6), new Point3D(10.0, 3.0, 3.0));
+
+      footstepsCompletedPerSide = new SideDependentList<>(new AtomicInteger(), new AtomicInteger());
+      drcSimulationTestHelper.createSubscriberFromController(FootstepStatusMessage.class, m ->
+      {
+         if (FootstepStatus.fromByte(m.getFootstepStatus()) == FootstepStatus.COMPLETED)
+         {
+            footstepsCompletedPerSide.get(RobotSide.fromByte(m.getRobotSide())).incrementAndGet();
+         }
+      });
 
       // get YoVariables
       for (RobotSide robotSide : RobotSide.values)
@@ -286,15 +301,14 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
 
       footsteps.setAreFootstepsAdjustable(true);
       drcSimulationTestHelper.publishToController(footsteps);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
    }
 
    private void testPush(Vector3D forceDirection,
                          double velocityChange,
                          double percentInState,
-                         RobotSide side,
-                         SideDependentList<StateTransitionCondition> condition,
-                         double stateTime) throws SimulationExceededMaximumTimeException
+                         StateTransitionCondition condition,
+                         double stateTime,
+                         int stepsToTake) throws SimulationExceededMaximumTimeException
    {
       walkForward();
 
@@ -302,8 +316,11 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
       double pushMagnitude = velocityChange / pushDuration * totalMass;
 
       double delay = stateTime * percentInState;
-      pushRobotController.applyForceDelayed(condition.get(side), delay, forceDirection, pushMagnitude, pushDuration);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0));
+      pushRobotController.applyForceDelayed(condition, delay, forceDirection, pushMagnitude, pushDuration);
+
+      double simulationDuration = getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime() + swingTime +
+                                  (swingTime + transferTime) * stepsToTake;
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationDuration));
    }
 
    private static class SingleSupportStartCondition implements StateTransitionCondition
