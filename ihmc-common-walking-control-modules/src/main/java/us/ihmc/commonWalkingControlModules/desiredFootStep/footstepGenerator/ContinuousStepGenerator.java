@@ -120,6 +120,8 @@ public class ContinuousStepGenerator implements Updatable
    private BooleanProvider walkInputProvider;
    private final YoBoolean walk = new YoBoolean("walk" + variableNameSuffix, registry);
    private final YoBoolean walkPreviousValue = new YoBoolean("walkPreviousValue" + variableNameSuffix, registry);
+   private final YoBoolean stepsAreAdjustable = new YoBoolean("stepsAreAdjustable" + variableNameSuffix, registry);
+   private final YoBoolean shiftUpcomingStepsWithTouchdown = new YoBoolean("shiftUpcomingStepsWithTouchdown" + variableNameSuffix, registry);
 
    private final YoEnum<RobotSide> currentSupportSide = new YoEnum<>("currentSupportSide" + variableNameSuffix, registry, RobotSide.class);
    private final YoFramePose3D currentSupportFootPose = new YoFramePose3D("currentSupportFootPose" + variableNameSuffix, worldFrame, registry);
@@ -187,6 +189,8 @@ public class ContinuousStepGenerator implements Updatable
       footstepDataListMessage.setDefaultSwingDuration(parameters.getSwingDuration());
       footstepDataListMessage.setDefaultTransferDuration(parameters.getTransferDuration());
       footstepDataListMessage.setFinalTransferDuration(parameters.getTransferDuration());
+      footstepDataListMessage.setAreFootstepsAdjustable(stepsAreAdjustable.getBooleanValue());
+      footstepDataListMessage.setOffsetFootstepsWithExecutionError(shiftUpcomingStepsWithTouchdown.getBooleanValue());
 
       if (walkInputProvider != null)
          walk.set(walkInputProvider.getValue());
