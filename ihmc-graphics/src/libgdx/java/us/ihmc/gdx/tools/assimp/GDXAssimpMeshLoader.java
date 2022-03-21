@@ -183,6 +183,10 @@ public class GDXAssimpMeshLoader
       int vertexSize = 3;
       if (hasNormals)
          vertexSize += 3;
+      if (hasTangents)
+         vertexSize += 3;
+      if (hasBitangents)
+         vertexSize += 3;
       if (hasColors)
          vertexSize += 4;
       if (hasTextureCoordinates)
