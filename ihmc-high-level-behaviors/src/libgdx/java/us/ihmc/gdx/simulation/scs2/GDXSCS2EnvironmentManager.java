@@ -6,9 +6,11 @@ import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.scs2.SCS2AvatarSimulation;
 import us.ihmc.avatar.scs2.SCS2AvatarSimulationFactory;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.gdx.imgui.ImGuiPanel;
+import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.simulation.environment.object.objects.FlatGroundDefinition;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -22,6 +24,7 @@ import java.util.ArrayList;
 public class GDXSCS2EnvironmentManager
 {
    private GDXSCS2SimulationSession scs2SimulationSession;
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiPanel managerPanel = new ImGuiPanel("SCS 2 Simulation Session", this::renderImGuiWidgets);
    private SCS2AvatarSimulation avatarSimulation;
    private RealtimeROS2Node realtimeROS2Node;
@@ -34,6 +37,8 @@ public class GDXSCS2EnvironmentManager
    private CommunicationMode ros2CommunicationMode;
    private final ArrayList<Robot> secondaryRobots = new ArrayList<>();
    private final ArrayList<String> robotsToHide = new ArrayList<>();
+   private volatile boolean starting = true;
+   private volatile boolean started = false;
 
    public void create(GDXImGuiBasedUI baseUI, DRCRobotModel robotModel, CommunicationMode ros2CommunicationMode)
    {
@@ -50,75 +55,113 @@ public class GDXSCS2EnvironmentManager
       double initialYaw = 0.3;
       robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, initialYaw);
 
-      rebuildSimulation();
+      baseUI.getImGuiPanelManager().addPanel(managerPanel);
+
+      buildSimulation();
    }
 
    private void renderImGuiWidgets()
    {
-      if (ImGui.button("Rebuild simulation"))
+      if (!starting && !started)
       {
-         rebuildSimulation();
+         if (ImGui.button(labels.get("Build simulation")))
+         {
+            buildSimulation();
+         }
       }
-      scs2SimulationSession.renderImGuiWidgets();
+      if (started)
+      {
+         if (ImGui.button(labels.get("Rebuild simulation")))
+         {
+            destroy();
+            buildSimulation();
+         }
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Destroy")))
+         {
+            destroy();
+         }
+      }
+      if (starting)
+      {
+         ImGui.text("Starting...");
+      }
+
+      if (started)
+      {
+         scs2SimulationSession.renderImGuiWidgets();
+      }
    }
 
-   private void rebuildSimulation()
+   private void buildSimulation()
    {
-      if (scs2SimulationSession != null)
+      starting = true;
+      ThreadTools.startAsDaemon(() ->
       {
-         baseUI.getImGuiPanelManager().queueRemovePanel(managerPanel);
-         destroy(baseUI);
-      }
+         realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(ros2CommunicationMode.getPubSubImplementation(),
+                                                             "flat_ground_walking_track_simulation");
 
-      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(ros2CommunicationMode.getPubSubImplementation(),
-                                                          "flat_ground_walking_track_simulation");
+         SCS2AvatarSimulationFactory avatarSimulationFactory = new SCS2AvatarSimulationFactory();
+         avatarSimulationFactory.setRobotModel(robotModel);
+         avatarSimulationFactory.setRealtimeROS2Node(realtimeROS2Node);
+         avatarSimulationFactory.setDefaultHighLevelHumanoidControllerFactory(useVelocityAndHeadingScript, walkingScriptParameters);
+         avatarSimulationFactory.setTerrainObjectDefinition(new FlatGroundDefinition());
+         for (Robot secondaryRobot : secondaryRobots)
+         {
+            avatarSimulationFactory.addSecondaryRobot(secondaryRobot);
+         }
+         avatarSimulationFactory.setRobotInitialSetup(robotInitialSetup);
+         avatarSimulationFactory.setSimulationDataRecordTickPeriod(recordFrequency);
+         avatarSimulationFactory.setCreateYoVariableServer(true);
+         avatarSimulationFactory.setUseBulletPhysicsEngine(true);
+         avatarSimulationFactory.setUseDescriptionCollisions(true);
+         avatarSimulationFactory.setShowGUI(false);
 
-      SCS2AvatarSimulationFactory avatarSimulationFactory = new SCS2AvatarSimulationFactory();
-      avatarSimulationFactory.setRobotModel(robotModel);
-      avatarSimulationFactory.setRealtimeROS2Node(realtimeROS2Node);
-      avatarSimulationFactory.setDefaultHighLevelHumanoidControllerFactory(useVelocityAndHeadingScript, walkingScriptParameters);
-      avatarSimulationFactory.setTerrainObjectDefinition(new FlatGroundDefinition());
-      for (Robot secondaryRobot : secondaryRobots)
-      {
-         avatarSimulationFactory.addSecondaryRobot(secondaryRobot);
-      }
-      avatarSimulationFactory.setRobotInitialSetup(robotInitialSetup);
-      avatarSimulationFactory.setSimulationDataRecordTickPeriod(recordFrequency);
-      avatarSimulationFactory.setCreateYoVariableServer(true);
-      avatarSimulationFactory.setUseBulletPhysicsEngine(true);
-      avatarSimulationFactory.setUseDescriptionCollisions(true);
-      avatarSimulationFactory.setShowGUI(false);
+         avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
+         avatarSimulation.setSystemExitOnDestroy(false);
 
-      avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
-      avatarSimulation.setSystemExitOnDestroy(false);
+         scs2SimulationSession = new GDXSCS2SimulationSession(avatarSimulation.getSimulationSession());
 
-      scs2SimulationSession = new GDXSCS2SimulationSession(avatarSimulation.getSimulationSession());
+         avatarSimulation.beforeSessionThreadStart();
 
-      avatarSimulation.beforeSessionThreadStart();
+         scs2SimulationSession.setDT(robotModel.getEstimatorDT());
+         scs2SimulationSession.create(baseUI, managerPanel);
 
-      scs2SimulationSession.setDT(robotModel.getEstimatorDT());
-      scs2SimulationSession.create(baseUI, managerPanel);
+         for (String robotToHide : robotsToHide)
+         {
+            scs2SimulationSession.getShowRobotMap().get(robotToHide).set(false);
+         }
 
-      for (String robotToHide : robotsToHide)
-      {
-         scs2SimulationSession.getShowRobotMap().get(robotToHide).set(false);
-      }
+         avatarSimulation.afterSessionThreadStart();
 
-      avatarSimulation.afterSessionThreadStart();
-
-      scs2SimulationSession.getControlPanel().getIsShowing().set(true);
-      baseUI.getImGuiPanelManager().queueAddPanel(managerPanel);
+         scs2SimulationSession.getControlPanel().getIsShowing().set(true);
+         starting = false;
+         started = true;
+      }, getClass().getSimpleName() + "Build");
    }
 
    public void update()
    {
-      scs2SimulationSession.update();
+      if (started)
+      {
+         scs2SimulationSession.update();
+      }
    }
 
-   public void destroy(GDXImGuiBasedUI baseUI)
+   public void destroy()
    {
-      avatarSimulation.destroy();
-      scs2SimulationSession.destroy(baseUI);
+      if (started)
+      {
+         started = false;
+         ThreadTools.startAsDaemon(() ->
+         {
+            avatarSimulation.destroy();
+            scs2SimulationSession.destroy(baseUI);
+            avatarSimulation = null;
+            scs2SimulationSession = null;
+            realtimeROS2Node = null;
+         }, getClass().getSimpleName() + "Destroy");
+      }
    }
 
    public void addSecondaryRobot(RobotDefinition robotDefinition)

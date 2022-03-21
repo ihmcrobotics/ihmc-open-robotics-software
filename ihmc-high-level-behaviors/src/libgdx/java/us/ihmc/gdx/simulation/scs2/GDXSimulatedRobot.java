@@ -1,5 +1,6 @@
 package us.ihmc.gdx.simulation.scs2;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -36,7 +37,8 @@ public class GDXSimulatedRobot
       rootBody = GDXMultiBodySystemFactories.toYoGDXMultiBodySystem(originalRigidBody,
                                                                     ReferenceFrame.getWorldFrame(),
                                                                     robotDefinition,
-                                                                    mirroredRobotRegistry);
+                                                                    mirroredRobotRegistry,
+                                                                    Gdx.app::postRunnable);
       robotLinkedYoRegistry = yoManager.newLinkedYoRegistry(mirroredRobotRegistry);
       mirroredRobotRegistry.getVariables().forEach(yoVariable ->
       {
