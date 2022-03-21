@@ -37,7 +37,7 @@ public class GDXSCS2EnvironmentManager
    private CommunicationMode ros2CommunicationMode;
    private final ArrayList<Robot> secondaryRobots = new ArrayList<>();
    private final ArrayList<String> robotsToHide = new ArrayList<>();
-   private volatile boolean starting = true;
+   private volatile boolean starting = false;
    private volatile boolean started = false;
 
    public void create(GDXImGuiBasedUI baseUI, DRCRobotModel robotModel, CommunicationMode ros2CommunicationMode)
@@ -56,8 +56,6 @@ public class GDXSCS2EnvironmentManager
       robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, initialYaw);
 
       baseUI.getImGuiPanelManager().addPanel(managerPanel);
-
-      buildSimulation();
    }
 
    private void renderImGuiWidgets()
@@ -93,7 +91,7 @@ public class GDXSCS2EnvironmentManager
       }
    }
 
-   private void buildSimulation()
+   public void buildSimulation()
    {
       starting = true;
       ThreadTools.startAsDaemon(() ->
