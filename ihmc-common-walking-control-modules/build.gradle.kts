@@ -18,7 +18,6 @@ mainDependencies {
    api("com.google.guava:guava:18.0")
    api("org.ejml:ejml-ddense:0.39")
    api("org.ejml:ejml-core:0.39")
-   api("net.java.dev.jna:jna:4.1.0")
    api("net.sf.trove4j:trove4j:3.0.3")
 
    api("us.ihmc:ihmc-realtime:1.4.0")
