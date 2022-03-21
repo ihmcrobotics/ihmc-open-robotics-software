@@ -20,9 +20,13 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
+import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -30,17 +34,19 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class AtlasFlatGroundWalkingTrackSCS2Bullet
 {
-   private static final boolean USE_STAND_PREP = true;
+   private static final boolean USE_STAND_PREP = false;
    private static boolean createYoVariableServer = System.getProperty("create.yovariable.server") != null
          && Boolean.parseBoolean(System.getProperty("create.yovariable.server"));
 
    private final RealtimeROS2Node realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.INTRAPROCESS,
                                                                                       "flat_ground_walking_track_simulation");
+   private static final double SIMULATION_DT = 0.001;
 
    public AtlasFlatGroundWalkingTrackSCS2Bullet()
    {
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS);
       robotModel.setUseSDFCollisions(true);
+      setCollisionGroupsMasks(robotModel.getRobotDefinition());
       FlatGroundEnvironment environment = new FlatGroundEnvironment();
 
       int recordFrequency = (int) Math.max(1.0, Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT()));
@@ -64,9 +70,11 @@ public class AtlasFlatGroundWalkingTrackSCS2Bullet
       avatarSimulationFactory.setCreateYoVariableServer(createYoVariableServer);
       avatarSimulationFactory.setUseBulletPhysicsEngine(true);
       avatarSimulationFactory.setUseDescriptionCollisions(true);
+      //avatarSimulationFactory.setSimulationDT(SIMULATION_DT);
 
       SCS2AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
-      avatarSimulation.getSimulationSession().setSessionDTSeconds(robotModel.getEstimatorDT());
+      //Leave commented out - causes the feet to be jittery.
+//      avatarSimulation.getSimulationSession().setSessionDTSeconds(robotModel.getEstimatorDT());
 
       avatarSimulation.start();
 
@@ -126,6 +134,63 @@ public class AtlasFlatGroundWalkingTrackSCS2Bullet
       return controllerFactory;
    }
 
+   private void setCollisionGroupsMasks(RobotDefinition robotDefinition)
+   {
+      String bodyName = "Body";
+      String pelvis = "Pelvis";
+      String glut = "Glut";
+      String upperRightLeg = "UpperRightLeg";
+      String upperLeftLeg = "UpperLeftLeg";
+      long collisionMask;
+      long collisionGroup;
+
+      CollidableHelper helper = new CollidableHelper();
+
+      for (RigidBodyDefinition rigidBodyDefinition : robotDefinition.getAllRigidBodies())
+      {
+         for (CollisionShapeDefinition shapeDefinition : rigidBodyDefinition.getCollisionShapeDefinitions())
+         {
+            if (shapeDefinition.getName().equals("pelvis_collision"))
+            {
+               collisionMask = helper.getCollisionMask(pelvis);
+               collisionGroup = helper.createCollisionGroup(upperRightLeg, upperLeftLeg);
+               shapeDefinition.setCollisionGroup(collisionGroup);
+               shapeDefinition.setCollisionMask(collisionMask);
+            }
+            else if (shapeDefinition.getName().equals("l_uglut_collision") || shapeDefinition.getName().equals("l_lglut_collision")
+                  || shapeDefinition.getName().equals("r_uglut_collision") || shapeDefinition.getName().equals("r_lglut_collision"))
+            {
+               collisionMask = helper.getCollisionMask(glut);
+               collisionGroup = helper.createCollisionGroup(bodyName, upperRightLeg, upperLeftLeg);
+               shapeDefinition.setCollisionGroup(collisionGroup);
+               shapeDefinition.setCollisionMask(collisionMask);
+            }
+
+            else if (shapeDefinition.getName().equals("mtorso_collision") || shapeDefinition.getName().equals("utorso_collision")
+                  || shapeDefinition.getName().equals("hokuyo_link_collision") || shapeDefinition.getName().equals("head_collision"))
+            {
+               collisionMask = helper.getCollisionMask(bodyName);
+               collisionGroup = helper.createCollisionGroup(glut, upperRightLeg, upperLeftLeg);
+               shapeDefinition.setCollisionGroup(collisionGroup);
+               shapeDefinition.setCollisionMask(collisionMask);
+            }
+            else if (shapeDefinition.getName().equals("l_uleg_collision"))
+            {
+               collisionMask = helper.getCollisionMask(upperLeftLeg);
+               collisionGroup = helper.createCollisionGroup(pelvis, bodyName, upperRightLeg);
+               shapeDefinition.setCollisionGroup(collisionGroup);
+               shapeDefinition.setCollisionMask(collisionMask);
+            }
+            else if (shapeDefinition.getName().equals("r_uleg_collision"))
+            {
+               collisionMask = helper.getCollisionMask(upperRightLeg);
+               collisionGroup = helper.createCollisionGroup(pelvis, bodyName, upperLeftLeg);
+               shapeDefinition.setCollisionGroup(collisionGroup);
+               shapeDefinition.setCollisionMask(collisionMask);
+            }
+         }
+      }
+   }
 
    public static void main(String[] args)
    {
