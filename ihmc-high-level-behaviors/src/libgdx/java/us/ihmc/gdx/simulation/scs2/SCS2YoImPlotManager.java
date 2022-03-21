@@ -154,4 +154,14 @@ public class SCS2YoImPlotManager
       plotPanels.remove(plotPanel);
       parentPanel.queueRemoveChild(plotPanel);
    }
+
+   public void destroy()
+   {
+      ImPlotModifiableYoPlotPanel[] plotPanelsArray = plotPanels.toArray(new ImPlotModifiableYoPlotPanel[0]);
+      for (ImPlotModifiableYoPlotPanel plotPanel : plotPanelsArray)
+      {
+         removePlotPanel(plotPanel);
+      }
+      parentPanel.queueRemoveChild(yoVariableSearchPanel.getPanel());
+   }
 }

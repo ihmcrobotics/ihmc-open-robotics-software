@@ -317,6 +317,8 @@ public class GDXSCS2SimulationSession
       baseUI.get3DSceneManager().getSceneBasics().removeRenderableProvider(getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
       baseUI.get3DSceneManager().getSceneBasics().removeRenderableProvider(getVirtualRenderables, GDXSceneLevel.VIRTUAL);
 
+      plotManager.destroy();
+
       showRobotMap.clear();
       showRobotPairs.clear();
    }

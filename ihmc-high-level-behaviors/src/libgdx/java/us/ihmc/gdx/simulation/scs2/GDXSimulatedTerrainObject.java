@@ -1,5 +1,6 @@
 package us.ihmc.gdx.simulation.scs2;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
@@ -23,18 +24,21 @@ public class GDXSimulatedTerrainObject
 
    public void create()
    {
-      for (DynamicGDXModel terrainModelPart : GDXVisualTools.collectNodes(terrainObjectDefinition.getVisualDefinitions()))
+      Gdx.app.postRunnable(() ->
       {
-         ModelInstance modelInstance = terrainModelPart.getOrCreateModelInstance();
-         visualModelInstances.add(modelInstance);
-         GDXTools.toGDX(terrainModelPart.getLocalTransform(), modelInstance.transform);
-      }
-      for (DynamicGDXModel terrainCollisionModelPart : GDXVisualTools.collectCollisionNodes(terrainObjectDefinition.getCollisionShapeDefinitions()))
-      {
-         ModelInstance modelInstance = terrainCollisionModelPart.getOrCreateModelInstance();
-         collisionModelInstances.add(modelInstance);
-         GDXTools.toGDX(terrainCollisionModelPart.getLocalTransform(), modelInstance.transform);
-      }
+         for (DynamicGDXModel terrainModelPart : GDXVisualTools.collectNodes(terrainObjectDefinition.getVisualDefinitions()))
+         {
+            ModelInstance modelInstance = terrainModelPart.getOrCreateModelInstance();
+            visualModelInstances.add(modelInstance);
+            GDXTools.toGDX(terrainModelPart.getLocalTransform(), modelInstance.transform);
+         }
+         for (DynamicGDXModel terrainCollisionModelPart : GDXVisualTools.collectCollisionNodes(terrainObjectDefinition.getCollisionShapeDefinitions()))
+         {
+            ModelInstance modelInstance = terrainCollisionModelPart.getOrCreateModelInstance();
+            collisionModelInstances.add(modelInstance);
+            GDXTools.toGDX(terrainCollisionModelPart.getLocalTransform(), modelInstance.transform);
+         }
+      });
    }
 
    public void getRealRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
