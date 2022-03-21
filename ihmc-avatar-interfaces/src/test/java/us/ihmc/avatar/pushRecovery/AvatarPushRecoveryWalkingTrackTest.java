@@ -19,7 +19,6 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.robotDataLogger.RobotVisualizer;
@@ -55,7 +54,7 @@ public abstract class AvatarPushRecoveryWalkingTrackTest implements MultiRobotTe
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    private static final double standingTimeDuration = 1.0;
-   private static final double defaultWalkingTimeDuration = BambooTools.isEveryCommitBuild() ? 45.0 : 90.0;
+   private static final double defaultWalkingTimeDuration = 30.0;
    private static final boolean useVelocityAndHeadingScript = true;
    private static final boolean cheatWithGroundHeightAtForFootstep = false;
 
@@ -125,6 +124,15 @@ public abstract class AvatarPushRecoveryWalkingTrackTest implements MultiRobotTe
 
    public abstract double getInwardPushDeltaV();
 
+   public abstract double getForwardPushInTransferDeltaV();
+
+   public abstract double getOutwardPushInTransferDeltaV();
+
+   public abstract double getBackwardPushInTransferDeltaV();
+
+   public abstract double getInwardPushInTransferDeltaV();
+
+
    @Tag("humanoid-flat-ground")
    @Test
    public void testFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
@@ -169,6 +177,7 @@ public abstract class AvatarPushRecoveryWalkingTrackTest implements MultiRobotTe
       YoBoolean walk = (YoBoolean) scs.findVariable("walkCSG");
       YoDouble desiredXVelocity = (YoDouble) scs.findVariable("scriptDesiredVelocityRateLimitedX");
       YoDouble desiredYVelocity = (YoDouble) scs.findVariable("scriptDesiredVelocityRateLimitedY");
+      YoDouble desiredTurningVelocity = (YoDouble) scs.findVariable("scriptDesiredTurningVelocityRateLimited");
 
       drcSimulationTestHelper.simulateAndBlock(standingTimeDuration);
 
@@ -181,24 +190,52 @@ public abstract class AvatarPushRecoveryWalkingTrackTest implements MultiRobotTe
          for (RobotSide robotSide : RobotSide.values)
             footstepsCompletedPerSide.get(robotSide).set(0);
 
-         Vector2D pushDirection = EuclidCoreRandomTools.nextVector2D(random);
-         pushDirection.normalize();
-         Vector3D forceDirection = new Vector3D(pushDirection);
+         boolean pushInSwing = RandomNumbers.nextBoolean(random, 0.75);
+         if (pushInSwing)
+         {
+            Vector2D pushDirection = EuclidCoreRandomTools.nextVector2D(random);
+            pushDirection.normalize();
+            Vector3D forceDirection = new Vector3D(pushDirection);
 
-         RobotSide swingSideForPush = RandomNumbers.nextBoolean(random, 0.5) ? RobotSide.LEFT : RobotSide.RIGHT;
+            RobotSide swingSideForPush = RandomNumbers.nextBoolean(random, 0.5) ? RobotSide.LEFT : RobotSide.RIGHT;
 
-         // queue push
-         double totalMass = getRobotModel().createFullRobotModel().getTotalMass();
-         double pushMagnitude = getPushDeltaV(pushDirection, new Vector2D(desiredXVelocity.getDoubleValue(), desiredYVelocity.getDoubleValue()), swingSideForPush) / pushDuration * totalMass;
+            // queue push
+            double totalMass = getRobotModel().createFullRobotModel().getTotalMass();
+            double pushMagnitude = getPushDeltaVForMidSwing(pushDirection,
+                                                            new Vector2D(desiredXVelocity.getDoubleValue(), desiredYVelocity.getDoubleValue()),
+                                                            desiredTurningVelocity.getDoubleValue(),
+                                                            swingSideForPush) / pushDuration * totalMass;
 
-         double percentOfState = 0.5;
-         double delay = getRobotModel().getWalkingControllerParameters().getDefaultSwingTime() * percentOfState;
+            double percentOfState = 0.5;
+            double delay = getRobotModel().getWalkingControllerParameters().getDefaultSwingTime() * percentOfState;
 
-         pushRobotController.applyForceDelayed(swingStartConditions.get(swingSideForPush), delay, forceDirection, pushMagnitude, pushDuration);
+            pushRobotController.applyForceDelayed(swingStartConditions.get(swingSideForPush), delay, forceDirection, pushMagnitude, pushDuration);
+         }
+         else
+         {
+            Vector2D pushDirection = EuclidCoreRandomTools.nextVector2D(random);
+            pushDirection.normalize();
+            Vector3D forceDirection = new Vector3D(pushDirection);
+
+            RobotSide swingSideForPush = RandomNumbers.nextBoolean(random, 0.5) ? RobotSide.LEFT : RobotSide.RIGHT;
+
+            // queue push
+            double totalMass = getRobotModel().createFullRobotModel().getTotalMass();
+            double pushMagnitude = getPushDeltaVForTransfer(pushDirection,
+                                                            new Vector2D(desiredXVelocity.getDoubleValue(), desiredYVelocity.getDoubleValue()),
+                                                            desiredTurningVelocity.getDoubleValue(),
+                                                            swingSideForPush) / pushDuration * totalMass;
+
+            double percentOfState = 0.5;
+            double delay = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime() * percentOfState;
+
+            pushRobotController.applyForceDelayed(swingFinishConditions.get(swingSideForPush), delay, forceDirection, pushMagnitude, pushDuration);
+         }
 
          scs.simulate();
 
-         while (!simulationCrashed.get() && footstepsCompletedPerSide.get(RobotSide.LEFT).get() < 3 && footstepsCompletedPerSide.get(RobotSide.RIGHT).get() < 3)
+         double stepsToTakeWithEachFoot = 3;
+         while (!simulationCrashed.get() && footstepsCompletedPerSide.get(RobotSide.LEFT).get() < stepsToTakeWithEachFoot && footstepsCompletedPerSide.get(RobotSide.RIGHT).get() < stepsToTakeWithEachFoot)
          {
             Thread.yield();
          }
@@ -238,7 +275,7 @@ public abstract class AvatarPushRecoveryWalkingTrackTest implements MultiRobotTe
       }
    }
 
-   private double getPushDeltaV(Vector2DReadOnly pushDirection, Vector2DReadOnly desiredVelocity, RobotSide pushSide)
+   private double getPushDeltaVForMidSwing(Vector2DReadOnly pushDirection, Vector2DReadOnly desiredVelocity, double desiredTurningVelocity, RobotSide pushSide)
    {
       // TODO scale this based on yaw velocity, too
       Vector2D direction = new Vector2D(pushDirection);
@@ -258,6 +295,36 @@ public abstract class AvatarPushRecoveryWalkingTrackTest implements MultiRobotTe
       else
          yMax = getInwardPushDeltaV();
 
+      yMax = InterpolationTools.linearInterpolate(yMax, 0.0, MathTools.clamp(pushSide.negateIfLeftSide(desiredTurningVelocity) / 0.5, 0.0, 1.0));
+      double magnitudeAlongEllipse = Math.sqrt(1.0 / (MathTools.square(direction.getX() / xMax) + MathTools.square(direction.getY() / yMax)));
+
+      double dotValue = pushDirection.dot(desiredVelocity);
+      double magnitudeScaler = InterpolationTools.linearInterpolate(1.5, 0.5, (dotValue + 1.0) / 2.0);
+
+      return magnitudeScaler * magnitudeAlongEllipse;
+   }
+
+   private double getPushDeltaVForTransfer(Vector2DReadOnly pushDirection, Vector2DReadOnly desiredVelocity, double desiredTurningVelocity, RobotSide pushSide)
+   {
+      // TODO scale this based on yaw velocity, too
+      Vector2D direction = new Vector2D(pushDirection);
+      Vector2D velocityDirection = new Vector2D(desiredVelocity);
+      direction.normalize();
+      if (velocityDirection.lengthSquared() > 0.0)
+         velocityDirection.normalize();
+
+      double xMax;
+      double yMax;
+      if (direction.getX() > 0.0)
+         xMax = getForwardPushInTransferDeltaV();
+      else
+         xMax = getBackwardPushInTransferDeltaV();
+      if (pushSide.negateIfRightSide(direction.getY()) > 0.0)
+         yMax = getOutwardPushInTransferDeltaV();
+      else
+         yMax = getInwardPushInTransferDeltaV();
+
+      yMax = InterpolationTools.linearInterpolate(yMax, 0.0, Math.min(Math.abs(desiredTurningVelocity) / 0.5, 1.0));
       double magnitudeAlongEllipse = Math.sqrt(1.0 / (MathTools.square(direction.getX() / xMax) + MathTools.square(direction.getY() / yMax)));
 
       double dotValue = pushDirection.dot(desiredVelocity);

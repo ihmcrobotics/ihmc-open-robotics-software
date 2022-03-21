@@ -40,7 +40,31 @@ public class AtlasPushRecoveryWalkingTrackTest extends AvatarPushRecoveryWalking
    @Override
    public double getInwardPushDeltaV()
    {
+      return 0.2;
+   }
+
+   @Override
+   public double getForwardPushInTransferDeltaV()
+   {
       return 0.3;
+   }
+
+   @Override
+   public double getOutwardPushInTransferDeltaV()
+   {
+      return 0.4;
+   }
+
+   @Override
+   public double getBackwardPushInTransferDeltaV()
+   {
+      return 0.25;
+   }
+
+   @Override
+   public double getInwardPushInTransferDeltaV()
+   {
+      return 0.1;
    }
 
    @Override
