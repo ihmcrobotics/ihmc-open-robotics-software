@@ -167,7 +167,6 @@ public class StaticEquilibriumSolverInputExamples
       return input;
    }
 
-
    public static StaticEquilibriumSolverInput createBipedFeetWithTwoHandholds()
    {
       StaticEquilibriumSolverInput input = new StaticEquilibriumSolverInput();
