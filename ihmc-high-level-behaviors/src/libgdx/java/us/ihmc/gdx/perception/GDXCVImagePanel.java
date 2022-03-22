@@ -20,7 +20,8 @@ public class GDXCVImagePanel
 
    public GDXCVImagePanel(String name, int imageWidth, int imageHeight)
    {
-      videoPanel = new ImGuiVideoPanel(name, true);
+      boolean flipY = true;
+      videoPanel = new ImGuiVideoPanel(name, flipY);
       pixmap = new Pixmap(imageWidth, imageHeight, Pixmap.Format.RGBA8888);
       bytedecoImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4, pixmap.getPixels());
       panelTexture = new Texture(new PixmapTextureData(pixmap, null, false, false));
