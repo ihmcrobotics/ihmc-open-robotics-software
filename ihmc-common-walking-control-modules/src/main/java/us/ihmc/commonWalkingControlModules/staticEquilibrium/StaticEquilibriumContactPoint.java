@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 
+import org.ejml.data.DMatrixRMaj;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -19,7 +20,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 /* package-private */ class StaticEquilibriumContactPoint
 {
    private static final double basisVectorGraphicScale = 0.1;
-   private static final double forceVectorGraphicScale = 0.1;
+   private static final double forceVectorGraphicScale = 0.05;
    public static final int basisVectorsPerContactPoint = 4;
 
    private final int contactPointIndex;
