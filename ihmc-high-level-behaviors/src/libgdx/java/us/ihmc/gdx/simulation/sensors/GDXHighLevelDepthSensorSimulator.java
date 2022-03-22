@@ -18,7 +18,9 @@ import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -37,6 +39,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.gdx.GDXPointCloudRenderer;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.perception.GDXBytedecoImage;
 import us.ihmc.gdx.sceneManager.GDX3DSceneBasics;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
@@ -88,6 +91,10 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
    private IHMCROS2Publisher<?> publisher;
    private IHMCROS2Publisher<VideoPacket> ros2VideoPublisher;
    private ByteBuffer flippedColorByteBuffer;
+   private Mat sourceMatWrapperForPublishing;
+   private Mat yuvI420BufferForPublishing;
+   private IntPointer jpegCompressionParameters;
+   private BytePointer jpegOutputBytePointer;
    private final JPEGCompressor jpegCompressor = new JPEGCompressor();
    private RecyclingArrayList<Point3D> ros2PointsToPublish;
    private int[] ros2ColorsToPublish;
@@ -99,6 +106,8 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
    private final ResettableExceptionHandlingExecutorService colorExecutor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
    private final ResettableExceptionHandlingExecutorService pointCloudExecutor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
    private final ResettableExceptionHandlingExecutorService colorROS2Executor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
+   private final ResettableExceptionHandlingExecutorService colorOpenCVROS2Executor
+         = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
    private final double publishRateHz;
    private final ImBoolean debugCoordinateFrame = new ImBoolean(false);
    private ModelInstance coordinateFrame;
@@ -110,6 +119,7 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
    private final ImBoolean publishDepthImageROS1 = new ImBoolean(false);
    private final ImBoolean publishColorImageROS1 = new ImBoolean(false);
    private final ImBoolean publishColorImageROS2 = new ImBoolean(false);
+   private final ImBoolean publishColorImageROS2OpenCV = new ImBoolean(false);
    private final ImBoolean publishPointCloudROS2 = new ImBoolean(false);
 
    private final ImBoolean useSensorColor = new ImBoolean(false);
@@ -184,7 +194,6 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
       if (ros2Node != null && ros2VideoTopic != null)
       {
          ros2VideoPublisher = ROS2Tools.createPublisher(ros2Node, ros2VideoTopic);
-         flippedColorByteBuffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * 4);
       }
 
       throttleTimer.reset();
@@ -209,6 +218,14 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
          rgba8Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, new BytePointer(depthSensorSimulator.getColorRGBA8Buffer()));
          rgb8Buffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * 3);
          rgb8Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3, new BytePointer(rgb8Buffer));
+         if (ros2Node != null)
+         {
+            flippedColorByteBuffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * 4);
+            sourceMatWrapperForPublishing = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, new BytePointer(depthSensorSimulator.getColorRGBA8Buffer()));
+            yuvI420BufferForPublishing = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3);
+            jpegCompressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 75);
+            jpegOutputBytePointer = new BytePointer();
+         }
          buffersCreated = true;
       }, "LoadJavaCV");
    }
@@ -258,6 +275,8 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
                   publishPointCloudROS2();
                if (publishColorImageROS2.get())
                   publishColorImageROS2();
+               if (publishColorImageROS2OpenCV.get())
+                  publishColorImageROS2OpenCV();
             }
             throttleTimer.reset();
          }
@@ -292,27 +311,32 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
    {
       if (!colorROS2Executor.isExecuting())
       {
-         ByteBuffer colorRGBA8Buffer = depthSensorSimulator.getColorRGBA8Buffer();
-         colorRGBA8Buffer.rewind();
-         int capacity = colorRGBA8Buffer.capacity();
-         for (int y = 0; y < imageHeight; y++)
-         {
-            for (int x = 0; x < imageWidth; x++)
-//            for (int i = 0; i < capacity; i += 4)
-            {
-               int iSrc = (y * imageWidth + x) * 4;
-               int iDest = (y * imageWidth + (imageWidth - x - 1)) * 4;
+//         ByteBuffer colorRGBA8Buffer = depthSensorSimulator.getColorRGBA8Buffer();
+//         colorRGBA8Buffer.rewind();
 
-               // flipping RGBA to BGRA here
-               flippedColorByteBuffer.put(capacity - iDest - 4 + 0, colorRGBA8Buffer.get(iSrc + 2));
-               flippedColorByteBuffer.put(capacity - iDest - 4 + 1, colorRGBA8Buffer.get(iSrc + 1));
-               flippedColorByteBuffer.put(capacity - iDest - 4 + 2, colorRGBA8Buffer.get(iSrc + 0));
-               flippedColorByteBuffer.put(capacity - iDest - 4 + 3, colorRGBA8Buffer.get(iSrc + 3));
-            }
-         }
-         flippedColorByteBuffer.rewind();
+         depthSensorSimulator.getColorRGBA8Buffer().rewind();
+//         opencv_imgproc.cvtColor(sourceMatWrapperForPublishing, yuvI420BufferForPublishing, opencv_imgproc.COLOR_RGBA2YUV_I420);
+         opencv_imgproc.cvtColor(sourceMatWrapperForPublishing, yuvI420BufferForPublishing, opencv_imgproc.COLOR_RGBA2BGR);
 
-         byte[] data = jpegCompressor.convertBGRA8ToJPEGData(imageWidth, imageHeight, flippedColorByteBuffer);
+//         int capacity = colorRGBA8Buffer.capacity();
+//         for (int y = 0; y < imageHeight; y++)
+//         {
+//            for (int x = 0; x < imageWidth; x++)
+////            for (int i = 0; i < capacity; i += 4)
+//            {
+//               int iSrc = (y * imageWidth + x) * 4;
+//               int iDest = (y * imageWidth + (imageWidth - x - 1)) * 4;
+//
+//               // flipping RGBA to BGRA here
+//               flippedColorByteBuffer.put(capacity - iDest - 4 + 0, colorRGBA8Buffer.get(iSrc + 2));
+//               flippedColorByteBuffer.put(capacity - iDest - 4 + 1, colorRGBA8Buffer.get(iSrc + 1));
+//               flippedColorByteBuffer.put(capacity - iDest - 4 + 2, colorRGBA8Buffer.get(iSrc + 0));
+//               flippedColorByteBuffer.put(capacity - iDest - 4 + 3, colorRGBA8Buffer.get(iSrc + 3));
+//            }
+//         }
+//         flippedColorByteBuffer.rewind();
+//
+//         byte[] data = jpegCompressor.convertBGRA8ToJPEGData(imageWidth, imageHeight, flippedColorByteBuffer);
 
          colorROS2Executor.execute(() ->
          {
@@ -327,8 +351,47 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
             if (tuning)
                updateCameraPinholeBrown();
             videoPacket.getIntrinsicParameters().set(HumanoidMessageTools.toIntrinsicParametersMessage(depthCameraIntrinsics));
-            videoPacket.getData().add(data);
+
+            opencv_imgcodecs.imencode(".jpg", yuvI420BufferForPublishing, jpegOutputBytePointer, jpegCompressionParameters);
+
+            ByteBuffer jpegOutputByteBuffer = jpegOutputBytePointer.asBuffer();
+            while (jpegOutputByteBuffer.remaining() > 0)
+            {
+               videoPacket.getData().add(jpegOutputByteBuffer.get());
+            }
+
             ros2VideoPublisher.publish(videoPacket);
+         });
+      }
+   }
+
+   private void publishColorImageROS2OpenCV()
+   {
+      if (!colorOpenCVROS2Executor.isExecuting())
+      {
+         ByteBuffer colorRGBA8Buffer = depthSensorSimulator.getColorRGBA8Buffer();
+         colorRGBA8Buffer.rewind();
+
+         ByteBuffer colorRGBA8BufferCopy = BufferUtils.newByteBuffer(colorRGBA8Buffer.limit());
+         colorRGBA8BufferCopy.put(colorRGBA8Buffer);
+
+         colorOpenCVROS2Executor.execute(() ->
+         {
+            GDXBytedecoImage gdxBytedecoImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4, colorRGBA8BufferCopy);
+
+//            opencv_imgcodecs.imencode(".jpg", )
+
+//            OpenCVImage openCVImageMessage = new OpenCVImage();
+//            long timestamp = timestampSupplier == null ? System.nanoTime() : timestampSupplier.getAsLong();
+//            openCVImageMessage.setTimestamp(timestamp);
+//            tempSensorFramePose2.setToZero(sensorFrame);
+//            tempSensorFramePose2.changeFrame(ReferenceFrame.getWorldFrame());
+//            openCVImageMessage.getPosition().set(tempSensorFramePose2.getPosition());
+//            openCVImageMessage.getOrientation().set(tempSensorFramePose2.getOrientation());
+//            if (tuning)
+//               updateCameraPinholeBrown();
+//            openCVImageMessage.getIntrinsicParameters().set(HumanoidMessageTools.toIntrinsicParametersMessage(depthCameraIntrinsics));
+
          });
       }
    }
