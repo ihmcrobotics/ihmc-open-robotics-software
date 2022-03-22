@@ -40,13 +40,13 @@ public class AtlasFlatGroundWalkingTrackSCS2Bullet
 
    private final RealtimeROS2Node realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.INTRAPROCESS,
                                                                                       "flat_ground_walking_track_simulation");
-   private static final double SIMULATION_DT = 0.001;
+//   private static final double SIMULATION_DT = 0.001;
 
    public AtlasFlatGroundWalkingTrackSCS2Bullet()
    {
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS);
       robotModel.setUseSDFCollisions(true);
-      setCollisionGroupsMasks(robotModel.getRobotDefinition());
+      //setCollisionGroupsMasks(robotModel.getRobotDefinition());
       FlatGroundEnvironment environment = new FlatGroundEnvironment();
 
       int recordFrequency = (int) Math.max(1.0, Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT()));
@@ -136,9 +136,10 @@ public class AtlasFlatGroundWalkingTrackSCS2Bullet
 
    private void setCollisionGroupsMasks(RobotDefinition robotDefinition)
    {
-      String bodyName = "Body";
+      
+      //TODO: Add arms, hands, bottom parts of legs, and feet to the collision groups/masks.
+      String bodyName = "Body"; 
       String pelvis = "Pelvis";
-      String glut = "Glut";
       String upperRightLeg = "UpperRightLeg";
       String upperLeftLeg = "UpperLeftLeg";
       long collisionMask;
@@ -150,41 +151,41 @@ public class AtlasFlatGroundWalkingTrackSCS2Bullet
       {
          for (CollisionShapeDefinition shapeDefinition : rigidBodyDefinition.getCollisionShapeDefinitions())
          {
-            if (shapeDefinition.getName().equals("pelvis_collision"))
+            if (shapeDefinition.getName().equals("pelvis_collision")
+                  || shapeDefinition.getName().equals("l_uglut_collision")
+                  || shapeDefinition.getName().equals("r_uglut_collision")
+                  || shapeDefinition.getName().equals("l_lglut_collision")
+                  || shapeDefinition.getName().equals("r_lglut_collision")
+                  || shapeDefinition.getName().equals("mtorso_collision"))
             {
                collisionMask = helper.getCollisionMask(pelvis);
-               collisionGroup = helper.createCollisionGroup(upperRightLeg, upperLeftLeg);
+               collisionGroup = helper.createCollisionGroup(bodyName, upperLeftLeg, upperRightLeg);
+               System.out.println("pelvis " + collisionMask + " " + collisionGroup);
                shapeDefinition.setCollisionGroup(collisionGroup);
                shapeDefinition.setCollisionMask(collisionMask);
             }
-            else if (shapeDefinition.getName().equals("l_uglut_collision") || shapeDefinition.getName().equals("l_lglut_collision")
-                  || shapeDefinition.getName().equals("r_uglut_collision") || shapeDefinition.getName().equals("r_lglut_collision"))
-            {
-               collisionMask = helper.getCollisionMask(glut);
-               collisionGroup = helper.createCollisionGroup(bodyName, upperRightLeg, upperLeftLeg);
-               shapeDefinition.setCollisionGroup(collisionGroup);
-               shapeDefinition.setCollisionMask(collisionMask);
-            }
-
-            else if (shapeDefinition.getName().equals("mtorso_collision") || shapeDefinition.getName().equals("utorso_collision")
+            else if (shapeDefinition.getName().equals("utorso_collision") || shapeDefinition.getName().equals("utorso_collision")
                   || shapeDefinition.getName().equals("hokuyo_link_collision") || shapeDefinition.getName().equals("head_collision"))
             {
                collisionMask = helper.getCollisionMask(bodyName);
-               collisionGroup = helper.createCollisionGroup(glut, upperRightLeg, upperLeftLeg);
+               collisionGroup = helper.createCollisionGroup(upperRightLeg, upperLeftLeg);
+               System.out.println("bodyName " + collisionMask + " " + collisionGroup);
                shapeDefinition.setCollisionGroup(collisionGroup);
                shapeDefinition.setCollisionMask(collisionMask);
             }
             else if (shapeDefinition.getName().equals("l_uleg_collision"))
             {
                collisionMask = helper.getCollisionMask(upperLeftLeg);
-               collisionGroup = helper.createCollisionGroup(pelvis, bodyName, upperRightLeg);
+               collisionGroup = helper.createCollisionGroup(bodyName, pelvis, upperRightLeg);
+               System.out.println("left Leg " + collisionMask + " " + collisionGroup);
                shapeDefinition.setCollisionGroup(collisionGroup);
                shapeDefinition.setCollisionMask(collisionMask);
             }
             else if (shapeDefinition.getName().equals("r_uleg_collision"))
             {
                collisionMask = helper.getCollisionMask(upperRightLeg);
-               collisionGroup = helper.createCollisionGroup(pelvis, bodyName, upperLeftLeg);
+               collisionGroup = helper.createCollisionGroup(bodyName, pelvis, upperLeftLeg);
+               System.out.println("right Leg " + collisionMask + " " + collisionGroup);
                shapeDefinition.setCollisionGroup(collisionGroup);
                shapeDefinition.setCollisionMask(collisionMask);
             }
