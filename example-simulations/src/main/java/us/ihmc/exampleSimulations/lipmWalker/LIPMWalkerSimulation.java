@@ -11,7 +11,8 @@ public class LIPMWalkerSimulation
       LIPMWalkerRobot robotConstructor = new LIPMWalkerRobot();
 
       Robot robot = robotConstructor.getRobot();
-      LIPMWalkerControllerBhavyansh controller = new LIPMWalkerControllerBhavyansh(robotConstructor);
+      LIPMHoppingControllerBhavyansh controller = new LIPMHoppingControllerBhavyansh(robotConstructor);
+//      LIPMWalkerControllerBhavyansh controller = new LIPMWalkerControllerBhavyansh(robotConstructor);
 //      LIPMWalkerControllerTobi controller = new LIPMWalkerControllerTobi(robotConstructor);
 //      LIPMWalkerController controller = new LIPMWalkerController(robotConstructor);
 
@@ -21,7 +22,7 @@ public class LIPMWalkerSimulation
       robot.setController(controller);
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
       scs.setSimulateNoFasterThanRealTime(true);
-      scs.setCameraTracking(true, true, true, true);
+//      scs.setCameraTracking(true, true, true, true);
 
       scs.startOnAThread();
    }
