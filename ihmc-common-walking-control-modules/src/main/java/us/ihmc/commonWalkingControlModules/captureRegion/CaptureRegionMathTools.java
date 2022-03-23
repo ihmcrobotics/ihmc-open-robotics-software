@@ -7,12 +7,12 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
+import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple4D.Quaternion;
 
 public class CaptureRegionMathTools
 {
-   private final RotationMatrix rotation = new RotationMatrix();
    private final FrameVector2D rotatedFromA = new FrameVector2D();
 
    /**
@@ -35,8 +35,7 @@ public class CaptureRegionMathTools
       double angleBetweenDirectionsToSetLine = -angleBetweenDirections * alpha;
 
       rotatedFromA.setReferenceFrame(directionA.getReferenceFrame());
-      rotation.setToYawOrientation(angleBetweenDirectionsToSetLine);
-      rotation.transform(directionA, rotatedFromA);
+      RotationMatrixTools.applyYawRotation(angleBetweenDirectionsToSetLine, directionA, rotatedFromA);
 
       rotatedFromA.scale(radius / rotatedFromA.length());
 
