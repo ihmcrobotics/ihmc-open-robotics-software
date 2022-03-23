@@ -5,7 +5,6 @@ import org.apache.commons.math3.optim.PointValuePair;
 import org.apache.commons.math3.optim.linear.*;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.ejml.data.DMatrixRMaj;
-import us.ihmc.convexOptimization.linearProgram.LinearProgramSolver;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -15,14 +14,12 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static us.ihmc.commonWalkingControlModules.staticEquilibrium.StaticEquilibriumContactPoint.basisVectorsPerContactPoint;
@@ -36,8 +33,11 @@ import static us.ihmc.commonWalkingControlModules.staticEquilibrium.StaticEquili
  */
 public class StaticSupportRegionSolver
 {
-   static final int numberOfDirectionsToOptimize = 32;
-   static final double rhoMax = 10.0;
+   private static final int numberOfDirectionsToOptimize = 32;
+   private static final int maximumNumberOfIterations = 10000;
+   private static final double convergenceThreshold = 1e-5;
+   private static final double rhoMax = 10.0;
+   /* Only dimensionally related to rhoMax. */
    static final double mass = 1.0;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -47,24 +47,11 @@ public class StaticSupportRegionSolver
    private final List<StaticEquilibriumContactPoint> contactPoints = new ArrayList<>();
 
    private StaticEquilibriumSolverInput input;
-   private final LinearProgramSolver linearProgramSolver = new LinearProgramSolver();
+   private final SimplexSolver solver = new SimplexSolver(convergenceThreshold);
+   private int numberOfDecisionVariables;
 
-   private int nominalDecisionVariables;
-   private int nonNegativeDecisionVariables;
-
-   /* Nominal equality matrices */
-   private final DMatrixRMaj Aeq = new DMatrixRMaj(0);
-   private final DMatrixRMaj beq = new DMatrixRMaj(0);
-
-   /* Expanded equality A matrix, such that all decision variables are non-negative */
-   private final DMatrixRMaj APosEq = new DMatrixRMaj(0);
-
-   /* Inequality matrices, which encode the equality matrices */
-   private final DMatrixRMaj Ain = new DMatrixRMaj(0);
-   private final DMatrixRMaj bin = new DMatrixRMaj(0);
-
-   private final DMatrixRMaj costVectorC = new DMatrixRMaj(0);
-   private final DMatrixRMaj solution = new DMatrixRMaj(0);
+   private final DMatrixRMaj Aeq = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj beq = new DMatrixRMaj(0, 0);
 
    private final ConvexPolygon2D supportRegion = new ConvexPolygon2D();
    private final List<Point2D> points = new ArrayList<>();
@@ -102,18 +89,11 @@ public class StaticSupportRegionSolver
    public void initialize(StaticEquilibriumSolverInput input)
    {
       this.input = input;
+      numberOfDecisionVariables = basisVectorsPerContactPoint * input.getNumberOfContacts() + 2;
       points.clear();
 
-      int rhoSize = basisVectorsPerContactPoint * input.getNumberOfContacts();
-      nominalDecisionVariables = rhoSize + 2;
-      nonNegativeDecisionVariables = nominalDecisionVariables + 2;
-
-      Aeq.reshape(6, nominalDecisionVariables);
+      Aeq.reshape(6, numberOfDecisionVariables);
       beq.reshape(6, 1);
-      APosEq.reshape(6, nonNegativeDecisionVariables);
-      Ain.reshape(12 + rhoSize, nonNegativeDecisionVariables);
-      bin.reshape(12 + rhoSize, 1);
-      costVectorC.reshape(nonNegativeDecisionVariables, 1);
 
       for (int i = 0; i < contactPoints.size(); i++)
       {
@@ -150,70 +130,69 @@ public class StaticSupportRegionSolver
          }
       }
 
-      Aeq.set(3, nominalDecisionVariables - 1, - mass * input.getGravityMagnitude());
-      Aeq.set(4, nominalDecisionVariables - 2, mass * input.getGravityMagnitude());
+      Aeq.set(3, numberOfDecisionVariables - 1, - mass * input.getGravityMagnitude());
+      Aeq.set(4, numberOfDecisionVariables - 2, mass * input.getGravityMagnitude());
       beq.set(2, 0, mass * input.getGravityMagnitude());
-
-      MatrixTools.setMatrixBlock(APosEq, 0, 0, Aeq, 0, 0, Aeq.getNumRows(), Aeq.getNumCols(), 1.0);
-      MatrixTools.setMatrixBlock(APosEq, 0, Aeq.getNumCols(), Aeq, 0, Aeq.getNumCols() - 2, Aeq.getNumRows(), 2, -1.0);
-
-      Arrays.fill(Ain.getData(), 0.0);
-      Arrays.fill(bin.getData(), 0.0);
-
-      MatrixTools.setMatrixBlock(Ain, 0, 0, APosEq, 0, 0, 6, APosEq.getNumCols(), 1.0);
-      MatrixTools.setMatrixBlock(Ain, 6, 0, APosEq, 0, 0, 6, APosEq.getNumCols(), -1.0);
-      MatrixTools.setMatrixBlock(bin, 0, 0, beq, 0, 0, 6, beq.getNumCols(), 1.0);
-      MatrixTools.setMatrixBlock(bin, 6, 0, beq, 0, 0, 6, beq.getNumCols(), -1.0);
-
-      for (int i = 0; i < rhoSize; i++)
-      {
-         Ain.set(12 + i, i, 1.0);
-         bin.set(12 + i, 0, rhoMax);
-      }
    }
 
    public void solve()
    {
       supportRegion.clear();
-      Arrays.fill(costVectorC.getData(), 0.0);
 
       for (int i = 0; i < directionsToOptimize.size(); i++)
       {
          Vector2D directionToOptimize = directionsToOptimize.get(i);
          this.directionToOptimize.set(directionToOptimize);
 
-         costVectorC.set(nonNegativeDecisionVariables - 4, 0, directionToOptimize.getX());
-         costVectorC.set(nonNegativeDecisionVariables - 3, 0, directionToOptimize.getY());
-         costVectorC.set(nonNegativeDecisionVariables - 2, 0, -directionToOptimize.getX());
-         costVectorC.set(nonNegativeDecisionVariables - 1, 0, -directionToOptimize.getY());
+         double[] objectiveCoefficients = new double[numberOfDecisionVariables];
+         objectiveCoefficients[numberOfDecisionVariables - 2] = directionToOptimize.getX();
+         objectiveCoefficients[numberOfDecisionVariables - 1] = directionToOptimize.getY();
+         LinearObjectiveFunction objectiveFunction = new LinearObjectiveFunction(objectiveCoefficients, 0.0);
 
-         linearProgramSolver.solve(costVectorC, Ain, bin, solution);
+         List<LinearConstraint> constraints = new ArrayList<>();
+         for (int j = 0; j < Aeq.getNumRows(); j++)
+         {
+            double[] constraintCoefficients = new double[numberOfDecisionVariables];
+            for (int k = 0; k < numberOfDecisionVariables; k++)
+            {
+               constraintCoefficients[k] = Aeq.get(j, k);
+            }
 
-         double comExtremumX = solution.get(nonNegativeDecisionVariables - 4) - solution.get(nonNegativeDecisionVariables - 2);
-         double comExtremumY = solution.get(nonNegativeDecisionVariables - 3) - solution.get(nonNegativeDecisionVariables - 1);
+            constraints.add(new LinearConstraint(constraintCoefficients, Relationship.EQ, beq.get(j)));
+         }
+
+         for (int j = 0; j < numberOfDecisionVariables - 2; j++)
+         {
+            double[] constraintCoefficients = new double[numberOfDecisionVariables];
+            constraintCoefficients[j] = 1.0;
+            constraints.add(new LinearConstraint(constraintCoefficients, Relationship.GEQ, 0.0));
+            constraints.add(new LinearConstraint(constraintCoefficients, Relationship.LEQ, rhoMax));
+         }
+
+         PointValuePair optSolution = solver.optimize(new MaxIter(maximumNumberOfIterations), objectiveFunction, new LinearConstraintSet(constraints), GoalType.MAXIMIZE);
+         double[] solution = optSolution.getPoint();
+         double comExtremumX = solution[numberOfDecisionVariables - 2];
+         double comExtremumY = solution[numberOfDecisionVariables - 1];
          supportRegion.addVertex(comExtremumX, comExtremumY);
          points.add(new Point2D(comExtremumX, comExtremumY));
-         updateGraphics();
+         updateGraphics(solution);
       }
 
       supportRegion.update();
    }
 
-   private void updateGraphics()
+   private void updateGraphics(double[] solution)
    {
       if (tickAndUpdatable == null)
          return;
 
       for (int j = 0; j < input.getNumberOfContacts(); j++)
       {
-         contactPoints.get(j).setResolvedForce(solution.getData());
+         contactPoints.get(j).setResolvedForce(solution);
       }
 
-      double comExtremumX = solution.get(nonNegativeDecisionVariables - 4) - solution.get(nonNegativeDecisionVariables - 2);
-      double comExtremumY = solution.get(nonNegativeDecisionVariables - 3) - solution.get(nonNegativeDecisionVariables - 1);
-
-      this.optimizedCoM.setX(comExtremumX);
-      this.optimizedCoM.setY(comExtremumY);
+      this.optimizedCoM.setX(solution[numberOfDecisionVariables - 2]);
+      this.optimizedCoM.setY(solution[numberOfDecisionVariables - 1]);
       this.optimizedCoM.setZ(0.1);
 
       tickAndUpdatable.tickAndUpdate();

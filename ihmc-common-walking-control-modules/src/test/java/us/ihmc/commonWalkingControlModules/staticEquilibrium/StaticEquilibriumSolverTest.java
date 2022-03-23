@@ -1,35 +1,96 @@
 package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 
-import java.util.Arrays;
-import java.util.List;
-
-public class StaticEquilibriumRegionSolverTest
+public class StaticEquilibriumSolverTest
 {
    private static final boolean VISUALIZE = false; //  Boolean.parseBoolean(System.getProperty("visualize", "true"));
-   private static final double marginToTest = 1e-3;
+   private static final double marginToTest = 0.02;
 
    @Test
-   public void testStaticEquilibriumSolver()
+   public void testTriangleFlat()
    {
-      List<StaticEquilibriumSolverInput> inputsToTest = Arrays.asList(StaticEquilibriumSolverInputExamples.createTriangleFlatGround(),
-                                                                      StaticEquilibriumSolverInputExamples.createTriangleTiltedOutSlightly(),
-                                                                      StaticEquilibriumSolverInputExamples.createTriangleTiltedOutALot(),
-                                                                      StaticEquilibriumSolverInputExamples.createTriangleOneTiltedFullyOut(),
-                                                                      StaticEquilibriumSolverInputExamples.createTriangleOneTiltedFullyIn(),
-                                                                      StaticEquilibriumSolverInputExamples.createFlatSquare(),
-                                                                      StaticEquilibriumSolverInputExamples.createBipedFeet(),
-                                                                      StaticEquilibriumSolverInputExamples.createBipedFeetWithSingleHandhold(),
-                                                                      StaticEquilibriumSolverInputExamples.createBipedFeetWithSingleHandhold());
+      runTest(StaticEquilibriumSolverInputExamples.createTriangleFlatGround());
+   }
 
-      for (int i = 0; i < inputsToTest.size(); i++)
+   @Test
+   public void testTriangleLowAngle()
+   {
+      runTest(StaticEquilibriumSolverInputExamples.createTriangleTiltedOutSlightly());
+   }
+
+   @Test
+   public void testTriangleHighAngle()
+   {
+      runTest(StaticEquilibriumSolverInputExamples.createTriangleTiltedOutALot());
+   }
+
+   @Test
+   public void testFlatSquare()
+   {
+      runTest(StaticEquilibriumSolverInputExamples.createFlatSquare());
+   }
+
+   @Test
+   public void testBipedFeet()
+   {
+      runTest(StaticEquilibriumSolverInputExamples.createBipedFeet());
+   }
+
+   @Test
+   public void testBipedFeetWithHandhold()
+   {
+      runTest(StaticEquilibriumSolverInputExamples.createBipedFeetWithSingleHandhold());
+   }
+
+   @Test
+   public void testMatricesForFlatGround()
+   {
+      double comX = -0.5;
+      double comY = -0.5;
+
+      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createFlatSquare();
+      StaticSupportRegionSolver solver = new StaticSupportRegionSolver();
+      solver.initialize(input);
+
+      DMatrixRMaj Aeq = solver.getAeq();
+      DMatrixRMaj beq = solver.getBeq();
+
+      // test corner
+      DMatrixRMaj solution = new DMatrixRMaj(0);
+      int numberOfVariables = input.getNumberOfContacts() * 4 + 2;
+      solution.reshape(numberOfVariables, 1);
+
+      double verticalForce = StaticSupportRegionSolver.mass * input.getGravityMagnitude();
+      input.getSurfaceNormals().get(0).changeFrame(ReferenceFrame.getWorldFrame());
+      double mu = input.getCoefficientOfFriction();
+      double betaZ = 1.0 / Math.sqrt(MathTools.square(mu) + 1.0);
+      double rhoAtCorner = verticalForce / (4.0 * betaZ);
+
+      CommonOps_DDRM.fill(solution, 0.0);
+      solution.set(0, rhoAtCorner);
+      solution.set(1, rhoAtCorner);
+      solution.set(2, rhoAtCorner);
+      solution.set(3, rhoAtCorner);
+      solution.set(numberOfVariables - 2, comX);
+      solution.set(numberOfVariables - 1, comY);
+
+      DMatrixRMaj b = new DMatrixRMaj(0);
+      CommonOps_DDRM.mult(Aeq, solution, b);
+
+      for (int i = 0; i < 6; i++)
       {
-         runTest(inputsToTest.get(i));
+         double eps = 1e-8;
+         Assertions.assertTrue(Math.abs(b.get(i) - beq.get(i)) < eps);
       }
    }
 
@@ -74,7 +135,7 @@ public class StaticEquilibriumRegionSolverTest
       StaticEquilibriumSolverInput[] inputs = new StaticEquilibriumSolverInput[]{input0, input1, input2, input3, input4};
 
       // warm up
-      int warmups = 20;
+      int warmups = 10;
       for (int i = 0; i < warmups; i++)
       {
          solver.initialize(input0);
@@ -82,7 +143,7 @@ public class StaticEquilibriumRegionSolverTest
       }
 
       // do timing test
-      int iterations = 20;
+      int iterations = 10;
       long start = System.currentTimeMillis();
 
       for (int i = 0; i < iterations; i++)
@@ -90,14 +151,15 @@ public class StaticEquilibriumRegionSolverTest
          for (int j = 0; j < inputs.length; j++)
          {
             solver.initialize(inputs[j]);
-            solver.solve();
          }
       }
+
+      solver.solve();
 
       long stop = System.currentTimeMillis();
 
       long diff = stop - start;
-      System.out.println("Average solve time: " + (diff / (iterations * inputs.length)) + "ms") ;
+      System.out.println("Solver time: " + (diff / (iterations * inputs.length)) + "ms") ;
    }
 
    public static void main(String[] args)

@@ -8,7 +8,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.log.LogTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
@@ -27,11 +26,11 @@ public class StaticEquilibriumSolverVisualizer
       solver.initialize(input);
       solver.solve();
 
-      LogTools.info("----- Support Region -----");
+      System.out.println("----- support region ----");
       ConvexPolygon2D supportRegion0 = solver.getSupportRegion();
       for (int i = 0; i < supportRegion0.getNumberOfVertices(); i++)
       {
-         System.out.println("\t" + supportRegion0.getVertex(i));
+         System.out.println(supportRegion0.getVertex(i));
       }
 
       Graphics3DObject supportRegionGraphics = new Graphics3DObject();
