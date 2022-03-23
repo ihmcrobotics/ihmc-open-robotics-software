@@ -544,13 +544,19 @@ public class WorkspaceLimiterControlModule
       pelvisLinearVelocity.checkReferenceFrameMatch(virtualLegTangentialFrameAnkleCentered);
 
       // Mix the desired leg extension velocity to progressively follow the pelvis velocity as the the leg is more straight
-      double desiredLinearVelocityZ = InterpolationTools.linearInterpolate(desiredFootLinearVelocity.getZ(),
-                                                                           pelvisLinearVelocity.getZ(),
+      double desiredLinearVelocityZ = desiredFootLinearVelocity.getZ();
+      double desiredLinearAccelerationZ = desiredFootLinearAcceleration.getZ();
+      if (isLegLengthening())
+      {
+         desiredLinearVelocityZ = InterpolationTools.linearInterpolate(desiredFootLinearVelocity.getZ(),
+                                              pelvisLinearVelocity.getZ(),
+                                              alphaSwingSingularityAvoidanceForFoot.getDoubleValue());
+         desiredLinearAccelerationZ = InterpolationTools.linearInterpolate(desiredFootLinearAcceleration.getZ(),
+                                                                           0.0,
                                                                            alphaSwingSingularityAvoidanceForFoot.getDoubleValue());
-      desiredFootLinearAcceleration.interpolate(EuclidCoreTools.zeroVector3D, alphaSwingSingularityAvoidanceForFoot.getDoubleValue());
-      double desiredLinearAccelerationZ = InterpolationTools.linearInterpolate(desiredFootLinearAcceleration.getZ(),
-                                                                               0.0,
-                                                                               alphaSwingSingularityAvoidanceForFoot.getDoubleValue());
+      }
+//      desiredFootLinearAcceleration.interpolate(EuclidCoreTools.zeroVector3D, alphaSwingSingularityAvoidanceForFoot.getDoubleValue());
+
 
       desiredFootPosition.setZ(desiredFootPositionInAxisFrame);
       desiredFootLinearVelocity.setZ(desiredLinearVelocityZ);
@@ -579,11 +585,13 @@ public class WorkspaceLimiterControlModule
 
    private boolean isLegLengthening()
    {
+      pelvisLinearVelocity.checkReferenceFrameMatch(desiredFootLinearVelocity);
       return pelvisLinearVelocity.getZ() - desiredFootLinearVelocity.getZ() > velocityDifferenceForLengthening.getValue();
    }
 
    private boolean isLegShortening()
    {
+      pelvisLinearVelocity.checkReferenceFrameMatch(desiredFootLinearVelocity);
       return desiredFootLinearVelocity.getZ() - pelvisLinearVelocity.getZ() > velocityDifferenceForLengthening.getValue();
    }
 
