@@ -1,6 +1,5 @@
 package us.ihmc.robotics.math.trajectories;
 
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -8,6 +7,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
@@ -203,6 +203,7 @@ public class BlendedPositionTrajectoryGenerator implements FixedFramePositionTra
       computeInitialConstraintError(initialPosition, initialTime);
       computeConstraintVelocityError(initialVelocity, initialConstraintVelocityError);
    }
+
 
    private void computeFinalConstraintError(FramePoint3DReadOnly finalPosition, double finalTime)
    {
