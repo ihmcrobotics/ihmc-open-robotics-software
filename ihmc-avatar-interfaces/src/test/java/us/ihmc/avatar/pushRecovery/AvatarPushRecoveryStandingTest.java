@@ -266,7 +266,7 @@ public abstract class AvatarPushRecoveryStandingTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
-      double magnitude = 350.0;
+      double magnitude = 275.0;
       double duration = 0.2;
       applyPushAndCheckFinalState(pushCondition, delay, forceDirection, magnitude, duration, 4.0);
    }
