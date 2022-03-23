@@ -458,4 +458,9 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
    {
       return bulletPhysicsManager;
    }
+
+   public ArrayList<GDXEnvironmentObject> getAllObjects()
+   {
+      return allObjects;
+   }
 }

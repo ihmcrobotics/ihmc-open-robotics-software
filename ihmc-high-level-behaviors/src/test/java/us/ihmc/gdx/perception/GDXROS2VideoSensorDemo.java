@@ -4,6 +4,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.environment.GDXEnvironmentBuilder;
+import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
@@ -45,8 +46,6 @@ public class GDXROS2VideoSensorDemo
             sensorPoseGizmo.setResizeAutomatically(true);
             baseUI.addImGui3DViewInputProcessor(sensorPoseGizmo::process3DViewInput);
             baseUI.get3DSceneManager().addRenderableProvider(sensorPoseGizmo, GDXSceneLevel.VIRTUAL);
-//            sensorPoseGizmo.getTransformToParent().appendTranslation(2.2, 0.0, 1.0);
-//            sensorPoseGizmo.getTransformToParent().appendPitchRotation(Math.PI / 4.0);
 
             ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.INTRAPROCESS, "test_node");
 
@@ -103,6 +102,11 @@ public class GDXROS2VideoSensorDemo
          {
             highLevelDepthSensorSimulator.render(baseUI.get3DSceneManager());
             globalVisualizersPanel.update();
+
+            for (GDXEnvironmentObject allObject : environmentBuilder.getAllObjects())
+            {
+               allObject.getRealisticModelInstance().setDiffuseColor(highLevelDepthSensorSimulator.getPointColorFromPicker());
+            }
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
