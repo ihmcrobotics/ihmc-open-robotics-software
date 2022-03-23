@@ -16,7 +16,7 @@ public interface StepAdjustmentController
 
    void setFootstepToAdjust(SimpleFootstep footstep, double swingDuration, double nextTransferDuration);
 
-   void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeForSwing);
+   void submitSwingSpeedUpUnderDisturbance(double remainingTimeForSwing);
 
    void setStepConstraintRegion(StepConstraintRegion stepConstraintRegion);
 
