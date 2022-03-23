@@ -6,75 +6,6 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-<<<<<<< HEAD
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial3D;
-import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-
-public class BlendedWaypointPositionTrajectoryGenerator implements FixedFramePositionTrajectoryGenerator
-{
-   private final FixedFramePositionTrajectoryGenerator trajectory;
-   private final ReferenceFrame trajectoryFrame;
-
-   private final Point3D initialConstraintPositionError = new Point3D();
-   private final Vector3D initialConstraintVelocityError = new Vector3D();
-
-   private final Point3D finalConstraintPositionError = new Point3D();
-   private final Vector3D finalConstraintVelocityError = new Vector3D();
-
-   private final Point3D constraintPositionError = new Point3D();
-   private final Vector3D constraintVelocityError = new Vector3D();
-
-   private final Point3DReadOnly zeroPoint = new Point3D();
-   private final Vector3DReadOnly zeroVector = new Vector3D();
-
-   private final FramePoint3D position = new FramePoint3D();
-   private final FrameVector3D velocity = new FrameVector3D();
-   private final FrameVector3D acceleration = new FrameVector3D();
-   private final FramePoint3D tempPosition = new FramePoint3D();
-   private final FrameVector3D tempVelocity = new FrameVector3D();
-
-   private final MultipleWaypointsPositionTrajectoryGenerator blendTrajectory;
-
-   public BlendedWaypointPositionTrajectoryGenerator(String prefix,
-                                                     FixedFramePositionTrajectoryGenerator trajectory,
-                                                     ReferenceFrame trajectoryFrame,
-                                                     YoRegistry parentRegistry)
-   {
-      this.trajectory = trajectory;
-      this.trajectoryFrame = trajectoryFrame;
-
-      blendTrajectory = new MultipleWaypointsPositionTrajectoryGenerator(prefix + "BlendTrajectory", 4, trajectoryFrame, parentRegistry);
-
-      this.position.changeFrame(trajectoryFrame);
-      this.velocity.changeFrame(trajectoryFrame);
-      this.acceleration.changeFrame(trajectoryFrame);
-      this.tempPosition.changeFrame(trajectoryFrame);
-      this.tempVelocity.changeFrame(trajectoryFrame);
-
-      clear();
-   }
-
-   public void clear()
-   {
-      clearInitialConstraint();
-      clearFinalConstraint();
-      blendTrajectory.clear();
-   }
-
-   public void clearInitialConstraint()
-   {
-      initialConstraintPositionError.setToZero();
-      initialConstraintVelocityError.setToZero();
-=======
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -148,7 +79,6 @@ public class BlendedWaypointPositionTrajectoryGenerator implements FixedFramePos
    public MultipleWaypointsPositionTrajectoryGenerator getBlendTrajectory()
    {
       return blendTrajectory;
->>>>>>> refs/remotes/origin/develop
    }
 
    public void clearFinalConstraint()
