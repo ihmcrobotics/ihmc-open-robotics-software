@@ -1,12 +1,13 @@
 package us.ihmc.robotics.math.trajectories;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
@@ -33,7 +34,7 @@ public class BlendedPositionTrajectoryGenerator implements FixedFramePositionTra
    private final Vector3D finalConstraintPositionError = new Vector3D();
    private final Vector3D finalConstraintVelocityError = new Vector3D();
 
-   private final Vector3DReadOnly zeroVector = new Vector3D();
+   private static final Vector3DReadOnly zeroVector = EuclidCoreTools.zeroVector3D;
 
    private final FramePoint3D position = new FramePoint3D();
    private final FrameVector3D velocity = new FrameVector3D();
@@ -90,14 +91,14 @@ public class BlendedPositionTrajectoryGenerator implements FixedFramePositionTra
    public void blendInitialConstraint(FramePoint3DReadOnly initialPosition, double initialTime, double blendDuration)
    {
       clearInitialConstraint();
-      computeInitialConstraintStartingError(initialPosition, initialTime);
+      computeInitialConstraintError(initialPosition, initialTime);
       computeInitialConstraintPolynomial(initialTime, blendDuration);
    }
 
    public void blendInitialConstraint(FramePoint3DReadOnly initialPosition, FrameVector3DReadOnly initialVelocity, double initialTime, double blendDuration)
    {
       clearInitialConstraint();
-      computeInitialConstraintStartingError(initialPosition, initialVelocity, initialTime);
+      computeInitialConstraintError(initialPosition, initialVelocity, initialTime);
       computeInitialConstraintPolynomial(initialTime, blendDuration);
    }
 
@@ -191,7 +192,7 @@ public class BlendedPositionTrajectoryGenerator implements FixedFramePositionTra
       return trajectory.isDone();
    }
 
-   private void computeInitialConstraintStartingError(FramePoint3DReadOnly initialPosition, double initialTime)
+   private void computeInitialConstraintError(FramePoint3DReadOnly initialPosition, double initialTime)
    {
       computeConstraintPositionError(initialPosition, initialTime, initialConstraintPositionError);
    }
@@ -210,7 +211,7 @@ public class BlendedPositionTrajectoryGenerator implements FixedFramePositionTra
 
    private void computeFinalConstraintError(FramePoint3DReadOnly finalPosition, FrameVector3DReadOnly finalVelocity, double finalTime)
    {
-      computeFinalConstraintEndingError(finalPosition, finalTime);
+      computeFinalConstraintError(finalPosition, finalTime);
       computeConstraintVelocityError(finalVelocity, finalConstraintVelocityError);
    }
 
