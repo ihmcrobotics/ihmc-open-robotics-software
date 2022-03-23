@@ -6,6 +6,7 @@ import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.simulation.environment.object.objects.LabFloorDefinition;
 import us.ihmc.gdx.simulation.environment.object.objects.door.DoorDefinition;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.tools.UnitConversions;
 
 public class GDXSCS2BulletPhysicsDoorDemo
 {
@@ -31,6 +32,7 @@ public class GDXSCS2BulletPhysicsDoorDemo
             scs2SimulationSession.addTerrainObject(new LabFloorDefinition());
 
             scs2SimulationSession.create(baseUI);
+            scs2SimulationSession.setDT(UnitConversions.hertzToSeconds(240.0));
             baseUI.getImGuiPanelManager().addPanel(scs2SimulationSession.getControlPanel());
          }
 

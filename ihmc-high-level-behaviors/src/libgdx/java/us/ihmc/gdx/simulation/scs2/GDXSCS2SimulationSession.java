@@ -40,7 +40,7 @@ public class GDXSCS2SimulationSession
    private final ImGuiPanel controlPanel = new ImGuiPanel("SCS 2 Simulation Session", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImInt bufferIndex = new ImInt();
-   private final ImInt dtHz = new ImInt(240);
+   private final ImInt dtHz = new ImInt(-1);
    private final ImInt bufferRecordTickPeriod = new ImInt(1);
    private final ImFloat bufferDuration = new ImFloat(5.0f);
    private final ImBoolean pauseAtEndOfBuffer = new ImBoolean(true);
@@ -70,6 +70,7 @@ public class GDXSCS2SimulationSession
    public GDXSCS2SimulationSession(SimulationSession simulationSession)
    {
       this.simulationSession = simulationSession;
+      dtHz.set((int) UnitConversions.secondsToHertz(simulationSession.getSessionDTSeconds()));
 
       physicsEngine = simulationSession.getPhysicsEngine();
       if (physicsEngine instanceof BulletPhysicsEngine)
@@ -130,7 +131,7 @@ public class GDXSCS2SimulationSession
 
       bufferRecordTickPeriod.set(simulationSession.getBufferRecordTickPeriod());
       changeBufferDuration();
-      changeDT();
+      updateDTFromSession();
       simulationSession.submitPlaybackRealTimeRate(playbackRealtimeRate.get());
       simulationSession.submitRunAtRealTimeRate(runAtRealtimeRate.get());
 
@@ -217,7 +218,7 @@ public class GDXSCS2SimulationSession
       }
       else
       {
-         dtHz.set((int) UnitConversions.secondsToHertz(simulationSession.getSessionDTSeconds()));
+         updateDTFromSession();
       }
       ImGui.popItemWidth();
       if (ImGui.radioButton("Run", simulationSession.getActiveMode() == SessionMode.RUNNING))
@@ -293,6 +294,11 @@ public class GDXSCS2SimulationSession
       if (physicsEngine instanceof BulletPhysicsEngine)
          bulletPhysicsDebugger.renderImGuiWidgets();
       plotManager.renderImGuiWidgets();
+   }
+
+   private void updateDTFromSession()
+   {
+      dtHz.set((int) UnitConversions.secondsToHertz(simulationSession.getSessionDTSeconds()));
    }
 
    private void changeBufferDuration()
