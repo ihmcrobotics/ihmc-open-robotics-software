@@ -199,7 +199,6 @@ public class BalanceManager
 
    private boolean initializeOnStateChange = false;
    private boolean minimizeAngularMomentumRateZ = false;
-   private double timeRemainingInSwing = Double.NaN;
    private RobotSide supportSide;
    private final YoFrameVector2D residualICPErrorForStepAdjustment = new YoFrameVector2D("residualICPErrorForStepAdjustment", worldFrame, registry);
    private final FixedFramePoint2DBasics desiredCMP = new FramePoint2D();
