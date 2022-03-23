@@ -56,7 +56,7 @@ public class GDXROS2VideoSensorDemo
             baseUI.getImGuiPanelManager().addPanel(globalVisualizersPanel);
 
             // https://www.scratchapixel.com/lessons/3d-basic-rendering/perspective-and-orthographic-projection-matrix/opengl-perspective-projection-matrix
-            double publishRateHz = 5.0;
+            double publishRateHz = 240.0;
             double verticalFOV = 55.0;
             int imageWidth = 640;
             int imageHeight = 480;
