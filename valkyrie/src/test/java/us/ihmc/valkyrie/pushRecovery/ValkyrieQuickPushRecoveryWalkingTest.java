@@ -111,4 +111,22 @@ public class ValkyrieQuickPushRecoveryWalkingTest extends AvatarQuickPushRecover
       setPushChangeInVelocity(0.7);
       super.testForwardPushInLeftSwing();
    }
+
+   @Tag("humanoid-push-recovery")
+   @Override
+   @Test
+   public void testInwardPushLeftMidSwing() throws SimulationExceededMaximumTimeException
+   {
+      setPushChangeInVelocity(0.25);
+      super.testInwardPushLeftMidSwing();
+   }
+
+   @Tag("humanoid-push-recovery")
+   @Override
+   @Test
+   public void testForwardAndOutwardPushInLeftSwing() throws SimulationExceededMaximumTimeException
+   {
+      setPushChangeInVelocity(0.55);
+      super.testForwardAndOutwardPushInLeftSwing();
+   }
 }
