@@ -82,8 +82,6 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
 
    private final BipedSupportPolygons bipedSupportPolygons;
 
-   private final TwoStepCaptureRegionCalculator twoStepCaptureRegionCalculator;
-
    public CaptureRegionStepAdjustmentController(WalkingControllerParameters walkingControllerParameters,
                                                 SideDependentList<? extends ReferenceFrame> soleZUpFrames,
                                                 BipedSupportPolygons bipedSupportPolygons,
@@ -118,7 +116,6 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
                                                                                yoGraphicsListRegistry);
 
       captureRegionCalculator = new OneStepCaptureRegionCalculator(soleZUpFrames, walkingControllerParameters, false, yoNamePrefix, registry, yoGraphicsListRegistry);
-      twoStepCaptureRegionCalculator = new TwoStepCaptureRegionCalculator(registry, yoGraphicsListRegistry);
 
       if (walkingControllerParameters != null)
          swingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
@@ -157,7 +154,6 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
       footstepSolution.setToNaN();
       footstepWasAdjusted.set(false);
       captureRegionCalculator.hideCaptureRegion();
-      twoStepCaptureRegionCalculator.reset();
    }
 
    private SimpleFootstep nextFootstep;
@@ -252,16 +248,6 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
                                                      omega0,
                                                      allowableAreaForCoP);
 
-      if (nextFootstep != null)
-         twoStepCaptureRegionCalculator.computeFromStepGoal(nextFootstepTiming.getStepTime(),
-                                                            nextFootstep,
-                                                            currentICP,
-                                                            allowableAreaForCoP.getCentroid(),
-                                                            omega0,
-                                                            captureRegionCalculator.getCaptureRegion());
-      //      else
-      //         inverseCaptureRegionCalculator.reset();
-
       if (!useStepAdjustment.getBooleanValue())
          return;
 
@@ -276,12 +262,7 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
    private boolean adjustStepForError()
    {
       adjustedSolutionInControlPlane.set(upcomingFootstep.getPosition());
-//      adjustedSolutionInControlPlane.add(deadbandedAdjustment);
-
-      if (twoStepCaptureRegionCalculator.hasTwoStepRegion())
-         captureRegionInWorld.setIncludingFrame(twoStepCaptureRegionCalculator.getCaptureRegion());
-      else
-         captureRegionInWorld.setIncludingFrame(captureRegionCalculator.getCaptureRegion());
+      captureRegionInWorld.setIncludingFrame(captureRegionCalculator.getCaptureRegion());
       captureRegionInWorld.changeFrameAndProjectToXYPlane(worldFrame);
 
       boolean adjusted = captureRegionInWorld.orthogonalProjection(adjustedSolutionInControlPlane);
