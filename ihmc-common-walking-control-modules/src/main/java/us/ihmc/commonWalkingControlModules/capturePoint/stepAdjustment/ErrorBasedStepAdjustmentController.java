@@ -208,6 +208,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                                                                                registry,
                                                                                yoGraphicsListRegistry);
 
+      // the 1.5 multiplier is important so that the capture region is bigger than reachable
       captureRegionCalculator = new OneStepCaptureRegionCalculator(steppingParameters.getFootWidth(),
                                                                    () -> 1.5 * lengthLimit.getValue(),
                                                                    soleZUpFrames,
