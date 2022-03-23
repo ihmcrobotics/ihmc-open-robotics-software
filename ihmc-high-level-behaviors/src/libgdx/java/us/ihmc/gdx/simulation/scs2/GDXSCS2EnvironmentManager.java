@@ -122,7 +122,6 @@ public class GDXSCS2EnvironmentManager
 
          avatarSimulation.beforeSessionThreadStart();
 
-         scs2SimulationSession.setDT(robotModel.getEstimatorDT());
          scs2SimulationSession.create(baseUI, managerPanel);
 
          for (String robotToHide : robotsToHide)
