@@ -3,7 +3,6 @@ package us.ihmc.gdx.ui.graphics.live;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
-import com.badlogic.gdx.utils.BufferUtils;
 import controller_msgs.msg.dds.DetectedFiducialPacket;
 import controller_msgs.msg.dds.VideoPacket;
 import imgui.internal.ImGui;
@@ -14,7 +13,6 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.producers.JPEGDecompressor;
-import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiVideoPanel;
 import us.ihmc.gdx.ui.visualizers.ImGuiFrequencyPlot;
@@ -25,10 +23,7 @@ import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
-import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
-import java.awt.image.WritableRaster;
 import java.nio.ByteBuffer;
 
 public class GDXROS2VideoVisualizer extends ImGuiGDXVisualizer
@@ -48,7 +43,7 @@ public class GDXROS2VideoVisualizer extends ImGuiGDXVisualizer
 //   private BufferedImage bufferedImage;
    private ByteBuffer backingByteBuffer;
    private Mat inputJPEGMat = new Mat(1, 1, opencv_core.CV_8UC1);
-   private Mat yuvI420Mat = new Mat(100); // allocate any amount of data, it'll be resized later
+   private Mat bgrMat = new Mat(100); // allocate any amount of data, it'll be resized later
    private Mat rgba8Mat;
    private boolean needNewTexture = false;
    private BytePointer data;
@@ -98,28 +93,31 @@ public class GDXROS2VideoVisualizer extends ImGuiGDXVisualizer
 
 
 //            opencv_imgcodecs.imdecode(inputJPEGMat, opencv_imgcodecs.IMREAD_ANYCOLOR, yuvI420Mat);
-            opencv_imgcodecs.imdecode(inputJPEGMat, opencv_imgcodecs.IMREAD_COLOR, yuvI420Mat);
+
+            // Converts image to 3 channel BGR color image.
+            // This should handle JPEG encoded YUV I420 and output BGR
+            opencv_imgcodecs.imdecode(inputJPEGMat, opencv_imgcodecs.IMREAD_COLOR, bgrMat);
 
 //            rgba8Mat.rows(yuvI420Mat.rows());
 //            rgba8Mat.cols(yuvI420Mat.cols());
 
             synchronized (this)
             {
-               if (rgba8Mat == null || pixmap.getWidth() < yuvI420Mat.cols() || pixmap.getHeight() < yuvI420Mat.rows())
+               if (rgba8Mat == null || pixmap.getWidth() < bgrMat.cols() || pixmap.getHeight() < bgrMat.rows())
                {
                   if (pixmap != null)
                   {
                      pixmap.dispose();
                   }
 
-                  pixmap = new Pixmap(yuvI420Mat.cols(), yuvI420Mat.rows(), Pixmap.Format.RGBA8888);
+                  pixmap = new Pixmap(bgrMat.cols(), bgrMat.rows(), Pixmap.Format.RGBA8888);
                   data = new BytePointer(pixmap.getPixels());
-                  rgba8Mat = new Mat(yuvI420Mat.rows(), yuvI420Mat.cols(), opencv_core.CV_8UC4, data);
+                  rgba8Mat = new Mat(bgrMat.rows(), bgrMat.cols(), opencv_core.CV_8UC4, data);
                   needNewTexture = true;
                }
 
 //               opencv_imgproc.cvtColor(yuvI420Mat, rgba8Mat, opencv_imgproc.COLOR_YUV2RGBA_I420);
-               opencv_imgproc.cvtColor(yuvI420Mat, rgba8Mat, opencv_imgproc.COLOR_BGR2RGBA);
+               opencv_imgproc.cvtColor(bgrMat, rgba8Mat, opencv_imgproc.COLOR_BGR2BGRA);
 
 //               System.out.println(Byte.toUnsignedInt(rgba8Mat.ptr(6, 59).get()));
 
