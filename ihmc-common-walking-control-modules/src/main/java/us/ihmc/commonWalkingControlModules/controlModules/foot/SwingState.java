@@ -92,7 +92,6 @@ public class SwingState extends AbstractFootControlState
    private final YoDouble timeWhenAdjusted;
    private final YoFramePoint3D desiredPositionWhenAdjusted;
    private final YoFrameVector3D desiredVelocityWhenAdjusted;
-   private final YoFramePoint3D desiredPositionWhenAdjusted;
 
    private final double controlDT;
 
@@ -204,7 +203,6 @@ public class SwingState extends AbstractFootControlState
 
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       swingDuration = new YoDouble(namePrefix + "Duration", registry);
-      desiredPositionWhenAdjusted = new YoFramePoint3D(namePrefix + "DesiredPositionWhenAdjusted", worldFrame, registry);
       desiredPositionWhenAdjusted = new YoFramePoint3D(namePrefix + "DesiredPositionWhenAdjusted", worldFrame, registry);
       desiredVelocityWhenAdjusted = new YoFrameVector3D(namePrefix + "DesiredVelocityWhenAdjusted", worldFrame, registry);
       timeWhenAdjusted = new YoDouble(namePrefix + "TimeWhenStepAdjusted", registry);
@@ -339,7 +337,6 @@ public class SwingState extends AbstractFootControlState
       yoDesiredLinearVelocity.setToNaN();
 
       footstepWasAdjusted.set(false);
-      desiredPositionWhenAdjusted.setToNaN();
       desiredPositionWhenAdjusted.setToNaN();
       desiredVelocityWhenAdjusted.setToNaN();
       timeWhenAdjusted.setToNaN();;
@@ -546,7 +543,6 @@ public class SwingState extends AbstractFootControlState
    {
       replanTrajectory.set(true);
       footstepWasAdjusted.set(true);
-      desiredPositionWhenAdjusted.set(yoDesiredSolePosition);
 
       timeWhenAdjusted.set(currentTime.getValue());
       swingTrajectorySmoother.compute(currentTime.getDoubleValue());
@@ -639,7 +635,6 @@ public class SwingState extends AbstractFootControlState
             swingTrajectorySmoother.updateErrorDynamicsAtTime(timeWhenAdjusted.getDoubleValue(), desiredPositionWhenAdjusted, desiredVelocityWhenAdjusted);
 
             swingTrajectorySmoother.updateErrorDynamicsAtTime(timeWhenAdjusted.getDoubleValue(), desiredPositionWhenAdjusted, desiredVelocityWhenAdjusted);
-
 
             touchdownTrajectory.setLinearTrajectory(swingDuration,
                                                     rateLimitedAdjustedPose.getPosition(),
