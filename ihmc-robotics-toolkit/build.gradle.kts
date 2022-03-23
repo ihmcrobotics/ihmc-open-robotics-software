@@ -28,10 +28,10 @@ mainDependencies {
    api("org.yaml:snakeyaml:1.17") //1.11
 
    api("us.ihmc:log-tools:0.6.3")
-   api("us.ihmc:euclid:0.17.0")
-   api("us.ihmc:euclid-frame:0.17.0")
-   api("us.ihmc:euclid-frame-shape:0.17.0")
-   api("us.ihmc:euclid-shape:0.17.0")
+   api("us.ihmc:euclid:0.17.2")
+   api("us.ihmc:euclid-frame:0.17.2")
+   api("us.ihmc:euclid-frame-shape:0.17.2")
+   api("us.ihmc:euclid-shape:0.17.2")
    api("us.ihmc:mecano:0.9.0")
    api("us.ihmc:mecano-yovariables:0.9.0")
    api("us.ihmc:ihmc-commons:0.30.5")
@@ -41,13 +41,14 @@ mainDependencies {
    api("us.ihmc:ihmc-graphics-description:0.19.4")
    api("us.ihmc:simulation-construction-set-utilities:0.21.16")
    api("us.ihmc:ihmc-native-library-loader:1.3.1")
-   api("us.ihmc:scs2-definition:0.5.0")
+   api("us.ihmc:scs2-definition:0.5.1")
    // NOTE: IHMCRoboticsToolkit should not depend on any other IHMC project(!), especially it should not depend on IHMCJavaToolkit.
 }
 
 testDependencies {
    api("org.jfree:jfreechart:1.0.17")
    api("org.jfree:jcommon:1.0.21")
+   api("us.ihmc:simulation-construction-set:0.21.16")
 
    api("us.ihmc:ihmc-matrix-library-test:0.18.5")
    api("us.ihmc:ihmc-commons-testing:0.30.5")

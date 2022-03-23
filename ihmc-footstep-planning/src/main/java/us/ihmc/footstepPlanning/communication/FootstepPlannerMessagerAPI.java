@@ -9,18 +9,16 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.BodyPathPlanningResult;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.bodyPath.BodyPathLatticePoint;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerOccupancyMap;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
-import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
-import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader;
-import us.ihmc.footstepPlanning.log.VariableDescriptor;
+import us.ihmc.footstepPlanning.log.*;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.messager.MessagerAPIFactory;
@@ -30,6 +28,7 @@ import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetName;
+import us.ihmc.pathPlanning.HeightMapDataSetName;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
@@ -50,6 +49,7 @@ public class FootstepPlannerMessagerAPI
    // Robot state
    public static final Topic<RobotConfigurationData> RobotConfigurationData = topic("RobotConfigurationData");
    public static final Topic<DataSetName> DataSetSelected = topic("DataSetSelected");
+   public static final Topic<HeightMapDataSetName> HeightMapDataSetSelected = topic("HeightMapDataSetSelected");
    public static final Topic<ConvexPolygon2D> LeftFootStartSupportPolygon = topic("LeftFootStartSupportPolygon");
    public static final Topic<ConvexPolygon2D> RightFootStartSupportPolygon = topic("RightFootStartSupportPolygon");
    public static final Topic<Pose3DReadOnly> LeftFootPose = topic("LeftStartPose");
@@ -59,8 +59,9 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<FootstepStatusMessage> FootstepStatusMessage = topic("FootstepStatusMessage");
    public static final Topic<Pair<RobotSide, double[]>> RequestedArmJointAngles = topic("RequestedArmJointAngles");
 
-   // REA data
+   // Perception data
    public static final Topic<PlanarRegionsList> PlanarRegionData = topic("PlanarRegionData");
+   public static final Topic<HeightMapMessage> HeightMapData = topic("HeightMapData");
    public static final Topic<Boolean> AcceptNewPlanarRegions = topic("AcceptNewPlanarRegions");
    public static final Topic<OcTreeKeyListMessage> OcTreeData = topic("OcTreeData");
 
@@ -110,9 +111,9 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> ShowNavigableRegionVisibilityMaps = topic("ShowNavigableRegionVisibilityMaps");
 
    public static final Topic<Boolean> ShowFootstepPlan = topic("ShowFootstepPlan");
-   public static final Topic<Boolean> ShowOccupancyMap = topic("ShowOccupancyMap");
    public static final Topic<Boolean> ShowPostProcessingInfo = topic("ShowPostProcessingInfo");
    public static final Topic<Boolean> ShowLogGraphics = topic("ShowLogGraphics");
+   public static final Topic<Boolean> ShowBodyPathLogGraphics = topic("ShowBodyPathLogGraphics");
    public static final Topic<Boolean> RenderShiftedWaypoints = topic("RenderShiftedWaypoints");
 
    // Goal editing
@@ -148,7 +149,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<GoHomeMessage> GoHomeTopic = topic("GoHome");
 
    // Body path planner output
-   public static final Topic<List<? extends Pose3DReadOnly>> BodyPathData = topic("BodyPathData");
+   public static final Topic<Pair<List<? extends Pose3DReadOnly>, List<? extends Point3DReadOnly>>> BodyPathData = topic("BodyPathData");
    public static final Topic<List<VisibilityMapWithNavigableRegion>> VisibilityMapWithNavigableRegionData = topic("VisibilityMapWithNavigableRegionData");
    public static final Topic<VisibilityMapHolder> StartVisibilityMap = topic("StartVisibilityMap");
    public static final Topic<VisibilityMapHolder> GoalVisibilityMap = topic("GoalVisibilityMap");
@@ -160,7 +161,6 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<FootstepDataListMessage> FootstepPlanToRobot = topic("FootstepPlanToRobot"); // UI >> Robot (if operator adjusts path or overrides swing times, etc.)
    public static final Topic<Point3D> LowLevelGoalPosition = topic("LowLevelGoalPosition");
    public static final Topic<Quaternion> LowLevelGoalOrientation = topic("LowLevelGoalOrientation");
-   public static final Topic<PlannerOccupancyMap> OccupancyMap = topic("OccupancyMap");
    public static final Topic<FootstepPlanningTimingsMessage> PlannerTimings = topic("PlannerTimings");
    public static final Topic<BodyPathPlanningResult> BodyPathPlanningResultTopic = topic("BodyPathPlanningResult");
    public static final Topic<FootstepPlanningResult> FootstepPlanningResultTopic = topic("FootstepPlanningResult");
@@ -179,12 +179,23 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<HeadTrajectoryMessage> HeadTrajectoryMessageTopic = topic("HeadTrajectoryMessageTopic");
    public static final Topic<NeckTrajectoryMessage> NeckTrajectoryMessageTopic = topic("NeckTrajectoryMessageTopic");
 
+   // Height map navigation
+   public static final Topic<Boolean> StartHeightMapNavigation = topic("StartHeightMapNavigation");
+   public static final Topic<Boolean> StopHeightMapNavigation = topic("StopHeightMapNavigation");
+   public static final Topic<PlanarRegionsList> GPUREARegions = topic("GPUREARegions");
+   public static final Topic<Boolean> ApproveStep = topic("ApproveStep");
+   public static final Topic<Boolean> ReplanStep = topic("ReplanStep");
+   public static final Topic<Boolean> WriteHeightMapLog = topic("WriteHeightMapLog");
+   public static final Topic<Boolean> ResendLastStep = topic("ResendLastStep");
+   public static final Topic<Boolean> ReconnectRos1Node = topic("ReconnectRos1Node");
+
    // Logging
    public static final Topic<Boolean> RequestGenerateLog = topic("RequestGenerateLog");
    public static final Topic<FootstepPlannerLogLoader.LoadRequestType> RequestLoadLog = topic("RequestLoadLog");
    public static final Topic<String> GenerateLogStatus = topic("GenerateLogStatus");
    public static final Topic<String> LoadLogStatus = topic("LoadLogStatus");
    public static final Topic<Triple<Map<GraphEdge<FootstepGraphNode>, FootstepPlannerEdgeData>, List<FootstepPlannerIterationData>, List<VariableDescriptor>>> GraphData = topic("GraphData");
+   public static final Topic<Triple<Map<GraphEdge<BodyPathLatticePoint>, AStarBodyPathEdgeData>, List<AStarBodyPathIterationData>, List<VariableDescriptor>>> BodyPathGraphData = topic("BodyPathGraphData");
    public static final Topic<Pair<DiscreteFootstep, FootstepSnapData>> StartOfSwingStepToVisualize = topic("StartOfSwingStepToVisualize");
    public static final Topic<Pair<DiscreteFootstep, FootstepSnapData>> StanceStepToVisualize = topic("StanceStepToVisualize");
    public static final Topic<Pair<DiscreteFootstep, FootstepSnapData>> TouchdownStepToVisualize = topic("TouchdownStepToVisualize");
@@ -198,14 +209,14 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> ShowLoggedWiggledCandidateStep = topic("ShowLoggedWiggledCandidateStep");
    public static final Topic<Boolean> ShowLoggedIdealStep = topic("ShowLoggedIdealStep");
    public static final Topic<Boolean> ShowBodyBox = topic("ShowBodyBox");
+   public static final Topic<Boolean> ShowHeightMap = topic("ShowHeightMap");
+
+   public static final Topic<Pair<BodyPathLatticePoint, Double>> BodyPathStartNodeToVisualize = topic("BodyPathStartNodeToVisualize");
+   public static final Topic<Pair<BodyPathLatticePoint, Double>> BodyPathCandidateNodeToVisualize = topic("BodyPathCandidateNodeToVisualize");
 
    // Test dashboard, only displayed if launched from test class
    public static final Topic<List<DataSet>> TestDataSets = topic("TestDataSets");
    public static final Topic<DataSet> TestDataSetSelected = topic("TestDataSetSelected");
-
-   // Walking preview
-   public static final Topic<WalkingControllerPreviewInputMessage> RequestWalkingPreview = topic("RequestWalkingPreview");
-   public static final Topic<WalkingControllerPreviewOutputMessage> WalkingPreviewOutput = topic("WalkingPreviewOutput");
 
    public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 

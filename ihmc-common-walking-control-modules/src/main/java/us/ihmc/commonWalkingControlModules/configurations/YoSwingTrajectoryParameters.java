@@ -46,8 +46,6 @@ public class YoSwingTrajectoryParameters
    private final DoubleProvider maxInitialLinearVelocityMagnitude;
    private final DoubleProvider maxInitialAngularVelocityMagnitude;
 
-   private final DoubleProvider velocityAdjustmentDamping;
-
    public YoSwingTrajectoryParameters(String namePrefix, WalkingControllerParameters walkingControllerParameters, YoRegistry registry)
    {
       this(namePrefix, walkingControllerParameters, walkingControllerParameters.getSwingTrajectoryParameters(), registry);
@@ -123,8 +121,6 @@ public class YoSwingTrajectoryParameters
       maxInitialAngularVelocityMagnitude = new DoubleParameter(namePrefix + "MaxInitialAngularVelocityMagnitude",
                                                                registry,
                                                                walkingControllerParameters.getMaxSwingInitialAngularVelocityMagnitude());
-
-      velocityAdjustmentDamping = new DoubleParameter(namePrefix + "VelocityAdjustmentDamping", registry, parameters.getSwingFootVelocityAdjustmentDamping());
    }
 
    public boolean doToeTouchdownIfPossible()
@@ -235,10 +231,5 @@ public class YoSwingTrajectoryParameters
    public double getMaxSwingInitialAngularVelocityMagnitude()
    {
       return maxInitialAngularVelocityMagnitude.getValue();
-   }
-
-   public double getSwingFootVelocityAdjustmentDamping()
-   {
-      return velocityAdjustmentDamping.getValue();
    }
 }

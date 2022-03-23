@@ -51,6 +51,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.javaFXToolkit.graphics.JavaFXMeshDataInterpreter;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javafx.JavaFXRobotVisualizer;
@@ -147,7 +148,7 @@ public class StepGeneratorJavaFXController
       reaStateRequestPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, REAStateRequestMessage.class, REACommunicationProperties.inputTopic);
 
       continuousStepController.setFootstepMessenger(this::prepareFootsteps);
-      continuousStepController.setPauseWalkingPublisher(pauseWalkingPublisher::publish);
+      continuousStepController.setPauseWalkingPublisher(this::sendPauseWalkingMessage);
       continuousStepController.setFootPoseProviders(robotSide ->
       {
          if (javaFXRobotVisualizer.isRobotConfigurationInitialized())
@@ -304,6 +305,11 @@ public class StepGeneratorJavaFXController
       footstepsToSendReference.set(new FootstepDataListMessage(footstepDataListMessage));
    }
 
+   private void sendPauseWalkingMessage()
+   {
+      pauseWalkingPublisher.publish(HumanoidMessageTools.createPauseWalkingMessage(true));
+   }
+
    private void sendFootsteps()
    {
       FootstepDataListMessage footstepsToSend = footstepsToSendReference.getAndSet(null);
@@ -427,9 +433,7 @@ public class StepGeneratorJavaFXController
    public void stop()
    {
       animationTimer.stop();
-      PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
-      pauseWalkingMessage.setPause(true);
-      pauseWalkingPublisher.publish(pauseWalkingMessage);
+      sendPauseWalkingMessage();
       if (yoVariableServer != null)
       {
          yoVariableServer.close();

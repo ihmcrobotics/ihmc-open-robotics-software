@@ -155,6 +155,7 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends ImGuiGDXBehaviorUIInterfac
       {
          currentStatePlot.render(-1, "");
       }
+
       pauseTimeLeft.setNextValue((float) timeLeftInPause);
       pauseTimeLeft.calculate(FormattingTools.getFormattedDecimal2D(timeLeftInPause));
       boolean supportRegionsReceivedRecently = supportRegionsReceivedTimer.isRunning(5.0);

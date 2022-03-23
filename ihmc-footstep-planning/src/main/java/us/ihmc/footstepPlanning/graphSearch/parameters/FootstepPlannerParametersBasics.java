@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
 import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.*;
+import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.heightMapSnapThreshold;
 
 public interface FootstepPlannerParametersBasics extends FootstepPlannerParametersReadOnly, StoredPropertySetBasics
 {
@@ -135,6 +136,26 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
    default void setMinClearanceFromStance(double clearance)
    {
       set(FootstepPlannerParameterKeys.minClearanceFromStance, clearance);
+   }
+
+   default void setRMSErrorThreshold(double rmsErrorThreshold)
+   {
+      set(FootstepPlannerParameterKeys.rmsErrorThreshold, rmsErrorThreshold);
+   }
+
+   default void setRMSErrorCost(double rmsErrorCost)
+   {
+      set(FootstepPlannerParameterKeys.rmsErrorCost, rmsErrorCost);
+   }
+
+   default void setRMSMinErrorToPenalize(double rmsMinErrorToPenalize)
+   {
+      set(FootstepPlannerParameterKeys.rmsMinErrorToPenalize, rmsMinErrorToPenalize);
+   }
+
+   default void setHeightMapSnapThreshold(double heightMapSnapThreshold)
+   {
+      set(FootstepPlannerParameterKeys.heightMapSnapThreshold, heightMapSnapThreshold);
    }
 
    default void setWiggleInsideDeltaTarget(double wiggleInsideDeltaTarget)
@@ -438,25 +459,12 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setMinimumDistanceFromCliffTops(parametersPacket.getMinimumDistanceFromCliffTops());
       if (parametersPacket.getBodyBoxHeight() != noValue)
          setBodyBoxHeight(parametersPacket.getBodyBoxHeight());
-      if (parametersPacket.getBodyBoxDepth() != noValue)
-         setBodyBoxDepth(parametersPacket.getBodyBoxDepth());
-      if (parametersPacket.getBodyBoxWidth() != noValue)
-         setBodyBoxWidth(parametersPacket.getBodyBoxWidth());
-      if (parametersPacket.getBodyBoxBaseX() != noValue)
-         setBodyBoxBaseX(parametersPacket.getBodyBoxBaseX());
-      if (parametersPacket.getBodyBoxBaseY() != noValue)
-         setBodyBoxBaseY(parametersPacket.getBodyBoxBaseY());
       if (parametersPacket.getBodyBoxBaseZ() != noValue)
          setBodyBoxBaseZ(parametersPacket.getBodyBoxBaseZ());
       if (parametersPacket.getMaximumSnapHeight() != noValue)
          setMaximumSnapHeight(parametersPacket.getMaximumSnapHeight());
       if (parametersPacket.getMinClearanceFromStance() != noValue)
          setMinClearanceFromStance(parametersPacket.getMinClearanceFromStance());
-      if (parametersPacket.getFinalTurnProximity() != noValue)
-         setFinalTurnProximity(parametersPacket.getFinalTurnProximity());
-      setMaximumBranchFactor(parametersPacket.getMaximumBranchFactor());
-      setEnableExpansionMask(parametersPacket.getEnableExpansionMask());
-
       if (parametersPacket.getAStarHeuristicsWeight() != noValue)
          setAStarHeuristicsWeight(parametersPacket.getAStarHeuristicsWeight());
 
@@ -492,5 +500,37 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setShinHeelClearance(parametersPacket.getShinHeelClearance());
       if (parametersPacket.getShinHeightOffet() != noValue)
          setShinHeightOffset(parametersPacket.getShinHeightOffet());
+
+      if (parametersPacket.getBodyBoxDepth() != noValue)
+      {
+         setBodyBoxDepth(parametersPacket.getBodyBoxDepth());
+      }
+      if (parametersPacket.getBodyBoxWidth() != noValue)
+      {
+         setBodyBoxWidth(parametersPacket.getBodyBoxWidth());
+      }
+      if (parametersPacket.getBodyBoxBaseX() != noValue)
+      {
+         setBodyBoxBaseX(parametersPacket.getBodyBoxBaseX());
+      }
+      if (parametersPacket.getBodyBoxBaseY() != noValue)
+      {
+         setBodyBoxBaseY(parametersPacket.getBodyBoxBaseY());
+      }
+      if (parametersPacket.getFinalTurnProximity() != noValue)
+      {
+         setFinalTurnProximity(parametersPacket.getFinalTurnProximity());
+      }
+      setMaximumBranchFactor(parametersPacket.getMaximumBranchFactor());
+      setEnableExpansionMask(parametersPacket.getEnableExpansionMask());
+
+      if (parametersPacket.getRmsErrorThreshold() != noValue)
+         setRMSErrorThreshold(parametersPacket.getRmsErrorThreshold());
+      if (parametersPacket.getRmsErrorCost() != noValue)
+         setRMSErrorCost(parametersPacket.getRmsErrorCost());
+      if (parametersPacket.getRmsMinErrorToPenalize() != noValue)
+         setRMSMinErrorToPenalize(parametersPacket.getRmsMinErrorToPenalize());
+      if (parametersPacket.getHeightMapSnapThreshold() != noValue)
+         setHeightMapSnapThreshold(parametersPacket.getHeightMapSnapThreshold());
    }
 }

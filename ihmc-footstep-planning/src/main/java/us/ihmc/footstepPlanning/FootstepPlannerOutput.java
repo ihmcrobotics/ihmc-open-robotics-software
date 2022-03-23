@@ -1,13 +1,14 @@
 package us.ihmc.footstepPlanning;
 
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
-import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class FootstepPlannerOutput
 {
@@ -39,7 +40,12 @@ public class FootstepPlannerOutput
    /**
     * Planned body path. Empty if planner failed
     */
-   private final ArrayList<Pose3D> bodyPath = new ArrayList<>();
+   private final List<Pose3D> bodyPath = new ArrayList<>();
+
+   /**
+    * Planned body path before smoothing. Empty if planner failed
+    */
+   private final List<Point3D> bodyPathUnsmoothed = new ArrayList<>();
 
    /**
     * Goal pose used by the planner. This will be different from the requested goal pose if it's beyond the horizon length.
@@ -69,6 +75,7 @@ public class FootstepPlannerOutput
       footstepPlanningResult = null;
       planarRegionsList = null;
       bodyPath.clear();
+      bodyPathUnsmoothed.clear();
       goalPose.setToNaN();
       exception = null;
       plannerTimings.clear();
@@ -103,9 +110,14 @@ public class FootstepPlannerOutput
       return planarRegionsList;
    }
 
-   public ArrayList<Pose3D> getBodyPath()
+   public List<Pose3D> getBodyPath()
    {
       return bodyPath;
+   }
+
+   public List<Point3D> getBodyPathUnsmoothed()
+   {
+      return bodyPathUnsmoothed;
    }
 
    public Pose3D getGoalPose()
@@ -158,6 +170,7 @@ public class FootstepPlannerOutput
       outputStatus.setPlanId(getRequestId());
       outputStatus.getFootstepDataList().set(FootstepDataMessageConverter.createFootstepDataListFromPlan(getFootstepPlan(), -1.0, -1.0));
       outputStatus.getBodyPath().clear();
+      outputStatus.getBodyPathUnsmoothed().clear();
       outputStatus.getGoalPose().set(getGoalPose());
       getPlannerTimings().setPacket(outputStatus.getPlannerTimings());
 
@@ -193,6 +206,11 @@ public class FootstepPlannerOutput
       for (int i = 0; i < bodyPath.size(); i++)
       {
          outputStatus.getBodyPath().add().set(bodyPath.get(i));
+      }
+
+      for (int i = 0; i < bodyPathUnsmoothed.size(); i++)
+      {
+         outputStatus.getBodyPathUnsmoothed().add().set(bodyPathUnsmoothed.get(i));
       }
    }
 }

@@ -15,6 +15,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
+import us.ihmc.footstepPlanning.bodyPath.BodyPathLatticePoint;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
@@ -67,11 +68,12 @@ public class FootstepPlannerLogger
    static final String bodyPathParametersFileName = "BodyPathParametersPacket.json";
    static final String footstepParametersFileName = "FootstepParametersPacket.json";
    static final String swingParametersFileName = "SwingParametersPacket.json";
-   static final String splitFractionParametersFileName = "SplitFractionParametersPacket.json";
    static final String statusPacketFileName = "StatusPacket.json";
    static final String bodyPathPlanFileName = "BodyPathPlanData.log";
    static final String headerFileName = "Header.txt";
+   static final String bodyPathHeaderFileName = "BodyPathHeader.txt";
    static final String dataFileName = "PlannerIterationData.log";
+   static final String astarBodyPathPlanFileName = "AStarBodyPathPlanData.log";
 
    private final FootstepPlanningModule planner;
    private final AtomicBoolean generatingLog = new AtomicBoolean();
@@ -208,7 +210,7 @@ public class FootstepPlannerLogger
          FileTools.ensureFileExists(bodyPathPlannerDataFile.toPath());
          fileWriter = new FileWriter(bodyPathPlannerDataFile);
 
-         VisibilityGraphHolder visibilityGraphHolder = planner.getBodyPathPlanner().getVisibilityGraphHolder();
+         VisibilityGraphHolder visibilityGraphHolder = planner.getVisibilityGraphPlanner().getVisibilityGraphHolder();
          writeLine(0, "startMapId:" + visibilityGraphHolder.getStartMapId());
          writeLine(0, "goalMapId:" + visibilityGraphHolder.getGoalMapId());
          writeLine(0, "interRegionsMapId:" + visibilityGraphHolder.getInterRegionsMapId());
@@ -237,76 +239,13 @@ public class FootstepPlannerLogger
       }
 
       // log planner iteration header file
-      String plannerHeaderFileName = sessionDirectory + headerFileName;
-      Map<Class<?>, Integer> enumIndexMap = new HashMap<>();
-
       try
       {
-         File plannerHeaderFile = new File(plannerHeaderFileName);
+         File plannerHeaderFile = new File(sessionDirectory + headerFileName);
          FileTools.ensureFileExists(plannerHeaderFile.toPath());
          fileWriter = new FileWriter(plannerHeaderFile);
 
-         YoRegistry registry = planner.getAStarPlannerRegistry();
-         List<YoVariable> allVariables = registry.collectSubtreeVariables();
-
-         List<Pair<Class<?>, Enum<?>[]>> enumDescriptions = new ArrayList<>();
-
-         for (int i = 0; i < allVariables.size(); i++)
-         {
-            YoVariable yoVariable = allVariables.get(i);
-            if (yoVariable.getType() == YoVariableType.ENUM)
-            {
-               YoEnum<?> yoEnum = (YoEnum<?>) yoVariable;
-               Class<?> enumType = yoEnum.getEnumType();
-               Enum<?>[] enumValues = yoEnum.getEnumValues();
-
-               if (!enumIndexMap.containsKey(enumType))
-               {
-                  enumIndexMap.put(enumType, enumDescriptions.size());
-                  enumDescriptions.add(Pair.of(enumType, enumValues));
-               }
-            }
-         }
-
-         fileWriter.write("enums:" + enumDescriptions.size() + newLine);
-         for (int i = 0; i < enumDescriptions.size(); i++)
-         {
-            fileWriter.write(tab);
-            fileWriter.write(enumDescriptions.get(i).getKey().getSimpleName() + ":");
-
-            Enum<?>[] enumValues = enumDescriptions.get(i).getRight();
-            for (int j = 0; j < enumValues.length; j++)
-            {
-               fileWriter.write(enumValues[j] + (j == enumValues.length - 1 ? "" : ","));
-            }
-
-            fileWriter.write(newLine);
-         }
-
-         fileWriter.write("variables:" + allVariables.size() + newLine);
-         for (int i = 0; i < allVariables.size(); i++)
-         {
-            YoVariable yoVariable = allVariables.get(i);
-            String name = yoVariable.getName();
-            YoVariableType type = yoVariable.getType();
-            String registryName = yoVariable.getRegistry().getName();
-
-            fileWriter.write(tab);
-            fileWriter.write(name + ",");
-            fileWriter.write(type + ",");
-            fileWriter.write(registryName);
-
-            if (type == YoVariableType.ENUM)
-            {
-               YoEnum<?> yoEnum = (YoEnum<?>) yoVariable;
-               Class<?> enumType = yoEnum.getEnumType();
-               fileWriter.write( "," + enumIndexMap.get(enumType));
-               fileWriter.write( "," + yoEnum.isNullAllowed());
-            }
-
-            fileWriter.write(newLine);
-         }
-
+         logVariableDescriptors(planner.getAStarPlannerRegistry());
          SideDependentList<ConvexPolygon2D> footPolygons = planner.getFootPolygons();
          for (RobotSide robotSide : RobotSide.values)
          {
@@ -325,7 +264,27 @@ public class FootstepPlannerLogger
          return false;
       }
 
-      // log planner iteration data
+      // log body path planner iteration header file
+      try
+      {
+         File plannerHeaderFile = new File(sessionDirectory + bodyPathHeaderFileName);
+         FileTools.ensureFileExists(plannerHeaderFile.toPath());
+         fileWriter = new FileWriter(plannerHeaderFile);
+
+         logVariableDescriptors(planner.getBodyPathPlannerRegistry());
+         fileWriter.flush();
+      }
+      catch (Exception e)
+      {
+         LogTools.error("Error logging header file");
+         fileWriter = null;
+         outputStream = null;
+         printStream = null;
+         e.printStackTrace();
+         return false;
+      }
+
+      // Log footstep planner iteration data
       String plannerIterationDataFileName = sessionDirectory + dataFileName;
       try
       {
@@ -377,7 +336,125 @@ public class FootstepPlannerLogger
          return false;
       }
 
+      // Log footstep planner iteration data
+      try
+      {
+         File plannerDataFile = new File(sessionDirectory + astarBodyPathPlanFileName);
+         FileTools.ensureFileExists(plannerDataFile.toPath());
+         fileWriter = new FileWriter(sessionDirectory + astarBodyPathPlanFileName);
+
+         List<AStarBodyPathIterationData> iterationDataList = planner.getBodyPathIterationData();
+         for (int i = 0; i < iterationDataList.size(); i++)
+         {
+            AStarBodyPathIterationData iterationData = iterationDataList.get(i);
+            fileWriter.write("Iteration " + i + newLine);
+            writeNode(1, "parentNode", iterationData.getParentNode());
+            writeLine(1, "edges:" + iterationData.getChildNodes().size());
+            writeLine(1, "height:" + iterationData.getParentNodeHeight());
+
+            for (int j = 0; j < iterationData.getChildNodes().size(); j++)
+            {
+               AStarBodyPathEdgeData edgeData = planner.getBodyPathEdgeDataMap().get(new GraphEdge<>(iterationData.getParentNode(), iterationData.getChildNodes().get(j)));
+               if (edgeData == null)
+               {
+                  System.out.println();
+                  throw new RuntimeException("No edge data!" + "\n Parent: " + iterationData.getParentNode() + "\n Child: " + iterationData.getChildNodes().get(j));
+               }
+
+               // indicate start of data
+               writeLine(1, "Edge:");
+               writeNode(2, "candidateNode", edgeData.getChildNode());
+               writeLine(2, "solutionEdge:" + edgeData.isSolutionEdge());
+               writeLine(2, "height:" + edgeData.getChildSnapHeight());
+
+               // write additional data as doubles
+               fileWriter.write(tab + tab + "data:");
+               long[] dataBuffer = edgeData.getDataBuffer();
+               for (int k = 0; k < dataBuffer.length; k++)
+               {
+                  fileWriter.write(dataBuffer[k] + (k == dataBuffer.length - 1 ? "" : ","));
+               }
+               fileWriter.write(newLine);
+            }
+         }
+
+         fileWriter.flush();
+      }
+      catch (Exception e)
+      {
+         LogTools.error("Error logging footstep planner data");
+         fileWriter = null;
+         outputStream = null;
+         printStream = null;
+         e.printStackTrace();
+         return false;
+      }
+
       return true;
+   }
+
+   private void logVariableDescriptors(YoRegistry registry) throws IOException
+   {
+      Map<Class<?>, Integer> enumIndexMap = new HashMap<>();
+      List<YoVariable> allVariables = registry.collectSubtreeVariables();
+
+      List<Pair<Class<?>, Enum<?>[]>> enumDescriptions = new ArrayList<>();
+
+      for (int i = 0; i < allVariables.size(); i++)
+      {
+         YoVariable yoVariable = allVariables.get(i);
+         if (yoVariable.getType() == YoVariableType.ENUM)
+         {
+            YoEnum<?> yoEnum = (YoEnum<?>) yoVariable;
+            Class<?> enumType = yoEnum.getEnumType();
+            Enum<?>[] enumValues = yoEnum.getEnumValues();
+
+            if (!enumIndexMap.containsKey(enumType))
+            {
+               enumIndexMap.put(enumType, enumDescriptions.size());
+               enumDescriptions.add(Pair.of(enumType, enumValues));
+            }
+         }
+      }
+
+      fileWriter.write("enums:" + enumDescriptions.size() + newLine);
+      for (int i = 0; i < enumDescriptions.size(); i++)
+      {
+         fileWriter.write(tab);
+         fileWriter.write(enumDescriptions.get(i).getKey().getSimpleName() + ":");
+
+         Enum<?>[] enumValues = enumDescriptions.get(i).getRight();
+         for (int j = 0; j < enumValues.length; j++)
+         {
+            fileWriter.write(enumValues[j] + (j == enumValues.length - 1 ? "" : ","));
+         }
+
+         fileWriter.write(newLine);
+      }
+
+      fileWriter.write("variables:" + allVariables.size() + newLine);
+      for (int i = 0; i < allVariables.size(); i++)
+      {
+         YoVariable yoVariable = allVariables.get(i);
+         String name = yoVariable.getName();
+         YoVariableType type = yoVariable.getType();
+         String registryName = yoVariable.getRegistry().getName();
+
+         fileWriter.write(tab);
+         fileWriter.write(name + ",");
+         fileWriter.write(type + ",");
+         fileWriter.write(registryName);
+
+         if (type == YoVariableType.ENUM)
+         {
+            YoEnum<?> yoEnum = (YoEnum<?>) yoVariable;
+            Class<?> enumType = yoEnum.getEnumType();
+            fileWriter.write("," + enumIndexMap.get(enumType));
+            fileWriter.write( "," + yoEnum.isNullAllowed());
+         }
+
+         fileWriter.write(newLine);
+      }
    }
 
    private void writeToFile(String file, byte[] fileContents) throws Exception
@@ -392,6 +469,20 @@ public class FootstepPlannerLogger
       printStream.flush();
       outputStream.close();
       printStream.close();
+   }
+
+   private void writeNode(int numTabs, String name, BodyPathLatticePoint node) throws IOException
+   {
+      if (node == null)
+      {
+         writeLine(numTabs, name + ":null");
+      }
+      else
+      {
+         writeLine(numTabs, name + ":" +
+                            node.getXIndex() + "," +
+                            node.getYIndex());
+      }
    }
 
    private void writeNode(int numTabs, String name, FootstepGraphNode node) throws IOException

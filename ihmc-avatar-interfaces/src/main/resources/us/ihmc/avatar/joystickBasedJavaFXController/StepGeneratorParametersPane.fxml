@@ -61,8 +61,6 @@
                <children>
                   <Label text="Number of fixed footsteps" />
                   <Spinner fx:id="numberOfFixedFootstepsSpinner" editable="true" GridPane.columnIndex="1" />
-                  <Label text="Turn width" GridPane.rowIndex="1" />
-                  <Spinner fx:id="turnStepWidthSpinner" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                   <Label text="Turn max in-angle" GridPane.rowIndex="2" />
                   <Spinner fx:id="turnMaxAngleInwardSpinner" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                   <Label text="Turn max out-angle" GridPane.rowIndex="3" />

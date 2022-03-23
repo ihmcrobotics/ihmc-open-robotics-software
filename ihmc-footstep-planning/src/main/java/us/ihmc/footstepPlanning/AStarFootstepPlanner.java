@@ -30,6 +30,7 @@ import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.heightMap.HeightMapData;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -291,6 +292,12 @@ public class AStarFootstepPlanner
       statusCallbacks.forEach(callback -> callback.accept(outputToPack));
    }
 
+   public void clearLoggedData()
+   {
+      edgeDataMap.clear();
+      iterationData.clear();
+   }
+
    private void markSolutionEdges()
    {
       edgeDataMap.values().forEach(data -> data.setSolutionEdge(false));
@@ -309,6 +316,7 @@ public class AStarFootstepPlanner
          return;
       }
 
+      /* Check if this node has already been expanded, since a max branch factor can be imposed, if so append that log data */
       FootstepPlannerIterationData loggedData = null;
       for (int i = 0; i < this.iterationData.size(); i++)
       {
@@ -497,5 +505,11 @@ public class AStarFootstepPlanner
    public SwingPlanningModule getSwingPlanningModule()
    {
       return swingPlanningModule;
+   }
+
+   public void setHeightMapData(HeightMapData heightMapData)
+   {
+      snapper.setHeightMapData(heightMapData);
+      checker.setHeightMapData(heightMapData);
    }
 }

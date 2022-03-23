@@ -66,7 +66,7 @@ public class ImPlotYoGraph
    {
       YoDoubleClientHelper variable = helper.subscribeToYoDouble(variableName);
       variables.add(variable);
-      variableValueBuffers.add(ImPlotTools.newNaNFilledBuffer(bufferSize));
+      variableValueBuffers.add(ImPlotTools.newNaNFilledDoubleBuffer(bufferSize));
       requestAddVariable = false;
    }
 
@@ -74,8 +74,6 @@ public class ImPlotYoGraph
    {
       if (!shouldGraphExist)
          return;
-
-      ImPlot.setCurrentContext(imPlotContext);
 
       int currentValueIndex = currentIndex.getAndIncrement();
       float graphWidth = ImGui.getColumnWidth();
@@ -146,7 +144,7 @@ public class ImPlotYoGraph
             {
                YoDoubleClientHelper yoDoubleHelper = helper.subscribeToYoDouble(payload);
                variables.add(yoDoubleHelper);
-               variableValueBuffers.add(ImPlotTools.newNaNFilledBuffer(bufferSize));
+               variableValueBuffers.add(ImPlotTools.newNaNFilledDoubleBuffer(bufferSize));
             }
          }
          ImPlot.endPlot();

@@ -3,9 +3,14 @@
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 
-byte BODY_PATH_PLANNING_RESULT_FOUND_SOLUTION = 0
-byte BODY_PATH_PLANNING_RESULT_NO_PATH_EXISTS = 1
-byte BODY_PATH_PLANNING_RESULT_EXCEPTION = 2
+byte BODY_PATH_PLANNING_RESULT_PLANNING = 0
+byte BODY_PATH_PLANNING_RESULT_FOUND_SOLUTION = 1
+byte BODY_PATH_PLANNING_RESULT_TIMED_OUT_BEFORE_SOLUTION = 2
+byte BODY_PATH_PLANNING_RESULT_NO_PATH_EXISTS = 3
+byte BODY_PATH_PLANNING_RESULT_INVALID_GOAL = 4
+byte BODY_PATH_PLANNING_RESULT_MAXIMUM_ITERATIONS_REACHED = 5
+byte BODY_PATH_PLANNING_RESULT_EXCEPTION = 6
+byte BODY_PATH_PLANNING_RESULT_HALTED = 7
 
 byte FOOTSTEP_PLANNING_RESULT_PLANNING = 0
 byte FOOTSTEP_PLANNING_RESULT_FOUND_SOLUTION = 1
@@ -35,6 +40,9 @@ PlanarRegionsListMessage planar_regions_list
 
 # Planned body path. Empty if planner failed
 geometry_msgs/Pose[] body_path
+
+# Planned body path before smoothing, used for debugging. Empty if planner failed
+geometry_msgs/Point[] body_path_unsmoothed
 
 # Goal pose used by the planner. This will be different from the requested goal pose if it's beyond the horizon length.
 geometry_msgs/Pose goal_pose

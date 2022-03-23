@@ -16,10 +16,10 @@ ihmc {
 mainDependencies {
    api("org.jgrapht:jgrapht-core:0.9.0")
 
-   api("us.ihmc:euclid:0.17.0")
-   api("us.ihmc:euclid-geometry:0.17.0")
-   api("us.ihmc:euclid-frame:0.17.0")
-   api("us.ihmc:euclid-shape:0.17.0")
+   api("us.ihmc:euclid:0.17.2")
+   api("us.ihmc:euclid-geometry:0.17.2")
+   api("us.ihmc:euclid-frame:0.17.2")
+   api("us.ihmc:euclid-shape:0.17.2")
    api("us.ihmc:ihmc-javafx-toolkit:0.20.0")
    api("us.ihmc:ihmc-yovariables:0.9.11")
    api("us.ihmc:ihmc-convex-optimization:0.17.10")
@@ -53,6 +53,7 @@ dataSetsDependencies {
    api("us.ihmc:ihmc-commons-testing:0.30.5")
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:robot-environment-awareness:source")
+   api("us.ihmc:ihmc-sensor-processing:source")
 }
 
 task updateDataSetList {

@@ -12,6 +12,9 @@ float64 time_planning_body_path_seconds
 # Elapsed time for step planning
 float64 time_planning_steps_seconds
 
+# Number of iterations performed during path planning
+int64 path_planning_iterations
+
 # Number of iterations performed during step planning
 int64 step_planning_iterations
 

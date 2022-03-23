@@ -81,27 +81,37 @@ public abstract class HumanoidRobotInitialSetup implements RobotInitialSetup<Hum
       jointPositions.put(jointName, q);
    }
 
-   public void adjustRootJointHeightUsingLowestSole(RobotDefinition robotDefinition)
+   public double getHeightOfPelvisAboveLowestSoleZ(RobotDefinition robotDefinition)
    {
       RigidBodyBasics rootBody = robotDefinition.newInstance(ReferenceFrameTools.constructARootFrame("temp"));
       initializeRobot(rootBody, false);
       rootBody.updateFramesRecursively();
 
-      double minSoleHeight = Double.POSITIVE_INFINITY;
-      RigidBodyTransform temp = new RigidBodyTransform();
+      double pelvisToLowestSoleZ = Double.NEGATIVE_INFINITY;
+      RigidBodyTransform tempAnkleFrameToTempRootFrame = new RigidBodyTransform();
+      RigidBodyTransform tempSoleFrameToTempRootFrame = new RigidBodyTransform();
 
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBodyBasics foot = MultiBodySystemTools.findRigidBody(rootBody, jointMap.getFootName(robotSide));
          if (foot == null)
             continue;
-         temp.set(foot.getParentJoint().getFrameAfterJoint().getTransformToRoot());
-         temp.multiply(jointMap.getSoleToParentFrameTransform(robotSide));
-         minSoleHeight = Math.min(temp.getTranslationZ(), minSoleHeight);
+         tempAnkleFrameToTempRootFrame.set(foot.getParentJoint().getFrameAfterJoint().getTransformToRoot());
+         tempSoleFrameToTempRootFrame.set(tempAnkleFrameToTempRootFrame);
+         tempSoleFrameToTempRootFrame.multiply(jointMap.getSoleToParentFrameTransform(robotSide));
+         double pelvisToSoleZ = -tempSoleFrameToTempRootFrame.getTranslationZ();
+         pelvisToLowestSoleZ = Math.max(pelvisToSoleZ, pelvisToLowestSoleZ);
       }
 
-      if (Double.isFinite(minSoleHeight))
-         rootJointPosition.setZ(-minSoleHeight);
+      return pelvisToLowestSoleZ;
+   }
+
+   public void setRootJointHeightSuchThatLowestSoleIsAtZero(RobotDefinition robotDefinition)
+   {
+      double farthestSoleToPelvisDistance = getHeightOfPelvisAboveLowestSoleZ(robotDefinition);
+
+      if (Double.isFinite(farthestSoleToPelvisDistance))
+         rootJointPosition.setZ(farthestSoleToPelvisDistance);
    }
 
    @Override
