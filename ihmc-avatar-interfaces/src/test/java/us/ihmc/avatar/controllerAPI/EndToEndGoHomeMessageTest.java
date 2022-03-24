@@ -58,10 +58,10 @@ public abstract class EndToEndGoHomeMessageTest implements MultiRobotTestInterfa
 
       Assert.assertTrue(testHelper.simulateAndWait(trajectoryTime + 0.25));
 
-      AvatarCommonAsserts.assertDesiredArmPositions(leftHome, RobotSide.LEFT, robot, testHelper.getControllerRegistry(), 1.0e-10);
-      AvatarCommonAsserts.assertDesiredArmPositions(rightHome, RobotSide.RIGHT, robot, testHelper.getControllerRegistry(), 1.0e-10);
-      AvatarCommonAsserts.assertDesiredArmVelocitiesZero(RobotSide.LEFT, robot, testHelper.getControllerRegistry(), 1.0e-10);
-      AvatarCommonAsserts.assertDesiredArmVelocitiesZero(RobotSide.RIGHT, robot, testHelper.getControllerRegistry(), 1.0e-10);
+      AvatarCommonAsserts.assertDesiredArmPositions(leftHome, RobotSide.LEFT, robot, testHelper, 1.0e-10);
+      AvatarCommonAsserts.assertDesiredArmPositions(rightHome, RobotSide.RIGHT, robot, testHelper, 1.0e-10);
+      AvatarCommonAsserts.assertDesiredArmVelocitiesZero(RobotSide.LEFT, robot, testHelper, 1.0e-10);
+      AvatarCommonAsserts.assertDesiredArmVelocitiesZero(RobotSide.RIGHT, robot, testHelper, 1.0e-10);
 
       Assert.assertTrue(testHelper.simulateAndWait(2.0));
 
@@ -86,8 +86,8 @@ public abstract class EndToEndGoHomeMessageTest implements MultiRobotTestInterfa
 
       Assert.assertTrue(testHelper.simulateAndWait(trajectoryTime + 0.25));
 
-      AvatarCommonAsserts.assertDesiredChestOrientation(chestHome, robot, testHelper.getControllerRegistry(), 1.0e-6);
-      AvatarCommonAsserts.assertDesiredChestAngularVelocityZero(robot, testHelper.getControllerRegistry(), 1.0e-6);
+      AvatarCommonAsserts.assertDesiredChestOrientation(chestHome, robot, testHelper, 1.0e-6);
+      AvatarCommonAsserts.assertDesiredChestAngularVelocityZero(robot, testHelper, 1.0e-6);
 
       Assert.assertTrue(testHelper.simulateAndWait(2.0));
 
@@ -110,10 +110,10 @@ public abstract class EndToEndGoHomeMessageTest implements MultiRobotTestInterfa
       Assert.assertTrue(testHelper.simulateAndWait(trajectoryTime + 1.0));
 
       FrameQuaternion pelvisHomeOrientation = new FrameQuaternion(testHelper.getReferenceFrames().getMidFeetZUpFrame());
-      AvatarCommonAsserts.assertDesiredPelvisOrientation(pelvisHomeOrientation, robot, testHelper.getControllerRegistry(), 1.0e-3);
-      AvatarCommonAsserts.assertDesiredPelvisAngularVelocityZero(robot, testHelper.getControllerRegistry(), 1.0e-6);
-      AvatarCommonAsserts.assertDesiredPelvisHeightOffsetZero(testHelper.getControllerRegistry(), 1.0e-10);
-      AvatarCommonAsserts.assertDesiredICPOffsetZero(testHelper.getControllerRegistry(), 1.0e-3);
+      AvatarCommonAsserts.assertDesiredPelvisOrientation(pelvisHomeOrientation, robot, testHelper, 1.0e-3);
+      AvatarCommonAsserts.assertDesiredPelvisAngularVelocityZero(robot, testHelper, 1.0e-6);
+      AvatarCommonAsserts.assertDesiredPelvisHeightOffsetZero(testHelper, 1.0e-10);
+      AvatarCommonAsserts.assertDesiredICPOffsetZero(testHelper, 1.0e-3);
    }
 
    private static double[] getArmHome(DRCRobotModel robotModel, RobotSide robotSide, FullHumanoidRobotModel robot)
@@ -157,7 +157,9 @@ public abstract class EndToEndGoHomeMessageTest implements MultiRobotTestInterfa
 
    private void createSimulation() throws SimulationExceededMaximumTimeException
    {
-      SCS2AvatarTestingSimulationFactory factory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(), new FlatGroundEnvironment(), simulationTestingParameters);
+      SCS2AvatarTestingSimulationFactory factory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
+                                                                                                                         new FlatGroundEnvironment(),
+                                                                                                                         simulationTestingParameters);
       factory.setStartingLocationOffset(new OffsetAndYawRobotInitialSetup(EuclidCoreRandomTools.nextDouble(random, Math.PI)));
       testHelper = factory.createAvatarTestingSimulation();
       testHelper.start();

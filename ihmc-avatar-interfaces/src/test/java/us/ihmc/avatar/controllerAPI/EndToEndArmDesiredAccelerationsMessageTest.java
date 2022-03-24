@@ -64,27 +64,22 @@ public abstract class EndToEndArmDesiredAccelerationsMessageTest implements Mult
          ArmDesiredAccelerationsMessage armDesiredAccelerationsMessage = HumanoidMessageTools.createArmDesiredAccelerationsMessage(robotSide,
                                                                                                                                    armDesiredJointAccelerations);
 
-         assertEquals(RigidBodyControlMode.JOINTSPACE,
-                      EndToEndTestTools.findRigidBodyControlManagerState(handName, simulationTestHelper.getControllerRegistry()));
+         assertEquals(RigidBodyControlMode.JOINTSPACE, EndToEndTestTools.findRigidBodyControlManagerState(handName, simulationTestHelper));
          simulationTestHelper.publishToController(armDesiredAccelerationsMessage);
 
          success = simulationTestHelper.simulateAndWait(RigidBodyUserControlState.TIME_WITH_NO_MESSAGE_BEFORE_ABORT - 0.05);
          assertTrue(success);
 
-         assertEquals(RigidBodyControlMode.USER, EndToEndTestTools.findRigidBodyControlManagerState(handName, simulationTestHelper.getControllerRegistry()));
-         double[] controllerDesiredJointAccelerations = findControllerDesiredJointAccelerations(hand.getName(),
-                                                                                                robotSide,
-                                                                                                armJoints,
-                                                                                                simulationTestHelper.getControllerRegistry());
+         assertEquals(RigidBodyControlMode.USER, EndToEndTestTools.findRigidBodyControlManagerState(handName, simulationTestHelper));
+         double[] controllerDesiredJointAccelerations = findControllerDesiredJointAccelerations(hand.getName(), robotSide, armJoints, simulationTestHelper);
          assertArrayEquals(armDesiredJointAccelerations, controllerDesiredJointAccelerations, 1.0e-10);
-         double[] qpOutputJointAccelerations = findQPOutputJointAccelerations(armJoints, simulationTestHelper.getControllerRegistry());
+         double[] qpOutputJointAccelerations = findQPOutputJointAccelerations(armJoints, simulationTestHelper);
          assertArrayEquals(armDesiredJointAccelerations, qpOutputJointAccelerations, 1.0e-3);
 
          success = simulationTestHelper.simulateAndWait(0.07);
          assertTrue(success);
 
-         assertEquals(RigidBodyControlMode.JOINTSPACE,
-                      EndToEndTestTools.findRigidBodyControlManagerState(handName, simulationTestHelper.getControllerRegistry()));
+         assertEquals(RigidBodyControlMode.JOINTSPACE, EndToEndTestTools.findRigidBodyControlManagerState(handName, simulationTestHelper));
       }
    }
 
@@ -98,10 +93,7 @@ public abstract class EndToEndArmDesiredAccelerationsMessageTest implements Mult
       return qdd_ds;
    }
 
-   public static double[] findControllerDesiredJointAccelerations(String bodyName,
-                                                                  RobotSide robotSide,
-                                                                  OneDoFJointBasics[] armJoints,
-                                                                  YoVariableHolder scs)
+   public static double[] findControllerDesiredJointAccelerations(String bodyName, RobotSide robotSide, OneDoFJointBasics[] armJoints, YoVariableHolder scs)
    {
       double[] qdd_ds = new double[armJoints.length];
       String namespace = bodyName + "UserControlModule";

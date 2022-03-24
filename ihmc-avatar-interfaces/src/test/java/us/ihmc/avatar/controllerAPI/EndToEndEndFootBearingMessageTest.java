@@ -81,12 +81,10 @@ public abstract class EndToEndEndFootBearingMessageTest implements MultiRobotTes
 
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
 
-         WalkingStateEnum walkingState = ((YoEnum<WalkingStateEnum>) simulationTestHelper.getControllerRegistry()
-                                                                                         .findVariable("WalkingHighLevelHumanoidController",
+         WalkingStateEnum walkingState = ((YoEnum<WalkingStateEnum>) simulationTestHelper.findVariable("WalkingHighLevelHumanoidController",
                                                                                                        "walkingCurrentState")).getEnumValue();
          assertEquals(WalkingStateEnum.STANDING, walkingState);
-         ConstraintType footState = ((YoEnum<ConstraintType>) simulationTestHelper.getControllerRegistry()
-                                                                                  .findVariable(sidePrefix + "FootControlModule",
+         ConstraintType footState = ((YoEnum<ConstraintType>) simulationTestHelper.findVariable(sidePrefix + "FootControlModule",
                                                                                                 sidePrefix + "FootCurrentState")).getEnumValue();
          assertEquals(ConstraintType.FULL, footState);
       }

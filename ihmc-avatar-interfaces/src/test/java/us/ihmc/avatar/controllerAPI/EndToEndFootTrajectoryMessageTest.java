@@ -240,7 +240,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          assertTrue(pickupFoot(robotSide, foot));
 
          // Now we can do the usual test. Asserts happen in the method
-         moveFootToRandomPosition(random, robotSide, foot, simulationTestHelper.getControllerRegistry());
+         moveFootToRandomPosition(random, robotSide, foot, simulationTestHelper);
 
          // Without forgetting to put the foot back on the ground
          assertTrue(putFootOnGround(robotSide, foot, initialFootPosition));
@@ -341,7 +341,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
                                                                                trajectoryTime);
          List<FootTrajectoryMessage> footTrajectoryMessages = new ArrayList<>();
          ArrayDeque<FrameSE3TrajectoryPoint> frameSE3TrajectoryPoints = sendFootTrajectoryMessages(random,
-                                                                                                   simulationTestHelper.getControllerRegistry(),
+                                                                                                   simulationTestHelper,
                                                                                                    robotSide,
                                                                                                    1,
                                                                                                    trajectoryPoints,
@@ -358,16 +358,14 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
          int expectedNumberOfPointsInGenerator = Math.min(RigidBodyTaskspaceControlState.maxPointsInGenerator, numberOfTrajectoryPoints + 1);
 
-         EndToEndTestTools.assertTotalNumberOfWaypointsInTaskspaceManager(footName, numberOfTrajectoryPoints + 1, simulationTestHelper.getControllerRegistry());
+         EndToEndTestTools.assertTotalNumberOfWaypointsInTaskspaceManager(footName, numberOfTrajectoryPoints + 1, simulationTestHelper);
 
          FrameSE3TrajectoryPoint lastFramePoint = frameSE3TrajectoryPoints.peekLast();
          for (int trajectoryPointIndex = 1; trajectoryPointIndex < expectedNumberOfPointsInGenerator; trajectoryPointIndex++)
          {
             FrameSE3TrajectoryPoint framePoint = frameSE3TrajectoryPoints.removeFirst();
 
-            SE3TrajectoryPoint controllerTrajectoryPoint = EndToEndTestTools.findSE3TrajectoryPoint(footName,
-                                                                                                    trajectoryPointIndex,
-                                                                                                    simulationTestHelper.getControllerRegistry());
+            SE3TrajectoryPoint controllerTrajectoryPoint = EndToEndTestTools.findSE3TrajectoryPoint(footName, trajectoryPointIndex, simulationTestHelper);
             SE3TrajectoryPoint expectedTrajectoryPoint = new SE3TrajectoryPoint();
             framePoint.get(expectedTrajectoryPoint);
 
@@ -379,7 +377,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          assertTrue(success);
 
          SE3TrajectoryPoint controllerTrajectoryPoint = EndToEndTestTools.findFeedbackControllerCurrentDesiredSE3TrajectoryPoint(footName,
-                                                                                                                                 simulationTestHelper.getControllerRegistry());
+                                                                                                                                 simulationTestHelper);
          SE3TrajectoryPoint expectedTrajectoryPoint = new SE3TrajectoryPoint();
          lastFramePoint.get(expectedTrajectoryPoint);
 
@@ -512,7 +510,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
                                                                             trajectoryTime);
       List<FootTrajectoryMessage> footTrajectoryMessages = new ArrayList<>();
       ArrayDeque<FrameSE3TrajectoryPoint> footTrajectoryPoints = sendFootTrajectoryMessages(random,
-                                                                                            simulationTestHelper.getControllerRegistry(),
+                                                                                            simulationTestHelper,
                                                                                             robotSide,
                                                                                             numberOfMessages,
                                                                                             trajectoryPoints,
@@ -530,7 +528,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          if (firstSegment)
             expectedNumberOfPointsInGenerator = Math.min(RigidBodyTaskspaceControlState.maxPointsInGenerator, numberOfTrajectoryPointsPerMessage + 1);
          int expectedPointsInQueue = totalNumberOfPoints - expectedNumberOfPointsInGenerator;
-         EndToEndTestTools.assertTotalNumberOfWaypointsInTaskspaceManager(footName, totalNumberOfPoints, simulationTestHelper.getControllerRegistry());
+         EndToEndTestTools.assertTotalNumberOfWaypointsInTaskspaceManager(footName, totalNumberOfPoints, simulationTestHelper);
 
          double lastPointTime = 0.0;
          fullRobotModel.updateFrames();
@@ -539,9 +537,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          {
             FrameSE3TrajectoryPoint framePoint = footTrajectoryPoints.removeFirst();
 
-            SE3TrajectoryPoint controllerTrajectoryPoint = EndToEndTestTools.findSE3TrajectoryPoint(footName,
-                                                                                                    trajectoryPointIndex,
-                                                                                                    simulationTestHelper.getControllerRegistry());
+            SE3TrajectoryPoint controllerTrajectoryPoint = EndToEndTestTools.findSE3TrajectoryPoint(footName, trajectoryPointIndex, simulationTestHelper);
             SE3TrajectoryPoint expectedTrajectoryPoint = new SE3TrajectoryPoint();
             framePoint.get(expectedTrajectoryPoint);
             assertEquals(expectedTrajectoryPoint.getTime(), controllerTrajectoryPoint.getTime(), EPSILON_FOR_DESIREDS);
@@ -570,15 +566,11 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       // check internal desired matches last trajectory point:
       String namespacePositionDesired = FeedbackControllerToolbox.class.getSimpleName();
       String varnamePositionDesired = footName + Type.DESIRED.getName() + SpaceData3D.POSITION.getName();
-      Vector3D currentDesiredPosition = EndToEndTestTools.findVector3D(namespacePositionDesired,
-                                                                       varnamePositionDesired,
-                                                                       simulationTestHelper.getControllerRegistry());
+      Vector3D currentDesiredPosition = EndToEndTestTools.findVector3D(namespacePositionDesired, varnamePositionDesired, simulationTestHelper);
 
       String namespaceOrientationDesired = FeedbackControllerToolbox.class.getSimpleName();
       String varnameOrientationDesired = footName + Type.DESIRED.getName() + SpaceData3D.ORIENTATION.getName();
-      Quaternion currentDesiredOrientation = EndToEndTestTools.findQuaternion(namespaceOrientationDesired,
-                                                                              varnameOrientationDesired,
-                                                                              simulationTestHelper.getControllerRegistry());
+      Quaternion currentDesiredOrientation = EndToEndTestTools.findQuaternion(namespaceOrientationDesired, varnameOrientationDesired, simulationTestHelper);
 
       EuclidCoreTestTools.assertTuple3DEquals(lastPoint.getPositionCopy(), currentDesiredPosition, 0.001);
       EuclidCoreTestTools.assertQuaternionEquals(lastPoint.getOrientationCopy(), currentDesiredOrientation, 0.001);
@@ -735,7 +727,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
                                                                                numberOfMessages,
                                                                                trajectoryTime);
 
-         sendFootTrajectoryMessages(new Random(923752), simulationTestHelper.getControllerRegistry(), robotSide, numberOfMessages, trajectoryPoints);
+         sendFootTrajectoryMessages(new Random(923752), simulationTestHelper, robotSide, numberOfMessages, trajectoryPoints);
 
          FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage();
          footTrajectoryMessage.setRobotSide(robotSide.toByte());
@@ -752,7 +744,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          assertTrue(success);
 
          String bodyName = fullRobotModel.getFoot(robotSide).getName();
-         EndToEndTestTools.assertTotalNumberOfWaypointsInTaskspaceManager(bodyName, 1, simulationTestHelper.getControllerRegistry());
+         EndToEndTestTools.assertTotalNumberOfWaypointsInTaskspaceManager(bodyName, 1, simulationTestHelper);
 
          assertTrue(putFootOnGround(robotSide, foot, initialFootPosition));
       }
@@ -873,7 +865,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       double desiredEpsilon = 6.0e-3;
 
       SE3TrajectoryPoint currentDesiredTrajectoryPoint = EndToEndTestTools.findFeedbackControllerCurrentDesiredSE3TrajectoryPoint(foot.getName(),
-                                                                                                                                  simulationTestHelper.getControllerRegistry());
+                                                                                                                                  simulationTestHelper);
       Pose3D controllerDesiredPose = new Pose3D(currentDesiredTrajectoryPoint.getPosition(), currentDesiredTrajectoryPoint.getOrientation());
       SpatialVector controllerDesiredVelocity = new SpatialVector(ReferenceFrame.getWorldFrame(),
                                                                   currentDesiredTrajectoryPoint.getAngularVelocity(),
@@ -894,8 +886,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       success = simulationTestHelper.simulateAndWait(0.5 * trajectoryTime.getValue() + 1.5);
       assertTrue(success);
 
-      currentDesiredTrajectoryPoint = EndToEndTestTools.findFeedbackControllerCurrentDesiredSE3TrajectoryPoint(foot.getName(),
-                                                                                                               simulationTestHelper.getControllerRegistry());
+      currentDesiredTrajectoryPoint = EndToEndTestTools.findFeedbackControllerCurrentDesiredSE3TrajectoryPoint(foot.getName(), simulationTestHelper);
       controllerDesiredPose = new Pose3D(currentDesiredTrajectoryPoint.getPosition(), currentDesiredTrajectoryPoint.getOrientation());
       controllerDesiredVelocity = new SpatialVector(ReferenceFrame.getWorldFrame(),
                                                     currentDesiredTrajectoryPoint.getAngularVelocity(),
@@ -1003,13 +994,13 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
                                                                                numberOfTrajectoryPointsPerMessage,
                                                                                1,
                                                                                trajectoryTime);
-         sendFootTrajectoryMessages(random, simulationTestHelper.getControllerRegistry(), robotSide, numberOfMessages, trajectoryPoints);
+         sendFootTrajectoryMessages(random, simulationTestHelper, robotSide, numberOfMessages, trajectoryPoints);
 
          success = simulationTestHelper.simulateAndWait(getRobotModel().getControllerDT());
          assertTrue(success);
 
          //send a single trajectory point message in override mode
-         moveFootToRandomPosition(random, robotSide, foot, simulationTestHelper.getControllerRegistry());
+         moveFootToRandomPosition(random, robotSide, foot, simulationTestHelper);
 
          // Without forgetting to put the foot back on the ground
          putFootOnGround(robotSide, foot, initialFootPosition);

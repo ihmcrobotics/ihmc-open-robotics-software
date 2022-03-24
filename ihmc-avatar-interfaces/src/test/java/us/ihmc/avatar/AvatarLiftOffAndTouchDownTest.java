@@ -210,7 +210,7 @@ public class AvatarLiftOffAndTouchDownTest
 
       String footName = testHelper.getControllerFullRobotModel().getFoot(side).getName();
       FrameQuaternion desiredSoleOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame());
-      desiredSoleOrientation.set(EndToEndTestTools.findFeedbackControllerDesiredOrientation(footName, testHelper.getControllerRegistry()));
+      desiredSoleOrientation.set(EndToEndTestTools.findFeedbackControllerDesiredOrientation(footName, testHelper));
       desiredSoleOrientation.changeFrame(soleZUpFrame);
       double actualDesiredPitch = desiredSoleOrientation.getPitch();
 
@@ -218,8 +218,8 @@ public class AvatarLiftOffAndTouchDownTest
       boolean desiredPitchEquals = MathTools.epsilonEquals(expectedPitch, actualDesiredPitch, PITCH_EPSILON);
 
       if (!actualPitchEquals)
-         System.out.println("At time " + testHelper.getSimulationTime() + ": actual pitch " + actualPitch + " was not close enough to expected "
-               + expectedPitch + ".");
+         System.out.println("At time " + testHelper.getSimulationTime() + ": actual pitch " + actualPitch + " was not close enough to expected " + expectedPitch
+               + ".");
       if (!desiredPitchEquals)
          System.out.println("At time " + testHelper.getSimulationTime() + ": desired pitch " + actualDesiredPitch + " was not close enough to expected "
                + expectedPitch + ".");
