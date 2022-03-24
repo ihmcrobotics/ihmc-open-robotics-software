@@ -68,23 +68,22 @@ public abstract class EndToEndChestDesiredAccelerationsMessageTest implements Mu
       if (defaultControlState == null)
          defaultControlState = RigidBodyControlMode.JOINTSPACE;
 
-      assertEquals(defaultControlState, EndToEndTestTools.findRigidBodyControlManagerState(chest.getName(), simulationTestHelper.getControllerRegistry()));
+      assertEquals(defaultControlState, EndToEndTestTools.findRigidBodyControlManagerState(chest.getName(), simulationTestHelper));
 
       simulationTestHelper.publishToController(desiredAccelerationsMessage);
       success = simulationTestHelper.simulateAndWait(RigidBodyUserControlState.TIME_WITH_NO_MESSAGE_BEFORE_ABORT - 0.05);
       assertTrue(success);
 
-      assertEquals(RigidBodyControlMode.USER,
-                   EndToEndTestTools.findRigidBodyControlManagerState(chest.getName(), simulationTestHelper.getControllerRegistry()));
-      double[] controllerDesiredJointAccelerations = findControllerDesiredJointAccelerations(spineJoints, simulationTestHelper.getControllerRegistry());
+      assertEquals(RigidBodyControlMode.USER, EndToEndTestTools.findRigidBodyControlManagerState(chest.getName(), simulationTestHelper));
+      double[] controllerDesiredJointAccelerations = findControllerDesiredJointAccelerations(spineJoints, simulationTestHelper);
       assertArrayEquals(chestDesiredJointAccelerations, controllerDesiredJointAccelerations, 1.0e-10);
-      double[] qpOutputJointAccelerations = findQPOutputJointAccelerations(spineJoints, simulationTestHelper.getControllerRegistry());
+      double[] qpOutputJointAccelerations = findQPOutputJointAccelerations(spineJoints, simulationTestHelper);
       assertArrayEquals(chestDesiredJointAccelerations, qpOutputJointAccelerations, 1.0e-3);
 
       success = simulationTestHelper.simulateAndWait(0.07);
       assertTrue(success);
 
-      assertEquals(defaultControlState, EndToEndTestTools.findRigidBodyControlManagerState(chest.getName(), simulationTestHelper.getControllerRegistry()));
+      assertEquals(defaultControlState, EndToEndTestTools.findRigidBodyControlManagerState(chest.getName(), simulationTestHelper));
    }
 
    public double[] findQPOutputJointAccelerations(OneDoFJointBasics[] joints, YoVariableHolder scs)

@@ -67,7 +67,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
       final SideDependentList<StateTransitionCondition> singleSupportStartConditions = new SideDependentList<>();
       final SideDependentList<StateTransitionCondition> doubleSupportStartConditions = new SideDependentList<>();
 
-      findWalkingStateVariables(simulationTestHelper.getControllerRegistry(), singleSupportStartConditions, doubleSupportStartConditions);
+      findWalkingStateVariables(simulationTestHelper, singleSupportStartConditions, doubleSupportStartConditions);
 
       final AtomicBoolean hasControllerAdjustedFootstep = new AtomicBoolean(false);
 
@@ -95,7 +95,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
                   if (time >= swingInitialTime + delayBeforeAdjusting)
                   {
                      Quaternion orientation = new Quaternion();
-                     Pose3D nextFootstepPose = findNextFootstepPose(simulationTestHelper.getControllerRegistry());
+                     Pose3D nextFootstepPose = findNextFootstepPose(simulationTestHelper);
                      adjustedLocation.set(nextFootstepPose.getPosition());
                      orientation.set(nextFootstepPose.getOrientation());
                      adjustedLocation.setX(adjustedLocation.getX() + 0.1);
@@ -111,7 +111,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
                {
                   if (time >= swingInitialTime + delayBeforeAdjusting + delayBeforeChecking)
                   {
-                     Pose3D nextFootstepPose = findNextFootstepPose(simulationTestHelper.getControllerRegistry());
+                     Pose3D nextFootstepPose = findNextFootstepPose(simulationTestHelper);
                      boolean xEquals = MathTools.epsilonEquals(adjustedLocation.getX(), nextFootstepPose.getX(), 1.0e-10);
                      boolean yEquals = MathTools.epsilonEquals(adjustedLocation.getY(), nextFootstepPose.getY(), 1.0e-10);
                      boolean zEquals = MathTools.epsilonEquals(adjustedLocation.getZ(), nextFootstepPose.getZ(), 1.0e-10);
