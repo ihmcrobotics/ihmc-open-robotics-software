@@ -3,18 +3,16 @@ package us.ihmc.valkyrie.controllerAPI;
 import static us.ihmc.robotics.Assert.assertEquals;
 import static us.ihmc.robotics.Assert.assertTrue;
 
-import controller_msgs.msg.dds.HandWrenchTrajectoryMessage;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.HandTrajectoryMessage;
+import controller_msgs.msg.dds.HandWrenchTrajectoryMessage;
 import controller_msgs.msg.dds.SE3TrajectoryMessage;
 import controller_msgs.msg.dds.WrenchTrajectoryMessage;
-import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -30,23 +28,12 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameEuclideanT
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-import us.ihmc.simulationConstructionSetTools.util.environments.HeavyBallOnTableEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
-import us.ihmc.valkyrie.parameters.ValkyrieContactPointParameters;
-import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajectoryMessageTest
 {
-   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS)
-   {
-      @Override
-      public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes)
-      { // FIXME Hack to disable joint damping so it is easier to perform assertions on tracking. It'd be good if that was available at construction of the sim.
-         return createHumanoidFloatingRootJointRobot(createCollisionMeshes, false);
-      };
-   };
+   private ValkyrieRobotModel robotModel;
 
    @Tag("controller-api-slow-3")
    @Override
@@ -134,15 +121,17 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-
       HeavyBallOnTableEnvironment testEnvironment = new HeavyBallOnTableEnvironment();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModelWithHandContacts(), testEnvironment);
-      drcSimulationTestHelper.setStartingLocation(selectedLocation);
-      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
+      SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
+                                                                                                                                             testEnvironment,
+                                                                                                                                             simulationTestingParameters);
+      simulationTestHelperFactory.addSecondaryRobot(testEnvironment.getBallRobot());
+      simulationTestHelperFactory.setUseImpulseBasedPhysicsEngine(true);
+      simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+      simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      boolean success = simulationTestHelper.simulateAndWait(2.0);
       assertTrue(success);
 
       double firstTrajectoryTime = 1.0;
@@ -180,18 +169,17 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
 
       RobotSide side = RobotSide.RIGHT;
       HandTrajectoryMessage rightHandTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(side, se3TrajectoryMessage);
-      drcSimulationTestHelper.publishToController(rightHandTrajectoryMessage);
+      simulationTestHelper.publishToController(rightHandTrajectoryMessage);
 
       HandWrenchTrajectoryMessage handWrenchTrajectoryMessage = new HandWrenchTrajectoryMessage();
       handWrenchTrajectoryMessage.setRobotSide(side.toByte());
       handWrenchTrajectoryMessage.getWrenchTrajectory().set(wrenchTrajectoryMessage);
-      drcSimulationTestHelper.publishToController(handWrenchTrajectoryMessage);
+      simulationTestHelper.publishToController(handWrenchTrajectoryMessage);
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0);
+      success = simulationTestHelper.simulateAndWait(5.0);
       assertTrue(success);
 
-      double ballHeight = testEnvironment.getBallRobot().getFloatingJoint().getQz().getValue();
-      assertEquals(testEnvironment.getBallRadius(), ballHeight, 0.01);
+      assertEquals(testEnvironment.getBallRadius(), testEnvironment.getBallRobotPosition().getZ(), 0.01);
    }
 
    @Tag("controller-api-2")
@@ -205,27 +193,12 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
    @Override
    public ValkyrieRobotModel getRobotModel()
    {
-      return robotModel;
-   }
-
-   public DRCRobotModel getRobotModelWithHandContacts()
-   {
-      return new ValkyrieRobotModel(RobotTarget.SCS)
+      if (robotModel == null)
       {
-         @Override
-         public RobotContactPointParameters<RobotSide> getContactPointParameters()
-         {
-            ValkyrieContactPointParameters contactPointParameters = new ValkyrieContactPointParameters(getJointMap(), robotModel.getRobotPhysicalProperties(), null);
-            contactPointParameters.createAdditionalHandContactPoints();
-            return contactPointParameters;
-         }
-
-         @Override
-         public double getSimulateDT()
-         {
-            return super.getSimulateDT();
-         }
-      };
+         robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
+         robotModel.disableOneDoFJointDamping();
+      }
+      return robotModel;
    }
 
    @Override

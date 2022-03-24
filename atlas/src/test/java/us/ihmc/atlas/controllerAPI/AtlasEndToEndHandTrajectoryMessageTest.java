@@ -14,8 +14,8 @@ import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.MessageTools;
@@ -29,19 +29,11 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajectoryMessageTest
 {
-   private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false)
-   {
-      public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes)
-      { // FIXME Hack to disable joint damping so it is easier to perform assertions on tracking. It'd be good if that was available at construction of the sim.
-         return createHumanoidFloatingRootJointRobot(createCollisionMeshes, false);
-      };
-   };
+   private AtlasRobotModel robotModel;
 
    @Tag("controller-api-slow-3")
    @Override
@@ -134,14 +126,14 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
+      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
+      simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
+      boolean success = simulationTestHelper.simulateAndWait(1.5);
       assertTrue(success);
 
-      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
 
       RobotSide robotSide = RobotSide.RIGHT;
 
@@ -179,16 +171,15 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
       se3Trajectory.getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(2.0
             * trajectoryTime, waypointPosition1, waypointOrientation1, new Vector3D(), new Vector3D()));
 
-      drcSimulationTestHelper.publishToController(handTrajectoryMessage);
+      simulationTestHelper.publishToController(handTrajectoryMessage);
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + 2.0 * trajectoryTime);
+      success = simulationTestHelper.simulateAndWait(1.0 + 2.0 * trajectoryTime);
       assertTrue(success);
 
-      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       String handName = fullRobotModel.getHand(robotSide).getName();
       String namespace = FeedbackControllerToolbox.class.getSimpleName();
       String varname = handName + "ErrorRotationVector";
-      Vector3D rotationError = EndToEndTestTools.findVector3D(namespace, varname, scs);
+      Vector3D rotationError = EndToEndTestTools.findVector3D(namespace, varname, simulationTestHelper);
 
       /*
        * Checking the tracking error should be enough. As went the bug is present, the error magnitude
@@ -209,6 +200,11 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
    @Override
    public DRCRobotModel getRobotModel()
    {
+      if (robotModel == null)
+      {
+         robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
+         robotModel.disableOneDoFJointDamping();
+      }
       return robotModel;
    }
 
