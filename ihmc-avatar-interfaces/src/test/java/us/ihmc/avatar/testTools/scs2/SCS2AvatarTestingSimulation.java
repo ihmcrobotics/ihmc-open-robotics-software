@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BooleanSupplier;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -60,7 +59,7 @@ public class SCS2AvatarTestingSimulation
       this.avatarSimulation = avatarSimulation;
       simulationSessionControls = avatarSimulation.getSimulationSession().getSimulationSessionControls();
       simulationSessionControls.addSimulationThrowableListener(lastThrowable::set);
-      
+
       AtomicBoolean controllerFailed = new AtomicBoolean(false);
       avatarSimulation.getHighLevelHumanoidControllerFactory().attachControllerFailureListener(fallingDirection -> controllerFailed.set(true));
       simulationSessionControls.addExternalTerminalCondition(() -> controllerFailed.get());
@@ -279,6 +278,11 @@ public class SCS2AvatarTestingSimulation
    public SimulationSession getSimulationSession()
    {
       return avatarSimulation.getSimulationSession();
+   }
+
+   public double getSimulationTime()
+   {
+      return avatarSimulation.getSimulationSession().getTime().getValue();
    }
 
    public YoVariable findVariable(String name)

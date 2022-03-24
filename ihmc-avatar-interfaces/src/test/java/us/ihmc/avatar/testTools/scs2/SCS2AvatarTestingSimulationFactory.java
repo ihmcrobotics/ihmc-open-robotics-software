@@ -93,11 +93,47 @@ public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFact
 
    public SCS2AvatarTestingSimulation createAvatarTestingSimulation()
    {
+      return createAvatarTestingSimulation(null);
+   }
+
+   public SCS2AvatarTestingSimulation createAvatarTestingSimulation(String simulationName)
+   {
+      setSimulationName(simulationName != null ? simulationName : retrieveCallingTestName());
       SCS2AvatarTestingSimulation avatarTestingSimulation = new SCS2AvatarTestingSimulation(super.createAvatarSimulation());
       avatarTestingSimulation.setROS2Node(ros2Node);
       avatarTestingSimulation.setDefaultControllerPublishers(defaultControllerPublishers);
       avatarTestingSimulation.setCreateVideo(createVideo);
       return avatarTestingSimulation;
+   }
+
+   public static String retrieveCallingTestName()
+   {
+      StackTraceElement[] stackTrace = new Throwable().getStackTrace();
+
+      StackTraceElement callingElement = null;
+
+      for (StackTraceElement candidate : stackTrace)
+      {
+         if (candidate.getClassName().startsWith("sun.reflect"))
+            break;
+         else if (candidate.getClassName().startsWith("java.lang"))
+            break;
+         else if (candidate.getClassName().startsWith("org.junit"))
+            break;
+         callingElement = candidate;
+      }
+
+      if (callingElement == null)
+      {
+         return "Unknown test simulation";
+      }
+      else
+      {
+         String className = callingElement.getClassName();
+         String methodName = callingElement.getMethodName();
+         String classSimpleName = className.substring(className.lastIndexOf(".") + 1);
+         return classSimpleName + ": " + methodName;
+      }
    }
 
    @Override
