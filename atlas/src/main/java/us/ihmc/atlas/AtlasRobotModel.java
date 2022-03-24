@@ -256,6 +256,11 @@ public class AtlasRobotModel implements DRCRobotModel
       return robotDefinitionWithSDFCollision;
    }
 
+   public void disableOneDoFJointDamping()
+   {
+      setRobotDefinitionMutator(getRobotDefinitionMutator().andThen(def -> def.forEachOneDoFJointDefinition(joint -> joint.setDamping(0.0))));
+   }
+
    public void setRobotDefinitionMutator(Consumer<RobotDefinition> robotDefinitionMutator)
    {
       if (robotDefinition != null)

@@ -299,6 +299,11 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
       return avatarSimulation.getSimulationSession().getTime().getValue();
    }
 
+   public double getControllerTime()
+   {
+      return avatarSimulation.getHighLevelHumanoidControllerFactory().getHighLevelHumanoidControllerToolbox().getYoTime().getValue();
+   }
+
    public void createVideo(String simplifiedRobotModelName, int callStackHeight)
    {
       if (createVideo)
@@ -353,33 +358,43 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
       };
    }
 
+   public void addRegistry(YoRegistry registry)
+   {
+      getRootRegistry().addChild(registry);
+   }
+
+   public YoRegistry getRootRegistry()
+   {
+      return getSimulationSession().getRootRegistry();
+   }
+
    @Override
    public YoVariable findVariable(String namespace, String name)
    {
-      return getSimulationSession().getRootRegistry().findVariable(namespace, name);
+      return getRootRegistry().findVariable(namespace, name);
    }
 
    @Override
    public List<YoVariable> findVariables(String namespaceEnding, String name)
    {
-      return getSimulationSession().getRootRegistry().findVariables(namespaceEnding, name);
+      return getRootRegistry().findVariables(namespaceEnding, name);
    }
 
    @Override
    public List<YoVariable> findVariables(YoNamespace namespace)
    {
-      return getSimulationSession().getRootRegistry().findVariables(namespace);
+      return getRootRegistry().findVariables(namespace);
    }
 
    @Override
    public boolean hasUniqueVariable(String namespaceEnding, String name)
    {
-      return getSimulationSession().getRootRegistry().hasUniqueVariable(namespaceEnding, name);
+      return getRootRegistry().hasUniqueVariable(namespaceEnding, name);
    }
 
    @Override
    public List<YoVariable> getVariables()
    {
-      return getSimulationSession().getRootRegistry().getVariables();
+      return getRootRegistry().getVariables();
    }
 }
