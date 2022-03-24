@@ -67,6 +67,7 @@ import us.ihmc.scs2.definition.robot.JointDefinition;
 import us.ihmc.scs2.definition.robot.OneDoFJointDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
+import us.ihmc.scs2.session.Session;
 import us.ihmc.scs2.session.tools.SCS1GraphicConversionTools;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.parameters.ContactPointBasedContactParameters;
@@ -119,6 +120,7 @@ public class SCS2AvatarSimulationFactory
    private final OptionalFactoryField<Boolean> useImpulseBasePhysicsEngine = new OptionalFactoryField<>("useImpulseBasePhysicsEngine", false);
    private final OptionalFactoryField<Boolean> enableSimulatedRobotDamping = new OptionalFactoryField<>("enableSimulatedRobotDamping", true);
    private final OptionalFactoryField<List<Robot>> secondaryRobots = new OptionalFactoryField<>("secondaryRobots", new ArrayList<>());
+   private final OptionalFactoryField<String> simulationName = new OptionalFactoryField<>("simulationName");
 
    // TO CONSTRUCT
    private RobotDefinition robotDefinition;
@@ -220,7 +222,8 @@ public class SCS2AvatarSimulationFactory
          };
       }
 
-      simulationSession = new SimulationSession(physicsEngineFactory);
+      String name = simulationName.hasValue() ? simulationName.get() : Session.retrieveCallerName();
+      simulationSession = new SimulationSession(name, physicsEngineFactory);
       simulationSession.initializeBufferSize(simulationDataBufferSize.get());
       simulationSession.initializeBufferRecordTickPeriod(simulationDataRecordTickPeriod.get());
       simulationSession.addTerrainObject(terrainObjectDefinition.get());
@@ -477,6 +480,11 @@ public class SCS2AvatarSimulationFactory
    {
       simulatedRobotTimeProvider = new SimulatedDRCRobotTimeProvider(simulationDT.get());
       robot.getControllerManager().addController(() -> simulatedRobotTimeProvider.doControl());
+   }
+
+   public void setSimulationName(String simulationName)
+   {
+      this.simulationName.set(simulationName);
    }
 
    public void setRobotModel(DRCRobotModel robotModel)
