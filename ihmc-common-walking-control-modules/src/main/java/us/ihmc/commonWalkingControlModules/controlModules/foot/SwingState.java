@@ -486,9 +486,12 @@ public class SwingState extends AbstractFootControlState
 
    public void setFootstep(Footstep footstep, double swingTime, FrameVector3DReadOnly finalCoMVelocity, FrameVector3DReadOnly finalCoMAcceleration)
    {
+      setFootstepDurationInternal(swingTime);
+
       swingTrajectoryCalculator.setFootstep(footstep);
 
       touchdownDesiredLinearVelocity.set(swingTrajectoryParameters.getDesiredTouchdownVelocity());
+      touchdownDesiredLinearVelocity.scale(1.0 / Math.min(swingDuration.getDoubleValue(), 1.0));
       if (finalCoMVelocity != null)
       {
          touchdownDesiredLinearVelocity.checkReferenceFrameMatch(finalCoMVelocity);
@@ -508,7 +511,6 @@ public class SwingState extends AbstractFootControlState
       }
 
       setFootstepInternal(footstep);
-      setFootstepDurationInternal(swingTime);
 
       adjustedFootstepPose.set(footstepPose);
       rateLimitedAdjustedPose.set(footstepPose);
@@ -663,7 +665,15 @@ public class SwingState extends AbstractFootControlState
    private void computeCurrentWeights(Vector3DReadOnly nominalAngularWeight, Vector3DReadOnly nominalLinearWeight, Vector3DBasics currentAngularWeightToPack,
                                       Vector3DBasics currentLinearWeightToPack)
    {
-      currentAngularWeightToPack.set(nominalAngularWeight);
+      double percentThroughSwing = currentTime.getDoubleValue() / swingDuration.getValue();
+      double minAlpha = 0.25;
+      double alpha;
+      if (percentThroughSwing > 0.75)
+         alpha = 1.0;
+      else
+         alpha = minAlpha + (1.0 - minAlpha) * percentThroughSwing / 0.75;
+
+      currentAngularWeightToPack.setAndScale(alpha, nominalAngularWeight);
       leapOfFaithModule.scaleFootWeight(nominalLinearWeight, currentLinearWeightToPack);
    }
 

@@ -313,9 +313,9 @@ public class FootControlModule
    public void initializeSwingTrajectoryPreview(Footstep footstep, double swingDuration)
    {
       SwingTrajectoryCalculator swingTrajectoryCalculator = footControlHelper.getSwingTrajectoryCalculator();
+      swingTrajectoryCalculator.setSwingDuration(swingDuration);
       swingTrajectoryCalculator.setInitialConditionsToCurrent();
       swingTrajectoryCalculator.setFootstep(footstep);
-      swingTrajectoryCalculator.setSwingDuration(swingDuration);
       swingTrajectoryCalculator.setShouldVisualize(false);
       swingTrajectoryCalculator.initializeTrajectoryWaypoints(true);
    }

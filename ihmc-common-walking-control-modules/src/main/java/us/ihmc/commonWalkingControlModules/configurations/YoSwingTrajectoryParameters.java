@@ -26,6 +26,7 @@ public class YoSwingTrajectoryParameters
    private final List<DoubleProvider> defaultWaypointProportions = new ArrayList<>();
    private final List<DoubleProvider> defaultObstacleClearanceWaypointProportions = new ArrayList<>();
 
+   private final DoubleProvider minLiftOffVerticalVelocity;
    private final ParameterVector3D touchdownVelocityWeight;
    private final FrameParameterVector3D touchdownVelocity;
    private final FrameParameterVector3D touchdownAcceleration;
@@ -75,6 +76,7 @@ public class YoSwingTrajectoryParameters
 
       Vector3D defaultTouchdownVelocity = new Vector3D(0.0, 0.0, parameters.getDesiredTouchdownVelocity());
       touchdownVelocity = new FrameParameterVector3D(namePrefix + "TouchdownVelocity", ReferenceFrame.getWorldFrame(), defaultTouchdownVelocity, registry);
+      minLiftOffVerticalVelocity = new DoubleParameter(namePrefix + "MinLiftOffVerticalVelocity", registry, 0.0);
       finalCoMVelocityInjectionRatio = new DoubleParameter(namePrefix + "FinalCoMVelocityInjectionRatio",
                                                            registry,
                                                            parameters.getFinalCoMVelocityInjectionRatio());
@@ -167,5 +169,10 @@ public class YoSwingTrajectoryParameters
    public double getMaxSwingInitialAngularVelocityMagnitude()
    {
       return maxInitialAngularVelocityMagnitude.getValue();
+   }
+
+   public double getMinLiftOffVerticalVelocity()
+   {
+      return minLiftOffVerticalVelocity.getValue();
    }
 }
