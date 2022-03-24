@@ -4,6 +4,7 @@ import static us.ihmc.robotics.Assert.fail;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -36,10 +37,12 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools.VideoAndDataExporter;
 import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.yoVariables.registry.YoNamespace;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.registry.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-public class SCS2AvatarTestingSimulation
+public class SCS2AvatarTestingSimulation implements YoVariableHolder
 {
    private final SCS2AvatarSimulation avatarSimulation;
 
@@ -53,6 +56,7 @@ public class SCS2AvatarTestingSimulation
    private SessionVisualizerControls sessionVisualizerControls;
 
    private boolean createVideo = false;
+   private boolean keepSCSUp = false;
 
    public SCS2AvatarTestingSimulation(SCS2AvatarSimulation avatarSimulation)
    {
@@ -68,6 +72,11 @@ public class SCS2AvatarTestingSimulation
    public void setCreateVideo(boolean createVideo)
    {
       this.createVideo = createVideo;
+   }
+
+   public void setKeepSCSUp(boolean keepSCSUp)
+   {
+      this.keepSCSUp = keepSCSUp;
    }
 
    public void start()
@@ -179,6 +188,11 @@ public class SCS2AvatarTestingSimulation
    }
 
    // Misc.
+   public void finishTest()
+   {
+      finishTest(keepSCSUp);
+   }
+
    public void finishTest(boolean waitUntilGUIIsDone)
    {
       if (waitUntilGUIIsDone && sessionVisualizerControls != null && !avatarSimulation.hasBeenDestroyed())
@@ -285,16 +299,6 @@ public class SCS2AvatarTestingSimulation
       return avatarSimulation.getSimulationSession().getTime().getValue();
    }
 
-   public YoVariable findVariable(String name)
-   {
-      return getSimulationSession().getRootRegistry().findVariable(name);
-   }
-
-   public YoVariable findVariable(String namespace, String name)
-   {
-      return getSimulationSession().getRootRegistry().findVariable(namespace, name);
-   }
-
    public void createVideo(String simplifiedRobotModelName, int callStackHeight)
    {
       if (createVideo)
@@ -347,5 +351,35 @@ public class SCS2AvatarTestingSimulation
             return videoFile;
          }
       };
+   }
+
+   @Override
+   public YoVariable findVariable(String namespace, String name)
+   {
+      return getSimulationSession().getRootRegistry().findVariable(namespace, name);
+   }
+
+   @Override
+   public List<YoVariable> findVariables(String namespaceEnding, String name)
+   {
+      return getSimulationSession().getRootRegistry().findVariables(namespaceEnding, name);
+   }
+
+   @Override
+   public List<YoVariable> findVariables(YoNamespace namespace)
+   {
+      return getSimulationSession().getRootRegistry().findVariables(namespace);
+   }
+
+   @Override
+   public boolean hasUniqueVariable(String namespaceEnding, String name)
+   {
+      return getSimulationSession().getRootRegistry().hasUniqueVariable(namespaceEnding, name);
+   }
+
+   @Override
+   public List<YoVariable> getVariables()
+   {
+      return getSimulationSession().getRootRegistry().getVariables();
    }
 }

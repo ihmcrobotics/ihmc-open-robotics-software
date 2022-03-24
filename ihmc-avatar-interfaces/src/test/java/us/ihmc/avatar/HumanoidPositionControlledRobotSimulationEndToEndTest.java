@@ -71,7 +71,7 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
    {
       if (simulationTestHelper != null)
       {
-         simulationTestHelper.finishTest(simulationTestingParameters.getKeepSCSUp());
+         simulationTestHelper.finishTest();
          simulationTestHelper = null;
       }
    }

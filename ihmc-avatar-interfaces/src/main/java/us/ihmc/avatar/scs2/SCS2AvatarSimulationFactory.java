@@ -93,50 +93,50 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SCS2AvatarSimulationFactory
 {
-   private final RequiredFactoryField<DRCRobotModel> robotModel = new RequiredFactoryField<>("robotModel");
-   private final RequiredFactoryField<HighLevelHumanoidControllerFactory> highLevelHumanoidControllerFactory = new RequiredFactoryField<>("highLevelHumanoidControllerFactory");
-   private final RequiredFactoryField<TerrainObjectDefinition> terrainObjectDefinition = new RequiredFactoryField<>("terrainObjectDefinition");
-   private final RequiredFactoryField<RealtimeROS2Node> realtimeROS2Node = new RequiredFactoryField<>("realtimeROS2Node");
+   protected final RequiredFactoryField<DRCRobotModel> robotModel = new RequiredFactoryField<>("robotModel");
+   protected final RequiredFactoryField<HighLevelHumanoidControllerFactory> highLevelHumanoidControllerFactory = new RequiredFactoryField<>("highLevelHumanoidControllerFactory");
+   protected final RequiredFactoryField<TerrainObjectDefinition> terrainObjectDefinition = new RequiredFactoryField<>("terrainObjectDefinition");
+   protected final RequiredFactoryField<RealtimeROS2Node> realtimeROS2Node = new RequiredFactoryField<>("realtimeROS2Node");
 
-   private final OptionalFactoryField<Double> simulationDT = new OptionalFactoryField<>("simulationDT");
-   private final OptionalFactoryField<RobotInitialSetup<HumanoidFloatingRootJointRobot>> robotInitialSetup = new OptionalFactoryField<>("robotInitialSetup");
-   private final OptionalFactoryField<Double> gravity = new OptionalFactoryField<>("gravity", -9.81);
-   private final OptionalFactoryField<Boolean> createYoVariableServer = new OptionalFactoryField<>("createYoVariableServer", false);
-   private final OptionalFactoryField<Boolean> logToFile = new OptionalFactoryField<>("logToFile", false);
-   private final OptionalFactoryField<PelvisPoseCorrectionCommunicatorInterface> externalPelvisCorrectorSubscriber = new OptionalFactoryField<>("externalPelvisCorrectorSubscriber");
-   private final OptionalFactoryField<Integer> simulationDataBufferSize = new OptionalFactoryField<>("simulationDataBufferSize", 8192);
-   private final OptionalFactoryField<Integer> simulationDataRecordTickPeriod = new OptionalFactoryField<>("simulationDataRecordTickPeriod");
-   private final OptionalFactoryField<Boolean> usePerfectSensors = new OptionalFactoryField<>("usePerfectSensors", false);
-   private final OptionalFactoryField<SCS2JointDesiredOutputWriterFactory> outputWriterFactory = new OptionalFactoryField<>("outputWriterFactory",
+   protected final OptionalFactoryField<Double> simulationDT = new OptionalFactoryField<>("simulationDT");
+   protected final OptionalFactoryField<RobotInitialSetup<HumanoidFloatingRootJointRobot>> robotInitialSetup = new OptionalFactoryField<>("robotInitialSetup");
+   protected final OptionalFactoryField<Double> gravity = new OptionalFactoryField<>("gravity", -9.81);
+   protected final OptionalFactoryField<Boolean> createYoVariableServer = new OptionalFactoryField<>("createYoVariableServer", false);
+   protected final OptionalFactoryField<Boolean> logToFile = new OptionalFactoryField<>("logToFile", false);
+   protected final OptionalFactoryField<PelvisPoseCorrectionCommunicatorInterface> externalPelvisCorrectorSubscriber = new OptionalFactoryField<>("externalPelvisCorrectorSubscriber");
+   protected final OptionalFactoryField<Integer> simulationDataBufferSize = new OptionalFactoryField<>("simulationDataBufferSize", 8192);
+   protected final OptionalFactoryField<Integer> simulationDataRecordTickPeriod = new OptionalFactoryField<>("simulationDataRecordTickPeriod");
+   protected final OptionalFactoryField<Boolean> usePerfectSensors = new OptionalFactoryField<>("usePerfectSensors", false);
+   protected final OptionalFactoryField<SCS2JointDesiredOutputWriterFactory> outputWriterFactory = new OptionalFactoryField<>("outputWriterFactory",
                                                                                                                             (in,
                                                                                                                              out) -> new SCS2OutputWriter(in,
                                                                                                                                                           out,
                                                                                                                                                           true));
-   private final OptionalFactoryField<Boolean> runMultiThreaded = new OptionalFactoryField<>("runMultiThreaded", true);
-   private final OptionalFactoryField<Boolean> initializeEstimatorToActual = new OptionalFactoryField<>("initializeEstimatorToActual", true);
-   private final OptionalFactoryField<Boolean> showGUI = new OptionalFactoryField<>("showGUI", true);
-   private final OptionalFactoryField<Boolean> automaticallyStartSimulation = new OptionalFactoryField<>("automaticallyStartSimulation", false);
+   protected final OptionalFactoryField<Boolean> runMultiThreaded = new OptionalFactoryField<>("runMultiThreaded", true);
+   protected final OptionalFactoryField<Boolean> initializeEstimatorToActual = new OptionalFactoryField<>("initializeEstimatorToActual", true);
+   protected final OptionalFactoryField<Boolean> showGUI = new OptionalFactoryField<>("showGUI", true);
+   protected final OptionalFactoryField<Boolean> automaticallyStartSimulation = new OptionalFactoryField<>("automaticallyStartSimulation", false);
 
-   private final OptionalFactoryField<Boolean> useImpulseBasePhysicsEngine = new OptionalFactoryField<>("useImpulseBasePhysicsEngine", false);
-   private final OptionalFactoryField<Boolean> enableSimulatedRobotDamping = new OptionalFactoryField<>("enableSimulatedRobotDamping", true);
-   private final OptionalFactoryField<List<Robot>> secondaryRobots = new OptionalFactoryField<>("secondaryRobots", new ArrayList<>());
-   private final OptionalFactoryField<String> simulationName = new OptionalFactoryField<>("simulationName");
+   protected final OptionalFactoryField<Boolean> useImpulseBasePhysicsEngine = new OptionalFactoryField<>("useImpulseBasePhysicsEngine", false);
+   protected final OptionalFactoryField<Boolean> enableSimulatedRobotDamping = new OptionalFactoryField<>("enableSimulatedRobotDamping", true);
+   protected final OptionalFactoryField<List<Robot>> secondaryRobots = new OptionalFactoryField<>("secondaryRobots", new ArrayList<>());
+   protected final OptionalFactoryField<String> simulationName = new OptionalFactoryField<>("simulationName");
 
    // TO CONSTRUCT
-   private RobotDefinition robotDefinition;
-   private Robot robot;
-   private YoVariableServer yoVariableServer;
-   private IntraprocessYoVariableLogger intraprocessYoVariableLogger;
-   private SimulationSession simulationSession;
-   private JointDesiredOutputWriter simulationOutputWriter;
-   private AvatarEstimatorThread estimatorThread;
-   private AvatarControllerThread controllerThread;
-   private DisposableRobotController robotController;
-   private SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
+   protected RobotDefinition robotDefinition;
+   protected Robot robot;
+   protected YoVariableServer yoVariableServer;
+   protected IntraprocessYoVariableLogger intraprocessYoVariableLogger;
+   protected SimulationSession simulationSession;
+   protected JointDesiredOutputWriter simulationOutputWriter;
+   protected AvatarEstimatorThread estimatorThread;
+   protected AvatarControllerThread controllerThread;
+   protected DisposableRobotController robotController;
+   protected SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
 
-   private final CollidableHelper collidableHelper = new CollidableHelper();
-   private final String robotCollisionName = "robot";
-   private final String terrainCollisionName = "terrain";
+   protected final CollidableHelper collidableHelper = new CollidableHelper();
+   protected final String robotCollisionName = "robot";
+   protected final String terrainCollisionName = "terrain";
 
    public SCS2AvatarSimulation createAvatarSimulation()
    {

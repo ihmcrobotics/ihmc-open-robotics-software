@@ -176,7 +176,7 @@ public abstract class EndToEndGoHomeMessageTest implements MultiRobotTestInterfa
    {
       if (testHelper != null)
       {
-         testHelper.finishTest(simulationTestingParameters.getKeepSCSUp());
+         testHelper.finishTest();
          testHelper = null;
       }
 
