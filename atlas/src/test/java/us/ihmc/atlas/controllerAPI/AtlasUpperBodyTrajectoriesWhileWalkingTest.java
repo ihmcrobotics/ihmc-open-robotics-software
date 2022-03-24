@@ -20,10 +20,10 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.controllerAPI.EndToEndPelvisTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -44,10 +44,8 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.OneDoFTrajector
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.registry.YoRegistry;
 
 @Tag("controller-api-2")
 public class AtlasUpperBodyTrajectoriesWhileWalkingTest
@@ -60,7 +58,7 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
       simulationTestingParameters.setKeepSCSUp(false);
    }
 
-   protected DRCSimulationTestHelper drcSimulationTestHelper;
+   protected SCS2AvatarTestingSimulation simulationTestHelper;
 
    @Test
    public void testWalkingWithRandomArmTrajectoryMovements() throws Exception
@@ -69,20 +67,19 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
       DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.SCS, false);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
-      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(robotModel, simulationTestingParameters);
+      simulationTestHelper.start();
+      boolean success = simulationTestHelper.simulateAndWait(0.5);
       assertTrue(success);
 
-      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
       fullRobotModel.updateFrames();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
 
-      YoRegistry registry = drcSimulationTestHelper.getYoVariableRegistry();
-      double timeToCompleteWalking = sendWalkingPacket(robotModel, fullRobotModel, referenceFrames, registry);
+      double timeToCompleteWalking = sendWalkingPacket(robotModel, fullRobotModel, referenceFrames);
       sendArmTrajectoryMessageWithRandomPoints(random, robotModel, fullRobotModel);
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeToCompleteWalking);
+      success = simulationTestHelper.simulateAndWait(timeToCompleteWalking);
       assertTrue(success);
    }
 
@@ -92,18 +89,16 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
       DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.SCS, false);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
-      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.5);
+      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(robotModel, simulationTestingParameters);
+      simulationTestHelper.start();
+      boolean success = simulationTestHelper.simulateAndWait(2.5);
       assertTrue(success);
 
-      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
       fullRobotModel.updateFrames();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
 
-      YoRegistry registry = drcSimulationTestHelper.getYoVariableRegistry();
-      double timeToCompleteWalking = sendWalkingPacket(robotModel, fullRobotModel, referenceFrames, registry);
-
+      double timeToCompleteWalking = sendWalkingPacket(robotModel, fullRobotModel, referenceFrames);
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       for (RobotSide robotSide : RobotSide.values)
@@ -117,18 +112,19 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
 
          HandTrajectoryMessage handHoldMessage = new HandTrajectoryMessage();
          handHoldMessage.setRobotSide(robotSide.toByte());
-         handHoldMessage.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(referenceFrames.getAnkleZUpFrame(robotSide.getOppositeSide())));
+         handHoldMessage.getSe3Trajectory().getFrameInformation()
+                        .setTrajectoryReferenceFrameId(MessageTools.toFrameId(referenceFrames.getAnkleZUpFrame(robotSide.getOppositeSide())));
          handHoldMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
          Vector3D zeroVelocity = new Vector3D();
-         handHoldMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(11.0, position, orientation, zeroVelocity, zeroVelocity));
-         drcSimulationTestHelper.publishToController(handHoldMessage);
+         handHoldMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add()
+                        .set(HumanoidMessageTools.createSE3TrajectoryPointMessage(11.0, position, orientation, zeroVelocity, zeroVelocity));
+         simulationTestHelper.publishToController(handHoldMessage);
       }
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeToCompleteWalking);
+      success = simulationTestHelper.simulateAndWait(timeToCompleteWalking);
       assertTrue(success);
    }
 
    private void sendArmTrajectoryMessageWithRandomPoints(Random random, DRCRobotModel robotModel, FullHumanoidRobotModel fullRobotModel)
-         throws SimulationExceededMaximumTimeException
    {
       boolean success;
       long id = 1264L;
@@ -183,22 +179,23 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
                for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
                {
                   OneDoFTrajectoryPoint trajectoryPoint = trajectoryData.getTrajectoryPoint(trajectoryPointIndex);
-                  jointTrajectoryMessage.getTrajectoryPoints().add().set(HumanoidMessageTools.createTrajectoryPoint1DMessage(trajectoryPoint.getTime(), trajectoryPoint.getPosition(),
-                                                                                                                        trajectoryPoint.getVelocity()));
+                  jointTrajectoryMessage.getTrajectoryPoints().add()
+                                        .set(HumanoidMessageTools.createTrajectoryPoint1DMessage(trajectoryPoint.getTime(),
+                                                                                                 trajectoryPoint.getPosition(),
+                                                                                                 trajectoryPoint.getVelocity()));
                }
             }
             messageList.add(armTrajectoryMessage);
-            drcSimulationTestHelper.publishToController(armTrajectoryMessage);
+            simulationTestHelper.publishToController(armTrajectoryMessage);
 
-            success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(robotModel.getControllerDT());
+            success = simulationTestHelper.simulateAndWait(robotModel.getControllerDT());
             assertTrue(success);
          }
          armTrajectoryMessages.put(robotSide, messageList);
       }
    }
 
-   private double sendWalkingPacket(DRCRobotModel robotModel, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
-         YoRegistry registry)
+   private double sendWalkingPacket(DRCRobotModel robotModel, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames)
    {
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       double swingTime = walkingControllerParameters.getDefaultSwingTime();
@@ -207,12 +204,15 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
 
       Vector2D desiredVelocity = new Vector2D(0.15, 0.0);
       int numberOfSteps = 30;
-      FootstepDataListMessage footsteps = EndToEndPelvisTrajectoryMessageTest.computeNextFootsteps(numberOfSteps, RobotSide.LEFT, referenceFrames.getSoleFrames(), walkingControllerParameters,
+      FootstepDataListMessage footsteps = EndToEndPelvisTrajectoryMessageTest.computeNextFootsteps(numberOfSteps,
+                                                                                                   RobotSide.LEFT,
+                                                                                                   referenceFrames.getSoleFrames(),
+                                                                                                   walkingControllerParameters,
                                                                                                    desiredVelocity);
       footsteps.setDefaultSwingDuration(swingTime);
       footsteps.setDefaultTransferDuration(transferTime);
 
-      drcSimulationTestHelper.publishToController(footsteps);
+      simulationTestHelper.publishToController(footsteps);
 
       int timeWalking = numberOfSteps;
       double timeToCompleteWalking = stepTime * timeWalking;
@@ -228,16 +228,11 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
    @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
-      {
-         ThreadTools.sleepForever();
-      }
-
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcSimulationTestHelper != null)
+      if (simulationTestHelper != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
+         simulationTestHelper.finishTest();
+         simulationTestHelper = null;
       }
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
