@@ -90,7 +90,6 @@ public class FootControlModule
    private final YoBoolean resetFootPolygon;
 
    private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
-   private final UnloadedAnkleControlModule ankleControlModule;
 
    private final DoubleProvider maxWeightFractionPerFoot;
    private final DoubleProvider minWeightFractionPerFoot;
@@ -156,17 +155,6 @@ public class FootControlModule
 
       requestExploration = new YoBoolean(namePrefix + "RequestExploration", registry);
       resetFootPolygon = new YoBoolean(namePrefix + "ResetFootPolygon", registry);
-
-      AnkleIKSolver ankleIKSolver = walkingControllerParameters.getAnkleIKSolver();
-      if (ankleIKSolver != null)
-      {
-         FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
-         ankleControlModule = new UnloadedAnkleControlModule(fullRobotModel, robotSide, ankleIKSolver, registry);
-      }
-      else
-      {
-         ankleControlModule = null;
-      }
 
       this.maxWeightFractionPerFoot = maxWeightFractionPerFoot;
       this.minWeightFractionPerFoot = minWeightFractionPerFoot;
@@ -353,11 +341,6 @@ public class FootControlModule
          footControlHelper.getPartialFootholdControlModule().reset();
 
       stateMachine.doAction();
-
-      if (ankleControlModule != null)
-      {
-         ankleControlModule.compute(stateMachine.getCurrentStateKey(), stateMachine.getCurrentState());
-      }
    }
 
    // Used to restart the current state reseting the current state time
@@ -475,10 +458,6 @@ public class FootControlModule
    {
       inverseDynamicsCommandList.clear();
       inverseDynamicsCommandList.addCommand(stateMachine.getCurrentState().getInverseDynamicsCommand());
-      if (ankleControlModule != null)
-      {
-         inverseDynamicsCommandList.addCommand(ankleControlModule.getInverseDynamicsCommand());
-      }
       if (maxWrenchCommand != null && stateMachine.getCurrentStateKey().isLoadBearing())
       {
          inverseDynamicsCommandList.addCommand(maxWrenchCommand);
@@ -494,10 +473,6 @@ public class FootControlModule
 
    public JointDesiredOutputListReadOnly getJointDesiredData()
    {
-      if (ankleControlModule != null)
-      {
-         return ankleControlModule.getJointDesiredOutputList();
-      }
       return null;
    }
 
