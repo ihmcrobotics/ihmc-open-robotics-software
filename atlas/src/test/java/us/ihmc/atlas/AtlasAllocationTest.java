@@ -23,7 +23,8 @@ import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.avatar.DRCEstimatorThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.allocations.AllocationProfiler;
@@ -59,7 +60,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.wholeBodyController.DRCControllerThread;
@@ -73,16 +73,16 @@ public class AtlasAllocationTest
       simulationTestingParameters.setKeepSCSUp(false);
    }
 
-   private DRCSimulationTestHelper testHelper;
+   private SCS2AvatarTestingSimulation testHelper;
    private AllocationProfiler allocationProfiler = new AllocationProfiler();
-   
+
    @BeforeEach
-   public void before() throws SimulationExceededMaximumTimeException
+   public void before() throws Exception
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
-      
+
       AllocationProfiler.checkInstrumentation();
-      
+
       allocationProfiler.includeAllocationsInsideClass(DRCControllerThread.class.getName()); // only testing these classes!
       allocationProfiler.includeAllocationsInsideClass(DRCEstimatorThread.class.getName()); // only testing these classes!
       allocationProfiler.excludeAllocationsInsideClass(MirroredYoVariableRegistry.class.getName());
@@ -104,7 +104,7 @@ public class AtlasAllocationTest
       allocationProfiler.excludeAllocationsInsideMethod(Throwable.class.getName() + ".printStackTrace");
       allocationProfiler.excludeAllocationsInsideMethod(PrintTools.class.getName() + ".print");
       allocationProfiler.excludeAllocationsInsideMethod(LogTools.class.getName() + ".warn");
-      
+
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       setup();
@@ -112,14 +112,15 @@ public class AtlasAllocationTest
 
    @Test
    @Tag("allocation-slow")
-   public void testForAllocationsStanding() throws SimulationExceededMaximumTimeException
+   public void testForAllocationsStanding() throws Exception
    {
-      testInternal(() -> {
+      testInternal(() ->
+      {
          try
          {
-            testHelper.simulateAndBlockAndCatchExceptions(0.25);
+            testHelper.simulateAndWait(0.25);
          }
-         catch (SimulationExceededMaximumTimeException e)
+         catch (Exception e)
          {
             Assert.fail(e.getMessage());
          }
@@ -128,25 +129,26 @@ public class AtlasAllocationTest
 
    @Test
    @Tag("allocation-slow-2")
-   public void testForAllocationsWalking() throws SimulationExceededMaximumTimeException
+   public void testForAllocationsWalking() throws Exception
    {
       double defaultSwingDuration = 0.5;
       double defaultTransferDuration = 0.1;
 
       int warmupSteps = 4;
       testHelper.publishToController(createFootsteps(warmupSteps, defaultSwingDuration, defaultTransferDuration, 0.0, 0.0));
-      testHelper.simulateAndBlockAndCatchExceptions(3.0);
+      testHelper.simulateAndWait(3.0);
 
       int steps = 4;
       FootstepDataListMessage footsteps = createFootsteps(steps, defaultSwingDuration, defaultTransferDuration, 0.0, 0.3);
 
-      testInternal(() -> {
+      testInternal(() ->
+      {
          try
          {
             testHelper.publishToController(footsteps);
-            testHelper.simulateAndBlockAndCatchExceptions(4.0);
+            testHelper.simulateAndWait(4.0);
          }
-         catch (SimulationExceededMaximumTimeException e)
+         catch (Exception e)
          {
             Assert.fail(e.getMessage());
          }
@@ -157,7 +159,7 @@ public class AtlasAllocationTest
 
    @Test
    @Tag("allocation-slow")
-   public void testForAllocationsDuringPelvisMotion() throws SimulationExceededMaximumTimeException
+   public void testForAllocationsDuringPelvisMotion() throws Exception
    {
       Random random = new Random(42884L);
       double minMax = 0.05;
@@ -165,13 +167,14 @@ public class AtlasAllocationTest
       double duration = 1.0;
       PelvisTrajectoryMessage message = createPelvisTrajectory(random, minMax, timeStep, duration);
 
-      testInternal(() -> {
+      testInternal(() ->
+      {
          try
          {
             testHelper.publishToController(message);
-            testHelper.simulateAndBlockAndCatchExceptions(duration + 0.25);
+            testHelper.simulateAndWait(duration + 0.25);
          }
-         catch (SimulationExceededMaximumTimeException e)
+         catch (Exception e)
          {
             Assert.fail(e.getMessage());
          }
@@ -180,7 +183,7 @@ public class AtlasAllocationTest
 
    @Test
    @Tag("allocation-slow")
-   public void testForAllocationsWithPelvisUserControl() throws SimulationExceededMaximumTimeException
+   public void testForAllocationsWithPelvisUserControl() throws Exception
    {
       Random random = new Random(4281284L);
       double minMax = 0.05;
@@ -191,13 +194,14 @@ public class AtlasAllocationTest
       message.setEnableUserPelvisControl(true);
       message.setEnableUserPelvisControlDuringWalking(true);
 
-      testInternal(() -> {
+      testInternal(() ->
+      {
          try
          {
             testHelper.publishToController(message);
-            testHelper.simulateAndBlockAndCatchExceptions(duration + 0.25);
+            testHelper.simulateAndWait(duration + 0.25);
          }
-         catch (SimulationExceededMaximumTimeException e)
+         catch (Exception e)
          {
             Assert.fail(e.getMessage());
          }
@@ -206,19 +210,20 @@ public class AtlasAllocationTest
 
    @Test
    @Tag("allocation-slow")
-   public void testForAllocationsDuringArmMotion() throws SimulationExceededMaximumTimeException
+   public void testForAllocationsDuringArmMotion() throws Exception
    {
       Random random = new Random(4281284L);
       double duration = 0.3;
       ArmTrajectoryMessage message = createArmTrajectory(random, duration);
 
-      testInternal(() -> {
+      testInternal(() ->
+      {
          try
          {
             testHelper.publishToController(message);
-            testHelper.simulateAndBlockAndCatchExceptions(duration + 0.25);
+            testHelper.simulateAndWait(duration + 0.25);
          }
-         catch (SimulationExceededMaximumTimeException e)
+         catch (Exception e)
          {
             Assert.fail(e.getMessage());
          }
@@ -227,19 +232,20 @@ public class AtlasAllocationTest
 
    @Test
    @Tag("allocation-slow")
-   public void testForAllocationsDuringChestMotion() throws SimulationExceededMaximumTimeException
+   public void testForAllocationsDuringChestMotion() throws Exception
    {
       Random random = new Random(4281284L);
       double duration = 0.3;
       ChestTrajectoryMessage message = createChestTrajectory(random, duration);
 
-      testInternal(() -> {
+      testInternal(() ->
+      {
          try
          {
             testHelper.publishToController(message);
-            testHelper.simulateAndBlockAndCatchExceptions(duration + 0.25);
+            testHelper.simulateAndWait(duration + 0.25);
          }
-         catch (SimulationExceededMaximumTimeException e)
+         catch (Exception e)
          {
             Assert.fail(e.getMessage());
          }
@@ -262,7 +268,9 @@ public class AtlasAllocationTest
       desiredRandomChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
       Quaternion desiredOrientation = new Quaternion(desiredRandomChestOrientation);
-      ChestTrajectoryMessage message = HumanoidMessageTools.createChestTrajectoryMessage(duration, desiredOrientation, ReferenceFrame.getWorldFrame(),
+      ChestTrajectoryMessage message = HumanoidMessageTools.createChestTrajectoryMessage(duration,
+                                                                                         desiredOrientation,
+                                                                                         ReferenceFrame.getWorldFrame(),
                                                                                          pelvisZUpFrame);
       return message;
    }
@@ -298,7 +306,10 @@ public class AtlasAllocationTest
          orientation.changeFrame(ReferenceFrame.getWorldFrame());
          linearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
          angularVelocity.changeFrame(ReferenceFrame.getWorldFrame());
-         SE3TrajectoryPointMessage trajectoryPoint = HumanoidMessageTools.createSE3TrajectoryPointMessage(time, position, orientation, linearVelocity,
+         SE3TrajectoryPointMessage trajectoryPoint = HumanoidMessageTools.createSE3TrajectoryPointMessage(time,
+                                                                                                          position,
+                                                                                                          orientation,
+                                                                                                          linearVelocity,
                                                                                                           angularVelocity);
          trajectory.getTaskspaceTrajectoryPoints().add().set(trajectoryPoint);
       }
@@ -327,12 +338,12 @@ public class AtlasAllocationTest
       return footstepListMessage;
    }
 
-   private void setup() throws SimulationExceededMaximumTimeException
+   private void setup() throws Exception
    {
       DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
-      testHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, new FlatGroundEnvironment());
-      testHelper.createSimulation(getClass().getSimpleName());
-      testHelper.simulateAndBlockAndCatchExceptions(0.25);
+      testHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(robotModel, new FlatGroundEnvironment(), simulationTestingParameters);
+      testHelper.start();
+      testHelper.simulateAndWait(0.25);
    }
 
    private void testInternal(Runnable whatToTestFor)
@@ -358,7 +369,7 @@ public class AtlasAllocationTest
 
       if (testHelper != null)
       {
-         testHelper.destroySimulation();
+         testHelper.finishTest(simulationTestingParameters.getKeepSCSUp());
          testHelper = null;
       }
    }
