@@ -182,6 +182,7 @@ public class SwingTrajectoryCalculator
       finalOrientation.changeFrame(worldFrame);
       finalPosition.addZ(swingTrajectoryParameters.getDesiredTouchdownHeightOffset());
       finalLinearVelocity.set(swingTrajectoryParameters.getDesiredTouchdownVelocity());
+      finalLinearVelocity.scale(1.0 / Math.min(swingDuration.getDoubleValue(), 1.0));
       finalAngularVelocity.setToZero(worldFrame);
 
       if (footstep.getTrajectoryType() == null)
@@ -244,8 +245,13 @@ public class SwingTrajectoryCalculator
          initialAngularVelocity.changeFrame(worldFrame);
          initialAngularVelocity.setZ(0.0);
       }
+      initialLinearVelocity.changeFrame(worldFrame);
+      double liftOffVelocity = swingTrajectoryParameters.getMinLiftOffVerticalVelocity() / (Math.min(1.0, swingDuration.getDoubleValue()));
+      initialLinearVelocity.setZ(Math.max(liftOffVelocity, initialLinearVelocity.getZ()));
+
       initialLinearVelocity.clipToMaxLength(swingTrajectoryParameters.getMaxSwingInitialLinearVelocityMagnitude());
       initialAngularVelocity.clipToMaxLength(swingTrajectoryParameters.getMaxSwingInitialAngularVelocityMagnitude());
+
       stanceFootPosition.setToZero(oppositeSoleFrame);
    }
 
