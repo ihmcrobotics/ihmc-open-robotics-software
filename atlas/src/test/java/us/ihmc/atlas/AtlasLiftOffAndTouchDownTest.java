@@ -27,7 +27,7 @@ public class AtlasLiftOffAndTouchDownTest
 
       boolean success = AvatarLiftOffAndTouchDownTest.doStep(robotModel, testHelper, stepLength, startPitch, finalPitch, footLength);
 
-      testHelper.finishTest(false);
+      testHelper.finishTest();
 
       Assert.assertTrue("A check failed. See console output.", success);
    }
@@ -45,7 +45,7 @@ public class AtlasLiftOffAndTouchDownTest
 
       boolean success = AvatarLiftOffAndTouchDownTest.doStep(robotModel, testHelper, stepLength, startPitch, finalPitch, footLength, 0.1);
 
-      testHelper.finishTest(false);
+      testHelper.finishTest();
 
       Assert.assertTrue("A check failed. See console output.", success);
    }

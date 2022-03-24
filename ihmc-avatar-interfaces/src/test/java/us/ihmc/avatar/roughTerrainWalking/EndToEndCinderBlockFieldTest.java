@@ -65,7 +65,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       // Do this here in case a test fails. That way the memory will be recycled.
       if (simulationTestHelper != null)
       {
-         simulationTestHelper.finishTest(simulationTestingParameters.getKeepSCSUp());
+         simulationTestHelper.finishTest();
          simulationTestHelper = null;
       }
 

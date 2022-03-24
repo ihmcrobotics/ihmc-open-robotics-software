@@ -362,14 +362,9 @@ public class AtlasAllocationTest
    {
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
 
-      if (simulationTestingParameters.getKeepSCSUp())
-      {
-         ThreadTools.sleepForever();
-      }
-
       if (testHelper != null)
       {
-         testHelper.finishTest(simulationTestingParameters.getKeepSCSUp());
+         testHelper.finishTest();
          testHelper = null;
       }
    }
