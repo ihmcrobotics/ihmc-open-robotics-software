@@ -10,8 +10,9 @@ import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.trajectories.PositionOptimizedTrajectoryGenerator;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -31,15 +32,24 @@ public class AvatarLiftOffAndTouchDownTest
 {
    private static final double PITCH_EPSILON = Math.toRadians(3.0);
 
-   public static boolean doStep(DRCRobotModel robotModel, DRCSimulationTestHelper testHelper, double stepLength, double startPitch, double finalPitch,
+   public static boolean doStep(DRCRobotModel robotModel,
+                                SCS2AvatarTestingSimulation testHelper,
+                                double stepLength,
+                                double startPitch,
+                                double finalPitch,
                                 double footLength)
          throws SimulationExceededMaximumTimeException
    {
       return doStep(robotModel, testHelper, stepLength, startPitch, finalPitch, footLength, 0.0);
    }
 
-   public static boolean doStep(DRCRobotModel robotModel, DRCSimulationTestHelper testHelper, double stepLength, double startPitch, double finalPitch,
-                                double footLength, double adjustmentX)
+   public static boolean doStep(DRCRobotModel robotModel,
+                                SCS2AvatarTestingSimulation testHelper,
+                                double stepLength,
+                                double startPitch,
+                                double finalPitch,
+                                double footLength,
+                                double adjustmentX)
          throws SimulationExceededMaximumTimeException
    {
       double swingDuration = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
@@ -122,13 +132,13 @@ public class AvatarLiftOffAndTouchDownTest
       success &= checkFootPitch(testHelper, 0.0, side);
 
       testHelper.publishToController(message);
-      testHelper.simulateAndBlockAndCatchExceptions(robotModel.getWalkingControllerParameters().getDefaultInitialTransferTime() - timeOffset);
+      testHelper.simulateAndWait(robotModel.getWalkingControllerParameters().getDefaultInitialTransferTime() - timeOffset);
       if (!MathTools.epsilonEquals(startPitch, 0.0, Math.toRadians(5.0)))
          success &= checkPartialContact(testHelper, side, robotModel);
-      testHelper.simulateAndBlockAndCatchExceptions(timeOffset);
+      testHelper.simulateAndWait(timeOffset);
       success &= checkFootPitch(testHelper, startPitch, side);
 
-      testHelper.simulateAndBlockAndCatchExceptions(robotModel.getWalkingControllerParameters().getDefaultSwingTime() / 3.0);
+      testHelper.simulateAndWait(robotModel.getWalkingControllerParameters().getDefaultSwingTime() / 3.0);
 
       if (!Precision.equals(adjustmentX, 0.0))
       {
@@ -140,58 +150,57 @@ public class AvatarLiftOffAndTouchDownTest
          testHelper.publishToController(adjustFootstepMessage);
       }
 
-      testHelper.simulateAndBlockAndCatchExceptions(robotModel.getWalkingControllerParameters().getDefaultSwingTime() * 2.0 / 3.0);
+      testHelper.simulateAndWait(robotModel.getWalkingControllerParameters().getDefaultSwingTime() * 2.0 / 3.0);
       success &= checkFootPitch(testHelper, finalPitch, side);
-      testHelper.simulateAndBlockAndCatchExceptions(timeOffset);
+      testHelper.simulateAndWait(timeOffset);
       if (!MathTools.epsilonEquals(finalPitch, 0.0, Math.toRadians(5.0)))
          success &= checkPartialContact(testHelper, side, robotModel);
-      testHelper.simulateAndBlockAndCatchExceptions(Math.max(robotModel.getWalkingControllerParameters().getDefaultFinalTransferTime(), partialFootholdDuration)
-            - timeOffset);
+      testHelper.simulateAndWait(Math.max(robotModel.getWalkingControllerParameters().getDefaultFinalTransferTime(), partialFootholdDuration) - timeOffset);
 
       success &= checkFootPitch(testHelper, 0.0, side);
-      testHelper.simulateAndBlockAndCatchExceptions(timeOffset);
+      testHelper.simulateAndWait(timeOffset);
       success &= checkFullContact(testHelper, side, robotModel);
-      testHelper.simulateAndBlockAndCatchExceptions(0.25 - timeOffset);
+      testHelper.simulateAndWait(0.25 - timeOffset);
 
       return success;
    }
 
-   private static boolean checkPartialContact(DRCSimulationTestHelper testHelper, RobotSide side, DRCRobotModel robotModel)
+   private static boolean checkPartialContact(SCS2AvatarTestingSimulation testHelper, RobotSide side, DRCRobotModel robotModel)
    {
       int contactPoints = robotModel.getWalkingControllerParameters().getMomentumOptimizationSettings().getNumberOfContactPointsPerContactableBody();
       String prefix = testHelper.getReferenceFrames().getSoleFrame(side).getName();
       int inContact = 0;
       for (int i = 0; i < contactPoints; i++)
       {
-         if (((YoBoolean) testHelper.getYoVariable(prefix + "InContact" + i)).getValue())
+         if (((YoBoolean) testHelper.findVariable(prefix + "InContact" + i)).getValue())
             inContact++;
       }
       boolean atLeastOneContact = inContact > 0;
       boolean notFullContact = inContact < contactPoints;
       if (!atLeastOneContact)
-         System.out.println("At time " + testHelper.getRobot().getTime() + ": Foot was not in contact at all but expected partial contact.");
+         System.out.println("At time " + testHelper.getSimulationTime() + ": Foot was not in contact at all but expected partial contact.");
       if (!notFullContact)
-         System.out.println("At time " + testHelper.getRobot().getTime() + ": Foot was in full contact but expected partial contact.");
+         System.out.println("At time " + testHelper.getSimulationTime() + ": Foot was in full contact but expected partial contact.");
       return atLeastOneContact && notFullContact;
    }
 
-   private static boolean checkFullContact(DRCSimulationTestHelper testHelper, RobotSide side, DRCRobotModel robotModel)
+   private static boolean checkFullContact(SCS2AvatarTestingSimulation testHelper, RobotSide side, DRCRobotModel robotModel)
    {
       int contactPoints = robotModel.getWalkingControllerParameters().getMomentumOptimizationSettings().getNumberOfContactPointsPerContactableBody();
       String prefix = testHelper.getReferenceFrames().getSoleFrame(side).getName();
       int inContact = 0;
       for (int i = 0; i < contactPoints; i++)
       {
-         if (((YoBoolean) testHelper.getYoVariable(prefix + "InContact" + i)).getValue())
+         if (((YoBoolean) testHelper.findVariable(prefix + "InContact" + i)).getValue())
             inContact++;
       }
       boolean fullContact = inContact == contactPoints;
       if (!fullContact)
-         System.out.println("At time " + testHelper.getRobot().getTime() + ": Foot was not in full contact.");
+         System.out.println("At time " + testHelper.getSimulationTime() + ": Foot was not in full contact.");
       return fullContact;
    }
 
-   private static boolean checkFootPitch(DRCSimulationTestHelper testHelper, double expectedPitch, RobotSide side)
+   private static boolean checkFootPitch(SCS2AvatarTestingSimulation testHelper, double expectedPitch, RobotSide side)
    {
       MovingReferenceFrame soleFrame = testHelper.getReferenceFrames().getSoleFrame(side);
       MovingReferenceFrame soleZUpFrame = testHelper.getReferenceFrames().getSoleZUpFrame(side);
@@ -201,7 +210,7 @@ public class AvatarLiftOffAndTouchDownTest
 
       String footName = testHelper.getControllerFullRobotModel().getFoot(side).getName();
       FrameQuaternion desiredSoleOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame());
-      desiredSoleOrientation.set(EndToEndTestTools.findFeedbackControllerDesiredOrientation(footName, testHelper.getSimulationConstructionSet()));
+      desiredSoleOrientation.set(EndToEndTestTools.findFeedbackControllerDesiredOrientation(footName, testHelper.getControllerRegistry()));
       desiredSoleOrientation.changeFrame(soleZUpFrame);
       double actualDesiredPitch = desiredSoleOrientation.getPitch();
 
@@ -209,28 +218,31 @@ public class AvatarLiftOffAndTouchDownTest
       boolean desiredPitchEquals = MathTools.epsilonEquals(expectedPitch, actualDesiredPitch, PITCH_EPSILON);
 
       if (!actualPitchEquals)
-         System.out.println("At time " + testHelper.getRobot().getTime() + ": actual pitch " + actualPitch + " was not close enough to expected "
+         System.out.println("At time " + testHelper.getSimulationTime() + ": actual pitch " + actualPitch + " was not close enough to expected "
                + expectedPitch + ".");
       if (!desiredPitchEquals)
-         System.out.println("At time " + testHelper.getRobot().getTime() + ": desired pitch " + actualDesiredPitch + " was not close enough to expected "
+         System.out.println("At time " + testHelper.getSimulationTime() + ": desired pitch " + actualDesiredPitch + " was not close enough to expected "
                + expectedPitch + ".");
 
       return actualPitchEquals && desiredPitchEquals;
    }
 
-   public static DRCSimulationTestHelper setupTest(DRCRobotModel robotModel) throws SimulationExceededMaximumTimeException
+   public static SCS2AvatarTestingSimulation setupTest(DRCRobotModel robotModel) throws SimulationExceededMaximumTimeException
    {
       return setupTest(robotModel, 0.0);
    }
 
-   public static DRCSimulationTestHelper setupTest(DRCRobotModel robotModel, double initialYaw) throws SimulationExceededMaximumTimeException
+   public static SCS2AvatarTestingSimulation setupTest(DRCRobotModel robotModel, double initialYaw) throws SimulationExceededMaximumTimeException
    {
       SimulationTestingParameters simulationTestParameters = SimulationTestingParameters.createFromSystemProperties();
-      DRCSimulationTestHelper testHelper = new DRCSimulationTestHelper(simulationTestParameters, robotModel, new FlatGroundEnvironment());
-      testHelper.setStartingLocation(new OffsetAndYawRobotInitialSetup(initialYaw));
-      testHelper.createSimulation("LiftOffAndTouchDownTest");
-      testHelper.setupCameraForUnitTest(new Point3D(0.3, 0.0, 0.3), new Point3D(1.0, 4.0, 1.0));
-      testHelper.simulateAndBlockAndCatchExceptions(0.25);
+      SCS2AvatarTestingSimulationFactory testHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
+                                                                                                                                   new FlatGroundEnvironment(),
+                                                                                                                                   simulationTestParameters);
+      testHelperFactory.setStartingLocationOffset(new OffsetAndYawRobotInitialSetup(initialYaw));
+      SCS2AvatarTestingSimulation testHelper = testHelperFactory.createAvatarTestingSimulation();
+      testHelper.start();
+      testHelper.setCamera(new Point3D(0.3, 0.0, 0.3), new Point3D(1.0, 4.0, 1.0));
+      testHelper.simulateAndWait(0.25);
       return testHelper;
    }
 }
