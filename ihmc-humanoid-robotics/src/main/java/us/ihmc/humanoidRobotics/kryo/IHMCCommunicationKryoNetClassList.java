@@ -260,6 +260,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(ToolboxStateMessagePubSubType.class);
       registerPacketField(CameraInfoPubSubType.class);
       registerPacketField(RequestPlanarRegionsListMessagePubSubType.class);
+      registerPacketField(HeightMapMessagePubSubType.class);
       registerPacketField(EmptyPubSubType.class);
       registerPacketField(AbortWalkingMessagePubSubType.class);
       registerPacketField(PointCloud2PubSubType.class);
@@ -491,6 +492,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(HeadTrajectoryMessagePubSubType.class);
       registerPacketField(WalkOverTerrainGoalPacketPubSubType.class);
       registerPacketField(PlanarRegionsListMessagePubSubType.class);
+      registerPacketField(HeightMapMessagePubSubType.class);
       registerPacketField(BehaviorControlModePacketPubSubType.class);
       registerPacketField(AccelStampedPubSubType.class);
       registerPacketField(ByteBufferPubSubType.class);
@@ -712,6 +714,10 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(BoundingBox3DMessage.class);
       registerPacketField(Polygon2DMessage.class);
       registerPacketField(Polygon2DMessage[].class);
+
+      // Height map
+      registerPacketClass(HeightMapMessage.class);
+      registerPacketField(HeightMapMessage.class);
 
       //SCS
       registerPacketClass(SCSListenerPacket.class);
