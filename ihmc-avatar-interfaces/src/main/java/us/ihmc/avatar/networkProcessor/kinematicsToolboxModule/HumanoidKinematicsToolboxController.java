@@ -28,12 +28,15 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.StaticEquilibriumSolverInput;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.StaticSupportRegionSolver;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -108,6 +111,9 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     */
    private final YoFramePoint3D initialCenterOfMassPosition = new YoFramePoint3D("initialCenterOfMass", worldFrame, registry);
 
+   /** Multi-contact support region solver */
+   private final StaticSupportRegionSolver supportRegionSolver = new StaticSupportRegionSolver();
+   private final StaticEquilibriumSolverInput supportRegionSolverInput = new StaticEquilibriumSolverInput();
    /**
     * Indicates whether the rigid-bodies currently in contact as reported per:
     * {@link CapturabilityBasedStatus} or {@link MultiContactBalanceStatus} should be held in place for
@@ -600,9 +606,29 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       }
       else if (hasMultiContactBalanceStatus)
       {
-         Object<Point3D> supportPolygonFromStatus = multiContactBalanceStatusInternal.getSupportPolygon();
-         for (int i = 0; i < supportPolygonFromStatus.size(); i++)
-            activeContactPointPositions.add().setIncludingFrame(worldFrame, supportPolygonFromStatus.get(i));
+         boolean hasSurfaceNormalData = multiContactBalanceStatusInternal.getSurfaceNormalsInWorld().size() == multiContactBalanceStatusInternal.getContactPointsInBody().size();
+         if (hasSurfaceNormalData)
+         {
+            supportRegionSolverInput.clear();
+            for (int i = 0; i < multiContactBalanceStatusInternal.getContactPointsInBody().size(); i++)
+            {
+               supportRegionSolverInput.addContactPoint(multiContactBalanceStatusInternal.getContactPointsInBody().get(i), multiContactBalanceStatusInternal.getSurfaceNormalsInWorld().get(i));
+            }
+
+            supportRegionSolver.initialize(supportRegionSolverInput);
+            supportRegionSolver.solve();
+
+            for (int i = 0; i < supportRegionSolver.getSupportRegionVertices().size(); i++)
+            {
+               activeContactPointPositions.add().set(supportRegionSolver.getSupportRegionVertices().get(i));
+            }
+         }
+         else
+         {
+            Object<Point3D> supportPolygonFromStatus = multiContactBalanceStatusInternal.getSupportPolygon();
+            for (int i = 0; i < supportPolygonFromStatus.size(); i++)
+               activeContactPointPositions.add().setIncludingFrame(worldFrame, supportPolygonFromStatus.get(i));
+         }
       }
 
       updateSupportPolygonConstraint(activeContactPointPositions, bufferToPack);

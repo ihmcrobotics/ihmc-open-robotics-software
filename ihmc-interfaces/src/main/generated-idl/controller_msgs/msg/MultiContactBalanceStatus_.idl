@@ -2,6 +2,7 @@
 #define __controller_msgs__msg__MultiContactBalanceStatus__idl__
 
 #include "geometry_msgs/msg/./Point_.idl"
+#include "geometry_msgs/msg/./Vector3_.idl"
 module controller_msgs
 {
   module msg
@@ -42,6 +43,10 @@ module controller_msgs
          * List of the rigid-bodies in contact. This list's size and ordering corresponds to the support_polygon and contact_point_in_body lists.
          */
         sequence<long, 16> support_rigid_body_ids;
+        /**
+         * List of the contact surface normals in world frame.
+         */
+        sequence<geometry_msgs::msg::dds::Vector3, 16> surface_normals_in_world;
       };
     };
   };

@@ -1,15 +1,12 @@
 package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 
-import org.apache.commons.math3.optim.MaxIter;
-import org.apache.commons.math3.optim.PointValuePair;
-import org.apache.commons.math3.optim.linear.*;
-import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.ejml.data.DMatrixRMaj;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.convexOptimization.linearProgram.LinearProgramSolver;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -45,7 +42,6 @@ public class StaticSupportRegionSolver
    private TickAndUpdatable tickAndUpdatable = null;
 
    private final List<StaticEquilibriumContactPoint> contactPoints = new ArrayList<>();
-
    private StaticEquilibriumSolverInput input;
    private final LinearProgramSolver linearProgramSolver = new LinearProgramSolver();
 
@@ -67,9 +63,9 @@ public class StaticSupportRegionSolver
    private final DMatrixRMaj solution = new DMatrixRMaj(0);
 
    private final ConvexPolygon2D supportRegion = new ConvexPolygon2D();
-   private final List<Point2D> points = new ArrayList<>();
+   private final RecyclingArrayList<FramePoint3D> supportRegionVertices = new RecyclingArrayList<>(30, FramePoint3D::new);
 
-   private final YoFramePoint3D directionToOptimizeBase = new YoFramePoint3D("directionToOptimizeBase", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D averageContactPointPosition = new YoFramePoint3D("averageContactPointPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D directionToOptimize = new YoFrameVector3D("directionToOptimize", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D optimizedCoM = new YoFramePoint3D("optimizedCoM", ReferenceFrame.getWorldFrame(), registry);
 
@@ -91,9 +87,8 @@ public class StaticSupportRegionSolver
          contactPoints.add(new StaticEquilibriumContactPoint(i, registry, graphicsListRegistry));
       }
 
-      YoGraphicVector directionToOptimizeGraphic = new YoGraphicVector("directionToOptimizeGraphic", directionToOptimizeBase, directionToOptimize, 0.5);
+      YoGraphicVector directionToOptimizeGraphic = new YoGraphicVector("directionToOptimizeGraphic", averageContactPointPosition, directionToOptimize, 0.5);
       graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), directionToOptimizeGraphic);
-      directionToOptimizeBase.set(0.0, 0.0, 0.4);
 
       YoGraphicPosition optimizedCoMGraphic = new YoGraphicPosition("optimizedCoMGraphic", optimizedCoM, 0.03, YoAppearance.DarkRed());
       graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), optimizedCoMGraphic);
@@ -102,7 +97,6 @@ public class StaticSupportRegionSolver
    public void initialize(StaticEquilibriumSolverInput input)
    {
       this.input = input;
-      points.clear();
 
       int rhoSize = basisVectorsPerContactPoint * input.getNumberOfContacts();
       nominalDecisionVariables = rhoSize + 2;
@@ -170,11 +164,24 @@ public class StaticSupportRegionSolver
          Ain.set(12 + i, i, 1.0);
          bin.set(12 + i, 0, rhoMax);
       }
+
+      if (tickAndUpdatable == null)
+      {
+         return;
+      }
+
+      averageContactPointPosition.setToZero();
+      for (int i = 0; i < input.getNumberOfContacts(); i++)
+      {
+         averageContactPointPosition.add(input.getContactPointPositions().get(i));
+      }
+      averageContactPointPosition.scale(1.0 / input.getNumberOfContacts());
    }
 
    public void solve()
    {
       supportRegion.clear();
+      supportRegionVertices.clear();
       Arrays.fill(costVectorC.getData(), 0.0);
 
       for (int i = 0; i < directionsToOptimize.size(); i++)
@@ -192,7 +199,8 @@ public class StaticSupportRegionSolver
          double comExtremumX = solution.get(nonNegativeDecisionVariables - 4) - solution.get(nonNegativeDecisionVariables - 2);
          double comExtremumY = solution.get(nonNegativeDecisionVariables - 3) - solution.get(nonNegativeDecisionVariables - 1);
          supportRegion.addVertex(comExtremumX, comExtremumY);
-         points.add(new Point2D(comExtremumX, comExtremumY));
+         supportRegionVertices.add().setIncludingFrame(ReferenceFrame.getWorldFrame(), comExtremumX, comExtremumY, 0.0);
+
          updateGraphics();
       }
 
@@ -214,7 +222,7 @@ public class StaticSupportRegionSolver
 
       this.optimizedCoM.setX(comExtremumX);
       this.optimizedCoM.setY(comExtremumY);
-      this.optimizedCoM.setZ(0.1);
+      this.optimizedCoM.setZ(averageContactPointPosition.getZ());
 
       tickAndUpdatable.tickAndUpdate();
    }
@@ -225,13 +233,12 @@ public class StaticSupportRegionSolver
 
    public ConvexPolygon2D getSupportRegion()
    {
-      supportRegion.update();
-      return new ConvexPolygon2D(supportRegion);
+      return supportRegion;
    }
 
-   public List<Point2D> getPoints()
+   public RecyclingArrayList<? extends FramePoint3DReadOnly> getSupportRegionVertices()
    {
-      return points;
+      return supportRegionVertices;
    }
 
    public YoRegistry getRegistry()
@@ -257,5 +264,10 @@ public class StaticSupportRegionSolver
    public DMatrixRMaj getBeq()
    {
       return beq;
+   }
+
+   public YoFramePoint3D getAverageContactPointPosition()
+   {
+      return averageContactPointPosition;
    }
 }

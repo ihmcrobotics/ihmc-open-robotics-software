@@ -21,4 +21,7 @@ geometry_msgs/Point[] contact_points_in_body
 # List of the rigid-bodies in contact. This list's size and ordering corresponds to the support_polygon and contact_point_in_body lists.
 int32[] support_rigid_body_ids
 
+# List of the contact surface normals in world frame.
+geometry_msgs/Vector3[] surface_normals_in_world
+
 
