@@ -13,23 +13,22 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
-import us.ihmc.simulationToolkit.controllers.PushRobotController;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationToolkit.controllers.PushRobotControllerSCS2;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -38,12 +37,12 @@ public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTest
 {
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private OffsetAndYawRobotInitialSetup location = new OffsetAndYawRobotInitialSetup(new Vector3D(0.0, 0.0, 0.0), 0.0);
-   private DRCSimulationTestHelper drcSimulationTestHelper;
+   private SCS2AvatarTestingSimulation simulationTestHelper;
    private DRCRobotModel robotModel;
    private FullHumanoidRobotModel fullRobotModel;
    Random random = new Random();
 
-   private PushRobotController pushRobotController;
+   private PushRobotControllerSCS2 pushRobotController;
    private static final double GRAVITY = 9.81;
    private SideDependentList<StateTransitionCondition> singleSupportStartConditions = new SideDependentList<>();
    private SideDependentList<StateTransitionCondition> doubleSupportStartConditions = new SideDependentList<>();
@@ -131,7 +130,7 @@ public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTest
    }
 
    @Test
-   public void testSideStepping() throws SimulationExceededMaximumTimeException
+   public void testSideStepping()
    {
       setupTest();
       setupCameraBackView();
@@ -141,12 +140,12 @@ public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTest
       FootstepDataListMessage footMessage = getFootstepDataListMessage();
       ArrayList<Point3D> rootLocations = new ArrayList<>();
 
-      PelvisCheckpointChecker controllerSpy = new PelvisCheckpointChecker(drcSimulationTestHelper);
+      PelvisCheckpointChecker controllerSpy = new PelvisCheckpointChecker(simulationTestHelper);
 
       double centerStepY = 0.0;
       for (int currentStep = 1; currentStep < numberOfSteps + 1; currentStep++)
       {
-         if (drcSimulationTestHelper.getQueuedControllerCommands().isEmpty())
+         if (simulationTestHelper.getQueuedControllerCommands().isEmpty())
          {
             if (currentStep % 2 != 0)
             {
@@ -161,16 +160,16 @@ public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTest
       }
 
       controllerSpy.setFootStepCheckPoints(rootLocations, getStepLength(), getStepWidth());
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      drcSimulationTestHelper.publishToController(footMessage);
+      simulationTestHelper.simulateAndWait(1.0);
+      simulationTestHelper.publishToController(footMessage);
       double simulationTime = 1 * footMessage.getFootstepDataList().size() + 1.0;
 
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+      assertTrue(simulationTestHelper.simulateAndWait(simulationTime));
       controllerSpy.assertCheckpointsReached();
    }
 
    @Test
-   public void testSideSteppingWithForceDisturbances() throws SimulationExceededMaximumTimeException
+   public void testSideSteppingWithForceDisturbances()
    {
       setupTest();
       setupCameraBackView();
@@ -180,12 +179,12 @@ public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTest
       FootstepDataListMessage footMessage = getFootstepDataListMessage();
       ArrayList<Point3D> rootLocations = new ArrayList<>();
 
-      PelvisCheckpointChecker controllerSpy = new PelvisCheckpointChecker(drcSimulationTestHelper);
+      PelvisCheckpointChecker controllerSpy = new PelvisCheckpointChecker(simulationTestHelper);
 
       double centerStepY = 0.0;
       for (int currentStep = 1; currentStep < numberOfSteps + 1; currentStep++)
       {
-         if (drcSimulationTestHelper.getQueuedControllerCommands().isEmpty())
+         if (simulationTestHelper.getQueuedControllerCommands().isEmpty())
          {
             if (currentStep % 2 != 0)
             {
@@ -200,8 +199,8 @@ public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTest
       }
 
       controllerSpy.setFootStepCheckPoints(rootLocations, getStepLength(), getStepWidth());
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      drcSimulationTestHelper.publishToController(footMessage);
+      simulationTestHelper.simulateAndWait(1.0);
+      simulationTestHelper.publishToController(footMessage);
       double simulationTime = 1 * footMessage.getFootstepDataList().size() + 1.0;
 
       boolean success;
@@ -209,22 +208,22 @@ public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTest
       StateTransitionCondition firstPushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
       StateTransitionCondition secondPushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      success = simulationTestHelper.simulateAndWait(2.0);
       assertTrue(success);
 
       magnitude1 = 80; //TODO: overwritten
-      PrintTools.info("Force magnitude = " + magnitude1 + "N along " + forceDirection1.toString());
+      LogTools.info("Force magnitude = " + magnitude1 + "N along " + forceDirection1.toString());
       pushRobotController.applyForceDelayed(firstPushCondition, delay1, forceDirection1, magnitude1, duration1);
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      success = simulationTestHelper.simulateAndWait(2.0);
       assertTrue(success);
 
       magnitude2 = 80; //TODO:overwritten
-      PrintTools.info("Force magnitude = " + magnitude2 + "N along " + forceDirection2.toString());
+      LogTools.info("Force magnitude = " + magnitude2 + "N along " + forceDirection2.toString());
       pushRobotController.applyForceDelayed(secondPushCondition, delay2, forceDirection2, magnitude2, duration2);
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      success = simulationTestHelper.simulateAndWait(2.0);
       assertTrue(success);
 
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime - 6.0));
+      assertTrue(simulationTestHelper.simulateAndWait(simulationTime - 6.0));
       controllerSpy.assertCheckpointsReached();
    }
 
@@ -241,14 +240,7 @@ public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTest
    {
       Point3D cameraFix = new Point3D(0.0, 0.0, 1.0);
       Point3D cameraPosition = new Point3D(-10.0, 0.0, 1.0);
-      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
-   }
-
-   private void setupCameraSideView()
-   {
-      Point3D cameraFix = new Point3D(0.0, 0.0, 1.0);
-      Point3D cameraPosition = new Point3D(0.0, 10.0, 1.0);
-      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
+      simulationTestHelper.setCamera(cameraFix, cameraPosition);
    }
 
    @BeforeEach
@@ -266,20 +258,19 @@ public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTest
       }
 
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcSimulationTestHelper != null)
+      if (simulationTestHelper != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
+         simulationTestHelper.finishTest();
+         simulationTestHelper = null;
       }
 
       simulationTestingParameters = null;
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   private void setupTest() throws SimulationExceededMaximumTimeException
+   private void setupTest()
    {
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
-      String className = getClass().getSimpleName();
       DRCStartingLocation startingLocation = new DRCStartingLocation()
       {
          @Override
@@ -288,10 +279,12 @@ public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTest
             return location;
          }
       };
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.setTestEnvironment(flatGround);
-      drcSimulationTestHelper.setStartingLocation(startingLocation);
-      drcSimulationTestHelper.createSimulation(className);
+      SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
+                                                                                                                                             flatGround,
+                                                                                                                                             simulationTestingParameters);
+      simulationTestHelperFactory.setStartingLocationOffset(startingLocation.getStartingLocationOffset());
+      simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+      simulationTestHelper.start();
       robotModel = getRobotModel();
       fullRobotModel = robotModel.createFullRobotModel();
 
@@ -314,22 +307,21 @@ public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTest
 
       double z = getForcePointOffsetZInChestFrame();
 
-      pushRobotController = new PushRobotController(drcSimulationTestHelper.getRobot(),
-                                                    fullRobotModel.getChest().getParentJoint().getName(),
-                                                    new Vector3D(0, 0, z));
-      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-      scs.addYoGraphic(pushRobotController.getForceVisualizer());
+      pushRobotController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationSession().getTime(),
+                                                        simulationTestHelper.getRobot(),
+                                                        fullRobotModel.getChest().getParentJoint().getName(),
+                                                        new Vector3D(0, 0, z));
+      simulationTestHelper.addYoGraphicDefinition(pushRobotController.getForceVizDefinition());
 
       for (RobotSide robotSide : RobotSide.values)
       {
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-         String footPrefix = sidePrefix + "Foot";
          @SuppressWarnings("unchecked")
-         final YoEnum<ConstraintType> footConstraintType = (YoEnum<ConstraintType>) scs.findVariable(sidePrefix + "FootControlModule",
-                                                                                                    sidePrefix + "FootCurrentState");
+         final YoEnum<ConstraintType> footConstraintType = (YoEnum<ConstraintType>) simulationTestHelper.findVariable(sidePrefix + "FootControlModule",
+                                                                                                                      sidePrefix + "FootCurrentState");
          @SuppressWarnings("unchecked")
-         final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.findVariable(WalkingHighLevelHumanoidController.class.getSimpleName(),
-                                                                                                  "walkingCurrentState");
+         final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) simulationTestHelper.findVariable(WalkingHighLevelHumanoidController.class.getSimpleName(),
+                                                                                                                    "walkingCurrentState");
          singleSupportStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType));
          doubleSupportStartConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
       }

@@ -9,8 +9,6 @@ import javax.swing.JButton;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
@@ -48,8 +46,6 @@ public class PushRobotControllerSCS2 implements Controller
    private StateTransitionCondition pushCondition = null;
    private final ExternalWrenchPoint forcePoint;
    private final Vector3D forceVector = new Vector3D();
-
-   private final YoGraphicVector forceVisualizer = null;
 
    private final LinkedList<DelayedPush> delayedPushs = new LinkedList<>();
 
@@ -111,11 +107,6 @@ public class PushRobotControllerSCS2 implements Controller
       definition.setBodyRadius(0.015);
       definition.setHeadRadius(0.0375);
       return definition;
-   }
-
-   public YoGraphic getForceVisualizer()
-   {
-      return forceVisualizer;
    }
 
    public int getPushNumber()
