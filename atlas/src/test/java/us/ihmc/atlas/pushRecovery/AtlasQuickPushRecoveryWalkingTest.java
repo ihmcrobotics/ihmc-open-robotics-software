@@ -28,10 +28,10 @@ public class AtlasQuickPushRecoveryWalkingTest extends AvatarQuickPushRecoveryWa
    @Tag("humanoid-push-recovery")
    @Override
    @Test
-   public void testInwardPushLeftMidSwing() throws SimulationExceededMaximumTimeException
+   public void testInwardPushLeftAtDifferentTimes() throws SimulationExceededMaximumTimeException
    {
       setPushChangeInVelocity(0.3);
-      super.testInwardPushLeftMidSwing();
+      super.testInwardPushLeftAtDifferentTimes();
    }
 
    @Tag("humanoid-push-recovery")
@@ -73,10 +73,10 @@ public class AtlasQuickPushRecoveryWalkingTest extends AvatarQuickPushRecoveryWa
    @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
-   public void testBackwardPushInLeftSwing() throws SimulationExceededMaximumTimeException
+   public void testBackwardPushInLeftSwingAtDifferentTimes() throws SimulationExceededMaximumTimeException
    {
-      setPushChangeInVelocity(0.5);
-      super.testBackwardPushInLeftSwing();
+      setPushChangeInVelocity(0.8);
+      super.testBackwardPushInLeftSwingAtDifferentTimes();
    }
 
    @Tag("humanoid-push-recovery")
