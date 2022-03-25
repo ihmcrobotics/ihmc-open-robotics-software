@@ -8,7 +8,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 import java.util.ArrayList;
 
-public class GDX2DSprite
+public class GDX2DSprite implements GDX2DSpriteDrawable
 {
    private final Sprite sprite;
    private final Texture texture;
@@ -34,6 +34,7 @@ public class GDX2DSprite
       orientation = 0.0;
    }
 
+   @Override
    public void draw(SpriteBatch spriteBatch)
    {
       float x = sprite.getX();
@@ -92,7 +93,7 @@ public class GDX2DSprite
       return sprite;
    }
 
-   public void getSpriteRenderables(ArrayList<GDX2DSprite> sprites)
+   public void getSpriteRenderables(ArrayList<GDX2DSpriteDrawable> sprites)
    {
       if (visible)
       {
