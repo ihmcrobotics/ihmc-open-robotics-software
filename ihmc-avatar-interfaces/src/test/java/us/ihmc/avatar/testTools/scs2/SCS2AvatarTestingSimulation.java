@@ -1,5 +1,6 @@
 package us.ihmc.avatar.testTools.scs2;
 
+import static us.ihmc.robotics.Assert.assertTrue;
 import static us.ihmc.robotics.Assert.fail;
 
 import java.io.File;
@@ -8,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+
+import org.apache.commons.lang3.mutable.MutableInt;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -19,6 +22,7 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -27,6 +31,7 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.session.SessionMode;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizerControls;
 import us.ihmc.scs2.sessionVisualizer.jfx.tools.JavaFXMissingTools;
 import us.ihmc.scs2.simulation.SimulationSession;
@@ -37,9 +42,11 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools.VideoAndDataExporter;
 import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.registry.YoNamespace;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.registry.YoVariableHolder;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class SCS2AvatarTestingSimulation implements YoVariableHolder
@@ -282,6 +289,59 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    public void addRobotControllerOnControllerThread(RobotController controller)
    {
       avatarSimulation.addRobotControllerOnControllerThread(controller);
+   }
+
+   public void addDesiredICPContinuityAssertion(double maxICPPlanError)
+   {
+      final YoDouble desiredICPX = (YoDouble) findVariable("desiredICPX");
+      final YoDouble desiredICPY = (YoDouble) findVariable("desiredICPY");
+
+      final Point2D previousDesiredICP = new Point2D();
+      final Point2D desiredICP = new Point2D();
+
+      final int ticksToInitialize = 100;
+      final MutableInt xTicks = new MutableInt(0);
+      final MutableInt yTicks = new MutableInt(0);
+
+      desiredICPX.addListener(new YoVariableChangedListener()
+      {
+         @Override
+         public void changed(YoVariable v)
+         {
+            if (getSimulationSession() == null | getSimulationSession().getActiveMode() != SessionMode.RUNNING)
+               return; // Do not perform this check if the sim is not running, so the user can scrub the data when sim is done.
+
+            desiredICP.setX(desiredICPX.getDoubleValue());
+            if (xTicks.getValue() > ticksToInitialize && yTicks.getValue() > ticksToInitialize)
+            {
+               assertTrue("ICP plan desired jumped from " + previousDesiredICP + " to " + desiredICP + " in one control DT.",
+                          previousDesiredICP.distance(desiredICP) < maxICPPlanError);
+            }
+            previousDesiredICP.set(desiredICP);
+
+            xTicks.setValue(xTicks.getValue() + 1);
+         }
+      });
+
+      desiredICPY.addListener(new YoVariableChangedListener()
+      {
+         @Override
+         public void changed(YoVariable v)
+         {
+            if (getSimulationSession() == null | getSimulationSession().getActiveMode() != SessionMode.RUNNING)
+               return; // Do not perform this check if the sim is not running, so the user can scrub the data when sim is done.
+
+            desiredICP.setY(desiredICPY.getDoubleValue());
+            if (xTicks.getValue() > ticksToInitialize && yTicks.getValue() > ticksToInitialize)
+            {
+               assertTrue("ICP plan desired jumped from " + previousDesiredICP + " to " + desiredICP + " in one control DT.",
+                          previousDesiredICP.distance(desiredICP) < maxICPPlanError);
+            }
+            previousDesiredICP.set(desiredICP);
+
+            yTicks.setValue(yTicks.getValue() + 1);
+         }
+      });
    }
 
    public Robot getRobot()
