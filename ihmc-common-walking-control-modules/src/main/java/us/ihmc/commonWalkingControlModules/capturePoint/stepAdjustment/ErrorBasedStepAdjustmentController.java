@@ -111,7 +111,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    private final YoBoolean footstepWasAdjusted = new YoBoolean(yoNamePrefix + "FootstepWasAdjusted", registry);
 
    private final BooleanProvider useICPControlPlaneInStepAdjustment = new BooleanParameter(yoNamePrefix + "useICPControlPlaneInStepAdjustment", registry, false);
-   private final DoubleProvider minimumTimeForStepAdjustment = new DoubleParameter(yoNamePrefix + "minimumTimeForStepAdjustment", registry, -1.0);
+   private final DoubleProvider minimumTimeForStepAdjustment = new DoubleParameter(yoNamePrefix + "minimumTimeForStepAdjustment", registry, 0.02);
    private final DoubleProvider distanceInsideToScaleSupportPolygon = new DoubleParameter(yoNamePrefix + "distanceInsideToScaleSupportPolygon", registry, 0.035);
 
    private final StepAdjustmentReachabilityConstraint reachabilityConstraintHandler;
@@ -486,7 +486,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    private FrameConvexPolygon2DReadOnly getBestReachabilityConstraintToUseWhenNotIntersecting()
    {
       if (!allowCrossOverSteps.getValue())
-         return reachableCaptureRegion;
+         return reachabilityConstraintHandler.getReachabilityConstraint();
 
       double distanceToForward = reachabilityConstraintHandler.getForwardCrossOverPolygon().distance(adjustedSolutionInControlPlane);
       double distanceToBackward = reachabilityConstraintHandler.getBackwardCrossOverPolygon().distance(adjustedSolutionInControlPlane);

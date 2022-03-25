@@ -34,7 +34,7 @@ public class MultiStepCaptureRegionCalculator
    private final IntegerParameter maxStepsToConsider = new IntegerParameter("maxStepsToConsiderForRecovery", registry, 10);
 
    private final FrameConvexPolygon2D multiStepRegion = new FrameConvexPolygon2D();
-   private final YoFrameConvexPolygon2D yoMultiStepRegion = new YoFrameConvexPolygon2D("multiStepCaptureRegion", ReferenceFrame.getWorldFrame(), 30, registry);
+   private final YoFrameConvexPolygon2D yoMultiStepRegion = new YoFrameConvexPolygon2D("multiStepCaptureRegion", ReferenceFrame.getWorldFrame(), 35, registry);
 
    private final BooleanProvider useCrossOverSteps;
 

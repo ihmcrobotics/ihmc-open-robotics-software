@@ -11,7 +11,6 @@ import controller_msgs.msg.dds.FootTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.states.PushRecoveryStateEnum;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
@@ -27,7 +26,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -41,7 +39,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 import static us.ihmc.robotics.Assert.*;
 
-public abstract class DRCPushRecoveryTest
+public abstract class AvatarPushRecoveryStandingTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    static
@@ -93,75 +91,6 @@ public abstract class DRCPushRecoveryTest
    }
 
    protected abstract DRCRobotModel getRobotModel();
-
-   @Test
-   public void testPushICPOptimiWhileInSwing() throws SimulationExceededMaximumTimeException
-   {
-      setupTest(getScriptFilePath(), false);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
-
-      // push timing:
-      StateTransitionCondition pushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
-      double delay = 0.5 * swingTime;
-
-      // push parameters:
-      Vector3D forceDirection = new Vector3D(0.0, -1.0, 0.0);
-      double magnitude = 600.0;
-      double duration = 0.1;
-      applyPushAndCheckFinalState(pushCondition, delay, forceDirection, magnitude, duration, simulationTime);
-   }
-
-   @Test
-   public void testPushWhileInSwing() throws SimulationExceededMaximumTimeException
-   {
-      setupTest(getScriptFilePath(), true);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
-
-      // push timing:
-      StateTransitionCondition pushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
-      double delayMultiplier = getPushWhileInSwingDelayMultiplier();
-      double delay = delayMultiplier * swingTime;
-
-      // push parameters:
-      Vector3D forceDirection = new Vector3D(0.0, -1.0, 0.0);
-      double magnitude = 550.0;
-      double duration = 0.1;
-      applyPushAndCheckFinalState(pushCondition, delay, forceDirection, magnitude, duration, simulationTime);
-   }
-
-   @Test
-   public void testRecoveringWithSwingSpeedUpWhileInSwing() throws SimulationExceededMaximumTimeException
-   {
-      setupTest(getScriptFilePath(), true);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
-
-      // push timing:
-      StateTransitionCondition pushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
-      double delay = 0.25 * swingTime;
-
-      // push parameters:
-      Vector3D forceDirection = new Vector3D(0.0, -1.0, 0.0);
-      double magnitude = 450.0;
-      double duration = 0.1;
-      applyPushAndCheckFinalState(pushCondition, delay, forceDirection, magnitude, duration, simulationTime);
-   }
-
-   @Test
-   public void testPushWhileInTransfer() throws SimulationExceededMaximumTimeException
-   {
-      setupTest(getScriptFilePath(), false);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
-
-      // push timing:
-      StateTransitionCondition pushCondition = doubleSupportStartConditions.get(RobotSide.RIGHT);
-      double delay = 0.5 * transferTime;
-
-      // push parameters:
-      Vector3D forceDirection = new Vector3D(0.0, 1.0, 0.0);
-      double magnitude = 450.0;
-      double duration = 0.1;
-      applyPushAndCheckFinalState(pushCondition, delay, forceDirection, magnitude, duration, simulationTime);
-   }
 
    @Test
    public void testPushWhileStanding() throws SimulationExceededMaximumTimeException
@@ -337,7 +266,7 @@ public abstract class DRCPushRecoveryTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
-      double magnitude = 350.0;
+      double magnitude = 275.0;
       double duration = 0.2;
       applyPushAndCheckFinalState(pushCondition, delay, forceDirection, magnitude, duration, 4.0);
    }
