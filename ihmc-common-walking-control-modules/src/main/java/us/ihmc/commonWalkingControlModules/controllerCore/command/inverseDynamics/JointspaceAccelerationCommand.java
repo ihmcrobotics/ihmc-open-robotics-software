@@ -9,6 +9,7 @@ import org.ejml.data.DMatrixRMaj;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.jointspace.OneDoFJointFeedbackController;
@@ -56,6 +57,8 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
     */
    private final TDoubleArrayList weights = new TDoubleArrayList(initialCapacity);
 
+   private ConstraintType constraintType = ConstraintType.OBJECTIVE;
+
    /**
     * Creates an empty command. It needs to be configured before being submitted to the controller
     * core.
@@ -81,6 +84,7 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
          weights.add(other.getWeight(i));
       }
       desiredAccelerations.set(other.desiredAccelerations);
+      constraintType = other.getConstraintType();
    }
 
    /**
@@ -93,6 +97,11 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
       joints.clear();
       desiredAccelerations.clear();
       weights.reset();
+   }
+
+   public void setConstraintType(ConstraintType constraintType)
+   {
+      this.constraintType = constraintType;
    }
 
    /**
@@ -276,6 +285,11 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
       return isHardConstraint;
    }
 
+   public ConstraintType getConstraintType()
+   {
+      return constraintType;
+   }
+
    /**
     * Gets the weight associated with the {@code jointIndex}<sup>th</sup> joint of this command.
     * 
@@ -377,6 +391,8 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
          if (commandId != other.commandId)
             return false;
          if (getNumberOfJoints() != other.getNumberOfJoints())
+            return false;
+         if (constraintType != other.getConstraintType())
             return false;
          for (int jointIndex = 0; jointIndex < getNumberOfJoints(); jointIndex++)
          {
