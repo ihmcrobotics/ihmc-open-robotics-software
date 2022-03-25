@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics;
 
 import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 
@@ -14,6 +15,15 @@ public class QPObjectiveCommand implements InverseDynamicsCommand<QPObjectiveCom
 
    public QPObjectiveCommand()
    {
+   }
+
+   public void reshape(int numberOfRows, int numberOfDoFs)
+   {
+      objective.reshape(numberOfRows, 1);
+      jacobian.reshape(numberOfRows, numberOfDoFs);
+      weightMatrix.reshape(numberOfRows, numberOfRows);
+      selectionMatrix.reshape(numberOfRows, numberOfRows);
+      CommonOps_DDRM.setIdentity(selectionMatrix);
    }
 
    @Override
