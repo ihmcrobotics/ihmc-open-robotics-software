@@ -54,6 +54,9 @@ public class MultiContactBalanceStatusPubSubType implements us.ihmc.pubsub.Topic
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (16 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 16; ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);}
 
       return current_alignment - initial_alignment;
    }
@@ -88,6 +91,11 @@ public class MultiContactBalanceStatusPubSubType implements us.ihmc.pubsub.Topic
       current_alignment += (data.getSupportRigidBodyIds().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getSurfaceNormalsInWorld().size(); ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getSurfaceNormalsInWorld().get(i0), current_alignment);}
+
 
       return current_alignment - initial_alignment;
    }
@@ -110,6 +118,10 @@ public class MultiContactBalanceStatusPubSubType implements us.ihmc.pubsub.Topic
       cdr.write_type_e(data.getSupportRigidBodyIds());else
           throw new RuntimeException("support_rigid_body_ids field exceeds the maximum length");
 
+      if(data.getSurfaceNormalsInWorld().size() <= 16)
+      cdr.write_type_e(data.getSurfaceNormalsInWorld());else
+          throw new RuntimeException("surface_normals_in_world field exceeds the maximum length");
+
    }
 
    public static void read(controller_msgs.msg.dds.MultiContactBalanceStatus data, us.ihmc.idl.CDR cdr)
@@ -121,6 +133,7 @@ public class MultiContactBalanceStatusPubSubType implements us.ihmc.pubsub.Topic
       cdr.read_type_e(data.getSupportPolygon());	
       cdr.read_type_e(data.getContactPointsInBody());	
       cdr.read_type_e(data.getSupportRigidBodyIds());	
+      cdr.read_type_e(data.getSurfaceNormalsInWorld());	
 
    }
 
@@ -135,6 +148,7 @@ public class MultiContactBalanceStatusPubSubType implements us.ihmc.pubsub.Topic
       ser.write_type_e("support_polygon", data.getSupportPolygon());
       ser.write_type_e("contact_points_in_body", data.getContactPointsInBody());
       ser.write_type_e("support_rigid_body_ids", data.getSupportRigidBodyIds());
+      ser.write_type_e("surface_normals_in_world", data.getSurfaceNormalsInWorld());
    }
 
    @Override
@@ -148,6 +162,7 @@ public class MultiContactBalanceStatusPubSubType implements us.ihmc.pubsub.Topic
       ser.read_type_e("support_polygon", data.getSupportPolygon());
       ser.read_type_e("contact_points_in_body", data.getContactPointsInBody());
       ser.read_type_e("support_rigid_body_ids", data.getSupportRigidBodyIds());
+      ser.read_type_e("surface_normals_in_world", data.getSurfaceNormalsInWorld());
    }
 
    public static void staticCopy(controller_msgs.msg.dds.MultiContactBalanceStatus src, controller_msgs.msg.dds.MultiContactBalanceStatus dest)

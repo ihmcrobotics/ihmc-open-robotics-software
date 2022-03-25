@@ -53,20 +53,12 @@ public class StaticEquilibriumSolverVisualizer
 
       if (showSupportRegion)
       {
-         double renderedHeight = 0.1;
+         double renderedHeight = solver.getAverageContactPointPosition().getZ();
 
          ConvexPolygon2D supportRegion = solver.getSupportRegion();
          supportRegionGraphics.identity();
          supportRegionGraphics.translate(0.0, 0.0, renderedHeight);
          supportRegionGraphics.addExtrudedPolygon(supportRegion, 0.01, YoAppearance.Glass());
-
-//         List<Point2D> points = solver.getPoints();
-//         for (int i = 0; i < points.size(); i++)
-//         {
-//            supportRegionGraphics.identity();
-//            supportRegionGraphics.translate(points.get(i).getX(), points.get(i).getY(), renderedHeight);
-//            supportRegionGraphics.addSphere(0.01, YoAppearance.Red());
-//         }
       }
 
       scs.addStaticLinkGraphics(supportRegionGraphics);
@@ -86,8 +78,9 @@ public class StaticEquilibriumSolverVisualizer
 //      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createTriangleOneTiltedFullyIn();
 //      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createFlatSquare();
 //      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createBipedFeet();
+      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createBipedFeet(1.0, -1.0, 0.6);
 //      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createBipedFeetWithSingleHandhold();
-      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createBipedFeetWithTwoHandholds();
+//      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createBipedFeetWithTwoHandholds();
 
       new StaticEquilibriumSolverVisualizer(input);
    }

@@ -92,6 +92,11 @@ public class StaticEquilibriumSolverInputExamples
 
    public static StaticEquilibriumSolverInput createBipedFeet()
    {
+      return createBipedFeet(0.0, 0.0, 0.0);
+   }
+
+   public static StaticEquilibriumSolverInput createBipedFeet(double dx, double dy, double dz)
+   {
       StaticEquilibriumSolverInput input = new StaticEquilibriumSolverInput();
 
       double footWidth = 0.1;
@@ -106,10 +111,10 @@ public class StaticEquilibriumSolverInputExamples
       FramePose3D leftFootPose = new FramePose3D();
       FramePose3D rightFootPose = new FramePose3D();
 
-      leftFootPose.getPosition().set(0.0, 0.25, 0.0);
+      leftFootPose.getPosition().set(dx, dy + 0.25, dz);
       leftFootPose.getOrientation().setToRollOrientation(Math.toRadians(30.0));
 
-      rightFootPose.getPosition().set(0.0, -0.25, -0.1);
+      rightFootPose.getPosition().set(dx, dy + -0.25, dz - 0.1);
       rightFootPose.getOrientation().setYawPitchRoll(Math.toRadians(-20.0), Math.toRadians(20.0), 0.0);
 
       SideDependentList<FramePose3D> footPoses = new SideDependentList<>(leftFootPose, rightFootPose);

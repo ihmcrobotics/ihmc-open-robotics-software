@@ -1,7 +1,11 @@
 package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,12 +24,12 @@ public class StaticEquilibriumSolverInput
    /**
     * The vector r in the paper above
     */
-   private final List<FramePoint3D> contactPointPositions = new ArrayList<>();
+   private final RecyclingArrayList<FramePoint3D> contactPointPositions = new RecyclingArrayList<>(20, FramePoint3D::new);
 
    /**
     * The vector v in the paper above
     */
-   private final List<FrameVector3D> surfaceNormals = new ArrayList<>();
+   private final RecyclingArrayList<FrameVector3D> surfaceNormals = new RecyclingArrayList<>(20, FrameVector3D::new);
 
    private double gravityMagnitude = defaultGravityMagnitude;
 
@@ -39,10 +43,10 @@ public class StaticEquilibriumSolverInput
       coefficientOfFriction = defaultCoefficientOfFriction;
    }
 
-   public void addContactPoint(FramePoint3D contactPointPosition, FrameVector3D surfaceNormal)
+   public void addContactPoint(Point3DReadOnly contactPointPosition, Vector3DReadOnly surfaceNormal)
    {
-      this.contactPointPositions.add(contactPointPosition);
-      this.surfaceNormals.add(surfaceNormal);
+      this.contactPointPositions.add().set(contactPointPosition);
+      this.surfaceNormals.add().set(surfaceNormal);
    }
 
    public void setGravityMagnitude(double gravityMagnitude)

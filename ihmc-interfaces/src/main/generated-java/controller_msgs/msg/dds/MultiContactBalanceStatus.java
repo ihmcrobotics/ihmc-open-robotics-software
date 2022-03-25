@@ -38,6 +38,10 @@ public class MultiContactBalanceStatus extends Packet<MultiContactBalanceStatus>
             * List of the rigid-bodies in contact. This list's size and ordering corresponds to the support_polygon and contact_point_in_body lists.
             */
    public us.ihmc.idl.IDLSequence.Integer  support_rigid_body_ids_;
+   /**
+            * List of the contact surface normals in world frame.
+            */
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Vector3D>  surface_normals_in_world_;
 
    public MultiContactBalanceStatus()
    {
@@ -47,6 +51,7 @@ public class MultiContactBalanceStatus extends Packet<MultiContactBalanceStatus>
       contact_points_in_body_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (16, new geometry_msgs.msg.dds.PointPubSubType());
       support_rigid_body_ids_ = new us.ihmc.idl.IDLSequence.Integer (16, "type_2");
 
+      surface_normals_in_world_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Vector3D> (16, new geometry_msgs.msg.dds.Vector3PubSubType());
 
    }
 
@@ -65,6 +70,7 @@ public class MultiContactBalanceStatus extends Packet<MultiContactBalanceStatus>
       support_polygon_.set(other.support_polygon_);
       contact_points_in_body_.set(other.contact_points_in_body_);
       support_rigid_body_ids_.set(other.support_rigid_body_ids_);
+      surface_normals_in_world_.set(other.surface_normals_in_world_);
    }
 
    /**
@@ -128,6 +134,15 @@ public class MultiContactBalanceStatus extends Packet<MultiContactBalanceStatus>
    }
 
 
+   /**
+            * List of the contact surface normals in world frame.
+            */
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Vector3D>  getSurfaceNormalsInWorld()
+   {
+      return surface_normals_in_world_;
+   }
+
+
    public static Supplier<MultiContactBalanceStatusPubSubType> getPubSubType()
    {
       return MultiContactBalanceStatusPubSubType::new;
@@ -165,6 +180,13 @@ public class MultiContactBalanceStatus extends Packet<MultiContactBalanceStatus>
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.support_rigid_body_ids_, other.support_rigid_body_ids_, epsilon)) return false;
 
+      if (this.surface_normals_in_world_.size() != other.surface_normals_in_world_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.surface_normals_in_world_.size(); i++)
+         {  if (!this.surface_normals_in_world_.get(i).epsilonEquals(other.surface_normals_in_world_.get(i), epsilon)) return false; }
+      }
+
 
       return true;
    }
@@ -185,6 +207,7 @@ public class MultiContactBalanceStatus extends Packet<MultiContactBalanceStatus>
       if (!this.support_polygon_.equals(otherMyClass.support_polygon_)) return false;
       if (!this.contact_points_in_body_.equals(otherMyClass.contact_points_in_body_)) return false;
       if (!this.support_rigid_body_ids_.equals(otherMyClass.support_rigid_body_ids_)) return false;
+      if (!this.surface_normals_in_world_.equals(otherMyClass.surface_normals_in_world_)) return false;
 
       return true;
    }
@@ -206,7 +229,9 @@ public class MultiContactBalanceStatus extends Packet<MultiContactBalanceStatus>
       builder.append("contact_points_in_body=");
       builder.append(this.contact_points_in_body_);      builder.append(", ");
       builder.append("support_rigid_body_ids=");
-      builder.append(this.support_rigid_body_ids_);
+      builder.append(this.support_rigid_body_ids_);      builder.append(", ");
+      builder.append("surface_normals_in_world=");
+      builder.append(this.surface_normals_in_world_);
       builder.append("}");
       return builder.toString();
    }
