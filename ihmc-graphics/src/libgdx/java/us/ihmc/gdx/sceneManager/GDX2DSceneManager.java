@@ -16,10 +16,10 @@ import java.util.function.Consumer;
 
 public class GDX2DSceneManager
 {
-   private final ArrayList<GDX2DSprite> sprites = new ArrayList<>();
+   private final ArrayList<GDX2DSpriteDrawable> sprites = new ArrayList<>();
    private SpriteBatch spriteBatch;
-   private final ArrayList<Consumer<ArrayList<GDX2DSprite>>> spriteRenderableProviders = new ArrayList<>();
-   private final ConcurrentLinkedQueue<Consumer<ArrayList<GDX2DSprite>>> spriteRenderableRemovalQueue = new ConcurrentLinkedQueue();
+   private final ArrayList<Consumer<ArrayList<GDX2DSpriteDrawable>>> spriteRenderableProviders = new ArrayList<>();
+   private final ConcurrentLinkedQueue<Consumer<ArrayList<GDX2DSpriteDrawable>>> spriteRenderableRemovalQueue = new ConcurrentLinkedQueue();
 
    private InputMultiplexer inputMultiplexer;
    private GDX2DOrthographicCamera orthographicCamera;
@@ -81,12 +81,12 @@ public class GDX2DSceneManager
       spriteBatch.begin();
 
       sprites.clear();
-      for (Consumer<ArrayList<GDX2DSprite>> spriteRenderableProvider : spriteRenderableProviders)
+      for (Consumer<ArrayList<GDX2DSpriteDrawable>> spriteRenderableProvider : spriteRenderableProviders)
       {
          spriteRenderableProvider.accept(sprites);
       }
 
-      for (GDX2DSprite sprite : sprites)
+      for (GDX2DSpriteDrawable sprite : sprites)
       {
          sprite.draw(spriteBatch);
       }
@@ -140,12 +140,12 @@ public class GDX2DSceneManager
       this.onCreate = onCreate;
    }
 
-   public void addSpriteRenderableProvider(Consumer<ArrayList<GDX2DSprite>> spriteRenderableProvider)
+   public void addSpriteRenderableProvider(Consumer<ArrayList<GDX2DSpriteDrawable>> spriteRenderableProvider)
    {
       spriteRenderableProviders.add(spriteRenderableProvider);
    }
 
-   public void queueRemoveSpriteRenderableProvider(Consumer<ArrayList<GDX2DSprite>> spriteRenderableProvider)
+   public void queueRemoveSpriteRenderableProvider(Consumer<ArrayList<GDX2DSpriteDrawable>> spriteRenderableProvider)
    {
       spriteRenderableRemovalQueue.add(spriteRenderableProvider);
    }
