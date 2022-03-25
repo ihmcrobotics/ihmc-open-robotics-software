@@ -14,12 +14,11 @@ import org.junit.jupiter.api.Test;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.log.LogTools;
@@ -29,6 +28,11 @@ import us.ihmc.manipulation.planning.walkingpath.footstep.SkeletonPathFootStepPl
 import us.ihmc.manipulation.planning.walkingpath.rrtplanner.RRT2DNodeWalkingPath;
 import us.ihmc.manipulation.planning.walkingpath.rrtplanner.RRT2DPlannerWalkingPath;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.scs2.definition.visual.ColorDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.visual.MaterialDefinition;
+import us.ihmc.scs2.definition.visual.VisualDefinition;
+import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
@@ -36,7 +40,6 @@ import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObject
 import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -46,7 +49,7 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
-   private DRCSimulationTestHelper drcSimulationTestHelper;
+   private SCS2AvatarTestingSimulation simulationTestHelper;
 
    Point3D goalState;
    Point3D initialState;
@@ -60,17 +63,11 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
    @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
-//      if (!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer()) // set
-      if (simulationTestingParameters.getKeepSCSUp())
-      {
-         ThreadTools.sleepForever();
-      }
-
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcSimulationTestHelper != null)
+      if (simulationTestHelper != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
+         simulationTestHelper.finishTest();
+         simulationTestHelper = null;
       }
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
@@ -86,7 +83,7 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
 
          addBoxEnvironment(RRT2DNodeWalkingPath.boxes[0], YoAppearance.Grey());
 
-         for(int i=1;i<RRT2DNodeWalkingPath.boxes.length;i++)
+         for (int i = 1; i < RRT2DNodeWalkingPath.boxes.length; i++)
          {
             addBoxEnvironment(RRT2DNodeWalkingPath.boxes[i], YoAppearance.Red());
          }
@@ -101,8 +98,7 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
 
       public void addBoxEnvironment(RRT2DNodeWalkingPath.BoxInfo box, AppearanceDefinition app)
       {
-         EnvSet.addBox(box.centerX - box.sizeX/2, box.centerY - box.sizeY/2,
-                       box.centerX + box.sizeX/2, box.centerY + box.sizeY/2, box.sizeZ, app);
+         EnvSet.addBox(box.centerX - box.sizeX / 2, box.centerY - box.sizeY / 2, box.centerX + box.sizeX / 2, box.centerY + box.sizeY / 2, box.sizeZ, app);
       }
 
       @Override
@@ -138,14 +134,17 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
    private void setUpSimulationTestHelper(CommonAvatarEnvironmentInterface environment, DRCObstacleCourseStartingLocation startingLocation)
    {
 
-      if (drcSimulationTestHelper != null)
+      if (simulationTestHelper != null)
       {
-         drcSimulationTestHelper.destroySimulation();
+         simulationTestHelper.finishTest();
       }
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), environment);
-      drcSimulationTestHelper.setStartingLocation(startingLocation);
-      drcSimulationTestHelper.createSimulation(getSimpleRobotName());
+      SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
+                                                                                                                                             environment,
+                                                                                                                                             simulationTestingParameters);
+      simulationTestHelperFactory.setStartingLocationOffset(startingLocation.getStartingLocationOffset());
+      simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+      simulationTestHelper.start();
 
    }
 
@@ -177,221 +176,176 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
       CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface = new WalkingPathTestEnvironment();
       setUpSimulationTestHelper(commonAvatarEnvironmentInterface, selectedLocation);
 
-      SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
+      setupCamera();
 
-      setupCamera(simulationConstructionSet);
-
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      boolean success = simulationTestHelper.simulateAndWait(1.0);
       assertTrue(success);
 
       // ******************************** //
       // RRT Planning ******************* //
       // ******************************** //
 
-
       rrtPlanner.expandTreeGoal(2000);
-      LogTools.info("path has "+rrtPlanner.getOptimalPath().size()+" nodes");
+      LogTools.info("path has " + rrtPlanner.getOptimalPath().size() + " nodes");
 
-      simulationConstructionSet.addStaticLinkGraphics(getPrintNodePath(rrtPlanner.getOptimalPath(), YoAppearance.Red()));
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      simulationTestHelper.addStaticVisuals(getPrintNodePath(rrtPlanner.getOptimalPath(), ColorDefinitions.Red()));
+      success = simulationTestHelper.simulateAndWait(0.5);
       assertTrue(success);
 
       rrtPlanner.updateOptimalPath(50, 200);
-      simulationConstructionSet.addStaticLinkGraphics(getPrintNodePath(rrtPlanner.getOptimalPath(), YoAppearance.Aqua()));
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      simulationTestHelper.addStaticVisuals(getPrintNodePath(rrtPlanner.getOptimalPath(), ColorDefinitions.Aqua()));
+      success = simulationTestHelper.simulateAndWait(0.5);
       assertTrue(success);
 
-      LogTools.info("shortcut optimized path has "+rrtPlanner.getOptimalPath().size()+" nodes");
-
+      LogTools.info("shortcut optimized path has " + rrtPlanner.getOptimalPath().size() + " nodes");
 
       // footstep
       rrtPlanner.createFootStepPlanner(0.5, 0.35);
 
       SkeletonPathFootStepPlanner footStepPlanner = rrtPlanner.getFootStepPlanner();
 
-      simulationConstructionSet.addStaticLinkGraphics(getPrintSegments(footStepPlanner.pathSegmentsLeftSide.get()));
-      simulationConstructionSet.addStaticLinkGraphics(getPrintSegments(footStepPlanner.pathSegmentsRightSide.get()));
+      simulationTestHelper.addStaticVisuals(getPrintSegments(footStepPlanner.pathSegmentsLeftSide.get()));
+      simulationTestHelper.addStaticVisuals(getPrintSegments(footStepPlanner.pathSegmentsRightSide.get()));
 
       footStepPlanner.setZeroStep(RobotSide.LEFT);
       footStepPlanner.createFootSteps();
 
-      simulationConstructionSet.addStaticLinkGraphics(getPrintFootSteps(footStepPlanner.footSteps));
-      simulationConstructionSet.addStaticLinkGraphics(getPrintSphere(footStepPlanner.tempPoint, YoAppearance.Black()));
-
-
-
-
+      simulationTestHelper.addStaticVisuals(getPrintFootSteps(footStepPlanner.footSteps));
+      simulationTestHelper.addStaticVisuals(getPrintSphere(footStepPlanner.tempPoint, ColorDefinitions.Black()));
 
       // ******************************** //
       // Foot Step Planning ************* //
       // ******************************** //
-//
-//      double swingTime = 2.0;
-//      double transferTime = 0.8;
-//      int steps = 3;
-//
-//      FootstepDataListMessage footsteps = new FootstepDataListMessage(swingTime, transferTime);
-//      FootstepDataMessage footstepData;
-//      RobotSide robotSide;
-//      double footstepY;
-//      double footstepX;
-//      Point3D location;
-//      Quaternion orientation;
-//
-//      robotSide = RobotSide.LEFT;
-//      footstepX = 0.2;
-//      footstepY = 0.14;
-//      location = new Point3D(footstepX, footstepY, 0.0);
-//      orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
-//      footstepData = new FootstepDataMessage(robotSide, location, orientation);
-//      footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
-//      footsteps.add(footstepData);
-//
-//      robotSide = RobotSide.RIGHT;
-//      footstepX = 0.4;
-//      footstepY = -0.14;
-//      location = new Point3D(footstepX, footstepY, 0.0);
-//      orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
-//      footstepData = new FootstepDataMessage(robotSide, location, orientation);
-//      footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
-//      footsteps.add(footstepData);
-//
-//      robotSide = RobotSide.LEFT;
-//      footstepX = 0.4;
-//      footstepY = 0.14;
-//      location = new Point3D(footstepX, footstepY, 0.0);
-//      orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
-//      footstepData = new FootstepDataMessage(robotSide, location, orientation);
-//      footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
-//      footsteps.add(footstepData);
-//
-//      drcSimulationTestHelper.send(footsteps);
-//      double simulationTime = (swingTime + transferTime) * steps + 1.0;
+      //
+      //      double swingTime = 2.0;
+      //      double transferTime = 0.8;
+      //      int steps = 3;
+      //
+      //      FootstepDataListMessage footsteps = new FootstepDataListMessage(swingTime, transferTime);
+      //      FootstepDataMessage footstepData;
+      //      RobotSide robotSide;
+      //      double footstepY;
+      //      double footstepX;
+      //      Point3D location;
+      //      Quaternion orientation;
+      //
+      //      robotSide = RobotSide.LEFT;
+      //      footstepX = 0.2;
+      //      footstepY = 0.14;
+      //      location = new Point3D(footstepX, footstepY, 0.0);
+      //      orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
+      //      footstepData = new FootstepDataMessage(robotSide, location, orientation);
+      //      footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
+      //      footsteps.add(footstepData);
+      //
+      //      robotSide = RobotSide.RIGHT;
+      //      footstepX = 0.4;
+      //      footstepY = -0.14;
+      //      location = new Point3D(footstepX, footstepY, 0.0);
+      //      orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
+      //      footstepData = new FootstepDataMessage(robotSide, location, orientation);
+      //      footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
+      //      footsteps.add(footstepData);
+      //
+      //      robotSide = RobotSide.LEFT;
+      //      footstepX = 0.4;
+      //      footstepY = 0.14;
+      //      location = new Point3D(footstepX, footstepY, 0.0);
+      //      orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
+      //      footstepData = new FootstepDataMessage(robotSide, location, orientation);
+      //      footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
+      //      footsteps.add(footstepData);
+      //
+      //      drcSimulationTestHelper.send(footsteps);
+      //      double simulationTime = (swingTime + transferTime) * steps + 1.0;
 
-//      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+      //      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
       // ******************************** //
-
 
       LogTools.info("END!!");
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      success = simulationTestHelper.simulateAndWait(1.0);
       assertTrue(success);
 
    }
 
-   private void setupCamera(SimulationConstructionSet scs)
+   private void setupCamera()
    {
       Point3D cameraFix = new Point3D(2.0, 0.0, 1.1);
       Point3D cameraPosition = new Point3D(-5.0, 10.0, 15.0);
 
-      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
+      simulationTestHelper.setCamera(cameraFix, cameraPosition);
    }
    // ******************************** //
    // Print
    // ******************************** //
 
-
-
-   private ArrayList<Graphics3DObject> getPrintNodePath(ArrayList<RRTNode> nodePath, AppearanceDefinition app)
+   private List<VisualDefinition> getPrintNodePath(List<RRTNode> nodePath, ColorDefinition app)
    {
-      ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
+      List<VisualDefinition> ret = new ArrayList<>();
 
-      for(int i =0;i<nodePath.size()-1;i++)
+      for (int i = 0; i < nodePath.size() - 1; i++)
       {
-         ret.addAll(getPrintNodeConnection(nodePath.get(i), nodePath.get(i+1), app));
+         ret.addAll(getPrintNodeConnection(nodePath.get(i), nodePath.get(i + 1), app));
       }
 
       return ret;
    }
 
-
-   private ArrayList<Graphics3DObject> getPrintNodeConnection(RRTNode nodeOne, RRTNode nodeTwo)
+   private List<VisualDefinition> getPrintNodeConnection(RRTNode nodeOne, RRTNode nodeTwo)
    {
-      ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
-
-      Graphics3DObject nodeOneSphere = new Graphics3DObject();
-      Graphics3DObject nodeTwoSphere = new Graphics3DObject();
-
-      Graphics3DObject lineCapsule = new Graphics3DObject();
-
-      Point3D translationNodeOne = new Point3D(nodeOne.getNodeData(0), nodeOne.getNodeData(1), 0);
-      nodeOneSphere.translate(translationNodeOne);
-      nodeOneSphere.addSphere(0.05, YoAppearance.DarkGray());
-
-      Point3D translationNodeTwo = new Point3D(nodeTwo.getNodeData(0), nodeTwo.getNodeData(1), 0);
-      nodeTwoSphere.translate(translationNodeTwo);
-      nodeTwoSphere.addSphere(0.05, YoAppearance.DarkGray());
-
-      Point3D translationLine = new Point3D((nodeOne.getNodeData(0)+nodeTwo.getNodeData(0))/2, (nodeOne.getNodeData(1)+nodeTwo.getNodeData(1))/2, 0);
-      AxisAngle rotationLine = new AxisAngle(-(nodeOne.getNodeData(1)-nodeTwo.getNodeData(1)), (nodeOne.getNodeData(0)-nodeTwo.getNodeData(0)), 0, Math.PI/2);
-      lineCapsule.translate(translationLine);
-      lineCapsule.rotate(rotationLine);
-      lineCapsule.addCapsule(0.02, nodeOne.getDistance(nodeTwo), YoAppearance.Gray());
-
-      ret.add(nodeOneSphere);
-      ret.add(nodeTwoSphere);
-      ret.add(lineCapsule);
-
-      return ret;
+      return getPrintNodeConnection(nodeOne, nodeTwo, ColorDefinitions.DarkGray());
    }
 
-   private ArrayList<Graphics3DObject> getPrintNodeConnection(RRTNode nodeOne, RRTNode nodeTwo, AppearanceDefinition app)
+   private List<VisualDefinition> getPrintNodeConnection(RRTNode nodeOne, RRTNode nodeTwo, ColorDefinition color)
    {
-      ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
-
-      Graphics3DObject nodeOneSphere = new Graphics3DObject();
-      Graphics3DObject nodeTwoSphere = new Graphics3DObject();
-
-      Graphics3DObject lineCapsule = new Graphics3DObject();
+      VisualDefinitionFactory factory = new VisualDefinitionFactory();
+      MaterialDefinition materialDefinition = new MaterialDefinition(color);
 
       Point3D translationNodeOne = new Point3D(nodeOne.getNodeData(0), nodeOne.getNodeData(1), 0);
-      nodeOneSphere.translate(translationNodeOne);
-      nodeOneSphere.addSphere(0.05, app);
+      factory.appendTranslation(translationNodeOne);
+      factory.addSphere(0.05, materialDefinition);
 
       Point3D translationNodeTwo = new Point3D(nodeTwo.getNodeData(0), nodeTwo.getNodeData(1), 0);
-      nodeTwoSphere.translate(translationNodeTwo);
-      nodeTwoSphere.addSphere(0.05, app);
+      factory.identity();
+      factory.appendTranslation(translationNodeTwo);
+      factory.addSphere(0.05, materialDefinition);
 
-      Point3D translationLine = new Point3D((nodeOne.getNodeData(0)+nodeTwo.getNodeData(0))/2, (nodeOne.getNodeData(1)+nodeTwo.getNodeData(1))/2, 0);
-      AxisAngle rotationLine = new AxisAngle(-(nodeOne.getNodeData(1)-nodeTwo.getNodeData(1)), (nodeOne.getNodeData(0)-nodeTwo.getNodeData(0)), 0, Math.PI/2);
-      lineCapsule.translate(translationLine);
-      lineCapsule.rotate(rotationLine);
-      lineCapsule.addCapsule(0.02, nodeOne.getDistance(nodeTwo), app);
+      Point3D translationLine = new Point3D((nodeOne.getNodeData(0) + nodeTwo.getNodeData(0)) / 2, (nodeOne.getNodeData(1) + nodeTwo.getNodeData(1)) / 2, 0);
+      AxisAngle rotationLine = new AxisAngle(-(nodeOne.getNodeData(1) - nodeTwo.getNodeData(1)),
+                                             (nodeOne.getNodeData(0) - nodeTwo.getNodeData(0)),
+                                             0,
+                                             Math.PI / 2);
+      factory.identity();
+      factory.appendTranslation(translationLine);
+      factory.appendRotation(rotationLine);
+      factory.addCapsule(0.02, nodeOne.getDistance(nodeTwo), materialDefinition);
 
-      ret.add(nodeOneSphere);
-      ret.add(nodeTwoSphere);
-      ret.add(lineCapsule);
-
-      return ret;
+      return factory.getVisualDefinitions();
    }
 
-   private ArrayList<Graphics3DObject> getPrintFootStep(FootstepDataListMessage footsteps)
+   private List<VisualDefinition> getPrintFootStep(FootstepDataListMessage footsteps)
    {
-      ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
+      VisualDefinitionFactory factory = new VisualDefinitionFactory();
 
-      for(int i =0;i<footsteps.getFootstepDataList().size();i++)
+      for (int i = 0; i < footsteps.getFootstepDataList().size(); i++)
       {
-         Graphics3DObject singleStep = new Graphics3DObject();
-
-         singleStep.translate(footsteps.getFootstepDataList().get(i).getLocation());
-         if(footsteps.getFootstepDataList().get(i).getRobotSide() == RobotSide.RIGHT.toByte())
+         factory.identity();
+         factory.appendTranslation(footsteps.getFootstepDataList().get(i).getLocation());
+         if (footsteps.getFootstepDataList().get(i).getRobotSide() == RobotSide.RIGHT.toByte())
          {
-            singleStep.addSphere(0.05, YoAppearance.Blue());
+            factory.addSphere(0.05, new MaterialDefinition(ColorDefinitions.Blue()));
          }
          else
          {
-            singleStep.addSphere(0.05, YoAppearance.Green());
+            factory.addSphere(0.05, new MaterialDefinition(ColorDefinitions.Green()));
          }
-
-         ret.add(singleStep);
       }
-      return ret;
+      return factory.getVisualDefinitions();
    }
 
-   private Graphics3DObject getPrintFootStep(SkeletonPathFootStep footstep)
+   private List<VisualDefinition> getPrintFootStep(SkeletonPathFootStep footstep)
    {
-      Graphics3DObject ret = new Graphics3DObject();
-
       double sizeX = 0.3;
       double sizeY = 0.15;
       double sizeZ = 0.01;
@@ -400,79 +354,72 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
       AxisAngle rotation = new AxisAngle();
       rotation.appendYawRotation(footstep.getYawAngle());
 
-      ret.translate(location);
-      ret.rotate(rotation);
-      if(footstep.getRobotSide() == RobotSide.RIGHT)
+      VisualDefinitionFactory factory = new VisualDefinitionFactory();
+      factory.appendTranslation(location);
+      factory.appendRotation(rotation);
+      if (footstep.getRobotSide() == RobotSide.RIGHT)
       {
-         ret.addCube(sizeX, sizeY, sizeZ, YoAppearance.Green());
+         factory.addBox(sizeX, sizeY, sizeZ, new MaterialDefinition(ColorDefinitions.Green()));
          //PrintTools.info("R "+footstep.getLocation().getX()+" "+footstep.getLocation().getY());
       }
 
       else
       {
-         ret.addCube(sizeX, sizeY, sizeZ, YoAppearance.Blue());
+         factory.addBox(sizeX, sizeY, sizeZ, new MaterialDefinition(ColorDefinitions.Blue()));
          //PrintTools.info("L "+footstep.getLocation().getX()+" "+footstep.getLocation().getY());
       }
 
-      return ret;
+      return factory.getVisualDefinitions();
    }
 
-   private ArrayList<Graphics3DObject> getPrintFootSteps(ArrayList<SkeletonPathFootStep> footSteps)
+   private List<VisualDefinition> getPrintFootSteps(List<SkeletonPathFootStep> footSteps)
    {
-      ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
-
-      for(int i=0;i<footSteps.size();i++)
+      List<VisualDefinition> ret = new ArrayList<>();
+      for (int i = 0; i < footSteps.size(); i++)
       {
-         ret.add(getPrintFootStep(footSteps.get(i)));
-//         PrintTools.info(" "+footSteps.get(i).getLocation().getX()+" "+footSteps.get(i).getLocation().getY());
+         ret.addAll(getPrintFootStep(footSteps.get(i)));
+         //         PrintTools.info(" "+footSteps.get(i).getLocation().getX()+" "+footSteps.get(i).getLocation().getY());
       }
 
       return ret;
    }
 
-   private Graphics3DObject getPrintSphere(Point2D aPoint, AppearanceDefinition app)
+   private List<VisualDefinition> getPrintSphere(Point2D aPoint, ColorDefinition app)
    {
-      Graphics3DObject aSphere = new Graphics3DObject();
-      aSphere.translate(aPoint.getX(), aPoint.getY(), 0);
-      aSphere.addSphere(0.05, app);
-      return aSphere;
+      VisualDefinitionFactory factory = new VisualDefinitionFactory();
+      factory.appendTranslation(aPoint.getX(), aPoint.getY(), 0);
+      factory.addSphere(0.05, new MaterialDefinition(app));
+      return factory.getVisualDefinitions();
    }
 
-   private ArrayList<Graphics3DObject> getPrintSegment(Line2D pathSegment)
+   private List<VisualDefinition> getPrintSegment(Line2D pathSegment)
    {
-      ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
-
-      Graphics3DObject nodeOneSphere = new Graphics3DObject();
-      Graphics3DObject nodeTwoSphere = new Graphics3DObject();
-
-      Graphics3DObject lineCapsule = new Graphics3DObject();
+      VisualDefinitionFactory factory = new VisualDefinitionFactory();
 
       Point3D translationNodeOne = new Point3D(pathSegment.getX1(), pathSegment.getY1(), 0);
-      nodeOneSphere.translate(translationNodeOne);
-      nodeOneSphere.addSphere(0.05, YoAppearance.DarkGray());
+      factory.appendTranslation(translationNodeOne);
+      factory.addSphere(0.05, new MaterialDefinition(ColorDefinitions.DarkGray()));
 
       Point3D translationNodeTwo = new Point3D(pathSegment.getX2(), pathSegment.getY2(), 0);
-      nodeTwoSphere.translate(translationNodeTwo);
-      nodeTwoSphere.addSphere(0.05, YoAppearance.DarkGray());
+      factory.identity();
+      factory.appendTranslation(translationNodeTwo);
+      factory.addSphere(0.05, new MaterialDefinition(ColorDefinitions.DarkGray()));
 
-      Point3D translationLine = new Point3D((pathSegment.getX1()+pathSegment.getX2())/2, (pathSegment.getY1()+pathSegment.getY2())/2, 0);
-      AxisAngle rotationLine = new AxisAngle(-(pathSegment.getY1()-pathSegment.getY2()), (pathSegment.getX1()-pathSegment.getX2()), 0, Math.PI/2);
-      lineCapsule.translate(translationLine);
-      lineCapsule.rotate(rotationLine);
-      lineCapsule.addCapsule(0.02, pathSegment.getP1().distance(pathSegment.getP2()), YoAppearance.Gray());
+      Point3D translationLine = new Point3D((pathSegment.getX1() + pathSegment.getX2()) / 2, (pathSegment.getY1() + pathSegment.getY2()) / 2, 0);
+      AxisAngle rotationLine = new AxisAngle(-(pathSegment.getY1() - pathSegment.getY2()), (pathSegment.getX1() - pathSegment.getX2()), 0, Math.PI / 2);
+      factory.identity();
+      factory.appendTranslation(translationLine);
+      factory.appendRotation(rotationLine);
+      factory.addCapsule(0.02, pathSegment.getP1().distance(pathSegment.getP2()), new MaterialDefinition(ColorDefinitions.Gray()));
 
-      ret.add(nodeOneSphere);
-      ret.add(nodeTwoSphere);
-      ret.add(lineCapsule);
-
-      return ret;
+      return factory.getVisualDefinitions();
    }
 
-   private ArrayList<Graphics3DObject> getPrintSegments(ArrayList<Line2D> pathSegments)
+   private List<VisualDefinition> getPrintSegments(ArrayList<Line2D> pathSegments)
    {
-      ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
+      List<VisualDefinition> ret = new ArrayList<>();
 
-      for(int i =0;i<pathSegments.size();i++)
+      for (int i = 0; i < pathSegments.size(); i++)
       {
          ret.addAll(getPrintSegment(pathSegments.get(i)));
       }
