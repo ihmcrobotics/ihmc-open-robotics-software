@@ -195,7 +195,7 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
       Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
       RobotSide side = RobotSide.LEFT;
 
-      walkForward(16);
+      walkForward(18);
 
       StateTransitionCondition condition = time -> swingStartConditions.get(side).testCondition(time) && footstepsCompletedPerSide.get(side).get() > 0;
 
@@ -212,7 +212,7 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
       footstepsCompletedPerSide.get(side).set(0);
       condition = time -> swingStartConditions.get(side).testCondition(time) && footstepsCompletedPerSide.get(side).get() > 0;
 
-      testPush(forceDirection, 0.6 * pushChangeInVelocity, 0.8, condition, swingTime, 4);
+      testPush(forceDirection, 0.7 * pushChangeInVelocity, 0.8, condition, swingTime, 4);
    }
 
    @Test
