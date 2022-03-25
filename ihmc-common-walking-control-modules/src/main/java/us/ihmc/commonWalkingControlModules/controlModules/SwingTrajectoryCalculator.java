@@ -38,6 +38,7 @@ public class SwingTrajectoryCalculator
 
    private final TwoWaypointSwingGenerator swingTrajectoryOptimizer;
 
+   private final MovingReferenceFrame pelvisFrame;
    private final MovingReferenceFrame soleFrame;
    private final ReferenceFrame oppositeSoleFrame;
    private final ReferenceFrame oppositeSoleZUpFrame;
@@ -57,6 +58,7 @@ public class SwingTrajectoryCalculator
 
    private final FramePoint3D initialPosition = new FramePoint3D();
    private final FrameVector3D initialLinearVelocity = new FrameVector3D();
+   private final FrameVector3D footCurrentVelocity = new FrameVector3D();
    private final FrameQuaternion initialOrientation = new FrameQuaternion();
    private final FrameVector3D initialAngularVelocity = new FrameVector3D();
 
@@ -88,6 +90,7 @@ public class SwingTrajectoryCalculator
       double defaultSwingHeightFromStanceFoot = walkingControllerParameters.getSteppingParameters().getDefaultSwingHeightFromStanceFoot();
       double customWaypointAngleThreshold = walkingControllerParameters.getSteppingParameters().getCustomWaypointAngleThreshold();
 
+      pelvisFrame = controllerToolbox.getReferenceFrames().getPelvisFrame();
       soleFrame = controllerToolbox.getReferenceFrames().getSoleFrame(robotSide);
       oppositeSoleFrame = controllerToolbox.getReferenceFrames().getSoleFrame(robotSide.getOppositeSide());
       oppositeSoleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(robotSide.getOppositeSide());
@@ -236,9 +239,13 @@ public class SwingTrajectoryCalculator
    public void setInitialConditionsToCurrent()
    {
       currentStateProvider.getPosition(initialPosition);
-      currentStateProvider.getLinearVelocity(initialLinearVelocity);
+      currentStateProvider.getLinearVelocity(footCurrentVelocity);
       currentStateProvider.getOrientation(initialOrientation);
       currentStateProvider.getAngularVelocity(initialAngularVelocity);
+
+      initialLinearVelocity.setIncludingFrame(pelvisFrame.getTwistOfFrame().getLinearPart());
+      initialLinearVelocity.changeFrame(worldFrame);
+      initialLinearVelocity.add(footCurrentVelocity);
 
       if (swingTrajectoryParameters.ignoreSwingInitialAngularVelocityZ())
       {
