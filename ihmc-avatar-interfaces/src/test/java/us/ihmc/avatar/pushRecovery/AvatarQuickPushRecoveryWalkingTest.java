@@ -195,12 +195,12 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
       Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
       RobotSide side = RobotSide.LEFT;
 
-      walkForward(18);
+      walkForward(16);
 
       StateTransitionCondition condition = time -> swingStartConditions.get(side).testCondition(time) && footstepsCompletedPerSide.get(side).get() > 0;
 
       // apply the push
-      testPush(forceDirection, pushChangeInVelocity, 0.5, condition, swingTime, 4);
+      testPush(forceDirection, pushChangeInVelocity, 0.5, condition, swingTime, 5);
 
       // reset and queue an early push
       footstepsCompletedPerSide.get(side).set(0);
