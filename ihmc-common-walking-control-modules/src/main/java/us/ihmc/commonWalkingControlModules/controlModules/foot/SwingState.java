@@ -12,11 +12,14 @@ import us.ihmc.commonWalkingControlModules.configurations.YoSwingTrajectoryParam
 import us.ihmc.commonWalkingControlModules.controlModules.SwingTrajectoryCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.leapOfFaith.FootLeapOfFaithModule;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPoseTrajectoryGenerator;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -149,15 +152,12 @@ public class SwingState extends AbstractFootControlState
    private final YoFrameVector3D touchdownDesiredLinearAcceleration;
 
    private final OneDoFJointBasics kneeJoint;
-   private final OneDoFJointBasics ankleJoint;
    private final YoDouble kickOffVelocity;
-   private final YoDouble kickOffWeight;
    private final YoDouble kickOffDuration;
    private final YoPDGains kickOffGains;
-   private final OneDoFJointFeedbackControlCommand kneeKickOffCommand = new OneDoFJointFeedbackControlCommand();
-   private final OneDoFJointFeedbackControlCommand ankleKickOffCommand = new OneDoFJointFeedbackControlCommand();
 
    private final FeedbackControlCommandList feedbackControlCommandList = new FeedbackControlCommandList();
+   private final JointspaceAccelerationCommand jointspaceAccelerationCommand = new JointspaceAccelerationCommand();
 
    public SwingState(FootControlHelper footControlHelper, PIDSE3GainsReadOnly gains, YoRegistry registry)
    {
@@ -202,21 +202,13 @@ public class SwingState extends AbstractFootControlState
       changeControlFrame(anklePoseInFoot);
 
       kickOffVelocity = new YoDouble(namePrefix + "KickOffVelocity", registry);
-      kickOffWeight = new YoDouble(namePrefix + "KickOffWeight", registry);
       kickOffGains = new YoPDGains(namePrefix + "KickOffGains", registry);
       kickOffDuration = new YoDouble(namePrefix + "KickOffDuration", registry);
-      kickOffGains.setKd(150);
-      kickOffVelocity.set(-1.0);
-      kickOffWeight.set(25.0);
-      kickOffDuration.set(0.1);
+      kickOffGains.setKd(50);
+      kickOffVelocity.set(3.0);
+      kickOffDuration.set(0.15);
       FullHumanoidRobotModel fullRobotModel = footControlHelper.getHighLevelHumanoidControllerToolbox().getFullRobotModel();
       kneeJoint = fullRobotModel.getLegJoint(footControlHelper.getRobotSide(), LegJointName.KNEE_PITCH);
-      ankleJoint = fullRobotModel.getLegJoint(footControlHelper.getRobotSide(), LegJointName.ANKLE_PITCH);
-      kneeKickOffCommand.setJoint(kneeJoint);
-      kneeKickOffCommand.setControlMode(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
-      ankleKickOffCommand.setJoint(ankleJoint);
-      ankleKickOffCommand.setControlMode(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
-
 
       touchdownDesiredLinearVelocity = new YoFrameVector3D(namePrefix + "TouchdownDesiredLinearVelocity", worldFrame, registry);
 
@@ -428,15 +420,11 @@ public class SwingState extends AbstractFootControlState
       spatialFeedbackControlCommand.setScaleSecondaryTaskJointWeight(scaleSecondaryJointWeights.getBooleanValue(), secondaryJointWeightScale.getDoubleValue());
       spatialFeedbackControlCommand.setGains(gains);
 
-      kneeKickOffCommand.setReferenceVelocity(kickOffVelocity.getDoubleValue());
-      if (currentTime.getValue() < kickOffDuration.getValue())
-         kneeKickOffCommand.setWeightForSolver(kickOffWeight.getDoubleValue());
-      else
-         kneeKickOffCommand.setWeightForSolver(0.0);
-      kneeKickOffCommand.setGains(kickOffGains);
-      ankleKickOffCommand.setReferenceVelocity(kickOffVelocity.getDoubleValue());
-      ankleKickOffCommand.setWeightForSolver(kickOffWeight.getDoubleValue());
-      ankleKickOffCommand.setGains(kickOffGains);
+      double desiredAcceleration = kickOffGains.getKd() * (kickOffVelocity.getDoubleValue() - kneeJoint.getQd());
+
+      jointspaceAccelerationCommand.clear();
+      jointspaceAccelerationCommand.addJoint(kneeJoint, desiredAcceleration);
+      jointspaceAccelerationCommand.setConstraintType(ConstraintType.GEQ_INEQUALITY);
 
       yoDesiredPosition.setMatchingFrame(desiredPosition);
       yoDesiredLinearVelocity.setMatchingFrame(desiredLinearVelocity);
@@ -846,7 +834,12 @@ public class SwingState extends AbstractFootControlState
    @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return null;
+      if (currentTime.getDoubleValue() > kickOffDuration.getDoubleValue())
+         return null;
+      if (jointspaceAccelerationCommand.getDesiredAcceleration(0).get(0) < 0.0)
+         return null;
+
+      return jointspaceAccelerationCommand;
    }
 
    @Override
@@ -854,9 +847,6 @@ public class SwingState extends AbstractFootControlState
    {
       feedbackControlCommandList.clear();
       feedbackControlCommandList.addCommand(spatialFeedbackControlCommand);
-      feedbackControlCommandList.addCommand(kneeKickOffCommand);
-//         if (ankleJoint.getQd() < kickOffVelocity.getValue())
-//            feedbackControlCommandList.addCommand(ankleKickOffCommand);
       return feedbackControlCommandList;
    }
 
