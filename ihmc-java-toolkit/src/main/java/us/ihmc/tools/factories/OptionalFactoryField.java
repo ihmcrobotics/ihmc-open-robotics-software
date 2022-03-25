@@ -14,21 +14,21 @@ public class OptionalFactoryField<T> extends FactoryField<T>
       this(fieldName);
       setDefaultValue(defaultValue);
    }
-   
+
    public void setDefaultValue(T defaultValue)
    {
       Objects.requireNonNull(defaultValue);
-      
+
       if (!hasBeenSet)
       {
          set(defaultValue);
       }
    }
-   
+
    public boolean hasValue()
    {
       checkNotDisposed();
-      
+
       return hasBeenSet;
    }
 }
