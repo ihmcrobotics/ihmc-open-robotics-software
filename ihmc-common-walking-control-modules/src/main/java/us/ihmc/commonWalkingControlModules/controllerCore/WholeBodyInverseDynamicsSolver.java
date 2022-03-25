@@ -19,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.QPObjectiveCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
@@ -348,6 +349,9 @@ public class WholeBodyInverseDynamicsSolver
 
          switch (command.getCommandType())
          {
+            case QP_INPUT:
+               optimizationControlModule.submitQPObjectiveCommand((QPObjectiveCommand) command);
+               break;
             case TASKSPACE:
                optimizationControlModule.submitSpatialAccelerationCommand((SpatialAccelerationCommand) command);
                break;

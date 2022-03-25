@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.QPObjectiveCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
@@ -321,6 +322,13 @@ public class InverseDynamicsOptimizationControlModule
                                               dynamicsMatrixCalculator.getTorqueMinimizationObjective());
    }
 
+   public void submitQPObjectiveCommand(QPObjectiveCommand command)
+   {
+      boolean success = motionQPInputCalculator.convertQPObjectiveCommand(command, motionQPInput);
+      if (success)
+         qpSolver.addMotionInput(motionQPInput);
+   }
+   
    public void submitSpatialAccelerationCommand(SpatialAccelerationCommand command)
    {
       boolean success = motionQPInputCalculator.convertSpatialAccelerationCommand(command, motionQPInput);
