@@ -38,8 +38,8 @@ public class GDX2DSprite
    {
       float x = sprite.getX();
       float y = sprite.getY();
-      float originX = 0.0f;
-      float originY = 0.0f;
+      float originX = sprite.getWidth() / 2.0f;
+      float originY = sprite.getHeight() / 2.0f;
       float width = sprite.getWidth();
       float height = sprite.getHeight();
       float scaleX = sprite.getScaleX();
@@ -79,7 +79,9 @@ public class GDX2DSprite
 
    public void setHeightPreserveScale(double height)
    {
-      float heightToWidthRatio = texture.getHeight() / texture.getWidth();
+      int textureHeight = texture.getHeight();
+      int textureWidth = texture.getWidth();
+      float heightToWidthRatio = textureHeight / (float) textureWidth;
       float newWidth = (float) height / heightToWidthRatio;
       float newHeight = (float) height;
       sprite.setSize(newWidth, newHeight);
