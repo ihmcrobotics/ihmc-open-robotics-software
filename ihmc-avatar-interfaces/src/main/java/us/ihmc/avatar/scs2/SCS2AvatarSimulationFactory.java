@@ -108,10 +108,10 @@ public class SCS2AvatarSimulationFactory
    protected final OptionalFactoryField<Integer> simulationDataRecordTickPeriod = new OptionalFactoryField<>("simulationDataRecordTickPeriod");
    protected final OptionalFactoryField<Boolean> usePerfectSensors = new OptionalFactoryField<>("usePerfectSensors", false);
    protected final OptionalFactoryField<SCS2JointDesiredOutputWriterFactory> outputWriterFactory = new OptionalFactoryField<>("outputWriterFactory",
-                                                                                                                            (in,
-                                                                                                                             out) -> new SCS2OutputWriter(in,
-                                                                                                                                                          out,
-                                                                                                                                                          true));
+                                                                                                                              (in,
+                                                                                                                               out) -> new SCS2OutputWriter(in,
+                                                                                                                                                            out,
+                                                                                                                                                            true));
    protected final OptionalFactoryField<Boolean> runMultiThreaded = new OptionalFactoryField<>("runMultiThreaded", true);
    protected final OptionalFactoryField<Boolean> initializeEstimatorToActual = new OptionalFactoryField<>("initializeEstimatorToActual", true);
    protected final OptionalFactoryField<Boolean> showGUI = new OptionalFactoryField<>("showGUI", true);
@@ -549,7 +549,12 @@ public class SCS2AvatarSimulationFactory
    public HighLevelHumanoidControllerFactory setDefaultHighLevelHumanoidControllerFactory(boolean useVelocityAndHeadingScript,
                                                                                           HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters)
    {
-      HighLevelHumanoidControllerFactory controllerFactory = setDefaultHighLevelHumanoidControllerFactory();
+      HighLevelHumanoidControllerFactory controllerFactory;
+
+      if (highLevelHumanoidControllerFactory.hasBeenSet())
+         controllerFactory = highLevelHumanoidControllerFactory.get();
+      else
+         controllerFactory = setDefaultHighLevelHumanoidControllerFactory();
       controllerFactory.createComponentBasedFootstepDataMessageGenerator(useVelocityAndHeadingScript, walkingScriptParameters);
       return controllerFactory;
    }
