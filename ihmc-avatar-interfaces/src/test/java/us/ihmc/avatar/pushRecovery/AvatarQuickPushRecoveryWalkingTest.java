@@ -281,6 +281,9 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, flatGround);
       drcSimulationTestHelper.createSimulation("DRCSimpleFlatGroundScriptTest");
       ((YoBoolean) drcSimulationTestHelper.getYoVariable("controllerAllowStepAdjustment")).set(true);
+      ((YoBoolean) drcSimulationTestHelper.getYoVariable("controllerSwingSpeedUpEnabled")).set(true);
+      ((YoBoolean) drcSimulationTestHelper.getYoVariable("leftFootSwingIsSpeedUpEnabled")).set(true);
+      ((YoBoolean) drcSimulationTestHelper.getYoVariable("rightFootSwingIsSpeedUpEnabled")).set(true);
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       pushRobotController = new PushRobotController(drcSimulationTestHelper.getRobot(), fullRobotModel);
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
