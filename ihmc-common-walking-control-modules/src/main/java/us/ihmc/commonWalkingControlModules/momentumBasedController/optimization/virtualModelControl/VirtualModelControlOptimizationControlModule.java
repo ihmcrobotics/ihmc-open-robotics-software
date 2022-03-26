@@ -12,6 +12,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.QPObjectiveCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.QPObjectiveCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ExternalWrenchHandler;
@@ -180,6 +182,13 @@ public class VirtualModelControlOptimizationControlModule
       return virtualModelControlSolution;
    }
 
+   public void submitQPObjectiveCommand(QPObjectiveCommand command)
+   {
+      boolean success = convertQPObjectiveCommand(command, motionQPInput);
+      if (success)
+         qpSolver.addMotionInput(motionQPInput);
+   }
+   
    public void submitMomentumRateCommand(MomentumRateCommand command)
    {
       boolean success = convertMomentumRateCommand(command, momentumQPInput);
@@ -225,6 +234,40 @@ public class VirtualModelControlOptimizationControlModule
          qpSolver.setMomentumAccelerationRegularization(command.getMomentumAccelerationWeight());
    }
 
+   public boolean convertQPObjectiveCommand(QPObjectiveCommand commandToConvert, QPInputTypeA qpInputToPack)
+   {
+      DMatrixRMaj jacobian = commandToConvert.getJacobian();
+      DMatrixRMaj objective = commandToConvert.getObjective();
+      DMatrixRMaj selectionMatrix = commandToConvert.getSelectionMatrix();
+      DMatrixRMaj weightMatrix = commandToConvert.getWeightMatrix();
+
+      int taskSize = selectionMatrix.getNumRows();
+
+      if (taskSize == 0)
+         return false;
+
+      if (jacobian.getNumCols() != numberOfDoFs)
+      {
+         LogTools.error("Jacobian is not of the right size: {}, expected: {}", jacobian.getNumCols(), numberOfDoFs);
+         return false;
+      }
+
+      qpInputToPack.reshape(taskSize);
+      qpInputToPack.setConstraintType(ConstraintType.OBJECTIVE);
+
+      qpInputToPack.setUseWeightScalar(false);
+      CommonOps_DDRM.mult(selectionMatrix, weightMatrix, tempTaskWeightSubspace);
+      CommonOps_DDRM.multTransB(tempTaskWeightSubspace, selectionMatrix, qpInputToPack.taskWeightMatrix);
+
+      CommonOps_DDRM.mult(selectionMatrix, objective, qpInputToPack.taskObjective);
+
+      tempTaskJacobian.reshape(taskSize, jacobianCalculator.getNumberOfDegreesOfFreedom());
+      CommonOps_DDRM.mult(selectionMatrix, jacobian, tempTaskJacobian);
+
+      recordTaskJacobian(qpInputToPack.taskJacobian);
+      return true;
+   }
+   
    /**
     * Converts a {@link MomentumRateCommand} into a {@link QPInputTypeA}.
     *

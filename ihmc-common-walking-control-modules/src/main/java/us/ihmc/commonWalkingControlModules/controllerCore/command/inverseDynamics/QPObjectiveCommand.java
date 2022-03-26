@@ -4,8 +4,9 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 
-public class QPObjectiveCommand implements InverseDynamicsCommand<QPObjectiveCommand>
+public class QPObjectiveCommand implements InverseDynamicsCommand<QPObjectiveCommand>, VirtualModelControlCommand<QPObjectiveCommand>
 {
    private int commandId;
    private final DMatrixRMaj objective = new DMatrixRMaj(1, 1);
