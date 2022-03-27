@@ -19,7 +19,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPoseTrajectoryGenerator;
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
@@ -29,7 +28,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
@@ -40,7 +38,6 @@ import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
-import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
 import us.ihmc.robotics.math.filters.RateLimitedYoFramePose;
 import us.ihmc.robotics.math.trajectories.*;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
@@ -51,7 +48,6 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -153,10 +149,7 @@ public class SwingState extends AbstractFootControlState
    private final PoseReferenceFrame axialFrame = new PoseReferenceFrame("axialFrame", worldFrame);
 
    private final OneDoFJointBasics kneeJoint;
-   private final YoDouble kickOffVelocity;
-   private final YoDouble kickOffDuration;
-   private final YoDouble kickOffKd;
-   private final YoDouble kickOffAcceleration;
+   private final YoDouble liftOffKneeAcceleration;
 
    private final FeedbackControlCommandList feedbackControlCommandList = new FeedbackControlCommandList();
    private final JointspaceAccelerationCommand jointspaceAccelerationCommand = new JointspaceAccelerationCommand();
@@ -203,13 +196,7 @@ public class SwingState extends AbstractFootControlState
       anklePoseInFoot.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
       changeControlFrame(anklePoseInFoot);
 
-      kickOffVelocity = new YoDouble(namePrefix + "KickOffVelocity", registry);
-      kickOffKd = new YoDouble(namePrefix + "KickOffKd", registry);
-      kickOffDuration = new YoDouble(namePrefix + "KickOffDuration", registry);
-      kickOffAcceleration = new YoDouble(namePrefix + "KickOffAcceleration", registry);
-      kickOffKd.set(50.0);
-      kickOffVelocity.set(3.0);
-      kickOffDuration.set(0.05);
+      liftOffKneeAcceleration = new YoDouble(namePrefix + "LiftOffKneeAcceleration", registry);
       FullHumanoidRobotModel fullRobotModel = footControlHelper.getHighLevelHumanoidControllerToolbox().getFullRobotModel();
       kneeJoint = fullRobotModel.getLegJoint(footControlHelper.getRobotSide(), LegJointName.KNEE_PITCH);
 
@@ -429,19 +416,25 @@ public class SwingState extends AbstractFootControlState
       spatialFeedbackControlCommand.setGainsFrames(null, axialFrame);
 //      spatialFeedbackControlCommand.getSpatialAccelerationCommand().getWeightMatrix().getLinearPart().setWeightFrame(axialFrame);
 
-      if (currentTime.getValue() < kickOffDuration.getValue() && kneeJoint.getQd() < kickOffVelocity.getValue())
-         kickOffAcceleration.set(kickOffKd.getDoubleValue() * (kickOffVelocity.getDoubleValue() - kneeJoint.getQd()));
-      else if (currentTime.getValue() < kickOffDuration.getValue())
-         kickOffAcceleration.set(Double.NEGATIVE_INFINITY);
-      else
-         kickOffAcceleration.set(Double.NEGATIVE_INFINITY);
 
-      jointspaceAccelerationCommand.clear();
-      jointspaceAccelerationCommand.addJoint(kneeJoint, kickOffAcceleration.getDoubleValue());
-      jointspaceAccelerationCommand.setConstraintType(ConstraintType.GEQ_INEQUALITY);
+      updateLiftOffKneeAcceleration();
 
       yoDesiredPosition.setMatchingFrame(desiredPosition);
       yoDesiredLinearVelocity.setMatchingFrame(desiredLinearVelocity);
+   }
+
+   private void updateLiftOffKneeAcceleration()
+   {
+      double liftOffVelocityError = swingTrajectoryParameters.getLiftOffKneeDesiredVelocity() - kneeJoint.getQd();
+      if (currentTime.getValue() < swingTrajectoryParameters.getLiftOffPhaseDuration()
+          && liftOffVelocityError > 0.0)
+         liftOffKneeAcceleration.set(swingTrajectoryParameters.getLiftOffKd() * liftOffVelocityError);
+      else
+         liftOffKneeAcceleration.set(Double.NEGATIVE_INFINITY);
+
+      jointspaceAccelerationCommand.clear();
+      jointspaceAccelerationCommand.addJoint(kneeJoint, liftOffKneeAcceleration.getDoubleValue());
+      jointspaceAccelerationCommand.setConstraintType(ConstraintType.GEQ_INEQUALITY);
    }
 
    private void computeAndPackTrajectory(double timeInState)
@@ -866,9 +859,11 @@ public class SwingState extends AbstractFootControlState
    @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      if (currentTime.getDoubleValue() > kickOffDuration.getDoubleValue())
+      if (!swingTrajectoryParameters.addLiftOffKneeAcceleration())
          return null;
-      if (jointspaceAccelerationCommand.getDesiredAcceleration(0).get(0) < 0.0)
+      if (currentTime.getDoubleValue() > swingTrajectoryParameters.getLiftOffPhaseDuration())
+         return null;
+      if (liftOffKneeAcceleration.getDoubleValue() < 0.0)
          return null;
 
       return jointspaceAccelerationCommand;
