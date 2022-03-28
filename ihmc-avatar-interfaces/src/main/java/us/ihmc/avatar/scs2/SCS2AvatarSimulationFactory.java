@@ -182,6 +182,11 @@ public class SCS2AvatarSimulationFactory
 
       robotDefinition = robotModel.getRobotDefinition();
 
+      if (useBulletPhysicsEngine.get())
+      {
+         SCS2BulletSimulationTools.fixHumanoidCollisionGroupsMasksToPreventSelfCollision(robotDefinition);
+      }
+
       if (!enableSimulatedRobotDamping.get())
       {
          for (JointDefinition joint : robotDefinition.getAllJoints())
