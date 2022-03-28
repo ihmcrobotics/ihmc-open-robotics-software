@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
+package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
 import org.ejml.data.DMatrix1Row;
 
@@ -13,7 +13,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
-public class ICPOptimizationControllerHelper
+public class ICPControllerHelper
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final Vector2dZUpFrame icpVelocityDirectionFrame = new Vector2dZUpFrame("icpVelocityDirectionFrame", worldFrame);
@@ -93,7 +93,7 @@ public class ICPOptimizationControllerHelper
       valuesToPack.set(1, 1, frameMatrix3D.getElement(1, 1));
    }
 
-   private class Vector2dZUpFrame extends ReferenceFrame
+   private static class Vector2dZUpFrame extends ReferenceFrame
    {
       private final FrameVector2D xAxis;
       private final Vector3D x = new Vector3D();

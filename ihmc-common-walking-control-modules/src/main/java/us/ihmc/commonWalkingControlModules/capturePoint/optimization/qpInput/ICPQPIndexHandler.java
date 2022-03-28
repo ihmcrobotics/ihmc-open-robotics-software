@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationQPSolver;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
