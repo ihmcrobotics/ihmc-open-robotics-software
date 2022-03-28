@@ -263,25 +263,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    }
 
    @Override
-   public ICPControlGains createICPControlGains()
-   {
-      ICPControlGains gains = new ICPControlGains();
-
-      double kpParallel = 2.5;
-      double kpOrthogonal = 1.5;
-      double ki = 0.0;
-      double kiBleedOff = 0.0;
-
-      gains.setKpParallelToMotion(kpParallel);
-      gains.setKpOrthogonalToMotion(kpOrthogonal);
-      gains.setKi(ki);
-      gains.setIntegralLeakRatio(kiBleedOff);
-
-      //      if (runningOnRealRobot) gains.setFeedbackPartMaxRate(1.0);
-      return gains;
-   }
-
-   @Override
    public PDGains getCoMHeightControlGains()
    {
       PDGains gains = new PDGains();

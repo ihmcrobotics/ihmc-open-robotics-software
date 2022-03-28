@@ -197,29 +197,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    }
 
    @Override
-   public ICPControlGains createICPControlGains()
-   {
-      ICPControlGains gains = new ICPControlGains();
-
-      boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
-
-      double kpOrthogonal = runningOnRealRobot ? 1.9 : 1.5;
-      double kpParallel = runningOnRealRobot ? 2.0 : 2.5;
-      double ki = runningOnRealRobot ? 0.0 : 0.0;
-      double kiBleedOff = 0.9;
-
-      gains.setKpParallelToMotion(kpParallel);
-      gains.setKpOrthogonalToMotion(kpOrthogonal);
-      gains.setKi(ki);
-      gains.setIntegralLeakRatio(kiBleedOff);
-
-      if (target == RobotTarget.REAL_ROBOT)
-         gains.setFeedbackPartMaxRate(1.5);
-
-      return gains;
-   }
-
-   @Override
    public PDGains getCoMHeightControlGains()
    {
       PDGains gains = new PDGains();
