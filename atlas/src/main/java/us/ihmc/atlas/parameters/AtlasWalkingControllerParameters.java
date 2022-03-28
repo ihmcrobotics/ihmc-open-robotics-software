@@ -9,7 +9,8 @@ import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
@@ -63,7 +64,8 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    private LegConfigurationParameters legConfigurationParameters;
    private ToeOffParameters toeOffParameters;
    private SwingTrajectoryParameters swingTrajectoryParameters;
-   private ICPOptimizationParameters icpOptimizationParameters;
+   private ICPControllerParameters icpOptimizationParameters;
+   private StepAdjustmentParameters stepAdjustmentParameters;
    private AtlasSteppingParameters steppingParameters;
    private LeapOfFaithParameters leapOfFaithParameters;
 
@@ -92,7 +94,8 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       steppingParameters = new AtlasSteppingParameters(jointMap);
       leapOfFaithParameters = new AtlasLeapOfFaithParameters(runningOnRealRobot);
 
-      icpOptimizationParameters = new AtlasICPOptimizationParameters(runningOnRealRobot);
+      icpOptimizationParameters = new AtlasICPControllerParameters(runningOnRealRobot);
+      stepAdjustmentParameters = new AtlasStepAdjustmentParameters();
 
       spineJointLimitParameters = new JointLimitParameters();
       spineJointLimitParameters.setMaxAbsJointVelocity(9.0);
@@ -586,9 +589,16 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
-   public ICPOptimizationParameters getICPOptimizationParameters()
+   public ICPControllerParameters getICPControllerParameters()
    {
       return icpOptimizationParameters;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public StepAdjustmentParameters getStepAdjustmentParameters()
+   {
+      return stepAdjustmentParameters;
    }
 
    /** {@inheritDoc} */
@@ -633,7 +643,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       this.swingTrajectoryParameters = swingTrajectoryParameters;
    }
 
-   public void setIcpOptimizationParameters(ICPOptimizationParameters icpOptimizationParameters)
+   public void setIcpOptimizationParameters(ICPControllerParameters icpOptimizationParameters)
    {
       this.icpOptimizationParameters = icpOptimizationParameters;
    }

@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
+package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
@@ -7,7 +7,7 @@ import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
-public class ICPOptimizationCoPConstraintHandler
+public class ICPCoPConstraintHandler
 {
    private final BipedSupportPolygons bipedSupportPolygons;
    private final ICPControlPolygons icpControlPolygons;
@@ -19,11 +19,11 @@ public class ICPOptimizationCoPConstraintHandler
    private int numberOfVertices = 0;
    private boolean hasSupportPolygonChanged;
 
-   public ICPOptimizationCoPConstraintHandler(BipedSupportPolygons bipedSupportPolygons,
-                                              ICPControlPolygons icpControlPolygons,
-                                              BooleanProvider useICPControlPolygons,
-                                              boolean hasICPControlPolygons,
-                                              YoRegistry parentRegistry)
+   public ICPCoPConstraintHandler(BipedSupportPolygons bipedSupportPolygons,
+                                  ICPControlPolygons icpControlPolygons,
+                                  BooleanProvider useICPControlPolygons,
+                                  boolean hasICPControlPolygons,
+                                  YoRegistry parentRegistry)
    {
       this.bipedSupportPolygons = bipedSupportPolygons;
       this.icpControlPolygons = icpControlPolygons;

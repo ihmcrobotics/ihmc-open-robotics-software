@@ -1,9 +1,8 @@
-package us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput;
+package us.ihmc.commonWalkingControlModules.capturePoint.controller.qpInput;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.MatrixFeatures_DDRM;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationQPSolver;
 
 /**
  * Class that represents any objective task that is submitted to the {@link ICPOptimizationQPSolver}.

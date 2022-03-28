@@ -8,13 +8,13 @@ import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
-import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
+import us.ihmc.atlas.parameters.AtlasICPControllerParameters;
 import us.ihmc.atlas.parameters.AtlasToeOffParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.roughTerrainWalking.HumanoidPointyRocksEnvironmentContactsTest;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -111,7 +111,7 @@ public class AtlasPointyRocksEnvironmentContactsTest extends HumanoidPointyRocks
       }
 
       @Override
-      public ICPOptimizationParameters getICPOptimizationParameters()
+      public ICPControllerParameters getICPControllerParameters()
       {
          return icpOptimizationParameters;
       }
@@ -123,7 +123,7 @@ public class AtlasPointyRocksEnvironmentContactsTest extends HumanoidPointyRocks
       }
    }
 
-   private class TestICPOptimizationParameters extends AtlasICPOptimizationParameters
+   private class TestICPOptimizationParameters extends AtlasICPControllerParameters
    {
       public TestICPOptimizationParameters()
       {
