@@ -1,18 +1,19 @@
-package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
+package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
 import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;
 
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerHelper;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.Assert;
 
-public class ICPOptimizationControllerHelperTest
+public class ICPControllerHelperTest
 {
    @Test
    public void testTransformFromDynamicsFrame()
    {
-      ICPOptimizationControllerHelper helper = new ICPOptimizationControllerHelper();
+      ICPControllerHelper helper = new ICPControllerHelper();
 
       FrameVector2D icpVelocity = new FrameVector2D(ReferenceFrame.getWorldFrame(), 0.1, 0.1);
       DMatrixRMaj gainsToPack = new DMatrixRMaj(2, 2);

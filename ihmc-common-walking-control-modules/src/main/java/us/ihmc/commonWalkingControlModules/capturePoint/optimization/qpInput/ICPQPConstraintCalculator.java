@@ -2,8 +2,6 @@ package us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput;
 
 import org.ejml.data.DMatrixRMaj;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationQPSolver;
-
 /**
  * This class is used by the {@link ICPOptimizationQPSolver} to calculate variable constraints for the QP Solver
  */

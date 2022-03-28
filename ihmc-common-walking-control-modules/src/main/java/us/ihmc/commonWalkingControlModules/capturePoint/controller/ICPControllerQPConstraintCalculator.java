@@ -5,7 +5,6 @@ import static us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPCon
 
 import org.ejml.data.DMatrixRMaj;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationQPSolver;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ICPInequalityInput;
 
 /**
