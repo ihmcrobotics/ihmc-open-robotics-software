@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
+import us.ihmc.atlas.parameters.AtlasICPControllerParameters;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.angularMomentumTest.AvatarAngularMomentumWalkingTest;
@@ -31,7 +31,7 @@ public class AtlasAngularMomentumWalkingTest extends AvatarAngularMomentumWalkin
             @Override
             public ICPControllerParameters getICPOptimizationParameters()
             {
-               return new AtlasICPOptimizationParameters(false)
+               return new AtlasICPControllerParameters(false)
                {
                   @Override
                   public boolean useAngularMomentum()
