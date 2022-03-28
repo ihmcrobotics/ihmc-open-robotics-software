@@ -5,6 +5,10 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
@@ -93,8 +97,32 @@ public class ValkyrieHumanoidKinematicsToolboxControllerTest extends HumanoidKin
       contactConstraintData.handNormals.get(RobotSide.RIGHT).setIncludingFrame(poseReferenceFrame, Axis3D.Z);
       contactConstraintData.handNormals.get(RobotSide.RIGHT).changeFrame(ReferenceFrame.getWorldFrame());
 
-      contactConstraintData.nominalCenterOfMass.set(0.0, 0.0, 0.19);
-      contactConstraintData.centerOfMassSampleRadius = 0.11;
+      contactConstraintData.nominalCenterOfMass.set(0.0, -0.02, 0.19);
+      contactConstraintData.centerOfMassSampleWindowX = 0.07;
+      contactConstraintData.centerOfMassSampleWindowY = 0.13;
+
+      contactConstraintData.initialConfigurationSetup = fullRobotModel ->
+      {
+         fullRobotModel.getRootJoint().getJointPose().getOrientation().setYawPitchRoll(0.0, 1.4, 0.0);
+         fullRobotModel.getRootJoint().getJointPose().getPosition().set(-0.1, 0.0, 0.2);
+
+         RigidBodyBasics chest = fullRobotModel.getChest();
+
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
+            OneDoFJointBasics[] armJoints = MultiBodySystemTools.createOneDoFJointPath(chest, hand);
+            for (OneDoFJointBasics joint : armJoints)
+            {
+               joint.setQ(0.5 * (joint.getJointLimitLower() + joint.getJointLimitUpper()));
+            }
+
+            fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH).setQ(1.5);
+            fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_PITCH).setQ(-1.6);
+         }
+
+         fullRobotModel.updateFrames();
+      };
 
       return contactConstraintData;
    }
