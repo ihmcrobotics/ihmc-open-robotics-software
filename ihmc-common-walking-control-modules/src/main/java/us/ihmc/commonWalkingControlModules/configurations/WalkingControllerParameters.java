@@ -29,7 +29,6 @@ import us.ihmc.robotics.sensors.FootSwitchFactory;
 
 public abstract class WalkingControllerParameters
 {
-   private final LegConfigurationParameters legConfigurationParameters;
    private final JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
    private final DynamicReachabilityParameters dynamicReachabilityParameters;
    private final PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters;
@@ -42,7 +41,6 @@ public abstract class WalkingControllerParameters
       dynamicReachabilityParameters = new DynamicReachabilityParameters();
       pelvisOffsetWhileWalkingParameters = new PelvisOffsetWhileWalkingParameters();
       leapOfFaithParameters = new LeapOfFaithParameters();
-      legConfigurationParameters = new LegConfigurationParameters();
 
       kneePrivilegedConfigurationParameters = new OneDoFJointPrivilegedConfigurationParameters();
       kneePrivilegedConfigurationParameters.setConfigurationGain(40.0);
