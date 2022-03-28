@@ -2,27 +2,25 @@ package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
-public class StaticEquilibriumSolverVisualizer
+public class MultiContactSupportRegionSolverVisualizer
 {
    private static final boolean showSupportRegion = true;
 
-   public StaticEquilibriumSolverVisualizer(StaticEquilibriumSolverInput input)
+   public MultiContactSupportRegionSolverVisualizer(MultiContactSupportRegionSolverInput input)
    {
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("dummy"));
 
-      StaticSupportRegionSolver solver = new StaticSupportRegionSolver();
+      MultiContactSupportRegionSolver solver = new MultiContactSupportRegionSolver();
       scs.getRootRegistry().addChild(solver.getRegistry());
       scs.addYoGraphicsListRegistry(solver.getGraphicsListRegistry());
 
@@ -83,8 +81,8 @@ public class StaticEquilibriumSolverVisualizer
 //      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createBipedFeet();
 //      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createBipedFeet(1.0, -1.0, 0.6);
 //      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createBipedFeetWithSingleHandhold();
-      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createBipedFeetWithTwoHandholds();
+      MultiContactSupportRegionSolverInput input = MultiContactSupportRegionSolverInputExamples.createBipedFeetWithTwoHandholds();
 
-      new StaticEquilibriumSolverVisualizer(input);
+      new MultiContactSupportRegionSolverVisualizer(input);
    }
 }

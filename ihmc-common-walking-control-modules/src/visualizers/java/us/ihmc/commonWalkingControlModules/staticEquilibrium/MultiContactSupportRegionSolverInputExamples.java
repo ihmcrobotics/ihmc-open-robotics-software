@@ -7,33 +7,32 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class StaticEquilibriumSolverInputExamples
+public class MultiContactSupportRegionSolverInputExamples
 {
-   public static StaticEquilibriumSolverInput createTriangleFlatGround()
+   public static MultiContactSupportRegionSolverInput createTriangleFlatGround()
    {
       return createTriangleInput(0.0, 0.0, 0.0);
    }
 
-   public static StaticEquilibriumSolverInput createTriangleTiltedOutSlightly()
+   public static MultiContactSupportRegionSolverInput createTriangleTiltedOutSlightly()
    {
       double angle = Math.toRadians(30.0);
       return createTriangleInput(angle, angle, angle);
    }
 
-   public static StaticEquilibriumSolverInput createTriangleTiltedOutALot()
+   public static MultiContactSupportRegionSolverInput createTriangleTiltedOutALot()
    {
       double angle = Math.toRadians(50.0);
       return createTriangleInput(angle, angle, angle);
    }
 
-   public static StaticEquilibriumSolverInput createTriangleOneTiltedFullyOut()
+   public static MultiContactSupportRegionSolverInput createTriangleOneTiltedFullyOut()
    {
       double theta0 = Math.toRadians(90.0);
       double theta2 = Math.toRadians(0.0);
@@ -41,7 +40,7 @@ public class StaticEquilibriumSolverInputExamples
       return createTriangleInput(theta0, theta1, theta2);
    }
 
-   public static StaticEquilibriumSolverInput createTriangleOneTiltedFullyIn()
+   public static MultiContactSupportRegionSolverInput createTriangleOneTiltedFullyIn()
    {
       double theta0 = Math.toRadians(-90.0);
       double theta2 = Math.toRadians(0.0);
@@ -49,9 +48,9 @@ public class StaticEquilibriumSolverInputExamples
       return createTriangleInput(theta0, theta1, theta2);
    }
 
-   public static StaticEquilibriumSolverInput createFlatSquare()
+   public static MultiContactSupportRegionSolverInput createFlatSquare()
    {
-      StaticEquilibriumSolverInput input = new StaticEquilibriumSolverInput();
+      MultiContactSupportRegionSolverInput input = new MultiContactSupportRegionSolverInput();
       input.addContactPoint(new FramePoint3D(ReferenceFrame.getWorldFrame(), -0.5, -0.5, 0.0), new FrameVector3D(ReferenceFrame.getWorldFrame(), Axis3D.Z));
       input.addContactPoint(new FramePoint3D(ReferenceFrame.getWorldFrame(), -0.5, 0.5, 0.0), new FrameVector3D(ReferenceFrame.getWorldFrame(), Axis3D.Z));
       input.addContactPoint(new FramePoint3D(ReferenceFrame.getWorldFrame(),  0.5, -0.5, 0.0), new FrameVector3D(ReferenceFrame.getWorldFrame(), Axis3D.Z));
@@ -59,16 +58,16 @@ public class StaticEquilibriumSolverInputExamples
       return input;
    }
 
-   public static StaticEquilibriumSolverInput createSingleFlatContactPoint(double x, double y)
+   public static MultiContactSupportRegionSolverInput createSingleFlatContactPoint(double x, double y)
    {
-      StaticEquilibriumSolverInput input = new StaticEquilibriumSolverInput();
+      MultiContactSupportRegionSolverInput input = new MultiContactSupportRegionSolverInput();
       input.addContactPoint(new FramePoint3D(ReferenceFrame.getWorldFrame(), x, y, 0.0), new FrameVector3D(ReferenceFrame.getWorldFrame(), Axis3D.Z));
       return input;
    }
 
-   private static StaticEquilibriumSolverInput createTriangleInput(double... angles)
+   private static MultiContactSupportRegionSolverInput createTriangleInput(double... angles)
    {
-      StaticEquilibriumSolverInput input = new StaticEquilibriumSolverInput();
+      MultiContactSupportRegionSolverInput input = new MultiContactSupportRegionSolverInput();
 
       double distance = 1.0;
       for (int i = 0; i < 3; i++)
@@ -90,14 +89,14 @@ public class StaticEquilibriumSolverInputExamples
       return input;
    }
 
-   public static StaticEquilibriumSolverInput createBipedFeet()
+   public static MultiContactSupportRegionSolverInput createBipedFeet()
    {
       return createBipedFeet(0.0, 0.0, 0.0);
    }
 
-   public static StaticEquilibriumSolverInput createBipedFeet(double dx, double dy, double dz)
+   public static MultiContactSupportRegionSolverInput createBipedFeet(double dx, double dy, double dz)
    {
-      StaticEquilibriumSolverInput input = new StaticEquilibriumSolverInput();
+      MultiContactSupportRegionSolverInput input = new MultiContactSupportRegionSolverInput();
 
       double footWidth = 0.1;
       double footLength = 0.2;
@@ -131,9 +130,9 @@ public class StaticEquilibriumSolverInputExamples
       return input;
    }
 
-   public static StaticEquilibriumSolverInput createBipedFeetWithSingleHandhold()
+   public static MultiContactSupportRegionSolverInput createBipedFeetWithSingleHandhold()
    {
-      StaticEquilibriumSolverInput input = new StaticEquilibriumSolverInput();
+      MultiContactSupportRegionSolverInput input = new MultiContactSupportRegionSolverInput();
 
       double footWidth = 0.1;
       double footLength = 0.2;
@@ -172,9 +171,9 @@ public class StaticEquilibriumSolverInputExamples
       return input;
    }
 
-   public static StaticEquilibriumSolverInput createBipedFeetWithTwoHandholds()
+   public static MultiContactSupportRegionSolverInput createBipedFeetWithTwoHandholds()
    {
-      StaticEquilibriumSolverInput input = new StaticEquilibriumSolverInput();
+      MultiContactSupportRegionSolverInput input = new MultiContactSupportRegionSolverInput();
 
       double footWidth = 0.1;
       double footLength = 0.2;
@@ -219,7 +218,7 @@ public class StaticEquilibriumSolverInputExamples
       return input;
    }
 
-   private static void addContactPoint(PoseReferenceFrame contactFrame, FramePose3D contactPose, StaticEquilibriumSolverInput input, Point3D contactPointInLocal)
+   private static void addContactPoint(PoseReferenceFrame contactFrame, FramePose3D contactPose, MultiContactSupportRegionSolverInput input, Point3D contactPointInLocal)
    {
       contactFrame.setPoseAndUpdate(contactPose);
 
