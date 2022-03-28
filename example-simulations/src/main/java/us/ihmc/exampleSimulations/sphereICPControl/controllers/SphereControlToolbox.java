@@ -575,24 +575,6 @@ public class SphereControlToolbox
       return new ICPControllerParameters()
       {
          @Override
-         public double getForwardFootstepWeight()
-         {
-            return 20.0;
-         }
-
-         @Override
-         public double getLateralFootstepWeight()
-         {
-            return 20.0;
-         }
-
-         @Override
-         public double getFootstepRateWeight()
-         {
-            return 0.001;
-         }
-
-         @Override
          public double getFeedbackForwardWeight()
          {
             return 0.5;
@@ -626,21 +608,9 @@ public class SphereControlToolbox
          }
 
          @Override
-         public double getDynamicsObjectiveDoubleSupportWeightModifier()
-         {
-            return 1.0;
-         }
-
-         @Override
          public double getAngularMomentumMinimizationWeight()
          {
             return 50.0;
-         }
-
-         @Override
-         public boolean scaleStepRateWeightWithTime()
-         {
-            return false;
          }
 
          @Override
@@ -650,39 +620,9 @@ public class SphereControlToolbox
          }
 
          @Override
-         public boolean useFeedbackRate()
-         {
-            return true;
-         }
-
-         @Override
-         public boolean allowStepAdjustment()
-         {
-            return true;
-         }
-
-         @Override
          public boolean useAngularMomentum()
          {
             return true;
-         }
-
-        @Override
-         public boolean useFootstepRate()
-         {
-            return true;
-         }
-
-         @Override
-         public double getMinimumTimeRemaining()
-         {
-            return 0.0001;
-         }
-
-         @Override
-         public double getAdjustmentDeadband()
-         {
-            return 0.03;
          }
       };
    }
