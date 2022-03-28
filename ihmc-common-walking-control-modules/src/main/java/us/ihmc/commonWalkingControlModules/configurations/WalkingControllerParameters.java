@@ -7,7 +7,8 @@ import java.util.Map;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
-import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetector;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOffsetTrajectoryWhileWalking;
@@ -749,7 +750,9 @@ public abstract class WalkingControllerParameters
     */
    public abstract SwingTrajectoryParameters getSwingTrajectoryParameters();
 
-   public abstract ICPOptimizationParameters getICPOptimizationParameters();
+   public abstract ICPControllerParameters getICPOptimizationParameters();
+
+   public abstract StepAdjustmentParameters getStepAdjustmentParameters();
 
    /**
     * Get the maximum leg length for the singularity avoidance control module.

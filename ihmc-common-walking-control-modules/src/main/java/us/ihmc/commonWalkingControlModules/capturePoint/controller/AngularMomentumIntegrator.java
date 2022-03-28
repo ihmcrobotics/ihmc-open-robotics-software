@@ -32,7 +32,7 @@ public class AngularMomentumIntegrator
 
    private final double controlDT;
 
-   public AngularMomentumIntegrator(String prefix, ICPOptimizationParameters icpOptimizationParameters, ICPControlGainsReadOnly feedbackGains, double controlDT, YoRegistry registry)
+   public AngularMomentumIntegrator(String prefix, ICPControllerParameters icpOptimizationParameters, ICPControlGainsReadOnly feedbackGains, double controlDT, YoRegistry registry)
    {
       this.controlDT = controlDT;
       this.feedbackGains = feedbackGains;

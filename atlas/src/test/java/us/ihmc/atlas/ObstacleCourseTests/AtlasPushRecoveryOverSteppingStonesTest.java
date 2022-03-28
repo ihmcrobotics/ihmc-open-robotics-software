@@ -12,7 +12,7 @@ import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.AvatarPushRecoveryOverSteppingStonesTest;
-import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -33,7 +33,7 @@ public class AtlasPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryO
             return new AtlasWalkingControllerParameters(RobotTarget.SCS, getJointMap(), getContactPointParameters())
             {
                @Override
-               public ICPOptimizationParameters getICPOptimizationParameters()
+               public ICPControllerParameters getICPOptimizationParameters()
                {
                   return new AtlasICPOptimizationParameters(false)
                   {

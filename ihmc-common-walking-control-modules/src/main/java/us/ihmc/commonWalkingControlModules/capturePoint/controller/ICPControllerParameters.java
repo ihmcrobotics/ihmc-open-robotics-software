@@ -7,16 +7,8 @@ import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
  * The ICP Optimization based controller encodes the ICP plan based on the upcoming footsteps, and can either do control
  * with adjusting the feet or without adjusting the feet, using a feedback-based convex optimization.
  */
-public abstract class ICPOptimizationParameters
+public abstract class ICPControllerParameters
 {
-   /**
-    * Specifies the amount of ICP error (the 2D distance in XY from desired to current) that is required for the controller to consider step adjustment.
-    */
-   public double getMinICPErrorForStepAdjustment()
-   {
-      return 0.0;
-   }
-
    /**
     * The weight for tracking the nominal desired CMP.
     * This weight penalizes using a large amount of CMP control.
@@ -88,10 +80,6 @@ public abstract class ICPOptimizationParameters
     */
    public abstract boolean scaleFeedbackWeightWithGain();
 
-   /**
-    * Enabling this boolean enables the use step adjustment for stabilization.
-    */
-   public abstract boolean allowStepAdjustment();
 
    /**
     * Enabling this boolean allows modifying the CMP offset from the CoP in the optimization.
@@ -113,15 +101,6 @@ public abstract class ICPOptimizationParameters
       return 0.0;
    }
 
-
-   /**
-    * Deadband on the step adjustment.
-    * When the adjustment is within the deadband, it is set to zero.
-    * When it is outside the deadband, the deadband is subtracted from it.
-    */
-   public abstract double getAdjustmentDeadband();
-
-
    /**
     * Sets the minimum distance inside the support polygon for the CoP to be located.
     */
@@ -138,33 +117,8 @@ public abstract class ICPOptimizationParameters
       return true;
    }
 
-   /**
-    * Specifies the transfer split fraction to use for the ICP value recursion multiplier. This value is added to the time remaining
-    * to compute the recursion multiplier. Increasing this value effectively causes more step adjustment to occur.
-    */
-   public double getTransferSplitFraction()
-   {
-      return 0.1;
-   }
 
-   /**
-    * Specifies the maximum duration that can be included in the footstep multiplier by the {@link #getTransferSplitFraction()}.
-    * This is useful when the robot by default has long split fractions.
-    */
-   public double maximumTimeFromTransferInFootstepMultiplier()
-   {
-      return 0.1;
-   }
-   
-   /**
-    * Specifies the minimum footstep multiplier that the robot will use to compute the desired step adjustment. This is
-    * particularly useful when walking slowly or when recovering early in the, to avoid extremely large
-    * footstep adjustment magnitudes.
-    */
-   public double getMinimumFootstepMultiplier()
-   {
-      return 0.33;
-   }
+
 
 
 }

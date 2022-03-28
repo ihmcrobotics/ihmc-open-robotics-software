@@ -8,7 +8,7 @@ import java.util.Map;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
-import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
@@ -49,7 +49,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    private final ToeOffParameters toeOffParameters;
    private final SwingTrajectoryParameters swingTrajectoryParameters;
    private final ValkyrieSteppingParameters steppingParameters;
-   private final ICPOptimizationParameters icpOptimizationParameters;
+   private final ICPControllerParameters icpOptimizationParameters;
 
    private final ValkyriePhysicalProperties physicalProperties;
 
@@ -711,7 +711,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    /** {@inheritDoc} */
    @Override
-   public ICPOptimizationParameters getICPOptimizationParameters()
+   public ICPControllerParameters getICPOptimizationParameters()
    {
       return icpOptimizationParameters;
    }

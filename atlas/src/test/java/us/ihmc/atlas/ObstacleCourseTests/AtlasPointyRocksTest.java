@@ -13,7 +13,7 @@ import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.HumanoidPointyRocksTest;
-import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -189,7 +189,7 @@ public class AtlasPointyRocksTest extends HumanoidPointyRocksTest
       }
 
       @Override
-      public ICPOptimizationParameters getICPOptimizationParameters()
+      public ICPControllerParameters getICPOptimizationParameters()
       {
          return icpOptimizationParameters;
       }

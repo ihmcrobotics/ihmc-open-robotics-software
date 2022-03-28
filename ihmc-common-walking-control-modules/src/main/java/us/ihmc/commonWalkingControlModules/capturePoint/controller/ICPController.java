@@ -135,7 +135,7 @@ public class ICPController
    }
 
    public ICPController(WalkingControllerParameters walkingControllerParameters,
-                        ICPOptimizationParameters icpOptimizationParameters,
+                        ICPControllerParameters icpOptimizationParameters,
                         BipedSupportPolygons bipedSupportPolygons,
                         ICPControlPolygons icpControlPolygons,
                         SideDependentList<? extends ContactablePlaneBody> contactableFeet,

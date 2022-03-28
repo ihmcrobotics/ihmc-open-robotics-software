@@ -10,7 +10,7 @@ import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.angularMomentumTest.AvatarAngularMomentumWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
@@ -29,7 +29,7 @@ public class AtlasAngularMomentumWalkingTest extends AvatarAngularMomentumWalkin
          return new AtlasWalkingControllerParameters(target, jointMap, getContactPointParameters())
          {
             @Override
-            public ICPOptimizationParameters getICPOptimizationParameters()
+            public ICPControllerParameters getICPOptimizationParameters()
             {
                return new AtlasICPOptimizationParameters(false)
                {
