@@ -79,7 +79,7 @@ public class LIPMHoppingControllerBhavyansh implements RobotController
 
    private enum States
    {
-      SUPPORT, SWING;
+      SUPPORT, SWING, FLIGHT;
    }
 
    private YoDouble timeOfLastFootSwitch = new YoDouble("timeOfLastFootSwitch", registry);
@@ -103,8 +103,6 @@ public class LIPMHoppingControllerBhavyansh implements RobotController
       initialize();
 
       stateMachines = setupStateMachines();
-
-
    }
 
    @Override
@@ -167,9 +165,9 @@ public class LIPMHoppingControllerBhavyansh implements RobotController
          stateMachines.get(robotSide).doTransitions();
       }
 
-      //      LogTools.info("State -> Left: {}, Right: {}",
-      //                    stateMachines.get(RobotSide.LEFT).getCurrentStateKey(),
-      //                    stateMachines.get(RobotSide.RIGHT).getCurrentStateKey());
+      LogTools.info("State -> Left: {}, Right: {}",
+                    stateMachines.get(RobotSide.LEFT).getCurrentStateKey(),
+                    stateMachines.get(RobotSide.RIGHT).getCurrentStateKey());
    }
 
    public void filterFootForces()
@@ -204,8 +202,7 @@ public class LIPMHoppingControllerBhavyansh implements RobotController
    {
       double distanceToNextStep = strideLength.getValue() - stepCoMPosition.getX();
       double desiredHipAngle = -EuclidCoreTools.atan2(distanceToNextStep, desiredHeight.getValue());
-      double desiredKneeLength = EuclidCoreTools.squareRoot(
-            distanceToNextStep * distanceToNextStep + desiredHeight.getValue() * desiredHeight.getValue());
+      double desiredKneeLength = EuclidCoreTools.squareRoot(distanceToNextStep * distanceToNextStep + desiredHeight.getValue() * desiredHeight.getValue());
 
       LogTools.info("DistanceToNextStep: {} \tCoMX: {} \tDesiredKneeLength: {}", distanceToNextStep, comPositionFromSupportFoot, desiredKneeLength);
 
@@ -220,7 +217,7 @@ public class LIPMHoppingControllerBhavyansh implements RobotController
       double kneeLength = robot.getKneeLength(side);
       double kneeVelocity = robot.getKneeVelocity(side);
 
-      double desiredKneeLength = 1.1f;
+      double desiredKneeLength = 1.0f;
 
       Point3DReadOnly centerOfMassPosition = robot.getCenterOfMassPosition();
       Vector3DReadOnly centerOfMassVelocity = robot.getCenterOfMassVelocity();
@@ -234,16 +231,14 @@ public class LIPMHoppingControllerBhavyansh implements RobotController
          desiredKneeLength = 1.0f;
       }
 
-//      double feedForwardSupportKneeForce = g * mass * kneeLength / centerOfMassPosition.getZ();
-//      double feedBackKneeForce =
-//            kpKnee.getValue() * (desiredHeight.getValue() - comHeight.getValue()) + kdKnee.getValue() * (0.0 - centerOfMassVelocity.getZ());
+      //      double feedForwardSupportKneeForce = g * mass * kneeLength / centerOfMassPosition.getZ();
+      //      double feedBackKneeForce =
+      //            kpKnee.getValue() * (desiredHeight.getValue() - comHeight.getValue()) + kdKnee.getValue() * (0.0 - centerOfMassVelocity.getZ());
 
-      double feedBackKneeForce = 10000 * (desiredKneeLength - kneeLength) + 20 * (0.0 - kneeVelocity);
+      double feedBackKneeForce = 4000 * (desiredKneeLength - kneeLength) + 20 * (0.0 - kneeVelocity);
       robot.setKneeForce(side, feedBackKneeForce);
 
-
-
-//      robot.setHipTorque(side, -kpBody.getValue() * (0.0 - robot.getBodyPitchAngle()) + kdBody.getValue() * robot.getBodyPitchAngularVelocity());
+      robot.setHipTorque(side, -kpBody.getValue() * (0.0 - robot.getBodyPitchAngle()) + kdBody.getValue() * robot.getBodyPitchAngularVelocity());
 
       worldHipAngles.get(side).set(robot.getHipAngle(side) + robot.getBodyPitchAngle());
    }
@@ -260,31 +255,30 @@ public class LIPMHoppingControllerBhavyansh implements RobotController
       double kneeLength = robot.getKneeLength(side);
       double kneeVelocity = robot.getKneeVelocity(side);
 
-//      if (StrictMath.abs(comXPositionFromFoot.getValue()) < 0.01 && swingTrajectoriesCalculated.getValue() == false)
-//      {
-//         calculateStepCoMPosition();
-//         footXTarget.set(nextStepCoMLocation.getX());
-//         calculateSwingTrajectories(side, nextStepCoMLocation, robot.getCenterOfMassXDistanceFromSupportFoot(), false);
-//         swingTrajectoriesCalculated.set(true);
-//      }
+      //      if (StrictMath.abs(comXPositionFromFoot.getValue()) < 0.01 && swingTrajectoriesCalculated.getValue() == false)
+      //      {
+      //         calculateStepCoMPosition();
+      //         footXTarget.set(nextStepCoMLocation.getX());
+      //         calculateSwingTrajectories(side, nextStepCoMLocation, robot.getCenterOfMassXDistanceFromSupportFoot(), false);
+      //         swingTrajectoriesCalculated.set(true);
+      //      }
 
-      double desiredKneeLength = 0.6;
+      double desiredKneeLength = desiredKneeLengths.get(side).getValue();
       double desiredKneeVelocity = 0.0;
-      double desiredHipAngle = 0.0;
+      double desiredHipAngle = -0.12;
       double desiredHipVelocity = 0.0;
 
-      if (comXPositionFromFoot.getValue() > 0.0)
-      {
-//         trajectorySwingKneeLength.compute(comXPositionFromFoot.getValue());
-//         trajectorySwingHipPitch.compute(comXPositionFromFoot.getValue());
-//         desiredKneeLength = trajectorySwingKneeLength.getValue();
-//         desiredKneeVelocity = trajectorySwingKneeLength.getVelocity();
-//         desiredHipAngle = trajectorySwingHipPitch.getValue();
-//         desiredHipVelocity = trajectorySwingHipPitch.getVelocity();
-
-         desiredHipAngle = -0.05;
-
-      }
+//      if (comXPositionFromFoot.getValue() > 0.0)
+//      {
+//         //         trajectorySwingKneeLength.compute(comXPositionFromFoot.getValue());
+//         //         trajectorySwingHipPitch.compute(comXPositionFromFoot.getValue());
+//         //         desiredKneeLength = trajectorySwingKneeLength.getValue();
+//         //         desiredKneeVelocity = trajectorySwingKneeLength.getVelocity();
+//         //         desiredHipAngle = trajectorySwingHipPitch.getValue();
+//         //         desiredHipVelocity = trajectorySwingHipPitch.getVelocity();
+//
+//         desiredHipAngle = ;
+//      }
 
       /* ----------------------------------- Compute and set knee force. ----------------------------------------------*/
       desiredKneeLengths.get(side).set(desiredKneeLength);
@@ -297,6 +291,30 @@ public class LIPMHoppingControllerBhavyansh implements RobotController
       robot.setHipTorque(side, feedBackHipTorque);
 
       //      LogTools.info("CoMX: {}, KneeLength: {}, HipAngle: {}", comXPositionFromFoot.getValue(), desiredKneeLength, desiredHipAngle);
+   }
+
+   private void controlFlightLeg(RobotSide side, double timeInState)
+   {
+      double hipAngle = robot.getHipAngle(side) + robot.getBodyPitchAngle();
+      worldHipAngles.get(side).set(hipAngle);
+
+      double supportHipAngle = robot.getHipAngle(side.getOppositeSide()) + robot.getBodyPitchAngle();
+      double hipVelocity = robot.getHipVelocity(side);
+      double kneeLength = robot.getKneeLength(side);
+      double kneeVelocity = robot.getKneeVelocity(side);
+
+      double desiredKneeLength = desiredKneeLengths.get(side).getValue();
+      double desiredKneeVelocity = 0.0;
+      double desiredHipAngle = 0.0;
+      double desiredHipVelocity = 0.0;
+
+      /* ----------------------------------- Compute and set knee force. ----------------------------------------------*/
+      double feedBackKneeForce = 1300 * (desiredKneeLengths.get(side).getValue() - kneeLength) + 70 * (desiredKneeVelocity - kneeVelocity);
+      robot.setKneeForce(side, feedBackKneeForce);
+
+      double feedBackHipTorque = kdHip.getValue() * (0 - hipVelocity);
+      desiredHipAngles.get(side).set(desiredHipAngle);
+      robot.setHipTorque(side, feedBackHipTorque);
    }
 
    private SideDependentList<StateMachine<LIPMHoppingControllerBhavyansh.States, State>> setupStateMachines()
@@ -315,22 +333,39 @@ public class LIPMHoppingControllerBhavyansh implements RobotController
       rightFactory.buildClock(robot.getRobot().getYoTime());
 
       // Left State Transitions:
-      leftFactory.addTransition(LIPMHoppingControllerBhavyansh.States.SUPPORT, LIPMHoppingControllerBhavyansh.States.SWING, new HeelOffGroundCondition(RobotSide.LEFT));
-      leftFactory.addTransition(LIPMHoppingControllerBhavyansh.States.SWING, LIPMHoppingControllerBhavyansh.States.SUPPORT, new HeelOnGroundCondition(RobotSide.LEFT));
+      leftFactory.addTransition(LIPMHoppingControllerBhavyansh.States.SUPPORT,
+                                LIPMHoppingControllerBhavyansh.States.FLIGHT,
+                                new HeelOffGroundCondition(RobotSide.LEFT));
+      leftFactory.addTransition(LIPMHoppingControllerBhavyansh.States.FLIGHT,
+                                LIPMHoppingControllerBhavyansh.States.SWING,
+                                new OppositeContactCondition(RobotSide.LEFT));
+      leftFactory.addTransition(LIPMHoppingControllerBhavyansh.States.SWING,
+                                LIPMHoppingControllerBhavyansh.States.SUPPORT,
+                                new HeelOnGroundCondition(RobotSide.LEFT));
 
       // Right State Transitions:
-      rightFactory.addTransition(LIPMHoppingControllerBhavyansh.States.SUPPORT, LIPMHoppingControllerBhavyansh.States.SWING, new HeelOffGroundCondition(RobotSide.RIGHT));
-      rightFactory.addTransition(LIPMHoppingControllerBhavyansh.States.SWING, LIPMHoppingControllerBhavyansh.States.SUPPORT, new HeelOnGroundCondition(RobotSide.RIGHT));
+      rightFactory.addTransition(LIPMHoppingControllerBhavyansh.States.SUPPORT,
+                                 LIPMHoppingControllerBhavyansh.States.FLIGHT,
+                                 new HeelOffGroundCondition(RobotSide.RIGHT));
+      rightFactory.addTransition(LIPMHoppingControllerBhavyansh.States.FLIGHT,
+                                 LIPMHoppingControllerBhavyansh.States.SWING,
+                                 new OppositeContactCondition(RobotSide.RIGHT));
+      rightFactory.addTransition(LIPMHoppingControllerBhavyansh.States.SWING,
+                                 LIPMHoppingControllerBhavyansh.States.SUPPORT,
+                                 new HeelOnGroundCondition(RobotSide.RIGHT));
 
       // Assemble the Left State Machine:
       leftFactory.addState(LIPMHoppingControllerBhavyansh.States.SUPPORT, new SupportState(RobotSide.LEFT));
       leftFactory.addState(LIPMHoppingControllerBhavyansh.States.SWING, new SwingState(RobotSide.LEFT));
+      leftFactory.addState(LIPMHoppingControllerBhavyansh.States.FLIGHT, new FlightState(RobotSide.LEFT));
 
       // Assemble the Right State Machine:
       rightFactory.addState(LIPMHoppingControllerBhavyansh.States.SUPPORT, new SupportState(RobotSide.RIGHT));
       rightFactory.addState(LIPMHoppingControllerBhavyansh.States.SWING, new SwingState(RobotSide.RIGHT));
+      rightFactory.addState(LIPMHoppingControllerBhavyansh.States.FLIGHT, new FlightState(RobotSide.RIGHT));
 
-      return new SideDependentList<>(leftFactory.build(LIPMHoppingControllerBhavyansh.States.SUPPORT), rightFactory.build(LIPMHoppingControllerBhavyansh.States.SWING));
+      return new SideDependentList<>(leftFactory.build(LIPMHoppingControllerBhavyansh.States.SUPPORT),
+                                     rightFactory.build(LIPMHoppingControllerBhavyansh.States.SWING));
    }
 
    private class SupportState implements State
@@ -390,6 +425,34 @@ public class LIPMHoppingControllerBhavyansh implements RobotController
       }
    }
 
+   private class FlightState implements State
+   {
+      private final RobotSide robotSide;
+
+      public FlightState(RobotSide robotSide)
+      {
+         this.robotSide = robotSide;
+      }
+
+      @Override
+      public void onEntry()
+      {
+
+      }
+
+      @Override
+      public void doAction(double timeInState)
+      {
+         controlFlightLeg(robotSide, timeInState);
+      }
+
+      @Override
+      public void onExit(double timeInState)
+      {
+
+      }
+   }
+
    private class HeelOffGroundCondition implements StateTransitionCondition
    {
       private final RobotSide robotSide;
@@ -403,12 +466,12 @@ public class LIPMHoppingControllerBhavyansh implements RobotController
       public boolean testCondition(double timeInCurrentState)
       {
          double timeDiff = t.getValue() - timeOfLastFootSwitch.getValue();
-         boolean fs = footZForces.get(robotSide).getValue() < 5.0 && footZForces.get(robotSide).getValue() > 2.0 && timeDiff > 0.1; // Eliminates switch bouncing.
-         LogTools.info("Switch: {} {} {}", fs, footZForces.get(robotSide).getValue(), timeDiff);
+         boolean fs =
+               footZForces.get(robotSide).getValue() < 5.0 && footZForces.get(robotSide).getValue() > 2.0 && timeDiff > 0.1; // Eliminates switch bouncing.
+         //         LogTools.info("Switch: {} {} {}", fs, footZForces.get(robotSide).getValue(), timeDiff);
          if (fs)
          {
-            numberOfStepsTaken.set(numberOfStepsTaken.getValue() + 1);
-            LogTools.info("Step: {} -> ComX: {}", robot.getCenterOfMassXDistanceFromSupportFoot(), numberOfStepsTaken.getValue());
+            //            LogTools.info("Step: {} -> ComX: {}", robot.getCenterOfMassXDistanceFromSupportFoot(), numberOfStepsTaken.getValue());
 
             groundContactPositions.add(robot.getFootPosition(robotSide).getX());
 
@@ -417,9 +480,9 @@ public class LIPMHoppingControllerBhavyansh implements RobotController
                      groundContactPositions.get(groundContactPositions.size() - 1) - groundContactPositions.get(groundContactPositions.size() - 2));
 
             timeOfLastFootSwitch.set(t.getValue());
-            swingFootGroundContact.set(true);
 
-            swingTrajectoriesCalculated.set(false);
+            desiredKneeLengths.get(robotSide.getOppositeSide()).set(0.9);
+            desiredKneeLengths.get(robotSide).set(0.6);
          }
          return fs;
       }
@@ -437,13 +500,44 @@ public class LIPMHoppingControllerBhavyansh implements RobotController
       @Override
       public boolean testCondition(double timeInCurrentState)
       {
-         if (swingFootGroundContact.getValue())
+         double timeDiff = t.getValue() - timeOfLastFootSwitch.getValue();
+         boolean fs = footZForces.get(robotSide).getValue() > 5.0 && timeDiff > 0.1; // Eliminates switch bouncing.
+         //         LogTools.info("Switch: {} {} {}", fs, footZForces.get(robotSide).getValue(), timeDiff);
+         if (fs)
          {
-            swingFootGroundContact.set(false);
-            return true;
+            //            LogTools.info("Step: {} -> ComX: {}", robot.getCenterOfMassXDistanceFromSupportFoot(), numberOfStepsTaken.getValue());
+
+            groundContactPositions.add(robot.getFootPosition(robotSide).getX());
+
+            if (groundContactPositions.size() >= 2)
+               lastStepLength.set(
+                     groundContactPositions.get(groundContactPositions.size() - 1) - groundContactPositions.get(groundContactPositions.size() - 2));
+
+            timeOfLastFootSwitch.set(t.getValue());
          }
-         else
-            return false;
+         return fs;
+      }
+   }
+
+   private class OppositeContactCondition implements StateTransitionCondition
+   {
+      private final RobotSide robotSide;
+
+      public OppositeContactCondition(RobotSide robotSide)
+      {
+         this.robotSide = robotSide;
+      }
+
+      @Override
+      public boolean testCondition(double timeInCurrentState)
+      {
+         double timeDiff = t.getValue() - timeOfLastFootSwitch.getValue();
+         boolean fs = footZForces.get(robotSide.getOppositeSide()).getValue() > 5.0 && timeDiff > 0.1; // Eliminates switch bouncing.
+         if (fs)
+         {
+            timeOfLastFootSwitch.set(t.getValue());
+         }
+         return fs;
       }
    }
 }
