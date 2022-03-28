@@ -29,7 +29,7 @@ public class AtlasAngularMomentumWalkingTest extends AvatarAngularMomentumWalkin
          return new AtlasWalkingControllerParameters(target, jointMap, getContactPointParameters())
          {
             @Override
-            public ICPControllerParameters getICPOptimizationParameters()
+            public ICPControllerParameters getICPControllerParameters()
             {
                return new AtlasICPControllerParameters(false)
                {

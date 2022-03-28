@@ -24,7 +24,7 @@ public class AtlasStepInPlaceTest extends AvatarStepInPlaceTest
          return new AtlasWalkingControllerParameters(target, getJointMap(), getContactPointParameters())
          {
             @Override
-            public ICPControllerParameters getICPOptimizationParameters()
+            public ICPControllerParameters getICPControllerParameters()
             {
                return new AtlasICPControllerParameters(false)
                {

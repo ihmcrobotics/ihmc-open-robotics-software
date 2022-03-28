@@ -89,7 +89,7 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
                                                 YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(walkingControllerParameters,
-           walkingControllerParameters.getICPOptimizationParameters(),
+           walkingControllerParameters.getICPControllerParameters(),
            soleZUpFrames,
            bipedSupportPolygons,
            parentRegistry,

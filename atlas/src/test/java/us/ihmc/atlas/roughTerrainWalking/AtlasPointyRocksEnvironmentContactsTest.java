@@ -111,7 +111,7 @@ public class AtlasPointyRocksEnvironmentContactsTest extends HumanoidPointyRocks
       }
 
       @Override
-      public ICPControllerParameters getICPOptimizationParameters()
+      public ICPControllerParameters getICPControllerParameters()
       {
          return icpOptimizationParameters;
       }

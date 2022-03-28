@@ -97,7 +97,7 @@ public class AtlasLineContactWalkingTest extends HumanoidLineContactWalkingTest
       }
 
       @Override
-      public ICPControllerParameters getICPOptimizationParameters()
+      public ICPControllerParameters getICPControllerParameters()
       {
          return icpOptimizationParameters;
       }

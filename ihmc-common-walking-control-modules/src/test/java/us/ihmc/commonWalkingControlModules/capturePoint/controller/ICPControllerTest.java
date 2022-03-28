@@ -763,7 +763,7 @@ public class ICPControllerTest
       }
 
       @Override
-      public ICPControllerParameters getICPOptimizationParameters()
+      public ICPControllerParameters getICPControllerParameters()
       {
          return new TestICPOptimizationParameters();
       }

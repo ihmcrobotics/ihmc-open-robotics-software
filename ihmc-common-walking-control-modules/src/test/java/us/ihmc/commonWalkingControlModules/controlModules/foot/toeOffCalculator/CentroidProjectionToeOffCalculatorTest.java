@@ -408,7 +408,7 @@ public class CentroidProjectionToeOffCalculatorTest
          }
 
          @Override
-         public ICPControllerParameters getICPOptimizationParameters()
+         public ICPControllerParameters getICPControllerParameters()
          {
             return null;
          }

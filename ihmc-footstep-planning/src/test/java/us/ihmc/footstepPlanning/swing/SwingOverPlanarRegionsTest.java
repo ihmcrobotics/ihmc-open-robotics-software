@@ -649,7 +649,7 @@ public class SwingOverPlanarRegionsTest
          }
 
          @Override
-         public ICPControllerParameters getICPOptimizationParameters()
+         public ICPControllerParameters getICPControllerParameters()
          {
             return null;
          }

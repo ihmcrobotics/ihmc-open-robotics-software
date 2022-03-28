@@ -33,7 +33,7 @@ public class AtlasPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryO
             return new AtlasWalkingControllerParameters(RobotTarget.SCS, getJointMap(), getContactPointParameters())
             {
                @Override
-               public ICPControllerParameters getICPOptimizationParameters()
+               public ICPControllerParameters getICPControllerParameters()
                {
                   return new AtlasICPControllerParameters(false)
                   {

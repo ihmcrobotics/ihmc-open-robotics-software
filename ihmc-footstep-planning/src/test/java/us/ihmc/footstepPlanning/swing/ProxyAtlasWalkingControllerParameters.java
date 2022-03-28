@@ -133,7 +133,7 @@ public class ProxyAtlasWalkingControllerParameters extends WalkingControllerPara
    }
 
    @Override
-   public ICPControllerParameters getICPOptimizationParameters()
+   public ICPControllerParameters getICPControllerParameters()
    {
       return null;
    }

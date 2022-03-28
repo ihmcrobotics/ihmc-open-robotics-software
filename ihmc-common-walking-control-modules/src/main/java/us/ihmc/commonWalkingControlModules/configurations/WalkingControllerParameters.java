@@ -750,7 +750,7 @@ public abstract class WalkingControllerParameters
     */
    public abstract SwingTrajectoryParameters getSwingTrajectoryParameters();
 
-   public abstract ICPControllerParameters getICPOptimizationParameters();
+   public abstract ICPControllerParameters getICPControllerParameters();
 
    public abstract StepAdjustmentParameters getStepAdjustmentParameters();
 

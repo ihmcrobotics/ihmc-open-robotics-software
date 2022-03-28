@@ -714,7 +714,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    /** {@inheritDoc} */
    @Override
-   public ICPControllerParameters getICPOptimizationParameters()
+   public ICPControllerParameters getICPControllerParameters()
    {
       return icpControllerParameters;
    }
