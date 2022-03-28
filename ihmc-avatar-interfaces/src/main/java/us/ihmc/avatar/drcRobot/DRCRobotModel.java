@@ -46,7 +46,7 @@ import us.ihmc.wholeBodyController.UIParameters;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
-import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, WholeBodyControllerParameters<RobotSide>
 {
@@ -97,8 +97,8 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    }
 
    public default SimulatedHandKinematicController createSimulatedHandKinematicController(FullHumanoidRobotModel fullHumanoidRobotModel,
-                                                                                  RealtimeROS2Node realtimeROS2Node,
-                                                                                  YoDouble controllerTime)
+                                                                                          RealtimeROS2Node realtimeROS2Node,
+                                                                                          DoubleProvider controllerTime)
    {
       return null;
    }
