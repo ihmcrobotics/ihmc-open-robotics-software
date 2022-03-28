@@ -35,7 +35,6 @@ public class StandingState extends WalkingState
    private final BalanceManager balanceManager;
    private final PelvisOrientationManager pelvisOrientationManager;
    private final RigidBodyControlManager chestManager;
-   private final LegConfigurationManager legConfigurationManager;
    private final SideDependentList<RigidBodyControlManager> handManagers = new SideDependentList<>();
    private final FeetManager feetManager;
 
@@ -74,7 +73,6 @@ public class StandingState extends WalkingState
       else
          chestManager = null;
 
-      legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
    }
 
@@ -118,12 +116,6 @@ public class StandingState extends WalkingState
 
       failureDetectionControlModule.setNextFootstep(null);
       controllerToolbox.reportChangeOfRobotMotionStatus(RobotMotionStatus.STANDING);
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         legConfigurationManager.setFullyExtendLeg(robotSide, false);
-         legConfigurationManager.setStraight(robotSide);
-      }
    }
 
    @Override

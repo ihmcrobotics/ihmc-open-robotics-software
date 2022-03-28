@@ -58,8 +58,6 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final FeetManager feetManager;
    private final LegConfigurationManager legConfigurationManager;
 
-   private final YoDouble fractionOfSwingToStraightenSwingLeg = new YoDouble("fractionOfSwingToStraightenSwingLeg", registry);
-   private final YoDouble fractionOfSwingToCollapseStanceLeg = new YoDouble("fractionOfSwingToCollapseStanceLeg", registry);
 
    private final YoBoolean finishSingleSupportWhenICPPlannerIsDone = new YoBoolean("finishSingleSupportWhenICPPlannerIsDone", registry);
    private final YoBoolean resubmitStepsInSwingEveryTick = new YoBoolean("resubmitStepsInSwingEveryTick", registry);
@@ -92,9 +90,6 @@ public class WalkingSingleSupportState extends SingleSupportState
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
       legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
-
-      fractionOfSwingToStraightenSwingLeg.set(walkingControllerParameters.getLegConfigurationParameters().getFractionOfSwingToStraightenLeg());
-      fractionOfSwingToCollapseStanceLeg.set(walkingControllerParameters.getLegConfigurationParameters().getFractionOfSwingToCollapseStanceLeg());
 
       finishSingleSupportWhenICPPlannerIsDone.set(walkingControllerParameters.finishSingleSupportWhenICPPlannerIsDone());
       minimizeAngularMomentumRateZDuringSwing = new BooleanParameter("minimizeAngularMomentumRateZDuringSwing",
@@ -191,19 +186,6 @@ public class WalkingSingleSupportState extends SingleSupportState
          double swingTimeRemaining = requestSwingSpeedUpIfNeeded();
          balanceManager.updateSwingTimeRemaining(swingTimeRemaining);
       }
-      boolean feetAreWellPositioned = legConfigurationManager.areFeetWellPositionedForCollapse(swingSide.getOppositeSide(),
-                                                                                               nextFootstep.getSoleReferenceFrame());
-
-      if (timeInState > fractionOfSwingToStraightenSwingLeg.getDoubleValue() * swingTime)
-      {
-         legConfigurationManager.straightenLegDuringSwing(swingSide);
-      }
-
-      if (timeInState > fractionOfSwingToCollapseStanceLeg.getDoubleValue() * swingTime && !legConfigurationManager.isLegCollapsed(supportSide)
-            && feetAreWellPositioned)
-      {
-         legConfigurationManager.collapseLegDuringSwing(swingSide.getOppositeSide());
-      }
 
       if (timeInState > swingTime + timeOverrunToInitializeFreeFall.getValue())
       {
@@ -280,10 +262,6 @@ public class WalkingSingleSupportState extends SingleSupportState
       }
 
       balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
-
-      legConfigurationManager.startSwing(swingSide);
-      legConfigurationManager.useHighWeight(swingSide.getOppositeSide());
-      legConfigurationManager.setStepDuration(supportSide, footstepTiming.getStepTime());
 
       if (isLastStep)
       {

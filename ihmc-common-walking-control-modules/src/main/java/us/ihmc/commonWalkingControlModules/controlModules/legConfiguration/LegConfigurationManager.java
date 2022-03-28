@@ -20,46 +20,21 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class LegConfigurationManager
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-
-   private static final double forwardSteppingThreshold = -0.05;
-   private static final double minimumAngleForSideStepping = 45.0;
-
-   private static final double stepDownTooFar = -0.10;
-   private static final double stepHeightForCollapse = 10.0;
 
    private final YoBoolean attemptToStraightenLegs = new YoBoolean("attemptToStraightenLegs", registry);
 
-   private final YoDouble stepHeight = new YoDouble("stepHeight", registry);
-   private final YoDouble maxStepHeightForCollapse = new YoDouble("maxStepHeightForCollapse", registry);
-   private final YoDouble stepHeightForForcedCollapse = new YoDouble("stepHeightForForcedCollapsing", registry);
-   private final YoDouble minStepLengthForCollapse = new YoDouble("minStepLengthForCollapse", registry);
-
    private final SideDependentList<LegConfigurationControlModule> legConfigurationControlModules = new SideDependentList<>();
-   private final SideDependentList<? extends ContactablePlaneBody> feet;
-
-   private final double inPlaceWidth;
-   private final double footLength;
 
    public LegConfigurationManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
                                   YoRegistry parentRegistry)
    {
-      this.feet = controllerToolbox.getContactableFeet();
-
       LegConfigurationParameters legConfigurationParameters = walkingControllerParameters.getLegConfigurationParameters();
       for (RobotSide robotSide : RobotSide.values)
          legConfigurationControlModules.put(robotSide, new LegConfigurationControlModule(robotSide, controllerToolbox, legConfigurationParameters, registry));
 
       attemptToStraightenLegs.set(legConfigurationParameters.attemptToStraightenLegs());
 
-      this.inPlaceWidth = walkingControllerParameters.getSteppingParameters().getInPlaceWidth();
-      this.footLength = walkingControllerParameters.getSteppingParameters().getFootBackwardOffset()
-            + walkingControllerParameters.getSteppingParameters().getFootForwardOffset();
-
-      maxStepHeightForCollapse.set(stepHeightForCollapse);
-      stepHeightForForcedCollapse.set(stepDownTooFar);
-      minStepLengthForCollapse.set(walkingControllerParameters.getSteppingParameters().getFootLength());
 
       parentRegistry.addChild(registry);
    }
@@ -78,108 +53,6 @@ public class LegConfigurationManager
       {
          legConfigurationControlModules.get(robotSide).doControl();
       }
-   }
-
-   public void startSwing(RobotSide upcomingSwingSide)
-   {
-   }
-
-   public boolean isLegCollapsed(RobotSide robotSide)
-   {
-      return true;
-   }
-
-
-   public void collapseLegDuringTransfer(RobotSide transferSide)
-   {
-   }
-
-   public void collapseLegDuringSwing(RobotSide supportSide)
-   {
-   }
-
-   public void straightenLegDuringSwing(RobotSide swingSide)
-   {
-   }
-
-   public void setStepDuration(RobotSide supportSide, double stepDuration)
-   {
-      legConfigurationControlModules.get(supportSide).setStepDuration(stepDuration);
-   }
-
-   public void setFullyExtendLeg(RobotSide robotSide, boolean fullyExtendLeg)
-   {
-      legConfigurationControlModules.get(robotSide).setFullyExtendLeg(fullyExtendLeg);
-   }
-
-
-   public void useHighWeight(RobotSide robotSide)
-   {
-      if (attemptToStraightenLegs.getBooleanValue())
-      {
-         legConfigurationControlModules.get(robotSide).setLegControlWeight(LegControlWeight.HIGH);
-      }
-   }
-
-   public void setStraight(RobotSide robotSide)
-   {
-
-   }
-
-   public void beginStraightening(RobotSide robotSide)
-   {
-
-   }
-
-   private final FramePoint2D tempLeadingFootPosition = new FramePoint2D();
-   private final FramePoint2D tempTrailingFootPosition = new FramePoint2D();
-   private final FramePoint3D tempLeadingFootPositionInWorld = new FramePoint3D();
-   private final FramePoint3D tempTrailingFootPositionInWorld = new FramePoint3D();
-
-   public boolean areFeetWellPositionedForCollapse(RobotSide trailingLeg)
-   {
-      ReferenceFrame frontFootFrame = feet.get(trailingLeg.getOppositeSide()).getSoleFrame();
-      return areFeetWellPositionedForCollapse(trailingLeg, frontFootFrame);
-   }
-
-   public boolean areFeetWellPositionedForCollapse(RobotSide trailingLeg, ReferenceFrame frontFootFrame)
-   {
-      ReferenceFrame trailingFootFrame = feet.get(trailingLeg).getSoleFrame();
-      tempTrailingFootPosition.setToZero(trailingFootFrame);
-      tempLeadingFootPosition.setToZero(frontFootFrame);
-      tempLeadingFootPosition.changeFrameAndProjectToXYPlane(trailingFootFrame);
-
-      if (Math.abs(tempLeadingFootPosition.getY()) > inPlaceWidth)
-         tempLeadingFootPosition.setY(tempLeadingFootPosition.getY() + trailingLeg.negateIfRightSide(inPlaceWidth));
-      else
-         tempLeadingFootPosition.setY(0.0);
-
-      tempLeadingFootPositionInWorld.setToZero(frontFootFrame);
-      tempTrailingFootPositionInWorld.setToZero(trailingFootFrame);
-      tempLeadingFootPositionInWorld.changeFrame(worldFrame);
-      tempTrailingFootPositionInWorld.changeFrame(worldFrame);
-
-      stepHeight.set(tempLeadingFootPositionInWorld.getZ() - tempTrailingFootPositionInWorld.getZ());
-
-      boolean isNextStepTooLow = stepHeight.getDoubleValue() < stepHeightForForcedCollapse.getDoubleValue();
-      if (isNextStepTooLow)
-         return true;
-
-      boolean isForwardStepping = tempLeadingFootPositionInWorld.getX() > forwardSteppingThreshold;
-      if (!isForwardStepping)
-         return false;
-
-      boolean isNextStepTooHigh = stepHeight.getDoubleValue() > maxStepHeightForCollapse.getDoubleValue();
-      if (isNextStepTooHigh)
-         return false;
-
-      boolean isSideStepping = Math.abs(Math.atan2(tempLeadingFootPosition.getY(), tempLeadingFootPosition.getX())) > Math.toRadians(minimumAngleForSideStepping);
-      if (isSideStepping)
-         return false;
-
-      boolean isStepLongEnough = tempLeadingFootPosition.distance(tempTrailingFootPosition) > minStepLengthForCollapse.getDoubleValue();
-      boolean isStepLongEnoughAlongX = tempLeadingFootPosition.getX() > footLength;
-      return isStepLongEnough && isStepLongEnoughAlongX;
    }
 
    public FeedbackControlCommand<?> getFeedbackControlCommand(RobotSide robotSide)
