@@ -13,10 +13,12 @@ import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslat
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetector;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOffsetTrajectoryWhileWalking;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
@@ -32,6 +34,7 @@ public abstract class WalkingControllerParameters
    private final DynamicReachabilityParameters dynamicReachabilityParameters;
    private final PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters;
    private final LeapOfFaithParameters leapOfFaithParameters;
+   private final OneDoFJointPrivilegedConfigurationParameters kneePrivilegedConfigurationParameters;
 
    public WalkingControllerParameters()
    {
@@ -40,6 +43,13 @@ public abstract class WalkingControllerParameters
       pelvisOffsetWhileWalkingParameters = new PelvisOffsetWhileWalkingParameters();
       leapOfFaithParameters = new LeapOfFaithParameters();
       legConfigurationParameters = new LegConfigurationParameters();
+
+      kneePrivilegedConfigurationParameters = new OneDoFJointPrivilegedConfigurationParameters();
+      kneePrivilegedConfigurationParameters.setConfigurationGain(40.0);
+      kneePrivilegedConfigurationParameters.setVelocityGain(6.0);
+      kneePrivilegedConfigurationParameters.setWeight(5.0);
+      kneePrivilegedConfigurationParameters.setMaxAcceleration(Double.POSITIVE_INFINITY);
+      kneePrivilegedConfigurationParameters.setPrivilegedConfigurationOption(PrivilegedConfigurationCommand.PrivilegedConfigurationOption.AT_MID_RANGE);
    }
 
    /**
@@ -666,11 +676,11 @@ public abstract class WalkingControllerParameters
    }
 
    /**
-    * Returns the parameters used for straight leg walking
+    * Returns the parameters used for the knee privileged configuration
     */
-   public LegConfigurationParameters getLegConfigurationParameters()
+   public OneDoFJointPrivilegedConfigurationParameters getKneePrivilegedConfigurationParameters()
    {
-      return legConfigurationParameters;
+      return kneePrivilegedConfigurationParameters;
    }
 
    /**

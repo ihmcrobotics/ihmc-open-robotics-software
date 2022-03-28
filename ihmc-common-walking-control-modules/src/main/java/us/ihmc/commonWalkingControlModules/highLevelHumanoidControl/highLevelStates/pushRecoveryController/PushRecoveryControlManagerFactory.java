@@ -100,12 +100,6 @@ public class PushRecoveryControlManagerFactory
       return controlManagerFactory.getOrCreateFeetManager();
    }
 
-
-   public LegConfigurationManager getOrCreateLegConfigurationManager()
-   {
-      return controlManagerFactory.getOrCreateLegConfigurationManager();
-   }
-
    public PelvisOrientationManager getOrCreatePelvisOrientationManager()
    {
       return controlManagerFactory.getOrCreatePelvisOrientationManager();

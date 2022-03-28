@@ -98,7 +98,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;
-   private final LegConfigurationManager legConfigurationManager;
    private final BalanceManager balanceManager;
    private final CenterOfMassHeightManager comHeightManager;
 
@@ -149,9 +148,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    private final YoBoolean enableHeightFeedbackControl = new YoBoolean("enableHeightFeedbackControl", registry);
 
-   private final OneDoFJointPrivilegedConfigurationParameters kneePrivilegedConfigurationparameters = new OneDoFJointPrivilegedConfigurationParameters();
-
-
    private boolean firstTick = true;
 
    public WalkingHighLevelHumanoidController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
@@ -171,7 +167,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       this.pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       this.feetManager = managerFactory.getOrCreateFeetManager();
-      this.legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
 
       RigidBodyBasics head = fullRobotModel.getHead();
       RigidBodyBasics chest = fullRobotModel.getChest();
@@ -472,7 +467,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       privilegedConfigurationCommand.clear();
       privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_ZERO);
 
-      LegConfigurationParameters legConfigurationParameters = walkingControllerParameters.getLegConfigurationParameters();
       for (RobotSide robotSide : RobotSide.values)
       {
          ArmJointName[] armJointNames = fullRobotModel.getRobotSpecificJointNames().getArmJointNames();
@@ -481,14 +475,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
          OneDoFJointBasics kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH);
 
-         kneePrivilegedConfigurationparameters.clear();
-         kneePrivilegedConfigurationparameters.setConfigurationGain(legConfigurationParameters.getBentLegGains().getJointSpaceKp());
-         kneePrivilegedConfigurationparameters.setVelocityGain(legConfigurationParameters.getBentLegGains().getJointSpaceKd());
-         kneePrivilegedConfigurationparameters.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_MID_RANGE);
-         kneePrivilegedConfigurationparameters.setWeight(legConfigurationParameters.getLegPrivilegedLowWeight());
-         kneePrivilegedConfigurationparameters.setMaxAcceleration(legConfigurationParameters.getPrivilegedMaxAcceleration());
-
-         privilegedConfigurationCommand.addJoint(kneeJoint, kneePrivilegedConfigurationparameters);
+         privilegedConfigurationCommand.addJoint(kneeJoint, walkingControllerParameters.getKneePrivilegedConfigurationParameters());
       }
 
       if (!shouldKeepInitialContacts.getAndSet(false))
@@ -698,7 +685,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       double omega0 = controllerToolbox.getOmega0();
 
       feetManager.compute();
-      legConfigurationManager.compute();
 
       boolean bodyManagerIsLoadBearing = false;
       for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
