@@ -14,7 +14,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetect
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOffsetTrajectoryWhileWalking;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
-import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
@@ -30,7 +29,6 @@ import us.ihmc.robotics.sensors.FootSwitchFactory;
 public abstract class WalkingControllerParameters
 {
    private final JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
-   private final DynamicReachabilityParameters dynamicReachabilityParameters;
    private final PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters;
    private final LeapOfFaithParameters leapOfFaithParameters;
    private final OneDoFJointPrivilegedConfigurationParameters kneePrivilegedConfigurationParameters;
@@ -38,7 +36,6 @@ public abstract class WalkingControllerParameters
    public WalkingControllerParameters()
    {
       jointPrivilegedConfigurationParameters = new JointPrivilegedConfigurationParameters();
-      dynamicReachabilityParameters = new DynamicReachabilityParameters();
       pelvisOffsetWhileWalkingParameters = new PelvisOffsetWhileWalkingParameters();
       leapOfFaithParameters = new LeapOfFaithParameters();
 
@@ -159,12 +156,6 @@ public abstract class WalkingControllerParameters
    {
       return 0.04;
    }
-
-   /**
-    * The desired position of the CMP is computed based on a feedback control law on the ICP. This
-    * method returns the gains used in this controller.
-    */
-   public abstract ICPControlGains createICPControlGains();
 
    /**
     * This method returns the gains used in the controller to regulate the center of mass height.
@@ -702,18 +693,6 @@ public abstract class WalkingControllerParameters
    public boolean enableHeightFeedbackControl()
    {
       return true;
-   }
-
-   /**
-    * Sets whether or not the {@link DynamicReachabilityCalculator} will simply check whether or not
-    * the upcoming step is reachable using the given step timing ({@return} is false), or will edit the
-    * step timings to make sure that the step is reachable if ({@return} is true).
-    *
-    * @return whether or not to edit the timing based on the reachability of the step.
-    */
-   public boolean editStepTimingForReachability()
-   {
-      return false;
    }
 
    /**
