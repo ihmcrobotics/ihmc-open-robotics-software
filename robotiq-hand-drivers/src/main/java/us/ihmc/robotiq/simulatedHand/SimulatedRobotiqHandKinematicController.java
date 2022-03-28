@@ -9,8 +9,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +20,7 @@ public class SimulatedRobotiqHandKinematicController implements SimulatedHandKin
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final FullHumanoidRobotModel fullRobotModel;
    private final RealtimeROS2Node realtimeROS2Node;
-   private final YoDouble controllerTime;
+   private final DoubleProvider controllerTime;
 
    private final List<OneDoFJointBasics> controlledFingerJoints = new ArrayList<>();
    private final SimulatedRobotiqHandsController controller;
@@ -28,7 +28,7 @@ public class SimulatedRobotiqHandKinematicController implements SimulatedHandKin
    public SimulatedRobotiqHandKinematicController(String simpleRobotName,
                                                   FullHumanoidRobotModel fullRobotModel,
                                                   RealtimeROS2Node realtimeROS2Node,
-                                                  YoDouble controllerTime)
+                                                  DoubleProvider controllerTime)
    {
       this.fullRobotModel = fullRobotModel;
       this.realtimeROS2Node = realtimeROS2Node;

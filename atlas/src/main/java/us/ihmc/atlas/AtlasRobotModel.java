@@ -80,7 +80,7 @@ import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.UIParameters;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
-import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public class AtlasRobotModel implements DRCRobotModel
 {
@@ -527,7 +527,7 @@ public class AtlasRobotModel implements DRCRobotModel
    @Override
    public SimulatedHandKinematicController createSimulatedHandKinematicController(FullHumanoidRobotModel fullHumanoidRobotModel,
                                                                                   RealtimeROS2Node realtimeROS2Node,
-                                                                                  YoDouble controllerTime)
+                                                                                  DoubleProvider controllerTime)
    {
       switch (selectedVersion.getHandModel())
       {
