@@ -9,12 +9,14 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasICPControllerParameters;
+import us.ihmc.atlas.parameters.AtlasStepAdjustmentParameters;
 import us.ihmc.atlas.parameters.AtlasSteppingParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.roughTerrainWalking.AvatarPushRecoveryOverCinderBlocksTest;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -143,21 +145,16 @@ public class AtlasPushRecoveryOverCinderBlocksTest extends AvatarPushRecoveryOve
                      {
                         return true;
                      }
+                  };
+               }
 
+               @Override
+               public StepAdjustmentParameters getStepAdjustmentParameters()
+               {
+                  return new AtlasStepAdjustmentParameters()
+                  {
                      @Override
                      public boolean allowStepAdjustment()
-                     {
-                        return true;
-                     }
-
-                     @Override
-                     public boolean usePlanarRegionConstraints()
-                     {
-                        return true;
-                     }
-
-                     @Override
-                     public boolean switchPlanarRegionConstraintsAutomatically()
                      {
                         return true;
                      }
