@@ -3,11 +3,13 @@ package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -23,12 +25,13 @@ public class StaticEquilibriumSolverVisualizer
       StaticSupportRegionSolver solver = new StaticSupportRegionSolver();
       scs.getRootRegistry().addChild(solver.getRegistry());
       scs.addYoGraphicsListRegistry(solver.getGraphicsListRegistry());
+
       solver.setTickAndUpdatable(scs);
       solver.initialize(input);
       solver.solve();
 
       LogTools.info("----- Support Region -----");
-      ConvexPolygon2D supportRegion0 = solver.getSupportRegion();
+      ConvexPolygon2DReadOnly supportRegion0 = solver.getSupportRegion();
       for (int i = 0; i < supportRegion0.getNumberOfVertices(); i++)
       {
          System.out.println("\t" + supportRegion0.getVertex(i));
@@ -55,7 +58,7 @@ public class StaticEquilibriumSolverVisualizer
       {
          double renderedHeight = solver.getAverageContactPointPosition().getZ();
 
-         ConvexPolygon2D supportRegion = solver.getSupportRegion();
+         ConvexPolygon2DReadOnly supportRegion = solver.getSupportRegion();
          supportRegionGraphics.identity();
          supportRegionGraphics.translate(0.0, 0.0, renderedHeight);
          supportRegionGraphics.addExtrudedPolygon(supportRegion, 0.01, YoAppearance.Glass());
@@ -78,9 +81,9 @@ public class StaticEquilibriumSolverVisualizer
 //      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createTriangleOneTiltedFullyIn();
 //      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createFlatSquare();
 //      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createBipedFeet();
-      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createBipedFeet(1.0, -1.0, 0.6);
+//      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createBipedFeet(1.0, -1.0, 0.6);
 //      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createBipedFeetWithSingleHandhold();
-//      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createBipedFeetWithTwoHandholds();
+      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createBipedFeetWithTwoHandholds();
 
       new StaticEquilibriumSolverVisualizer(input);
    }

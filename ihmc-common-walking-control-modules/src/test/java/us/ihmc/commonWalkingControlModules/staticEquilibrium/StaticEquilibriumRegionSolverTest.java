@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 
@@ -39,7 +40,7 @@ public class StaticEquilibriumRegionSolverTest
       solver.initialize(input);
       solver.solve();
 
-      ConvexPolygon2D supportPolygon = solver.getSupportRegion();
+      ConvexPolygon2DReadOnly supportPolygon = solver.getSupportRegion();
       StaticEquilibriumForceOptimizer forceOptimizer = new StaticEquilibriumForceOptimizer();
 
       ConvexPolygonScaler scaler = new ConvexPolygonScaler();
