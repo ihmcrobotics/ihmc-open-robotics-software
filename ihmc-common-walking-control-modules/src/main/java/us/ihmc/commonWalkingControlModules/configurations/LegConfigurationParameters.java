@@ -112,22 +112,7 @@ public class LegConfigurationParameters
       return false;
    }
 
-   /**
-    * These are the configuration gain used to control the knee privileged joint accelerations or privileged joint velocities
-    * when the leg is in the straight leg state or straightening state.
-    * It contains the gains used by the {@link us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationControlModule} to determine either
-    * the privileged acceleration or the privileged velocity to project into the nullspace of the full task Jacobian.
-    *
-    * @return privileged configuration gain.
-    */
-   public LegConfigurationGains getStraightLegGains()
-   {
-      LegConfigurationGains gains = new LegConfigurationGains();
-      gains.setJointSpaceKp(40.0);
-      gains.setJointSpaceKd(6.0);
 
-      return gains;
-   }
 
    /**
     * This is the weight placed on the knee privileged joint accelerations or velocities when the leg is in

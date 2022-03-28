@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.controlModules.legConfiguration;
 
 import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationControlModule.LegConfigurationType;
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationControlModule.LegControlWeight;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -83,64 +82,24 @@ public class LegConfigurationManager
 
    public void startSwing(RobotSide upcomingSwingSide)
    {
-      if (attemptToStraightenLegs.getBooleanValue())
-      {
-         legConfigurationControlModules.get(upcomingSwingSide).setKneeAngleState(LegConfigurationType.BENT);
-      }
    }
 
    public boolean isLegCollapsed(RobotSide robotSide)
    {
-      LegConfigurationType legConfigurationControlState = legConfigurationControlModules.get(robotSide).getCurrentKneeControlState();
-      return (legConfigurationControlState.equals(LegConfigurationType.BENT) || legConfigurationControlState.equals(LegConfigurationType.COLLAPSE));
+      return true;
    }
 
-   public boolean isLegBent(RobotSide robotSide)
-   {
-      LegConfigurationType legConfigurationControlState = legConfigurationControlModules.get(robotSide).getCurrentKneeControlState();
-      return (legConfigurationControlState.equals(LegConfigurationType.BENT));
-   }
-
-   private boolean isLegCurrentlyStraightening(RobotSide robotSide)
-   {
-      return (legConfigurationControlModules.get(robotSide).getCurrentKneeControlState() == LegConfigurationType.STRAIGHTEN);
-   }
 
    public void collapseLegDuringTransfer(RobotSide transferSide)
    {
-      if (attemptToStraightenLegs.getBooleanValue())
-      {
-         legConfigurationControlModules.get(transferSide.getOppositeSide()).setKneeAngleState(LegConfigurationType.COLLAPSE);
-      }
    }
 
    public void collapseLegDuringSwing(RobotSide supportSide)
    {
-      if (attemptToStraightenLegs.getBooleanValue())
-      {
-         legConfigurationControlModules.get(supportSide).setKneeAngleState(LegConfigurationType.COLLAPSE);
-      }
    }
 
    public void straightenLegDuringSwing(RobotSide swingSide)
    {
-      if (legConfigurationControlModules.get(swingSide).getCurrentKneeControlState() != LegConfigurationType.STRAIGHTEN &&
-            legConfigurationControlModules.get(swingSide).getCurrentKneeControlState() != LegConfigurationType.STRAIGHT)
-      {
-         setStraight(swingSide);
-         setFullyExtendLeg(swingSide, true);
-         useHighWeight(swingSide);
-
-         boolean isNextStepTooLow = stepHeight.getDoubleValue() < stepHeightForForcedCollapse.getDoubleValue();
-         if (isNextStepTooLow)
-         {
-            prepareForLegBracing(swingSide);
-         }
-         else
-         {
-            doNotBrace(swingSide);
-         }
-      }
    }
 
    public void setStepDuration(RobotSide supportSide, double stepDuration)
@@ -153,31 +112,6 @@ public class LegConfigurationManager
       legConfigurationControlModules.get(robotSide).setFullyExtendLeg(fullyExtendLeg);
    }
 
-   public void prepareForLegBracing(RobotSide robotSide)
-   {
-      legConfigurationControlModules.get(robotSide).prepareForLegBracing();
-   }
-
-   public void doNotBrace(RobotSide robotSide)
-   {
-      legConfigurationControlModules.get(robotSide).doNotBrace();
-   }
-
-   public void useLowWeight(RobotSide robotSide)
-   {
-      if (attemptToStraightenLegs.getBooleanValue())
-      {
-         legConfigurationControlModules.get(robotSide).setLegControlWeight(LegControlWeight.LOW);
-      }
-   }
-
-   public void useMediumWeight(RobotSide robotSide)
-   {
-      if (attemptToStraightenLegs.getBooleanValue())
-      {
-         legConfigurationControlModules.get(robotSide).setLegControlWeight(LegControlWeight.MEDIUM);
-      }
-   }
 
    public void useHighWeight(RobotSide robotSide)
    {
@@ -189,18 +123,12 @@ public class LegConfigurationManager
 
    public void setStraight(RobotSide robotSide)
    {
-      if (attemptToStraightenLegs.getBooleanValue() && !isLegCurrentlyStraightening(robotSide))
-      {
-         legConfigurationControlModules.get(robotSide).setKneeAngleState(LegConfigurationType.STRAIGHT);
-      }
+
    }
 
    public void beginStraightening(RobotSide robotSide)
    {
-      if (attemptToStraightenLegs.getBooleanValue() && !isLegCurrentlyStraightening(robotSide))
-      {
-         legConfigurationControlModules.get(robotSide).setKneeAngleState(LegConfigurationType.STRAIGHTEN);
-      }
+
    }
 
    private final FramePoint2D tempLeadingFootPosition = new FramePoint2D();
