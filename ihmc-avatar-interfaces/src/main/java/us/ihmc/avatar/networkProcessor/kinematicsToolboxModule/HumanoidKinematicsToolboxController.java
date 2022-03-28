@@ -159,6 +159,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     * Visualization of multi-contact contact points and support region
     */
    private static final int maxMultiContactPoints = 20;
+   private final YoBoolean usingMultiContactSupportRegion = new YoBoolean("usingMultiContactSupportRegion", registry);
    private final YoFramePoint3D[] multiContactPoints = new YoFramePoint3D[maxMultiContactPoints];
    private final YoFrameVector3D[] multiContactNormals = new YoFrameVector3D[maxMultiContactPoints];
    private final YoFrameConvexPolygon2D yoMultiContactSupportRegion;
@@ -234,9 +235,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       yoMultiContactSupportRegion = new YoFrameConvexPolygon2D("multiContactSupportRegion", ReferenceFrame.getWorldFrame(), 30, parentRegistry);
       multiContactSupportRegionOrigin = new YoFramePose3D("origin", ReferenceFrame.getWorldFrame(), parentRegistry);
-      AppearanceDefinition mcSupportRegionColor = YoAppearance.Red();
-//      mcSupportRegionColor.setTransparency(0.5);
-      multiContactSupportRegionGraphic = new YoGraphicPolygon("multiContactSupportRegion", yoMultiContactSupportRegion, multiContactSupportRegionOrigin, 1.0, mcSupportRegionColor);
+      multiContactSupportRegionGraphic = new YoGraphicPolygon("multiContactSupportRegion", yoMultiContactSupportRegion, multiContactSupportRegionOrigin, 1.0, YoAppearance.Red());
       yoGraphicsListRegistry.registerYoGraphic("SupportRegion", multiContactSupportRegionGraphic);
    }
 
@@ -380,10 +379,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
             supportRegionSolver.initialize(supportRegionSolverInput);
             supportRegionSolver.solve();
-
-//            yoMultiContactSupportRegion.set(supportRegionSolver.getSupportRegion());
-            multiContactSupportRegionOrigin.getPosition().set(0.0, 0.0, supportRegionSolver.getAverageContactPointPosition().getZ());
-//            multiContactSupportRegionGraphic.update();
          }
 
          for (RobotSide robotSide : RobotSide.values)
@@ -395,8 +390,11 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
             isFootInSupport.get(robotSide).set(true);
       }
 
-      if (initialRobotConfigurationMap != null && !hasMultiContactBalanceStatus)
+      if (initialRobotConfigurationMap != null)
       {
+         if (hasMultiContactBalanceStatus)
+            throw new UnsupportedOperationException("Initial robot configuration is not supported with multi-contact context.");
+         
          /*
           * Default initial configuration was provided and is set in the super class. The goal here, is to
           * recompute the pose of the root joint such that our initial configuration has its support feet as
@@ -470,10 +468,11 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       super.updateInternal();
 
-      if (!hasCapturabilityBasedStatus && hasMultiContactBalanceStatus)
+      if (usingMultiContactSupportRegion.getValue())
       { // project current and desired center of mass onto the support region
-         desiredCenterOfMass.setZ(supportRegionSolver.getAverageContactPointPosition().getZ());
-         currentCenterOfMass.setZ(supportRegionSolver.getAverageContactPointPosition().getZ());
+         multiContactSupportRegionOrigin.getPosition().set(0.0, 0.0, supportRegionSolver.getAverageContactPointPosition().getZ());
+         yoDesiredCenterOfMass.setZ(supportRegionSolver.getAverageContactPointPosition().getZ());
+         yoCurrentCenterOfMass.setZ(supportRegionSolver.getAverageContactPointPosition().getZ());
       }
    }
 
@@ -636,6 +635,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     */
    private void addLinearMomentumConvexConstraint2DCommand(InverseKinematicsCommandBuffer bufferToPack)
    {
+      usingMultiContactSupportRegion.set(false);
       if (!enableAutoSupportPolygon.getValue())
          return;
       if (!enableSupportPolygonConstraint.getValue())
@@ -659,6 +659,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          boolean hasSurfaceNormalData = multiContactBalanceStatusInternal.getSurfaceNormalsInWorld().size() == multiContactBalanceStatusInternal.getContactPointsInWorld().size();
          if (hasSurfaceNormalData)
          {
+            usingMultiContactSupportRegion.set(true);
             for (int i = 0; i < supportRegionSolver.getSupportRegionVertices().size(); i++)
             {
                activeContactPointPositions.add().set(supportRegionSolver.getSupportRegionVertices().get(i));
@@ -674,7 +675,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       updateSupportPolygonConstraint(activeContactPointPositions, bufferToPack);
 
-      yoMultiContactSupportRegion.set(shrunkConvexPolygon);
+      yoMultiContactSupportRegion.set(shrunkSupportPolygon);
       multiContactSupportRegionGraphic.update();
    }
 

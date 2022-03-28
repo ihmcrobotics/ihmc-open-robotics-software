@@ -32,7 +32,6 @@ import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.collision.EuclidFrameShape3DCollisionResult;
@@ -225,7 +224,7 @@ public class KinematicsToolboxController extends ToolboxController
     * Center of Mass data used for visualization.
     * They are only updated and visible when the center of mass either has a setpoint or is constrained.
     */
-   protected final YoFramePoint3D desiredCenterOfMass, currentCenterOfMass;
+   protected final YoFramePoint3D yoDesiredCenterOfMass, yoCurrentCenterOfMass;
    protected final YoGraphicPosition desiredCenterOfMassGraphic, currentCenterOfMassGraphic;
 
    /**
@@ -254,7 +253,7 @@ public class KinematicsToolboxController extends ToolboxController
    /** Helper used for shrink the support polygon. */
    private final ConvexPolygonScaler convexPolygonScaler = new ConvexPolygonScaler();
    private final FrameConvexPolygon2D newSupportPolygon = new FrameConvexPolygon2D();
-   protected final ConvexPolygon2D shrunkConvexPolygon = new ConvexPolygon2D();
+   protected final ConvexPolygon2D shrunkSupportPolygon = new ConvexPolygon2D();
    private final FramePoint3D centerOfMass = new FramePoint3D();
    /** Distance to shrink the support polygon for safety purpose. */
    private final YoDouble centerOfMassSafeMargin = new YoDouble("centerOfMassSafeMargin",
@@ -382,10 +381,10 @@ public class KinematicsToolboxController extends ToolboxController
       privilegedConfigurationGain.set(DEFAULT_PRIVILEGED_CONFIGURATION_GAIN);
       privilegedMaxVelocity.set(Double.POSITIVE_INFINITY);
 
-      desiredCenterOfMass = new YoFramePoint3D("desiredCenterOfMass", ReferenceFrame.getWorldFrame(), registry);
-      currentCenterOfMass = new YoFramePoint3D("currentCenterOfMass", ReferenceFrame.getWorldFrame(), registry);
-      desiredCenterOfMassGraphic = new YoGraphicPosition("desiredCoMGraphic", desiredCenterOfMass, 0.02, YoAppearance.Red());
-      currentCenterOfMassGraphic = new YoGraphicPosition("currentCoMGraphic", currentCenterOfMass, 0.02, YoAppearance.Black());
+      yoDesiredCenterOfMass = new YoFramePoint3D("desiredCenterOfMass", ReferenceFrame.getWorldFrame(), registry);
+      yoCurrentCenterOfMass = new YoFramePoint3D("currentCenterOfMass", ReferenceFrame.getWorldFrame(), registry);
+      desiredCenterOfMassGraphic = new YoGraphicPosition("desiredCoMGraphic", yoDesiredCenterOfMass, 0.02, YoAppearance.Red());
+      currentCenterOfMassGraphic = new YoGraphicPosition("currentCoMGraphic", yoCurrentCenterOfMass, 0.02, YoAppearance.Black());
       yoGraphicsListRegistry.registerYoGraphic("CenterOfMass", desiredCenterOfMassGraphic);
       yoGraphicsListRegistry.registerYoGraphic("CenterOfMass", currentCenterOfMassGraphic);
 
@@ -734,10 +733,10 @@ public class KinematicsToolboxController extends ToolboxController
 
       if (!isUserControllingCenterOfMass())
       {
-         desiredCenterOfMass.setToNaN();
+         yoDesiredCenterOfMass.setToNaN();
       }
+      yoCurrentCenterOfMass.set(centerOfMass);
       desiredCenterOfMassGraphic.update();
-      currentCenterOfMass.set(centerOfMass);
       currentCenterOfMassGraphic.update();
 
       // Updating the the robot state from the current solution, initializing the next control tick.
@@ -882,7 +881,7 @@ public class KinematicsToolboxController extends ToolboxController
 
          KinematicsToolboxCenterOfMassCommand command = commandInputManager.pollNewestCommand(KinematicsToolboxCenterOfMassCommand.class);
          KinematicsToolboxHelper.consumeCenterOfMassCommand(command, spatialGains.getPositionGains(), userFBCommands.addCenterOfMassFeedbackControlCommand());
-         desiredCenterOfMass.set(command.getDesiredPosition());
+         yoDesiredCenterOfMass.set(command.getDesiredPosition());
 
          if (preserveUserCommandHistory.getValue())
          {
@@ -1095,10 +1094,10 @@ public class KinematicsToolboxController extends ToolboxController
       if (!newSupportPolygon.epsilonEquals(supportPolygon, 5.0e-3))
       { // Update the polygon only if there is an actual update.
          supportPolygon.set(newSupportPolygon);
-         convexPolygonScaler.scaleConvexPolygon(supportPolygon, centerOfMassSafeMargin.getValue(), shrunkConvexPolygon);
+         convexPolygonScaler.scaleConvexPolygon(supportPolygon, centerOfMassSafeMargin.getValue(), shrunkSupportPolygon);
          shrunkSupportPolygonVertices.clear();
-         for (int i = 0; i < shrunkConvexPolygon.getNumberOfVertices(); i++)
-            shrunkSupportPolygonVertices.add().set(shrunkConvexPolygon.getVertex(i));
+         for (int i = 0; i < shrunkSupportPolygon.getNumberOfVertices(); i++)
+            shrunkSupportPolygonVertices.add().set(shrunkSupportPolygon.getVertex(i));
 
          for (int i = shrunkSupportPolygonVertices.size() - 1; i >= 0; i--)
          { // Filtering vertices that barely expand the polygon.
