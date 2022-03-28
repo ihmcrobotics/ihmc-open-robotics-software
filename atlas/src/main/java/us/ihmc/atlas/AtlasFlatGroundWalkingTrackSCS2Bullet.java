@@ -40,7 +40,7 @@ public class AtlasFlatGroundWalkingTrackSCS2Bullet
 
    private final RealtimeROS2Node realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.INTRAPROCESS,
                                                                                       "flat_ground_walking_track_simulation");
-   //private static final double SIMULATION_DT = 5e-4;
+   //private static final double SIMULATION_DT = 0.001;
 
    public AtlasFlatGroundWalkingTrackSCS2Bullet()
    {
@@ -49,8 +49,6 @@ public class AtlasFlatGroundWalkingTrackSCS2Bullet
       setCollisionGroupsMasks(robotModel.getRobotDefinition());
       FlatGroundEnvironment environment = new FlatGroundEnvironment();
 
-      int recordFrequency = (int) Math.max(1.0, Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT()));
-
       boolean useVelocityAndHeadingScript = true;
       HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters = new HeadingAndVelocityEvaluationScriptParameters();
 
@@ -58,6 +56,8 @@ public class AtlasFlatGroundWalkingTrackSCS2Bullet
       RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, initialYaw);
 
       SCS2AvatarSimulationFactory avatarSimulationFactory = new SCS2AvatarSimulationFactory();
+      //avatarSimulationFactory.setSimulationDT(SIMULATION_DT);
+
       avatarSimulationFactory.setRobotModel(robotModel);
       avatarSimulationFactory.setRealtimeROS2Node(realtimeROS2Node);
       if (USE_STAND_PREP)
@@ -65,13 +65,12 @@ public class AtlasFlatGroundWalkingTrackSCS2Bullet
       else
          avatarSimulationFactory.setDefaultHighLevelHumanoidControllerFactory(useVelocityAndHeadingScript, walkingScriptParameters);
       avatarSimulationFactory.setCommonAvatarEnvrionmentInterface(environment);
+      
       avatarSimulationFactory.setRobotInitialSetup(robotInitialSetup);
-      avatarSimulationFactory.setSimulationDataRecordTickPeriod(recordFrequency);
+      //avatarSimulationFactory.setSimulationDataRecordTimePeriod(robotModel.getControllerDT());
       avatarSimulationFactory.setCreateYoVariableServer(createYoVariableServer);
       avatarSimulationFactory.setUseBulletPhysicsEngine(true);
       avatarSimulationFactory.setUseDescriptionCollisions(true);
-      
-      //avatarSimulationFactory.setSimulationDT(SIMULATION_DT);
 
       SCS2AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
 
@@ -223,8 +222,9 @@ public class AtlasFlatGroundWalkingTrackSCS2Bullet
                bulletCollideMask = 1 + 2;
             }
 
-            shapeDefinition.setCollisionGroup(bulletCollisionGroup);
-            shapeDefinition.setCollisionMask(bulletCollideMask);
+            //bullet has it the opposite names as CollidableHelper e.g. a collisionMask is a collisionGroup in bullet
+            shapeDefinition.setCollisionMask(bulletCollisionGroup);
+            shapeDefinition.setCollisionGroup(bulletCollideMask);
          }
       }
    }

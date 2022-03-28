@@ -179,8 +179,9 @@ public class AtlasFallingOnGroundSCS2Bullet
                bulletCollideMask = 1 + 2;
             }
 
-            shapeDefinition.setCollisionGroup(bulletCollisionGroup);
-            shapeDefinition.setCollisionMask(bulletCollideMask);
+            //bullet has it the opposite names as CollidableHelper e.g. a collisionMask is a collisionGroup in bullet
+            shapeDefinition.setCollisionMask(bulletCollisionGroup);
+            shapeDefinition.setCollisionGroup(bulletCollideMask);
          }
       }
    }
