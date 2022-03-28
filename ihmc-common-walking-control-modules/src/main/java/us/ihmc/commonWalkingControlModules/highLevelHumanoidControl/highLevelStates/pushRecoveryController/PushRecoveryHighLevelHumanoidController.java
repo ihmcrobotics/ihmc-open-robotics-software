@@ -539,9 +539,6 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
          controllerCoreCommand.addInverseDynamicsCommand(feetManager.getInverseDynamicsCommand(robotSide));
          controllerCoreCommand.completeLowLevelJointData(feetManager.getJointDesiredData(robotSide));
 
-         controllerCoreCommand.addFeedbackControlCommand(legConfigurationManager.getFeedbackControlCommand(robotSide));
-         controllerCoreCommand.addInverseDynamicsCommand(legConfigurationManager.getInverseDynamicsCommand(robotSide));
-
          YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
          PlaneContactStateCommand planeContactStateCommand = planeContactStateCommandPool.add();
          contactState.getPlaneContactStateCommand(planeContactStateCommand);
