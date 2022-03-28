@@ -677,6 +677,9 @@ public class AtlasRobotModel implements DRCRobotModel
 
    public void setUseSDFCollisions(boolean useSDFCollisions)
    {
+      if (robotDefinition != null)
+         throw new RuntimeException("Must set before RobotDefinition is created!");
+
       this.useSDFCollisions = useSDFCollisions;
    }
 }
