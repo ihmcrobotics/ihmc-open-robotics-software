@@ -36,7 +36,6 @@ public class FlamingoStanceState extends SingleSupportState
    private final CenterOfMassHeightManager comHeightManager;
    private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;
-   private final LegConfigurationManager legConfigurationManager;
 
    private final FootstepTiming footstepTiming = new FootstepTiming();
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
@@ -54,7 +53,6 @@ public class FlamingoStanceState extends SingleSupportState
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
-      legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
 
       String namePrefix = supportSide.getOppositeSide().getLowerCaseName();
       loadFoot = new YoBoolean(namePrefix + "LoadFoot", registry);
@@ -153,7 +151,6 @@ public class FlamingoStanceState extends SingleSupportState
       loadFoot.set(false);
       loadFootStartTime.setToNaN();
 
-      legConfigurationManager.startSwing(swingSide);
       controllerToolbox.updateContactPointsForUpcomingFootstep(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide));
    }
 

@@ -39,8 +39,6 @@ public class TransferToWalkingSingleSupportState extends TransferState
 
    private final DoubleProvider minimumTransferTime;
 
-   private final LegConfigurationManager legConfigurationManager;
-   private final YoDouble fractionOfTransferToCollapseLeg = new YoDouble("fractionOfTransferToCollapseLeg", registry);
    private final YoDouble currentTransferDuration = new YoDouble("CurrentTransferDuration", registry);
    private final YoBoolean resubmitStepsInTransferEveryTick = new YoBoolean("resubmitStepsInTransferEveryTick", registry);
 
@@ -72,9 +70,6 @@ public class TransferToWalkingSingleSupportState extends TransferState
       this.minimumTransferTime = minimumTransferTime;
       this.touchdownErrorCompensator = touchdownErrorCompensator;
 
-      legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
-
-      fractionOfTransferToCollapseLeg.set(walkingControllerParameters.getLegConfigurationParameters().getFractionOfTransferToCollapseLeg());
       minimizeAngularMomentumRateZDuringTransfer = new BooleanParameter("minimizeAngularMomentumRateZDuringTransfer",
                                                                         registry,
                                                                         walkingControllerParameters.minimizeAngularMomentumRateZDuringTransfer());
@@ -150,9 +145,6 @@ public class TransferToWalkingSingleSupportState extends TransferState
 
       pelvisOrientationManager.setUpcomingFootstep(footsteps[0]);
       pelvisOrientationManager.initializeTransfer(transferToSide, firstTiming.getTransferTime(), firstTiming.getSwingTime());
-
-      legConfigurationManager.beginStraightening(transferToSide);
-      legConfigurationManager.setFullyExtendLeg(transferToSide, false);
    }
 
    @Override
@@ -188,12 +180,6 @@ public class TransferToWalkingSingleSupportState extends TransferState
       super.doAction(timeInState);
 
       double transferDuration = currentTransferDuration.getDoubleValue();
-      boolean pastMinimumTime = timeInState > fractionOfTransferToCollapseLeg.getDoubleValue() * transferDuration;
-      boolean isFootWellPosition = legConfigurationManager.areFeetWellPositionedForCollapse(transferToSide.getOppositeSide());
-      if (pastMinimumTime && isFootWellPosition && !legConfigurationManager.isLegCollapsed(transferToSide.getOppositeSide()))
-      {
-         legConfigurationManager.collapseLegDuringTransfer(transferToSide);
-      }
 
       updateFootPlanOffset();
 
