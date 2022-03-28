@@ -4,11 +4,13 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.parameters.AtlasICPControllerParameters;
+import us.ihmc.atlas.parameters.AtlasStepAdjustmentParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.AvatarStepInPlaceTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
@@ -24,9 +26,9 @@ public class AtlasStepInPlaceTest extends AvatarStepInPlaceTest
          return new AtlasWalkingControllerParameters(target, getJointMap(), getContactPointParameters())
          {
             @Override
-            public ICPControllerParameters getICPControllerParameters()
+            public StepAdjustmentParameters getStepAdjustmentParameters()
             {
-               return new AtlasICPControllerParameters(false)
+               return new AtlasStepAdjustmentParameters()
                {
                   @Override
                   public double getMinICPErrorForStepAdjustment()
