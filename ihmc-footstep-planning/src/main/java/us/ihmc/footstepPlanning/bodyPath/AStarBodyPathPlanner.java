@@ -294,9 +294,9 @@ public class AStarBodyPathPlanner
          populateNeighbors(node);
 
          double parentSnapHeight = gridHeightMap.get(node);
-         for (int i = 0; i < neighbors.size(); i++)
+         for (int neighborIndex = 0; neighborIndex < neighbors.size(); neighborIndex++)
          {
-            BodyPathLatticePoint neighbor = neighbors.get(i);
+            BodyPathLatticePoint neighbor = neighbors.get(neighborIndex);
 
             this.snapHeight.set(snap(neighbor));
             heuristicCost.set(xyDistance(neighbor, goalNode));
@@ -321,7 +321,7 @@ public class AStarBodyPathPlanner
 
             if (checkForCollisions)
             {
-               this.containsCollision.set(collisionDetector.collisionDetected(heightMapData, neighbor, i, snapHeight.getDoubleValue(), groundClearance));
+               this.containsCollision.set(collisionDetector.collisionDetected(heightMapData, neighbor, neighborIndex, snapHeight.getDoubleValue(), groundClearance));
                if (containsCollision.getValue())
                {
                   rejectionReason.set(RejectionReason.COLLISION);
@@ -334,7 +334,7 @@ public class AStarBodyPathPlanner
 
             if (useRANSACTraversibility)
             {
-               traversibilityCost.set(ransacTraversibilityCalculator.computeTraversibility(neighbor, node, i));
+               traversibilityCost.set(ransacTraversibilityCalculator.computeTraversibility(neighbor, node, neighborIndex));
                if (ransacTraversibilityCalculator.isTraversible())
                {
                   edgeCost.add(traversibilityCost);
@@ -551,28 +551,30 @@ public class AStarBodyPathPlanner
    }
 
    /**
-    * Populates an 8-connected grid starting along +x and moving clockwise
+    * Populates a 16-connected grid starting along +x and moving clockwise
     */
    private void populateNeighbors(BodyPathLatticePoint latticePoint)
    {
       neighbors.clear();
 
       neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex()));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() + 1));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex(), latticePoint.getYIndex() + 1));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex() + 1));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex()));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex() - 1));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex(), latticePoint.getYIndex() - 1));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() - 1));
-
       neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 2, latticePoint.getYIndex() + 1));
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() + 1));
       neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() + 2));
+
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex(), latticePoint.getYIndex() + 1));
       neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex() + 2));
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex() + 1));
       neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 2, latticePoint.getYIndex() + 1));
+
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex()));
       neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 2, latticePoint.getYIndex() - 1));
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex() - 1));
       neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex() - 2));
+
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex(), latticePoint.getYIndex() - 1));
       neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() - 2));
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() - 1));
       neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 2, latticePoint.getYIndex() - 1));
    }
 
