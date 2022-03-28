@@ -184,38 +184,6 @@ public abstract class ICPOptimizationParameters
    public abstract double getAdjustmentDeadband();
 
    /**
-    * Gets the maximum amount of step adjustment allowed in the forward direction.
-    */
-   public double getMaximumStepAdjustmentForward()
-   {
-      return Double.POSITIVE_INFINITY;
-   }
-
-   /**
-    * Gets the maximum amount of step adjustment allowed in the backward direction.
-    */
-   public double getMaximumStepAdjustmentBackward()
-   {
-      return Double.POSITIVE_INFINITY;
-   }
-
-   /**
-    * Gets the maximum amount of step adjustment allowed in the inward direction.
-    */
-   public double getMaximumStepAdjustmentInward()
-   {
-      return Double.POSITIVE_INFINITY;
-   }
-
-   /**
-    * Gets the maximum amount of step adjustment allowed in the outward direction.
-    */
-   public double getMaximumStepAdjustmentOutward()
-   {
-      return Double.POSITIVE_INFINITY;
-   }
-
-   /**
     * This method sets what the minimum change in the current footstep is allowed to be.
     * Works in tandem with the footstep rate parameter.
     */

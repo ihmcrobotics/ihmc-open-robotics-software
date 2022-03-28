@@ -16,7 +16,6 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
@@ -32,19 +31,11 @@ public class ICPOptimizationReachabilityConstraintHandler
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final int numberOfVertices = 5;
-   private static final double SUFFICIENTLY_LARGE = 5.0;
 
    private final SideDependentList<List<YoFramePoint2D>> reachabilityVertices = new SideDependentList<>();
    private final SideDependentList<YoFrameConvexPolygon2D> reachabilityPolygons = new SideDependentList<>();
 
-   private final SideDependentList<List<YoFramePoint2D>> adjustmentVertices = new SideDependentList<>();
-   private final SideDependentList<PoseReferenceFrame> stepFrames = new SideDependentList<>();
-   private final SideDependentList<YoFrameConvexPolygon2D> adjustmentPolygons = new SideDependentList<>();
-
-   private final FixedFrameConvexPolygon2DBasics adjustmentPolygon = new FrameConvexPolygon2D(worldFrame);
-   private final FixedFrameConvexPolygon2DBasics reachabilityPolygon = new FrameConvexPolygon2D(worldFrame);
-
-   private final YoFrameConvexPolygon2D contractedReachabilityPolygon;
+   private final YoFrameConvexPolygon2D reachabilityPolygon;
    private final YoFrameLineSegment2D motionLimitLine;
    private final YoFrameLineSegment2D adjustmentLineSegment;
 
@@ -52,13 +43,6 @@ public class ICPOptimizationReachabilityConstraintHandler
    private final DoubleProvider lengthBackLimit;
    private final DoubleProvider innerLimit;
    private final DoubleProvider outerLimit;
-
-   private final DoubleProvider forwardAdjustmentLimit;
-   private final DoubleProvider backwardAdjustmentLimit;
-   private final DoubleProvider inwardAdjustmentLimit;
-   private final DoubleProvider outwardAdjustmentLimit;
-
-   private final ConvexPolygonTools polygonTools = new ConvexPolygonTools();
 
    public ICPOptimizationReachabilityConstraintHandler(SideDependentList<ReferenceFrame> soleZUpFrames, ICPOptimizationParameters icpOptimizationParameters,
                                                        SteppingParameters steppingParameters, String yoNamePrefix, boolean visualize,
@@ -69,14 +53,6 @@ public class ICPOptimizationReachabilityConstraintHandler
       innerLimit = new DoubleParameter(yoNamePrefix + "MaxReachabilityWidth", registry, steppingParameters.getMinStepWidth());
       outerLimit = new DoubleParameter(yoNamePrefix + "MinReachabilityWidth", registry, steppingParameters.getMaxStepWidth());
 
-      forwardAdjustmentLimit = new DoubleParameter(yoNamePrefix + "ForwardAdjustmentLimit", registry,
-                                                   Math.min(SUFFICIENTLY_LARGE, icpOptimizationParameters.getMaximumStepAdjustmentForward()));
-      backwardAdjustmentLimit = new DoubleParameter(yoNamePrefix + "BackwardAdjustmentLimit", registry,
-                                                    Math.min(SUFFICIENTLY_LARGE, icpOptimizationParameters.getMaximumStepAdjustmentBackward()));
-      inwardAdjustmentLimit = new DoubleParameter(yoNamePrefix + "InwardAdjustmentLimit", registry,
-                                                  Math.min(SUFFICIENTLY_LARGE, icpOptimizationParameters.getMaximumStepAdjustmentInward()));
-      outwardAdjustmentLimit = new DoubleParameter(yoNamePrefix + "OutwardAdjustmentLimit", registry,
-                                                   Math.min(SUFFICIENTLY_LARGE, icpOptimizationParameters.getMaximumStepAdjustmentOutward()));
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -98,33 +74,15 @@ public class ICPOptimizationReachabilityConstraintHandler
          this.reachabilityVertices.put(robotSide, reachabilityVertices);
          this.reachabilityPolygons.put(robotSide, reachabilityPolygon);
 
-         PoseReferenceFrame adjustmentFrame = new PoseReferenceFrame(prefix + "AdjustmentFrame", worldFrame);
-
-         YoInteger yoNumberOfAdjustmentVertices = new YoInteger(robotSide.getLowerCaseName() + "NumberOfAdjustmentVertices", registry);
-         yoNumberOfAdjustmentVertices.set(4);
-
-         List<YoFramePoint2D> adjustmentVertices = new ArrayList<>();
-         for (int i = 0; i < 4; i++)
-         {
-            YoFramePoint2D adjustmentVertex = new YoFramePoint2D(prefix + "AdjustmentVertex" + i, adjustmentFrame, registry);
-            adjustmentVertices.add(adjustmentVertex);
-         }
-
-         YoFrameConvexPolygon2D adjustmentPolygon = new YoFrameConvexPolygon2D(adjustmentVertices, yoNumberOfAdjustmentVertices, adjustmentFrame);
-
-         this.stepFrames.put(robotSide, adjustmentFrame);
-         this.adjustmentVertices.put(robotSide, adjustmentVertices);
-         this.adjustmentPolygons.put(robotSide, adjustmentPolygon);
-
       }
 
-      contractedReachabilityPolygon = new YoFrameConvexPolygon2D(yoNamePrefix + "ReachabilityRegion", "", worldFrame, 12, registry);
+      reachabilityPolygon = new YoFrameConvexPolygon2D(yoNamePrefix + "ReachabilityRegion", "", worldFrame, 12, registry);
       motionLimitLine = new YoFrameLineSegment2D(yoNamePrefix + "AdjustmentThresholdSegment", "", worldFrame, registry);
       adjustmentLineSegment = new YoFrameLineSegment2D(yoNamePrefix + "AdjustmentLineSegment", "", worldFrame, registry);
 
       if (yoGraphicsListRegistry != null)
       {
-         YoArtifactPolygon reachabilityGraphic = new YoArtifactPolygon("ReachabilityRegionViz", contractedReachabilityPolygon, Color.BLUE, false);
+         YoArtifactPolygon reachabilityGraphic = new YoArtifactPolygon("ReachabilityRegionViz", reachabilityPolygon, Color.BLUE, false);
          YoArtifactLineSegment2d adjustmentGraphic = new YoArtifactLineSegment2d("AdjustmentViz", adjustmentLineSegment, Color.GREEN);
          YoArtifactLineSegment2d adjustmentClippingGraphic = new YoArtifactLineSegment2d("AdjustmentClippingViz", motionLimitLine, Color.RED);
 
@@ -145,7 +103,7 @@ public class ICPOptimizationReachabilityConstraintHandler
     */
    public FrameConvexPolygon2DReadOnly initializeReachabilityConstraintForDoubleSupport()
    {
-      contractedReachabilityPolygon.clear();
+      reachabilityPolygon.clear();
       motionLimitLine.setToNaN();
       adjustmentLineSegment.setToNaN();
 
@@ -161,21 +119,8 @@ public class ICPOptimizationReachabilityConstraintHandler
     */
    public FrameConvexPolygon2DReadOnly initializeReachabilityConstraintForSingleSupport(RobotSide supportSide, FramePose3DReadOnly footstepPose)
    {
-      FrameConvexPolygon2DReadOnly reachabilityPolygon = getReachabilityPolygon(supportSide);
-      FrameConvexPolygon2DReadOnly adjustmentPolygon = getAdjustmentPolygon(supportSide.getOppositeSide(), footstepPose);
-
-      contractedReachabilityPolygon.checkReferenceFrameMatch(reachabilityPolygon);
-      contractedReachabilityPolygon.checkReferenceFrameMatch(adjustmentPolygon);
-
-      if (polygonTools.computeIntersectionOfPolygons(reachabilityPolygon, adjustmentPolygon, contractedReachabilityPolygon))
-         return contractedReachabilityPolygon;
-
-      // there is no intersection, make the reachability only a single point.
-      contractedReachabilityPolygon.clear();
-      contractedReachabilityPolygon.addVertex(footstepPose.getPosition());
-      contractedReachabilityPolygon.update();
-
-      return contractedReachabilityPolygon;
+      reachabilityPolygon.setMatchingFrame(getReachabilityPolygon(supportSide), false);
+      return reachabilityPolygon;
    }
 
    private FrameConvexPolygon2DReadOnly getReachabilityPolygon(RobotSide supportSide)
@@ -201,27 +146,7 @@ public class ICPOptimizationReachabilityConstraintHandler
       polygon.notifyVerticesChanged();
       polygon.update();
 
-      reachabilityPolygon.setMatchingFrame(polygon, false);
-      return reachabilityPolygon;
-   }
-
-   private FrameConvexPolygon2DReadOnly getAdjustmentPolygon(RobotSide swingSide, FramePose3DReadOnly footstepPose)
-   {
-      stepFrames.get(swingSide).setPoseAndUpdate(footstepPose);
-
-      List<YoFramePoint2D> vertices = adjustmentVertices.get(swingSide);
-      YoFrameConvexPolygon2D polygon = adjustmentPolygons.get(swingSide);
-
-      vertices.get(0).set(forwardAdjustmentLimit.getValue(), swingSide.negateIfRightSide(outwardAdjustmentLimit.getValue()));
-      vertices.get(1).set(forwardAdjustmentLimit.getValue(), swingSide.negateIfLeftSide(inwardAdjustmentLimit.getValue()));
-      vertices.get(2).set(-backwardAdjustmentLimit.getValue(), swingSide.negateIfRightSide(outwardAdjustmentLimit.getValue()));
-      vertices.get(3).set(-backwardAdjustmentLimit.getValue(), swingSide.negateIfLeftSide(inwardAdjustmentLimit.getValue()));
-
-      polygon.notifyVerticesChanged();
-      polygon.update();
-
-      adjustmentPolygon.setMatchingFrame(polygon, false);
-      return adjustmentPolygon;
+      return polygon;
    }
 
    private final FramePoint2D adjustedLocation = new FramePoint2D();
@@ -247,8 +172,8 @@ public class ICPOptimizationReachabilityConstraintHandler
       motionLine.getPoint().set(adjustedLocation);
       motionLine.getDirection().set(adjustmentDirection);
 
-      contractedReachabilityPolygon.update();
-      ConvexPolygonTools.cutPolygonWithLine(motionLine, contractedReachabilityPolygon, lineIntersector2d, RobotSide.LEFT);
+      reachabilityPolygon.update();
+      ConvexPolygonTools.cutPolygonWithLine(motionLine, reachabilityPolygon, lineIntersector2d, RobotSide.LEFT);
 
       adjustmentLineSegment.set(referenceLocation, adjustedLocation);
       motionLimitLine.set(lineIntersector2d.getIntersectionPointOne(), lineIntersector2d.getIntersectionPointTwo());
@@ -259,8 +184,8 @@ public class ICPOptimizationReachabilityConstraintHandler
     */
    public FrameConvexPolygon2DReadOnly updateReachabilityConstraint()
    {
-      contractedReachabilityPolygon.update();
+      reachabilityPolygon.update();
 
-      return contractedReachabilityPolygon;
+      return reachabilityPolygon;
    }
 }

@@ -108,7 +108,6 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
       allowStepAdjustment = new BooleanParameter(yoNamePrefix + "AllowStepAdjustment", registry, icpOptimizationParameters.allowStepAdjustment());
 
       reachabilityConstraintHandler = new StepAdjustmentReachabilityConstraint(soleZUpFrames,
-                                                                               icpOptimizationParameters,
                                                                                walkingControllerParameters.getSteppingParameters(),
                                                                                yoNamePrefix,
                                                                                VISUALIZE,

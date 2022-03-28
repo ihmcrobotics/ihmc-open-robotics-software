@@ -13,6 +13,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.parameters.IntegerParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -33,7 +34,9 @@ public class MultiStepCaptureRegionCalculator
    private final IntegerParameter maxStepsToConsider = new IntegerParameter("maxStepsToConsiderForRecovery", registry, 10);
 
    private final FrameConvexPolygon2D multiStepRegion = new FrameConvexPolygon2D();
-   private final YoFrameConvexPolygon2D yoMultiStepRegion = new YoFrameConvexPolygon2D("multiStepCaptureRegion", ReferenceFrame.getWorldFrame(), 30, registry);
+   private final YoFrameConvexPolygon2D yoMultiStepRegion = new YoFrameConvexPolygon2D("multiStepCaptureRegion", ReferenceFrame.getWorldFrame(), 35, registry);
+
+   private final BooleanProvider useCrossOverSteps;
 
    private final StepAdjustmentReachabilityConstraint reachabilityConstraint;
 
@@ -45,14 +48,15 @@ public class MultiStepCaptureRegionCalculator
 
    private MultiStepCaptureRegionVisualizer visualizer = null;
 
-   public MultiStepCaptureRegionCalculator(StepAdjustmentReachabilityConstraint reachabilityConstraint, YoRegistry parentRegistry)
+   public MultiStepCaptureRegionCalculator(StepAdjustmentReachabilityConstraint reachabilityConstraint, BooleanProvider useCrossOverSteps, YoRegistry parentRegistry)
    {
-      this(reachabilityConstraint, parentRegistry, null);
+      this(reachabilityConstraint, useCrossOverSteps, parentRegistry, null);
    }
 
-   public MultiStepCaptureRegionCalculator(StepAdjustmentReachabilityConstraint reachabilityConstraint, YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   public MultiStepCaptureRegionCalculator(StepAdjustmentReachabilityConstraint reachabilityConstraint, BooleanProvider useCrossOverSteps, YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this.reachabilityConstraint = reachabilityConstraint;
+      this.useCrossOverSteps = useCrossOverSteps;
 
       if (graphicsListRegistry != null)
       {
@@ -187,7 +191,10 @@ public class MultiStepCaptureRegionCalculator
       // compute the reachability polygon for that side. Make sure to include the stance position, as the CoP can actually be placed in convex
       // hull of both the reachability region, and the stance position.
       stancePosition.setToZero();
-      reachabilityPolygon.set(reachabilityConstraint.getReachabilityPolygonInFootFrame(supportSide));
+      if (useCrossOverSteps.getValue())
+         reachabilityPolygon.set(reachabilityConstraint.getTotalReachabilityHull(supportSide));
+      else
+         reachabilityPolygon.set(reachabilityConstraint.getReachabilityPolygonInFootFrame(supportSide));
       reachabilityPolygon.addVertex(stancePosition);
       reachabilityPolygon.update();
 
