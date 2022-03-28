@@ -10,47 +10,12 @@ import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
 public abstract class ICPOptimizationParameters
 {
    /**
-    * Specifies a scaling factor on the amount of footstep adjustment. By increasing this past 1.0, the footstep will be adjusted more than explicitly necessary.
-    */
-   public double getFootstepAdjustmentSafetyFactor()
-   {
-      return 1.0;
-   }
-
-   /**
     * Specifies the amount of ICP error (the 2D distance in XY from desired to current) that is required for the controller to consider step adjustment.
     */
    public double getMinICPErrorForStepAdjustment()
    {
       return 0.0;
    }
-
-   /**
-    * Specifies how long the controller must have been in the swing date (as a function of the swing duration) before it will allow step adjustment.
-    * By default, this is set to 0.0, meaning the controller can immediately adjust the desired step at the start of swing.
-    */
-   public double getFractionThroughSwingForAdjustment()
-   {
-      return 0.0;
-   }
-
-   /**
-    * The weight for tracking the desired footsteps.
-    * Setting this weight fairly high ensures that the footsteps will only be adjusted when the CoP control authority has been saturated.
-    */
-   public abstract double getForwardFootstepWeight();
-
-   /**
-    * The weight for tracking the desired footsteps.
-    * Setting this weight fairly high ensures that the footsteps will only be adjusted when the CoP control authority has been saturated.
-    */
-   public abstract double getLateralFootstepWeight();
-
-   /**
-    * Penalization on changes in the footstep location solution between control ticks.
-    * This weight is normalized by the control DT.
-    */
-   public abstract double getFootstepRateWeight();
 
    /**
     * The weight for tracking the nominal desired CMP.
@@ -111,22 +76,10 @@ public abstract class ICPOptimizationParameters
    public abstract double getDynamicsObjectiveWeight();
 
    /**
-    * Modifier to reduce the dynamic relaxation penalization when in double support.
-    * This is introduced to improve the problem feasibility when switching between contact states.
-    */
-   public abstract double getDynamicsObjectiveDoubleSupportWeightModifier();
-
-   /**
     * Weight on the use of angular momentum minimization.
     * This is only utilized when it is specified to use angular momentum in the feedback controller.
     */
    public abstract double getAngularMomentumMinimizationWeight();
-
-   /**
-    * Enabling this boolean causes the {@link #getFootstepRateWeight()} to be increased when approaching the end of the step.
-    * This acts as a way to cause the solution to "lock in" near the step end.
-    */
-   public abstract boolean scaleStepRateWeightWithTime();
 
    /**
     * Enabling this boolean causes the {@link #getFeedbackForwardWeight()} and {@link #getFeedbackLateralWeight()} to be decreased
@@ -134,11 +87,6 @@ public abstract class ICPOptimizationParameters
     * the feedback controller.
     */
    public abstract boolean scaleFeedbackWeightWithGain();
-
-   /**
-    * Enabling this boolean enables the use of feedback rate, found in {@link #getFeedbackRateWeight()}.
-    */
-   public abstract boolean useFeedbackRate();
 
    /**
     * Enabling this boolean enables the use step adjustment for stabilization.
@@ -159,22 +107,12 @@ public abstract class ICPOptimizationParameters
     */
    public abstract boolean useAngularMomentum();
 
-   /**
-    * Enabling this boolean enables the use of step adjustment rate, found in {@link #getFootstepRateWeight()}.
-    */
-   public abstract boolean useFootstepRate();
-
 
    public double getFeedbackDirectionWeight()
    {
       return 0.0;
    }
 
-   /**
-    * The minimum value to use for the time remaining when computing the recursion multipliers.
-    * This makes sure the problem maintains a "nice" form.
-    */
-   public abstract double getMinimumTimeRemaining();
 
    /**
     * Deadband on the step adjustment.
@@ -183,14 +121,6 @@ public abstract class ICPOptimizationParameters
     */
    public abstract double getAdjustmentDeadband();
 
-   /**
-    * This method sets what the minimum change in the current footstep is allowed to be.
-    * Works in tandem with the footstep rate parameter.
-    */
-   public double getFootstepSolutionResolution()
-   {
-      return 0.015;
-   }
 
    /**
     * Sets the minimum distance inside the support polygon for the CoP to be located.
@@ -209,38 +139,6 @@ public abstract class ICPOptimizationParameters
    }
 
    /**
-    * Limits the reachability polygon constraint so that the foot cannot be retracted once it has started adjusting.
-    */
-   public boolean getLimitReachabilityFromAdjustment()
-   {
-      return false;
-   }
-
-   /**
-    * Specifies whether or not to increase the cost of using angular momentum based on the amount of angular momentum used.
-    */
-   public boolean getUseAngularMomentumIntegrator()
-   {
-      return true;
-   }
-
-   /**
-    * Defines the integral gain for the angular momentum integrator, as used in {@link #getUseAngularMomentumIntegrator()}.
-    */
-   public double getAngularMomentumIntegratorGain()
-   {
-      return 50.0;
-   }
-
-   /**
-    * Defines the integral leak ratio for the angular momentum integrator, as used in {@link #getUseAngularMomentumIntegrator()}.
-    */
-   public double getAngularMomentumIntegratorLeakRatio()
-   {
-      return 0.92;
-   }
-
-   /**
     * Specifies the transfer split fraction to use for the ICP value recursion multiplier. This value is added to the time remaining
     * to compute the recursion multiplier. Increasing this value effectively causes more step adjustment to occur.
     */
@@ -256,43 +154,6 @@ public abstract class ICPOptimizationParameters
    public double maximumTimeFromTransferInFootstepMultiplier()
    {
       return 0.1;
-   }
-
-   /**
-    * Sets whether or not to account for the used angular momentum when computing the amount of step adjustment.
-    */
-   public boolean considerAngularMomentumInAdjustment()
-   {
-      return true;
-   }
-
-   /**
-    * Sets whether or not to account for the used CoP feedback when computing the amount of step adjustment.
-    */
-   public boolean considerFeedbackInAdjustment()
-   {
-      return true;
-   }
-
-   /**
-    * Sets whether or not the ICP optimization algorithm will consider planar regions.
-    */
-   public boolean usePlanarRegionConstraints()
-   {
-      return false;
-   }
-
-   public boolean allowUsePlanarRegionConstraints()
-   {
-      return true;
-   }
-
-   /**
-    * Sets whether or not the ICP optimization algorithm will switch the planar region if it starts to lose balance.
-    */
-   public boolean switchPlanarRegionConstraintsAutomatically()
-   {
-      return true;
    }
    
    /**
