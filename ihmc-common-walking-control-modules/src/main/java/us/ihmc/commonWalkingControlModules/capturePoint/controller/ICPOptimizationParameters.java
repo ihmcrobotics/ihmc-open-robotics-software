@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
+package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
 
