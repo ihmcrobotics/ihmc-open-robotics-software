@@ -11,7 +11,8 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.configurations.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
@@ -595,6 +596,12 @@ public class SwingOverPlanarRegionsTest
          }
 
          @Override
+         public StepAdjustmentParameters getStepAdjustmentParameters()
+         {
+            return null;
+         }
+
+         @Override
          public double getDefaultTransferTime()
          {
             return 0;
@@ -649,7 +656,7 @@ public class SwingOverPlanarRegionsTest
          }
 
          @Override
-         public ICPOptimizationParameters getICPOptimizationParameters()
+         public ICPControllerParameters getICPControllerParameters()
          {
             return null;
          }

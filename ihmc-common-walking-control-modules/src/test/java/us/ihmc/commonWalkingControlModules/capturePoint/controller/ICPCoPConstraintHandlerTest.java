@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
+package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
 import static org.fest.assertions.Fail.fail;
 import static us.ihmc.robotics.Assert.*;
@@ -34,7 +34,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
-public class ICPOptimizationCoPConstraintHandlerTest
+public class ICPCoPConstraintHandlerTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -59,8 +59,8 @@ public class ICPOptimizationCoPConstraintHandlerTest
       SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry, contactStates);
       YoBoolean useControlPolygons = new YoBoolean("useControlPolygons", registry);
-      ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, false, registry);
-      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(5, false);
+      ICPCoPConstraintHandler constraintHandler = new ICPCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, false, registry);
+      ICPControllerQPSolver solver = new ICPControllerQPSolver(5, false, null);
 
       solver.resetCoPLocationConstraint();
       solver.addSupportPolygon(constraintHandler.updateCoPConstraint());
@@ -126,8 +126,8 @@ public class ICPOptimizationCoPConstraintHandlerTest
       bipedSupportPolygons.updateUsingContactStates(contactStates);
 
       YoBoolean useControlPolygons = new YoBoolean("useControlPolygons", registry);
-      ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, false, registry);
-      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(5, false);
+      ICPCoPConstraintHandler constraintHandler = new ICPCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, false, registry);
+      ICPControllerQPSolver solver = new ICPControllerQPSolver(5, false, null);
 
       // test left support
       solver.resetCoPLocationConstraint();
@@ -233,8 +233,8 @@ public class ICPOptimizationCoPConstraintHandlerTest
       SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry, contactStates);
       YoBoolean useControlPolygons = new YoBoolean("useControlPolygons", registry);
-      ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, false, registry);
-      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(5, false);
+      ICPCoPConstraintHandler constraintHandler = new ICPCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, false, registry);
+      ICPControllerQPSolver solver = new ICPControllerQPSolver(5, false, null);
 
       solver.resetCoPLocationConstraint();
       solver.addSupportPolygon(constraintHandler.updateCoPConstraint());
@@ -288,8 +288,8 @@ public class ICPOptimizationCoPConstraintHandlerTest
       SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry, contactStates);
       YoBoolean useControlPolygons = new YoBoolean("useControlPolygons", registry);
-      ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, false, registry);
-      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(5, false);
+      ICPCoPConstraintHandler constraintHandler = new ICPCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, false, registry);
+      ICPControllerQPSolver solver = new ICPControllerQPSolver(5, false, null);
 
       contactStates.get(RobotSide.RIGHT).getContactPoints().forEach(point -> point.setInContact(false));
       bipedSupportPolygons.updateUsingContactStates(contactStates);

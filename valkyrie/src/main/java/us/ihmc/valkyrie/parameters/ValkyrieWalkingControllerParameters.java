@@ -8,7 +8,8 @@ import java.util.Map;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
@@ -49,7 +50,8 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    private final ToeOffParameters toeOffParameters;
    private final SwingTrajectoryParameters swingTrajectoryParameters;
    private final ValkyrieSteppingParameters steppingParameters;
-   private final ICPOptimizationParameters icpOptimizationParameters;
+   private final ICPControllerParameters icpControllerParameters;
+   private final StepAdjustmentParameters stepAdjustmentParameters;
 
    private final ValkyriePhysicalProperties physicalProperties;
 
@@ -73,7 +75,8 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       toeOffParameters = new ValkyrieToeOffParameters(physicalProperties, target);
       swingTrajectoryParameters = new ValkyrieSwingTrajectoryParameters(physicalProperties, target);
       steppingParameters = new ValkyrieSteppingParameters(physicalProperties, target);
-      icpOptimizationParameters = new ValkyrieICPOptimizationParameters(target);
+      icpControllerParameters = new ValkyrieICPControllerParameters(target);
+      stepAdjustmentParameters = new ValkyrieStepAdjustmentParameters(target);
 
       minimumHeightAboveGround = jointMap.getModelScale() * (0.595 + 0.23 + 0.08);
       nominalHeightAboveGround = jointMap.getModelScale() * (0.675 + 0.23 - 0.01 + 0.08);
@@ -711,9 +714,16 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    /** {@inheritDoc} */
    @Override
-   public ICPOptimizationParameters getICPOptimizationParameters()
+   public ICPControllerParameters getICPControllerParameters()
    {
-      return icpOptimizationParameters;
+      return icpControllerParameters;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public StepAdjustmentParameters getStepAdjustmentParameters()
+   {
+      return stepAdjustmentParameters;
    }
 
    /** {@inheritDoc} */
