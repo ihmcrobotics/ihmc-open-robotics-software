@@ -5,24 +5,24 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.robotics.heightMap.HeightMapData;
 import us.ihmc.robotics.heightMap.HeightMapTools;
 
+/* package-private */
 class BodyPathCollisionDetector
 {
-   final TIntArrayList zeroDegCollisionOffsetsX = new TIntArrayList();
-   final TIntArrayList zeroDegCollisionOffsetsY = new TIntArrayList();
-
-   final TIntArrayList fourtyFiveDegCollisionOffsetsX = new TIntArrayList();
-   final TIntArrayList fourtyFiveDegCollisionOffsetsY = new TIntArrayList();
-
-   final TIntArrayList twentyTwoDegCollisionOffsetsX = new TIntArrayList();
-   final TIntArrayList twentyTwoDegCollisionOffsetsY = new TIntArrayList();
+   /* Offsets of height map cells inside a box rotated at 0 (index 0), pi/8 (index 1) and pi/4 (index 2) radians */
+   final TIntArrayList[] xOffsets = new TIntArrayList[]{new TIntArrayList(), new TIntArrayList(), new TIntArrayList()};
+   final TIntArrayList[] yOffsets = new TIntArrayList[]{new TIntArrayList(), new TIntArrayList(), new TIntArrayList()};
 
    void initialize(double gridResolutionXY, double boxSizeX, double boxSizeY)
    {
-      packOffsets(gridResolutionXY, zeroDegCollisionOffsetsX, zeroDegCollisionOffsetsY, boxSizeX, boxSizeY, 0.0);
-      packOffsets(gridResolutionXY, fourtyFiveDegCollisionOffsetsX, fourtyFiveDegCollisionOffsetsY, boxSizeX, boxSizeY, Math.toRadians(45.0));
-      packOffsets(gridResolutionXY, twentyTwoDegCollisionOffsetsX, twentyTwoDegCollisionOffsetsY, boxSizeX, boxSizeY, Math.toRadians(22.5));
+      for (int i = 0; i < 3; i++)
+      {
+         packOffsets(gridResolutionXY, xOffsets[i], yOffsets[i], boxSizeX, boxSizeY, i * Math.PI / 8.0);
+      }
    }
 
+   /**
+    * Yaw index (0-15) represents the angle of the collision box and corresponds to a yaw rotation of (pi * yawIndex / 8)
+    */
    boolean collisionDetected(HeightMapData heightMapData, BodyPathLatticePoint latticePoint, int yawIndex, double height, double groundClearance)
    {
       int centerIndex = heightMapData.getCenterIndex();
@@ -30,13 +30,13 @@ class BodyPathCollisionDetector
       int yIndex = HeightMapTools.coordinateToIndex(latticePoint.getY(), heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), centerIndex);
       double heightThreshold = height + groundClearance;
 
-      TIntArrayList xOffsets = getXOffsets(yawIndex);
-      TIntArrayList yOffsets = getYOffsets(yawIndex);
+      TIntArrayList xOffsets = getOffsets(yawIndex, this.xOffsets);
+      TIntArrayList yOffsets = getOffsets(yawIndex, this.yOffsets);
 
       for (int i = 0; i < xOffsets.size(); i++)
       {
-         int xQuery = xIndex + computeCollisionOffsetX(i, xOffsets.get(i), yOffsets.get(i));
-         int yQuery = yIndex + computeCollisionOffsetY(i, xOffsets.get(i), yOffsets.get(i));
+         int xQuery = xIndex + computeCollisionOffsetX(yawIndex, xOffsets.get(i), yOffsets.get(i));
+         int yQuery = yIndex + computeCollisionOffsetY(yawIndex, xOffsets.get(i), yOffsets.get(i));
          double heightQuery = heightMapData.getHeightAt(xQuery, yQuery);
          if (Double.isNaN(heightQuery))
          {
@@ -52,60 +52,20 @@ class BodyPathCollisionDetector
       return false;
    }
 
-   private TIntArrayList getXOffsets(int yawIndex)
+   private TIntArrayList getOffsets(int yawIndex, TIntArrayList[] offsets)
    {
-      switch (yawIndex)
+      if (yawIndex % 4 == 0)
       {
-         case 0:
-         case 2:
-         case 4:
-         case 6:
-            return zeroDegCollisionOffsetsX;
-         case 1:
-         case 3:
-         case 5:
-         case 7:
-            return fourtyFiveDegCollisionOffsetsX;
-         case 8:
-         case 9:
-         case 10:
-         case 11:
-         case 12:
-         case 13:
-         case 14:
-         case 15:
-            return twentyTwoDegCollisionOffsetsX;
+         return offsets[0];
       }
-
-      throw new RuntimeException("Yaw index out of range: " + yawIndex);
-   }
-
-   private TIntArrayList getYOffsets(int yawIndex)
-   {
-      switch (yawIndex)
+      else if (yawIndex % 2 == 0)
       {
-         case 0:
-         case 2:
-         case 4:
-         case 6:
-            return zeroDegCollisionOffsetsY;
-         case 1:
-         case 3:
-         case 5:
-         case 7:
-            return fourtyFiveDegCollisionOffsetsY;
-         case 8:
-         case 9:
-         case 10:
-         case 11:
-         case 12:
-         case 13:
-         case 14:
-         case 15:
-            return twentyTwoDegCollisionOffsetsY;
+         return offsets[2];
       }
-
-      throw new RuntimeException("Yaw index out of range: " + yawIndex);
+      else
+      {
+         return offsets[1];
+      }
    }
 
    /*
@@ -115,7 +75,7 @@ class BodyPathCollisionDetector
    {
       xOffsets.clear();
       yOffsets.clear();
-      int minMaxOffset = (int) (0.5 * EuclidCoreTools.norm(boxSizeX, boxSizeY) / gridResolutionXY);
+      int minMaxOffset = (int) Math.ceil(0.5 * EuclidCoreTools.norm(boxSizeX, boxSizeY) / gridResolutionXY);
 
       for (int xi = -minMaxOffset; xi <= minMaxOffset; xi++)
       {
@@ -139,49 +99,51 @@ class BodyPathCollisionDetector
 
    static int computeCollisionOffsetX(int yawIndex, int xOffset, int yOffset)
    {
-      // rotate by 0
-      if (yawIndex == 0 || yawIndex == 1 || yawIndex == 4 || yawIndex == 5 || yawIndex == 8 || yawIndex == 12)
-      {
+      /* Box is symmetric so treat rotation by pi the same */
+      int yawIndexMod = yawIndex % 8;
+
+      if (yawIndexMod == 0 || yawIndexMod == 1 || yawIndexMod == 2)
+      { // rotate by 0
          return xOffset;
       }
-      // reflect across x = y
-      else if (yawIndex == 9 || yawIndex == 13)
-      {
+      else if (yawIndexMod == 3)
+      { // reflect across x = y
          return yOffset;
       }
-      // reflect x axis
-      else if (yawIndex == 11 || yawIndex == 15)
-      {
-         return xOffset;
-      }
-      // rotate by 90
-      else
-      {
+      else if (yawIndexMod == 4 || yawIndexMod == 5 || yawIndexMod == 6)
+      { // rotate by 90
          return -yOffset;
       }
+      else if (yawIndexMod == 7)
+      { // reflect across x axis
+         return xOffset;
+      }
+
+      throw new RuntimeException("Invalid yaw index " + yawIndex);
    }
 
    static int computeCollisionOffsetY(int yawIndex, int xOffset, int yOffset)
    {
-      // rotate by 0
-      if (yawIndex == 0 || yawIndex == 1 || yawIndex == 4 || yawIndex == 5 || yawIndex == 8 || yawIndex == 12)
-      {
+      /* Box is symmetric so treat rotation by pi the same */
+      int yawIndexMod = yawIndex % 8;
+
+      if (yawIndexMod == 0 || yawIndexMod == 1 || yawIndexMod == 2)
+      { // rotate by 0
          return yOffset;
       }
-      // reflect across x = y
-      else if (yawIndex == 9 || yawIndex == 13)
-      {
+      else if (yawIndexMod == 3)
+      { // reflect across x = y
          return xOffset;
       }
-      // reflect x axis
-      else if (yawIndex == 11 || yawIndex == 15)
-      {
+      else if (yawIndexMod == 4 || yawIndexMod == 5 || yawIndexMod == 6)
+      { // rotate by 90
+         return xOffset;
+      }
+      else if (yawIndexMod == 7)
+      { // reflect across x axis
          return -yOffset;
       }
-      // rotate by 90
-      else
-      {
-         return xOffset;
-      }
+
+      throw new RuntimeException("Invalid yaw index " + yawIndex);
    }
 }
