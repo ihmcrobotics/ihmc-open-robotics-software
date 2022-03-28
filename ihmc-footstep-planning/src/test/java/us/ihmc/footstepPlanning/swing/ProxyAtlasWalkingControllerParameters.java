@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.swing;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.configurations.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -118,6 +119,12 @@ public class ProxyAtlasWalkingControllerParameters extends WalkingControllerPara
    public double getMaxICPErrorBeforeSingleSupportInnerY()
    {
       return 0;
+   }
+
+   @Override
+   public StepAdjustmentParameters getStepAdjustmentParameters()
+   {
+      return null;
    }
 
    @Override
