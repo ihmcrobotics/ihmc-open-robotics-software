@@ -6,20 +6,6 @@ import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConf
 public class LegConfigurationParameters
 {
    /**
-    * Determines whether or not to attempt to use straight legs when indirectly controlling the center of mass
-    * height using the nullspace in the full task Jacobian.
-    * This will not do anything noticeable unless {@link WalkingControllerParameters#enableHeightFeedbackControl()}
-    * returns true, as that indicates whether or not to use the pelvis to control the center of mass height.
-    *
-    * @return boolean (true = try and straighten, false = do not try and straighten)
-    */
-   public boolean attemptToStraightenLegs()
-   {
-      return false;
-   }
-
-
-   /**
     * This is the weight placed on the knee privileged joint accelerations or velocities when the leg is in
     * the bent leg state in the optimization. For a typical humanoid, these joints are the hip pitch and
     * ankle pitch.

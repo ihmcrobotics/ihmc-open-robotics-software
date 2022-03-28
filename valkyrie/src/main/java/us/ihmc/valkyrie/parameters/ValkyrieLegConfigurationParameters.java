@@ -23,10 +23,4 @@ public class ValkyrieLegConfigurationParameters extends LegConfigurationParamete
 
       return gains;
    }
-
-   /** {@inheritDoc} */
-   public boolean attemptToStraightenLegs()
-   {
-      return false;
-   }
 }
