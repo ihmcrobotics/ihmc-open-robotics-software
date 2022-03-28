@@ -4,6 +4,7 @@ import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.convexOptimization.linearProgram.LinearProgramSolver;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -34,7 +35,7 @@ import static us.ihmc.commonWalkingControlModules.staticEquilibrium.StaticEquili
 public class StaticSupportRegionSolver
 {
    static final int numberOfDirectionsToOptimize = 32;
-   static final double rhoMax = 10.0;
+   static final double rhoMax = 2.0;
    static final double mass = 1.0;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -231,7 +232,7 @@ public class StaticSupportRegionSolver
    ////////////////////////////////////////  GETTERS ////////////////////////////////////////
    //////////////////////////////////////////////////////////////////////////////////////////
 
-   public ConvexPolygon2D getSupportRegion()
+   public ConvexPolygon2DReadOnly getSupportRegion()
    {
       return supportRegion;
    }

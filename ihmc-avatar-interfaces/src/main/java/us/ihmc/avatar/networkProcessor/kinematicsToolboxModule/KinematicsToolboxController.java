@@ -33,6 +33,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.collision.EuclidFrameShape3DCollisionResult;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -220,6 +221,12 @@ public class KinematicsToolboxController extends ToolboxController
     * {@code SCSVisualizer}. They are only visible when the end-effector is being actively controlled.
     */
    private final Map<RigidBodyBasics, YoGraphicCoordinateSystem> currentCoodinateSystems = new HashMap<>();
+   /**
+    * Center of Mass data used for visualization.
+    * They are only updated and visible when the center of mass either has a setpoint or is constrained.
+    */
+   protected final YoFramePoint3D desiredCenterOfMass, currentCenterOfMass;
+   protected final YoGraphicPosition desiredCenterOfMassGraphic, currentCenterOfMassGraphic;
 
    /**
     * Reference to the most recent robot configuration received from the controller. It is used for
@@ -238,7 +245,7 @@ public class KinematicsToolboxController extends ToolboxController
    /** Intermediate variable for garbage-free operation. */
    private final List<FramePoint3DReadOnly> contactPointLocations = new ArrayList<>();
    /** The active support polygon updated from the most recent robot configuration. */
-   private final ConvexPolygon2D supportPolygon = new ConvexPolygon2D();
+   protected final ConvexPolygon2D supportPolygon = new ConvexPolygon2D();
    /**
     * The active support polygon shrunk by the distance {@code centerOfMassSafeMargin}. This represents
     * the convex horizontal region that the center of mass is constrained to.
@@ -247,8 +254,8 @@ public class KinematicsToolboxController extends ToolboxController
    /** Helper used for shrink the support polygon. */
    private final ConvexPolygonScaler convexPolygonScaler = new ConvexPolygonScaler();
    private final FrameConvexPolygon2D newSupportPolygon = new FrameConvexPolygon2D();
-   private final ConvexPolygon2D shrunkConvexPolygon = new ConvexPolygon2D();
-   private final FramePoint2D centerOfMass = new FramePoint2D();
+   protected final ConvexPolygon2D shrunkConvexPolygon = new ConvexPolygon2D();
+   private final FramePoint3D centerOfMass = new FramePoint3D();
    /** Distance to shrink the support polygon for safety purpose. */
    private final YoDouble centerOfMassSafeMargin = new YoDouble("centerOfMassSafeMargin",
                                                                 "Describes the minimum distance away from the support polygon's edges.",
@@ -374,6 +381,13 @@ public class KinematicsToolboxController extends ToolboxController
       privilegedWeight.set(DEFAULT_PRIVILEGED_CONFIGURATION_WEIGHT);
       privilegedConfigurationGain.set(DEFAULT_PRIVILEGED_CONFIGURATION_GAIN);
       privilegedMaxVelocity.set(Double.POSITIVE_INFINITY);
+
+      desiredCenterOfMass = new YoFramePoint3D("desiredCenterOfMass", ReferenceFrame.getWorldFrame(), registry);
+      currentCenterOfMass = new YoFramePoint3D("currentCenterOfMass", ReferenceFrame.getWorldFrame(), registry);
+      desiredCenterOfMassGraphic = new YoGraphicPosition("desiredCoMGraphic", desiredCenterOfMass, 0.02, YoAppearance.Red());
+      currentCenterOfMassGraphic = new YoGraphicPosition("currentCoMGraphic", currentCenterOfMass, 0.02, YoAppearance.Black());
+      yoGraphicsListRegistry.registerYoGraphic("CenterOfMass", desiredCenterOfMassGraphic);
+      yoGraphicsListRegistry.registerYoGraphic("CenterOfMass", currentCenterOfMassGraphic);
 
       publishSolutionPeriod.set(0.01);
       preserveUserCommandHistory.set(true);
@@ -718,6 +732,14 @@ public class KinematicsToolboxController extends ToolboxController
       // Calculating the solution quality based on sum of all the active feedback controllers' output velocity.
       solutionQuality.set(solutionQualityCalculator.calculateSolutionQuality(feedbackControllerDataHolder, totalRobotMass, 1.0 / GLOBAL_PROPORTIONAL_GAIN));
 
+      if (!isUserControllingCenterOfMass())
+      {
+         desiredCenterOfMass.setToNaN();
+      }
+      desiredCenterOfMassGraphic.update();
+      currentCenterOfMass.set(centerOfMass);
+      currentCenterOfMassGraphic.update();
+
       // Updating the the robot state from the current solution, initializing the next control tick.
       KinematicsToolboxHelper.setRobotStateFromControllerCoreOutput(controllerCore.getControllerCoreOutput(), rootJoint, oneDoFJoints);
       updateVisualization();
@@ -860,6 +882,7 @@ public class KinematicsToolboxController extends ToolboxController
 
          KinematicsToolboxCenterOfMassCommand command = commandInputManager.pollNewestCommand(KinematicsToolboxCenterOfMassCommand.class);
          KinematicsToolboxHelper.consumeCenterOfMassCommand(command, spatialGains.getPositionGains(), userFBCommands.addCenterOfMassFeedbackControlCommand());
+         desiredCenterOfMass.set(command.getDesiredPosition());
 
          if (preserveUserCommandHistory.getValue())
          {
@@ -1097,7 +1120,7 @@ public class KinematicsToolboxController extends ToolboxController
       { // Only adding constraints that are close to be violated.
          Point2DReadOnly vertex = shrunkSupportPolygonVertices.get(i);
          Point2DReadOnly nextVertex = ListWrappingIndexTools.getNext(i, shrunkSupportPolygonVertices);
-         double signedDistanceToEdge = EuclidGeometryTools.signedDistanceFromPoint2DToLine2D(centerOfMass, vertex, nextVertex);
+         double signedDistanceToEdge = EuclidGeometryTools.signedDistanceFromPoint2DToLine2D(centerOfMass.getX(), centerOfMass.getY(), vertex, nextVertex);
 
          if (signedDistanceToEdge > -distanceThreshold)
          {
@@ -1105,8 +1128,8 @@ public class KinematicsToolboxController extends ToolboxController
             command.clear();
             Vector2D h0 = command.addLinearMomentumConstraintVertex();
             Vector2D h1 = command.addLinearMomentumConstraintVertex();
-            h0.sub(vertex, centerOfMass);
-            h1.sub(nextVertex, centerOfMass);
+            h0.set(vertex.getX() - centerOfMass.getX(), vertex.getY() - centerOfMass.getY());
+            h1.set(nextVertex.getX() - centerOfMass.getX(), nextVertex.getY() - centerOfMass.getY());
             h0.scale(robotMass / updateDT);
             h1.scale(robotMass / updateDT);
          }

@@ -1,37 +1,25 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.holdRigidBodyCurrentPose;
-import static us.ihmc.robotics.Assert.assertTrue;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.stream.Collectors;
-
+import controller_msgs.msg.dds.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
-import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
-import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.RobotDefinitionTools;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.StaticEquilibriumSolverInput;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.StaticSupportRegionSolver;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -39,7 +27,10 @@ import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -54,6 +45,8 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.instructions.Graphics3DInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxPrivilegedConfigurationCommand;
+import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.log.LogTools;
@@ -66,10 +59,12 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
 import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
@@ -92,6 +87,12 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.holdRigidBodyCurrentPose;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 @Tag("humanoid-toolbox")
 public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRobotTestInterface
@@ -154,7 +155,7 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
                                                                   yoGraphicsListRegistry,
                                                                   mainRegistry);
       commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel, toolboxController.getDesiredReferenceFrames()));
-      toolboxController.setInitialRobotConfiguration(robotModel);
+//      toolboxController.setInitialRobotConfiguration(robotModel);
 
       robot = robotModel.createHumanoidFloatingRootJointRobot(false);
       toolboxUpdater = createToolboxUpdater();
@@ -175,6 +176,7 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
       {
          scs = new SimulationConstructionSet(new Robot[] {robot, ghost}, simulationTestingParameters);
          scs.addYoGraphicsListRegistry(yoGraphicsListRegistry, true);
+         scs.setGroundVisible(false);
          scs.setCameraFix(0.0, 0.0, 1.0);
          scs.setCameraPosition(8.0, 0.0, 3.0);
          scs.startOnAThread();
@@ -224,13 +226,16 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
 
    private void snapGhostToFullRobotModel(FullHumanoidRobotModel fullHumanoidRobotModel)
    {
-      new JointAnglesWriter(ghost, fullHumanoidRobotModel).updateRobotConfigurationBasedOnFullRobotModel();
+      JointAnglesWriter jointAnglesWriter = new JointAnglesWriter(ghost, fullHumanoidRobotModel);
+      jointAnglesWriter.setWriteJointVelocities(false);
+      jointAnglesWriter.setWriteJointAccelerations(false);
+      jointAnglesWriter.updateRobotConfigurationBasedOnFullRobotModel();
    }
 
    @AfterEach
    public void tearDown()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
+//      if (simulationTestingParameters.getKeepSCSUp())
          ThreadTools.sleepForever();
 
       if (mainRegistry != null)
@@ -580,7 +585,173 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
          runKinematicsToolboxController(numberOfIterations);
 
          Point2D centerOfMass2D = new Point2D(computeCenterOfMass3D(toolboxController.getDesiredFullRobotModel()));
-         assertTrue(shrunkSupportPolygon.isPointInside(centerOfMass2D, 1.0e-7), "Error: " + shrunkSupportPolygon.signedDistance(centerOfMass2D));
+         assertTrue("Error: " + shrunkSupportPolygon.signedDistance(centerOfMass2D), shrunkSupportPolygon.isPointInside(centerOfMass2D, 1.0e-7));
+      }
+   }
+
+   @Test
+   public void testMultiContactCenterOfMassConstraint() throws Exception
+   {
+      if (VERBOSE)
+         LogTools.info("Entering: testGeneralizedCenterOfMassConstraint");
+
+      Random random = new Random(21652);
+
+      toolboxController.getDesiredFullRobotModel().getRootJoint().getJointPose().getOrientation().setYawPitchRoll(0.0, 1.4, 0.0);
+      toolboxController.getDesiredFullRobotModel().getRootJoint().getJointPose().getPosition().set(-0.1, 0.0, 0.2);
+      RigidBodyBasics chest = toolboxController.getDesiredFullRobotModel().getChest();
+
+      /* Setup multi-contact objectives */
+      MultiContactConstraintData multiContactConstraintData = createMultiContactConstraintData();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBodyBasics hand = toolboxController.getDesiredFullRobotModel().getHand(robotSide);
+         OneDoFJointBasics[] armJoints = MultiBodySystemTools.createOneDoFJointPath(chest, hand);
+         for (OneDoFJointBasics joint : armJoints)
+         {
+            joint.setQ(0.5 * (joint.getJointLimitLower() + joint.getJointLimitUpper()));
+         }
+
+         toolboxController.getDesiredFullRobotModel().getLegJoint(robotSide, LegJointName.KNEE_PITCH).setQ(1.5);
+         toolboxController.getDesiredFullRobotModel().getLegJoint(robotSide, LegJointName.HIP_PITCH).setQ(-1.6);
+      }
+
+      SideDependentList<KinematicsToolboxRigidBodyMessage> footMessages = new SideDependentList<>();
+      SideDependentList<KinematicsToolboxRigidBodyMessage> handMessages = new SideDependentList<>();
+
+      for (RobotSide side : RobotSide.values())
+      {
+         footMessages.put(side, KinematicsToolboxMessageFactory.holdRigidBodyAtTargetFrame(toolboxController.getDesiredFullRobotModel().getFoot(side), multiContactConstraintData.footPoses.get(side)));
+         handMessages.put(side, KinematicsToolboxMessageFactory.holdRigidBodyAtTargetFrame(toolboxController.getDesiredFullRobotModel().getHand(side), multiContactConstraintData.handPoses.get(side)));
+
+         double contactWeight = 20.0;
+         footMessages.get(side).getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(contactWeight));
+         footMessages.get(side).getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(contactWeight));
+         handMessages.get(side).getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(contactWeight));
+         handMessages.get(side).getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(false, false, false));
+      }
+
+      KinematicsToolboxPrivilegedConfigurationMessage privilegedConfigurationMessage = new KinematicsToolboxPrivilegedConfigurationMessage();
+      OneDoFJointBasics[] oneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(toolboxController.getDesiredFullRobotModel());
+
+      for (int i = 0; i < oneDoFJoints.length; i++)
+      {
+         privilegedConfigurationMessage.getPrivilegedJointHashCodes().add(oneDoFJoints[i].hashCode());
+         privilegedConfigurationMessage.getPrivilegedJointAngles().add((float) oneDoFJoints[i].getQ());
+      }
+      privilegedConfigurationMessage.setPrivilegedGain(50.0);
+      privilegedConfigurationMessage.setPrivilegedWeight(0.025);
+
+      toolboxController.getDesiredFullRobotModel().updateFrames();
+      KinematicsToolboxRigidBodyMessage chestOrientationObjective = shiftBodyMessage(chest, new Vector3D(), 2.0, true, false);
+      chestOrientationObjective.getAngularSelectionMatrix().setXSelected(false);
+
+      snapGhostToFullRobotModel(toolboxController.getDesiredFullRobotModel());
+
+      KinematicsToolboxCenterOfMassMessage centerOfMassMessage = new KinematicsToolboxCenterOfMassMessage();
+      centerOfMassMessage.getDesiredPositionInWorld().set(multiContactConstraintData.nominalCenterOfMass);
+      centerOfMassMessage.getSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, false));
+      centerOfMassMessage.getWeights().set(MessageTools.createWeightMatrix3DMessage(0.1));
+
+      // Solve initial IK problem of getting starting configuration
+      commandInputManager.submitMessage(footMessages.get(RobotSide.LEFT));
+      commandInputManager.submitMessage(footMessages.get(RobotSide.RIGHT));
+      commandInputManager.submitMessage(handMessages.get(RobotSide.LEFT));
+      commandInputManager.submitMessage(handMessages.get(RobotSide.RIGHT));
+      commandInputManager.submitMessage(privilegedConfigurationMessage);
+      commandInputManager.submitMessage(centerOfMassMessage);
+      commandInputManager.submitMessage(chestOrientationObjective);
+
+      RobotConfigurationData robotConfigurationData = extractRobotConfigurationData(toolboxController.getDesiredFullRobotModel());
+      toolboxController.updateRobotConfigurationData(robotConfigurationData);
+
+      int numberOfIterations = 250;
+      runKinematicsToolboxController(numberOfIterations);
+
+      RobotConfigurationData step1RobotConfigurationData = extractRobotConfigurationData(toolboxController.getDesiredFullRobotModel());
+      snapGhostToFullRobotModel(toolboxController.getDesiredFullRobotModel());
+//      ThreadTools.sleepForever();
+
+      // Update privilege configuration off step 1
+      privilegedConfigurationMessage.getPrivilegedJointHashCodes().clear();
+      privilegedConfigurationMessage.getPrivilegedJointAngles().clear();
+      for (int i = 0; i < oneDoFJoints.length; i++)
+      {
+         privilegedConfigurationMessage.getPrivilegedJointHashCodes().add(toolboxController.getDesiredOneDoFJoint()[i].hashCode());
+         privilegedConfigurationMessage.getPrivilegedJointAngles().add((float) toolboxController.getDesiredOneDoFJoint()[i].getQ());
+      }
+
+      FramePoint3D nominalCenterOfMass = computeCenterOfMass3D(toolboxController.getDesiredFullRobotModel());
+
+      MultiContactBalanceStatus multiContactBalanceStatus = createMultiContactBalanceStatus(toolboxController.getDesiredFullRobotModel(), getRobotModel().getContactPointParameters(), multiContactConstraintData, true, false);
+      double comSafeMargin = toolboxController.getCenterOfMassSafeMargin().getValue();
+
+      StaticSupportRegionSolver staticSupportRegionSolver = new StaticSupportRegionSolver();
+      StaticEquilibriumSolverInput input = new StaticEquilibriumSolverInput();
+      for (int i = 0; i < multiContactBalanceStatus.getContactPointsInWorld().size(); i++)
+      {
+         input.addContactPoint(multiContactBalanceStatus.getContactPointsInWorld().get(i), multiContactBalanceStatus.getSurfaceNormalsInWorld().get(i));
+      }
+
+      KinematicsToolboxRigidBodyMessage pelvisOrientationObjective = shiftBodyMessage(toolboxController.getDesiredFullRobotModel().getPelvis(), new Vector3D(), 5.0, true, false);
+      chestOrientationObjective = shiftBodyMessage(chest, new Vector3D(), 5.0, true, false);
+
+      staticSupportRegionSolver.initialize(input);
+      staticSupportRegionSolver.solve();
+      ConvexPolygon2D multiContactSupportPolygon = new ConvexPolygon2D(staticSupportRegionSolver.getSupportRegion());
+      ConvexPolygon2D shrunkMultiContactSupportPolygon = shrinkPolygon(multiContactSupportPolygon, comSafeMargin);
+
+      for (int i = 0; i < 15; i++)
+      { // Asserts that the CoM can move inside the support polygon, close to the nominal CoM
+
+//         Point2D offset;
+//         int maxSamples = 100;
+//         int sampleCounter = 0;
+//         while (true)
+//         {
+//            sampleCounter++;
+//            if (sampleCounter > maxSamples)
+//            {
+//               fail("Could not find CoM position inside multi-contact support region.");
+//            }
+//
+//            offset = EuclidCoreRandomTools.nextPoint2D(random, multiContactConstraintData.centerOfMassSampleRadius);
+//         }
+
+         Point2D offset = EuclidCoreRandomTools.nextPoint2D(random, multiContactConstraintData.centerOfMassSampleRadius);
+
+         centerOfMassMessage = new KinematicsToolboxCenterOfMassMessage();
+         centerOfMassMessage.getDesiredPositionInWorld().set(multiContactConstraintData.nominalCenterOfMass);
+         centerOfMassMessage.getDesiredPositionInWorld().add(offset.getX(), offset.getY(), 0.0);
+         centerOfMassMessage.getSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, true));
+         centerOfMassMessage.getWeights().set(MessageTools.createWeightMatrix3DMessage(0.1));
+
+         commandInputManager.submitMessage(footMessages.get(RobotSide.LEFT));
+         commandInputManager.submitMessage(footMessages.get(RobotSide.RIGHT));
+         commandInputManager.submitMessage(handMessages.get(RobotSide.LEFT));
+         commandInputManager.submitMessage(handMessages.get(RobotSide.RIGHT));
+         commandInputManager.submitMessage(privilegedConfigurationMessage);
+         commandInputManager.submitMessage(pelvisOrientationObjective);
+         commandInputManager.submitMessage(chestOrientationObjective);
+         commandInputManager.submitMessage(centerOfMassMessage);
+
+         toolboxController.updateRobotConfigurationData(step1RobotConfigurationData);
+         toolboxController.updateMultiContactBalanceStatus(multiContactBalanceStatus);
+
+         runKinematicsToolboxController(numberOfIterations);
+
+         boolean isInsideSupportRegion = shrunkMultiContactSupportPolygon.isPointInside(centerOfMassMessage.getDesiredPositionInWorld().getX(), centerOfMassMessage.getDesiredPositionInWorld().getY());
+//         assertTrue(KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.", initializationSucceeded.getBooleanValue());
+//         assertTrue("Poor solution quality: " + toolboxController.getSolution().getSolutionQuality(),
+//                    toolboxController.getSolution().getSolutionQuality() < 1.0e-4);
+
+         Point2D centerOfMass2D = new Point2D(computeCenterOfMass3D(toolboxController.getDesiredFullRobotModel()));
+
+         System.out.println("Iteration " + i);
+         System.out.println("\t Is inside region: " + isInsideSupportRegion);
+         System.out.println("\t Solution quality: " + toolboxController.getSolution().getSolutionQuality());
+         System.out.println("\t Distance to edge: " + shrunkMultiContactSupportPolygon.signedDistance(centerOfMass2D));
       }
    }
 
@@ -611,10 +782,15 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
 
    private static KinematicsToolboxCenterOfMassMessage shiftCoMMessage(FullHumanoidRobotModel robot, Tuple3DReadOnly shift, double weight)
    {
+      return shiftCoMMessage(robot, shift, weight, false);
+   }
+
+   private static KinematicsToolboxCenterOfMassMessage shiftCoMMessage(FullHumanoidRobotModel robot, Tuple3DReadOnly shift, double weight, boolean zSelected)
+   {
       KinematicsToolboxCenterOfMassMessage message = new KinematicsToolboxCenterOfMassMessage();
       message.getDesiredPositionInWorld().set(computeCenterOfMass3D(robot));
       message.getDesiredPositionInWorld().add(shift);
-      message.getSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, false));
+      message.getSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, zSelected));
       message.getWeights().set(MessageTools.createWeightMatrix3DMessage(weight));
       return message;
    }
@@ -838,4 +1014,61 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
                         .forEach(cp -> rightFootSupportPolygon2d.add().set(cp.getX(), cp.getY(), 0.0));
       return capturabilityBasedStatus;
    }
+
+   public static MultiContactBalanceStatus createMultiContactBalanceStatus(FullHumanoidRobotModel currentRobotModel,
+                                                                           RobotContactPointParameters<RobotSide> contactPointParameters,
+                                                                           MultiContactConstraintData multiContactConstraintData,
+                                                                           boolean leftHandInContact,
+                                                                           boolean rightHandInContact)
+   {
+      MultiContactBalanceStatus multiContactBalanceStatus = new MultiContactBalanceStatus();
+
+      // Feet contact points
+      Object<Point3D> contactPointsInWorld = multiContactBalanceStatus.getContactPointsInWorld();
+      SegmentDependentList<RobotSide, ArrayList<Point2D>> feetContactPoints = contactPointParameters.getFootContactPoints();
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         ArrayList<Point2D> footContactPoints = feetContactPoints.get(robotSide);
+         for (int i = 0; i < footContactPoints.size(); i++)
+         {
+            FramePoint3D footContactPoint = new FramePoint3D(currentRobotModel.getSoleFrame(robotSide), footContactPoints.get(i));
+            footContactPoint.changeFrame(ReferenceFrame.getWorldFrame());
+            contactPointsInWorld.add().set(footContactPoint);
+
+            multiContactBalanceStatus.getSupportRigidBodyIds().add(currentRobotModel.getFoot(robotSide).hashCode());
+            multiContactBalanceStatus.getSurfaceNormalsInWorld().add().set(multiContactConstraintData.footNormals.get(robotSide));
+         }
+      }
+
+      // Hand contact points
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         if ((robotSide == RobotSide.LEFT && !leftHandInContact) || (robotSide == RobotSide.RIGHT && !rightHandInContact))
+         {
+            continue;
+         }
+
+         FramePoint3D handContactPoint = new FramePoint3D(currentRobotModel.getHand(robotSide).getBodyFixedFrame());
+         handContactPoint.changeFrame(ReferenceFrame.getWorldFrame());
+         contactPointsInWorld.add().set(handContactPoint);
+
+         multiContactBalanceStatus.getSupportRigidBodyIds().add(currentRobotModel.getHand(robotSide).hashCode());
+         multiContactBalanceStatus.getSurfaceNormalsInWorld().add().set(multiContactConstraintData.handNormals.get(robotSide));
+      }
+
+      return multiContactBalanceStatus;
+   }
+
+   protected static class MultiContactConstraintData
+   {
+      protected final SideDependentList<FramePose3D> footPoses = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+      protected final SideDependentList<FramePose3D> handPoses = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+      protected final SideDependentList<FrameVector3D> footNormals = new SideDependentList<>(new FrameVector3D(), new FrameVector3D());
+      protected final SideDependentList<FrameVector3D> handNormals = new SideDependentList<>(new FrameVector3D(), new FrameVector3D());
+
+      protected final Point3D nominalCenterOfMass = new Point3D();
+      protected double centerOfMassSampleRadius = 0.1;
+   }
+
+   protected abstract MultiContactConstraintData createMultiContactConstraintData();
 }
