@@ -112,6 +112,13 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
       return simulationSessionControls.simulateAndWait(duration);
    }
 
+   public boolean simulateOneBufferRecordPeriodAndWait()
+   {
+      checkSimulationHasStarted();
+      lastThrowable.set(null);
+      return simulationSessionControls.simulateAndWait(getSimulationSession().getBufferRecordTickPeriod());
+   }
+
    private void checkSimulationHasStarted()
    {
       if (!avatarSimulation.getSimulationSession().hasSessionStarted())
@@ -139,6 +146,16 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    public void setBufferOutPointIndexToCurrent()
    {
       simulationSessionControls.setBufferOutPointIndexToCurrent();
+   }
+
+   public void stepBufferIndexForward()
+   {
+      simulationSessionControls.stepBufferIndexForward();
+   }
+
+   public void stepBufferIndexBackward()
+   {
+      simulationSessionControls.stepBufferIndexBackward();
    }
 
    // GUI controls:
@@ -362,6 +379,11 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    public double getControllerTime()
    {
       return avatarSimulation.getHighLevelHumanoidControllerFactory().getHighLevelHumanoidControllerToolbox().getYoTime().getValue();
+   }
+
+   public double getTimePerRecordTick()
+   {
+      return getSimulationSession().getBufferRecordTimePeriod();
    }
 
    public void createVideo(String simplifiedRobotModelName, int callStackHeight)
