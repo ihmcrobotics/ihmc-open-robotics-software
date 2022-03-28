@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
@@ -279,6 +280,12 @@ public class WrapperForMultipleToeOffCalculatorsTest
 
          @Override
          public MomentumOptimizationSettings getMomentumOptimizationSettings()
+         {
+            return null;
+         }
+
+         @Override
+         public StepAdjustmentParameters getStepAdjustmentParameters()
          {
             return null;
          }

@@ -89,7 +89,7 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
                                                 YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(walkingControllerParameters,
-           walkingControllerParameters.getICPControllerParameters(),
+           walkingControllerParameters.getStepAdjustmentParameters(),
            soleZUpFrames,
            bipedSupportPolygons,
            parentRegistry,
@@ -97,7 +97,7 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
    }
 
    public CaptureRegionStepAdjustmentController(WalkingControllerParameters walkingControllerParameters,
-                                                ICPControllerParameters icpOptimizationParameters,
+                                                StepAdjustmentParameters stepAdjustmentParameters,
                                                 SideDependentList<? extends ReferenceFrame> soleZUpFrames,
                                                 BipedSupportPolygons bipedSupportPolygons,
                                                 YoRegistry parentRegistry,
@@ -105,7 +105,7 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
    {
       this.bipedSupportPolygons = bipedSupportPolygons;
 
-      allowStepAdjustment = new BooleanParameter(yoNamePrefix + "AllowStepAdjustment", registry, icpOptimizationParameters.allowStepAdjustment());
+      allowStepAdjustment = new BooleanParameter(yoNamePrefix + "AllowStepAdjustment", registry, stepAdjustmentParameters.allowStepAdjustment());
 
       reachabilityConstraintHandler = new StepAdjustmentReachabilityConstraint(soleZUpFrames,
                                                                                walkingControllerParameters.getSteppingParameters(),
