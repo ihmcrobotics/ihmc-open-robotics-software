@@ -61,6 +61,7 @@ public class GDXSCS2SimulationSession
    private final RenderableProvider getRealRenderables = this::getRealRenderables;
    private final RenderableProvider getVirtualRenderables = this::getVirtualRenderables;
    private PhysicsEngine physicsEngine;
+   private ArrayList<Runnable> onSessionStartedRunnables = new ArrayList<>();
 
    public GDXSCS2SimulationSession()
    {
@@ -130,7 +131,7 @@ public class GDXSCS2SimulationSession
       simulationSession.getRootRegistry().addChild(yoRegistry);
 
       bufferRecordTickPeriod.set(simulationSession.getBufferRecordTickPeriod());
-      changeBufferDuration();
+      changeBufferDuration(bufferDuration.get());
       updateDTFromSession();
       simulationSession.submitPlaybackRealTimeRate(playbackRealtimeRate.get());
       simulationSession.submitRunAtRealTimeRate(runAtRealtimeRate.get());
@@ -159,6 +160,10 @@ public class GDXSCS2SimulationSession
          sessionStartedHandled = true;
          LogTools.info("Session started.");
          plotManager.initializeLinkedVariables();
+         for (Runnable onSessionStartedRunnable : onSessionStartedRunnables)
+         {
+            onSessionStartedRunnable.run();
+         }
       }
 
       if (simulationSession.getActiveMode() != SessionMode.RUNNING)
@@ -254,8 +259,7 @@ public class GDXSCS2SimulationSession
       }
       if (ImGui.inputInt(labels.get("Buffer record tick period"), bufferRecordTickPeriod))
       {
-         simulationSession.submitBufferRecordTickPeriod(bufferRecordTickPeriod.get());
-         changeBufferDuration();
+         setBufferRecordTickPeriod(bufferRecordTickPeriod.get());
       }
       else
       {
@@ -263,7 +267,7 @@ public class GDXSCS2SimulationSession
       }
       if (ImGui.inputFloat(labels.get("Buffer duration (s)"), bufferDuration))
       {
-         changeBufferDuration();
+         changeBufferDuration(bufferDuration.get());
       }
       if (ImGui.sliderInt(labels.get("Buffer"), bufferIndex.getData(), 0, yoManager.getBufferSize()))
       {
@@ -296,15 +300,28 @@ public class GDXSCS2SimulationSession
       plotManager.renderImGuiWidgets();
    }
 
+   public void setBufferRecordTickPeriod(int bufferRecordTickPeriod)
+   {
+      this.bufferRecordTickPeriod.set(bufferRecordTickPeriod);
+      simulationSession.submitBufferRecordTickPeriod(bufferRecordTickPeriod);
+      changeBufferDuration(bufferDuration.get());
+   }
+
    private void updateDTFromSession()
    {
       dtHz.set((int) UnitConversions.secondsToHertz(simulationSession.getSessionDTSeconds()));
    }
 
-   private void changeBufferDuration()
+   public void changeBufferDuration(double bufferDuration)
    {
-      int bufferSizeRequest = (int) (bufferDuration.get() / UnitConversions.hertzToSeconds(dtHz.get()) / bufferRecordTickPeriod.get());
+      this.bufferDuration.set((float) bufferDuration);
+      int bufferSizeRequest = (int) (bufferDuration / UnitConversions.hertzToSeconds(dtHz.get()) / bufferRecordTickPeriod.get());
       simulationSession.submitBufferSizeRequest(bufferSizeRequest);
+   }
+
+   public void setPauseAtEndOfBuffer(boolean pauseAtEndOfBuffer)
+   {
+      this.pauseAtEndOfBuffer.set(pauseAtEndOfBuffer);
    }
 
    private void changeDT()
@@ -357,5 +374,10 @@ public class GDXSCS2SimulationSession
    public ImBoolean getShowVirtualRenderables()
    {
       return showVirtualRenderables;
+   }
+
+   public ArrayList<Runnable> getOnSessionStartedRunnables()
+   {
+      return onSessionStartedRunnables;
    }
 }

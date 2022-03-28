@@ -39,6 +39,7 @@ public class GDXSCS2EnvironmentManager
    private final ArrayList<String> robotsToHide = new ArrayList<>();
    private volatile boolean starting = false;
    private volatile boolean started = false;
+   private ArrayList<Runnable> onSessionStartedRunnables = new ArrayList<>();
 
    public void create(GDXImGuiBasedUI baseUI, DRCRobotModel robotModel, CommunicationMode ros2CommunicationMode)
    {
@@ -119,6 +120,7 @@ public class GDXSCS2EnvironmentManager
          avatarSimulation.setSystemExitOnDestroy(false);
 
          scs2SimulationSession = new GDXSCS2SimulationSession(avatarSimulation.getSimulationSession());
+         scs2SimulationSession.getOnSessionStartedRunnables().addAll(onSessionStartedRunnables);
 
          avatarSimulation.beforeSessionThreadStart();
 
@@ -175,5 +177,10 @@ public class GDXSCS2EnvironmentManager
    public ArrayList<String> getRobotsToHide()
    {
       return robotsToHide;
+   }
+
+   public ArrayList<Runnable> getOnSessionStartedRunnables()
+   {
+      return onSessionStartedRunnables;
    }
 }
