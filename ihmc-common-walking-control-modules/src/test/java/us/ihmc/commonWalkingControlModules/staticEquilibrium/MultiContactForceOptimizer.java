@@ -5,8 +5,6 @@ import org.apache.commons.math3.optim.PointValuePair;
 import org.apache.commons.math3.optim.linear.*;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.ejml.data.DMatrixRMaj;
-import org.ejml.dense.row.CommonOps_DDRM;
-import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolverWithInactiveVariables;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -17,14 +15,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static us.ihmc.commonWalkingControlModules.staticEquilibrium.StaticEquilibriumContactPoint.basisVectorsPerContactPoint;
-import static us.ihmc.commonWalkingControlModules.staticEquilibrium.StaticSupportRegionSolver.mass;
+import static us.ihmc.commonWalkingControlModules.staticEquilibrium.ContactPoint.basisVectorsPerContactPoint;
+import static us.ihmc.commonWalkingControlModules.staticEquilibrium.MultiContactSupportRegionSolver.mass;
 
 /**
  * This class solves for forces given a set of contact points, surface normals, and CoM xy position
  * {@see http://lall.stanford.edu/papers/bretl_eqmcut_ieee_tro_projection_2008_08_01_01/pubdata/entry.pdf}
  */
-public class StaticEquilibriumForceOptimizer
+public class MultiContactForceOptimizer
 {
    private static final int maximumNumberOfIterations = 10000;
    private static final double convergenceThreshold = 1e-8;
@@ -33,7 +31,7 @@ public class StaticEquilibriumForceOptimizer
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
-   private final List<StaticEquilibriumContactPoint> contactPoints = new ArrayList<>();
+   private final List<ContactPoint> contactPoints = new ArrayList<>();
    private final SimplexSolver solver = new SimplexSolver(convergenceThreshold);
 
    private int numberOfDecisionVariables;
@@ -42,15 +40,15 @@ public class StaticEquilibriumForceOptimizer
    private final DMatrixRMaj beq = new DMatrixRMaj(0);
    private double[] solution;
 
-   public StaticEquilibriumForceOptimizer()
+   public MultiContactForceOptimizer()
    {
-      for (int i = 0; i < StaticEquilibriumSolverInput.maxContactPoints; i++)
+      for (int i = 0; i < MultiContactSupportRegionSolverInput.maxContactPoints; i++)
       {
-         contactPoints.add(new StaticEquilibriumContactPoint(i, registry, graphicsListRegistry));
+         contactPoints.add(new ContactPoint(i, registry, graphicsListRegistry));
       }
    }
 
-   public boolean solve(StaticEquilibriumSolverInput input, Point2DReadOnly centerOfMassXY)
+   public boolean solve(MultiContactSupportRegionSolverInput input, Point2DReadOnly centerOfMassXY)
    {
       numberOfDecisionVariables = basisVectorsPerContactPoint * input.getNumberOfContacts();
 
@@ -65,7 +63,7 @@ public class StaticEquilibriumForceOptimizer
 
       for (int i = 0; i < input.getNumberOfContacts(); i++)
       {
-         StaticEquilibriumContactPoint contactPoint = contactPoints.get(i);
+         ContactPoint contactPoint = contactPoints.get(i);
          contactPoint.initialize(input);
 
          FramePoint3D contactPointPosition = input.getContactPointPositions().get(i);

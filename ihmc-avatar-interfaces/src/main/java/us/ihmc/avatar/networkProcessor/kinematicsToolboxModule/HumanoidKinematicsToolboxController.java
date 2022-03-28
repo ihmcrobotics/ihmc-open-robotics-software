@@ -10,8 +10,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
-import us.ihmc.commonWalkingControlModules.staticEquilibrium.StaticEquilibriumSolverInput;
-import us.ihmc.commonWalkingControlModules.staticEquilibrium.StaticSupportRegionSolver;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.MultiContactSupportRegionSolverInput;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.MultiContactSupportRegionSolver;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -21,7 +21,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -106,8 +105,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    private final YoFramePoint3D initialCenterOfMassPosition = new YoFramePoint3D("initialCenterOfMass", worldFrame, registry);
 
    /** Multi-contact support region solver */
-   private final StaticSupportRegionSolver supportRegionSolver = new StaticSupportRegionSolver();
-   private final StaticEquilibriumSolverInput supportRegionSolverInput = new StaticEquilibriumSolverInput();
+   private final MultiContactSupportRegionSolver supportRegionSolver = new MultiContactSupportRegionSolver();
+   private final MultiContactSupportRegionSolverInput supportRegionSolverInput = new MultiContactSupportRegionSolverInput();
    /**
     * Indicates whether the rigid-bodies currently in contact as reported per:
     * {@link CapturabilityBasedStatus} or {@link MultiContactBalanceStatus} should be held in place for
@@ -378,7 +377,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
             }
 
             supportRegionSolver.initialize(supportRegionSolverInput);
-            supportRegionSolver.solve();
+            if (!supportRegionSolver.solve())
+               return false;
          }
 
          for (RobotSide robotSide : RobotSide.values)

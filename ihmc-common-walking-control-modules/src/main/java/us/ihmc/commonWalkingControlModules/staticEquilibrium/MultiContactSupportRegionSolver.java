@@ -18,12 +18,13 @@ import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static us.ihmc.commonWalkingControlModules.staticEquilibrium.StaticEquilibriumContactPoint.basisVectorsPerContactPoint;
+import static us.ihmc.commonWalkingControlModules.staticEquilibrium.ContactPoint.basisVectorsPerContactPoint;
 
 /**
  * This is an implementation of "Testing Static Equilibrium for Legged Robots", Bretl et al, 2008
@@ -32,7 +33,7 @@ import static us.ihmc.commonWalkingControlModules.staticEquilibrium.StaticEquili
  * It solves for the (convex) region of feasible CoM XY positions, modelling the robot as a point mass
  * and imposing friction constraints.
  */
-public class StaticSupportRegionSolver
+public class MultiContactSupportRegionSolver
 {
    static final int numberOfDirectionsToOptimize = 32;
    static final double rhoMax = 2.0;
@@ -42,9 +43,10 @@ public class StaticSupportRegionSolver
    private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
    private TickAndUpdatable tickAndUpdatable = null;
 
-   private final List<StaticEquilibriumContactPoint> contactPoints = new ArrayList<>();
-   private StaticEquilibriumSolverInput input;
+   private final List<ContactPoint> contactPoints = new ArrayList<>();
+   private MultiContactSupportRegionSolverInput input;
    private final LinearProgramSolver linearProgramSolver = new LinearProgramSolver();
+   private final YoBoolean foundSolution = new YoBoolean("foundSolution", registry);
 
    private int nominalDecisionVariables;
    private int nonNegativeDecisionVariables;
@@ -81,11 +83,11 @@ public class StaticSupportRegionSolver
       }
    }
 
-   public StaticSupportRegionSolver()
+   public MultiContactSupportRegionSolver()
    {
-      for (int i = 0; i < StaticEquilibriumSolverInput.maxContactPoints; i++)
+      for (int i = 0; i < MultiContactSupportRegionSolverInput.maxContactPoints; i++)
       {
-         contactPoints.add(new StaticEquilibriumContactPoint(i, registry, graphicsListRegistry));
+         contactPoints.add(new ContactPoint(i, registry, graphicsListRegistry));
       }
 
       YoGraphicVector directionToOptimizeGraphic = new YoGraphicVector("directionToOptimizeGraphic", averageContactPointPosition, directionToOptimize, 0.5);
@@ -95,7 +97,7 @@ public class StaticSupportRegionSolver
       graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), optimizedCoMGraphic);
    }
 
-   public void initialize(StaticEquilibriumSolverInput input)
+   public void initialize(MultiContactSupportRegionSolverInput input)
    {
       this.input = input;
 
@@ -117,7 +119,7 @@ public class StaticSupportRegionSolver
 
       for (int i = 0; i < input.getNumberOfContacts(); i++)
       {
-         StaticEquilibriumContactPoint contactPoint = contactPoints.get(i);
+         ContactPoint contactPoint = contactPoints.get(i);
          contactPoint.initialize(input);
 
          FramePoint3D contactPointPosition = input.getContactPointPositions().get(i);
@@ -179,7 +181,7 @@ public class StaticSupportRegionSolver
       averageContactPointPosition.scale(1.0 / input.getNumberOfContacts());
    }
 
-   public void solve()
+   public boolean solve()
    {
       supportRegion.clear();
       supportRegionVertices.clear();
@@ -195,7 +197,13 @@ public class StaticSupportRegionSolver
          costVectorC.set(nonNegativeDecisionVariables - 2, 0, -directionToOptimize.getX());
          costVectorC.set(nonNegativeDecisionVariables - 1, 0, -directionToOptimize.getY());
 
-         linearProgramSolver.solve(costVectorC, Ain, bin, solution);
+         boolean foundSolution = linearProgramSolver.solve(costVectorC, Ain, bin, solution);
+         if (!foundSolution)
+         {
+            this.foundSolution.set(false);
+            supportRegion.clear();
+            return false;
+         }
 
          double comExtremumX = solution.get(nonNegativeDecisionVariables - 4) - solution.get(nonNegativeDecisionVariables - 2);
          double comExtremumY = solution.get(nonNegativeDecisionVariables - 3) - solution.get(nonNegativeDecisionVariables - 1);
@@ -206,6 +214,12 @@ public class StaticSupportRegionSolver
       }
 
       supportRegion.update();
+      return true;
+   }
+
+   public boolean foundSolution()
+   {
+      return foundSolution.getValue();
    }
 
    private void updateGraphics()

@@ -9,8 +9,8 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.RobotDefinitionTools;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
-import us.ihmc.commonWalkingControlModules.staticEquilibrium.StaticEquilibriumSolverInput;
-import us.ihmc.commonWalkingControlModules.staticEquilibrium.StaticSupportRegionSolver;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.MultiContactSupportRegionSolverInput;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.MultiContactSupportRegionSolver;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
@@ -196,7 +196,7 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
    @AfterEach
    public void tearDown()
    {
-//      if (simulationTestingParameters.getKeepSCSUp())
+      if (simulationTestingParameters.getKeepSCSUp())
          ThreadTools.sleepForever();
 
       if (mainRegistry != null)
@@ -631,16 +631,17 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
       //////////////////  Step 2: solve for multi-contact support region directly   //////////////////
       ////////////////////////////////////////////////////////////////////////////////////////////////
 
-      StaticSupportRegionSolver staticSupportRegionSolver = new StaticSupportRegionSolver();
-      StaticEquilibriumSolverInput input = new StaticEquilibriumSolverInput();
+      MultiContactSupportRegionSolver multiContactSupportRegionSolver = new MultiContactSupportRegionSolver();
+      MultiContactSupportRegionSolverInput input = new MultiContactSupportRegionSolverInput();
       for (int i = 0; i < multiContactBalanceStatus.getContactPointsInWorld().size(); i++)
       {
          input.addContactPoint(multiContactBalanceStatus.getContactPointsInWorld().get(i), multiContactBalanceStatus.getSurfaceNormalsInWorld().get(i));
       }
 
-      staticSupportRegionSolver.initialize(input);
-      staticSupportRegionSolver.solve();
-      ConvexPolygon2D multiContactSupportPolygon = new ConvexPolygon2D(staticSupportRegionSolver.getSupportRegion());
+      multiContactSupportRegionSolver.initialize(input);
+      if (!multiContactSupportRegionSolver.solve())
+         fail("The given multi-contact scenario is not feasible");
+      ConvexPolygon2D multiContactSupportPolygon = new ConvexPolygon2D(multiContactSupportRegionSolver.getSupportRegion());
       ConvexPolygon2D shrunkMultiContactSupportPolygon = shrinkPolygon(multiContactSupportPolygon, comSafeMargin);
 
       ///////////////////////////////////////////////////////////////////////////////////////////////////
