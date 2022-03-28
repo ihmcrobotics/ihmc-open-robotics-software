@@ -7,7 +7,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.misc.UnrolledInverseFromMinor_DDRM;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ICPQPInput;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.qpInput.ICPQPInput;
 import us.ihmc.matrixlib.MatrixTools;
 
 /**

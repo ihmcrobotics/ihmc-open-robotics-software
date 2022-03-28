@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.captureRegion.CaptureRegionSafetyHeuristics;
 import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepCaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;

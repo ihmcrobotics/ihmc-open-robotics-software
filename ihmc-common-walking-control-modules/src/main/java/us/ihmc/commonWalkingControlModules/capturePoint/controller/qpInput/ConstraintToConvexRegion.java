@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput;
+package us.ihmc.commonWalkingControlModules.capturePoint.controller.qpInput;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;

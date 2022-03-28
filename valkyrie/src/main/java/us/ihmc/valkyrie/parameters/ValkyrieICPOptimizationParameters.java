@@ -3,7 +3,7 @@ package us.ihmc.valkyrie.parameters;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPOptimizationParameters;
 
 /** {@inheritDoc} */
 public class ValkyrieICPOptimizationParameters extends ICPOptimizationParameters
