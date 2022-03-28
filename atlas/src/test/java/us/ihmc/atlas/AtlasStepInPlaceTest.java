@@ -3,7 +3,7 @@ package us.ihmc.atlas;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
+import us.ihmc.atlas.parameters.AtlasICPControllerParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.AvatarStepInPlaceTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -26,7 +26,7 @@ public class AtlasStepInPlaceTest extends AvatarStepInPlaceTest
             @Override
             public ICPControllerParameters getICPOptimizationParameters()
             {
-               return new AtlasICPOptimizationParameters(false)
+               return new AtlasICPControllerParameters(false)
                {
                   @Override
                   public double getMinICPErrorForStepAdjustment()

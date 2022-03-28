@@ -8,7 +8,7 @@ import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
-import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
+import us.ihmc.atlas.parameters.AtlasICPControllerParameters;
 import us.ihmc.atlas.parameters.AtlasToeOffParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -109,7 +109,7 @@ public class AtlasLineContactWalkingTest extends HumanoidLineContactWalkingTest
       }
    }
 
-   private class TestICPOptimizationParameters extends AtlasICPOptimizationParameters
+   private class TestICPOptimizationParameters extends AtlasICPControllerParameters
    {
       public TestICPOptimizationParameters()
       {

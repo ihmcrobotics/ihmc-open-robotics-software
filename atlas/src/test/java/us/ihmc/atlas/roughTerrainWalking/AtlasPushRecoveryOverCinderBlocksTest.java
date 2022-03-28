@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
+import us.ihmc.atlas.parameters.AtlasICPControllerParameters;
 import us.ihmc.atlas.parameters.AtlasSteppingParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -136,7 +136,7 @@ public class AtlasPushRecoveryOverCinderBlocksTest extends AvatarPushRecoveryOve
                @Override
                public ICPControllerParameters getICPOptimizationParameters()
                {
-                  return new AtlasICPOptimizationParameters(false)
+                  return new AtlasICPControllerParameters(false)
                   {
                      @Override
                      public boolean useAngularMomentum()

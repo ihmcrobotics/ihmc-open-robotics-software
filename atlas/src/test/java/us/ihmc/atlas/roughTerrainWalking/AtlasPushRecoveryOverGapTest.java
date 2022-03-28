@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
+import us.ihmc.atlas.parameters.AtlasICPControllerParameters;
 import us.ihmc.atlas.parameters.AtlasSteppingParameters;
 import us.ihmc.atlas.parameters.AtlasSwingTrajectoryParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
@@ -88,7 +88,7 @@ public class AtlasPushRecoveryOverGapTest extends AvatarPushRecoveryOverGapTest
                @Override
                public ICPControllerParameters getICPOptimizationParameters()
                {
-                  return new AtlasICPOptimizationParameters(false)
+                  return new AtlasICPControllerParameters(false)
                   {
                      @Override
                      public boolean usePlanarRegionConstraints()

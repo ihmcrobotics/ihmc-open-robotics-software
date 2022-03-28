@@ -5,36 +5,14 @@ import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 
 /** {@inheritDoc} */
-public class AtlasICPOptimizationParameters extends ICPControllerParameters
+public class AtlasICPControllerParameters extends ICPControllerParameters
 {
    private final boolean runningOnRealRobot;
    private final boolean useAngularMomentum = true;
-   private final boolean useStepAdjustment = true;
 
-   public AtlasICPOptimizationParameters(boolean runningOnRealRobot)
+   public AtlasICPControllerParameters(boolean runningOnRealRobot)
    {
       this.runningOnRealRobot = runningOnRealRobot;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getForwardFootstepWeight()
-   {
-      return runningOnRealRobot ? 20.0 : 20.0;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getLateralFootstepWeight()
-   {
-      return runningOnRealRobot ? 20.0 : 20.0;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getFootstepRateWeight()
-   {
-      return runningOnRealRobot ? 4e-9 : 4e-7;
    }
 
    /** {@inheritDoc} */
@@ -89,23 +67,9 @@ public class AtlasICPOptimizationParameters extends ICPControllerParameters
 
    /** {@inheritDoc} */
    @Override
-   public double getDynamicsObjectiveDoubleSupportWeightModifier()
-   {
-      return 1.0;
-   }
-
-   /** {@inheritDoc} */
-   @Override
    public double getAngularMomentumMinimizationWeight()
    {
       return 10.0;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public boolean scaleStepRateWeightWithTime()
-   {
-      return false;
    }
 
    /** {@inheritDoc} */
@@ -115,19 +79,6 @@ public class AtlasICPOptimizationParameters extends ICPControllerParameters
       return true;
    }
 
-   /** {@inheritDoc} */
-   @Override
-   public boolean useFeedbackRate()
-   {
-      return true;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public boolean allowStepAdjustment()
-   {
-      return useStepAdjustment;
-   }
 
    /** {@inheritDoc} */
    @Override
@@ -143,51 +94,12 @@ public class AtlasICPOptimizationParameters extends ICPControllerParameters
       return 0.001;
    }
 
-   /** {@inheritDoc} */
-   @Override
-   public boolean useFootstepRate()
-   {
-      return true;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getMinimumTimeRemaining()
-   {
-      return 0.0001;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getAdjustmentDeadband()
-   {
-      return 0.02;
-   }
-
    @Override
    public double getFeedbackDirectionWeight()
    {
       return 1e6;
    }
 
-   /** {@inheritDoc} */
-   @Override
-   public boolean getLimitReachabilityFromAdjustment()
-   {
-      return false;
-   }
-
-   @Override
-   public double getTransferSplitFraction()
-   {
-      return 0.2;
-   }
-
-   @Override
-   public double getMinimumFootstepMultiplier()
-   {
-      return 0.25;
-   }
 
    @Override
    public boolean useSmartICPIntegrator()

@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
+import us.ihmc.atlas.parameters.AtlasICPControllerParameters;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.AvatarFlatGroundForwardWalkingTest;
@@ -32,7 +32,7 @@ public class AtlasFlatGroundForwardWalkingTest extends AvatarFlatGroundForwardWa
             @Override
             public ICPControllerParameters getICPOptimizationParameters()
             {
-               return new AtlasICPOptimizationParameters(false)
+               return new AtlasICPControllerParameters(false)
                {
                   @Override
                   public boolean useAngularMomentum()
