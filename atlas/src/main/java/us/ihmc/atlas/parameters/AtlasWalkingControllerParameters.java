@@ -589,7 +589,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
-   public ICPControllerParameters getICPOptimizationParameters()
+   public ICPControllerParameters getICPControllerParameters()
    {
       return icpOptimizationParameters;
    }

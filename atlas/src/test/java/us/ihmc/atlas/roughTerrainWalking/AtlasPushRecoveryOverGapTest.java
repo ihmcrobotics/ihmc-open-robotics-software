@@ -86,7 +86,7 @@ public class AtlasPushRecoveryOverGapTest extends AvatarPushRecoveryOverGapTest
                }
 
                @Override
-               public ICPControllerParameters getICPOptimizationParameters()
+               public ICPControllerParameters getICPControllerParameters()
                {
                   return new AtlasICPControllerParameters(false)
                   {

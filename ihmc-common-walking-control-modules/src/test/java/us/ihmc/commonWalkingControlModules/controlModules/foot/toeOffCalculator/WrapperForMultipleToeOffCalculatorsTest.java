@@ -412,7 +412,7 @@ public class WrapperForMultipleToeOffCalculatorsTest
          }
 
          @Override
-         public ICPControllerParameters getICPOptimizationParameters()
+         public ICPControllerParameters getICPControllerParameters()
          {
             return null;
          }

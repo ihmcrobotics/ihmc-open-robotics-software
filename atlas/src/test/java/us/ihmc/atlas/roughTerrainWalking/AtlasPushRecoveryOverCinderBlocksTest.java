@@ -134,7 +134,7 @@ public class AtlasPushRecoveryOverCinderBlocksTest extends AvatarPushRecoveryOve
                }
 
                @Override
-               public ICPControllerParameters getICPOptimizationParameters()
+               public ICPControllerParameters getICPControllerParameters()
                {
                   return new AtlasICPControllerParameters(false)
                   {

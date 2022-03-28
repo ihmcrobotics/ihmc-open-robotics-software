@@ -125,7 +125,7 @@ public class ICPController
                         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(walkingControllerParameters,
-           walkingControllerParameters.getICPOptimizationParameters(),
+           walkingControllerParameters.getICPControllerParameters(),
            bipedSupportPolygons,
            icpControlPolygons,
            contactableFeet,

@@ -30,7 +30,7 @@ public class AtlasFlatGroundForwardWalkingTest extends AvatarFlatGroundForwardWa
          return new AtlasWalkingControllerParameters(target, jointMap, getContactPointParameters())
          {
             @Override
-            public ICPControllerParameters getICPOptimizationParameters()
+            public ICPControllerParameters getICPControllerParameters()
             {
                return new AtlasICPControllerParameters(false)
                {
