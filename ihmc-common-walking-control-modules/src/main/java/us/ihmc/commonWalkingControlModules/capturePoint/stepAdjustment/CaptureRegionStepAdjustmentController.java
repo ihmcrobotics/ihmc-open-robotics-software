@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -97,7 +97,7 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
    }
 
    public CaptureRegionStepAdjustmentController(WalkingControllerParameters walkingControllerParameters,
-                                                ICPOptimizationParameters icpOptimizationParameters,
+                                                ICPControllerParameters icpOptimizationParameters,
                                                 SideDependentList<? extends ReferenceFrame> soleZUpFrames,
                                                 BipedSupportPolygons bipedSupportPolygons,
                                                 YoRegistry parentRegistry,

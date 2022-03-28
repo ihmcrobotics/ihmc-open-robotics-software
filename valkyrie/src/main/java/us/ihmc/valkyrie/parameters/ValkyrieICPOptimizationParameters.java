@@ -3,10 +3,10 @@ package us.ihmc.valkyrie.parameters;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
-import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 
 /** {@inheritDoc} */
-public class ValkyrieICPOptimizationParameters extends ICPOptimizationParameters
+public class ValkyrieICPOptimizationParameters extends ICPControllerParameters
 {
    private final boolean useAngularMomentum;
    private final boolean useStepAdjustment;

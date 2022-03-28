@@ -2,10 +2,10 @@ package us.ihmc.atlas.parameters;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
-import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 
 /** {@inheritDoc} */
-public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
+public class AtlasICPOptimizationParameters extends ICPControllerParameters
 {
    private final boolean runningOnRealRobot;
    private final boolean useAngularMomentum = true;

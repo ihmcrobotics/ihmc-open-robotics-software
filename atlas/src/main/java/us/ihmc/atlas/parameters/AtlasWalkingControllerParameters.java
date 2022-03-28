@@ -9,7 +9,7 @@ import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
-import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
@@ -63,7 +63,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    private LegConfigurationParameters legConfigurationParameters;
    private ToeOffParameters toeOffParameters;
    private SwingTrajectoryParameters swingTrajectoryParameters;
-   private ICPOptimizationParameters icpOptimizationParameters;
+   private ICPControllerParameters icpOptimizationParameters;
    private AtlasSteppingParameters steppingParameters;
    private LeapOfFaithParameters leapOfFaithParameters;
 
@@ -586,7 +586,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
-   public ICPOptimizationParameters getICPOptimizationParameters()
+   public ICPControllerParameters getICPOptimizationParameters()
    {
       return icpOptimizationParameters;
    }
@@ -633,7 +633,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       this.swingTrajectoryParameters = swingTrajectoryParameters;
    }
 
-   public void setIcpOptimizationParameters(ICPOptimizationParameters icpOptimizationParameters)
+   public void setIcpOptimizationParameters(ICPControllerParameters icpOptimizationParameters)
    {
       this.icpOptimizationParameters = icpOptimizationParameters;
    }

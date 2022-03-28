@@ -495,7 +495,7 @@ public class ICPControllerTest
       return bipedSupportPolygons;
    }
 
-   private class TestICPOptimizationParameters extends ICPOptimizationParameters
+   private class TestICPOptimizationParameters extends ICPControllerParameters
    {
       @Override
       public double getForwardFootstepWeight()
@@ -763,7 +763,7 @@ public class ICPControllerTest
       }
 
       @Override
-      public ICPOptimizationParameters getICPOptimizationParameters()
+      public ICPControllerParameters getICPOptimizationParameters()
       {
          return new TestICPOptimizationParameters();
       }
