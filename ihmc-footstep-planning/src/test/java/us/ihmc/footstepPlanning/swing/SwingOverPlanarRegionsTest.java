@@ -566,12 +566,6 @@ public class SwingOverPlanarRegionsTest
          }
 
          @Override
-         public ICPControlGains createICPControlGains()
-         {
-            return null;
-         }
-
-         @Override
          public PDGains getCoMHeightControlGains()
          {
             return null;
@@ -857,36 +851,6 @@ public class SwingOverPlanarRegionsTest
    {
       return new SwingTrajectoryParameters()
       {
-         @Override
-         public boolean doToeTouchdownIfPossible()
-         {
-            return false;
-         }
-
-         @Override
-         public double getToeTouchdownAngle()
-         {
-            return Math.toRadians(20.0);
-         }
-
-         @Override
-         public boolean doHeelTouchdownIfPossible()
-         {
-            return false;
-         }
-
-         @Override
-         public double getHeelTouchdownAngle()
-         {
-            return Math.toRadians(-5.0);
-         }
-
-         @Override
-         public double getMinMechanicalLegLength()
-         {
-            return 0.420;
-         }
-
          @Override
          public double getDesiredTouchdownHeightOffset()
          {
