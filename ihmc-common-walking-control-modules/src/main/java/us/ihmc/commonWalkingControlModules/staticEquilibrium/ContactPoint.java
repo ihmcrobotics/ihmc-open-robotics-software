@@ -16,11 +16,12 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-/* package-private */ class StaticEquilibriumContactPoint
+/* package-private */
+class ContactPoint
 {
    private static final double basisVectorGraphicScale = 0.1;
-   private static final double forceVectorGraphicScale = 0.1;
-   public static final int basisVectorsPerContactPoint = 4;
+   private static final double forceVectorGraphicScale = 0.05;
+   public static final int basisVectorsPerContactPoint = 6;
 
    private final int contactPointIndex;
 
@@ -30,7 +31,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
    private final PoseReferenceFrame contactPointFrame;
    private final YoDouble[] rhoValues = new YoDouble[basisVectorsPerContactPoint];
 
-   public StaticEquilibriumContactPoint(int contactPointIndex, YoRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
+   public ContactPoint(int contactPointIndex, YoRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this.contactPointIndex = contactPointIndex;
       this.contactPointFrame = new PoseReferenceFrame("cpFrame" + contactPointIndex, ReferenceFrame.getWorldFrame());
@@ -55,7 +56,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
       }
    }
 
-   public void initialize(StaticEquilibriumSolverInput input)
+   public void initialize(MultiContactSupportRegionSolverInput input)
    {
       FramePoint3D contactPointPosition = input.getContactPointPositions().get(contactPointIndex);
       FrameVector3D surfaceNormal = input.getSurfaceNormals().get(contactPointIndex);
