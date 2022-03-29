@@ -39,12 +39,14 @@ public class SCS2BulletSimulationTools
       String debrisFilter = "DebrisFilter";
       String sensorTrigger = "SensorTrigger";
       String characterFilter = "CharacterFilter";
-      String bodyName = "Body";
+      String body = "Body";
       String pelvis = "Pelvis";
       String rightLeg = "RightLeg";
       String leftLeg = "LeftLeg";
       String rightArm = "RightArm";
       String leftArm = "LeftArm";
+      String rightHand = "RightHand";
+      String leftHand = "LeftHand";
       long bulletCollisionGroup;
       long bulletCollideMask;
 
@@ -68,14 +70,14 @@ public class SCS2BulletSimulationTools
             )
             {
                bulletCollisionGroup = helper.getCollisionMask(pelvis);
-               bulletCollideMask = helper.createCollisionGroup(defaultFilter, staticFilter, bodyName, leftArm, rightArm);
+               bulletCollideMask = helper.createCollisionGroup(defaultFilter, staticFilter, body, leftArm, rightArm);
 
             }
             else if (shapeDefinition.getName().contains("utorso")
                      || shapeDefinition.getName().contains("hokuyo")
                      || shapeDefinition.getName().contains("head"))
             {
-               bulletCollisionGroup = helper.getCollisionMask(bodyName);
+               bulletCollisionGroup = helper.getCollisionMask(body);
                bulletCollideMask = helper.createCollisionGroup(defaultFilter, staticFilter, rightLeg, leftLeg, rightArm, leftArm);
             }
             else if (shapeDefinition.getName().contains("l_uleg")
@@ -84,7 +86,7 @@ public class SCS2BulletSimulationTools
                      || shapeDefinition.getName().contains("l_foot"))
             {
                bulletCollisionGroup = helper.getCollisionMask(leftLeg);
-               bulletCollideMask = helper.createCollisionGroup(defaultFilter, staticFilter, bodyName, rightLeg, leftArm);
+               bulletCollideMask = helper.createCollisionGroup(defaultFilter, staticFilter, body, rightLeg, leftArm);
 
             }
             else if (shapeDefinition.getName().contains("r_uleg")
@@ -93,7 +95,7 @@ public class SCS2BulletSimulationTools
                      || shapeDefinition.getName().contains("r_foot"))
             {
                bulletCollisionGroup = helper.getCollisionMask(rightLeg);
-               bulletCollideMask = helper.createCollisionGroup(defaultFilter, staticFilter, bodyName, leftLeg, leftArm);
+               bulletCollideMask = helper.createCollisionGroup(defaultFilter, staticFilter, body, leftLeg, leftArm);
             }
             else if (shapeDefinition.getName().contains("l_uarm")
                      || shapeDefinition.getName().contains("l_clav")
@@ -103,7 +105,7 @@ public class SCS2BulletSimulationTools
                      || shapeDefinition.getName().contains("l_lfarm"))
             {
                bulletCollisionGroup = helper.getCollisionMask(leftArm);
-               bulletCollideMask = helper.createCollisionGroup(defaultFilter, staticFilter, bodyName, pelvis, leftLeg, rightLeg, rightArm);
+               bulletCollideMask = helper.createCollisionGroup(defaultFilter, staticFilter, body, pelvis, leftLeg, rightLeg, rightArm);
             }
             else if (shapeDefinition.getName().contains("r_uarm")
                      || shapeDefinition.getName().contains("r_clav")
@@ -113,7 +115,21 @@ public class SCS2BulletSimulationTools
                      || shapeDefinition.getName().contains("r_lfarm"))
             {
                bulletCollisionGroup = helper.getCollisionMask(rightArm);
-               bulletCollideMask = helper.createCollisionGroup(defaultFilter, staticFilter, bodyName, pelvis, leftLeg, rightLeg, leftArm);
+               bulletCollideMask = helper.createCollisionGroup(defaultFilter, staticFilter, body, pelvis, leftLeg, rightLeg, leftArm);
+            }
+            else if (shapeDefinition.getName().contains("r_finger")
+                  || shapeDefinition.getName().contains("r_palm")
+                  || shapeDefinition.getName().contains("r_hand"))
+            {
+               bulletCollisionGroup = helper.getCollisionMask(rightHand);
+               bulletCollideMask = helper.createCollisionGroup(defaultFilter, staticFilter, body, pelvis, leftLeg, rightLeg, leftArm);
+            }
+            else if (shapeDefinition.getName().contains("l_finger")
+                  || shapeDefinition.getName().contains("l_palm")
+                  || shapeDefinition.getName().contains("l_hand"))
+            {
+               bulletCollisionGroup = helper.getCollisionMask(leftHand);
+               bulletCollideMask = helper.createCollisionGroup(defaultFilter, staticFilter, body, pelvis, leftLeg, rightLeg, rightArm);
             }
             else
             {
