@@ -140,8 +140,6 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       if (!variableDifferences.isEmpty())
       {
          System.err.println("variableDifferences: \n" + VariableDifference.allVariableDifferencesToString(variableDifferences));
-         if (simulationTestingParameters.getKeepSCSUp())
-            ThreadTools.sleepForever();
          fail("Found Variable Differences!\n variableDifferences: \n" + VariableDifference.allVariableDifferencesToString(variableDifferences));
       }
 
