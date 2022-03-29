@@ -14,7 +14,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.session.SessionMode;
-import us.ihmc.scs2.session.SessionState;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizer;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizerControls;
 import us.ihmc.scs2.simulation.SimulationSession;
@@ -55,7 +54,7 @@ public class SCS2AvatarSimulation
          yoVariableServer.start();
       }
 
-      simulationSession.setSessionState(SessionState.ACTIVE);
+      simulationSession.startSessionThread();
 
       if (showGUI)
       {
