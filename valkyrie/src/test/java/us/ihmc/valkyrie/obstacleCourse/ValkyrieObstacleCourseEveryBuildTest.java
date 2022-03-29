@@ -26,7 +26,8 @@ public class ValkyrieObstacleCourseEveryBuildTest extends DRCObstacleCourseEvery
    {
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);
    }
-   
+
+   @Tag("humanoid-obstacle")
    @Override
    @Test
    public void testSimpleFlatGroundScript() throws SimulationExceededMaximumTimeException
@@ -34,7 +35,7 @@ public class ValkyrieObstacleCourseEveryBuildTest extends DRCObstacleCourseEvery
       super.testSimpleFlatGroundScript();
    }
 
-   @Tag("humanoid-rough-terrain")
+   @Tag("humanoid-obstacle")
    @Override
    @Test
    public void testWalkingUpToRampWithLongSteps() throws SimulationExceededMaximumTimeException
