@@ -2,6 +2,7 @@
 #define __controller_msgs__msg__MultiContactBalanceStatus__idl__
 
 #include "geometry_msgs/msg/./Point_.idl"
+#include "geometry_msgs/msg/./Vector3_.idl"
 module controller_msgs
 {
   module msg
@@ -31,15 +32,15 @@ module controller_msgs
          */
         geometry_msgs::msg::dds::Point center_of_mass_3d;
         /**
-         * List of the active contact points expressed in world frame. Only x and y coordinates are relevant.
+         * List of contact points in world-frame.
          */
-        sequence<geometry_msgs::msg::dds::Point, 16> support_polygon;
+        sequence<geometry_msgs::msg::dds::Point, 16> contact_points_in_world;
         /**
-         * List of the active contact points expressed in local body-fixed frame.
+         * (Optional) List of the contact surface normals in world frame. If provided these are used to solve generalized support region.
          */
-        sequence<geometry_msgs::msg::dds::Point, 16> contact_points_in_body;
+        sequence<geometry_msgs::msg::dds::Vector3, 16> surface_normals_in_world;
         /**
-         * List of the rigid-bodies in contact. This list's size and ordering corresponds to the support_polygon and contact_point_in_body lists.
+         * List of the rigid-bodies in contact. This list's size and ordering corresponds to contact_point_in_world and surface_normals_in_world.
          */
         sequence<long, 16> support_rigid_body_ids;
       };

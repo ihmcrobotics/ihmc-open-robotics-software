@@ -180,7 +180,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       bodyPathPlanner.clearLoggedData();
 
       boolean heightMapAvailable = request.getHeightMapMessage() != null && !request.getHeightMapMessage().getHeights().isEmpty();
-      boolean planarRegionsAvailable = request.getPlanarRegionsList() == null || request.getPlanarRegionsList().isEmpty();
+      boolean planarRegionsAvailable = request.getPlanarRegionsList() != null && !request.getPlanarRegionsList().isEmpty();
 
       if (heightMapAvailable)
       {
@@ -197,7 +197,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       goalMidFootPose.interpolate(request.getGoalFootPoses().get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.RIGHT), 0.5);
 
       // Update planar regions
-      boolean flatGroundMode = request.getAssumeFlatGround() || (!planarRegionsAvailable && !heightMapAvailable);
+      boolean flatGroundMode = request.getAssumeFlatGround() || !(planarRegionsAvailable || heightMapAvailable);
       PlanarRegionsList planarRegionsList = flatGroundMode ? null : request.getPlanarRegionsList();
       visibilityGraphPlanner.setPlanarRegionsList(planarRegionsList);
       narrowPassageBodyPathOptimizer.setPlanarRegionsList(planarRegionsList);

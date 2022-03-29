@@ -128,6 +128,7 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
       super.testHoldHandWhileWalking();
    }
 
+   @Tag("controller-api-2")
    @Test
    public void testWrenchTrajectoryMessage() throws Exception
    {

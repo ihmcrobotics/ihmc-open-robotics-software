@@ -28,6 +28,7 @@ public class ValkyrieObstacleCourseDoNothingTest extends DRCObstacleCourseDoNoth
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);
    }
 
+   @Tag("humanoid-obstacle")
    @Test
    public void testDoNothingGroundContactPoints() throws SimulationExceededMaximumTimeException
    {

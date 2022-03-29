@@ -18,7 +18,6 @@ mainDependencies {
    api("com.google.guava:guava:18.0")
    api("org.ejml:ejml-ddense:0.39")
    api("org.ejml:ejml-core:0.39")
-   api("net.java.dev.jna:jna:4.1.0")
    api("net.sf.trove4j:trove4j:3.0.3")
 
    api("us.ihmc:ihmc-realtime:1.4.0")
@@ -31,7 +30,7 @@ mainDependencies {
    api("us.ihmc:ihmc-sensor-processing:source")
    api("us.ihmc:ihmc-trajectory-optimization:source")
    api("us.ihmc:ihmc-communication:source")
-   api("us.ihmc:ihmc-convex-optimization:0.17.10")
+   api("us.ihmc:ihmc-convex-optimization:0.17.11")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
@@ -43,7 +42,7 @@ testDependencies {
    api("us.ihmc:simulation-construction-set-tools-test:source")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
-   api("us.ihmc:ihmc-convex-optimization-test:0.17.10")
+   api("us.ihmc:ihmc-convex-optimization-test:0.17.11")
 }
 
 visualizersDependencies {

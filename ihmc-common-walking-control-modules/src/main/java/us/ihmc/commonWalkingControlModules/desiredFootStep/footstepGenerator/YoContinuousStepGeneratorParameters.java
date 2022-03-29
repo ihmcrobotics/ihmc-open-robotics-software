@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator;
 
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -13,6 +14,8 @@ public class YoContinuousStepGeneratorParameters implements ContinuousStepGenera
    private final YoDouble maxStepLength;
    private final YoDouble inPlaceWidth, minStepWidth, maxStepWidth;
    private final YoDouble turnMaxAngleInward, turnMaxAngleOutward;
+   private final YoBoolean stepsAreAdjustable;
+   private final YoBoolean shiftUpcomingStepsWithTouchdown;
 
    public YoContinuousStepGeneratorParameters(String nameSuffix, YoRegistry registry)
    {
@@ -27,6 +30,20 @@ public class YoContinuousStepGeneratorParameters implements ContinuousStepGenera
       maxStepLength = new YoDouble("maxStepLength" + nameSuffix, registry);
       turnMaxAngleOutward = new YoDouble("maxAngleTurnOutwards" + nameSuffix, registry);
       turnMaxAngleInward = new YoDouble("maxAngleTurnInwards" + nameSuffix, registry);
+      stepsAreAdjustable = new YoBoolean("stepsAreAdjustable" + nameSuffix, registry);
+      shiftUpcomingStepsWithTouchdown = new YoBoolean("shiftUpcomingStepsWithTouchdown" + nameSuffix, registry);
+   }
+
+   @Override
+   public void setStepsAreAdjustable(boolean stepsAreAdjustable)
+   {
+      this.stepsAreAdjustable.set(stepsAreAdjustable);
+   }
+
+   @Override
+   public void setShiftUpcomingStepsWithTouchdown(boolean shiftUpcomingStepsWithTouchdown)
+   {
+      this.shiftUpcomingStepsWithTouchdown.set(shiftUpcomingStepsWithTouchdown);
    }
 
    @Override
@@ -159,6 +176,18 @@ public class YoContinuousStepGeneratorParameters implements ContinuousStepGenera
    public double getTurnMaxAngleOutward()
    {
       return turnMaxAngleOutward.getValue();
+   }
+
+   @Override
+   public boolean getStepsAreAdjustable()
+   {
+      return stepsAreAdjustable.getBooleanValue();
+   }
+
+   @Override
+   public boolean getShiftUpcomingStepsWithTouchdown()
+   {
+      return shiftUpcomingStepsWithTouchdown.getBooleanValue();
    }
 
    @Override

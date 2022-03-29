@@ -17,16 +17,6 @@ import java.util.List;
 
 public class YoSwingTrajectoryParameters
 {
-   private final BooleanParameter doHeelTouchdownIfPossible;
-   private final DoubleParameter heelTouchdownAngle;
-   private final DoubleParameter maximumHeightForHeelTouchdown;
-   private final DoubleParameter heelTouchdownLengthRatio;
-
-   private final BooleanParameter doToeTouchdownIfPossible;
-   private final DoubleParameter toeTouchdownAngle;
-   private final DoubleParameter stepDownHeightForToeTouchdown;
-   private final DoubleParameter toeTouchdownDepthRatio;
-
    private final BooleanParameter addOrientationMidpointForClearance;
    private final DoubleParameter midpointOrientationInterpolationForClearance;
 
@@ -46,8 +36,6 @@ public class YoSwingTrajectoryParameters
    private final DoubleProvider maxInitialLinearVelocityMagnitude;
    private final DoubleProvider maxInitialAngularVelocityMagnitude;
 
-   private final DoubleProvider velocityAdjustmentDamping;
-
    public YoSwingTrajectoryParameters(String namePrefix, WalkingControllerParameters walkingControllerParameters, YoRegistry registry)
    {
       this(namePrefix, walkingControllerParameters, walkingControllerParameters.getSwingTrajectoryParameters(), registry);
@@ -56,20 +44,6 @@ public class YoSwingTrajectoryParameters
    public YoSwingTrajectoryParameters(String namePrefix, WalkingControllerParameters walkingControllerParameters, SwingTrajectoryParameters parameters,
                                       YoRegistry registry)
    {
-      doHeelTouchdownIfPossible = new BooleanParameter(namePrefix + "DoHeelTouchdownIfPossible", registry, parameters.doHeelTouchdownIfPossible());
-      heelTouchdownAngle = new DoubleParameter(namePrefix + "HeelTouchdownAngle", registry, parameters.getHeelTouchdownAngle());
-      maximumHeightForHeelTouchdown = new DoubleParameter(namePrefix + "MaximumHeightForHeelTouchdown",
-                                                          registry,
-                                                          parameters.getMaximumHeightForHeelTouchdown());
-      heelTouchdownLengthRatio = new DoubleParameter(namePrefix + "HeelTouchdownLengthRatio", registry, parameters.getHeelTouchdownLengthRatio());
-
-      doToeTouchdownIfPossible = new BooleanParameter(namePrefix + "DoToeTouchdownIfPossible", registry, parameters.doToeTouchdownIfPossible());
-      toeTouchdownAngle = new DoubleParameter(namePrefix + "ToeTouchdownAngle", registry, parameters.getToeTouchdownAngle());
-      stepDownHeightForToeTouchdown = new DoubleParameter(namePrefix + "StepDownHeightForToeTouchdown",
-                                                          registry,
-                                                          parameters.getStepDownHeightForToeTouchdown());
-      toeTouchdownDepthRatio = new DoubleParameter(namePrefix + "ToeTouchdownDepthRatio", registry, parameters.getToeTouchdownDepthRatio());
-
       addOrientationMidpointForClearance = new BooleanParameter(namePrefix + "AddOrientationMidpointForClearance",
                                                                 registry,
                                                                 parameters.addOrientationMidpointForObstacleClearance());
@@ -123,48 +97,6 @@ public class YoSwingTrajectoryParameters
       maxInitialAngularVelocityMagnitude = new DoubleParameter(namePrefix + "MaxInitialAngularVelocityMagnitude",
                                                                registry,
                                                                walkingControllerParameters.getMaxSwingInitialAngularVelocityMagnitude());
-
-      velocityAdjustmentDamping = new DoubleParameter(namePrefix + "VelocityAdjustmentDamping", registry, parameters.getSwingFootVelocityAdjustmentDamping());
-   }
-
-   public boolean doToeTouchdownIfPossible()
-   {
-      return doToeTouchdownIfPossible.getValue();
-   }
-
-   public double getToeTouchdownAngle()
-   {
-      return toeTouchdownAngle.getValue();
-   }
-
-   public double getToeTouchdownDepthRatio()
-   {
-      return toeTouchdownDepthRatio.getValue();
-   }
-
-   public double getStepDownHeightForToeTouchdown()
-   {
-      return stepDownHeightForToeTouchdown.getValue();
-   }
-
-   public boolean doHeelTouchdownIfPossible()
-   {
-      return doHeelTouchdownIfPossible.getValue();
-   }
-
-   public double getHeelTouchdownAngle()
-   {
-      return heelTouchdownAngle.getValue();
-   }
-
-   public double getHeelTouchdownLengthRatio()
-   {
-      return heelTouchdownLengthRatio.getValue();
-   }
-
-   public double getMaximumHeightForHeelTouchdown()
-   {
-      return maximumHeightForHeelTouchdown.getValue();
    }
 
    public boolean addOrientationMidpointForObstacleClearance()
@@ -235,10 +167,5 @@ public class YoSwingTrajectoryParameters
    public double getMaxSwingInitialAngularVelocityMagnitude()
    {
       return maxInitialAngularVelocityMagnitude.getValue();
-   }
-
-   public double getSwingFootVelocityAdjustmentDamping()
-   {
-      return velocityAdjustmentDamping.getValue();
    }
 }

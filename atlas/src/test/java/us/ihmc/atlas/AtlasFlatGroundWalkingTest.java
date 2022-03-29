@@ -2,6 +2,7 @@ package us.ihmc.atlas;
 
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.TestAbortedException;
 
@@ -29,6 +30,7 @@ public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
       this.doPelvisWarmup = doPelvisWarmup;
    }
 
+   @Tag("fast")
    @Override
    @Test
    public void testFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
@@ -47,6 +49,7 @@ public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
       super.testFlatGroundWalkingBullet();
    }
 
+   @Tag("fast")
    @Override
    @Test
    public void testReset() throws SimulationExceededMaximumTimeException, ControllerFailureException

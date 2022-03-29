@@ -18,6 +18,8 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
+import static us.ihmc.robotics.Assert.assertEquals;
+
 public class CaptureRegionMathToolsTest
 {
    @AfterEach
@@ -33,10 +35,10 @@ public class CaptureRegionMathToolsTest
       CaptureRegionMathTools captureRegionMathTools = new CaptureRegionMathTools();
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       RotationMatrix rotationMatrix = new RotationMatrix();
-      
+
       double radius = RandomNumbers.nextDouble(random, 0.1, 10.0);
       FramePoint2D center = EuclidFrameRandomTools.nextFramePoint2D(random, worldFrame, -10.0, 10.0, -10.0, 10.0);
-      
+
       FrameVector2D directionToExpectedPoint = EuclidFrameRandomTools.nextFrameVector2D(random, worldFrame);
       directionToExpectedPoint.normalize();
       FramePoint2D expectedPoint = new FramePoint2D();
@@ -56,6 +58,10 @@ public class CaptureRegionMathToolsTest
 
       FramePoint2D actualPoint = new FramePoint2D();
       captureRegionMathTools.getPointBetweenVectorsAtDistanceFromOriginCircular(directionA, directionB, alpha, radius, center, actualPoint);
+
+      FrameVector2D actualRadius = new FrameVector2D();
+      actualRadius.sub(actualPoint, center);
+      assertEquals(radius, actualRadius.length(), 1e-8);
 
       EuclidCoreTestTools.assertTuple2DEquals(expectedPoint, actualPoint, 1.0e-12);
    }
