@@ -33,7 +33,8 @@ public class ValkyrieObstacleCourseEveryBuildTest extends DRCObstacleCourseEvery
    {
       super.testSimpleFlatGroundScript();
    }
-   
+
+   @Tag("humanoid-rough-terrain")
    @Override
    @Test
    public void testWalkingUpToRampWithLongSteps() throws SimulationExceededMaximumTimeException

@@ -142,4 +142,12 @@ public class ValkyriePushRecoveryStandingTest extends AvatarPushRecoveryStanding
    {
       super.testRecoveryForwardWhileInFlamingoStance();
    }
+
+   @Tag("humanoid-push-recovery")
+   @Override
+   @Test
+   public void testRecoverySidewaysWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
+   {
+      super.testRecoverySidewaysWhileInFlamingoStance();
+   }
 }
