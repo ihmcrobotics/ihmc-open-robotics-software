@@ -319,43 +319,6 @@ public class SwingTrajectoryCalculator
       return zDifference > swingTrajectoryParameters.getMinHeightDifferenceForStepUpOrDown();
    }
 
-   private void modifyFinalOrientationForTouchdown(FrameQuaternion finalOrientationToPack)
-   {
-      finalPosition.changeFrame(oppositeSoleZUpFrame);
-      stanceFootPosition.changeFrame(oppositeSoleZUpFrame);
-      double stepHeight = finalPosition.getZ() - stanceFootPosition.getZ();
-      double initialFootstepPitch = finalOrientationToPack.getPitch();
-
-      double footstepPitchModification;
-      if (MathTools.intervalContains(stepHeight,
-                                     swingTrajectoryParameters.getStepDownHeightForToeTouchdown(),
-                                     swingTrajectoryParameters.getMaximumHeightForHeelTouchdown())
-            && swingTrajectoryParameters.doHeelTouchdownIfPossible())
-      { // not stepping down too far, and not stepping up too far, so do heel strike
-         double stepLength = finalPosition.getX() - stanceFootPosition.getX();
-         double heelTouchdownAngle = MathTools.clamp(-stepLength * swingTrajectoryParameters.getHeelTouchdownLengthRatio(),
-                                                     -swingTrajectoryParameters.getHeelTouchdownAngle());
-         // use the footstep pitch if its greater than the heel strike angle
-         footstepPitchModification = Math.max(initialFootstepPitch, heelTouchdownAngle);
-         // decrease the foot pitch modification if next step pitches down
-         footstepPitchModification = Math.min(footstepPitchModification, heelTouchdownAngle + initialFootstepPitch);
-         footstepPitchModification -= initialFootstepPitch;
-      }
-      else if (stepHeight < swingTrajectoryParameters.getStepDownHeightForToeTouchdown() && swingTrajectoryParameters.doToeTouchdownIfPossible())
-      { // stepping down and do toe touchdown
-         double toeTouchdownAngle = MathTools.clamp(-swingTrajectoryParameters.getToeTouchdownDepthRatio()
-               * (stepHeight - swingTrajectoryParameters.getStepDownHeightForToeTouchdown()), swingTrajectoryParameters.getToeTouchdownAngle());
-         footstepPitchModification = Math.max(toeTouchdownAngle, initialFootstepPitch);
-         footstepPitchModification -= initialFootstepPitch;
-      }
-      else
-      {
-         footstepPitchModification = 0.0;
-      }
-
-      finalOrientationToPack.appendPitchRotation(footstepPitchModification);
-   }
-
    private void setWaypointsFromStepPosition(Footstep footstep)
    {
       swingHeight.set(footstep.getSwingHeight());
@@ -416,7 +379,6 @@ public class SwingTrajectoryCalculator
       // append footstep pose if not provided in the waypoints
       if (appendFootstepPose)
       {
-         modifyFinalOrientationForTouchdown(finalOrientation);
          swingTrajectory.appendPositionWaypoint(swingDuration.getDoubleValue(), finalPosition, finalLinearVelocity);
          swingTrajectory.appendOrientationWaypoint(swingDuration.getDoubleValue(), finalOrientation, finalAngularVelocity);
       }
@@ -454,7 +416,6 @@ public class SwingTrajectoryCalculator
          swingTrajectory.appendOrientationWaypoint(0.5 * swingDuration.getDoubleValue(), tmpOrientation, tmpVector);
       }
 
-      modifyFinalOrientationForTouchdown(finalOrientation);
       swingTrajectoryOptimizer.getFinalVelocity(finalLinearVelocity);
       swingTrajectory.appendPositionWaypoint(swingDuration.getDoubleValue(), finalPosition, finalLinearVelocity);
       swingTrajectory.appendOrientationWaypoint(swingDuration.getDoubleValue(), finalOrientation, finalAngularVelocity);
