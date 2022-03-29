@@ -33,6 +33,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -291,6 +292,7 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
       ((YoBoolean) drcSimulationTestHelper.getYoVariable("controllerSwingSpeedUpEnabled")).set(true);
       ((YoBoolean) drcSimulationTestHelper.getYoVariable("leftFootSwingIsSpeedUpEnabled")).set(true);
       ((YoBoolean) drcSimulationTestHelper.getYoVariable("rightFootSwingIsSpeedUpEnabled")).set(true);
+      ((YoDouble) drcSimulationTestHelper.getYoVariable("icpDistanceFromFootPolygonThreshold")).set(0.15);
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       pushRobotController = new PushRobotController(drcSimulationTestHelper.getRobot(), fullRobotModel);
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
