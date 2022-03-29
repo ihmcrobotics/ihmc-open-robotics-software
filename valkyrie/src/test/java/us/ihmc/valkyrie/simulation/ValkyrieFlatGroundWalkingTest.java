@@ -1,5 +1,6 @@
 package us.ihmc.valkyrie.simulation;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.DRCFlatGroundWalkingTest;
@@ -21,6 +22,7 @@ public class ValkyrieFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
       return true;
    }
 
+   @Tag("fast")
    @Override
 	@Test
    public void testFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
@@ -29,6 +31,7 @@ public class ValkyrieFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
       super.testFlatGroundWalking();
    }
 
+   @Tag("fast")
    @Override
    @Test
    public void testReset() throws SimulationExceededMaximumTimeException, ControllerFailureException
