@@ -134,7 +134,7 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
       testPush(forceDirection, pushChangeInVelocity, 0.2, swingStartConditions.get(side), swingTime, 4);
 
       // apply the push at late swing
-      testPush(forceDirection, 0.6 * pushChangeInVelocity, 0.7, swingStartConditions.get(side), swingTime, 4);
+      testPush(forceDirection, 0.6 * pushChangeInVelocity, 0.65, swingStartConditions.get(side), swingTime, 4);
    }
 
    @Test
