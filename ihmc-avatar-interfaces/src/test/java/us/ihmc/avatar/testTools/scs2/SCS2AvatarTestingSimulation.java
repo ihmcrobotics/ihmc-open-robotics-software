@@ -4,9 +4,11 @@ import static us.ihmc.robotics.Assert.assertTrue;
 import static us.ihmc.robotics.Assert.fail;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -20,10 +22,13 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -240,6 +245,46 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    {
       IHMCROS2Publisher ihmcros2Publisher = defaultControllerPublishers.get(message.getClass());
       ihmcros2Publisher.publish(message);
+   }
+
+
+   //   private ScriptedFootstepGenerator scriptedFootstepGenerator;
+   //
+   //   public ScriptedFootstepGenerator getScriptedFootstepGenerator()
+   //   {
+   //      if (scriptedFootstepGenerator == null)
+   //         scriptedFootstepGenerator = new ScriptedFootstepGenerator(avatarSimulation.getRobotModel().createFullRobotModel());
+   //      return scriptedFootstepGenerator;
+   //   }
+
+   private ConcurrentLinkedQueue<Command<?, ?>> controllerCommands;
+
+   public ConcurrentLinkedQueue<Command<?, ?>> getQueuedControllerCommands()
+   {
+      if (controllerCommands == null)
+      {
+         controllerCommands = new ConcurrentLinkedQueue<>();
+         getHighLevelHumanoidControllerFactory().createQueuedControllerCommandGenerator(controllerCommands);
+      }
+
+      return controllerCommands;
+   }
+
+   private ScriptBasedControllerCommandGenerator scriptBasedControllerCommandGenerator;
+
+   public ScriptBasedControllerCommandGenerator getScriptBasedControllerCommandGenerator()
+   {
+      if (scriptBasedControllerCommandGenerator == null)
+      {
+         FullHumanoidRobotModel fullRobotModel = getHighLevelHumanoidControllerFactory().getHighLevelHumanoidControllerToolbox().getFullRobotModel();
+         scriptBasedControllerCommandGenerator = new ScriptBasedControllerCommandGenerator(getQueuedControllerCommands(), fullRobotModel);
+      }
+      return scriptBasedControllerCommandGenerator;
+   }
+
+   public void loadScriptFile(InputStream scriptInputStream, ReferenceFrame referenceFrame)
+   {
+      getScriptBasedControllerCommandGenerator().loadScriptFile(scriptInputStream, referenceFrame);
    }
 
    public ROS2Node getROS2Node()

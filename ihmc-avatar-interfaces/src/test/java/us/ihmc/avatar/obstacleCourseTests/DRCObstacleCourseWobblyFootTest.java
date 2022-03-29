@@ -268,7 +268,7 @@ public abstract class DRCObstacleCourseWobblyFootTest implements MultiRobotTestI
          }
       };
 
-      RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.RIGHT, footstepLocationsAndOrientations.length);
+      RobotSide[] robotSides = ScriptedFootstepGenerator.createRobotSidesStartingFrom(RobotSide.RIGHT, footstepLocationsAndOrientations.length);
 
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
    }
@@ -349,7 +349,7 @@ public abstract class DRCObstacleCourseWobblyFootTest implements MultiRobotTestI
          }
       };
 
-      RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.RIGHT, footstepLocationsAndOrientations.length);
+      RobotSide[] robotSides = ScriptedFootstepGenerator.createRobotSidesStartingFrom(RobotSide.RIGHT, footstepLocationsAndOrientations.length);
 
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
    }

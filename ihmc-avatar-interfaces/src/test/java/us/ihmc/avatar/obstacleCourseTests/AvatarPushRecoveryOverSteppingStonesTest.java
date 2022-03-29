@@ -16,6 +16,7 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.thread.ThreadTools;
@@ -206,7 +207,7 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       orientations.add(new Quaternion(0.0, 0.0, 1.0, 0.0));
       orientations.add(new Quaternion(0.0, 0.0, 1.0, 0.0));
 
-      RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.RIGHT, locations.size());
+      RobotSide[] robotSides = ScriptedFootstepGenerator.createRobotSidesStartingFrom(RobotSide.RIGHT, locations.size());
       for (int i = 0; i < locations.size(); i++)
       {
          FramePoint3D placeToStep = new FramePoint3D(ReferenceFrame.getWorldFrame(), locations.get(i));

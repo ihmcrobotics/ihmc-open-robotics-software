@@ -121,7 +121,7 @@ public abstract class DRCObstacleCourseSteppingStonesTest implements MultiRobotT
          {{-10.20677294790819, -0.6741336761434962, 0.3829201197142793}, {0.004772284224629501, 0.005592011887113724, 0.9999639290557834, 0.004253856327364576}}
          };
       
-      RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.RIGHT, footstepLocationsAndOrientations.length);
+      RobotSide[] robotSides = ScriptedFootstepGenerator.createRobotSidesStartingFrom(RobotSide.RIGHT, footstepLocationsAndOrientations.length);
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
    }
 

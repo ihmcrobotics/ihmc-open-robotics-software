@@ -935,7 +935,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       double[][][] footstepLocationsAndOrientations = new double[][][] {{{0.4, 0.10, 0.10}, {0.4, 0.0, 0.0, 0.8}},
             {{0.48, -0.10329823409587219, 0.08400000000000005}, {-1.705361817083927E-23, 6.776242118837171E-21, 0.0025166698394258787, 0.9999968331814453}}};
 
-      RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.LEFT, footstepLocationsAndOrientations.length);
+      RobotSide[] robotSides = ScriptedFootstepGenerator.createRobotSidesStartingFrom(RobotSide.LEFT, footstepLocationsAndOrientations.length);
 
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
    }
@@ -974,7 +974,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
             {{3.2610268900368817, -0.08254601644719128, 0.08398952447640476},
                   {3.49577202412201E-21, 2.923107094657073E-20, 0.0025166698394258787, 0.9999968331814453}}};
 
-      RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.RIGHT, footstepLocationsAndOrientations.length);
+      RobotSide[] robotSides = ScriptedFootstepGenerator.createRobotSidesStartingFrom(RobotSide.RIGHT, footstepLocationsAndOrientations.length);
 
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
    }
@@ -994,7 +994,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
             {{3.0729346702590505, -0.0816428320664241, 0.0812390388356},
                   {-8.243740658642556E-5, -0.005993134849034999, 0.003301792738040525, 0.999976586577641}}};
 
-      RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.LEFT, footstepLocationsAndOrientations.length);
+      RobotSide[] robotSides = ScriptedFootstepGenerator.createRobotSidesStartingFrom(RobotSide.LEFT, footstepLocationsAndOrientations.length);
 
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
    }
@@ -1037,7 +1037,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
             {{-0.0496373406094997, -0.06666317759167362, 0.08574185062507425},
                   {-7.826318574113734E-11, 1.8865011916447275E-10, -0.5937694705296589, 0.8046352067035897}}};
 
-      RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.RIGHT, footstepLocationsAndOrientations.length);
+      RobotSide[] robotSides = ScriptedFootstepGenerator.createRobotSidesStartingFrom(RobotSide.RIGHT, footstepLocationsAndOrientations.length);
 
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
    }

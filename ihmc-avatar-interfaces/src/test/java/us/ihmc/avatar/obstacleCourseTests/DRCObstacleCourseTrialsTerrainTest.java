@@ -326,7 +326,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
     * 0.9265857268991324} }, };
     *
     * RobotSide[] robotSides =
-    * drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.LEFT,
+    * DRCSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.LEFT,
     * footstepLocationsAndOrientations.length);
     *
     * return
@@ -400,7 +400,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
             {3.128623440850548, 3.133453453117145, 0.20285914961446738}, {0.12598064593469932, -0.06710112170905909, -0.35316275861517443, 0.9246093133008028}
          }
       };
-      RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.LEFT, footstepLocationsAndOrientations.length);
+      RobotSide[] robotSides = ScriptedFootstepGenerator.createRobotSidesStartingFrom(RobotSide.LEFT, footstepLocationsAndOrientations.length);
 
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
    }
@@ -425,7 +425,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
             {3.2811041904535196, 3.3537632182460775, 0.22458026669614373}, {-0.11259311979747, 0.025105614756717354, -0.36036496334456175, 0.9256509010829258}
          }
       };
-      RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.RIGHT, footstepLocationsAndOrientations.length);
+      RobotSide[] robotSides = ScriptedFootstepGenerator.createRobotSidesStartingFrom(RobotSide.RIGHT, footstepLocationsAndOrientations.length);
 
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
    }

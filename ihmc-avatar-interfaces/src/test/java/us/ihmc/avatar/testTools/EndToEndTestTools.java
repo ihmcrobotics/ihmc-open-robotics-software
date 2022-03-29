@@ -31,6 +31,7 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -47,6 +48,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryExecutionStatus;
+import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
@@ -742,6 +744,27 @@ public class EndToEndTestTools
       }
 
       return message;
+   }
+
+   public static FootstepDataListMessage generateFootstepsFromPose3Ds(RobotSide initialStepSide, Pose3D[] footstepPoses)
+   {
+      return generateFootstepsFromPose3Ds(initialStepSide, footstepPoses, 0, 0);
+   }
+
+   public static FootstepDataListMessage generateFootstepsFromPose3Ds(RobotSide initialStepSide, Pose3D[] footstepPoses, double swingTime, double transferTime)
+   {
+      FootstepDataListMessage footstepDataList = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
+      RobotSide side = initialStepSide;
+
+      Object<FootstepDataMessage> list = footstepDataList.getFootstepDataList();
+
+      for (int i = 0; i < footstepPoses.length; i++)
+      {
+         list.add().set(HumanoidMessageTools.createFootstepDataMessage(side, footstepPoses[i]));
+         side = side.getOppositeSide();
+      }
+
+      return footstepDataList;
    }
 
    public static void writeJointStatesMatlab(SimulationConstructionSet scs, File destination)
