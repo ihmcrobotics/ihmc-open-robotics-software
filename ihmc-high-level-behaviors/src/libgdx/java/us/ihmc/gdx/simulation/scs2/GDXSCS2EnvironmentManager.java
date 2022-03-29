@@ -113,7 +113,7 @@ public class GDXSCS2EnvironmentManager
          avatarSimulationFactory.setSimulationDataRecordTickPeriod(recordFrequency);
          avatarSimulationFactory.setCreateYoVariableServer(true);
          avatarSimulationFactory.setUseBulletPhysicsEngine(true);
-         avatarSimulationFactory.setUseDescriptionCollisions(true);
+         avatarSimulationFactory.setUseRobotDefinitionCollisions(true);
          avatarSimulationFactory.setShowGUI(false);
 
          avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
