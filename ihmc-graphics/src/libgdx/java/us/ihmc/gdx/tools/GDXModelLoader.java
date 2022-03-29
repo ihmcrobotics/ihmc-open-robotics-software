@@ -54,6 +54,17 @@ public class GDXModelLoader
             LogTools.debug("Loading {}", modelFileName);
             try
             {
+               if (!modelFileName.endsWith(".g3dj"))
+               {
+                  String modelFileNameWithoutExtension = modelFileName.substring(0, modelFileName.lastIndexOf("."));
+                  FileHandle potentialFileHandle = Gdx.files.internal(modelFileNameWithoutExtension + ".g3dj");
+                  if (potentialFileHandle.exists())
+                  {
+                     LogTools.debug("Found G3DJ file as an alternative for {}", modelFileName);
+                     modelFileName = modelFileNameWithoutExtension + ".g3dj";
+                  }
+               }
+
                if (modelFileName.endsWith(".g3dj"))
                {
                   FileHandle fileHandle = Gdx.files.internal(modelFileName);

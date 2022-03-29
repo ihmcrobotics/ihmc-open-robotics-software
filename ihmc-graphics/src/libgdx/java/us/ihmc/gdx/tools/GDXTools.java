@@ -3,6 +3,7 @@ package us.ihmc.gdx.tools;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
@@ -364,6 +365,14 @@ public class GDXTools
       gdxColor.a = (float) colorDefinition.getAlpha();
    }
 
+   public static void toGDX(Vector3 bulletColor, Color gdxColor)
+   {
+      gdxColor.r = bulletColor.x;
+      gdxColor.g = bulletColor.y;
+      gdxColor.b = bulletColor.z;
+      gdxColor.a = 1.0f;
+   }
+
    public static Color toGDX(double red, double green, double blue, double alpha)
    {
       return new Color((float) red, (float) green, (float) blue, (float) alpha);
@@ -377,19 +386,40 @@ public class GDXTools
       gdxColor.a = 1.0f - (float) appearanceDefinition.getTransparency();
    }
 
-   public static void setTransparency(ModelInstance modelInstance, float transparency)
+   public static void setTransparency(ModelInstance modelInstance, float opacity)
    {
-      modelInstance.materials.get(0).set(new BlendingAttribute(true, transparency));
+      for (Material material : modelInstance.materials)
+      {
+         setOpacity(material, opacity);
+      }
    }
 
-   public static void setTransparency(Model model, float transparency)
+   public static void setTransparency(Model model, float opacity)
    {
-      model.materials.get(0).set(new BlendingAttribute(true, transparency));
+      for (Material material : model.materials)
+      {
+         setOpacity(material, opacity);
+      }
+   }
+
+   public static void setOpacity(Material material, float opacity)
+   {
+      if (opacity < 1.0f)
+      {
+         material.set(new BlendingAttribute(true, opacity));
+      }
+      else
+      {
+         material.remove(BlendingAttribute.Type);
+      }
    }
 
    public static void setDiffuseColor(ModelInstance modelInstance, Color color)
    {
-      modelInstance.materials.get(0).set(ColorAttribute.createDiffuse(color));
+      for (Material material : modelInstance.materials)
+      {
+         material.set(ColorAttribute.createDiffuse(color));
+      }
    }
 
    public static void printShaderLog(String shaderPath, ShaderProgram shaderProgram)

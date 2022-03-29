@@ -1,5 +1,6 @@
 package us.ihmc.perception;
 
+import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -44,5 +45,11 @@ public class BytedecoOpenCVTools
    public static void setRGBA8888ImageAlpha(Mat image, int alpha)
    {
       image.reshape(1, image.rows() * image.cols()).col(3).setTo(new Mat(new byte[] {(byte) alpha}));
+   }
+
+   public static void convertABGRToRGBA(Mat srcABGR, Mat dstRGBA)
+   {
+      IntPointer fromABGRToRGBA = new IntPointer(0, 3, 1, 2, 2, 1, 3, 0);
+      opencv_core.mixChannels(srcABGR, 1, dstRGBA, 1, fromABGRToRGBA, 4);
    }
 }

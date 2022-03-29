@@ -80,9 +80,12 @@ public class FullHumanoidRobotModelWrapper extends FullRobotModelWrapper impleme
          RigidBodyTransform soleFrameTransform = jointNameMap.getSoleToParentFrameTransform(robotSide);
          if (soleFrameTransform != null)
          {
+            RigidBodyBasics foot = feet.get(robotSide);
+            if (foot == null)
+               continue;
             soleFrames.put(robotSide,
                            new FixedMovingReferenceFrame(robotSide.getCamelCaseName() + "Sole",
-                                                         feet.get(robotSide).getParentJoint().getFrameAfterJoint(),
+                                                         foot.getParentJoint().getFrameAfterJoint(),
                                                          soleFrameTransform));
          }
 

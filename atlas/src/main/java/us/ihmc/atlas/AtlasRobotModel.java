@@ -30,6 +30,7 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.factory.RobotDefinitionTools;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
+import us.ihmc.avatar.kinematicsSimulation.SimulatedHandKinematicController;
 import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.avatar.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.avatar.reachabilityMap.footstep.StepReachabilityIOHelper;
@@ -63,6 +64,7 @@ import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotiq.model.RobotiqHandModel;
+import us.ihmc.robotiq.simulatedHand.SimulatedRobotiqHandKinematicController;
 import us.ihmc.robotiq.simulatedHand.SimulatedRobotiqHandsControlThread;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -78,6 +80,7 @@ import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.UIParameters;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public class AtlasRobotModel implements DRCRobotModel
 {
@@ -114,6 +117,7 @@ public class AtlasRobotModel implements DRCRobotModel
    private RobotDefinition robotDefinition, robotDefinitionWithSDFCollision;
    private String simpleRobotName = "Atlas";
    private StepReachabilityData stepReachabilityData = null;
+   private boolean useSDFCollisions = false;
 
    public AtlasRobotModel(AtlasRobotVersion atlasVersion)
    {
@@ -216,7 +220,7 @@ public class AtlasRobotModel implements DRCRobotModel
 
    public RobotDefinition createRobotDefinition(MaterialDefinition materialDefinition)
    {
-      return createRobotDefinition(materialDefinition, true);
+      return createRobotDefinition(materialDefinition, !useSDFCollisions);
    }
 
    public RobotDefinition createRobotDefinition(MaterialDefinition materialDefinition, boolean removeCollisions)
@@ -521,6 +525,20 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
+   public SimulatedHandKinematicController createSimulatedHandKinematicController(FullHumanoidRobotModel fullHumanoidRobotModel,
+                                                                                  RealtimeROS2Node realtimeROS2Node,
+                                                                                  DoubleProvider controllerTime)
+   {
+      switch (selectedVersion.getHandModel())
+      {
+         case ROBOTIQ:
+            return new SimulatedRobotiqHandKinematicController(getSimpleRobotName(), fullHumanoidRobotModel, realtimeROS2Node, controllerTime);
+         default:
+            return null;
+      }
+   }
+
+   @Override
    public LogModelProvider getLogModelProvider()
    {
       return new DefaultLogModelProvider<>(SDFModelLoader.class,
@@ -655,5 +673,13 @@ public class AtlasRobotModel implements DRCRobotModel
    public RobotLowLevelMessenger newRobotLowLevelMessenger(ROS2NodeInterface ros2Node)
    {
       return new AtlasDirectRobotInterface(ros2Node, this);
+   }
+
+   public void setUseSDFCollisions(boolean useSDFCollisions)
+   {
+      if (robotDefinition != null)
+         throw new RuntimeException("Must set before RobotDefinition is created!");
+
+      this.useSDFCollisions = useSDFCollisions;
    }
 }

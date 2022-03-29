@@ -7,7 +7,7 @@ import com.badlogic.gdx.math.Vector3;
 import org.lwjgl.assimp.AIMesh;
 import org.lwjgl.assimp.AINode;
 import org.lwjgl.system.MemoryUtil;
-import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.matrix.LinearTransform3D;
 
 import java.util.ArrayList;
 
@@ -37,18 +37,17 @@ public class GDXAssimpNodeLoader
       modelNode.translation.y = assimpNode.mTransformation().b4();
       modelNode.translation.z = assimpNode.mTransformation().c4();
 
-      RotationMatrix rotationMatrix = new RotationMatrix();
-      rotationMatrix.set(assimpNode.mTransformation().a1(),
-                         assimpNode.mTransformation().a2(),
-                         assimpNode.mTransformation().a3(),
-                         assimpNode.mTransformation().b1(),
-                         assimpNode.mTransformation().b2(),
-                         assimpNode.mTransformation().b3(),
-                         assimpNode.mTransformation().c1(),
-                         assimpNode.mTransformation().c2(),
-                         assimpNode.mTransformation().c3());
-      us.ihmc.euclid.tuple4D.Quaternion euclidQuaternion = new us.ihmc.euclid.tuple4D.Quaternion();
-      rotationMatrix.get(euclidQuaternion);
+      LinearTransform3D linearTransform = new LinearTransform3D(assimpNode.mTransformation().a1(),
+                                                                assimpNode.mTransformation().a2(),
+                                                                assimpNode.mTransformation().a3(),
+                                                                assimpNode.mTransformation().b1(),
+                                                                assimpNode.mTransformation().b2(),
+                                                                assimpNode.mTransformation().b3(),
+                                                                assimpNode.mTransformation().c1(),
+                                                                assimpNode.mTransformation().c2(),
+                                                                assimpNode.mTransformation().c3());
+
+      us.ihmc.euclid.tuple4D.Quaternion euclidQuaternion = new us.ihmc.euclid.tuple4D.Quaternion(linearTransform.getAsQuaternion());
       modelNode.rotation = new Quaternion();
       modelNode.rotation.x = euclidQuaternion.getX32();
       modelNode.rotation.y = euclidQuaternion.getY32();
