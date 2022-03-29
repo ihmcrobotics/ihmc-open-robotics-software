@@ -491,13 +491,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
-   public boolean useCenterOfMassVelocityFromEstimator()
-   {
-      return false;
-   }
-
-   /** {@inheritDoc} */
-   @Override
    public boolean usePelvisHeightControllerOnly()
    {
       return false;
