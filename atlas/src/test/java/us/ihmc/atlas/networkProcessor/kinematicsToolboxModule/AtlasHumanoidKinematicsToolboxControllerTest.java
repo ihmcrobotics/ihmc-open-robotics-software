@@ -49,6 +49,12 @@ public class AtlasHumanoidKinematicsToolboxControllerTest extends HumanoidKinema
    }
 
    @Override
+   protected MultiContactConstraintData createMultiContactConstraintData()
+   {
+      return null;
+   }
+
+   @Override
    public DRCRobotModel getRobotModel()
    {
       return robotModel;

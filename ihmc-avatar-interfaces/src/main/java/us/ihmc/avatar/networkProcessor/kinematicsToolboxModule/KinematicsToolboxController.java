@@ -1,17 +1,5 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD;
-import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL;
-import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_RUNNING;
-
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-
 import controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
@@ -20,24 +8,15 @@ import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
-import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataHolderReadOnly;
-import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemplate;
-import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
-import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
-import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand.JointVelocityLimitMode;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.LinearMomentumConvexConstraint2DCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.FBPoint3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.FBQuaternion3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.Type;
@@ -53,7 +32,7 @@ import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.collision.EuclidFrameShape3DCollisionResult;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -66,13 +45,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxContactStateCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxInputCollectionCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxOneDoFJointCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxPrivilegedConfigurationCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.*;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -97,6 +70,12 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import java.awt.*;
+import java.util.List;
+import java.util.*;
+
+import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.*;
 
 /**
  * {@code KinematicsToolboxController} is used as a whole-body inverse kinematics solver.
@@ -164,7 +143,7 @@ public class KinematicsToolboxController extends ToolboxController
     * gathering the entire set of desired inputs and formulate the adequate optimization problem to be
     * solved for every control tick. The output of the controller core provides every tick a new robot
     * joint configurations and velocities that are one step closer to the desireds. The output is used
-    * to update the state of the {@link #desiredFullRobotModel} such that it progresses towards the
+    * to update the state of the {@link #oneDoFJoints} such that it progresses towards the
     * desired user inputs over time.
     */
    private final WholeBodyControllerCore controllerCore;
@@ -177,7 +156,7 @@ public class KinematicsToolboxController extends ToolboxController
 
    /**
     * This is the output of the {@code KinematicsToolboxController}. It is filled with the robot
-    * configuration obtained from {@link #desiredFullRobotModel} and also with the solution quality
+    * configuration obtained from {@link #oneDoFJoints} and also with the solution quality
     * which can be used to quickly see if the solution is viable. It is sent back to the caller only.
     */
    private final KinematicsToolboxOutputStatus inverseKinematicsSolution;
@@ -213,7 +192,7 @@ public class KinematicsToolboxController extends ToolboxController
     */
    private final YoDouble privilegedMaxVelocity = new YoDouble("privilegedMaxVelocity", registry);
    /**
-    * Defines a robot configuration the this IK start from and also defines the privileged joint
+    * Defines a robot configuration that this IK start from and also defines the privileged joint
     * configuration.
     */
    protected TObjectDoubleHashMap<OneDoFJointBasics> initialRobotConfigurationMap = null;
@@ -241,10 +220,16 @@ public class KinematicsToolboxController extends ToolboxController
     * {@code SCSVisualizer}. They are only visible when the end-effector is being actively controlled.
     */
    private final Map<RigidBodyBasics, YoGraphicCoordinateSystem> currentCoodinateSystems = new HashMap<>();
+   /**
+    * Center of Mass data used for visualization.
+    * They are only updated and visible when the center of mass either has a setpoint or is constrained.
+    */
+   protected final YoFramePoint3D yoDesiredCenterOfMass, yoCurrentCenterOfMass;
+   protected final YoGraphicPosition desiredCenterOfMassGraphic, currentCenterOfMassGraphic;
 
    /**
     * Reference to the most recent robot configuration received from the controller. It is used for
-    * initializing the {@link #desiredFullRobotModel} before starting the optimization process.
+    * initializing the {@link #oneDoFJoints} before starting the optimization process.
     */
    private final ConcurrentCopier<RobotConfigurationData> concurrentRobotConfigurationDataCopier = new ConcurrentCopier<>(RobotConfigurationData::new);
    protected final RobotConfigurationData robotConfigurationDataInternal = new RobotConfigurationData();
@@ -259,7 +244,7 @@ public class KinematicsToolboxController extends ToolboxController
    /** Intermediate variable for garbage-free operation. */
    private final List<FramePoint3DReadOnly> contactPointLocations = new ArrayList<>();
    /** The active support polygon updated from the most recent robot configuration. */
-   private final ConvexPolygon2D supportPolygon = new ConvexPolygon2D();
+   protected final ConvexPolygon2D supportPolygon = new ConvexPolygon2D();
    /**
     * The active support polygon shrunk by the distance {@code centerOfMassSafeMargin}. This represents
     * the convex horizontal region that the center of mass is constrained to.
@@ -268,8 +253,8 @@ public class KinematicsToolboxController extends ToolboxController
    /** Helper used for shrink the support polygon. */
    private final ConvexPolygonScaler convexPolygonScaler = new ConvexPolygonScaler();
    private final FrameConvexPolygon2D newSupportPolygon = new FrameConvexPolygon2D();
-   private final ConvexPolygon2D shrunkConvexPolygon = new ConvexPolygon2D();
-   private final FramePoint2D centerOfMass = new FramePoint2D();
+   protected final ConvexPolygon2D shrunkSupportPolygon = new ConvexPolygon2D();
+   private final FramePoint3D centerOfMass = new FramePoint3D();
    /** Distance to shrink the support polygon for safety purpose. */
    private final YoDouble centerOfMassSafeMargin = new YoDouble("centerOfMassSafeMargin",
                                                                 "Describes the minimum distance away from the support polygon's edges.",
@@ -396,6 +381,13 @@ public class KinematicsToolboxController extends ToolboxController
       privilegedConfigurationGain.set(DEFAULT_PRIVILEGED_CONFIGURATION_GAIN);
       privilegedMaxVelocity.set(Double.POSITIVE_INFINITY);
 
+      yoDesiredCenterOfMass = new YoFramePoint3D("desiredCenterOfMass", ReferenceFrame.getWorldFrame(), registry);
+      yoCurrentCenterOfMass = new YoFramePoint3D("currentCenterOfMass", ReferenceFrame.getWorldFrame(), registry);
+      desiredCenterOfMassGraphic = new YoGraphicPosition("desiredCoMGraphic", yoDesiredCenterOfMass, 0.02, YoAppearance.Red());
+      currentCenterOfMassGraphic = new YoGraphicPosition("currentCoMGraphic", yoCurrentCenterOfMass, 0.02, YoAppearance.Black());
+      yoGraphicsListRegistry.registerYoGraphic("CenterOfMass", desiredCenterOfMassGraphic);
+      yoGraphicsListRegistry.registerYoGraphic("CenterOfMass", currentCenterOfMassGraphic);
+
       publishSolutionPeriod.set(0.01);
       preserveUserCommandHistory.set(true);
 
@@ -455,7 +447,7 @@ public class KinematicsToolboxController extends ToolboxController
       }
 
       this.initialRobotConfigurationMap = new TObjectDoubleHashMap<>();
-      initialRobotConfigurationMap.entrySet().forEach(entry -> this.initialRobotConfigurationMap.put(entry.getKey(), entry.getValue()));
+      initialRobotConfigurationMap.forEach((key, value) -> this.initialRobotConfigurationMap.put(key, value));
    }
 
    /**
@@ -561,7 +553,7 @@ public class KinematicsToolboxController extends ToolboxController
     * Creating the controller core which is the main piece of this solver.
     * 
     * @param controllableRigidBodies
-    * @return the controller core that will run for the desired robot {@link #desiredFullRobotModel}.
+    * @return the controller core that will run for the desired robot model in {@link #oneDoFJoints}.
     */
    private WholeBodyControllerCore createControllerCore(Collection<? extends RigidBodyBasics> controllableRigidBodies)
    {
@@ -739,6 +731,14 @@ public class KinematicsToolboxController extends ToolboxController
       // Calculating the solution quality based on sum of all the active feedback controllers' output velocity.
       solutionQuality.set(solutionQualityCalculator.calculateSolutionQuality(feedbackControllerDataHolder, totalRobotMass, 1.0 / GLOBAL_PROPORTIONAL_GAIN));
 
+      if (!isUserControllingCenterOfMass())
+      {
+         yoDesiredCenterOfMass.setToNaN();
+      }
+      yoCurrentCenterOfMass.set(centerOfMass);
+      desiredCenterOfMassGraphic.update();
+      currentCenterOfMassGraphic.update();
+
       // Updating the the robot state from the current solution, initializing the next control tick.
       KinematicsToolboxHelper.setRobotStateFromControllerCoreOutput(controllerCore.getControllerCoreOutput(), rootJoint, oneDoFJoints);
       updateVisualization();
@@ -881,6 +881,7 @@ public class KinematicsToolboxController extends ToolboxController
 
          KinematicsToolboxCenterOfMassCommand command = commandInputManager.pollNewestCommand(KinematicsToolboxCenterOfMassCommand.class);
          KinematicsToolboxHelper.consumeCenterOfMassCommand(command, spatialGains.getPositionGains(), userFBCommands.addCenterOfMassFeedbackControlCommand());
+         yoDesiredCenterOfMass.set(command.getDesiredPosition());
 
          if (preserveUserCommandHistory.getValue())
          {
@@ -1093,10 +1094,10 @@ public class KinematicsToolboxController extends ToolboxController
       if (!newSupportPolygon.epsilonEquals(supportPolygon, 5.0e-3))
       { // Update the polygon only if there is an actual update.
          supportPolygon.set(newSupportPolygon);
-         convexPolygonScaler.scaleConvexPolygon(supportPolygon, centerOfMassSafeMargin.getValue(), shrunkConvexPolygon);
+         convexPolygonScaler.scaleConvexPolygon(supportPolygon, centerOfMassSafeMargin.getValue(), shrunkSupportPolygon);
          shrunkSupportPolygonVertices.clear();
-         for (int i = 0; i < shrunkConvexPolygon.getNumberOfVertices(); i++)
-            shrunkSupportPolygonVertices.add().set(shrunkConvexPolygon.getVertex(i));
+         for (int i = 0; i < shrunkSupportPolygon.getNumberOfVertices(); i++)
+            shrunkSupportPolygonVertices.add().set(shrunkSupportPolygon.getVertex(i));
 
          for (int i = shrunkSupportPolygonVertices.size() - 1; i >= 0; i--)
          { // Filtering vertices that barely expand the polygon.
@@ -1118,7 +1119,7 @@ public class KinematicsToolboxController extends ToolboxController
       { // Only adding constraints that are close to be violated.
          Point2DReadOnly vertex = shrunkSupportPolygonVertices.get(i);
          Point2DReadOnly nextVertex = ListWrappingIndexTools.getNext(i, shrunkSupportPolygonVertices);
-         double signedDistanceToEdge = EuclidGeometryTools.signedDistanceFromPoint2DToLine2D(centerOfMass, vertex, nextVertex);
+         double signedDistanceToEdge = EuclidGeometryTools.signedDistanceFromPoint2DToLine2D(centerOfMass.getX(), centerOfMass.getY(), vertex, nextVertex);
 
          if (signedDistanceToEdge > -distanceThreshold)
          {
@@ -1126,8 +1127,8 @@ public class KinematicsToolboxController extends ToolboxController
             command.clear();
             Vector2D h0 = command.addLinearMomentumConstraintVertex();
             Vector2D h1 = command.addLinearMomentumConstraintVertex();
-            h0.sub(vertex, centerOfMass);
-            h1.sub(nextVertex, centerOfMass);
+            h0.set(vertex.getX() - centerOfMass.getX(), vertex.getY() - centerOfMass.getY());
+            h1.set(nextVertex.getX() - centerOfMass.getX(), nextVertex.getY() - centerOfMass.getY());
             h0.scale(robotMass / updateDT);
             h1.scale(robotMass / updateDT);
          }
@@ -1288,7 +1289,7 @@ public class KinematicsToolboxController extends ToolboxController
 
    /**
     * Creates a {@code PrivilegedConfigurationCommand} to update the privileged joint angles to match
-    * the current state of {@link #desiredFullRobotModel}.
+    * the current state of {@link #oneDoFJoints}.
     */
    private void snapPrivilegedConfigurationToCurrent()
    {
