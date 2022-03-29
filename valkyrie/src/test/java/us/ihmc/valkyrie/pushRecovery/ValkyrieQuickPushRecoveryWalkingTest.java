@@ -81,7 +81,7 @@ public class ValkyrieQuickPushRecoveryWalkingTest extends AvatarQuickPushRecover
    @Test
    public void testOutwardPushTransferToLeftState() throws SimulationExceededMaximumTimeException
    {
-      setPushChangeInVelocity(0.5);
+      setPushChangeInVelocity(0.4);
       super.testOutwardPushTransferToLeftState();
    }
 
@@ -90,7 +90,7 @@ public class ValkyrieQuickPushRecoveryWalkingTest extends AvatarQuickPushRecover
    @Test
    public void testBackwardPushInLeftSwingAtDifferentTimes() throws SimulationExceededMaximumTimeException
    {
-      setPushChangeInVelocity(0.7);
+      setPushChangeInVelocity(0.6);
       super.testBackwardPushInLeftSwingAtDifferentTimes();
    }
 
@@ -99,7 +99,7 @@ public class ValkyrieQuickPushRecoveryWalkingTest extends AvatarQuickPushRecover
    @Test
    public void testForwardPushInLeftSwingAtDifferentTimes() throws SimulationExceededMaximumTimeException
    {
-      setPushChangeInVelocity(0.7);
+      setPushChangeInVelocity(0.6);
       super.testForwardPushInLeftSwingAtDifferentTimes();
    }
 
