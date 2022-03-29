@@ -337,40 +337,6 @@ public abstract class WalkingControllerParameters
    }
 
    /**
-    * Ramps up the maximum loading of the normal force of the toe contact points over time, if returns
-    * true. If returns false, it simply immediately sets the normal force maximum to infinity.
-    *
-    * @return whether or not to ramp up.
-    */
-   public boolean rampUpAllowableToeLoadAfterContact()
-   {
-      return false;
-   }
-
-   /**
-    * Defines the duration spent ramping up the allowable normal toe contact force if
-    * {@link #rampUpAllowableToeLoadAfterContact()} is true.
-    *
-    * @return duration (s)
-    */
-   public double getToeLoadingDuration()
-   {
-      return 0.2;
-   }
-
-   /**
-    * The maximum normal force allowed in the toe if {@link #rampUpAllowableToeLoadAfterContact()} is
-    * true at the time returned by {@link #getToeLoadingDuration()}. After this time, the maximum
-    * normal force goes to infinity.
-    * 
-    * @return
-    */
-   public double getFullyLoadedToeForce()
-   {
-      return 1.0e3;
-   }
-
-   /**
     * This is the default transfer time used in the walking controller to shift the weight to the
     * initial stance foot when starting to execute a footstep plan.
     */
@@ -673,14 +639,6 @@ public abstract class WalkingControllerParameters
    }
 
    /**
-    * Returns the parameters in the dynamic reachability calculator.
-    */
-   public DynamicReachabilityParameters getDynamicReachabilityParameters()
-   {
-      return dynamicReachabilityParameters;
-   }
-
-   /**
     * Determines whether or not to attempt to directly control the height. If true, the height will be
     * controlled directly via a command to the controller core. This can be a linear momentum z command
     * or a feedback control command for the pelvis. If false, the height will be controlled inside the
@@ -773,6 +731,8 @@ public abstract class WalkingControllerParameters
     * Whether the height should be controlled with the rate of change of momentum or using a feedback
     * controller on the pelvis. Note that the height of the pelvis should be controlled to set this
     * flag to {@code false}, i.e. {@code controlPelvisHeightInsteadOfCoMHeight() == true}.
+    *
+    * Fixme does this do what we think it does?
     */
    public boolean controlHeightWithMomentum()
    {
