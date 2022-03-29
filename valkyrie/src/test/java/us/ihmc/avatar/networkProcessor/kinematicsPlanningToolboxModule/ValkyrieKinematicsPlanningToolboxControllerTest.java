@@ -2,6 +2,7 @@ package us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule;
 
 import java.io.IOException;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -33,30 +34,35 @@ public class ValkyrieKinematicsPlanningToolboxControllerTest extends AvatarKinem
       return ghostRobotModel;
    }
 
+   @Tag("humanoid-toolbox")
    @Test
    public void testDualHandTrajectory() throws Exception, UnreasonableAccelerationException
    {
       super.testDualHandTrajectory();
    }
 
+   @Tag("humanoid-toolbox")
    @Test
    public void testLinearInterpolatedTrajectory() throws Exception, UnreasonableAccelerationException
    {
       super.testLinearInterpolatedTrajectory();
    }
 
+   @Tag("humanoid-toolbox")
    @Test
    public void testReachToAPoint() throws Exception, UnreasonableAccelerationException
    {
       super.testReachToAPoint();
    }
 
+   @Tag("humanoid-toolbox")
    @Test
    public void testDifferentDistanceBetweenKeyFrames() throws Exception, UnreasonableAccelerationException
    {
       super.testDifferentDistanceBetweenKeyFrames();
    }
 
+   @Tag("humanoid-toolbox")
    @Test
    public void testLastKeyFrameBadPositionPlanning() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException, IOException
    {
