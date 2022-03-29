@@ -309,7 +309,6 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
       }
    }
 
-
    private void publishColorImageROS2()
    {
       if (!colorROS2Executor.isExecuting())
