@@ -392,25 +392,29 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       ImGui.sameLine();
       footstepGoal.renderPlaceGoalButton();
 
-      ImGui.text("Right hand:");
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Calibrate")))
+      for (RobotSide side : RobotSide.values)
       {
-         communicationHelper.publish(ROS2Tools::getHandConfigurationTopic,
-                                     HumanoidMessageTools.createHandDesiredConfigurationMessage(RobotSide.RIGHT, HandConfiguration.CALIBRATE));
+         ImGui.text(side.getPascalCaseName() + " hand:");
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Calibrate", side.getCamelCaseName())))
+         {
+            communicationHelper.publish(ROS2Tools::getHandConfigurationTopic,
+                                        HumanoidMessageTools.createHandDesiredConfigurationMessage(side, HandConfiguration.CALIBRATE));
+         }
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Open", side.getCamelCaseName())))
+         {
+            communicationHelper.publish(ROS2Tools::getHandConfigurationTopic,
+                                        HumanoidMessageTools.createHandDesiredConfigurationMessage(side, HandConfiguration.OPEN));
+         }
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Close", side.getCamelCaseName())))
+         {
+            communicationHelper.publish(ROS2Tools::getHandConfigurationTopic,
+                                        HumanoidMessageTools.createHandDesiredConfigurationMessage(side, HandConfiguration.CLOSE));
+         }
       }
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Open")))
-      {
-         communicationHelper.publish(ROS2Tools::getHandConfigurationTopic,
-                                     HumanoidMessageTools.createHandDesiredConfigurationMessage(RobotSide.RIGHT, HandConfiguration.OPEN));
-      }
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Close")))
-      {
-         communicationHelper.publish(ROS2Tools::getHandConfigurationTopic,
-                                     HumanoidMessageTools.createHandDesiredConfigurationMessage(RobotSide.RIGHT, HandConfiguration.CLOSE));
-      }
+
       ImGui.text("Lidar REA:");
       ImGui.sameLine();
       if (ImGui.button(labels.get("Clear")))
