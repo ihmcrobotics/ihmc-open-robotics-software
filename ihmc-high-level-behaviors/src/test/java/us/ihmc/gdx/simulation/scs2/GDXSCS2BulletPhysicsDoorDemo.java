@@ -6,6 +6,7 @@ import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.simulation.environment.object.objects.LabFloorDefinition;
 import us.ihmc.gdx.simulation.environment.object.objects.door.DoorDefinition;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.tools.UnitConversions;
 
 public class GDXSCS2BulletPhysicsDoorDemo
@@ -27,7 +28,8 @@ public class GDXSCS2BulletPhysicsDoorDemo
             DoorDefinition doorDefinition = new DoorDefinition();
             doorDefinition.getInitialSixDoFState().setConfiguration(new YawPitchRoll(0.1, 0.1, 0.1), new Point3D(0.0, 0.0, 0.5));
             doorDefinition.getInitialHingeState().setEffort(15.0);
-            scs2SimulationSession.addRobot(doorDefinition);
+            Robot doorRobot = scs2SimulationSession.addRobot(doorDefinition);
+            doorDefinition.applyPDController(doorRobot);
 
             scs2SimulationSession.addTerrainObject(new LabFloorDefinition());
 

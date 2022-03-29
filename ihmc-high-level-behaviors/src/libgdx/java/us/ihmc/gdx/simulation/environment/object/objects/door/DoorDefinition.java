@@ -10,6 +10,8 @@ import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.robot.SixDoFJointDefinition;
 import us.ihmc.scs2.definition.state.OneDoFJointState;
 import us.ihmc.scs2.definition.state.SixDoFJointState;
+import us.ihmc.scs2.simulation.robot.Robot;
+import us.ihmc.scs2.simulation.robot.multiBodySystem.SimRevoluteJoint;
 
 public class DoorDefinition extends RobotDefinition
 {
@@ -52,6 +54,21 @@ public class DoorDefinition extends RobotDefinition
       doorLeverJoint.setSuccessor(doorLeverHandleDefinition);
 
       setRootBodyDefinition(rootBodyDefinition);
+   }
+
+   public void applyPDController(Robot robot)
+   {
+      SimRevoluteJoint doorLeverJoint = (SimRevoluteJoint) robot.getJoint("doorLeverJoint");
+      robot.getControllerManager().addController(() ->
+      {
+         double p = 2.0;
+         double d = 1.0;
+
+         double errorQ = doorLeverJoint.getQ();
+         double errorQd = doorLeverJoint.getQd();
+
+         doorLeverJoint.setTau(-p * errorQ - d * errorQd);
+      });
    }
 
    public SixDoFJointState getInitialSixDoFState()

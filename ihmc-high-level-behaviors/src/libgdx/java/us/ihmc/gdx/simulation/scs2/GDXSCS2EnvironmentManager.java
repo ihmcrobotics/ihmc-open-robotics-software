@@ -163,10 +163,11 @@ public class GDXSCS2EnvironmentManager
       }
    }
 
-   public void addSecondaryRobot(RobotDefinition robotDefinition)
+   public Robot addSecondaryRobot(RobotDefinition robotDefinition)
    {
       Robot robot = new Robot(robotDefinition, SimulationSession.DEFAULT_INERTIAL_FRAME);
       secondaryRobots.add(robot);
+      return robot;
    }
 
    public GDXSCS2SimulationSession getSCS2SimulationSession()

@@ -23,6 +23,7 @@ import us.ihmc.scs2.sharedMemory.CropBufferRequest;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
 import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngine;
+import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.time.DurationCalculator;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -95,9 +96,9 @@ public class GDXSCS2SimulationSession
       });
    }
 
-   public void addRobot(RobotDefinition robotDefinition)
+   public Robot addRobot(RobotDefinition robotDefinition)
    {
-      simulationSession.addRobot(robotDefinition);
+      return simulationSession.addRobot(robotDefinition);
    }
 
    public void addTerrainObject(TerrainObjectDefinition terrainObjectDefinition)
