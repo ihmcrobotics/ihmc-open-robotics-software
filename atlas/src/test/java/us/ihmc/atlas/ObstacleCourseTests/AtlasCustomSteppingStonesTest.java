@@ -24,7 +24,7 @@ public class AtlasCustomSteppingStonesTest extends AvatarCustomSteppingStonesTes
         setNumberOfSteps(4);
         super.testTakingStep(testInfo, 0.24);
     }
-3
+
     @Tag("humanoid-obstacle-2")
     @Test
     public void testTakingBigStepUpAndStopping(TestInfo testInfo) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
