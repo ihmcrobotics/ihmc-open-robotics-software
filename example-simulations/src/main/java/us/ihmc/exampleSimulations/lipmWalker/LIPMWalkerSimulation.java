@@ -22,7 +22,7 @@ public class LIPMWalkerSimulation
       robot.setController(controller);
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
       scs.setSimulateNoFasterThanRealTime(true);
-//      scs.setCameraTracking(true, true, true, true);
+      scs.setCameraTracking(true, true, true, false);
 
       scs.startOnAThread();
    }

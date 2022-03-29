@@ -30,6 +30,8 @@ public class LIPMHoppingControllerBhavyansh implements RobotController
 
    private YoDouble t;
 
+   private final YoDouble kdFoot = new YoDouble("kdFoot", registry);
+
    private final YoDouble kpBody = new YoDouble("kpBody", registry);
    private final YoDouble kdBody = new YoDouble("kdBody", registry);
 
@@ -82,7 +84,9 @@ public class LIPMHoppingControllerBhavyansh implements RobotController
       SUPPORT, SWING, FLIGHT;
    }
 
-   private YoDouble timeOfLastFootSwitch = new YoDouble("timeOfLastFootSwitch", registry);
+   private YoDouble lastStanceTime = new YoDouble("lastStanceTime", registry);
+   private YoDouble timeOfLastHeelOff = new YoDouble("timeOfLastHeelOff", registry);
+   private YoDouble timeOfLastHeelOn = new YoDouble("timeOfLastHeelOn", registry);
    private YoBoolean swingTrajectoriesCalculated = new YoBoolean("footLocationCalculated", registry);
    private YoBoolean swingFootGroundContact = new YoBoolean("swingFootGroundContact", registry);
    private YoDouble desiredTopVelocity = new YoDouble("desiredTopVelocity", registry);
@@ -110,6 +114,8 @@ public class LIPMHoppingControllerBhavyansh implements RobotController
    {
       numberOfStepsTaken.set(0);
 
+      kdFoot.set(10.0);
+
       kpBody.set(200.0);
       kdBody.set(30.0);
 
@@ -130,10 +136,12 @@ public class LIPMHoppingControllerBhavyansh implements RobotController
       strideLength.set(0.5);
       swingTime.set(0.4);
 
-      timeOfLastFootSwitch.set(0.0);
+      lastStanceTime.set(0.3);
+      timeOfLastHeelOff.set(0.0);
+      timeOfLastHeelOn.set(0.0);
       swingTrajectoriesCalculated.set(false);
       swingFootGroundContact.set(false);
-      desiredTopVelocity.set(0.7);
+      desiredTopVelocity.set(1.0f);
       desiredEnergy.set(0.5 * desiredTopVelocity.getValue() * desiredTopVelocity.getValue());
 
       orbitalEnergy.set(0.5 * 0.7 * 0.7);
@@ -226,10 +234,10 @@ public class LIPMHoppingControllerBhavyansh implements RobotController
       computeOrbitalEnergy(side);
       comHeight.set(centerOfMassPosition.getZ());
 
-      if (centerOfMassVelocity.getZ() < -1.0 && footZForces.get(side).getValue() < 1.0f)
-      {
-         desiredKneeLength = 1.0f;
-      }
+//      if (centerOfMassVelocity.getZ() < -1.0 && footZForces.get(side).getValue() < 1.0f)
+//      {
+//         desiredKneeLength = 1.0f;
+//      }
 
       //      double feedForwardSupportKneeForce = g * mass * kneeLength / centerOfMassPosition.getZ();
       //      double feedBackKneeForce =
@@ -238,7 +246,7 @@ public class LIPMHoppingControllerBhavyansh implements RobotController
       double feedBackKneeForce = 4000 * (desiredKneeLength - kneeLength) + 20 * (0.0 - kneeVelocity);
       robot.setKneeForce(side, feedBackKneeForce);
 
-      robot.setHipTorque(side, -kpBody.getValue() * (0.0 - robot.getBodyPitchAngle()) + kdBody.getValue() * robot.getBodyPitchAngularVelocity());
+      robot.setHipTorque(side, -kpBody.getValue() * (0.0 - robot.getBodyPitchAngle()) + kdBody.getValue() * (robot.getBodyPitchAngularVelocity()));
 
       worldHipAngles.get(side).set(robot.getHipAngle(side) + robot.getBodyPitchAngle());
    }
@@ -263,9 +271,17 @@ public class LIPMHoppingControllerBhavyansh implements RobotController
       //         swingTrajectoriesCalculated.set(true);
       //      }
 
+      Point3DReadOnly centerOfMassPosition = robot.getCenterOfMassPosition();
+      Vector3DReadOnly centerOfMassVelocity = robot.getCenterOfMassVelocity();
+
+
+      double footXDesiredFromCoM = centerOfMassVelocity.getX() * lastStanceTime.getValue() / 2 + kdFoot.getValue() * (desiredTopVelocity.getValue() - centerOfMassVelocity.getX());
+//      double desiredHipAngle = - EuclidCoreTools.acos(footXDesiredFromCoM / 0.9f);
+      double desiredHipAngle =  (0.02 * kdFoot.getValue() * (desiredTopVelocity.getValue() / 2.0f - centerOfMassVelocity.getX()));
+
+
       double desiredKneeLength = desiredKneeLengths.get(side).getValue();
       double desiredKneeVelocity = 0.0;
-      double desiredHipAngle = -0.12;
       double desiredHipVelocity = 0.0;
 
 //      if (comXPositionFromFoot.getValue() > 0.0)
@@ -465,7 +481,7 @@ public class LIPMHoppingControllerBhavyansh implements RobotController
       @Override
       public boolean testCondition(double timeInCurrentState)
       {
-         double timeDiff = t.getValue() - timeOfLastFootSwitch.getValue();
+         double timeDiff = t.getValue() - timeOfLastHeelOff.getValue();
          boolean fs =
                footZForces.get(robotSide).getValue() < 5.0 && footZForces.get(robotSide).getValue() > 2.0 && timeDiff > 0.1; // Eliminates switch bouncing.
          //         LogTools.info("Switch: {} {} {}", fs, footZForces.get(robotSide).getValue(), timeDiff);
@@ -479,7 +495,8 @@ public class LIPMHoppingControllerBhavyansh implements RobotController
                lastStepLength.set(
                      groundContactPositions.get(groundContactPositions.size() - 1) - groundContactPositions.get(groundContactPositions.size() - 2));
 
-            timeOfLastFootSwitch.set(t.getValue());
+            timeOfLastHeelOff.set(t.getValue());
+            lastStanceTime.set(timeOfLastHeelOn.getValue() - timeOfLastHeelOff.getValue());
 
             desiredKneeLengths.get(robotSide.getOppositeSide()).set(0.9);
             desiredKneeLengths.get(robotSide).set(0.6);
@@ -500,7 +517,7 @@ public class LIPMHoppingControllerBhavyansh implements RobotController
       @Override
       public boolean testCondition(double timeInCurrentState)
       {
-         double timeDiff = t.getValue() - timeOfLastFootSwitch.getValue();
+         double timeDiff = t.getValue() - timeOfLastHeelOn.getValue();
          boolean fs = footZForces.get(robotSide).getValue() > 5.0 && timeDiff > 0.1; // Eliminates switch bouncing.
          //         LogTools.info("Switch: {} {} {}", fs, footZForces.get(robotSide).getValue(), timeDiff);
          if (fs)
@@ -513,7 +530,7 @@ public class LIPMHoppingControllerBhavyansh implements RobotController
                lastStepLength.set(
                      groundContactPositions.get(groundContactPositions.size() - 1) - groundContactPositions.get(groundContactPositions.size() - 2));
 
-            timeOfLastFootSwitch.set(t.getValue());
+            timeOfLastHeelOn.set(t.getValue());
          }
          return fs;
       }
@@ -531,12 +548,12 @@ public class LIPMHoppingControllerBhavyansh implements RobotController
       @Override
       public boolean testCondition(double timeInCurrentState)
       {
-         double timeDiff = t.getValue() - timeOfLastFootSwitch.getValue();
+         double timeDiff = t.getValue() - timeOfLastHeelOn.getValue();
          boolean fs = footZForces.get(robotSide.getOppositeSide()).getValue() > 5.0 && timeDiff > 0.1; // Eliminates switch bouncing.
-         if (fs)
-         {
-            timeOfLastFootSwitch.set(t.getValue());
-         }
+//         if (fs)
+//         {
+//            timeOfLastHeelOn.set(t.getValue());
+//         }
          return fs;
       }
    }
