@@ -45,6 +45,7 @@ public class AtlasPushRecoveryStandingTest extends AvatarPushRecoveryStandingTes
    @Test
    public void testLongBackwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
+      setMagnitude(100.0);
       super.testLongBackwardPushWhileStandingAfterControllerFailureKickedIn();
    }
 
@@ -61,6 +62,7 @@ public class AtlasPushRecoveryStandingTest extends AvatarPushRecoveryStandingTes
    @Test
    public void testLongForwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
+      setMagnitude(100.0);
       super.testLongForwardPushWhileStandingAfterControllerFailureKickedIn();
    }
 

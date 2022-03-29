@@ -71,6 +71,7 @@ public class ValkyriePushRecoveryStandingTest extends AvatarPushRecoveryStanding
    @Test
    public void testLongBackwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
+      setMagnitude(85.0);
       super.testLongBackwardPushWhileStandingAfterControllerFailureKickedIn();
    }
 
@@ -87,6 +88,7 @@ public class ValkyriePushRecoveryStandingTest extends AvatarPushRecoveryStanding
    @Test
    public void testLongForwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
+      setMagnitude(90.0);
       super.testLongForwardPushWhileStandingAfterControllerFailureKickedIn();
    }
 
