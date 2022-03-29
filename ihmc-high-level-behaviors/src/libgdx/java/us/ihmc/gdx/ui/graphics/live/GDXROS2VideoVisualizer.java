@@ -101,15 +101,12 @@ public class GDXROS2VideoVisualizer extends ImGuiGDXVisualizer
       frequencyPlot.renderImGuiWidgets();
    }
 
-   int i = 0;
-
    @Override
    public void update()
    {
       super.update();
       if (isActive())
       {
-
          synchronized (this)
          {
             if (rgba8Mat != null)
@@ -129,96 +126,6 @@ public class GDXROS2VideoVisualizer extends ImGuiGDXVisualizer
                texture.draw(pixmap, 0, 0);
             }
          }
-
-////         Triple<ByteBuffer, Integer, Integer> image = decompressedImage; // store the latest one here
-//         BufferedImage image = decompressedImage; // store the latest one here
-//
-//         if (image != null)
-//         {
-////            ByteBuffer buffer = image.getLeft();
-////            int width = image.getMiddle();
-////            int height = image.getRight();
-//            WritableRaster raster = image.getRaster();
-//            byte[] buffer = ((DataBufferByte) raster.getDataBuffer()).getData();
-//            int width = image.getWidth();
-//            int height = image.getHeight();
-//
-//            DetectedFiducialPacket currentFiducial = this.latestDetectedFiducial;
-//            if (currentFiducial != null)
-//            {
-////               if (bufferedImage == null)
-////               {
-////                  bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
-////               }
-////               WritableRaster raster = image.getRaster();
-////               DataBufferByte dataBuffer = (DataBufferByte) raster.getDataBuffer();
-////               raster.setDataElements(0, 0, width, height, buffer);
-////               System.arraycopy(buffer.array(), 0, dataBuffer.getData(), 0, width * height);
-//
-//               Graphics2D graphics = image.createGraphics();
-//               graphics.setColor(Color.RED);
-//               graphics.setStroke(new BasicStroke(5.0f));
-//               graphics.setFont(new Font("TimesRoman", Font.PLAIN, 20));
-//
-//               int nPoints = currentFiducial.getBounds().size();
-//               int[] xPoints = new int[nPoints];
-//               int[] yPoints = new int[nPoints];
-//               for (int j = 0; j < currentFiducial.getBounds().size(); j++)
-//               {
-//                  xPoints[j] = (int) Math.round(currentFiducial.getBounds().get(j).getX());
-//                  yPoints[j] = (int) Math.round(currentFiducial.getBounds().get(j).getY());
-//
-//                  if (j == 0)
-//                  {
-//                     graphics.drawString("" + currentFiducial.getFiducialId(), xPoints[j], yPoints[j]);
-//                  }
-//               }
-//
-//               graphics.drawPolygon(xPoints, yPoints, nPoints);
-//
-////               raster.getDataElements(0, 0, width, height, buffer);
-////               System.arraycopy(dataBuffer.getData(), 0, buffer.array(), 0, width * height);
-//            }
-//
-//
-//            if (texture == null || texture.getWidth() < width || texture.getHeight() < height)
-//            {
-//               if (texture != null)
-//               {
-//                  texture.dispose();
-//                  pixmap.dispose();
-//               }
-//
-//               pixmap = new Pixmap(width, height, Pixmap.Format.RGBA8888);
-//               texture = new Texture(new PixmapTextureData(pixmap, null, false, false));
-//
-//               videoPanel.setTexture(texture);
-//            }
-//
-//            // unpack BGR
-//            for (int y = 0; y < height; y++)
-//            {
-//               for (int x = 0; x < width; x++)
-//               {
-//                  int i = (y * width + x) * 3;
-////                  int b = Byte.toUnsignedInt(buffer.get(i + 0));
-////                  int g = Byte.toUnsignedInt(buffer.get(i + 1));
-////                  int r = Byte.toUnsignedInt(buffer.get(i + 2));
-//                  int b = Byte.toUnsignedInt(buffer[i + 0]);
-//                  int g = Byte.toUnsignedInt(buffer[i + 1]);
-//                  int r = Byte.toUnsignedInt(buffer[i + 2]);
-//                  int a = 255;
-//                  int rgb8888 = (r << 24) | (g << 16) | (b << 8) | a;
-//                  pixmap.drawPixel(x, y, rgb8888);
-//               }
-//            }
-//
-//            texture.draw(pixmap, 0, 0);
-//            decompressedImage = null;
-//
-//
-//
-//         }
       }
    }
 
