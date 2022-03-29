@@ -11,15 +11,16 @@ import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
-import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitchFactory;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
@@ -46,7 +47,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    private TObjectDoubleHashMap<String> jointHomeConfiguration = null;
    private Map<String, Pose3D> bodyHomeConfiguration = null;
 
-   private final LegConfigurationParameters legConfigurationParameters;
    private final ToeOffParameters toeOffParameters;
    private final SwingTrajectoryParameters swingTrajectoryParameters;
    private final ValkyrieSteppingParameters steppingParameters;
@@ -54,6 +54,8 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    private final StepAdjustmentParameters stepAdjustmentParameters;
 
    private final ValkyriePhysicalProperties physicalProperties;
+
+   private final OneDoFJointPrivilegedConfigurationParameters kneePrivilegedConfigurationParameters;
 
    // USE THESE FOR Real Robot and sims when controlling pelvis height instead of CoM.
    private final double minimumHeightAboveGround;
@@ -71,7 +73,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       this.physicalProperties = physicalProperties;
       this.target = target;
 
-      legConfigurationParameters = new ValkyrieLegConfigurationParameters(target);
       toeOffParameters = new ValkyrieToeOffParameters(physicalProperties, target);
       swingTrajectoryParameters = new ValkyrieSwingTrajectoryParameters(physicalProperties, target);
       steppingParameters = new ValkyrieSteppingParameters(physicalProperties, target);
@@ -81,6 +82,15 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       minimumHeightAboveGround = jointMap.getModelScale() * (0.595 + 0.23 + 0.08);
       nominalHeightAboveGround = jointMap.getModelScale() * (0.675 + 0.23 - 0.01 + 0.08);
       maximumHeightAboveGround = jointMap.getModelScale() * (0.735 + 0.23 + 0.08);
+
+
+      kneePrivilegedConfigurationParameters = new OneDoFJointPrivilegedConfigurationParameters();
+      kneePrivilegedConfigurationParameters.setConfigurationGain(target == RobotTarget.REAL_ROBOT ? 40.0 : 150.0);
+      kneePrivilegedConfigurationParameters.setVelocityGain(6.0);
+      kneePrivilegedConfigurationParameters.setWeight(5.0);
+      kneePrivilegedConfigurationParameters.setMaxAcceleration(Double.POSITIVE_INFINITY);
+      kneePrivilegedConfigurationParameters.setPrivilegedConfigurationOption(PrivilegedConfigurationCommand.PrivilegedConfigurationOption.AT_MID_RANGE);
+
    }
 
    @Override
@@ -184,29 +194,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    public double getMaxSwingInitialAngularVelocityMagnitude()
    {
       return 1.5;
-   }
-
-   @Override
-   public ICPControlGains createICPControlGains()
-   {
-      ICPControlGains gains = new ICPControlGains();
-
-      boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
-
-      double kpOrthogonal = runningOnRealRobot ? 1.9 : 1.5;
-      double kpParallel = runningOnRealRobot ? 2.0 : 2.5;
-      double ki = runningOnRealRobot ? 0.0 : 0.0;
-      double kiBleedOff = 0.9;
-
-      gains.setKpParallelToMotion(kpParallel);
-      gains.setKpOrthogonalToMotion(kpOrthogonal);
-      gains.setKi(ki);
-      gains.setIntegralLeakRatio(kiBleedOff);
-
-      if (target == RobotTarget.REAL_ROBOT)
-         gains.setFeedbackPartMaxRate(1.5);
-
-      return gains;
    }
 
    @Override
@@ -671,9 +658,9 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    /** {@inheritDoc} */
    @Override
-   public LegConfigurationParameters getLegConfigurationParameters()
+   public OneDoFJointPrivilegedConfigurationParameters getKneePrivilegedConfigurationParameters()
    {
-      return legConfigurationParameters;
+      return kneePrivilegedConfigurationParameters;
    }
 
    /** {@inheritDoc} */

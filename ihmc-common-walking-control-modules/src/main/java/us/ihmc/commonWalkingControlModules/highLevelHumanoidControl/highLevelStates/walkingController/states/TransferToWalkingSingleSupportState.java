@@ -2,10 +2,8 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import org.apache.commons.math3.util.Precision;
 
-import rcl_interfaces.msg.dds.Log;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.TouchdownErrorCompensator;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
@@ -17,7 +15,6 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -39,8 +36,6 @@ public class TransferToWalkingSingleSupportState extends TransferState
 
    private final DoubleProvider minimumTransferTime;
 
-   private final LegConfigurationManager legConfigurationManager;
-   private final YoDouble fractionOfTransferToCollapseLeg = new YoDouble("fractionOfTransferToCollapseLeg", registry);
    private final YoDouble currentTransferDuration = new YoDouble("CurrentTransferDuration", registry);
    private final YoBoolean resubmitStepsInTransferEveryTick = new YoBoolean("resubmitStepsInTransferEveryTick", registry);
 
@@ -72,9 +67,6 @@ public class TransferToWalkingSingleSupportState extends TransferState
       this.minimumTransferTime = minimumTransferTime;
       this.touchdownErrorCompensator = touchdownErrorCompensator;
 
-      legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
-
-      fractionOfTransferToCollapseLeg.set(walkingControllerParameters.getLegConfigurationParameters().getFractionOfTransferToCollapseLeg());
       minimizeAngularMomentumRateZDuringTransfer = new BooleanParameter("minimizeAngularMomentumRateZDuringTransfer",
                                                                         registry,
                                                                         walkingControllerParameters.minimizeAngularMomentumRateZDuringTransfer());
@@ -150,9 +142,6 @@ public class TransferToWalkingSingleSupportState extends TransferState
 
       pelvisOrientationManager.setUpcomingFootstep(footsteps[0]);
       pelvisOrientationManager.initializeTransfer(transferToSide, firstTiming.getTransferTime(), firstTiming.getSwingTime());
-
-      legConfigurationManager.beginStraightening(transferToSide);
-      legConfigurationManager.setFullyExtendLeg(transferToSide, false);
    }
 
    @Override
@@ -188,12 +177,6 @@ public class TransferToWalkingSingleSupportState extends TransferState
       super.doAction(timeInState);
 
       double transferDuration = currentTransferDuration.getDoubleValue();
-      boolean pastMinimumTime = timeInState > fractionOfTransferToCollapseLeg.getDoubleValue() * transferDuration;
-      boolean isFootWellPosition = legConfigurationManager.areFeetWellPositionedForCollapse(transferToSide.getOppositeSide());
-      if (pastMinimumTime && isFootWellPosition && !legConfigurationManager.isLegCollapsed(transferToSide.getOppositeSide()))
-      {
-         legConfigurationManager.collapseLegDuringTransfer(transferToSide);
-      }
 
       updateFootPlanOffset();
 
