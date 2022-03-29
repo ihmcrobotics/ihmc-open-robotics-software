@@ -96,4 +96,36 @@ public class AtlasPushRecoveryStandingTest extends AvatarPushRecoveryStandingTes
    {
       super.testRecoveryForwardWhileInFlamingoStance();
    }
+
+   @Tag("humanoid-push-recovery")
+   @Override
+   @Test
+   public void testRecoverySidewaysWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
+   {
+      super.testRecoverySidewaysWhileInFlamingoStance();
+   }
+
+   @Tag("humanoid-push-recovery")
+   @Override
+   @Test
+   public void testRecoveryAngledWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
+   {
+      super.testRecoveryAngledWhileInFlamingoStance();
+   }
+
+   @Tag("humanoid-push-recovery")
+   @Override
+   @Test
+   public void testRecoveryPushForwardWhileInFlamingoStanceAndAfterTouchDown() throws SimulationExceededMaximumTimeException
+   {
+      super.testRecoveryPushForwardWhileInFlamingoStanceAndAfterTouchDown();
+   }
+
+   @Tag("humanoid-push-recovery")
+   @Override
+   @Test
+   public void testFailureAfterRecoveryStep() throws SimulationExceededMaximumTimeException
+   {
+      super.testFailureAfterRecoveryStep();
+   }
 }

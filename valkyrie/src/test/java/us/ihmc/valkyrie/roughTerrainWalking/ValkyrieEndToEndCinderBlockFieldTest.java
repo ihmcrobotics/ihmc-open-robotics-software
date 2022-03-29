@@ -60,6 +60,7 @@ public class ValkyrieEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFie
    }
 
    @Override
+   @Tag("humanoid-rough-terrain")
    @Test
    public void testWalkingOverCinderBlockField() throws Exception
    {
@@ -103,6 +104,7 @@ public class ValkyrieEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFie
       super.testSlantedCinderBlockField(true);
    }
 
+   @Tag("humanoid-rough-terrain")
    @Test
    public void testWalkingOverCinderBlockFieldVal2Scale() throws Exception
    {

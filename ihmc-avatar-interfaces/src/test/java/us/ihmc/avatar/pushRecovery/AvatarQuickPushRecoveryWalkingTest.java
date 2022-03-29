@@ -187,7 +187,6 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
    @Test
    public void testForwardPushInLeftSwingAtDifferentTimes() throws SimulationExceededMaximumTimeException
    {
-      simulationTestingParameters.setKeepSCSUp(true);
       setupTest();
       enableSpeedUp();
 
