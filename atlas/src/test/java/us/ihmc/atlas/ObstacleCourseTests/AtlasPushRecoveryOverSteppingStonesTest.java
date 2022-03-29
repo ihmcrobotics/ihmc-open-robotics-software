@@ -5,14 +5,12 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
-import us.ihmc.atlas.parameters.AtlasSteppingParameters;
-import us.ihmc.atlas.parameters.AtlasToeOffParameters;
-import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
+import us.ihmc.atlas.parameters.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.AvatarPushRecoveryOverSteppingStonesTest;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -33,24 +31,25 @@ public class AtlasPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryO
             return new AtlasWalkingControllerParameters(RobotTarget.SCS, getJointMap(), getContactPointParameters())
             {
                @Override
-               public ICPOptimizationParameters getICPOptimizationParameters()
+               public ICPControllerParameters getICPControllerParameters()
                {
-                  return new AtlasICPOptimizationParameters(false)
+                  return new AtlasICPControllerParameters(false)
                   {
                      @Override
                      public boolean useAngularMomentum()
                      {
                         return true;
                      }
+                  };
+               }
 
+               @Override
+               public StepAdjustmentParameters getStepAdjustmentParameters()
+               {
+                  return new AtlasStepAdjustmentParameters()
+                  {
                      @Override
                      public boolean allowStepAdjustment()
-                     {
-                        return true;
-                     }
-
-                     @Override
-                     public boolean usePlanarRegionConstraints()
                      {
                         return true;
                      }

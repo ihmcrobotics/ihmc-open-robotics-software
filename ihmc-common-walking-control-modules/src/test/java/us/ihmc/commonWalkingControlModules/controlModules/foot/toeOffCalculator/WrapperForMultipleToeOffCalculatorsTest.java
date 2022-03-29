@@ -10,7 +10,8 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
@@ -224,12 +225,6 @@ public class WrapperForMultipleToeOffCalculatorsTest
          }
 
          @Override
-         public ICPControlGains createICPControlGains()
-         {
-            return null;
-         }
-
-         @Override
          public PDGains getCoMHeightControlGains()
          {
             return null;
@@ -279,6 +274,12 @@ public class WrapperForMultipleToeOffCalculatorsTest
 
          @Override
          public MomentumOptimizationSettings getMomentumOptimizationSettings()
+         {
+            return null;
+         }
+
+         @Override
+         public StepAdjustmentParameters getStepAdjustmentParameters()
          {
             return null;
          }
@@ -362,30 +363,6 @@ public class WrapperForMultipleToeOffCalculatorsTest
             return new SwingTrajectoryParameters()
             {
                @Override
-               public boolean doToeTouchdownIfPossible()
-               {
-                  return false;
-               }
-
-               @Override
-               public double getToeTouchdownAngle()
-               {
-                  return 0;
-               }
-
-               @Override
-               public boolean doHeelTouchdownIfPossible()
-               {
-                  return false;
-               }
-
-               @Override
-               public double getHeelTouchdownAngle()
-               {
-                  return 0;
-               }
-
-               @Override
                public double getDesiredTouchdownHeightOffset()
                {
                   return 0;
@@ -402,17 +379,11 @@ public class WrapperForMultipleToeOffCalculatorsTest
                {
                   return 0;
                }
-
-               @Override
-               public double getMinMechanicalLegLength()
-               {
-                  return 0;
-               }
             };
          }
 
          @Override
-         public ICPOptimizationParameters getICPOptimizationParameters()
+         public ICPControllerParameters getICPControllerParameters()
          {
             return null;
          }

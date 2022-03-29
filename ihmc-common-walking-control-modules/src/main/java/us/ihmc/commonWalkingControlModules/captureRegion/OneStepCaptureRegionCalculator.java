@@ -56,71 +56,34 @@ public class OneStepCaptureRegionCalculator
    public OneStepCaptureRegionCalculator(CommonHumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters,
          YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(walkingControllerParameters.getSteppingParameters().getFootWidth(), walkingControllerParameters.getSteppingParameters().getMaxStepLength(),
-           referenceFrames.getSoleZUpFrames(), "", parentRegistry, yoGraphicsListRegistry);
+      this(walkingControllerParameters.getSteppingParameters().getFootWidth(),
+           () -> walkingControllerParameters.getSteppingParameters().getMaxStepLength(),
+           referenceFrames.getSoleZUpFrames(),
+           true,
+           "",
+           parentRegistry,
+           yoGraphicsListRegistry);
    }
 
-   public OneStepCaptureRegionCalculator(CommonHumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters,
-                                         String suffix, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-      this(walkingControllerParameters.getSteppingParameters().getFootWidth(), walkingControllerParameters.getSteppingParameters().getMaxStepLength(),
-           referenceFrames.getSoleZUpFrames(), suffix, parentRegistry, yoGraphicsListRegistry);
-   }
-
-   public OneStepCaptureRegionCalculator(SideDependentList<? extends ReferenceFrame> soleZUpFrames, WalkingControllerParameters walkingControllerParameters,
-                                         YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-      this(walkingControllerParameters.getSteppingParameters().getFootWidth(), walkingControllerParameters.getSteppingParameters().getMaxStepLength(),
-           soleZUpFrames, "", parentRegistry, yoGraphicsListRegistry);
-   }
 
    public OneStepCaptureRegionCalculator(SideDependentList<? extends ReferenceFrame> soleZUpFrames, WalkingControllerParameters walkingControllerParameters,
                                          String suffix, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(walkingControllerParameters.getSteppingParameters().getFootWidth(), walkingControllerParameters.getSteppingParameters().getMaxStepLength(),
-              soleZUpFrames, suffix, parentRegistry, yoGraphicsListRegistry);
-   }
-
-   public OneStepCaptureRegionCalculator(SideDependentList<? extends ReferenceFrame> soleZUpFrames, WalkingControllerParameters walkingControllerParameters,
-                                         boolean useInternalReachableRegions,
-                                         String suffix, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-      this(walkingControllerParameters.getSteppingParameters().getFootWidth(), walkingControllerParameters.getSteppingParameters().getMaxStepLength(),
-           soleZUpFrames, useInternalReachableRegions, suffix, parentRegistry, yoGraphicsListRegistry);
-   }
-
-
-   public OneStepCaptureRegionCalculator(double footWidth, double kinematicStepRange,
-                                         SideDependentList<? extends ReferenceFrame> soleZUpFrames, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-      this(footWidth, kinematicStepRange, soleZUpFrames, "", parentRegistry, yoGraphicsListRegistry);
-   }
-
-   public OneStepCaptureRegionCalculator(double footWidth,
-                                         double kinematicStepRange,
-                                         SideDependentList<? extends ReferenceFrame> soleZUpFrames,
-                                         String suffix,
-                                         YoRegistry parentRegistry,
-                                         YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-      this(footWidth,
-           () -> kinematicStepRange,
+      this(walkingControllerParameters.getSteppingParameters().getFootWidth(),
+           () -> walkingControllerParameters.getSteppingParameters().getMaxStepLength(),
            soleZUpFrames,
+           true,
            suffix,
            parentRegistry,
            yoGraphicsListRegistry);
    }
 
-   public OneStepCaptureRegionCalculator(double footWidth,
-                                         double kinematicStepRange,
-                                         SideDependentList<? extends ReferenceFrame> soleZUpFrames,
+   public OneStepCaptureRegionCalculator(SideDependentList<? extends ReferenceFrame> soleZUpFrames, WalkingControllerParameters walkingControllerParameters,
                                          boolean useInternalReachableRegions,
-                                         String suffix,
-                                         YoRegistry parentRegistry,
-                                         YoGraphicsListRegistry yoGraphicsListRegistry)
+                                         String suffix, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(footWidth,
-           () -> kinematicStepRange,
+      this(walkingControllerParameters.getSteppingParameters().getFootWidth(),
+           () -> walkingControllerParameters.getSteppingParameters().getMaxStepLength(),
            soleZUpFrames,
            useInternalReachableRegions,
            suffix,
@@ -128,14 +91,11 @@ public class OneStepCaptureRegionCalculator
            yoGraphicsListRegistry);
    }
 
-   public OneStepCaptureRegionCalculator(double footWidth,
-                                         DoubleProvider kinematicStepRange,
-                                         SideDependentList<? extends ReferenceFrame> soleZUpFrames,
-                                         String suffix,
-                                         YoRegistry parentRegistry,
-                                         YoGraphicsListRegistry yoGraphicsListRegistry)
+
+   public OneStepCaptureRegionCalculator(double footWidth, double kinematicStepRange,
+                                         SideDependentList<? extends ReferenceFrame> soleZUpFrames, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(footWidth, kinematicStepRange, soleZUpFrames, true, suffix, parentRegistry, yoGraphicsListRegistry);
+      this(footWidth, () -> kinematicStepRange, soleZUpFrames, true, "", parentRegistry, yoGraphicsListRegistry);
    }
 
    public OneStepCaptureRegionCalculator(double footWidth,

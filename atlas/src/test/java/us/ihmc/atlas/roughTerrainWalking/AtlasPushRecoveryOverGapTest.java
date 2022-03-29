@@ -5,14 +5,12 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
-import us.ihmc.atlas.parameters.AtlasSteppingParameters;
-import us.ihmc.atlas.parameters.AtlasSwingTrajectoryParameters;
-import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
+import us.ihmc.atlas.parameters.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.roughTerrainWalking.AvatarPushRecoveryOverGapTest;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -86,18 +84,12 @@ public class AtlasPushRecoveryOverGapTest extends AvatarPushRecoveryOverGapTest
                }
 
                @Override
-               public ICPOptimizationParameters getICPOptimizationParameters()
+               public StepAdjustmentParameters getStepAdjustmentParameters()
                {
-                  return new AtlasICPOptimizationParameters(false)
+                  return new AtlasStepAdjustmentParameters()
                   {
                      @Override
-                     public boolean usePlanarRegionConstraints()
-                     {
-                        return true;
-                     }
-
-                     @Override
-                     public boolean switchPlanarRegionConstraintsAutomatically()
+                     public boolean allowStepAdjustment()
                      {
                         return true;
                      }

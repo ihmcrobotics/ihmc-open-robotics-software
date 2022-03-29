@@ -1,5 +1,6 @@
 package us.ihmc.atlas.ObstacleCourseTests;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import us.ihmc.atlas.AtlasRobotModel;
@@ -12,6 +13,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 
 public class AtlasCustomSteppingStonesTest extends AvatarCustomSteppingStonesTest
 {
+    @Tag("humanoid-obstacle-2")
     @Test
     public void testToeOffTakingBigStepsUp(TestInfo testInfo) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
     {
@@ -23,6 +25,7 @@ public class AtlasCustomSteppingStonesTest extends AvatarCustomSteppingStonesTes
         super.testTakingStep(testInfo, 0.24);
     }
 
+    @Tag("humanoid-obstacle-2")
     @Test
     public void testTakingBigStepUpAndStopping(TestInfo testInfo) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
     {   // NOTE this passes but violates knee joint limits
@@ -30,6 +33,7 @@ public class AtlasCustomSteppingStonesTest extends AvatarCustomSteppingStonesTes
         super.testTakingStep(testInfo, 0.4);
     }
 
+    @Tag("humanoid-obstacle-2")
     @Test
     public void testTakingBigStepUpAndStoppingThenSquaringUp(TestInfo testInfo) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
     {   // NOTE this passes but violates knee joint limits
@@ -38,12 +42,14 @@ public class AtlasCustomSteppingStonesTest extends AvatarCustomSteppingStonesTes
         super.testTakingStepOneFootAtATime(testInfo, 0.22);
     }
 
+    @Tag("humanoid-obstacle-2")
     @Test
     public void testTakingBigStepUpAndSquaringUp(TestInfo testInfo) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
     {   // NOTE this passes but the shins collide with stair step
         super.testTakingStep(testInfo, 0.4);
     }
 
+    @Tag("humanoid-obstacle-2")
     @Test
     public void testToeOffTakingBigSideStepUp(TestInfo testInfo) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
     {

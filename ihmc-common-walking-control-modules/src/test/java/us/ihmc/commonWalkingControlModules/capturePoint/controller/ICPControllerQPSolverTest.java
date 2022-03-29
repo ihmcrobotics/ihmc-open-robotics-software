@@ -5,7 +5,6 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationControllerHelper;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
@@ -13,7 +12,6 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.matrixlib.MatrixTestTools;
-import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 
@@ -377,7 +375,7 @@ public class ICPControllerQPSolverTest
    public void testTransferConstrainedTrickyCase()
    {
       ICPControllerQPSolver solver = new ICPControllerQPSolver(10);
-      ICPOptimizationControllerHelper helper = new ICPOptimizationControllerHelper();
+      ICPControllerHelper helper = new ICPControllerHelper();
       solver.setMaxNumberOfIterations(10);
 
       // create support polygon constraint

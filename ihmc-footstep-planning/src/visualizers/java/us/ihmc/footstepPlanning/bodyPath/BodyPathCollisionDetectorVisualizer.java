@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.bodyPath;
 
+import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -57,7 +58,10 @@ public class BodyPathCollisionDetectorVisualizer
       graphics10.addCoordinateSystem(0.2);
       graphics11.addCoordinateSystem(0.2);
 
-      for (int i = 0; i < collisionDetector.zeroDegCollisionOffsetsX.size(); i++)
+      TIntArrayList zeroDegCollisionOffsetsX = collisionDetector.xOffsets[0];
+      TIntArrayList zeroDegCollisionOffsetsY = collisionDetector.yOffsets[0];
+
+      for (int i = 0; i < zeroDegCollisionOffsetsX.size(); i++)
       {
          graphics0.identity();
          graphics1.identity();
@@ -65,18 +69,21 @@ public class BodyPathCollisionDetectorVisualizer
          graphics0.translate(0.0, 0.0, 0.0);
          graphics1.translate(1.0, 0.0, 0.0);
 
-         double dx0 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetX(0, collisionDetector.zeroDegCollisionOffsetsX.get(i), collisionDetector.zeroDegCollisionOffsetsY.get(i));
-         double dy0 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetY(0, collisionDetector.zeroDegCollisionOffsetsX.get(i), collisionDetector.zeroDegCollisionOffsetsY.get(i));
+         double dx0 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetX(0, zeroDegCollisionOffsetsX.get(i), zeroDegCollisionOffsetsY.get(i));
+         double dy0 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetY(0, zeroDegCollisionOffsetsX.get(i), zeroDegCollisionOffsetsY.get(i));
          graphics0.translate(dx0, dy0, 0.0);
          graphics0.addSphere(0.01, YoAppearance.Red());
 
-         double dx1 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetX(2, collisionDetector.zeroDegCollisionOffsetsX.get(i), collisionDetector.zeroDegCollisionOffsetsY.get(i));
-         double dy1 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetY(2, collisionDetector.zeroDegCollisionOffsetsX.get(i), collisionDetector.zeroDegCollisionOffsetsY.get(i));
+         double dx1 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetX(4, zeroDegCollisionOffsetsX.get(i), zeroDegCollisionOffsetsY.get(i));
+         double dy1 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetY(4, zeroDegCollisionOffsetsX.get(i), zeroDegCollisionOffsetsY.get(i));
          graphics1.translate(dx1, dy1, 0.0);
          graphics1.addSphere(0.01, YoAppearance.Blue());
       }
 
-      for (int i = 0; i < collisionDetector.fourtyFiveDegCollisionOffsetsX.size(); i++)
+      TIntArrayList fourtyFiveDegCollisionOffsetsX = collisionDetector.xOffsets[2];
+      TIntArrayList fourtyFiveDegCollisionOffsetsY = collisionDetector.yOffsets[2];
+
+      for (int i = 0; i < fourtyFiveDegCollisionOffsetsX.size(); i++)
       {
          graphics2.identity();
          graphics3.identity();
@@ -84,18 +91,21 @@ public class BodyPathCollisionDetectorVisualizer
          graphics2.translate(0.0, 1.0, 0.0);
          graphics3.translate(1.0, 1.0, 0.0);
 
-         double dx0 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetX(1, collisionDetector.fourtyFiveDegCollisionOffsetsX.get(i), collisionDetector.fourtyFiveDegCollisionOffsetsY.get(i));
-         double dy0 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetY(1, collisionDetector.fourtyFiveDegCollisionOffsetsX.get(i), collisionDetector.fourtyFiveDegCollisionOffsetsY.get(i));
+         double dx0 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetX(2, fourtyFiveDegCollisionOffsetsX.get(i), fourtyFiveDegCollisionOffsetsY.get(i));
+         double dy0 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetY(2, fourtyFiveDegCollisionOffsetsX.get(i), fourtyFiveDegCollisionOffsetsY.get(i));
          graphics2.translate(dx0, dy0, 0.0);
          graphics2.addSphere(0.01, YoAppearance.Red());
 
-         double dx1 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetX(3, collisionDetector.fourtyFiveDegCollisionOffsetsX.get(i), collisionDetector.fourtyFiveDegCollisionOffsetsY.get(i));
-         double dy1 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetY(3, collisionDetector.fourtyFiveDegCollisionOffsetsX.get(i), collisionDetector.fourtyFiveDegCollisionOffsetsY.get(i));
+         double dx1 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetX(6, fourtyFiveDegCollisionOffsetsX.get(i), fourtyFiveDegCollisionOffsetsY.get(i));
+         double dy1 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetY(6, fourtyFiveDegCollisionOffsetsX.get(i), fourtyFiveDegCollisionOffsetsY.get(i));
          graphics3.translate(dx1, dy1, 0.0);
          graphics3.addSphere(0.01, YoAppearance.Blue());
       }
 
-      for (int i = 0; i < collisionDetector.twentyTwoDegCollisionOffsetsX.size(); i++)
+      TIntArrayList twentyTwoDegCollisionOffsetsX = collisionDetector.xOffsets[1];
+      TIntArrayList twentyTwoDegCollisionOffsetsY = collisionDetector.yOffsets[1];
+
+      for (int i = 0; i < twentyTwoDegCollisionOffsetsX.size(); i++)
       {
          graphics4.identity();
          graphics5.identity();
@@ -115,43 +125,43 @@ public class BodyPathCollisionDetectorVisualizer
          graphics10.translate(6.0, 2.0, 0.0);
          graphics11.translate(7.0, 2.0, 0.0);
 
-         double dx4 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetX(8, collisionDetector.twentyTwoDegCollisionOffsetsX.get(i), collisionDetector.twentyTwoDegCollisionOffsetsY.get(i));
-         double dy4 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetY(8, collisionDetector.twentyTwoDegCollisionOffsetsX.get(i), collisionDetector.twentyTwoDegCollisionOffsetsY.get(i));
+         double dx4 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetX(1, twentyTwoDegCollisionOffsetsX.get(i), twentyTwoDegCollisionOffsetsY.get(i));
+         double dy4 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetY(1, twentyTwoDegCollisionOffsetsX.get(i), twentyTwoDegCollisionOffsetsY.get(i));
          graphics4.translate(dx4, dy4, 0.0);
          graphics4.addSphere(0.01, YoAppearance.Red());
 
-         double dx5 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetX(9, collisionDetector.twentyTwoDegCollisionOffsetsX.get(i), collisionDetector.twentyTwoDegCollisionOffsetsY.get(i));
-         double dy5 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetY(9, collisionDetector.twentyTwoDegCollisionOffsetsX.get(i), collisionDetector.twentyTwoDegCollisionOffsetsY.get(i));
+         double dx5 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetX(3, twentyTwoDegCollisionOffsetsX.get(i), twentyTwoDegCollisionOffsetsY.get(i));
+         double dy5 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetY(3, twentyTwoDegCollisionOffsetsX.get(i), twentyTwoDegCollisionOffsetsY.get(i));
          graphics5.translate(dx5, dy5, 0.0);
          graphics5.addSphere(0.01, YoAppearance.Blue());
 
-         double dx6 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetX(10, collisionDetector.twentyTwoDegCollisionOffsetsX.get(i), collisionDetector.twentyTwoDegCollisionOffsetsY.get(i));
-         double dy6 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetY(10, collisionDetector.twentyTwoDegCollisionOffsetsX.get(i), collisionDetector.twentyTwoDegCollisionOffsetsY.get(i));
+         double dx6 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetX(5, twentyTwoDegCollisionOffsetsX.get(i), twentyTwoDegCollisionOffsetsY.get(i));
+         double dy6 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetY(5, twentyTwoDegCollisionOffsetsX.get(i), twentyTwoDegCollisionOffsetsY.get(i));
          graphics6.translate(dx6, dy6, 0.0);
          graphics6.addSphere(0.01, YoAppearance.Blue());
 
-         double dx7 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetX(11, collisionDetector.twentyTwoDegCollisionOffsetsX.get(i), collisionDetector.twentyTwoDegCollisionOffsetsY.get(i));
-         double dy7 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetY(11, collisionDetector.twentyTwoDegCollisionOffsetsX.get(i), collisionDetector.twentyTwoDegCollisionOffsetsY.get(i));
+         double dx7 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetX(7, twentyTwoDegCollisionOffsetsX.get(i), twentyTwoDegCollisionOffsetsY.get(i));
+         double dy7 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetY(7, twentyTwoDegCollisionOffsetsX.get(i), twentyTwoDegCollisionOffsetsY.get(i));
          graphics7.translate(dx7, dy7, 0.0);
          graphics7.addSphere(0.01, YoAppearance.Blue());
 
-         double dx8 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetX(12, collisionDetector.twentyTwoDegCollisionOffsetsX.get(i), collisionDetector.twentyTwoDegCollisionOffsetsY.get(i));
-         double dy8 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetY(12, collisionDetector.twentyTwoDegCollisionOffsetsX.get(i), collisionDetector.twentyTwoDegCollisionOffsetsY.get(i));
+         double dx8 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetX(9, twentyTwoDegCollisionOffsetsX.get(i), twentyTwoDegCollisionOffsetsY.get(i));
+         double dy8 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetY(9, twentyTwoDegCollisionOffsetsX.get(i), twentyTwoDegCollisionOffsetsY.get(i));
          graphics8.translate(dx8, dy8, 0.0);
          graphics8.addSphere(0.01, YoAppearance.Blue());
 
-         double dx9 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetX(13, collisionDetector.twentyTwoDegCollisionOffsetsX.get(i), collisionDetector.twentyTwoDegCollisionOffsetsY.get(i));
-         double dy9 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetY(13, collisionDetector.twentyTwoDegCollisionOffsetsX.get(i), collisionDetector.twentyTwoDegCollisionOffsetsY.get(i));
+         double dx9 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetX(11, twentyTwoDegCollisionOffsetsX.get(i), twentyTwoDegCollisionOffsetsY.get(i));
+         double dy9 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetY(11, twentyTwoDegCollisionOffsetsX.get(i), twentyTwoDegCollisionOffsetsY.get(i));
          graphics9.translate(dx9, dy9, 0.0);
          graphics9.addSphere(0.01, YoAppearance.Blue());
 
-         double dx10 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetX(14, collisionDetector.twentyTwoDegCollisionOffsetsX.get(i), collisionDetector.twentyTwoDegCollisionOffsetsY.get(i));
-         double dy10 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetY(14, collisionDetector.twentyTwoDegCollisionOffsetsX.get(i), collisionDetector.twentyTwoDegCollisionOffsetsY.get(i));
+         double dx10 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetX(13, twentyTwoDegCollisionOffsetsX.get(i), twentyTwoDegCollisionOffsetsY.get(i));
+         double dy10 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetY(13, twentyTwoDegCollisionOffsetsX.get(i), twentyTwoDegCollisionOffsetsY.get(i));
          graphics10.translate(dx10, dy10, 0.0);
          graphics10.addSphere(0.01, YoAppearance.Blue());
 
-         double dx11 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetX(15, collisionDetector.twentyTwoDegCollisionOffsetsX.get(i), collisionDetector.twentyTwoDegCollisionOffsetsY.get(i));
-         double dy11 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetY(15, collisionDetector.twentyTwoDegCollisionOffsetsX.get(i), collisionDetector.twentyTwoDegCollisionOffsetsY.get(i));
+         double dx11 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetX(15, twentyTwoDegCollisionOffsetsX.get(i), twentyTwoDegCollisionOffsetsY.get(i));
+         double dy11 = gridResolution * BodyPathCollisionDetector.computeCollisionOffsetY(15, twentyTwoDegCollisionOffsetsX.get(i), twentyTwoDegCollisionOffsetsY.get(i));
          graphics11.translate(dx11, dy11, 0.0);
          graphics11.addSphere(0.01, YoAppearance.Blue());
       }
