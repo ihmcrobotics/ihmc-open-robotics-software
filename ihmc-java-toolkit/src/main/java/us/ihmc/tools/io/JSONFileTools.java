@@ -51,7 +51,7 @@ public class JSONFileTools
 
       try (InputStream closableStream = settingsStream)
       {
-         load(closableStream, jsonNodeConsumer);
+         loadInternal(closableStream, jsonNodeConsumer);
       }
       catch (IOException e)
       {
@@ -67,12 +67,14 @@ public class JSONFileTools
          settingsStream = hybridFile.getClasspathResourceAsStream();
          if (settingsStream == null)
          {
-            LogTools.warn("Defaults not found. Please save to {}. Not loading anything.", hybridFile.getWorkspaceFile().toString());
+            LogTools.warn("Defaults not found. Please save to {}. Not loading anything.", hybridFile.getPathForResourceLoadingPathFiltered());
             return;
          }
          else
          {
-            LogTools.info("{} not found. Loading defaults from {}", hybridFile.getExternalFile().toString(), hybridFile.getWorkspaceFile().toString());
+            LogTools.info("{} not found. Loading defaults from {}",
+                          hybridFile.getExternalFile().toString(),
+                          hybridFile.getPathForResourceLoadingPathFiltered());
          }
       }
       else
@@ -83,7 +85,7 @@ public class JSONFileTools
 
       try (InputStream closableStream = settingsStream)
       {
-         load(closableStream, jsonNodeConsumer);
+         loadInternal(closableStream, jsonNodeConsumer);
       }
       catch (IOException e)
       {
@@ -105,7 +107,7 @@ public class JSONFileTools
    {
       try (InputStream resourceStream = classForLoading.getResourceAsStream(resourcePathString))
       {
-         load(resourceStream, jsonNodeConsumer);
+         loadInternal(resourceStream, jsonNodeConsumer);
          return true;
       }
       catch (IOException e)
@@ -119,7 +121,7 @@ public class JSONFileTools
    {
       try (InputStream fileStream = FileTools.newFileDataInputStream(filePath, DefaultExceptionHandler.PRINT_STACKTRACE))
       {
-         load(fileStream, jsonNodeConsumer);
+         loadInternal(fileStream, jsonNodeConsumer);
          return true;
       }
       catch (IOException e)
@@ -129,12 +131,25 @@ public class JSONFileTools
       }
    }
 
-   public static void load(InputStream fileStream, Consumer<JsonNode> jsonNodeConsumer) throws IOException
+   private static void loadInternal(InputStream fileStream, Consumer<JsonNode> jsonNodeConsumer) throws IOException
    {
       JsonFactory jsonFactory = new JsonFactory();
       ObjectMapper objectMapper = new ObjectMapper(jsonFactory);
       JsonNode jsonNode = objectMapper.readTree(fileStream);
       jsonNodeConsumer.accept(jsonNode);
+   }
+
+   public static void load(InputStream fileStream, Consumer<JsonNode> jsonNodeConsumer)
+   {
+      try
+      {
+         JSONFileTools.loadInternal(fileStream, jsonNodeConsumer);
+      }
+      catch (IOException e)
+      {
+         LogTools.error("Could not load JSON.");
+         e.printStackTrace();
+      }
    }
 
    public static boolean saveToClasspath(String directoryNameToAssumePresent,

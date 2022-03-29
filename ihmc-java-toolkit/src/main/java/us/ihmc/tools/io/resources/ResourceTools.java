@@ -125,4 +125,14 @@ public class ResourceTools
       }
       return resources;
    }
+
+   public static boolean exists(Class<?> getClassForLoading, String name)
+   {
+      return getClassForLoading.getResource(name) != null;
+   }
+
+   public static boolean exists(String name)
+   {
+      return ClassLoader.getSystemResource(name) != null;
+   }
 }

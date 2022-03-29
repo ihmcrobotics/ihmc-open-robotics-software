@@ -9,6 +9,7 @@ import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.ui.tools.ImPlotTools;
 
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
 public class ImPlotPlot
@@ -25,6 +26,7 @@ public class ImPlotPlot
    private int xFlags;
    private int yFlags;
    private final ImVec2 outerBoundsDimensionsPixels;
+   private final ConcurrentLinkedQueue<ImPlotPlotLine> removalQueue = new ConcurrentLinkedQueue<>();
 
    public ImPlotPlot()
    {
@@ -67,6 +69,9 @@ public class ImPlotPlot
 
    public void render(float plotWidth, float plotHeight)
    {
+      while (!removalQueue.isEmpty())
+         plotLines.remove(removalQueue.poll());
+
       outerBoundsDimensionsPixels.x = plotWidth;
       outerBoundsDimensionsPixels.y = plotHeight;
       if (ImPlot.beginPlot(labels.get("Plot"), xLabel, yLabel, outerBoundsDimensionsPixels, flags, xFlags, yFlags))
@@ -131,5 +136,10 @@ public class ImPlotPlot
    public ArrayList<ImPlotPlotLine> getPlotLines()
    {
       return plotLines;
+   }
+
+   public void queueRemovePlotLine(ImPlotPlotLine plotLineToRemove)
+   {
+      removalQueue.add(plotLineToRemove);
    }
 }

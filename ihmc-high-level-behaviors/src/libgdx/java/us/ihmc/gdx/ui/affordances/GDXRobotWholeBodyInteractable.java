@@ -206,7 +206,8 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
          }
          for (GDXLiveRobotPartInteractable handInteractable : handInteractables)
          {
-            handInteractable.process3DViewInput(input);
+            if (handInteractable != null)
+               handInteractable.process3DViewInput(input);
          }
       }
    }
@@ -254,7 +255,8 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
          }
          for (GDXLiveRobotPartInteractable handInteractable : handInteractables)
          {
-            handInteractable.getVirtualRenderables(renderables, pool);
+            if (handInteractable != null)
+               handInteractable.getVirtualRenderables(renderables, pool);
          }
 
          walkPathControlRing.getVirtualRenderables(renderables, pool);
