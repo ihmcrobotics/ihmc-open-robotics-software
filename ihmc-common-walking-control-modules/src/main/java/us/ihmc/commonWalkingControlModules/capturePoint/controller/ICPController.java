@@ -302,6 +302,7 @@ public class ICPController
    private void submitSolverTaskConditions()
    {
       solver.resetCoPLocationConstraint();
+      // TODO trim this based on heuristics
       solver.addSupportPolygon(copConstraintHandler.updateCoPConstraint());
 
       if (copConstraintHandler.hasSupportPolygonChanged())
