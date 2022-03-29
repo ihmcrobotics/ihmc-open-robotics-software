@@ -49,7 +49,7 @@ public class AtlasLongPushRecoveryWalkingTest extends AvatarLongPushRecoveryWalk
       return 0.3;
    }
 
-   @Tag("humanoid-push-recovery")
+   @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
    public void testInwardPushInSwing() throws SimulationExceededMaximumTimeException
@@ -57,7 +57,7 @@ public class AtlasLongPushRecoveryWalkingTest extends AvatarLongPushRecoveryWalk
       super.testInwardPushInSwing();
    }
 
-   @Tag("humanoid-push-recovery")
+   @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
    public void testOutwardPushInSwing() throws SimulationExceededMaximumTimeException
@@ -65,7 +65,7 @@ public class AtlasLongPushRecoveryWalkingTest extends AvatarLongPushRecoveryWalk
       super.testOutwardPushInSwing();
    }
 
-   @Tag("humanoid-push-recovery")
+   @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
    public void testForwardPushInSwing() throws SimulationExceededMaximumTimeException
@@ -73,7 +73,7 @@ public class AtlasLongPushRecoveryWalkingTest extends AvatarLongPushRecoveryWalk
       super.testForwardPushInSwing();
    }
 
-   @Tag("humanoid-push-recovery")
+   @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
    public void testBackwardPushInSwing() throws SimulationExceededMaximumTimeException
