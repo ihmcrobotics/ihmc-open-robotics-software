@@ -358,7 +358,7 @@ public abstract class AvatarPushRecoveryStandingTest
       double magnitude = 350.0;
       double duration = 0.2;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.95));
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, 0.7*magnitude, duration);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0));
