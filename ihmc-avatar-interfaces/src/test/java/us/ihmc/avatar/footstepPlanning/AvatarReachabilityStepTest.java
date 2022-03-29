@@ -49,7 +49,7 @@ public abstract class AvatarReachabilityStepTest implements MultiRobotTestInterf
    private static final int numberOfStancesToCheck = 10;
    private static final double solutionQualityThreshold = 2.2;
    private static final double initialStanceTime = 1.0;
-   private static final double stepTime = 5.0;
+   private static final double stepTime = 3.0;
    private static final double finalStanceTime = 2.0;
    private static final Random random = new Random(3920);
 
