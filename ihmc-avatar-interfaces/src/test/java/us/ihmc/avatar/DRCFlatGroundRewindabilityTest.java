@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.avatar.testTools.scs2.SCS2RewindabilityVerifier;
@@ -72,7 +71,7 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
       SCS2AvatarTestingSimulation simulationTestHelper2 = setupSimulation();
       simulationTestHelper1.start();
       simulationTestHelper2.start();
-      List<String> exceptions = DRCSimulationTestHelper.createVariableNamesStringsToIgnore();
+      List<String> exceptions = createVariableNamesStringsToIgnore();
       SCS2RewindabilityVerifier checker = new SCS2RewindabilityVerifier(simulationTestHelper1, simulationTestHelper2, exceptions);
       YoBoolean walk1 = (YoBoolean) simulationTestHelper1.findVariable("walkCSG");
       YoBoolean walk2 = (YoBoolean) simulationTestHelper2.findVariable("walkCSG");
@@ -109,7 +108,7 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
       // Get past the initialization hump.
       int numTicksToStartComparingAt = 2;
       int numberTicksAfterWalking = (int) Math.round(totalTimeAfterWalking / timePerTick);
-      ArrayList<String> exceptions = DRCSimulationTestHelper.createVariableNamesStringsToIgnore();
+      List<String> exceptions = createVariableNamesStringsToIgnore();
       SCS2RewindabilityVerifier checker = new SCS2RewindabilityVerifier(simulationTestHelper1, simulationTestHelper2, exceptions);
       double maxDifferenceAllowed = 1e-14;
       ArrayList<VariableDifference> variableDifferences = new ArrayList<>();
@@ -161,7 +160,7 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
       // Get past the initialization hump.
       int numTicksToStartComparingAt = 2;
       int numberTicksAfterWalking = (int) Math.round(totalTimeAfterWalking / timePerTick);
-      ArrayList<String> exceptions = DRCSimulationTestHelper.createVariableNamesStringsToIgnore();
+      List<String> exceptions = createVariableNamesStringsToIgnore();
       SCS2RewindabilityVerifier checker = new SCS2RewindabilityVerifier(simulationTestHelper1, simulationTestHelper2, exceptions);
       double maxDifferenceAllowed = 1e-14;
       ArrayList<VariableDifference> variableDifferences = new ArrayList<>();
@@ -224,5 +223,29 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
       runner.simulateAndWait(standingTimeDuration);
       walk.set(true);
       runner.simulateAndWait(walkingTimeDuration);
+   }
+
+   public static List<String> createVariableNamesStringsToIgnore()
+   {
+      List<String> exceptions = new ArrayList<String>();
+      exceptions.add("nano");
+      exceptions.add("milli");
+      exceptions.add("Timer");
+      exceptions.add("startTime");
+      exceptions.add("actualEstimatorDT");
+      exceptions.add("nextExecutionTime");
+      exceptions.add("totalDelay");
+      exceptions.add("lastEstimatorClockStartTime");
+      exceptions.add("lastControllerClockTime");
+      exceptions.add("controllerStartTime");
+      exceptions.add("actualControlDT");
+      exceptions.add("timePassed");
+
+      //    exceptions.add("gc_");
+      //    exceptions.add("toolFrame");
+      //    exceptions.add("ef_");
+      //    exceptions.add("kp_");
+
+      return exceptions;
    }
 }

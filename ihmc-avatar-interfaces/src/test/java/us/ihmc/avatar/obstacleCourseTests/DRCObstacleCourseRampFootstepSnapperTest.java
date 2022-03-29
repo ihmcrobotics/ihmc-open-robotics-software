@@ -328,7 +328,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
             { { 7.56, -0.1, 0.0}, { 0.0, 0.0, 0.0, 1 } },
             { { 7.56,  0.1, 0.0}, { 0.0, 0.0, 0.0, 1 } } };
 
-      RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.RIGHT, footstepLocationsAndOrientations.length);
+      RobotSide[] robotSides = ScriptedFootstepGenerator.createRobotSidesStartingFrom(RobotSide.RIGHT, footstepLocationsAndOrientations.length);
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
    }
 }

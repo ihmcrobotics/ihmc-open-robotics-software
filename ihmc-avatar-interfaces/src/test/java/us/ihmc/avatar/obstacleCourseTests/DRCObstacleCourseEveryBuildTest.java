@@ -183,7 +183,7 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
          }
       };
 
-      RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.LEFT, footstepLocationsAndOrientations.length);
+      RobotSide[] robotSides = ScriptedFootstepGenerator.createRobotSidesStartingFrom(RobotSide.LEFT, footstepLocationsAndOrientations.length);
 
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
    }
