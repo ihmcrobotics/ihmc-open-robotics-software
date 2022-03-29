@@ -20,7 +20,6 @@ import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateContro
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
-import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
@@ -70,6 +69,7 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -95,7 +95,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;
-   private final LegConfigurationManager legConfigurationManager;
    private final BalanceManager balanceManager;
    private final CenterOfMassHeightManager comHeightManager;
 
@@ -165,7 +164,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       this.pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       this.feetManager = managerFactory.getOrCreateFeetManager();
-      this.legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
 
       RigidBodyBasics head = fullRobotModel.getHead();
       RigidBodyBasics chest = fullRobotModel.getChest();
@@ -471,6 +469,10 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          ArmJointName[] armJointNames = fullRobotModel.getRobotSpecificJointNames().getArmJointNames();
          for (int i = 0; i < armJointNames.length; i++)
             privilegedConfigurationCommand.addJoint(fullRobotModel.getArmJoint(robotSide, armJointNames[i]), PrivilegedConfigurationOption.AT_MID_RANGE);
+
+         OneDoFJointBasics kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH);
+
+         privilegedConfigurationCommand.addJoint(kneeJoint, walkingControllerParameters.getKneePrivilegedConfigurationParameters());
       }
 
       if (!shouldKeepInitialContacts.getAndSet(false))
@@ -680,7 +682,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       double omega0 = controllerToolbox.getOmega0();
 
       feetManager.compute();
-      legConfigurationManager.compute();
 
       boolean bodyManagerIsLoadBearing = false;
       for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
@@ -824,9 +825,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          controllerCoreCommand.addFeedbackControlCommand(feetManager.getFeedbackControlCommand(robotSide));
          controllerCoreCommand.addInverseDynamicsCommand(feetManager.getInverseDynamicsCommand(robotSide));
          controllerCoreCommand.completeLowLevelJointData(feetManager.getJointDesiredData(robotSide));
-
-         controllerCoreCommand.addFeedbackControlCommand(legConfigurationManager.getFeedbackControlCommand(robotSide));
-         controllerCoreCommand.addInverseDynamicsCommand(legConfigurationManager.getInverseDynamicsCommand(robotSide));
 
          YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
          PlaneContactStateCommand planeContactStateCommand = planeContactStateCommandPool.add();

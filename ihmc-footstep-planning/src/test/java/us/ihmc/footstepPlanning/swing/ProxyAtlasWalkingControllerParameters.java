@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning.swing;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.configurations.*;
@@ -47,12 +46,6 @@ public class ProxyAtlasWalkingControllerParameters extends WalkingControllerPara
    public boolean allowAutomaticManipulationAbort()
    {
       return false;
-   }
-
-   @Override
-   public ICPControlGains createICPControlGains()
-   {
-      return null;
    }
 
    @Override
@@ -183,36 +176,6 @@ public class ProxyAtlasWalkingControllerParameters extends WalkingControllerPara
 
    private static class ProxyAtlasSwingTrajectoryParameters extends SwingTrajectoryParameters
    {
-      @Override
-      public boolean doToeTouchdownIfPossible()
-      {
-         return false;
-      }
-
-      @Override
-      public double getToeTouchdownAngle()
-      {
-         return Math.toRadians(20.0);
-      }
-
-      @Override
-      public boolean doHeelTouchdownIfPossible()
-      {
-         return false;
-      }
-
-      @Override
-      public double getHeelTouchdownAngle()
-      {
-         return Math.toRadians(-5.0);
-      }
-
-      @Override
-      public double getMinMechanicalLegLength()
-      {
-         return 0.420;
-      }
-
       @Override
       public double getDesiredTouchdownHeightOffset()
       {
