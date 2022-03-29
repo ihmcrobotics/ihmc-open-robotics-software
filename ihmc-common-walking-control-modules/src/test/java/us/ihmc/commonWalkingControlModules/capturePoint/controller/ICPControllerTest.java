@@ -559,12 +559,6 @@ public class ICPControllerTest
       }
 
       @Override
-      public ICPControlGains createICPControlGains()
-      {
-         return null;
-      }
-
-      @Override
       public PDGains getCoMHeightControlGains()
       {
          return null;
