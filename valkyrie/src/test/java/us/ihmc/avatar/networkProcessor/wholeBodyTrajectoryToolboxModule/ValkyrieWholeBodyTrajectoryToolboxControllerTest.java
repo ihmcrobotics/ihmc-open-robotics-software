@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.ReachingManifoldMessage;
@@ -58,6 +59,7 @@ public class ValkyrieWholeBodyTrajectoryToolboxControllerTest extends AvatarWhol
    }
 
    @Override
+   @Tag("humanoid-toolbox")
    @Test
    public void testOneBigCircle() throws Exception, UnreasonableAccelerationException
    {
@@ -65,6 +67,7 @@ public class ValkyrieWholeBodyTrajectoryToolboxControllerTest extends AvatarWhol
    }
 
    @Override
+   @Tag("humanoid-toolbox")
    @Test
    public void testHandCirclePositionAndYaw() throws Exception, UnreasonableAccelerationException
    {
@@ -72,12 +75,14 @@ public class ValkyrieWholeBodyTrajectoryToolboxControllerTest extends AvatarWhol
    }
 
    @Override
+   @Tag("humanoid-toolbox")
    @Test
    public void testHandCirclePositionAndYawPitchRoll() throws Exception, UnreasonableAccelerationException
    {
       super.testHandCirclePositionAndYawPitchRoll();
    }
 
+   @Tag("humanoid-toolbox")
    @Test
    public void testDoorMotion() throws Exception, UnreasonableAccelerationException
    {
@@ -139,6 +144,7 @@ public class ValkyrieWholeBodyTrajectoryToolboxControllerTest extends AvatarWhol
       runTrajectoryTest(message, maxNumberOfIterations);
    }
 
+   @Tag("humanoid-toolbox")
    @Test
    public void testDrillMotion() throws Exception, UnreasonableAccelerationException
    {
@@ -206,6 +212,7 @@ public class ValkyrieWholeBodyTrajectoryToolboxControllerTest extends AvatarWhol
       runTrajectoryTest(message, maxNumberOfIterations);
    }
 
+   @Tag("humanoid-toolbox")
    @Test
    public void testValveMotion() throws Exception, UnreasonableAccelerationException
    {
@@ -259,6 +266,7 @@ public class ValkyrieWholeBodyTrajectoryToolboxControllerTest extends AvatarWhol
       runTrajectoryTest(message, maxNumberOfIterations);
    }
 
+   @Tag("humanoid-toolbox")
    @Test
    public void testReaching() throws Exception, UnreasonableAccelerationException
    {

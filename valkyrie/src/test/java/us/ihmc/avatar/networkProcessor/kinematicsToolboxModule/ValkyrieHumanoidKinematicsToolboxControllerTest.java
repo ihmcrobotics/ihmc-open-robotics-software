@@ -1,5 +1,6 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -11,6 +12,7 @@ public class ValkyrieHumanoidKinematicsToolboxControllerTest extends HumanoidKin
    private final DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
    private final DRCRobotModel ghostRobotModel = new ValkyrieRobotModel(RobotTarget.SCS);
 
+   @Tag("humanoid-toolbox")
    @Override
    @Test // (timeout = 30000)
    public void testHoldBodyPose() throws Exception
@@ -18,6 +20,7 @@ public class ValkyrieHumanoidKinematicsToolboxControllerTest extends HumanoidKin
       super.testHoldBodyPose();
    }
 
+   @Tag("humanoid-toolbox")
    @Override
    @Test // (timeout = 30000)
    public void testRandomHandPoses() throws Exception
@@ -25,6 +28,7 @@ public class ValkyrieHumanoidKinematicsToolboxControllerTest extends HumanoidKin
       super.testRandomHandPoses();
    }
 
+   @Tag("humanoid-toolbox")
    @Override
    @Test // (timeout = 30000)
    public void testRandomHandPositions() throws Exception
@@ -32,6 +36,7 @@ public class ValkyrieHumanoidKinematicsToolboxControllerTest extends HumanoidKin
       super.testRandomHandPositions();
    }
 
+   @Tag("humanoid-toolbox")
    @Override
    @Test // (timeout = 30000)
    public void testSingleSupport() throws Exception
@@ -39,6 +44,7 @@ public class ValkyrieHumanoidKinematicsToolboxControllerTest extends HumanoidKin
       super.testSingleSupport();
    }
 
+   @Tag("humanoid-toolbox")
    @Override
    @Test
    public void testCenterOfMassConstraint() throws Exception

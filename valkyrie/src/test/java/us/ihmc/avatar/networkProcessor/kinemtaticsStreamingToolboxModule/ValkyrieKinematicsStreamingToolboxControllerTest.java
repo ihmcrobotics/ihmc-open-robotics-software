@@ -1,5 +1,6 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -16,6 +17,7 @@ public class ValkyrieKinematicsStreamingToolboxControllerTest extends Kinematics
       return new ValkyrieRobotModel(RobotTarget.SCS);
    }
 
+   @Tag("humanoid-toolbox")
    @Override
    @Test
    public void testHandMotionWithCollision()
@@ -23,6 +25,7 @@ public class ValkyrieKinematicsStreamingToolboxControllerTest extends Kinematics
       super.testHandMotionWithCollision();
    }
 
+   @Tag("humanoid-toolbox")
    @Test
    @Override
    public void testStreamingToController() throws SimulationExceededMaximumTimeException
