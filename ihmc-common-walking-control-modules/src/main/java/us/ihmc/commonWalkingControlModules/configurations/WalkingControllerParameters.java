@@ -528,8 +528,6 @@ public abstract class WalkingControllerParameters
     * When true, some of the tracking performance will be degraded to reduce the generated angular
     * momentum rate around the vertical axis during swing only. Useful when the robot has heavy legs
     * and tends to slips during swing.
-    * 
-    * @return
     */
    public boolean minimizeAngularMomentumRateZDuringSwing()
    {
@@ -537,15 +535,6 @@ public abstract class WalkingControllerParameters
    }
 
    public boolean minimizeAngularMomentumRateZDuringTransfer()
-   {
-      return false;
-   }
-
-   /**
-    * Determines whether the robot should use the velocity to be computed in the estimator, or just
-    * compute it from the robot state in the controller (new feature to be tested with Atlas)
-    */
-   public boolean useCenterOfMassVelocityFromEstimator()
    {
       return false;
    }
