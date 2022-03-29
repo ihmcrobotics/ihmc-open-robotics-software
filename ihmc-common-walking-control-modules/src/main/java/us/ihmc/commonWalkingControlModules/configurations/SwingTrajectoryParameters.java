@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
-import us.ihmc.commonWalkingControlModules.controlModules.foot.LegSingularityAndKneeCollapseAvoidanceControlModule;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 
@@ -140,18 +139,4 @@ public abstract class SwingTrajectoryParameters
    {
       return true;
    }
-
-   /**
-    * Represents the minimum distance hip-ankle that can be achieved when completely bending the knee.
-    * <p>
-    * It is used in {@link LegSingularityAndKneeCollapseAvoidanceControlModule} to limit swing/height
-    * trajectory to remain within the leg workspace.
-    * </p>
-    * <p>
-    * This parameter depends on the knee upper position limit, thigh length, and shin length.
-    * </p>
-    * 
-    * @return the minimum leg length in meter.
-    */
-   public abstract double getMinMechanicalLegLength();
 }
