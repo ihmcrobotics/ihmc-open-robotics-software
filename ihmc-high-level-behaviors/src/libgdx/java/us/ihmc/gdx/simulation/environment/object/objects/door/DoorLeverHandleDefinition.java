@@ -4,7 +4,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.mecano.tools.MomentOfInertiaFactory;
 import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
-import us.ihmc.scs2.definition.geometry.Box3DDefinition;
 import us.ihmc.scs2.definition.geometry.ModelFileGeometryDefinition;
 import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
@@ -36,12 +35,13 @@ public class DoorLeverHandleDefinition extends RigidBodyDefinition
       modelVisualDefinition.setGeometryDefinition(geometryDefinition);
       addVisualDefinition(modelVisualDefinition);
 
-      Point3D collisionShapeOffset = new Point3D(0.0, sizeY / 2.0 + 0.025, sizeZ / 2.0);
+//      Point3D collisionShapeOffset = new Point3D(0.0, sizeY / 2.0 + 0.025, sizeZ / 2.0);
       CollisionShapeDefinition collisionShapeDefinition = new CollisionShapeDefinition();
-//      new ModelFileGeometryDefinition();
-      Box3DDefinition boxCollisionDefinition = new Box3DDefinition(sizeX, sizeY, sizeZ);
-      collisionShapeDefinition.setGeometryDefinition(boxCollisionDefinition);
-      collisionShapeDefinition.getOriginPose().set(new YawPitchRoll(), collisionShapeOffset);
+      ModelFileGeometryDefinition collisionShapeGeometryDefinition
+            = new ModelFileGeometryDefinition("environmentObjects/door/doorLeverHandle/DoorLeverHandle.stl");
+      collisionShapeDefinition.setGeometryDefinition(collisionShapeGeometryDefinition);
+      collisionShapeDefinition.setConcave(true);
+      collisionShapeDefinition.getOriginPose().set(new YawPitchRoll(0.0, 0.0, -Math.toRadians(90.0)), new Point3D());
       addCollisionShapeDefinition(collisionShapeDefinition);
    }
 }
