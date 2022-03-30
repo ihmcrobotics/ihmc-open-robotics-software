@@ -27,8 +27,6 @@ import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLine2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
-import us.ihmc.yoVariables.parameters.BooleanParameter;
-import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -38,23 +36,38 @@ public class HeuristicICPController implements ICPControllerInterface
 
    private final String yoNamePrefix = "heuristic";
    private final YoRegistry registry = new YoRegistry("HeuristicICPController");
-
-   private final YoDouble adjustedICP = new YoDouble(yoNamePrefix + "AdjustedICP", registry);
-   private final YoDouble firstIntersection = new YoDouble(yoNamePrefix + "FirstIntersection", registry);
-   private final YoDouble secondIntersection = new YoDouble(yoNamePrefix + "SecondIntersection", registry);
-   private final YoDouble firstPerfect = new YoDouble(yoNamePrefix + "FirstPerfect", registry);
-   private final YoDouble secondPerfect = new YoDouble(yoNamePrefix + "SecondPerfect", registry);
-   private final YoDouble minICPPushDelta = new YoDouble(yoNamePrefix + "MinICPPushDelta", registry);
-   private final YoDouble maxProjectionInside = new YoDouble(yoNamePrefix + "MaxProjectionInside", registry);
-   private final YoDouble adjustmentDistance = new YoDouble(yoNamePrefix + "AdjustmentDistance", registry);
-
-   private final BooleanProvider useCMPFeedback;
-   private final BooleanProvider useAngularMomentum;
-
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final ICPControlGainsReadOnly feedbackGains;
+   // Control Parameters:
+   private final YoDouble pureFeedbackErrorThreshold = new YoDouble(yoNamePrefix + "PureFeedbackErrorThresh",
+                                                                    "Amount of ICP error before feedforward terms are ignored.",
+                                                                    registry);
+   private final YoDouble minICPPushDelta = new YoDouble(yoNamePrefix
+         + "MinICPPushDelta", "When projecting the CoP into the foot, make sure to not move the CMP any closer than this amount from the ICP", registry);
+   private final YoDouble maxCoPProjectionInside = new YoDouble(yoNamePrefix + "MaxCoPProjectionInside",
+                                                                "When projecting the CoP into the foot, move up to this far from the edge if possible",
+                                                                registry);
 
+   private final ICPControlGainsReadOnly feedbackGains;
+   //   private final BooleanProvider useCMPFeedback;
+   //   private final BooleanProvider useAngularMomentum;
+
+   // Algorithm Inputs:
+   private final BipedSupportPolygons bipedSupportPolygons;
+
+   private final FramePoint2D desiredICP = new FramePoint2D();
+   private final FrameVector2D desiredICPVelocity = new FrameVector2D();
+   private final FrameVector2D parallelDirection = new FrameVector2D();
+   private final FrameVector2D perpDirection = new FrameVector2D();
+   private final FrameVector2D perfectCMPOffset = new FrameVector2D();
+   private final FramePoint2D currentICP = new FramePoint2D();
+   private final FramePoint2D currentCoMPosition = new FramePoint2D();
+   private final FrameVector2D currentCoMVelocity = new FrameVector2D();
+
+   final YoFramePoint2D perfectCoP = new YoFramePoint2D(yoNamePrefix + "PerfectCoP", worldFrame, registry);
+   final YoFramePoint2D perfectCMP = new YoFramePoint2D(yoNamePrefix + "PerfectCMP", worldFrame, registry);
+
+   // Feedback control computations before projection (unconstrained)
    final YoFrameVector2D icpError = new YoFrameVector2D(yoNamePrefix + "ICPError", "", worldFrame, registry);
    private final YoDouble icpErrorMagnitude = new YoDouble(yoNamePrefix + "ICPErrorMagnitude", registry);
    private final YoDouble icpParallelError = new YoDouble(yoNamePrefix + "ICPParallelError", registry);
@@ -67,30 +80,21 @@ public class HeuristicICPController implements ICPControllerInterface
    private final YoDouble pureFeedbackMagnitude = new YoDouble(yoNamePrefix + "PureFeedbackMagnitude", registry);
 
    private final YoDouble feedbackFeedforwardAlpha = new YoDouble(yoNamePrefix + "FeedbackFeedforwardAlpha", registry);
-   private final YoDouble pureFeedbackThreshError = new YoDouble(yoNamePrefix + "PureFeedbackThreshError", registry);
 
    private final YoDouble icpParallelFeedback = new YoDouble(yoNamePrefix + "ICPParallelFeedback", registry);
    private final YoDouble icpPerpFeedback = new YoDouble(yoNamePrefix + "ICPPerpFeedback", registry);
-
-   private final FramePoint2D desiredICP = new FramePoint2D();
-   private final FrameVector2D desiredICPVelocity = new FrameVector2D();
-   private final FrameVector2D parallelDirection = new FrameVector2D();
-   private final FrameVector2D perpDirection = new FrameVector2D();
-   private final FrameVector2D perfectCMPOffset = new FrameVector2D();
-   private final FramePoint2D currentICP = new FramePoint2D();
-   private final FramePoint2D currentCoMPosition = new FramePoint2D();
-   private final FrameVector2D currentCoMVelocity = new FrameVector2D();
 
    private final YoFrameVector2D unconstrainedFeedback = new YoFrameVector2D(yoNamePrefix + "UnconstrainedFeedback", worldFrame, registry);
    private final YoFramePoint2D unconstrainedFeedbackCMP = new YoFramePoint2D(yoNamePrefix + "UnconstrainedFeedbackCMP", worldFrame, registry);
    private final YoFramePoint2D unconstrainedFeedbackCoP = new YoFramePoint2D(yoNamePrefix + "UnconstrainedFeedbackCoP", worldFrame, registry);
 
-   private final YoFramePoint2D feedbackCoP = new YoFramePoint2D(yoNamePrefix + "FeedbackCoPSolution", worldFrame, registry);
-   private final YoFramePoint2D coPProjection = new YoFramePoint2D(yoNamePrefix + "CoPProjection", worldFrame, registry);
-   private final YoFramePoint2D feedbackCMP = new YoFramePoint2D(yoNamePrefix + "FeedbackCMPSolution", worldFrame, registry);
-
-   final YoFramePoint2D perfectCoP = new YoFramePoint2D(yoNamePrefix + "PerfectCoP", worldFrame, registry);
-   final YoFramePoint2D perfectCMP = new YoFramePoint2D(yoNamePrefix + "PerfectCMP", worldFrame, registry);
+   // Projection computation variables:
+   private final YoDouble adjustedICP = new YoDouble(yoNamePrefix + "AdjustedICP", registry);
+   private final YoDouble firstIntersection = new YoDouble(yoNamePrefix + "FirstIntersection", registry);
+   private final YoDouble secondIntersection = new YoDouble(yoNamePrefix + "SecondIntersection", registry);
+   private final YoDouble firstPerfect = new YoDouble(yoNamePrefix + "FirstPerfect", registry);
+   private final YoDouble secondPerfect = new YoDouble(yoNamePrefix + "SecondPerfect", registry);
+   private final YoDouble adjustmentDistance = new YoDouble(yoNamePrefix + "AdjustmentDistance", registry);
 
    private final YoFrameVector2D projectionVector = new YoFrameVector2D(yoNamePrefix + "ProjectionVector", worldFrame, registry);
    private final YoFrameLine2D projectionLine = new YoFrameLine2D(yoNamePrefix + "ProjectionLine", worldFrame, registry);
@@ -99,18 +103,21 @@ public class HeuristicICPController implements ICPControllerInterface
    private final YoFramePoint2D secondProjectionIntersection = new YoFramePoint2D(yoNamePrefix + "SecondIntersection", worldFrame, registry);
    private final YoFramePoint2D closestPointWithProjectionLine = new YoFramePoint2D(yoNamePrefix + "ClosestPointWithProjectionLine", worldFrame, registry);
 
+   // Outputs:
+   private final YoFramePoint2D feedbackCoP = new YoFramePoint2D(yoNamePrefix + "FeedbackCoPSolution", worldFrame, registry);
+   private final YoFramePoint2D coPProjection = new YoFramePoint2D(yoNamePrefix + "CoPProjection", worldFrame, registry);
+   private final YoFramePoint2D feedbackCMP = new YoFramePoint2D(yoNamePrefix + "FeedbackCMPSolution", worldFrame, registry);
+
    private final YoFrameVector2D residualError = new YoFrameVector2D(yoNamePrefix + "ResidualDynamicsError", worldFrame, registry);
 
    private final ExecutionTimer controllerTimer = new ExecutionTimer("icpControllerTimer", 0.5, registry);
 
-   private final double controlDT;
-   private final double controlDTSquare;
-
-   private final BipedSupportPolygons bipedSupportPolygons;
+   //   private final double controlDT;
+   //   private final double controlDTSquare;
 
    private final FrameVector2D tempVector = new FrameVector2D();
 
-   public HeuristicICPController(WalkingControllerParameters walkingControllerParameters,
+   public HeuristicICPController(ICPControllerParameters icpControllerParameters,
                                  BipedSupportPolygons bipedSupportPolygons,
                                  ICPControlPolygons icpControlPolygons,
                                  SideDependentList<? extends ContactablePlaneBody> contactableFeet,
@@ -118,32 +125,25 @@ public class HeuristicICPController implements ICPControllerInterface
                                  YoRegistry parentRegistry,
                                  YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(walkingControllerParameters, walkingControllerParameters.getICPControllerParameters(), bipedSupportPolygons, icpControlPolygons, contactableFeet, controlDT, parentRegistry,
-           yoGraphicsListRegistry);
-   }
+      
+      pureFeedbackErrorThreshold.set(icpControllerParameters.getPureFeedbackErrorThreshold());
+      minICPPushDelta.set(icpControllerParameters.getMinICPPushDelta());
+      maxCoPProjectionInside.set(icpControllerParameters.getMaxCoPProjectionInside());
 
-   public HeuristicICPController(WalkingControllerParameters walkingControllerParameters,
-                                 ICPControllerParameters icpOptimizationParameters,
-                                 BipedSupportPolygons bipedSupportPolygons,
-                                 ICPControlPolygons icpControlPolygons,
-                                 SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-                                 double controlDT,
-                                 YoRegistry parentRegistry,
-                                 YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-      pureFeedbackThreshError.set(0.06);
+      
+      pureFeedbackErrorThreshold.set(0.06);
       minICPPushDelta.set(0.05);
-      maxProjectionInside.set(0.04);
+      maxCoPProjectionInside.set(0.04);
 
-      this.controlDT = controlDT;
-      this.controlDTSquare = controlDT * controlDT;
+//      this.controlDT = controlDT;
+//      this.controlDTSquare = controlDT * controlDT;
 
       this.bipedSupportPolygons = bipedSupportPolygons;
 
-      useCMPFeedback = new BooleanParameter(yoNamePrefix + "UseCMPFeedback", registry, icpOptimizationParameters.useCMPFeedback());
-      useAngularMomentum = new BooleanParameter(yoNamePrefix + "UseAngularMomentum", registry, icpOptimizationParameters.useAngularMomentum());
+//      useCMPFeedback = new BooleanParameter(yoNamePrefix + "UseCMPFeedback", registry, icpControllerParameters.useCMPFeedback());
+//      useAngularMomentum = new BooleanParameter(yoNamePrefix + "UseAngularMomentum", registry, icpControllerParameters.useAngularMomentum());
 
-      feedbackGains = new ParameterizedICPControlGains("", icpOptimizationParameters.getICPFeedbackGains(), registry);
+      feedbackGains = new ParameterizedICPControlGains("", icpControllerParameters.getICPFeedbackGains(), registry);
 
       if (yoGraphicsListRegistry != null)
          setupVisualizers(yoGraphicsListRegistry);
@@ -241,18 +241,18 @@ public class HeuristicICPController implements ICPControllerInterface
       pureFeedforwardMagnitude.set(pureFeedforwardControl.length());
 
       //      if (icpErrorMagnitude.getValue() >= pureFeedbackThreshError.getValue())
-      if (Math.abs(icpPerpError.getValue()) >= pureFeedbackThreshError.getValue())
+      if (Math.abs(icpPerpError.getValue()) >= pureFeedbackErrorThreshold.getValue())
       {
          feedbackFeedforwardAlpha.set(1.0);
       }
       else
       {
          //         feedbackFeedforwardAlpha.set(icpErrorMagnitude.getValue()/pureFeedbackThreshError.getValue());
-         double perpErrorAdjusted = Math.abs(icpPerpError.getValue()) - pureFeedbackThreshError.getValue() / 2.0;
+         double perpErrorAdjusted = Math.abs(icpPerpError.getValue()) - pureFeedbackErrorThreshold.getValue() / 2.0;
          if (perpErrorAdjusted < 0.0)
             perpErrorAdjusted = 0.0;
 
-         feedbackFeedforwardAlpha.set(perpErrorAdjusted / (pureFeedbackThreshError.getValue() / 2.0));
+         feedbackFeedforwardAlpha.set(perpErrorAdjusted / (pureFeedbackErrorThreshold.getValue() / 2.0));
       }
 
       limitAbsoluteValue(icpParallelFeedback, feedbackGains.getFeedbackPartMaxValueParallelToMotion());
@@ -367,7 +367,7 @@ public class HeuristicICPController implements ICPControllerInterface
                                                                                     firstPerfect.getValue(),
                                                                                     secondPerfect.getValue(),
                                                                                     minICPPushDelta.getValue(),
-                                                                                    maxProjectionInside.getValue()));
+                                                                                    maxCoPProjectionInside.getValue()));
 
       tempVector.set(projectionVector);
       tempVector.scale(adjustmentDistance.getValue());

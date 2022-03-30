@@ -79,8 +79,7 @@ public class HeuristicICPControllerTest
                                                       YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       if (testHeuristicController)
-         return new HeuristicICPController(walkingControllerParameters,
-                                           icpControllerParameters,
+         return new HeuristicICPController(icpControllerParameters,
                                            bipedSupportPolygons,
                                            null,
                                            contactableFeet,
