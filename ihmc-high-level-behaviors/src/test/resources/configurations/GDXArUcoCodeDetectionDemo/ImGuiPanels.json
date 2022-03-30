@@ -1,6 +1,8 @@
 {
   "dockspacePanels" : { },
   "windows" : {
+    "ArUco Marker Detection" : true,
+    "ArUco Marker Detection Image" : true,
     "Blackfly Fisheye Simulator###java.lang.Integer:Blackfly Fisheye Simulator" : true,
     "Blackfly Fisheye Color###GlobalWidgetIndex:1:Blackfly Fisheye Color" : true,
     "Blackfly Fisheye Depth###GlobalWidgetIndex:0:Blackfly Fisheye Depth" : false,
