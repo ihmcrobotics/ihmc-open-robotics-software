@@ -93,7 +93,7 @@ tasks.create("deployOCUApplications") {
    }
 }
 
-val directory = "/home/val/valkyrie"
+val directory = System.getProperty("user.home") + "/valkyrie"
 
 tasks.create("deployLocal") {
    dependsOn("installDist")
