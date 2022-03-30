@@ -30,16 +30,19 @@ public class ActualCMPComputer extends SimpleRobotController
 
    private final Vector3D linearMomentum = new Vector3D();
    private final Vector3D linearMomentumRate = new Vector3D();
+   private final Vector3D angularMomentum = new Vector3D();
    private final Point3D comPosition = new Point3D();
    private final Point2D comPosition2d = new Point2D();
    private final Vector3D comAcceleration = new Vector3D();
    private final Point2D cmp = new Point2D();
 
-   private final YoDouble alpha = new YoDouble("momentumRateAlpha", registry);
-   private final YoFrameVector3D yoLinearMomentum = new YoFrameVector3D("linearMomentum", worldFrame, registry);
-   private final FilteredVelocityYoFrameVector momentumChange;
+   private final YoDouble alpha = new YoDouble("simMomentumRateAlpha", registry);
+   private final YoFrameVector3D yoLinearMomentum = new YoFrameVector3D("simLinearMomentum", worldFrame, registry);
+   private final YoFrameVector3D yoAngularMomentum = new YoFrameVector3D("simAngularMomentum", worldFrame, registry);
+   private final FilteredVelocityYoFrameVector linearMomentumRateOfChange;
+   private final FilteredVelocityYoFrameVector angularMomentumRateOfChange;
 
-   private final YoFrameVector2D yoCmp = new YoFrameVector2D("actualCMP", worldFrame, registry);
+   private final YoFrameVector2D yoCmp = new YoFrameVector2D("simActualCMP", worldFrame, registry);
 
    public ActualCMPComputer(boolean createViz, SimulationConstructionSet scs, FloatingRootJointRobot simulatedRobot)
    {
@@ -47,8 +50,10 @@ public class ActualCMPComputer extends SimpleRobotController
       simulateDT = scs.getDT();
       gravity = simulatedRobot.getGravityZ();
 
-      momentumChange = FilteredVelocityYoFrameVector
-            .createFilteredVelocityYoFrameVector("rateOfChangeLinearMomentum", "", alpha, simulateDT, registry, yoLinearMomentum);
+      linearMomentumRateOfChange = FilteredVelocityYoFrameVector
+            .createFilteredVelocityYoFrameVector("SimRateOfChangeLinearMomentum", "", alpha, simulateDT, registry, yoLinearMomentum);
+      angularMomentumRateOfChange = FilteredVelocityYoFrameVector
+            .createFilteredVelocityYoFrameVector("SimRateOfChangeAngularMomentum", "", alpha, simulateDT, registry, yoAngularMomentum);
 
       if (createViz)
       {
@@ -67,11 +72,11 @@ public class ActualCMPComputer extends SimpleRobotController
    @Override
    public void doControl()
    {
-      // update the linear momentum rate by numerical differentiation of the robot momentum
+      // update the linear momentum rate by numerical differentiation of the robot linear momentum
       simulatedRobot.getRootJoint().physics.recursiveComputeLinearMomentum(linearMomentum);
       yoLinearMomentum.set(linearMomentum);
-      momentumChange.update();
-      linearMomentumRate.set(momentumChange);
+      linearMomentumRateOfChange.update();
+      linearMomentumRate.set(linearMomentumRateOfChange);
 
       // get mass and COM position from the robot
       double totalMass = simulatedRobot.computeCenterOfMass(comPosition);
@@ -89,6 +94,11 @@ public class ActualCMPComputer extends SimpleRobotController
       cmp.add(comPosition2d);
 
       yoCmp.set(cmp);
+      
+      // update the angular momentum rate by numerical differentiation of the robot angular momentum
+      simulatedRobot.getRootJoint().physics.recursiveComputeAngularMomentum(angularMomentum);
+      yoAngularMomentum.set(angularMomentum);
+      angularMomentumRateOfChange.update();
    }
 
    public YoGraphicsListRegistry getYoGraphicsListRegistry()
