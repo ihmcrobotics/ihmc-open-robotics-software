@@ -7,27 +7,28 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.gdx.imgui.ImGuiVideoPanel;
 import us.ihmc.perception.BytedecoOpenCVTools;
+import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLManager;
 
 public class GDXCVImagePanel
 {
    private final ImGuiVideoPanel videoPanel;
-   private final GDXBytedecoImage bytedecoImage;
+   private final BytedecoImage bytedecoImage;
    private Pixmap pixmap;
    private Texture panelTexture;
 
-   private final GDXBytedecoImage normalizedScaledImage;
+   private final BytedecoImage normalizedScaledImage;
 
    public GDXCVImagePanel(String name, int imageWidth, int imageHeight)
    {
       boolean flipY = true;
       videoPanel = new ImGuiVideoPanel(name, flipY);
       pixmap = new Pixmap(imageWidth, imageHeight, Pixmap.Format.RGBA8888);
-      bytedecoImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4, pixmap.getPixels());
+      bytedecoImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4, pixmap.getPixels());
       panelTexture = new Texture(new PixmapTextureData(pixmap, null, false, false));
       videoPanel.setTexture(panelTexture);
 
-      normalizedScaledImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1);
+      normalizedScaledImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1);
 
       BytedecoOpenCVTools.setRGBA8888ImageAlpha(bytedecoImage.getBytedecoOpenCVMat(), 255);
    }
@@ -72,7 +73,7 @@ public class GDXCVImagePanel
       return videoPanel;
    }
 
-   public GDXBytedecoImage getBytedecoImage()
+   public BytedecoImage getBytedecoImage()
    {
       return bytedecoImage;
    }
