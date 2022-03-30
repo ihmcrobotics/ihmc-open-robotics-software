@@ -2,9 +2,13 @@ package us.ihmc.gdx.simulation.sensors;
 
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.RosTools;
+
+import java.util.function.LongSupplier;
 
 public class GDXSimulatedSensorFactory
 {
@@ -171,6 +175,35 @@ public class GDXSimulatedSensorFactory
                                                   null,
                                                   syncedRobot.getReferenceFrames().getOusterLidarFrame(),
                                                   syncedRobot::getTimestamp,
+                                                  verticalFOV,
+                                                  imageWidth,
+                                                  imageHeight,
+                                                  minRange,
+                                                  maxRange,
+                                                  publishRateHz,
+                                                  false);
+   }
+
+   public static GDXHighLevelDepthSensorSimulator createBlackflyFisheyeImageOnlyNoComms(ReferenceFrame sensorFrame)
+   {
+      double publishRateHz = 1.0;
+      double verticalFOV = 100.0;
+      int imageWidth = 1024;
+      int imageHeight = 1024;
+      double minRange = 0.105;
+      double maxRange = 5.0;
+      LongSupplier timeSupplier = null;
+      return new GDXHighLevelDepthSensorSimulator("Blackfly Fisheye",
+                                                  null,
+                                                  null,
+                                                  null,
+                                                  null,
+                                                  null,
+                                                  null,
+                                                  null,
+                                                  null,
+                                                  sensorFrame,
+                                                  timeSupplier,
                                                   verticalFOV,
                                                   imageWidth,
                                                   imageHeight,
