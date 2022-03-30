@@ -413,8 +413,6 @@ public class SwingState extends AbstractFootControlState
       spatialFeedbackControlCommand.setScaleSecondaryTaskJointWeight(scaleSecondaryJointWeights.getBooleanValue(), secondaryJointWeightScale.getDoubleValue());
       spatialFeedbackControlCommand.setGains(gains);
       spatialFeedbackControlCommand.setGainsFrames(null, axialFrame);
-//      spatialFeedbackControlCommand.getSpatialAccelerationCommand().getWeightMatrix().getLinearPart().setWeightFrame(axialFrame);
-
 
       updateLiftOffKneeAcceleration();
 
