@@ -117,8 +117,36 @@ public abstract class ICPControllerParameters
       return true;
    }
 
+   /**
+    * Specifies whether or not to use the HeuristicICPController instead of the optimization based ICPController.
+    */
+   public boolean getUseHeuristicICPController()
+   {
+      return false;
+   }
 
+   /**
+    * Threshold for when to ignore the feedforward ICP controller, specified by the perfect CoP and CMP, and instead just use feedback and ignore the feedforward because the error is so large that the feedforward is probably fairly irrelevant at that high of an error.
+    */
+   public double getPureFeedbackErrorThreshold()
+   {
+      return 0.06;
+   }
 
+   /**
+    *  Minimum distance that the CMP can get towards the ICP when being projected into the foot, away from an edge. Once the CoP is inside the foot, and once the CMP gets this close to the ICP, do not push the CMP any closer towards the ICP.
+    */
+   public double getMinICPPushDelta()
+   {
+      return 0.05;
+   }
 
+   /**
+    * The maximum distance to project the CoP into the foot, away from the edge. Once it is projected this far, then do not push it any further inside the foot.
+    */
+   public double getMaxCoPProjectionInside()
+   {
+      return 0.04;
+   }
 
 }
