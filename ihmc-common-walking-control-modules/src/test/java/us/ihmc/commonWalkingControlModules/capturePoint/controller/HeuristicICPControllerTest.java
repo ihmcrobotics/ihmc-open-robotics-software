@@ -55,7 +55,7 @@ public class HeuristicICPControllerTest
    private static final double stanceWidth = 0.35;
 
    private static boolean visualize = false;
-   private static boolean testHeuristicController = !false;
+   private static boolean testHeuristicController = true;
 
    @BeforeEach
    public void setup()
@@ -135,7 +135,7 @@ public class HeuristicICPControllerTest
                                                               yoGraphicsListRegistry);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
-      ICPControllerTestVisualizer visualizer = new ICPControllerTestVisualizer(4000, registry, yoGraphicsListRegistry);
+      ICPControllerTestVisualizer visualizer = new ICPControllerTestVisualizer(60000, registry, yoGraphicsListRegistry);
 
       ICPControllerTestCase testCase = new ICPControllerTestCase();
 
@@ -167,9 +167,18 @@ public class HeuristicICPControllerTest
 
       solveAndVisualize(bipedSupportPolygons, controller, visualizer, testCase);
 
-      for (double x = -0.2; x< 0.4; x=x+0.01)
+      double xLowerBound = -0.2;
+      double xUpperBound = 0.4;
+      double yBounds = 0.2;
+      double yIncrement = 0.002;
+      double xIncrement = 0.002;
+
+      boolean incrementY=true;
+      double y = -yBounds;
+
+      for (double x = xLowerBound; x< xUpperBound; x=x+xIncrement)
       {
-         for (double y = -0.2; y<0.2; y = y + 0.01)
+         while(true)
          {
             testCase = new ICPControllerTestCase(testCase);
             currentICP.set(x, y);
@@ -179,6 +188,25 @@ public class HeuristicICPControllerTest
             testCase.setDesiredICPVelocity(desiredICPVelocity);
 
             solveAndVisualize(bipedSupportPolygons, controller, visualizer, testCase);
+
+            if (incrementY)
+            {
+               y = y + yIncrement;
+               if (y >= yBounds)
+               {
+                  incrementY = !incrementY;
+                  break;
+               }
+            }
+            else
+            {
+               y = y - yIncrement;
+               if (y <= -yBounds)
+               {
+                  incrementY = !incrementY;
+                  break;
+               }
+            }
          }
       }
 
