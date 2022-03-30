@@ -1,16 +1,15 @@
-package us.ihmc.gdx.perception;
+package us.ihmc.perception;
 
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl._cl_mem;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
-import us.ihmc.perception.OpenCLManager;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-public class GDXBytedecoImage
+public class BytedecoImage
 {
    private ByteBuffer backingDirectByteBuffer;
    private BytePointer bytedecoByteBufferPointer;
@@ -25,12 +24,12 @@ public class GDXBytedecoImage
    private int openCLImageObjectFlags;
    private final boolean isBackedByExternalByteBuffer;
 
-   public GDXBytedecoImage(int imageWidth, int imageHeight, int cvMatType)
+   public BytedecoImage(int imageWidth, int imageHeight, int cvMatType)
    {
       this(imageWidth, imageHeight, cvMatType, null);
    }
 
-   public GDXBytedecoImage(int imageWidth, int imageHeight, int cvMatType, ByteBuffer backingDirectByteBuffer)
+   public BytedecoImage(int imageWidth, int imageHeight, int cvMatType, ByteBuffer backingDirectByteBuffer)
    {
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
