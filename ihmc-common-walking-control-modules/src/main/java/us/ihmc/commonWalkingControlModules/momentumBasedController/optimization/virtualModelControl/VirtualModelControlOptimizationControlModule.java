@@ -78,6 +78,9 @@ public class VirtualModelControlOptimizationControlModule
    private final ReferenceFrame centerOfMassFrame;
 
    private final DMatrixRMaj zeroObjective = new DMatrixRMaj(0, 0);
+   
+   private final int numberOfDoFs;
+   private final DMatrixRMaj tempTaskJacobian = new DMatrixRMaj(0, 0);
 
    public VirtualModelControlOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, YoRegistry parentRegistry)
    {
@@ -87,6 +90,8 @@ public class VirtualModelControlOptimizationControlModule
       ControllerCoreOptimizationSettings optimizationSettings = toolbox.getOptimizationSettings();
       int rhoSize = optimizationSettings.getRhoSize();
       momentumQPInput = new QPInputTypeA(SpatialForce.SIZE);
+      
+      numberOfDoFs = toolbox.getJointIndexHandler().getNumberOfDoFs();
 
       if (VISUALIZE_RHO_BASIS_VECTORS)
          basisVectorVisualizer = new BasisVectorVisualizer("ContactBasisVectors", rhoSize, 1.0, toolbox.getYoGraphicsListRegistry(), registry);
@@ -184,9 +189,9 @@ public class VirtualModelControlOptimizationControlModule
 
    public void submitQPObjectiveCommand(QPObjectiveCommand command)
    {
-      boolean success = convertQPObjectiveCommand(command, motionQPInput);
+      boolean success = convertQPObjectiveCommand(command, momentumQPInput);
       if (success)
-         qpSolver.addMotionInput(motionQPInput);
+         qpSolver.addMomentumInput(momentumQPInput);
    }
    
    public void submitMomentumRateCommand(MomentumRateCommand command)
@@ -261,10 +266,10 @@ public class VirtualModelControlOptimizationControlModule
 
       CommonOps_DDRM.mult(selectionMatrix, objective, qpInputToPack.taskObjective);
 
-      tempTaskJacobian.reshape(taskSize, jacobianCalculator.getNumberOfDegreesOfFreedom());
+      tempTaskJacobian.reshape(taskSize, numberOfDoFs); //jacobianCalculator.getNumberOfDegreesOfFreedom());
       CommonOps_DDRM.mult(selectionMatrix, jacobian, tempTaskJacobian);
 
-      recordTaskJacobian(qpInputToPack.taskJacobian);
+//      recordTaskJacobian(qpInputToPack.taskJacobian);
       return true;
    }
    
