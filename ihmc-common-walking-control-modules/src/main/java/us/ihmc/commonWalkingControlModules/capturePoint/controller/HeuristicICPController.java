@@ -7,8 +7,6 @@ import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.ParameterizedICPControlGains;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationControllerHelper;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -108,8 +106,6 @@ public class HeuristicICPController implements ICPControllerInterface
    private final double controlDT;
    private final double controlDTSquare;
 
-   private final ICPOptimizationControllerHelper helper = new ICPOptimizationControllerHelper();
-
    private final BipedSupportPolygons bipedSupportPolygons;
 
    private final FrameVector2D tempVector = new FrameVector2D();
@@ -122,12 +118,12 @@ public class HeuristicICPController implements ICPControllerInterface
                                  YoRegistry parentRegistry,
                                  YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(walkingControllerParameters, walkingControllerParameters.getICPOptimizationParameters(), bipedSupportPolygons, icpControlPolygons, contactableFeet, controlDT, parentRegistry,
+      this(walkingControllerParameters, walkingControllerParameters.getICPControllerParameters(), bipedSupportPolygons, icpControlPolygons, contactableFeet, controlDT, parentRegistry,
            yoGraphicsListRegistry);
    }
 
    public HeuristicICPController(WalkingControllerParameters walkingControllerParameters,
-                                 ICPOptimizationParameters icpOptimizationParameters,
+                                 ICPControllerParameters icpOptimizationParameters,
                                  BipedSupportPolygons bipedSupportPolygons,
                                  ICPControlPolygons icpControlPolygons,
                                  SideDependentList<? extends ContactablePlaneBody> contactableFeet,
