@@ -1,0 +1,10 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "Blackfly Fisheye Simulator###java.lang.Integer:Blackfly Fisheye Simulator" : true,
+    "Blackfly Fisheye Color###GlobalWidgetIndex:1:Blackfly Fisheye Color" : true,
+    "Blackfly Fisheye Depth###GlobalWidgetIndex:0:Blackfly Fisheye Depth" : false,
+    "Environment###java.lang.Class:Environment" : true,
+    "VR Thread Debugger" : false
+  }
+}
