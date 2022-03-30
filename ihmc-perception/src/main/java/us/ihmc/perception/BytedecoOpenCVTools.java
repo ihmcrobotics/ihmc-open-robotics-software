@@ -52,4 +52,10 @@ public class BytedecoOpenCVTools
       IntPointer fromABGRToRGBA = new IntPointer(0, 3, 1, 2, 2, 1, 3, 0);
       opencv_core.mixChannels(srcABGR, 1, dstRGBA, 1, fromABGRToRGBA, 4);
    }
+
+   public static void convertRGBAToABGR(Mat srcRGBA, Mat dstABGR)
+   {
+      IntPointer fromABGRToRGBA = new IntPointer(0, 3, 1, 2, 2, 1, 3, 0);
+      opencv_core.mixChannels(srcRGBA, 1, dstABGR, 1, fromABGRToRGBA, 4);
+   }
 }

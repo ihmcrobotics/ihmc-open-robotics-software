@@ -60,6 +60,12 @@ public class BytedecoImage
          openCLChannelOrder = OpenCL.CL_R;
          openCLChannelDataType = OpenCL.CL_UNSIGNED_INT8;
       }
+      else if (cvMatType == opencv_core.CV_8UC3)
+      {
+         bytesPerPixel = 3;
+         openCLChannelOrder = OpenCL.CL_RGB;
+         openCLChannelDataType = OpenCL.CL_UNSIGNED_INT8;
+      }
       else if (cvMatType == opencv_core.CV_8UC4)
       {
          bytesPerPixel = 4;
@@ -156,5 +162,15 @@ public class BytedecoImage
    public _cl_mem getOpenCLImageObject()
    {
       return openCLImageObject;
+   }
+
+   public int getImageWidth()
+   {
+      return imageWidth;
+   }
+
+   public int getImageHeight()
+   {
+      return imageHeight;
    }
 }
