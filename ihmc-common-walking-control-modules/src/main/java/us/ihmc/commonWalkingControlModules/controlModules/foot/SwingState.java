@@ -151,7 +151,6 @@ public class SwingState extends AbstractFootControlState
    private final OneDoFJointBasics kneeJoint;
    private final YoDouble liftOffKneeAcceleration;
 
-   private final FeedbackControlCommandList feedbackControlCommandList = new FeedbackControlCommandList();
    private final JointspaceAccelerationCommand jointspaceAccelerationCommand = new JointspaceAccelerationCommand();
 
    public SwingState(FootControlHelper footControlHelper, PIDSE3GainsReadOnly gains, YoRegistry registry)
@@ -870,11 +869,9 @@ public class SwingState extends AbstractFootControlState
    }
 
    @Override
-   public FeedbackControlCommand<FeedbackControlCommandList> getFeedbackControlCommand()
+   public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
-      feedbackControlCommandList.clear();
-      feedbackControlCommandList.addCommand(spatialFeedbackControlCommand);
-      return feedbackControlCommandList;
+      return spatialFeedbackControlCommand;
    }
 
 }
