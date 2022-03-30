@@ -13,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.SwingTrajectoryCalcula
 import us.ihmc.commonWalkingControlModules.controlModules.leapOfFaith.FootLeapOfFaithModule;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
@@ -146,7 +145,7 @@ public class SwingState extends AbstractFootControlState
 
    private final ReferenceFrame frameBeforeHipPitchJoint;
    private final ReferenceFrame originOfControlFrame;
-   private final PoseReferenceFrame axialFrame = new PoseReferenceFrame("axialFrame", worldFrame);
+   private final PoseReferenceFrame radialFrame = new PoseReferenceFrame("axialFrame", worldFrame);
 
    private final OneDoFJointBasics kneeJoint;
    private final YoDouble liftOffKneeAcceleration;
@@ -364,7 +363,7 @@ public class SwingState extends AbstractFootControlState
    @Override
    public void doSpecificAction(double timeInState)
    {
-      updateControlFrame();
+      updateRadialFrame();
 
       computeAndPackTrajectory(timeInState);
 
@@ -412,7 +411,7 @@ public class SwingState extends AbstractFootControlState
       spatialFeedbackControlCommand.setWeightsForSolver(currentAngularWeight, currentLinearWeight);
       spatialFeedbackControlCommand.setScaleSecondaryTaskJointWeight(scaleSecondaryJointWeights.getBooleanValue(), secondaryJointWeightScale.getDoubleValue());
       spatialFeedbackControlCommand.setGains(gains);
-      spatialFeedbackControlCommand.setGainsFrames(null, axialFrame);
+      spatialFeedbackControlCommand.setGainsFrames(null, radialFrame);
 
       updateLiftOffKneeAcceleration();
 
@@ -578,7 +577,7 @@ public class SwingState extends AbstractFootControlState
    private final FramePoint3D tempPoint = new FramePoint3D();
    private final FrameVector3D footToHipAxis = new FrameVector3D();
 
-   public void updateControlFrame()
+   public void updateRadialFrame()
    {
       tempPoint.setToZero(frameBeforeHipPitchJoint);
       tempPoint.changeFrame(originOfControlFrame);
@@ -589,7 +588,7 @@ public class SwingState extends AbstractFootControlState
       anklePitchRotationToParentFrame.changeFrame(worldFrame);
       tempPoint.setToZero(originOfControlFrame);
       tempPoint.changeFrame(worldFrame);
-      axialFrame.setPoseAndUpdate(tempPoint, anklePitchRotationToParentFrame);
+      radialFrame.setPoseAndUpdate(tempPoint, anklePitchRotationToParentFrame);
    }
 
    public void setAdjustedFootstepAndTime(Footstep adjustedFootstep, double swingTime)
@@ -721,15 +720,7 @@ public class SwingState extends AbstractFootControlState
    private void computeCurrentWeights(Vector3DReadOnly nominalAngularWeight, Vector3DReadOnly nominalLinearWeight, Vector3DBasics currentAngularWeightToPack,
                                       Vector3DBasics currentLinearWeightToPack)
    {
-      double percentThroughSwing = currentTime.getDoubleValue() / swingDuration.getValue();
-      double minAlpha = 0.25;
-      double alpha;
-      if (percentThroughSwing > 0.75)
-         alpha = 1.0;
-      else
-         alpha = minAlpha + (1.0 - minAlpha) * percentThroughSwing / 0.75;
-
-      currentAngularWeightToPack.setAndScale(alpha, nominalAngularWeight);
+      currentAngularWeightToPack.set(nominalAngularWeight);
       leapOfFaithModule.scaleFootWeight(nominalLinearWeight, currentLinearWeightToPack);
    }
 
