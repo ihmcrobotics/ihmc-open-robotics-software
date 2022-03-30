@@ -22,7 +22,7 @@ mainDependencies {
    api("us.ihmc:euclid-shape:0.17.2")
    api("us.ihmc:ihmc-javafx-toolkit:0.20.0")
    api("us.ihmc:ihmc-yovariables:0.9.11")
-   api("us.ihmc:ihmc-convex-optimization:0.17.10")
+   api("us.ihmc:ihmc-convex-optimization:0.17.11")
    api("us.ihmc:robot-environment-awareness:source")
 }
 

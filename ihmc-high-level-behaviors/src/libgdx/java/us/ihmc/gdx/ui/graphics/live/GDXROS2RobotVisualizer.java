@@ -7,7 +7,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.gdx.FocusBasedGDXCamera;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.gdx.ui.graphics.GDXRobotModelGraphic;
+import us.ihmc.gdx.ui.graphics.GDXMultiBodyGraphic;
 import us.ihmc.gdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -17,7 +17,7 @@ import us.ihmc.scs2.definition.visual.MaterialDefinition;
 
 import java.util.function.Supplier;
 
-public class GDXROS2RobotVisualizer extends GDXRobotModelGraphic
+public class GDXROS2RobotVisualizer extends GDXMultiBodyGraphic
 {
    private final ImBoolean trackRobot = new ImBoolean(false);
    private final Supplier<FocusBasedGDXCamera> cameraForTrackingSupplier;
@@ -59,7 +59,7 @@ public class GDXROS2RobotVisualizer extends GDXRobotModelGraphic
          RobotDefinition.forEachRigidBodyDefinition(robotDefinition.getRigidBodyDefinition(handName),
                                                     body -> body.getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material)));
       }
-      loadRobotModelAndGraphics(robotDefinition, syncedRobot.getFullRobotModel().getElevator(), robotModel);
+      loadRobotModelAndGraphics(robotDefinition, syncedRobot.getFullRobotModel().getElevator());
    }
 
    @Override

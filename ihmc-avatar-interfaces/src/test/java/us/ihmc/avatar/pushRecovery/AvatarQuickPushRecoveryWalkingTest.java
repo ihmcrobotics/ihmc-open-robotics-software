@@ -33,6 +33,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -94,45 +95,47 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
    }
 
    @Test
-   public void testOutwardPushLeftEarlySwing() throws SimulationExceededMaximumTimeException
+   public void testInwardPushLeftAtDifferentTimes() throws SimulationExceededMaximumTimeException
    {
       setupTest();
-
-      // setup all parameters
-      Vector3D forceDirection = new Vector3D(0.0, 1.0, 0.0);
-      double percentInSwing = 0.2;
-      RobotSide side = RobotSide.LEFT;
-
-      // apply the push
-      testPush(forceDirection, pushChangeInVelocity, percentInSwing, swingStartConditions.get(side), swingTime, 6);
-   }
-
-   @Test
-   public void testInwardPushLeftMidSwing() throws SimulationExceededMaximumTimeException
-   {
-      setupTest();
+      enableSpeedUp();
 
       // setup all parameters
       Vector3D forceDirection = new Vector3D(0.0, -1.0, 0.0);
-      double percentInSwing = 0.5;
       RobotSide side = RobotSide.LEFT;
 
-      // apply the push
-      testPush(forceDirection, pushChangeInVelocity, percentInSwing, swingStartConditions.get(side), swingTime, 6);
+      walkForward(16);
+
+      // apply the push at mid swing
+      testPush(forceDirection, pushChangeInVelocity, 0.45, swingStartConditions.get(side), swingTime, 4);
+
+      // apply the push at early swing
+      testPush(forceDirection, pushChangeInVelocity, 0.2, swingStartConditions.get(side), swingTime, 4);
+
+      // apply the push at late swing
+      testPush(forceDirection, pushChangeInVelocity, 0.7, swingStartConditions.get(side), swingTime, 4);
    }
 
    @Test
-   public void testOutwardPushMidLeftSwing() throws SimulationExceededMaximumTimeException
+   public void testOutwardPushLeftSwingAtDifferentTimes() throws SimulationExceededMaximumTimeException
    {
       setupTest();
+      enableSpeedUp();
 
       // setup all parameters
       Vector3D forceDirection = new Vector3D(0.0, 1.0, 0.0);
-      double percentInSwing = 0.5;
       RobotSide side = RobotSide.LEFT;
 
-      // apply the push
-      testPush(forceDirection, pushChangeInVelocity, percentInSwing, swingStartConditions.get(side), swingTime, 6);
+      walkForward(16);
+
+      // apply the push at mid swing
+      testPush(forceDirection, pushChangeInVelocity, 0.45, swingStartConditions.get(side), swingTime, 4);
+
+      // apply the push at early swing
+      testPush(forceDirection, pushChangeInVelocity, 0.2, swingStartConditions.get(side), swingTime, 4);
+
+      // apply the push at late swing
+      testPush(forceDirection, 0.6 * pushChangeInVelocity, 0.65, swingStartConditions.get(side), swingTime, 4);
    }
 
    @Test
@@ -144,6 +147,8 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
       Vector3D forceDirection = new Vector3D(0.0, -1.0, 0.0);
       double percentInSwing = 0.4;
       RobotSide side = RobotSide.RIGHT;
+
+      walkForward();
 
       StateTransitionCondition condition = time -> swingStartConditions.get(side).testCondition(time) && footstepsCompletedPerSide.get(side).get() > 0;
       // apply the push
@@ -157,35 +162,57 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
    }
 
    @Test
-   public void testBackwardPushInLeftSwing() throws SimulationExceededMaximumTimeException
+   public void testBackwardPushInLeftSwingAtDifferentTimes() throws SimulationExceededMaximumTimeException
    {
       setupTest();
+      enableSpeedUp();
 
       // setup all parameters
       Vector3D forceDirection = new Vector3D(-1.0, 0.0, 0.0);
-      double percentInSwing = 0.2;
       RobotSide side = RobotSide.LEFT;
+
+      walkForward(16);
+
+      StateTransitionCondition condition = time -> swingStartConditions.get(side).testCondition(time) && footstepsCompletedPerSide.get(side).get() > 0;
+
+      // apply the push at mid swing
+      testPush(forceDirection, pushChangeInVelocity, 0.45, condition, swingTime, 4);
+
+      // apply the push at early swing
+      testPush(forceDirection, pushChangeInVelocity, 0.2, condition, swingTime, 4);
+
+      // apply the push at late swing
+      testPush(forceDirection, pushChangeInVelocity, 0.7, condition, swingTime, 4);
+   }
+
+   @Test
+   public void testForwardPushInLeftSwingAtDifferentTimes() throws SimulationExceededMaximumTimeException
+   {
+      setupTest();
+      enableSpeedUp();
+
+      // setup all parameters
+      Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
+      RobotSide side = RobotSide.LEFT;
+
+      walkForward(16);
 
       StateTransitionCondition condition = time -> swingStartConditions.get(side).testCondition(time) && footstepsCompletedPerSide.get(side).get() > 0;
 
       // apply the push
-      testPush(forceDirection, pushChangeInVelocity, percentInSwing, condition, swingTime, 6);
-   }
+      testPush(forceDirection, pushChangeInVelocity, 0.5, condition, swingTime, 4);
 
-   @Test
-   public void testForwardPushInLeftSwing() throws SimulationExceededMaximumTimeException
-   {
-      setupTest();
+      // reset and queue an early push
+      footstepsCompletedPerSide.get(side).set(0);
+      condition = time -> swingStartConditions.get(side).testCondition(time) && footstepsCompletedPerSide.get(side).get() > 0;
 
-      // setup all parameters
-      Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
-      double percentInSwing = 0.4;
-      RobotSide side = RobotSide.LEFT;
+      testPush(forceDirection, pushChangeInVelocity, 0.1, condition, swingTime, 4);
 
-      StateTransitionCondition condition = time -> swingStartConditions.get(side).testCondition(time) && footstepsCompletedPerSide.get(side).get() > 1;
+      // reset and queue a late push
+      footstepsCompletedPerSide.get(side).set(0);
+      condition = time -> swingStartConditions.get(side).testCondition(time) && footstepsCompletedPerSide.get(side).get() > 0;
 
-      // apply the push
-      testPush(forceDirection, pushChangeInVelocity, percentInSwing, condition, swingTime, 7);
+      testPush(forceDirection, 0.6 * pushChangeInVelocity, 0.8, condition, swingTime, 4);
    }
 
    @Test
@@ -197,6 +224,8 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
       Vector3D forceDirection = new Vector3D(1.0, 0.5, 0.0);
       double percentInSwing = 0.4;
       RobotSide side = RobotSide.LEFT;
+
+      walkForward();
 
       StateTransitionCondition condition = time -> swingStartConditions.get(side).testCondition(time) && footstepsCompletedPerSide.get(side).get() > 1;
 
@@ -214,6 +243,8 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
       Vector3D forceDirection = new Vector3D(0.0, -1.0, 0.0);
       double percentInTransferState = 0.5;
       RobotSide side = RobotSide.LEFT;
+
+      walkForward();
 
       // apply the push
       testPush(forceDirection, pushChangeInVelocity, percentInTransferState, swingFinishConditions.get(side), transferTime, 4);
@@ -240,6 +271,8 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
       double percentInTransferState = 0.4;
       RobotSide side = RobotSide.LEFT;
 
+      walkForward();
+
       StateTransitionCondition condition = time -> swingFinishConditions.get(side).testCondition(time) &&
                                                    footstepsCompletedPerSide.get(side.getOppositeSide()).get() > 0;
       // apply the push
@@ -256,6 +289,10 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, flatGround);
       drcSimulationTestHelper.createSimulation("DRCSimpleFlatGroundScriptTest");
       ((YoBoolean) drcSimulationTestHelper.getYoVariable("controllerAllowStepAdjustment")).set(true);
+      ((YoBoolean) drcSimulationTestHelper.getYoVariable("controllerSwingSpeedUpEnabled")).set(true);
+      ((YoBoolean) drcSimulationTestHelper.getYoVariable("leftFootSwingIsSpeedUpEnabled")).set(true);
+      ((YoBoolean) drcSimulationTestHelper.getYoVariable("rightFootSwingIsSpeedUpEnabled")).set(true);
+      ((YoDouble) drcSimulationTestHelper.getYoVariable("icpDistanceFromFootPolygonThreshold")).set(0.15);
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       pushRobotController = new PushRobotController(drcSimulationTestHelper.getRobot(), fullRobotModel);
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -290,11 +327,21 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
       //      enable.set(true);
    }
 
-   private void walkForward() throws SimulationExceededMaximumTimeException
+   public void enableSpeedUp()
+   {
+      ((YoBoolean) drcSimulationTestHelper.getYoVariable("speedUpTransferDynamicsFromError")).set(true);
+      ((YoBoolean) drcSimulationTestHelper.getYoVariable("speedUpSwingDynamicsFromError")).set(true);
+   }
+
+   private void walkForward()
+   {
+      walkForward(10);
+   }
+
+   private void walkForward(int steps)
    {
       double stepLength = 0.3;
       double stepWidth = 0.14;
-      int steps = 10;
 
       ReferenceFrame pelvisFrame = drcSimulationTestHelper.getControllerFullRobotModel().getPelvis().getBodyFixedFrame();
 
@@ -323,8 +370,6 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
                          double stateTime,
                          int stepsToTake) throws SimulationExceededMaximumTimeException
    {
-      walkForward();
-
       double totalMass = getRobotModel().createFullRobotModel().getTotalMass();
       double pushMagnitude = velocityChange / pushDuration * totalMass;
 

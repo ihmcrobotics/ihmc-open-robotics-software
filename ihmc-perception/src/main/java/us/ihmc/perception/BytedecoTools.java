@@ -14,14 +14,19 @@ public class BytedecoTools
       Activator nativesActivated = new Activator();
       ThreadTools.startAThread(() ->
       {
-         LogTools.info("Loading Bytedeco OpenCL...");
-         Loader.load(OpenCL.class);
-         LogTools.info("Bytedeco OpenCL loaded.");
-         LogTools.info("Loading Bytedeco OpenCV...");
-         Loader.load(opencv_core.class);
-         LogTools.info("Bytedeco OpenCV loaded.");
+         loadNatives();
          nativesActivated.activate();
       }, "Bytedeco loader");
       return nativesActivated;
+   }
+
+   public static void loadNatives()
+   {
+      LogTools.info("Loading Bytedeco OpenCL...");
+      Loader.load(OpenCL.class);
+      LogTools.info("Bytedeco OpenCL loaded.");
+      LogTools.info("Loading Bytedeco OpenCV...");
+      Loader.load(opencv_core.class);
+      LogTools.info("Bytedeco OpenCV loaded.");
    }
 }

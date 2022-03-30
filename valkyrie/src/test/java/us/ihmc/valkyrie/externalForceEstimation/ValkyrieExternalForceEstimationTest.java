@@ -228,7 +228,7 @@ public class ValkyrieExternalForceEstimationTest
 
             initializeToolbox.set(true);
             updateToolbox.set(true);
-            drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(7.0);
+            drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0);
             Assertions.assertTrue(force.epsilonEquals(testConfig.estimatedForce, epsilon),
                                   "Estimator failed to estimate force applied on " + testConfig.endEffectorName + ", simulated force: " + force
                                   + ", estimated force: " + testConfig.estimatedForce);

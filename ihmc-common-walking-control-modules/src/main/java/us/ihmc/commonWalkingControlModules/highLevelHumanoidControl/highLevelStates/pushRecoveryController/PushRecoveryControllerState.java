@@ -56,7 +56,7 @@ public class PushRecoveryControllerState extends HighLevelControllerState
 
       // create push recovery controller
       pushRecoveryController = new PushRecoveryHighLevelHumanoidController(commandInputManager, statusOutputManager, managerFactory, pushRecoveryControllerParameters,
-                                                                 controllerToolbox);
+                                                                           walkingControllerParameters.getKneePrivilegedConfigurationParameters(), controllerToolbox);
 
       // get controller core
       controllerCoreFactory.setFeedbackControllerTemplate(managerFactory.createFeedbackControlTemplate());

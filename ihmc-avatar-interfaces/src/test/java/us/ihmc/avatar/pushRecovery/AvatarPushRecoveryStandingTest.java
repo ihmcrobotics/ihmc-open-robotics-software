@@ -55,13 +55,19 @@ public abstract class AvatarPushRecoveryStandingTest
 
    private PushRobotController pushRobotController;
 
-   private double swingTime, transferTime;
+   private double magnitude;
 
    private SideDependentList<StateTransitionCondition> singleSupportStartConditions = new SideDependentList<>();
 
    private SideDependentList<StateTransitionCondition> doubleSupportStartConditions = new SideDependentList<>();
 
    private YoEnum<HighLevelControllerName> currentHighLevelState;
+
+
+   public void setMagnitude(double magnitude)
+   {
+      this.magnitude = magnitude;
+   }
 
    @BeforeEach
    public void showMemoryUsageBeforeTest()
@@ -72,6 +78,7 @@ public abstract class AvatarPushRecoveryStandingTest
    @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
+      magnitude = Double.NaN;
       if (simulationTestingParameters.getKeepSCSUp())
       {
          ThreadTools.sleepForever();
@@ -193,7 +200,6 @@ public abstract class AvatarPushRecoveryStandingTest
       // push parameters:
       Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
       forceDirection.normalize();
-      double magnitude = 100.0;
       double duration = 1.0;
       applyPushAndCheckFinalState(pushCondition, delay, forceDirection, magnitude, duration, duration + 2.0);
    }
@@ -201,6 +207,7 @@ public abstract class AvatarPushRecoveryStandingTest
    @Test
    public void testLongBackwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
+      simulationTestingParameters.setKeepSCSUp(true);
       setupTest(null, true);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
@@ -210,7 +217,6 @@ public abstract class AvatarPushRecoveryStandingTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(-1.0, 0.0, 0.0);
-      double magnitude = 100.0;
       double duration = 1.0;
       applyPushAndCheckFinalState(pushCondition, delay, forceDirection, magnitude, duration, duration + 2.0);
    }
@@ -358,7 +364,7 @@ public abstract class AvatarPushRecoveryStandingTest
       double magnitude = 350.0;
       double duration = 0.2;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.95));
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, 0.7*magnitude, duration);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0));
@@ -458,8 +464,6 @@ public abstract class AvatarPushRecoveryStandingTest
                                                                                                                "pushRecoveryCurrentState");
 
       setupCamera(scs);
-      swingTime = getRobotModel().getWalkingControllerParameters().getDefaultSwingTime();
-      transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
       ThreadTools.sleep(1000);
    }
 

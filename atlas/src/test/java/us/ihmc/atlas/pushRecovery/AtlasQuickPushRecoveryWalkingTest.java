@@ -28,19 +28,10 @@ public class AtlasQuickPushRecoveryWalkingTest extends AvatarQuickPushRecoveryWa
    @Tag("humanoid-push-recovery")
    @Override
    @Test
-   public void testOutwardPushLeftEarlySwing() throws SimulationExceededMaximumTimeException
-   {
-      setPushChangeInVelocity(0.6);
-      super.testOutwardPushLeftEarlySwing();
-   }
-
-   @Tag("humanoid-push-recovery")
-   @Override
-   @Test
-   public void testInwardPushLeftMidSwing() throws SimulationExceededMaximumTimeException
+   public void testInwardPushLeftAtDifferentTimes() throws SimulationExceededMaximumTimeException
    {
       setPushChangeInVelocity(0.3);
-      super.testInwardPushLeftMidSwing();
+      super.testInwardPushLeftAtDifferentTimes();
    }
 
    @Tag("humanoid-push-recovery")
@@ -52,13 +43,13 @@ public class AtlasQuickPushRecoveryWalkingTest extends AvatarQuickPushRecoveryWa
       super.testOutwardPushInitialTransferToLeftStateAndLeftMidSwing();
    }
 
-   @Tag("humanoid-push-recovery-slow")
+   @Tag("humanoid-push-recovery")
    @Override
    @Test
-   public void testOutwardPushMidLeftSwing() throws SimulationExceededMaximumTimeException
+   public void testOutwardPushLeftSwingAtDifferentTimes() throws SimulationExceededMaximumTimeException
    {
       setPushChangeInVelocity(0.6);
-      super.testOutwardPushMidLeftSwing();
+      super.testOutwardPushLeftSwingAtDifferentTimes();
    }
 
    @Tag("humanoid-push-recovery-slow")
@@ -82,19 +73,19 @@ public class AtlasQuickPushRecoveryWalkingTest extends AvatarQuickPushRecoveryWa
    @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
-   public void testBackwardPushInLeftSwing() throws SimulationExceededMaximumTimeException
+   public void testBackwardPushInLeftSwingAtDifferentTimes() throws SimulationExceededMaximumTimeException
    {
-      setPushChangeInVelocity(0.5);
-      super.testBackwardPushInLeftSwing();
+      setPushChangeInVelocity(0.8);
+      super.testBackwardPushInLeftSwingAtDifferentTimes();
    }
 
    @Tag("humanoid-push-recovery")
    @Override
    @Test
-   public void testForwardPushInLeftSwing() throws SimulationExceededMaximumTimeException
+   public void testForwardPushInLeftSwingAtDifferentTimes() throws SimulationExceededMaximumTimeException
    {
-      setPushChangeInVelocity(0.4);
-      super.testForwardPushInLeftSwing();
+      setPushChangeInVelocity(0.8);
+      super.testForwardPushInLeftSwingAtDifferentTimes();
    }
 
    @Tag("humanoid-push-recovery")

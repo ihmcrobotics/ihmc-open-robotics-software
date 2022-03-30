@@ -9,9 +9,6 @@ import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.ParameterizedICPControlGains;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationCoPConstraintHandler;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationControllerHelper;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -31,7 +28,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.parameters.IntegerParameter;
@@ -40,7 +36,6 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
@@ -103,7 +98,7 @@ public class ICPController implements ICPControllerInterface
 
    private final IntegerProvider maxNumberOfIterations = new IntegerParameter(yoNamePrefix + "MaxNumberOfIterations", registry, 100);
 
-   private final ICPOptimizationCoPConstraintHandler copConstraintHandler;
+   private final ICPCoPConstraintHandler copConstraintHandler;
    private final ICPControllerQPSolver solver;
 
    private final ExecutionTimer qpSolverTimer = new ExecutionTimer("icpQPSolverTimer", 0.5, registry);
@@ -119,7 +114,7 @@ public class ICPController implements ICPControllerInterface
    private final double controlDT;
    private final double controlDTSquare;
 
-   private final ICPOptimizationControllerHelper helper = new ICPOptimizationControllerHelper();
+   private final ICPControllerHelper helper = new ICPControllerHelper();
 
    public ICPController(WalkingControllerParameters walkingControllerParameters,
                         BipedSupportPolygons bipedSupportPolygons,
@@ -130,7 +125,7 @@ public class ICPController implements ICPControllerInterface
                         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(walkingControllerParameters,
-           walkingControllerParameters.getICPOptimizationParameters(),
+           walkingControllerParameters.getICPControllerParameters(),
            bipedSupportPolygons,
            icpControlPolygons,
            contactableFeet,
@@ -140,7 +135,7 @@ public class ICPController implements ICPControllerInterface
    }
 
    public ICPController(WalkingControllerParameters walkingControllerParameters,
-                        ICPOptimizationParameters icpOptimizationParameters,
+                        ICPControllerParameters icpOptimizationParameters,
                         BipedSupportPolygons bipedSupportPolygons,
                         ICPControlPolygons icpControlPolygons,
                         SideDependentList<? extends ContactablePlaneBody> contactableFeet,
@@ -191,11 +186,11 @@ public class ICPController implements ICPControllerInterface
       boolean updateRateAutomatically = true;
       solver = new ICPControllerQPSolver(totalVertices, updateRateAutomatically, registry);
 
-      copConstraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons,
-                                                                     icpControlPolygons,
-                                                                     useICPControlPolygons,
-                                                                     hasICPControlPolygons,
-                                                                     registry);
+      copConstraintHandler = new ICPCoPConstraintHandler(bipedSupportPolygons,
+                                                         icpControlPolygons,
+                                                         useICPControlPolygons,
+                                                         hasICPControlPolygons,
+                                                         registry);
 
       if (yoGraphicsListRegistry != null)
          setupVisualizers(yoGraphicsListRegistry);

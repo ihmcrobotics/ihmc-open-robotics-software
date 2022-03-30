@@ -137,10 +137,8 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
-      YoBoolean doToeTouchdownIfPossible = (YoBoolean) simulationConstructionSet.findVariable("FootSwingDoToeTouchdownIfPossible");
 //      YoBoolean rightDoToeTouchdownIfPossible = (YoBoolean) simulationConstructionSet.findVariable("rightFootSwingDoToeTouchdownIfPossible");
       YoBoolean doToeOffIfPossibleInSingleSupport = (YoBoolean) simulationConstructionSet.findVariable("doToeOffIfPossibleInSingleSupport");
-      doToeTouchdownIfPossible.set(true);
 //      rightDoToeTouchdownIfPossible.set(true);
       doToeOffIfPossibleInSingleSupport.set(true);
 
