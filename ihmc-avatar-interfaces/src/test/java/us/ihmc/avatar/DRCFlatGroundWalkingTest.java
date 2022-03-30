@@ -101,8 +101,6 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 
    public void runFlatGroundWalking(boolean useBulletPhysicsEngine) throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
-      simulationTestingParameters.setKeepSCSUp(true);
-      DRCRobotModel robotModel = getRobotModel();
       boolean doPelvisWarmup = doPelvisWarmup();
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       simulationTestingParameters.setUsePefectSensors(getUsePerfectSensors());
