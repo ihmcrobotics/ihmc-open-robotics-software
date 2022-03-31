@@ -28,7 +28,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
-import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -139,6 +138,7 @@ public class HeuristicICPControllerTest
       FrameVector2D desiredICPVelocity = new FrameVector2D(worldFrame);
       computeDesiredICPVelocityFromPerfectCMP(omega, desiredICP, perfectCMP, desiredICPVelocity);
 
+      testCase.setSupportPolygonInWorld(supportPolygonInWorld);
       testCase.setDesiredICP(desiredICP);
       testCase.setPerfectCoP(perfectCoP);
       testCase.setPerfectCMPOffset(perfectCMPOffset);
@@ -146,7 +146,7 @@ public class HeuristicICPControllerTest
       testCase.setCurrentICP(currentICP);
       testCase.setCurrentCoMPosition(currentCoMPosition);
 
-      solveAndVisualize(supportPolygonInWorld, controller, visualizer, testCase);
+      solveAndVisualize(controller, visualizer, testCase);
 
       double xLowerBound = -0.2;
       double xUpperBound = 0.4;
@@ -168,7 +168,7 @@ public class HeuristicICPControllerTest
             computeDesiredICPVelocityFromPerfectCMP(omega, desiredICP, perfectCMP, desiredICPVelocity);
             testCase.setDesiredICPVelocity(desiredICPVelocity);
 
-            solveAndVisualize(supportPolygonInWorld, controller, visualizer, testCase);
+            solveAndVisualize(controller, visualizer, testCase);
 
             if (incrementY)
             {
@@ -245,6 +245,7 @@ public class HeuristicICPControllerTest
       FrameVector2D desiredICPVelocity = new FrameVector2D(worldFrame);
       computeDesiredICPVelocityFromPerfectCMP(omega, desiredICP, perfectCMP, desiredICPVelocity);
 
+      testCase.setSupportPolygonInWorld(supportPolygonInWorld);
       testCase.setDesiredICP(desiredICP);
       testCase.setPerfectCoP(perfectCoP);
       testCase.setPerfectCMPOffset(perfectCMPOffset);
@@ -252,7 +253,7 @@ public class HeuristicICPControllerTest
       testCase.setCurrentICP(currentICP);
       testCase.setCurrentCoMPosition(currentCoMPosition);
 
-      solveAndVisualize(supportPolygonInWorld, controller, visualizer, testCase);
+      solveAndVisualize(controller, visualizer, testCase);
 
       for (int i = 0; i < 20; i++)
       {
@@ -263,7 +264,7 @@ public class HeuristicICPControllerTest
          computeDesiredICPVelocityFromPerfectCMP(omega, desiredICP, perfectCMP, desiredICPVelocity);
          testCase.setDesiredICPVelocity(desiredICPVelocity);
          
-         solveAndVisualize(supportPolygonInWorld, controller, visualizer, testCase);
+         solveAndVisualize(controller, visualizer, testCase);
       }
 
       testCase = new ICPControllerTestCase(testCase);
@@ -272,7 +273,7 @@ public class HeuristicICPControllerTest
       
       computeDesiredICPVelocityFromPerfectCMP(omega, desiredICP, perfectCMP, desiredICPVelocity);
       testCase.setDesiredICPVelocity(desiredICPVelocity);
-      solveAndVisualize(supportPolygonInWorld, controller, visualizer, testCase);
+      solveAndVisualize(controller, visualizer, testCase);
 
       for (int i = 0; i < 20; i++)
       {
@@ -281,7 +282,7 @@ public class HeuristicICPControllerTest
          testCase.setCurrentICP(currentICP);
          computeDesiredICPVelocityFromPerfectCMP(omega, desiredICP, perfectCMP, desiredICPVelocity);
          testCase.setDesiredICPVelocity(desiredICPVelocity);
-         solveAndVisualize(supportPolygonInWorld, controller, visualizer, testCase);
+         solveAndVisualize(controller, visualizer, testCase);
       }
       
       testCase = new ICPControllerTestCase(testCase);
@@ -290,7 +291,7 @@ public class HeuristicICPControllerTest
       currentICP.set(0.1, 0.1);
       computeDesiredICPVelocityFromPerfectCMP(omega, desiredICP, perfectCMP, desiredICPVelocity);
       testCase.setDesiredICPVelocity(desiredICPVelocity);
-      solveAndVisualize(supportPolygonInWorld, controller, visualizer, testCase);
+      solveAndVisualize(controller, visualizer, testCase);
 
       for (int i = 0; i < 20; i++)
       {
@@ -299,7 +300,7 @@ public class HeuristicICPControllerTest
          testCase.setCurrentICP(currentICP);
          computeDesiredICPVelocityFromPerfectCMP(omega, desiredICP, perfectCMP, desiredICPVelocity);
          testCase.setDesiredICPVelocity(desiredICPVelocity);
-         solveAndVisualize(supportPolygonInWorld, controller, visualizer, testCase);
+         solveAndVisualize(controller, visualizer, testCase);
       }
       
       ThreadTools.sleepForever();
@@ -400,6 +401,7 @@ public class HeuristicICPControllerTest
          FrameVector2D desiredICPVelocity = new FrameVector2D(worldFrame);
          computeDesiredICPVelocityFromPerfectCMP(omega, desiredICP, perfectCMP, desiredICPVelocity);
 
+         testCase.setSupportPolygonInWorld(supportPolygonInWorld);
          testCase.setDesiredICP(desiredICP);
          testCase.setDesiredICPVelocity(desiredICPVelocity);
          testCase.setPerfectCoP(perfectCoP);
@@ -409,13 +411,12 @@ public class HeuristicICPControllerTest
          testCases.add(testCase);
       }
 
-      solveAndVisualize(supportPolygonInWorld, controller, visualizer, testCases);
+      solveAndVisualize(controller, visualizer, testCases);
 
       ThreadTools.sleepForever();
    }
 
-   private void solveAndVisualize(FrameConvexPolygon2DReadOnly supportPolygonInWorld,
-                                  ICPControllerInterface controller,
+   private void solveAndVisualize(ICPControllerInterface controller,
                                   ICPControllerTestVisualizer visualizer,
                                   ArrayList<ICPControllerTestCase> testCases)
    {
@@ -423,15 +424,15 @@ public class HeuristicICPControllerTest
       {
          ICPControllerTestCase testCase = testCases.get(i);
 
-         solveAndVisualize(supportPolygonInWorld, controller, visualizer, testCase);
+         solveAndVisualize(controller, visualizer, testCase);
       }
    }
 
-   private void solveAndVisualize(FrameConvexPolygon2DReadOnly supportPolygonInWorld,
-                                  ICPControllerInterface controller,
+   private void solveAndVisualize(ICPControllerInterface controller,
                                   ICPControllerTestVisualizer visualizer,
                                   ICPControllerTestCase testCase)
    {
+      FrameConvexPolygon2DReadOnly supportPolygonInWorld = testCase.getSupportPolygonInWorld();
       double omega = testCase.getOmega();
 
       FramePoint2DReadOnly desiredICP = testCase.getDesiredICP();

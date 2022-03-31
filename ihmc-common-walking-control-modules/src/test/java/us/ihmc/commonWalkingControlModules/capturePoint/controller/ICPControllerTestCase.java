@@ -1,7 +1,9 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 
@@ -9,6 +11,7 @@ public class ICPControllerTestCase
 {
    private double omega;
 
+   private final FrameConvexPolygon2D supportPolygonInWorld = new FrameConvexPolygon2D();
    private final FrameVector2D desiredICPVelocity = new FrameVector2D();
    private final FramePoint2D desiredICP = new FramePoint2D();
    private final FramePoint2D perfectCoP = new FramePoint2D();
@@ -22,6 +25,7 @@ public class ICPControllerTestCase
    public ICPControllerTestCase()
    {
       omega = Double.NaN;
+      supportPolygonInWorld.setToNaN();
       desiredICPVelocity.setToNaN();
       desiredICP.setToNaN();
       perfectCoP.setToNaN();
@@ -35,6 +39,7 @@ public class ICPControllerTestCase
    public ICPControllerTestCase(ICPControllerTestCase testCase)
    {
       this.setOmega(testCase.getOmega());
+      this.setSupportPolygonInWorld(testCase.getSupportPolygonInWorld());
       this.setDesiredICPVelocity(testCase.getDesiredICPVelocity());
       this.setDesiredICP(testCase.getDesiredICP());
       this.setPerfectCoP(testCase.getPerfectCoP());
@@ -54,6 +59,16 @@ public class ICPControllerTestCase
    public void setOmega(double omega)
    {
       this.omega = omega;
+   }
+
+   public FrameConvexPolygon2DReadOnly getSupportPolygonInWorld()
+   {
+      return supportPolygonInWorld;
+   }
+
+   public void setSupportPolygonInWorld(FrameConvexPolygon2DReadOnly supportPolygonInWorld)
+   {
+      this.supportPolygonInWorld.set(supportPolygonInWorld);
    }
 
    public FrameVector2DReadOnly getDesiredICPVelocity()
@@ -135,5 +150,5 @@ public class ICPControllerTestCase
    {
       this.desiredCoP.set(desiredCoP);
    }
-
+   
 }
