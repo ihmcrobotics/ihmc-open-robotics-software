@@ -21,7 +21,8 @@ public class ICPControllerTestCase
 
    private final FramePoint2D desiredCMP = new FramePoint2D();
    private final FramePoint2D desiredCoP = new FramePoint2D();
-
+   private final FrameVector2D expectedControlICPVelocity = new FrameVector2D();
+   
    public ICPControllerTestCase()
    {
       omega = Double.NaN;
@@ -34,6 +35,7 @@ public class ICPControllerTestCase
       currentICP.setToNaN();
       desiredCMP.setToNaN();
       desiredCoP.setToNaN();
+      expectedControlICPVelocity.setToNaN();
    }
 
    public ICPControllerTestCase(ICPControllerTestCase testCase)
@@ -49,6 +51,7 @@ public class ICPControllerTestCase
 
       desiredCMP.setToNaN();
       desiredCoP.setToNaN();
+      expectedControlICPVelocity.setToNaN();
    }
 
    public double getOmega()
@@ -149,6 +152,16 @@ public class ICPControllerTestCase
    public void setDesiredCoP(FramePoint2DReadOnly desiredCoP)
    {
       this.desiredCoP.set(desiredCoP);
+   }
+
+   public FrameVector2DReadOnly getExpectedControlICPVelocity()
+   {
+      return expectedControlICPVelocity;
+   }
+
+   public void setExpectedControlICPVelocity(FrameVector2D expectedControlICPVelocity)
+   {
+      this.expectedControlICPVelocity.set(expectedControlICPVelocity);
    }
    
 }
