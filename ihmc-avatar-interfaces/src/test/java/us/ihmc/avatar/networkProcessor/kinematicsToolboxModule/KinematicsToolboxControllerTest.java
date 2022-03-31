@@ -55,6 +55,7 @@ import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
@@ -432,12 +433,12 @@ public final class KinematicsToolboxControllerTest
       SideDependentList<RigidBodyDefinition> handLinkDescriptions = new SideDependentList<>(side -> robotDescription.getRigidBodyDefinition(side.getCamelCaseName()
             + "HandLink"));
 
-      MaterialDefinition collisionGraphicAppearance = new MaterialDefinition(ColorDefinitions.SpringGreen().derive(0, 1.0, 0.5, 0.15));
+      ColorDefinition collisionGraphicAppearance = ColorDefinitions.SpringGreen().derive(0, 1.0, 0.5, 0.15);
 
       VisualDefinitionFactory torsoCollisionGraphic = new VisualDefinitionFactory();
       torsoCollisionGraphic.appendTranslation(torsoCollisionShape.getPosition());
-      torsoCollisionGraphic.addCapsule(torsoCollisionShape.getRadius(),
-                                       torsoCollisionShape.getLength() + 2.0 * torsoCollisionShape.getRadius(), // the 2nd term is removed internally.
+      torsoCollisionGraphic.addCapsule(torsoCollisionShape.getLength() + 2.0 * torsoCollisionShape.getRadius(),
+                                       torsoCollisionShape.getRadius(), // the 2nd term is removed internally.
                                        collisionGraphicAppearance);
       torsoLinkDescription.getVisualDefinitions().addAll(torsoCollisionGraphic.getVisualDefinitions());
       VisualDefinitionFactory handCollisionGraphic = new VisualDefinitionFactory();

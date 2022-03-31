@@ -367,8 +367,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
          VisualDefinitionFactory visualDefinitionFactory = new VisualDefinitionFactory();
          visualDefinitionFactory.appendTranslation(position);
-         visualDefinitionFactory.addSphere(0.01,
-                                           new MaterialDefinition(ColorDefinitions.rgb(FootstepListVisualizer.defaultFeetColors.get(robotSide).getRGB())));
+         visualDefinitionFactory.addSphere(0.01, ColorDefinitions.rgb(FootstepListVisualizer.defaultFeetColors.get(robotSide).getRGB()));
          simulationTestHelper.addStaticVisuals(visualDefinitionFactory.getVisualDefinitions());
 
          simulationTestHelper.publishToController(handTrajectoryMessage);
@@ -400,8 +399,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
          VisualDefinitionFactory visualDefinitionFactory = new VisualDefinitionFactory();
          visualDefinitionFactory.appendTranslation(position);
-         visualDefinitionFactory.addSphere(0.01,
-                                           new MaterialDefinition(ColorDefinitions.rgb(FootstepListVisualizer.defaultFeetColors.get(robotSide).getRGB())));
+         visualDefinitionFactory.addSphere(0.01, ColorDefinitions.rgb(FootstepListVisualizer.defaultFeetColors.get(robotSide).getRGB()));
          simulationTestHelper.addStaticVisuals(visualDefinitionFactory.getVisualDefinitions());
 
          simulationTestHelper.publishToController(handTrajectoryMessage);
@@ -507,8 +505,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
             VisualDefinitionFactory visualDefinitionFactory = new VisualDefinitionFactory();
             visualDefinitionFactory.appendTranslation(desiredPosition);
-            visualDefinitionFactory.addSphere(0.01,
-                                              new MaterialDefinition(ColorDefinitions.rgb(FootstepListVisualizer.defaultFeetColors.get(robotSide).getRGB())));
+            visualDefinitionFactory.addSphere(0.01, ColorDefinitions.rgb(FootstepListVisualizer.defaultFeetColors.get(robotSide).getRGB()));
             simulationTestHelper.addStaticVisuals(visualDefinitionFactory.getVisualDefinitions());
 
             handTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add()
@@ -796,8 +793,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
             VisualDefinitionFactory visualDefinitionFactory = new VisualDefinitionFactory();
             visualDefinitionFactory.appendTranslation(desiredPosition);
-            visualDefinitionFactory.addSphere(0.01,
-                                              new MaterialDefinition(ColorDefinitions.rgb(FootstepListVisualizer.defaultFeetColors.get(robotSide).getRGB())));
+            visualDefinitionFactory.addSphere(0.01, ColorDefinitions.rgb(FootstepListVisualizer.defaultFeetColors.get(robotSide).getRGB()));
             simulationTestHelper.addStaticVisuals(visualDefinitionFactory.getVisualDefinitions());
 
             handTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(time
@@ -1025,9 +1021,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
                VisualDefinitionFactory visualDefinitionFactory = new VisualDefinitionFactory();
                visualDefinitionFactory.appendTranslation(desiredPosition);
-               visualDefinitionFactory.addSphere(0.01,
-                                                 new MaterialDefinition(ColorDefinitions.rgb(FootstepListVisualizer.defaultFeetColors.get(robotSide)
-                                                                                                                                     .getRGB())));
+               visualDefinitionFactory.addSphere(0.01, ColorDefinitions.rgb(FootstepListVisualizer.defaultFeetColors.get(robotSide).getRGB()));
                simulationTestHelper.addStaticVisuals(visualDefinitionFactory.getVisualDefinitions());
 
                handTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(time
@@ -1146,9 +1140,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
                VisualDefinitionFactory visualDefinitionFactory = new VisualDefinitionFactory();
                visualDefinitionFactory.appendTranslation(desiredPosition);
-               visualDefinitionFactory.addSphere(0.01,
-                                                 new MaterialDefinition(ColorDefinitions.rgb(FootstepListVisualizer.defaultFeetColors.get(robotSide)
-                                                                                                                                     .getRGB())));
+               visualDefinitionFactory.addSphere(0.01, ColorDefinitions.rgb(FootstepListVisualizer.defaultFeetColors.get(robotSide).getRGB()));
                simulationTestHelper.addStaticVisuals(visualDefinitionFactory.getVisualDefinitions());
 
                handTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(time

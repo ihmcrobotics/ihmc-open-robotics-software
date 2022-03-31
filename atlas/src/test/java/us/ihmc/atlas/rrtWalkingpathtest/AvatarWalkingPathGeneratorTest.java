@@ -300,16 +300,14 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
    private List<VisualDefinition> getPrintNodeConnection(RRTNode nodeOne, RRTNode nodeTwo, ColorDefinition color)
    {
       VisualDefinitionFactory factory = new VisualDefinitionFactory();
-      MaterialDefinition materialDefinition = new MaterialDefinition(color);
-
       Point3D translationNodeOne = new Point3D(nodeOne.getNodeData(0), nodeOne.getNodeData(1), 0);
       factory.appendTranslation(translationNodeOne);
-      factory.addSphere(0.05, materialDefinition);
+      factory.addSphere(0.05, color);
 
       Point3D translationNodeTwo = new Point3D(nodeTwo.getNodeData(0), nodeTwo.getNodeData(1), 0);
       factory.identity();
       factory.appendTranslation(translationNodeTwo);
-      factory.addSphere(0.05, materialDefinition);
+      factory.addSphere(0.05, color);
 
       Point3D translationLine = new Point3D((nodeOne.getNodeData(0) + nodeTwo.getNodeData(0)) / 2, (nodeOne.getNodeData(1) + nodeTwo.getNodeData(1)) / 2, 0);
       AxisAngle rotationLine = new AxisAngle(-(nodeOne.getNodeData(1) - nodeTwo.getNodeData(1)),
@@ -319,7 +317,7 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
       factory.identity();
       factory.appendTranslation(translationLine);
       factory.appendRotation(rotationLine);
-      factory.addCapsule(0.02, nodeOne.getDistance(nodeTwo), materialDefinition);
+      factory.addCapsule(nodeOne.getDistance(nodeTwo), 0.02, color);
 
       return factory.getVisualDefinitions();
    }
@@ -334,11 +332,11 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
          factory.appendTranslation(footsteps.getFootstepDataList().get(i).getLocation());
          if (footsteps.getFootstepDataList().get(i).getRobotSide() == RobotSide.RIGHT.toByte())
          {
-            factory.addSphere(0.05, new MaterialDefinition(ColorDefinitions.Blue()));
+            factory.addSphere(0.05, ColorDefinitions.Blue());
          }
          else
          {
-            factory.addSphere(0.05, new MaterialDefinition(ColorDefinitions.Green()));
+            factory.addSphere(0.05, ColorDefinitions.Green());
          }
       }
       return factory.getVisualDefinitions();
@@ -359,13 +357,13 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
       factory.appendRotation(rotation);
       if (footstep.getRobotSide() == RobotSide.RIGHT)
       {
-         factory.addBox(sizeX, sizeY, sizeZ, new MaterialDefinition(ColorDefinitions.Green()));
+         factory.addBox(sizeX, sizeY, sizeZ, ColorDefinitions.Green());
          //PrintTools.info("R "+footstep.getLocation().getX()+" "+footstep.getLocation().getY());
       }
 
       else
       {
-         factory.addBox(sizeX, sizeY, sizeZ, new MaterialDefinition(ColorDefinitions.Blue()));
+         factory.addBox(sizeX, sizeY, sizeZ, ColorDefinitions.Blue());
          //PrintTools.info("L "+footstep.getLocation().getX()+" "+footstep.getLocation().getY());
       }
 
@@ -388,7 +386,7 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
    {
       VisualDefinitionFactory factory = new VisualDefinitionFactory();
       factory.appendTranslation(aPoint.getX(), aPoint.getY(), 0);
-      factory.addSphere(0.05, new MaterialDefinition(app));
+      factory.addSphere(0.05, app);
       return factory.getVisualDefinitions();
    }
 
@@ -398,19 +396,19 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
 
       Point3D translationNodeOne = new Point3D(pathSegment.getX1(), pathSegment.getY1(), 0);
       factory.appendTranslation(translationNodeOne);
-      factory.addSphere(0.05, new MaterialDefinition(ColorDefinitions.DarkGray()));
+      factory.addSphere(0.05, ColorDefinitions.DarkGray());
 
       Point3D translationNodeTwo = new Point3D(pathSegment.getX2(), pathSegment.getY2(), 0);
       factory.identity();
       factory.appendTranslation(translationNodeTwo);
-      factory.addSphere(0.05, new MaterialDefinition(ColorDefinitions.DarkGray()));
+      factory.addSphere(0.05, ColorDefinitions.DarkGray());
 
       Point3D translationLine = new Point3D((pathSegment.getX1() + pathSegment.getX2()) / 2, (pathSegment.getY1() + pathSegment.getY2()) / 2, 0);
       AxisAngle rotationLine = new AxisAngle(-(pathSegment.getY1() - pathSegment.getY2()), (pathSegment.getX1() - pathSegment.getX2()), 0, Math.PI / 2);
       factory.identity();
       factory.appendTranslation(translationLine);
       factory.appendRotation(rotationLine);
-      factory.addCapsule(0.02, pathSegment.getP1().distance(pathSegment.getP2()), new MaterialDefinition(ColorDefinitions.Gray()));
+      factory.addCapsule(pathSegment.getP1().distance(pathSegment.getP2()), 0.02, ColorDefinitions.Gray());
 
       return factory.getVisualDefinitions();
    }
