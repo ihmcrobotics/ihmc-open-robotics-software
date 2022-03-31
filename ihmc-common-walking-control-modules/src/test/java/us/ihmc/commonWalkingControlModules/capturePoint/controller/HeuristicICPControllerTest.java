@@ -67,8 +67,7 @@ public class HeuristicICPControllerTest
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-   private ICPControllerInterface createICPController(TestWalkingControllerParameters walkingControllerParameters,
-                                                      TestICPControllerParameters icpControllerParameters,
+   private ICPControllerInterface createICPController(TestICPControllerParameters icpControllerParameters,
                                                       double controlDT,
                                                       YoRegistry registry,
                                                       YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -99,8 +98,6 @@ public class HeuristicICPControllerTest
       double kpOrthogonal = 2.0;
       TestICPControllerParameters icpControllerParameters = createTestICPControllerParameters(kpParallel, kpOrthogonal);
 
-      TestWalkingControllerParameters walkingControllerParameters = new TestWalkingControllerParameters();
-
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, footWidth, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
@@ -108,8 +105,7 @@ public class HeuristicICPControllerTest
       double controlDT = 0.001;
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      ICPControllerInterface controller = createICPController(walkingControllerParameters,
-                                                              icpControllerParameters,
+      ICPControllerInterface controller = createICPController(icpControllerParameters,
                                                               controlDT,
                                                               registry,
                                                               yoGraphicsListRegistry);
@@ -119,7 +115,7 @@ public class HeuristicICPControllerTest
 
       ICPControllerTestCase testCase = new ICPControllerTestCase();
 
-      double omega = walkingControllerParameters.getOmega0();
+      double omega = 3.0;
       testCase.setOmega(omega);
 
       FramePoint2D desiredICP = new FramePoint2D(worldFrame, 0.15, 0.0);
@@ -201,8 +197,6 @@ public class HeuristicICPControllerTest
       double kpParallel = 1.0;
       double kpOrthogonal = 2.0;
       TestICPControllerParameters icpControllerParameters = createTestICPControllerParameters(kpParallel, kpOrthogonal);
-
-      TestWalkingControllerParameters walkingControllerParameters = new TestWalkingControllerParameters();
       
       double footLength = 10.25;
       double footWidth = 10.1;
@@ -215,8 +209,7 @@ public class HeuristicICPControllerTest
       double controlDT = 0.001;
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      ICPControllerInterface controller = createICPController(walkingControllerParameters,
-                                                              icpControllerParameters,
+      ICPControllerInterface controller = createICPController(icpControllerParameters,
                                                               controlDT,
                                                               registry,
                                                               yoGraphicsListRegistry);
@@ -226,7 +219,7 @@ public class HeuristicICPControllerTest
 
       ICPControllerTestCase testCase = new ICPControllerTestCase();
 
-      double omega = walkingControllerParameters.getOmega0();
+      double omega = 3.0;
       testCase.setOmega(omega);
 
       FramePoint2D desiredICP = new FramePoint2D(worldFrame, 0.04, 0.06);
@@ -350,7 +343,6 @@ public class HeuristicICPControllerTest
       double kpOrthogonal = 2.0;
       TestICPControllerParameters icpControllerParameters = createTestICPControllerParameters(kpParallel, kpOrthogonal);
 
-      TestWalkingControllerParameters walkingControllerParameters = new TestWalkingControllerParameters();
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
@@ -358,8 +350,7 @@ public class HeuristicICPControllerTest
       double controlDT = 0.001;
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      ICPControllerInterface controller = createICPController(walkingControllerParameters,
-                                                              icpControllerParameters,
+      ICPControllerInterface controller = createICPController(icpControllerParameters,
                                                               controlDT,
                                                               registry,
                                                               yoGraphicsListRegistry);
@@ -369,7 +360,7 @@ public class HeuristicICPControllerTest
 
       visualizer = new ICPControllerTestVisualizer(registry, yoGraphicsListRegistry);
 
-      double omega = walkingControllerParameters.getOmega0();
+      double omega = 3.0;
 
       ArrayList<ICPControllerTestCase> testCases = new ArrayList<>();
 
@@ -449,6 +440,7 @@ public class HeuristicICPControllerTest
       controller.initialize();
       controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, perfectCoP, perfectCMPOffset, currentICP, currentCoMPosition, omega);
 
+      FrameVector2D expectedControlICPVelocity = new FrameVector2D(worldFrame);
       FramePoint2D desiredCMP = new FramePoint2D(worldFrame);
       FramePoint2D desiredCoP = new FramePoint2D(worldFrame);
 
@@ -458,8 +450,11 @@ public class HeuristicICPControllerTest
       testCase.setDesiredCMP(desiredCMP);
       testCase.setDesiredCoP(desiredCoP);
 
+      expectedControlICPVelocity.sub(currentICP, desiredCMP);
+      expectedControlICPVelocity.scale(omega);
+      
       visualizer.updateInputs(omega, supportPolygonInWorld, desiredICP, desiredICPVelocity, perfectCMP, perfectCoP, currentICP, currentCoMPosition);
-      visualizer.updateOutputs(desiredCoP, desiredCMP);
+      visualizer.updateOutputs(desiredCoP, desiredCMP, expectedControlICPVelocity);
    }
 
    @Test
@@ -469,8 +464,6 @@ public class HeuristicICPControllerTest
       double feedbackGain = 2.0;
       TestICPControllerParameters icpControllerParameters = createTestICPControllerParameters(feedbackGain, feedbackGain);
 
-      TestWalkingControllerParameters walkingControllerParameters = new TestWalkingControllerParameters();
-
       double stanceWidth = 0.4;
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, RobotSide.RIGHT, registry);
@@ -479,8 +472,7 @@ public class HeuristicICPControllerTest
       double controlDT = 0.001;
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
-      ICPControllerInterface controller = createICPController(walkingControllerParameters,
-                                                              icpControllerParameters,
+      ICPControllerInterface controller = createICPController(icpControllerParameters,
                                                               controlDT,
                                                               registry,
                                                               yoGraphicsListRegistry);
@@ -492,7 +484,7 @@ public class HeuristicICPControllerTest
          visualizer = new ICPControllerTestVisualizer(registry, yoGraphicsListRegistry);
       }
 
-      double omega = walkingControllerParameters.getOmega0();
+      double omega = 3.0;
 
       FrameVector2D desiredICPVelocity = new FrameVector2D(worldFrame);
       FramePoint2D desiredICP = new FramePoint2D(worldFrame);
@@ -514,13 +506,18 @@ public class HeuristicICPControllerTest
       controller.initialize();
       controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition, omega);
 
-      FramePoint2D desiredCMP = new FramePoint2D();
-      FramePoint2D desiredCoP = new FramePoint2D();
+      FrameVector2D expectedControlICPVelocity = new FrameVector2D(worldFrame);
+      FramePoint2D desiredCMP = new FramePoint2D(worldFrame);
+      FramePoint2D desiredCoP = new FramePoint2D(worldFrame);
+
       controller.getDesiredCMP(desiredCMP);
       controller.getDesiredCoP(desiredCoP);
 
+      expectedControlICPVelocity.sub(currentICP, desiredCMP);
+      expectedControlICPVelocity.scale(omega);
+
       if (visualize)
-         visualizer.updateOutputs(desiredCoP, desiredCMP);
+         visualizer.updateOutputs(desiredCoP, desiredCMP, expectedControlICPVelocity);
 
       FrameLine2D lineFromICPTODesired = new FrameLine2D(desiredICP, currentICP);
       double distanceFromLineToProjection = lineFromICPTODesired.distance(desiredCMP);
@@ -543,8 +540,6 @@ public class HeuristicICPControllerTest
       double feedbackGain = 2.0;
       TestICPControllerParameters icpControllerParameters = createTestICPControllerParameters(feedbackGain, feedbackGain);
 
-      TestWalkingControllerParameters walkingControllerParameters = new TestWalkingControllerParameters();
-
       double footLength = 0.25;
       double stanceWidth = 0.3;
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
@@ -555,8 +550,7 @@ public class HeuristicICPControllerTest
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
-      ICPControllerInterface controller = createICPController(walkingControllerParameters,
-                                                              icpControllerParameters,
+      ICPControllerInterface controller = createICPController(icpControllerParameters,
                                                               controlDT,
                                                               registry,
                                                               yoGraphicsListRegistry);
@@ -568,7 +562,7 @@ public class HeuristicICPControllerTest
          visualizer = new ICPControllerTestVisualizer(registry, yoGraphicsListRegistry);
       }
 
-      double omega = walkingControllerParameters.getOmega0();
+      double omega = 3.0;
 
       FrameVector2D desiredICPVelocity = new FrameVector2D(worldFrame);
       FramePoint2D desiredICP = new FramePoint2D(worldFrame);
@@ -596,13 +590,18 @@ public class HeuristicICPControllerTest
       controller.initialize();
       controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition, omega);
 
-      FramePoint2D desiredCMP = new FramePoint2D();
-      FramePoint2D desiredCoP = new FramePoint2D();
+      FrameVector2D expectedControlICPVelocity = new FrameVector2D(worldFrame);
+      FramePoint2D desiredCMP = new FramePoint2D(worldFrame);
+      FramePoint2D desiredCoP = new FramePoint2D(worldFrame);
+
       controller.getDesiredCMP(desiredCMP);
       controller.getDesiredCoP(desiredCoP);
 
+      expectedControlICPVelocity.sub(currentICP, desiredCMP);
+      expectedControlICPVelocity.scale(omega);
+
       if (visualize)
-         visualizer.updateOutputs(desiredCoP, desiredCMP);
+         visualizer.updateOutputs(desiredCoP, desiredCMP, expectedControlICPVelocity);
 
       FrameLine2D lineFromICPTODesired = new FrameLine2D(desiredICP, currentICP);
       double distanceFromLineToProjection = lineFromICPTODesired.distance(desiredCMP);
@@ -622,7 +621,6 @@ public class HeuristicICPControllerTest
       double feedbackGain = 2.0;
       TestICPControllerParameters icpControllerParameters = createTestICPControllerParameters(feedbackGain, feedbackGain);
 
-      TestWalkingControllerParameters walkingControllerParameters = new TestWalkingControllerParameters();
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
@@ -630,14 +628,13 @@ public class HeuristicICPControllerTest
       double controlDT = 0.001;
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      ICPControllerInterface controller = createICPController(walkingControllerParameters,
-                                                              icpControllerParameters,
+      ICPControllerInterface controller = createICPController(icpControllerParameters,
                                                               controlDT,
                                                               registry,
                                                               yoGraphicsListRegistry);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
-      double omega = walkingControllerParameters.getOmega0();
+      double omega = 3.0;
 
       FrameVector2D desiredICPVelocity = new FrameVector2D(worldFrame);
       FramePoint2D desiredICP = new FramePoint2D(worldFrame, 0.03, 0.06);
@@ -659,17 +656,22 @@ public class HeuristicICPControllerTest
       controller.initialize();
       controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition, omega);
 
-      FramePoint2D desiredCMP = new FramePoint2D();
-      FramePoint2D desiredCoP = new FramePoint2D();
+      FrameVector2D expectedControlICPVelocity = new FrameVector2D(worldFrame);
+      FramePoint2D desiredCMP = new FramePoint2D(worldFrame);
+      FramePoint2D desiredCoP = new FramePoint2D(worldFrame);
+
       controller.getDesiredCMP(desiredCMP);
       controller.getDesiredCoP(desiredCoP);
+
+      expectedControlICPVelocity.sub(currentICP, desiredCMP);
+      expectedControlICPVelocity.scale(omega);
 
       ICPControllerTestVisualizer visualizer = null;
       if (visualize)
       {
          visualizer = new ICPControllerTestVisualizer(registry, yoGraphicsListRegistry);
          visualizer.updateInputs(omega, supportPolygonInWorld, desiredICP, desiredICPVelocity, perfectCMP, perfectCoP, currentICP, currentCoMPosition);
-         visualizer.updateOutputs(desiredCoP, desiredCMP);
+         visualizer.updateOutputs(desiredCoP, desiredCMP, expectedControlICPVelocity);
       }
 
       Assert.assertTrue(desiredCMP.epsilonEquals(perfectCMP, epsilon));
@@ -687,7 +689,6 @@ public class HeuristicICPControllerTest
       double feedbackGain = 2.0;
       TestICPControllerParameters icpControllerParameters = createTestICPControllerParameters(feedbackGain, feedbackGain);
 
-      TestWalkingControllerParameters walkingControllerParameters = new TestWalkingControllerParameters();
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
@@ -695,14 +696,13 @@ public class HeuristicICPControllerTest
       double controlDT = 0.001;
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      ICPControllerInterface controller = createICPController(walkingControllerParameters,
-                                                              icpControllerParameters,
+      ICPControllerInterface controller = createICPController(icpControllerParameters,
                                                               controlDT,
                                                               registry,
                                                               yoGraphicsListRegistry);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
-      double omega = walkingControllerParameters.getOmega0();
+      double omega = 3.0;
 
       FramePoint2D desiredICP = new FramePoint2D(worldFrame, 0.03, 0.06);
       FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.01, 0.04);
@@ -863,162 +863,4 @@ public class HeuristicICPControllerTest
       }
    }
    
-   private class TestWalkingControllerParameters extends WalkingControllerParameters
-   {
-      @Override
-      public double getOmega0()
-      {
-         return 3.0;
-      }
-
-      @Override
-      public boolean allowDisturbanceRecoveryBySpeedingUpSwing()
-      {
-         return false;
-      }
-
-      @Override
-      public double getMinimumSwingTimeForDisturbanceRecovery()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getICPErrorThresholdToSpeedUpSwing()
-      {
-         return 0;
-      }
-
-      @Override
-      public boolean allowAutomaticManipulationAbort()
-      {
-         return false;
-      }
-
-      @Override
-      public PDGains getCoMHeightControlGains()
-      {
-         return null;
-      }
-
-      @Override
-      public PIDSE3Configuration getSwingFootControlGains()
-      {
-         return null;
-      }
-
-      @Override
-      public PIDSE3Configuration getHoldPositionFootControlGains()
-      {
-         return null;
-      }
-
-      @Override
-      public PIDSE3Configuration getToeOffFootControlGains()
-      {
-         return null;
-      }
-
-      @Override
-      public double getDefaultTransferTime()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getDefaultSwingTime()
-      {
-         return 0;
-      }
-
-      @Override
-      public FootSwitchFactory getFootSwitchFactory()
-      {
-         return null;
-      }
-
-      @Override
-      public String[] getJointsToIgnoreInController()
-      {
-         return new String[0];
-      }
-
-      @Override
-      public MomentumOptimizationSettings getMomentumOptimizationSettings()
-      {
-         return null;
-      }
-
-      @Override
-      public double getMaxICPErrorBeforeSingleSupportForwardX()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getMaxICPErrorBeforeSingleSupportInnerY()
-      {
-         return 0;
-      }
-
-      @Override
-      public ToeOffParameters getToeOffParameters()
-      {
-         return null;
-      }
-
-      @Override
-      public SwingTrajectoryParameters getSwingTrajectoryParameters()
-      {
-         return null;
-      }
-
-      @Override
-      public double getMaximumLegLengthForSingularityAvoidance()
-      {
-         return 0;
-      }
-
-      @Override
-      public double minimumHeightAboveAnkle()
-      {
-         return 0;
-      }
-
-      @Override
-      public double nominalHeightAboveAnkle()
-      {
-         return 0;
-      }
-
-      @Override
-      public double maximumHeightAboveAnkle()
-      {
-         return 0;
-      }
-
-      @Override
-      public double defaultOffsetHeightAboveAnkle()
-      {
-         return 0;
-      }
-
-      @Override
-      public ICPControllerParameters getICPControllerParameters()
-      {
-         return new TestICPControllerParameters();
-      }
-
-      @Override
-      public StepAdjustmentParameters getStepAdjustmentParameters()
-      {
-         return null;
-      }
-
-      @Override
-      public SteppingParameters getSteppingParameters()
-      {
-         return null;
-      }
-   }
 }

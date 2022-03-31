@@ -218,16 +218,12 @@ public class ICPControllerTestVisualizer
       plotter.update();
    }
 
-   public void updateOutputs(FramePoint2D desiredCoP, FramePoint2D desiredCMP)
+   public void updateOutputs(FramePoint2DReadOnly desiredCoP, FramePoint2DReadOnly desiredCMP, FrameVector2DReadOnly expectedControlICPVelocity)
    {
       this.yoDesiredCMP.set(desiredCMP);
       this.yoDesiredCoP.set(desiredCoP);
-      
-      
-      this.yoExpectedControlICPVelocity.sub(this.yoCapturePoint, yoDesiredCMP);
-      this.yoExpectedControlICPVelocity.scale(yoOmega0.getValue());
 
-      yoExpectedScaledControlICPVelocity3D.set(yoExpectedControlICPVelocity);
+      yoExpectedScaledControlICPVelocity3D.set(expectedControlICPVelocity);
       yoExpectedScaledControlICPVelocity3D.scale(0.1);
 
       scs.setTime(scs.getTime() + 1.0);
