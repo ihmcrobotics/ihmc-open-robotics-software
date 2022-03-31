@@ -18,6 +18,8 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -42,14 +44,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-   private DRCSimulationTestHelper drcSimulationTestHelper;
+   private SCS2AvatarTestingSimulation simulationTestHelper;
    Random random = new Random(42);
-
-   @AfterEach
-   public void tearDown()
-   {
-      drcSimulationTestHelper = null;
-   }
 
    protected double getRadiusForCircle()
    {
@@ -119,10 +115,12 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
       };
       DRCRobotModel robotModel = getRobotModel();
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
-      drcSimulationTestHelper.setStartingLocation(startingLocation);
-      drcSimulationTestHelper.setTestEnvironment(emptyEnvironment);
-      drcSimulationTestHelper.createSimulation(className);
+      SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
+                                                                                                                                             emptyEnvironment,
+                                                                                                                                             simulationTestingParameters);
+      simulationTestHelperFactory.setStartingLocationOffset(startingLocation.getStartingLocationOffset());
+      simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+      simulationTestHelper.start();
       ThreadTools.sleep(1000);
 
       setupCameraSideView();
@@ -145,7 +143,7 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
       ArrayList<Point3D> rootLocations = new ArrayList<>();
       ArrayList<OneDoFJointTrajectoryMessage> leftArmTrajectory = new ArrayList<>();
       ArrayList<OneDoFJointTrajectoryMessage> rightArmTrajectory = new ArrayList<>();
-      ControllerSpy controllerSpy = new ControllerSpy(drcSimulationTestHelper, fullRobotModel);
+      ControllerSpy controllerSpy = new ControllerSpy(simulationTestHelper, fullRobotModel);
 
       for (int armJointIndex = 0; armJointIndex < getArmDoF(); armJointIndex++)
       {
@@ -154,8 +152,18 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
          for (int trajectoryPointIndex = 0; trajectoryPointIndex < getArmTrajectoryPoints(); trajectoryPointIndex++)
          {
 
-            leftJointTrajectory.getTrajectoryPoints().add().set(HumanoidMessageTools.createTrajectoryPoint1DMessage((double) (2 * trajectoryPointIndex + 1), getRandomValidJointAngle(RobotSide.LEFT, armJoint[armJointIndex], fullRobotModel), (double) 0));
-            rightJointTrajectory.getTrajectoryPoints().add().set(HumanoidMessageTools.createTrajectoryPoint1DMessage((double) (2 * trajectoryPointIndex + 1), getRandomValidJointAngle(RobotSide.RIGHT, armJoint[armJointIndex], fullRobotModel), (double) 0));
+            leftJointTrajectory.getTrajectoryPoints().add()
+                               .set(HumanoidMessageTools.createTrajectoryPoint1DMessage((double) (2 * trajectoryPointIndex + 1),
+                                                                                        getRandomValidJointAngle(RobotSide.LEFT,
+                                                                                                                 armJoint[armJointIndex],
+                                                                                                                 fullRobotModel),
+                                                                                        (double) 0));
+            rightJointTrajectory.getTrajectoryPoints().add()
+                                .set(HumanoidMessageTools.createTrajectoryPoint1DMessage((double) (2 * trajectoryPointIndex + 1),
+                                                                                         getRandomValidJointAngle(RobotSide.RIGHT,
+                                                                                                                  armJoint[armJointIndex],
+                                                                                                                  fullRobotModel),
+                                                                                         (double) 0));
          }
          leftHandMessage.getJointspaceTrajectory().getJointTrajectoryMessages().add().set(leftJointTrajectory);
          rightHandMessage.getJointspaceTrajectory().getJointTrajectoryMessages().add().set(rightJointTrajectory);
@@ -166,10 +174,11 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
 
       while (theta < 2 * Math.PI)
       {
-         if (drcSimulationTestHelper.getQueuedControllerCommands().isEmpty())
+         if (simulationTestHelper.getQueuedControllerCommands().isEmpty())
          {
             Point3D footLocation = new Point3D((radius + side.negateIfLeftSide(stepWidth / 2)) * Math.cos(theta),
-                                               (radius + side.negateIfLeftSide(stepWidth / 2)) * Math.sin(theta), 0.0);
+                                               (radius + side.negateIfLeftSide(stepWidth / 2)) * Math.sin(theta),
+                                               0.0);
             rootLocations.add(new Point3D(radius * Math.cos(theta), radius * Math.sin(theta), 0.0));
             Quaternion footOrientation = new Quaternion(0.0, 0.0, Math.sin(theta / 2 + Math.PI / 4), Math.cos(theta / 2 + Math.PI / 4));
             addFootstep(footLocation, footOrientation, side, footMessage);
@@ -179,24 +188,28 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
       }
 
       addFootstep(new Point3D((radius + side.negateIfLeftSide(stepWidth / 2)), 0.0, 0.0),
-                  new Quaternion(0.0, 0.0, Math.sin(Math.PI / 4), Math.sin(Math.PI / 4)), side, footMessage);
+                  new Quaternion(0.0, 0.0, Math.sin(Math.PI / 4), Math.sin(Math.PI / 4)),
+                  side,
+                  footMessage);
       side = side.getOppositeSide();
       addFootstep(new Point3D((radius + side.negateIfLeftSide(stepWidth / 2)), 0.0, 0.0),
-                  new Quaternion(0.0, 0.0, Math.sin(Math.PI / 4), Math.sin(Math.PI / 4)), side, footMessage);
+                  new Quaternion(0.0, 0.0, Math.sin(Math.PI / 4), Math.sin(Math.PI / 4)),
+                  side,
+                  footMessage);
 
       controllerSpy.setFootStepCheckPoints(rootLocations, getStepLength(), getStepWidth());
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      drcSimulationTestHelper.publishToController(leftHandMessage);
-      drcSimulationTestHelper.publishToController(rightHandMessage);
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
-      drcSimulationTestHelper.publishToController(footMessage);
+      simulationTestHelper.simulateAndWait(1.0);
+      simulationTestHelper.publishToController(leftHandMessage);
+      simulationTestHelper.publishToController(rightHandMessage);
+      simulationTestHelper.simulateAndWait(0.5);
+      simulationTestHelper.publishToController(footMessage);
       int numberOfFootsteps = footMessage.getFootstepDataList().size();
       double defaultSwingTime = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
       double defaultTransferTime = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
 
       double simulationTime = numberOfFootsteps * defaultSwingTime + numberOfFootsteps * defaultTransferTime + 2.0;
 
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+      assertTrue(simulationTestHelper.simulateAndWait(simulationTime));
       ArrayList<YoBoolean> footCheckPointFlags = controllerSpy.getFootCheckPointFlag();
       for (int i = 0; i < footCheckPointFlags.size(); i++)
       {
@@ -208,7 +221,7 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
          assertTrue(armCheckPointFlags.get(i).getBooleanValue());
       }
 
-      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
+      simulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
    private void addFootstep(Point3D stepLocation, Quaternion orient, RobotSide robotSide, FootstepDataListMessage message)
@@ -224,14 +237,14 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
    {
       Point3D cameraFix = new Point3D(0.0, 0.0, 1.0);
       Point3D cameraPosition = new Point3D(-10.0, 0.0, 1.0);
-      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
+      simulationTestHelper.setCamera(cameraFix, cameraPosition);
    }
 
    private void setupCameraSideView()
    {
       Point3D cameraFix = new Point3D(0.0, 0.0, 1.0);
       Point3D cameraPosition = new Point3D(0.0, 10.0, 1.0);
-      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
+      simulationTestHelper.setCamera(cameraFix, cameraPosition);
    }
 
    @BeforeEach
@@ -249,10 +262,10 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
       }
 
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcSimulationTestHelper != null)
+      if (simulationTestHelper != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
+         simulationTestHelper.finishTest();
+         simulationTestHelper = null;
       }
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
@@ -260,8 +273,7 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
 
    private class ControllerSpy extends SimpleRobotController
    {
-      private final HumanoidFloatingRootJointRobot humanoidRobotModel;
-      private final DRCSimulationTestHelper drcSimTestHelper;
+      private final SCS2AvatarTestingSimulation simulationTestHelper;
 
       private ArrayList<YoBoolean> footCheckPointFlag;
       private ArrayList<BoundingBox3D> footCheckPoint;
@@ -277,12 +289,11 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
       private final double EPSILON = 1e-2;
       private FullHumanoidRobotModel fullRobotModel;
 
-      public ControllerSpy(DRCSimulationTestHelper drcSimulationTestHelper, FullHumanoidRobotModel fullRobotModel)
+      public ControllerSpy(SCS2AvatarTestingSimulation simulationTestHelper, FullHumanoidRobotModel fullRobotModel)
       {
          this.fullRobotModel = fullRobotModel;
-         humanoidRobotModel = drcSimulationTestHelper.getRobot();
-         drcSimTestHelper = drcSimulationTestHelper;
-         drcSimulationTestHelper.addRobotControllerOnControllerThread(this);
+         this.simulationTestHelper = simulationTestHelper;
+         simulationTestHelper.addRobotControllerOnControllerThread(this);
          position = new Point3D();
          footStepCheckPointIndex = 0;
 
@@ -350,7 +361,7 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
 
       private void checkFootCheckPoints()
       {
-         humanoidRobotModel.getRootJoint().getPosition(position);
+         position.set(simulationTestHelper.getRobot().getFloatingRootJoint().getJointPose().getPosition());
          if (footStepCheckPointIndex < footCheckPoint.size() && footCheckPoint.get(footStepCheckPointIndex).isInsideInclusive(position))
          {
             footCheckPointFlag.get(footStepCheckPointIndex).set(true);
@@ -399,13 +410,13 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
       public YoDouble getJointDesiredPosition(RobotSide side, OneDoFJointBasics joint)
       {
          String variable = "q_d_" + joint.getName();
-         return (YoDouble) humanoidRobotModel.findVariable(variable);
+         return (YoDouble) simulationTestHelper.findVariable(variable);
       }
 
       public YoDouble getJointDesiredPosition(RobotSide side, ArmJointName jointName)
       {
          String variable = "q_d_" + fullRobotModel.getArmJoint(side, jointName).getName();
-         return (YoDouble) humanoidRobotModel.findVariable(variable);
+         return (YoDouble) simulationTestHelper.findVariable(variable);
       }
 
       public boolean getFootCheckPointFlag(int index)
