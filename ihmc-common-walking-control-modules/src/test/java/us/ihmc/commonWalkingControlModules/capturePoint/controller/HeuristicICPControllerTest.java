@@ -54,7 +54,7 @@ public class HeuristicICPControllerTest
    private static final double footLength = 0.25;
    private static final double stanceWidth = 0.35;
 
-   private static boolean visualize = false;
+   private static boolean visualize = !false;
    private static boolean testHeuristicController = true;
 
    @BeforeEach
