@@ -159,7 +159,7 @@ public class GDXSCS2ImpulseBasedPhysicsTumblingBlocksDemo
       VisualDefinitionFactory factory = new VisualDefinitionFactory();
       if (offsetFromParentJoint != null)
          factory.appendTranslation(offsetFromParentJoint);
-      factory.addBox(sizeX, sizeY, sizeZ, new MaterialDefinition(color));
+      factory.addBox(sizeX, sizeY, sizeZ, color);
       rigidBody.addVisualDefinitions(factory.getVisualDefinitions());
       return rigidBody;
    }

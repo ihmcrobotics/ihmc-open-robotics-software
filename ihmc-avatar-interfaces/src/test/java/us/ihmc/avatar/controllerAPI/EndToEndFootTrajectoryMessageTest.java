@@ -659,7 +659,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
             spheres.appendTranslation(desiredPosition);
             ColorDefinition color = ColorDefinition.rgb(FootstepListVisualizer.defaultFeetColors.get(robotSide).getRGB());
-            spheres.addSphere(0.01, new MaterialDefinition(color));
+            spheres.addSphere(0.01, color);
             spheres.identity();
 
             footTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(time
