@@ -2,8 +2,6 @@ package us.ihmc.avatar;
 
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.ArrayList;
-
-import controller_msgs.msg.dds.FootstepDataListMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -19,15 +17,10 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotics.Assert;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.simulationTesting.SimulationRunsSameWayTwiceVerifier;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -166,31 +159,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       simulationTestingParameters.setUsePefectSensors(getUsePerfectSensors());
 
-      FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.setTestEnvironment(flatGround);
-      drcSimulationTestHelper.createSimulation(robotModel.getSimpleRobotName() + "FlatGroundWalking");
-
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
-
-      CommonHumanoidReferenceFrames referenceFrames = drcSimulationTestHelper.getReferenceFrames();
-      MovingReferenceFrame midFootZUpGroundFrame = referenceFrames.getMidFootZUpGroundFrame();
-      FramePose3D startPose = new FramePose3D(midFootZUpGroundFrame);
-      startPose.changeFrame(ReferenceFrame.getWorldFrame());
-      FootstepDataListMessage footsteps = EndToEndTestTools.generateForwardSteps(RobotSide.LEFT,
-                                                                                 30,
-                                                                                 EndToEndTestTools.trapezoidFunction(0.2, getMaxForwardStepLength(), 0.15, 0.85),
-                                                                                 0.25,
-                                                                                 getFastSwingTime(),
-                                                                                 getFastTransferTime(),
-                                                                                 startPose,
-                                                                                 true);
-      footsteps.setOffsetFootstepsHeightWithExecutionError(true);
-      drcSimulationTestHelper.publishToController(footsteps);
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.1
-                                                                 * EndToEndTestTools.computeWalkingDuration(footsteps, getRobotModel().getWalkingControllerParameters()));
-
-//      createVideo(scs);
+      createVideo();
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
