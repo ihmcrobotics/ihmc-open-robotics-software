@@ -3,6 +3,31 @@ package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 public class HeuristicICPControllerHelper
 {
 
+   /**
+    * Computes how much to adjust the ICP and the CoP based on how a sequence of other points lines up.
+    * All values are with respect to the unconstrained CoP, which is at 0.0 here.
+    * 
+    * @param adjustedICP         Where the ICP is with respect to the unconstrained CoP, but adjusted
+    *                            based on the vector from perfect CoP to perfect CMP.
+    * @param firstIntersection   Where the first foot intersection is along the line from unconstrained
+    *                            CoP to adjusted ICP.
+    * @param secondIntersection  Where the second foot intersection is along the line from
+    *                            unconstrained CoP to adjusted ICP.
+    * @param firstPerfect        Where the first perfect boundary is along the line from unconstrained
+    *                            CoP to adjusted ICP. Can just be set to the first intersection. Will
+    *                            be ignored if before the first intersection.
+    * @param secondPerfect       Where the second perfect boundary is along the line from unconstrained
+    *                            CoP to adjusted ICP. Can just be set to the second intersection. Will
+    *                            be ignored if beyond the second intersection.
+    * @param minICPPushDelta     Minimum amount that the ICP must be pushed by the CMP. Adjustment will
+    *                            not get any closer than this unless they must in order to get inside
+    *                            the foot.
+    * @param maxProjectionInside Maximum amount that the CoP may be projected inside the foot, between
+    *                            the two boundaries defined by the first and second intersections or
+    *                            perfect locations.
+    * @return How much to project the unconstrained CoP and unconstrained CMP along the vector from the
+    *         unconstrained CMP to the current ICP.
+    */
    public static double computeAdjustmentDistance(double adjustedICP,
                                                   double firstIntersection,
                                                   double secondIntersection,
@@ -11,6 +36,7 @@ public class HeuristicICPControllerHelper
                                                   double minICPPushDelta,
                                                   double maxProjectionInside)
    {
+      // Figure out the two boundaries, based on the perfect boundaries and the intersections.
       double firstBoundary = firstPerfect;
       double secondBoundary = secondPerfect;
 
@@ -39,58 +65,28 @@ public class HeuristicICPControllerHelper
       else if (midPointOrPerfectBoundaryIfOutside > secondBoundary)
          midPointOrPerfectBoundaryIfOutside = secondBoundary;
 
-      // Don't shift towards midpoint if it means speeding up!
-      // TODO: Relax this constraint later with some deltas...
-      if (midPointOrPerfectBoundaryIfOutside < 0.0)
-      {
-         midPointOrPerfectBoundaryIfOutside = 0.0;
-      }
+      double maxLocationInside = firstIntersection + maxProjectionInside;
+      double maxLocationBeforeICP = adjustedICP - minICPPushDelta;
 
-      double maxAdjustmentBeforeInsideMinICPPush = adjustedICP - minICPPushDelta;
+      double increaseToNoMoreThan = minimumOf(maxLocationInside, midPointOrPerfectBoundaryIfOutside, maxLocationBeforeICP);
+      if (increaseToNoMoreThan < 0.0)
+         increaseToNoMoreThan = 0.0;
 
-      if (midPointOrPerfectBoundaryIfOutside < maxAdjustmentBeforeInsideMinICPPush)
-      {
-         // Can push as far as the midpoint. But do not push any further inside than maxProjectionInside.
+      if (increaseToNoMoreThan > secondIntersection)
+         increaseToNoMoreThan = secondIntersection;
 
-         //TODO: Check the ordering of these. And make test cases where they matter.
-         if (midPointOrPerfectBoundaryIfOutside <= 0.0)
-            return midPointOrPerfectBoundaryIfOutside;
-         else if ((midPointOrPerfectBoundaryIfOutside > 0.0) && (midPointOrPerfectBoundaryIfOutside < firstIntersection + maxProjectionInside))
-            return midPointOrPerfectBoundaryIfOutside;
-         else if (firstIntersection + maxProjectionInside < 0.0)
-            return 0.0;
-         else
-            return firstIntersection + maxProjectionInside;
-      }
+      double increaseToNoLessThan = firstIntersection;
 
-      else if (maxAdjustmentBeforeInsideMinICPPush < 0.0)
-      {
-         //TODO: Check the ordering of these. And make test cases where they matter.
-
-         if (firstIntersection > 0.0)
-            return firstIntersection;
-         else if (secondIntersection < 0.0)
-            return secondIntersection;
-         else
-            return 0.0;
-      }
-
-      else if (maxAdjustmentBeforeInsideMinICPPush > firstIntersection)
-      {
-         //TODO: Check the ordering of these. And make test cases where they matter.
-
-         if (maxAdjustmentBeforeInsideMinICPPush <= 0.0)
-            return maxAdjustmentBeforeInsideMinICPPush;
-         else if ((maxAdjustmentBeforeInsideMinICPPush > 0.0) && (maxAdjustmentBeforeInsideMinICPPush < firstIntersection + maxProjectionInside))
-            return maxAdjustmentBeforeInsideMinICPPush;
-         else if (firstIntersection + maxProjectionInside < 0.0)
-            return 0.0;
-         else
-            return firstIntersection + maxProjectionInside;
-      }
+      if (increaseToNoMoreThan > increaseToNoLessThan)
+         return increaseToNoMoreThan;
 
       else
-         return firstIntersection;
+         return increaseToNoLessThan;
+   }
+
+   private static final double minimumOf(double a, double b, double c)
+   {
+      return Math.min(Math.min(a, b), c);
    }
 
 }
