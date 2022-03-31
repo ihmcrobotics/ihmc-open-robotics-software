@@ -129,6 +129,7 @@ public class SCS2AvatarSimulationFactory
    protected IntraprocessYoVariableLogger intraprocessYoVariableLogger;
    protected SimulationSession simulationSession;
    protected JointDesiredOutputWriter simulationOutputWriter;
+   protected HumanoidRobotContextData masterContext;
    protected AvatarEstimatorThread estimatorThread;
    protected AvatarControllerThread controllerThread;
    protected DisposableRobotController robotController;
@@ -156,10 +157,12 @@ public class SCS2AvatarSimulationFactory
 
       SCS2AvatarSimulation avatarSimulation = new SCS2AvatarSimulation();
       avatarSimulation.setRobotModel(robotModel.get());
+      avatarSimulation.setRobotInitialSetup(robotInitialSetup.get());
       avatarSimulation.setSimulationSession(simulationSession);
       avatarSimulation.setHighLevelHumanoidControllerFactory(highLevelHumanoidControllerFactory.get());
       avatarSimulation.setYoVariableServer(yoVariableServer);
       avatarSimulation.setIntraprocessYoVariableLogger(intraprocessYoVariableLogger);
+      avatarSimulation.setMasterContext(masterContext);
       avatarSimulation.setControllerThread(controllerThread);
       avatarSimulation.setEstimatorThread(estimatorThread);
       avatarSimulation.setRobotController(robotController);
@@ -321,7 +324,7 @@ public class SCS2AvatarSimulationFactory
       // Create intermediate data buffer for threading.
       FullHumanoidRobotModel masterFullRobotModel = robotModel.createFullRobotModel();
       robotInitialSetup.get().initializeFullRobotModel(masterFullRobotModel);
-      HumanoidRobotContextData masterContext = new HumanoidRobotContextData(masterFullRobotModel);
+      masterContext = new HumanoidRobotContextData(masterFullRobotModel);
 
       // Create the tasks that will be run on their own threads.
       int estimatorDivisor = (int) Math.round(robotModel.getEstimatorDT() / simulationDT.get());
