@@ -23,9 +23,9 @@ import controller_msgs.msg.dds.MomentumTrajectoryMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commons.ContinuousIntegrationTools;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -33,10 +33,10 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.idl.IDLSequence.Object;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.scs2.simulation.TimeConsumer;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
-import us.ihmc.simulationconstructionset.scripts.Script;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -49,7 +49,7 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
    private static final boolean keepSCSUp = false;
 
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-   private DRCSimulationTestHelper drcSimulationTestHelper;
+   private SCS2AvatarTestingSimulation simulationTestHelper;
    private DRCRobotModel robotModel;
    private final Random random = new Random(1738);
 
@@ -63,22 +63,17 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
-      simulationTestingParameters.setKeepSCSUp(keepSCSUp && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
+      simulationTestingParameters.setKeepSCSUp(!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() && keepSCSUp);
    }
 
    @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
-      {
-         ThreadTools.sleepForever();
-      }
-
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcSimulationTestHelper != null)
+      if (simulationTestHelper != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
+         simulationTestHelper.finishTest();
+         simulationTestHelper = null;
       }
 
       simulationTestingParameters = null;
@@ -88,19 +83,17 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
    private void setupTest()
    {
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
-      String className = getClass().getSimpleName();
 
-      PrintTools.debug("simulationTestingParameters.getKeepSCSUp " + simulationTestingParameters.getKeepSCSUp());
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.setTestEnvironment(flatGround);
-      drcSimulationTestHelper.createSimulation(className);
+      LogTools.debug("simulationTestingParameters.getKeepSCSUp " + simulationTestingParameters.getKeepSCSUp());
       robotModel = getRobotModel();
+      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(robotModel, flatGround, simulationTestingParameters);
+      simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
    }
 
    @Test
-   public void testForwardWalkWithAngularMomentumReference() throws SimulationExceededMaximumTimeException
+   public void testForwardWalkWithAngularMomentumReference()
    {
       // only set to true when saving new angular momentum data. output file usually needs to be manually moved to resources folder
       boolean exportAchievedAngularMomentum = false;
@@ -108,12 +101,12 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
       setupTest();
       setupCameraSideView();
 
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1);
+      simulationTestHelper.simulateAndWait(0.1);
 
       AngularMomentumRecorder recordingScript = null;
-      if(exportAchievedAngularMomentum)
+      if (exportAchievedAngularMomentum)
       {
-         recordingScript = new AngularMomentumRecorder(drcSimulationTestHelper);
+         recordingScript = new AngularMomentumRecorder(simulationTestHelper);
          recordingScript.markStart();
       }
 
@@ -123,31 +116,31 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
       double transfer = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
       double swing = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
 
-      YoBoolean planSwingAngularMomentum = (YoBoolean) drcSimulationTestHelper.getYoVariable("PlanSwingAngularMomentumWithCommand");
-      YoBoolean planTransferAngularMomentum = (YoBoolean) drcSimulationTestHelper.getYoVariable("PlanTransferAngularMomentumWithCommand");
+      YoBoolean planSwingAngularMomentum = (YoBoolean) simulationTestHelper.findVariable("PlanSwingAngularMomentumWithCommand");
+      YoBoolean planTransferAngularMomentum = (YoBoolean) simulationTestHelper.findVariable("PlanTransferAngularMomentumWithCommand");
       planSwingAngularMomentum.set(true);
       planTransferAngularMomentum.set(true);
 
-      drcSimulationTestHelper.publishToController(createFootstepMessage(numberOfSteps, false));
+      simulationTestHelper.publishToController(createFootstepMessage(numberOfSteps, false));
 
       MomentumTrajectoryMessage momentumTrajectoryMessage = loadFileToMessage();
-      drcSimulationTestHelper.publishToController(momentumTrajectoryMessage);
+      simulationTestHelper.publishToController(momentumTrajectoryMessage);
 
       double simulationTime = initialTransfer + (transfer + swing) * (numberOfSteps + 1) + 1.0;
 
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+      assertTrue(simulationTestHelper.simulateAndWait(simulationTime));
 
-      if(exportAchievedAngularMomentum)
+      if (exportAchievedAngularMomentum)
          recordingScript.exportToFile();
    }
 
    @Test
-   public void testForwardWalkWithCorruptedMomentum() throws SimulationExceededMaximumTimeException
+   public void testForwardWalkWithCorruptedMomentum()
    {
       setupTest();
       setupCameraSideView();
 
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      simulationTestHelper.simulateAndWait(1.0);
 
       int numberOfSteps = 4;
 
@@ -155,29 +148,29 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
       double transfer = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
       double swing = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
 
-      YoBoolean planSwingAngularMomentum = (YoBoolean) drcSimulationTestHelper.getYoVariable("PlanSwingAngularMomentumWithCommand");
-      YoBoolean planTransferAngularMomentum = (YoBoolean) drcSimulationTestHelper.getYoVariable("PlanTransferAngularMomentumWithCommand");
+      YoBoolean planSwingAngularMomentum = (YoBoolean) simulationTestHelper.findVariable("PlanSwingAngularMomentumWithCommand");
+      YoBoolean planTransferAngularMomentum = (YoBoolean) simulationTestHelper.findVariable("PlanTransferAngularMomentumWithCommand");
       planSwingAngularMomentum.set(true);
       planTransferAngularMomentum.set(true);
 
-      drcSimulationTestHelper.publishToController(createFootstepMessage(numberOfSteps, true));
+      simulationTestHelper.publishToController(createFootstepMessage(numberOfSteps, true));
 
       MomentumTrajectoryMessage momentumTrajectoryMessage = loadFileToMessage();
       addTimeCorruption(momentumTrajectoryMessage);
-      drcSimulationTestHelper.publishToController(momentumTrajectoryMessage);
+      simulationTestHelper.publishToController(momentumTrajectoryMessage);
 
       double simulationTime = initialTransfer + (transfer + swing) * (numberOfSteps + 1) + 1.0;
 
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+      assertTrue(simulationTestHelper.simulateAndWait(simulationTime));
    }
 
    @Test
-   public void testWalkingWithDelayedMomentum() throws SimulationExceededMaximumTimeException
+   public void testWalkingWithDelayedMomentum()
    {
       setupTest();
       setupCameraSideView();
 
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1);
+      simulationTestHelper.simulateAndWait(0.1);
 
       int numberOfSteps = 4;
 
@@ -185,30 +178,30 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
       double transfer = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
       double swing = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
 
-      YoBoolean planSwingAngularMomentum = (YoBoolean) drcSimulationTestHelper.getYoVariable("PlanSwingAngularMomentumWithCommand");
-      YoBoolean planTransferAngularMomentum = (YoBoolean) drcSimulationTestHelper.getYoVariable("PlanTransferAngularMomentumWithCommand");
+      YoBoolean planSwingAngularMomentum = (YoBoolean) simulationTestHelper.findVariable("PlanSwingAngularMomentumWithCommand");
+      YoBoolean planTransferAngularMomentum = (YoBoolean) simulationTestHelper.findVariable("PlanTransferAngularMomentumWithCommand");
       planSwingAngularMomentum.set(true);
       planTransferAngularMomentum.set(true);
 
-      drcSimulationTestHelper.publishToController(createFootstepMessage(numberOfSteps, true));
+      simulationTestHelper.publishToController(createFootstepMessage(numberOfSteps, true));
 
       MomentumTrajectoryMessage momentumTrajectoryMessage = loadFileToMessage();
       double timeDelay = 1.5 * initialTransfer;
       addTimeDelay(momentumTrajectoryMessage, timeDelay);
-      drcSimulationTestHelper.publishToController(momentumTrajectoryMessage);
+      simulationTestHelper.publishToController(momentumTrajectoryMessage);
 
       double simulationTime = initialTransfer + (transfer + swing) * (numberOfSteps + 1) + 1.0;
 
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+      assertTrue(simulationTestHelper.simulateAndWait(simulationTime));
    }
 
    @Test
-   public void testForwardWalkZeroMomentumFirstStep() throws SimulationExceededMaximumTimeException
+   public void testForwardWalkZeroMomentumFirstStep()
    {
       setupTest();
       setupCameraSideView();
 
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      simulationTestHelper.simulateAndWait(1.0);
 
       int numberOfSteps = 4;
 
@@ -216,29 +209,29 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
       double transfer = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
       double swing = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
 
-      YoBoolean planSwingAngularMomentum = (YoBoolean) drcSimulationTestHelper.getYoVariable("PlanSwingAngularMomentumWithCommand");
-      YoBoolean planTransferAngularMomentum = (YoBoolean) drcSimulationTestHelper.getYoVariable("PlanTransferAngularMomentumWithCommand");
+      YoBoolean planSwingAngularMomentum = (YoBoolean) simulationTestHelper.findVariable("PlanSwingAngularMomentumWithCommand");
+      YoBoolean planTransferAngularMomentum = (YoBoolean) simulationTestHelper.findVariable("PlanTransferAngularMomentumWithCommand");
       planSwingAngularMomentum.set(true);
       planTransferAngularMomentum.set(true);
 
       MomentumTrajectoryMessage momentumTrajectoryMessage = loadFileToMessage();
       setTimeRangeToZero(momentumTrajectoryMessage, 0.0, initialTransfer + swing);
 
-      drcSimulationTestHelper.publishToController(createFootstepMessage(numberOfSteps, true));
-      drcSimulationTestHelper.publishToController(momentumTrajectoryMessage);
+      simulationTestHelper.publishToController(createFootstepMessage(numberOfSteps, true));
+      simulationTestHelper.publishToController(momentumTrajectoryMessage);
 
       double simulationTime = initialTransfer + (transfer + swing) * (numberOfSteps + 1) + 1.0;
 
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+      assertTrue(simulationTestHelper.simulateAndWait(simulationTime));
    }
 
    @Test
-   public void testWalkingWithRandomSinusoidalMomentum() throws SimulationExceededMaximumTimeException
+   public void testWalkingWithRandomSinusoidalMomentum()
    {
       setupTest();
       setupCameraSideView();
 
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      simulationTestHelper.simulateAndWait(1.0);
 
       int numberOfSteps = 4;
 
@@ -246,17 +239,17 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
       double transfer = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
       double swing = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
 
-      YoBoolean planSwingAngularMomentum = (YoBoolean) drcSimulationTestHelper.getYoVariable("PlanSwingAngularMomentumWithCommand");
-      YoBoolean planTransferAngularMomentum = (YoBoolean) drcSimulationTestHelper.getYoVariable("PlanTransferAngularMomentumWithCommand");
+      YoBoolean planSwingAngularMomentum = (YoBoolean) simulationTestHelper.findVariable("PlanSwingAngularMomentumWithCommand");
+      YoBoolean planTransferAngularMomentum = (YoBoolean) simulationTestHelper.findVariable("PlanTransferAngularMomentumWithCommand");
       planSwingAngularMomentum.set(true);
       planTransferAngularMomentum.set(true);
 
-      drcSimulationTestHelper.publishToController(createFootstepMessage(numberOfSteps, true));
-      drcSimulationTestHelper.publishToController(createRandomSinusoidalMomentumTrajectoryMessage(initialTransfer, transfer, swing, numberOfSteps + 1, random));
+      simulationTestHelper.publishToController(createFootstepMessage(numberOfSteps, true));
+      simulationTestHelper.publishToController(createRandomSinusoidalMomentumTrajectoryMessage(initialTransfer, transfer, swing, numberOfSteps + 1, random));
 
       double simulationTime = initialTransfer + (transfer + swing) * (numberOfSteps + 1) + 1.0;
 
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+      assertTrue(simulationTestHelper.simulateAndWait(simulationTime));
    }
 
    private FootstepDataListMessage createFootstepMessage(int numberOfSteps, boolean addTimeCorruption)
@@ -278,7 +271,7 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
       Quaternion footOrientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
       message.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(side, footLocation, footOrientation));
 
-      if(addTimeCorruption)
+      if (addTimeCorruption)
          addCorruptionToFootstepTimings(message);
 
       return message;
@@ -335,11 +328,11 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
       for (int i = 0; i < taskspaceTrajectoryPoints.size(); i++)
       {
          EuclideanTrajectoryPointMessage trajectoryPoint = taskspaceTrajectoryPoints.get(i);
-         if(trajectoryPoint.getTime() > tf)
+         if (trajectoryPoint.getTime() > tf)
          {
             break;
          }
-         else if(trajectoryPoint.getTime() > t0)
+         else if (trajectoryPoint.getTime() > t0)
          {
             trajectoryPoint.getPosition().setToZero();
             trajectoryPoint.getLinearVelocity().setToZero();
@@ -347,8 +340,11 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
       }
    }
 
-   private MomentumTrajectoryMessage createRandomSinusoidalMomentumTrajectoryMessage(double initialTransferDuration, double transferDuration, double swingDuration,
-                                                                           int numberOfSteps, Random random)
+   private MomentumTrajectoryMessage createRandomSinusoidalMomentumTrajectoryMessage(double initialTransferDuration,
+                                                                                     double transferDuration,
+                                                                                     double swingDuration,
+                                                                                     int numberOfSteps,
+                                                                                     Random random)
    {
       MomentumTrajectoryMessage momentumTrajectoryMessage = new MomentumTrajectoryMessage();
       EuclideanTrajectoryMessage angularMomentum = momentumTrajectoryMessage.getAngularMomentumTrajectory();
@@ -429,12 +425,12 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
    {
       Point3D cameraFix = new Point3D(0.0, 0.0, 1.0);
       Point3D cameraPosition = new Point3D(0.0, 10.0, 1.0);
-      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
+      simulationTestHelper.setCamera(cameraFix, cameraPosition);
    }
 
    // Angular momentum recording/loading
 
-   class AngularMomentumRecorder implements Script
+   class AngularMomentumRecorder implements TimeConsumer
    {
       private int recordCounter = 0;
       private final int recordFrequency;
@@ -450,23 +446,23 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
       private final YoDouble angularMomentumZ;
       private final YoDouble time;
 
-      AngularMomentumRecorder(DRCSimulationTestHelper helper)
+      AngularMomentumRecorder(SCS2AvatarTestingSimulation helper)
       {
-         this.recordFrequency = (int) Math.round(angularMomentumRecordDT / helper.getSimulationConstructionSet().getDT());
+         this.recordFrequency = (int) Math.round(angularMomentumRecordDT / helper.getSimulationSession().getSessionDTSeconds());
 
-         this.angularMomentumX = (YoDouble) helper.getYoVariable("AngularMomentumX");
-         this.angularMomentumY = (YoDouble) helper.getYoVariable("AngularMomentumY");
-         this.angularMomentumZ = (YoDouble) helper.getYoVariable("AngularMomentumZ");
-         this.time = (YoDouble) helper.getYoVariable("t");
+         this.angularMomentumX = (YoDouble) helper.findVariable("AngularMomentumX");
+         this.angularMomentumY = (YoDouble) helper.findVariable("AngularMomentumY");
+         this.angularMomentumZ = (YoDouble) helper.findVariable("AngularMomentumZ");
+         this.time = helper.getSimulationSession().getTime();
 
-         drcSimulationTestHelper.getSimulationConstructionSet().addScript(this);
+         simulationTestHelper.getSimulationSession().addAfterPhysicsCallback(this);
          recordCounter = recordFrequency - 1;
       }
 
       @Override
-      public void doScript(double t)
+      public void accept(double t)
       {
-         if(++recordCounter >= recordFrequency)
+         if (++recordCounter >= recordFrequency)
          {
             times.add(t - startTime);
             achievedAngularMomentumX.add(angularMomentumX.getDoubleValue());
@@ -501,11 +497,11 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
 
             writer.flush();
             writer.close();
-            PrintTools.info("Exported angular momentum data to file: " + fileName);
+            LogTools.info("Exported angular momentum data to file: " + fileName);
          }
          catch (IOException e)
          {
-            PrintTools.error("Unable to export angular momentum data. Tried to write to file: " + fileName);
+            LogTools.error("Unable to export angular momentum data. Tried to write to file: " + fileName);
             e.printStackTrace();
          }
       }
@@ -528,10 +524,12 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
       try
       {
          ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+         @SuppressWarnings("unchecked")
          List<String> trajectoryDataList = (List<String>) IOUtils.readLines(classLoader.getResourceAsStream(fileName), "UTF-8");
-         
+
          MomentumTrajectoryMessage trajectoryMessage = new MomentumTrajectoryMessage();
-         us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.EuclideanTrajectoryPointMessage> trajectoryPoints = trajectoryMessage.getAngularMomentumTrajectory().getTaskspaceTrajectoryPoints();
+         us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.EuclideanTrajectoryPointMessage> trajectoryPoints = trajectoryMessage.getAngularMomentumTrajectory()
+                                                                                                                                     .getTaskspaceTrajectoryPoints();
 
          for (int i = 0; i < trajectoryDataList.size(); i++)
          {
@@ -559,7 +557,7 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
 
          return trajectoryMessage;
       }
-      catch(IOException e)
+      catch (IOException e)
       {
          throw new RuntimeException("Unable to import angular momentum data. Tried to load file: " + fileName);
       }
