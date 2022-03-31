@@ -32,7 +32,8 @@ public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFact
    private final OptionalFactoryField<Boolean> createVideo = new OptionalFactoryField<>("createVideo", false);
    private final OptionalFactoryField<Boolean> keepSCSUp = new OptionalFactoryField<>("keepSCSUp", false);
 
-   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.INTRAPROCESS, "ihmc_simulation_test_helper");
+   private final PubSubImplementation pubSubImplementation = PubSubImplementation.INTRAPROCESS;
+   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "ihmc_simulation_test_helper");
 
    @SuppressWarnings("rawtypes")
    private final Map<Class<?>, IHMCROS2Publisher> defaultControllerPublishers = new HashMap<>();
@@ -74,7 +75,7 @@ public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFact
       setRobotModel(robotModel);
       setCommonAvatarEnvrionmentInterface(environment);
 
-      setRealtimeROS2Node(ROS2Tools.createRealtimeROS2Node(PubSubImplementation.INTRAPROCESS, "ihmc_simulation"));
+      setRealtimeROS2Node(ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "ihmc_simulation"));
 
       List<Class<? extends Command<?, ?>>> controllerSupportedCommands = ControllerAPIDefinition.getControllerSupportedCommands();
 

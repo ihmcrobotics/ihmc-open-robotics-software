@@ -252,6 +252,15 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
       ihmcros2Publisher.publish(message);
    }
 
+   public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, ROS2Topic<?> generator)
+   {
+      return ROS2Tools.createPublisherTypeNamed(ros2Node, messageType, generator);
+   }
+
+   public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, String topicName)
+   {
+      return ROS2Tools.createPublisher(ros2Node, messageType, topicName);
+   }
 
    //   private ScriptedFootstepGenerator scriptedFootstepGenerator;
    //
