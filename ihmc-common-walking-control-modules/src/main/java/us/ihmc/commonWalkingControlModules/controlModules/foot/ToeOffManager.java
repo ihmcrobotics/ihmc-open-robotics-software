@@ -924,7 +924,7 @@ public class ToeOffManager
          checkRearKneeLowerLimitForToeOff(trailingLeg);
          legInspector.updateSwitchToToeOffDueToJointLimits();
 
-         if (forceToeOffAtJointLimit.getValue() && legInspector.needToSwitchToToeOffDueToJointLimit() && !icpIsInsideSupportFoot.getBooleanValue())
+         if (doToeOffIfPossibleInSingleSupport.getValue() && forceToeOffAtJointLimit.getValue() && legInspector.needToSwitchToToeOffDueToJointLimit() && !icpIsInsideSupportFoot.getBooleanValue())
          {
             doLineToeOff.set(true);
             computeToeLineContact.set(updateLineContactDuringToeOff.getValue());
@@ -938,7 +938,7 @@ public class ToeOffManager
             return false;
          }
 
-         if (!forceToeOffAtJointLimit.getValue() && legInspector.needToSwitchToToeOffDueToJointLimit())
+         if (doToeOffIfPossibleInSingleSupport.getValue() && !forceToeOffAtJointLimit.getValue() && legInspector.needToSwitchToToeOffDueToJointLimit())
          {
             doLineToeOff.set(true);
             computeToeLineContact.set(updateLineContactDuringToeOff.getValue());
