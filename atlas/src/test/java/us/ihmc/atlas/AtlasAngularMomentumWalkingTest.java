@@ -12,7 +12,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 @Disabled // TODO Since the PR #1678 about switching to a new ICP planner, the feature tested here is not available.
 @Tag("humanoid-flat-ground-slow-2")
@@ -58,35 +57,35 @@ public class AtlasAngularMomentumWalkingTest extends AvatarAngularMomentumWalkin
 
    @Override
    @Test
-   public void testForwardWalkWithAngularMomentumReference() throws SimulationExceededMaximumTimeException
+   public void testForwardWalkWithAngularMomentumReference()
    {
       super.testForwardWalkWithAngularMomentumReference();
    }
 
    @Override
    @Test
-   public void testForwardWalkWithCorruptedMomentum() throws SimulationExceededMaximumTimeException
+   public void testForwardWalkWithCorruptedMomentum()
    {
       super.testForwardWalkWithCorruptedMomentum();
    }
 
    @Override
    @Test
-   public void testWalkingWithDelayedMomentum() throws SimulationExceededMaximumTimeException
+   public void testWalkingWithDelayedMomentum()
    {
       super.testWalkingWithDelayedMomentum();
    }
 
    @Override
    @Test
-   public void testForwardWalkZeroMomentumFirstStep() throws SimulationExceededMaximumTimeException
+   public void testForwardWalkZeroMomentumFirstStep()
    {
       super.testForwardWalkZeroMomentumFirstStep();
    }
 
    @Override
    @Test
-   public void testWalkingWithRandomSinusoidalMomentum() throws SimulationExceededMaximumTimeException
+   public void testWalkingWithRandomSinusoidalMomentum()
    {
       super.testWalkingWithRandomSinusoidalMomentum();
    }
