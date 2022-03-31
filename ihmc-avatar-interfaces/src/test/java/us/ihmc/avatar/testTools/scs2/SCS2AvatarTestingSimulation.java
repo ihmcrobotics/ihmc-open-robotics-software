@@ -124,6 +124,11 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
       return simulationSessionControls.simulateAndWait(getSimulationSession().getBufferRecordTickPeriod());
    }
 
+   public void resetRobot(boolean simulateAfterReset)
+   {
+      avatarSimulation.resetRobot(simulateAfterReset);
+   }
+
    private void checkSimulationHasStarted()
    {
       if (!avatarSimulation.getSimulationSession().hasSessionStarted())

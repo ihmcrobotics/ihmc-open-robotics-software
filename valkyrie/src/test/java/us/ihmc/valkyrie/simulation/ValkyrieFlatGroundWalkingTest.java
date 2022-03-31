@@ -7,8 +7,6 @@ import us.ihmc.avatar.DRCFlatGroundWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.ControllerFailureException;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 //This test is slow but very important, let's keep it in the FAST build please. (Sylvain)
@@ -25,7 +23,7 @@ public class ValkyrieFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
    @Tag("fast")
    @Override
 	@Test
-   public void testFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
+   public void testFlatGroundWalking()
    {
       robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
       super.testFlatGroundWalking();
@@ -34,7 +32,7 @@ public class ValkyrieFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
    @Tag("fast")
    @Override
    @Test
-   public void testReset() throws SimulationExceededMaximumTimeException, ControllerFailureException
+   public void testReset()
    {
       // Not supported for Valkyrie yet.
    }
