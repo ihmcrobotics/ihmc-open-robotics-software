@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -254,7 +255,8 @@ public class ICPController implements ICPControllerInterface
 
    /** {@inheritDoc} */
    @Override
-   public void compute(FramePoint2DReadOnly desiredICP,
+   public void compute(FrameConvexPolygon2DReadOnly supportPolygonInWorld,
+                       FramePoint2DReadOnly desiredICP,
                        FrameVector2DReadOnly desiredICPVelocity,
                        FramePoint2DReadOnly perfectCoP,
                        FramePoint2DReadOnly currentICP,
@@ -262,12 +264,13 @@ public class ICPController implements ICPControllerInterface
                        double omega0)
    {
       desiredCMPOffsetToThrowAway.setToZero(worldFrame);
-      compute(desiredICP, desiredICPVelocity, perfectCoP, desiredCMPOffsetToThrowAway, currentICP, currentCoMPosition, omega0);
+      compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, perfectCoP, desiredCMPOffsetToThrowAway, currentICP, currentCoMPosition, omega0);
    }
 
    /** {@inheritDoc} */
    @Override
-   public void compute(FramePoint2DReadOnly desiredICP,
+   public void compute(FrameConvexPolygon2DReadOnly supportPolygonInWorld,
+                       FramePoint2DReadOnly desiredICP,
                        FrameVector2DReadOnly desiredICPVelocity,
                        FramePoint2DReadOnly perfectCoP,
                        FrameVector2DReadOnly perfectCMPOffset,

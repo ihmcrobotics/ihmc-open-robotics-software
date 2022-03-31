@@ -13,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -83,6 +84,8 @@ public class ICPControllerTest
       TestWalkingControllerParameters walkingControllerParameters = new TestWalkingControllerParameters();
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
+      FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
+
       double controlDT = 0.001;
       ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters,
                                                                            bipedSupportPolygons, null, contactableFeet, controlDT, registry, null);
@@ -105,7 +108,7 @@ public class ICPControllerTest
       FramePoint2D currentCoMPosition = new FramePoint2D(currentICP);
 
       controller.initialize();
-      controller.compute(desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition, omega);
+      controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition, omega);
 
       FramePoint2D desiredCMP = new FramePoint2D();
       controller.getDesiredCMP(desiredCMP);
@@ -147,6 +150,8 @@ public class ICPControllerTest
       TestWalkingControllerParameters walkingControllerParameters = new TestWalkingControllerParameters();
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
+      FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
+
       double controlDT = 0.001;
       ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters,
                                                                            bipedSupportPolygons, null, contactableFeet, controlDT, registry, null);
@@ -170,7 +175,7 @@ public class ICPControllerTest
       FramePoint2D currentCoM = new FramePoint2D(currentICP);
 
       controller.initialize();
-      controller.compute(desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoM, omega);
+      controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoM, omega);
 
       FramePoint2D desiredCMP = new FramePoint2D();
       controller.getDesiredCMP(desiredCMP);
@@ -213,6 +218,8 @@ public class ICPControllerTest
       TestWalkingControllerParameters walkingControllerParameters = new TestWalkingControllerParameters();
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, footWidth, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
+      FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
+
       double controlDT = 0.001;
       ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters,
                                                                            bipedSupportPolygons, null, contactableFeet, controlDT, registry, null);
@@ -235,7 +242,7 @@ public class ICPControllerTest
       FramePoint2D currentCoMPosition = new FramePoint2D(currentICP);
 
       controller.initialize();
-      controller.compute(desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition, omega);
+      controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition, omega);
 
       FramePoint2D desiredCMP = new FramePoint2D();
       controller.getDesiredCMP(desiredCMP);
@@ -288,6 +295,8 @@ public class ICPControllerTest
       TestWalkingControllerParameters walkingControllerParameters = new TestWalkingControllerParameters();
          SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(10.0, 5.0, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
+      FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
+
       double controlDT = 0.001;
       ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters,
                                                    bipedSupportPolygons, null, contactableFeet, controlDT, registry, null);
@@ -310,7 +319,7 @@ public class ICPControllerTest
       FramePoint2D currentCoMPosition = new FramePoint2D(currentICP);
 
       controller.initialize();
-      controller.compute(desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition, omega);
+      controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition, omega);
 
       FramePoint2D desiredCMP = new FramePoint2D();
       controller.getDesiredCMP(desiredCMP);
@@ -372,6 +381,8 @@ public class ICPControllerTest
       TestWalkingControllerParameters walkingControllerParameters = new TestWalkingControllerParameters();
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
+      FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
+
       double controlDT = 0.001;
       ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters,
                                                                            bipedSupportPolygons, null, contactableFeet, controlDT, registry, null);
@@ -394,7 +405,7 @@ public class ICPControllerTest
       FramePoint2D currentCoMPosition = new FramePoint2D(currentICP);
 
       controller.initialize();
-      controller.compute(desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition, omega);
+      controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition, omega);
 
       FramePoint2D desiredCMP = new FramePoint2D();
       controller.getDesiredCMP(desiredCMP);
