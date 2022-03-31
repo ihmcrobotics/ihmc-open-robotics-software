@@ -6,13 +6,12 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.util.function.ToDoubleFunction;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInfo;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -22,24 +21,20 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.yoVariables.variable.YoVariable;
 
 // FIXME Need to improve impulse resolution and minimize tolerances in these tests.
 public abstract class HumanoidExperimentalSimulationEndToEndTest implements MultiRobotTestInterface
 {
    protected static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-   protected DRCSimulationTestHelper drcSimulationTestHelper = null;
+   protected SCS2AvatarTestingSimulation simulationTestHelper = null;
 
    @AfterEach
    public void tearDown()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
-         ThreadTools.sleepForever();
-
-      if (drcSimulationTestHelper != null)
+      if (simulationTestHelper != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
+         simulationTestHelper.finishTest();
+         simulationTestHelper = null;
       }
    }
 
@@ -47,10 +42,13 @@ public abstract class HumanoidExperimentalSimulationEndToEndTest implements Mult
    {
       DRCRobotModel robotModel = getRobotModel();
       FlatGroundEnvironment testEnvironment = new FlatGroundEnvironment();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, testEnvironment);
-      drcSimulationTestHelper.getSCSInitialSetup().setUseExperimentalPhysicsEngine(true);
-      drcSimulationTestHelper.createSimulation(testInfo.getTestClass().getClass().getSimpleName() + "." + testInfo.getTestMethod().get().getName() + "()");
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0));
+      SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
+                                                                                                                                             testEnvironment,
+                                                                                                                                             simulationTestingParameters);
+      simulationTestHelperFactory.setUseImpulseBasedPhysicsEngine(true);
+      simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+      simulationTestHelper.start();
+      assertTrue(simulationTestHelper.simulateAndWait(3.0));
    }
 
    public void testZeroTorque(TestInfo testInfo) throws Exception
@@ -59,17 +57,21 @@ public abstract class HumanoidExperimentalSimulationEndToEndTest implements Mult
 
       DRCRobotModel robotModel = getRobotModel();
       FlatGroundEnvironment testEnvironment = new FlatGroundEnvironment();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, testEnvironment);
-      drcSimulationTestHelper.getSCSInitialSetup().setUseExperimentalPhysicsEngine(true);
-      drcSimulationTestHelper.createSimulation(testInfo.getTestClass().getClass().getSimpleName() + "." + testInfo.getTestMethod().get().getName() + "()");
+      SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
+                                                                                                                                             testEnvironment,
+                                                                                                                                             simulationTestingParameters);
+      simulationTestHelperFactory.setUseImpulseBasedPhysicsEngine(true);
+      simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+      simulationTestHelper.start();
       // Switch to zero-torque controller.
-      drcSimulationTestHelper.getAvatarSimulation().getHighLevelHumanoidControllerFactory().getRequestedControlStateEnum()
-                             .set(HighLevelControllerName.DO_NOTHING_BEHAVIOR);
+      simulationTestHelper.getHighLevelHumanoidControllerFactory().getRequestedControlStateEnum().set(HighLevelControllerName.DO_NOTHING_BEHAVIOR);
 
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0));
+      assertTrue(simulationTestHelper.simulateAndWait(3.0));
 
-      RigidBodyBasics elevator = drcSimulationTestHelper.getControllerFullRobotModel().getElevator();
-      assertRigidBodiesAreAboveFlatGround(elevator, p -> testEnvironment.getTerrainObject3D().getHeightMapIfAvailable().heightAt(p.getX(), p.getY(), p.getZ()), 3.0e-3);
+      RigidBodyBasics elevator = simulationTestHelper.getControllerFullRobotModel().getElevator();
+      assertRigidBodiesAreAboveFlatGround(elevator,
+                                          p -> testEnvironment.getTerrainObject3D().getHeightMapIfAvailable().heightAt(p.getX(), p.getY(), p.getZ()),
+                                          3.0e-3);
       assertOneDoFJointsAreWithingLimits(elevator, 2.0e-2);
    }
 
