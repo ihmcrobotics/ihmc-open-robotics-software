@@ -17,9 +17,7 @@ import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.lwjgl.opengl.GL41;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
@@ -34,7 +32,6 @@ import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.visualizers.GDXFrustumVisualizer;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
-import us.ihmc.robotics.perception.ProjectionTools;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.UnitConversions;
 
@@ -347,6 +344,15 @@ public class GDXLowLevelDepthSensorSimulator
    public ByteBuffer getMetersDepthFloatBuffer()
    {
       return metersDepthImage.getBackingDirectByteBuffer();
+   }
+
+   /**
+    * OpenGL and OpenCV have different orderings, this data is ABGR, but OpenGl reads
+    * each pixel right to left so to OpenGL it's RGBA.
+    */
+   public GDXBytedecoImage getABGR8888ColorImage()
+   {
+      return rgba8888ColorImage;
    }
 
    public ByteBuffer getColorRGBA8Buffer()

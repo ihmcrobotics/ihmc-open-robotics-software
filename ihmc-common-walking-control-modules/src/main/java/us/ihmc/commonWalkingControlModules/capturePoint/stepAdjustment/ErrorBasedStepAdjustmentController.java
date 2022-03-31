@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.captureRegion.CaptureRegionSafetyHeuristics;
 import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepCaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
@@ -111,7 +110,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    private final YoBoolean footstepWasAdjusted = new YoBoolean(yoNamePrefix + "FootstepWasAdjusted", registry);
 
    private final BooleanProvider useICPControlPlaneInStepAdjustment = new BooleanParameter(yoNamePrefix + "useICPControlPlaneInStepAdjustment", registry, false);
-   private final DoubleProvider minimumTimeForStepAdjustment = new DoubleParameter(yoNamePrefix + "minimumTimeForStepAdjustment", registry, -1.0);
+   private final DoubleProvider minimumTimeForStepAdjustment = new DoubleParameter(yoNamePrefix + "minimumTimeForStepAdjustment", registry, 0.02);
    private final DoubleProvider distanceInsideToScaleSupportPolygon = new DoubleParameter(yoNamePrefix + "distanceInsideToScaleSupportPolygon", registry, 0.035);
 
    private final StepAdjustmentReachabilityConstraint reachabilityConstraintHandler;
@@ -140,51 +139,48 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                                              BipedSupportPolygons bipedSupportPolygons,
                                              ICPControlPolygons icpControlPolygons,
                                              SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-                                             double controlDT,
                                              YoRegistry parentRegistry,
                                              YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(walkingControllerParameters,
-           walkingControllerParameters.getICPOptimizationParameters(),
+           walkingControllerParameters.getStepAdjustmentParameters(),
            soleZUpFrames,
            bipedSupportPolygons,
            icpControlPolygons,
            contactableFeet,
-           controlDT,
            parentRegistry,
            yoGraphicsListRegistry);
    }
 
    public ErrorBasedStepAdjustmentController(WalkingControllerParameters walkingControllerParameters,
-                                             ICPOptimizationParameters icpOptimizationParameters,
+                                             StepAdjustmentParameters stepAdjustmentParameters,
                                              SideDependentList<? extends ReferenceFrame> soleZUpFrames,
                                              BipedSupportPolygons bipedSupportPolygons,
                                              ICPControlPolygons icpControlPolygons,
                                              SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-                                             double controlDT,
                                              YoRegistry parentRegistry,
                                              YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.icpControlPlane = icpControlPolygons.getIcpControlPlane();
       this.bipedSupportPolygons = bipedSupportPolygons;
 
-      allowStepAdjustment = new BooleanParameter(yoNamePrefix + "AllowStepAdjustment", registry, icpOptimizationParameters.allowStepAdjustment());
+      allowStepAdjustment = new BooleanParameter(yoNamePrefix + "AllowStepAdjustment", registry, stepAdjustmentParameters.allowStepAdjustment());
 
       minimumFootstepMultiplier = new DoubleParameter(yoNamePrefix + "MinimumFootstepMultiplier",
                                                       registry,
-                                                      icpOptimizationParameters.getMinimumFootstepMultiplier());
+                                                      stepAdjustmentParameters.getMinimumFootstepMultiplier());
       maximumTimeFromTransfer = new DoubleParameter(yoNamePrefix + "MaximumTimeFromTransfer",
                                                     registry,
-                                                    icpOptimizationParameters.maximumTimeFromTransferInFootstepMultiplier());
+                                                    stepAdjustmentParameters.maximumTimeFromTransferInFootstepMultiplier());
       minICPErrorForStepAdjustment = new DoubleParameter(yoNamePrefix + "MinICPErrorForStepAdjustment",
                                                          registry,
-                                                         icpOptimizationParameters.getMinICPErrorForStepAdjustment());
+                                                         stepAdjustmentParameters.getMinICPErrorForStepAdjustment());
 
       transferDurationSplitFraction = new DoubleParameter(yoNamePrefix + "TransferDurationSplitFraction",
                                                           registry,
-                                                          icpOptimizationParameters.getTransferSplitFraction());
+                                                          stepAdjustmentParameters.getTransferSplitFraction());
 
-      footstepDeadband = new DoubleParameter(yoNamePrefix + "FootstepDeadband", registry, icpOptimizationParameters.getAdjustmentDeadband());
+      footstepDeadband = new DoubleParameter(yoNamePrefix + "FootstepDeadband", registry, stepAdjustmentParameters.getAdjustmentDeadband());
       allowCrossOverSteps = new BooleanParameter(yoNamePrefix + "AllowCrossOverSteps", registry, false);
 
       SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
@@ -486,7 +482,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    private FrameConvexPolygon2DReadOnly getBestReachabilityConstraintToUseWhenNotIntersecting()
    {
       if (!allowCrossOverSteps.getValue())
-         return reachableCaptureRegion;
+         return reachabilityConstraintHandler.getReachabilityConstraint();
 
       double distanceToForward = reachabilityConstraintHandler.getForwardCrossOverPolygon().distance(adjustedSolutionInControlPlane);
       double distanceToBackward = reachabilityConstraintHandler.getBackwardCrossOverPolygon().distance(adjustedSolutionInControlPlane);

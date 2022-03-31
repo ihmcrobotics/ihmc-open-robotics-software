@@ -1,6 +1,7 @@
 package us.ihmc.atlas.ObstacleCourseTests;
 
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -27,6 +28,7 @@ public class AtlasObstacleCourseDoNothingTest extends DRCObstacleCourseDoNothing
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 
+   @Tag("humanoid-flat-ground")
    @Test
    public void testDoNothing() throws SimulationExceededMaximumTimeException
    {

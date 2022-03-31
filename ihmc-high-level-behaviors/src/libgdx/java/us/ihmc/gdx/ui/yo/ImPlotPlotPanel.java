@@ -1,5 +1,6 @@
 package us.ihmc.gdx.ui.yo;
 
+import imgui.ImGui;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 
 import java.util.ArrayList;
@@ -23,7 +24,11 @@ public class ImPlotPlotPanel extends ImGuiPanel
 
    public void render()
    {
-      layout.render();
+      ImGui.beginMenuBar();
+      layout.renderLayoutMenu();
+      ImGui.endMenuBar();
+
+      layout.renderPlots();
    }
 
    public ArrayList<ImPlotPlot> getPlots()

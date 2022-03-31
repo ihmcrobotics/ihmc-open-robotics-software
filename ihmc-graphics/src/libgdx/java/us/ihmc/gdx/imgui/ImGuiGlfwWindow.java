@@ -2,6 +2,7 @@ package us.ihmc.gdx.imgui;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.internal.ImGui;
+import org.lwjgl.glfw.GLFW;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
@@ -49,28 +50,25 @@ public class ImGuiGlfwWindow
                                                           directoryNameToAssumePresent,
                                                           subsequentPathToResourceFolder,
                                                           configurationExtraPath,
-                                                          configurationBaseDirectory,
-      updatedPerspectiveDirectory ->
+                                                          configurationBaseDirectory);
+      perspectiveManager.getPerspectiveDirectoryUpdatedListeners().add(imGuiWindowAndDockSystem::setDirectory);
+      perspectiveManager.getPerspectiveDirectoryUpdatedListeners().add(updatedPerspectiveDirectory ->
       {
          windowSettingsFile = new HybridFile(updatedPerspectiveDirectory, "WindowSettings.json");
-         imGuiWindowAndDockSystem.setDirectory(updatedPerspectiveDirectory);
-      },
-      loadConfigurationLocation ->
+      });
+      perspectiveManager.getLoadListeners().add(imGuiWindowAndDockSystem::loadConfiguration);
+      perspectiveManager.getLoadListeners().add(loadConfigurationLocation ->
       {
-         imGuiWindowAndDockSystem.loadConfiguration(loadConfigurationLocation);
-         Path libGDXFile = loadConfigurationLocation == ImGuiConfigurationLocation.VERSION_CONTROL
-               ? windowSettingsFile.getWorkspaceFile() : windowSettingsFile.getExternalFile();
-         JSONFileTools.load(libGDXFile, jsonNode ->
+         windowSettingsFile.setMode(loadConfigurationLocation.toHybridResourceMode());
+         JSONFileTools.load(windowSettingsFile.getInputStream(), jsonNode ->
          {
             int width = jsonNode.get("windowWidth").asInt();
             int height = jsonNode.get("windowHeight").asInt();
             glfwWindowForImGui.setWindowSize(width, height);
          });
-      },
-      saveConfigurationLocation ->
-      {
-         saveApplicationSettings(saveConfigurationLocation);
       });
+      perspectiveManager.getSaveListeners().add(this::saveApplicationSettings);
+      perspectiveManager.applyPerspectiveDirectory();
    }
 
    public void run(Runnable render, Runnable dispose)
@@ -93,8 +91,6 @@ public class ImGuiGlfwWindow
 
       while (!glfwWindowShouldClose(windowHandle))
       {
-         ImGuiTools.glClearDarkGray();
-
          if (configure != null)
          {
             configure.run();
@@ -106,6 +102,8 @@ public class ImGuiGlfwWindow
          render.run();
 
          imGuiWindowAndDockSystem.afterWindowManagement();
+         GLFW.glfwSwapBuffers(windowHandle);
+         GLFW.glfwPollEvents();
       }
 
       dispose.run();

@@ -310,7 +310,6 @@ public class BalanceManager
                                                                            bipedSupportPolygons,
                                                                            icpControlPolygons,
                                                                            controllerToolbox.getContactableFeet(),
-                                                                           controllerToolbox.getControlDT(),
                                                                            registry,
                                                                            yoGraphicsListRegistry);
       }

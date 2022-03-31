@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.configurations.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -78,12 +78,6 @@ public class ICPControllerTest
          {
             return false;
          }
-
-         @Override
-         public boolean allowStepAdjustment()
-         {
-            return false;
-         }
       };
 
       TestWalkingControllerParameters walkingControllerParameters = new TestWalkingControllerParameters();
@@ -145,12 +139,6 @@ public class ICPControllerTest
 
          @Override
          public boolean useAngularMomentum()
-         {
-            return false;
-         }
-
-         @Override
-         public boolean allowStepAdjustment()
          {
             return false;
          }
@@ -216,12 +204,6 @@ public class ICPControllerTest
 
          @Override
          public boolean useAngularMomentum()
-         {
-            return false;
-         }
-
-         @Override
-         public boolean allowStepAdjustment()
          {
             return false;
          }
@@ -298,12 +280,6 @@ public class ICPControllerTest
 
          @Override
          public boolean useAngularMomentum()
-         {
-            return false;
-         }
-
-         @Override
-         public boolean allowStepAdjustment()
          {
             return false;
          }
@@ -390,12 +366,6 @@ public class ICPControllerTest
          public double getAngularMomentumMinimizationWeight()
          {
             return 1.0;
-         }
-
-         @Override
-         public boolean allowStepAdjustment()
-         {
-            return false;
          }
       };
 
@@ -496,26 +466,8 @@ public class ICPControllerTest
       return bipedSupportPolygons;
    }
 
-   private class TestICPOptimizationParameters extends ICPOptimizationParameters
+   private class TestICPOptimizationParameters extends ICPControllerParameters
    {
-      @Override
-      public double getForwardFootstepWeight()
-      {
-         return 10.0;
-      }
-
-      @Override
-      public double getLateralFootstepWeight()
-      {
-         return 10.0;
-      }
-
-      @Override
-      public double getFootstepRateWeight()
-      {
-         return 0.0001;
-      }
-
       @Override
       public double getFeedbackForwardWeight()
       {
@@ -550,21 +502,9 @@ public class ICPControllerTest
       }
 
       @Override
-      public double getDynamicsObjectiveDoubleSupportWeightModifier()
-      {
-         return 1.0;
-      }
-
-      @Override
       public double getAngularMomentumMinimizationWeight()
       {
          return 50;
-      }
-
-      @Override
-      public boolean scaleStepRateWeightWithTime()
-      {
-         return false;
       }
 
       @Override
@@ -574,40 +514,9 @@ public class ICPControllerTest
       }
 
       @Override
-      public boolean useFeedbackRate()
-      {
-         return false;
-      }
-
-      @Override
-      public boolean allowStepAdjustment()
-      {
-         return false;
-      }
-
-      @Override
       public boolean useAngularMomentum()
       {
          return false;
-      }
-
-      @Override
-      public boolean useFootstepRate()
-      {
-         return false;
-      }
-
-
-      @Override
-      public double getMinimumTimeRemaining()
-      {
-         return 0.0001;
-      }
-
-      @Override
-      public double getAdjustmentDeadband()
-      {
-         return 0.03;
       }
 
       @Override
@@ -647,12 +556,6 @@ public class ICPControllerTest
       public boolean allowAutomaticManipulationAbort()
       {
          return false;
-      }
-
-      @Override
-      public ICPControlGains createICPControlGains()
-      {
-         return null;
       }
 
       @Override
@@ -764,9 +667,15 @@ public class ICPControllerTest
       }
 
       @Override
-      public ICPOptimizationParameters getICPOptimizationParameters()
+      public ICPControllerParameters getICPControllerParameters()
       {
          return new TestICPOptimizationParameters();
+      }
+
+      @Override
+      public StepAdjustmentParameters getStepAdjustmentParameters()
+      {
+         return null;
       }
 
       @Override

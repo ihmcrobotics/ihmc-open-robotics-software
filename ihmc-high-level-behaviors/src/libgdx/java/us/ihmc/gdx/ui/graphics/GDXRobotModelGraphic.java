@@ -19,6 +19,7 @@ import us.ihmc.simulationConstructionSetTools.grahics.GraphicsIDRobot;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
 import us.ihmc.tools.thread.Activator;
 
+@Deprecated // Use GDXMultiBodyGraphic instead.
 public class GDXRobotModelGraphic extends ImGuiGDXVisualizer implements RenderableProvider
 {
    private GDXGraphics3DNode robotRootNode;

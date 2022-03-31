@@ -63,6 +63,7 @@ public class GDXImGuiBasedUI
    private final ImBoolean shadows = new ImBoolean(false);
    private final ImInt libGDXLogLevel = new ImInt(GDXTools.toGDX(LogTools.getLevel()));
    private final GDXImGuiPerspectiveManager perspectiveManager;
+   private long renderIndex = 0;
 
    public GDXImGuiBasedUI(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
    {
@@ -85,28 +86,26 @@ public class GDXImGuiBasedUI
                                                           directoryNameToAssumePresent,
                                                           subsequentPathToResourceFolder,
                                                           configurationExtraPath,
-                                                          configurationBaseDirectory,
-      updatedPerspectiveDirectory ->
+                                                          configurationBaseDirectory);
+      perspectiveManager.getPerspectiveDirectoryUpdatedListeners().add(imGuiWindowAndDockSystem::setDirectory);
+      perspectiveManager.getPerspectiveDirectoryUpdatedListeners().add(updatedPerspectiveDirectory ->
       {
          libGDXSettingsFile = new HybridFile(updatedPerspectiveDirectory, "GDXSettings.json");
-         imGuiWindowAndDockSystem.setDirectory(updatedPerspectiveDirectory);
-      },
-      loadConfigurationLocation ->
+      });
+      perspectiveManager.getLoadListeners().add(imGuiWindowAndDockSystem::loadConfiguration);
+      perspectiveManager.getLoadListeners().add(loadConfigurationLocation ->
       {
-         imGuiWindowAndDockSystem.loadConfiguration(loadConfigurationLocation);
-         Path libGDXFile = loadConfigurationLocation == ImGuiConfigurationLocation.VERSION_CONTROL
-               ? libGDXSettingsFile.getWorkspaceFile() : libGDXSettingsFile.getExternalFile();
-         JSONFileTools.load(libGDXFile, jsonNode ->
+         libGDXSettingsFile.setMode(loadConfigurationLocation.toHybridResourceMode());
+         LogTools.info("Loading libGDX settings from {}", libGDXSettingsFile.getLocationOfResourceForReading());
+         JSONFileTools.load(libGDXSettingsFile.getInputStream(), jsonNode ->
          {
             int width = jsonNode.get("windowWidth").asInt();
             int height = jsonNode.get("windowHeight").asInt();
             Gdx.graphics.setWindowedMode(width, height);
          });
-      },
-      saveConfigurationLocation ->
-      {
-         saveApplicationSettings(saveConfigurationLocation);
       });
+      perspectiveManager.getSaveListeners().add(this::saveApplicationSettings);
+      perspectiveManager.applyPerspectiveDirectory();
 
 //      guiRecorder = new GDXLinuxGUIRecorder(24, 0.8f, getClass().getSimpleName());
 //      onCloseRequestListeners.add(guiRecorder::stop);
@@ -172,6 +171,7 @@ public class GDXImGuiBasedUI
    public void renderEnd()
    {
       imGuiWindowAndDockSystem.afterWindowManagement();
+      ++renderIndex;
    }
 
    private void renderMenuBar()
@@ -368,5 +368,15 @@ public class GDXImGuiBasedUI
    public GDXImGuiWindowAndDockSystem getImGuiWindowAndDockSystem()
    {
       return imGuiWindowAndDockSystem;
+   }
+
+   public HybridDirectory getConfigurationBaseDirectory()
+   {
+      return configurationBaseDirectory;
+   }
+
+   public long getRenderIndex()
+   {
+      return renderIndex;
    }
 }

@@ -1,5 +1,6 @@
 package us.ihmc.avatar.networkProcessor.walkingPreview;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -13,6 +14,7 @@ public class ValkyrieWalkingControllerPreviewToolboxControllerTest extends Avata
    private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
    private final ValkyrieRobotModel ghostRobotModel = new ValkyrieRobotModel(RobotTarget.SCS);
 
+   @Tag("humanoid-toolbox")
    @Override
    @Test
    public void testWalkingPreviewAlone() throws SimulationExceededMaximumTimeException, ControllerFailureException
@@ -20,6 +22,7 @@ public class ValkyrieWalkingControllerPreviewToolboxControllerTest extends Avata
       super.testWalkingPreviewAlone();
    }
 
+   @Tag("humanoid-toolbox")
    @Override
    @Test
    public void testStepsInPlacePreviewAtControllerDT() throws SimulationExceededMaximumTimeException
@@ -27,6 +30,7 @@ public class ValkyrieWalkingControllerPreviewToolboxControllerTest extends Avata
       super.testStepsInPlacePreviewAtControllerDT();
    }
 
+   @Tag("humanoid-toolbox")
    @Override
    @Test
    public void testResetFeature() throws SimulationExceededMaximumTimeException

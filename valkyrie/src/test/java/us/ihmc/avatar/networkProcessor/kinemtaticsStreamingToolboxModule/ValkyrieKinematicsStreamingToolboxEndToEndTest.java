@@ -1,5 +1,6 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -20,6 +21,7 @@ public class ValkyrieKinematicsStreamingToolboxEndToEndTest extends KinematicsSt
       return new ValkyrieRobotModel(RobotTarget.SCS);
    }
 
+   @Tag("humanoid-toolbox")
    @Test
    public void testSimpleArmMotions() throws IOException, SimulationExceededMaximumTimeException
    {
@@ -28,6 +30,7 @@ public class ValkyrieKinematicsStreamingToolboxEndToEndTest extends KinematicsSt
       runTest(inputStream);
    }
 
+   @Tag("humanoid-toolbox")
    @Test
    public void testArmCollisions() throws IOException, SimulationExceededMaximumTimeException
    {
@@ -36,6 +39,7 @@ public class ValkyrieKinematicsStreamingToolboxEndToEndTest extends KinematicsSt
       runTest(inputStream);
    }
 
+   @Tag("humanoid-toolbox")
    @Test
    public void testCrazyInputsLog() throws IOException, SimulationExceededMaximumTimeException
    {
