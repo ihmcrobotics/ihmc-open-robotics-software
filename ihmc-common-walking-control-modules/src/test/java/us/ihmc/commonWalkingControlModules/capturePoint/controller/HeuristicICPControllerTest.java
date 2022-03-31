@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -12,14 +14,9 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
-import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
-import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
-import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameLine2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -35,13 +32,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.Assert;
-import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
-import us.ihmc.robotics.controllers.pidGains.implementations.PIDSE3Configuration;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -82,7 +76,7 @@ public class HeuristicICPControllerTest
    public static void main(String[] args) throws Exception
    {
       HeuristicICPControllerTest test = new HeuristicICPControllerTest();
-      //      test.visualizeRandom();
+//            test.visualizeRandom();
 //      test.visualizeCasesOfInterest();
       
       double footLength = 0.25;
@@ -343,10 +337,6 @@ public class HeuristicICPControllerTest
       double kpOrthogonal = 2.0;
       TestICPControllerParameters icpControllerParameters = createTestICPControllerParameters(kpParallel, kpOrthogonal);
 
-      SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
-      BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
-      FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
-
       double controlDT = 0.001;
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -372,6 +362,13 @@ public class HeuristicICPControllerTest
       {
          ICPControllerTestCase testCase = new ICPControllerTestCase();
          testCase.setOmega(omega);
+         
+         FrameConvexPolygon2D supportPolygonInWorld = new FrameConvexPolygon2D(ReferenceFrame.getWorldFrame());
+         supportPolygonInWorld.addVertex(-0.3, -0.2);
+         supportPolygonInWorld.addVertex(0.3, 0.05);
+         supportPolygonInWorld.addVertex(0.35, 0.15);
+         supportPolygonInWorld.addVertex(-0.15, 0.1);
+         supportPolygonInWorld.update();
 
          FramePoint2D desiredICP = new FramePoint2D(worldFrame, EuclidCoreRandomTools.nextPoint2D(random, 0.2));
          FramePoint2D perfectCoP = new FramePoint2D(worldFrame, EuclidCoreRandomTools.nextPoint2D(random, 0.06));
@@ -404,6 +401,37 @@ public class HeuristicICPControllerTest
 
       solveAndVisualize(controller, visualizer, testCases);
 
+      for (ICPControllerTestCase testCase : testCases)
+      {
+         FrameConvexPolygon2DReadOnly supportPolygonInWorld = testCase.getSupportPolygonInWorld();
+         FramePoint2DReadOnly desiredCMP = testCase.getDesiredCMP();
+         FramePoint2DReadOnly desiredCoP = testCase.getDesiredCoP();
+         
+         double copDistanceToPolygon = supportPolygonInWorld.signedDistance(desiredCoP);
+         
+         assertTrue(copDistanceToPolygon < 1e-7);
+         
+         FramePoint2DReadOnly currentICP = testCase.getCurrentICP();
+         FramePoint2DReadOnly desiredICP = testCase.getDesiredICP();
+         
+         FrameVector2D icpError = new FrameVector2D(desiredICP);
+         icpError.sub(currentICP);
+         
+         FrameVector2DReadOnly expectedControlICPVelocity = testCase.getExpectedControlICPVelocity();
+         
+         //TODO: Figure out what we can assert about the output of the ICP Controller...
+         double dotProduct = expectedControlICPVelocity.dot(icpError);
+
+//         if (copDistanceToPolygon < -0.002)
+//         {
+//            System.out.println("icpError = " + icpError);
+//            System.out.println("expectedControlICPVelocity = " + expectedControlICPVelocity);
+//            System.out.println("dotProduct = " + dotProduct);
+//
+//            assertTrue(dotProduct > 0.0);
+//         }
+      }
+
       ThreadTools.sleepForever();
    }
 
@@ -414,14 +442,13 @@ public class HeuristicICPControllerTest
       for (int i = 0; i < testCases.size(); i++)
       {
          ICPControllerTestCase testCase = testCases.get(i);
-
          solveAndVisualize(controller, visualizer, testCase);
       }
    }
 
    private void solveAndVisualize(ICPControllerInterface controller,
-                                  ICPControllerTestVisualizer visualizer,
-                                  ICPControllerTestCase testCase)
+                                                       ICPControllerTestVisualizer visualizer,
+                                                       ICPControllerTestCase testCase)
    {
       FrameConvexPolygon2DReadOnly supportPolygonInWorld = testCase.getSupportPolygonInWorld();
       double omega = testCase.getOmega();
@@ -452,7 +479,8 @@ public class HeuristicICPControllerTest
 
       expectedControlICPVelocity.sub(currentICP, desiredCMP);
       expectedControlICPVelocity.scale(omega);
-      
+      testCase.setExpectedControlICPVelocity(expectedControlICPVelocity);
+
       visualizer.updateInputs(omega, supportPolygonInWorld, desiredICP, desiredICPVelocity, perfectCMP, perfectCoP, currentICP, currentCoMPosition);
       visualizer.updateOutputs(desiredCoP, desiredCMP, expectedControlICPVelocity);
    }

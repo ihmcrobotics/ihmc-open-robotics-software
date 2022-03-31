@@ -2,10 +2,8 @@ package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.ParameterizedICPControlGains;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -20,8 +18,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLine2d;
-import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLine2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
@@ -316,9 +312,23 @@ public class HeuristicICPController implements ICPControllerInterface
 
       adjustedICP.set(projectionVector.length());
 
-      //TODO: What if projection vector length is small?
-      projectionVector.normalize();
+      // If the projection vector, and hence the error is small and already inside the foot, then do not project at all.
+      // But if it is small and not inside the foot, then orthogonally project the CMP into the foot
+      if (adjustedICP.getValue() < 0.002)
+      {
+         if (supportPolygonInWorld.isPointInside(unconstrainedFeedbackCoP))
+         {
+            feedbackCoP.set(unconstrainedFeedbackCoP);
+            return;
+         }
+         else
+         {
+            feedbackCoP.set(unconstrainedFeedbackCoP);
+            supportPolygonInWorld.orthogonalProjection(unconstrainedFeedbackCoP);
+         }
+      }
 
+      projectionVector.normalize();
       projectionLine.set(unconstrainedFeedbackCoP, projectionVector);
 
       supportPolygonInWorld.intersectionWith(projectionLine, firstProjectionIntersection, secondProjectionIntersection);
