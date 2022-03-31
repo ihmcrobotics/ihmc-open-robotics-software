@@ -186,7 +186,7 @@ public class ICPControllerTestVisualizer
    }
 
    public void updateInputs(double omega0, 
-                            BipedSupportPolygons bipedSupportPolygons,
+                            FrameConvexPolygon2DReadOnly supportPolygonInWorld,
                             FramePoint2DReadOnly desiredICP,
                             FrameVector2DReadOnly desiredICPVelocity,
                             FramePoint2DReadOnly perfectCMP,
@@ -194,8 +194,6 @@ public class ICPControllerTestVisualizer
                             FramePoint2DReadOnly currentICP,
                             FramePoint2DReadOnly currentCoMPosition)
    {
-      FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
-
       this.yoOmega0.set(omega0);
 
       this.yoDesiredICP.set(desiredICP);
