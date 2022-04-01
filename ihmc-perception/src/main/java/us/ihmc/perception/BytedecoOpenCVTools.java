@@ -4,6 +4,7 @@ import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Size;
 
 public class BytedecoOpenCVTools
 {
@@ -57,5 +58,23 @@ public class BytedecoOpenCVTools
    {
       IntPointer fromABGRToRGBA = new IntPointer(0, 3, 1, 2, 2, 1, 3, 0);
       opencv_core.mixChannels(srcRGBA, 1, dstABGR, 1, fromABGRToRGBA, 4);
+   }
+
+   public static void blur(Mat sourceImage, Mat destinationImage)
+   {
+      int gaussianSize = 6;
+      int size = gaussianSize * 2 + 1;
+      Size gaussianKernelSize = new Size();
+      gaussianKernelSize.width(size);
+      gaussianKernelSize.height(size);
+      double sigmaX = 4.74;
+      double sigmaY = sigmaX;
+      int borderType = opencv_core.BORDER_DEFAULT;
+      opencv_imgproc.GaussianBlur(sourceImage,
+                                  destinationImage,
+                                  gaussianKernelSize,
+                                  sigmaX,
+                                  sigmaY,
+                                  borderType);
    }
 }
