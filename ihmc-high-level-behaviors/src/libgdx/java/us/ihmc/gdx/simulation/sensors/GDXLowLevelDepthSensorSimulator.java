@@ -215,7 +215,9 @@ public class GDXLowLevelDepthSensorSimulator
       GL41.glReadBuffer(GL41.GL_COLOR_ATTACHMENT0);
       GL41.glPixelStorei(GL41.GL_UNPACK_ALIGNMENT, 4); // to read ints
       rgba8888ColorImage.getBackingDirectByteBuffer().rewind();
-      GL41.glReadPixels(0, 0, imageWidth, imageHeight, GL41.GL_RGBA, GL41.GL_UNSIGNED_INT_8_8_8_8, rgba8888ColorImage.getBackingDirectByteBuffer());
+      // Careful, if loaded as type GL_UNSIGNED_INT_8_8_8_8, the bytes with be in native order, sometime AGBR (flipped)
+      // See https://stackoverflow.com/questions/7786187/opengl-texture-upload-unsigned-byte-vs-unsigned-int-8-8-8-8
+      GL41.glReadPixels(0, 0, imageWidth, imageHeight, GL41.GL_RGBA, GL41.GL_UNSIGNED_BYTE, rgba8888ColorImage.getBackingDirectByteBuffer());
       GL41.glPixelStorei(GL41.GL_UNPACK_ALIGNMENT, 1); // undo what we did
 
       if (depthEnabled)
@@ -346,11 +348,7 @@ public class GDXLowLevelDepthSensorSimulator
       return metersDepthImage.getBackingDirectByteBuffer();
    }
 
-   /**
-    * OpenGL and OpenCV have different orderings, this data is ABGR, but OpenGl reads
-    * each pixel right to left so to OpenGL it's RGBA.
-    */
-   public BytedecoImage getABGR8888ColorImage()
+   public BytedecoImage getRGBA8888ColorImage()
    {
       return rgba8888ColorImage;
    }
