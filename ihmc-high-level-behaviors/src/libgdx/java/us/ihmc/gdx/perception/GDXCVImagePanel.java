@@ -2,6 +2,7 @@ package us.ihmc.gdx.perception;
 
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Gdx2DPixmap;
 import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -12,19 +13,43 @@ import us.ihmc.perception.OpenCLManager;
 
 public class GDXCVImagePanel
 {
-   private final ImGuiVideoPanel videoPanel;
-   private final BytedecoImage bytedecoImage;
    private Pixmap pixmap;
+   private final BytedecoImage bytedecoImage;
+   private ImGuiVideoPanel videoPanel;
    private Texture panelTexture;
 
-   private final BytedecoImage normalizedScaledImage;
+   private BytedecoImage normalizedScaledImage;
+
+   public GDXCVImagePanel(String name, BytedecoImage bytedecoImage)
+   {
+      int imageWidth = bytedecoImage.getImageWidth();
+      int imageHeight = bytedecoImage.getImageHeight();
+
+      long[] nativeData = new long[4];
+      nativeData[0] = bytedecoImage.getBytedecoByteBufferPointer().address();
+      nativeData[1] = imageWidth;
+      nativeData[2] = imageHeight;
+      nativeData[3] = Gdx2DPixmap.GDX2D_FORMAT_RGBA8888;
+      pixmap = new Pixmap(new Gdx2DPixmap(bytedecoImage.getBackingDirectByteBuffer(), nativeData));
+
+      this.bytedecoImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4, pixmap.getPixels());
+
+      setup(name, imageWidth, imageHeight);
+   }
 
    public GDXCVImagePanel(String name, int imageWidth, int imageHeight)
    {
-      boolean flipY = true;
-      videoPanel = new ImGuiVideoPanel(name, flipY);
       pixmap = new Pixmap(imageWidth, imageHeight, Pixmap.Format.RGBA8888);
       bytedecoImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4, pixmap.getPixels());
+
+      setup(name, imageWidth, imageHeight);
+   }
+
+   private void setup(String name, int imageWidth, int imageHeight)
+   {
+      boolean flipY = true;
+      videoPanel = new ImGuiVideoPanel(name, flipY);
+
       panelTexture = new Texture(new PixmapTextureData(pixmap, null, false, false));
       videoPanel.setTexture(panelTexture);
 
@@ -49,6 +74,8 @@ public class GDXCVImagePanel
     */
    public void draw()
    {
+      bytedecoImage.rewind();
+
       if (videoPanel.getIsShowing().get())
          panelTexture.draw(pixmap, 0, 0);
    }
