@@ -12,8 +12,9 @@ import controller_msgs.msg.dds.ClearDelayQueueMessage;
 import controller_msgs.msg.dds.SpineTrajectoryMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -27,7 +28,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 
@@ -39,7 +39,7 @@ public abstract class EndToEndMessageDelayTest implements MultiRobotTestInterfac
       simulationTestingParameters.setKeepSCSUp(false);
    }
 
-   private DRCSimulationTestHelper drcSimulationTestHelper;
+   private SCS2AvatarTestingSimulation simulationTestHelper;
 
    @Test
    public void testClearingDelaysWithMessageOfMessagesWithDelays() throws Exception
@@ -48,15 +48,14 @@ public abstract class EndToEndMessageDelayTest implements MultiRobotTestInterfac
 
       DRCRobotModel robotModel = getRobotModel();
       HumanoidJointNameMap jointMap = robotModel.getJointMap();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
-      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(robotModel, simulationTestingParameters);
+      simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      boolean success = simulationTestHelper.simulateAndWait(0.5);
       assertTrue(success);
 
-      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
       HumanoidReferenceFrames humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       humanoidReferenceFrames.updateFrames();
 
@@ -81,25 +80,31 @@ public abstract class EndToEndMessageDelayTest implements MultiRobotTestInterfac
       FrameQuaternion lookRight = new FrameQuaternion(humanoidReferenceFrames.getPelvisZUpFrame(), lookRightQuat);
       lookRight.changeFrame(ReferenceFrame.getWorldFrame());
 
-      ChestTrajectoryMessage lookStraightAheadMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, lookStraightAhead,
-                                                                                                          ReferenceFrame.getWorldFrame(), pelvisZUpFrame);
+      ChestTrajectoryMessage lookStraightAheadMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime,
+                                                                                                          lookStraightAhead,
+                                                                                                          ReferenceFrame.getWorldFrame(),
+                                                                                                          pelvisZUpFrame);
       lookStraightAheadMessage.getSo3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
       lookStraightAheadMessage.getSo3Trajectory().getQueueingProperties().setPreviousMessageId((long) -1);
-      drcSimulationTestHelper.publishToController(lookStraightAheadMessage);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(robotModel.getControllerDT()));
+      simulationTestHelper.publishToController(lookStraightAheadMessage);
+      assertTrue(simulationTestHelper.simulateAndWait(robotModel.getControllerDT()));
 
-      ChestTrajectoryMessage lookLeftMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, lookLeft, ReferenceFrame.getWorldFrame(),
+      ChestTrajectoryMessage lookLeftMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime,
+                                                                                                 lookLeft,
+                                                                                                 ReferenceFrame.getWorldFrame(),
                                                                                                  pelvisZUpFrame);
       lookLeftMessage.getSo3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
       lookLeftMessage.getSo3Trajectory().getQueueingProperties().setPreviousMessageId((long) -1);
-      drcSimulationTestHelper.publishToController(lookLeftMessage);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(robotModel.getControllerDT()));
+      simulationTestHelper.publishToController(lookLeftMessage);
+      assertTrue(simulationTestHelper.simulateAndWait(robotModel.getControllerDT()));
 
-      ChestTrajectoryMessage lookRightMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, lookRight, ReferenceFrame.getWorldFrame(),
+      ChestTrajectoryMessage lookRightMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime,
+                                                                                                  lookRight,
+                                                                                                  ReferenceFrame.getWorldFrame(),
                                                                                                   pelvisZUpFrame);
       lookRightMessage.getSo3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
       lookRightMessage.getSo3Trajectory().getQueueingProperties().setPreviousMessageId((long) -1);
-      drcSimulationTestHelper.publishToController(lookRightMessage);
+      simulationTestHelper.publishToController(lookRightMessage);
 
       SpineJointName[] spineJointNames = jointMap.getSpineJointNames();
       SpineTrajectoryMessage zeroSpineJointMessage = new SpineTrajectoryMessage();
@@ -109,17 +114,17 @@ public abstract class EndToEndMessageDelayTest implements MultiRobotTestInterfac
          zeroSpineJointMessage.getJointspaceTrajectory().getJointTrajectoryMessages().add()
                               .set(HumanoidMessageTools.createOneDoFJointTrajectoryMessage(1.0, 0.0));
       }
-      drcSimulationTestHelper.publishToController(zeroSpineJointMessage);
+      simulationTestHelper.publishToController(zeroSpineJointMessage);
 
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(robotModel.getControllerDT() * 3.0));
-      assertEquals(RigidBodyControlMode.TASKSPACE, EndToEndTestTools.findRigidBodyControlManagerState(chest.getName(), scs));
+      assertTrue(simulationTestHelper.simulateAndWait(robotModel.getControllerDT() * 3.0));
+      assertEquals(RigidBodyControlMode.TASKSPACE, EndToEndTestTools.findRigidBodyControlManagerState(chest.getName(), simulationTestHelper));
 
       ClearDelayQueueMessage clearMessage = HumanoidMessageTools.createClearDelayQueueMessage(SpineTrajectoryMessage.class);
-      drcSimulationTestHelper.publishToController(clearMessage);
+      simulationTestHelper.publishToController(clearMessage);
 
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0));
+      assertTrue(simulationTestHelper.simulateAndWait(6.0));
       //send a taskspace command, then delayed a jointspace command and then cleared the delay queue, so we should be in taskspace still
-      assertEquals(RigidBodyControlMode.TASKSPACE, EndToEndTestTools.findRigidBodyControlManagerState(chest.getName(), scs));
+      assertEquals(RigidBodyControlMode.TASKSPACE, EndToEndTestTools.findRigidBodyControlManagerState(chest.getName(), simulationTestHelper));
    }
 
    @BeforeEach
@@ -131,16 +136,11 @@ public abstract class EndToEndMessageDelayTest implements MultiRobotTestInterfac
    @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
-      {
-         ThreadTools.sleepForever();
-      }
-
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcSimulationTestHelper != null)
+      if (simulationTestHelper != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
+         simulationTestHelper.finishTest();
+         simulationTestHelper = null;
       }
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
