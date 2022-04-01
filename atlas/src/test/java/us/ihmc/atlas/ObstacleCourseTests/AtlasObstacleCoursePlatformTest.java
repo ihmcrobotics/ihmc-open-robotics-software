@@ -104,7 +104,7 @@ public class AtlasObstacleCoursePlatformTest extends DRCObstacleCoursePlatformTe
    @Tag("humanoid-obstacle-2")
    @Override
    @Test
-   public void testWalkingOntoLargePlatform() throws SimulationExceededMaximumTimeException
+   public void testWalkingOntoLargePlatform()
    {
       super.testWalkingOntoLargePlatform();
    }
