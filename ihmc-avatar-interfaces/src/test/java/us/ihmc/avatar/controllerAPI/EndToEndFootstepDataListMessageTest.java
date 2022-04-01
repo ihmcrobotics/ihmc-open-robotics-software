@@ -17,7 +17,6 @@ import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
@@ -27,8 +26,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -65,7 +62,6 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
       DRCRobotModel robotModel = getRobotModel();
       createSimulationTestHelper(environment, location);
       simulationTestHelper.start();
-      setupCamera(simulationTestHelper);
       ThreadTools.sleep(1000);
       assertTrue(simulationTestHelper.simulateAndWait(0.25));
 
@@ -181,18 +177,6 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
          footstep.getLocation().set(stepPose.getPosition());
          footstep.getOrientation().set(stepPose.getOrientation());
       }
-   }
-
-   private static void setupCamera(SCS2AvatarTestingSimulation simulationTestHelper)
-   {
-      OffsetAndYawRobotInitialSetup startingLocationOffset = location.getStartingLocationOffset();
-      Point3D cameraFocus = new Point3D(startingLocationOffset.getAdditionalOffset());
-      cameraFocus.addZ(1.0);
-      RigidBodyTransform transform = new RigidBodyTransform();
-      transform.setRotationYawAndZeroTranslation(startingLocationOffset.getYaw());
-      Point3D cameraPosition = new Point3D(10.0, 5.0, cameraFocus.getZ() + 2.0);
-      transform.transform(cameraPosition);
-      simulationTestHelper.setCamera(cameraFocus, cameraPosition);
    }
 
    @BeforeEach
