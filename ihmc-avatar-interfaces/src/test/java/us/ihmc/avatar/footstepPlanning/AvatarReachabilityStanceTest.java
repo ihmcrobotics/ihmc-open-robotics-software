@@ -46,11 +46,10 @@ public abstract class AvatarReachabilityStanceTest implements MultiRobotTestInte
 {
    private static final boolean visualize = false;
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-   private SCS2AvatarTestingSimulation simulationTestHelper;
 
-   private static final int numberOfStancesToCheck = 10;
+   private static final int numberOfStancesToCheck = 4;
    private static final double solutionQualityThreshold = 2.2;
-   private static final double simulationTime = 4.0;
+   private static final double simulationTime = 2.0;
    private static final Random random = new Random(3920);
 
    @BeforeEach
@@ -63,12 +62,6 @@ public abstract class AvatarReachabilityStanceTest implements MultiRobotTestInte
    @AfterEach
    public void tearDown()
    {
-      if (simulationTestHelper != null)
-      {
-         simulationTestHelper.finishTest();
-         simulationTestHelper = null;
-      }
-
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
@@ -99,77 +92,81 @@ public abstract class AvatarReachabilityStanceTest implements MultiRobotTestInte
       for (int i = 0; i < numberOfStancesToCheck; i++)
       {
          performStanceCheck(robotModel, feasibleSolutions);
-         if (simulationTestHelper != null)
-         {
-            simulationTestHelper.finishTest();
-            simulationTestHelper = null;
-         }
       }
    }
 
    private void performStanceCheck(DRCRobotModel robotModel, List<KinematicsToolboxSnapshotDescription> feasibleSolutions)
    {
-      LogTools.info("Number of feasible solutions: " + feasibleSolutions.size());
-
-      int indexToTest = random.nextInt(feasibleSolutions.size());
-      LogTools.info("Random index chosen: " + indexToTest);
-
-      KinematicsToolboxSnapshotDescription snapshotToTest = feasibleSolutions.get(indexToTest);
-      feasibleSolutions.remove(indexToTest);
-
-      IDLSequence.Float jointAngles = snapshotToTest.getIkSolution().getDesiredJointAngles();
-      Vector3D rootPosition = snapshotToTest.getIkSolution().getDesiredRootTranslation();
-      Quaternion rootOrientation = snapshotToTest.getIkSolution().getDesiredRootOrientation();
-
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      OneDoFJointBasics[] ikJoints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
-      for (int i = 0; i < jointAngles.size(); i++)
+      SCS2AvatarTestingSimulation simulationTestHelper = null;
+      try
       {
-         ikJoints[i].setQ(jointAngles.get(i));
+         LogTools.info("Number of feasible solutions: " + feasibleSolutions.size());
+
+         int indexToTest = random.nextInt(feasibleSolutions.size());
+         LogTools.info("Random index chosen: " + indexToTest);
+
+         KinematicsToolboxSnapshotDescription snapshotToTest = feasibleSolutions.get(indexToTest);
+         feasibleSolutions.remove(indexToTest);
+
+         IDLSequence.Float jointAngles = snapshotToTest.getIkSolution().getDesiredJointAngles();
+         Vector3D rootPosition = snapshotToTest.getIkSolution().getDesiredRootTranslation();
+         Quaternion rootOrientation = snapshotToTest.getIkSolution().getDesiredRootOrientation();
+
+         FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+         OneDoFJointBasics[] ikJoints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
+         for (int i = 0; i < jointAngles.size(); i++)
+         {
+            ikJoints[i].setQ(jointAngles.get(i));
+         }
+         fullRobotModel.getRootJoint().setJointConfiguration(rootOrientation, rootPosition);
+         fullRobotModel.updateFrames();
+
+         LogTools.info("Starting to generate regions");
+         PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            generator.identity();
+            MovingReferenceFrame soleFrame = fullRobotModel.getSoleFrame(robotSide);
+            generator.setTransform(soleFrame.getTransformToWorldFrame());
+            generator.addRectangle(0.4, 0.4);
+         }
+
+         PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
+         PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment(planarRegionsList, 0.015, false);
+
+         HumanoidRobotInitialSetup initialSetup = createInitialSetup(robotModel.getJointMap());
+         initialSetup.getRootJointPosition().set(rootPosition);
+         initialSetup.getRootJointOrientation().set(rootOrientation);
+
+         for (int i = 0; i < ikJoints.length; i++)
+         {
+            initialSetup.getJointPositions().put(ikJoints[i].getName(), ikJoints[i].getQ());
+         }
+
+         SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
+                                                                                                                                                environment,
+                                                                                                                                                simulationTestingParameters);
+         simulationTestHelperFactory.setRobotInitialSetup(initialSetup);
+         simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+         simulationTestHelper.start();
+
+         simulationTestHelper.simulateAndWait(2 * robotModel.getControllerDT());
+         holdCurrentPosition(simulationTestHelper, fullRobotModel);
+         boolean success = simulationTestHelper.simulateAndWait(simulationTime);
+
+         if (!visualize)
+         {
+            Assertions.assertTrue(success);
+         }
       }
-      fullRobotModel.getRootJoint().setJointConfiguration(rootOrientation, rootPosition);
-      fullRobotModel.updateFrames();
-
-      LogTools.info("Starting to generate regions");
-      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
-      for (RobotSide robotSide : RobotSide.values)
+      finally
       {
-         generator.identity();
-         MovingReferenceFrame soleFrame = fullRobotModel.getSoleFrame(robotSide);
-         generator.setTransform(soleFrame.getTransformToWorldFrame());
-         generator.addRectangle(0.4, 0.4);
-      }
-
-      PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
-      PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment(planarRegionsList, 0.015, false);
-
-      HumanoidRobotInitialSetup initialSetup = createInitialSetup(robotModel.getJointMap());
-      initialSetup.getRootJointPosition().set(rootPosition);
-      initialSetup.getRootJointOrientation().set(rootOrientation);
-
-      for (int i = 0; i < ikJoints.length; i++)
-      {
-         initialSetup.getJointPositions().put(ikJoints[i].getName(), ikJoints[i].getQ());
-      }
-
-      SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
-                                                                                                                                             environment,
-                                                                                                                                             simulationTestingParameters);
-      simulationTestHelperFactory.setRobotInitialSetup(initialSetup);
-      simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
-      simulationTestHelper.start();
-
-      simulationTestHelper.simulateAndWait(10);
-      holdCurrentPosition(fullRobotModel);
-      boolean success = simulationTestHelper.simulateAndWait(simulationTime);
-
-      if (!visualize)
-      {
-         Assertions.assertTrue(success);
+         if (simulationTestHelper != null)
+            simulationTestHelper.finishTest();
       }
    }
 
-   private void holdCurrentPosition(FullHumanoidRobotModel fullRobotModel)
+   private void holdCurrentPosition(SCS2AvatarTestingSimulation simulationTestHelper, FullHumanoidRobotModel fullRobotModel)
    {
       long sequenceId = 10;
 

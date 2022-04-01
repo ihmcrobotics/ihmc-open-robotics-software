@@ -279,6 +279,12 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
 
    public void destroy()
    {
+      if (ros2Node != null)
+      {
+         ros2Node.destroy();
+         ros2Node = null;
+      }
+
       avatarSimulation.destroy();
    }
 
