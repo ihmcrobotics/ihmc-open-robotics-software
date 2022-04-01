@@ -25,15 +25,20 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.scs2.definition.state.interfaces.SixDoFJointStateBasics;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.session.SessionMode;
@@ -56,6 +61,10 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 public class SCS2AvatarTestingSimulation implements YoVariableHolder
 {
+   private static final double CAMERA_PITCH_FROM_ROBOT = Math.toRadians(-15.0);
+   private static final double CAMERA_YAW_FROM_ROBOT = Math.toRadians(15.0);
+   private static final double CAMERA_DISTANCE_FROM_ROBOT = 6.0;
+
    private final SCS2AvatarSimulation avatarSimulation;
 
    private ROS2Node ros2Node;
@@ -101,11 +110,28 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
       sessionVisualizerControls = avatarSimulation.getSessionVisualizerControls();
       if (sessionVisualizerControls != null)
       {
+
          sessionVisualizerControls.waitUntilFullyUp();
-         sessionVisualizerControls.requestCameraRigidBodyTracking(avatarSimulation.getRobotModel().getSimpleRobotName(),
-                                                                  avatarSimulation.getControllerFullRobotModel().getPelvis().getName());
-         sessionVisualizerControls.setCameraZoom(6.0);
+
+         SixDoFJointStateBasics initialRootJointState = (SixDoFJointStateBasics) avatarSimulation.getRobotDefinition().getRootJointDefinitions().get(0)
+                                                                                                 .getInitialJointState();
+         initializeCamera(initialRootJointState.getOrientation(), initialRootJointState.getPosition());
+         requestCameraRigidBodyTracking(avatarSimulation.getRobotModel().getSimpleRobotName(), getControllerFullRobotModel().getPelvis().getName());
       }
+   }
+
+   private void initializeCamera(Orientation3DReadOnly robotOrientation, Tuple3DReadOnly robotPosition)
+   {
+      Point3D focusPosition = new Point3D(robotPosition);
+      Point3D cameraPosition = new Point3D(10, 0, 0);
+      RotationMatrixTools.applyPitchRotation(CAMERA_PITCH_FROM_ROBOT, cameraPosition, cameraPosition);
+      RotationMatrixTools.applyYawRotation(CAMERA_YAW_FROM_ROBOT, cameraPosition, cameraPosition);
+      RotationMatrixTools.applyYawRotation(robotOrientation.getYaw(), cameraPosition, cameraPosition);
+      cameraPosition.scale(CAMERA_DISTANCE_FROM_ROBOT / cameraPosition.distanceFromOrigin());
+      cameraPosition.add(focusPosition);
+
+      setCameraFocusPosition(focusPosition);
+      setCameraPosition(cameraPosition);
    }
 
    // Simulation controls:
@@ -169,6 +195,12 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    }
 
    // GUI controls:
+   public void setCameraZoom(double distanceFromFocus)
+   {
+      if (sessionVisualizerControls != null)
+         sessionVisualizerControls.setCameraZoom(distanceFromFocus);
+   }
+
    public void setCameraFocusPosition(Point3DReadOnly focus)
    {
       setCameraFocusPosition(focus.getX(), focus.getY(), focus.getZ());
