@@ -16,7 +16,6 @@ import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.avatar.testTools.scs2.SCS2RunsSameWayTwiceVerifier;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotics.Assert;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -100,7 +99,6 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       if (CHECK_ICP_CONTINUITY)
          simulationTestHelper.addDesiredICPContinuityAssertion(3.0 * robotModel.getControllerDT());
 
-      setupCameraForUnitTest();
       simulateAndAssertGoodWalking(simulationTestHelper, doPelvisWarmup);
 
       //      if (simulationTestingParameters.getCheckNothingChangedInSimulation())
@@ -241,7 +239,6 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
                                                                                                                                              simulationTestingParameters);
       simulationTestHelperFactory.setDefaultHighLevelHumanoidControllerFactory(useVelocityAndHeadingScript, getWalkingScriptParameters());
       SCS2AvatarTestingSimulation simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
-      setupCameraForUnitTest();
 
       return simulationTestHelper;
    }
@@ -259,11 +256,6 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 
       double maxPercentDifference = 0.000001;
       assertTrue("Simulation did not run same way twice!", verifier.verifySimRunsSameWayTwice(maxPercentDifference, stringsToIgnore));
-   }
-
-   private void setupCameraForUnitTest()
-   {
-      simulationTestHelper.setCamera(new Point3D(0.6, 0.4, 1.1), new Point3D(-0.15, 10.0, 3.0));
    }
 
    public SimulationTestingParameters getSimulationTestingParameters()
