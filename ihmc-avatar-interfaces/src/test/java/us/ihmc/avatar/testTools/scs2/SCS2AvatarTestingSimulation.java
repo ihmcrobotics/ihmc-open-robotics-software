@@ -32,6 +32,8 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -42,6 +44,7 @@ import us.ihmc.scs2.definition.state.interfaces.SixDoFJointStateBasics;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.session.SessionMode;
+import us.ihmc.scs2.session.tools.SCS1GraphicConversionTools;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizerControls;
 import us.ihmc.scs2.sessionVisualizer.jfx.tools.JavaFXMissingTools;
 import us.ihmc.scs2.simulation.SimulationSession;
@@ -256,6 +259,16 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    {
       if (sessionVisualizerControls != null)
          sessionVisualizerControls.addYoGraphic(namespace, yoGraphicDefinition);
+   }
+
+   public void addYoGraphicsListRegistry(YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      SCS1GraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry).forEach(this::addYoGraphicDefinition);
+   }
+
+   public void addYoGraphic(YoGraphic yoGraphic)
+   {
+      addYoGraphicDefinition(SCS1GraphicConversionTools.toYoGraphicDefinition(yoGraphic));
    }
 
    // Misc.
