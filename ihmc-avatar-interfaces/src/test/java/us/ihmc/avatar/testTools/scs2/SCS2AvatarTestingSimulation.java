@@ -182,7 +182,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
 
    public void setCameraPosition(Point3DReadOnly position)
    {
-      setCameraFocusPosition(position.getX(), position.getY(), position.getZ());
+      setCameraPosition(position.getX(), position.getY(), position.getZ());
    }
 
    public void setCameraPosition(double x, double y, double z)
