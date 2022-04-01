@@ -19,9 +19,9 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.HumanoidRobotInitialSetup;
 import us.ihmc.avatar.multiContact.KinematicsToolboxSnapshotDescription;
 import us.ihmc.avatar.reachabilityMap.footstep.StepReachabilityIOHelper;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commons.ContinuousIntegrationTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -40,14 +40,13 @@ import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 
 public abstract class AvatarReachabilityStanceTest implements MultiRobotTestInterface
 {
    private static final boolean visualize = false;
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-   private DRCSimulationTestHelper drcSimulationTestHelper;
+   private SCS2AvatarTestingSimulation simulationTestHelper;
 
    private static final int numberOfStancesToCheck = 10;
    private static final double solutionQualityThreshold = 2.2;
@@ -57,20 +56,17 @@ public abstract class AvatarReachabilityStanceTest implements MultiRobotTestInte
    @BeforeEach
    public void setup()
    {
-      simulationTestingParameters.setKeepSCSUp(visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
+      simulationTestingParameters.setKeepSCSUp(!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() && visualize);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @AfterEach
    public void tearDown()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
-         ThreadTools.sleepForever();
-
-      if (drcSimulationTestHelper != null)
+      if (simulationTestHelper != null)
       {
-         /* destroy simulation is already called below */
-         drcSimulationTestHelper = null;
+         simulationTestHelper.finishTest();
+         simulationTestHelper = null;
       }
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
@@ -88,31 +84,30 @@ public abstract class AvatarReachabilityStanceTest implements MultiRobotTestInte
 
       LogTools.info("Filtering feasible solutions");
       List<KinematicsToolboxSnapshotDescription> feasibleSolutions = snapShots.stream()
-                                                                              .filter(snapshot -> snapshot.getIkSolution().getSolutionQuality()
-                                                                                                  < solutionQualityThreshold)
+                                                                              .filter(snapshot -> snapshot.getIkSolution()
+                                                                                                          .getSolutionQuality() < solutionQualityThreshold)
                                                                               .collect(Collectors.toList());
       LogTools.info(feasibleSolutions.size() + " feasible solutions found");
 
       if (feasibleSolutions.size() < numberOfStancesToCheck)
       {
          LogTools.error("Not enough feasible solutions found to check. Wanted to test " + numberOfStancesToCheck + " but only " + feasibleSolutions.size()
-                        + " found with solution quality of " + solutionQualityThreshold + ". Increase solution quality.");
+               + " found with solution quality of " + solutionQualityThreshold + ". Increase solution quality.");
          fail();
       }
 
       for (int i = 0; i < numberOfStancesToCheck; i++)
       {
          performStanceCheck(robotModel, feasibleSolutions);
-
-         drcSimulationTestHelper.getBlockingSimulationRunner().destroySimulation();
-         drcSimulationTestHelper.getAvatarSimulation().dispose();
-         drcSimulationTestHelper.getSimulationStarter().close();
-         drcSimulationTestHelper.getROS2Node().destroy();
+         if (simulationTestHelper != null)
+         {
+            simulationTestHelper.finishTest();
+            simulationTestHelper = null;
+         }
       }
    }
 
    private void performStanceCheck(DRCRobotModel robotModel, List<KinematicsToolboxSnapshotDescription> feasibleSolutions)
-         throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       LogTools.info("Number of feasible solutions: " + feasibleSolutions.size());
 
@@ -157,13 +152,16 @@ public abstract class AvatarReachabilityStanceTest implements MultiRobotTestInte
          initialSetup.getJointPositions().put(ikJoints[i].getName(), ikJoints[i].getQ());
       }
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, environment);
-      drcSimulationTestHelper.setInitialSetup(initialSetup);
-      drcSimulationTestHelper.createSimulation(robotModel.getSimpleRobotName() + "FlatGroundWalking");
+      SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
+                                                                                                                                             environment,
+                                                                                                                                             simulationTestingParameters);
+      simulationTestHelperFactory.setRobotInitialSetup(initialSetup);
+      simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+      simulationTestHelper.start();
 
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10);
+      simulationTestHelper.simulateAndWait(10);
       holdCurrentPosition(fullRobotModel);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+      boolean success = simulationTestHelper.simulateAndWait(simulationTime);
 
       if (!visualize)
       {
@@ -180,22 +178,28 @@ public abstract class AvatarReachabilityStanceTest implements MultiRobotTestInte
       PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.001, pelvisPosition.getZ());
       pelvisHeightTrajectoryMessage.setEnableUserPelvisControl(true);
       pelvisHeightTrajectoryMessage.setSequenceId(sequenceId++);
-      drcSimulationTestHelper.publishToController(pelvisHeightTrajectoryMessage);
+      simulationTestHelper.publishToController(pelvisHeightTrajectoryMessage);
 
       for (RobotSide robotSide : RobotSide.values)
       {
          FramePose3D handPose = new FramePose3D(fullRobotModel.getHandControlFrame(robotSide));
          handPose.changeFrame(ReferenceFrame.getWorldFrame());
-         HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(robotSide, 0.001, handPose, ReferenceFrame.getWorldFrame());
+         HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(robotSide,
+                                                                                                        0.001,
+                                                                                                        handPose,
+                                                                                                        ReferenceFrame.getWorldFrame());
          handTrajectoryMessage.setForceExecution(true);
          handTrajectoryMessage.setSequenceId(sequenceId++);
-         drcSimulationTestHelper.publishToController(handTrajectoryMessage);
+         simulationTestHelper.publishToController(handTrajectoryMessage);
       }
 
       FramePose3D headPose = new FramePose3D(fullRobotModel.getHead().getBodyFixedFrame());
       headPose.changeFrame(ReferenceFrame.getWorldFrame());
-      HeadTrajectoryMessage headTrajectoryMessage = HumanoidMessageTools.createHeadTrajectoryMessage(0.001, headPose.getOrientation(), ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
+      HeadTrajectoryMessage headTrajectoryMessage = HumanoidMessageTools.createHeadTrajectoryMessage(0.001,
+                                                                                                     headPose.getOrientation(),
+                                                                                                     ReferenceFrame.getWorldFrame(),
+                                                                                                     ReferenceFrame.getWorldFrame());
       headTrajectoryMessage.setSequenceId(sequenceId++);
-      drcSimulationTestHelper.publishToController(headTrajectoryMessage);
+      simulationTestHelper.publishToController(headTrajectoryMessage);
    }
 }
