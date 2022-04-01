@@ -8,6 +8,16 @@ import org.bytedeco.opencv.opencv_core.Size;
 
 public class BytedecoOpenCVTools
 {
+   public static int getImageWidth(Mat image)
+   {
+      return image.cols();
+   }
+
+   public static int getImageHeight(Mat image)
+   {
+      return image.rows();
+   }
+
    public static void clamp(Mat source, Mat destination, double min, double max)
    {
       int normType = opencv_core.NORM_MINMAX;
