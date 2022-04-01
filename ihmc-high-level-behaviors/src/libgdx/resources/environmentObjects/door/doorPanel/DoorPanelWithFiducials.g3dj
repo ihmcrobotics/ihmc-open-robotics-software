@@ -890,8 +890,7 @@
 		}
 	], 
 	"materials": [
-		{
-			"id": "07 - Default", 
+		{"id": "07 - Default", 
 			"ambient": [ 0.050876,  0.050876,  0.050876], 
 			"diffuse": [ 0.588235,  0.588235,  0.588235], 
 			"emissive": [ 0.000000,  0.000000,  0.000000], 
@@ -899,15 +898,11 @@
 			"specular": [ 0.588235,  0.588235,  0.588235], 
 			"shininess":  2.000001, 
 			"textures": [
-				{
-					"id": "base_color_texture", 
+				{"id": "base_color_texture", 
 					"filename": "WhiteSquare.png", 
-					"type": "DIFFUSE"
-				}
-			]
-		}, 
-		{
-			"id": "19 - Default", 
+					"type": "DIFFUSE"}
+			]}, 
+		{"id": "19 - Default", 
 			"ambient": [ 0.050876,  0.050876,  0.050876], 
 			"diffuse": [ 1.000000,  1.000000,  1.000000], 
 			"emissive": [ 0.000000,  0.000000,  0.000000], 
@@ -915,15 +910,11 @@
 			"specular": [ 1.000000,  1.000000,  1.000000], 
 			"shininess":  2.000001, 
 			"textures": [
-				{
-					"id": "base_color_texture", 
-					"filename": "fiducial50.jpg", 
-					"type": "DIFFUSE"
-				}
-			]
-		}, 
-		{
-			"id": "20 - Default", 
+				{"id": "base_color_texture", 
+					"filename": "marker1.jpg", 
+					"type": "DIFFUSE"}
+			]}, 
+		{"id": "20 - Default", 
 			"ambient": [ 0.050876,  0.050876,  0.050876], 
 			"diffuse": [ 1.000000,  1.000000,  1.000000], 
 			"emissive": [ 0.000000,  0.000000,  0.000000], 
@@ -931,47 +922,32 @@
 			"specular": [ 1.000000,  1.000000,  1.000000], 
 			"shininess":  2.000001, 
 			"textures": [
-				{
-					"id": "base_color_texture", 
-					"filename": "fiducial150.jpg", 
-					"type": "DIFFUSE"
-				}
-			]
-		}
+				{"id": "base_color_texture", 
+					"filename": "marker0.jpg", 
+					"type": "DIFFUSE"}
+			]}
 	], 
 	"nodes": [
-		{
-			"id": "Box031", 
+		{"id": "Box031", 
 			"parts": [
-				{
-					"meshpartid": "Mesh_part1", 
+				{"meshpartid": "Mesh_part1", 
 					"materialid": "07 - Default", 
-					"uvMapping": [[]]
-				}
-			]
-		}, 
-		{
-			"id": "Box034", 
+					"uvMapping": [[]]}
+			]}, 
+		{"id": "Box034", 
 			"translation": [ 0.025875,  0.681831,  1.039812], 
 			"parts": [
-				{
-					"meshpartid": "Mesh.001_part1", 
+				{"meshpartid": "Mesh.001_part1", 
 					"materialid": "19 - Default", 
-					"uvMapping": [[]]
-				}
-			]
-		}, 
-		{
-			"id": "Box035", 
+					"uvMapping": [[]]}
+			]}, 
+		{"id": "Box035", 
 			"translation": [-0.026000,  0.681831,  1.039812], 
 			"parts": [
-				{
-					"meshpartid": "Mesh.002_part1", 
+				{"meshpartid": "Mesh.002_part1", 
 					"materialid": "20 - Default", 
-					"uvMapping": [[]]
-				}
-			]
-		}
+					"uvMapping": [[]]}
+			]}
 	], 
 	"animations": []
 }
