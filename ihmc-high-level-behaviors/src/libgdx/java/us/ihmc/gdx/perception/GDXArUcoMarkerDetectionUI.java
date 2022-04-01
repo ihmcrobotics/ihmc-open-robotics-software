@@ -1,50 +1,96 @@
 package us.ihmc.gdx.perception;
 
 import imgui.internal.ImGui;
-import org.bytedeco.javacpp.IntPointer;
+import imgui.type.ImBoolean;
+import imgui.type.ImDouble;
+import imgui.type.ImInt;
 import org.bytedeco.opencv.global.opencv_aruco;
-import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
+import org.bytedeco.opencv.opencv_core.Rect;
+import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.gdx.imgui.ImGuiPanel;
+import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.perception.ArUcoMarkerDetection;
-import us.ihmc.perception.BytedecoImage;
 
 public class GDXArUcoMarkerDetectionUI
 {
    private ArUcoMarkerDetection arUcoMarkerDetection;
-   private BytedecoImage agbrImage;
-   private IntPointer fromRGBAToABGR = new IntPointer(0, 3, 1, 2, 2, 1, 3, 0);
    private GDXCVImagePanel markerImagePanel;
-   private ImGuiPanel mainPanel = new ImGuiPanel("ArUco Marker Detection", this::renderImGuiWidgets);
+   private final ImGuiPanel mainPanel = new ImGuiPanel("ArUco Marker Detection", this::renderImGuiWidgets);
+   private Rect rectangle;
+   private Scalar rectangleColor;
+   private Scalar idColor;
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ImInt adaptiveThresholdWindowSizeMin = new ImInt();
+   private final ImInt adaptiveThresholdWindowSizeMax = new ImInt();
+   private final ImInt adaptiveThresholdWindowSizeStep = new ImInt();
+   private final ImDouble adaptiveThreshConstant = new ImDouble();
+   private final ImDouble minMarkerPerimeterRate = new ImDouble();
+   private final ImDouble maxMarkerPerimeterRate = new ImDouble();
+   private final ImDouble polygonalApproxAccuracyRate = new ImDouble();
+   private final ImDouble minCornerDistanceRate = new ImDouble();
+   private final ImDouble minMarkerDistanceRate = new ImDouble();
+   private final ImInt minDistanceToBorder = new ImInt();
+   private final ImInt markerBorderBits = new ImInt();
+   private final ImDouble minOtsuStdDev = new ImDouble();
+   private final ImInt perspectiveRemovePixelPerCell = new ImInt();
+   private final ImDouble perspectiveRemoveIgnoredMarginPerCell = new ImDouble();
+   private final ImDouble maxErroneousBitsInBorderRate = new ImDouble();
+   private final ImDouble errorCorrectionRate = new ImDouble();
+   private final ImBoolean detectInvertedMarker = new ImBoolean();
 
    public void create(ArUcoMarkerDetection arUcoMarkerDetection)
    {
       this.arUcoMarkerDetection = arUcoMarkerDetection;
 
-      agbrImage = new BytedecoImage(arUcoMarkerDetection.getAbgr8888ColorImage().getImageWidth(),
-                                    arUcoMarkerDetection.getAbgr8888ColorImage().getImageHeight(),
-                                    opencv_core.CV_8UC4);
       markerImagePanel = new GDXCVImagePanel("ArUco Marker Detection Image",
                                              arUcoMarkerDetection.getAbgr8888ColorImage().getImageWidth(),
                                              arUcoMarkerDetection.getAbgr8888ColorImage().getImageHeight());
       mainPanel.addChild(markerImagePanel.getVideoPanel());
+
+      adaptiveThresholdWindowSizeMin.set(arUcoMarkerDetection.getDetectorParameters().adaptiveThreshWinSizeMin());
+      adaptiveThresholdWindowSizeMax.set(arUcoMarkerDetection.getDetectorParameters().adaptiveThreshWinSizeMax());
+      adaptiveThresholdWindowSizeStep.set(arUcoMarkerDetection.getDetectorParameters().adaptiveThreshWinSizeStep());
+      adaptiveThreshConstant.set(arUcoMarkerDetection.getDetectorParameters().adaptiveThreshConstant());
+      minMarkerPerimeterRate.set(arUcoMarkerDetection.getDetectorParameters().minMarkerPerimeterRate());
+      maxMarkerPerimeterRate.set(arUcoMarkerDetection.getDetectorParameters().maxMarkerPerimeterRate());
+      polygonalApproxAccuracyRate.set(arUcoMarkerDetection.getDetectorParameters().polygonalApproxAccuracyRate());
+      minCornerDistanceRate.set(arUcoMarkerDetection.getDetectorParameters().minCornerDistanceRate());
+      minMarkerDistanceRate.set(arUcoMarkerDetection.getDetectorParameters().minMarkerDistanceRate());
+      minDistanceToBorder.set(arUcoMarkerDetection.getDetectorParameters().minDistanceToBorder());
+      markerBorderBits.set(arUcoMarkerDetection.getDetectorParameters().markerBorderBits());
+      minOtsuStdDev.set(arUcoMarkerDetection.getDetectorParameters().minOtsuStdDev());
+      perspectiveRemovePixelPerCell.set(arUcoMarkerDetection.getDetectorParameters().perspectiveRemovePixelPerCell());
+      perspectiveRemoveIgnoredMarginPerCell.set(arUcoMarkerDetection.getDetectorParameters().perspectiveRemoveIgnoredMarginPerCell());
+      maxErroneousBitsInBorderRate.set(arUcoMarkerDetection.getDetectorParameters().maxErroneousBitsInBorderRate());
+      errorCorrectionRate.set(arUcoMarkerDetection.getDetectorParameters().errorCorrectionRate());
+      detectInvertedMarker.set(arUcoMarkerDetection.getDetectorParameters().detectInvertedMarker());
+
+      rectangle = new Rect();
+      rectangleColor = new Scalar(255, 0, 0, 0);
+      idColor = new Scalar(0, 0, 255, 0);
    }
 
    public void update()
    {
-//      opencv_aruco.drawDetectedMarkers(arUcoMarkerDetection.getAlphaRemovedImage().getBytedecoOpenCVMat(), arUcoMarkerDetection.getCorners());
+      opencv_aruco.drawDetectedMarkers(arUcoMarkerDetection.getImageOfDetection().getBytedecoOpenCVMat(),
+                                       arUcoMarkerDetection.getCorners(),
+                                       arUcoMarkerDetection.getIdsAsMat(),
+                                       idColor);
+      opencv_aruco.drawDetectedMarkers(arUcoMarkerDetection.getImageOfDetection().getBytedecoOpenCVMat(), arUcoMarkerDetection.getRejectedImagePoints());
 
-//      opencv_imgproc.cvtColor(arUcoMarkerDetection.getAlphaRemovedImage().getBytedecoOpenCVMat(),
-//                              agbrImage.getBytedecoOpenCVMat(),
-//                              opencv_imgproc.COLOR_RGB2RGBA);
-//
-//      opencv_core.mixChannels(agbrImage.getBytedecoOpenCVMat(), 1, markerImagePanel.getBytedecoImage().getBytedecoOpenCVMat(), 1, fromRGBAToABGR, 4);
+      for (int i = 0; i < arUcoMarkerDetection.getRejectedImagePoints().size(); i++)
+      {
+         int x = arUcoMarkerDetection.getRejectedImagePoints().get(i).ptr(0).getInt();
+         int y = arUcoMarkerDetection.getRejectedImagePoints().get(i).ptr(1).getInt();
+         rectangle.x(x);
+         rectangle.y(y);
+         opencv_imgproc.rectangle(arUcoMarkerDetection.getImageOfDetection().getBytedecoOpenCVMat(), rectangle, rectangleColor);
+      }
 
-      opencv_imgproc.cvtColor(arUcoMarkerDetection.getAlphaRemovedImage().getBytedecoOpenCVMat(),
+      opencv_imgproc.cvtColor(arUcoMarkerDetection.getImageOfDetection().getBytedecoOpenCVMat(),
                               markerImagePanel.getBytedecoImage().getBytedecoOpenCVMat(),
                               opencv_imgproc.COLOR_RGB2RGBA);
-
-//      opencv_core.mixChannels(agbrImage.getBytedecoOpenCVMat(), 1, markerImagePanel.getBytedecoImage().getBytedecoOpenCVMat(), 1, fromRGBAToABGR, 4);
 
       markerImagePanel.draw();
    }
@@ -56,6 +102,88 @@ public class GDXArUcoMarkerDetectionUI
       {
          ImGui.text("ID: " + id);
       }
+      ImGui.text("Rejected image points: " + arUcoMarkerDetection.getRejectedImagePoints().size());
+
+      ImGui.pushItemWidth(150.0f);
+      if (ImGui.inputInt(labels.get("adaptiveThresholdWindowSizeMin"), adaptiveThresholdWindowSizeMin))
+      {
+         if (adaptiveThresholdWindowSizeMin.get() < 3)
+            adaptiveThresholdWindowSizeMin.set(3);
+         arUcoMarkerDetection.getDetectorParameters().adaptiveThreshWinSizeMin(adaptiveThresholdWindowSizeMin.get());
+      }
+      if (ImGui.inputInt(labels.get("adaptiveThresholdWindowSizeMax"), adaptiveThresholdWindowSizeMax))
+      {
+         if (adaptiveThresholdWindowSizeMax.get() < 3)
+            adaptiveThresholdWindowSizeMax.set(3);
+         arUcoMarkerDetection.getDetectorParameters().adaptiveThreshWinSizeMax(adaptiveThresholdWindowSizeMin.get());
+      }
+      if (ImGui.inputInt(labels.get("adaptiveThresholdWindowSizeStep"), adaptiveThresholdWindowSizeStep))
+      {
+         arUcoMarkerDetection.getDetectorParameters().adaptiveThreshWinSizeStep(adaptiveThresholdWindowSizeMin.get());
+      }
+      if (ImGui.inputDouble(labels.get("adaptiveThreshConstant"), adaptiveThreshConstant))
+      {
+         arUcoMarkerDetection.getDetectorParameters().adaptiveThreshConstant(adaptiveThreshConstant.get());
+      }
+      if (ImGui.inputDouble(labels.get("minMarkerPerimeterRate"), minMarkerPerimeterRate))
+      {
+         if (minMarkerPerimeterRate.get() <= 0)
+            minMarkerPerimeterRate.set(0.0001);
+         arUcoMarkerDetection.getDetectorParameters().minMarkerPerimeterRate(minMarkerPerimeterRate.get());
+      }
+      if (ImGui.inputDouble(labels.get("maxMarkerPerimeterRate"), maxMarkerPerimeterRate))
+      {
+         if (maxMarkerPerimeterRate.get() <= 0)
+            maxMarkerPerimeterRate.set(0.0001);
+         arUcoMarkerDetection.getDetectorParameters().maxMarkerPerimeterRate(maxMarkerPerimeterRate.get());
+      }
+      if (ImGui.inputDouble(labels.get("polygonalApproxAccuracyRate"), polygonalApproxAccuracyRate))
+      {
+         if (polygonalApproxAccuracyRate.get() <= 0)
+            polygonalApproxAccuracyRate.set(0.0001);
+         arUcoMarkerDetection.getDetectorParameters().polygonalApproxAccuracyRate(polygonalApproxAccuracyRate.get());
+      }
+      if (ImGui.inputDouble(labels.get("minCornerDistanceRate"), minCornerDistanceRate))
+      {
+         arUcoMarkerDetection.getDetectorParameters().minCornerDistanceRate(minCornerDistanceRate.get());
+      }
+      if (ImGui.inputDouble(labels.get("minMarkerDistanceRate"), minMarkerDistanceRate))
+      {
+         arUcoMarkerDetection.getDetectorParameters().minMarkerDistanceRate(minMarkerDistanceRate.get());
+      }
+      if (ImGui.inputInt(labels.get("minDistanceToBorder"), minDistanceToBorder))
+      {
+         arUcoMarkerDetection.getDetectorParameters().minDistanceToBorder(minDistanceToBorder.get());
+      }
+      if (ImGui.inputInt(labels.get("markerBorderBits"), markerBorderBits))
+      {
+         arUcoMarkerDetection.getDetectorParameters().markerBorderBits(markerBorderBits.get());
+      }
+      if (ImGui.inputDouble(labels.get("minOtsuStdDev"), minOtsuStdDev))
+      {
+         arUcoMarkerDetection.getDetectorParameters().minOtsuStdDev(minOtsuStdDev.get());
+      }
+      if (ImGui.inputInt(labels.get("perspectiveRemovePixelPerCell"), perspectiveRemovePixelPerCell))
+      {
+         arUcoMarkerDetection.getDetectorParameters().perspectiveRemovePixelPerCell(perspectiveRemovePixelPerCell.get());
+      }
+      if (ImGui.inputDouble(labels.get("perspectiveRemoveIgnoredMarginPerCell"), perspectiveRemoveIgnoredMarginPerCell))
+      {
+         arUcoMarkerDetection.getDetectorParameters().perspectiveRemoveIgnoredMarginPerCell(perspectiveRemoveIgnoredMarginPerCell.get());
+      }
+      if (ImGui.inputDouble(labels.get("maxErroneousBitsInBorderRate"), maxErroneousBitsInBorderRate))
+      {
+         arUcoMarkerDetection.getDetectorParameters().maxErroneousBitsInBorderRate(maxErroneousBitsInBorderRate.get());
+      }
+      if (ImGui.inputDouble(labels.get("errorCorrectionRate"), errorCorrectionRate))
+      {
+         arUcoMarkerDetection.getDetectorParameters().errorCorrectionRate(errorCorrectionRate.get());
+      }
+      if (ImGui.checkbox(labels.get("detectInvertedMarker"), detectInvertedMarker))
+      {
+         arUcoMarkerDetection.getDetectorParameters().detectInvertedMarker(detectInvertedMarker.get());
+      }
+      ImGui.popItemWidth();
    }
 
    public ImGuiPanel getMainPanel()
