@@ -8,6 +8,10 @@ import org.bytedeco.opencv.opencv_core.Size;
 
 public class BytedecoOpenCVTools
 {
+   public static final int FLIP_Y = 0;
+   public static final int FLIP_X = 1;
+   public static final int FLIP_BOTH = -1;
+
    public static int getImageWidth(Mat image)
    {
       return image.cols();
@@ -49,7 +53,7 @@ public class BytedecoOpenCVTools
 
    public static void flipY(Mat source, Mat destination)
    {
-      int flipCode = 0; // 0 flips X, 1 flips Y, -1 flips both
+      int flipCode = FLIP_Y;
       opencv_core.flip(source, destination, flipCode);
    }
 
