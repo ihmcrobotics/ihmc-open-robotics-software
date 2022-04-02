@@ -1,10 +1,9 @@
 package us.ihmc.perception;
 
-import org.bytedeco.javacpp.IntPointer;
+import boofcv.struct.calib.CameraPinholeBrown;
 import org.bytedeco.opencv.global.opencv_aruco;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
-import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_aruco.DetectorParameters;
 import org.bytedeco.opencv.opencv_aruco.Dictionary;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -12,12 +11,12 @@ import org.bytedeco.opencv.opencv_core.MatVector;
 
 import java.util.ArrayList;
 
-public class ArUcoMarkerDetection
+public class OpenCVArUcoMarkerDetection
 {
    public static final int DEFAULT_DICTIONARY = opencv_aruco.DICT_4X4_100;
 
    private Dictionary dictionary;
-   private BytedecoImage abgr8888ColorImage;
+   private BytedecoImage rgb888ColorImage;
    private MatVector corners;
    private Mat ids;
    private MatVector rejectedImagePoints;
@@ -25,42 +24,34 @@ public class ArUcoMarkerDetection
    private Mat cameraMatrix;
    private Mat distanceCoefficient;
    private ArrayList<Integer> idsAsList = new ArrayList<>();
-   private IntPointer fromABGRToRGBA = new IntPointer(0, 3, 1, 2, 2, 1, 3, 0);
-   private BytedecoImage rgbaImage;
-   private BytedecoImage alphaRemovedImage;
-   private BytedecoImage blurredImage;
 
-   public void create(BytedecoImage abgr8888ColorImage)
+   public void create(BytedecoImage rgb888ColorImage, CameraPinholeBrown depthCameraIntrinsics)
    {
-      this.abgr8888ColorImage = abgr8888ColorImage;
-      dictionary = opencv_aruco.getPredefinedDictionary(DEFAULT_DICTIONARY);
+      this.rgb888ColorImage = rgb888ColorImage;
 
-      rgbaImage = new BytedecoImage(abgr8888ColorImage.getImageWidth(), abgr8888ColorImage.getImageHeight(), opencv_core.CV_8UC4);
-      alphaRemovedImage = new BytedecoImage(abgr8888ColorImage.getImageWidth(), abgr8888ColorImage.getImageHeight(), opencv_core.CV_8UC3);
-      blurredImage = new BytedecoImage(abgr8888ColorImage.getImageWidth(), abgr8888ColorImage.getImageHeight(), opencv_core.CV_8UC3);
+      dictionary = opencv_aruco.getPredefinedDictionary(DEFAULT_DICTIONARY);
       corners = new MatVector();
       ids = new Mat();
       rejectedImagePoints = new MatVector();
       detectorParameters = new DetectorParameters();
       detectorParameters.markerBorderBits(2);
-      cameraMatrix = new Mat();
+      cameraMatrix = new Mat(3, 3, opencv_core.CV_32FC1);
       distanceCoefficient = new Mat();
+
+      cameraMatrix.ptr(0, 0).putFloat((float) depthCameraIntrinsics.getFx());
+      cameraMatrix.ptr(0, 1).putFloat(0.0f);
+      cameraMatrix.ptr(0, 2).putFloat((float) depthCameraIntrinsics.getCx());
+      cameraMatrix.ptr(1, 0).putFloat(0.0f);
+      cameraMatrix.ptr(1, 1).putFloat((float) depthCameraIntrinsics.getFy());
+      cameraMatrix.ptr(1, 2).putFloat((float) depthCameraIntrinsics.getCy());
+      cameraMatrix.ptr(2, 0).putFloat(0.0f);
+      cameraMatrix.ptr(2, 1).putFloat(0.0f);
+      cameraMatrix.ptr(2, 2).putFloat(1.0f);
    }
    
    public void update()
    {
-      opencv_core.mixChannels(abgr8888ColorImage.getBytedecoOpenCVMat(), 1, rgbaImage.getBytedecoOpenCVMat(), 1, fromABGRToRGBA, 4);
-
-      // ArUco library doesn't support alpha channel being in there
-      opencv_imgproc.cvtColor(rgbaImage.getBytedecoOpenCVMat(), alphaRemovedImage.getBytedecoOpenCVMat(), opencv_imgproc.COLOR_RGBA2RGB);
-
-//      BytedecoOpenCVTools.blur(alphaRemovedImage.getBytedecoOpenCVMat(), blurredImage.getBytedecoOpenCVMat());
-
-//      opencv_core.flip(alphaRemovedImage.getBytedecoOpenCVMat(), alphaRemovedImage.getBytedecoOpenCVMat(), 1);
-
-//      opencv_aruco.drawMarker(dictionary, 23, 6, alphaRemovedImage.getBytedecoOpenCVMat(), 1);
-
-      opencv_aruco.detectMarkers(alphaRemovedImage.getBytedecoOpenCVMat(),
+      opencv_aruco.detectMarkers(rgb888ColorImage.getBytedecoOpenCVMat(),
                                  dictionary,
                                  corners,
                                  ids,
@@ -73,8 +64,6 @@ public class ArUcoMarkerDetection
       {
          idsAsList.add(ids.ptr(0, i).getInt());
       }
-
-
    }
 
    public MatVector getCorners()
@@ -99,12 +88,7 @@ public class ArUcoMarkerDetection
 
    public BytedecoImage getImageOfDetection()
    {
-      return blurredImage;
-   }
-
-   public BytedecoImage getAbgr8888ColorImage()
-   {
-      return abgr8888ColorImage;
+      return rgb888ColorImage;
    }
 
    public DetectorParameters getDetectorParameters()

@@ -5,18 +5,24 @@ import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
 import imgui.type.ImInt;
 import org.bytedeco.opencv.global.opencv_aruco;
+import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.perception.ArUcoMarkerDetection;
+import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.OpenCVArUcoMarkerDetection;
 
-public class GDXArUcoMarkerDetectionUI
+public class GDXOpenCVArUcoMarkerDetectionUI
 {
-   private ArUcoMarkerDetection arUcoMarkerDetection;
+   private final String namePostfix;
+   private int imageWidth;
+   private int imageHeight;
+   private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
+   private BytedecoImage imageForDrawing;
    private GDXCVImagePanel markerImagePanel;
-   private final ImGuiPanel mainPanel = new ImGuiPanel("ArUco Marker Detection", this::renderImGuiWidgets);
+   private final ImGuiPanel mainPanel;
    private Rect rectangle;
    private Scalar rectangleColor;
    private Scalar idColor;
@@ -39,13 +45,21 @@ public class GDXArUcoMarkerDetectionUI
    private final ImDouble errorCorrectionRate = new ImDouble();
    private final ImBoolean detectInvertedMarker = new ImBoolean();
 
-   public void create(ArUcoMarkerDetection arUcoMarkerDetection)
+   public GDXOpenCVArUcoMarkerDetectionUI(String namePostfix)
+   {
+      this.namePostfix = namePostfix;
+      mainPanel = new ImGuiPanel("ArUco Marker Detection " + namePostfix, this::renderImGuiWidgets);
+   }
+
+   public void create(OpenCVArUcoMarkerDetection arUcoMarkerDetection)
    {
       this.arUcoMarkerDetection = arUcoMarkerDetection;
 
-      markerImagePanel = new GDXCVImagePanel("ArUco Marker Detection Image",
-                                             arUcoMarkerDetection.getAbgr8888ColorImage().getImageWidth(),
-                                             arUcoMarkerDetection.getAbgr8888ColorImage().getImageHeight());
+      imageWidth = arUcoMarkerDetection.getImageOfDetection().getImageWidth();
+      imageHeight = arUcoMarkerDetection.getImageOfDetection().getImageHeight();
+      imageForDrawing = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC3);
+      boolean flipY = false;
+      markerImagePanel = new GDXCVImagePanel("ArUco Marker Detection Image " + namePostfix, imageWidth, imageHeight, flipY);
       mainPanel.addChild(markerImagePanel.getVideoPanel());
 
       adaptiveThresholdWindowSizeMin.set(arUcoMarkerDetection.getDetectorParameters().adaptiveThreshWinSizeMin());
@@ -73,22 +87,24 @@ public class GDXArUcoMarkerDetectionUI
 
    public void update()
    {
-      opencv_aruco.drawDetectedMarkers(arUcoMarkerDetection.getImageOfDetection().getBytedecoOpenCVMat(),
+      arUcoMarkerDetection.getImageOfDetection().getBytedecoOpenCVMat().copyTo(imageForDrawing.getBytedecoOpenCVMat());
+
+      opencv_aruco.drawDetectedMarkers(imageForDrawing.getBytedecoOpenCVMat(),
                                        arUcoMarkerDetection.getCorners(),
                                        arUcoMarkerDetection.getIdsAsMat(),
                                        idColor);
-      opencv_aruco.drawDetectedMarkers(arUcoMarkerDetection.getImageOfDetection().getBytedecoOpenCVMat(), arUcoMarkerDetection.getRejectedImagePoints());
+      opencv_aruco.drawDetectedMarkers(imageForDrawing.getBytedecoOpenCVMat(), arUcoMarkerDetection.getRejectedImagePoints());
 
-      for (int i = 0; i < arUcoMarkerDetection.getRejectedImagePoints().size(); i++)
-      {
-         int x = arUcoMarkerDetection.getRejectedImagePoints().get(i).ptr(0).getInt();
-         int y = arUcoMarkerDetection.getRejectedImagePoints().get(i).ptr(1).getInt();
-         rectangle.x(x);
-         rectangle.y(y);
-         opencv_imgproc.rectangle(arUcoMarkerDetection.getImageOfDetection().getBytedecoOpenCVMat(), rectangle, rectangleColor);
-      }
+//      for (int i = 0; i < arUcoMarkerDetection.getRejectedImagePoints().size(); i++)
+//      {
+//         int x = arUcoMarkerDetection.getRejectedImagePoints().get(i).ptr(0).getInt();
+//         int y = arUcoMarkerDetection.getRejectedImagePoints().get(i).ptr(1).getInt();
+//         rectangle.x(x);
+//         rectangle.y(y);
+//         opencv_imgproc.rectangle(imageForDrawing.getBytedecoOpenCVMat(), rectangle, rectangleColor);
+//      }
 
-      opencv_imgproc.cvtColor(arUcoMarkerDetection.getImageOfDetection().getBytedecoOpenCVMat(),
+      opencv_imgproc.cvtColor(imageForDrawing.getBytedecoOpenCVMat(),
                               markerImagePanel.getBytedecoImage().getBytedecoOpenCVMat(),
                               opencv_imgproc.COLOR_RGB2RGBA);
 
@@ -97,6 +113,7 @@ public class GDXArUcoMarkerDetectionUI
 
    public void renderImGuiWidgets()
    {
+      ImGui.text("Image width: " + imageWidth + " height: " + imageHeight);
       ImGui.text("Detected ArUco Markers:");
       for (Integer id : arUcoMarkerDetection.getIds())
       {
@@ -189,5 +206,10 @@ public class GDXArUcoMarkerDetectionUI
    public ImGuiPanel getMainPanel()
    {
       return mainPanel;
+   }
+
+   public GDXCVImagePanel getMarkerImagePanel()
+   {
+      return markerImagePanel;
    }
 }
