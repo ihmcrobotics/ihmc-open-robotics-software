@@ -1,5 +1,8 @@
 package us.ihmc.gdx.perception;
 
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
@@ -7,24 +10,29 @@ import imgui.type.ImInt;
 import org.bytedeco.opencv.global.opencv_aruco;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
-import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.gdx.simulation.environment.GDXModelInstance;
+import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.OpenCVArUcoMarker;
 import us.ihmc.perception.OpenCVArUcoMarkerDetection;
+
+import java.util.ArrayList;
 
 public class GDXOpenCVArUcoMarkerDetectionUI
 {
    private final String namePostfix;
    private int imageWidth;
    private int imageHeight;
+   private ReferenceFrame cameraFrame;
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
    private BytedecoImage imageForDrawing;
    private GDXCVImagePanel markerImagePanel;
    private final ImGuiPanel mainPanel;
-   private Rect rectangle;
-   private Scalar rectangleColor;
    private Scalar idColor;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImInt adaptiveThresholdWindowSizeMin = new ImInt();
@@ -44,6 +52,9 @@ public class GDXOpenCVArUcoMarkerDetectionUI
    private final ImDouble maxErroneousBitsInBorderRate = new ImDouble();
    private final ImDouble errorCorrectionRate = new ImDouble();
    private final ImBoolean detectInvertedMarker = new ImBoolean();
+   private ArrayList<OpenCVArUcoMarker> markersToTrack;
+   private final ArrayList<GDXModelInstance> markerPoseCoordinateFrames = new ArrayList<>();
+   private final FramePose3D markerPose = new FramePose3D();
 
    public GDXOpenCVArUcoMarkerDetectionUI(String namePostfix)
    {
@@ -51,9 +62,11 @@ public class GDXOpenCVArUcoMarkerDetectionUI
       mainPanel = new ImGuiPanel("ArUco Marker Detection " + namePostfix, this::renderImGuiWidgets);
    }
 
-   public void create(OpenCVArUcoMarkerDetection arUcoMarkerDetection)
+   public void create(OpenCVArUcoMarkerDetection arUcoMarkerDetection, ArrayList<OpenCVArUcoMarker> markersToTrack, ReferenceFrame cameraFrame)
    {
       this.arUcoMarkerDetection = arUcoMarkerDetection;
+      this.markersToTrack = markersToTrack;
+      this.cameraFrame = cameraFrame;
 
       imageWidth = arUcoMarkerDetection.getImageOfDetection().getImageWidth();
       imageHeight = arUcoMarkerDetection.getImageOfDetection().getImageHeight();
@@ -80,9 +93,13 @@ public class GDXOpenCVArUcoMarkerDetectionUI
       errorCorrectionRate.set(arUcoMarkerDetection.getDetectorParameters().errorCorrectionRate());
       detectInvertedMarker.set(arUcoMarkerDetection.getDetectorParameters().detectInvertedMarker());
 
-      rectangle = new Rect();
-      rectangleColor = new Scalar(255, 0, 0, 0);
       idColor = new Scalar(0, 0, 255, 0);
+
+      for (OpenCVArUcoMarker markerToTrack : markersToTrack)
+      {
+         GDXModelInstance coordinateFrame = new GDXModelInstance(GDXModelPrimitives.createCoordinateFrame(0.4));
+         markerPoseCoordinateFrames.add(coordinateFrame);
+      }
    }
 
    public void update()
@@ -95,20 +112,23 @@ public class GDXOpenCVArUcoMarkerDetectionUI
                                        idColor);
       opencv_aruco.drawDetectedMarkers(imageForDrawing.getBytedecoOpenCVMat(), arUcoMarkerDetection.getRejectedImagePoints());
 
-//      for (int i = 0; i < arUcoMarkerDetection.getRejectedImagePoints().size(); i++)
-//      {
-//         int x = arUcoMarkerDetection.getRejectedImagePoints().get(i).ptr(0).getInt();
-//         int y = arUcoMarkerDetection.getRejectedImagePoints().get(i).ptr(1).getInt();
-//         rectangle.x(x);
-//         rectangle.y(y);
-//         opencv_imgproc.rectangle(imageForDrawing.getBytedecoOpenCVMat(), rectangle, rectangleColor);
-//      }
-
       opencv_imgproc.cvtColor(imageForDrawing.getBytedecoOpenCVMat(),
                               markerImagePanel.getBytedecoImage().getBytedecoOpenCVMat(),
                               opencv_imgproc.COLOR_RGB2RGBA);
 
       markerImagePanel.draw();
+
+      for (int i = 0; i < markersToTrack.size(); i++)
+      {
+         OpenCVArUcoMarker markerToTrack = markersToTrack.get(i);
+         if (arUcoMarkerDetection.isDetected(markerToTrack.getId()))
+         {
+            markerPose.setToZero(cameraFrame);
+            arUcoMarkerDetection.getPose(markerToTrack.getId(), markerToTrack.getSideLength(), markerPose);
+            markerPose.changeFrame(ReferenceFrame.getWorldFrame());
+            markerPoseCoordinateFrames.get(i).setPoseInWorldFrame(markerPose);
+         }
+      }
    }
 
    public void renderImGuiWidgets()
@@ -201,6 +221,14 @@ public class GDXOpenCVArUcoMarkerDetectionUI
          arUcoMarkerDetection.getDetectorParameters().detectInvertedMarker(detectInvertedMarker.get());
       }
       ImGui.popItemWidth();
+   }
+
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      for (GDXModelInstance markerPoseCoordinateFrame : markerPoseCoordinateFrames)
+      {
+         markerPoseCoordinateFrame.getRenderables(renderables, pool);
+      }
    }
 
    public ImGuiPanel getMainPanel()

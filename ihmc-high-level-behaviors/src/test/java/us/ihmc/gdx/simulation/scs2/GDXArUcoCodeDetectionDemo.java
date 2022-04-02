@@ -15,11 +15,14 @@ import us.ihmc.gdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
 import us.ihmc.gdx.simulation.sensors.GDXSimulatedSensorFactory;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
+import us.ihmc.perception.OpenCVArUcoMarker;
 import us.ihmc.perception.OpenCVArUcoMarkerDetection;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.tools.io.WorkspaceFile;
 import us.ihmc.tools.thread.Activator;
+
+import java.util.ArrayList;
 
 public class GDXArUcoCodeDetectionDemo
 {
@@ -85,15 +88,19 @@ public class GDXArUcoCodeDetectionDemo
                   arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
                   arUcoMarkerDetection.create(rgb888ColorImage, cameraSensor.getDepthCameraIntrinsics());
                   arUcoMarkerDetectionUI = new GDXOpenCVArUcoMarkerDetectionUI("from Sensor");
-                  arUcoMarkerDetectionUI.create(arUcoMarkerDetection);
+                  ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
+                  markersToTrack.add(new OpenCVArUcoMarker(0, 0.2032));
+                  markersToTrack.add(new OpenCVArUcoMarker(1, 0.2032));
+                  arUcoMarkerDetectionUI.create(arUcoMarkerDetection, markersToTrack, sensorPoseGizmo.getGizmoFrame());
                   baseUI.getImGuiPanelManager().addPanel(arUcoMarkerDetectionUI.getMainPanel());
+                  baseUI.get3DSceneManager().addRenderableProvider(arUcoMarkerDetectionUI::getRenderables, GDXSceneLevel.VIRTUAL);
 
                   loadTestImage();
 
                   testImageArUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
                   testImageArUcoMarkerDetection.create(testRGB888ColorImage, cameraSensor.getDepthCameraIntrinsics());
                   testImageArUcoMarkerDetectionUI = new GDXOpenCVArUcoMarkerDetectionUI("Test");
-                  testImageArUcoMarkerDetectionUI.create(testImageArUcoMarkerDetection);
+                  testImageArUcoMarkerDetectionUI.create(testImageArUcoMarkerDetection, new ArrayList<>(), sensorPoseGizmo.getGizmoFrame());
                   ImGuiPanel testUIPanel = new ImGuiPanel("Test image detection", this::renderTestUIImGuiWidgets);
                   testUIPanel.addChild(testImageArUcoMarkerDetectionUI.getMarkerImagePanel().getVideoPanel());
                   baseUI.getImGuiPanelManager().addPanel(testUIPanel);

@@ -1,15 +1,20 @@
 package us.ihmc.perception;
 
 import boofcv.struct.calib.CameraPinholeBrown;
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_aruco;
+import org.bytedeco.opencv.global.opencv_calib3d;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_aruco.DetectorParameters;
 import org.bytedeco.opencv.opencv_aruco.Dictionary;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
+import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
+import us.ihmc.euclid.matrix.LinearTransform3D;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class OpenCVArUcoMarkerDetection
 {
@@ -22,8 +27,16 @@ public class OpenCVArUcoMarkerDetection
    private MatVector rejectedImagePoints;
    private DetectorParameters detectorParameters;
    private Mat cameraMatrix;
-   private Mat distanceCoefficient;
-   private ArrayList<Integer> idsAsList = new ArrayList<>();
+   private Mat distortionCoefficients;
+   private final ArrayList<Integer> idsAsList = new ArrayList<>();
+   private final HashMap<Integer, Mat> idToCornersMap = new HashMap<>();
+   private MatVector cornerForPose;
+   private Mat rotationVectors;
+   private Mat rotationVector;
+   private Mat rotationMatrix;
+   private final LinearTransform3D euclidLinearTransform = new LinearTransform3D();
+   private Mat translationVectors;
+   private Mat objectPoints;
 
    public void create(BytedecoImage rgb888ColorImage, CameraPinholeBrown depthCameraIntrinsics)
    {
@@ -36,7 +49,17 @@ public class OpenCVArUcoMarkerDetection
       detectorParameters = new DetectorParameters();
       detectorParameters.markerBorderBits(2);
       cameraMatrix = new Mat(3, 3, opencv_core.CV_32FC1);
-      distanceCoefficient = new Mat();
+      distortionCoefficients = new Mat(1, 4, opencv_core.CV_32FC1);
+      distortionCoefficients.ptr(0, 0).putFloat(0.0f);
+      distortionCoefficients.ptr(0, 1).putFloat(0.0f);
+      distortionCoefficients.ptr(0, 2).putFloat(0.0f);
+      distortionCoefficients.ptr(0, 3).putFloat(0.0f);
+      cornerForPose = new MatVector();
+      rotationVectors = new Mat();
+      rotationVector = new Mat(3, 1, opencv_core.CV_64FC1);
+      rotationMatrix = new Mat(3, 3, opencv_core.CV_64FC1);
+      translationVectors = new Mat();
+      objectPoints = new Mat();
 
       cameraMatrix.ptr(0, 0).putFloat((float) depthCameraIntrinsics.getFx());
       cameraMatrix.ptr(0, 1).putFloat(0.0f);
@@ -58,12 +81,65 @@ public class OpenCVArUcoMarkerDetection
                                  detectorParameters,
                                  rejectedImagePoints,
                                  cameraMatrix,
-                                 distanceCoefficient);
+                                 distortionCoefficients);
       idsAsList.clear();
-      for (int i = 0; i < ids.cols(); i++)
+      idToCornersMap.clear();
+      for (int i = 0; i < ids.rows(); i++)
       {
-         idsAsList.add(ids.ptr(0, i).getInt());
+         int markerID = ids.ptr(i, 0).getInt();
+         idsAsList.add(markerID);
+         idToCornersMap.put(markerID, corners.get(i));
       }
+   }
+
+   public boolean isDetected(int markerID)
+   {
+      return idToCornersMap.containsKey(markerID);
+   }
+
+   /**
+    * Estimates the pose of the single marker ID.
+    * Multiple markers of the same ID is not supported.
+    */
+   public void getPose(int markerID, double markerLength, Pose3DBasics poseToPack)
+   {
+      cornerForPose.clear();
+      cornerForPose.put(idToCornersMap.get(markerID));
+
+      opencv_aruco.estimatePoseSingleMarkers(cornerForPose,
+                                             (float) markerLength,
+                                             cameraMatrix,
+                                             distortionCoefficients,
+                                             rotationVectors,
+                                             translationVectors,
+                                             objectPoints);
+
+      double rx = rotationVectors.ptr(0).getDouble();
+      double ry = rotationVectors.ptr(0).getDouble(Double.BYTES);
+      double rz = rotationVectors.ptr(0).getDouble(2 * Double.BYTES);
+      rotationVector.ptr(0).putDouble(rz);
+      rotationVector.ptr(0).putDouble(Double.BYTES, -rx);
+      rotationVector.ptr(0).putDouble(2 * Double.BYTES, -ry);
+
+      opencv_calib3d.Rodrigues(rotationVector, rotationMatrix);
+
+      BytePointer basePtr = rotationMatrix.ptr(0);
+      euclidLinearTransform.set(basePtr.getDouble(),
+                                basePtr.getDouble(Double.BYTES),
+                                basePtr.getDouble(2 * Double.BYTES),
+                                basePtr.getDouble(3 * Double.BYTES),
+                                basePtr.getDouble(4 * Double.BYTES),
+                                basePtr.getDouble(5 * Double.BYTES),
+                                basePtr.getDouble(6 * Double.BYTES),
+                                basePtr.getDouble(7 * Double.BYTES),
+                                basePtr.getDouble(8 * Double.BYTES));
+
+      poseToPack.getOrientation().set(euclidLinearTransform.getAsQuaternion());
+
+      double x = translationVectors.ptr(0).getDouble();
+      double y = translationVectors.ptr(0).getDouble(Double.BYTES);
+      double z = translationVectors.ptr(0).getDouble(2 * Double.BYTES);
+      poseToPack.getPosition().set(z, -x, -y);
    }
 
    public MatVector getCorners()
