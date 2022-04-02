@@ -31,6 +31,20 @@ public class BytedecoImage
 
    public BytedecoImage(int imageWidth, int imageHeight, int cvMatType, ByteBuffer backingDirectByteBuffer)
    {
+      this(imageWidth, imageHeight, cvMatType, backingDirectByteBuffer, null);
+   }
+
+   public BytedecoImage(Mat suppliedMat)
+   {
+      this(BytedecoOpenCVTools.getImageWidth(suppliedMat),
+           BytedecoOpenCVTools.getImageHeight(suppliedMat),
+           suppliedMat.type(),
+           suppliedMat.data().asByteBuffer(),
+           suppliedMat);
+   }
+
+   public BytedecoImage(int imageWidth, int imageHeight, int cvMatType, ByteBuffer backingDirectByteBuffer, Mat suppliedMat)
+   {
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
       this.cvMatType = cvMatType;
@@ -89,7 +103,14 @@ public class BytedecoImage
       }
 
       bytedecoByteBufferPointer = new BytePointer(this.backingDirectByteBuffer);
-      bytedecoOpenCVMat = new Mat(imageHeight, imageWidth, cvMatType, bytedecoByteBufferPointer);
+      if (suppliedMat != null)
+      {
+         bytedecoOpenCVMat = suppliedMat;
+      }
+      else
+      {
+         bytedecoOpenCVMat = new Mat(imageHeight, imageWidth, cvMatType, bytedecoByteBufferPointer);
+      }
    }
 
    public void createOpenCLImage(OpenCLManager openCLManager, int flags)
