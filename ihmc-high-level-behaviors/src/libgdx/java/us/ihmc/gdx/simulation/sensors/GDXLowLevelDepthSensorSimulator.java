@@ -30,6 +30,7 @@ import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.DepthSensorShaderProvider;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.visualizers.GDXFrustumVisualizer;
+import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.tools.Timer;
@@ -230,6 +231,12 @@ public class GDXLowLevelDepthSensorSimulator
       }
 
       frameBuffer.end();
+
+      // libGDX renders this stuff upside down, so let's flip them right side up.
+      opencv_core.flip(rgba8888ColorImage.getBytedecoOpenCVMat(), rgba8888ColorImage.getBytedecoOpenCVMat(), BytedecoOpenCVTools.FLIP_Y);
+      opencv_core.flip(normalizedDeviceCoordinateDepthImage.getBytedecoOpenCVMat(),
+                       normalizedDeviceCoordinateDepthImage.getBytedecoOpenCVMat(),
+                       BytedecoOpenCVTools.FLIP_Y);
 
       opencv_core.randu(noiseImage.getBytedecoOpenCVMat(), noiseLow, noiseHigh);
 
