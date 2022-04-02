@@ -34,20 +34,25 @@ public class GDXCVImagePanel
 
       this.bytedecoImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4, pixmap.getPixels());
 
-      setup(name, imageWidth, imageHeight);
+      boolean flipY = false;
+      setup(name, imageWidth, imageHeight, flipY);
    }
 
    public GDXCVImagePanel(String name, int imageWidth, int imageHeight)
    {
+      this(name, imageWidth, imageHeight, false);
+   }
+
+   public GDXCVImagePanel(String name, int imageWidth, int imageHeight, boolean flipY)
+   {
       pixmap = new Pixmap(imageWidth, imageHeight, Pixmap.Format.RGBA8888);
       bytedecoImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4, pixmap.getPixels());
 
-      setup(name, imageWidth, imageHeight);
+      setup(name, imageWidth, imageHeight, flipY);
    }
 
-   private void setup(String name, int imageWidth, int imageHeight)
+   private void setup(String name, int imageWidth, int imageHeight, boolean flipY)
    {
-      boolean flipY = true;
       videoPanel = new ImGuiVideoPanel(name, flipY);
 
       panelTexture = new Texture(new PixmapTextureData(pixmap, null, false, false));
