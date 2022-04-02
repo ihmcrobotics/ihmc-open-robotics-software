@@ -61,8 +61,7 @@ public class GDXOpenCVColorByteOrderDemo
             ImGuiPanel panel = new ImGuiPanel("Color Byte Order Debugging", this::renderImGuiWidgets);
             baseUI.getImGuiPanelManager().addPanel(panel);
 
-            openCVImagePanel = new GDXCVImagePanel("OpenCV Image Panel",
-                                                   highLevelDepthSensorSimulator.getLowLevelSimulator().getRGBA8888ColorImage());
+            openCVImagePanel = new GDXCVImagePanel("OpenCV Image Panel", highLevelDepthSensorSimulator.getLowLevelSimulator().getRGBA8888ColorImage());
             baseUI.getImGuiPanelManager().addPanel(openCVImagePanel.getVideoPanel());
          }
 
