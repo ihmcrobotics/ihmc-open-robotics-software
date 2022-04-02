@@ -8,6 +8,14 @@ public class WorkspaceDirectory
    private final Path workspaceDirectory;
    private final String pathNecessaryForClasspathLoading;
 
+   /**
+    * For loading from the root of the resources directory.
+    */
+   public WorkspaceDirectory(String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
+   {
+      this(directoryNameToAssumePresent, subsequentPathToResourceFolder, null, "");
+   }
+
    public WorkspaceDirectory(String directoryNameToAssumePresent,
                              String subsequentPathToResourceFolder,
                              Class<?> classForResourceDirectory)
