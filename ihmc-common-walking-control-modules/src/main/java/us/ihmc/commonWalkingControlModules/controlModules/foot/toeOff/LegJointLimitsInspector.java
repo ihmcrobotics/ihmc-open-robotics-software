@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.controlModules.foot;
+package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff;
 
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
