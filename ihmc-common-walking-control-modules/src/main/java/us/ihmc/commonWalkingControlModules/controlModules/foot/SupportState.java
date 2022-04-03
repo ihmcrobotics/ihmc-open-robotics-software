@@ -320,6 +320,9 @@ public class SupportState extends AbstractFootControlState
       spatialAccelerationCommand.setSpatialAcceleration(controlFrame, footAcceleration);
       spatialAccelerationCommand.setWeights(angularWeight, linearWeight);
 
+      spatialFeedbackControlCommand.setScaleSecondaryTaskJointWeight(true, 0.0);
+//      spatialAccelerationCommand.setScaleSecondaryTaskJointWeight(true, 0.1);
+
       // assemble feedback command
       bodyFixedControlledPose.setToZero(controlFrame);
       bodyFixedControlledPose.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
@@ -356,6 +359,7 @@ public class SupportState extends AbstractFootControlState
       {
          isDirectionFeedbackControlled[0] = true; // control x orientation
          isDirectionFeedbackControlled[1] = true; // control y orientation
+         isDirectionFeedbackControlled[2] = true; // control z orientation
       }
       if (liftOff.getValue() || touchDown.getValue())
       {
@@ -411,7 +415,8 @@ public class SupportState extends AbstractFootControlState
       else if (copOnEdge.getBooleanValue()) // => Holding Pitch-Roll-Components (cuz CoP on edge)
       { // Update X-Y-Z and yaw for next time the foot will be barely loaded
          desiredPosition.set(footPosition);
-         desiredOrientation.setYawPitchRoll(footOrientation.getYaw(), desiredOrientation.getPitch(), desiredOrientation.getRoll());
+//         desiredOrientation.set(desiredOrientation);
+//         desiredOrientation.setYawPitchRoll(footOrientation.getYaw(), desiredOrientation.getPitch(), desiredOrientation.getRoll());
       }
       else // Not holding anything
       { // Update the full pose.
