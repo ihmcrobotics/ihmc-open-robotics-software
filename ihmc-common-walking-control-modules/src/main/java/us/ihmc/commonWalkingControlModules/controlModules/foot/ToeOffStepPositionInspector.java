@@ -58,7 +58,7 @@ public class ToeOffStepPositionInspector
       parentRegistry.addChild(registry);
    }
 
-   private boolean isFrontFootWellPositionedForToeOff(RobotSide trailingLeg, FramePose3DReadOnly frontFootPose)
+   public boolean isFrontFootWellPositionedForToeOff(RobotSide trailingLeg, FramePose3DReadOnly frontFootPose)
    {
       ReferenceFrame trailingFootFrame = soleZUpFrames.get(trailingLeg);
       trailingFootPosition.setToZero(trailingFootFrame);
