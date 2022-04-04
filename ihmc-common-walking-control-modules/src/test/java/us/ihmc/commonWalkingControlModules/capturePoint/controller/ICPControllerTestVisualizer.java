@@ -13,6 +13,7 @@ import java.awt.Color;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -59,9 +60,13 @@ public class ICPControllerTestVisualizer
    private final YoFrameVector3D yoDesiredScaledICPVelocity3D;
    private final YoFrameVector3D yoExpectedScaledControlICPVelocity3D;
 
+   private final YoFramePoint2D yoExpectedICPMeetupPoint;
+   private final YoBoolean yoICPMeetupPointDoesNotExist;
+
    private final YoDouble yoCoPDistanceToPolygon;
    private final YoDouble yoErrorToVelocityDotProduct;
-   private final YoBoolean yoPotentialProblemFlag;
+   private final YoBoolean yoCoPOutsidePolygon;
+   private final YoBoolean yoPushingICPFurtherFromDesired;
    
    //   private final YoFramePoint2D yoFinalDesiredICP;
    //   private final YoFramePoint3D yoFinalDesiredCoM;
@@ -95,10 +100,14 @@ public class ICPControllerTestVisualizer
       yoDesiredScaledICPVelocity3D = new YoFrameVector3D("desiredScaledICPVelocity3D", worldFrame, registry);
 
       yoExpectedScaledControlICPVelocity3D = new YoFrameVector3D("expectedScaledControlICPVelocity3D", worldFrame, registry);
-
+      yoExpectedICPMeetupPoint = new YoFramePoint2D("expectedICPMeetupPoint", worldFrame, registry);
+      
       yoCoPDistanceToPolygon = new YoDouble("copDistanceToPolygon", registry);
       yoErrorToVelocityDotProduct = new YoDouble("errorToVelocityDotProduct", registry);
-      yoPotentialProblemFlag = new YoBoolean("yoPotentialProblemFlag", registry);
+      yoCoPOutsidePolygon = new YoBoolean("copOutsidePolygon", registry);
+      yoPushingICPFurtherFromDesired = new YoBoolean("pushingICPFurtherFromDesired", registry);
+
+      yoICPMeetupPointDoesNotExist = new YoBoolean("icpMeetupPointDoesNotExist", registry);
 
       //      yoFinalDesiredICP = new YoFramePoint2D("finalDesiredICP", worldFrame, registry);
       //      yoFinalDesiredCoM = new YoFramePoint3D("finalDesiredCoM", worldFrame, registry);
@@ -133,6 +142,8 @@ public class ICPControllerTestVisualizer
                                                                   YoAppearance.Blue(),
                                                                   true);
 
+      
+      
       YoGraphicPosition desiredCoPViz = new YoGraphicPosition("Desired CoP", yoDesiredCoP, 0.01, Brown(), GraphicType.DIAMOND);
       YoGraphicPosition desiredCMPViz = new YoGraphicPosition("Desired CMP", yoDesiredCMP, 0.012, Purple(), GraphicType.BALL_WITH_CROSS);
       //      YoGraphicPosition achievedCMPViz = new YoGraphicPosition("Achieved CMP", yoAchievedCMP, 0.005, DarkRed(), GraphicType.BALL_WITH_CROSS);
@@ -178,6 +189,10 @@ public class ICPControllerTestVisualizer
 
       yoGraphicsListRegistry.registerArtifact("ICPControllerTest", supportPolygonArtifact);
 
+      YoGraphicPosition expectedICPMeetupPointViz = new YoGraphicPosition("Expected ICP Meetup Point", yoExpectedICPMeetupPoint, 0.02, Purple(), GraphicType.BALL_WITH_CROSS);
+      yoGraphicsListRegistry.registerYoGraphic("yoGraphics", expectedICPMeetupPointViz);
+      yoGraphicsListRegistry.registerArtifact("ICPControllerTest", expectedICPMeetupPointViz.createArtifact());
+      
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       SimulationOverheadPlotterFactory plotterFactory = scs.createSimulationOverheadPlotterFactory();
       plotterFactory.setShowOnStart(true);
@@ -223,9 +238,11 @@ public class ICPControllerTestVisualizer
       plotter.update();
    }
 
-   public void updateOutputs(FramePoint2DReadOnly desiredCoP, FramePoint2DReadOnly desiredCMP, FrameVector2DReadOnly expectedControlICPVelocity)
+   public void updateOutputs(FramePoint2DReadOnly desiredCoP, FramePoint2DReadOnly desiredCMP, FrameVector2DReadOnly expectedControlICPVelocity, FramePoint2DBasics expectedICPMeetupPoint)
    {
-      yoPotentialProblemFlag.set(false);
+      yoCoPOutsidePolygon.set(false);
+      yoPushingICPFurtherFromDesired.set(false);
+      yoICPMeetupPointDoesNotExist.set(false);
 
       this.yoDesiredCMP.set(desiredCMP);
       this.yoDesiredCoP.set(desiredCoP);
@@ -233,11 +250,15 @@ public class ICPControllerTestVisualizer
       yoExpectedScaledControlICPVelocity3D.set(expectedControlICPVelocity);
       yoExpectedScaledControlICPVelocity3D.scale(0.1);
 
+      yoExpectedICPMeetupPoint.set(expectedICPMeetupPoint);
+      if (expectedICPMeetupPoint.containsNaN())
+         yoICPMeetupPointDoesNotExist.set(true);
+
       double copDistanceToPolygon = yoSupportPolygonInWorld.signedDistance(desiredCoP);
       yoCoPDistanceToPolygon.set(copDistanceToPolygon);
       
       if (copDistanceToPolygon > 1e-7)
-         yoPotentialProblemFlag.set(true);
+         yoCoPOutsidePolygon.set(true);
 
       FrameVector2D icpError = new FrameVector2D(yoDesiredICP);
       icpError.sub(yoCapturePoint);
@@ -248,7 +269,7 @@ public class ICPControllerTestVisualizer
       if (copDistanceToPolygon < -0.002)
       {  
          if (dotProduct < 0.0)
-            yoPotentialProblemFlag.set(true);
+            yoPushingICPFurtherFromDesired.set(true);
       }     
 
       scs.setTime(scs.getTime() + 1.0);
