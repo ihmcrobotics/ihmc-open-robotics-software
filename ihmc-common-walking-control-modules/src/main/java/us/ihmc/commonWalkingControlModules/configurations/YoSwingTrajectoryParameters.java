@@ -42,6 +42,8 @@ public class YoSwingTrajectoryParameters
    private final DoubleProvider liftOffPhaseDuration;
    private final DoubleProvider liftOffKd;
 
+   private final DoubleProvider pelvisVelocityInjectionRatio;
+
    public YoSwingTrajectoryParameters(String namePrefix, WalkingControllerParameters walkingControllerParameters, YoRegistry registry)
    {
       this(namePrefix, walkingControllerParameters, walkingControllerParameters.getSwingTrajectoryParameters(), registry);
@@ -109,6 +111,8 @@ public class YoSwingTrajectoryParameters
       liftOffKneeDesiredVelocity = new DoubleParameter(namePrefix + "LiftOffKneeDesiredVelocity", registry, 3.0);
       liftOffPhaseDuration = new DoubleParameter(namePrefix + "LiftOffPhaseDuration", registry, 0.05);
       liftOffKd = new DoubleParameter(namePrefix + "LiftOffKneeKd", registry, 50.0);
+
+      pelvisVelocityInjectionRatio = new DoubleParameter(namePrefix + "PelvisVelocityInjectionRatio", registry, 0.0);
    }
 
    public boolean addOrientationMidpointForObstacleClearance()
@@ -169,6 +173,11 @@ public class YoSwingTrajectoryParameters
    public boolean ignoreSwingInitialAngularVelocityZ()
    {
       return ignoreInitialAngularVelocityZ.getValue();
+   }
+
+   public double getPelvisVelocityInjectionRatio()
+   {
+      return pelvisVelocityInjectionRatio.getValue();
    }
 
    public double getMaxSwingInitialLinearVelocityMagnitude()

@@ -58,6 +58,7 @@ public class SwingTrajectoryCalculator
 
    private final FramePoint3D initialPosition = new FramePoint3D();
    private final FrameVector3D initialLinearVelocity = new FrameVector3D();
+   private final FrameVector3D pelvisVelocity = new FrameVector3D();
    private final FrameVector3D footCurrentVelocity = new FrameVector3D();
    private final FrameQuaternion initialOrientation = new FrameQuaternion();
    private final FrameVector3D initialAngularVelocity = new FrameVector3D();
@@ -233,19 +234,20 @@ public class SwingTrajectoryCalculator
    }
 
    /**
-    * Sets the initial conditions that the calculator uses to the calculate the swing trajectory to the
+    * Sets the initial conditions that the calculator uses to calculate the swing trajectory to the
     * current state of the sole frame.
     */
    public void setInitialConditionsToCurrent()
    {
       currentStateProvider.getPosition(initialPosition);
-      currentStateProvider.getLinearVelocity(footCurrentVelocity);
+      currentStateProvider.getLinearVelocity(initialLinearVelocity);
       currentStateProvider.getOrientation(initialOrientation);
       currentStateProvider.getAngularVelocity(initialAngularVelocity);
 
-      initialLinearVelocity.setIncludingFrame(pelvisFrame.getTwistOfFrame().getLinearPart());
-      initialLinearVelocity.changeFrame(worldFrame);
-      initialLinearVelocity.add(footCurrentVelocity);
+      pelvisVelocity.setIncludingFrame(pelvisFrame.getTwistOfFrame().getLinearPart());
+      pelvisVelocity.changeFrame(worldFrame);
+
+      initialLinearVelocity.scaleAdd(swingTrajectoryParameters.getPelvisVelocityInjectionRatio(), pelvisVelocity, initialLinearVelocity);
 
       if (swingTrajectoryParameters.ignoreSwingInitialAngularVelocityZ())
       {
