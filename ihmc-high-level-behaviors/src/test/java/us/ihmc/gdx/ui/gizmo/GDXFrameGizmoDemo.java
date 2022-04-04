@@ -1,12 +1,12 @@
-package us.ihmc.gdx;
+package us.ihmc.gdx.ui.gizmo;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.affordances.GDXInteractableReferenceFrame;
-import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 public class GDXFrameGizmoDemo

@@ -157,7 +157,8 @@ public class GDXPose3DGizmo implements RenderableProvider
          {
             Vector3DReadOnly linearMotion = lineDragAlgorithm.calculate(pickRay,
                                                                         closestCollision,
-                                                                        axisRotations.get(closestCollisionSelection.toAxis3D()), transformToWorld);
+                                                                        axisRotations.get(closestCollisionSelection.toAxis3D()),
+                                                                        transformToWorld);
 
             tempFramePose3D.setToZero(gizmoFrame);
             tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
@@ -170,7 +171,8 @@ public class GDXPose3DGizmo implements RenderableProvider
          {
             if (clockFaceDragAlgorithm.calculate(pickRay,
                                                  closestCollision,
-                                                 axisRotations.get(closestCollisionSelection.toAxis3D()), transformToWorld))
+                                                 axisRotations.get(closestCollisionSelection.toAxis3D()),
+                                                 transformToWorld))
             {
                tempFramePose3D.setToZero(gizmoFrame);
                tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
@@ -490,5 +492,10 @@ public class GDXPose3DGizmo implements RenderableProvider
    public void setResizeAutomatically(boolean resizeAutomatically)
    {
       this.resizeAutomatically.set(resizeAutomatically);
+   }
+
+   ClockFaceRotation3DMouseDragAlgorithm getClockFaceDragAlgorithm()
+   {
+      return clockFaceDragAlgorithm;
    }
 }
