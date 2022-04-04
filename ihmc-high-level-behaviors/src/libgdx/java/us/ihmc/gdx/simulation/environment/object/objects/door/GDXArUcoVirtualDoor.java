@@ -15,8 +15,7 @@ public class GDXArUcoVirtualDoor extends GDXVirtualDoor
    private final ReferenceFrame markerFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
                                                                                                                      markerToWorld);
    private final RigidBodyTransform transformToMarker = new RigidBodyTransform();
-   private final ReferenceFrame virtualFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(markerFrame,
-                                                                                                                        transformToMarker);
+   private final ReferenceFrame virtualFrame;
 
    public GDXArUcoVirtualDoor(int id)
    {
@@ -33,6 +32,8 @@ public class GDXArUcoVirtualDoor extends GDXVirtualDoor
       {
 
       }
+
+      virtualFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(markerFrame, transformToMarker);
    }
 
    @Override
