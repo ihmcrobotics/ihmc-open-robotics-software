@@ -277,19 +277,19 @@ public class InverseDynamicsOptimizationControlModule
          boolean hasCustomMax = Double.isFinite(customQDDotMaxMatrix.get(jointIndex, 0));
          double qDDotMin = qDDotMinMatrix.get(jointIndex, 0);
          double qDDotMax = qDDotMaxMatrix.get(jointIndex, 0);
-         double customQDDotMin = MathTools.clamp(customQDDotMinMatrix.get(jointIndex, 0), absoluteMaximumJointAcceleration.getDoubleValue());
-         double customQDDotMax = MathTools.clamp(customQDDotMaxMatrix.get(jointIndex, 0), absoluteMaximumJointAcceleration.getDoubleValue());
+         double customQDDotMin = MathTools.clamp(customQDDotMinMatrix.get(jointIndex, 0), absoluteMaximumJointAcceleration.getDoubleValue() - 5.0);
+         double customQDDotMax = MathTools.clamp(customQDDotMaxMatrix.get(jointIndex, 0), absoluteMaximumJointAcceleration.getDoubleValue() - 5.0);
 
          if (hasCustomMin != hasCustomMax)
          {
             if (hasCustomMin)
             {
                qDDotMin = Math.max(qDDotMin, customQDDotMin);
-               qDDotMax = Math.max(qDDotMax, customQDDotMin + 20.0);
+               qDDotMax = Math.max(qDDotMax, customQDDotMin + 5.0);
             }
             else
             {
-               qDDotMin = Math.min(qDDotMin, customQDDotMax - 20.0);
+               qDDotMin = Math.min(qDDotMin, customQDDotMax - 5.0);
                qDDotMax = Math.min(qDDotMax, customQDDotMax);
             }
          }
