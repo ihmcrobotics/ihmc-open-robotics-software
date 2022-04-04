@@ -23,6 +23,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
@@ -481,8 +482,41 @@ public class HeuristicICPControllerTest
       expectedControlICPVelocity.scale(omega);
       testCase.setExpectedControlICPVelocity(expectedControlICPVelocity);
 
+      FramePoint2DBasics expectedICPMeetupPoint = computeExpectedICPMeetupPoint(desiredICP, currentICP, desiredICPVelocity, expectedControlICPVelocity);
+
       visualizer.updateInputs(omega, supportPolygonInWorld, desiredICP, desiredICPVelocity, perfectCMP, perfectCoP, currentICP, currentCoMPosition);
-      visualizer.updateOutputs(desiredCoP, desiredCMP, expectedControlICPVelocity);
+      visualizer.updateOutputs(desiredCoP, desiredCMP, expectedControlICPVelocity, expectedICPMeetupPoint);
+   }
+
+   private static FramePoint2DBasics computeExpectedICPMeetupPoint(FramePoint2DReadOnly desiredICP,
+                                                                   FramePoint2DReadOnly currentICP,
+                                                                   FrameVector2DReadOnly desiredICPVelocity,
+                                                                   FrameVector2D expectedControlICPVelocity)
+   {
+      FramePoint2DBasics expectedICPMeetupPoint = new FramePoint2D(desiredICP.getReferenceFrame());
+
+      FrameLine2D desiredICPLine = new FrameLine2D(desiredICP, desiredICPVelocity);
+      FrameLine2D expectedICPLine = new FrameLine2D(currentICP, expectedControlICPVelocity);
+
+      boolean intersectionExists = desiredICPLine.intersectionWith(expectedICPLine, expectedICPMeetupPoint);
+      if (!intersectionExists)
+      {
+         expectedICPMeetupPoint.setToNaN();
+         return expectedICPMeetupPoint;
+      }
+
+      FrameVector2D desiredToMeetup = new FrameVector2D(expectedICPMeetupPoint);
+      desiredToMeetup.sub(desiredICP);
+      
+      if (desiredToMeetup.length() < 0.002)
+         return expectedICPMeetupPoint;
+
+      if (desiredICPVelocity.dot(desiredToMeetup) < 0.0)
+      {
+         expectedICPMeetupPoint.setToNaN();
+      }
+
+      return expectedICPMeetupPoint;
    }
 
    @Test
@@ -544,8 +578,12 @@ public class HeuristicICPControllerTest
       expectedControlICPVelocity.sub(currentICP, desiredCMP);
       expectedControlICPVelocity.scale(omega);
 
+      FramePoint2DBasics expectedICPMeetupPoint = computeExpectedICPMeetupPoint(desiredICP, currentICP, desiredICPVelocity, expectedControlICPVelocity);
+
       if (visualize)
-         visualizer.updateOutputs(desiredCoP, desiredCMP, expectedControlICPVelocity);
+      {
+         visualizer.updateOutputs(desiredCoP, desiredCMP, expectedControlICPVelocity, expectedICPMeetupPoint);
+      }
 
       FrameLine2D lineFromICPTODesired = new FrameLine2D(desiredICP, currentICP);
       double distanceFromLineToProjection = lineFromICPTODesired.distance(desiredCMP);
@@ -628,8 +666,12 @@ public class HeuristicICPControllerTest
       expectedControlICPVelocity.sub(currentICP, desiredCMP);
       expectedControlICPVelocity.scale(omega);
 
+      FramePoint2DBasics expectedICPMeetupPoint = computeExpectedICPMeetupPoint(desiredICP, currentICP, desiredICPVelocity, expectedControlICPVelocity);
+
       if (visualize)
-         visualizer.updateOutputs(desiredCoP, desiredCMP, expectedControlICPVelocity);
+      {
+         visualizer.updateOutputs(desiredCoP, desiredCMP, expectedControlICPVelocity, expectedICPMeetupPoint);
+      }
 
       FrameLine2D lineFromICPTODesired = new FrameLine2D(desiredICP, currentICP);
       double distanceFromLineToProjection = lineFromICPTODesired.distance(desiredCMP);
@@ -694,12 +736,14 @@ public class HeuristicICPControllerTest
       expectedControlICPVelocity.sub(currentICP, desiredCMP);
       expectedControlICPVelocity.scale(omega);
 
+      FramePoint2DBasics expectedICPMeetupPoint = computeExpectedICPMeetupPoint(desiredICP, currentICP, desiredICPVelocity, expectedControlICPVelocity);
+
       ICPControllerTestVisualizer visualizer = null;
       if (visualize)
       {
          visualizer = new ICPControllerTestVisualizer(registry, yoGraphicsListRegistry);
          visualizer.updateInputs(omega, supportPolygonInWorld, desiredICP, desiredICPVelocity, perfectCMP, perfectCoP, currentICP, currentCoMPosition);
-         visualizer.updateOutputs(desiredCoP, desiredCMP, expectedControlICPVelocity);
+         visualizer.updateOutputs(desiredCoP, desiredCMP, expectedControlICPVelocity, expectedICPMeetupPoint);
       }
 
       Assert.assertTrue(desiredCMP.epsilonEquals(perfectCMP, epsilon));

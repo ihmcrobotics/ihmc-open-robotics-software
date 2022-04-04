@@ -91,6 +91,7 @@ public class HeuristicICPController implements ICPControllerInterface
    private final YoFramePoint2D unconstrainedFeedbackCoP = new YoFramePoint2D(yoNamePrefix + "UnconstrainedFeedbackCoP", worldFrame, registry);
 
    // Projection computation variables:
+   private final YoDouble yoDotProduct = new YoDouble(yoNamePrefix + "DotProduct", registry);
    private final YoDouble adjustedICP = new YoDouble(yoNamePrefix + "AdjustedICP", registry);
    private final YoDouble firstIntersection = new YoDouble(yoNamePrefix + "FirstIntersection", registry);
    private final YoDouble secondIntersection = new YoDouble(yoNamePrefix + "SecondIntersection", registry);
@@ -105,9 +106,11 @@ public class HeuristicICPController implements ICPControllerInterface
    private final YoFramePoint2D secondProjectionIntersection = new YoFramePoint2D(yoNamePrefix + "SecondIntersection", worldFrame, registry);
    private final YoFramePoint2D closestPointWithProjectionLine = new YoFramePoint2D(yoNamePrefix + "ClosestPointWithProjectionLine", worldFrame, registry);
 
+   private final YoFramePoint2D icpProjection = new YoFramePoint2D(yoNamePrefix + "icpProjection", worldFrame, registry);
+//   private final YoFramePoint2D coPProjection = new YoFramePoint2D(yoNamePrefix + "CoPProjection", worldFrame, registry);
+
    // Outputs:
    private final YoFramePoint2D feedbackCoP = new YoFramePoint2D(yoNamePrefix + "FeedbackCoPSolution", worldFrame, registry);
-   private final YoFramePoint2D coPProjection = new YoFramePoint2D(yoNamePrefix + "CoPProjection", worldFrame, registry);
    private final YoFramePoint2D feedbackCMP = new YoFramePoint2D(yoNamePrefix + "FeedbackCMPSolution", worldFrame, registry);
    private final YoFrameVector2D expectedControlICPVelocity = new YoFrameVector2D(yoNamePrefix + "ExpectedControlICPVelocity", worldFrame, registry);
 
@@ -119,6 +122,10 @@ public class HeuristicICPController implements ICPControllerInterface
    //   private final double controlDTSquare;
 
    private final FrameVector2D tempVector = new FrameVector2D();
+   private final FrameVector2D tempVectorTwo = new FrameVector2D();
+   
+   private final FrameVector2D bestPerpendicularVector = new FrameVector2D();
+
 
    public HeuristicICPController(ICPControllerParameters icpControllerParameters, 
                                  double controlDT,
@@ -303,7 +310,9 @@ public class HeuristicICPController implements ICPControllerInterface
    private void projectTowardsMidpoint(FrameConvexPolygon2DReadOnly supportPolygonInWorld)
    {
       // Project the CoP onto the support polygon, using a projection vector.
-      coPProjection.setToNaN();
+//      coPProjection.setToNaN();
+      yoDotProduct.setToNaN();
+      icpProjection.setToNaN();
       firstProjectionIntersection.setToNaN();
       secondProjectionIntersection.setToNaN();
       closestPointWithProjectionLine.setToNaN();
@@ -318,7 +327,7 @@ public class HeuristicICPController implements ICPControllerInterface
       adjustedICP.set(projectionVector.length());
 
       // If the projection vector, and hence the error is small and already inside the foot, then do not project at all.
-      // But if it is small and not inside the foot, then orthogonally project the CMP into the foot
+      // But if it is small and not inside the foot, then orthogonally project the CoP into the foot
       if (adjustedICP.getValue() < 0.002)
       {
          if (supportPolygonInWorld.isPointInside(unconstrainedFeedbackCoP))
@@ -328,8 +337,9 @@ public class HeuristicICPController implements ICPControllerInterface
          }
          else
          {
-            feedbackCoP.set(unconstrainedFeedbackCoP);
             supportPolygonInWorld.orthogonalProjection(unconstrainedFeedbackCoP);
+            feedbackCoP.set(unconstrainedFeedbackCoP);
+            return;
          }
       }
 
@@ -384,6 +394,15 @@ public class HeuristicICPController implements ICPControllerInterface
                                                                                     minICPPushDelta.getValue(),
                                                                                     maxCoPProjectionInside.getValue()));
 
+      // If the adjustment distance is greater than the adjustedICP, then that means you are pushing directly backwards on the ICP. 
+      // Instead, in that case, do a smart projection.
+      
+      if (adjustmentDistance.getValue() > adjustedICP.getValue())
+      {
+         projectWhenProjectionLineDoesNotIntersectFoot(supportPolygonInWorld);
+         return;
+      }
+      
       tempVector.set(projectionVector);
       tempVector.scale(adjustmentDistance.getValue());
       feedbackCoP.set(unconstrainedFeedbackCoP);
@@ -392,35 +411,96 @@ public class HeuristicICPController implements ICPControllerInterface
 
    private void projectWhenProjectionLineDoesNotIntersectFoot(FrameConvexPolygon2DReadOnly supportPolygonInWorld)
    {
-      coPProjection.set(unconstrainedFeedbackCoP);
-      supportPolygonInWorld.orthogonalProjection(coPProjection);
-
-      supportPolygonInWorld.getClosestPointWithRay(projectionLine, closestPointWithProjectionLine);
+      // Project the ICP onto the foot. Then figure out which direction is best to move perpendicular from there to try to help things out.
+      // Then move in that perpendicular direction a little bit more than the distance from the foot to the ICP.
+      // (Note this distance if made infinite, would just find the line of sight point. But the line of sight point can be too far if it is
+      // not helping much. By going just a little more than 1, you make sure you do not fight the badness that comes after 45 degrees, 
+      // where you increase the ICP expected velocity a lot, just to get a little bit more angle.)
+      // Then project that point back into the foot.
+      
+      icpProjection.set(currentICP);
+      supportPolygonInWorld.orthogonalProjection(icpProjection);
 
       tempVector.set(currentICP);
-      tempVector.sub(coPProjection);
+      tempVector.sub(unconstrainedFeedbackCoP);
       tempVector.normalize();
-      double copProjectionDot = tempVector.dot(projectionVector);
+      if (tempVector.containsNaN())
+      {
+         feedbackCoP.set(icpProjection);
+         return;
+      }
 
-      tempVector.set(currentICP);
-      tempVector.sub(closestPointWithProjectionLine);
-      tempVector.normalize();
-      double closestPointWithProjectionLineDot = tempVector.dot(projectionVector);
+      bestPerpendicularVector.sub(currentICP, icpProjection);
+      double distanceFromProjectionToICP = bestPerpendicularVector.length();
 
-      // TODO: Not sure if this is what we want to be doing here. Might be something smarter.
-      if (copProjectionDot >= closestPointWithProjectionLineDot)
-         feedbackCoP.set(coPProjection);
+      if (distanceFromProjectionToICP < 0.001)
+      {
+         feedbackCoP.set(icpProjection);
+         return;
+      }
+
+      bestPerpendicularVector.scale(1.0/distanceFromProjectionToICP);
+      bestPerpendicularVector.set(-bestPerpendicularVector.getY(), bestPerpendicularVector.getX());
+
+      double dotProduct = tempVector.dot(bestPerpendicularVector);
+
+      if (dotProduct > 0.0)
+         bestPerpendicularVector.scale(-1.0);
       else
-         feedbackCoP.set(closestPointWithProjectionLine);
+      {
+         dotProduct = -1.0 * dotProduct;
+      }
+      yoDotProduct.set(dotProduct);
 
-      //            double coPProjectionDistanceSquared = coPProjection.distanceSquared(unconstrainedFeedbackCoP);
-      //            double closestPointWithProjectionLineDistanceSquared = closestPointWithProjectionLine.distanceSquared(unconstrainedFeedbackCoP);
+      double scaleDistanceFromICP = 1.5;
+      double addDistanceToPerpendicular = 0.04;
+      
+      double amountToMoveInPerpendicularDirection = (scaleDistanceFromICP * distanceFromProjectionToICP) + addDistanceToPerpendicular;
+      amountToMoveInPerpendicularDirection = amountToMoveInPerpendicularDirection * dotProduct;
 
-      //            if (coPProjectionDistanceSquared <= closestPointWithProjectionLineDistanceSquared)
-      //               feedbackCoP.set(coPProjection);
-      //            else
-      //               feedbackCoP.set(closestPointWithProjectionLine);
+      bestPerpendicularVector.scale(amountToMoveInPerpendicularDirection);
+      feedbackCoP.set(icpProjection);
+      feedbackCoP.add(bestPerpendicularVector);
 
+      supportPolygonInWorld.orthogonalProjection(feedbackCoP);
+   }
+
+   private FramePoint2DReadOnly computeBestLineOfSIghtPoint(FrameConvexPolygon2DReadOnly supportPolygonInWorld)
+   {
+      int lineOfSightStartIndex = supportPolygonInWorld.lineOfSightStartIndex(currentICP);
+      int lineOfSightEndIndex = supportPolygonInWorld.lineOfSightEndIndex(currentICP);
+
+      FramePoint2DReadOnly bestLineOfSightPoint = null;
+      if ((lineOfSightStartIndex >= 0) && (lineOfSightEndIndex >=0))
+      {
+         FramePoint2DReadOnly lineOfSightVertexOne = supportPolygonInWorld.getVertex(lineOfSightStartIndex);
+         FramePoint2DReadOnly lineOfSightVertexTwo = supportPolygonInWorld.getVertex(lineOfSightEndIndex);
+
+         tempVector.set(currentICP);
+         tempVector.sub(unconstrainedFeedbackCoP);
+
+         tempVectorTwo.set(currentICP);
+         tempVectorTwo.sub(lineOfSightVertexOne);
+         tempVectorTwo.normalize();
+
+         double dotOne = tempVectorTwo.dot(tempVector);
+
+         tempVectorTwo.set(currentICP);
+         tempVectorTwo.sub(lineOfSightVertexTwo);
+         tempVectorTwo.normalize();
+
+         double dotTwo = tempVectorTwo.dot(tempVector);
+
+         if (dotOne > dotTwo)
+         {
+            bestLineOfSightPoint = lineOfSightVertexOne;
+         }
+         else
+         {
+            bestLineOfSightPoint = lineOfSightVertexTwo;
+         }
+      }
+      return bestLineOfSightPoint;
    }
 
    private void limitAbsoluteValue(YoDouble yoDouble, double maxAbsoluteValue)
@@ -452,7 +532,8 @@ public class HeuristicICPController implements ICPControllerInterface
       YoGraphicPosition closestPointWithProjectionLineViz = new YoGraphicPosition(yoNamePrefix
             + "ClosestToProjectionLine", this.closestPointWithProjectionLine, 0.003, YoAppearance.Green(), GraphicType.SOLID_BALL);
 
-      YoGraphicPosition copProjectionViz = new YoGraphicPosition(yoNamePrefix + "CoPProjection", this.coPProjection, 0.002, YoAppearance.Green(), GraphicType.SOLID_BALL);
+//      YoGraphicPosition copProjectionViz = new YoGraphicPosition(yoNamePrefix + "CoPProjection", this.coPProjection, 0.002, YoAppearance.Green(), GraphicType.SOLID_BALL);
+      YoGraphicPosition icpProjectionViz = new YoGraphicPosition(yoNamePrefix + "ICPProjection", this.icpProjection, 0.003, YoAppearance.Purple(), GraphicType.BALL);
 
       artifactList.add(feedbackCoPViz.createArtifact());
       artifactList.add(unconstrainedFeedbackCMPViz.createArtifact());
@@ -462,7 +543,8 @@ public class HeuristicICPController implements ICPControllerInterface
       artifactList.add(firstIntersectionViz.createArtifact());
       artifactList.add(secondIntersectionViz.createArtifact());
       artifactList.add(closestPointWithProjectionLineViz.createArtifact());
-      artifactList.add(copProjectionViz.createArtifact());
+//      artifactList.add(copProjectionViz.createArtifact());
+      artifactList.add(icpProjectionViz.createArtifact());
 
       artifactList.setVisible(VISUALIZE);
 
