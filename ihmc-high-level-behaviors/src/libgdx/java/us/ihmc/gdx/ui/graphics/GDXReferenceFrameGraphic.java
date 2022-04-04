@@ -38,6 +38,16 @@ public class GDXReferenceFrameGraphic implements RenderableProvider
    public void updateFromLastGivenFrame()
    {
       framePose3D.setToZero(referenceFrame);
+      updateFromFramePose();
+   }
+
+   public FramePose3D getFramePose3D()
+   {
+      return framePose3D;
+   }
+
+   public void updateFromFramePose()
+   {
       framePose3D.changeFrame(ReferenceFrame.getWorldFrame());
       framePose3D.get(rigidBodyTransform);
       GDXTools.toGDX(rigidBodyTransform, coordinateFrameInstance.transform);

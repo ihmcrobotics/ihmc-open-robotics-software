@@ -52,6 +52,7 @@ public class GDXOpenCVArUcoMarkerDetectionUI
    private final ImDouble maxErroneousBitsInBorderRate = new ImDouble();
    private final ImDouble errorCorrectionRate = new ImDouble();
    private final ImBoolean detectInvertedMarker = new ImBoolean();
+   private final ImBoolean showGraphics = new ImBoolean(true);
    private ArrayList<OpenCVArUcoMarker> markersToTrack;
    private final ArrayList<GDXModelInstance> markerPoseCoordinateFrames = new ArrayList<>();
    private final FramePose3D markerPose = new FramePose3D();
@@ -104,35 +105,42 @@ public class GDXOpenCVArUcoMarkerDetectionUI
 
    public void update()
    {
-      arUcoMarkerDetection.getImageOfDetection().getBytedecoOpenCVMat().copyTo(imageForDrawing.getBytedecoOpenCVMat());
-
-      opencv_aruco.drawDetectedMarkers(imageForDrawing.getBytedecoOpenCVMat(),
-                                       arUcoMarkerDetection.getCorners(),
-                                       arUcoMarkerDetection.getIdsAsMat(),
-                                       idColor);
-      opencv_aruco.drawDetectedMarkers(imageForDrawing.getBytedecoOpenCVMat(), arUcoMarkerDetection.getRejectedImagePoints());
-
-      opencv_imgproc.cvtColor(imageForDrawing.getBytedecoOpenCVMat(),
-                              markerImagePanel.getBytedecoImage().getBytedecoOpenCVMat(),
-                              opencv_imgproc.COLOR_RGB2RGBA);
-
-      markerImagePanel.draw();
-
-      for (int i = 0; i < markersToTrack.size(); i++)
+      if (markerImagePanel.getVideoPanel().getIsShowing().get())
       {
-         OpenCVArUcoMarker markerToTrack = markersToTrack.get(i);
-         if (arUcoMarkerDetection.isDetected(markerToTrack.getId()))
+         arUcoMarkerDetection.getImageOfDetection().getBytedecoOpenCVMat().copyTo(imageForDrawing.getBytedecoOpenCVMat());
+
+         opencv_aruco.drawDetectedMarkers(imageForDrawing.getBytedecoOpenCVMat(),
+                                          arUcoMarkerDetection.getCorners(),
+                                          arUcoMarkerDetection.getIdsAsMat(),
+                                          idColor);
+         opencv_aruco.drawDetectedMarkers(imageForDrawing.getBytedecoOpenCVMat(), arUcoMarkerDetection.getRejectedImagePoints());
+
+         opencv_imgproc.cvtColor(imageForDrawing.getBytedecoOpenCVMat(),
+                                 markerImagePanel.getBytedecoImage().getBytedecoOpenCVMat(),
+                                 opencv_imgproc.COLOR_RGB2RGBA);
+
+         markerImagePanel.draw();
+      }
+
+      if (showGraphics.get())
+      {
+         for (int i = 0; i < markersToTrack.size(); i++)
          {
-            markerPose.setToZero(cameraFrame);
-            arUcoMarkerDetection.getPose(markerToTrack.getId(), markerToTrack.getSideLength(), markerPose);
-            markerPose.changeFrame(ReferenceFrame.getWorldFrame());
-            markerPoseCoordinateFrames.get(i).setPoseInWorldFrame(markerPose);
+            OpenCVArUcoMarker markerToTrack = markersToTrack.get(i);
+            if (arUcoMarkerDetection.isDetected(markerToTrack))
+            {
+               markerPose.setToZero(cameraFrame);
+               arUcoMarkerDetection.getPose(markerToTrack, markerPose);
+               markerPose.changeFrame(ReferenceFrame.getWorldFrame());
+               markerPoseCoordinateFrames.get(i).setPoseInWorldFrame(markerPose);
+            }
          }
       }
    }
 
    public void renderImGuiWidgets()
    {
+      ImGui.checkbox(labels.get("Show graphics"), showGraphics);
       ImGui.text("Image width: " + imageWidth + " height: " + imageHeight);
       ImGui.text("Detected ArUco Markers:");
       for (Integer id : arUcoMarkerDetection.getIds())
@@ -225,9 +233,12 @@ public class GDXOpenCVArUcoMarkerDetectionUI
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      for (GDXModelInstance markerPoseCoordinateFrame : markerPoseCoordinateFrames)
+      if (showGraphics.get())
       {
-         markerPoseCoordinateFrame.getRenderables(renderables, pool);
+         for (GDXModelInstance markerPoseCoordinateFrame : markerPoseCoordinateFrames)
+         {
+            markerPoseCoordinateFrame.getRenderables(renderables, pool);
+         }
       }
    }
 
