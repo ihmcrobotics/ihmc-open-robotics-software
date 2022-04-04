@@ -57,6 +57,11 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
     */
    private final TDoubleArrayList weights = new TDoubleArrayList(initialCapacity);
 
+   /**
+    * Specifies the constraint type to use. If it is an objective, this command will be entered as a cost objective
+    * into the QP. If it is equality, it will be entered as an equality constraint. If it is an inequality,
+    * it will be used to set either the upper or lower acceleration bound in the QP.
+    */
    private ConstraintType constraintType = ConstraintType.OBJECTIVE;
 
    /**
@@ -99,6 +104,9 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
       weights.reset();
    }
 
+   /**
+    * Sets the constraint type to be used in the QP for this command.
+    */
    public void setConstraintType(ConstraintType constraintType)
    {
       this.constraintType = constraintType;
@@ -285,6 +293,9 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
       return isHardConstraint;
    }
 
+   /**
+    * Gets the constraint type to be used in the QP for this command.
+    */
    public ConstraintType getConstraintType()
    {
       return constraintType;
