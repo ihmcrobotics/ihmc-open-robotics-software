@@ -156,7 +156,7 @@ public class GDXImGuiPerspectiveManager
    private void renderPerspectiveManager(TreeSet<String> perspectives, ImGuiConfigurationLocation configurationLocation, ImString perspectiveNameToSave)
    {
       boolean enableSaving = configurationLocation == ImGuiConfigurationLocation.USER_HOME
-                         || (configurationLocation == ImGuiConfigurationLocation.VERSION_CONTROL && configurationBaseDirectory.isWorkspaceWritingAvailable());
+                         || (configurationLocation == ImGuiConfigurationLocation.VERSION_CONTROL && configurationBaseDirectory.isWorkspaceFileAccessAvailable());
       for (String perspective : perspectives)
       {
          if (ImGui.radioButton(labels.get(perspective, configurationLocation.name()),
