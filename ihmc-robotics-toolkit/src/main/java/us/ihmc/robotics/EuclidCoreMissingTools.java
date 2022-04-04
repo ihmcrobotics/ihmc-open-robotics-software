@@ -4,6 +4,8 @@ import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.ONE_MILLIONTH;
 import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.ONE_TRILLIONTH;
 import static us.ihmc.euclid.tools.EuclidCoreTools.normSquared;
 
+import org.ejml.data.DMatrixRMaj;
+
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -1309,5 +1311,19 @@ public class EuclidCoreMissingTools
          angle = 2.0 * EuclidCoreTools.atan2(sinHalfTheta, diffs);
       angularVelocityToPack.set(diffx, diffy, diffz);
       angularVelocityToPack.scale(angle / (sinHalfTheta * duration));
+   }
+
+   public static DMatrixRMaj quaternionDotToOmegaTransform(QuaternionReadOnly rotatingFrameQuaternion)
+   {
+      double qs = rotatingFrameQuaternion.getS();
+      double qx = rotatingFrameQuaternion.getX();
+      double qy = rotatingFrameQuaternion.getY();
+      double qz = rotatingFrameQuaternion.getZ();
+
+      DMatrixRMaj E = new DMatrixRMaj(4,4);
+      
+      // NOT DONE...
+      
+      return E;
    }
 }
