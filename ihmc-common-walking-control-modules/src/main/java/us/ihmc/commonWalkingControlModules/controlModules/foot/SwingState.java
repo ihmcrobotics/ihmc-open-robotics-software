@@ -145,7 +145,10 @@ public class SwingState extends AbstractFootControlState
 
    private final ReferenceFrame frameBeforeHipPitchJoint;
    private final ReferenceFrame originOfControlFrame;
-   private final PoseReferenceFrame radialFrame = new PoseReferenceFrame("axialFrame", worldFrame);
+   /**
+    * This is a frame that points with Z centered at the control frame towards the hip of the leg. Yaw about matches the control frame.
+    */
+   private final PoseReferenceFrame radialFrame = new PoseReferenceFrame("radialFrame", worldFrame);
 
    private final OneDoFJointBasics kneeJoint;
    private final YoDouble liftOffKneeAcceleration;
@@ -523,6 +526,7 @@ public class SwingState extends AbstractFootControlState
 
    public void setFootstep(Footstep footstep, double swingTime, FrameVector3DReadOnly finalCoMVelocity, FrameVector3DReadOnly finalCoMAcceleration)
    {
+      // this has to be set here to not zero out the speed scaling
       setFootstepDurationInternal(swingTime);
 
       swingTrajectoryCalculator.setFootstep(footstep);
