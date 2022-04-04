@@ -57,7 +57,6 @@ public class ICPControllerTestVisualizer
    //   private final YoFramePoint2D yoAdjustedDesiredCapturePoint;
    private final YoFrameVector2D yoDesiredICPVelocity;
    private final YoFrameVector3D yoDesiredScaledICPVelocity3D;
-   private final YoFrameVector2D yoExpectedControlICPVelocity;
    private final YoFrameVector3D yoExpectedScaledControlICPVelocity3D;
 
    private final YoDouble yoCoPDistanceToPolygon;
@@ -95,7 +94,6 @@ public class ICPControllerTestVisualizer
       yoDesiredICPVelocity = new YoFrameVector2D("desiredICPVelocity", worldFrame, registry);
       yoDesiredScaledICPVelocity3D = new YoFrameVector3D("desiredScaledICPVelocity3D", worldFrame, registry);
 
-      yoExpectedControlICPVelocity = new YoFrameVector2D("expectedControlICPVelocity", worldFrame, registry);
       yoExpectedScaledControlICPVelocity3D = new YoFrameVector3D("expectedScaledControlICPVelocity3D", worldFrame, registry);
 
       yoCoPDistanceToPolygon = new YoDouble("copDistanceToPolygon", registry);

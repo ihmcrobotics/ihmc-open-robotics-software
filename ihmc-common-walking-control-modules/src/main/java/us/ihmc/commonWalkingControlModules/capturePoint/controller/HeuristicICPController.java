@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
@@ -108,6 +109,7 @@ public class HeuristicICPController implements ICPControllerInterface
    private final YoFramePoint2D feedbackCoP = new YoFramePoint2D(yoNamePrefix + "FeedbackCoPSolution", worldFrame, registry);
    private final YoFramePoint2D coPProjection = new YoFramePoint2D(yoNamePrefix + "CoPProjection", worldFrame, registry);
    private final YoFramePoint2D feedbackCMP = new YoFramePoint2D(yoNamePrefix + "FeedbackCMPSolution", worldFrame, registry);
+   private final YoFrameVector2D expectedControlICPVelocity = new YoFrameVector2D(yoNamePrefix + "ExpectedControlICPVelocity", worldFrame, registry);
 
    private final YoFrameVector2D residualError = new YoFrameVector2D(yoNamePrefix + "ResidualDynamicsError", worldFrame, registry);
 
@@ -291,6 +293,9 @@ public class HeuristicICPController implements ICPControllerInterface
 
       feedbackCMP.set(feedbackCoP);
       feedbackCMP.add(perfectCMPOffset);
+
+      expectedControlICPVelocity.sub(currentICP, feedbackCMP);
+      expectedControlICPVelocity.scale(omega0);
 
       controllerTimer.stopMeasurement();
    }
@@ -484,6 +489,12 @@ public class HeuristicICPController implements ICPControllerInterface
    public void getDesiredCoP(FixedFramePoint2DBasics desiredCoPToPack)
    {
       desiredCoPToPack.set(feedbackCoP);
+   }
+
+   @Override
+   public void getExpectedControlICPVelocity(FixedFrameVector2DBasics expectedControlICPVelocityToPack)
+   {
+      expectedControlICPVelocityToPack.set(expectedControlICPVelocity);
    }
 
    @Override

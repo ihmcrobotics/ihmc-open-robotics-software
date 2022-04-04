@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
@@ -32,6 +33,8 @@ public interface ICPControllerInterface
    public abstract void getDesiredCMP(FixedFramePoint2DBasics desiredCMPToPack);
 
    public abstract void getDesiredCoP(FixedFramePoint2DBasics desiredCoPToPack);
+
+   public abstract void getExpectedControlICPVelocity(FixedFrameVector2DBasics expectedControlICPVelocityToPack);
 
    public abstract boolean useAngularMomentum();
 

@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
@@ -58,6 +59,8 @@ public class ICPController implements ICPControllerInterface
    final YoFrameVector2D icpError = new YoFrameVector2D(yoNamePrefix + "ICPError", "", worldFrame, registry);
    private final YoFramePoint2D feedbackCoP = new YoFramePoint2D(yoNamePrefix + "FeedbackCoPSolution", worldFrame, registry);
    private final YoFramePoint2D feedbackCMP = new YoFramePoint2D(yoNamePrefix + "FeedbackCMPSolution", worldFrame, registry);
+   private final YoFrameVector2D expectedControlICPVelocity = new YoFrameVector2D(yoNamePrefix + "ExpectedControlICPVelocity", worldFrame, registry);
+
    private final YoFrameVector2D unconstrainedFeedback = new YoFrameVector2D(yoNamePrefix + "UnconstrainedFeedback", worldFrame, registry);
    private final YoFramePoint2D unconstrainedFeedbackCMP = new YoFramePoint2D(yoNamePrefix + "UnconstrainedFeedbackCMP", worldFrame, registry);
    final YoFramePoint2D perfectCoP = new YoFramePoint2D(yoNamePrefix + "PerfectCoP", worldFrame, registry);
@@ -246,6 +249,13 @@ public class ICPController implements ICPControllerInterface
 
    /** {@inheritDoc} */
    @Override
+   public void getExpectedControlICPVelocity(FixedFrameVector2DBasics expectedControlICPVelocityToPack)
+   {
+      expectedControlICPVelocityToPack.set(expectedControlICPVelocity);
+   }
+
+   /** {@inheritDoc} */
+   @Override
    public boolean useAngularMomentum()
    {
       return useAngularMomentum.getValue();
@@ -304,6 +314,9 @@ public class ICPController implements ICPControllerInterface
       qpSolverTimer.stopMeasurement();
 
       extractSolutionsFromSolver(converged);
+
+      expectedControlICPVelocity.sub(currentICP, feedbackCMP);
+      expectedControlICPVelocity.scale(omega0);
 
       controllerTimer.stopMeasurement();
    }
