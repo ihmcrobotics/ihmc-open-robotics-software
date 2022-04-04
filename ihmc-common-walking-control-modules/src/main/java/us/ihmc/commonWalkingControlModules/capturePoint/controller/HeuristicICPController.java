@@ -452,11 +452,15 @@ public class HeuristicICPController implements ICPControllerInterface
       }
       yoDotProduct.set(dotProduct);
 
-      double scaleDistanceFromICP = 1.5;
-      double addDistanceToPerpendicular = 0.04;
+      double scaleDistanceFromICP = 2.5;
+      double addDistanceToPerpendicular = 0.06;
       
       double amountToMoveInPerpendicularDirection = (scaleDistanceFromICP * distanceFromProjectionToICP) + addDistanceToPerpendicular;
-      amountToMoveInPerpendicularDirection = amountToMoveInPerpendicularDirection * dotProduct;
+      double amountToScaleFromDotProduct = (dotProduct - 0.25)/(1.0-0.25);
+      if (amountToScaleFromDotProduct < 0.0)
+         amountToScaleFromDotProduct = 0.0;
+
+      amountToMoveInPerpendicularDirection = amountToMoveInPerpendicularDirection * amountToScaleFromDotProduct;
 
       bestPerpendicularVector.scale(amountToMoveInPerpendicularDirection);
       feedbackCoP.set(icpProjection);
