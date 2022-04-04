@@ -899,7 +899,7 @@ public class EuclidCoreMissingTools
       double qz = rotatingFrameQuaternion.getZ();
 
       DMatrixRMaj E = new DMatrixRMaj(4,4);
-      
+
       E.set(0,0, qs); E.set(0,1, qx); E.set(0,2, qy); E.set(0,3, qz);
       E.set(1,0,-qx); E.set(1,1, qs); E.set(1,2, qz); E.set(1,3,-qy);
       E.set(2,0,-qy); E.set(2,1,-qz); E.set(2,2, qs); E.set(2,3, qx);
