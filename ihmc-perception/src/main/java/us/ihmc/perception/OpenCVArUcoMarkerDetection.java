@@ -2,16 +2,18 @@ package us.ihmc.perception;
 
 import boofcv.struct.calib.CameraPinholeBrown;
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.opencv.global.opencv_aruco;
-import org.bytedeco.opencv.global.opencv_calib3d;
-import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.global.opencv_imgcodecs;
+import org.bytedeco.opencv.global.*;
 import org.bytedeco.opencv.opencv_aruco.DetectorParameters;
 import org.bytedeco.opencv.opencv_aruco.Dictionary;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.matrix.LinearTransform3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,6 +23,10 @@ public class OpenCVArUcoMarkerDetection
    public static final int DEFAULT_DICTIONARY = opencv_aruco.DICT_4X4_100;
 
    private Dictionary dictionary;
+   private BytedecoImage sourceColorImage;
+   private boolean alphaRemovalMode;
+   private ReferenceFrame sensorFrame;
+   private final FramePose3D markerPose = new FramePose3D();
    private BytedecoImage rgb888ColorImage;
    private MatVector corners;
    private Mat ids;
@@ -36,11 +42,25 @@ public class OpenCVArUcoMarkerDetection
    private Mat rotationMatrix;
    private final LinearTransform3D euclidLinearTransform = new LinearTransform3D();
    private Mat translationVectors;
+   private final Point3D euclidPosition = new Point3D();
    private Mat objectPoints;
 
-   public void create(BytedecoImage rgb888ColorImage, CameraPinholeBrown depthCameraIntrinsics)
+   public void create(BytedecoImage sourceColorImage, CameraPinholeBrown depthCameraIntrinsics, ReferenceFrame sensorFrame)
    {
-      this.rgb888ColorImage = rgb888ColorImage;
+      this.sourceColorImage = sourceColorImage;
+
+      // ArUco library doesn't support alpha channel being in there
+      alphaRemovalMode = sourceColorImage.getBytedecoOpenCVMat().type() == opencv_core.CV_8UC4;
+      this.sensorFrame = sensorFrame;
+
+      if (alphaRemovalMode)
+      {
+         rgb888ColorImage = new BytedecoImage(sourceColorImage.getImageWidth(), sourceColorImage.getImageHeight(), opencv_core.CV_8UC3);
+      }
+      else
+      {
+         rgb888ColorImage = sourceColorImage; // Assuming source is 8UC3 RGB
+      }
 
       dictionary = opencv_aruco.getPredefinedDictionary(DEFAULT_DICTIONARY);
       corners = new MatVector();
@@ -74,6 +94,11 @@ public class OpenCVArUcoMarkerDetection
    
    public void update()
    {
+      if (alphaRemovalMode)
+      {
+         opencv_imgproc.cvtColor(sourceColorImage.getBytedecoOpenCVMat(), rgb888ColorImage.getBytedecoOpenCVMat(), opencv_imgproc.COLOR_RGBA2RGB);
+      }
+
       opencv_aruco.detectMarkers(rgb888ColorImage.getBytedecoOpenCVMat(),
                                  dictionary,
                                  corners,
@@ -92,22 +117,41 @@ public class OpenCVArUcoMarkerDetection
       }
    }
 
-   public boolean isDetected(int markerID)
+   public boolean isDetected(OpenCVArUcoMarker marker)
    {
-      return idToCornersMap.containsKey(markerID);
+      return idToCornersMap.containsKey(marker.getId());
+   }
+
+   public FramePose3DBasics getPose(OpenCVArUcoMarker marker)
+   {
+      updateMarkerPose(marker);
+      markerPose.setIncludingFrame(sensorFrame, euclidPosition, euclidLinearTransform.getAsQuaternion());
+      return markerPose;
+   }
+
+   public void getPose(OpenCVArUcoMarker marker, Pose3DBasics poseToPack)
+   {
+      updateMarkerPose(marker);
+      poseToPack.set(euclidPosition, euclidLinearTransform.getAsQuaternion());
+   }
+
+   public void getPose(OpenCVArUcoMarker marker, RigidBodyTransform transformToSensor)
+   {
+      updateMarkerPose(marker);
+      transformToSensor.set(euclidLinearTransform.getAsQuaternion(), euclidPosition);
    }
 
    /**
     * Estimates the pose of the single marker ID.
     * Multiple markers of the same ID is not supported.
     */
-   public void getPose(int markerID, double markerLength, Pose3DBasics poseToPack)
+   private void updateMarkerPose(OpenCVArUcoMarker marker)
    {
       cornerForPose.clear();
-      cornerForPose.put(idToCornersMap.get(markerID));
+      cornerForPose.put(idToCornersMap.get(marker.getId()));
 
       opencv_aruco.estimatePoseSingleMarkers(cornerForPose,
-                                             (float) markerLength,
+                                             (float) marker.getSideLength(),
                                              cameraMatrix,
                                              distortionCoefficients,
                                              rotationVectors,
@@ -134,12 +178,10 @@ public class OpenCVArUcoMarkerDetection
                                 basePtr.getDouble(7 * Double.BYTES),
                                 basePtr.getDouble(8 * Double.BYTES));
 
-      poseToPack.getOrientation().set(euclidLinearTransform.getAsQuaternion());
-
       double x = translationVectors.ptr(0).getDouble();
       double y = translationVectors.ptr(0).getDouble(Double.BYTES);
       double z = translationVectors.ptr(0).getDouble(2 * Double.BYTES);
-      poseToPack.getPosition().set(z, -x, -y);
+      euclidPosition.set(z, -x, -y);
    }
 
    public MatVector getCorners()

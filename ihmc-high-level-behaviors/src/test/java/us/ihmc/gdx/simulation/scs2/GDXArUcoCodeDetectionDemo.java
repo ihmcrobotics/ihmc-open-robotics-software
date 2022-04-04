@@ -1,9 +1,7 @@
 package us.ihmc.gdx.simulation.scs2;
 
 import imgui.internal.ImGui;
-import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
-import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.imgui.ImGuiPanel;
@@ -33,7 +31,6 @@ public class GDXArUcoCodeDetectionDemo
    private GDXEnvironmentBuilder environmentBuilder;
    private final GDXPose3DGizmo sensorPoseGizmo = new GDXPose3DGizmo();
    private GDXHighLevelDepthSensorSimulator cameraSensor;
-   private BytedecoImage rgb888ColorImage;
    private BytedecoImage testRGB888ColorImage;
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
    private GDXOpenCVArUcoMarkerDetectionUI arUcoMarkerDetectionUI;
@@ -81,12 +78,10 @@ public class GDXArUcoCodeDetectionDemo
                   baseUI.getImGuiPanelManager().addPanel(cameraSensor);
                   baseUI.get3DSceneManager().addRenderableProvider(cameraSensor, GDXSceneLevel.VIRTUAL);
 
-                  rgb888ColorImage = new BytedecoImage(cameraSensor.getLowLevelSimulator().getImageWidth(),
-                                                       cameraSensor.getLowLevelSimulator().getImageHeight(),
-                                                       opencv_core.CV_8UC3);
-
                   arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
-                  arUcoMarkerDetection.create(rgb888ColorImage, cameraSensor.getDepthCameraIntrinsics());
+                  arUcoMarkerDetection.create(cameraSensor.getLowLevelSimulator().getRGBA8888ColorImage(),
+                                              cameraSensor.getDepthCameraIntrinsics(),
+                                              cameraSensor.getSensorFrame());
                   arUcoMarkerDetectionUI = new GDXOpenCVArUcoMarkerDetectionUI("from Sensor");
                   ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
                   markersToTrack.add(new OpenCVArUcoMarker(0, 0.2032));
@@ -98,7 +93,9 @@ public class GDXArUcoCodeDetectionDemo
                   loadTestImage();
 
                   testImageArUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
-                  testImageArUcoMarkerDetection.create(testRGB888ColorImage, cameraSensor.getDepthCameraIntrinsics());
+                  testImageArUcoMarkerDetection.create(testRGB888ColorImage,
+                                                       cameraSensor.getDepthCameraIntrinsics(),
+                                                       cameraSensor.getSensorFrame());
                   testImageArUcoMarkerDetectionUI = new GDXOpenCVArUcoMarkerDetectionUI("Test");
                   testImageArUcoMarkerDetectionUI.create(testImageArUcoMarkerDetection, new ArrayList<>(), sensorPoseGizmo.getGizmoFrame());
                   ImGuiPanel testUIPanel = new ImGuiPanel("Test image detection", this::renderTestUIImGuiWidgets);
@@ -110,11 +107,6 @@ public class GDXArUcoCodeDetectionDemo
                }
 
                cameraSensor.render(baseUI.get3DSceneManager());
-
-               // ArUco library doesn't support alpha channel being in there
-               opencv_imgproc.cvtColor(cameraSensor.getLowLevelSimulator().getRGBA8888ColorImage().getBytedecoOpenCVMat(),
-                                       rgb888ColorImage.getBytedecoOpenCVMat(),
-                                       opencv_imgproc.COLOR_RGBA2RGB);
 
                arUcoMarkerDetection.update();
                arUcoMarkerDetectionUI.update();

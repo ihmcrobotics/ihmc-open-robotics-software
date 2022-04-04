@@ -568,4 +568,9 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
    {
       return pointColorFromPicker;
    }
+
+   public ReferenceFrame getSensorFrame()
+   {
+      return sensorFrame;
+   }
 }
