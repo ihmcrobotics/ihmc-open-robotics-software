@@ -13,6 +13,7 @@ import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
@@ -47,7 +48,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
    private static final boolean CHECK_ICP_CONTINUITY = false;
 
    private static final double yawingTimeDuration = 0.5;
-   private static final double standingTimeDuration = 1.0;
+   private static final double standingTimeDuration = RigidBodyControlManager.INITIAL_GO_HOME_TIME;
    private static final double defaultWalkingTimeDuration = BambooTools.isEveryCommitBuild() ? 45.0 : 90.0;
    private static final boolean useVelocityAndHeadingScript = true;
    private static final boolean cheatWithGroundHeightAtForFootstep = false;
