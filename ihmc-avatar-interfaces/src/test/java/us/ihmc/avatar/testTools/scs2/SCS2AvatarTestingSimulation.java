@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BooleanSupplier;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 
@@ -120,6 +121,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
       avatarSimulation.setJavaFXThreadImplicitExit(false);
 
       avatarSimulation.start();
+
       sessionVisualizerControls = avatarSimulation.getSessionVisualizerControls();
       if (sessionVisualizerControls != null)
       {
@@ -133,6 +135,9 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
          if (cameraTracksPelvis)
             requestCameraRigidBodyTracking(avatarSimulation.getRobotModel().getSimpleRobotName(), getControllerFullRobotModel().getPelvis().getName());
       }
+
+      // We park the simulation thread assuming that the calling test will need to run the simulation in their own thread to keep things synchronous.
+      getSimulationSession().stopSessionThread();
    }
 
    private void initializeCamera(Orientation3DReadOnly robotOrientation, Tuple3DReadOnly robotPosition)
@@ -150,58 +155,111 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    }
 
    // Simulation controls:
+   /**
+    * Adds a terminal condition that will be used in the subsequent simulations to determine when to
+    * stop the simulation.
+    * <p>
+    * The condition can be removed with {@link #removeSimulationTerminalCondition(BooleanSupplier)}.
+    * </p>
+    * 
+    * @param terminalCondition the new condition used to terminate future simulation.
+    */
+   public void addSimulationTerminalCondition(BooleanSupplier terminalCondition)
+   {
+      simulationSessionControls.addExternalTerminalCondition(terminalCondition);
+   }
 
+   /**
+    * Removes a terminal simulation condition that was previously registered.
+    * 
+    * @param terminalCondition the condition to remove.
+    */
+   public void removeSimulationTerminalCondition(BooleanSupplier terminalCondition)
+   {
+      simulationSessionControls.removeExternalTerminalCondition(terminalCondition);
+   }
+
+   /**
+    * Simulate a single tick.
+    * <p>
+    * The method returns once the simulation is done.
+    * </p>
+    * <p>
+    * If an exception is thrown during the simulation, it can be retrieved via
+    * {@link #getLastThrownException()}.
+    * </p>
+    * 
+    * @return {@code true} if the simulation was successful, {@code false} if the simulation failed or
+    *         the controller threw an exception.
+    */
+   public boolean simulateOneTickAndWait()
+   {
+      return simulateAndWait(1);
+   }
+
+   /**
+    * Simulate for the duration of 1 record period (typically equal to 1 controller period).
+    * <p>
+    * The method returns once the simulation is done.
+    * </p>
+    * <p>
+    * If an exception is thrown during the simulation, it can be retrieved via
+    * {@link #getLastThrownException()}.
+    * </p>
+    * 
+    * @return {@code true} if the simulation was successful, {@code false} if the simulation failed or
+    *         the controller threw an exception.
+    */
+   public boolean simulateOneBufferRecordPeriodAndWait()
+   {
+      return simulateAndWait(getSimulationSession().getBufferRecordTickPeriod());
+   }
+
+   /**
+    * Simulate for the given duration.
+    * <p>
+    * The method returns once the simulation is done.
+    * </p>
+    * <p>
+    * If an exception is thrown during the simulation, it can be retrieved via
+    * {@link #getLastThrownException()}.
+    * </p>
+    * 
+    * @param duration desired simulation duration in seconds.
+    * @return {@code true} if the simulation was successful, {@code false} if the simulation failed or
+    *         the controller threw an exception.
+    */
    public boolean simulateAndWait(double duration)
    {
-      checkSimulationHasStarted();
       lastThrowable.set(null);
       return simulationSessionControls.simulateAndWait(duration);
    }
 
-   public boolean simulateOneBufferRecordPeriodAndWait()
-   {
-      checkSimulationHasStarted();
-      lastThrowable.set(null);
-      return simulationSessionControls.simulateAndWait(getSimulationSession().getBufferRecordTickPeriod());
-   }
-
    /**
-    * Stops the internal thread of the simulation session. This allows to then execute single run ticks
-    * manually via {@link #singleSimulationTick()}.
-    */
-   public void stopSimulationInternalThread()
-   {
-      if (getSimulationSession().hasSessionStarted())
-         getSimulationSession().stopSessionThread();
-   }
-
-   /**
-    * Performs a single run tick (or simulation tick) now. The simulation thread has to be stopped
-    * first using {@link #stopSimulationInternalThread()}.
+    * Simulate for the given number of ticks.
     * <p>
-    * Once the manual simulation is over, call {@link #resumeSimulationInternalThread()} to re-enable
-    * GUI controls.
+    * The method returns once the simulation is done.
     * </p>
+    * <p>
+    * If an exception is thrown during the simulation, it can be retrieved via
+    * {@link #getLastThrownException()}.
+    * </p>
+    * 
+    * @param numberOfSimulationTicks desired number of simulation ticks.
+    * @return {@code true} if the simulation was successful, {@code false} if the simulation failed or
+    *         the controller threw an exception.
     */
-   public void singleSimulationTick()
+   public boolean simulateAndWait(long numberOfSimulationTicks)
    {
-      if (getSimulationSession().hasSessionStarted())
-         throw new IllegalStateException("The session thread is active, first stop it.");
-      getSimulationSession().runTick();
+      lastThrowable.set(null);
+      return simulationSessionControls.simulateAndWait(numberOfSimulationTicks);
    }
 
    /**
-    * Restart the simulation internal thread in pause mode, only effective if it was stopped.
+    * Gets the throwable (if any) that was thrown during the last simulation.
+    * 
+    * @return the exception thrown during the last simulation, or {@code null} if none was thrown.
     */
-   public void resumeSimulationInternalThread()
-   {
-      if (getSimulationSession().hasSessionStarted())
-         return;
-
-      getSimulationSession().setSessionMode(SessionMode.PAUSE);
-      getSimulationSession().startSessionThread();
-   }
-
    public Throwable getLastThrownException()
    {
       return lastThrowable.get();
@@ -330,8 +388,8 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    {
       if (waitUntilGUIIsDone && sessionVisualizerControls != null && !avatarSimulation.hasBeenDestroyed())
       {
-         // In case we were doing some manual simulation/visualization.
-         resumeSimulationInternalThread();
+         getSimulationSession().setSessionMode(SessionMode.PAUSE);
+         getSimulationSession().startSessionThread();
 
          JavaFXMissingTools.runAndWait(getClass(), () ->
          {

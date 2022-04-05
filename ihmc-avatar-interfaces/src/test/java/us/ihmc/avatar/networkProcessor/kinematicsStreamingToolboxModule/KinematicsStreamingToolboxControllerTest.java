@@ -322,10 +322,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
       snapSCSRobotToFullRobotModel(toolboxController.getDesiredFullRobotModel(), robot);
 
       if (visualize)
-      {
-         simulationTestHelper.stopSimulationInternalThread();
-         simulationTestHelper.singleSimulationTick();
-      }
+         simulationTestHelper.simulateOneTickAndWait();
 
       double circleRadius = 0.25;
       double circleFrequency = 0.25;
@@ -357,9 +354,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
          snapSCSRobotToFullRobotModel(desiredFullRobotModel, robot);
 
          if (visualize)
-         {
-            simulationTestHelper.singleSimulationTick();
-         }
+            simulationTestHelper.simulateOneTickAndWait();
 
          for (int collidable1Index = 0; collidable1Index < collidables.size(); collidable1Index++)
          {
