@@ -4,25 +4,36 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
+import imgui.type.ImBoolean;
 import org.apache.commons.lang3.tuple.MutablePair;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.commons.FormattingTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.gdx.FocusBasedGDXCamera;
+import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.tools.io.JSONFileTools;
+import us.ihmc.tools.io.WorkspaceDirectory;
+import us.ihmc.tools.io.WorkspaceFile;
 
 import java.util.LinkedList;
 
 public class GDXBehaviorActionSequenceEditor
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private ImGuiPanel panel;
+   private final ImBoolean enabled = new ImBoolean(false);
+   private String name;
+   private final WorkspaceFile workspaceFile;
    private final LinkedList<GDXBehaviorAction> actionSequence = new LinkedList<>();
+   private String pascalCasedName;
    private FocusBasedGDXCamera camera3D;
    private DRCRobotModel robotModel;
    private int playbackNextIndex = 0;
@@ -31,6 +42,26 @@ public class GDXBehaviorActionSequenceEditor
    private ROS2ControllerHelper ros2ControllerHelper;
    private final MutablePair<Integer, Integer> reorderRequest = MutablePair.of(-1, 0);
 
+   public GDXBehaviorActionSequenceEditor(WorkspaceFile fileToLoadFrom)
+   {
+      this.workspaceFile = fileToLoadFrom;
+      loadFromFile();
+      afterNameDetermination();
+   }
+
+   public GDXBehaviorActionSequenceEditor(String name, WorkspaceDirectory storageDirectory)
+   {
+      this.name = name;
+      afterNameDetermination();
+      this.workspaceFile = new WorkspaceFile(storageDirectory, pascalCasedName + ".json");
+   }
+
+   private void afterNameDetermination()
+   {
+      panel = new ImGuiPanel(name + " Behavior Sequence Editor", this::renderImGuiWidgets, false, true);
+      pascalCasedName = FormattingTools.titleToPascalCase(name);
+   }
+
    public void create(FocusBasedGDXCamera camera3D, DRCRobotModel robotModel, ROS2Node ros2Node, ROS2SyncedRobotModel syncedRobot)
    {
       this.camera3D = camera3D;
@@ -38,6 +69,26 @@ public class GDXBehaviorActionSequenceEditor
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
       this.syncedRobot = syncedRobot;
       ros2ControllerHelper = new ROS2ControllerHelper(ros2Node, robotModel);
+   }
+
+   public void loadFromFile()
+   {
+      // load name
+      JSONFileTools.load(workspaceFile, jsonNode ->
+      {
+         name = jsonNode.get("name").asText();
+      });
+   }
+
+   public void saveToFile()
+   {
+      if (workspaceFile.isFileAccessAvailable())
+      {
+         JSONFileTools.save(workspaceFile, jsonRootObjectNode ->
+         {
+            jsonRootObjectNode.put("name", name);
+         });
+      }
    }
 
    public void process3DViewInput(ImGui3DViewInput input)
@@ -154,5 +205,25 @@ public class GDXBehaviorActionSequenceEditor
       {
          action.getRenderables(renderables, pool);
       }
+   }
+
+   public ImGuiPanel getPanel()
+   {
+      return panel;
+   }
+
+   public String getName()
+   {
+      return name;
+   }
+
+   public ImBoolean getEnabled()
+   {
+      return enabled;
+   }
+
+   public WorkspaceFile getWorkspaceFile()
+   {
+      return workspaceFile;
    }
 }
