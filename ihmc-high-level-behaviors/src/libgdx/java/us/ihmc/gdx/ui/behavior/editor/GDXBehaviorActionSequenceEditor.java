@@ -3,6 +3,9 @@ package us.ihmc.gdx.ui.behavior.editor;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -23,6 +26,7 @@ import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.tools.io.WorkspaceFile;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 
 public class GDXBehaviorActionSequenceEditor
@@ -45,7 +49,7 @@ public class GDXBehaviorActionSequenceEditor
    public GDXBehaviorActionSequenceEditor(WorkspaceFile fileToLoadFrom)
    {
       this.workspaceFile = fileToLoadFrom;
-      loadFromFile();
+      loadNameFromFile();
       afterNameDetermination();
    }
 
@@ -56,7 +60,7 @@ public class GDXBehaviorActionSequenceEditor
       this.workspaceFile = new WorkspaceFile(storageDirectory, pascalCasedName + ".json");
    }
 
-   private void afterNameDetermination()
+   public void afterNameDetermination()
    {
       panel = new ImGuiPanel(name + " Behavior Sequence Editor", this::renderImGuiWidgets, false, true);
       pascalCasedName = FormattingTools.titleToPascalCase(name);
@@ -71,12 +75,31 @@ public class GDXBehaviorActionSequenceEditor
       ros2ControllerHelper = new ROS2ControllerHelper(ros2Node, robotModel);
    }
 
-   public void loadFromFile()
+   public void loadNameFromFile()
    {
-      // load name
+      JSONFileTools.load(workspaceFile, jsonNode -> name = jsonNode.get("name").asText());
+   }
+
+   public void loadActionsFromFile()
+   {
+      actionSequence.clear();
       JSONFileTools.load(workspaceFile, jsonNode ->
       {
-         name = jsonNode.get("name").asText();
+         for (Iterator<JsonNode> actionNodeIterator = jsonNode.withArray("actions").elements(); actionNodeIterator.hasNext(); )
+         {
+            JsonNode actionNode = actionNodeIterator.next();
+            String actionType = actionNode.get("type").asText();
+            if (actionType.equals(GDXWalkAction.class.getSimpleName()))
+            {
+               GDXWalkAction walkAction = addWalkAction();
+               walkAction.loadFromFile(actionNode);
+            }
+            else if (actionType.equals(GDXHandPoseAction.class.getSimpleName()))
+            {
+               GDXHandPoseAction handPoseAction = addHandPoseAction();
+               handPoseAction.loadFromFile(actionNode);
+            }
+         }
       });
    }
 
@@ -87,6 +110,13 @@ public class GDXBehaviorActionSequenceEditor
          JSONFileTools.save(workspaceFile, jsonRootObjectNode ->
          {
             jsonRootObjectNode.put("name", name);
+            ArrayNode actionsArrayNode = jsonRootObjectNode.putArray("actions");
+            for (GDXBehaviorAction behaviorAction : actionSequence)
+            {
+               ObjectNode actionNode = actionsArrayNode.addObject();
+               actionNode.put("type", behaviorAction.getClass().getSimpleName());
+               behaviorAction.saveToFile(actionNode);
+            }
          });
       }
    }
@@ -101,6 +131,23 @@ public class GDXBehaviorActionSequenceEditor
 
    public void renderImGuiWidgets()
    {
+      ImGui.beginMenuBar();
+      if (ImGui.beginMenu(labels.get("File")))
+      {
+         if (ImGui.menuItem("Save to JSON"))
+         {
+            saveToFile();
+         }
+         if (ImGui.menuItem("Load from JSON"))
+         {
+            loadActionsFromFile();
+         }
+
+         ImGui.endMenu();
+      }
+
+      ImGui.endMenuBar();
+
       if (ImGui.button(labels.get("<")))
       {
          if (playbackNextIndex > 0)
@@ -178,11 +225,11 @@ public class GDXBehaviorActionSequenceEditor
          actionSequence.add(destinationIndex, actionSequence.remove(indexToMove));
       }
 
+      ImGui.separator();
+
       if (ImGui.button(labels.get("Add Walk")))
       {
-         GDXWalkAction walkAction = new GDXWalkAction();
-         walkAction.create(camera3D, robotModel, footstepPlanner);
-         actionSequence.addLast(walkAction);
+         addWalkAction();
       }
       ImGui.text("Add Hand Pose");
       ImGui.sameLine();
@@ -190,13 +237,28 @@ public class GDXBehaviorActionSequenceEditor
       {
          if (ImGui.button(labels.get(side.getPascalCaseName())))
          {
-            GDXHandPoseAction handPoseAction = new GDXHandPoseAction();
-            handPoseAction.create(camera3D, robotModel, syncedRobot.getFullRobotModel(), side, ros2ControllerHelper);
-            actionSequence.addLast(handPoseAction);
+            GDXHandPoseAction handPoseAction = addHandPoseAction();
+            handPoseAction.setSide(side);
          }
          if (side.ordinal() < 1)
             ImGui.sameLine();
       }
+   }
+
+   private GDXHandPoseAction addHandPoseAction()
+   {
+      GDXHandPoseAction handPoseAction = new GDXHandPoseAction();
+      handPoseAction.create(camera3D, robotModel, syncedRobot.getFullRobotModel(), ros2ControllerHelper);
+      actionSequence.addLast(handPoseAction);
+      return handPoseAction;
+   }
+
+   private GDXWalkAction addWalkAction()
+   {
+      GDXWalkAction walkAction = new GDXWalkAction();
+      walkAction.create(camera3D, robotModel, footstepPlanner);
+      actionSequence.addLast(walkAction);
+      return walkAction;
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
