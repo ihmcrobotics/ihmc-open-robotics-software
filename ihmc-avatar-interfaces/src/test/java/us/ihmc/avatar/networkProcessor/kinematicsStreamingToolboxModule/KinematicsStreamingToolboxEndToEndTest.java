@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Tag;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.factory.RobotDefinitionTools;
 import us.ihmc.avatar.initialSetup.RobotConfigurationDataInitialSetup;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController;
@@ -31,8 +32,10 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
+import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -75,8 +78,8 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
          simulationTestingParameters.setKeepSCSUp(true);
 
       DRCRobotModel toolboxGhostRobotModel = newRobotModel();
-      toolboxGhost = KinematicsStreamingToolboxControllerTest.createSCSRobot(toolboxGhostRobotModel, "ghost", toolboxGhostMaterial);
-      KinematicsStreamingToolboxControllerTest.hideRobot(toolboxGhost);
+      toolboxGhost = KinematicsStreamingToolboxEndToEndTest.createSCSRobot(toolboxGhostRobotModel, "ghost", toolboxGhostMaterial);
+      hideRobot(toolboxGhost);
       toolboxGhost.setDynamic(false);
       toolboxGhost.setGravity(0);
 
@@ -140,6 +143,11 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
 
       if (simulationTestingParameters.getKeepSCSUp())
          ThreadTools.sleepForever();
+   }
+
+   protected static void hideRobot(HumanoidFloatingRootJointRobot robot)
+   {
+      robot.setPositionInWorld(new Point3D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY));
    }
 
    public void createToolboxController(DRCRobotModel robotModel)
@@ -212,5 +220,17 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
          toolboxROS2Node.destroy();
          toolboxROS2Node = null;
       }
+   }
+
+   protected static HumanoidFloatingRootJointRobot createSCSRobot(DRCRobotModel ghostRobotModel, String robotName, MaterialDefinition robotMaterial)
+   {
+      RobotDefinition robotDefinition = ghostRobotModel.getRobotDefinition();
+      robotDefinition.setName(robotName);
+      RobotDefinitionTools.setRobotDefinitionMaterial(robotDefinition, robotMaterial);
+      HumanoidFloatingRootJointRobot scsRobot = ghostRobotModel.createHumanoidFloatingRootJointRobot(false);
+      scsRobot.getRootJoint().setPinned(true);
+      scsRobot.setDynamic(false);
+      scsRobot.setGravity(0);
+      return scsRobot;
    }
 }
