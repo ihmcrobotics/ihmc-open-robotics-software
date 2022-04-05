@@ -3,6 +3,8 @@ package us.ihmc.gdx.ui.behavior.editor;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import controller_msgs.msg.dds.FrameInformation;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
@@ -16,9 +18,11 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.FocusBasedGDXCamera;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.ui.affordances.GDXInteractableHighlightModel;
+import us.ihmc.gdx.ui.affordances.GDXInteractableTools;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.io.JSONTools;
 
 public class GDXHandPoseAction implements GDXBehaviorAction
 {
@@ -27,17 +31,25 @@ public class GDXHandPoseAction implements GDXBehaviorAction
    private GDXInteractableHighlightModel highlightModel;
    private final GDXPose3DGizmo poseGizmo = new GDXPose3DGizmo();
    private RobotSide side;
+   private FullHumanoidRobotModel fullRobotModel;
+   private DRCRobotModel robotModel;
    private ROS2ControllerHelper ros2ControllerHelper;
    private ImBoolean selected = new ImBoolean();
 
    public void create(FocusBasedGDXCamera camera3D,
                       DRCRobotModel robotModel,
                       FullHumanoidRobotModel fullRobotModel,
-                      RobotSide side,
                       ROS2ControllerHelper ros2ControllerHelper)
    {
-      this.side = side;
       this.ros2ControllerHelper = ros2ControllerHelper;
+      this.fullRobotModel = fullRobotModel;
+      this.robotModel = robotModel;
+      poseGizmo.create(camera3D);
+   }
+
+   public void setSide(RobotSide side)
+   {
+      this.side = side;
       ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(side);
       controlToHandTranform = handControlFrame.getTransformToParent();
       handGraphicToControlTransform.setAndInvert(controlToHandTranform);
@@ -45,8 +57,9 @@ public class GDXHandPoseAction implements GDXBehaviorAction
       handGraphicToControlTransform.getRotation().appendPitchRotation(-Math.PI / 2.0);
       handGraphicToControlTransform.getRotation().appendRollRotation(0.0);
       handGraphicToControlTransform.getTranslation().add(0.126, -0.00179, 0.0); // TODO: Fix and check
-      highlightModel = new GDXInteractableHighlightModel((side == RobotSide.LEFT) ? "palm.g3dj" : "palmRight.g3dj");
-      poseGizmo.create(camera3D);
+      String handBodyName = (side == RobotSide.LEFT) ? "l_hand" : "r_hand";
+      String modelFileName = GDXInteractableTools.getModelFileName(robotModel.getRobotDefinition().getRigidBodyDefinition(handBodyName));
+      highlightModel = new GDXInteractableHighlightModel(modelFileName);
    }
 
    @Override
@@ -65,6 +78,20 @@ public class GDXHandPoseAction implements GDXBehaviorAction
       highlightModel.getRenderables(renderables, pool);
       if (selected.get())
          poseGizmo.getRenderables(renderables, pool);
+   }
+
+   @Override
+   public void loadFromFile(JsonNode jsonNode)
+   {
+      setSide(RobotSide.getSideFromString(jsonNode.get("side").asText()));
+      JSONTools.toEuclid(jsonNode, poseGizmo.getTransformToParent());
+   }
+
+   @Override
+   public void saveToFile(ObjectNode jsonNode)
+   {
+      jsonNode.put("side", side.getLowerCaseName());
+      JSONTools.toJSON(jsonNode, poseGizmo.getTransformToParent());
    }
 
    @Override

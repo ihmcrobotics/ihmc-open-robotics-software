@@ -3,6 +3,8 @@ package us.ihmc.gdx.ui.behavior.editor;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -34,6 +36,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.io.JSONTools;
 
 import java.util.UUID;
 
@@ -88,6 +91,18 @@ public class GDXWalkAction implements GDXBehaviorAction
          footstepPlannerGoalGizmo.getRenderables(renderables, pool);
       for (RobotSide side : RobotSide.values)
          goalFeet.get(side).getRenderables(renderables, pool);
+   }
+
+   @Override
+   public void loadFromFile(JsonNode jsonNode)
+   {
+      JSONTools.toEuclid(jsonNode, footstepPlannerGoalGizmo.getTransform());
+   }
+
+   @Override
+   public void saveToFile(ObjectNode jsonNode)
+   {
+      JSONTools.toJSON(jsonNode, footstepPlannerGoalGizmo.getTransform());
    }
 
    @Override

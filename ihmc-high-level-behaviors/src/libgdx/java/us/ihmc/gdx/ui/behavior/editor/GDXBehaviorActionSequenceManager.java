@@ -5,9 +5,14 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImString;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.gdx.FocusBasedGDXCamera;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.gdx.input.ImGui3DViewInput;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.tools.io.WorkspaceFile;
 
@@ -19,21 +24,32 @@ public class GDXBehaviorActionSequenceManager
    private ImGuiPanel managerPanel = new ImGuiPanel("Behavior Sequence Manager", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private WorkspaceDirectory behaviorSequenceStorageDirectory;
-   private boolean indexesFilesOnce = false;
+   private FocusBasedGDXCamera camera3D;
+   private DRCRobotModel robotModel;
+   private ROS2Node ros2Node;
+   private ROS2SyncedRobotModel syncedRobot;
    private final ImString newSequenceName = new ImString("", 100);
    private final TreeSet<GDXBehaviorActionSequenceEditor> editors = new TreeSet<>(Comparator.comparing(GDXBehaviorActionSequenceEditor::getName));
 
-   public void create(WorkspaceDirectory behaviorSequenceStorageDirectory)
+   public void create(WorkspaceDirectory behaviorSequenceStorageDirectory,
+                      FocusBasedGDXCamera camera3D,
+                      DRCRobotModel robotModel,
+                      ROS2Node ros2Node,
+                      ROS2SyncedRobotModel syncedRobot)
    {
       this.behaviorSequenceStorageDirectory = behaviorSequenceStorageDirectory;
+      this.camera3D = camera3D;
+      this.robotModel = robotModel;
+      this.ros2Node = ros2Node;
+      this.syncedRobot = syncedRobot;
+      reindexSequences();
    }
 
    private void renderImGuiWidgets()
    {
       boolean reindexClicked = ImGui.button(labels.get("Reindex sequence files"));
-      if (!indexesFilesOnce || reindexClicked)
+      if (reindexClicked)
       {
-         indexesFilesOnce = true;
          reindexSequences();
       }
 
@@ -64,14 +80,24 @@ public class GDXBehaviorActionSequenceManager
          {
             GDXBehaviorActionSequenceEditor editor = new GDXBehaviorActionSequenceEditor(queryContainedFile);
             addEditor(editor);
+            editor.loadActionsFromFile();
          }
       }
    }
 
    private void addEditor(GDXBehaviorActionSequenceEditor editor)
    {
+      editor.create(camera3D, robotModel, ros2Node, syncedRobot);
       editors.add(editor);
       managerPanel.queueAddChild(editor.getPanel());
+   }
+
+   public void process3DViewInput(ImGui3DViewInput input)
+   {
+      for (GDXBehaviorActionSequenceEditor editor : editors)
+      {
+         editor.process3DViewInput(input);
+      }
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
