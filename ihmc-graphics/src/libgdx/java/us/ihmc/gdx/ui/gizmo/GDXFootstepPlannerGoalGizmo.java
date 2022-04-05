@@ -71,8 +71,8 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
    private final Pose3D pose = new Pose3D();
    /** The main, source, true, base transform that this thing represents. */
    private final RigidBodyTransform transform = new RigidBodyTransform();
-   private final ReferenceFrame referenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
-                                                                                                                        transform);
+   private ReferenceFrame referenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
+                                                                                                                  transform);
    private FocusBasedGDXCamera camera3D;
    private final Point3D cameraPosition = new Point3D();
    private double lastDistanceToCamera = -1.0;
@@ -89,6 +89,11 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
 
    public GDXFootstepPlannerGoalGizmo()
    {
+   }
+
+   public void setParentFrame(ReferenceFrame parentFrame)
+   {
+      referenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentFrame, transform);
    }
 
    public void create(FocusBasedGDXCamera camera3D)

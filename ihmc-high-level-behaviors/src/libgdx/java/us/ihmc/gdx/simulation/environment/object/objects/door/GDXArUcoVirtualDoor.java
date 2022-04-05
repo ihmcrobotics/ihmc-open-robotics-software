@@ -55,4 +55,9 @@ public class GDXArUcoVirtualDoor extends GDXVirtualDoor
    {
       return arUcoMarker;
    }
+
+   public ReferenceFrame getVirtualFrame()
+   {
+      return virtualFrame;
+   }
 }

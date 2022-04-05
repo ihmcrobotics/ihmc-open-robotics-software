@@ -28,6 +28,7 @@ import us.ihmc.tools.io.WorkspaceFile;
 
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 
 public class GDXBehaviorActionSequenceEditor
 {
@@ -43,6 +44,7 @@ public class GDXBehaviorActionSequenceEditor
    private int playbackNextIndex = 0;
    private FootstepPlanningModule footstepPlanner;
    private ROS2SyncedRobotModel syncedRobot;
+   private List<ReferenceFrame> referenceFrameLibrary;
    private ROS2ControllerHelper ros2ControllerHelper;
    private final MutablePair<Integer, Integer> reorderRequest = MutablePair.of(-1, 0);
 
@@ -66,12 +68,17 @@ public class GDXBehaviorActionSequenceEditor
       pascalCasedName = FormattingTools.titleToPascalCase(name);
    }
 
-   public void create(FocusBasedGDXCamera camera3D, DRCRobotModel robotModel, ROS2Node ros2Node, ROS2SyncedRobotModel syncedRobot)
+   public void create(FocusBasedGDXCamera camera3D,
+                      DRCRobotModel robotModel,
+                      ROS2Node ros2Node,
+                      ROS2SyncedRobotModel syncedRobot,
+                      List<ReferenceFrame> referenceFrameLibrary)
    {
       this.camera3D = camera3D;
       this.robotModel = robotModel;
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
       this.syncedRobot = syncedRobot;
+      this.referenceFrameLibrary = referenceFrameLibrary;
       ros2ControllerHelper = new ROS2ControllerHelper(ros2Node, robotModel);
    }
 
@@ -216,6 +223,7 @@ public class GDXBehaviorActionSequenceEditor
             GDXBehaviorAction removedAction = actionSequence.remove(i);
 //            removedAction.destroy();
          }
+         action.renderImGuiWidgets();
       }
 
       int indexToMove = reorderRequest.getLeft();
@@ -256,7 +264,7 @@ public class GDXBehaviorActionSequenceEditor
    private GDXWalkAction addWalkAction()
    {
       GDXWalkAction walkAction = new GDXWalkAction();
-      walkAction.create(camera3D, robotModel, footstepPlanner);
+      walkAction.create(camera3D, robotModel, footstepPlanner, referenceFrameLibrary);
       actionSequence.addLast(walkAction);
       return walkAction;
    }

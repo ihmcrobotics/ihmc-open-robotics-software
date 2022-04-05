@@ -73,6 +73,12 @@ public class GDXHandPoseAction implements GDXBehaviorAction
    }
 
    @Override
+   public void renderImGuiWidgets()
+   {
+
+   }
+
+   @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       highlightModel.getRenderables(renderables, pool);

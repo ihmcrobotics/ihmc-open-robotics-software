@@ -7,6 +7,7 @@ import imgui.ImGui;
 import imgui.type.ImString;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.gdx.FocusBasedGDXCamera;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiTools;
@@ -17,6 +18,7 @@ import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.tools.io.WorkspaceFile;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.TreeSet;
 
 public class GDXBehaviorActionSequenceManager
@@ -28,6 +30,7 @@ public class GDXBehaviorActionSequenceManager
    private DRCRobotModel robotModel;
    private ROS2Node ros2Node;
    private ROS2SyncedRobotModel syncedRobot;
+   private List<ReferenceFrame> referenceFrameLibrary;
    private final ImString newSequenceName = new ImString("", 100);
    private final TreeSet<GDXBehaviorActionSequenceEditor> editors = new TreeSet<>(Comparator.comparing(GDXBehaviorActionSequenceEditor::getName));
 
@@ -35,14 +38,21 @@ public class GDXBehaviorActionSequenceManager
                       FocusBasedGDXCamera camera3D,
                       DRCRobotModel robotModel,
                       ROS2Node ros2Node,
-                      ROS2SyncedRobotModel syncedRobot)
+                      ROS2SyncedRobotModel syncedRobot,
+                      List<ReferenceFrame> referenceFrameLibrary)
    {
       this.behaviorSequenceStorageDirectory = behaviorSequenceStorageDirectory;
       this.camera3D = camera3D;
       this.robotModel = robotModel;
       this.ros2Node = ros2Node;
       this.syncedRobot = syncedRobot;
+      this.referenceFrameLibrary = referenceFrameLibrary;
       reindexSequences();
+   }
+
+   public void update()
+   {
+
    }
 
    private void renderImGuiWidgets()
@@ -87,7 +97,7 @@ public class GDXBehaviorActionSequenceManager
 
    private void addEditor(GDXBehaviorActionSequenceEditor editor)
    {
-      editor.create(camera3D, robotModel, ros2Node, syncedRobot);
+      editor.create(camera3D, robotModel, ros2Node, syncedRobot, referenceFrameLibrary);
       editors.add(editor);
       managerPanel.queueAddChild(editor.getPanel());
    }
