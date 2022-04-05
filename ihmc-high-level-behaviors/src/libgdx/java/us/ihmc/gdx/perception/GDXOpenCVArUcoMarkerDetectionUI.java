@@ -7,16 +7,18 @@ import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
 import imgui.type.ImInt;
-import org.bytedeco.opencv.global.opencv_aruco;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Scalar;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.simulation.environment.GDXModelInstance;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.ui.yo.ImPlotDoublePlotLine;
+import us.ihmc.gdx.ui.yo.ImPlotPlot;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCVArUcoMarker;
 import us.ihmc.perception.OpenCVArUcoMarkerDetection;
@@ -52,10 +54,15 @@ public class GDXOpenCVArUcoMarkerDetectionUI
    private final ImDouble maxErroneousBitsInBorderRate = new ImDouble();
    private final ImDouble errorCorrectionRate = new ImDouble();
    private final ImBoolean detectInvertedMarker = new ImBoolean();
+   private final ImBoolean detectionEnabled = new ImBoolean(true);
    private final ImBoolean showGraphics = new ImBoolean(true);
    private ArrayList<OpenCVArUcoMarker> markersToTrack;
    private final ArrayList<GDXModelInstance> markerPoseCoordinateFrames = new ArrayList<>();
    private final FramePose3D markerPose = new FramePose3D();
+   private final ImPlotPlot detectionDurationPlot = new ImPlotPlot(70);
+   private final ImPlotDoublePlotLine detectionDurationPlotLine = new ImPlotDoublePlotLine("Detection duration");
+   private final Stopwatch stopwatch = new Stopwatch().start();
+   private final ImPlotDoublePlotLine restOfStuffPlotLine = new ImPlotDoublePlotLine("Other stuff");
 
    public GDXOpenCVArUcoMarkerDetectionUI(String namePostfix)
    {
@@ -101,19 +108,22 @@ public class GDXOpenCVArUcoMarkerDetectionUI
          GDXModelInstance coordinateFrame = new GDXModelInstance(GDXModelPrimitives.createCoordinateFrame(0.4));
          markerPoseCoordinateFrames.add(coordinateFrame);
       }
+
+      detectionDurationPlot.getPlotLines().add(detectionDurationPlotLine);
+      detectionDurationPlot.getPlotLines().add(restOfStuffPlotLine);
    }
 
    public void update()
    {
+      stopwatch.lap();
+      detectionDurationPlotLine.addValue(arUcoMarkerDetection.getTimeTakenToDetect());
+
       if (markerImagePanel.getVideoPanel().getIsShowing().get())
       {
          arUcoMarkerDetection.getImageOfDetection().getBytedecoOpenCVMat().copyTo(imageForDrawing.getBytedecoOpenCVMat());
 
-         opencv_aruco.drawDetectedMarkers(imageForDrawing.getBytedecoOpenCVMat(),
-                                          arUcoMarkerDetection.getCorners(),
-                                          arUcoMarkerDetection.getIdsAsMat(),
-                                          idColor);
-         opencv_aruco.drawDetectedMarkers(imageForDrawing.getBytedecoOpenCVMat(), arUcoMarkerDetection.getRejectedImagePoints());
+         arUcoMarkerDetection.drawDetectedMarkers(imageForDrawing.getBytedecoOpenCVMat(), idColor);
+         arUcoMarkerDetection.drawRejectedPoints(imageForDrawing.getBytedecoOpenCVMat());
 
          opencv_imgproc.cvtColor(imageForDrawing.getBytedecoOpenCVMat(),
                                  markerImagePanel.getBytedecoImage().getBytedecoOpenCVMat(),
@@ -136,18 +146,20 @@ public class GDXOpenCVArUcoMarkerDetectionUI
             }
          }
       }
+      restOfStuffPlotLine.addValue(stopwatch.lapElapsed());
    }
 
    public void renderImGuiWidgets()
    {
+      if (ImGui.checkbox(labels.get("Detection enabled"), detectionEnabled))
+         arUcoMarkerDetection.setEnabled(detectionEnabled.get());
+      ImGui.sameLine();
       ImGui.checkbox(labels.get("Show graphics"), showGraphics);
       ImGui.text("Image width: " + imageWidth + " height: " + imageHeight);
+      detectionDurationPlot.render();
       ImGui.text("Detected ArUco Markers:");
-      for (Integer id : arUcoMarkerDetection.getIds())
-      {
-         ImGui.text("ID: " + id);
-      }
-      ImGui.text("Rejected image points: " + arUcoMarkerDetection.getRejectedImagePoints().size());
+      arUcoMarkerDetection.forEachDetectedID(id -> ImGui.text("ID: " + id));
+      ImGui.text("Rejected image points: " + arUcoMarkerDetection.getNumberOfRejectedPoints());
 
       ImGui.pushItemWidth(150.0f);
       if (ImGui.inputInt(labels.get("adaptiveThresholdWindowSizeMin"), adaptiveThresholdWindowSizeMin))
