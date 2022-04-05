@@ -78,6 +78,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    private final AtomicReference<Throwable> lastThrowable = new AtomicReference<>();
 
    private SessionVisualizerControls sessionVisualizerControls;
+   private final AtomicBoolean isVisualizerGoingDown = new AtomicBoolean(false);
 
    private boolean createVideo = false;
    private boolean keepSCSUp = false;
@@ -88,9 +89,13 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
       simulationSessionControls = avatarSimulation.getSimulationSession().getSimulationSessionControls();
       simulationSessionControls.addSimulationThrowableListener(lastThrowable::set);
 
-      AtomicBoolean controllerFailed = new AtomicBoolean(false);
-      avatarSimulation.getHighLevelHumanoidControllerFactory().attachControllerFailureListener(fallingDirection -> controllerFailed.set(true));
-      simulationSessionControls.addExternalTerminalCondition(() -> controllerFailed.get());
+      HighLevelHumanoidControllerFactory controllerFactory = avatarSimulation.getHighLevelHumanoidControllerFactory();
+      if (controllerFactory != null)
+      {
+         AtomicBoolean controllerFailed = new AtomicBoolean(false);
+         controllerFactory.attachControllerFailureListener(fallingDirection -> controllerFailed.set(true));
+         simulationSessionControls.addExternalTerminalCondition(() -> controllerFailed.get());
+      }
    }
 
    public void setCreateVideo(boolean createVideo)
@@ -105,6 +110,11 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
 
    public void start()
    {
+      start(true);
+   }
+
+   public void start(boolean cameraTracksPelvis)
+   {
       // Necessary to be able to restart the GUI during a series of tests.
       avatarSimulation.setSystemExitOnDestroy(false);
       avatarSimulation.setJavaFXThreadImplicitExit(false);
@@ -113,13 +123,15 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
       sessionVisualizerControls = avatarSimulation.getSessionVisualizerControls();
       if (sessionVisualizerControls != null)
       {
-
          sessionVisualizerControls.waitUntilFullyUp();
+         sessionVisualizerControls.addVisualizerShutdownListener(() -> isVisualizerGoingDown.set(true));
 
          SixDoFJointStateBasics initialRootJointState = (SixDoFJointStateBasics) avatarSimulation.getRobotDefinition().getRootJointDefinitions().get(0)
                                                                                                  .getInitialJointState();
-         initializeCamera(initialRootJointState.getOrientation(), initialRootJointState.getPosition());
-         requestCameraRigidBodyTracking(avatarSimulation.getRobotModel().getSimpleRobotName(), getControllerFullRobotModel().getPelvis().getName());
+         if (initialRootJointState != null)
+            initializeCamera(initialRootJointState.getOrientation(), initialRootJointState.getPosition());
+         if (cameraTracksPelvis)
+            requestCameraRigidBodyTracking(avatarSimulation.getRobotModel().getSimpleRobotName(), getControllerFullRobotModel().getPelvis().getName());
       }
    }
 
@@ -281,7 +293,12 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    {
       if (waitUntilGUIIsDone && sessionVisualizerControls != null && !avatarSimulation.hasBeenDestroyed())
       {
-         JavaFXMissingTools.runAndWait(getClass(), () -> new Alert(AlertType.INFORMATION, "Test complete!", ButtonType.OK).showAndWait());
+
+         JavaFXMissingTools.runAndWait(getClass(), () ->
+         {
+            if (!isVisualizerGoingDown.get())
+               new Alert(AlertType.INFORMATION, "Test complete!", ButtonType.OK).showAndWait();
+         });
          sessionVisualizerControls.waitUntilDown();
       }
       else
