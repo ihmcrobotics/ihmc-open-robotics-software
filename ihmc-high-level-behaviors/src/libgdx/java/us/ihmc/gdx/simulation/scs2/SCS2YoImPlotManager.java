@@ -59,6 +59,7 @@ public class SCS2YoImPlotManager
       InputStream inputStream = configurationFile.getInputStream();
       if (inputStream != null)
       {
+         plotPanels.clear();
          JSONFileTools.load(inputStream, node ->
          {
             for (Iterator<JsonNode> panelNodeIterator = node.withArray("panels").elements(); panelNodeIterator.hasNext(); )
