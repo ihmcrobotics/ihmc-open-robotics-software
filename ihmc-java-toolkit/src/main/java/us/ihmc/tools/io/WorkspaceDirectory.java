@@ -28,6 +28,13 @@ public class WorkspaceDirectory
                              Class<?> classForResourceDirectory)
    {
       this(directoryNameToAssumePresent, subsequentPathToResourceFolder, classForResourceDirectory, "");
+
+   }
+   public WorkspaceDirectory(String directoryNameToAssumePresent,
+                             String subsequentPathToResourceFolder,
+                             String subsequentOrAbsoluteResourcePackagePath)
+   {
+      this(directoryNameToAssumePresent, subsequentPathToResourceFolder, null, subsequentOrAbsoluteResourcePackagePath);
    }
 
    public WorkspaceDirectory(String directoryNameToAssumePresent,
@@ -44,9 +51,16 @@ public class WorkspaceDirectory
          putTogetherResourcePath += "/";
          putTogetherResourcePath += subsequentOrAbsoluteResourcePackagePath;
       }
-      else if (isAbsolute)
+      else
       {
-         putTogetherResourcePath += subsequentOrAbsoluteResourcePackagePath.replaceFirst("/", "");
+         if (isAbsolute)
+         {
+            putTogetherResourcePath += subsequentOrAbsoluteResourcePackagePath.replaceFirst("/", "");
+         }
+         else
+         {
+            putTogetherResourcePath += subsequentOrAbsoluteResourcePackagePath;
+         }
       }
       pathNecessaryForClasspathLoading = subsequentOrAbsoluteResourcePackagePath;
       String tempPathNecessaryForResourceExploring = pathNecessaryForClasspathLoading;

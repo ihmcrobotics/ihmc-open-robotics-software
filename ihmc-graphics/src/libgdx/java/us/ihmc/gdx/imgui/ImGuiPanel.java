@@ -20,6 +20,7 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
    private final boolean hasMenuBar;
    private final TreeSet<ImGuiPanel> children = new TreeSet<>(Comparator.comparing(ImGuiPanel::getPanelName));
    private final ConcurrentLinkedQueue<ImGuiPanel> removalQueue = new ConcurrentLinkedQueue<>();
+   private final ConcurrentLinkedQueue<ImGuiPanel> additionQueue = new ConcurrentLinkedQueue<>();
 
    private int lastDockID = -1;
 
@@ -67,6 +68,8 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
    {
       while (!removalQueue.isEmpty())
          children.remove(removalQueue.poll());
+      while (!additionQueue.isEmpty())
+         children.add(additionQueue.poll());
 
       if (isTogglable() && isShowing.get())
       {
@@ -107,6 +110,11 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
    public void queueRemoveChild(ImGuiPanel panel)
    {
       removalQueue.add(panel);
+
+   }
+   public void queueAddChild(ImGuiPanel panel)
+   {
+      additionQueue.add(panel);
    }
 
    /* package-private */ void load(Map.Entry<String, JsonNode> panelEntry)

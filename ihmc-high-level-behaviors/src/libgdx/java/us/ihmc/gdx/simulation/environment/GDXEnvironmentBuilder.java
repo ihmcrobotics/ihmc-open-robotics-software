@@ -244,9 +244,7 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
             }
          }
       }
-      int flags = ImGuiInputTextFlags.None;
-      flags += ImGuiInputTextFlags.CallbackResize;
-      ImGui.inputText("###saveText", saveString, flags);
+      ImGuiTools.inputText("###saveText", saveString);
       ImGui.sameLine();
       if (ImGui.button("Save as"))
       {
