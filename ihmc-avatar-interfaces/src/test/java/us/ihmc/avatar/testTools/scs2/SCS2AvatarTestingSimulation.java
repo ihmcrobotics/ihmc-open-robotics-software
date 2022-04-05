@@ -165,6 +165,43 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
       return simulationSessionControls.simulateAndWait(getSimulationSession().getBufferRecordTickPeriod());
    }
 
+   /**
+    * Stops the internal thread of the simulation session. This allows to then execute single run ticks
+    * manually via {@link #singleSimulationTick()}.
+    */
+   public void stopSimulationInternalThread()
+   {
+      if (getSimulationSession().hasSessionStarted())
+         getSimulationSession().stopSessionThread();
+   }
+
+   /**
+    * Performs a single run tick (or simulation tick) now. The simulation thread has to be stopped
+    * first using {@link #stopSimulationInternalThread()}.
+    * <p>
+    * Once the manual simulation is over, call {@link #resumeSimulationInternalThread()} to re-enable
+    * GUI controls.
+    * </p>
+    */
+   public void singleSimulationTick()
+   {
+      if (getSimulationSession().hasSessionStarted())
+         throw new IllegalStateException("The session thread is active, first stop it.");
+      getSimulationSession().runTick();
+   }
+
+   /**
+    * Restart the simulation internal thread in pause mode, only effective if it was stopped.
+    */
+   public void resumeSimulationInternalThread()
+   {
+      if (getSimulationSession().hasSessionStarted())
+         return;
+
+      getSimulationSession().setSessionMode(SessionMode.PAUSE);
+      getSimulationSession().startSessionThread();
+   }
+
    public Throwable getLastThrownException()
    {
       return lastThrowable.get();
@@ -293,6 +330,8 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    {
       if (waitUntilGUIIsDone && sessionVisualizerControls != null && !avatarSimulation.hasBeenDestroyed())
       {
+         // In case we were doing some manual simulation/visualization.
+         resumeSimulationInternalThread();
 
          JavaFXMissingTools.runAndWait(getClass(), () ->
          {
@@ -334,15 +373,6 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    {
       return ROS2Tools.createPublisher(ros2Node, messageType, topicName);
    }
-
-   //   private ScriptedFootstepGenerator scriptedFootstepGenerator;
-   //
-   //   public ScriptedFootstepGenerator getScriptedFootstepGenerator()
-   //   {
-   //      if (scriptedFootstepGenerator == null)
-   //         scriptedFootstepGenerator = new ScriptedFootstepGenerator(avatarSimulation.getRobotModel().createFullRobotModel());
-   //      return scriptedFootstepGenerator;
-   //   }
 
    private ConcurrentLinkedQueue<Command<?, ?>> controllerCommands;
 
