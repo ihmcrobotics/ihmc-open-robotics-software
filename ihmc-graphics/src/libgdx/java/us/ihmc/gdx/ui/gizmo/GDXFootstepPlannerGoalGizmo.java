@@ -294,7 +294,7 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
       }
    }
 
-   private void updateTransforms()
+   public void updateTransforms()
    {
       gizmoFrame.update();
       // keeping the gizmo on the X-Y plane

@@ -10,9 +10,9 @@ import us.ihmc.gdx.input.ImGui3DViewInput;
 
 public interface GDXBehaviorAction
 {
-   public void process3DViewInput(ImGui3DViewInput input);
-
    public void update();
+
+   public void process3DViewInput(ImGui3DViewInput input);
 
    public void renderImGuiWidgets();
 

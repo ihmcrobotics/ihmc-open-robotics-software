@@ -20,6 +20,7 @@ import us.ihmc.gdx.FocusBasedGDXCamera;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.io.JSONFileTools;
@@ -90,6 +91,7 @@ public class GDXBehaviorActionSequenceEditor
    public void loadActionsFromFile()
    {
       actionSequence.clear();
+      LogTools.info("Loading from {}", workspaceFile.getClasspathResource().toString());
       JSONFileTools.load(workspaceFile, jsonNode ->
       {
          for (Iterator<JsonNode> actionNodeIterator = jsonNode.withArray("actions").elements(); actionNodeIterator.hasNext(); )
@@ -106,6 +108,16 @@ public class GDXBehaviorActionSequenceEditor
                GDXHandPoseAction handPoseAction = addHandPoseAction();
                handPoseAction.loadFromFile(actionNode);
             }
+            else if (actionType.equals(GDXHandConfigurationAction.class.getSimpleName()))
+            {
+               GDXHandConfigurationAction action = addHandConfigurationAction();
+               action.loadFromFile(actionNode);
+            }
+            else if (actionType.equals(GDXChestOrientationAction.class.getSimpleName()))
+            {
+               GDXChestOrientationAction action = addChestOrientationAction();
+               action.loadFromFile(actionNode);
+            }
          }
       });
    }
@@ -114,6 +126,7 @@ public class GDXBehaviorActionSequenceEditor
    {
       if (workspaceFile.isFileAccessAvailable())
       {
+         LogTools.info("Saving to {}", workspaceFile.getClasspathResource().toString());
          JSONFileTools.save(workspaceFile, jsonRootObjectNode ->
          {
             jsonRootObjectNode.put("name", name);
@@ -125,6 +138,10 @@ public class GDXBehaviorActionSequenceEditor
                behaviorAction.saveToFile(actionNode);
             }
          });
+      }
+      else
+      {
+         LogTools.error("Saving not available.");
       }
    }
 
@@ -149,7 +166,7 @@ public class GDXBehaviorActionSequenceEditor
       ImGui.beginMenuBar();
       if (ImGui.beginMenu(labels.get("File")))
       {
-         if (ImGui.menuItem("Save to JSON"))
+         if (workspaceFile.isFileAccessAvailable() && ImGui.menuItem("Save to JSON"))
          {
             saveToFile();
          }
@@ -252,6 +269,14 @@ public class GDXBehaviorActionSequenceEditor
          if (side.ordinal() < 1)
             ImGui.sameLine();
       }
+      if (ImGui.button(labels.get("Add Hand Configuration")))
+      {
+         addHandConfigurationAction();
+      }
+      if (ImGui.button(labels.get("Add Chest Orientation")))
+      {
+         addChestOrientationAction();
+      }
    }
 
    private GDXHandPoseAction addHandPoseAction()
@@ -260,6 +285,22 @@ public class GDXBehaviorActionSequenceEditor
       handPoseAction.create(camera3D, robotModel, syncedRobot.getFullRobotModel(), ros2ControllerHelper, referenceFrameLibrary);
       actionSequence.addLast(handPoseAction);
       return handPoseAction;
+   }
+
+   private GDXHandConfigurationAction addHandConfigurationAction()
+   {
+      GDXHandConfigurationAction handConfigurationAction = new GDXHandConfigurationAction();
+      handConfigurationAction.create(ros2ControllerHelper);
+      actionSequence.addLast(handConfigurationAction);
+      return handConfigurationAction;
+   }
+
+   private GDXChestOrientationAction addChestOrientationAction()
+   {
+      GDXChestOrientationAction chestOrientationAction = new GDXChestOrientationAction();
+      chestOrientationAction.create(ros2ControllerHelper, syncedRobot);
+      actionSequence.addLast(chestOrientationAction);
+      return chestOrientationAction;
    }
 
    private GDXWalkAction addWalkAction()
