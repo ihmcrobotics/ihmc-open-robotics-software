@@ -8,14 +8,18 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import controller_msgs.msg.dds.FrameInformation;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
+import imgui.ImGui;
 import imgui.type.ImBoolean;
+import imgui.type.ImInt;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.FocusBasedGDXCamera;
+import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.ui.affordances.GDXInteractableHighlightModel;
 import us.ihmc.gdx.ui.affordances.GDXInteractableTools;
@@ -24,27 +28,40 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.JSONTools;
 
+import java.util.List;
+
 public class GDXHandPoseAction implements GDXBehaviorAction
 {
    private RigidBodyTransform controlToHandTranform;
    private final RigidBodyTransform handGraphicToControlTransform = new RigidBodyTransform();
    private GDXInteractableHighlightModel highlightModel;
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final GDXPose3DGizmo poseGizmo = new GDXPose3DGizmo();
    private RobotSide side;
    private FullHumanoidRobotModel fullRobotModel;
    private DRCRobotModel robotModel;
+   private List<ReferenceFrame> referenceFrameLibrary;
+   private final ImInt referenceFrameIndex = new ImInt();
+   private String[] referenceFrameNames;
    private ROS2ControllerHelper ros2ControllerHelper;
-   private ImBoolean selected = new ImBoolean();
+   private final ImBoolean selected = new ImBoolean();
 
    public void create(FocusBasedGDXCamera camera3D,
                       DRCRobotModel robotModel,
                       FullHumanoidRobotModel fullRobotModel,
-                      ROS2ControllerHelper ros2ControllerHelper)
+                      ROS2ControllerHelper ros2ControllerHelper,
+                      List<ReferenceFrame> referenceFrameLibrary)
    {
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.fullRobotModel = fullRobotModel;
       this.robotModel = robotModel;
+      this.referenceFrameLibrary = referenceFrameLibrary;
       poseGizmo.create(camera3D);
+      referenceFrameNames = new String[referenceFrameLibrary.size()];
+      for (int i = 0; i < referenceFrameLibrary.size(); i++)
+      {
+         referenceFrameNames[i] = referenceFrameLibrary.get(i).getName();
+      }
    }
 
    public void setSide(RobotSide side)
@@ -81,7 +98,14 @@ public class GDXHandPoseAction implements GDXBehaviorAction
    @Override
    public void renderImGuiWidgets()
    {
-
+      if (ImGui.combo(labels.get("Reference frame"), referenceFrameIndex, referenceFrameNames))
+      {
+         FramePose3D poseToKeep = new FramePose3D();
+         poseToKeep.setToZero(poseGizmo.getGizmoFrame());
+         poseGizmo.setParentFrame(referenceFrameLibrary.get(referenceFrameIndex.get()));
+         poseToKeep.changeFrame(poseGizmo.getGizmoFrame().getParent());
+         poseToKeep.get(poseGizmo.getTransformToParent());
+      }
    }
 
    @Override
@@ -95,6 +119,16 @@ public class GDXHandPoseAction implements GDXBehaviorAction
    @Override
    public void loadFromFile(JsonNode jsonNode)
    {
+      String referenceFrameName = jsonNode.get("parentFrame").asText();
+      for (int i = 0; i < referenceFrameLibrary.size(); i++)
+      {
+         ReferenceFrame referenceFrame = referenceFrameLibrary.get(i);
+         if (referenceFrameName.equals(referenceFrame.getName()))
+         {
+            referenceFrameIndex.set(i);
+            poseGizmo.setParentFrame(referenceFrame);
+         }
+      }
       setSide(RobotSide.getSideFromString(jsonNode.get("side").asText()));
       JSONTools.toEuclid(jsonNode, poseGizmo.getTransformToParent());
    }
@@ -102,6 +136,7 @@ public class GDXHandPoseAction implements GDXBehaviorAction
    @Override
    public void saveToFile(ObjectNode jsonNode)
    {
+      jsonNode.put("parentFrame", poseGizmo.getGizmoFrame().getParent().getName());
       jsonNode.put("side", side.getLowerCaseName());
       JSONTools.toJSON(jsonNode, poseGizmo.getTransformToParent());
    }

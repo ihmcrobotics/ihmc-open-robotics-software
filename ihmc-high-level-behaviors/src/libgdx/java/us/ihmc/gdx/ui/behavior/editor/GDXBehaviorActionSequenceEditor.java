@@ -264,7 +264,7 @@ public class GDXBehaviorActionSequenceEditor
    private GDXHandPoseAction addHandPoseAction()
    {
       GDXHandPoseAction handPoseAction = new GDXHandPoseAction();
-      handPoseAction.create(camera3D, robotModel, syncedRobot.getFullRobotModel(), ros2ControllerHelper);
+      handPoseAction.create(camera3D, robotModel, syncedRobot.getFullRobotModel(), ros2ControllerHelper, referenceFrameLibrary);
       actionSequence.addLast(handPoseAction);
       return handPoseAction;
    }
