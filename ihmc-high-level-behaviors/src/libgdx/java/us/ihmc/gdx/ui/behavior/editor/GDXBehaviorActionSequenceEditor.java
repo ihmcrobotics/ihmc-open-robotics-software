@@ -118,6 +118,11 @@ public class GDXBehaviorActionSequenceEditor
                GDXChestOrientationAction action = addChestOrientationAction();
                action.loadFromFile(actionNode);
             }
+            else if (actionType.equals(GDXArmJointAnglesAction.class.getSimpleName()))
+            {
+               GDXArmJointAnglesAction action = addArmJointAnglesAction();
+               action.loadFromFile(actionNode);
+            }
          }
       });
    }
@@ -188,7 +193,7 @@ public class GDXBehaviorActionSequenceEditor
       ImGui.sameLine();
       if (playbackNextIndex < actionSequence.size())
       {
-         ImGui.text("Index: " + playbackNextIndex);
+         ImGui.text("Index: " + String.format("%03d", playbackNextIndex));
          ImGui.sameLine();
          if (ImGui.button(labels.get("Execute")))
          {
@@ -209,6 +214,9 @@ public class GDXBehaviorActionSequenceEditor
       }
 
       ImGui.separator();
+
+      ImGui.beginChild(labels.get("childRegion"));
+
 
       reorderRequest.setLeft(-1);
       for (int i = 0; i < actionSequence.size(); i++)
@@ -277,13 +285,19 @@ public class GDXBehaviorActionSequenceEditor
       {
          addChestOrientationAction();
       }
+      if (ImGui.button(labels.get("Add Arm Joint Angles")))
+      {
+         addArmJointAnglesAction();
+      }
+
+      ImGui.endChild();
    }
 
    private GDXHandPoseAction addHandPoseAction()
    {
       GDXHandPoseAction handPoseAction = new GDXHandPoseAction();
       handPoseAction.create(camera3D, robotModel, syncedRobot.getFullRobotModel(), ros2ControllerHelper, referenceFrameLibrary);
-      actionSequence.addLast(handPoseAction);
+      actionSequence.add(playbackNextIndex, handPoseAction);
       return handPoseAction;
    }
 
@@ -291,7 +305,7 @@ public class GDXBehaviorActionSequenceEditor
    {
       GDXHandConfigurationAction handConfigurationAction = new GDXHandConfigurationAction();
       handConfigurationAction.create(ros2ControllerHelper);
-      actionSequence.addLast(handConfigurationAction);
+      actionSequence.add(playbackNextIndex, handConfigurationAction);
       return handConfigurationAction;
    }
 
@@ -299,15 +313,23 @@ public class GDXBehaviorActionSequenceEditor
    {
       GDXChestOrientationAction chestOrientationAction = new GDXChestOrientationAction();
       chestOrientationAction.create(ros2ControllerHelper, syncedRobot);
-      actionSequence.addLast(chestOrientationAction);
+      actionSequence.add(playbackNextIndex, chestOrientationAction);
       return chestOrientationAction;
+   }
+
+   private GDXArmJointAnglesAction addArmJointAnglesAction()
+   {
+      GDXArmJointAnglesAction armJointAnglesAction = new GDXArmJointAnglesAction();
+      armJointAnglesAction.create(ros2ControllerHelper);
+      actionSequence.add(playbackNextIndex, armJointAnglesAction);
+      return armJointAnglesAction;
    }
 
    private GDXWalkAction addWalkAction()
    {
       GDXWalkAction walkAction = new GDXWalkAction();
       walkAction.create(camera3D, robotModel, footstepPlanner, syncedRobot, ros2ControllerHelper, referenceFrameLibrary);
-      actionSequence.addLast(walkAction);
+      actionSequence.add(playbackNextIndex, walkAction);
       return walkAction;
    }
 
