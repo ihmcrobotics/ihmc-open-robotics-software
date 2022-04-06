@@ -49,11 +49,12 @@ public class GDXFrameGizmoDemo
             baseUI.getImGuiPanelManager().addPanel(poseGizmo.createTunerPanel(GDXFrameGizmoDemo.class.getSimpleName()));
             poseGizmo.getTransformToParent().getTranslation().add(0.5, 0.5, 0.5);
 
-//            footstepRingGizmo.create(baseUI.get3DSceneManager().getCamera3D());
-//            baseUI.addImGui3DViewInputProcessor(footstepRingGizmo::process3DViewInput);
-//            baseUI.get3DSceneManager().addRenderableProvider(footstepRingGizmo);
-//            baseUI.getImGuiPanelManager().addPanel(footstepRingGizmo.createTunerPanel(GDXFrameGizmoDemo.class.getSimpleName()));
-
+            GDXFootstepPlannerGoalGizmo footstepRingGizmo
+                  = new GDXFootstepPlannerGoalGizmo(interactableReferenceFrame2.getSelectablePose3DGizmo().getPoseGizmo().getGizmoFrame());
+            footstepRingGizmo.create(baseUI.get3DSceneManager().getCamera3D());
+            baseUI.addImGui3DViewInputProcessor(footstepRingGizmo::process3DViewInput);
+            baseUI.get3DSceneManager().addRenderableProvider(footstepRingGizmo);
+            baseUI.getImGuiPanelManager().addPanel(footstepRingGizmo.createTunerPanel(GDXFrameGizmoDemo.class.getSimpleName()));
          }
 
          @Override

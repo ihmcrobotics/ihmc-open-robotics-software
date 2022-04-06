@@ -136,6 +136,14 @@ public class GDXBehaviorActionSequenceEditor
       }
    }
 
+   public void update()
+   {
+      for (GDXBehaviorAction action : actionSequence)
+      {
+         action.update();
+      }
+   }
+
    public void renderImGuiWidgets()
    {
       ImGui.beginMenuBar();

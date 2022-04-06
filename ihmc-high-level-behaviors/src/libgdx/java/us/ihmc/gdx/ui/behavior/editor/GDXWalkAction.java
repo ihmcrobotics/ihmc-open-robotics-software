@@ -94,12 +94,18 @@ public class GDXWalkAction implements GDXBehaviorAction
          for (RobotSide side : RobotSide.values)
          {
             FramePose3D goalFootPose = goalFeetPoses.get(side);
-            goalFootPose.setToZero(footstepPlannerGoalGizmo.getReferenceFrame());
+            goalFootPose.setToZero(footstepPlannerGoalGizmo.getGizmoFrame());
             goalFootPose.getPosition().addY(0.5 * side.negateIfRightSide(footstepPlannerParameters.getIdealFootstepWidth()));
             goalFootPose.changeFrame(ReferenceFrame.getWorldFrame());
             goalFeet.get(side).setPose(goalFootPose);
          }
       }
+   }
+
+   @Override
+   public void update()
+   {
+
    }
 
    @Override
@@ -124,14 +130,25 @@ public class GDXWalkAction implements GDXBehaviorAction
    @Override
    public void loadFromFile(JsonNode jsonNode)
    {
-//      String referenceFrameName = jsonNode.get("referenceFrame").asText();
-      JSONTools.toEuclid(jsonNode, footstepPlannerGoalGizmo.getTransform());
+      String referenceFrameName = jsonNode.get("parentFrame").asText();
+      for (int i = 0; i < referenceFrameLibrary.size(); i++)
+      {
+         ReferenceFrame referenceFrame = referenceFrameLibrary.get(i);
+         if (referenceFrameName.equals(referenceFrame.getName()))
+         {
+            referenceFrameIndex.set(i);
+            footstepPlannerGoalGizmo.setParentFrame(referenceFrame);
+         }
+      }
+
+      JSONTools.toEuclid(jsonNode, footstepPlannerGoalGizmo.getTransformToParent());
    }
 
    @Override
    public void saveToFile(ObjectNode jsonNode)
    {
-      JSONTools.toJSON(jsonNode, footstepPlannerGoalGizmo.getTransform());
+      jsonNode.put("parentFrame", footstepPlannerGoalGizmo.getGizmoFrame().getParent().getName());
+      JSONTools.toJSON(jsonNode, footstepPlannerGoalGizmo.getTransformToParent());
    }
 
    @Override
@@ -145,7 +162,7 @@ public class GDXWalkAction implements GDXBehaviorAction
       double proximityToGoalToMaintainOrientation = 1.5;
 
       FramePose3D approachPointA = new FramePose3D(referenceFrame);
-      approachPointA.set(footstepPlannerGoalGizmo.getTransform());
+      approachPointA.set(footstepPlannerGoalGizmo.getTransformToParent());
       approachPointA.changeFrame(ReferenceFrame.getWorldFrame());
 
       FramePose3DReadOnly midFeetUnderPelvisFramePose = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame);

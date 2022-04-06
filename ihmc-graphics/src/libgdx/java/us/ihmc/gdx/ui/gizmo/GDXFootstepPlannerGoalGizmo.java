@@ -13,9 +13,9 @@ import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import imgui.type.ImFloat;
 import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -38,6 +38,7 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
    public static final Color DISC_HIGHLIGHTED_COLOR = LIGHTER_GRAY;
    public static final Color ARROW_NORMAL_COLOR = LIGHT_GRAY;
    public static final Color ARROW_HIGHLIGHTED_COLOR = LIGHTER_GRAY;
+
    static
    {
       DISC_NORMAL_COLOR.a = 0.4f;
@@ -45,6 +46,7 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
       DISC_HIGHLIGHTED_COLOR.a = 0.9f;
       ARROW_HIGHLIGHTED_COLOR.a = 0.9f;
    }
+
    private final double QUARTER_TURN = Math.PI / 2.0;
    private final ImFloat discOuterRadius = new ImFloat(0.426f);
    private final ImFloat discInnerRadius = new ImFloat(0.290f);
@@ -68,11 +70,15 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
    private final DiscreteIsoscelesTriangularPrismRayIntersection positiveYArrowIntersection = new DiscreteIsoscelesTriangularPrismRayIntersection();
    private final DiscreteIsoscelesTriangularPrismRayIntersection negativeXArrowIntersection = new DiscreteIsoscelesTriangularPrismRayIntersection();
    private final DiscreteIsoscelesTriangularPrismRayIntersection negativeYArrowIntersection = new DiscreteIsoscelesTriangularPrismRayIntersection();
-   private final Pose3D pose = new Pose3D();
-   /** The main, source, true, base transform that this thing represents. */
-   private final RigidBodyTransform transform = new RigidBodyTransform();
-   private ReferenceFrame referenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
-                                                                                                                  transform);
+   private final FramePose3D framePose3D = new FramePose3D();
+   private final FramePose3D tempFramePose3D = new FramePose3D();
+   /**
+    * The main, source, true, base transform that this thing represents.
+    */
+   private final RigidBodyTransform transformToParent;
+   private ReferenceFrame parentReferenceFrame;
+   private ReferenceFrame gizmoFrame;
+   private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
    private FocusBasedGDXCamera camera3D;
    private final Point3D cameraPosition = new Point3D();
    private double lastDistanceToCamera = -1.0;
@@ -89,11 +95,20 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
 
    public GDXFootstepPlannerGoalGizmo()
    {
+      this(ReferenceFrame.getWorldFrame());
    }
 
-   public void setParentFrame(ReferenceFrame parentFrame)
+   public GDXFootstepPlannerGoalGizmo(ReferenceFrame parentReferenceFrame)
    {
-      referenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentFrame, transform);
+      this.parentReferenceFrame = parentReferenceFrame;
+      transformToParent = new RigidBodyTransform();
+      gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentReferenceFrame, transformToParent);
+   }
+
+   public void setParentFrame(ReferenceFrame parentReferenceFrame)
+   {
+      this.parentReferenceFrame = parentReferenceFrame;
+      gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentReferenceFrame, transformToParent);
    }
 
    public void create(FocusBasedGDXCamera camera3D)
@@ -162,7 +177,7 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
 
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      updateFromSourceTransform();
+      updateTransforms();
 
       boolean rightMouseDragging = input.isDragging(ImGuiMouseButton.Right);
       boolean middleMouseDragging = input.isDragging(ImGuiMouseButton.Middle);
@@ -190,41 +205,58 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
             if (rightMouseDragging)
             {
                Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z);
-               transform.getTranslation().add(planarMotion);
+               tempFramePose3D.setToZero(gizmoFrame);
+               tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
+               tempFramePose3D.getPosition().add(planarMotion);
+               tempFramePose3D.changeFrame(parentReferenceFrame);
+               tempFramePose3D.get(transformToParent);
                closestCollision.add(planarMotion);
             }
             else // middleMouseDragging
             {
-               if (clockFaceDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z, transform))
+               if (clockFaceDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z, transformToWorld))
                {
-                  clockFaceDragAlgorithm.getMotion().transform(transform.getRotation());
+                  tempFramePose3D.setToZero(gizmoFrame);
+                  tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
+                  clockFaceDragAlgorithm.getMotion().transform(tempFramePose3D.getOrientation());
+                  tempFramePose3D.changeFrame(parentReferenceFrame);
+                  tempFramePose3D.get(transformToParent);
                }
             }
          }
       }
 
       // after things have been modified, update the derivative stuff
-      updateFromSourceTransform();
+      updateTransforms();
 
       GDXTools.toEuclid(camera3D.position, cameraPosition);
-      double distanceToCamera = cameraPosition.distance(pose.getPosition());
+      double distanceToCamera = cameraPosition.distance(framePose3D.getPosition());
       if (lastDistanceToCamera != distanceToCamera)
       {
          lastDistanceToCamera = distanceToCamera;
          recreateGraphics();
-         updateFromSourceTransform();
+         updateTransforms();
       }
    }
 
-   private void updateFromSourceTransform()
+   private void updateTransforms()
    {
-      pose.set(transform);
-      GDXTools.toGDX(transform, discModel.getOrCreateModelInstance().transform);
-      GDXTools.toGDX(transform, positiveXArrowModel.getOrCreateModelInstance().transform);
-      GDXTools.toGDX(transform, positiveYArrowModel.getOrCreateModelInstance().transform);
-      GDXTools.toGDX(transform, negativeXArrowModel.getOrCreateModelInstance().transform);
-      GDXTools.toGDX(transform, negativeYArrowModel.getOrCreateModelInstance().transform);
-      referenceFrame.update();
+      gizmoFrame.update();
+      // keeping the gizmo on the X-Y plane
+      tempFramePose3D.setToZero(gizmoFrame);
+      tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
+      tempFramePose3D.getOrientation().setToYawOrientation(tempFramePose3D.getOrientation().getYaw());
+      tempFramePose3D.changeFrame(parentReferenceFrame);
+      tempFramePose3D.get(transformToParent);
+      gizmoFrame.update();
+      framePose3D.setToZero(gizmoFrame);
+      framePose3D.changeFrame(ReferenceFrame.getWorldFrame());
+      framePose3D.get(transformToWorld);
+      GDXTools.toGDX(transformToWorld, discModel.getOrCreateModelInstance().transform);
+      GDXTools.toGDX(transformToWorld, positiveXArrowModel.getOrCreateModelInstance().transform);
+      GDXTools.toGDX(transformToWorld, positiveYArrowModel.getOrCreateModelInstance().transform);
+      GDXTools.toGDX(transformToWorld, negativeXArrowModel.getOrCreateModelInstance().transform);
+      GDXTools.toGDX(transformToWorld, negativeYArrowModel.getOrCreateModelInstance().transform);
    }
 
    private void determineCurrentSelectionFromPickRay(Line3DReadOnly pickRay)
@@ -237,7 +269,7 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
       closestCollisionSelection = -1;
       double closestCollisionDistance = Double.POSITIVE_INFINITY;
 
-      hollowCylinderIntersection.setup(discThickness.get(), discOuterRadius.get(), discInnerRadius.get(), 0.0, transform);
+      hollowCylinderIntersection.setup(discThickness.get(), discOuterRadius.get(), discInnerRadius.get(), 0.0, transformToWorld);
       double distance = hollowCylinderIntersection.intersect(pickRay);
       if (!Double.isNaN(distance) && distance < closestCollisionDistance)
       {
@@ -253,7 +285,7 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
                                           discThickness.get(),
                                           new Point3D(discOuterRadius.get() + arrowSpacing.get(), 0.0, 0.0),
                                           new YawPitchRoll(-QUARTER_TURN, 0.0, -QUARTER_TURN),
-                                          transform);
+                                          transformToWorld);
          distance = positiveXArrowIntersection.intersect(pickRay, 100);
          if (!Double.isNaN(distance) && distance < closestCollisionDistance)
          {
@@ -267,7 +299,7 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
                                           discThickness.get(),
                                           new Point3D(0.0, discOuterRadius.get() + arrowSpacing.get(), 0.0),
                                           new YawPitchRoll(0.0, 0.0, -QUARTER_TURN),
-                                          transform);
+                                          transformToWorld);
          distance = positiveYArrowIntersection.intersect(pickRay, 100);
          if (!Double.isNaN(distance) && distance < closestCollisionDistance)
          {
@@ -281,7 +313,7 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
                                           discThickness.get(),
                                           new Point3D(-discOuterRadius.get() - arrowSpacing.get(), 0.0, 0.0),
                                           new YawPitchRoll(QUARTER_TURN, 0.0, -QUARTER_TURN),
-                                          transform);
+                                          transformToWorld);
          distance = negativeXArrowIntersection.intersect(pickRay, 100);
          if (!Double.isNaN(distance) && distance < closestCollisionDistance)
          {
@@ -295,7 +327,7 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
                                           discThickness.get(),
                                           new Point3D(0.0, -discOuterRadius.get() - arrowSpacing.get(), 0.0),
                                           new YawPitchRoll(0.0, 0.0, QUARTER_TURN),
-                                          transform);
+                                          transformToWorld);
          distance = negativeYArrowIntersection.intersect(pickRay, 100);
          if (!Double.isNaN(distance) && distance < closestCollisionDistance)
          {
@@ -329,7 +361,7 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
 
       if (ImGui.button("Reset"))
       {
-         transform.setToZero();
+         transformToParent.setToZero();
       }
 
       ImGui.pushItemWidth(100.00f);
@@ -345,7 +377,7 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
       if (proportionsChanged)
          recreateGraphics();
 
-      updateFromSourceTransform();
+      updateTransforms();
    }
 
    private void recreateGraphics()
@@ -371,20 +403,20 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
       }
    }
 
-   public Pose3DReadOnly getPose()
+   public Pose3DReadOnly getPose3D()
    {
-      return pose;
+      return framePose3D;
    }
 
    // TODO: Make this transform the ground truth and give the pose as needed only
-   public RigidBodyTransform getTransform()
+   public RigidBodyTransform getTransformToParent()
    {
-      return transform;
+      return transformToParent;
    }
 
-   public ReferenceFrame getReferenceFrame()
+   public ReferenceFrame getGizmoFrame()
    {
-      return referenceFrame;
+      return gizmoFrame;
    }
 
    public boolean getIntersectsAny()
