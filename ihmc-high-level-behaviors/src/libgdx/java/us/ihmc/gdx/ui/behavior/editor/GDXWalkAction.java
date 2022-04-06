@@ -20,7 +20,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
@@ -48,6 +47,8 @@ import java.util.UUID;
 public class GDXWalkAction implements GDXBehaviorAction
 {
    private GDXFootstepPlanGraphic footstepPlanGraphic;
+   private ROS2SyncedRobotModel syncedRobot;
+   private ROS2ControllerHelper ros2ControllerHelper;
    private List<ReferenceFrame> referenceFrameLibrary;
    private final SideDependentList<GDXFootstepGraphic> goalFeet = new SideDependentList<>();
    private final SideDependentList<FramePose3D> goalFeetPoses = new SideDependentList<>();
@@ -62,10 +63,14 @@ public class GDXWalkAction implements GDXBehaviorAction
    public void create(FocusBasedGDXCamera camera3D,
                       DRCRobotModel robotModel,
                       FootstepPlanningModule footstepPlanner,
+                      ROS2SyncedRobotModel syncedRobot,
+                      ROS2ControllerHelper ros2ControllerHelper,
                       List<ReferenceFrame> referenceFrameLibrary)
    {
       this.footstepPlanner = footstepPlanner;
       footstepPlanGraphic = new GDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
+      this.syncedRobot = syncedRobot;
+      this.ros2ControllerHelper = ros2ControllerHelper;
       this.referenceFrameLibrary = referenceFrameLibrary;
       referenceFrameNames = new String[referenceFrameLibrary.size()];
       for (int i = 0; i < referenceFrameLibrary.size(); i++)
@@ -161,12 +166,13 @@ public class GDXWalkAction implements GDXBehaviorAction
       footstepPlanGraphic.destroy();
    }
 
-   public void walk(ReferenceFrame referenceFrame, ROS2ControllerHelper helper, ROS2SyncedRobotModel syncedRobot)
+   @Override
+   public void performAction()
    {
       double proximityToGoalToMaintainOrientation = 1.5;
 
-      FramePose3D approachPointA = new FramePose3D(referenceFrame);
-      approachPointA.set(footstepPlannerGoalGizmo.getTransformToParent());
+      FramePose3D approachPointA = new FramePose3D();
+      approachPointA.setToZero(footstepPlannerGoalGizmo.getGizmoFrame());
       approachPointA.changeFrame(ReferenceFrame.getWorldFrame());
 
       FramePose3DReadOnly midFeetUnderPelvisFramePose = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame);
@@ -233,7 +239,7 @@ public class GDXWalkAction implements GDXBehaviorAction
                                                                              transferDuration);
          footstepDataListMessage.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
          footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
-         helper.publishToController(footstepDataListMessage);
+         ros2ControllerHelper.publishToController(footstepDataListMessage);
       }
    }
 

@@ -22,6 +22,8 @@ public interface GDXBehaviorAction
 
    public void loadFromFile(JsonNode jsonNode);
 
+   public void performAction();
+
    public void destroy();
 
    public ImBoolean getSelected();

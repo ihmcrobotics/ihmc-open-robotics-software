@@ -176,14 +176,7 @@ public class GDXBehaviorActionSequenceEditor
          if (ImGui.button(labels.get("Execute")))
          {
             GDXBehaviorAction action = actionSequence.get(playbackNextIndex);
-            if (action instanceof GDXWalkAction)
-            {
-               ((GDXWalkAction) action).walk(ReferenceFrame.getWorldFrame(), ros2ControllerHelper, syncedRobot);
-            }
-            else if (action instanceof GDXHandPoseAction)
-            {
-               ((GDXHandPoseAction) action).moveHand(4.0);
-            }
+            action.performAction();
             playbackNextIndex++;
          }
       }
@@ -272,7 +265,7 @@ public class GDXBehaviorActionSequenceEditor
    private GDXWalkAction addWalkAction()
    {
       GDXWalkAction walkAction = new GDXWalkAction();
-      walkAction.create(camera3D, robotModel, footstepPlanner, referenceFrameLibrary);
+      walkAction.create(camera3D, robotModel, footstepPlanner, syncedRobot, ros2ControllerHelper, referenceFrameLibrary);
       actionSequence.addLast(walkAction);
       return walkAction;
    }
