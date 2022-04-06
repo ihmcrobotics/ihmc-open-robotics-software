@@ -91,26 +91,26 @@ public class GDXWalkAction implements GDXBehaviorAction
    }
 
    @Override
+   public void update()
+   {
+      footstepPlannerGoalGizmo.updateTransforms();
+      for (RobotSide side : RobotSide.values)
+      {
+         FramePose3D goalFootPose = goalFeetPoses.get(side);
+         goalFootPose.setToZero(footstepPlannerGoalGizmo.getGizmoFrame());
+         goalFootPose.getPosition().addY(0.5 * side.negateIfRightSide(footstepPlannerParameters.getIdealFootstepWidth()));
+         goalFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+         goalFeet.get(side).setPose(goalFootPose);
+      }
+   }
+
+   @Override
    public void process3DViewInput(ImGui3DViewInput input)
    {
       if (selected.get())
       {
          footstepPlannerGoalGizmo.process3DViewInput(input);
-         for (RobotSide side : RobotSide.values)
-         {
-            FramePose3D goalFootPose = goalFeetPoses.get(side);
-            goalFootPose.setToZero(footstepPlannerGoalGizmo.getGizmoFrame());
-            goalFootPose.getPosition().addY(0.5 * side.negateIfRightSide(footstepPlannerParameters.getIdealFootstepWidth()));
-            goalFootPose.changeFrame(ReferenceFrame.getWorldFrame());
-            goalFeet.get(side).setPose(goalFootPose);
-         }
       }
-   }
-
-   @Override
-   public void update()
-   {
-
    }
 
    @Override
@@ -137,6 +137,13 @@ public class GDXWalkAction implements GDXBehaviorAction
    }
 
    @Override
+   public void saveToFile(ObjectNode jsonNode)
+   {
+      jsonNode.put("parentFrame", footstepPlannerGoalGizmo.getGizmoFrame().getParent().getName());
+      JSONTools.toJSON(jsonNode, footstepPlannerGoalGizmo.getTransformToParent());
+   }
+
+   @Override
    public void loadFromFile(JsonNode jsonNode)
    {
       String referenceFrameName = jsonNode.get("parentFrame").asText();
@@ -151,13 +158,6 @@ public class GDXWalkAction implements GDXBehaviorAction
       }
 
       JSONTools.toEuclid(jsonNode, footstepPlannerGoalGizmo.getTransformToParent());
-   }
-
-   @Override
-   public void saveToFile(ObjectNode jsonNode)
-   {
-      jsonNode.put("parentFrame", footstepPlannerGoalGizmo.getGizmoFrame().getParent().getName());
-      JSONTools.toJSON(jsonNode, footstepPlannerGoalGizmo.getTransformToParent());
    }
 
    @Override

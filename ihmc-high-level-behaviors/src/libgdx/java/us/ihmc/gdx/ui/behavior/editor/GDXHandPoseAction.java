@@ -14,7 +14,6 @@ import imgui.type.ImDouble;
 import imgui.type.ImInt;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -83,20 +82,20 @@ public class GDXHandPoseAction implements GDXBehaviorAction
    }
 
    @Override
+   public void update()
+   {
+      poseGizmo.updateTransforms();
+      poseGizmo.getGizmoFrame().getTransformToDesiredFrame(tempTransform, ReferenceFrame.getWorldFrame());
+      highlightModel.setPose(tempTransform, handGraphicToControlTransform);
+   }
+
+   @Override
    public void process3DViewInput(ImGui3DViewInput input)
    {
       if (selected.get())
       {
          poseGizmo.process3DViewInput(input);
-         poseGizmo.getGizmoFrame().getTransformToDesiredFrame(tempTransform, ReferenceFrame.getWorldFrame());
-         highlightModel.setPose(tempTransform, handGraphicToControlTransform);
       }
-   }
-
-   @Override
-   public void update()
-   {
-
    }
 
    @Override
@@ -110,7 +109,9 @@ public class GDXHandPoseAction implements GDXBehaviorAction
          poseToKeep.changeFrame(poseGizmo.getGizmoFrame().getParent());
          poseToKeep.get(poseGizmo.getTransformToParent());
       }
-      ImGui.inputDouble("Trajectory time", trajectoryTime);
+      ImGui.pushItemWidth(80.0f);
+      ImGui.inputDouble(labels.get("Trajectory time"), trajectoryTime);
+      ImGui.popItemWidth();
    }
 
    @Override
@@ -119,6 +120,15 @@ public class GDXHandPoseAction implements GDXBehaviorAction
       highlightModel.getRenderables(renderables, pool);
       if (selected.get())
          poseGizmo.getRenderables(renderables, pool);
+   }
+
+   @Override
+   public void saveToFile(ObjectNode jsonNode)
+   {
+      jsonNode.put("parentFrame", poseGizmo.getGizmoFrame().getParent().getName());
+      jsonNode.put("side", side.getLowerCaseName());
+      jsonNode.put("trajectoryTime", trajectoryTime.get());
+      JSONTools.toJSON(jsonNode, poseGizmo.getTransformToParent());
    }
 
    @Override
@@ -135,17 +145,8 @@ public class GDXHandPoseAction implements GDXBehaviorAction
          }
       }
       setSide(RobotSide.getSideFromString(jsonNode.get("side").asText()));
-//      trajectoryTime.set(jsonNode.get("trajectoryTime").asDouble());
+      trajectoryTime.set(jsonNode.get("trajectoryTime").asDouble());
       JSONTools.toEuclid(jsonNode, poseGizmo.getTransformToParent());
-   }
-
-   @Override
-   public void saveToFile(ObjectNode jsonNode)
-   {
-      jsonNode.put("parentFrame", poseGizmo.getGizmoFrame().getParent().getName());
-      jsonNode.put("side", side.getLowerCaseName());
-      jsonNode.put("trajectoryTime", trajectoryTime.get());
-      JSONTools.toJSON(jsonNode, poseGizmo.getTransformToParent());
    }
 
    @Override
