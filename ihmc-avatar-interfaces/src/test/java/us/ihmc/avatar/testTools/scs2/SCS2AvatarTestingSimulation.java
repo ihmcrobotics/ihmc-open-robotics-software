@@ -190,8 +190,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
       cameraPosition.scale(CAMERA_DISTANCE_FROM_ROBOT / cameraPosition.distanceFromOrigin());
       cameraPosition.add(focusPosition);
 
-      setCameraFocusPosition(focusPosition);
-      setCameraPosition(cameraPosition);
+      setCamera(focusPosition, cameraPosition);
    }
 
    // Simulation controls:
@@ -349,32 +348,74 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
          getSessionVisualizerControls().setCameraZoom(distanceFromFocus);
    }
 
+   /**
+    * Sets the new focus point the camera is looking at.
+    * <p>
+    * The camera is rotated during this operation, its position remains unchanged.
+    * </p>
+    * 
+    * @param focus the new focus position.
+    */
    public void setCameraFocusPosition(Point3DReadOnly focus)
    {
       setCameraFocusPosition(focus.getX(), focus.getY(), focus.getZ());
    }
 
+   /**
+    * Sets the new focus point the camera is looking at.
+    * <p>
+    * The camera is rotated during this operation, its position remains unchanged.
+    * </p>
+    *
+    * @param x the x-coordinate of the new focus location.
+    * @param y the y-coordinate of the new focus location.
+    * @param z the z-coordinate of the new focus location.
+    */
    public void setCameraFocusPosition(double x, double y, double z)
    {
       if (getSessionVisualizerControls() != null)
          getSessionVisualizerControls().setCameraFocusPosition(x, y, z);
    }
 
+   /**
+    * Sets the new camera position.
+    * <p>
+    * The camera is rotated during this operation such that the focus point remains unchanged.
+    * </p>
+    * 
+    * @param position the new camera position.
+    */
    public void setCameraPosition(Point3DReadOnly position)
    {
       setCameraPosition(position.getX(), position.getY(), position.getZ());
    }
 
+   /**
+    * Sets the new camera position.
+    * <p>
+    * The camera is rotated during this operation such that the focus point remains unchanged.
+    * </p>
+    * 
+    * @param x the x-coordinate of the new camera location.
+    * @param y the y-coordinate of the new camera location.
+    * @param z the z-coordinate of the new camera location.
+    */
    public void setCameraPosition(double x, double y, double z)
    {
       if (getSessionVisualizerControls() != null)
          getSessionVisualizerControls().setCameraPosition(x, y, z);
    }
 
+   /**
+    * Sets the camera configuration.
+    * 
+    * @param cameraFocus    the new focus position (where the camera is looking at).
+    * @param cameraPosition the new camerate position.
+    */
    public void setCamera(Point3DReadOnly cameraFocus, Point3DReadOnly cameraPosition)
    {
-      setCameraFocusPosition(cameraFocus);
       setCameraPosition(cameraPosition);
+      setCameraFocusPosition(cameraFocus);
    }
 
    public void requestCameraRigidBodyTracking(String robotName, String rigidBodyName)
