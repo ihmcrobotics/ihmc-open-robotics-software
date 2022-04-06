@@ -19,6 +19,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.tools.thread.SwapReference;
+import us.ihmc.tools.thread.ZeroCopySwapReference;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,7 +35,7 @@ public class OpenCVArUcoMarkerDetection
    private ReferenceFrame sensorFrame;
    private final FramePose3D markerPose = new FramePose3D();
    private final Object inputImageSync = new Object();
-   private BytedecoImage rgb888ColorImage;
+   private ZeroCopySwapReference<BytedecoImage> rgb888ColorImage;
    private final Object detectionDataSync = new Object();
    private SwapReference<MatVector> corners;
    private SwapReference<Mat> ids;
@@ -55,6 +56,8 @@ public class OpenCVArUcoMarkerDetection
    private final SwapReference<Stopwatch> stopwatch = new SwapReference<>(() -> new Stopwatch().start());
    private boolean enabled = true;
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
+   private int imageWidth;
+   private int imageHeight;
 
    public void create(BytedecoImage sourceColorImage, CameraPinholeBrown depthCameraIntrinsics, ReferenceFrame sensorFrame)
    {
@@ -63,7 +66,9 @@ public class OpenCVArUcoMarkerDetection
       // ArUco library doesn't support alpha channel being in there
       alphaRemovalMode = sourceColorImage.getBytedecoOpenCVMat().type() == opencv_core.CV_8UC4;
       this.sensorFrame = sensorFrame;
-      rgb888ColorImage = new BytedecoImage(sourceColorImage.getImageWidth(), sourceColorImage.getImageHeight(), opencv_core.CV_8UC3);
+      imageWidth = sourceColorImage.getImageWidth();
+      imageHeight = sourceColorImage.getImageHeight();
+      rgb888ColorImage = new ZeroCopySwapReference<>(() -> new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC3));
 
       dictionary = opencv_aruco.getPredefinedDictionary(DEFAULT_DICTIONARY);
       corners = new SwapReference<>(MatVector::new);
@@ -99,7 +104,7 @@ public class OpenCVArUcoMarkerDetection
    {
       if (enabled)
       {
-         synchronized (inputImageSync)
+         rgb888ColorImage.accessOnHighPriorityThread(rgb888ColorImage ->
          {
             if (alphaRemovalMode)
             {
@@ -109,21 +114,24 @@ public class OpenCVArUcoMarkerDetection
             {
                sourceColorImage.getBytedecoOpenCVMat().copyTo(rgb888ColorImage.getBytedecoOpenCVMat());
             }
-         }
+         });
 
-         executorService.execute(() ->
+         executorService.clearQueueAndExecute(() ->
          {
             synchronized (inputImageSync)
             {
                stopwatch.getForThreadOne().lap();
-               opencv_aruco.detectMarkers(rgb888ColorImage.getBytedecoOpenCVMat(),
-                                          dictionary,
-                                          corners.getForThreadOne(),
-                                          ids.getForThreadOne(),
-                                          detectorParameters,
-                                          rejectedImagePoints.getForThreadOne(),
-                                          cameraMatrix,
-                                          distortionCoefficients);
+               rgb888ColorImage.accessOnLowPriorityThread(rgb888ColorImage ->
+               {
+                  opencv_aruco.detectMarkers(rgb888ColorImage.getBytedecoOpenCVMat(),
+                                             dictionary,
+                                             corners.getForThreadOne(),
+                                             ids.getForThreadOne(),
+                                             detectorParameters,
+                                             rejectedImagePoints.getForThreadOne(),
+                                             cameraMatrix,
+                                             distortionCoefficients);
+               });
                stopwatch.getForThreadOne().suspend();
             }
 
@@ -256,9 +264,19 @@ public class OpenCVArUcoMarkerDetection
       return rejectedImagePoints.getForThreadTwo().size();
    }
 
-   public BytedecoImage getImageOfDetection()
+   public void getImageOfDetection(Mat imageToPack)
    {
-      return rgb888ColorImage;
+      rgb888ColorImage.accessOnHighPriorityThread(rgb888ColorImage -> rgb888ColorImage.getBytedecoOpenCVMat().copyTo(imageToPack));
+   }
+
+   public int getImageWidth()
+   {
+      return imageWidth;
+   }
+
+   public int getImageHeight()
+   {
+      return imageHeight;
    }
 
    public DetectorParameters getDetectorParameters()

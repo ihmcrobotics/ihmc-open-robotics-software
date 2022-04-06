@@ -76,8 +76,8 @@ public class GDXOpenCVArUcoMarkerDetectionUI
       this.markersToTrack = markersToTrack;
       this.cameraFrame = cameraFrame;
 
-      imageWidth = arUcoMarkerDetection.getImageOfDetection().getImageWidth();
-      imageHeight = arUcoMarkerDetection.getImageOfDetection().getImageHeight();
+      imageWidth = arUcoMarkerDetection.getImageWidth();
+      imageHeight = arUcoMarkerDetection.getImageHeight();
       imageForDrawing = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC3);
       boolean flipY = false;
       markerImagePanel = new GDXCVImagePanel("ArUco Marker Detection Image " + namePostfix, imageWidth, imageHeight, flipY);
@@ -120,7 +120,7 @@ public class GDXOpenCVArUcoMarkerDetectionUI
 
       if (markerImagePanel.getVideoPanel().getIsShowing().get())
       {
-         arUcoMarkerDetection.getImageOfDetection().getBytedecoOpenCVMat().copyTo(imageForDrawing.getBytedecoOpenCVMat());
+         arUcoMarkerDetection.getImageOfDetection(imageForDrawing.getBytedecoOpenCVMat());
 
          arUcoMarkerDetection.drawDetectedMarkers(imageForDrawing.getBytedecoOpenCVMat(), idColor);
          arUcoMarkerDetection.drawRejectedPoints(imageForDrawing.getBytedecoOpenCVMat());
