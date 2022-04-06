@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -31,7 +32,6 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -746,21 +746,37 @@ public class EndToEndTestTools
       return message;
    }
 
-   public static FootstepDataListMessage generateFootstepsFromPose3Ds(RobotSide initialStepSide, Pose3D[] footstepPoses)
+   public static FootstepDataListMessage generateFootstepsFromPose3Ds(RobotSide initialStepSide, Pose3DReadOnly[] footstepPoses)
    {
       return generateFootstepsFromPose3Ds(initialStepSide, footstepPoses, 0, 0);
    }
 
-   public static FootstepDataListMessage generateFootstepsFromPose3Ds(RobotSide initialStepSide, Pose3D[] footstepPoses, double swingTime, double transferTime)
+   public static FootstepDataListMessage generateFootstepsFromPose3Ds(RobotSide initialStepSide,
+                                                                      Pose3DReadOnly[] footstepPoses,
+                                                                      double swingTime,
+                                                                      double transferTime)
+   {
+      return generateFootstepsFromPose3Ds(initialStepSide, Arrays.asList(footstepPoses), swingTime, transferTime);
+   }
+
+   public static FootstepDataListMessage generateFootstepsFromPose3Ds(RobotSide initialStepSide, List<? extends Pose3DReadOnly> footstepPoses)
+   {
+      return generateFootstepsFromPose3Ds(initialStepSide, footstepPoses, 0, 0);
+   }
+
+   public static FootstepDataListMessage generateFootstepsFromPose3Ds(RobotSide initialStepSide,
+                                                                      List<? extends Pose3DReadOnly> footstepPoses,
+                                                                      double swingTime,
+                                                                      double transferTime)
    {
       FootstepDataListMessage footstepDataList = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
       RobotSide side = initialStepSide;
 
       Object<FootstepDataMessage> list = footstepDataList.getFootstepDataList();
 
-      for (int i = 0; i < footstepPoses.length; i++)
+      for (int i = 0; i < footstepPoses.size(); i++)
       {
-         list.add().set(HumanoidMessageTools.createFootstepDataMessage(side, footstepPoses[i]));
+         list.add().set(HumanoidMessageTools.createFootstepDataMessage(side, footstepPoses.get(i)));
          side = side.getOppositeSide();
       }
 

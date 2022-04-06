@@ -270,6 +270,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
     */
    public boolean simulateNow(double duration)
    {
+      checkSimulationSessionAlive();
       lastThrowable.set(null);
       return getSimulationSessionControls().simulateNow(duration);
    }
@@ -290,6 +291,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
     */
    public boolean simulateNow(long numberOfSimulationTicks)
    {
+      checkSimulationSessionAlive();
       lastThrowable.set(null);
       return getSimulationSessionControls().simulateNow(numberOfSimulationTicks);
    }
@@ -306,11 +308,19 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
 
    public void resetRobot(boolean simulateAfterReset)
    {
+      checkSimulationSessionAlive();
       avatarSimulation.resetRobot(simulateAfterReset);
+   }
+
+   private void checkSimulationSessionAlive()
+   {
+      if (getSimulationSession().isSessionShutdown())
+         throw new IllegalStateException("Simulation has been shutdown");
    }
 
    public void assertRobotsRootJointIsInBoundingBox(BoundingBox3DReadOnly boundingBox)
    {
+      checkSimulationSessionAlive();
       RobotInterface robot = getSimulationSession().getPhysicsEngine().getRobots().get(0);
       FloatingJointBasics rootJoint = (FloatingJointBasics) robot.getRootBody().getChildrenJoints().get(0);
       boolean inside = boundingBox.isInsideInclusive(rootJoint.getJointPose().getPosition());
@@ -323,27 +333,32 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    // Buffer controls:
    public void setBufferInPointIndexToCurrent()
    {
+      checkSimulationSessionAlive();
       getSimulationSessionControls().setBufferInPointIndexToCurrent();
    }
 
    public void setBufferOutPointIndexToCurrent()
    {
+      checkSimulationSessionAlive();
       getSimulationSessionControls().setBufferOutPointIndexToCurrent();
    }
 
    public void stepBufferIndexForward()
    {
+      checkSimulationSessionAlive();
       getSimulationSessionControls().stepBufferIndexForward();
    }
 
    public void stepBufferIndexBackward()
    {
+      checkSimulationSessionAlive();
       getSimulationSessionControls().stepBufferIndexBackward();
    }
 
    // GUI controls:
    public void setCameraZoom(double distanceFromFocus)
    {
+      checkSimulationSessionAlive();
       if (getSessionVisualizerControls() != null)
          getSessionVisualizerControls().setCameraZoom(distanceFromFocus);
    }
@@ -358,6 +373,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
     */
    public void setCameraFocusPosition(Point3DReadOnly focus)
    {
+      checkSimulationSessionAlive();
       setCameraFocusPosition(focus.getX(), focus.getY(), focus.getZ());
    }
 
@@ -373,6 +389,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
     */
    public void setCameraFocusPosition(double x, double y, double z)
    {
+      checkSimulationSessionAlive();
       if (getSessionVisualizerControls() != null)
          getSessionVisualizerControls().setCameraFocusPosition(x, y, z);
    }
@@ -402,6 +419,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
     */
    public void setCameraPosition(double x, double y, double z)
    {
+      checkSimulationSessionAlive();
       if (getSessionVisualizerControls() != null)
          getSessionVisualizerControls().setCameraPosition(x, y, z);
    }
@@ -414,41 +432,47 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
     */
    public void setCamera(Point3DReadOnly cameraFocus, Point3DReadOnly cameraPosition)
    {
-      setCameraPosition(cameraPosition);
       setCameraFocusPosition(cameraFocus);
+      setCameraPosition(cameraPosition);
    }
 
    public void requestCameraRigidBodyTracking(String robotName, String rigidBodyName)
    {
+      checkSimulationSessionAlive();
       if (getSessionVisualizerControls() != null)
          getSessionVisualizerControls().requestCameraRigidBodyTracking(robotName, rigidBodyName);
    }
 
    public void addStaticVisuals(Collection<? extends VisualDefinition> visualDefinitions)
    {
+      checkSimulationSessionAlive();
       if (getSessionVisualizerControls() != null)
          getSessionVisualizerControls().addStaticVisuals(visualDefinitions);
    }
 
    public void addYoGraphicDefinition(YoGraphicDefinition yoGraphicDefinition)
    {
+      checkSimulationSessionAlive();
       if (getSessionVisualizerControls() != null)
          getSessionVisualizerControls().addYoGraphic(yoGraphicDefinition);
    }
 
    public void addYoGraphicDefinition(String namespace, YoGraphicDefinition yoGraphicDefinition)
    {
+      checkSimulationSessionAlive();
       if (getSessionVisualizerControls() != null)
          getSessionVisualizerControls().addYoGraphic(namespace, yoGraphicDefinition);
    }
 
    public void addYoGraphicsListRegistry(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
+      checkSimulationSessionAlive();
       SCS1GraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry).forEach(this::addYoGraphicDefinition);
    }
 
    public void addYoGraphic(YoGraphic yoGraphic)
    {
+      checkSimulationSessionAlive();
       addYoGraphicDefinition(SCS1GraphicConversionTools.toYoGraphicDefinition(yoGraphic));
    }
 
