@@ -71,7 +71,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       double controllerDT = getRobotModel().getControllerDT();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -101,7 +101,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
 
       simulationTestHelper.publishToController(pelvisHeightTrajectoryMessage);
 
-      success = simulationTestHelper.simulateAndWait(3.0 + trajectoryTime);
+      success = simulationTestHelper.simulateNow(3.0 + trajectoryTime);
       assertTrue(success);
 
       // Hard to figure out how to verify the desired there
@@ -142,7 +142,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(2.0);
+      boolean success = simulationTestHelper.simulateNow(2.0);
       assertTrue(success);
 
       RigidBodyBasics pelvis = simulationTestHelper.getControllerFullRobotModel().getPelvis();
@@ -157,7 +157,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       pelvisHeightTrajectoryMessage.getEuclideanTrajectory().setUseCustomControlFrame(true);
 
       simulationTestHelper.publishToController(pelvisHeightTrajectoryMessage);
-      success = simulationTestHelper.simulateAndWait(1.0 + trajectoryTime);
+      success = simulationTestHelper.simulateNow(1.0 + trajectoryTime);
       assertTrue(success);
 
       FramePoint3D actualPosition = new FramePoint3D(pelvisBodyFrame);
@@ -184,7 +184,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -208,7 +208,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       pelvisHeightTrajectoryMessage.setEnableUserPelvisControl(true);
       simulationTestHelper.publishToController(pelvisHeightTrajectoryMessage);
 
-      success = simulationTestHelper.simulateAndWait(1.0 + trajectoryTime);
+      success = simulationTestHelper.simulateNow(1.0 + trajectoryTime);
       assertTrue(success);
 
       double pelvisHeight = fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getTranslationZ();
@@ -225,7 +225,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
-      assertTrue(simulationTestHelper.simulateAndWait(1.0));
+      assertTrue(simulationTestHelper.simulateNow(1.0));
 
       String namespace = HeightOffsetHandler.class.getSimpleName();
       YoDouble offsetHeight = (YoDouble) simulationTestHelper.findVariable(namespace, "offsetHeightAboveGround");
@@ -246,7 +246,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
 
          // Move pelvis using YoVariable
          offsetHeight.set(offset1);
-         assertTrue(simulationTestHelper.simulateAndWait(1.5));
+         assertTrue(simulationTestHelper.simulateNow(1.5));
          pelvisPosition.setToZero(pelvisFrame);
          pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
          assertEquals(initialPelvisHeight + offset1, pelvisPosition.getZ(), 0.01);
@@ -255,7 +255,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
          double desiredHeight = initialPelvisHeight + offset2;
          PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, desiredHeight);
          simulationTestHelper.publishToController(pelvisHeightTrajectoryMessage);
-         assertTrue(simulationTestHelper.simulateAndWait(1.5));
+         assertTrue(simulationTestHelper.simulateNow(1.5));
          pelvisPosition.setToZero(pelvisFrame);
          pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
          assertEquals(desiredHeight, pelvisPosition.getZ(), 0.01);
@@ -289,8 +289,8 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       simulationTestHelper.addYoGraphicDefinition(pushController.getForceVizDefinition());
       pushController.applyForce(new Vector3D(0.0, 0.0, 1.0), forceMagnitude, Double.POSITIVE_INFINITY);
 
-      assertTrue(simulationTestHelper.simulateAndWait(RigidBodyControlManager.INITIAL_GO_HOME_TIME + 1.0));
-      CommonHumanoidReferenceFrames referenceFrames = simulationTestHelper.getReferenceFrames();
+      assertTrue(simulationTestHelper.simulateNow(RigidBodyControlManager.INITIAL_GO_HOME_TIME + 1.0));
+      CommonHumanoidReferenceFrames referenceFrames = simulationTestHelper.getControllerReferenceFrames();
       referenceFrames.updateFrames();
       double initialPelvisHeight = referenceFrames.getPelvisFrame().getTransformToWorldFrame().getTranslationZ();
 
@@ -299,7 +299,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       for (int i = 0; i < 50; i++)
       {
          simulationTestHelper.publishToController(stopMessage);
-         assertTrue(simulationTestHelper.simulateAndWait(0.1));
+         assertTrue(simulationTestHelper.simulateNow(0.1));
       }
 
       // Would be nicer to check desired values but we currently have so many difference height control schemes that that would not be easy.
@@ -323,7 +323,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       simulationTestHelper.start();
       simulationTestHelper.getRootRegistry().addChild(testRegistry);
 
-      boolean success = simulationTestHelper.simulateAndWait(1.0);
+      boolean success = simulationTestHelper.simulateNow(1.0);
       assertTrue(success);
 
       YoDouble startTime = new YoDouble("startTime", testRegistry);
@@ -399,7 +399,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
          }
       });
 
-      success = simulationTestHelper.simulateAndWait(0.5 * trajectoryTime.getValue());
+      success = simulationTestHelper.simulateNow(0.5 * trajectoryTime.getValue());
       assertTrue(success);
 
       YoDouble controllerHeight = EndToEndTestTools.findYoDouble(CenterOfMassHeightControlState.class.getSimpleName(),
@@ -412,7 +412,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       assertEquals(desiredHeight.getValue(), controllerHeight.getValue(), 5.0e-4);
       assertEquals(desiredHeightRate.getValue(), controllerHeightRate.getValue(), 1.0e-7);
 
-      success = simulationTestHelper.simulateAndWait(0.5 * trajectoryTime.getValue() + 1.5);
+      success = simulationTestHelper.simulateNow(0.5 * trajectoryTime.getValue() + 1.5);
       assertTrue(success);
 
       assertEquals(desiredHeight.getValue(), controllerHeight.getValue(), 1.0e-7);

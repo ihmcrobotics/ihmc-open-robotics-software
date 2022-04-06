@@ -128,7 +128,7 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
       simulationTestHelper.setCamera(cameraFix, cameraPosition);
 
       ThreadTools.sleep(1000);
-      assertTrue(simulationTestHelper.simulateAndWait(0.5));
+      assertTrue(simulationTestHelper.simulateNow(0.5));
 
       fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
       humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
@@ -138,7 +138,7 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
       kinematicsStreamingToolboxMessageReplay.initialize(simulationTestHelper.getSimulationTime());
 
       simulationTestHelper.addSimulationTerminalCondition(() -> !kinematicsStreamingToolboxMessageReplay.update(simulationTestHelper.getSimulationTime()));
-      simulationTestHelper.simulateAndWait(1000.0);
+      simulationTestHelper.simulateNow(1000.0);
    }
 
    protected static void hideRobot(HumanoidFloatingRootJointRobot robot)

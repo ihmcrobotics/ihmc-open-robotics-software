@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
@@ -17,7 +16,6 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -65,7 +63,7 @@ public abstract class AvatarDoubleStepTest implements MultiRobotTestInterface
    {
       setupTest();
 
-      assertTrue(simulationTestHelper.simulateAndWait(0.5));
+      assertTrue(simulationTestHelper.simulateNow(0.5));
 
       RobotSide stepSide = RobotSide.LEFT;
       FramePoint3D stepLocation = new FramePoint3D(simulationTestHelper.getControllerFullRobotModel().getSoleFrame(stepSide));
@@ -78,7 +76,7 @@ public abstract class AvatarDoubleStepTest implements MultiRobotTestInterface
 
       simulationTestHelper.publishToController(footstepMessage);
 
-      assertTrue(simulationTestHelper.simulateAndWait(9.0));
+      assertTrue(simulationTestHelper.simulateNow(9.0));
    }
 
    @Test
@@ -86,7 +84,7 @@ public abstract class AvatarDoubleStepTest implements MultiRobotTestInterface
    {
       setupTest();
 
-      assertTrue(simulationTestHelper.simulateAndWait(0.5));
+      assertTrue(simulationTestHelper.simulateNow(0.5));
 
       RobotSide stepSide = RobotSide.RIGHT;
       FramePoint3D stepLocation1 = new FramePoint3D(simulationTestHelper.getControllerFullRobotModel().getSoleFrame(stepSide.getOppositeSide()));
@@ -111,7 +109,7 @@ public abstract class AvatarDoubleStepTest implements MultiRobotTestInterface
 
       double stepDuration = 3.0;
 
-      assertTrue(simulationTestHelper.simulateAndWait(4 * stepDuration + 3.0));
+      assertTrue(simulationTestHelper.simulateNow(4 * stepDuration + 3.0));
    }
 
    @Test
@@ -119,7 +117,7 @@ public abstract class AvatarDoubleStepTest implements MultiRobotTestInterface
    {
       setupTest();
 
-      assertTrue(simulationTestHelper.simulateAndWait(0.5));
+      assertTrue(simulationTestHelper.simulateNow(0.5));
 
       RobotSide stepSide = RobotSide.LEFT;
       FramePoint3D stepLocation = new FramePoint3D(simulationTestHelper.getControllerFullRobotModel().getSoleFrame(stepSide));
@@ -132,7 +130,7 @@ public abstract class AvatarDoubleStepTest implements MultiRobotTestInterface
 
       simulationTestHelper.publishToController(footstepMessage);
 
-      assertTrue(simulationTestHelper.simulateAndWait(9.0));
+      assertTrue(simulationTestHelper.simulateNow(9.0));
    }
 
    @Test
@@ -140,7 +138,7 @@ public abstract class AvatarDoubleStepTest implements MultiRobotTestInterface
    {
       setupTest();
 
-      assertTrue(simulationTestHelper.simulateAndWait(0.5));
+      assertTrue(simulationTestHelper.simulateNow(0.5));
 
       RobotSide stepSide = RobotSide.LEFT;
       FramePoint3D stepLocation = new FramePoint3D(simulationTestHelper.getControllerFullRobotModel().getSoleFrame(stepSide));
@@ -151,34 +149,25 @@ public abstract class AvatarDoubleStepTest implements MultiRobotTestInterface
       footstepMessage.setFinalTransferDuration(2.0);
 
       simulationTestHelper.publishToController(footstepMessage);
-      assertTrue(simulationTestHelper.simulateAndWait(6.0));
+      assertTrue(simulationTestHelper.simulateNow(6.0));
 
+      @SuppressWarnings("unchecked")
       YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) simulationTestHelper.findVariable("walkingCurrentState");
       assertEquals("Robot isn't yet standing.", WalkingStateEnum.STANDING, walkingState.getEnumValue());
 
       simulationTestHelper.publishToController(footstepMessage);
-      assertTrue(simulationTestHelper.simulateAndWait(6.0));
+      assertTrue(simulationTestHelper.simulateNow(6.0));
    }
 
    private void setupTest()
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       FlatGroundEnvironment emptyEnvironment = new FlatGroundEnvironment();
-      String className = getClass().getSimpleName();
 
-      DRCStartingLocation startingLocation = new DRCStartingLocation()
-      {
-         @Override
-         public OffsetAndYawRobotInitialSetup getStartingLocationOffset()
-         {
-            return new OffsetAndYawRobotInitialSetup(new Vector3D(0.0, 0.0, 0.0), 0.0);
-         }
-      };
       robotModel = getRobotModel();
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
                                                                                                                                              emptyEnvironment,
                                                                                                                                              simulationTestingParameters);
-      simulationTestHelperFactory.setStartingLocationOffset(startingLocation.getStartingLocationOffset());
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       simulationTestHelper.addDesiredICPContinuityAssertion(getMaxICPPlanError());
       simulationTestHelper.start();

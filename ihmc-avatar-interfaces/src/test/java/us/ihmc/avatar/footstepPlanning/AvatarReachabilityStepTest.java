@@ -151,13 +151,13 @@ public abstract class AvatarReachabilityStepTest implements MultiRobotTestInterf
          FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, step, orientation);
          footstepDataListMessage.getFootstepDataList().add().set(footstepData);
 
-         boolean success = simulationTestHelper.simulateAndWait(initialStanceTime);
+         boolean success = simulationTestHelper.simulateNow(initialStanceTime);
          if (!visualize)
             Assertions.assertTrue(success);
 
          simulationTestHelper.publishToController(footstepDataListMessage);
 
-         success = simulationTestHelper.simulateAndWait(stepTime);
+         success = simulationTestHelper.simulateNow(stepTime);
          if (!visualize)
             Assertions.assertTrue(success);
       }

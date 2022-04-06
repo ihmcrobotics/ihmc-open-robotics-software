@@ -50,7 +50,7 @@ public abstract class EndToEndEndFootBearingMessageTest implements MultiRobotTes
       simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -68,7 +68,7 @@ public abstract class EndToEndEndFootBearingMessageTest implements MultiRobotTes
          FootTrajectoryMessage footTrajectoryMessage = HumanoidMessageTools.createFootTrajectoryMessage(robotSide, 0.0, desiredPosition, desiredOrientation);
          simulationTestHelper.publishToController(footTrajectoryMessage);
 
-         success = simulationTestHelper.simulateAndWait(0.5 + getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
+         success = simulationTestHelper.simulateNow(0.5 + getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
          assertTrue(success);
 
          // Now we can do the usual test.
@@ -76,7 +76,7 @@ public abstract class EndToEndEndFootBearingMessageTest implements MultiRobotTes
 
          simulationTestHelper.publishToController(footLoadBearingMessage);
 
-         success = simulationTestHelper.simulateAndWait(2.5);
+         success = simulationTestHelper.simulateNow(2.5);
          assertTrue(success);
 
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();

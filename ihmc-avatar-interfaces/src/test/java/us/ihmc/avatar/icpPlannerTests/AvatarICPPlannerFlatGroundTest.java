@@ -135,7 +135,7 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       setupCameraForWalkingUpToRamp();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(1.0);
+      boolean success = simulationTestHelper.simulateNow(1.0);
 
       Robot robot = simulationTestHelper.getRobot();
       RobotSide robotSide = RobotSide.LEFT;
@@ -154,7 +154,7 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
                                                         newContactPoints,
                                                         jointNames.get(robotSide),
                                                         robotSide);
-         success = success & simulationTestHelper.simulateAndWait(2.0);
+         success = success & simulationTestHelper.simulateNow(2.0);
          if (!success)
             break;
 
@@ -241,7 +241,7 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       setupCameraForWalkingUpToRamp();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(1.0);
+      boolean success = simulationTestHelper.simulateNow(1.0);
 
       int numberOfSteps = 5;
       double swingDuration = 1.0;
@@ -249,13 +249,13 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       FootstepDataListMessage message = createForwardWalkingFootsteps(numberOfSteps, 0.3, 0.3, swingDuration, transferDuration);
       simulationTestHelper.publishToController(message);
 
-      simulationTestHelper.simulateAndWait(2 * (swingDuration + transferDuration));
+      simulationTestHelper.simulateNow(2 * (swingDuration + transferDuration));
       simulationTestHelper.publishToController(HumanoidMessageTools.createPauseWalkingMessage(true));
 
-      simulationTestHelper.simulateAndWait(3.0);
+      simulationTestHelper.simulateNow(3.0);
       simulationTestHelper.publishToController(HumanoidMessageTools.createPauseWalkingMessage(false));
 
-      simulationTestHelper.simulateAndWait((numberOfSteps) * (swingDuration + transferDuration));
+      simulationTestHelper.simulateNow((numberOfSteps) * (swingDuration + transferDuration));
 
       //      simulationTestHelper.checkNothingChanged();
 
@@ -306,7 +306,7 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       setupCameraForWalkingUpToRamp();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(1.0);
+      boolean success = simulationTestHelper.simulateNow(1.0);
 
       int numberOfSteps = 5;
       double swingDuration = 1.0;
@@ -314,13 +314,13 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       FootstepDataListMessage message = createForwardWalkingFootsteps(numberOfSteps, 0.3, 0.3, swingDuration, transferDuration);
       simulationTestHelper.publishToController(message);
 
-      simulationTestHelper.simulateAndWait(0.8 * transferDuration);
+      simulationTestHelper.simulateNow(0.8 * transferDuration);
       simulationTestHelper.publishToController(HumanoidMessageTools.createPauseWalkingMessage(true));
 
-      simulationTestHelper.simulateAndWait(4.0);
+      simulationTestHelper.simulateNow(4.0);
       simulationTestHelper.publishToController(HumanoidMessageTools.createPauseWalkingMessage(false));
 
-      simulationTestHelper.simulateAndWait((numberOfSteps + 1) * (swingDuration + transferDuration));
+      simulationTestHelper.simulateNow((numberOfSteps + 1) * (swingDuration + transferDuration));
 
       //      simulationTestHelper.checkNothingChanged();
 
@@ -371,7 +371,7 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       setupCameraForWalkingUpToRamp();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(1.0);
+      boolean success = simulationTestHelper.simulateNow(1.0);
 
       int numberOfSteps = 5;
       double swingDuration = 1.0;
@@ -379,13 +379,13 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       FootstepDataListMessage message = createForwardWalkingFootsteps(numberOfSteps, 0.3, 0.3, swingDuration, transferDuration);
       simulationTestHelper.publishToController(message);
 
-      simulationTestHelper.simulateAndWait(2 * (swingDuration + transferDuration) + 0.8 * transferDuration);
+      simulationTestHelper.simulateNow(2 * (swingDuration + transferDuration) + 0.8 * transferDuration);
       simulationTestHelper.publishToController(HumanoidMessageTools.createPauseWalkingMessage(true));
 
-      simulationTestHelper.simulateAndWait(4.0);
+      simulationTestHelper.simulateNow(4.0);
       simulationTestHelper.publishToController(HumanoidMessageTools.createPauseWalkingMessage(false));
 
-      simulationTestHelper.simulateAndWait((numberOfSteps) * (swingDuration + transferDuration));
+      simulationTestHelper.simulateNow((numberOfSteps) * (swingDuration + transferDuration));
 
       //      simulationTestHelper.checkNothingChanged();
 
@@ -523,9 +523,9 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       message.getFootstepDataList().add().set(footstepData);
 
       simulationTestHelper.publishToController(message);
-      boolean success = simulationTestHelper.simulateAndWait(1.2);
+      boolean success = simulationTestHelper.simulateNow(1.2);
       changeAppendageGroundContactPointsToNewOffsets(time, robot, contactPointsInAnkleFrame, jointName, robotSide);
-      success = success && simulationTestHelper.simulateAndWait(2.0);
+      success = success && simulationTestHelper.simulateNow(2.0);
 
       return success;
    }

@@ -69,7 +69,7 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
       headTrajectoryMessage.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
       simulationTestHelper.publishToController(headTrajectoryMessage);
 
-      boolean success = simulationTestHelper.simulateAndWait(getRobotModel().getControllerDT()); // Trick to get frames synchronized with the controller.
+      boolean success = simulationTestHelper.simulateNow(getRobotModel().getControllerDT()); // Trick to get frames synchronized with the controller.
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -77,7 +77,7 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
       humanoidReferenceFrames.updateFrames();
       desiredRandomChestOrientation.changeFrame(humanoidReferenceFrames.getChestFrame());
 
-      success = simulationTestHelper.simulateAndWait(1.0 + trajectoryTime);
+      success = simulationTestHelper.simulateNow(1.0 + trajectoryTime);
       assertTrue(success);
 
       humanoidReferenceFrames.updateFrames();
@@ -120,24 +120,24 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
                                                                                                         ReferenceFrame.getWorldFrame(),
                                                                                                         chestCoMFrame);
       simulationTestHelper.publishToController(lookStraightAheadMessage);
-      assertTrue(simulationTestHelper.simulateAndWait(trajectoryTime + 0.1));
+      assertTrue(simulationTestHelper.simulateNow(trajectoryTime + 0.1));
 
       HeadTrajectoryMessage lookLeftMessage = HumanoidMessageTools.createHeadTrajectoryMessage(trajectoryTime,
                                                                                                lookLeft,
                                                                                                ReferenceFrame.getWorldFrame(),
                                                                                                chestCoMFrame);
       simulationTestHelper.publishToController(lookLeftMessage);
-      assertTrue(simulationTestHelper.simulateAndWait(trajectoryTime + 0.1));
+      assertTrue(simulationTestHelper.simulateNow(trajectoryTime + 0.1));
 
       HeadTrajectoryMessage lookRightMessage = HumanoidMessageTools.createHeadTrajectoryMessage(trajectoryTime,
                                                                                                 lookRight,
                                                                                                 ReferenceFrame.getWorldFrame(),
                                                                                                 chestCoMFrame);
       simulationTestHelper.publishToController(lookRightMessage);
-      assertTrue(simulationTestHelper.simulateAndWait(trajectoryTime + 0.1));
+      assertTrue(simulationTestHelper.simulateNow(trajectoryTime + 0.1));
 
       simulationTestHelper.publishToController(lookStraightAheadMessage);
-      assertTrue(simulationTestHelper.simulateAndWait(trajectoryTime + 0.1));
+      assertTrue(simulationTestHelper.simulateNow(trajectoryTime + 0.1));
 
       simulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
@@ -157,7 +157,7 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
 
       simulationTestHelper.setCamera(new Point3D(0.0, 0.0, 0.4), new Point3D(5.0, 0.0, 2.0));
 
-      assertTrue(simulationTestHelper.simulateAndWait(1.0));
+      assertTrue(simulationTestHelper.simulateNow(1.0));
    }
 
    public static Quaternion findControllerDesiredOrientation(String bodyName, YoVariableHolder yoVariableHolder)

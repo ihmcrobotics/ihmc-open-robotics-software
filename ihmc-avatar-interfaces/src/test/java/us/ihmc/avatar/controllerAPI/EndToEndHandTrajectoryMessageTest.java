@@ -84,7 +84,6 @@ import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
-import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
 import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -138,7 +137,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       double controllerDT = getRobotModel().getControllerDT();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -186,7 +185,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          handTrajectoryMessage.getSe3Trajectory().getControlFramePose().getOrientation().setUnsafe(0.0, 0.0, 0.0, 0.0);
 
          simulationTestHelper.publishToController(handTrajectoryMessage);
-         success = simulationTestHelper.simulateAndWait(controllerDT);
+         success = simulationTestHelper.simulateNow(controllerDT);
          humanoidReferenceFrames.updateFrames();
          String handName = fullRobotModel.getHand(robotSide).getName();
 
@@ -198,7 +197,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
                                                            statusMessages.remove(0),
                                                            controllerDT);
 
-         success = simulationTestHelper.simulateAndWait(1.0 + trajectoryTime);
+         success = simulationTestHelper.simulateNow(1.0 + trajectoryTime);
          assertTrue(success);
 
          humanoidReferenceFrames.updateFrames();
@@ -242,11 +241,11 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       double controllerDT = getRobotModel().getControllerDT();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       simulationTestHelper.publishToController(EndToEndTestTools.generateStepsInPlace(simulationTestHelper.getControllerFullRobotModel(), 10));
-      success = simulationTestHelper.simulateAndWait(0.5);
+      success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -295,7 +294,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          handTrajectoryMessage.getSe3Trajectory().getControlFramePose().getOrientation().setUnsafe(0.0, 0.0, 0.0, 0.0);
 
          simulationTestHelper.publishToController(handTrajectoryMessage);
-         success = simulationTestHelper.simulateAndWait(controllerDT);
+         success = simulationTestHelper.simulateNow(controllerDT);
          humanoidReferenceFrames.updateFrames();
          String handName = fullRobotModel.getHand(robotSide).getName();
 
@@ -307,7 +306,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
                                                            statusMessages.remove(0),
                                                            controllerDT);
 
-         success = simulationTestHelper.simulateAndWait(1.0 + trajectoryTime);
+         success = simulationTestHelper.simulateNow(1.0 + trajectoryTime);
          assertTrue(success);
 
          humanoidReferenceFrames.updateFrames();
@@ -342,7 +341,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       simulationTestHelper.start();
       ThreadTools.sleep(1000);
       Random random = new Random(873736734567L);
-      boolean success = simulationTestHelper.simulateAndWait(1.0);
+      boolean success = simulationTestHelper.simulateNow(1.0);
       assertTrue(success);
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -371,7 +370,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          simulationTestHelper.addStaticVisuals(visualDefinitionFactory.getVisualDefinitions());
 
          simulationTestHelper.publishToController(handTrajectoryMessage);
-         success = simulationTestHelper.simulateAndWait(trajectoryTime + 1.5);
+         success = simulationTestHelper.simulateNow(trajectoryTime + 1.5);
          assertTrue(success);
       }
 
@@ -403,7 +402,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          simulationTestHelper.addStaticVisuals(visualDefinitionFactory.getVisualDefinitions());
 
          simulationTestHelper.publishToController(handTrajectoryMessage);
-         success = simulationTestHelper.simulateAndWait(trajectoryTime + 1.5);
+         success = simulationTestHelper.simulateNow(trajectoryTime + 1.5);
          assertTrue(success);
       }
 
@@ -432,7 +431,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       Random random = new Random(34536);
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -528,7 +527,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          simulationTestHelper.publishToController(handTrajectoryMessage);
       }
 
-      success = simulationTestHelper.simulateAndWait(2.0 * controllerDT);
+      success = simulationTestHelper.simulateNow(2.0 * controllerDT);
       assertTrue(success);
       fullRobotModel.updateFrames();
       int expectedNumberOfPointsInGenerator = Math.min(RigidBodyTaskspaceControlState.maxPointsInGenerator, numberOfTrajectoryPoints + 1);
@@ -579,7 +578,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          }
       }
 
-      success = simulationTestHelper.simulateAndWait(trajectoryTime + firstTrajectoryPointTime + 0.5);
+      success = simulationTestHelper.simulateNow(trajectoryTime + firstTrajectoryPointTime + 0.5);
       assertTrue(success);
       fullRobotModel.updateFrames();
 
@@ -637,7 +636,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -660,7 +659,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          }
          simulationTestHelper.publishToController(message);
 
-         success = simulationTestHelper.simulateAndWait(4.0 * getRobotModel().getControllerDT());
+         success = simulationTestHelper.simulateNow(4.0 * getRobotModel().getControllerDT());
          assertTrue(success);
 
          RigidBodyControlMode controllerState = EndToEndTestTools.findRigidBodyControlManagerState(handName, simulationTestHelper);
@@ -684,7 +683,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          }
          simulationTestHelper.publishToController(message);
 
-         success = simulationTestHelper.simulateAndWait(4.0 * getRobotModel().getControllerDT());
+         success = simulationTestHelper.simulateNow(4.0 * getRobotModel().getControllerDT());
          assertTrue(success);
 
          RigidBodyControlMode controllerState = EndToEndTestTools.findRigidBodyControlManagerState(handName, simulationTestHelper);
@@ -710,7 +709,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       simulationTestHelper.createSubscriberFromController(TaskspaceTrajectoryStatusMessage.class, statusMessages::add);
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -809,11 +808,11 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
          handTrajectoryMessages.add(handTrajectoryMessage);
          simulationTestHelper.publishToController(handTrajectoryMessage);
-         success = simulationTestHelper.simulateAndWait(controllerDT);
+         success = simulationTestHelper.simulateNow(controllerDT);
          assertTrue(success);
       }
 
-      success = simulationTestHelper.simulateAndWait(controllerDT);
+      success = simulationTestHelper.simulateNow(controllerDT);
       fullRobotModel.updateFrames();
       assertTrue(success);
 
@@ -847,7 +846,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
             lastPoint.setIncludingFrame(framePoint);
          }
 
-         success = simulationTestHelper.simulateAndWait(lastPointTime - timeOffset);
+         success = simulationTestHelper.simulateNow(lastPointTime - timeOffset);
          assertTrue(success);
 
          timeOffset = lastPointTime;
@@ -858,7 +857,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
             break;
       }
 
-      success = simulationTestHelper.simulateAndWait(0.5);
+      success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       // check internal tracking is decent:
@@ -933,7 +932,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -1031,12 +1030,12 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
             handTrajectoryMessages.get(robotSide).add(handTrajectoryMessage);
             simulationTestHelper.publishToController(handTrajectoryMessage);
-            success = simulationTestHelper.simulateAndWait(getRobotModel().getControllerDT());
+            success = simulationTestHelper.simulateNow(getRobotModel().getControllerDT());
             assertTrue(success);
          }
       }
 
-      success = simulationTestHelper.simulateAndWait(0.05 + getRobotModel().getControllerDT());
+      success = simulationTestHelper.simulateNow(0.05 + getRobotModel().getControllerDT());
       assertTrue(success);
 
       for (RobotSide robotSide : RobotSide.values)
@@ -1062,7 +1061,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       simulationTestHelper.setCamera(new Point3D(0.0, 0.0, 0.5), new Point3D(6.0, 0.0, 0.5));
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -1149,12 +1148,12 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
             }
 
             simulationTestHelper.publishToController(handTrajectoryMessage);
-            success = simulationTestHelper.simulateAndWait(getRobotModel().getControllerDT());
+            success = simulationTestHelper.simulateNow(getRobotModel().getControllerDT());
             assertTrue(success);
          }
       }
 
-      success = simulationTestHelper.simulateAndWait(0.1);
+      success = simulationTestHelper.simulateNow(0.1);
       assertTrue(success);
 
       double overrideTrajectoryTime = 1.0;
@@ -1183,7 +1182,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          overridingPoses.put(robotSide, desiredHandPose);
       }
 
-      success = simulationTestHelper.simulateAndWait(2.0 * getRobotModel().getControllerDT());
+      success = simulationTestHelper.simulateNow(2.0 * getRobotModel().getControllerDT());
       assertTrue(success);
       fullRobotModel.updateFrames();
 
@@ -1194,7 +1193,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          EndToEndTestTools.assertTotalNumberOfWaypointsInTaskspaceManager(handName, 2, simulationTestHelper);
       }
 
-      success = simulationTestHelper.simulateAndWait(overrideTrajectoryTime + 1.0);
+      success = simulationTestHelper.simulateNow(overrideTrajectoryTime + 1.0);
       assertTrue(success);
       fullRobotModel.updateFrames();
 
@@ -1272,7 +1271,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -1304,7 +1303,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
          simulationTestHelper.publishToController(handTrajectoryMessage);
 
-         success = simulationTestHelper.simulateAndWait(trajectoryTime / 2.0);
+         success = simulationTestHelper.simulateNow(trajectoryTime / 2.0);
          assertTrue(success);
 
          RigidBodyControlMode controllerState = EndToEndTestTools.findRigidBodyControlManagerState(handName, simulationTestHelper);
@@ -1320,7 +1319,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
          simulationTestHelper.publishToController(new StopAllTrajectoryMessage());
 
-         success = simulationTestHelper.simulateAndWait(0.05);
+         success = simulationTestHelper.simulateNow(0.05);
          assertTrue(success);
 
          controllerState = EndToEndTestTools.findRigidBodyControlManagerState(handName, simulationTestHelper);
@@ -1345,7 +1344,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       simulationTestHelper.start();
 
-      boolean success = simulationTestHelper.simulateAndWait(1.5);
+      boolean success = simulationTestHelper.simulateNow(1.5);
       assertTrue(success);
 
       PrepareForLocomotionMessage prepareForLocomotionMessage = new PrepareForLocomotionMessage();
@@ -1365,7 +1364,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
                                                                                        ReferenceFrame.getWorldFrame());
       simulationTestHelper.publishToController(message);
 
-      assertTrue(simulationTestHelper.simulateAndWait(1.0));
+      assertTrue(simulationTestHelper.simulateNow(1.0));
 
       FootstepDataListMessage twoStepsInPlace = twoStepsInPlace(fullRobotModel.getSoleFrames());
       simulationTestHelper.publishToController(twoStepsInPlace);
@@ -1376,7 +1375,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
       for (int i = 0; i < numberOfAssertions; i++)
       {
-         assertTrue(simulationTestHelper.simulateAndWait(walkingDuration / numberOfAssertions));
+         assertTrue(simulationTestHelper.simulateNow(walkingDuration / numberOfAssertions));
 
          FramePose3D currentHandPose = new FramePose3D(rightHandControlFrame);
          currentHandPose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -1401,7 +1400,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       simulationTestHelper.addRegistry(testRegistry);
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(1.5);
+      boolean success = simulationTestHelper.simulateNow(1.5);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -1511,7 +1510,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          }
       });
 
-      success = simulationTestHelper.simulateAndWait(0.5 * trajectoryTime.getValue());
+      success = simulationTestHelper.simulateNow(0.5 * trajectoryTime.getValue());
       assertTrue(success);
 
       double desiredEpsilon = 6.0e-3;
@@ -1539,7 +1538,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
                                                                  0.1);
       }
 
-      success = simulationTestHelper.simulateAndWait(0.5 * trajectoryTime.getValue() + 1.5);
+      success = simulationTestHelper.simulateNow(0.5 * trajectoryTime.getValue() + 1.5);
       assertTrue(success);
 
       desiredEpsilon = 1.0e-7;

@@ -69,7 +69,7 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
 
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(robotModel, simulationTestingParameters);
       simulationTestHelper.start();
-      boolean success = simulationTestHelper.simulateAndWait(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -79,7 +79,7 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
       double timeToCompleteWalking = sendWalkingPacket(robotModel, fullRobotModel, referenceFrames);
       sendArmTrajectoryMessageWithRandomPoints(random, robotModel, fullRobotModel);
 
-      success = simulationTestHelper.simulateAndWait(timeToCompleteWalking);
+      success = simulationTestHelper.simulateNow(timeToCompleteWalking);
       assertTrue(success);
    }
 
@@ -91,7 +91,7 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
 
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(robotModel, simulationTestingParameters);
       simulationTestHelper.start();
-      boolean success = simulationTestHelper.simulateAndWait(2.5);
+      boolean success = simulationTestHelper.simulateNow(2.5);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -120,7 +120,7 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
                         .set(HumanoidMessageTools.createSE3TrajectoryPointMessage(11.0, position, orientation, zeroVelocity, zeroVelocity));
          simulationTestHelper.publishToController(handHoldMessage);
       }
-      success = simulationTestHelper.simulateAndWait(timeToCompleteWalking);
+      success = simulationTestHelper.simulateNow(timeToCompleteWalking);
       assertTrue(success);
    }
 
@@ -188,7 +188,7 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
             messageList.add(armTrajectoryMessage);
             simulationTestHelper.publishToController(armTrajectoryMessage);
 
-            success = simulationTestHelper.simulateAndWait(robotModel.getControllerDT());
+            success = simulationTestHelper.simulateNow(robotModel.getControllerDT());
             assertTrue(success);
          }
          armTrajectoryMessages.put(robotSide, messageList);

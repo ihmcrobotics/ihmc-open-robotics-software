@@ -178,7 +178,7 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
 
       setupCamera();
 
-      boolean success = simulationTestHelper.simulateAndWait(1.0);
+      boolean success = simulationTestHelper.simulateNow(1.0);
       assertTrue(success);
 
       // ******************************** //
@@ -189,12 +189,12 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
       LogTools.info("path has " + rrtPlanner.getOptimalPath().size() + " nodes");
 
       simulationTestHelper.addStaticVisuals(getPrintNodePath(rrtPlanner.getOptimalPath(), ColorDefinitions.Red()));
-      success = simulationTestHelper.simulateAndWait(0.5);
+      success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       rrtPlanner.updateOptimalPath(50, 200);
       simulationTestHelper.addStaticVisuals(getPrintNodePath(rrtPlanner.getOptimalPath(), ColorDefinitions.Aqua()));
-      success = simulationTestHelper.simulateAndWait(0.5);
+      success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       LogTools.info("shortcut optimized path has " + rrtPlanner.getOptimalPath().size() + " nodes");
@@ -264,7 +264,7 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
 
       LogTools.info("END!!");
 
-      success = simulationTestHelper.simulateAndWait(1.0);
+      success = simulationTestHelper.simulateNow(1.0);
       assertTrue(success);
 
    }

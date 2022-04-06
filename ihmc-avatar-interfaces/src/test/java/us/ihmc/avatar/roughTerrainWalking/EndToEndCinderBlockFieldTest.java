@@ -104,7 +104,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -120,7 +120,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       double stepTime = walkingControllerParameters.getDefaultSwingTime() + walkingControllerParameters.getDefaultTransferTime();
       double initialFinalTransfer = walkingControllerParameters.getDefaultInitialTransferTime();
 
-      success = simulationTestHelper.simulateAndWait(footsteps.getFootstepDataList().size() * stepTime + 2.0 * initialFinalTransfer + 1.0);
+      success = simulationTestHelper.simulateNow(footsteps.getFootstepDataList().size() * stepTime + 2.0 * initialFinalTransfer + 1.0);
       assertTrue(success);
 
       Point3D step1 = footsteps.getFootstepDataList().get(footsteps.getFootstepDataList().size() - 1).getLocation();
@@ -157,13 +157,13 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       simulationTestHelper.setCameraFocusPosition(1.6, 0.0, 1.0);
       simulationTestHelper.setCameraPosition(1.6, -6.0, 2.4);
 
-      assertTrue(simulationTestHelper.simulateAndWait(0.5));
+      assertTrue(simulationTestHelper.simulateNow(0.5));
       simulationTestHelper.setBufferInPointIndexToCurrent();
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       simulationTestHelper.publishToController(footsteps);
       double simulationTime = 1.1 * EndToEndTestTools.computeWalkingDuration(footsteps, walkingControllerParameters);
-      assertTrue(simulationTestHelper.simulateAndWait(simulationTime));
+      assertTrue(simulationTestHelper.simulateNow(simulationTime));
    }
 
    public void testSteppingStonesB() throws Exception
@@ -192,14 +192,14 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       simulationTestHelper.setCameraFocusPosition(2.0, 1.3, 1.0);
       simulationTestHelper.setCameraPosition(6.0, 7.0, 3.25);
 
-      assertTrue(simulationTestHelper.simulateAndWait(0.5));
+      assertTrue(simulationTestHelper.simulateNow(0.5));
       simulationTestHelper.setBufferInPointIndexToCurrent();
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       EndToEndTestTools.setStepDurations(footsteps, 1.5 * walkingControllerParameters.getDefaultSwingTime(), Double.NaN);
       simulationTestHelper.publishToController(footsteps);
       double simulationTime = 1.1 * EndToEndTestTools.computeWalkingDuration(footsteps, walkingControllerParameters);
-      assertTrue(simulationTestHelper.simulateAndWait(simulationTime));
+      assertTrue(simulationTestHelper.simulateNow(simulationTime));
    }
 
    public void testSlantedCinderBlockField(boolean varyHeight) throws Exception
@@ -233,7 +233,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       simulationTestHelper.setCameraPosition(0.0, -6.0, 2.25);
       simulationTestHelper.requestCameraRigidBodyTracking(getSimpleRobotName(), simulationTestHelper.getControllerFullRobotModel().getPelvis().getName());
 
-      assertTrue(simulationTestHelper.simulateAndWait(0.5));
+      assertTrue(simulationTestHelper.simulateNow(0.5));
       simulationTestHelper.setBufferInPointIndexToCurrent();
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
@@ -244,7 +244,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       }
       simulationTestHelper.publishToController(footsteps);
       double simulationTime = 1.1 * EndToEndTestTools.computeWalkingDuration(footsteps, walkingControllerParameters);
-      assertTrue(simulationTestHelper.simulateAndWait(simulationTime));
+      assertTrue(simulationTestHelper.simulateNow(simulationTime));
    }
 
    public void testSlantedCinderBlockAnkleRollLimit() throws Exception
@@ -278,7 +278,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       simulationTestHelper.setCameraPosition(0.0, -6.0, 2.25);
       simulationTestHelper.requestCameraRigidBodyTracking(getSimpleRobotName(), simulationTestHelper.getControllerFullRobotModel().getPelvis().getName());
 
-      assertTrue(simulationTestHelper.simulateAndWait(0.5));
+      assertTrue(simulationTestHelper.simulateNow(0.5));
       simulationTestHelper.setBufferInPointIndexToCurrent();
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
@@ -289,7 +289,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       }
       simulationTestHelper.publishToController(footsteps);
       double simulationTime = 1.1 * EndToEndTestTools.computeWalkingDuration(footsteps, walkingControllerParameters);
-      assertTrue(simulationTestHelper.simulateAndWait(simulationTime));
+      assertTrue(simulationTestHelper.simulateNow(simulationTime));
    }
 
    public abstract double getPelvisOffsetHeight();

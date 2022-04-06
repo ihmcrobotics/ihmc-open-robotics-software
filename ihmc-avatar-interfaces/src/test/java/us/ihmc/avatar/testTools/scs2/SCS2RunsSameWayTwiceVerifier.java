@@ -37,8 +37,8 @@ public class SCS2RunsSameWayTwiceVerifier
 
       while (!firstSimDone && !secondSimDone)
       {
-         simulationTestHelperOne.simulateAndWait(1.0);
-         simulationTestHelperTwo.simulateAndWait(1.0);
+         simulationTestHelperOne.simulateNow(1.0);
+         simulationTestHelperTwo.simulateNow(1.0);
 
          if (!compareSCSInstances(maxPercentDifference, stringsToIgnore))
          {
@@ -90,7 +90,7 @@ public class SCS2RunsSameWayTwiceVerifier
       {
          walk.set(false);
       }
-      simulationTestHelperTwo.simulateAndWait(standingTimeDuration);
+      simulationTestHelperTwo.simulateNow(standingTimeDuration);
       if (walk != null)
       {
          walk.set(true);

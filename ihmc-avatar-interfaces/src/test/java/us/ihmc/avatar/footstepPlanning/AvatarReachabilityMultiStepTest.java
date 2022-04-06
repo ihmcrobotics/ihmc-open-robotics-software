@@ -278,13 +278,13 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       simulationTestHelper.start();
 
-      boolean success = simulationTestHelper.simulateAndWait(initialStanceTime);
+      boolean success = simulationTestHelper.simulateNow(initialStanceTime);
       if (!visualize)
          assertTrue(success);
 
       simulationTestHelper.publishToController(footstepDataListMessage);
 
-      success = simulationTestHelper.simulateAndWait(stepTime);
+      success = simulationTestHelper.simulateNow(stepTime);
       if (!visualize)
          assertTrue(success);
    }

@@ -131,7 +131,7 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
       simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(2.0);
+      boolean success = simulationTestHelper.simulateNow(2.0);
       assertTrue(success);
 
       double firstTrajectoryTime = 1.0;
@@ -176,7 +176,7 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
       handWrenchTrajectoryMessage.getWrenchTrajectory().set(wrenchTrajectoryMessage);
       simulationTestHelper.publishToController(handWrenchTrajectoryMessage);
 
-      success = simulationTestHelper.simulateAndWait(5.0);
+      success = simulationTestHelper.simulateNow(5.0);
       assertTrue(success);
 
       assertEquals(testEnvironment.getBallRadius(), testEnvironment.getBallRobotPosition().getZ(), 0.01);

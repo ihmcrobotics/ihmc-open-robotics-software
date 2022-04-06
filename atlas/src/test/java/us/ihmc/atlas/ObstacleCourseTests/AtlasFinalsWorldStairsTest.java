@@ -82,19 +82,19 @@ public class AtlasFinalsWorldStairsTest
       setupCameraForWalkingUpStairs();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       ReferenceFrame rootFrame = simulationTestHelper.getControllerFullRobotModel().getRootJoint().getFrameAfterJoint();
       FramePoint3D pelvisPosition = new FramePoint3D(rootFrame);
       pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
       PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, pelvisPosition.getZ() + 0.025);
       simulationTestHelper.publishToController(message);
 
-      success = simulationTestHelper.simulateAndWait(0.5);
+      success = simulationTestHelper.simulateNow(0.5);
 
       FootstepDataListMessage footstepDataList = createFootstepsWithHighSwing(robotModel.getWalkingControllerParameters());
       simulationTestHelper.publishToController(footstepDataList);
 
-      success = success && simulationTestHelper.simulateAndWait(14.0);
+      success = success && simulationTestHelper.simulateNow(14.0);
 
       simulationTestHelper.createVideo(getSimpleRobotName(), 1);
 
@@ -130,19 +130,19 @@ public class AtlasFinalsWorldStairsTest
       setupCameraForWalkingUpStairs();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       ReferenceFrame rootFrame = simulationTestHelper.getControllerFullRobotModel().getRootJoint().getFrameAfterJoint();
       FramePoint3D pelvisPosition = new FramePoint3D(rootFrame);
       pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
       PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, pelvisPosition.getZ() + 0.07);
       simulationTestHelper.publishToController(message);
 
-      success = simulationTestHelper.simulateAndWait(0.5);
+      success = simulationTestHelper.simulateNow(0.5);
 
       FootstepDataListMessage footstepDataList = createFastFootstepsForStairs(robotModel.getWalkingControllerParameters());
       simulationTestHelper.publishToController(footstepDataList);
 
-      success = success && simulationTestHelper.simulateAndWait(12.0);
+      success = success && simulationTestHelper.simulateNow(12.0);
 
       simulationTestHelper.createVideo(getSimpleRobotName(), 1);
 

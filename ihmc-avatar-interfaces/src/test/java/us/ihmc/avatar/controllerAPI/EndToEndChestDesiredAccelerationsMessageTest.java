@@ -53,7 +53,7 @@ public abstract class EndToEndChestDesiredAccelerationsMessageTest implements Mu
       simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -71,7 +71,7 @@ public abstract class EndToEndChestDesiredAccelerationsMessageTest implements Mu
       assertEquals(defaultControlState, EndToEndTestTools.findRigidBodyControlManagerState(chest.getName(), simulationTestHelper));
 
       simulationTestHelper.publishToController(desiredAccelerationsMessage);
-      success = simulationTestHelper.simulateAndWait(RigidBodyUserControlState.TIME_WITH_NO_MESSAGE_BEFORE_ABORT - 0.05);
+      success = simulationTestHelper.simulateNow(RigidBodyUserControlState.TIME_WITH_NO_MESSAGE_BEFORE_ABORT - 0.05);
       assertTrue(success);
 
       assertEquals(RigidBodyControlMode.USER, EndToEndTestTools.findRigidBodyControlManagerState(chest.getName(), simulationTestHelper));
@@ -80,7 +80,7 @@ public abstract class EndToEndChestDesiredAccelerationsMessageTest implements Mu
       double[] qpOutputJointAccelerations = findQPOutputJointAccelerations(spineJoints, simulationTestHelper);
       assertArrayEquals(chestDesiredJointAccelerations, qpOutputJointAccelerations, 1.0e-3);
 
-      success = simulationTestHelper.simulateAndWait(0.07);
+      success = simulationTestHelper.simulateNow(0.07);
       assertTrue(success);
 
       assertEquals(defaultControlState, EndToEndTestTools.findRigidBodyControlManagerState(chest.getName(), simulationTestHelper));

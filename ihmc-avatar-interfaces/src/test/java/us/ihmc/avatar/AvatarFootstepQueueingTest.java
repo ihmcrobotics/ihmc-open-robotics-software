@@ -16,8 +16,6 @@ import controller_msgs.msg.dds.FootstepStatusMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -26,12 +24,10 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.variable.YoEnum;
 
 public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterface
 {
@@ -97,12 +93,12 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
       double transfer = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
       double swing = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
 
-      simulationTestHelper.simulateAndWait(1.0);
+      simulationTestHelper.simulateNow(1.0);
       simulationTestHelper.publishToController(footMessage);
 
       double simulationTime = intitialTransfer - transfer + (transfer + swing) * (firstNumberofSteps - 1);
 
-      assertTrue(simulationTestHelper.simulateAndWait(simulationTime));
+      assertTrue(simulationTestHelper.simulateNow(simulationTime));
 
       footMessage = new FootstepDataListMessage();
       footMessage.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
@@ -122,7 +118,7 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
 
       simulationTime = transfer + (transfer + swing) * (secondNumberOfSteps + 1);
 
-      assertTrue(simulationTestHelper.simulateAndWait(simulationTime));
+      assertTrue(simulationTestHelper.simulateNow(simulationTime));
       assertEquals(firstNumberofSteps + secondNumberOfSteps, stepCounter.get());
    }
 
@@ -157,7 +153,7 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
 
       RobotSide side = RobotSide.LEFT;
 
-      simulationTestHelper.simulateAndWait(1.0);
+      simulationTestHelper.simulateNow(1.0);
 
       double intitialTransfer = robotModel.getWalkingControllerParameters().getDefaultInitialTransferTime();
       double transfer = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
@@ -198,13 +194,13 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
          // send a new footstep when the current footstep is halfway done
          double simulationTime = (transfer + swing);
 
-         assertTrue(simulationTestHelper.simulateAndWait(simulationTime));
+         assertTrue(simulationTestHelper.simulateNow(simulationTime));
 
       }
 
       double simulationTime = intitialTransfer - transfer + (transfer + swing) * (firstNumberofSteps - 1) - (((transfer + swing)) * firstNumberofSteps - 1);
 
-      assertTrue(simulationTestHelper.simulateAndWait(simulationTime));
+      assertTrue(simulationTestHelper.simulateNow(simulationTime));
 
       assertEquals(firstNumberofSteps, stepCounter.get());
    }
@@ -240,7 +236,7 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
 
       RobotSide side = RobotSide.LEFT;
 
-      simulationTestHelper.simulateAndWait(1.0);
+      simulationTestHelper.simulateNow(1.0);
 
       int firstNumberofSteps = 4;
       double stepX = 0.0;
@@ -255,7 +251,7 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
          side = side.getOppositeSide();
 
          simulationTestHelper.publishToController(footMessage);
-         simulationTestHelper.simulateAndWait(0.05);
+         simulationTestHelper.simulateNow(0.05);
 
          stepX += stepLength;
       }
@@ -266,7 +262,7 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
 
       double simulationTime = intitialTransfer - transfer + (transfer + swing) * (firstNumberofSteps);
 
-      assertTrue(simulationTestHelper.simulateAndWait(simulationTime));
+      assertTrue(simulationTestHelper.simulateNow(simulationTime));
 
       assertEquals(firstNumberofSteps, stepCounter.get());
    }
@@ -315,47 +311,5 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
    protected double getForcePointOffsetZInChestFrame()
    {
       return 0.3;
-   }
-
-   private class SingleSupportStartCondition implements StateTransitionCondition
-   {
-      private final YoEnum<ConstraintType> footConstraintType;
-
-      public SingleSupportStartCondition(YoEnum<ConstraintType> footConstraintType)
-      {
-         this.footConstraintType = footConstraintType;
-      }
-
-      @Override
-      public boolean testCondition(double time)
-      {
-         return footConstraintType.getEnumValue() == ConstraintType.SWING;
-      }
-   }
-
-   private class DoubleSupportStartCondition implements StateTransitionCondition
-   {
-      private final YoEnum<WalkingStateEnum> walkingState;
-
-      private final RobotSide side;
-
-      public DoubleSupportStartCondition(YoEnum<WalkingStateEnum> walkingState, RobotSide side)
-      {
-         this.walkingState = walkingState;
-         this.side = side;
-      }
-
-      @Override
-      public boolean testCondition(double time)
-      {
-         if (side == RobotSide.LEFT)
-         {
-            return (walkingState.getEnumValue() == WalkingStateEnum.TO_STANDING) || (walkingState.getEnumValue() == WalkingStateEnum.TO_WALKING_LEFT_SUPPORT);
-         }
-         else
-         {
-            return (walkingState.getEnumValue() == WalkingStateEnum.TO_STANDING) || (walkingState.getEnumValue() == WalkingStateEnum.TO_WALKING_RIGHT_SUPPORT);
-         }
-      }
    }
 }

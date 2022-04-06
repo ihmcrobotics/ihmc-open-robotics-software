@@ -30,7 +30,6 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.allocations.AllocationProfiler;
 import us.ihmc.commons.allocations.AllocationRecord;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -118,7 +117,7 @@ public class AtlasAllocationTest
       {
          try
          {
-            testHelper.simulateAndWait(0.25);
+            testHelper.simulateNow(0.25);
          }
          catch (Exception e)
          {
@@ -136,7 +135,7 @@ public class AtlasAllocationTest
 
       int warmupSteps = 4;
       testHelper.publishToController(createFootsteps(warmupSteps, defaultSwingDuration, defaultTransferDuration, 0.0, 0.0));
-      testHelper.simulateAndWait(3.0);
+      testHelper.simulateNow(3.0);
 
       int steps = 4;
       FootstepDataListMessage footsteps = createFootsteps(steps, defaultSwingDuration, defaultTransferDuration, 0.0, 0.3);
@@ -146,7 +145,7 @@ public class AtlasAllocationTest
          try
          {
             testHelper.publishToController(footsteps);
-            testHelper.simulateAndWait(4.0);
+            testHelper.simulateNow(4.0);
          }
          catch (Exception e)
          {
@@ -172,7 +171,7 @@ public class AtlasAllocationTest
          try
          {
             testHelper.publishToController(message);
-            testHelper.simulateAndWait(duration + 0.25);
+            testHelper.simulateNow(duration + 0.25);
          }
          catch (Exception e)
          {
@@ -199,7 +198,7 @@ public class AtlasAllocationTest
          try
          {
             testHelper.publishToController(message);
-            testHelper.simulateAndWait(duration + 0.25);
+            testHelper.simulateNow(duration + 0.25);
          }
          catch (Exception e)
          {
@@ -221,7 +220,7 @@ public class AtlasAllocationTest
          try
          {
             testHelper.publishToController(message);
-            testHelper.simulateAndWait(duration + 0.25);
+            testHelper.simulateNow(duration + 0.25);
          }
          catch (Exception e)
          {
@@ -243,7 +242,7 @@ public class AtlasAllocationTest
          try
          {
             testHelper.publishToController(message);
-            testHelper.simulateAndWait(duration + 0.25);
+            testHelper.simulateNow(duration + 0.25);
          }
          catch (Exception e)
          {
@@ -343,7 +342,7 @@ public class AtlasAllocationTest
       DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
       testHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(robotModel, new FlatGroundEnvironment(), simulationTestingParameters);
       testHelper.start();
-      testHelper.simulateAndWait(0.25);
+      testHelper.simulateNow(0.25);
    }
 
    private void testInternal(Runnable whatToTestFor)

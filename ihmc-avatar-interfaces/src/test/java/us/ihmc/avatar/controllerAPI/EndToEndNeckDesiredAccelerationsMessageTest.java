@@ -48,7 +48,7 @@ public abstract class EndToEndNeckDesiredAccelerationsMessageTest implements Mul
       simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(0.1);
+      boolean success = simulationTestHelper.simulateNow(0.1);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -69,7 +69,7 @@ public abstract class EndToEndNeckDesiredAccelerationsMessageTest implements Mul
       }
       NeckTrajectoryMessage neckTrajectoryMessage = HumanoidMessageTools.createNeckTrajectoryMessage(0.5, desiredJointPositions);
       simulationTestHelper.publishToController(neckTrajectoryMessage);
-      success = simulationTestHelper.simulateAndWait(0.55);
+      success = simulationTestHelper.simulateNow(0.55);
       assertTrue(success);
 
       double[] neckDesiredJointAccelerations = RandomNumbers.nextDoubleArray(random, neckJoints.length, 0.1);
@@ -78,7 +78,7 @@ public abstract class EndToEndNeckDesiredAccelerationsMessageTest implements Mul
       assertEquals(RigidBodyControlMode.JOINTSPACE, findControllerState(headName, simulationTestHelper));
 
       simulationTestHelper.publishToController(neckDesiredAccelerationsMessage);
-      success = simulationTestHelper.simulateAndWait(RigidBodyUserControlState.TIME_WITH_NO_MESSAGE_BEFORE_ABORT - 0.05);
+      success = simulationTestHelper.simulateNow(RigidBodyUserControlState.TIME_WITH_NO_MESSAGE_BEFORE_ABORT - 0.05);
       assertTrue(success);
 
       assertEquals(RigidBodyControlMode.USER, findControllerState(headName, simulationTestHelper));
@@ -87,7 +87,7 @@ public abstract class EndToEndNeckDesiredAccelerationsMessageTest implements Mul
       double[] qpOutputJointAccelerations = findQPOutputJointAccelerations(neckJoints, simulationTestHelper);
       assertArrayEquals(neckDesiredJointAccelerations, qpOutputJointAccelerations, 1.0e-3);
 
-      success = simulationTestHelper.simulateAndWait(0.07);
+      success = simulationTestHelper.simulateNow(0.07);
       assertTrue(success);
 
       assertEquals(RigidBodyControlMode.JOINTSPACE, findControllerState(headName, simulationTestHelper));

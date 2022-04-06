@@ -63,7 +63,7 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
       createSimulationTestHelper(environment, location);
       simulationTestHelper.start();
       ThreadTools.sleep(1000);
-      assertTrue(simulationTestHelper.simulateAndWait(0.25));
+      assertTrue(simulationTestHelper.simulateNow(0.25));
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
@@ -138,12 +138,12 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
       {
          simulationTestHelper.publishToController(messages.get(messageIdx));
          expectedNumberOfSteps += messages.get(messageIdx).getFootstepDataList().size();
-         assertTrue(simulationTestHelper.simulateAndWait(timeBetweenSendingMessages));
+         assertTrue(simulationTestHelper.simulateNow(timeBetweenSendingMessages));
          assertEquals(expectedNumberOfSteps, (int) numberOfStepsInController.getValueAsLongBits());
          timeUntilDone -= timeBetweenSendingMessages;
       }
 
-      assertTrue(simulationTestHelper.simulateAndWait(timeUntilDone + 0.25));
+      assertTrue(simulationTestHelper.simulateNow(timeUntilDone + 0.25));
       assertEquals(0, (int) numberOfStepsInController.getValueAsLongBits());
    }
 
@@ -153,13 +153,13 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
       DRCStartingLocation location = DRCObstacleCourseStartingLocation.DEFAULT_BUT_ALMOST_PI;
       createSimulationTestHelper(environment, location);
       simulationTestHelper.start();
-      assertTrue(simulationTestHelper.simulateAndWait(0.25));
+      assertTrue(simulationTestHelper.simulateNow(0.25));
 
-      MovingReferenceFrame messageFrame = simulationTestHelper.getReferenceFrames().getMidFeetZUpFrame();
+      MovingReferenceFrame messageFrame = simulationTestHelper.getControllerReferenceFrames().getMidFeetZUpFrame();
       transformMessageToWorld(messageFrame, messageInMidFeetZUp);
 
       simulationTestHelper.publishToController(messageInMidFeetZUp);
-      assertTrue(simulationTestHelper.simulateAndWait(0.25));
+      assertTrue(simulationTestHelper.simulateNow(0.25));
 
       int steps = (int) simulationTestHelper.findVariable("currentNumberOfFootsteps").getValueAsDouble();
       assertEquals(messageInMidFeetZUp.getFootstepDataList().size(), steps);

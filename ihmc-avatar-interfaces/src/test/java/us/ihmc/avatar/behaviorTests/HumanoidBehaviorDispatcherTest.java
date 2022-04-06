@@ -215,7 +215,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      boolean success = simulationTestHelper.simulateAndWait(1.0);
+      boolean success = simulationTestHelper.simulateNow(1.0);
       assertTrue(success);
 
       PelvisOrientationTrajectoryBehavior pelvisOrientationTrajectoryBehavior = new PelvisOrientationTrajectoryBehavior(getSimpleRobotName(), ros2Node, yoTime);
@@ -228,7 +228,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
                           .publish(requestPelvisPoseBehaviorPacket);
       LogTools.debug(this, "Requesting PelvisPoseBehavior");
 
-      success = simulationTestHelper.simulateAndWait(1.0);
+      success = simulationTestHelper.simulateNow(1.0);
       assertTrue(success);
 
       PelvisOrientationTrajectoryMessage pelvisPosePacket = createPelvisOrientationTrajectoryMessage(new Vector3D(0.0, 1.0, 0.0), Math.toRadians(5.0));
@@ -243,7 +243,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       LogTools.debug(this, "Starting to Excecute Behavior");
       while (!pelvisOrientationTrajectoryBehavior.isDone() && yoTime.getDoubleValue() < 20.0)
       {
-         success = simulationTestHelper.simulateAndWait(4.0);
+         success = simulationTestHelper.simulateNow(4.0);
          assertTrue(success);
       }
 
@@ -258,7 +258,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      boolean success = simulationTestHelper.simulateAndWait(1.0);
+      boolean success = simulationTestHelper.simulateNow(1.0);
       assertTrue(success);
 
       WalkToLocationBehavior walkToLocationBehavior = new WalkToLocationBehavior(getSimpleRobotName(),
@@ -275,7 +275,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
                           .publish(requestWalkToObjectBehaviorPacket);
       LogTools.debug(this, "Requesting WalkToLocationBehavior");
 
-      success = simulationTestHelper.simulateAndWait(1.0);
+      success = simulationTestHelper.simulateNow(1.0);
       assertTrue(success);
 
       double walkDistance = 2.0;
@@ -301,11 +301,11 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       LogTools.debug(this, "Starting to Excecute Behavior");
       while (!walkToLocationBehavior.isDone() && yoTime.getDoubleValue() < 20.0)
       {
-         success = simulationTestHelper.simulateAndWait(4.0);
+         success = simulationTestHelper.simulateNow(4.0);
          assertTrue(success);
       }
 
-      FramePose2D finalMidFeetPose = new FramePose2D(simulationTestHelper.getReferenceFrames().getMidFeetZUpFrame());
+      FramePose2D finalMidFeetPose = new FramePose2D(simulationTestHelper.getControllerReferenceFrames().getMidFeetZUpFrame());
       finalMidFeetPose.changeFrame(worldFrame);
       assertPosesAreWithinThresholds(targetMidFeetPose, finalMidFeetPose);
       assertTrue(walkToLocationBehavior.isDone());
@@ -318,7 +318,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      boolean success = simulationTestHelper.simulateAndWait(1.0);
+      boolean success = simulationTestHelper.simulateNow(1.0);
       assertTrue(success);
 
       YoEnum<RobotSide> supportLeg = new YoEnum<>("supportLeg", registry, RobotSide.class);
@@ -351,22 +351,22 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
                           .publish(requestDiagnosticBehaviorPacket);
       LogTools.debug(this, "Requesting DiagnosticBehavior");
 
-      success = simulationTestHelper.simulateAndWait(1.0);
+      success = simulationTestHelper.simulateNow(1.0);
       assertTrue(success);
 
       diagnosticBehavior.requestDiagnosticBehavior(DiagnosticTask.KARATE_KID);
 
-      success = simulationTestHelper.simulateAndWait(1.0);
+      success = simulationTestHelper.simulateNow(1.0);
       assertTrue(success);
 
       assertFalse(diagnosticBehavior.isDone());
 
-      success = simulationTestHelper.simulateAndWait(10.0);
+      success = simulationTestHelper.simulateNow(10.0);
       assertTrue(success);
 
       assertFalse(diagnosticBehavior.isDone());
 
-      success = simulationTestHelper.simulateAndWait(36.0);
+      success = simulationTestHelper.simulateNow(36.0);
       assertTrue(success);
 
       assertTrue(diagnosticBehavior.isDone());
@@ -379,7 +379,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      boolean success = simulationTestHelper.simulateAndWait(1.0);
+      boolean success = simulationTestHelper.simulateNow(1.0);
       assertTrue(success);
 
       WalkToLocationBehavior walkToLocationBehavior = new WalkToLocationBehavior(getSimpleRobotName(),
@@ -396,7 +396,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
                           .publish(requestWalkToObjectBehaviorPacket);
       LogTools.debug(this, "Requesting WalkToLocationBehavior");
 
-      success = simulationTestHelper.simulateAndWait(1.0);
+      success = simulationTestHelper.simulateNow(1.0);
       assertTrue(success);
 
       double walkDistance = 2.0;
@@ -406,9 +406,9 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       assertTrue(walkToLocationBehavior.hasInputBeenSet());
       LogTools.debug(this, "Setting WalkToLocationBehavior Target");
 
-      success = simulationTestHelper.simulateAndWait(2.0);
+      success = simulationTestHelper.simulateNow(2.0);
       assertTrue(success);
-      FramePose2D poseBeforeStop = new FramePose2D(simulationTestHelper.getReferenceFrames().getMidFeetZUpFrame());
+      FramePose2D poseBeforeStop = new FramePose2D(simulationTestHelper.getControllerReferenceFrames().getMidFeetZUpFrame());
       targetMidFeetPose.changeFrame(worldFrame);
 
       BehaviorControlModePacket stopModePacket = HumanoidMessageTools.createBehaviorControlModePacket(BehaviorControlModeEnum.STOP);
@@ -416,9 +416,9 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
                           .publish(stopModePacket);
       LogTools.debug(this, "Sending Stop Request");
 
-      success = simulationTestHelper.simulateAndWait(2.0);
+      success = simulationTestHelper.simulateNow(2.0);
       assertTrue(success);
-      FramePose2D poseTwoSecondsAfterStop = new FramePose2D(simulationTestHelper.getReferenceFrames().getMidFeetZUpFrame());
+      FramePose2D poseTwoSecondsAfterStop = new FramePose2D(simulationTestHelper.getControllerReferenceFrames().getMidFeetZUpFrame());
       targetMidFeetPose.changeFrame(worldFrame);
 
       double distanceWalkedAfterStopRequest = poseTwoSecondsAfterStop.getPositionDistance(poseBeforeStop);
@@ -433,7 +433,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      boolean success = simulationTestHelper.simulateAndWait(1.0);
+      boolean success = simulationTestHelper.simulateNow(1.0);
       assertTrue(success);
 
       WalkToLocationBehavior walkToLocationBehavior = new WalkToLocationBehavior(getSimpleRobotName(),
@@ -450,7 +450,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
                           .publish(requestWalkToObjectBehaviorPacket);
       LogTools.debug(this, "Requesting WalkToLocationBehavior");
 
-      success = simulationTestHelper.simulateAndWait(1.0);
+      success = simulationTestHelper.simulateNow(1.0);
       assertTrue(success);
 
       double walkDistance = 2.0;
@@ -460,9 +460,9 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       assertTrue(walkToLocationBehavior.hasInputBeenSet());
       LogTools.debug(this, "Setting WalkToLocationBehavior Target");
 
-      success = simulationTestHelper.simulateAndWait(2.0);
+      success = simulationTestHelper.simulateNow(2.0);
       assertTrue(success);
-      FramePose2D poseBeforePause = new FramePose2D(simulationTestHelper.getReferenceFrames().getMidFeetZUpFrame());
+      FramePose2D poseBeforePause = new FramePose2D(simulationTestHelper.getControllerReferenceFrames().getMidFeetZUpFrame());
       targetMidFeetPose.changeFrame(worldFrame);
 
       BehaviorControlModePacket pauseModePacket = HumanoidMessageTools.createBehaviorControlModePacket(BehaviorControlModeEnum.PAUSE);
@@ -471,9 +471,9 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       publisher.publish(pauseModePacket);
       LogTools.debug(this, "Sending Pause Request");
 
-      success = simulationTestHelper.simulateAndWait(2.0);
+      success = simulationTestHelper.simulateNow(2.0);
       assertTrue(success);
-      FramePose2D poseTwoSecondsAfterPause = new FramePose2D(simulationTestHelper.getReferenceFrames().getMidFeetZUpFrame());
+      FramePose2D poseTwoSecondsAfterPause = new FramePose2D(simulationTestHelper.getControllerReferenceFrames().getMidFeetZUpFrame());
       targetMidFeetPose.changeFrame(worldFrame);
 
       double distanceWalkedAfterStopRequest = poseTwoSecondsAfterPause.getPositionDistance(poseBeforePause);
@@ -486,12 +486,12 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
 
       while (!walkToLocationBehavior.isDone() && yoTime.getDoubleValue() < 20.0)
       {
-         success = simulationTestHelper.simulateAndWait(4.0);
+         success = simulationTestHelper.simulateNow(4.0);
          assertTrue(success);
       }
 
       assertTrue(walkToLocationBehavior.isDone());
-      FramePose2D finalMidFeetPose = new FramePose2D(simulationTestHelper.getReferenceFrames().getMidFeetZUpFrame());
+      FramePose2D finalMidFeetPose = new FramePose2D(simulationTestHelper.getControllerReferenceFrames().getMidFeetZUpFrame());
       targetMidFeetPose.changeFrame(worldFrame);
       assertPosesAreWithinThresholds(targetMidFeetPose, finalMidFeetPose);
 
@@ -500,7 +500,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
 
    private FramePose2D offsetCurrentRobotMidFeetZUpPose(double walkDistance)
    {
-      FramePose2D targetMidFeetPose = new FramePose2D(simulationTestHelper.getReferenceFrames().getMidFeetZUpFrame());
+      FramePose2D targetMidFeetPose = new FramePose2D(simulationTestHelper.getControllerReferenceFrames().getMidFeetZUpFrame());
       targetMidFeetPose.changeFrame(worldFrame);
       targetMidFeetPose.setX(targetMidFeetPose.getX() + walkDistance);
       return targetMidFeetPose;

@@ -268,7 +268,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       for (int msgIdx = 0; msgIdx < numberOfMessages; msgIdx++)
       {
          simulationTestHelper.publishToController(messages[msgIdx]);
-         simulationTestHelper.simulateAndWait(2.0 * controllerDT);
+         simulationTestHelper.simulateNow(2.0 * controllerDT);
 
          for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
             EndToEndTestTools.assertTotalNumberOfWaypointsInJointspaceManager((msgIdx + 1) * numberOfPoints + 1,
@@ -291,7 +291,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
                                                                            spineJoints[jointIdx].getName(),
                                                                            simulationTestHelper);
 
-      simulationTestHelper.simulateAndWait(totalTime + 1.0);
+      simulationTestHelper.simulateNow(totalTime + 1.0);
       assertControlWasConsistent(controllerSpy);
       assertDesiredsContinous(controllerSpy);
    }
@@ -335,7 +335,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       // send message
       double controllerDT = getRobotModel().getControllerDT();
       simulationTestHelper.publishToController(message);
-      simulationTestHelper.simulateAndWait(3.0 * controllerDT);
+      simulationTestHelper.simulateNow(3.0 * controllerDT);
 
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
@@ -346,7 +346,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
                                                                            simulationTestHelper);
       }
 
-      simulationTestHelper.simulateAndWait(maxTime);
+      simulationTestHelper.simulateNow(maxTime);
 
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
@@ -392,7 +392,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       simulationTestHelper.getRootRegistry().addChild(testRegistry);
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(1.5);
+      boolean success = simulationTestHelper.simulateNow(1.5);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -490,7 +490,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
          }
       });
 
-      success = simulationTestHelper.simulateAndWait(0.5 * trajectoryTime.getValue());
+      success = simulationTestHelper.simulateNow(0.5 * trajectoryTime.getValue());
       assertTrue(success);
 
       double desiredEpsilon = 5.0e-3;
@@ -524,7 +524,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
                             + Math.abs(controllerDesiredVelocities[i] - spineJoints[i].getQd()));
       }
 
-      success = simulationTestHelper.simulateAndWait(0.5 * trajectoryTime.getValue() + 1.5);
+      success = simulationTestHelper.simulateNow(0.5 * trajectoryTime.getValue() + 1.5);
 
       assertTrue(success);
 
@@ -618,7 +618,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
          if (jointTrajectoryTime > trajectoryTime)
             trajectoryTime = jointTrajectoryTime;
       }
-      assertTrue(simulationTestHelper.simulateAndWait(trajectoryTime + 5.0 * controllerDT));
+      assertTrue(simulationTestHelper.simulateNow(trajectoryTime + 5.0 * controllerDT));
       assertDesiredsMatchAfterExecution(message, spineJoints, simulationTestHelper);
    }
 
@@ -639,7 +639,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       simulationTestHelper.publishToController(message);
 
       double trajectoryTime = message.getSo3Trajectory().getTaskspaceTrajectoryPoints().getLast().getTime();
-      assertTrue(simulationTestHelper.simulateAndWait(trajectoryTime + 5.0 * controllerDT));
+      assertTrue(simulationTestHelper.simulateNow(trajectoryTime + 5.0 * controllerDT));
 
       Quaternion desired = new Quaternion(message.getSo3Trajectory().getTaskspaceTrajectoryPoints().getLast().getOrientation());
       assertChestDesired(simulationTestHelper, desired, chest);
@@ -678,7 +678,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       chest = fullRobotModel.getChest();
       spineJoints = MultiBodySystemTools.createOneDoFJointPath(pelvis, chest);
       numberOfJoints = spineJoints.length;
-      assertTrue(simulationTestHelper.simulateAndWait(1.0));
+      assertTrue(simulationTestHelper.simulateNow(1.0));
 
       controllerSpy = new ControllerSpy(spineJoints, simulationTestHelper, getRobotModel().getControllerDT());
       simulationTestHelper.addRobotControllerOnControllerThread(controllerSpy);

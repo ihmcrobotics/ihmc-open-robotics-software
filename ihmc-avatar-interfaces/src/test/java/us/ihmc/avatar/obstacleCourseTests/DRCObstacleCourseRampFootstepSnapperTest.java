@@ -110,7 +110,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       setupCameraForWalkingOverRamp();
       ThreadTools.sleep(1000);
 
-      boolean success = simulationTestHelper.simulateAndWait(2.0);
+      boolean success = simulationTestHelper.simulateNow(2.0);
       //      FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
 
       FootstepDataListMessage corruptedFootstepDataList = createFootstepsForWalkingUpRamp();
@@ -206,7 +206,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       simulationTestHelper.publishToController(snappedFootstepDataList);
 
       // Check for success
-      success = success && simulationTestHelper.simulateAndWait(16.0);
+      success = success && simulationTestHelper.simulateNow(16.0);
 
       simulationTestHelper.createVideo(getSimpleRobotName(), 2);
 

@@ -160,11 +160,11 @@ public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTest
       }
 
       controllerSpy.setFootStepCheckPoints(rootLocations, getStepLength(), getStepWidth());
-      simulationTestHelper.simulateAndWait(1.0);
+      simulationTestHelper.simulateNow(1.0);
       simulationTestHelper.publishToController(footMessage);
       double simulationTime = 1 * footMessage.getFootstepDataList().size() + 1.0;
 
-      assertTrue(simulationTestHelper.simulateAndWait(simulationTime));
+      assertTrue(simulationTestHelper.simulateNow(simulationTime));
       controllerSpy.assertCheckpointsReached();
    }
 
@@ -199,7 +199,7 @@ public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTest
       }
 
       controllerSpy.setFootStepCheckPoints(rootLocations, getStepLength(), getStepWidth());
-      simulationTestHelper.simulateAndWait(1.0);
+      simulationTestHelper.simulateNow(1.0);
       simulationTestHelper.publishToController(footMessage);
       double simulationTime = 1 * footMessage.getFootstepDataList().size() + 1.0;
 
@@ -208,22 +208,22 @@ public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTest
       StateTransitionCondition firstPushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
       StateTransitionCondition secondPushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
 
-      success = simulationTestHelper.simulateAndWait(2.0);
+      success = simulationTestHelper.simulateNow(2.0);
       assertTrue(success);
 
       magnitude1 = 80; //TODO: overwritten
       LogTools.info("Force magnitude = " + magnitude1 + "N along " + forceDirection1.toString());
       pushRobotController.applyForceDelayed(firstPushCondition, delay1, forceDirection1, magnitude1, duration1);
-      success = simulationTestHelper.simulateAndWait(2.0);
+      success = simulationTestHelper.simulateNow(2.0);
       assertTrue(success);
 
       magnitude2 = 80; //TODO:overwritten
       LogTools.info("Force magnitude = " + magnitude2 + "N along " + forceDirection2.toString());
       pushRobotController.applyForceDelayed(secondPushCondition, delay2, forceDirection2, magnitude2, duration2);
-      success = simulationTestHelper.simulateAndWait(2.0);
+      success = simulationTestHelper.simulateNow(2.0);
       assertTrue(success);
 
-      assertTrue(simulationTestHelper.simulateAndWait(simulationTime - 6.0));
+      assertTrue(simulationTestHelper.simulateNow(simulationTime - 6.0));
       controllerSpy.assertCheckpointsReached();
    }
 

@@ -149,7 +149,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       footstepPlanningModule.getVisibilityGraphParameters().setTooHighToStepDistance(height + 0.05);
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(1.0);
+      boolean success = simulationTestHelper.simulateNow(1.0);
       Assertions.assertTrue(success);
 
       PoseReferenceFrame startingFrame = new PoseReferenceFrame("startingFrame", ReferenceFrame.getWorldFrame());
@@ -186,7 +186,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       footstepPlannerParameters.setCheckForPathCollisions(false);
 
       ThreadTools.sleep(1000);
-      simulationTestHelper.simulateAndWait(1.0);
+      simulationTestHelper.simulateNow(1.0);
 
       FramePose3D goalPose = new FramePose3D();
       goalPose.getPosition().set(2.0, 0.0, 0.0);
@@ -342,7 +342,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
 
       simulationTestHelper.publishToController(footstepDataListMessage);
 
-      boolean success = simulationTestHelper.simulateAndWait((swingDuration + transferDuration) * numberOfSteps + 5.0);
+      boolean success = simulationTestHelper.simulateNow((swingDuration + transferDuration) * numberOfSteps + 5.0);
       assertTrue(success);
    }
 
@@ -359,7 +359,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
 
    private void armsUp()
    {
-      simulationTestHelper.simulateAndWait(0.1);
+      simulationTestHelper.simulateNow(0.1);
 
       // bring the arms in a stretched position
       for (RobotSide robotSide : RobotSide.values)
@@ -379,7 +379,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
          simulationTestHelper.publishToController(armTrajectoryMessage);
       }
 
-      simulationTestHelper.simulateAndWait(2.0);
+      simulationTestHelper.simulateNow(2.0);
    }
 
    private static FootstepPlanningRequestPacket getRequest(FullHumanoidRobotModel fullRobotModel,
@@ -458,7 +458,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       }
       double simulationTime = 2.0 + 1.5 * stepTime * footstepDataListMessage.getFootstepDataList().size();
 
-      boolean success = simulationTestHelper.simulateAndWait(simulationTime);
+      boolean success = simulationTestHelper.simulateNow(simulationTime);
 
       simulationTestHelper.createVideo(getSimpleRobotName(), 1);
       //      simulationTestHelper.checkNothingChanged();

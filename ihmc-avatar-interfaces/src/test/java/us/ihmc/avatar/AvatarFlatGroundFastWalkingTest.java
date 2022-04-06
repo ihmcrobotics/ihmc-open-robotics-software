@@ -70,9 +70,9 @@ public abstract class AvatarFlatGroundFastWalkingTest implements MultiRobotTestI
    public void testForwardWalking() throws Exception
    {
       setupSim(getRobotModel(), false, false, null);
-      assertTrue(simulationTestHelper.simulateAndWait(2.0));
+      assertTrue(simulationTestHelper.simulateNow(2.0));
 
-      CommonHumanoidReferenceFrames referenceFrames = simulationTestHelper.getReferenceFrames();
+      CommonHumanoidReferenceFrames referenceFrames = simulationTestHelper.getControllerReferenceFrames();
       MovingReferenceFrame midFootZUpGroundFrame = referenceFrames.getMidFootZUpGroundFrame();
       FramePose3D startPose = new FramePose3D(midFootZUpGroundFrame);
       startPose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -87,7 +87,7 @@ public abstract class AvatarFlatGroundFastWalkingTest implements MultiRobotTestI
       footsteps.setOffsetFootstepsHeightWithExecutionError(true);
       simulationTestHelper.publishToController(footsteps);
 
-      boolean success = simulationTestHelper.simulateAndWait(1.1
+      boolean success = simulationTestHelper.simulateNow(1.1
             * EndToEndTestTools.computeWalkingDuration(footsteps, getRobotModel().getWalkingControllerParameters()));
       assertTrue(success);
    }

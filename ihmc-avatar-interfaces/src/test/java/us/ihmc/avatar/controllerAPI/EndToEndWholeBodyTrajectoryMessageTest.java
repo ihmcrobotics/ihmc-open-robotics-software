@@ -62,7 +62,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
@@ -84,7 +84,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       simulationTestHelper.publishToController(footTrajectoryMessage);
       simulationTestHelper.publishToController(HumanoidMessageTools.createAutomaticManipulationAbortMessage(false));
 
-      success = simulationTestHelper.simulateAndWait(1.0 + getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
+      success = simulationTestHelper.simulateNow(1.0 + getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
       assertTrue(success);
 
       // Now we can do the usual test.
@@ -160,7 +160,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
 
       simulationTestHelper.publishToController(wholeBodyTrajectoryMessage);
 
-      success = simulationTestHelper.simulateAndWait(getRobotModel().getControllerDT()); // Trick to get frames synchronized with the controller.
+      success = simulationTestHelper.simulateNow(getRobotModel().getControllerDT()); // Trick to get frames synchronized with the controller.
       assertTrue(success);
 
       humanoidReferenceFrames.updateFrames();
@@ -168,7 +168,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       for (RobotSide robotSide : RobotSide.values)
          desiredHandPoses.get(robotSide).changeFrame(ReferenceFrame.getWorldFrame());
 
-      success = simulationTestHelper.simulateAndWait(1.0 + trajectoryTime);
+      success = simulationTestHelper.simulateNow(1.0 + trajectoryTime);
       assertTrue(success);
 
       RigidBodyBasics chest = fullRobotModel.getChest();
@@ -200,7 +200,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       MessageCollectionMessenger messageCollectionMessenger = new MessageCollectionMessenger();
@@ -222,7 +222,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       simulationTestHelper.publishToController(footTrajectoryMessage);
       //drcSimulationTestHelper.send(new AutomaticManipulationAbortMessage(false));
 
-      success = simulationTestHelper.simulateAndWait(1.0 + getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
+      success = simulationTestHelper.simulateNow(1.0 + getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
       assertTrue(success);
 
       // Now we can do the usual test.
@@ -284,7 +284,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       simulationTestHelper.createSubscriberFromController(MessageCollectionNotification.class, messageCollectionMessenger::receivedNotification);
       messageCollectionMessenger.sendMessageCollectionSafe(simulationTestHelper::publishToController, false);
 
-      success = simulationTestHelper.simulateAndWait(getRobotModel().getControllerDT()); // Trick to get frames synchronized with the controller.
+      success = simulationTestHelper.simulateNow(getRobotModel().getControllerDT()); // Trick to get frames synchronized with the controller.
       assertTrue(success);
 
       humanoidReferenceFrames.updateFrames();
@@ -292,7 +292,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       for (RobotSide robotSide : RobotSide.values)
          desiredHandPoses.get(robotSide).changeFrame(ReferenceFrame.getWorldFrame());
 
-      success = simulationTestHelper.simulateAndWait(1.0 + trajectoryTime);
+      success = simulationTestHelper.simulateNow(1.0 + trajectoryTime);
       assertTrue(success);
 
       RigidBodyBasics chest = fullRobotModel.getChest();
@@ -324,7 +324,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       MessageCollectionMessenger messageCollectionMessenger = new MessageCollectionMessenger();
@@ -345,7 +345,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       FootTrajectoryMessage footTrajectoryMessage = HumanoidMessageTools.createFootTrajectoryMessage(footSide, 0.0, desiredPosition, desiredOrientation);
       simulationTestHelper.publishToController(footTrajectoryMessage);
 
-      success = simulationTestHelper.simulateAndWait(1.0 + getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
+      success = simulationTestHelper.simulateNow(1.0 + getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
       assertTrue(success);
 
       // Now we can do the usual test.
@@ -409,7 +409,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       simulationTestHelper.createSubscriberFromController(MessageCollectionNotification.class, messageCollectionMessenger::receivedNotification);
       messageCollectionMessenger.sendMessageCollectionSafe(simulationTestHelper::publishToController, false);
 
-      success = simulationTestHelper.simulateAndWait(getRobotModel().getControllerDT()); // Trick to get frames synchronized with the controller.
+      success = simulationTestHelper.simulateNow(getRobotModel().getControllerDT()); // Trick to get frames synchronized with the controller.
       assertTrue(success);
 
       humanoidReferenceFrames.updateFrames();
@@ -417,7 +417,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       for (RobotSide robotSide : RobotSide.values)
          desiredHandPoses.get(robotSide).changeFrame(ReferenceFrame.getWorldFrame());
 
-      success = simulationTestHelper.simulateAndWait(1.0 + trajectoryTime);
+      success = simulationTestHelper.simulateNow(1.0 + trajectoryTime);
       assertTrue(success);
 
       RigidBodyBasics chest = fullRobotModel.getChest();
@@ -428,7 +428,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       //      EndToEndPelvisTrajectoryMessageTest.assertSingleWaypointExecuted(desiredPosition, desiredOrientation, simulationTestHelper);
       EndToEndHandTrajectoryMessageTest.assertSingleWaypointExecuted(footName, desiredFootPose.getPosition(), desiredFootPose.getOrientation(), simulationTestHelper);
 
-      success = simulationTestHelper.simulateAndWait(5.0 + trajectoryTime);
+      success = simulationTestHelper.simulateNow(5.0 + trajectoryTime);
       for (RobotSide robotSide : RobotSide.values)
       {
          String handName = simulationTestHelper.getControllerFullRobotModel().getHand(robotSide).getName();
@@ -468,7 +468,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       wholeBodyTrajectoryMessage.getChestTrajectoryMessage().set(chestTrajectoryMessage);
       simulationTestHelper.publishToController(wholeBodyTrajectoryMessage);
 
-      boolean success = simulationTestHelper.simulateAndWait(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
    }
 
@@ -496,7 +496,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       wholeBodyTrajectoryMessage.getPelvisTrajectoryMessage().set(pelvisTrajectoryMessage);
       simulationTestHelper.publishToController(wholeBodyTrajectoryMessage);
 
-      boolean success = simulationTestHelper.simulateAndWait(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
    }
 
