@@ -59,6 +59,7 @@ public class GDXWalkAction implements GDXBehaviorAction
    private final ImBoolean selected = new ImBoolean();
    private final ImInt referenceFrameIndex = new ImInt();
    private String[] referenceFrameNames;
+   private FootstepDataListMessage footstepDataListMessage;
 
    public void create(FocusBasedGDXCamera camera3D,
                       DRCRobotModel robotModel,
@@ -102,6 +103,7 @@ public class GDXWalkAction implements GDXBehaviorAction
          goalFootPose.changeFrame(ReferenceFrame.getWorldFrame());
          goalFeet.get(side).setPose(goalFootPose);
       }
+      footstepPlanGraphic.update();
    }
 
    @Override
@@ -123,6 +125,10 @@ public class GDXWalkAction implements GDXBehaviorAction
          footstepPlannerGoalGizmo.setParentFrame(referenceFrameLibrary.get(referenceFrameIndex.get()));
          poseToKeep.changeFrame(footstepPlannerGoalGizmo.getGizmoFrame().getParent());
          poseToKeep.get(footstepPlannerGoalGizmo.getTransformToParent());
+      }
+      if (ImGui.button(labels.get("Plan")))
+      {
+         plan();
       }
    }
 
@@ -166,8 +172,7 @@ public class GDXWalkAction implements GDXBehaviorAction
       footstepPlanGraphic.destroy();
    }
 
-   @Override
-   public void performAction()
+   public void plan()
    {
       double proximityToGoalToMaintainOrientation = 1.5;
 
@@ -225,6 +230,7 @@ public class GDXWalkAction implements GDXBehaviorAction
             LogTools.info("Rejection {}%: {}", FormattingTools.getFormattedToSignificantFigures(rejectionPercentage, 3), reason);
          }
          LogTools.info("Footstep planning failure...");
+         footstepDataListMessage = null;
       }
       else
       {
@@ -233,12 +239,20 @@ public class GDXWalkAction implements GDXBehaviorAction
 
          double swingDuration = 1.2;
          double transferDuration = 0.8;
-         FootstepDataListMessage footstepDataListMessage
-               = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlannerOutput.getFootstepPlan(),
-                                                                             swingDuration,
-                                                                             transferDuration);
+         footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlannerOutput.getFootstepPlan(),
+                                                                       swingDuration,
+                                                                       transferDuration);
          footstepDataListMessage.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
          footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
+      }
+   }
+
+   @Override
+   public void performAction()
+   {
+      plan();
+      if (footstepDataListMessage != null)
+      {
          ros2ControllerHelper.publishToController(footstepDataListMessage);
       }
    }
