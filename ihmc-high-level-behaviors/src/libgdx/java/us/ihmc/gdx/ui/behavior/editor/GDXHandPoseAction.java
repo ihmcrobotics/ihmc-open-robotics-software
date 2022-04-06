@@ -10,6 +10,7 @@ import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import imgui.type.ImDouble;
 import imgui.type.ImInt;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -45,6 +46,8 @@ public class GDXHandPoseAction implements GDXBehaviorAction
    private String[] referenceFrameNames;
    private ROS2ControllerHelper ros2ControllerHelper;
    private final ImBoolean selected = new ImBoolean();
+   private final ImDouble trajectoryTime = new ImDouble(4.0);
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
    public void create(FocusBasedGDXCamera camera3D,
                       DRCRobotModel robotModel,
@@ -85,7 +88,8 @@ public class GDXHandPoseAction implements GDXBehaviorAction
       if (selected.get())
       {
          poseGizmo.process3DViewInput(input);
-         highlightModel.setPose(poseGizmo.getTransformToParent(), handGraphicToControlTransform);
+         poseGizmo.getGizmoFrame().getTransformToDesiredFrame(tempTransform, ReferenceFrame.getWorldFrame());
+         highlightModel.setPose(tempTransform, handGraphicToControlTransform);
       }
    }
 
@@ -106,6 +110,7 @@ public class GDXHandPoseAction implements GDXBehaviorAction
          poseToKeep.changeFrame(poseGizmo.getGizmoFrame().getParent());
          poseToKeep.get(poseGizmo.getTransformToParent());
       }
+      ImGui.inputDouble("Trajectory time", trajectoryTime);
    }
 
    @Override
@@ -130,6 +135,7 @@ public class GDXHandPoseAction implements GDXBehaviorAction
          }
       }
       setSide(RobotSide.getSideFromString(jsonNode.get("side").asText()));
+//      trajectoryTime.set(jsonNode.get("trajectoryTime").asDouble());
       JSONTools.toEuclid(jsonNode, poseGizmo.getTransformToParent());
    }
 
@@ -138,6 +144,7 @@ public class GDXHandPoseAction implements GDXBehaviorAction
    {
       jsonNode.put("parentFrame", poseGizmo.getGizmoFrame().getParent().getName());
       jsonNode.put("side", side.getLowerCaseName());
+      jsonNode.put("trajectoryTime", trajectoryTime.get());
       JSONTools.toJSON(jsonNode, poseGizmo.getTransformToParent());
    }
 
@@ -147,15 +154,18 @@ public class GDXHandPoseAction implements GDXBehaviorAction
       highlightModel.dispose();
    }
 
-   public void moveHand(double trajectoryTime)
+   @Override
+   public void performAction()
    {
-      Pose3D endHandPose = new Pose3D(poseGizmo.getTransformToParent());
+      FramePose3D endHandPose = new FramePose3D();
+      endHandPose.setToZero(poseGizmo.getGizmoFrame());
+      endHandPose.changeFrame(ReferenceFrame.getWorldFrame());
       HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage();
       handTrajectoryMessage.setRobotSide(side.toByte());
       handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrameId(FrameInformation.CHEST_FRAME);
       handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(FrameInformation.WORLD_FRAME);
       SE3TrajectoryPointMessage trajectoryPoint = handTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add();
-      trajectoryPoint.setTime(trajectoryTime);
+      trajectoryPoint.setTime(trajectoryTime.get());
       trajectoryPoint.getPosition().set(endHandPose.getPosition());
       trajectoryPoint.getOrientation().set(endHandPose.getOrientation());
       trajectoryPoint.getLinearVelocity().set(EuclidCoreTools.zeroVector3D);
