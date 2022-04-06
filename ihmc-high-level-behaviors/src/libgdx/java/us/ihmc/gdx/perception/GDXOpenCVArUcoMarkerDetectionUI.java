@@ -115,38 +115,39 @@ public class GDXOpenCVArUcoMarkerDetectionUI
 
    public void update()
    {
-      stopwatch.lap();
-      detectionDurationPlotLine.addValue(arUcoMarkerDetection.getTimeTakenToDetect());
-
-      if (markerImagePanel.getVideoPanel().getIsShowing().get())
+      if (detectionEnabled.get())
       {
-         arUcoMarkerDetection.getImageOfDetection(imageForDrawing.getBytedecoOpenCVMat());
+         stopwatch.lap();
+         detectionDurationPlotLine.addValue(arUcoMarkerDetection.getTimeTakenToDetect());
 
-         arUcoMarkerDetection.drawDetectedMarkers(imageForDrawing.getBytedecoOpenCVMat(), idColor);
-         arUcoMarkerDetection.drawRejectedPoints(imageForDrawing.getBytedecoOpenCVMat());
-
-         opencv_imgproc.cvtColor(imageForDrawing.getBytedecoOpenCVMat(),
-                                 markerImagePanel.getBytedecoImage().getBytedecoOpenCVMat(),
-                                 opencv_imgproc.COLOR_RGB2RGBA);
-
-         markerImagePanel.draw();
-      }
-
-      if (showGraphics.get())
-      {
-         for (int i = 0; i < markersToTrack.size(); i++)
+         if (markerImagePanel.getVideoPanel().getIsShowing().get())
          {
-            OpenCVArUcoMarker markerToTrack = markersToTrack.get(i);
-            if (arUcoMarkerDetection.isDetected(markerToTrack))
+            arUcoMarkerDetection.getImageOfDetection(imageForDrawing.getBytedecoOpenCVMat());
+
+            arUcoMarkerDetection.drawDetectedMarkers(imageForDrawing.getBytedecoOpenCVMat(), idColor);
+            arUcoMarkerDetection.drawRejectedPoints(imageForDrawing.getBytedecoOpenCVMat());
+
+            opencv_imgproc.cvtColor(imageForDrawing.getBytedecoOpenCVMat(), markerImagePanel.getBytedecoImage().getBytedecoOpenCVMat(), opencv_imgproc.COLOR_RGB2RGBA);
+
+            markerImagePanel.draw();
+         }
+
+         if (showGraphics.get())
+         {
+            for (int i = 0; i < markersToTrack.size(); i++)
             {
-               markerPose.setToZero(cameraFrame);
-               arUcoMarkerDetection.getPose(markerToTrack, markerPose);
-               markerPose.changeFrame(ReferenceFrame.getWorldFrame());
-               markerPoseCoordinateFrames.get(i).setPoseInWorldFrame(markerPose);
+               OpenCVArUcoMarker markerToTrack = markersToTrack.get(i);
+               if (arUcoMarkerDetection.isDetected(markerToTrack))
+               {
+                  markerPose.setToZero(cameraFrame);
+                  arUcoMarkerDetection.getPose(markerToTrack, markerPose);
+                  markerPose.changeFrame(ReferenceFrame.getWorldFrame());
+                  markerPoseCoordinateFrames.get(i).setPoseInWorldFrame(markerPose);
+               }
             }
          }
+         restOfStuffPlotLine.addValue(stopwatch.lapElapsed());
       }
-      restOfStuffPlotLine.addValue(stopwatch.lapElapsed());
    }
 
    public void renderImGuiWidgets()
