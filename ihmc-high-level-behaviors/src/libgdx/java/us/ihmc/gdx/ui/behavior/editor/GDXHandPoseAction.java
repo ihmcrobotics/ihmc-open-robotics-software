@@ -73,6 +73,12 @@ public class GDXHandPoseAction implements GDXBehaviorAction
    }
 
    @Override
+   public void update()
+   {
+
+   }
+
+   @Override
    public void renderImGuiWidgets()
    {
 

@@ -20,16 +20,13 @@ import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.scs2.definition.geometry.ModelFileGeometryDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
-import us.ihmc.scs2.definition.visual.VisualDefinition;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -158,17 +155,17 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
 
    public void update()
    {
-      for (GDXRobotCollisionLink collisionLink : selfCollisionLinks)
-      {
-         collisionLink.update();
-      }
-      for (GDXRobotCollisionLink collisionLink : environmentCollisionLinks)
-      {
-         collisionLink.update();
-      }
-
       if (interactablesEnabled.get())
       {
+         for (GDXRobotCollisionLink collisionLink : selfCollisionLinks)
+         {
+            collisionLink.update();
+         }
+         for (GDXRobotCollisionLink collisionLink : environmentCollisionLinks)
+         {
+            collisionLink.update();
+         }
+
          walkPathControlRing.update();
       }
    }
@@ -176,18 +173,18 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
    // This happens after update.
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      walkPathControlRing.process3DViewInput(input);
-      for (GDXRobotCollisionLink collisionLink : selfCollisionLinks)
-      {
-         collisionLink.process3DViewInput(input);
-      }
-      for (GDXRobotCollisionLink collisionLink : environmentCollisionLinks)
-      {
-         collisionLink.process3DViewInput(input);
-      }
-
       if (interactablesEnabled.get())
       {
+         walkPathControlRing.process3DViewInput(input);
+         for (GDXRobotCollisionLink collisionLink : selfCollisionLinks)
+         {
+            collisionLink.process3DViewInput(input);
+         }
+         for (GDXRobotCollisionLink collisionLink : environmentCollisionLinks)
+         {
+            collisionLink.process3DViewInput(input);
+         }
+
          pelvisInteractable.process3DViewInput(input);
          for (GDXLiveRobotPartInteractable footInteractable : footInteractables)
          {
@@ -220,23 +217,23 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (showSelfCollisionMeshes.get())
-      {
-         for (GDXRobotCollisionLink collisionLink : selfCollisionLinks)
-         {
-            collisionLink.getRenderables(renderables, pool);
-         }
-      }
-      if (showEnvironmentCollisionMeshes.get())
-      {
-         for (GDXRobotCollisionLink collisionLink : environmentCollisionLinks)
-         {
-            collisionLink.getRenderables(renderables, pool);
-         }
-      }
-
       if (interactablesEnabled.get())
       {
+         if (showSelfCollisionMeshes.get())
+         {
+            for (GDXRobotCollisionLink collisionLink : selfCollisionLinks)
+            {
+               collisionLink.getRenderables(renderables, pool);
+            }
+         }
+         if (showEnvironmentCollisionMeshes.get())
+         {
+            for (GDXRobotCollisionLink collisionLink : environmentCollisionLinks)
+            {
+               collisionLink.getRenderables(renderables, pool);
+            }
+         }
+
          pelvisInteractable.getVirtualRenderables(renderables, pool);
          for (GDXLiveRobotPartInteractable footInteractable : footInteractables)
          {

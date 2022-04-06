@@ -46,7 +46,7 @@ public class GDXGizmoDemo
             baseUI.get3DSceneManager().addRenderableProvider(footstepRingGizmo);
             baseUI.getImGuiPanelManager().addPanel(footstepRingGizmo.createTunerPanel(GDXGizmoDemo.class.getSimpleName()));
 
-            footstepRingGizmo.getTransform().getTranslation().set(2.0, 1.0, 0.0);
+            footstepRingGizmo.getTransformToParent().getTranslation().set(2.0, 1.0, 0.0);
          }
 
          @Override

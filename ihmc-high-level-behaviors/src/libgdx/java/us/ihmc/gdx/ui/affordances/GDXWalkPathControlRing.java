@@ -98,7 +98,7 @@ public class GDXWalkPathControlRing
 
       goalFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("goalPose",
                                                                                   ReferenceFrame.getWorldFrame(),
-                                                                                  footstepPlannerGoalGizmo.getTransform());
+                                                                                  footstepPlannerGoalGizmo.getTransformToParent());
 
       turnWalkTurnPlanner = new TurnWalkTurnPlanner(footstepPlannerParameters);
 
@@ -120,7 +120,7 @@ public class GDXWalkPathControlRing
    {
       if (!modified)
       {
-         footstepPlannerGoalGizmo.getTransform().set(midFeetZUpFrame.getTransformToWorldFrame());
+         footstepPlannerGoalGizmo.getTransformToParent().set(midFeetZUpFrame.getTransformToWorldFrame());
       }
 
       if (footstepPlanToGenerateMeshes != null)
@@ -181,7 +181,7 @@ public class GDXWalkPathControlRing
          }
          if (footstepPlannerGoalGizmo.getIntersectsAnyArrow())
          {
-            footstepPlannerGoalGizmo.getTransform().appendOrientation(walkFacingDirection);
+            footstepPlannerGoalGizmo.getTransformToParent().appendOrientation(walkFacingDirection);
             updateStuff();
             queueFootstepPlan();
          }

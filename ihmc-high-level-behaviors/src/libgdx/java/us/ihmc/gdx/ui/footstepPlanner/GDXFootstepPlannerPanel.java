@@ -57,7 +57,7 @@ public class GDXFootstepPlannerPanel extends ImGuiPanel implements RenderablePro
       leftGoalFootstepGraphic = new GDXFootstepGraphic(contactPoints, RobotSide.LEFT);
       rightGoalFootstepGraphic = new GDXFootstepGraphic(contactPoints, RobotSide.RIGHT);
 
-      goalFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("goalPose", ReferenceFrame.getWorldFrame(), goalGizmo.getTransform());
+      goalFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("goalPose", ReferenceFrame.getWorldFrame(), goalGizmo.getTransformToParent());
 
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
       foostepPlanGraphic = new GDXFootstepPlanGraphic(contactPoints);

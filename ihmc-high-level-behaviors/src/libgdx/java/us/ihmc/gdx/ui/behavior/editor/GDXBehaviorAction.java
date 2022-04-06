@@ -12,6 +12,8 @@ public interface GDXBehaviorAction
 {
    public void process3DViewInput(ImGui3DViewInput input);
 
+   public void update();
+
    public void renderImGuiWidgets();
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool);

@@ -52,7 +52,10 @@ public class GDXBehaviorActionSequenceManager
 
    public void update()
    {
-
+      for (GDXBehaviorActionSequenceEditor editor : editors)
+      {
+         editor.update();
+      }
    }
 
    private void renderImGuiWidgets()
