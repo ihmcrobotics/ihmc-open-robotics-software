@@ -20,6 +20,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
@@ -51,10 +52,9 @@ public class GDXWalkAction implements GDXBehaviorAction
    private final SideDependentList<GDXFootstepGraphic> goalFeet = new SideDependentList<>();
    private final SideDependentList<FramePose3D> goalFeetPoses = new SideDependentList<>();
    private FootstepPlanningModule footstepPlanner;
-   private ReferenceFrame parentFrame = ReferenceFrame.getWorldFrame();
    private final GDXFootstepPlannerGoalGizmo footstepPlannerGoalGizmo = new GDXFootstepPlannerGoalGizmo();
    private FootstepPlannerParametersBasics footstepPlannerParameters;
-   private ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean selected = new ImBoolean();
    private final ImInt referenceFrameIndex = new ImInt();
    private String[] referenceFrameNames;
@@ -113,7 +113,11 @@ public class GDXWalkAction implements GDXBehaviorAction
    {
       if (ImGui.combo(labels.get("Reference frame"), referenceFrameIndex, referenceFrameNames))
       {
+         FramePose3D poseToKeep = new FramePose3D();
+         poseToKeep.setToZero(footstepPlannerGoalGizmo.getGizmoFrame());
          footstepPlannerGoalGizmo.setParentFrame(referenceFrameLibrary.get(referenceFrameIndex.get()));
+         poseToKeep.changeFrame(footstepPlannerGoalGizmo.getGizmoFrame().getParent());
+         poseToKeep.get(footstepPlannerGoalGizmo.getTransformToParent());
       }
    }
 

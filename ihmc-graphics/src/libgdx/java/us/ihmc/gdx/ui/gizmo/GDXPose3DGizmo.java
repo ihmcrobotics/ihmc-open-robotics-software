@@ -71,8 +71,8 @@ public class GDXPose3DGizmo implements RenderableProvider
    private final FramePose3D tempFramePose3D = new FramePose3D();
    /** The main, source, true, base transform that this thing represents. */
    private final RigidBodyTransform transformToParent;
-   private final ReferenceFrame parentReferenceFrame;
-   private final ReferenceFrame gizmoFrame;
+   private ReferenceFrame parentReferenceFrame;
+   private ReferenceFrame gizmoFrame;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
    private static final YawPitchRoll FLIP_180 = new YawPitchRoll(0.0, Math.PI, 0.0);
@@ -99,6 +99,12 @@ public class GDXPose3DGizmo implements RenderableProvider
       this.parentReferenceFrame = gizmoFrame.getParent();
       this.transformToParent = gizmoTransformToParentFrameToModify;
       this.gizmoFrame = gizmoFrame;
+   }
+
+   public void setParentFrame(ReferenceFrame parentReferenceFrame)
+   {
+      this.parentReferenceFrame = parentReferenceFrame;
+      gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentReferenceFrame, transformToParent);
    }
 
    public void create(FocusBasedGDXCamera camera3D)
