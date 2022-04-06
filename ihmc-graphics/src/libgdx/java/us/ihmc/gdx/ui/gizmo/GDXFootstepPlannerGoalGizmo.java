@@ -1,6 +1,7 @@
 package us.ihmc.gdx.ui.gizmo;
 
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Renderable;
@@ -222,6 +223,60 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
                   tempFramePose3D.changeFrame(parentReferenceFrame);
                   tempFramePose3D.get(transformToParent);
                }
+            }
+         }
+      }
+
+      // keyboard based controls
+      boolean upArrowHeld = ImGui.isKeyDown(ImGuiTools.getUpArrowKey());
+      boolean downArrowHeld = ImGui.isKeyDown(ImGuiTools.getDownArrowKey());
+      boolean leftArrowHeld = ImGui.isKeyDown(ImGuiTools.getLeftArrowKey());
+      boolean rightArrowHeld = ImGui.isKeyDown(ImGuiTools.getRightArrowKey());
+      boolean anyArrowHeld = upArrowHeld || downArrowHeld || leftArrowHeld || rightArrowHeld;
+      if (anyArrowHeld) // only the arrow keys do the moving
+      {
+         boolean ctrlHeld = ImGui.getIO().getKeyCtrl();
+         boolean altHeld = ImGui.getIO().getKeyAlt();
+         boolean shiftHeld = ImGui.getIO().getKeyShift();
+         double deltaTime = Gdx.graphics.getDeltaTime();
+         if (altHeld) // orientation
+         {
+            double amount = deltaTime * (shiftHeld ? 0.2 : 1.0);
+            if (leftArrowHeld && ctrlHeld) // yaw +
+            {
+               transformToParent.getRotation().appendYawRotation(amount);
+            }
+            if (rightArrowHeld && ctrlHeld) // yaw -
+            {
+               transformToParent.getRotation().appendYawRotation(-amount);
+            }
+         }
+         else // translation
+         {
+            double amount = deltaTime * (shiftHeld ? 0.05 : 0.4);
+            if (upArrowHeld && !ctrlHeld) // x +
+            {
+               transformToParent.getTranslation().addX(amount);
+            }
+            if (downArrowHeld && !ctrlHeld) // x -
+            {
+               transformToParent.getTranslation().subX(amount);
+            }
+            if (leftArrowHeld) // y +
+            {
+               transformToParent.getTranslation().addY(amount);
+            }
+            if (rightArrowHeld) // y -
+            {
+               transformToParent.getTranslation().subY(amount);
+            }
+            if (upArrowHeld && ctrlHeld) // z +
+            {
+               transformToParent.getTranslation().addZ(amount);
+            }
+            if (downArrowHeld && ctrlHeld) // z -
+            {
+               transformToParent.getTranslation().subZ(amount);
             }
          }
       }
