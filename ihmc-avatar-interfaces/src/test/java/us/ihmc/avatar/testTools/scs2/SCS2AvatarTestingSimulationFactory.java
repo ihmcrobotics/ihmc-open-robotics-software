@@ -136,7 +136,7 @@ public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFact
          String className = callingElement.getClassName();
          String methodName = callingElement.getMethodName();
          String classSimpleName = className.substring(className.lastIndexOf(".") + 1);
-         return classSimpleName + ": " + methodName;
+         return classSimpleName + "-" + methodName;
       }
    }
 
