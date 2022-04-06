@@ -130,7 +130,7 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
       simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(1.5);
+      boolean success = simulationTestHelper.simulateNow(1.5);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -173,7 +173,7 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
 
       simulationTestHelper.publishToController(handTrajectoryMessage);
 
-      success = simulationTestHelper.simulateAndWait(1.0 + 2.0 * trajectoryTime);
+      success = simulationTestHelper.simulateNow(1.0 + 2.0 * trajectoryTime);
       assertTrue(success);
 
       String handName = fullRobotModel.getHand(robotSide).getName();

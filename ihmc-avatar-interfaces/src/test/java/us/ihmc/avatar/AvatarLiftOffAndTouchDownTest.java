@@ -59,7 +59,7 @@ public class AvatarLiftOffAndTouchDownTest
 
       FootstepDataListMessage message = new FootstepDataListMessage();
       FootstepDataMessage step = message.getFootstepDataList().add();
-      MovingReferenceFrame soleFrame = testHelper.getReferenceFrames().getSoleFrame(side);
+      MovingReferenceFrame soleFrame = testHelper.getControllerReferenceFrames().getSoleFrame(side);
       FramePose3D footstepPose = new FramePose3D(soleFrame);
       footstepPose.setX(stepLength);
 
@@ -132,13 +132,13 @@ public class AvatarLiftOffAndTouchDownTest
       success &= checkFootPitch(testHelper, 0.0, side);
 
       testHelper.publishToController(message);
-      testHelper.simulateAndWait(robotModel.getWalkingControllerParameters().getDefaultInitialTransferTime() - timeOffset);
+      testHelper.simulateNow(robotModel.getWalkingControllerParameters().getDefaultInitialTransferTime() - timeOffset);
       if (!MathTools.epsilonEquals(startPitch, 0.0, Math.toRadians(5.0)))
          success &= checkPartialContact(testHelper, side, robotModel);
-      testHelper.simulateAndWait(timeOffset);
+      testHelper.simulateNow(timeOffset);
       success &= checkFootPitch(testHelper, startPitch, side);
 
-      testHelper.simulateAndWait(robotModel.getWalkingControllerParameters().getDefaultSwingTime() / 3.0);
+      testHelper.simulateNow(robotModel.getWalkingControllerParameters().getDefaultSwingTime() / 3.0);
 
       if (!Precision.equals(adjustmentX, 0.0))
       {
@@ -150,17 +150,17 @@ public class AvatarLiftOffAndTouchDownTest
          testHelper.publishToController(adjustFootstepMessage);
       }
 
-      testHelper.simulateAndWait(robotModel.getWalkingControllerParameters().getDefaultSwingTime() * 2.0 / 3.0);
+      testHelper.simulateNow(robotModel.getWalkingControllerParameters().getDefaultSwingTime() * 2.0 / 3.0);
       success &= checkFootPitch(testHelper, finalPitch, side);
-      testHelper.simulateAndWait(timeOffset);
+      testHelper.simulateNow(timeOffset);
       if (!MathTools.epsilonEquals(finalPitch, 0.0, Math.toRadians(5.0)))
          success &= checkPartialContact(testHelper, side, robotModel);
-      testHelper.simulateAndWait(Math.max(robotModel.getWalkingControllerParameters().getDefaultFinalTransferTime(), partialFootholdDuration) - timeOffset);
+      testHelper.simulateNow(Math.max(robotModel.getWalkingControllerParameters().getDefaultFinalTransferTime(), partialFootholdDuration) - timeOffset);
 
       success &= checkFootPitch(testHelper, 0.0, side);
-      testHelper.simulateAndWait(timeOffset);
+      testHelper.simulateNow(timeOffset);
       success &= checkFullContact(testHelper, side, robotModel);
-      testHelper.simulateAndWait(0.25 - timeOffset);
+      testHelper.simulateNow(0.25 - timeOffset);
 
       return success;
    }
@@ -168,7 +168,7 @@ public class AvatarLiftOffAndTouchDownTest
    private static boolean checkPartialContact(SCS2AvatarTestingSimulation testHelper, RobotSide side, DRCRobotModel robotModel)
    {
       int contactPoints = robotModel.getWalkingControllerParameters().getMomentumOptimizationSettings().getNumberOfContactPointsPerContactableBody();
-      String prefix = testHelper.getReferenceFrames().getSoleFrame(side).getName();
+      String prefix = testHelper.getControllerReferenceFrames().getSoleFrame(side).getName();
       int inContact = 0;
       for (int i = 0; i < contactPoints; i++)
       {
@@ -187,7 +187,7 @@ public class AvatarLiftOffAndTouchDownTest
    private static boolean checkFullContact(SCS2AvatarTestingSimulation testHelper, RobotSide side, DRCRobotModel robotModel)
    {
       int contactPoints = robotModel.getWalkingControllerParameters().getMomentumOptimizationSettings().getNumberOfContactPointsPerContactableBody();
-      String prefix = testHelper.getReferenceFrames().getSoleFrame(side).getName();
+      String prefix = testHelper.getControllerReferenceFrames().getSoleFrame(side).getName();
       int inContact = 0;
       for (int i = 0; i < contactPoints; i++)
       {
@@ -202,8 +202,8 @@ public class AvatarLiftOffAndTouchDownTest
 
    private static boolean checkFootPitch(SCS2AvatarTestingSimulation testHelper, double expectedPitch, RobotSide side)
    {
-      MovingReferenceFrame soleFrame = testHelper.getReferenceFrames().getSoleFrame(side);
-      MovingReferenceFrame soleZUpFrame = testHelper.getReferenceFrames().getSoleZUpFrame(side);
+      MovingReferenceFrame soleFrame = testHelper.getControllerReferenceFrames().getSoleFrame(side);
+      MovingReferenceFrame soleZUpFrame = testHelper.getControllerReferenceFrames().getSoleZUpFrame(side);
       FrameQuaternion soleOrientation = new FrameQuaternion(soleFrame);
       soleOrientation.changeFrame(soleZUpFrame);
       double actualPitch = soleOrientation.getPitch();
@@ -242,7 +242,7 @@ public class AvatarLiftOffAndTouchDownTest
       SCS2AvatarTestingSimulation testHelper = testHelperFactory.createAvatarTestingSimulation();
       testHelper.start();
       testHelper.setCamera(new Point3D(0.3, 0.0, 0.3), new Point3D(1.0, 4.0, 1.0));
-      testHelper.simulateAndWait(0.25);
+      testHelper.simulateNow(0.25);
       return testHelper;
    }
 }

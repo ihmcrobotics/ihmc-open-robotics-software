@@ -130,7 +130,7 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
    {
       setupCameraSideView();
 
-      simulationTestHelper.simulateAndWait(0.5);
+      simulationTestHelper.simulateNow(0.5);
 
       FootstepDataListMessage footMessage = new FootstepDataListMessage();
 
@@ -149,11 +149,11 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
       double swing = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
       int steps = footMessage.getFootstepDataList().size();
 
-      simulationTestHelper.simulateAndWait(1.0);
+      simulationTestHelper.simulateNow(1.0);
       simulationTestHelper.publishToController(footMessage);
       double simulationTime = initialTransfer + (transfer + swing) * steps + 1.0;
 
-      assertTrue(simulationTestHelper.simulateAndWait(simulationTime));
+      assertTrue(simulationTestHelper.simulateNow(simulationTime));
    }
 
    @Test
@@ -161,7 +161,7 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
    {
       setupCameraSideView();
 
-      simulationTestHelper.simulateAndWait(0.5);
+      simulationTestHelper.simulateNow(0.5);
 
       FootstepDataListMessage footMessage = new FootstepDataListMessage();
 
@@ -204,11 +204,11 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
       double dt = 0.05;
       for (int i = 0; i < simulationTime / dt; i++)
       {
-         assertTrue(simulationTestHelper.simulateAndWait(dt));
+         assertTrue(simulationTestHelper.simulateNow(dt));
          assertFalse(leftFootstepWasAdjusted.getBooleanValue());
       }
 
-      assertTrue(simulationTestHelper.simulateAndWait(0.5));
+      assertTrue(simulationTestHelper.simulateNow(0.5));
 
       simulationTestHelper.publishToController(footMessage);
 
@@ -219,15 +219,15 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
       LogTools.info("Push 2 magnitude = " + magnitude);
       pushRobotController.applyForceDelayed(singleSupportStartConditions.get(RobotSide.LEFT), 0.0, forceDirection, magnitude, pushDuration);
 
-      assertTrue(simulationTestHelper.simulateAndWait(initialTransfer));
+      assertTrue(simulationTestHelper.simulateNow(initialTransfer));
       for (int i = 0; i < (simulationTime - initialTransfer) / dt; i++)
       {
-         assertTrue(simulationTestHelper.simulateAndWait(dt));
+         assertTrue(simulationTestHelper.simulateNow(dt));
          if (i > 2 && singleSupportStartConditions.get(RobotSide.LEFT).testCondition(Double.NaN))
             assertTrue("Footstep wasn't adjusted, when it should have been", leftFootstepWasAdjusted.getBooleanValue());
       }
 
-      simulationTestHelper.simulateAndWait(0.5);
+      simulationTestHelper.simulateNow(0.5);
    }
 
    /**

@@ -81,24 +81,24 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
    {
       setupTest();
       walkPaused.set(false);
-      assertTrue(simulationTestHelper.simulateAndWait(1.0));
+      assertTrue(simulationTestHelper.simulateNow(1.0));
       sendFootstepCommand(0.0, getNumberOfFootsteps());
-      assertTrue(simulationTestHelper.simulateAndWait(getTimeForPausing()));
+      assertTrue(simulationTestHelper.simulateNow(getTimeForPausing()));
       PauseWalkingMessage pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(true);
       simulationTestHelper.publishToController(pauseWalkingMessage);
       walkPaused.set(true);
-      assertTrue(simulationTestHelper.simulateAndWait(getTimeForResuming()));
+      assertTrue(simulationTestHelper.simulateNow(getTimeForResuming()));
       pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(false);
       simulationTestHelper.publishToController(pauseWalkingMessage);
       walkPaused.set(false);
-      assertTrue(simulationTestHelper.simulateAndWait(getNumberOfFootsteps() * (getSwingTime() + getTransferTime())));
+      assertTrue(simulationTestHelper.simulateNow(getNumberOfFootsteps() * (getSwingTime() + getTransferTime())));
    }
 
    @Test
    public void testTwoIndependentSteps()
    {
       setupTest();
-      assertTrue(simulationTestHelper.simulateAndWait(0.5));
+      assertTrue(simulationTestHelper.simulateNow(0.5));
 
       FootstepDataListMessage footstepMessage = HumanoidMessageTools.createFootstepDataListMessage(getSwingTime(),
                                                                                                    getTransferTime(),
@@ -110,8 +110,9 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
 
       double simulationTime = getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime() + getSwingTime() + getFinalTransferDuration()
             + 0.5;
-      assertTrue(simulationTestHelper.simulateAndWait(simulationTime));
+      assertTrue(simulationTestHelper.simulateNow(simulationTime));
 
+      @SuppressWarnings("unchecked")
       YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) simulationTestHelper.findVariable("walkingCurrentState");
       assertEquals(WalkingStateEnum.STANDING, walkingState.getEnumValue());
 
@@ -121,14 +122,14 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       footstepMessage.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, new Quaternion()));
       simulationTestHelper.publishToController(footstepMessage);
 
-      assertTrue(simulationTestHelper.simulateAndWait(3.0));
+      assertTrue(simulationTestHelper.simulateNow(3.0));
    }
 
    @Test
    public void testStartSecondStepWhileTransitioningToStand()
    {
       setupTest();
-      assertTrue(simulationTestHelper.simulateAndWait(0.5));
+      assertTrue(simulationTestHelper.simulateNow(0.5));
 
       FootstepDataListMessage footstepMessage = HumanoidMessageTools.createFootstepDataListMessage(getSwingTime(), getTransferTime());
       FramePoint3D location = new FramePoint3D(simulationTestHelper.getControllerFullRobotModel().getSoleFrame(RobotSide.LEFT), 0.1, 0.0, 0.0);
@@ -138,8 +139,9 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
 
       double simulationTime = getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime() + getSwingTime()
             + 0.5 * getFinalTransferDuration();
-      assertTrue(simulationTestHelper.simulateAndWait(simulationTime));
+      assertTrue(simulationTestHelper.simulateNow(simulationTime));
 
+      @SuppressWarnings("unchecked")
       YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) simulationTestHelper.findVariable("walkingCurrentState");
       assertEquals(WalkingStateEnum.TO_STANDING, walkingState.getEnumValue());
 
@@ -149,7 +151,7 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       footstepMessage.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, new Quaternion()));
       simulationTestHelper.publishToController(footstepMessage);
 
-      assertTrue(simulationTestHelper.simulateAndWait(3.0));
+      assertTrue(simulationTestHelper.simulateNow(3.0));
    }
 
    @Test
@@ -157,17 +159,17 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
    {
       setupTest();
       walkPaused.set(false);
-      assertTrue(simulationTestHelper.simulateAndWait(1.0));
+      assertTrue(simulationTestHelper.simulateNow(1.0));
       sendFootstepCommand(getStepLength(), getNumberOfFootsteps());
-      assertTrue(simulationTestHelper.simulateAndWait(getTimeForPausing()));
+      assertTrue(simulationTestHelper.simulateNow(getTimeForPausing()));
       PauseWalkingMessage pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(true);
       simulationTestHelper.publishToController(pauseWalkingMessage);
       walkPaused.set(true);
-      assertTrue(simulationTestHelper.simulateAndWait(getTimeForResuming()));
+      assertTrue(simulationTestHelper.simulateNow(getTimeForResuming()));
       pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(false);
       simulationTestHelper.publishToController(pauseWalkingMessage);
       walkPaused.set(false);
-      assertTrue(simulationTestHelper.simulateAndWait(getNumberOfFootsteps() * (getSwingTime() + getTransferTime())));
+      assertTrue(simulationTestHelper.simulateNow(getNumberOfFootsteps() * (getSwingTime() + getTransferTime())));
    }
 
    @Test
@@ -175,21 +177,21 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
    {
       setupTest();
       walkPaused.set(false);
-      assertTrue(simulationTestHelper.simulateAndWait(1.0));
+      assertTrue(simulationTestHelper.simulateNow(1.0));
 
       sendFootstepCommand(0.0, getNumberOfFootsteps());
-      assertTrue(simulationTestHelper.simulateAndWait(0.85));
+      assertTrue(simulationTestHelper.simulateNow(0.85));
 
       PauseWalkingMessage pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(true);
 
       simulationTestHelper.publishToController(pauseWalkingMessage);
       walkPaused.set(true);
-      assertTrue(simulationTestHelper.simulateAndWait(2.0));
+      assertTrue(simulationTestHelper.simulateNow(2.0));
 
       pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(false);
       simulationTestHelper.publishToController(pauseWalkingMessage);
       walkPaused.set(false);
-      assertTrue(simulationTestHelper.simulateAndWait(getNumberOfFootsteps() * (getSwingTime() + getTransferTime())));
+      assertTrue(simulationTestHelper.simulateNow(getNumberOfFootsteps() * (getSwingTime() + getTransferTime())));
    }
 
    @Test
@@ -197,7 +199,7 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
    {
       setupTest();
       walkPaused.set(false);
-      assertTrue(simulationTestHelper.simulateAndWait(1.0));
+      assertTrue(simulationTestHelper.simulateNow(1.0));
 
       FramePoint3D stepLocation = new FramePoint3D(simulationTestHelper.getControllerFullRobotModel().getSoleFrame(RobotSide.LEFT));
       stepLocation.changeFrame(ReferenceFrame.getWorldFrame());
@@ -210,18 +212,18 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
 
       simulationTestHelper.publishToController(footstepMessage);
 
-      assertTrue(simulationTestHelper.simulateAndWait(0.85));
+      assertTrue(simulationTestHelper.simulateNow(0.85));
 
       PauseWalkingMessage pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(true);
 
       simulationTestHelper.publishToController(pauseWalkingMessage);
       walkPaused.set(true);
-      assertTrue(simulationTestHelper.simulateAndWait(2.0));
+      assertTrue(simulationTestHelper.simulateNow(2.0));
 
       pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(false);
       simulationTestHelper.publishToController(pauseWalkingMessage);
       walkPaused.set(false);
-      assertTrue(simulationTestHelper.simulateAndWait(swingTime + getTransferTime() + getFinalTransferDuration()));
+      assertTrue(simulationTestHelper.simulateNow(swingTime + getTransferTime() + getFinalTransferDuration()));
    }
 
    @Test
@@ -229,21 +231,21 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
    {
       setupTest();
       walkPaused.set(false);
-      assertTrue(simulationTestHelper.simulateAndWait(1.0));
+      assertTrue(simulationTestHelper.simulateNow(1.0));
 
       sendFootstepCommand(getStepLength(), getNumberOfFootsteps());
-      assertTrue(simulationTestHelper.simulateAndWait(1.0));
+      assertTrue(simulationTestHelper.simulateNow(1.0));
 
       PauseWalkingMessage pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(true);
       simulationTestHelper.publishToController(pauseWalkingMessage);
       walkPaused.set(true);
 
-      assertTrue(simulationTestHelper.simulateAndWait(2.0));
+      assertTrue(simulationTestHelper.simulateNow(2.0));
 
       pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(false);
       simulationTestHelper.publishToController(pauseWalkingMessage);
       walkPaused.set(false);
-      assertTrue(simulationTestHelper.simulateAndWait(getNumberOfFootsteps() * (getSwingTime() + getTransferTime())));
+      assertTrue(simulationTestHelper.simulateNow(getNumberOfFootsteps() * (getSwingTime() + getTransferTime())));
    }
 
    private void sendFootstepCommand(double stepLength, int numberOfFootsteps)

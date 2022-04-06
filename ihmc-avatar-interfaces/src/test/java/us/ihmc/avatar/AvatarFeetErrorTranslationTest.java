@@ -109,11 +109,11 @@ public abstract class AvatarFeetErrorTranslationTest implements MultiRobotTestIn
       int steps = footMessage.getFootstepDataList().size();
 
       controllerSpy.setFootStepCheckPoints(rootLocations, stepLength, stepWidth);
-      simulationTestHelper.simulateAndWait(1.0);
+      simulationTestHelper.simulateNow(1.0);
       simulationTestHelper.publishToController(footMessage);
       double simulationTime = initialTransfer + (transfer + swing) * steps + 1.0;
 
-      assertTrue(simulationTestHelper.simulateAndWait(simulationTime));
+      assertTrue(simulationTestHelper.simulateNow(simulationTime));
       controllerSpy.assertCheckpointsReached();
    }
 

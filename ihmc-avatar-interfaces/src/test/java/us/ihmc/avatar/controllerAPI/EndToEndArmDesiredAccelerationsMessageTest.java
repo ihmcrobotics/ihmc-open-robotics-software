@@ -48,7 +48,7 @@ public abstract class EndToEndArmDesiredAccelerationsMessageTest implements Mult
       simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -67,7 +67,7 @@ public abstract class EndToEndArmDesiredAccelerationsMessageTest implements Mult
          assertEquals(RigidBodyControlMode.JOINTSPACE, EndToEndTestTools.findRigidBodyControlManagerState(handName, simulationTestHelper));
          simulationTestHelper.publishToController(armDesiredAccelerationsMessage);
 
-         success = simulationTestHelper.simulateAndWait(RigidBodyUserControlState.TIME_WITH_NO_MESSAGE_BEFORE_ABORT - 0.05);
+         success = simulationTestHelper.simulateNow(RigidBodyUserControlState.TIME_WITH_NO_MESSAGE_BEFORE_ABORT - 0.05);
          assertTrue(success);
 
          assertEquals(RigidBodyControlMode.USER, EndToEndTestTools.findRigidBodyControlManagerState(handName, simulationTestHelper));
@@ -76,7 +76,7 @@ public abstract class EndToEndArmDesiredAccelerationsMessageTest implements Mult
          double[] qpOutputJointAccelerations = findQPOutputJointAccelerations(armJoints, simulationTestHelper);
          assertArrayEquals(armDesiredJointAccelerations, qpOutputJointAccelerations, 1.0e-3);
 
-         success = simulationTestHelper.simulateAndWait(0.07);
+         success = simulationTestHelper.simulateNow(0.07);
          assertTrue(success);
 
          assertEquals(RigidBodyControlMode.JOINTSPACE, EndToEndTestTools.findRigidBodyControlManagerState(handName, simulationTestHelper));

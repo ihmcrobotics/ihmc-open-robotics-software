@@ -58,7 +58,7 @@ public class ValkyrieExperimentalSimulationEndToEndTest extends HumanoidExperime
       // Switch to zero-torque controller.
       simulationTestHelper.getHighLevelHumanoidControllerFactory().getRequestedControlStateEnum().set(HighLevelControllerName.DO_NOTHING_BEHAVIOR);
 
-      assertTrue(simulationTestHelper.simulateAndWait(3.0));
+      assertTrue(simulationTestHelper.simulateNow(3.0));
 
       RigidBodyBasics elevator = simulationTestHelper.getControllerFullRobotModel().getElevator();
       assertRigidBodiesAreAboveFlatGround(elevator,

@@ -56,7 +56,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
       simulationTestHelper.start();
 
-      boolean success = simulationTestHelper.simulateAndWait(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -123,7 +123,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
          }
       });
 
-      success = simulationTestHelper.simulateAndWait(7.0);
+      success = simulationTestHelper.simulateNow(7.0);
       assertTrue(success);
       assertTrue("Controller did not adjust footstep", hasControllerAdjustedFootstep.get());
    }

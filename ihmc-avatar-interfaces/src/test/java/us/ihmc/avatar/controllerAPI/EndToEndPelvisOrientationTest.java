@@ -90,7 +90,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       pelvisOrientation.changeFrame(worldFrame);
       PelvisOrientationTrajectoryMessage message = HumanoidMessageTools.createPelvisOrientationTrajectoryMessage(trajectoryTime, pelvisOrientation);
       simulationTestHelper.publishToController(message);
-      assertTrue(simulationTestHelper.simulateAndWait(trajectoryTime + 0.25));
+      assertTrue(simulationTestHelper.simulateNow(trajectoryTime + 0.25));
 
       String pelvisName = fullRobotModel.getPelvis().getName();
       EndToEndTestTools.assertCurrentDesiredsMatchWaypoint(pelvisName,
@@ -100,7 +100,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
 
       GoHomeMessage goHomeMessage = HumanoidMessageTools.createGoHomeMessage(HumanoidBodyPart.PELVIS, trajectoryTime);
       simulationTestHelper.publishToController(goHomeMessage);
-      assertTrue(simulationTestHelper.simulateAndWait(trajectoryTime + 0.5));
+      assertTrue(simulationTestHelper.simulateNow(trajectoryTime + 0.5));
 
       humanoidReferenceFrames.updateFrames();
       FrameQuaternion homeOrientation = new FrameQuaternion(midFootZUpGroundFrame, new Quaternion());
@@ -137,7 +137,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       message.setSequenceId(random.nextLong());
       SO3TrajectoryPointMessage waypoint = message.getSo3Trajectory().getTaskspaceTrajectoryPoints().get(0);
       simulationTestHelper.publishToController(message);
-      simulationTestHelper.simulateAndWait(4.0 * controllerDT);
+      simulationTestHelper.simulateNow(4.0 * controllerDT);
 
       String pelvisName = fullRobotModel.getPelvis().getName();
 
@@ -153,7 +153,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       EndToEndTestTools.assertTotalNumberOfWaypointsInTaskspaceManager(pelvisName, postFix, 2, simulationTestHelper);
       EndToEndTestTools.assertWaypointInGeneratorMatches(pelvisName, 1, waypoint, epsilon, simulationTestHelper);
 
-      simulationTestHelper.simulateAndWait(trajectoryTime);
+      simulationTestHelper.simulateNow(trajectoryTime);
       EndToEndTestTools.assertCurrentDesiredsMatchWaypoint(pelvisName, waypoint, epsilon, simulationTestHelper);
 
       assertEquals(1, statusMessages.size());
@@ -184,13 +184,13 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       message.getSo3Trajectory().getQueueingProperties().setMessageId(1L);
 
       simulationTestHelper.publishToController(message);
-      Assert.assertTrue(simulationTestHelper.simulateAndWait(0.1));
+      Assert.assertTrue(simulationTestHelper.simulateNow(0.1));
 
       message.getSo3Trajectory().getQueueingProperties().setPreviousMessageId(2L);
       message.getSo3Trajectory().getQueueingProperties().setMessageId(3L);
 
       simulationTestHelper.publishToController(message);
-      Assert.assertTrue(simulationTestHelper.simulateAndWait(0.1));
+      Assert.assertTrue(simulationTestHelper.simulateNow(0.1));
    }
 
    @Test
@@ -202,7 +202,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
       double walkingTime = createWalkingMessage(steps, footsteps, true);
       simulationTestHelper.publishToController(footsteps);
-      simulationTestHelper.simulateAndWait(walkingTime + 1.0);
+      simulationTestHelper.simulateNow(walkingTime + 1.0);
 
       assertEquals("Control Mode", PelvisOrientationControlMode.WALKING_CONTROLLER, findCurrentControlMode());
       humanoidReferenceFrames.updateFrames();
@@ -238,7 +238,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
       double walkingTime = createWalkingMessage(steps, footsteps, false);
       simulationTestHelper.publishToController(footsteps);
-      simulationTestHelper.simulateAndWait(walkingTime + 1.5);
+      simulationTestHelper.simulateNow(walkingTime + 1.5);
       assertEquals("Control Mode", PelvisOrientationControlMode.WALKING_CONTROLLER, findCurrentControlMode());
 
       humanoidReferenceFrames.updateFrames();
@@ -310,7 +310,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       }
 
       simulationTestHelper.publishToController(message);
-      simulationTestHelper.simulateAndWait(2.0 * controllerDT);
+      simulationTestHelper.simulateNow(2.0 * controllerDT);
 
       String pelvisName = fullRobotModel.getPelvis().getName();
       assertEquals(1, statusMessages.size());
@@ -330,7 +330,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       }
 
       double simulationTime = timePerPoint * numberOfPoints + 0.5;
-      simulationTestHelper.simulateAndWait(simulationTime);
+      simulationTestHelper.simulateNow(simulationTime);
       SO3TrajectoryPointMessage waypoint = so3Trajectory.getTaskspaceTrajectoryPoints().get(numberOfPoints - 1);
       EndToEndTestTools.assertCurrentDesiredsMatchWaypoint(pelvisName, waypoint, epsilon, simulationTestHelper);
 
@@ -359,13 +359,13 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
 
       assertEquals("Control Mode", PelvisOrientationControlMode.WALKING_CONTROLLER, findCurrentControlMode());
       simulationTestHelper.publishToController(message);
-      simulationTestHelper.simulateAndWait(trajectoryTime);
+      simulationTestHelper.simulateNow(trajectoryTime);
       assertEquals("Control Mode", PelvisOrientationControlMode.USER, findCurrentControlMode());
 
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
       double walkingTime = createCircularWalkingMessage(8, footsteps, true);
       simulationTestHelper.publishToController(footsteps);
-      simulationTestHelper.simulateAndWait(walkingTime / 2.0);
+      simulationTestHelper.simulateNow(walkingTime / 2.0);
       assertEquals("Control Mode", PelvisOrientationControlMode.USER, findCurrentControlMode());
    }
 
@@ -384,14 +384,14 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       chestOrientation.changeFrame(worldFrame);
       ChestTrajectoryMessage holdChestInWorldMessage = HumanoidMessageTools.createChestTrajectoryMessage(0.0, chestOrientation, worldFrame, worldFrame);
       simulationTestHelper.publishToController(holdChestInWorldMessage);
-      simulationTestHelper.simulateAndWait(2.0 * getRobotModel().getControllerDT());
+      simulationTestHelper.simulateNow(2.0 * getRobotModel().getControllerDT());
 
       // now hold the pelvis in chest frame
       PelvisOrientationTrajectoryMessage holdPelvisInChestMessage = HumanoidMessageTools.createPelvisOrientationTrajectoryMessage(0.0,
                                                                                                                                   desiredOrientation,
                                                                                                                                   chestFrame);
       simulationTestHelper.publishToController(holdPelvisInChestMessage);
-      simulationTestHelper.simulateAndWait(2.0 * getRobotModel().getControllerDT());
+      simulationTestHelper.simulateNow(2.0 * getRobotModel().getControllerDT());
 
       // finally pitch the chest forward and assert that the pelvis follows
       humanoidReferenceFrames.updateFrames();
@@ -405,7 +405,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
                                                                                               worldFrame,
                                                                                               worldFrame);
       simulationTestHelper.publishToController(chestMessage);
-      simulationTestHelper.simulateAndWait(chestTrajectoryTime + 1.0);
+      simulationTestHelper.simulateNow(chestTrajectoryTime + 1.0);
 
       String pelvisName = fullRobotModel.getPelvis().getName();
       EndToEndTestTools.assertCurrentDesiredsMatch(pelvisName, desiredChestOrientation, zeroVector, epsilon, simulationTestHelper);
@@ -425,7 +425,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
 
       simulationTestHelper.getRootRegistry().addChild(testRegistry);
 
-      boolean success = simulationTestHelper.simulateAndWait(1.0);
+      boolean success = simulationTestHelper.simulateNow(1.0);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -501,7 +501,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
          }
       });
 
-      success = simulationTestHelper.simulateAndWait(0.5 * trajectoryTime.getValue());
+      success = simulationTestHelper.simulateNow(0.5 * trajectoryTime.getValue());
       assertTrue(success);
 
       SO3TrajectoryPoint currentDesiredTrajectoryPoint = EndToEndChestTrajectoryMessageTest.findCurrentDesiredTrajectoryPoint(simulationTestHelper, pelvis);
@@ -511,7 +511,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       EuclidCoreTestTools.assertTuple3DEquals(desiredAngularVelocity, currentDesiredTrajectoryPoint.getAngularVelocity(), desiredEpsilon);
       EndToEndChestTrajectoryMessageTest.assertControlErrorIsLow(simulationTestHelper, pelvis, 1.0e-2);
 
-      success = simulationTestHelper.simulateAndWait(0.5 * trajectoryTime.getValue() + 1.5);
+      success = simulationTestHelper.simulateNow(0.5 * trajectoryTime.getValue() + 1.5);
       assertTrue(success);
 
       currentDesiredTrajectoryPoint = EndToEndChestTrajectoryMessageTest.findCurrentDesiredTrajectoryPoint(simulationTestHelper, pelvis);
@@ -610,7 +610,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       simulationTestHelper.start();
       ThreadTools.sleep(1000);
-      assertTrue(simulationTestHelper.simulateAndWait(0.5));
+      assertTrue(simulationTestHelper.simulateNow(0.5));
 
       fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
       humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);

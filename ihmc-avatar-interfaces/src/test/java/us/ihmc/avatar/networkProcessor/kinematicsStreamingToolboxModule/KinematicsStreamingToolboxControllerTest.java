@@ -31,7 +31,6 @@ import us.ihmc.avatar.factory.RobotDefinitionTools;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.KSTState;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
-import us.ihmc.avatar.scs2.SCS2AvatarSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
@@ -73,7 +72,6 @@ import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
-import us.ihmc.scs2.session.tools.SCS1GraphicConversionTools;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -235,15 +233,12 @@ public abstract class KinematicsStreamingToolboxControllerTest
          session.getRootRegistry().addChild(toolboxRegistry);
          session.setSessionDTSeconds(toolboxControllerPeriod);
          session.initializeBufferRecordTickPeriod(1);
-         session.getYoGraphicDefinitions().addAll(SCS1GraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
 
-         SCS2AvatarSimulation avatarSimulation = new SCS2AvatarSimulation();
-         avatarSimulation.setRobot(robot);
-         avatarSimulation.setRobotModel(robotModel);
-         avatarSimulation.setFullHumanoidRobotModel(desiredFullRobotModel);
-         avatarSimulation.setSimulationSession(session);
-         avatarSimulation.setShowGUI(true);
-         simulationTestHelper = new SCS2AvatarTestingSimulation(avatarSimulation);
+         simulationTestHelper = new SCS2AvatarTestingSimulation(session,
+                                                                robotModel,
+                                                                desiredFullRobotModel,
+                                                                yoGraphicsListRegistry,
+                                                                simulationTestingParameters);
          simulationTestHelper.setKeepSCSUp(simulationTestingParameters.getKeepSCSUp());
          simulationTestHelper.start(false);
          simulationTestHelper.setCamera(new Point3D(0, 0, 1), new Point3D(6, 0, 1));
@@ -322,7 +317,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
       snapSCSRobotToFullRobotModel(toolboxController.getDesiredFullRobotModel(), robot);
 
       if (visualize)
-         simulationTestHelper.simulateOneTickAndWait();
+         simulationTestHelper.simulateOneTickNow();
 
       double circleRadius = 0.25;
       double circleFrequency = 0.25;
@@ -354,7 +349,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
          snapSCSRobotToFullRobotModel(desiredFullRobotModel, robot);
 
          if (visualize)
-            simulationTestHelper.simulateOneTickAndWait();
+            simulationTestHelper.simulateOneTickNow();
 
          for (int collidable1Index = 0; collidable1Index < collidables.size(); collidable1Index++)
          {
@@ -503,14 +498,14 @@ public abstract class KinematicsStreamingToolboxControllerTest
          }
       });
 
-      boolean success = simulationTestHelper.simulateAndWait(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       wakeupToolbox();
 
       ScheduledFuture<?> scheduleMessageGenerator = scheduleMessageGenerator(0.01, circleMessageGenerator(newRobotModel().createFullRobotModel(), true, 0.125));
 
-      success = simulationTestHelper.simulateAndWait(10.0);
+      success = simulationTestHelper.simulateNow(10.0);
       assertTrue(success);
 
       scheduleMessageGenerator.cancel(true);

@@ -110,8 +110,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
          for (int i = 0; i < numberOfTicks; i++)
          {
             System.out.println("Tick : " + i);
-            simulationTestHelper1.simulateOneBufferRecordPeriodAndWait();
-            simulationTestHelper2.simulateOneBufferRecordPeriodAndWait();
+            simulationTestHelper1.simulateOneBufferRecordPeriodNow();
+            simulationTestHelper2.simulateOneBufferRecordPeriodNow();
 
             boolean areTheVariableChangesDifferent = helper.areTheVariableChangesDifferent();
             if (areTheVariableChangesDifferent)
@@ -122,8 +122,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
       double runTime = 5.0;
 
-      boolean success = simulationTestHelper1.simulateAndWait(runTime);
-      success = success && simulationTestHelper2.simulateAndWait(runTime);
+      boolean success = simulationTestHelper1.simulateNow(runTime);
+      success = success && simulationTestHelper2.simulateNow(runTime);
 
       if (useVariableListenerTestHelper)
       {
@@ -165,7 +165,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       setupCameraForWalkingOverSmallPlatform();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(2.0); //2.0);
+      boolean success = simulationTestHelper.simulateNow(2.0); //2.0);
 
       ReferenceFrame rootFrame = simulationTestHelper.getControllerFullRobotModel().getRootJoint().getFrameAfterJoint();
       FramePoint3D pelvisPosition = new FramePoint3D(rootFrame);
@@ -176,7 +176,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       FootstepDataListMessage footstepDataList = createFootstepsForSteppingPastSmallPlatform();
       simulationTestHelper.publishToController(footstepDataList);
 
-      success = success && simulationTestHelper.simulateAndWait(4.0);
+      success = success && simulationTestHelper.simulateNow(4.0);
 
       simulationTestHelper.createVideo(getSimpleRobotName(), 1);
       // simulationTestHelper.checkNothingChanged();
@@ -207,7 +207,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       setupCameraForWalkingOverSmallPlatform();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(2.0); //2.0);
+      boolean success = simulationTestHelper.simulateNow(2.0); //2.0);
 
       FramePoint3D desiredPosition = new FramePoint3D(simulationTestHelper.getControllerFullRobotModel().getPelvis().getBodyFixedFrame());
       desiredPosition.changeFrame(ReferenceFrame.getWorldFrame());
@@ -215,14 +215,14 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       double trajectoryTime = 1.0;
       PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(trajectoryTime,
                                                                                                                              desiredPosition.getZ());
-      success &= simulationTestHelper.simulateAndWait(1.5);
+      success &= simulationTestHelper.simulateNow(1.5);
 
       simulationTestHelper.publishToController(pelvisHeightTrajectoryMessage);
 
       FootstepDataListMessage footstepDataList = createFootstepsForSideSteppingOverSmallPlatform();
       simulationTestHelper.publishToController(footstepDataList);
 
-      success = success && simulationTestHelper.simulateAndWait(11.0);
+      success = success && simulationTestHelper.simulateNow(11.0);
 
       simulationTestHelper.createVideo(getSimpleRobotName(), 1);
       // simulationTestHelper.checkNothingChanged();
@@ -253,12 +253,12 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       setupCameraForWalkingOverSmallPlatform();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(2.0); //2.0);
+      boolean success = simulationTestHelper.simulateNow(2.0); //2.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForSideSteppingOverSmallWall();
       simulationTestHelper.publishToController(footstepDataList);
 
-      success = success && simulationTestHelper.simulateAndWait(11.0);
+      success = success && simulationTestHelper.simulateNow(11.0);
 
       simulationTestHelper.createVideo(getSimpleRobotName(), 1);
       // simulationTestHelper.checkNothingChanged();
@@ -289,19 +289,19 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       setupCameraForWalkingOverSmallPlatform();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(2.0); //2.0);
+      boolean success = simulationTestHelper.simulateNow(2.0); //2.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForSteppingOntoSmallPlatform();
       simulationTestHelper.publishToController(footstepDataList);
 
-      success = success && simulationTestHelper.simulateAndWait(4.0);
+      success = success && simulationTestHelper.simulateNow(4.0);
 
       if (success)
       {
          footstepDataList = createFootstepsForSteppingOffOfSmallPlatform();
          simulationTestHelper.publishToController(footstepDataList);
 
-         success = success && simulationTestHelper.simulateAndWait(4.0);
+         success = success && simulationTestHelper.simulateNow(4.0);
       }
 
       simulationTestHelper.createVideo(getSimpleRobotName(), 1);
@@ -333,12 +333,12 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       setupCameraForWalkingOverMediumPlatform();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(2.0);
+      boolean success = simulationTestHelper.simulateNow(2.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForSteppingOntoMediumPlatform();
       simulationTestHelper.publishToController(footstepDataList);
 
-      success = success && simulationTestHelper.simulateAndWait(4.0);
+      success = success && simulationTestHelper.simulateNow(4.0);
 
       simulationTestHelper.createVideo(getSimpleRobotName(), 1);
       // simulationTestHelper.checkNothingChanged();
@@ -370,14 +370,14 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       setupCameraForWalkingOffOfMediumPlatform();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(2.0);
+      boolean success = simulationTestHelper.simulateNow(2.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForSteppingOffOfMediumPlatform();
       footstepDataList.setDefaultSwingDuration(1.1);
       footstepDataList.setDefaultTransferDuration(0.5);
       simulationTestHelper.publishToController(footstepDataList);
 
-      success = success && simulationTestHelper.simulateAndWait(4.0);
+      success = success && simulationTestHelper.simulateNow(4.0);
 
       simulationTestHelper.createVideo(getSimpleRobotName(), 1);
       // simulationTestHelper.checkNothingChanged();
@@ -412,7 +412,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(2.0);
+      boolean success = simulationTestHelper.simulateNow(2.0);
 
       FrameQuaternion desiredChestFrameOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame());
       double leanAngle = 30.0;
@@ -425,21 +425,21 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
                                                                                                  ReferenceFrame.getWorldFrame(),
                                                                                                  pelvisZUpFrame));
 
-      success = success && simulationTestHelper.simulateAndWait(0.5);
+      success = success && simulationTestHelper.simulateNow(0.5);
 
       //      double heightOffset = 0.12;
       //      double heightTrajectoryTime = 0.5;
       //      ComHeightPacket comHeightPacket = new ComHeightPacket(heightOffset, heightTrajectoryTime);
       //      drcSimulationTestHelper.send(comHeightPacket);
 
-      success = success && simulationTestHelper.simulateAndWait(1.0);
+      success = success && simulationTestHelper.simulateNow(1.0);
 
       double swingTime = 1.0;
       double transferTime = 0.6;
       FootstepDataListMessage footstepDataList = createFootstepsForSteppingOffOfMediumPlatformNarrowFootSpacing(swingTime, transferTime);
       simulationTestHelper.publishToController(footstepDataList);
 
-      success = success && simulationTestHelper.simulateAndWait(7.0);
+      success = success && simulationTestHelper.simulateNow(7.0);
 
       simulationTestHelper.createVideo(getSimpleRobotName(), 1);
       // simulationTestHelper.checkNothingChanged();
@@ -473,12 +473,12 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       setupCameraForWalkingOffOfLargePlatform();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(2.0);
+      boolean success = simulationTestHelper.simulateNow(2.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForSteppingOffOfLargePlatform();
       simulationTestHelper.publishToController(footstepDataList);
 
-      success = success && simulationTestHelper.simulateAndWait(4.0);
+      success = success && simulationTestHelper.simulateNow(4.0);
 
       simulationTestHelper.createVideo(getSimpleRobotName(), 1);
       // simulationTestHelper.checkNothingChanged();
@@ -512,12 +512,12 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       setupCameraForWalkingOffOfLargePlatform();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(2.0);
+      boolean success = simulationTestHelper.simulateNow(2.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForSteppingOntoLargePlatform();
       simulationTestHelper.publishToController(footstepDataList);
 
-      success = success && simulationTestHelper.simulateAndWait(4.0);
+      success = success && simulationTestHelper.simulateNow(4.0);
 
       simulationTestHelper.createVideo(getSimpleRobotName(), 1);
       // simulationTestHelper.checkNothingChanged();

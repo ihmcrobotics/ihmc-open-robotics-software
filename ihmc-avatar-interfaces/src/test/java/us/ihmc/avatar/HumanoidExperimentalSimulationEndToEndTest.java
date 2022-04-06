@@ -48,7 +48,7 @@ public abstract class HumanoidExperimentalSimulationEndToEndTest implements Mult
       simulationTestHelperFactory.setUseImpulseBasedPhysicsEngine(true);
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       simulationTestHelper.start();
-      assertTrue(simulationTestHelper.simulateAndWait(3.0));
+      assertTrue(simulationTestHelper.simulateNow(3.0));
    }
 
    public void testZeroTorque(TestInfo testInfo) throws Exception
@@ -66,7 +66,7 @@ public abstract class HumanoidExperimentalSimulationEndToEndTest implements Mult
       // Switch to zero-torque controller.
       simulationTestHelper.getHighLevelHumanoidControllerFactory().getRequestedControlStateEnum().set(HighLevelControllerName.DO_NOTHING_BEHAVIOR);
 
-      assertTrue(simulationTestHelper.simulateAndWait(3.0));
+      assertTrue(simulationTestHelper.simulateNow(3.0));
 
       RigidBodyBasics elevator = simulationTestHelper.getControllerFullRobotModel().getElevator();
       assertRigidBodiesAreAboveFlatGround(elevator,

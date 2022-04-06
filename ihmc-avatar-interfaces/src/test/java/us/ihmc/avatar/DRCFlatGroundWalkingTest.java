@@ -124,7 +124,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       ((YoBoolean) simulationTestHelper.findVariable("walkCSG")).set(true);
       for (int i = 0; i < 10; i++)
       {
-         Assert.assertTrue(simulationTestHelper.simulateAndWait(1.0));
+         Assert.assertTrue(simulationTestHelper.simulateNow(1.0));
          simulationTestHelper.resetRobot(false);
       }
    }
@@ -147,7 +147,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       YoDouble controllerICPErrorX = (YoDouble) simulationTestHelper.findVariable("controllerICPErrorX");
       YoDouble controllerICPErrorY = (YoDouble) simulationTestHelper.findVariable("controllerICPErrorY");
 
-      simulationTestHelper.simulateAndWait(standingTimeDuration);
+      simulationTestHelper.simulateNow(standingTimeDuration);
 
       walk.set(false);
 
@@ -155,13 +155,13 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       {
          userDesiredPelvisPoseTrajectoryTime.set(0.0);
          userUpdateDesiredPelvisPose.set(true);
-         simulationTestHelper.simulateAndWait(0.1);
+         simulationTestHelper.simulateNow(0.1);
 
          double startingYaw = userDesiredPelvisPoseYaw.getDoubleValue();
          userDesiredPelvisPoseYaw.set(startingYaw + Math.PI / 4.0);
          userDoPelvisPose.set(true);
 
-         simulationTestHelper.simulateAndWait(yawingTimeDuration);
+         simulationTestHelper.simulateNow(yawingTimeDuration);
 
          double icpError;
          if (icpErrorX != null && icpErrorY != null)
@@ -173,7 +173,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 
          userDesiredPelvisPoseYaw.set(startingYaw);
          userDoPelvisPose.set(true);
-         simulationTestHelper.simulateAndWait(yawingTimeDuration + 0.3);
+         simulationTestHelper.simulateNow(yawingTimeDuration + 0.3);
 
          if (icpErrorX != null && icpErrorY != null)
             icpError = Math.sqrt(icpErrorX.getDoubleValue() * icpErrorX.getDoubleValue() + icpErrorY.getDoubleValue() * icpErrorY.getDoubleValue());
@@ -189,7 +189,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 
       while (simulationTestHelper.getSimulationTime() - standingTimeDuration < defaultWalkingTimeDuration)
       {
-         simulationTestHelper.simulateAndWait(timeIncrement);
+         simulationTestHelper.simulateNow(timeIncrement);
          if (Math.abs(comError.getDoubleValue()) > 0.06)
             fail("Math.abs(comError.getDoubleValue()) > 0.06: " + comError.getDoubleValue() + " at t = " + simulationTestHelper.getSimulationTime());
       }

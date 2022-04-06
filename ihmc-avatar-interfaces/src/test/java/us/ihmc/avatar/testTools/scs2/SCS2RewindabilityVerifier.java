@@ -131,18 +131,18 @@ public class SCS2RewindabilityVerifier
          if (DEBUG)
             System.out.println("SimulationRewindabilityVerifier: Passed sims match test on loop " + tickIndex + " of " + numTicksToTest);
 
-         simulations[0].simulateOneBufferRecordPeriodAndWait();
+         simulations[0].simulateOneBufferRecordPeriodNow();
 
          for (int i = 0; i < numTicksToSimulateAhead; i++)
          {
-            simulations[1].simulateOneBufferRecordPeriodAndWait();
+            simulations[1].simulateOneBufferRecordPeriodNow();
          }
          for (int i = 0; i < numTicksToSimulateAhead; i++)
          {
             simulations[1].stepBufferIndexBackward();
          }
 
-         simulations[1].simulateOneBufferRecordPeriodAndWait();
+         simulations[1].simulateOneBufferRecordPeriodNow();
       }
 
       return numTicksToTest;
@@ -187,13 +187,13 @@ public class SCS2RewindabilityVerifier
 
          helper.setRecordDifferencesForSimOne(true);
          helper.setRecordDifferencesForSimTwo(false);
-         simulations[0].simulateOneBufferRecordPeriodAndWait();
+         simulations[0].simulateOneBufferRecordPeriodNow();
          helper.setRecordDifferencesForSimOne(false);
 
          int numberOfStepsForward = 1;
          for (int i = 0; i < numberOfStepsForward; i++)
          {
-            simulations[1].simulateOneBufferRecordPeriodAndWait();
+            simulations[1].simulateOneBufferRecordPeriodNow();
          }
          for (int i = 0; i < numberOfStepsForward; i++)
          {
@@ -201,7 +201,7 @@ public class SCS2RewindabilityVerifier
          }
 
          helper.setRecordDifferencesForSimTwo(true);
-         simulations[1].simulateOneBufferRecordPeriodAndWait();
+         simulations[1].simulateOneBufferRecordPeriodNow();
       }
    }
 
@@ -215,7 +215,7 @@ public class SCS2RewindabilityVerifier
    {
       for (int i = 0; i < numberOfTicks; i++)
       {
-         simulationTestHelper.simulateOneBufferRecordPeriodAndWait();
+         simulationTestHelper.simulateOneBufferRecordPeriodNow();
       }
    }
 

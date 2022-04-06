@@ -45,7 +45,7 @@ public abstract class EndToEndClearDelayQueueMessageTest implements MultiRobotTe
       simulationTestHelper = factory.createAvatarTestingSimulation();
       simulationTestHelper.start();
       ThreadTools.sleep(1000);
-      assertTrue(simulationTestHelper.simulateAndWait(0.1));
+      assertTrue(simulationTestHelper.simulateNow(0.1));
 
       String handName = simulationTestHelper.getControllerFullRobotModel().getHand(RobotSide.LEFT).getName();
       YoVariable footsteps = simulationTestHelper.findVariable(WalkingMessageHandler.class.getSimpleName(), "currentNumberOfFootsteps");
@@ -64,7 +64,7 @@ public abstract class EndToEndClearDelayQueueMessageTest implements MultiRobotTe
       footstepDataListMessage.getQueueingProperties().setExecutionDelayTime(0.1);
       simulationTestHelper.publishToController(handTrajectoryMessage);
       simulationTestHelper.publishToController(footstepDataListMessage);
-      assertTrue(simulationTestHelper.simulateAndWait(0.05));
+      assertTrue(simulationTestHelper.simulateNow(0.05));
 
       assertEquals(0, (int) footsteps.getValueAsLongBits());
       assertEquals(0, (int) handTrajectoryPoints.getValueAsLongBits());
@@ -72,7 +72,7 @@ public abstract class EndToEndClearDelayQueueMessageTest implements MultiRobotTe
       // clear hand trajectory
       ClearDelayQueueMessage clearHandTrajectory = HumanoidMessageTools.createClearDelayQueueMessage(HandTrajectoryMessage.class);
       simulationTestHelper.publishToController(clearHandTrajectory);
-      assertTrue(simulationTestHelper.simulateAndWait(0.1));
+      assertTrue(simulationTestHelper.simulateNow(0.1));
 
       assertEquals(10, (int) footsteps.getValueAsLongBits());
       assertEquals(0, (int) handTrajectoryPoints.getValueAsLongBits());

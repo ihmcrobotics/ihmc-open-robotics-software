@@ -76,7 +76,7 @@ public abstract class AvatarRangeOfMotionTests implements MultiRobotTestInterfac
       simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -93,7 +93,7 @@ public abstract class AvatarRangeOfMotionTests implements MultiRobotTestInterfac
 
       simulationTestHelper.publishToController(pelvisHeightTrajectoryMessage);
 
-      success = simulationTestHelper.simulateAndWait(5.0 + trajectoryTime);
+      success = simulationTestHelper.simulateNow(5.0 + trajectoryTime);
       assertTrue(success);
 
       simulationTestHelper.createVideo(getSimpleRobotName(), 2);
@@ -118,12 +118,12 @@ public abstract class AvatarRangeOfMotionTests implements MultiRobotTestInterfac
       setupCameraForWalkingOffOfLargePlatform();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(2.0);
+      boolean success = simulationTestHelper.simulateNow(2.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForSteppingOffOfLargePlatform();
       simulationTestHelper.publishToController(footstepDataList);
 
-      success = success && simulationTestHelper.simulateAndWait(4.0);
+      success = success && simulationTestHelper.simulateNow(4.0);
 
       simulationTestHelper.createVideo(getSimpleRobotName(), 1);
 
@@ -149,7 +149,7 @@ public abstract class AvatarRangeOfMotionTests implements MultiRobotTestInterfac
       simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -166,7 +166,7 @@ public abstract class AvatarRangeOfMotionTests implements MultiRobotTestInterfac
 
       simulationTestHelper.publishToController(chestTrajectoryMessage);
 
-      success = simulationTestHelper.simulateAndWait(1.0 + trajectoryTime);
+      success = simulationTestHelper.simulateNow(1.0 + trajectoryTime);
       assertTrue(success);
 
       FramePoint3D footPosition = new FramePoint3D(fullRobotModel.getFoot(RobotSide.LEFT).getBodyFixedFrame());
@@ -177,7 +177,7 @@ public abstract class AvatarRangeOfMotionTests implements MultiRobotTestInterfac
                                                                                                                              desiredPelvisHeight);
       simulationTestHelper.publishToController(pelvisHeightTrajectoryMessage);
 
-      success = simulationTestHelper.simulateAndWait(4.0 + trajectoryTime);
+      success = simulationTestHelper.simulateNow(4.0 + trajectoryTime);
       assertTrue(success);
 
       simulationTestHelper.createVideo(getSimpleRobotName(), 2);
@@ -195,7 +195,7 @@ public abstract class AvatarRangeOfMotionTests implements MultiRobotTestInterfac
       simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -210,7 +210,7 @@ public abstract class AvatarRangeOfMotionTests implements MultiRobotTestInterfac
 
       simulationTestHelper.publishToController(footTrajectoryMessage);
 
-      success = simulationTestHelper.simulateAndWait(4.0 + trajectoryTime);
+      success = simulationTestHelper.simulateNow(4.0 + trajectoryTime);
       assertTrue(success);
 
       simulationTestHelper.createVideo(getSimpleRobotName(), 2);

@@ -49,13 +49,13 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
       int numberOfSteps = 100;
       SCS2AvatarTestingSimulation simulationTestHelper = setupSimulation();
       simulationTestHelper.start();
-      simulationTestHelper.simulateOneBufferRecordPeriodAndWait();
-      simulationTestHelper.simulateOneBufferRecordPeriodAndWait();
+      simulationTestHelper.simulateOneBufferRecordPeriodNow();
+      simulationTestHelper.simulateOneBufferRecordPeriodNow();
 
       for (int i = 0; i < numberOfSteps; i++)
       {
-         simulationTestHelper.simulateOneBufferRecordPeriodAndWait();
-         simulationTestHelper.simulateOneBufferRecordPeriodAndWait();
+         simulationTestHelper.simulateOneBufferRecordPeriodNow();
+         simulationTestHelper.simulateOneBufferRecordPeriodNow();
          simulationTestHelper.stepBufferIndexBackward();
       }
 
@@ -220,9 +220,9 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
    private void initiateWalkingMotion(double standingTimeDuration, double walkingTimeDuration, SCS2AvatarTestingSimulation runner, YoBoolean walk)
    {
       walk.set(false);
-      runner.simulateAndWait(standingTimeDuration);
+      runner.simulateNow(standingTimeDuration);
       walk.set(true);
-      runner.simulateAndWait(walkingTimeDuration);
+      runner.simulateNow(walkingTimeDuration);
    }
 
    public static List<String> createVariableNamesStringsToIgnore()

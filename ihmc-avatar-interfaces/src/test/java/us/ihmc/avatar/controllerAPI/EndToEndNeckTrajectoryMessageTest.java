@@ -52,7 +52,7 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
       simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -84,7 +84,7 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
 
       simulationTestHelper.publishToController(armTrajectoryMessage);
 
-      success = simulationTestHelper.simulateAndWait(1.0 + trajectoryTime);
+      success = simulationTestHelper.simulateNow(1.0 + trajectoryTime);
       assertTrue(success);
 
       assertSingleWaypointExecuted(neckJoints, desiredJointPositions, desiredJointVelcoties, epsilon, simulationTestHelper);
@@ -104,7 +104,7 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
       simulationTestHelper.getRootRegistry().addChild(testRegistry);
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndWait(1.5);
+      boolean success = simulationTestHelper.simulateNow(1.5);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -202,7 +202,7 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
          }
       });
 
-      success = simulationTestHelper.simulateAndWait(0.5 * trajectoryTime.getValue());
+      success = simulationTestHelper.simulateNow(0.5 * trajectoryTime.getValue());
       assertTrue(success);
 
       double desiredEpsilon = 5.0e-3;
@@ -236,7 +236,7 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
                             + Math.abs(controllerDesiredVelocities[i] - neckJoints[i].getQd()));
       }
 
-      success = simulationTestHelper.simulateAndWait(0.5 * trajectoryTime.getValue() + 1.5);
+      success = simulationTestHelper.simulateNow(0.5 * trajectoryTime.getValue() + 1.5);
 
       assertTrue(success);
 
