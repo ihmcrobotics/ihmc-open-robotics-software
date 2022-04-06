@@ -891,6 +891,11 @@ public class EuclidCoreMissingTools
 
       return 2;   }
 
+   // *** NOTE ***: The 4x4 output matrix produced by this method assumes a Quaternion component ordering of:
+   //   Quat = [ Qs
+   //            Qx
+   //            Qy
+   //            Qz ]
    public static DMatrixRMaj quaternionDotToOmegaTransform(QuaternionReadOnly rotatingFrameQuaternion)
    {
       double qs = rotatingFrameQuaternion.getS();
