@@ -121,8 +121,7 @@ public class GDXArUcoCodeDetectionDemo
          private void loadTestImage()
          {
             WorkspaceFile testImageFile = new WorkspaceFile(new WorkspaceDirectory("ihmc-open-robotics-software",
-                                                                                   "ihmc-high-level-behaviors/src/test/resources",
-                                                                                   null),
+                                                                                   "ihmc-high-level-behaviors/src/test/resources"),
                                                             "testArUcoDetection.jpg");
             Mat readImage = opencv_imgcodecs.imread(testImageFile.getFilePath().toString());
             testRGB888ColorImage = new BytedecoImage(readImage);
