@@ -310,15 +310,8 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
       avatarSimulation.resetRobot(simulateAfterReset);
    }
 
-   private void checkSimulationHasStarted()
-   {
-      if (!getSimulationSession().hasSessionStarted())
-         throw new IllegalStateException("The simulation has not been started.");
-   }
-
    public void assertRobotsRootJointIsInBoundingBox(BoundingBox3DReadOnly boundingBox)
    {
-      checkSimulationHasStarted();
       RobotInterface robot = getSimulationSession().getPhysicsEngine().getRobots().get(0);
       FloatingJointBasics rootJoint = (FloatingJointBasics) robot.getRootBody().getChildrenJoints().get(0);
       boolean inside = boundingBox.isInsideInclusive(rootJoint.getJointPose().getPosition());
