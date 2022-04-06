@@ -72,7 +72,7 @@ public abstract class AvatarBigStepDownTest implements MultiRobotTestInterface
                                                                                                                                              simulationTestingParameters);
       simulationTestHelperFactory.setStartingLocationOffset(selectedLocation.getStartingLocationOffset());
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
-      simulationTestHelper.start();
+      simulationTestHelper.start(false);
 
       Point3D cameraFix = new Point3D(-4.68, -7.8, 0.55);
       Point3D cameraPosition = new Point3D(-8.6, -4.47, 0.58);
@@ -131,7 +131,7 @@ public abstract class AvatarBigStepDownTest implements MultiRobotTestInterface
                                                                                                                                              simulationTestingParameters);
       simulationTestHelperFactory.setStartingLocationOffset(selectedLocation.getStartingLocationOffset());
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
-      simulationTestHelper.start();
+      simulationTestHelper.start(false);
 
       Point3D cameraFix = new Point3D(-4.68, -7.8, 0.55);
       Point3D cameraPosition = new Point3D(-8.6, -4.47, 0.58);
