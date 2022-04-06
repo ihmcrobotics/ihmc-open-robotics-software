@@ -1,0 +1,54 @@
+#ifndef __controller_msgs__msg__NadiaGripperMessage__idl__
+#define __controller_msgs__msg__NadiaGripperMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet IDLE =
+      0;
+
+      const octet CALIBRATE =
+      1;
+
+      const octet CLOSE =
+      2;
+
+      const octet OPEN =
+      3;
+
+      const octet RELEASE =
+      4;
+
+
+      /**
+       * This message sends gripper commands/feedback to nadia
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::NadiaGripperMessage_")
+      struct NadiaGripperMessage
+      {
+        /**
+         * High level gripper command, sent to Gripper class
+         */
+        @defaultValue(value=255)
+        octet command;
+        /**
+         * Desired torque on 0 to 1
+         */
+        double desired_torque_ratio;
+        /**
+         * Desired position on 0 to 1
+         */
+        double desired_position_ratio;
+        /**
+         * Measured position on 0 to 1
+         */
+        double measured_position_ratio;
+      };
+    };
+  };
+};
+
+#endif
