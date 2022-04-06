@@ -373,8 +373,8 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
 
    public void setCamera(Point3DReadOnly cameraFocus, Point3DReadOnly cameraPosition)
    {
-      setCameraPosition(cameraPosition);
       setCameraFocusPosition(cameraFocus);
+      setCameraPosition(cameraPosition);
    }
 
    public void requestCameraRigidBodyTracking(String robotName, String rigidBodyName)
