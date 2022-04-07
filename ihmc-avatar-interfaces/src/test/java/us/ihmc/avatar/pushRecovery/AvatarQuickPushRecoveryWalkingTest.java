@@ -200,7 +200,7 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
       StateTransitionCondition condition = time -> swingStartConditions.get(side).testCondition(time) && footstepsCompletedPerSide.get(side).get() > 0;
 
       // apply the push
-      testPush(forceDirection, pushChangeInVelocity, 0.5, condition, swingTime, 4);
+      testPush(forceDirection, pushChangeInVelocity, 0.5, condition, swingTime, 5);
 
       // reset and queue an early push
       footstepsCompletedPerSide.get(side).set(0);
@@ -212,7 +212,7 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
       footstepsCompletedPerSide.get(side).set(0);
       condition = time -> swingStartConditions.get(side).testCondition(time) && footstepsCompletedPerSide.get(side).get() > 0;
 
-      testPush(forceDirection, 0.6 * pushChangeInVelocity, 0.8, condition, swingTime, 4);
+      testPush(forceDirection, 0.7 * pushChangeInVelocity, 0.8, condition, swingTime, 4);
    }
 
    @Test
