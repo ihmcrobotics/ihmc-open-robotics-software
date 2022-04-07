@@ -39,14 +39,16 @@ public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFact
 
    public static SCS2AvatarTestingSimulation createDefaultTestSimulation(DRCRobotModel robotModel, SimulationTestingParameters simulationTestingParameters)
    {
-      return createDefaultTestSimulationFactory(robotModel, simulationTestingParameters).createAvatarTestingSimulation();
+      SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = createDefaultTestSimulationFactory(robotModel, simulationTestingParameters);
+      return simulationTestHelperFactory.createAvatarTestingSimulation();
    }
 
    public static SCS2AvatarTestingSimulation createDefaultTestSimulation(DRCRobotModel robotModel,
                                                                          CommonAvatarEnvironmentInterface environment,
                                                                          SimulationTestingParameters simulationTestingParameters)
    {
-      return createDefaultTestSimulationFactory(robotModel, environment, simulationTestingParameters).createAvatarTestingSimulation();
+      SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = createDefaultTestSimulationFactory(robotModel, environment, simulationTestingParameters);
+      return simulationTestHelperFactory.createAvatarTestingSimulation();
    }
 
    public static SCS2AvatarTestingSimulationFactory createDefaultTestSimulationFactory(DRCRobotModel robotModel,
