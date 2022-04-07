@@ -343,6 +343,18 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
       getSimulationSessionControls().setBufferOutPointIndexToCurrent();
    }
 
+   public void gotoInPoint()
+   {
+      checkSimulationSessionAlive();
+      getSimulationSessionControls().setBufferCurrentIndexToInPoint();
+   }
+   
+   public void gotoOutPoint()
+   {
+      checkSimulationSessionAlive();
+      getSimulationSessionControls().setBufferCurrentIndexToInPoint();
+   }
+
    public void stepBufferIndexForward()
    {
       checkSimulationSessionAlive();
