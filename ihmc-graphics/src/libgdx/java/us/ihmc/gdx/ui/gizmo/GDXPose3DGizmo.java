@@ -201,38 +201,32 @@ public class GDXPose3DGizmo implements RenderableProvider
          boolean altHeld = ImGui.getIO().getKeyAlt();
          boolean shiftHeld = ImGui.getIO().getKeyShift();
          double deltaTime = Gdx.graphics.getDeltaTime();
-
-         tempFramePose3D.setToZero(gizmoFrame);
-//         tempFramePose3D.changeFrame(camera3D.getCameraZUpFrame());
-         tempFramePose3D.changeFrame(camera3D.getCameraFrame());
-//         tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
-
          if (altHeld) // orientation
          {
             double amount = deltaTime * (shiftHeld ? 0.2 : 1.0);
             if (upArrowHeld) // pitch +
             {
-               tempFramePose3D.getOrientation().appendPitchRotation(amount);
+               transformToParent.getRotation().appendPitchRotation(amount);
             }
             if (downArrowHeld) // pitch -
             {
-               tempFramePose3D.getOrientation().appendPitchRotation(-amount);
+               transformToParent.getRotation().appendPitchRotation(-amount);
             }
             if (rightArrowHeld && !ctrlHeld) // roll +
             {
-               tempFramePose3D.getOrientation().appendRollRotation(amount);
+               transformToParent.getRotation().appendRollRotation(amount);
             }
             if (leftArrowHeld && !ctrlHeld) // roll -
             {
-               tempFramePose3D.getOrientation().appendRollRotation(-amount);
+               transformToParent.getRotation().appendRollRotation(-amount);
             }
             if (leftArrowHeld && ctrlHeld) // yaw +
             {
-               tempFramePose3D.getOrientation().appendYawRotation(amount);
+               transformToParent.getRotation().appendYawRotation(amount);
             }
             if (rightArrowHeld && ctrlHeld) // yaw -
             {
-               tempFramePose3D.getOrientation().appendYawRotation(-amount);
+               transformToParent.getRotation().appendYawRotation(-amount);
             }
          }
          else // translation
@@ -240,31 +234,29 @@ public class GDXPose3DGizmo implements RenderableProvider
             double amount = deltaTime * (shiftHeld ? 0.05 : 0.4);
             if (upArrowHeld && !ctrlHeld) // x +
             {
-               tempFramePose3D.getPosition().addX(amount);
+               transformToParent.getTranslation().addX(amount);
             }
             if (downArrowHeld && !ctrlHeld) // x -
             {
-               tempFramePose3D.getPosition().subX(amount);
+               transformToParent.getTranslation().subX(amount);
             }
             if (leftArrowHeld) // y +
             {
-               tempFramePose3D.getPosition().addY(amount);
+               transformToParent.getTranslation().addY(amount);
             }
             if (rightArrowHeld) // y -
             {
-               tempFramePose3D.getPosition().subY(amount);
+               transformToParent.getTranslation().subY(amount);
             }
             if (upArrowHeld && ctrlHeld) // z +
             {
-               tempFramePose3D.getPosition().addZ(amount);
+               transformToParent.getTranslation().addZ(amount);
             }
             if (downArrowHeld && ctrlHeld) // z -
             {
-               tempFramePose3D.getPosition().subZ(amount);
+               transformToParent.getTranslation().subZ(amount);
             }
          }
-         tempFramePose3D.changeFrame(parentReferenceFrame);
-         tempFramePose3D.get(transformToParent);
       }
 
       // after things have been modified, update the derivative stuff
