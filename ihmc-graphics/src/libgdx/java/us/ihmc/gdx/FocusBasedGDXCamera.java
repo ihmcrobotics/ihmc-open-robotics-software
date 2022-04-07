@@ -23,18 +23,24 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
 import us.ihmc.gdx.tools.GDXTools;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 public class FocusBasedGDXCamera extends Camera
 {
    private final ReferenceFrame libGDXYUpFrame;
    private final FramePose3D cameraPose = new FramePose3D();
+   private final RigidBodyTransform transformToParent = new RigidBodyTransform();
+   private final ReferenceFrame cameraFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
+                                                                                                                     transformToParent);
 
    private final FrameVector3D euclidDirection = new FrameVector3D();
    private final FrameVector3D euclidUp = new FrameVector3D();
@@ -53,7 +59,7 @@ public class FocusBasedGDXCamera extends Camera
    private double longitudeSpeed = 0.005;
    private double translateSpeedFactor = 0.5;
 
-   private final FramePose3D focusPointPose = new FramePose3D();
+   private final FramePose3D focusPointPose;
    private double latitude = 0.0;
    private double longitude = 0.0;
    private double roll;
@@ -78,6 +84,7 @@ public class FocusBasedGDXCamera extends Camera
    public FocusBasedGDXCamera(ReferenceFrame libGDXYUpFrame)
    {
       this.libGDXYUpFrame = libGDXYUpFrame; // TODO: Use and understand this
+      focusPointPose = new FramePose3D(ReferenceFrame.getWorldFrame());
       verticalFieldOfView = 45.0f;
       viewportWidth = Gdx.graphics.getWidth();
       viewportHeight = Gdx.graphics.getHeight();
@@ -203,6 +210,10 @@ public class FocusBasedGDXCamera extends Camera
       longitudeAxisAngle.set(Axis3D.Y, -longitude);
       rollAxisAngle.set(Axis3D.Z, roll);
 
+      latitudeAxisAngle.set(Axis3D.Y, -latitude);
+      longitudeAxisAngle.set(Axis3D.Z, -longitude);
+      rollAxisAngle.set(Axis3D.X, roll);
+
       focusPointAxisAngle.set(Axis3D.Z, -longitude);
 
       focusPointPose.getOrientation().set(focusPointAxisAngle);
@@ -211,19 +222,20 @@ public class FocusBasedGDXCamera extends Camera
       focusPointSphere.nodes.get(0).scale.set((float) (0.0035 * zoom), (float) (0.0035 * zoom), (float) (0.0035 * zoom));
       focusPointSphere.calculateTransforms();
 
-      cameraPose.setToZero(ReferenceFrame.getWorldFrame());
-      cameraPose.appendTranslation(focusPointPose.getPosition());
-      cameraPose.appendRotation(cameraOrientationOffset);
-      cameraPose.appendRotation(longitudeAxisAngle);
+//      cameraPose.setToZero(ReferenceFrame.getWorldFrame());
+//      cameraPose.appendTranslation(focusPointPose.getPosition());
+//      cameraPose.appendRotation(cameraOrientationOffset);
+      cameraPose.setIncludingFrame(focusPointPose);
+//      cameraPose.appendRotation(longitudeAxisAngle);
       cameraPose.appendRotation(latitudeAxisAngle);
-      cameraPose.appendRotation(rollAxisAngle);
-      cameraPose.appendTranslation(0.0, 0.0, -zoom);
+//      cameraPose.appendRotation(rollAxisAngle);
+      cameraPose.appendTranslation(-zoom, 0.0, 0.0);
 
-//      euclidDirection.setIncludingFrame(ReferenceFrame.getWorldFrame(), Axis3D.X);
-      euclidDirection.setIncludingFrame(ReferenceFrame.getWorldFrame(), Axis3D.Z);
+      euclidDirection.setIncludingFrame(ReferenceFrame.getWorldFrame(), Axis3D.X);
+//      euclidDirection.setIncludingFrame(ReferenceFrame.getWorldFrame(), Axis3D.Z);
       cameraPose.getOrientation().transform(euclidDirection);
-//      euclidUp.setIncludingFrame(ReferenceFrame.getWorldFrame(), Axis3D.Z);
-      euclidUp.setIncludingFrame(ReferenceFrame.getWorldFrame(), Axis3D.Y);
+      euclidUp.setIncludingFrame(ReferenceFrame.getWorldFrame(), Axis3D.Z);
+//      euclidUp.setIncludingFrame(ReferenceFrame.getWorldFrame(), Axis3D.Y);
       cameraPose.getOrientation().transform(euclidUp);
 
 //      cameraPose.changeFrame(libGDXYUpFrame);
@@ -233,6 +245,10 @@ public class FocusBasedGDXCamera extends Camera
       GDXTools.toGDX(cameraPose.getPosition(), position);
       GDXTools.toGDX(euclidDirection, direction);
       GDXTools.toGDX(euclidUp, up);
+
+//      cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
+      cameraPose.get(transformToParent);
+      cameraFrame.update();
    }
 
    public void processImGuiInput(ImGui3DViewInput input)
@@ -342,5 +358,20 @@ public class FocusBasedGDXCamera extends Camera
    private double getTranslateSpeedFactor()
    {
       return translateSpeedFactor * zoom;
+   }
+
+   public ReferenceFrame getCameraFrame()
+   {
+      return cameraFrame;
+   }
+
+   public FramePose3DReadOnly getCameraPose()
+   {
+      return cameraPose;
+   }
+
+   public FramePose3DReadOnly getFocusPointPose()
+   {
+      return focusPointPose;
    }
 }
