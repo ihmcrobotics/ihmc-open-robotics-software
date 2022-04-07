@@ -7,7 +7,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseEveryBuildTest;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 @Tag("fast")
@@ -30,7 +29,7 @@ public class ValkyrieObstacleCourseEveryBuildTest extends DRCObstacleCourseEvery
    @Tag("humanoid-obstacle")
    @Override
    @Test
-   public void testSimpleFlatGroundScript() throws SimulationExceededMaximumTimeException
+   public void testSimpleFlatGroundScript()
    {
       super.testSimpleFlatGroundScript();
    }
@@ -38,7 +37,7 @@ public class ValkyrieObstacleCourseEveryBuildTest extends DRCObstacleCourseEvery
    @Tag("humanoid-obstacle")
    @Override
    @Test
-   public void testWalkingUpToRampWithLongSteps() throws SimulationExceededMaximumTimeException
+   public void testWalkingUpToRampWithLongSteps()
    {
       super.testWalkingUpToRampWithLongSteps();
    }
