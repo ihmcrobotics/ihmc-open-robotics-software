@@ -79,8 +79,12 @@ public class GDXPose3DGizmo implements RenderableProvider
    private final Line3DMouseDragAlgorithm lineDragAlgorithm = new Line3DMouseDragAlgorithm();
    private final ClockFaceRotation3DMouseDragAlgorithm clockFaceDragAlgorithm = new ClockFaceRotation3DMouseDragAlgorithm();
    private FocusBasedGDXCamera camera3D;
+   private final RigidBodyTransform transformFromKeyboardTransformationToWorld = new RigidBodyTransform();
+   private ReferenceFrame keyboardTransformationFrame;
    private final Point3D cameraPosition = new Point3D();
+   private double distanceToCamera;
    private double lastDistanceToCamera = -1.0;
+   private final double translateSpeedFactor = 0.5;
 
    public GDXPose3DGizmo()
    {
@@ -92,6 +96,8 @@ public class GDXPose3DGizmo implements RenderableProvider
       this.parentReferenceFrame = parentReferenceFrame;
       transformToParent = new RigidBodyTransform();
       gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentReferenceFrame, transformToParent);
+      keyboardTransformationFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
+                                                                                                           transformFromKeyboardTransformationToWorld);
    }
 
    public GDXPose3DGizmo(ReferenceFrame gizmoFrame, RigidBodyTransform gizmoTransformToParentFrameToModify)
@@ -201,6 +207,12 @@ public class GDXPose3DGizmo implements RenderableProvider
          boolean altHeld = ImGui.getIO().getKeyAlt();
          boolean shiftHeld = ImGui.getIO().getKeyShift();
          double deltaTime = Gdx.graphics.getDeltaTime();
+
+         transformFromKeyboardTransformationToWorld.setToZero();
+         transformFromKeyboardTransformationToWorld.getRotation().setToYawOrientation(camera3D.getFocusPointPose().getYaw());
+         keyboardTransformationFrame.update();
+         tempFramePose3D.setToZero(keyboardTransformationFrame);
+
          if (altHeld) // orientation
          {
             double amount = deltaTime * (shiftHeld ? 0.2 : 1.0);
@@ -232,31 +244,36 @@ public class GDXPose3DGizmo implements RenderableProvider
          else // translation
          {
             double amount = deltaTime * (shiftHeld ? 0.05 : 0.4);
+            distanceToCamera = cameraPosition.distance(framePose3D.getPosition());
             if (upArrowHeld && !ctrlHeld) // x +
             {
-               transformToParent.getTranslation().addX(amount);
+               tempFramePose3D.getPosition().addX(getTranslateSpeedFactor() * amount);
             }
             if (downArrowHeld && !ctrlHeld) // x -
             {
-               transformToParent.getTranslation().subX(amount);
+               tempFramePose3D.getPosition().subX(getTranslateSpeedFactor() * amount);
             }
             if (leftArrowHeld) // y +
             {
-               transformToParent.getTranslation().addY(amount);
+               tempFramePose3D.getPosition().addY(getTranslateSpeedFactor() * amount);
             }
             if (rightArrowHeld) // y -
             {
-               transformToParent.getTranslation().subY(amount);
+               tempFramePose3D.getPosition().subY(getTranslateSpeedFactor() * amount);
             }
             if (upArrowHeld && ctrlHeld) // z +
             {
-               transformToParent.getTranslation().addZ(amount);
+               tempFramePose3D.getPosition().addZ(getTranslateSpeedFactor() * amount);
             }
             if (downArrowHeld && ctrlHeld) // z -
             {
-               transformToParent.getTranslation().subZ(amount);
+               tempFramePose3D.getPosition().subZ(getTranslateSpeedFactor() * amount);
             }
          }
+
+         tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
+         tempFramePose3D.get(tempTransform);
+         transformToParent.getTranslation().add(tempTransform.getTranslation());
       }
 
       // after things have been modified, update the derivative stuff
@@ -265,7 +282,7 @@ public class GDXPose3DGizmo implements RenderableProvider
       if (resizeAutomatically.get())
       {
          GDXTools.toEuclid(camera3D.position, cameraPosition);
-         double distanceToCamera = cameraPosition.distance(framePose3D.getPosition());
+         distanceToCamera = cameraPosition.distance(framePose3D.getPosition());
          if (lastDistanceToCamera != distanceToCamera)
          {
             lastDistanceToCamera = distanceToCamera;
@@ -493,6 +510,11 @@ public class GDXPose3DGizmo implements RenderableProvider
       }
 
       return meshBuilder.generateMeshDataHolder();
+   }
+
+   private double getTranslateSpeedFactor()
+   {
+      return translateSpeedFactor * distanceToCamera;
    }
 
    public void setResizeAutomatically(boolean resizeAutomatically)
