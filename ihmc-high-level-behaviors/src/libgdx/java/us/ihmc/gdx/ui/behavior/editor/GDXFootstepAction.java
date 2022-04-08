@@ -5,84 +5,77 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import controller_msgs.msg.dds.FrameInformation;
-import controller_msgs.msg.dds.HandTrajectoryMessage;
-import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
-import imgui.ImGui;
+import controller_msgs.msg.dds.FootstepDataListMessage;
 import imgui.type.ImBoolean;
-import imgui.type.ImDouble;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
+import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.ui.affordances.GDXInteractableHighlightModel;
 import us.ihmc.gdx.ui.affordances.GDXInteractableTools;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.JSONTools;
 
 import java.util.List;
+import java.util.UUID;
 
-public class GDXHandPoseAction implements GDXBehaviorAction
+public class GDXFootstepAction implements GDXBehaviorAction
 {
-   private RigidBodyTransform controlToHandTranform;
-   private final RigidBodyTransform handGraphicToControlTransform = new RigidBodyTransform();
-   private GDXInteractableHighlightModel highlightModel;
+
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private GDXInteractableHighlightModel highlightModel;
    private final GDXPose3DGizmo poseGizmo = new GDXPose3DGizmo();
    private RobotSide side;
-   private FullHumanoidRobotModel fullRobotModel;
    private DRCRobotModel robotModel;
    private ImGuiReferenceFrameLibraryCombo referenceFrameLibraryCombo;
    private ROS2SyncedRobotModel syncedRobot;
    private ROS2ControllerHelper ros2ControllerHelper;
-   private final ImBoolean selected = new ImBoolean();
-   private final ImDouble trajectoryTime = new ImDouble(4.0);
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+   private final RigidBodyTransform ankleToSoleFrameTransform = new RigidBodyTransform();
+   private final ImBoolean selected = new ImBoolean();
+   private boolean wasInitializedToPreviousStep;
 
    public void create(GDXFocusBasedCamera camera3D,
                       DRCRobotModel robotModel,
                       ROS2SyncedRobotModel syncedRobot,
-                      FullHumanoidRobotModel fullRobotModel,
                       ROS2ControllerHelper ros2ControllerHelper,
-                      List<ReferenceFrame> referenceFrameLibrary)
+                      List<ReferenceFrame> referenceFrameLibrary,
+                      GDXFootstepAction possiblyNullPreviousFootstepAction)
    {
-      this.ros2ControllerHelper = ros2ControllerHelper;
-      this.fullRobotModel = fullRobotModel;
-      this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
+      this.ros2ControllerHelper = ros2ControllerHelper;
+      this.robotModel = robotModel;
       referenceFrameLibraryCombo = new ImGuiReferenceFrameLibraryCombo(referenceFrameLibrary);
       poseGizmo.create(camera3D);
+
+      wasInitializedToPreviousStep = possiblyNullPreviousFootstepAction != null;
+      if (wasInitializedToPreviousStep)
+      {
+         setToReferenceFrame(possiblyNullPreviousFootstepAction.getReferenceFrame());
+      }
    }
 
-   public void setSide(RobotSide side, boolean authoring, GDXHandPoseAction possiblyNullPreviousAction)
+   public void setSide(RobotSide side, boolean authoring)
    {
       this.side = side;
-      ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(side);
-      controlToHandTranform = handControlFrame.getTransformToParent();
-      handGraphicToControlTransform.setAndInvert(controlToHandTranform);
-      handGraphicToControlTransform.getRotation().appendYawRotation(side == RobotSide.LEFT ? 0.0 : Math.PI);
-      handGraphicToControlTransform.getRotation().appendPitchRotation(-Math.PI / 2.0);
-      handGraphicToControlTransform.getRotation().appendRollRotation(0.0);
-      handGraphicToControlTransform.getTranslation().add(0.126, -0.00179, 0.0); // TODO: Fix and check
-      String handBodyName = (side == RobotSide.LEFT) ? "l_hand" : "r_hand";
-      String modelFileName = GDXInteractableTools.getModelFileName(robotModel.getRobotDefinition().getRigidBodyDefinition(handBodyName));
+      String footBodyName = (side == RobotSide.LEFT) ? "l_foot" : "r_foot";
+      String modelFileName = GDXInteractableTools.getModelFileName(robotModel.getRobotDefinition().getRigidBodyDefinition(footBodyName));
       highlightModel = new GDXInteractableHighlightModel(modelFileName);
+      ankleToSoleFrameTransform.set(robotModel.getJointMap().getSoleToParentFrameTransform(side));
+      ankleToSoleFrameTransform.invert();
 
-      if (possiblyNullPreviousAction != null)
+      if (!wasInitializedToPreviousStep && authoring)
       {
-         setToReferenceFrame(possiblyNullPreviousAction.getReferenceFrame());
-      }
-      else if (authoring)
-      {
-         setToReferenceFrame(syncedRobot.getReferenceFrames().getHandFrame(side));
+         setToReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
       }
    }
 
@@ -91,7 +84,7 @@ public class GDXHandPoseAction implements GDXBehaviorAction
    {
       poseGizmo.updateTransforms();
       poseGizmo.getGizmoFrame().getTransformToDesiredFrame(tempTransform, ReferenceFrame.getWorldFrame());
-      highlightModel.setPose(tempTransform, handGraphicToControlTransform);
+      highlightModel.setPose(tempTransform, ankleToSoleFrameTransform);
    }
 
    @Override
@@ -114,9 +107,6 @@ public class GDXHandPoseAction implements GDXBehaviorAction
          poseToKeep.changeFrame(poseGizmo.getGizmoFrame().getParent());
          poseToKeep.get(poseGizmo.getTransformToParent());
       }
-      ImGui.pushItemWidth(80.0f);
-      ImGui.inputDouble(labels.get("Trajectory time"), trajectoryTime);
-      ImGui.popItemWidth();
    }
 
    @Override
@@ -132,7 +122,6 @@ public class GDXHandPoseAction implements GDXBehaviorAction
    {
       jsonNode.put("parentFrame", poseGizmo.getGizmoFrame().getParent().getName());
       jsonNode.put("side", side.getLowerCaseName());
-      jsonNode.put("trajectoryTime", trajectoryTime.get());
       JSONTools.toJSON(jsonNode, poseGizmo.getTransformToParent());
    }
 
@@ -141,8 +130,7 @@ public class GDXHandPoseAction implements GDXBehaviorAction
    {
       String referenceFrameName = jsonNode.get("parentFrame").asText();
       setReferenceFrame(referenceFrameName);
-      setSide(RobotSide.getSideFromString(jsonNode.get("side").asText()), false, null);
-      trajectoryTime.set(jsonNode.get("trajectoryTime").asDouble());
+      setSide(RobotSide.getSideFromString(jsonNode.get("side").asText()), false);
       JSONTools.toEuclid(jsonNode, poseGizmo.getTransformToParent());
    }
 
@@ -169,28 +157,24 @@ public class GDXHandPoseAction implements GDXBehaviorAction
    }
 
    @Override
-   public void destroy()
+   public void performAction()
    {
-      highlightModel.dispose();
+      double swingDuration = 1.2;
+      double transferDuration = 0.8;
+      FootstepPlan footstepPlan = new FootstepPlan();
+      footstepPlan.addFootstep(side, poseGizmo.getPose());
+      FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan,
+                                                                                                                    swingDuration,
+                                                                                                                    transferDuration);
+      footstepDataListMessage.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
+      footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
+      ros2ControllerHelper.publishToController(footstepDataListMessage);
    }
 
    @Override
-   public void performAction()
+   public void destroy()
    {
-      FramePose3D endHandPose = new FramePose3D();
-      endHandPose.setToZero(poseGizmo.getGizmoFrame());
-      endHandPose.changeFrame(ReferenceFrame.getWorldFrame());
-      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage();
-      handTrajectoryMessage.setRobotSide(side.toByte());
-      handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrameId(FrameInformation.CHEST_FRAME);
-      handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(FrameInformation.WORLD_FRAME);
-      SE3TrajectoryPointMessage trajectoryPoint = handTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add();
-      trajectoryPoint.setTime(trajectoryTime.get());
-      trajectoryPoint.getPosition().set(endHandPose.getPosition());
-      trajectoryPoint.getOrientation().set(endHandPose.getOrientation());
-      trajectoryPoint.getLinearVelocity().set(EuclidCoreTools.zeroVector3D);
-      trajectoryPoint.getAngularVelocity().set(EuclidCoreTools.zeroVector3D);
-      ros2ControllerHelper.publishToController(handTrajectoryMessage);
+      highlightModel.dispose();
    }
 
    @Override
@@ -199,15 +183,10 @@ public class GDXHandPoseAction implements GDXBehaviorAction
       return selected;
    }
 
-   public RobotSide getSide()
-   {
-      return side;
-   }
-
    @Override
    public String getNameForDisplay()
    {
-      return side.getPascalCaseName() + " Hand Pose";
+      return side.getPascalCaseName() + " Footstep";
    }
 
    public ReferenceFrame getReferenceFrame()

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.ImGui;
+import imgui.flag.ImGuiStyleVar;
 import imgui.type.ImBoolean;
 import org.apache.commons.lang3.tuple.MutablePair;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -123,6 +124,11 @@ public class GDXBehaviorActionSequenceEditor
                GDXArmJointAnglesAction action = addArmJointAnglesAction();
                action.loadFromFile(actionNode);
             }
+            else if (actionType.equals(GDXFootstepAction.class.getSimpleName()))
+            {
+               GDXFootstepAction action = addFootstepAction();
+               action.loadFromFile(actionNode);
+            }
          }
       });
    }
@@ -131,7 +137,7 @@ public class GDXBehaviorActionSequenceEditor
    {
       if (workspaceFile.isFileAccessAvailable())
       {
-         LogTools.info("Saving to {}", workspaceFile.getClasspathResource().toString());
+         LogTools.info("Saving to {}", workspaceFile.getPathForResourceLoadingPathFiltered());
          JSONFileTools.save(workspaceFile, jsonRootObjectNode ->
          {
             jsonRootObjectNode.put("name", name);
@@ -191,10 +197,17 @@ public class GDXBehaviorActionSequenceEditor
             playbackNextIndex--;
       }
       ImGui.sameLine();
-      if (playbackNextIndex < actionSequence.size())
+      ImGui.text("Index: " + String.format("%03d", playbackNextIndex));
+      ImGui.sameLine();
+      if (ImGui.button(labels.get(">")))
       {
-         ImGui.text("Index: " + String.format("%03d", playbackNextIndex));
-         ImGui.sameLine();
+         if (playbackNextIndex < actionSequence.size())
+            playbackNextIndex++;
+      }
+      ImGui.sameLine();
+      boolean endOfSequence = playbackNextIndex >= actionSequence.size();
+      if (!endOfSequence)
+      {
          if (ImGui.button(labels.get("Execute")))
          {
             GDXBehaviorAction action = actionSequence.get(playbackNextIndex);
@@ -202,16 +215,12 @@ public class GDXBehaviorActionSequenceEditor
             playbackNextIndex++;
          }
       }
-      else
-      {
-         ImGui.text("No actions left.");
-      }
       ImGui.sameLine();
-      if (ImGui.button(labels.get(">")))
-      {
-         if (playbackNextIndex < actionSequence.size())
-            playbackNextIndex++;
-      }
+      endOfSequence = playbackNextIndex >= actionSequence.size();
+      if (endOfSequence)
+         ImGui.text("No actions left.");
+      else
+         ImGui.text(actionSequence.get(playbackNextIndex).getNameForDisplay());
 
       ImGui.separator();
 
@@ -265,14 +274,24 @@ public class GDXBehaviorActionSequenceEditor
       {
          addWalkAction();
       }
-      ImGui.text("Add Hand Pose");
+      ImGui.text("Add Hand Pose:");
       ImGui.sameLine();
       for (RobotSide side : RobotSide.values)
       {
          if (ImGui.button(labels.get(side.getPascalCaseName())))
          {
             GDXHandPoseAction handPoseAction = addHandPoseAction();
-            handPoseAction.setSide(side);
+            // Set the new action to where the last one was for faster authoring
+            GDXHandPoseAction previousAction = null;
+            for (int i = 0; i < playbackNextIndex - 1; i++)
+            {
+               if (actionSequence.get(i) instanceof GDXHandPoseAction
+               && ((GDXHandPoseAction) actionSequence.get(i)).getSide() == side)
+               {
+                  previousAction = (GDXHandPoseAction) actionSequence.get(i);
+               }
+            }
+            handPoseAction.setSide(side, true, previousAction);
          }
          if (side.ordinal() < 1)
             ImGui.sameLine();
@@ -289,6 +308,18 @@ public class GDXBehaviorActionSequenceEditor
       {
          addArmJointAnglesAction();
       }
+      ImGui.text("Add Footstep:");
+      ImGui.sameLine();
+      for (RobotSide side : RobotSide.values)
+      {
+         if (ImGui.button(labels.get(side.getPascalCaseName(), 1)))
+         {
+            GDXFootstepAction footstepAction = addFootstepAction();
+            footstepAction.setSide(side, true);
+         }
+         if (side.ordinal() < 1)
+            ImGui.sameLine();
+      }
 
       ImGui.endChild();
    }
@@ -296,8 +327,8 @@ public class GDXBehaviorActionSequenceEditor
    private GDXHandPoseAction addHandPoseAction()
    {
       GDXHandPoseAction handPoseAction = new GDXHandPoseAction();
-      handPoseAction.create(camera3D, robotModel, syncedRobot.getFullRobotModel(), ros2ControllerHelper, referenceFrameLibrary);
-      actionSequence.add(playbackNextIndex, handPoseAction);
+      handPoseAction.create(camera3D, robotModel, syncedRobot, syncedRobot.getFullRobotModel(), ros2ControllerHelper, referenceFrameLibrary);
+      insertNewAction(handPoseAction);
       return handPoseAction;
    }
 
@@ -305,7 +336,7 @@ public class GDXBehaviorActionSequenceEditor
    {
       GDXHandConfigurationAction handConfigurationAction = new GDXHandConfigurationAction();
       handConfigurationAction.create(ros2ControllerHelper);
-      actionSequence.add(playbackNextIndex, handConfigurationAction);
+      insertNewAction(handConfigurationAction);
       return handConfigurationAction;
    }
 
@@ -313,7 +344,7 @@ public class GDXBehaviorActionSequenceEditor
    {
       GDXChestOrientationAction chestOrientationAction = new GDXChestOrientationAction();
       chestOrientationAction.create(ros2ControllerHelper, syncedRobot);
-      actionSequence.add(playbackNextIndex, chestOrientationAction);
+      insertNewAction(chestOrientationAction);
       return chestOrientationAction;
    }
 
@@ -321,7 +352,7 @@ public class GDXBehaviorActionSequenceEditor
    {
       GDXArmJointAnglesAction armJointAnglesAction = new GDXArmJointAnglesAction();
       armJointAnglesAction.create(ros2ControllerHelper);
-      actionSequence.add(playbackNextIndex, armJointAnglesAction);
+      insertNewAction(armJointAnglesAction);
       return armJointAnglesAction;
    }
 
@@ -329,15 +360,47 @@ public class GDXBehaviorActionSequenceEditor
    {
       GDXWalkAction walkAction = new GDXWalkAction();
       walkAction.create(camera3D, robotModel, footstepPlanner, syncedRobot, ros2ControllerHelper, referenceFrameLibrary);
-      actionSequence.add(playbackNextIndex, walkAction);
+      insertNewAction(walkAction);
       return walkAction;
+   }
+
+   private GDXFootstepAction addFootstepAction()
+   {
+      GDXFootstepAction footstepAction = new GDXFootstepAction();
+
+      // Set the new action to where the last one was for faster authoring
+      GDXFootstepAction previousAction = null;
+      for (int i = 0; i < playbackNextIndex; i++)
+      {
+         if (actionSequence.get(i) instanceof GDXFootstepAction)
+         {
+            previousAction = (GDXFootstepAction) actionSequence.get(i);
+         }
+      }
+
+      footstepAction.create(camera3D, robotModel, syncedRobot, ros2ControllerHelper, referenceFrameLibrary, previousAction);
+      insertNewAction(footstepAction);
+      return footstepAction;
+   }
+
+   private void insertNewAction(GDXBehaviorAction action)
+   {
+      actionSequence.add(playbackNextIndex, action);
+      for (int i = 0; i < actionSequence.size(); i++)
+      {
+         actionSequence.get(i).getSelected().set(i == playbackNextIndex);
+      }
+      playbackNextIndex++;
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      for (GDXBehaviorAction action : actionSequence)
+      if (panel.getIsShowing().get())
       {
-         action.getRenderables(renderables, pool);
+         for (GDXBehaviorAction action : actionSequence)
+         {
+            action.getRenderables(renderables, pool);
+         }
       }
    }
 
