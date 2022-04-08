@@ -30,7 +30,7 @@ import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
-public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
+public class GDXPathControlRingGizmo implements RenderableProvider
 {
    public static final Color LIGHT_GRAY = new Color().fromHsv(0.0f, 0.0f, 0.836f);
    public static final Color LIGHTER_GRAY = new Color().fromHsv(0.0f, 0.0f, 0.95f);
@@ -94,12 +94,12 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
    private boolean highlightingEnabled = true;
    private boolean isBeingDragged;
 
-   public GDXFootstepPlannerGoalGizmo()
+   public GDXPathControlRingGizmo()
    {
       this(ReferenceFrame.getWorldFrame());
    }
 
-   public GDXFootstepPlannerGoalGizmo(ReferenceFrame parentReferenceFrame)
+   public GDXPathControlRingGizmo(ReferenceFrame parentReferenceFrame)
    {
       this.parentReferenceFrame = parentReferenceFrame;
       transformToParent = new RigidBodyTransform();

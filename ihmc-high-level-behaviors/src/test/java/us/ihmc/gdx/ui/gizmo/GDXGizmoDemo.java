@@ -17,7 +17,7 @@ public class GDXGizmoDemo
 
    private GDXFocusBasedCamera focusBasedCamera;
    private final GDXPose3DGizmo poseGizmo = new GDXPose3DGizmo();
-   private final GDXFootstepPlannerGoalGizmo footstepRingGizmo = new GDXFootstepPlannerGoalGizmo();
+   private final GDXPathControlRingGizmo footstepRingGizmo = new GDXPathControlRingGizmo();
    private ModelInstance clockHandTip;
    private ModelInstance clockCenter;
    private GDXReferenceFrameGraphic keyboardTransformationFrameGraphic;
