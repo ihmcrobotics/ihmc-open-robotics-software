@@ -16,8 +16,7 @@ import us.ihmc.avatar.obstacleCourseTests.HumanoidPointyRocksTest;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.yoVariables.registry.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 @Tag("humanoid-obstacle-slow-3")
@@ -26,12 +25,13 @@ public class AtlasPointyRocksTest extends HumanoidPointyRocksTest
    private final DRCRobotModel robotModel = new TestModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
 
    /**
-    * Hard test: Atlas walks forward and steps on unknown contacts including lines that need to be explored.
+    * Hard test: Atlas walks forward and steps on unknown contacts including lines that need to be
+    * explored.
     */
    @Override
    @Disabled
    @Test
-   public void testWalkingForwardWithHalfFootContactChangesStopBetweenSteps() throws SimulationExceededMaximumTimeException
+   public void testWalkingForwardWithHalfFootContactChangesStopBetweenSteps()
    {
       super.testWalkingForwardWithHalfFootContactChangesStopBetweenSteps();
    }
@@ -41,7 +41,7 @@ public class AtlasPointyRocksTest extends HumanoidPointyRocksTest
     */
    @Override
    @Test
-   public void testStandingWithGCPointsChangingOnTheFly() throws SimulationExceededMaximumTimeException, RuntimeException
+   public void testStandingWithGCPointsChangingOnTheFly()
    {
       super.testStandingWithGCPointsChangingOnTheFly();
    }
@@ -52,49 +52,53 @@ public class AtlasPointyRocksTest extends HumanoidPointyRocksTest
    @Override
    @Disabled
    @Test
-   public void testWalkingForwardWithHalfFootContactChangesContinuousSteps() throws SimulationExceededMaximumTimeException
+   public void testWalkingForwardWithHalfFootContactChangesContinuousSteps()
    {
       super.testWalkingForwardWithHalfFootContactChangesContinuousSteps();
    }
 
    /**
-    * The robot walks forward with partial footholds. The controller knows about the foothold beforehand.
+    * The robot walks forward with partial footholds. The controller knows about the foothold
+    * beforehand.
     */
    @Override
    @Test
-   public void testWalkingForwardWithPartialFootholdsAndStopBetweenSteps() throws SimulationExceededMaximumTimeException
+   public void testWalkingForwardWithPartialFootholdsAndStopBetweenSteps()
    {
       super.testWalkingForwardWithPartialFootholdsAndStopBetweenSteps();
    }
 
    /**
-    * This test steps in place with partial footholds. The controller knows about the foothold beforehand.
+    * This test steps in place with partial footholds. The controller knows about the foothold
+    * beforehand.
     */
    @Override
    @Test
-   public void testTakingStepsWithActualAndPredictedFootPolygonsChanging() throws SimulationExceededMaximumTimeException
+   public void testTakingStepsWithActualAndPredictedFootPolygonsChanging()
    {
       super.testTakingStepsWithActualAndPredictedFootPolygonsChanging();
    }
 
    /**
-    * The robot takes a step while on a partial foothold and receives a push that requires the use of angular momentum to recover.
+    * The robot takes a step while on a partial foothold and receives a push that requires the use of
+    * angular momentum to recover.
     */
    @Override
    @Test
-   public void testSidePushDuringSwing() throws SimulationExceededMaximumTimeException
+   public void testSidePushDuringSwing()
    {
       super.testSidePushDuringSwing();
    }
 
    /**
-    * In this test, the robot is standing, but then the floor is dropped out from underneath it. So the robot has to detect the rotation
-    * and hold position. Then it takes some steps in place with the part of foot changing each step.
+    * In this test, the robot is standing, but then the floor is dropped out from underneath it. So the
+    * robot has to detect the rotation and hold position. Then it takes some steps in place with the
+    * part of foot changing each step.
     */
    @Override
    @Test
    @Disabled // is a duplicate of other tests with less asserts.
-   public void testStandingAndStepsInPlaceWithHalfFootContactsChanges() throws SimulationExceededMaximumTimeException
+   public void testStandingAndStepsInPlaceWithHalfFootContactsChanges()
    {
       super.testStandingAndStepsInPlaceWithHalfFootContactsChanges();
    }
@@ -105,7 +109,7 @@ public class AtlasPointyRocksTest extends HumanoidPointyRocksTest
    @Override
    @Test
    @Disabled // does only test stuff that is already covered by other tests in a easier setup
-   public void testWalkingWithLinePredictedSupportPolygonButFullActualPolygon() throws SimulationExceededMaximumTimeException
+   public void testWalkingWithLinePredictedSupportPolygonButFullActualPolygon()
    {
       super.testWalkingWithLinePredictedSupportPolygonButFullActualPolygon();
    }
@@ -113,7 +117,7 @@ public class AtlasPointyRocksTest extends HumanoidPointyRocksTest
    @Override
    @Test
    @Disabled // not very interesting test the push does not do much
-   public void testHoldPositionByStandingOnOneLegAndGettingPushedSideways() throws SimulationExceededMaximumTimeException
+   public void testHoldPositionByStandingOnOneLegAndGettingPushedSideways()
    {
       super.testHoldPositionByStandingOnOneLegAndGettingPushedSideways();
    }
@@ -124,7 +128,7 @@ public class AtlasPointyRocksTest extends HumanoidPointyRocksTest
    @Override
    @Disabled
    @Test
-   public void testBalanceOnLine() throws SimulationExceededMaximumTimeException
+   public void testBalanceOnLine()
    {
       super.testBalanceOnLine();
    }
@@ -142,11 +146,11 @@ public class AtlasPointyRocksTest extends HumanoidPointyRocksTest
    }
 
    @Override
-   protected YoDouble getPelvisOrientationErrorVariableName(SimulationConstructionSet scs)
+   protected YoDouble getPelvisOrientationErrorVariableName(YoVariableHolder yoVariableHolder)
    {
 
-      return (YoDouble) scs.findVariable("root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerFactory.WholeBodyControllerCore.WholeBodyFeedbackController.pelvisOrientationFBController.pelvisAxisAngleOrientationController",
-                                                "pelvisRotationErrorInBodyZ");
+      return (YoDouble) yoVariableHolder.findVariable("root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerFactory.WholeBodyControllerCore.WholeBodyFeedbackController.pelvisOrientationFBController.pelvisAxisAngleOrientationController",
+                                                      "pelvisRotationErrorInBodyZ");
    }
 
    private class TestModel extends AtlasRobotModel
@@ -210,4 +214,3 @@ public class AtlasPointyRocksTest extends HumanoidPointyRocksTest
    }
 
 }
-
