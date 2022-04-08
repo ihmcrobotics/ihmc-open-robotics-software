@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeOffStepPositionInspector;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.SideDependentList;
