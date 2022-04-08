@@ -2,6 +2,7 @@ package us.ihmc.avatar.joystickBasedJavaFXController;
 
 import static us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXTopics.SteppingParameters;
 import static us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXTopics.WalkingTrajectoryDuration;
+import static us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXTopics.StepsAreAdjustable;
 import static us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController.ButtonBState;
 import static us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController.ButtonLeftBumperState;
 import static us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController.ButtonRightBumperState;
@@ -89,6 +90,7 @@ public class StepGeneratorJavaFXController
    private final AtomicReference<FootstepDataListMessage> footstepsToSendReference = new AtomicReference<>(null);
 
    private final AtomicReference<Double> trajectoryDuration;
+   private final AtomicReference<Boolean> stepsAreAdjustable;
    private final JavaFXRobotVisualizer javaFXRobotVisualizer;
 
    public enum SecondaryControlOption
@@ -166,6 +168,7 @@ public class StepGeneratorJavaFXController
       });
 
       trajectoryDuration = messager.createInput(WalkingTrajectoryDuration, 1.0);
+      stepsAreAdjustable = messager.createInput(StepsAreAdjustable, false);
 
       setupKickAction(messager);
       setupPunchAction(messager);
@@ -301,8 +304,9 @@ public class StepGeneratorJavaFXController
          footstepNode.add(createFootstep(footstepDataMessage));
       }
       footstepsToVisualizeReference.set(footstepNode);
-      //      footstepDataListMessage.setAreFootstepsAdjustable(true);
-      footstepsToSendReference.set(new FootstepDataListMessage(footstepDataListMessage));
+      FootstepDataListMessage messageCopy = new FootstepDataListMessage(footstepDataListMessage);
+      messageCopy.setAreFootstepsAdjustable(stepsAreAdjustable.get());
+      footstepsToSendReference.set(messageCopy);
    }
 
    private void sendPauseWalkingMessage()

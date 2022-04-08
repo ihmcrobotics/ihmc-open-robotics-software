@@ -382,7 +382,7 @@ public class ToeOffManager
       checkCoPLocation(desiredCoP);
       checkECMPLocation(desiredECMP);
 
-      if (!toeContact.evaluateToeOffConditions(trailingLeg))
+      if (!toeContact.evaluateToeOffConditions(trailingLeg, doToeOffIfPossibleInSingleSupport.getValue()))
          return;
 
       if (doToeOffIfPossibleInSingleSupport.getValue())
@@ -488,7 +488,7 @@ public class ToeOffManager
       checkPerfectCoPLocation(perfectCoP);
       checkECMPLocation(desiredECMP);
 
-      if (!toeContact.evaluateToeOffConditions(trailingLeg))
+      if (!toeContact.evaluateToeOffConditions(trailingLeg, doToeOffIfPossibleInDoubleSupport.getValue()))
          return;
 
       if (doToeOffIfPossibleInDoubleSupport.getValue())
@@ -860,7 +860,7 @@ public class ToeOffManager
 
       public abstract void isReadyToSwitchToToeOff(RobotSide trailingLeg, FramePose3DReadOnly frontFootPosition);
 
-      public abstract boolean evaluateToeOffConditions(RobotSide trailingLeg);
+      public abstract boolean evaluateToeOffConditions(RobotSide trailingLeg, boolean doToeOffIfPossible);
 
       protected void computeToeContacts(RobotSide supportSide)
       {
@@ -945,14 +945,14 @@ public class ToeOffManager
       }
 
       @Override
-      public boolean evaluateToeOffConditions(RobotSide trailingLeg)
+      public boolean evaluateToeOffConditions(RobotSide trailingLeg, boolean doToeOffIfPossible)
       {
          checkAnkleLimitForToeOff(trailingLeg);
          checkLeadingKneeUpperLimitForToeOff(trailingLeg.getOppositeSide());
          checkRearKneeLowerLimitForToeOff(trailingLeg);
          legInspector.updateSwitchToToeOffDueToJointLimits();
 
-         if (forceToeOffAtJointLimit.getValue() && legInspector.needToSwitchToToeOffDueToJointLimit() && !icpIsInsideSupportFoot.getBooleanValue())
+         if (doToeOffIfPossible && forceToeOffAtJointLimit.getValue() && legInspector.needToSwitchToToeOffDueToJointLimit() && !icpIsInsideSupportFoot.getBooleanValue())
          {
             doLineToeOff.set(true);
             computeToeLineContact.set(updateLineContactDuringToeOff.getValue());
@@ -966,7 +966,7 @@ public class ToeOffManager
             return false;
          }
 
-         if (!forceToeOffAtJointLimit.getValue() && legInspector.needToSwitchToToeOffDueToJointLimit())
+         if (doToeOffIfPossible && !forceToeOffAtJointLimit.getValue() && legInspector.needToSwitchToToeOffDueToJointLimit())
          {
             doLineToeOff.set(true);
             computeToeLineContact.set(updateLineContactDuringToeOff.getValue());
@@ -1038,14 +1038,14 @@ public class ToeOffManager
       }
 
       @Override
-      public boolean evaluateToeOffConditions(RobotSide trailingLeg)
+      public boolean evaluateToeOffConditions(RobotSide trailingLeg, boolean doToeOffIfPossible)
       {
          checkAnkleLimitForToeOff(trailingLeg);
          checkLeadingKneeUpperLimitForToeOff(trailingLeg.getOppositeSide());
          checkRearKneeLowerLimitForToeOff(trailingLeg);
          legInspector.updateSwitchToToeOffDueToJointLimits();
 
-         if (forceToeOffAtJointLimit.getValue() && legInspector.needToSwitchToToeOffDueToJointLimit())
+         if (doToeOffIfPossible && forceToeOffAtJointLimit.getValue() && legInspector.needToSwitchToToeOffDueToJointLimit())
          {
             doPointToeOff.set(true);
             computeToePointContact.set(updatePointContactDuringToeOff.getValue());
@@ -1059,7 +1059,7 @@ public class ToeOffManager
             return false;
          }
 
-         if (!forceToeOffAtJointLimit.getValue() && legInspector.needToSwitchToToeOffDueToJointLimit())
+         if (doToeOffIfPossible && !forceToeOffAtJointLimit.getValue() && legInspector.needToSwitchToToeOffDueToJointLimit())
          {
             doPointToeOff.set(true);
             computeToePointContact.set(updatePointContactDuringToeOff.getValue());
