@@ -49,8 +49,8 @@ public class GDXFrameGizmoDemo
             baseUI.getImGuiPanelManager().addPanel(poseGizmo.createTunerPanel(GDXFrameGizmoDemo.class.getSimpleName()));
             poseGizmo.getTransformToParent().getTranslation().add(0.5, 0.5, 0.5);
 
-            GDXFootstepPlannerGoalGizmo footstepRingGizmo
-                  = new GDXFootstepPlannerGoalGizmo(interactableReferenceFrame2.getSelectablePose3DGizmo().getPoseGizmo().getGizmoFrame());
+            GDXPathControlRingGizmo footstepRingGizmo
+                  = new GDXPathControlRingGizmo(interactableReferenceFrame2.getSelectablePose3DGizmo().getPoseGizmo().getGizmoFrame());
             footstepRingGizmo.create(baseUI.get3DSceneManager().getCamera3D());
             baseUI.addImGui3DViewInputProcessor(footstepRingGizmo::process3DViewInput);
             baseUI.get3DSceneManager().addRenderableProvider(footstepRingGizmo);

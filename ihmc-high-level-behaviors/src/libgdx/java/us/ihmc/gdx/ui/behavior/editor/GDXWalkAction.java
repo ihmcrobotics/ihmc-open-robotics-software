@@ -31,7 +31,7 @@ import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
-import us.ihmc.gdx.ui.gizmo.GDXFootstepPlannerGoalGizmo;
+import us.ihmc.gdx.ui.gizmo.GDXPathControlRingGizmo;
 import us.ihmc.gdx.ui.graphics.GDXFootstepGraphic;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -53,7 +53,7 @@ public class GDXWalkAction implements GDXBehaviorAction
    private final SideDependentList<GDXFootstepGraphic> goalFeet = new SideDependentList<>();
    private final SideDependentList<FramePose3D> goalFeetPoses = new SideDependentList<>();
    private FootstepPlanningModule footstepPlanner;
-   private final GDXFootstepPlannerGoalGizmo footstepPlannerGoalGizmo = new GDXFootstepPlannerGoalGizmo();
+   private final GDXPathControlRingGizmo footstepPlannerGoalGizmo = new GDXPathControlRingGizmo();
    private FootstepPlannerParametersBasics footstepPlannerParameters;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean selected = new ImBoolean();
