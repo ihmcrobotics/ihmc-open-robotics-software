@@ -16,7 +16,7 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
-import us.ihmc.gdx.FocusBasedGDXCamera;
+import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
@@ -40,7 +40,7 @@ public class GDXBehaviorActionSequenceEditor
    private final WorkspaceFile workspaceFile;
    private final LinkedList<GDXBehaviorAction> actionSequence = new LinkedList<>();
    private String pascalCasedName;
-   private FocusBasedGDXCamera camera3D;
+   private GDXFocusBasedCamera camera3D;
    private DRCRobotModel robotModel;
    private int playbackNextIndex = 0;
    private FootstepPlanningModule footstepPlanner;
@@ -69,7 +69,7 @@ public class GDXBehaviorActionSequenceEditor
       pascalCasedName = FormattingTools.titleToPascalCase(name);
    }
 
-   public void create(FocusBasedGDXCamera camera3D,
+   public void create(GDXFocusBasedCamera camera3D,
                       DRCRobotModel robotModel,
                       ROS2Node ros2Node,
                       ROS2SyncedRobotModel syncedRobot,

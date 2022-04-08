@@ -24,7 +24,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
-import us.ihmc.gdx.FocusBasedGDXCamera;
+import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
@@ -78,7 +78,7 @@ public class GDXWalkPathControlRing
    private TurnWalkTurnPlanner turnWalkTurnPlanner;
    private final FootstepPlannerGoal turnWalkTurnGoal = new FootstepPlannerGoal();
 
-   public void create(FocusBasedGDXCamera camera3D, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot, ROS2ControllerHelper ros2Helper)
+   public void create(GDXFocusBasedCamera camera3D, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot, ROS2ControllerHelper ros2Helper)
    {
       this.syncedRobot = syncedRobot;
       this.ros2Helper = ros2Helper;

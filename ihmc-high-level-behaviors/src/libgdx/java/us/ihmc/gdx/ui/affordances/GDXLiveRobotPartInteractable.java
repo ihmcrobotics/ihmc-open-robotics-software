@@ -9,7 +9,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.gdx.FocusBasedGDXCamera;
+import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.ui.graphics.GDXReferenceFrameGraphic;
@@ -34,7 +34,7 @@ public class GDXLiveRobotPartInteractable
    private GDXReferenceFrameGraphic controlReferenceFrameGraphic;
    private boolean mouseIntersects;
 
-   public void create(GDXRobotCollisionLink collisionLink, ReferenceFrame controlFrame, String graphicFileName, FocusBasedGDXCamera camera3D)
+   public void create(GDXRobotCollisionLink collisionLink, ReferenceFrame controlFrame, String graphicFileName, GDXFocusBasedCamera camera3D)
    {
       create(collisionLink, controlFrame, controlFrame, controlFrame, graphicFileName, camera3D);
    }
@@ -44,7 +44,7 @@ public class GDXLiveRobotPartInteractable
                       ReferenceFrame collisionFrame,
                       ReferenceFrame controlFrame,
                       String modelFileName,
-                      FocusBasedGDXCamera camera3D)
+                      GDXFocusBasedCamera camera3D)
    {
       this.collisionLink = collisionLink;
       this.graphicFrame = graphicFrame;

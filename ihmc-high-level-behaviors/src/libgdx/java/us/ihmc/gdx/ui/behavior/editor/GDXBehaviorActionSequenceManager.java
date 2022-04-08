@@ -8,7 +8,7 @@ import imgui.type.ImString;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.gdx.FocusBasedGDXCamera;
+import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
@@ -26,7 +26,7 @@ public class GDXBehaviorActionSequenceManager
    private ImGuiPanel managerPanel = new ImGuiPanel("Behavior Sequence Manager", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private WorkspaceDirectory behaviorSequenceStorageDirectory;
-   private FocusBasedGDXCamera camera3D;
+   private GDXFocusBasedCamera camera3D;
    private DRCRobotModel robotModel;
    private ROS2Node ros2Node;
    private ROS2SyncedRobotModel syncedRobot;
@@ -35,7 +35,7 @@ public class GDXBehaviorActionSequenceManager
    private final TreeSet<GDXBehaviorActionSequenceEditor> editors = new TreeSet<>(Comparator.comparing(GDXBehaviorActionSequenceEditor::getName));
 
    public void create(WorkspaceDirectory behaviorSequenceStorageDirectory,
-                      FocusBasedGDXCamera camera3D,
+                      GDXFocusBasedCamera camera3D,
                       DRCRobotModel robotModel,
                       ROS2Node ros2Node,
                       ROS2SyncedRobotModel syncedRobot,

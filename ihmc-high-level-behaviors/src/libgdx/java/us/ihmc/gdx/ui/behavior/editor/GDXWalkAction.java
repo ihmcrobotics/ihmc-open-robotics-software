@@ -28,7 +28,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepP
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
-import us.ihmc.gdx.FocusBasedGDXCamera;
+import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.ui.gizmo.GDXFootstepPlannerGoalGizmo;
@@ -61,7 +61,7 @@ public class GDXWalkAction implements GDXBehaviorAction
    private String[] referenceFrameNames;
    private FootstepDataListMessage footstepDataListMessage;
 
-   public void create(FocusBasedGDXCamera camera3D,
+   public void create(GDXFocusBasedCamera camera3D,
                       DRCRobotModel robotModel,
                       FootstepPlanningModule footstepPlanner,
                       ROS2SyncedRobotModel syncedRobot,

@@ -22,7 +22,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.gdx.FocusBasedGDXCamera;
+import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewInput;
@@ -80,7 +80,7 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
    private ReferenceFrame parentReferenceFrame;
    private ReferenceFrame gizmoFrame;
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
-   private FocusBasedGDXCamera camera3D;
+   private GDXFocusBasedCamera camera3D;
    private final Point3D cameraPosition = new Point3D();
    private double lastDistanceToCamera = -1.0;
    private final Plane3DMouseDragAlgorithm planeDragAlgorithm = new Plane3DMouseDragAlgorithm();
@@ -112,7 +112,7 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
       gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentReferenceFrame, transformToParent);
    }
 
-   public void create(FocusBasedGDXCamera camera3D)
+   public void create(GDXFocusBasedCamera camera3D)
    {
       this.camera3D = camera3D;
 

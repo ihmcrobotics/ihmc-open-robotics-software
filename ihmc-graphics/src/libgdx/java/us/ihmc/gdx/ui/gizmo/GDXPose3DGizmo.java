@@ -24,7 +24,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.gdx.FocusBasedGDXCamera;
+import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.imgui.ImGuiTools;
@@ -78,7 +78,7 @@ public class GDXPose3DGizmo implements RenderableProvider
    private static final YawPitchRoll FLIP_180 = new YawPitchRoll(0.0, Math.PI, 0.0);
    private final Line3DMouseDragAlgorithm lineDragAlgorithm = new Line3DMouseDragAlgorithm();
    private final ClockFaceRotation3DMouseDragAlgorithm clockFaceDragAlgorithm = new ClockFaceRotation3DMouseDragAlgorithm();
-   private FocusBasedGDXCamera camera3D;
+   private GDXFocusBasedCamera camera3D;
    private final RigidBodyTransform transformFromKeyboardTransformationToWorld = new RigidBodyTransform();
    private ReferenceFrame keyboardTransformationFrame;
    private final Point3D cameraPosition = new Point3D();
@@ -113,7 +113,7 @@ public class GDXPose3DGizmo implements RenderableProvider
       gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentReferenceFrame, transformToParent);
    }
 
-   public void create(FocusBasedGDXCamera camera3D)
+   public void create(GDXFocusBasedCamera camera3D)
    {
       this.camera3D = camera3D;
 

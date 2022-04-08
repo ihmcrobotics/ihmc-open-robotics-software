@@ -18,7 +18,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.gdx.FocusBasedGDXCamera;
+import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.ui.affordances.GDXInteractableHighlightModel;
@@ -48,7 +48,7 @@ public class GDXHandPoseAction implements GDXBehaviorAction
    private final ImDouble trajectoryTime = new ImDouble(4.0);
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
-   public void create(FocusBasedGDXCamera camera3D,
+   public void create(GDXFocusBasedCamera camera3D,
                       DRCRobotModel robotModel,
                       FullHumanoidRobotModel fullRobotModel,
                       ROS2ControllerHelper ros2ControllerHelper,

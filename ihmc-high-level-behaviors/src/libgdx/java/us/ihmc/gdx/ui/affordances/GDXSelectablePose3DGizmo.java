@@ -7,7 +7,7 @@ import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.gdx.FocusBasedGDXCamera;
+import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
@@ -32,7 +32,7 @@ public class GDXSelectablePose3DGizmo
       poseGizmo = new GDXPose3DGizmo(gizmoFrame, gizmoTransformToParentFrameToModify);
    }
 
-   public void create(FocusBasedGDXCamera camera3D)
+   public void create(GDXFocusBasedCamera camera3D)
    {
       poseGizmo.create(camera3D);
    }

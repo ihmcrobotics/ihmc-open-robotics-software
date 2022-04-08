@@ -2,7 +2,7 @@ package us.ihmc.gdx.ui.gizmo;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import us.ihmc.gdx.FocusBasedGDXCamera;
+import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
@@ -15,7 +15,7 @@ public class GDXGizmoDemo
                                                               "ihmc-open-robotics-software",
                                                               "ihmc-high-level-behaviors/src/test/resources");
 
-   private FocusBasedGDXCamera focusBasedCamera;
+   private GDXFocusBasedCamera focusBasedCamera;
    private final GDXPose3DGizmo poseGizmo = new GDXPose3DGizmo();
    private final GDXFootstepPlannerGoalGizmo footstepRingGizmo = new GDXFootstepPlannerGoalGizmo();
    private ModelInstance clockHandTip;
