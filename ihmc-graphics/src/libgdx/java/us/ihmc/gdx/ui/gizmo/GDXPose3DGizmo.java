@@ -16,9 +16,9 @@ import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -452,7 +452,7 @@ public class GDXPose3DGizmo implements RenderableProvider
       }
    }
 
-   public Pose3DReadOnly getPose()
+   public FramePose3DReadOnly getPose()
    {
       return framePose3D;
    }
