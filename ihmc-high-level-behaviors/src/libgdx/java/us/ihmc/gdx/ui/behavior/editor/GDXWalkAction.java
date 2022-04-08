@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
-import imgui.type.ImInt;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -49,7 +48,7 @@ public class GDXWalkAction implements GDXBehaviorAction
    private GDXFootstepPlanGraphic footstepPlanGraphic;
    private ROS2SyncedRobotModel syncedRobot;
    private ROS2ControllerHelper ros2ControllerHelper;
-   private List<ReferenceFrame> referenceFrameLibrary;
+   private ImGuiReferenceFrameLibraryCombo referenceFrameLibraryCombo;
    private final SideDependentList<GDXFootstepGraphic> goalFeet = new SideDependentList<>();
    private final SideDependentList<FramePose3D> goalFeetPoses = new SideDependentList<>();
    private FootstepPlanningModule footstepPlanner;
@@ -57,8 +56,6 @@ public class GDXWalkAction implements GDXBehaviorAction
    private FootstepPlannerParametersBasics footstepPlannerParameters;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean selected = new ImBoolean();
-   private final ImInt referenceFrameIndex = new ImInt();
-   private String[] referenceFrameNames;
    private FootstepDataListMessage footstepDataListMessage;
 
    public void create(GDXFocusBasedCamera camera3D,
@@ -72,12 +69,7 @@ public class GDXWalkAction implements GDXBehaviorAction
       footstepPlanGraphic = new GDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
       this.syncedRobot = syncedRobot;
       this.ros2ControllerHelper = ros2ControllerHelper;
-      this.referenceFrameLibrary = referenceFrameLibrary;
-      referenceFrameNames = new String[referenceFrameLibrary.size()];
-      for (int i = 0; i < referenceFrameLibrary.size(); i++)
-      {
-         referenceFrameNames[i] = referenceFrameLibrary.get(i).getName();
-      }
+      referenceFrameLibraryCombo = new ImGuiReferenceFrameLibraryCombo(referenceFrameLibrary);
 
       footstepPlannerGoalGizmo.create(camera3D);
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
@@ -118,11 +110,11 @@ public class GDXWalkAction implements GDXBehaviorAction
    @Override
    public void renderImGuiWidgets()
    {
-      if (ImGui.combo(labels.get("Reference frame"), referenceFrameIndex, referenceFrameNames))
+      if (referenceFrameLibraryCombo.combo())
       {
          FramePose3D poseToKeep = new FramePose3D();
          poseToKeep.setToZero(footstepPlannerGoalGizmo.getGizmoFrame());
-         footstepPlannerGoalGizmo.setParentFrame(referenceFrameLibrary.get(referenceFrameIndex.get()));
+         footstepPlannerGoalGizmo.setParentFrame(referenceFrameLibraryCombo.getSelectedReferenceFrame());
          poseToKeep.changeFrame(footstepPlannerGoalGizmo.getGizmoFrame().getParent());
          poseToKeep.get(footstepPlannerGoalGizmo.getTransformToParent());
       }
@@ -153,16 +145,10 @@ public class GDXWalkAction implements GDXBehaviorAction
    public void loadFromFile(JsonNode jsonNode)
    {
       String referenceFrameName = jsonNode.get("parentFrame").asText();
-      for (int i = 0; i < referenceFrameLibrary.size(); i++)
+      if (referenceFrameLibraryCombo.setSelectedReferenceFrame(referenceFrameName))
       {
-         ReferenceFrame referenceFrame = referenceFrameLibrary.get(i);
-         if (referenceFrameName.equals(referenceFrame.getName()))
-         {
-            referenceFrameIndex.set(i);
-            footstepPlannerGoalGizmo.setParentFrame(referenceFrame);
-         }
+         footstepPlannerGoalGizmo.setParentFrame(referenceFrameLibraryCombo.getSelectedReferenceFrame());
       }
-
       JSONTools.toEuclid(jsonNode, footstepPlannerGoalGizmo.getTransformToParent());
    }
 
