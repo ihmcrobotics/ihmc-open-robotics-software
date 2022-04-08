@@ -1,12 +1,13 @@
 package us.ihmc.atlas.pushRecovery;
 
+import org.junit.jupiter.api.Test;
+
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.pushRecovery.HumanoidMomentumRecoveryTest;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasMomentumRecoveryTest extends HumanoidMomentumRecoveryTest
 {
@@ -24,32 +25,37 @@ public class AtlasMomentumRecoveryTest extends HumanoidMomentumRecoveryTest
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 
+   @Test
    @Override
-   public void testPushDuringDoubleSupport() throws SimulationExceededMaximumTimeException
+   public void testPushDuringDoubleSupport()
    {
       super.testPushDuringDoubleSupport();
    }
-   
+
+   @Test
    @Override
-   public void testPushDuringDoubleSupportExpectFall() throws SimulationExceededMaximumTimeException
+   public void testPushDuringDoubleSupportExpectFall()
    {
       super.testPushDuringDoubleSupportExpectFall();
    }
-   
+
+   @Test
    @Override
-   public void testPushDuringSwingExpectFall() throws SimulationExceededMaximumTimeException
+   public void testPushDuringSwingExpectFall()
    {
       super.testPushDuringSwingExpectFall();
    }
-   
+
+   @Test
    @Override
-   public void testRegularWalk() throws SimulationExceededMaximumTimeException
+   public void testRegularWalk()
    {
       super.testRegularWalk();
    }
-   
+
+   @Test
    @Override
-   public void testPushDuringSwing() throws SimulationExceededMaximumTimeException
+   public void testPushDuringSwing()
    {
       super.testPushDuringSwing();
    }

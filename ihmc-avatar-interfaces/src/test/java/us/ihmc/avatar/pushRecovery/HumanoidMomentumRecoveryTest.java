@@ -1,19 +1,20 @@
 package us.ihmc.avatar.pushRecovery;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commons.thread.ThreadTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -24,8 +25,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
-import us.ihmc.simulationToolkit.controllers.PushRobotController;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationToolkit.controllers.PushRobotControllerSCS2;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -36,8 +36,8 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-   private DRCSimulationTestHelper drcSimulationTestHelper;
-   private PushRobotController pushController;
+   private SCS2AvatarTestingSimulation simulationTestHelper;
+   private PushRobotControllerSCS2 pushController;
 
    private YoBoolean allowUpperBodyMomentumInSingleSupport;
    private YoBoolean allowUpperBodyMomentumInDoubleSupport;
@@ -62,7 +62,7 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
    {
       return 0.05;
    }
-   
+
    protected double getXOffsetForSteps()
    {
       return 0.6;
@@ -79,7 +79,7 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
     *
     * @throws SimulationExceededMaximumTimeException
     */
-   public void testPushDuringDoubleSupport() throws SimulationExceededMaximumTimeException
+   public void testPushDuringDoubleSupport()
    {
       setupTest();
       setupCameraSideView();
@@ -94,7 +94,7 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
     *
     * @throws SimulationExceededMaximumTimeException
     */
-   public void testPushDuringDoubleSupportExpectFall() throws SimulationExceededMaximumTimeException
+   public void testPushDuringDoubleSupportExpectFall()
    {
       setupTest();
       setupCameraSideView();
@@ -109,7 +109,7 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
     *
     * @throws SimulationExceededMaximumTimeException
     */
-   public void testPushDuringSwing() throws SimulationExceededMaximumTimeException
+   public void testPushDuringSwing()
    {
       setupTest();
       setupCameraBackView();
@@ -124,7 +124,7 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
     *
     * @throws SimulationExceededMaximumTimeException
     */
-   public void testPushDuringSwingExpectFall() throws SimulationExceededMaximumTimeException
+   public void testPushDuringSwingExpectFall()
    {
       setupTest();
       setupCameraBackView();
@@ -135,30 +135,30 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
 
    @Test
    /**
-    * End to end test that makes sure the momentum recovery does not get triggered during
-    * some normal steps
+    * End to end test that makes sure the momentum recovery does not get triggered during some normal
+    * steps
     *
     * @throws SimulationExceededMaximumTimeException
     */
-   public void testRegularWalk() throws SimulationExceededMaximumTimeException
+   public void testRegularWalk()
    {
       setupTest();
       setupCameraSideView();
       enableMomentum();
-      ControllerSpy controllerSpy = new ControllerSpy(drcSimulationTestHelper);
+      ControllerSpy controllerSpy = new ControllerSpy(simulationTestHelper);
 
       double yOffset = getYOffsetForSteps();
       double xOffset = getXOffsetForSteps();
-      
+
       FootstepDataListMessage message = new FootstepDataListMessage();
       addFootstep(new Point3D(xOffset / 2.0, yOffset, -0.02), RobotSide.LEFT, message);
       addFootstep(new Point3D(xOffset, -yOffset, -0.02), RobotSide.RIGHT, message);
       addFootstep(new Point3D(xOffset, yOffset * 2.0, -0.02), RobotSide.LEFT, message);
       addFootstep(new Point3D(xOffset, 0.0, -0.02), RobotSide.RIGHT, message);
 
-      drcSimulationTestHelper.publishToController(message);
+      simulationTestHelper.publishToController(message);
       double simulationTime = 1.0 * message.getFootstepDataList().size() + 2.0;
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+      assertTrue(simulationTestHelper.simulateNow(simulationTime));
 
       assertFalse(controllerSpy.wasMomentumTriggered());
       assertFalse(controllerSpy.wasWeightTriggered());
@@ -173,23 +173,22 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       message.getFootstepDataList().add().set(footstepData);
    }
 
-   private boolean standAndPush() throws SimulationExceededMaximumTimeException
+   private boolean standAndPush()
    {
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
+      assertTrue(simulationTestHelper.simulateNow(1.0));
       pushController.applyForce(new Vector3D(1.0, 0.0, 0.0), getDoubleSupportPushMagnitude(), getDoubleSupportPushDuration());
-      return drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10.0);
+      return simulationTestHelper.simulateNow(10.0);
    }
 
-   private boolean stepAndPush() throws SimulationExceededMaximumTimeException
+   private boolean stepAndPush()
    {
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
+      assertTrue(simulationTestHelper.simulateNow(1.0));
 
       FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(3.0, 0.3);
       FootstepDataMessage footstepData = new FootstepDataMessage();
       RobotSide stepSide = RobotSide.LEFT;
 
-      double xOffset = getXOffsetForSteps();
-      ReferenceFrame soleFrame = drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(stepSide);
+      ReferenceFrame soleFrame = simulationTestHelper.getControllerFullRobotModel().getSoleFrame(stepSide);
       FramePoint3D placeToStepInWorld = new FramePoint3D(soleFrame, 0.3, 0.0, 0.0);
       placeToStepInWorld.changeFrame(worldFrame);
 
@@ -198,12 +197,12 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       footstepData.setRobotSide(stepSide.toByte());
       message.getFootstepDataList().add().set(footstepData);
 
-      drcSimulationTestHelper.publishToController(message);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0));
+      simulationTestHelper.publishToController(message);
+      assertTrue(simulationTestHelper.simulateNow(2.0));
 
       // push the robot
       pushController.applyForce(new Vector3D(0.0, -1.0, 0.0), getSingleSupportPushMagnitude(), getSingleSupportPushDuration());
-      return drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0);
+      return simulationTestHelper.simulateNow(5.0);
    }
 
    private void enableMomentum()
@@ -226,17 +225,18 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
 
       // create simulation test helper
       FlatGroundEnvironment emptyEnvironment = new FlatGroundEnvironment();
-      String className = getClass().getSimpleName();
       DRCRobotModel robotModel = getRobotModel();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
-      drcSimulationTestHelper.setTestEnvironment(emptyEnvironment);
-      drcSimulationTestHelper.createSimulation(className);
+      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(robotModel, emptyEnvironment, simulationTestingParameters);
+      simulationTestHelper.start();
       Vector3D forcePointOffset = new Vector3D(0.0, 0.0, 0.1);
-      pushController = new PushRobotController(drcSimulationTestHelper.getRobot(), drcSimulationTestHelper.getRobot().getRootJoint().getName(), forcePointOffset);
+      pushController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationSession().getTime(),
+                                                   simulationTestHelper.getRobot(),
+                                                   simulationTestHelper.getRobot().getFloatingRootJoint().getName(),
+                                                   forcePointOffset);
 
-      allowUpperBodyMomentumInSingleSupport = (YoBoolean) drcSimulationTestHelper.getYoVariable("allowUpperBodyMomentumInSingleSupport");
-      allowUpperBodyMomentumInDoubleSupport = (YoBoolean) drcSimulationTestHelper.getYoVariable("allowUpperBodyMomentumInDoubleSupport");
-      allowUsingHighMomentumWeight = (YoBoolean) drcSimulationTestHelper.getYoVariable("allowUsingHighMomentumWeight");
+      allowUpperBodyMomentumInSingleSupport = (YoBoolean) simulationTestHelper.findVariable("allowUpperBodyMomentumInSingleSupport");
+      allowUpperBodyMomentumInDoubleSupport = (YoBoolean) simulationTestHelper.findVariable("allowUpperBodyMomentumInDoubleSupport");
+      allowUsingHighMomentumWeight = (YoBoolean) simulationTestHelper.findVariable("allowUsingHighMomentumWeight");
 
       ThreadTools.sleep(1000);
    }
@@ -245,14 +245,14 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
    {
       Point3D cameraFix = new Point3D(0.0, 0.0, 1.0);
       Point3D cameraPosition = new Point3D(-10.0, 0.0, 1.0);
-      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
+      simulationTestHelper.setCamera(cameraFix, cameraPosition);
    }
 
    private void setupCameraSideView()
    {
       Point3D cameraFix = new Point3D(0.0, 0.0, 1.0);
       Point3D cameraPosition = new Point3D(0.0, 10.0, 1.0);
-      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
+      simulationTestHelper.setCamera(cameraFix, cameraPosition);
    }
 
    @BeforeEach
@@ -264,16 +264,11 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
    @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
-      {
-         ThreadTools.sleepForever();
-      }
-
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcSimulationTestHelper != null)
+      if (simulationTestHelper != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
+         simulationTestHelper.finishTest();
+         simulationTestHelper = null;
       }
 
       simulationTestingParameters = null;
@@ -288,11 +283,11 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       private final YoBoolean momentumWasTriggered = new YoBoolean("momentumWasTriggered", registry);
       private final YoBoolean weightWasTriggered = new YoBoolean("weightWasTriggered", registry);
 
-      public ControllerSpy(DRCSimulationTestHelper drcSimulationTestHelper)
+      public ControllerSpy(SCS2AvatarTestingSimulation simulationTestHelper)
       {
-         usingUpperBodyMomentum = (YoBoolean) drcSimulationTestHelper.getYoVariable("usingUpperBodyMomentum");
-         usingHighMomentumWeight = (YoBoolean) drcSimulationTestHelper.getYoVariable("usingHighMomentumWeight");
-         drcSimulationTestHelper.addRobotControllerOnControllerThread(this);
+         usingUpperBodyMomentum = (YoBoolean) simulationTestHelper.findVariable("usingUpperBodyMomentum");
+         usingHighMomentumWeight = (YoBoolean) simulationTestHelper.findVariable("usingHighMomentumWeight");
+         simulationTestHelper.addRobotControllerOnControllerThread(this);
       }
 
       @Override
