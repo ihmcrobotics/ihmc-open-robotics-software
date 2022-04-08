@@ -38,6 +38,7 @@ public class SwingTrajectoryCalculator
 
    private final TwoWaypointSwingGenerator swingTrajectoryOptimizer;
 
+   private final MovingReferenceFrame pelvisFrame;
    private final MovingReferenceFrame soleFrame;
    private final ReferenceFrame oppositeSoleFrame;
    private final ReferenceFrame oppositeSoleZUpFrame;
@@ -57,6 +58,8 @@ public class SwingTrajectoryCalculator
 
    private final FramePoint3D initialPosition = new FramePoint3D();
    private final FrameVector3D initialLinearVelocity = new FrameVector3D();
+   private final FrameVector3D pelvisVelocity = new FrameVector3D();
+   private final FrameVector3D footCurrentVelocity = new FrameVector3D();
    private final FrameQuaternion initialOrientation = new FrameQuaternion();
    private final FrameVector3D initialAngularVelocity = new FrameVector3D();
 
@@ -88,6 +91,7 @@ public class SwingTrajectoryCalculator
       double defaultSwingHeightFromStanceFoot = walkingControllerParameters.getSteppingParameters().getDefaultSwingHeightFromStanceFoot();
       double customWaypointAngleThreshold = walkingControllerParameters.getSteppingParameters().getCustomWaypointAngleThreshold();
 
+      pelvisFrame = controllerToolbox.getReferenceFrames().getPelvisFrame();
       soleFrame = controllerToolbox.getReferenceFrames().getSoleFrame(robotSide);
       oppositeSoleFrame = controllerToolbox.getReferenceFrames().getSoleFrame(robotSide.getOppositeSide());
       oppositeSoleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(robotSide.getOppositeSide());
@@ -182,6 +186,7 @@ public class SwingTrajectoryCalculator
       finalOrientation.changeFrame(worldFrame);
       finalPosition.addZ(swingTrajectoryParameters.getDesiredTouchdownHeightOffset());
       finalLinearVelocity.set(swingTrajectoryParameters.getDesiredTouchdownVelocity());
+      finalLinearVelocity.scale(1.0 / Math.min(swingDuration.getDoubleValue(), 1.0));
       finalAngularVelocity.setToZero(worldFrame);
 
       if (footstep.getTrajectoryType() == null)
@@ -229,7 +234,7 @@ public class SwingTrajectoryCalculator
    }
 
    /**
-    * Sets the initial conditions that the calculator uses to the calculate the swing trajectory to the
+    * Sets the initial conditions that the calculator uses to calculate the swing trajectory to the
     * current state of the sole frame.
     */
    public void setInitialConditionsToCurrent()
@@ -239,13 +244,23 @@ public class SwingTrajectoryCalculator
       currentStateProvider.getOrientation(initialOrientation);
       currentStateProvider.getAngularVelocity(initialAngularVelocity);
 
+      pelvisVelocity.setIncludingFrame(pelvisFrame.getTwistOfFrame().getLinearPart());
+      pelvisVelocity.changeFrame(worldFrame);
+
+      initialLinearVelocity.scaleAdd(swingTrajectoryParameters.getPelvisVelocityInjectionRatio(), pelvisVelocity, initialLinearVelocity);
+
       if (swingTrajectoryParameters.ignoreSwingInitialAngularVelocityZ())
       {
          initialAngularVelocity.changeFrame(worldFrame);
          initialAngularVelocity.setZ(0.0);
       }
+      initialLinearVelocity.changeFrame(worldFrame);
+      double liftOffVelocity = swingTrajectoryParameters.getMinLiftOffVerticalVelocity() / (Math.min(1.0, swingDuration.getDoubleValue()));
+      initialLinearVelocity.setZ(Math.max(liftOffVelocity, initialLinearVelocity.getZ()));
+
       initialLinearVelocity.clipToMaxLength(swingTrajectoryParameters.getMaxSwingInitialLinearVelocityMagnitude());
       initialAngularVelocity.clipToMaxLength(swingTrajectoryParameters.getMaxSwingInitialAngularVelocityMagnitude());
+
       stanceFootPosition.setToZero(oppositeSoleFrame);
    }
 

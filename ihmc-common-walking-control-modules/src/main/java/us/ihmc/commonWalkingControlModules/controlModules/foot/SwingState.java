@@ -11,15 +11,15 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.configurations.YoSwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.SwingTrajectoryCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.leapOfFaith.FootLeapOfFaithModule;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPoseTrajectoryGenerator;
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
@@ -31,15 +31,18 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.math.filters.RateLimitedYoFramePose;
 import us.ihmc.robotics.math.trajectories.*;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameSE3TrajectoryPointBasics;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -140,6 +143,18 @@ public class SwingState extends AbstractFootControlState
 
    private final YoFrameVector3D touchdownDesiredLinearAcceleration;
 
+   private final ReferenceFrame frameBeforeHipPitchJoint;
+   private final ReferenceFrame originOfControlFrame;
+   /**
+    * This is a frame that points with Z centered at the control frame towards the hip of the leg. Yaw about matches the control frame.
+    */
+   private final PoseReferenceFrame radialFrame = new PoseReferenceFrame("radialFrame", worldFrame);
+
+   private final OneDoFJointBasics kneeJoint;
+   private final YoDouble liftOffKneeAcceleration;
+
+   private final JointspaceAccelerationCommand jointspaceAccelerationCommand = new JointspaceAccelerationCommand();
+
    public SwingState(FootControlHelper footControlHelper, PIDSE3GainsReadOnly gains, YoRegistry registry)
    {
       super(footControlHelper);
@@ -182,6 +197,10 @@ public class SwingState extends AbstractFootControlState
       anklePoseInFoot.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
       changeControlFrame(anklePoseInFoot);
 
+      liftOffKneeAcceleration = new YoDouble(namePrefix + "LiftOffKneeAcceleration", registry);
+      FullHumanoidRobotModel fullRobotModel = footControlHelper.getHighLevelHumanoidControllerToolbox().getFullRobotModel();
+      kneeJoint = fullRobotModel.getLegJoint(footControlHelper.getRobotSide(), LegJointName.KNEE_PITCH);
+
       touchdownDesiredLinearVelocity = new YoFrameVector3D(namePrefix + "TouchdownDesiredLinearVelocity", worldFrame, registry);
 
       controlDT = footControlHelper.getHighLevelHumanoidControllerToolbox().getControlDT();
@@ -196,9 +215,11 @@ public class SwingState extends AbstractFootControlState
       soleFrame = footControlHelper.getHighLevelHumanoidControllerToolbox().getReferenceFrames().getSoleFrame(robotSide);
       ReferenceFrame footFrame = contactableFoot.getFrameAfterParentJoint();
       ReferenceFrame toeFrame = createToeFrame(robotSide);
-      ReferenceFrame controlFrame = walkingControllerParameters.controlToeDuringSwing() ? toeFrame : footFrame;
+      originOfControlFrame = walkingControllerParameters.controlToeDuringSwing() ? toeFrame : footFrame;
+      frameBeforeHipPitchJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_PITCH).getFrameBeforeJoint();
+
       RigidBodyTransform soleToControlFrameTransform = new RigidBodyTransform();
-      controlFrame.getTransformToDesiredFrame(soleToControlFrameTransform, soleFrame);
+      originOfControlFrame.getTransformToDesiredFrame(soleToControlFrameTransform, soleFrame);
       desiredControlFrame.setPoseAndUpdate(soleToControlFrameTransform);
 
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
@@ -232,7 +253,7 @@ public class SwingState extends AbstractFootControlState
       LeapOfFaithParameters leapOfFaithParameters = walkingControllerParameters.getLeapOfFaithParameters();
       leapOfFaithModule = new FootLeapOfFaithModule(swingDuration, leapOfFaithParameters, registry);
 
-      FramePose3D controlFramePose = new FramePose3D(controlFrame);
+      FramePose3D controlFramePose = new FramePose3D(originOfControlFrame);
       controlFramePose.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
       changeControlFrame(controlFramePose);
 
@@ -345,6 +366,8 @@ public class SwingState extends AbstractFootControlState
    @Override
    public void doSpecificAction(double timeInState)
    {
+      updateRadialFrame();
+
       computeAndPackTrajectory(timeInState);
 
       if (USE_ALL_LEG_JOINT_SWING_CORRECTOR)
@@ -391,9 +414,26 @@ public class SwingState extends AbstractFootControlState
       spatialFeedbackControlCommand.setWeightsForSolver(currentAngularWeight, currentLinearWeight);
       spatialFeedbackControlCommand.setScaleSecondaryTaskJointWeight(scaleSecondaryJointWeights.getBooleanValue(), secondaryJointWeightScale.getDoubleValue());
       spatialFeedbackControlCommand.setGains(gains);
+      spatialFeedbackControlCommand.setGainsFrames(null, radialFrame);
+
+      updateLiftOffKneeAcceleration();
 
       yoDesiredPosition.setMatchingFrame(desiredPosition);
       yoDesiredLinearVelocity.setMatchingFrame(desiredLinearVelocity);
+   }
+
+   private void updateLiftOffKneeAcceleration()
+   {
+      double liftOffVelocityError = swingTrajectoryParameters.getLiftOffKneeDesiredVelocity() - kneeJoint.getQd();
+      if (currentTime.getValue() < swingTrajectoryParameters.getLiftOffPhaseDuration()
+          && liftOffVelocityError > 0.0)
+         liftOffKneeAcceleration.set(swingTrajectoryParameters.getLiftOffKd() * liftOffVelocityError);
+      else
+         liftOffKneeAcceleration.set(Double.NEGATIVE_INFINITY);
+
+      jointspaceAccelerationCommand.clear();
+      jointspaceAccelerationCommand.addJoint(kneeJoint, liftOffKneeAcceleration.getDoubleValue());
+      jointspaceAccelerationCommand.setConstraintType(ConstraintType.GEQ_INEQUALITY);
    }
 
    private void computeAndPackTrajectory(double timeInState)
@@ -486,9 +526,13 @@ public class SwingState extends AbstractFootControlState
 
    public void setFootstep(Footstep footstep, double swingTime, FrameVector3DReadOnly finalCoMVelocity, FrameVector3DReadOnly finalCoMAcceleration)
    {
+      // this has to be set here to not zero out the speed scaling
+      setFootstepDurationInternal(swingTime);
+
       swingTrajectoryCalculator.setFootstep(footstep);
 
       touchdownDesiredLinearVelocity.set(swingTrajectoryParameters.getDesiredTouchdownVelocity());
+      touchdownDesiredLinearVelocity.scale(1.0 / Math.min(swingDuration.getDoubleValue(), 1.0));
       if (finalCoMVelocity != null)
       {
          touchdownDesiredLinearVelocity.checkReferenceFrameMatch(finalCoMVelocity);
@@ -508,7 +552,6 @@ public class SwingState extends AbstractFootControlState
       }
 
       setFootstepInternal(footstep);
-      setFootstepDurationInternal(swingTime);
 
       adjustedFootstepPose.set(footstepPose);
       rateLimitedAdjustedPose.set(footstepPose);
@@ -532,6 +575,24 @@ public class SwingState extends AbstractFootControlState
       }
 
       return computeSwingTimeRemaining(currentTime.getDoubleValue());
+   }
+
+   private final FrameQuaternion anklePitchRotationToParentFrame = new FrameQuaternion();
+   private final FramePoint3D tempPoint = new FramePoint3D();
+   private final FrameVector3D footToHipAxis = new FrameVector3D();
+
+   public void updateRadialFrame()
+   {
+      tempPoint.setToZero(frameBeforeHipPitchJoint);
+      tempPoint.changeFrame(originOfControlFrame);
+      footToHipAxis.setIncludingFrame(tempPoint);
+      anklePitchRotationToParentFrame.setReferenceFrame(originOfControlFrame);
+      EuclidGeometryTools.orientation3DFromZUpToVector3D(footToHipAxis, anklePitchRotationToParentFrame);
+
+      anklePitchRotationToParentFrame.changeFrame(worldFrame);
+      tempPoint.setToZero(originOfControlFrame);
+      tempPoint.changeFrame(worldFrame);
+      radialFrame.setPoseAndUpdate(tempPoint, anklePitchRotationToParentFrame);
    }
 
    public void setAdjustedFootstepAndTime(Footstep adjustedFootstep, double swingTime)
@@ -790,11 +851,18 @@ public class SwingState extends AbstractFootControlState
    @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return null;
+      if (!swingTrajectoryParameters.addLiftOffKneeAcceleration())
+         return null;
+      if (currentTime.getDoubleValue() > swingTrajectoryParameters.getLiftOffPhaseDuration())
+         return null;
+      if (liftOffKneeAcceleration.getDoubleValue() < 0.0)
+         return null;
+
+      return jointspaceAccelerationCommand;
    }
 
    @Override
-   public SpatialFeedbackControlCommand getFeedbackControlCommand()
+   public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
       return spatialFeedbackControlCommand;
    }

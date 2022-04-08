@@ -13,8 +13,7 @@ import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.avatar.testTools.EndToEndTestTools;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
@@ -49,7 +48,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
    private static final boolean CHECK_ICP_CONTINUITY = false;
 
    private static final double yawingTimeDuration = 0.5;
-   private static final double standingTimeDuration = 1.0;
+   private static final double standingTimeDuration = RigidBodyControlManager.INITIAL_GO_HOME_TIME;
    private static final double defaultWalkingTimeDuration = BambooTools.isEveryCommitBuild() ? 45.0 : 90.0;
    private static final boolean useVelocityAndHeadingScript = true;
    private static final boolean cheatWithGroundHeightAtForFootstep = false;
@@ -130,34 +129,6 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
          //simulationTestHelper.checkNothingChanged();
       if (CHECK_ICP_CONTINUITY)
          verifyDesiredICPIsContinous(simulationTestHelper.getControllerRegistry());
-
-      createVideo();
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
-   }
-
-
-   public double getFastSwingTime()
-   {
-      return 1.0;
-   }
-
-   public double getFastTransferTime()
-   {
-      return 0.6;
-   }
-
-   public double getMaxForwardStepLength()
-   {
-      return 0.5;
-   }
-
-   @Tag("humanoid-flat-ground")
-   @Test
-   public void testFastFlatGroundWalking() throws Exception
-   {
-      DRCRobotModel robotModel = getRobotModel();
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-      simulationTestingParameters.setUsePefectSensors(getUsePerfectSensors());
 
       createVideo();
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());

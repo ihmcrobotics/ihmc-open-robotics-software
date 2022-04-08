@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -52,7 +53,7 @@ public abstract class AbstractFootControlState implements State
 
    public abstract InverseDynamicsCommand<?> getInverseDynamicsCommand();
 
-   public abstract SpatialFeedbackControlCommand getFeedbackControlCommand();
+   public abstract FeedbackControlCommand<?> getFeedbackControlCommand();
 
    @Override
    public void doAction(double timeInState)

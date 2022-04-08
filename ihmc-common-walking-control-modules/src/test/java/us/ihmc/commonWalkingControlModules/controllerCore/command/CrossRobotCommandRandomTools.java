@@ -79,6 +79,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointVeloci
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -711,6 +712,7 @@ public class CrossRobotCommandRandomTools
    {
       JointspaceAccelerationCommand next = new JointspaceAccelerationCommand();
       next.setCommandId(random.nextInt());
+      next.setConstraintType(ConstraintType.values()[RandomNumbers.nextInt(random, 0, ConstraintType.values().length - 1)]);
 
       List<JointBasics> allJoints = SubtreeStreams.fromChildren(rootBody).collect(Collectors.toList());
       int numberOfJoints = random.nextInt(allJoints.size());
