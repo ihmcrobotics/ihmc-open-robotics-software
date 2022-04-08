@@ -16,6 +16,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
+<?import javafx.scene.control.CheckBox?>
 <AnchorPane xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorParametersPaneController">
    <children>
       <HBox layoutX="27.923828125" layoutY="3.0" maxWidth="1.7976931348623157E308" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -66,6 +67,7 @@
                   <Label text="Turn max out-angle" GridPane.rowIndex="3" />
                   <Spinner fx:id="turnMaxAngleOutwardSpinner" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                   <Label text="Max length" GridPane.columnIndex="2" />
+                  <CheckBox fx:id="stepsAreAdjustable" mnemonicParsing="false"  text="Steps are adjustable"  GridPane.rowIndex="1"/>
                   <Spinner fx:id="maxStepLengthSpinner" editable="true" GridPane.columnIndex="3" />
                   <Label text="Default width" GridPane.columnIndex="2" GridPane.rowIndex="1" />
                   <Spinner fx:id="defaultStepWidthSpinner" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="1" />
