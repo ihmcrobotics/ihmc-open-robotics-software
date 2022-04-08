@@ -70,7 +70,7 @@ public class GDXPose3DGizmo implements RenderableProvider
    private final FramePose3D framePose3D = new FramePose3D();
    private final FramePose3D tempFramePose3D = new FramePose3D();
    /** The main, source, true, base transform that this thing represents. */
-   private final RigidBodyTransform transformToParent;
+   private RigidBodyTransform transformToParent;
    private ReferenceFrame parentReferenceFrame;
    private ReferenceFrame gizmoFrame;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
@@ -93,18 +93,23 @@ public class GDXPose3DGizmo implements RenderableProvider
 
    public GDXPose3DGizmo(ReferenceFrame parentReferenceFrame)
    {
-      this.parentReferenceFrame = parentReferenceFrame;
-      transformToParent = new RigidBodyTransform();
-      gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentReferenceFrame, transformToParent);
-      keyboardTransformationFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
-                                                                                                           transformFromKeyboardTransformationToWorld);
+      RigidBodyTransform transformToParent = new RigidBodyTransform();
+      ReferenceFrame gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentReferenceFrame, transformToParent);
+      initialize(gizmoFrame, transformToParent);
    }
 
    public GDXPose3DGizmo(ReferenceFrame gizmoFrame, RigidBodyTransform gizmoTransformToParentFrameToModify)
    {
+      initialize(gizmoFrame, gizmoTransformToParentFrameToModify);
+   }
+
+   private void initialize(ReferenceFrame gizmoFrame, RigidBodyTransform gizmoTransformToParentFrameToModify)
+   {
       this.parentReferenceFrame = gizmoFrame.getParent();
       this.transformToParent = gizmoTransformToParentFrameToModify;
       this.gizmoFrame = gizmoFrame;
+      keyboardTransformationFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
+                                                                                                           transformFromKeyboardTransformationToWorld);
    }
 
    public void setParentFrame(ReferenceFrame parentReferenceFrame)
@@ -207,12 +212,6 @@ public class GDXPose3DGizmo implements RenderableProvider
          boolean altHeld = ImGui.getIO().getKeyAlt();
          boolean shiftHeld = ImGui.getIO().getKeyShift();
          double deltaTime = Gdx.graphics.getDeltaTime();
-
-         transformFromKeyboardTransformationToWorld.setToZero();
-         transformFromKeyboardTransformationToWorld.getRotation().setToYawOrientation(camera3D.getFocusPointPose().getYaw());
-         keyboardTransformationFrame.update();
-         tempFramePose3D.setToZero(keyboardTransformationFrame);
-
          if (altHeld) // orientation
          {
             double amount = deltaTime * (shiftHeld ? 0.2 : 1.0);
@@ -243,6 +242,11 @@ public class GDXPose3DGizmo implements RenderableProvider
          }
          else // translation
          {
+            transformFromKeyboardTransformationToWorld.setToZero();
+            transformFromKeyboardTransformationToWorld.getRotation().setToYawOrientation(camera3D.getFocusPointPose().getYaw());
+            keyboardTransformationFrame.update();
+            tempFramePose3D.setToZero(keyboardTransformationFrame);
+
             double amount = deltaTime * (shiftHeld ? 0.05 : 0.4);
             distanceToCamera = cameraPosition.distance(framePose3D.getPosition());
             if (upArrowHeld && !ctrlHeld) // x +
@@ -269,11 +273,11 @@ public class GDXPose3DGizmo implements RenderableProvider
             {
                tempFramePose3D.getPosition().subZ(getTranslateSpeedFactor() * amount);
             }
-         }
 
-         tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
-         tempFramePose3D.get(tempTransform);
-         transformToParent.getTranslation().add(tempTransform.getTranslation());
+            tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
+            tempFramePose3D.get(tempTransform);
+            transformToParent.getTranslation().add(tempTransform.getTranslation());
+         }
       }
 
       // after things have been modified, update the derivative stuff
