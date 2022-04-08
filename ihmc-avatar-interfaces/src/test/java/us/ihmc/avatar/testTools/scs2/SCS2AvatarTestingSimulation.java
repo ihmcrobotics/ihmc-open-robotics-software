@@ -348,7 +348,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
       checkSimulationSessionAlive();
       getSimulationSessionControls().setBufferCurrentIndexToInPoint();
    }
-   
+
    public void gotoOutPoint()
    {
       checkSimulationSessionAlive();
@@ -530,6 +530,11 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    {
       IHMCROS2Publisher ihmcros2Publisher = defaultControllerPublishers.get(message.getClass());
       ihmcros2Publisher.publish(message);
+   }
+
+   public <T> IHMCROS2Publisher<T> createPublisherForController(Class<T> messageType)
+   {
+      return createPublisher(messageType, ROS2Tools.getControllerInputTopic(getRobotModel().getSimpleRobotName()));
    }
 
    public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, ROS2Topic<?> generator)
