@@ -81,7 +81,11 @@ public class GDXPathControlRingGizmo implements RenderableProvider
    private ReferenceFrame gizmoFrame;
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
    private GDXFocusBasedCamera camera3D;
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+   private final RigidBodyTransform transformFromKeyboardTransformationToWorld = new RigidBodyTransform();
+   private ReferenceFrame keyboardTransformationFrame;
    private final Point3D cameraPosition = new Point3D();
+   private double distanceToCamera;
    private double lastDistanceToCamera = -1.0;
    private final Plane3DMouseDragAlgorithm planeDragAlgorithm = new Plane3DMouseDragAlgorithm();
    private final ClockFaceRotation3DMouseDragAlgorithm clockFaceDragAlgorithm = new ClockFaceRotation3DMouseDragAlgorithm();
@@ -93,6 +97,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
    private boolean showArrows = true;
    private boolean highlightingEnabled = true;
    private boolean isBeingDragged;
+   private final double translateSpeedFactor = 0.5;
 
    public GDXPathControlRingGizmo()
    {
@@ -104,6 +109,8 @@ public class GDXPathControlRingGizmo implements RenderableProvider
       this.parentReferenceFrame = parentReferenceFrame;
       transformToParent = new RigidBodyTransform();
       gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentReferenceFrame, transformToParent);
+      keyboardTransformationFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
+                                                                                                           transformFromKeyboardTransformationToWorld);
    }
 
    public void setParentFrame(ReferenceFrame parentReferenceFrame)
@@ -253,31 +260,40 @@ public class GDXPathControlRingGizmo implements RenderableProvider
          }
          else // translation
          {
+            transformFromKeyboardTransformationToWorld.setToZero();
+            transformFromKeyboardTransformationToWorld.getRotation().setToYawOrientation(camera3D.getFocusPointPose().getYaw());
+            keyboardTransformationFrame.update();
+            tempFramePose3D.setToZero(keyboardTransformationFrame);
+
             double amount = deltaTime * (shiftHeld ? 0.05 : 0.4);
             if (upArrowHeld && !ctrlHeld) // x +
             {
-               transformToParent.getTranslation().addX(amount);
+               tempFramePose3D.getPosition().addX(getTranslateSpeedFactor() * amount);
             }
             if (downArrowHeld && !ctrlHeld) // x -
             {
-               transformToParent.getTranslation().subX(amount);
+               tempFramePose3D.getPosition().subX(getTranslateSpeedFactor() * amount);
             }
             if (leftArrowHeld) // y +
             {
-               transformToParent.getTranslation().addY(amount);
+               tempFramePose3D.getPosition().addY(getTranslateSpeedFactor() * amount);
             }
             if (rightArrowHeld) // y -
             {
-               transformToParent.getTranslation().subY(amount);
+               tempFramePose3D.getPosition().subY(getTranslateSpeedFactor() * amount);
             }
             if (upArrowHeld && ctrlHeld) // z +
             {
-               transformToParent.getTranslation().addZ(amount);
+               tempFramePose3D.getPosition().addZ(getTranslateSpeedFactor() * amount);
             }
             if (downArrowHeld && ctrlHeld) // z -
             {
-               transformToParent.getTranslation().subZ(amount);
+               tempFramePose3D.getPosition().subZ(getTranslateSpeedFactor() * amount);
             }
+
+            tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
+            tempFramePose3D.get(tempTransform);
+            transformToParent.getTranslation().add(tempTransform.getTranslation());
          }
       }
 
@@ -285,7 +301,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
       updateTransforms();
 
       GDXTools.toEuclid(camera3D.position, cameraPosition);
-      double distanceToCamera = cameraPosition.distance(framePose3D.getPosition());
+      distanceToCamera = cameraPosition.distance(framePose3D.getPosition());
       if (lastDistanceToCamera != distanceToCamera)
       {
          lastDistanceToCamera = distanceToCamera;
@@ -512,6 +528,11 @@ public class GDXPathControlRingGizmo implements RenderableProvider
    public void setShowArrows(boolean showArrows)
    {
       this.showArrows = showArrows;
+   }
+
+   private double getTranslateSpeedFactor()
+   {
+      return translateSpeedFactor * distanceToCamera;
    }
 
    public void setHighlightingEnabled(boolean highlightingEnabled)
