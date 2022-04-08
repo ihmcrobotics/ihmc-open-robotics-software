@@ -20,6 +20,7 @@ mainDependencies {
    api("us.ihmc:ihmc-yovariables:0.9.11")
    api("us.ihmc:simulation-construction-set:0.21.16")
    api("us.ihmc:scs2-definition:0.5.1")
+   api("us.ihmc:scs2-simulation:0.5.1")
    api("us.ihmc:ihmc-parameter-optimization:source")
    api("us.ihmc:ihmc-java-toolkit:source")
 }

@@ -703,6 +703,11 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
       return avatarSimulation.getRobotModel();
    }
 
+   public double getSimulationDT()
+   {
+      return getSimulationSession().getSessionDTSeconds();
+   }
+
    public Robot getRobot()
    {
       return avatarSimulation.getRobot();
