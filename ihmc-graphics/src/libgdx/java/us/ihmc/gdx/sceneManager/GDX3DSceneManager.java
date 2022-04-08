@@ -40,25 +40,6 @@ public class GDX3DSceneManager
    private Runnable onCreate;
    private GLProfiler glProfiler;
 
-   // TODO: Review and understand this better
-   // ReferenceFrame.getWorldFrame() is Z-up frame
-   // Finger axis definition is right hand, Thumb +Z, Index +X, Middle +Y
-   // The default orientation of the libGDX frame is such that
-   // your thumb is pointing forward away from your face and your index finger pointing left
-   // The default orientation of the IHMC Zup frame is such that
-   // your thumb is up and your index finger is pointing away from you
-   private final RigidBodyTransformReadOnly libGDXYUpToIHMCZUpSpace = new RigidBodyTransform(
-         new YawPitchRoll(          // For this transformation, we start with IHMC ZUp with index forward and thumb up
-            Math.toRadians(90.0),   // rotating around thumb, index goes forward to left
-            Math.toRadians(0.0),    // no rotation about middle finger
-            Math.toRadians(-90.0)   // rotating about index finger, thumb goes away from you
-         ),
-         new Point3D()
-   );
-   private final ReferenceFrame libGDXYUpFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("libGDXFrame",
-                                                                                                                   ReferenceFrame.getWorldFrame(),
-                                                                                                                   libGDXYUpToIHMCZUpSpace);
-
    public void create()
    {
       create(GDXInputMode.libGDX);
@@ -71,7 +52,7 @@ public class GDX3DSceneManager
 
       GDXTools.syncLogLevelWithLogTools();
 
-      camera3D = new FocusBasedGDXCamera(libGDXYUpFrame);
+      camera3D = new FocusBasedGDXCamera();
       if (inputMode == GDXInputMode.libGDX)
       {
          inputMultiplexer = new InputMultiplexer();
