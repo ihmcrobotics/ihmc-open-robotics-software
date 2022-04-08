@@ -5,7 +5,7 @@ import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
-import us.ihmc.gdx.FocusBasedGDXCamera;
+import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.tools.GDXTools;
 
@@ -18,7 +18,7 @@ import java.util.function.Supplier;
  */
 public class ImGui3DViewInput
 {
-   private final FocusBasedGDXCamera camera;
+   private final GDXFocusBasedCamera camera;
    private final Supplier<Float> viewportSizeXSupplier;
    private final Supplier<Float> viewportSizeYSupplier;
    private final ImGuiMouseDragData mouseDragDataLeft = new ImGuiMouseDragData(ImGuiMouseButton.Left);
@@ -35,7 +35,7 @@ public class ImGui3DViewInput
    private boolean computedPickRay = false;
    private boolean initialized = false;
 
-   public ImGui3DViewInput(FocusBasedGDXCamera camera, Supplier<Float> viewportSizeXSupplier, Supplier<Float> viewportSizeYSupplier)
+   public ImGui3DViewInput(GDXFocusBasedCamera camera, Supplier<Float> viewportSizeXSupplier, Supplier<Float> viewportSizeYSupplier)
    {
       this.camera = camera;
       this.viewportSizeXSupplier = viewportSizeXSupplier;

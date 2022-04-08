@@ -9,13 +9,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.gdx.FocusBasedGDXCamera;
+import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.input.GDXInputMode;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.log.LogTools;
@@ -28,7 +22,7 @@ public class GDX3DSceneManager
    private final GDX3DSceneBasics sceneBasics = new GDX3DSceneBasics();
 
    private InputMultiplexer inputMultiplexer;
-   private FocusBasedGDXCamera camera3D;
+   private GDXFocusBasedCamera camera3D;
    private ScreenViewport viewport;
 
    private int x = 0;
@@ -52,7 +46,7 @@ public class GDX3DSceneManager
 
       GDXTools.syncLogLevelWithLogTools();
 
-      camera3D = new FocusBasedGDXCamera();
+      camera3D = new GDXFocusBasedCamera();
       if (inputMode == GDXInputMode.libGDX)
       {
          inputMultiplexer = new InputMultiplexer();
@@ -179,7 +173,7 @@ public class GDX3DSceneManager
       return Gdx.graphics.getHeight();
    }
 
-   public FocusBasedGDXCamera getCamera3D()
+   public GDXFocusBasedCamera getCamera3D()
    {
       return camera3D;
    }

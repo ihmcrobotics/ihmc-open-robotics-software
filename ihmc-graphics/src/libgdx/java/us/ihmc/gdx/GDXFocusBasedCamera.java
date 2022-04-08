@@ -33,7 +33,7 @@ import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
-public class FocusBasedGDXCamera extends Camera
+public class GDXFocusBasedCamera extends Camera
 {
    private final FramePose3D cameraPose = new FramePose3D();
    private final RigidBodyTransform transformToParent = new RigidBodyTransform();
@@ -71,7 +71,7 @@ public class FocusBasedGDXCamera extends Camera
    private boolean isQPressed = false;
    private boolean isZPressed = false;
 
-   public FocusBasedGDXCamera()
+   public GDXFocusBasedCamera()
    {
       focusPointPose = new FramePose3D(ReferenceFrame.getWorldFrame());
       verticalFieldOfView = 45.0f;
@@ -112,7 +112,7 @@ public class FocusBasedGDXCamera extends Camera
          @Override
          public boolean scrolled(float amountX, float amountY)
          {
-            FocusBasedGDXCamera.this.scrolled(amountY);
+            GDXFocusBasedCamera.this.scrolled(amountY);
             return false;
          }
 
@@ -133,7 +133,7 @@ public class FocusBasedGDXCamera extends Camera
             lastDragY = screenY;
             if (Gdx.input.isButtonPressed(Input.Buttons.LEFT))
             {
-               FocusBasedGDXCamera.this.mouseDragged(deltaX, deltaY);
+               GDXFocusBasedCamera.this.mouseDragged(deltaX, deltaY);
             }
             return false;
          }

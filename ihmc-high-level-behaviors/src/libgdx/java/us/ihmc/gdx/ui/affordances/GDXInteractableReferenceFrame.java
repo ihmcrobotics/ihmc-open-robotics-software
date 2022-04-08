@@ -7,7 +7,7 @@ import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.gdx.FocusBasedGDXCamera;
+import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.collidables.GDXCoordinateFrameIntersection;
@@ -28,14 +28,14 @@ public class GDXInteractableReferenceFrame
    private boolean mouseCollidesWithFrame;
    private GDXSelectablePose3DGizmo selectablePose3DGizmo;
 
-   public void create(ReferenceFrame parentFrame, double length, FocusBasedGDXCamera camera3D)
+   public void create(ReferenceFrame parentFrame, double length, GDXFocusBasedCamera camera3D)
    {
       RigidBodyTransform transform = new RigidBodyTransform();
       ReferenceFrame referenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentFrame, transform);
       create(referenceFrame, transform, length, camera3D);
    }
 
-   public void create(ReferenceFrame referenceFrameToRepresent, RigidBodyTransform transformToParentToModify, double length, FocusBasedGDXCamera camera3D)
+   public void create(ReferenceFrame referenceFrameToRepresent, RigidBodyTransform transformToParentToModify, double length, GDXFocusBasedCamera camera3D)
    {
       representativeReferenceFrame = referenceFrameToRepresent;
       transformToParent = transformToParentToModify;

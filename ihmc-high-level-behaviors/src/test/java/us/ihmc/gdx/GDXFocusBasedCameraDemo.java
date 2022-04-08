@@ -14,7 +14,7 @@ public class GDXFocusBasedCameraDemo
                                                               "ihmc-open-robotics-software",
                                                               "ihmc-high-level-behaviors/src/test/resources");
 
-   private FocusBasedGDXCamera focusBasedCamera;
+   private GDXFocusBasedCamera focusBasedCamera;
    private final Vector3D tempVector = new Vector3D();
    private GDXReferenceFrameGraphic cameraFrameGraphic;
    private GDXReferenceFrameGraphic cameraPoseGraphic;
