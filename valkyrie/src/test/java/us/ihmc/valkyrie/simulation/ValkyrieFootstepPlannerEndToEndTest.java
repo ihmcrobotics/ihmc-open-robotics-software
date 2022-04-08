@@ -1,5 +1,10 @@
 package us.ihmc.valkyrie.simulation;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -7,7 +12,12 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.referenceFrame.FrameBox3D;
+import us.ihmc.euclid.referenceFrame.FrameCylinder3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -18,13 +28,14 @@ import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
+import us.ihmc.scs2.simulation.SimulationSession;
+import us.ihmc.scs2.simulation.collision.Collidable;
+import us.ihmc.scs2.simulation.collision.CollidableHolder;
+import us.ihmc.scs2.simulation.collision.CollisionListResult;
+import us.ihmc.scs2.simulation.physicsEngine.SimpleCollisionDetection;
+import us.ihmc.scs2.simulation.robot.Robot;
+import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimRigidBodyBasics;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.Link;
-import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionResult;
-import us.ihmc.simulationconstructionset.physics.collision.simple.CylinderShapeDescription;
-import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetector;
-import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionShapeFactory;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 @Tag("fast")
@@ -66,10 +77,11 @@ public class ValkyrieFootstepPlannerEndToEndTest extends AvatarBipedalFootstepPl
       return new ValkyrieLegCollisionDetectorScript(simTicksPerCollisionCheck);
    }
 
+   private static final ReferenceFrame InertialFrame = SimulationSession.DEFAULT_INERTIAL_FRAME;
+
    protected class ValkyrieLegCollisionDetectorScript extends CollisionCheckerScript
    {
-      private SimpleCollisionDetector collisionDetector = new SimpleCollisionDetector();
-      SimpleCollisionShapeFactory shapeFactory = (SimpleCollisionShapeFactory) collisionDetector.getShapeFactory();
+      private SimpleCollisionDetection collisionDetector = new SimpleCollisionDetection(InertialFrame);
 
       private final double thighRadius = 0.12;
       private final double thighLength = 0.45;
@@ -82,8 +94,6 @@ public class ValkyrieFootstepPlannerEndToEndTest extends AvatarBipedalFootstepPl
       private final double shinZOffset = -0.3;
 
       private final MaterialDefinition collisionAppearance = new MaterialDefinition(ColorDefinitions.SkyBlue().derive(0, 1, 1, 0.6));
-      private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-      private final CollisionDetectionResult collisionDetectionResult = new CollisionDetectionResult();
 
       private final String leftKneeJointName = getRobotModel().getJointMap().getLegJointName(RobotSide.LEFT, LegJointName.KNEE_PITCH);
       private final String rightKneeJointName = getRobotModel().getJointMap().getLegJointName(RobotSide.RIGHT, LegJointName.KNEE_PITCH);
@@ -91,6 +101,9 @@ public class ValkyrieFootstepPlannerEndToEndTest extends AvatarBipedalFootstepPl
       private final String rightHipJointName = getRobotModel().getJointMap().getLegJointName(RobotSide.RIGHT, LegJointName.HIP_PITCH);
 
       private boolean firstTick = true;
+
+      private CollidableHolder dynamicCollidableHolder;
+      private CollidableHolder staticCollidableHolder;
 
       public ValkyrieLegCollisionDetectorScript(int simTicksPerCollisionCheck)
       {
@@ -110,48 +123,73 @@ public class ValkyrieFootstepPlannerEndToEndTest extends AvatarBipedalFootstepPl
             firstTick = false;
          }
 
-         collisionDetector.performCollisionDetection(collisionDetectionResult);
-         return collisionDetectionResult.getNumberOfCollisions() > 0;
+         CollisionListResult result = collisionDetector.evaluationCollisions(Collections.singletonList(dynamicCollidableHolder),
+                                                                             staticCollidableHolder,
+                                                                             simulationTestHelper.getSimulationDT());
+         return result.size() > 0;
       }
 
       private void setupCollisionDetector()
       {
-         HumanoidFloatingRootJointRobot robot = drcSimulationTestHelper.getRobot();
-         Link leftShin = robot.getJoint(leftKneeJointName).getLink();
-         Link rightShin = robot.getJoint(rightKneeJointName).getLink();
-         Link leftThigh = robot.getJoint(leftHipJointName).getLink();
-         Link rightThigh = robot.getJoint(rightHipJointName).getLink();
+         Robot robot = simulationTestHelper.getRobot();
+         SimRigidBodyBasics leftShin = robot.getJoint(leftKneeJointName).getSuccessor();
+         SimRigidBodyBasics rightShin = robot.getJoint(rightKneeJointName).getSuccessor();
+         SimRigidBodyBasics leftThigh = robot.getJoint(leftHipJointName).getSuccessor();
+         SimRigidBodyBasics rightThigh = robot.getJoint(rightHipJointName).getSuccessor();
 
-         tempTransform.setIdentity();
-         tempTransform.getTranslation().setZ(shinZOffset + 0.5 * shinLength);
-         shapeFactory.addShape(leftShin, tempTransform, new CylinderShapeDescription<>(shinRadius, shinLength), false, 0b01, 0b10);
-         shapeFactory.addShape(rightShin, tempTransform, new CylinderShapeDescription<>(shinRadius, shinLength), false, 0b01, 0b10);
+         Collidable leftShinCollidable = new Collidable(leftShin,
+                                                        0b10,
+                                                        0b01,
+                                                        new FrameCylinder3D(leftShin.getParentJoint().getFrameAfterJoint(),
+                                                                            new Point3D(0.0, 0.0, shinZOffset + 0.5 * shinLength),
+                                                                            Axis3D.Z,
+                                                                            shinLength,
+                                                                            shinRadius));
+         Collidable rightShinCollidable = new Collidable(rightShin,
+                                                         0b10,
+                                                         0b01,
+                                                         new FrameCylinder3D(rightShin.getParentJoint().getFrameAfterJoint(),
+                                                                             new Point3D(0.0, 0.0, shinZOffset + 0.5 * shinLength),
+                                                                             Axis3D.Z,
+                                                                             shinLength,
+                                                                             shinRadius));
+         Collidable leftThighCollidable = new Collidable(leftThigh,
+                                                         0b10,
+                                                         0b01,
+                                                         new FrameCylinder3D(leftThigh.getParentJoint().getFrameAfterJoint(),
+                                                                             new Point3D(thighXOffset, thighYOffset, thighZOffset + 0.5 * thighLength),
+                                                                             Axis3D.Z,
+                                                                             thighLength,
+                                                                             thighRadius));
+         Collidable rightThighCollidable = new Collidable(rightThigh,
+                                                          0b10,
+                                                          0b01,
+                                                          new FrameCylinder3D(rightThigh.getParentJoint().getFrameAfterJoint(),
+                                                                              new Point3D(thighXOffset, -thighYOffset, thighZOffset + 0.5 * thighLength),
+                                                                              Axis3D.Z,
+                                                                              thighLength,
+                                                                              thighRadius));
+         List<Collidable> robotCollidables = Arrays.asList(leftShinCollidable, rightShinCollidable, leftThighCollidable, rightThighCollidable);
+         dynamicCollidableHolder = () -> robotCollidables;
 
-         tempTransform.getTranslation().set(thighXOffset, thighYOffset, thighZOffset + 0.5 * thighLength);
-         shapeFactory.addShape(leftThigh, tempTransform, new CylinderShapeDescription<>(thighRadius, thighLength), false, 0b01, 0b10);
-
-         tempTransform.getTranslation().set(thighXOffset, -thighYOffset, thighZOffset + 0.5 * thighLength);
-         shapeFactory.addShape(rightThigh, tempTransform, new CylinderShapeDescription<>(thighRadius, thighLength), false, 0b01, 0b10);
-
-         shapeFactory.addShape(shapeFactory.createBox(0.5 * bollardEnvironment.getBollardWidth(),
-                                                      0.5 * bollardEnvironment.getBollardWidth(),
-                                                      bollardEnvironment.getBollardHeight()));
-         shapeFactory.addShape(shapeFactory.createBox(0.5 * bollardEnvironment.getBollardWidth(),
-                                                      0.5 * bollardEnvironment.getBollardWidth(),
-                                                      bollardEnvironment.getBollardHeight()));
-
-         tempTransform.setIdentity();
-         tempTransform.getTranslation().set(0.0, 0.5 * BOLLARD_DISTANCE, 0.0);
-         collisionDetector.getCollisionObjects().get(4).setTransformToWorld(tempTransform);
-
-         tempTransform.getTranslation().set(0.0, -0.5 * BOLLARD_DISTANCE, 0.0);
-         collisionDetector.getCollisionObjects().get(5).setTransformToWorld(tempTransform);
-
-         collisionDetector.getCollisionObjects().get(4).setCollisionGroup(0b10);
-         collisionDetector.getCollisionObjects().get(5).setCollisionGroup(0b10);
-
-         collisionDetector.getCollisionObjects().get(4).setCollisionMask(0b01);
-         collisionDetector.getCollisionObjects().get(5).setCollisionMask(0b01);
+         List<Collidable> enironmentCollidables = new ArrayList<>();
+         enironmentCollidables.add(new Collidable(null,
+                                                  0b01,
+                                                  0b10,
+                                                  new FrameBox3D(new FramePoint3D(InertialFrame, 0.0, 0.5 * BOLLARD_DISTANCE, 0.0),
+                                                                 new FrameQuaternion(InertialFrame),
+                                                                 0.5 * bollardEnvironment.getBollardWidth(),
+                                                                 0.5 * bollardEnvironment.getBollardWidth(),
+                                                                 bollardEnvironment.getBollardHeight())));
+         enironmentCollidables.add(new Collidable(null,
+                                                  0b01,
+                                                  0b10,
+                                                  new FrameBox3D(new FramePoint3D(InertialFrame, 0.0, -0.5 * BOLLARD_DISTANCE, 0.0),
+                                                                 new FrameQuaternion(InertialFrame),
+                                                                 0.5 * bollardEnvironment.getBollardWidth(),
+                                                                 0.5 * bollardEnvironment.getBollardWidth(),
+                                                                 bollardEnvironment.getBollardHeight())));
+         staticCollidableHolder = () -> enironmentCollidables;
       }
 
       private void setupGraphics()
