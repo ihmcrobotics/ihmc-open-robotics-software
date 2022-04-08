@@ -44,6 +44,11 @@ public class ContinuousStepGeneratorParametersCommand implements Command<Continu
       parameters.setTurnMaxAngleOutward(message.getTurnMaxAngleOutward());
    }
 
+   public ContinuousStepGeneratorParameters getParameters()
+   {
+      return parameters;
+   }
+
    @Override
    public Class<ContinuousStepGeneratorParametersMessage> getMessageClass()
    {
