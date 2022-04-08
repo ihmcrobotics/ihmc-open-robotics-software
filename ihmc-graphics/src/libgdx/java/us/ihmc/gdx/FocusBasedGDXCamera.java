@@ -19,7 +19,6 @@ import imgui.internal.ImGui;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -36,7 +35,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 public class FocusBasedGDXCamera extends Camera
 {
-   private final ReferenceFrame libGDXYUpFrame;
    private final FramePose3D cameraPose = new FramePose3D();
    private final RigidBodyTransform transformToParent = new RigidBodyTransform();
    private final ReferenceFrame cameraFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
@@ -46,32 +44,24 @@ public class FocusBasedGDXCamera extends Camera
    private final FrameVector3D euclidUp = new FrameVector3D();
 
    private final AxisAngle latitudeAxisAngle = new AxisAngle();
-   private final AxisAngle longitudeAxisAngle = new AxisAngle();
-   private final AxisAngle rollAxisAngle = new AxisAngle();
    private final AxisAngle focusPointAxisAngle = new AxisAngle();
 
-   private final RotationMatrix cameraOrientationOffset = new RotationMatrix();
+   private final float verticalFieldOfView;
 
-   private float verticalFieldOfView;
-
-   private double zoomSpeedFactor = 0.1;
-   private double latitudeSpeed = 0.005;
-   private double longitudeSpeed = 0.005;
-   private double translateSpeedFactor = 0.5;
+   private final double zoomSpeedFactor = 0.1;
+   private final double latitudeSpeed = 0.005;
+   private final double longitudeSpeed = 0.005;
+   private final double translateSpeedFactor = 0.5;
 
    private final FramePose3D focusPointPose;
    private double latitude = 0.0;
    private double longitude = 0.0;
-   private double roll;
    private double zoom = 10.0;
 
    private final Model focusPointModel;
    private final ModelInstance focusPointSphere;
 
-   private final Vector3D cameraOffsetUp;
-   private final Vector3D cameraOffsetForward;
-   private final Vector3D cameraOffsetLeft;
-   private final Vector3D cameraOffsetDown;
+   private final Vector3D NEGATIVE_Z = new Vector3D(0.0, 0.0, -1.0);
 
    private boolean libGDXInputMode = false;
    private boolean isWPressed = false;
@@ -81,28 +71,14 @@ public class FocusBasedGDXCamera extends Camera
    private boolean isQPressed = false;
    private boolean isZPressed = false;
 
-   public FocusBasedGDXCamera(ReferenceFrame libGDXYUpFrame)
+   public FocusBasedGDXCamera()
    {
-      this.libGDXYUpFrame = libGDXYUpFrame; // TODO: Use and understand this
       focusPointPose = new FramePose3D(ReferenceFrame.getWorldFrame());
       verticalFieldOfView = 45.0f;
       viewportWidth = Gdx.graphics.getWidth();
       viewportHeight = Gdx.graphics.getHeight();
       near = 0.05f;
       far = 2000.0f;
-
-      // TODO: Explain what's going on here
-      cameraOffsetUp = new Vector3D(0.0, 0.0, 1.0);
-      cameraOffsetForward = new Vector3D(1.0, 0.0, 0.0);
-      cameraOffsetLeft = new Vector3D();
-      cameraOffsetLeft.cross(cameraOffsetUp, cameraOffsetForward);
-      cameraOffsetDown = new Vector3D();
-      cameraOffsetDown.setAndNegate(cameraOffsetUp);
-      Vector3D cameraZAxis = new Vector3D(cameraOffsetForward);
-      Vector3D cameraYAxis = new Vector3D(cameraOffsetUp);
-      Vector3D cameraXAxis = new Vector3D();
-      cameraXAxis.cross(cameraYAxis, cameraZAxis);
-      cameraOrientationOffset.setColumns(cameraXAxis, cameraYAxis, cameraZAxis);
 
       ModelBuilder modelBuilder = new ModelBuilder();
       modelBuilder.begin();
@@ -181,15 +157,15 @@ public class FocusBasedGDXCamera extends Camera
       Vector3D fromCameraToFocus = new Vector3D();
       fromCameraToFocus.setAndNegate(fromFocusToCamera);
       // We remove the component along up to be able to compute the longitude
-      fromCameraToFocus.scaleAdd(-fromCameraToFocus.dot(cameraOffsetDown), cameraOffsetDown, fromCameraToFocus);
+      fromCameraToFocus.scaleAdd(-fromCameraToFocus.dot(NEGATIVE_Z), NEGATIVE_Z, fromCameraToFocus);
 
-      latitude = Math.PI / 2.0 - fromFocusToCamera.angle(cameraOffsetDown);
-      longitude = fromCameraToFocus.angle(cameraOffsetForward);
+      latitude = Math.PI / 2.0 - fromFocusToCamera.angle(NEGATIVE_Z);
+      longitude = fromCameraToFocus.angle(Axis3D.X);
 
       Vector3D cross = new Vector3D();
-      cross.cross(fromCameraToFocus, cameraOffsetForward);
+      cross.cross(fromCameraToFocus, Axis3D.X);
 
-      if (cross.dot(cameraOffsetDown) > 0.0)
+      if (cross.dot(NEGATIVE_Z) > 0.0)
          longitude = -longitude;
    }
 
@@ -204,49 +180,28 @@ public class FocusBasedGDXCamera extends Camera
 
       latitude = MathTools.clamp(latitude, Math.PI / 2.0);
       longitude = EuclidCoreTools.trimAngleMinusPiToPi(longitude);
-      roll = 0.0;
-
-      latitudeAxisAngle.set(Axis3D.X, -latitude);
-      longitudeAxisAngle.set(Axis3D.Y, -longitude);
-      rollAxisAngle.set(Axis3D.Z, roll);
-
-      latitudeAxisAngle.set(Axis3D.Y, -latitude);
-      longitudeAxisAngle.set(Axis3D.Z, -longitude);
-      rollAxisAngle.set(Axis3D.X, roll);
 
       focusPointAxisAngle.set(Axis3D.Z, -longitude);
-
       focusPointPose.getOrientation().set(focusPointAxisAngle);
 
       GDXTools.toGDX(focusPointPose.getPosition(), focusPointSphere.nodes.get(0).translation);
       focusPointSphere.nodes.get(0).scale.set((float) (0.0035 * zoom), (float) (0.0035 * zoom), (float) (0.0035 * zoom));
       focusPointSphere.calculateTransforms();
 
-//      cameraPose.setToZero(ReferenceFrame.getWorldFrame());
-//      cameraPose.appendTranslation(focusPointPose.getPosition());
-//      cameraPose.appendRotation(cameraOrientationOffset);
       cameraPose.setIncludingFrame(focusPointPose);
-//      cameraPose.appendRotation(longitudeAxisAngle);
+      latitudeAxisAngle.set(Axis3D.Y, -latitude);
       cameraPose.appendRotation(latitudeAxisAngle);
-//      cameraPose.appendRotation(rollAxisAngle);
       cameraPose.appendTranslation(-zoom, 0.0, 0.0);
 
       euclidDirection.setIncludingFrame(ReferenceFrame.getWorldFrame(), Axis3D.X);
-//      euclidDirection.setIncludingFrame(ReferenceFrame.getWorldFrame(), Axis3D.Z);
       cameraPose.getOrientation().transform(euclidDirection);
       euclidUp.setIncludingFrame(ReferenceFrame.getWorldFrame(), Axis3D.Z);
-//      euclidUp.setIncludingFrame(ReferenceFrame.getWorldFrame(), Axis3D.Y);
       cameraPose.getOrientation().transform(euclidUp);
-
-//      cameraPose.changeFrame(libGDXYUpFrame);
-//      euclidDirection.changeFrame(libGDXYUpFrame);
-//      euclidUp.changeFrame(libGDXYUpFrame);
 
       GDXTools.toGDX(cameraPose.getPosition(), position);
       GDXTools.toGDX(euclidDirection, direction);
       GDXTools.toGDX(euclidUp, up);
 
-//      cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
       cameraPose.get(transformToParent);
       cameraFrame.update();
    }
