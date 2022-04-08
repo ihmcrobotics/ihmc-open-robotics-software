@@ -42,9 +42,9 @@ public class GDXInteractableReferenceFrame
       referenceFrameGraphic = new GDXReferenceFrameGraphic(length);
       highlightReferenceFrameGraphic = new GDXReferenceFrameGraphic(length);
       coordinateFrameIntersection = new GDXCoordinateFrameIntersection(length);
-      highlightReferenceFrameGraphicScaler = new GDXModelInstanceScaler(highlightReferenceFrameGraphic.getModelInstance());
+      highlightReferenceFrameGraphicScaler = new GDXModelInstanceScaler(highlightReferenceFrameGraphic);
       highlightReferenceFrameGraphicScaler.scale(1.01);
-      GDXTools.setTransparency(highlightReferenceFrameGraphic.getModelInstance(), 0.5f);
+      GDXTools.setTransparency(highlightReferenceFrameGraphic, 0.5f);
       selectablePose3DGizmo = new GDXSelectablePose3DGizmo(representativeReferenceFrame, transformToParent);
       selectablePose3DGizmo.create(camera3D);
    }
@@ -59,8 +59,8 @@ public class GDXInteractableReferenceFrame
       tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
       tempFramePose.get(tempTransform);
 
-      GDXTools.toGDX(tempTransform, referenceFrameGraphic.getModelInstance().transform);
-      GDXTools.toGDX(tempTransform, highlightReferenceFrameGraphic.getModelInstance().transform);
+      GDXTools.toGDX(tempTransform, referenceFrameGraphic.transform);
+      GDXTools.toGDX(tempTransform, highlightReferenceFrameGraphic.transform);
    }
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
