@@ -109,6 +109,8 @@ public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFact
       avatarTestingSimulation.setDefaultControllerPublishers(defaultControllerPublishers);
       avatarTestingSimulation.setCreateVideo(createVideo);
       avatarTestingSimulation.setKeepSCSUp(keepSCSUp);
+      // TODO This guy needs to be created before the robot is completely standing. Should cleanup QueuedControllerCommandGenerator, quite a mess.
+      avatarTestingSimulation.getQueuedControllerCommands();
       return avatarTestingSimulation;
    }
 
