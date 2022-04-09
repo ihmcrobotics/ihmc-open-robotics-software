@@ -20,7 +20,6 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -31,8 +30,8 @@ import static us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVi
 public class DynamicStateInspectorTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final double length = 0.2;
-   private static final double width = 0.1;
+   private static final double footLength = 0.2;
+   private static final double footWidth = 0.1;
 
    private FrameConvexPolygon2D leftPolygon;
    private FrameConvexPolygon2D rightPolygon;
@@ -40,15 +39,18 @@ public class DynamicStateInspectorTest
    private YoRegistry registry;
    private FramePoint2D toePosition;
    private FramePoint2D desiredICP;
+   private FramePoint2D currentICP;
 
    @BeforeEach
    public void setup()
    {
       registry = new YoRegistry("test");
 
-      leftPolygon = createFootPolygon(length, width);
-      rightPolygon = createFootPolygon(length, width);
+      leftPolygon = createFootPolygon(footLength, footWidth);
+      rightPolygon = createFootPolygon(footLength, footWidth);
       onToesPolygon = new FrameConvexPolygon2D();
+      desiredICP = new FramePoint2D();
+      currentICP = new FramePoint2D();
 
       toePosition = new FramePoint2D();
    }
@@ -61,14 +63,14 @@ public class DynamicStateInspectorTest
    }
 
    @Test
-   public void testLeftStepGrid()
+   public void testLeftStep()
    {
       DynamicStateInspector inspector = new DynamicStateInspector(registry);
 
       FramePose3D leftFootPose = new FramePose3D();
       FramePose3D rightFootPose = new FramePose3D();
 
-      double stepLength = 0.3;
+      double stepLength = 0.6;
       double stepWidth = 0.2;
 
       leftFootPose.getPosition().set(stepLength, 0.5 * stepWidth, 0.0);
@@ -78,7 +80,43 @@ public class DynamicStateInspectorTest
       rightPolygon.translate(rightFootPose.getX(), rightFootPose.getY());
 
       toePosition.setIncludingFrame(rightFootPose.getPosition());
-      toePosition.addX(0.5 * length);
+      toePosition.addX(0.5 * footLength);
+
+      onToesPolygon.addVertices(leftPolygon);
+      onToesPolygon.addVertex(toePosition);
+      onToesPolygon.update();
+
+      inspector.setPolygons(leftPolygon, rightPolygon, onToesPolygon);
+
+      desiredICP.interpolate(new FramePoint2D(rightFootPose.getPosition()), new FramePoint2D(leftFootPose.getPosition()), 0.75);
+
+      currentICP.set(desiredICP);
+      currentICP.subX(0.05);
+
+      inspector.checkICPLocations(RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, toePosition);
+
+      visualize();
+   }
+
+   @Test
+   public void testLeftStepGrid()
+   {
+      DynamicStateInspector inspector = new DynamicStateInspector(registry);
+
+      FramePose3D leftFootPose = new FramePose3D();
+      FramePose3D rightFootPose = new FramePose3D();
+
+      double stepLength = 0.6;
+      double stepWidth = 0.2;
+
+      leftFootPose.getPosition().set(stepLength, 0.5 * stepWidth, 0.0);
+      rightFootPose.getPosition().set(0.0, -0.5 * stepWidth, 0.0);
+
+      leftPolygon.translate(leftFootPose.getX(), leftFootPose.getY());
+      rightPolygon.translate(rightFootPose.getX(), rightFootPose.getY());
+
+      toePosition.setIncludingFrame(rightFootPose.getPosition());
+      toePosition.addX(0.5 * footLength);
 
       onToesPolygon.addVertices(leftPolygon);
       onToesPolygon.addVertex(toePosition);
@@ -89,7 +127,8 @@ public class DynamicStateInspectorTest
       desiredICP = new FramePoint2D();
       desiredICP.interpolate(new FramePoint2D(rightFootPose.getPosition()), new FramePoint2D(leftFootPose.getPosition()), 0.75);
 
-      visualize(inspector, stepLength, stepWidth, leftFootPose);
+
+      visualizeGrid(inspector, stepLength, stepWidth, leftFootPose);
    }
 
    private static FrameConvexPolygon2D createFootPolygon(double length, double width)
@@ -104,7 +143,59 @@ public class DynamicStateInspectorTest
       return polygon2D;
    }
 
-   private void visualize(DynamicStateInspector inspector, double stepLength, double stepWidth, FramePose3D leadingFootPose)
+
+   private void visualize()
+   {
+      SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("dummy"));
+
+      YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
+
+      YoFrameConvexPolygon2D yoToeOffPolygonViz = new YoFrameConvexPolygon2D("toeOffPolygon", "", worldFrame, 8, registry);
+      YoFrameConvexPolygon2D yoSupportPolygonViz = new YoFrameConvexPolygon2D("combinedPolygon", "", worldFrame, 8, registry);
+      YoFrameConvexPolygon2D yoLeftFootPolygonViz = new YoFrameConvexPolygon2D("LeftFootPolygon", "", worldFrame, 4, registry);
+      YoFrameConvexPolygon2D yoRightFootPolygonViz = new YoFrameConvexPolygon2D("RightFootPolygon", "", worldFrame, 4, registry);
+      YoFramePoint2D yoDesiredICP = new YoFramePoint2D("desiredICP", worldFrame, registry);
+      YoFramePoint2D yoCurrentICP = new YoFramePoint2D("currentICP", worldFrame, registry);
+
+      YoArtifactPolygon leftFootViz = new YoArtifactPolygon("Left Foot Polygon", yoLeftFootPolygonViz, defaultFeetColors.get(RobotSide.LEFT), false);
+      YoArtifactPolygon rightFootViz = new YoArtifactPolygon("Right Foot Polygon", yoRightFootPolygonViz, defaultFeetColors.get(RobotSide.RIGHT), false);
+      YoArtifactPolygon supportPolygonArtifact = new YoArtifactPolygon("Combined Polygon", yoSupportPolygonViz, Color.pink, false);
+      YoArtifactPolygon toeOffPolygonArtifact = new YoArtifactPolygon("Toe Off Polygon", yoToeOffPolygonViz, Color.RED, false);
+      YoGraphicPosition desiredICPArtifact = new YoGraphicPosition("Desired ICP", yoDesiredICP, 0.01, YoAppearance.Yellow(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
+      YoGraphicPosition currentICPArtifact = new YoGraphicPosition("Current ICP", yoCurrentICP, 0.01, YoAppearance.Blue(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
+
+      graphicsListRegistry.registerArtifact("test", leftFootViz);
+      graphicsListRegistry.registerArtifact("test", rightFootViz);
+      graphicsListRegistry.registerArtifact("test", supportPolygonArtifact);
+      graphicsListRegistry.registerArtifact("test", toeOffPolygonArtifact);
+      graphicsListRegistry.registerArtifact("test", desiredICPArtifact.createArtifact());
+      graphicsListRegistry.registerArtifact("test", currentICPArtifact.createArtifact());
+
+      yoLeftFootPolygonViz.set(leftPolygon);
+      yoRightFootPolygonViz.set(rightPolygon);
+      yoSupportPolygonViz.addVertices(yoLeftFootPolygonViz);
+      yoSupportPolygonViz.addVertices(yoRightFootPolygonViz);
+      yoSupportPolygonViz.update();
+      yoToeOffPolygonViz.set(onToesPolygon);
+      yoDesiredICP.set(desiredICP);
+      yoCurrentICP.set(currentICP);
+
+
+      scs.getRootRegistry().addChild(registry);
+      scs.addYoGraphicsListRegistry(graphicsListRegistry);
+      SimulationOverheadPlotterFactory plotterFactory = scs.createSimulationOverheadPlotterFactory();
+      plotterFactory.addYoGraphicsListRegistries(graphicsListRegistry);
+      plotterFactory.createOverheadPlotter();
+
+      scs.startOnAThread();
+
+
+      scs.tickAndUpdate();
+
+      ThreadTools.sleepForever();
+   }
+
+   private void visualizeGrid(DynamicStateInspector inspector, double stepLength, double stepWidth, FramePose3D leadingFootPose)
    {
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("dummy"));
 
@@ -137,8 +228,8 @@ public class DynamicStateInspectorTest
       yoDesiredICP.set(desiredICP);
 
 
-      double gridWidth = 0.5;
-      double gridHeight = 0.5;
+      double gridWidth = stepWidth + footWidth;
+      double gridHeight = stepLength + footLength;
       double gridRez = 0.025;
       int widthTicks = (int) (gridWidth / gridRez);
       int heightTicks = (int) (gridHeight / gridRez);
@@ -175,10 +266,10 @@ public class DynamicStateInspectorTest
 
       scs.startOnAThread();
 
-      YoVariableChangedListener changedListener = v -> updateListener(stepLength, inspector, leadingFootPose, validPoints, invalidPoints, scs);
+      YoVariableChangedListener changedListener = v -> updateListener(stepLength, stepWidth, inspector, leadingFootPose, validPoints, invalidPoints, scs);
       inspector.attachParameterChangeListener(changedListener);
 
-      updateListener(stepLength, inspector, leadingFootPose, validPoints, invalidPoints, scs);
+      updateListener(stepLength, stepWidth, inspector, leadingFootPose, validPoints, invalidPoints, scs);
 
 
 
@@ -189,11 +280,11 @@ public class DynamicStateInspectorTest
       ThreadTools.sleepForever();
    }
 
-   private void updateListener(double stepLength, DynamicStateInspector inspector, FramePose3D leadingFootPose, List<YoFramePoint2D> validPoints,
+   private void updateListener(double stepLength, double stepWidth, DynamicStateInspector inspector, FramePose3D leadingFootPose, List<YoFramePoint2D> validPoints,
                                List<YoFramePoint2D> invalidPoints, SimulationConstructionSet scs)
    {
-      double gridWidth = 0.5;
-      double gridHeight = 0.5;
+      double gridWidth = stepWidth + footWidth;
+      double gridHeight = stepLength + footLength;
       double gridRez = 0.025;
       int widthTicks = (int) (gridWidth / gridRez);
       int heightTicks = (int) (gridHeight / gridRez);
