@@ -22,7 +22,8 @@ public class ImGuiReferenceFrameLibraryCombo
       referenceFrameNames = new String[referenceFrameLibrary.size()];
       for (int i = 0; i < referenceFrameLibrary.size(); i++)
       {
-         referenceFrameNames[i] = referenceFrameLibrary.get(i).getName();
+         String fullName = referenceFrameLibrary.get(i).getName();
+         referenceFrameNames[i] = fullName.substring(fullName.lastIndexOf(".") + 1);
       }
    }
 
