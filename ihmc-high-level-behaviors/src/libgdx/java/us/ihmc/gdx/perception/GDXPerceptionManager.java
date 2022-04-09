@@ -65,7 +65,8 @@ public class GDXPerceptionManager
 
             cameraPose.setToZero(objectDetectionBlackflySimulator.getSensorFrame());
             cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
-            if (markerPose.getPosition().distance(cameraPose.getPosition()) < 1.0)
+            double distanceToMarker = markerPose.getPosition().distance(cameraPose.getPosition());
+            if (distanceToMarker < 0.9)
             {
                isFrameLockedIn = true;
             }
