@@ -16,9 +16,7 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
@@ -31,11 +29,10 @@ import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.ui.gizmo.GDXPathControlRingGizmo;
+import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.gdx.ui.graphics.GDXFootstepGraphic;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.JSONTools;
@@ -49,7 +46,7 @@ public class GDXWalkAction implements GDXBehaviorAction
    private ROS2SyncedRobotModel syncedRobot;
    private ROS2ControllerHelper ros2ControllerHelper;
    private ImGuiReferenceFrameLibraryCombo referenceFrameLibraryCombo;
-   private final SideDependentList<GDXFootstepGraphic> goalFeet = new SideDependentList<>();
+   private final SideDependentList<GDXFootstepGraphic> goalFeetGraphics = new SideDependentList<>();
    private final SideDependentList<FramePose3D> goalFeetPoses = new SideDependentList<>();
    private FootstepPlanningModule footstepPlanner;
    private final GDXPathControlRingGizmo footstepPlannerGoalGizmo = new GDXPathControlRingGizmo();
@@ -57,6 +54,8 @@ public class GDXWalkAction implements GDXBehaviorAction
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean selected = new ImBoolean();
    private FootstepDataListMessage footstepDataListMessage;
+   private final SideDependentList<ImBoolean> editGoalFootPoses = new SideDependentList<>();
+   private final SideDependentList<GDXPose3DGizmo> editGoalFootGizmos = new SideDependentList<>();
 
    public void create(GDXFocusBasedCamera camera3D,
                       DRCRobotModel robotModel,
@@ -73,27 +72,43 @@ public class GDXWalkAction implements GDXBehaviorAction
 
       footstepPlannerGoalGizmo.create(camera3D);
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
+
       for (RobotSide side : RobotSide.values)
       {
+         editGoalFootPoses.put(side, new ImBoolean(false));
+         GDXPose3DGizmo footGizmo = new GDXPose3DGizmo(footstepPlannerGoalGizmo.getGizmoFrame());
+         footGizmo.create(camera3D);
+         editGoalFootGizmos.put(side, footGizmo);
+
          GDXFootstepGraphic goalFootGraphic = new GDXFootstepGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints(),
                                                                      side);
          goalFootGraphic.create();
-         goalFeet.put(side, goalFootGraphic);
-         goalFeetPoses.put(side, new FramePose3D());
+         goalFeetGraphics.put(side, goalFootGraphic);
+         FramePose3D goalFootPose = new FramePose3D();
+         goalFootPose.setToZero(footstepPlannerGoalGizmo.getGizmoFrame());
+         goalFootPose.getPosition().addY(0.5 * side.negateIfRightSide(footstepPlannerParameters.getIdealFootstepWidth()));
+         goalFootPose.get(footGizmo.getTransformToParent());
+         goalFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+         goalFootGraphic.setPose(goalFootPose);
+         goalFeetPoses.put(side, goalFootPose);
       }
    }
 
    @Override
    public void update()
    {
+      if (!selected.get())
+         editGoalFootPoses.forEach(imBoolean -> imBoolean.set(false));
+
       footstepPlannerGoalGizmo.updateTransforms();
       for (RobotSide side : RobotSide.values)
       {
+         editGoalFootGizmos.get(side).updateTransforms();
+
          FramePose3D goalFootPose = goalFeetPoses.get(side);
-         goalFootPose.setToZero(footstepPlannerGoalGizmo.getGizmoFrame());
-         goalFootPose.getPosition().addY(0.5 * side.negateIfRightSide(footstepPlannerParameters.getIdealFootstepWidth()));
+         goalFootPose.setToZero(editGoalFootGizmos.get(side).getGizmoFrame());
          goalFootPose.changeFrame(ReferenceFrame.getWorldFrame());
-         goalFeet.get(side).setPose(goalFootPose);
+         goalFeetGraphics.get(side).setPose(goalFootPose);
       }
       footstepPlanGraphic.update();
    }
@@ -103,7 +118,17 @@ public class GDXWalkAction implements GDXBehaviorAction
    {
       if (selected.get())
       {
-         footstepPlannerGoalGizmo.process3DViewInput(input);
+         boolean goalFootEditingEnabled = false;
+         for (RobotSide side : RobotSide.values)
+         {
+            if (editGoalFootPoses.get(side).get())
+            {
+               goalFootEditingEnabled = true;
+               editGoalFootGizmos.get(side).process3DViewInput(input);
+            }
+         }
+         if (!goalFootEditingEnabled)
+            footstepPlannerGoalGizmo.process3DViewInput(input);
       }
    }
 
@@ -114,13 +139,20 @@ public class GDXWalkAction implements GDXBehaviorAction
       {
          FramePose3D poseToKeep = new FramePose3D();
          poseToKeep.setToZero(footstepPlannerGoalGizmo.getGizmoFrame());
-         footstepPlannerGoalGizmo.setParentFrame(referenceFrameLibraryCombo.getSelectedReferenceFrame());
+         updateParentFrame(referenceFrameLibraryCombo.getSelectedReferenceFrame());
          poseToKeep.changeFrame(footstepPlannerGoalGizmo.getGizmoFrame().getParent());
          poseToKeep.get(footstepPlannerGoalGizmo.getTransformToParent());
       }
       if (ImGui.button(labels.get("Plan")))
       {
          plan();
+      }
+      ImGui.sameLine();
+      for (RobotSide side : RobotSide.values)
+      {
+         ImGui.checkbox(labels.get("Edit " + side.getPascalCaseName()), editGoalFootPoses.get(side));
+         if (side == RobotSide.LEFT)
+            ImGui.sameLine();
       }
    }
 
@@ -129,9 +161,18 @@ public class GDXWalkAction implements GDXBehaviorAction
    {
       footstepPlanGraphic.getRenderables(renderables, pool);
       if (selected.get())
+      {
          footstepPlannerGoalGizmo.getRenderables(renderables, pool);
+         for (RobotSide side : RobotSide.values)
+         {
+            if (editGoalFootPoses.get(side).get())
+            {
+               editGoalFootGizmos.get(side).getRenderables(renderables, pool);
+            }
+         }
+      }
       for (RobotSide side : RobotSide.values)
-         goalFeet.get(side).getRenderables(renderables, pool);
+         goalFeetGraphics.get(side).getRenderables(renderables, pool);
    }
 
    @Override
@@ -139,6 +180,11 @@ public class GDXWalkAction implements GDXBehaviorAction
    {
       jsonNode.put("parentFrame", footstepPlannerGoalGizmo.getGizmoFrame().getParent().getName());
       JSONTools.toJSON(jsonNode, footstepPlannerGoalGizmo.getTransformToParent());
+      for (RobotSide side : RobotSide.values)
+      {
+         ObjectNode goalFootNode = jsonNode.putObject(side.getCamelCaseName() + "GoalFootTransform");
+         JSONTools.toJSON(goalFootNode, editGoalFootGizmos.get(side).getTransformToParent());
+      }
    }
 
    @Override
@@ -147,9 +193,23 @@ public class GDXWalkAction implements GDXBehaviorAction
       String referenceFrameName = jsonNode.get("parentFrame").asText();
       if (referenceFrameLibraryCombo.setSelectedReferenceFrame(referenceFrameName))
       {
-         footstepPlannerGoalGizmo.setParentFrame(referenceFrameLibraryCombo.getSelectedReferenceFrame());
+         updateParentFrame(referenceFrameLibraryCombo.getSelectedReferenceFrame());
       }
       JSONTools.toEuclid(jsonNode, footstepPlannerGoalGizmo.getTransformToParent());
+      for (RobotSide side : RobotSide.values)
+      {
+         JsonNode goalFootNode = jsonNode.get(side.getCamelCaseName() + "GoalFootTransform");
+         JSONTools.toEuclid(goalFootNode, editGoalFootGizmos.get(side).getTransformToParent());
+      }
+   }
+
+   private void updateParentFrame(ReferenceFrame newParentFrame)
+   {
+      footstepPlannerGoalGizmo.setParentFrame(newParentFrame);
+      for (RobotSide side : RobotSide.values)
+      {
+         editGoalFootGizmos.get(side).setParentFrame(footstepPlannerGoalGizmo.getGizmoFrame());
+      }
    }
 
    @Override
@@ -160,42 +220,26 @@ public class GDXWalkAction implements GDXBehaviorAction
 
    public void plan()
    {
-      double proximityToGoalToMaintainOrientation = 1.5;
-
-      FramePose3D approachPointA = new FramePose3D();
-      approachPointA.setToZero(footstepPlannerGoalGizmo.getGizmoFrame());
-      approachPointA.changeFrame(ReferenceFrame.getWorldFrame());
-
-      FramePose3DReadOnly midFeetUnderPelvisFramePose = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame);
-      double midFeetUnderPelvisYaw = midFeetUnderPelvisFramePose.getYaw();
-
-      FrameVector3D walkingDirection = new FrameVector3D(ReferenceFrame.getWorldFrame());
-      walkingDirection.set(approachPointA.getPosition());
-      walkingDirection.sub(midFeetUnderPelvisFramePose.getPosition());
-      walkingDirection.normalize();
-      double pathToGoalYaw = Math.atan2(walkingDirection.getY(), walkingDirection.getX());
-
-      double distanceToGoal = approachPointA.getPosition().distanceXY(midFeetUnderPelvisFramePose.getPosition());
-      double desiredHeading = AngleTools.computeAngleDifferenceMinusPiToPi(midFeetUnderPelvisYaw, pathToGoalYaw);
-      approachPointA.getOrientation().setToYawOrientation(midFeetUnderPelvisYaw);
-
-      RobotSide stanceSide = RobotSide.LEFT;
       FramePose3D leftFootPose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT));
       FramePose3D rightFootPose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT));
       leftFootPose.changeFrame(ReferenceFrame.getWorldFrame());
       rightFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
+      footstepPlannerParameters.setFinalTurnProximity(1.0);
+
       FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
       footstepPlannerRequest.setPlanBodyPath(false);
-      footstepPlannerRequest.setRequestedInitialStanceSide(stanceSide);
       footstepPlannerRequest.setStartFootPoses(leftFootPose, rightFootPose);
       // TODO: Set start footholds!!
-      footstepPlannerRequest.setGoalFootPoses(footstepPlannerParameters.getIdealFootstepWidth(), approachPointA);
+      for (RobotSide side : RobotSide.values)
+      {
+         footstepPlannerRequest.setGoalFootPose(side, goalFeetPoses.get(side));
+      }
+
       //      footstepPlannerRequest.setPlanarRegionsList(...);
       footstepPlannerRequest.setAssumeFlatGround(true); // FIXME Assuming flat ground
 
       footstepPlanner.getFootstepPlannerParameters().set(footstepPlannerParameters);
-      LogTools.info("Stance side: {}", stanceSide.name());
       LogTools.info("Planning footsteps...");
       FootstepPlannerOutput footstepPlannerOutput = footstepPlanner.handleRequest(footstepPlannerRequest);
       LogTools.info("Footstep planner completed with {}, {} step(s)",
