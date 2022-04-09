@@ -92,6 +92,7 @@ public class GDXBehaviorActionSequenceEditor
    public void loadActionsFromFile()
    {
       actionSequence.clear();
+      playbackNextIndex = 0;
       LogTools.info("Loading from {}", workspaceFile.getClasspathResource().toString());
       JSONFileTools.load(workspaceFile, jsonNode ->
       {
@@ -131,6 +132,7 @@ public class GDXBehaviorActionSequenceEditor
             }
          }
       });
+      playbackNextIndex = 0;
    }
 
    public void saveToFile()
