@@ -12,6 +12,8 @@ import us.ihmc.scs2.definition.visual.VisualDefinition;
 
 public class DoorFrameDefinition extends RigidBodyDefinition
 {
+   private final boolean ENABLE_SUPPORT_BOARD_COLLISIONS = false;
+
    public DoorFrameDefinition()
    {
       super("frameBody");
@@ -41,22 +43,28 @@ public class DoorFrameDefinition extends RigidBodyDefinition
       latchSidePostOffset.add(0.0, -0.0889 / 2.0, 2.159 / 2.0);
       addCollisionShape(sizeX, sizeY, sizeZ, latchSidePostOffset);
 
-      Point3D latchSideSupportBoardOffset = new Point3D();
-      latchSideSupportBoardOffset.add(0.0, -0.006064, 0.0);
-      latchSideSupportBoardOffset.add(0.0, -0.0889, 0.0);
-      latchSideSupportBoardOffset.add(0.0, -0.0381 / 2.0, 0.0889 / 2.0f);
-      addCollisionShape(1.016, 0.0381, 0.0889, latchSideSupportBoardOffset);
+      if (ENABLE_SUPPORT_BOARD_COLLISIONS)
+      {
+         Point3D latchSideSupportBoardOffset = new Point3D();
+         latchSideSupportBoardOffset.add(0.0, -0.006064, 0.0);
+         latchSideSupportBoardOffset.add(0.0, -0.0889, 0.0);
+         latchSideSupportBoardOffset.add(0.0, -0.0381 / 2.0, 0.0889 / 2.0f);
+         addCollisionShape(1.016, 0.0381, 0.0889, latchSideSupportBoardOffset);
+      }
 
       Point3D hingeSidePostOffset = new Point3D();
       hingeSidePostOffset.add(0.0, 0.93415, 0.0);
       hingeSidePostOffset.add(0.0, 0.0889 / 2.0, 2.159 / 2.0);
       addCollisionShape(sizeX, sizeY, sizeZ, hingeSidePostOffset);
 
-      Point3D hingeSideSupportBoardOffset = new Point3D();
-      hingeSideSupportBoardOffset.add(0.0, 0.93415, 0.0);
-      hingeSideSupportBoardOffset.add(0.0, 0.0889, 0.0);
-      hingeSideSupportBoardOffset.add(0.0, 0.0381 / 2.0, 0.0889 / 2.0f);
-      addCollisionShape(1.016, 0.0381, 0.0889, hingeSideSupportBoardOffset);
+      if (ENABLE_SUPPORT_BOARD_COLLISIONS)
+      {
+         Point3D hingeSideSupportBoardOffset = new Point3D();
+         hingeSideSupportBoardOffset.add(0.0, 0.93415, 0.0);
+         hingeSideSupportBoardOffset.add(0.0, 0.0889, 0.0);
+         hingeSideSupportBoardOffset.add(0.0, 0.0381 / 2.0, 0.0889 / 2.0f);
+         addCollisionShape(1.016, 0.0381, 0.0889, hingeSideSupportBoardOffset);
+      }
    }
 
    private void addCollisionShape(double sizeX, double sizeY, double sizeZ, Point3D offset)
