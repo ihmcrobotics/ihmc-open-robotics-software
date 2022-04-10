@@ -11,7 +11,7 @@ public class DynamicStateInspectorParameters
    private final YoDouble distanceForwardFromHeel;
 
    /** This checks to make sure the ICP isn't falling to the outside of the trailing foot. **/
-   private final YoDouble minLateralDistance;
+   private final YoDouble minLateralDistanceInside;
 
    /**
     * These variables make sure the ICP is far enough from the toe off point. If they're far enough, then there's probably enough control
@@ -20,15 +20,15 @@ public class DynamicStateInspectorParameters
    private final YoDouble minDistanceFromTheToe;
    private final YoDouble minFractionOfStrideFromTheToe;
 
-   private final YoDouble minDistanceFromOutsideEdge;
+   private final YoDouble minDistanceAlongErrorFromOutsideEdge;
    private final YoDouble minOrthogonalDistanceFromOutsideEdge;
-   private final YoDouble minDistanceFromInsideEdge;
+   private final YoDouble minDistanceAlongErrorFromInsideEdge;
    private final YoDouble minOrthogonalDistanceFromInsideEdge;
 
    private final YoDouble minNormalizedDistanceFromOutsideEdge;
    private final YoDouble minNormalizedDistanceFromInsideEdge;
    private final YoDouble maxRatioOfControlDecreaseFromToeingOff;
-   private final YoDouble maxNecessaryNormalizedError;
+   private final YoDouble maxNormalizedErrorNeededForControl;
 
    public DynamicStateInspectorParameters(YoRegistry parentRegistry)
    {
@@ -39,25 +39,25 @@ public class DynamicStateInspectorParameters
    {
       YoRegistry registry = new YoRegistry(getClass().getSimpleName() + suffix);
 
-      distanceForwardFromHeel = new YoDouble("distanceForwardFromHeel" + suffix, registry);
-      minLateralDistance = new YoDouble("minLateralDistance" + suffix, registry);
+      distanceForwardFromHeel = new YoDouble("distForwardFromHeel" + suffix, registry);
+      minLateralDistanceInside = new YoDouble("minLatDistInside" + suffix, registry);
 
-      minDistanceFromTheToe = new YoDouble("minDistanceFromTheToe" + suffix, registry);
-      minFractionOfStrideFromTheToe = new YoDouble("minFractionOfStrideFromTheToe" + suffix, registry);
+      minDistanceFromTheToe = new YoDouble("minDistanceFromToe" + suffix, registry);
+      minFractionOfStrideFromTheToe = new YoDouble("minFractionOfStrideFromToe" + suffix, registry);
 
-      minDistanceFromOutsideEdge = new YoDouble("minDistanceFromOutsideEdge" + suffix, registry);
-      minOrthogonalDistanceFromOutsideEdge = new YoDouble("minOrthogonalDistanceFromOutsideEdge" + suffix, registry);
-      minDistanceFromInsideEdge = new YoDouble("minDistanceFromInsideEdge" + suffix, registry);
-      minOrthogonalDistanceFromInsideEdge = new YoDouble("minOrthogonalDistanceFromInsideEdge" + suffix, registry);
+      minDistanceAlongErrorFromOutsideEdge = new YoDouble("minDistAlongErrorFromOutEdge" + suffix, registry);
+      minOrthogonalDistanceFromOutsideEdge = new YoDouble("minOrthoDistFromOutEdge" + suffix, registry);
+      minDistanceAlongErrorFromInsideEdge = new YoDouble("minDistAlongErrorFromInEdge" + suffix, registry);
+      minOrthogonalDistanceFromInsideEdge = new YoDouble("minOrthoDistFromInEdge" + suffix, registry);
 
-      minNormalizedDistanceFromOutsideEdge = new YoDouble("minNormalizedDistanceFromOutsideEdge" + suffix, registry);
-      minNormalizedDistanceFromInsideEdge = new YoDouble("minNormalizedDistanceFromInsideEdge" + suffix, registry);
+      minNormalizedDistanceFromOutsideEdge = new YoDouble("minNormDistFromOutEdge" + suffix, registry);
+      minNormalizedDistanceFromInsideEdge = new YoDouble("minNormDistFromInEdge" + suffix, registry);
       maxRatioOfControlDecreaseFromToeingOff = new YoDouble("maxRatioOfControlDecreaseFromToeingOff" + suffix, registry);
-      maxNecessaryNormalizedError = new YoDouble("maxNecessaryNormalizedError" + suffix, registry);
+      maxNormalizedErrorNeededForControl = new YoDouble("maxNormErrorNeededForControl" + suffix, registry);
 
       minNormalizedDistanceFromOutsideEdge.setToNaN();
       minNormalizedDistanceFromInsideEdge.setToNaN();
-      maxNecessaryNormalizedError.setToNaN();
+      maxNormalizedErrorNeededForControl.setToNaN();
       maxRatioOfControlDecreaseFromToeingOff.set(Double.POSITIVE_INFINITY);
 
       parentRegistry.addChild(registry);
@@ -68,9 +68,9 @@ public class DynamicStateInspectorParameters
       return distanceForwardFromHeel.getDoubleValue();
    }
 
-   public double getMinLateralDistance()
+   public double getMinLateralDistanceInside()
    {
-      return minLateralDistance.getDoubleValue();
+      return minLateralDistanceInside.getDoubleValue();
    }
 
    public double getMinDistanceFromTheToe()
@@ -83,9 +83,9 @@ public class DynamicStateInspectorParameters
       return minFractionOfStrideFromTheToe.getDoubleValue();
    }
 
-   public double getMinDistanceFromOutsideEdge()
+   public double getMinDistanceAlongErrorFromOutsideEdge()
    {
-      return minDistanceFromOutsideEdge.getDoubleValue();
+      return minDistanceAlongErrorFromOutsideEdge.getDoubleValue();
    }
 
    public double getMinNormalizedDistanceFromOutsideEdge()
@@ -103,9 +103,9 @@ public class DynamicStateInspectorParameters
       return minOrthogonalDistanceFromOutsideEdge.getDoubleValue();
    }
 
-   public double getMinDistanceFromInsideEdge()
+   public double getMinDistanceAlongErrorFromInsideEdge()
    {
-      return minDistanceFromInsideEdge.getDoubleValue();
+      return minDistanceAlongErrorFromInsideEdge.getDoubleValue();
    }
 
    public double getMinOrthogonalDistanceFromInsideEdge()
@@ -113,9 +113,9 @@ public class DynamicStateInspectorParameters
       return minOrthogonalDistanceFromInsideEdge.getDoubleValue();
    }
 
-   public double getMaxNecessaryNormalizedError()
+   public double getMaxNormalizedErrorNeededForControl()
    {
-      return maxNecessaryNormalizedError.getDoubleValue();
+      return maxNormalizedErrorNeededForControl.getDoubleValue();
    }
 
    public double getMaxRatioOfControlDecreaseFromToeingOff()
@@ -126,16 +126,16 @@ public class DynamicStateInspectorParameters
    public void attachParameterChangeListener(YoVariableChangedListener changedListener)
    {
       distanceForwardFromHeel.addListener(changedListener);
-      minLateralDistance.addListener(changedListener);
+      minLateralDistanceInside.addListener(changedListener);
       minDistanceFromTheToe.addListener(changedListener);
       minFractionOfStrideFromTheToe.addListener(changedListener);
-      minDistanceFromOutsideEdge.addListener(changedListener);
+      minDistanceAlongErrorFromOutsideEdge.addListener(changedListener);
       minOrthogonalDistanceFromOutsideEdge.addListener(changedListener);
-      minDistanceFromInsideEdge.addListener(changedListener);
+      minDistanceAlongErrorFromInsideEdge.addListener(changedListener);
       minOrthogonalDistanceFromInsideEdge.addListener(changedListener);
       minNormalizedDistanceFromInsideEdge.addListener(changedListener);
       minNormalizedDistanceFromOutsideEdge.addListener(changedListener);
       maxRatioOfControlDecreaseFromToeingOff.addListener(changedListener);
-      maxNecessaryNormalizedError.addListener(changedListener);
+      maxNormalizedErrorNeededForControl.addListener(changedListener);
    }
 }

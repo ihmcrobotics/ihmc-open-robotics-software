@@ -5,13 +5,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Line2D;
-import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
@@ -150,8 +148,8 @@ public class DynamicStateInspectorTest
       assertEquals(expectedICPY + 0.5 * stepWidth, inspector.getLateralDistanceOfCurrentICPInside(), epsilon);
       assertEquals(toePosition.distanceSquared(desiredICP), inspector.getDistanceSquaredOfDesiredICPFromToe(), epsilon);
       assertEquals(toePosition.distanceSquared(currentICP), inspector.getDistanceSquaredOfCurrentICPFromToe(), epsilon);
-      assertEquals(expectedDistanceAlongErrorToOutside, inspector.getErrorDistanceToOutsideEdge(), epsilon);
-      assertEquals(Double.NEGATIVE_INFINITY, inspector.getErrorDistanceToInsideEdge(), epsilon);
+      assertEquals(expectedDistanceAlongErrorToOutside, inspector.getDistanceAlongErrorToOutsideEdge(), epsilon);
+      assertEquals(Double.NEGATIVE_INFINITY, inspector.getDistanceAlongErrorToInsideEdge(), epsilon);
 
       assertFalse(inspector.isCurrentICPIsPastTheHeel());
       assertTrue(inspector.isCurrentICPFarEnoughFromTheToe());
@@ -203,8 +201,8 @@ public class DynamicStateInspectorTest
       assertEquals(expectedICPY + 0.5 * stepWidth, inspector.getLateralDistanceOfCurrentICPInside(), epsilon);
       assertEquals(toePosition.distanceSquared(desiredICP), inspector.getDistanceSquaredOfDesiredICPFromToe(), epsilon);
       assertEquals(toePosition.distanceSquared(currentICP), inspector.getDistanceSquaredOfCurrentICPFromToe(), epsilon);
-      assertEquals(expectedDistanceAlongErrorToOutside, inspector.getErrorDistanceToOutsideEdge(), epsilon);
-      assertEquals(Double.NEGATIVE_INFINITY, inspector.getErrorDistanceToInsideEdge(), epsilon);
+      assertEquals(expectedDistanceAlongErrorToOutside, inspector.getDistanceAlongErrorToOutsideEdge(), epsilon);
+      assertEquals(Double.NEGATIVE_INFINITY, inspector.getDistanceAlongErrorToInsideEdge(), epsilon);
 
       assertFalse(inspector.isCurrentICPIsPastTheHeel());
       assertTrue(inspector.isCurrentICPFarEnoughFromTheToe());
@@ -255,8 +253,8 @@ public class DynamicStateInspectorTest
       assertEquals(expectedICPY + 0.5 * stepWidth, inspector.getLateralDistanceOfCurrentICPInside(), epsilon);
       assertEquals(toePosition.distanceSquared(desiredICP), inspector.getDistanceSquaredOfDesiredICPFromToe(), epsilon);
       assertEquals(toePosition.distanceSquared(currentICP), inspector.getDistanceSquaredOfCurrentICPFromToe(), epsilon);
-      assertEquals(expectedDistanceAlongErrorToOutside, inspector.getErrorDistanceToOutsideEdge(), epsilon);
-      assertEquals(Double.NEGATIVE_INFINITY, inspector.getErrorDistanceToInsideEdge(), epsilon);
+      assertEquals(expectedDistanceAlongErrorToOutside, inspector.getDistanceAlongErrorToOutsideEdge(), epsilon);
+      assertEquals(Double.NEGATIVE_INFINITY, inspector.getDistanceAlongErrorToInsideEdge(), epsilon);
 
       assertFalse(inspector.isCurrentICPIsPastTheHeel());
       assertTrue(inspector.isCurrentICPFarEnoughFromTheToe());
