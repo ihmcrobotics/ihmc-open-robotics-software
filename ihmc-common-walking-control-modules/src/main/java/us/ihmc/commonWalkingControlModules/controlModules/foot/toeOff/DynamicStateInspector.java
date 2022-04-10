@@ -1,10 +1,15 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -19,27 +24,21 @@ public class DynamicStateInspector
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   /**
-    * If the ICP is this distance based the heel of the elading foot, toe off should happen, regardless of any of the other conditions.
-    **/
-   private final YoDouble distanceForwardFromHeel = new YoDouble("distanceForwardFromHeel", registry);
+   private final DynamicStateInspectorParameters parameters;
 
-   /**
-    * This checks to make sure the ICP isn't falling to the outside of the trailing foot.
-    **/
-   private final YoDouble minLateralDistance = new YoDouble("minLateralDistance", registry);
+   private final YoDouble distanceOfCurrentICPPastHeel = new YoDouble("distanceOfCurrentICPPastHeel", registry);
+   private final YoDouble distanceSquaredOfCurrentICPFromToe = new YoDouble("distanceSquaredOfCurrentICPFromToe", registry);
+   private final YoDouble distanceSquaredOfDesiredICPFromToe = new YoDouble("distanceSquaredOfDesiredICPFromToe", registry);
+   private final YoDouble distanceOfCurrentICPInside = new YoDouble("distanceOfCurrentICPInside", registry);
+   private final YoDouble distanceOfDesiredICPInside = new YoDouble("distanceOfDesiredICPInside", registry);
 
-   /**
-    * These variables make sure the ICP is far enough from the toe off point. If they're far enough, then there's probably enough control
-    * authority to control them
-    */
-   private final YoDouble minDistanceFromTheToe = new YoDouble("minDistanceFromTheToe", registry);
-   private final YoDouble minFractionOfStrideFromTheToe = new YoDouble("minFractionOfStrideFromTheToe", registry);
+   private final YoDouble currentOrthogonalDistanceToOutsideEdge = new YoDouble("currentOrthogonalDistanceToOutsideEdge", registry);
+   private final YoDouble desiredOrthogonalDistanceToOutsideEdge = new YoDouble("desiredOrthogonalDistanceToOutsideEdge", registry);
+   private final YoDouble errorDistanceToOutsideEdge = new YoDouble("errorDistanceToOutsideEdge", registry);
 
-   private final YoDouble minDistanceFromOutsideEdge = new YoDouble("minDistanceFromOutsideEdge", registry);
-   private final YoDouble minOrthgonalDistanceFromOutsideEdge = new YoDouble("minOrthogonalDistanceFromOutsideEdge", registry);
-   private final YoDouble minDistanceFromInsideEdge = new YoDouble("minDistanceFromInsideEdge", registry);
-   private final YoDouble minOrthgonalDistanceFromInsideEdge = new YoDouble("minOrthogonalDistanceFromInsideEdge", registry);
+   private final YoDouble currentOrthogonalDistanceToInsideEdge = new YoDouble("currentOrthogonalDistanceToInsideEdge", registry);
+   private final YoDouble desiredOrthogonalDistanceToInsideEdge = new YoDouble("desiredOrthogonalDistanceToInsideEdge", registry);
+   private final YoDouble errorDistanceToInsideEdge = new YoDouble("errorDistanceToInsideEdge", registry);
 
    private final YoBoolean currentIcpIsPastTheHeel = new YoBoolean("CurrentICPIsPastTheHeel", registry);
    private final YoBoolean currentIcpIsFarEnoughFromTheToe = new YoBoolean("currentIcpIsFarEnoughFromTheToe", registry);
@@ -71,9 +70,14 @@ public class DynamicStateInspector
 
    private final FrameLine2D insideEdge = new FrameLine2D();
    private final FrameLine2D outsideEdge = new FrameLine2D();
+   private final FrameVector2D errorDirection = new FrameVector2D();
 
-   public DynamicStateInspector(YoRegistry parentRegistry)
+   private final Point2DBasics tempPoint = new Point2D();
+
+   public DynamicStateInspector(DynamicStateInspectorParameters parameters, YoRegistry parentRegistry)
    {
+      this.parameters = parameters;
+
       parentRegistry.addChild(registry);
    }
 
@@ -85,8 +89,6 @@ public class DynamicStateInspector
       this.trailingFootPolygon.setIncludingFrame(trailingFootPolygon);
       this.onToesPolygon.setIncludingFrame(onToesPolygon);
    }
-
-
 
    public void checkICPLocations(RobotSide trailingFootSide,
                                  FramePose3DReadOnly leadingFootPose,
@@ -133,28 +135,35 @@ public class DynamicStateInspector
       leadingFootPolygon.changeFrameAndProjectToXYPlane(leadingFootZUpFrame);
 
       double minXValue = Math.max(leadingFootPolygon.getMinX(), toeOffPoint.getX());
+      distanceOfCurrentICPPastHeel.set(currentICP.getX() - minXValue);
 
-      currentIcpIsPastTheHeel.set(currentICP.getX() > minXValue + distanceForwardFromHeel.getValue());
+      currentIcpIsPastTheHeel.set(distanceOfCurrentICPPastHeel.getValue() > parameters.getDistanceForwardFromHeel());
    }
 
    private void checkIfICPIsTooFarOutward(RobotSide trailingFootSide)
    {
       leadingFootPolygon.changeFrameAndProjectToXYPlane(leadingFootFrame);
       currentICP.changeFrame(leadingFootZUpFrame);
+      desiredICP.changeFrame(leadingFootZUpFrame);
       toeOffPoint.changeFrame(leadingFootZUpFrame);
 
       if (trailingFootSide == RobotSide.LEFT)
       {
-         double maxY = Math.max(toeOffPoint.getY() - minLateralDistance.getValue(), leadingFootPolygon.getMaxY());
-         currentIcpIsFarEnoughInside.set(maxY > currentICP.getY());
-         desiredIcpIsFarEnoughInside.set(maxY > desiredICP.getY());
+         double maxY = Math.max(toeOffPoint.getY(), leadingFootPolygon.getMaxY() + parameters.getMinLateralDistance());
+
+         distanceOfCurrentICPInside.set(maxY - currentICP.getY());
+         distanceOfDesiredICPInside.set(maxY - desiredICP.getY());
       }
       else
       {
-         double minY = Math.min(toeOffPoint.getY() + minLateralDistance.getValue(), leadingFootPolygon.getMinY());
-         currentIcpIsFarEnoughInside.set(currentICP.getY() > minY);
-         desiredIcpIsFarEnoughInside.set(desiredICP.getY() > minY);
+         double minY = Math.min(toeOffPoint.getY(), leadingFootPolygon.getMinY() - parameters.getMinLateralDistance());
+
+         distanceOfCurrentICPInside.set(currentICP.getY() - minY);
+         distanceOfDesiredICPInside.set(desiredICP.getY() - minY);
       }
+
+      currentIcpIsFarEnoughInside.set(distanceOfCurrentICPInside.getValue() > parameters.getMinLateralDistance());
+      desiredIcpIsFarEnoughInside.set(distanceOfDesiredICPInside.getValue() > parameters.getMinLateralDistance());
    }
 
    private void checkIfICPIsFarEnoughFromTheToe(double pseudoStepLength)
@@ -163,16 +172,16 @@ public class DynamicStateInspector
       desiredICP.changeFrame(worldFrame);
       toeOffPoint.changeFrame(worldFrame);
 
-      double minDistance = Math.max(minDistanceFromTheToe.getDoubleValue(), minFractionOfStrideFromTheToe.getDoubleValue() * pseudoStepLength);
+      double minDistance = Math.max(parameters.getMinDistanceFromTheToe(), parameters.getMinFractionOfStrideFromTheToe() * pseudoStepLength);
       double minDistanceSquared = MathTools.square(minDistance);
 
-      currentIcpIsFarEnoughFromTheToe.set(currentICP.distanceSquared(toeOffPoint) > minDistanceSquared);
-      desiredIcpIsFarEnoughFromTheToe.set(desiredICP.distanceSquared(toeOffPoint) > minDistanceSquared);
+      distanceSquaredOfCurrentICPFromToe.set(currentICP.distanceSquared(toeOffPoint));
+      distanceSquaredOfDesiredICPFromToe.set(desiredICP.distanceSquared(toeOffPoint));
+
+      currentIcpIsFarEnoughFromTheToe.set(distanceSquaredOfCurrentICPFromToe.getValue() > minDistanceSquared);
+      desiredIcpIsFarEnoughFromTheToe.set(distanceSquaredOfDesiredICPFromToe.getValue() > minDistanceSquared);
    }
 
-   private final FrameVector2D errorDirection = new FrameVector2D();
-   private final FramePoint2D projectedPoint = new FramePoint2D();
-   private final FrameVector2D orthogonalDirection = new FrameVector2D();
 
    private void checkICPDistanceFromEdges(RobotSide trailingFootSide)
    {
@@ -192,8 +201,8 @@ public class DynamicStateInspector
 
    private void computeEdgesOfToeOff(RobotSide trailingFootSide)
    {
-      int startIndex = leadingFootPolygon.lineOfSightStartIndex(this.toeOffPoint);
-      int endIndex = leadingFootPolygon.lineOfSightEndIndex(this.toeOffPoint);
+      int startIndex = leadingFootPolygon.lineOfSightStartIndex(toeOffPoint);
+      int endIndex = leadingFootPolygon.lineOfSightEndIndex(toeOffPoint);
       boolean isClockwise = leadingFootPolygon.isClockwiseOrdered();
 
       if (isClockwise == (trailingFootSide == RobotSide.RIGHT))
@@ -210,14 +219,9 @@ public class DynamicStateInspector
 
    private void checkOutsideEdge(RobotSide trailingFootSide)
    {
-      outsideEdge.orthogonalProjection(currentICP, projectedPoint);
-      orthogonalDirection.sub(projectedPoint, currentICP);
-      orthogonalDirection.normalize();
-
-      double currentOrthogonalDistanceToOutsideEdge = projectedPoint.distance(currentICP);
+      double currentOrthogonalDistanceToOutsideEdge = outsideEdge.distance(currentICP);
       double desiredOrthogonalDistanceToOutsideEdge = outsideEdge.distance(desiredICP);
-      // FIXME this shouldn't be absolute
-      double directionToEdgeInError = Math.abs(currentOrthogonalDistanceToOutsideEdge / errorDirection.dot(orthogonalDirection));
+      double directionToEdgeInError = rayDistance(outsideEdge);
 
       if (outsideEdge.isPointOnSideOfLine(currentICP, trailingFootSide == RobotSide.LEFT))
       {  // inside or outside
@@ -228,21 +232,20 @@ public class DynamicStateInspector
       if (outsideEdge.isPointOnSideOfLine(desiredICP, trailingFootSide == RobotSide.LEFT))
          desiredOrthogonalDistanceToOutsideEdge = -desiredOrthogonalDistanceToOutsideEdge;
 
-      desiredIcpIsFarEnoughInsideOutsideEdge.set(desiredOrthogonalDistanceToOutsideEdge < minOrthgonalDistanceFromOutsideEdge.getValue());
-      currentIcpIsFarEnoughInsideOutsideEdge.set(currentOrthogonalDistanceToOutsideEdge < minOrthgonalDistanceFromOutsideEdge.getValue()
-                                                 && directionToEdgeInError < minDistanceFromOutsideEdge.getValue());
+      this.desiredOrthogonalDistanceToOutsideEdge.set(desiredOrthogonalDistanceToOutsideEdge);
+      this.currentOrthogonalDistanceToOutsideEdge.set(currentOrthogonalDistanceToOutsideEdge);
+      this.errorDistanceToOutsideEdge.set(directionToEdgeInError);
+
+      desiredIcpIsFarEnoughInsideOutsideEdge.set(desiredOrthogonalDistanceToOutsideEdge < parameters.getMinOrthogonalDistanceFromOutsideEdge());
+      currentIcpIsFarEnoughInsideOutsideEdge.set(currentOrthogonalDistanceToOutsideEdge < parameters.getMinOrthogonalDistanceFromOutsideEdge()
+                                                 && directionToEdgeInError < parameters.getMinDistanceFromOutsideEdge());
    }
 
    private void checkInsideEdge(RobotSide trailingFootSide)
    {
-      insideEdge.orthogonalProjection(currentICP, projectedPoint);
-      orthogonalDirection.sub(projectedPoint, currentICP);
-      orthogonalDirection.normalize();
-
-      double currentOrthogonalDistanceToInsideEdge = projectedPoint.distance(currentICP);
+      double currentOrthogonalDistanceToInsideEdge = insideEdge.distance(currentICP);
       double desiredOrthogonalDistanceToInsideEdge = insideEdge.distance(desiredICP);
-      // FIXME this shouldn't be absolute
-      double directionToEdgeInError = Math.abs(currentOrthogonalDistanceToInsideEdge / errorDirection.dot(orthogonalDirection));
+      double directionToEdgeInError = rayDistance(insideEdge);
 
       if (insideEdge.isPointOnSideOfLine(currentICP, trailingFootSide == RobotSide.RIGHT))
       {  // inside or outside
@@ -253,9 +256,27 @@ public class DynamicStateInspector
       if (insideEdge.isPointOnSideOfLine(desiredICP, trailingFootSide == RobotSide.RIGHT))
          desiredOrthogonalDistanceToInsideEdge = -desiredOrthogonalDistanceToInsideEdge;
 
-      desiredIcpIsFarEnoughInsideInsideEdge.set(desiredOrthogonalDistanceToInsideEdge < minOrthgonalDistanceFromInsideEdge.getValue());
-      currentIcpIsFarEnoughInsideInsideEdge.set(currentOrthogonalDistanceToInsideEdge < minOrthgonalDistanceFromInsideEdge.getValue()
-                                                && directionToEdgeInError < minDistanceFromInsideEdge.getValue());
+      this.desiredOrthogonalDistanceToInsideEdge.set(desiredOrthogonalDistanceToInsideEdge);
+      this.currentOrthogonalDistanceToInsideEdge.set(currentOrthogonalDistanceToInsideEdge);
+      this.errorDistanceToInsideEdge.set(directionToEdgeInError);
+
+      desiredIcpIsFarEnoughInsideInsideEdge.set(desiredOrthogonalDistanceToInsideEdge < parameters.getMinOrthogonalDistanceFromInsideEdge());
+      currentIcpIsFarEnoughInsideInsideEdge.set(currentOrthogonalDistanceToInsideEdge < parameters.getMinOrthogonalDistanceFromInsideEdge()
+                                                && directionToEdgeInError < parameters.getMinDistanceFromInsideEdge());
+   }
+
+   private double rayDistance(FrameLine2DReadOnly lineToIntersection)
+   {
+     boolean success = EuclidCoreMissingTools.intersectionBetweenRay2DAndLine2D(desiredICP,
+                                                                                errorDirection,
+                                                                                lineToIntersection.getPoint(),
+                                                                                lineToIntersection.getDirection(),
+                                                                                tempPoint);
+
+     if (success)
+        return tempPoint.distance(currentICP);
+
+     return Double.POSITIVE_INFINITY;
    }
 
    private double computeDistanceToLeadingFoot()
@@ -295,15 +316,93 @@ public class DynamicStateInspector
       return desiredIcpIsFarEnoughInside.getBooleanValue();
    }
 
+   boolean isCurrentICPFarEnoughInsideOutsideEdge()
+   {
+      return currentIcpIsFarEnoughInsideOutsideEdge.getBooleanValue();
+   }
+
+   boolean isDesiredICPFarEnoughInsideOutsideEdge()
+   {
+      return desiredIcpIsFarEnoughInsideOutsideEdge.getBooleanValue();
+   }
+
+   boolean isCurrentICPFarEnoughInsideInsideEdge()
+   {
+      return currentIcpIsFarEnoughInsideInsideEdge.getBooleanValue();
+   }
+
+   boolean isDesiredICPFarEnoughInsideInsideEdge()
+   {
+      return desiredIcpIsFarEnoughInsideInsideEdge.getBooleanValue();
+   }
+
+   boolean isDesiredICPOKForToeOff()
+   {
+      return isDesiredICPOKForToeOff.getBooleanValue();
+   }
+
+   boolean isCurrentICPOKForToeOff()
+   {
+      return isCurrentICPOKForToeOff.getBooleanValue();
+   }
+
+   double getDistanceOfCurrentICPPastTheHeel()
+   {
+      return distanceOfCurrentICPPastHeel.getValue();
+   }
+
+   double getDistanceSquaredOfCurrentICPFromToe()
+   {
+      return distanceSquaredOfCurrentICPFromToe.getValue();
+   }
+
+   double getDistanceSquaredOfDesiredICPFromToe()
+   {
+      return distanceSquaredOfDesiredICPFromToe.getValue();
+   }
+
+   double getLateralDistanceOfCurrentICPInside()
+   {
+      return distanceOfCurrentICPInside.getDoubleValue();
+   }
+
+   double getLateralDistanceOfDesiredICPInside()
+   {
+      return distanceOfDesiredICPInside.getDoubleValue();
+   }
+
+   double getCurrentOrthogonalDistanceToOutsideEdge()
+   {
+      return currentOrthogonalDistanceToOutsideEdge.getDoubleValue();
+   }
+
+   double getDesiredOrthogonalDistanceToOutsideEdge()
+   {
+      return desiredOrthogonalDistanceToOutsideEdge.getDoubleValue();
+   }
+
+   double getErrorDistanceToOutsideEdge()
+   {
+      return errorDistanceToOutsideEdge.getDoubleValue();
+   }
+
+   double getCurrentOrthogonalDistanceToInsideEdge()
+   {
+      return currentOrthogonalDistanceToInsideEdge.getDoubleValue();
+   }
+
+   double getDesiredOrthogonalDistanceToInsideEdge()
+   {
+      return desiredOrthogonalDistanceToInsideEdge.getDoubleValue();
+   }
+
+   double getErrorDistanceToInsideEdge()
+   {
+      return errorDistanceToInsideEdge.getDoubleValue();
+   }
+
    public void attachParameterChangeListener(YoVariableChangedListener changedListener)
    {
-      distanceForwardFromHeel.addListener(changedListener);
-      minLateralDistance.addListener(changedListener);
-      minDistanceFromTheToe.addListener(changedListener);
-      minFractionOfStrideFromTheToe.addListener(changedListener);
-      minDistanceFromOutsideEdge.addListener(changedListener);
-      minOrthgonalDistanceFromOutsideEdge.addListener(changedListener);
-      minDistanceFromInsideEdge.addListener(changedListener);
-      minOrthgonalDistanceFromInsideEdge.addListener(changedListener);
+      parameters.attachParameterChangeListener(changedListener);
    }
 }
