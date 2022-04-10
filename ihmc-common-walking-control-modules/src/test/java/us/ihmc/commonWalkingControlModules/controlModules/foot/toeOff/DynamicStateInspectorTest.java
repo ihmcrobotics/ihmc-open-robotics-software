@@ -4,10 +4,17 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.geometry.Line2D;
+import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -26,9 +33,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer.defaultFeetColors;
+import static us.ihmc.robotics.Assert.*;
 
 public class DynamicStateInspectorTest
 {
+   private static final double epsilon = 1e-5;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double footLength = 0.2;
    private static final double footWidth = 0.1;
@@ -65,7 +74,8 @@ public class DynamicStateInspectorTest
    @Test
    public void testLeftStep()
    {
-      DynamicStateInspector inspector = new DynamicStateInspector(registry);
+      DynamicStateInspectorParameters parameters = new DynamicStateInspectorParameters(registry);
+      DynamicStateInspector inspector = new DynamicStateInspector(parameters, registry);
 
       FramePose3D leftFootPose = new FramePose3D();
       FramePose3D rightFootPose = new FramePose3D();
@@ -90,10 +100,117 @@ public class DynamicStateInspectorTest
 
       desiredICP.interpolate(new FramePoint2D(rightFootPose.getPosition()), new FramePoint2D(leftFootPose.getPosition()), 0.75);
 
+      // test really inside
       currentICP.set(desiredICP);
       currentICP.subX(0.05);
 
       inspector.checkICPLocations(RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, toePosition);
+
+      double expectedICPX = 0.75 * stepLength - 0.05;
+      double expectedICPY = 0.25 * stepWidth;
+
+      int outsideVertexIdx = leftPolygon.lineOfSightEndIndex(toePosition);
+      int insideVertexIdx = leftPolygon.lineOfSightStartIndex(toePosition);
+
+      assertEquals(expectedICPX, currentICP.getX(), epsilon);
+      assertEquals(expectedICPY, currentICP.getY(), epsilon);
+
+      assertTrue(onToesPolygon.isPointInside(currentICP));
+      assertTrue(onToesPolygon.isPointInside(desiredICP));
+
+      Line2D errorLine = new Line2D();
+      Vector2D errorDirection = new Vector2D();
+      errorDirection.sub(currentICP, desiredICP);
+      errorLine.set(currentICP, errorDirection);
+
+      double expectedDistanceAlongErrorToOutside = -intersectionDistanceBetweenRay2DAndLineSegment2D(currentICP,
+                                                                                                     errorLine.getPoint(),
+                                                                                                     errorLine.getDirection(),
+                                                                                                     toePosition,
+                                                                                                     leftPolygon.getVertex(outsideVertexIdx));
+      double expectedDistanceAlongErrorToInside = -intersectionDistanceBetweenRay2DAndLineSegment2D(currentICP,
+                                                                                                    errorLine.getPoint(),
+                                                                                                    errorLine.getDirection(),
+                                                                                                    toePosition,
+                                                                                                    leftPolygon.getVertex(insideVertexIdx));
+
+      assertEquals(-EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(currentICP, toePosition, leftPolygon.getVertex(outsideVertexIdx)),
+                   inspector.getCurrentOrthogonalDistanceToOutsideEdge(),
+                   epsilon);
+      assertEquals(-EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(desiredICP, toePosition, leftPolygon.getVertex(outsideVertexIdx)),
+                   inspector.getDesiredOrthogonalDistanceToOutsideEdge(),
+                   epsilon);
+      assertEquals(-EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(currentICP, toePosition, leftPolygon.getVertex(insideVertexIdx)),
+                   inspector.getCurrentOrthogonalDistanceToInsideEdge(),
+                   epsilon);
+      assertEquals(-EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(desiredICP, toePosition, leftPolygon.getVertex(insideVertexIdx)),
+                   inspector.getDesiredOrthogonalDistanceToInsideEdge(),
+                   epsilon);
+      assertEquals(expectedICPY + 0.5 * stepWidth, inspector.getLateralDistanceOfDesiredICPInside(), epsilon);
+      assertEquals(expectedICPY + 0.5 * stepWidth, inspector.getLateralDistanceOfCurrentICPInside(), epsilon);
+      assertEquals(toePosition.distanceSquared(desiredICP), inspector.getDistanceSquaredOfDesiredICPFromToe(), epsilon);
+      assertEquals(toePosition.distanceSquared(currentICP), inspector.getDistanceSquaredOfCurrentICPFromToe(), epsilon);
+      assertEquals(expectedDistanceAlongErrorToOutside, inspector.getErrorDistanceToOutsideEdge(), epsilon);
+      assertEquals(Double.NEGATIVE_INFINITY, inspector.getErrorDistanceToInsideEdge(), epsilon);
+
+      assertFalse(inspector.isCurrentICPIsPastTheHeel());
+      assertTrue(inspector.isCurrentICPFarEnoughFromTheToe());
+      assertTrue(inspector.isDesiredICPFarEnoughFromTheToe());
+      assertTrue(inspector.isCurrentICPFarEnoughInside());
+      assertTrue(inspector.isDesiredICPFarEnoughInside());
+
+//      visualize();
+
+      // test not really inside
+      currentICP.set(desiredICP);
+      currentICP.subX(0.15);
+
+      inspector.checkICPLocations(RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, toePosition);
+
+      expectedICPX = 0.75 * stepLength - 0.15;
+      expectedICPY = 0.25 * stepWidth;
+
+      assertEquals(expectedICPX, currentICP.getX(), epsilon);
+      assertEquals(expectedICPY, currentICP.getY(), epsilon);
+
+      expectedDistanceAlongErrorToOutside = intersectionDistanceBetweenRay2DAndLineSegment2D(currentICP,
+                                                                                             errorLine.getPoint(),
+                                                                                             errorLine.getDirection(),
+                                                                                             toePosition,
+                                                                                             leftPolygon.getVertex(outsideVertexIdx));
+      expectedDistanceAlongErrorToInside = -intersectionDistanceBetweenRay2DAndLineSegment2D(currentICP,
+                                                                                             errorLine.getPoint(),
+                                                                                             errorLine.getDirection(),
+                                                                                             toePosition,
+                                                                                             leftPolygon.getVertex(insideVertexIdx));
+
+      assertTrue(!onToesPolygon.isPointInside(currentICP));
+      assertTrue(onToesPolygon.isPointInside(desiredICP));
+
+      assertEquals(EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(currentICP, toePosition, leftPolygon.getVertex(outsideVertexIdx)),
+                   inspector.getCurrentOrthogonalDistanceToOutsideEdge(),
+                   epsilon);
+      assertEquals(-EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(desiredICP, toePosition, leftPolygon.getVertex(outsideVertexIdx)),
+                   inspector.getDesiredOrthogonalDistanceToOutsideEdge(),
+                   epsilon);
+      assertEquals(-EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(currentICP, toePosition, leftPolygon.getVertex(insideVertexIdx)),
+                   inspector.getCurrentOrthogonalDistanceToInsideEdge(),
+                   epsilon);
+      assertEquals(-EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(desiredICP, toePosition, leftPolygon.getVertex(insideVertexIdx)),
+                   inspector.getDesiredOrthogonalDistanceToInsideEdge(),
+                   epsilon);
+      assertEquals(expectedICPY + 0.5 * stepWidth, inspector.getLateralDistanceOfDesiredICPInside(), epsilon);
+      assertEquals(expectedICPY + 0.5 * stepWidth, inspector.getLateralDistanceOfCurrentICPInside(), epsilon);
+      assertEquals(toePosition.distanceSquared(desiredICP), inspector.getDistanceSquaredOfDesiredICPFromToe(), epsilon);
+      assertEquals(toePosition.distanceSquared(currentICP), inspector.getDistanceSquaredOfCurrentICPFromToe(), epsilon);
+      assertEquals(expectedDistanceAlongErrorToOutside, inspector.getErrorDistanceToOutsideEdge(), epsilon);
+      assertEquals(Double.NEGATIVE_INFINITY, inspector.getErrorDistanceToInsideEdge(), epsilon);
+
+      assertFalse(inspector.isCurrentICPIsPastTheHeel());
+      assertTrue(inspector.isCurrentICPFarEnoughFromTheToe());
+      assertTrue(inspector.isDesiredICPFarEnoughFromTheToe());
+      assertTrue(inspector.isCurrentICPFarEnoughInside());
+      assertTrue(inspector.isDesiredICPFarEnoughInside());
 
       visualize();
    }
@@ -101,7 +218,8 @@ public class DynamicStateInspectorTest
    @Test
    public void testLeftStepGrid()
    {
-      DynamicStateInspector inspector = new DynamicStateInspector(registry);
+      DynamicStateInspectorParameters parameters = new DynamicStateInspectorParameters(registry);
+      DynamicStateInspector inspector = new DynamicStateInspector(parameters, registry);
 
       FramePose3D leftFootPose = new FramePose3D();
       FramePose3D rightFootPose = new FramePose3D();
@@ -323,5 +441,18 @@ public class DynamicStateInspectorTest
                invalidPoints.get(i).setToNaN();
 
       scs.tickAndUpdate();
+   }
+
+   private static double intersectionDistanceBetweenRay2DAndLineSegment2D(Point2DReadOnly currentICP,
+                                                                          Point2DReadOnly rayStart,
+                                                                          Vector2DReadOnly rayDirection,
+                                                                          Point2DReadOnly startPoint,
+                                                                          Point2DReadOnly endPoint)
+   {
+      Point2DReadOnly intersection = EuclidGeometryTools.intersectionBetweenRay2DAndLineSegment2D(rayStart, rayDirection, startPoint, endPoint);
+      if (intersection == null)
+         return Double.POSITIVE_INFINITY;
+
+      return intersection.distance(currentICP);
    }
 }
