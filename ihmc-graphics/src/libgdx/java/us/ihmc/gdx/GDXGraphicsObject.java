@@ -96,7 +96,7 @@ public class GDXGraphicsObject extends Graphics3DInstructionExecutor implements 
          if (modelFileName == null)
             return;
 
-         Model model = GDXModelLoader.loadG3DModel(modelFileName);
+         Model model = GDXModelLoader.load(modelFileName);
          if (model == null)
          {
             LogTools.warn("Could not load {}", modelFileName);

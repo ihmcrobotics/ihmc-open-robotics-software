@@ -1,6 +1,5 @@
 package us.ihmc.gdx.ui;
 
-import boofcv.struct.calib.CameraPinholeBrown;
 import com.badlogic.gdx.math.Matrix4;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -14,12 +13,15 @@ import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.environment.GDXEnvironmentBuilder;
 import us.ihmc.gdx.simulation.environment.object.objects.GDXL515SensorObject;
+import us.ihmc.gdx.simulation.environment.object.objects.GDXOusterSensorObject;
 import us.ihmc.gdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
 import us.ihmc.behaviors.tools.PlanarRegionSLAMMapper;
 import us.ihmc.behaviors.tools.perception.PeriodicPlanarRegionPublisher;
+import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.graphics.live.*;
 import us.ihmc.gdx.ui.tools.GDXTransformTuner;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXGlobalVisualizersPanel;
+import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
@@ -46,9 +48,13 @@ public class GDXPerceptionVisualizerUI
     private final Matrix4 gdxSensorTransform = new Matrix4();
     private GDXTransformTuner l515TransformTuner;
 
-    private final boolean LOW_RESOLUTION_SENSORS = true;
+    private final boolean LOW_RESOLUTION_SENSORS = false;
     private GDXHighLevelDepthSensorSimulator steppingL515Simulator;
     private GDXL515SensorObject l515Model;
+    private GDXOusterSensorObject ousterModel;
+
+    private GDXHighLevelDepthSensorSimulator ousterLidar;
+
 
     public GDXPerceptionVisualizerUI()
     {
@@ -86,6 +92,8 @@ public class GDXPerceptionVisualizerUI
         globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("Semantic Mask", RosTools.SEMANTIC_MASK));
         globalVisualizersUI.addVisualizer(new GDXROS1OdometryVisualizer("Semantic Target Pose", RosTools.SEMANTIC_TARGET_POSE));
 
+        globalVisualizersUI.addVisualizer(new GDXROS1PointCloudVisualizer("Ouster Point Cloud", RosTools.OUSTER_POINT_CLOUD));
+
 //        simulatedDepthSensor = createSimulatedDepthSensor(ros1Node);
 //        simulatedDepthSensor.setSensorFrameToWorldTransform(depthSensorTransform);
 //        simulatedDepthSensor.setRenderPointCloudDirectly(true);
@@ -99,10 +107,17 @@ public class GDXPerceptionVisualizerUI
         baseUI.getImGuiPanelManager().addPanel(mapsenseConfigurationUI.getWindowName(), mapsenseConfigurationUI::render);
         baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
 
-//        steppingL515Simulator = GDXSimulatedSensorFactory.createChestL515ForMapSense(syncedRobot, ros1Helper);
 
 //        l515TransformTuner = new GDXTransformTuner(robotModel.getSensorInformation().getSteppingCameraTransform());
 //        baseUI.getImGuiPanelManager().addPanel("L515 Transform Tuner", l515TransformTuner::renderImGuiWidgets);
+
+        ousterLidar = createOusterLidar(ros1Node, ros2Node);
+        ousterLidar.attachPointCloudPublisherROS1(RosTools.OUSTER_POINT_CLOUD);
+        ousterLidar.setSensorEnabled(true);
+        ousterLidar.setRenderPointCloudDirectly(true);
+        ousterLidar.setSensorFrameToWorldTransform(depthSensorTransform);
+
+        ros1Node.execute();
 
         baseUI.launchGDXApplication(new Lwjgl3ApplicationAdapter()
         {
@@ -116,6 +131,10 @@ public class GDXPerceptionVisualizerUI
 //                simulatedDepthSensor.create();
 //                baseUI.getSceneManager().addRenderableProvider(simulatedDepthSensor, GDXSceneLevel.VIRTUAL);
 
+                ousterLidar.create();
+                baseUI.get3DSceneManager().addRenderableProvider(ousterLidar, GDXSceneLevel.VIRTUAL);
+                baseUI.getImGuiPanelManager().addPanel(ousterLidar);
+
                 environmentBuilder.create(baseUI);
                 baseUI.get3DSceneManager().addRenderableProvider(environmentBuilder::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
                 baseUI.get3DSceneManager().addRenderableProvider(environmentBuilder::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
@@ -125,7 +144,14 @@ public class GDXPerceptionVisualizerUI
 //                l515Model = new GDXL515SensorObject();
 //                environmentBuilderUI.getModelInput().addInstance(l515Model);
 
-                ros1Node.execute();
+
+                ousterModel = new GDXOusterSensorObject();
+                baseUI.get3DSceneManager().addRenderableProvider(ousterModel::getRealRenderables);
+                environmentBuilder.addObject(ousterModel);
+
+                //                environmentBuilderUI.getModelInput().addInstance(ousterModel);
+
+
             }
 
             @Override
@@ -134,6 +160,12 @@ public class GDXPerceptionVisualizerUI
 //                gdxSensorTransform.set(l515Model.getRealisticModelInstance().transform);
 //                GDXTools.toEuclid(gdxSensorTransform, depthSensorTransform);
 //                simulatedDepthSensor.render(baseUI.getSceneManager());
+
+                gdxSensorTransform.set(ousterModel.getRealisticModelInstance().transform);
+                GDXTools.toEuclid(gdxSensorTransform, depthSensorTransform);
+
+                ousterLidar.render(baseUI.get3DSceneManager());
+
                 globalVisualizersUI.update();
 
                 baseUI.renderBeforeOnScreenUI();
@@ -164,7 +196,40 @@ public class GDXPerceptionVisualizerUI
         new PeriodicPlanarRegionPublisher(ros2Node, ROS2Tools.REALSENSE_SLAM_REGIONS, 0.001f, () -> realsensePlanarRegionSLAM.update(regionsUpdate)).start();
     }
 
-    private GDXHighLevelDepthSensorSimulator createSimulatedDepthSensor(RosNodeInterface ros1Node)
+    public GDXHighLevelDepthSensorSimulator createOusterLidar(RosNodeInterface ros1Node, ROS2NodeInterface ros2Node)
+    {
+        double publishRateHz = 5.0;
+        double verticalFOV = 90.0;
+        int imageWidth = 2048;
+        int imageHeight = 128;
+        if (LOW_RESOLUTION_SENSORS)
+        {
+            imageWidth /= 2;
+            imageHeight /= 2;
+        }
+        double minRange = 0.105;
+        double maxRange = 15.0;
+        return new GDXHighLevelDepthSensorSimulator("Ouster Lidar",
+                                                    ros1Node,
+                                                    RosTools.MAPSENSE_DEPTH_IMAGE,
+                                                    RosTools.MAPSENSE_DEPTH_CAMERA_INFO,
+                                                    RosTools.L515_VIDEO,
+                                                    RosTools.L515_COLOR_CAMERA_INFO,
+                                                    ros2Node,
+                                                    ROS2Tools.MULTISENSE_LIDAR_SCAN,
+                                                    null,
+                                                    null,
+                                                    null,
+                                                    verticalFOV,
+                                                    imageWidth,
+                                                    imageHeight,
+                                                    minRange,
+                                                    maxRange,
+                                                    publishRateHz,
+                                                    false);
+    }
+
+    private GDXHighLevelDepthSensorSimulator createSimulatedL515(RosNodeInterface ros1Node)
     {
         double publishRateHz = 5.0;
         double verticalFOV = 55.0;
@@ -181,6 +246,7 @@ public class GDXPerceptionVisualizerUI
         ROS2Topic<?> ros2Topic = null;
         ReferenceFrame sensorFrame = null;
         ROS2SyncedRobotModel syncedRobot = null;
+
         return new GDXHighLevelDepthSensorSimulator("L515",
                                                     ros1Node,
                                                     RosTools.MAPSENSE_DEPTH_IMAGE,
