@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
@@ -35,10 +35,15 @@ public class DynamicStateInspector
    private final YoDouble currentOrthogonalDistanceToOutsideEdge = new YoDouble("currentOrthogonalDistanceToOutsideEdge", registry);
    private final YoDouble desiredOrthogonalDistanceToOutsideEdge = new YoDouble("desiredOrthogonalDistanceToOutsideEdge", registry);
    private final YoDouble errorDistanceToOutsideEdge = new YoDouble("errorDistanceToOutsideEdge", registry);
+   private final YoDouble normalizedErrorDistanceToOutsideEdge = new YoDouble("normalizedErrorDistanceToOutsideEdge", registry);
 
    private final YoDouble currentOrthogonalDistanceToInsideEdge = new YoDouble("currentOrthogonalDistanceToInsideEdge", registry);
    private final YoDouble desiredOrthogonalDistanceToInsideEdge = new YoDouble("desiredOrthogonalDistanceToInsideEdge", registry);
    private final YoDouble errorDistanceToInsideEdge = new YoDouble("errorDistanceToInsideEdge", registry);
+   private final YoDouble normalizedErrorDistanceToInsideEdge = new YoDouble("normalizedErrorDistanceToInsideEdge", registry);
+
+   private final YoDouble errorDistanceToFullSupport = new YoDouble("errorDistanceToFullSupport", registry);
+   private final YoDouble normalizedErrorDistanceToFullSupport = new YoDouble("normalizedErrorDistanceToFullSupport", registry);
 
    private final YoBoolean currentIcpIsPastTheHeel = new YoBoolean("CurrentICPIsPastTheHeel", registry);
    private final YoBoolean currentIcpIsFarEnoughFromTheToe = new YoBoolean("currentIcpIsFarEnoughFromTheToe", registry);
@@ -52,6 +57,8 @@ public class DynamicStateInspector
    private final YoBoolean currentIcpIsFarEnoughInsideInsideEdge = new YoBoolean("currentIcpIsFarEnoughInsideInsideEdge", registry);
    private final YoBoolean desiredIcpIsFarEnoughInsideInsideEdge = new YoBoolean("desiredIcpIsFarEnoughInsideInsideEdge", registry);
 
+   private final YoBoolean toeingOffLosesTooMuchControl = new YoBoolean("toeingOffLosesTooMuchControl", registry);
+
    private final YoBoolean isDesiredICPOKForToeOff = new YoBoolean("isDesiredICPOKForToeOff", registry);
    private final YoBoolean isCurrentICPOKForToeOff = new YoBoolean("isCurrentICPOKForToeOff", registry);
 
@@ -60,6 +67,7 @@ public class DynamicStateInspector
    private final FrameConvexPolygon2D leadingFootPolygon = new FrameConvexPolygon2D();
    private final FrameConvexPolygon2D trailingFootPolygon = new FrameConvexPolygon2D();
    private final FrameConvexPolygon2D onToesPolygon = new FrameConvexPolygon2D();
+   private final FrameConvexPolygon2D supportPolygon = new FrameConvexPolygon2D();
 
    private final FramePoint2D desiredICP = new FramePoint2D();
    private final FramePoint2D currentICP = new FramePoint2D();
@@ -72,7 +80,8 @@ public class DynamicStateInspector
    private final FrameLine2D outsideEdge = new FrameLine2D();
    private final FrameVector2D errorDirection = new FrameVector2D();
 
-   private final Point2DBasics tempPoint = new Point2D();
+   private final Point2DBasics tempPoint1 = new Point2D();
+   private final Point2DBasics tempPoint2 = new Point2D();
 
    public DynamicStateInspector(DynamicStateInspectorParameters parameters, YoRegistry parentRegistry)
    {
@@ -88,6 +97,11 @@ public class DynamicStateInspector
       this.leadingFootPolygon.setIncludingFrame(leadingFootPolygon);
       this.trailingFootPolygon.setIncludingFrame(trailingFootPolygon);
       this.onToesPolygon.setIncludingFrame(onToesPolygon);
+
+      supportPolygon.clear();
+      supportPolygon.addVertices(leadingFootPolygon);
+      supportPolygon.addVertices(trailingFootPolygon);
+      supportPolygon.update();
    }
 
    public void checkICPLocations(RobotSide trailingFootSide,
@@ -116,7 +130,8 @@ public class DynamicStateInspector
       boolean isDesiredICPOKForToeOff = desiredIcpIsFarEnoughFromTheToe.getBooleanValue() && desiredIcpIsFarEnoughInside.getValue()
                                         && desiredIcpIsFarEnoughInsideOutsideEdge.getBooleanValue() && desiredIcpIsFarEnoughInsideInsideEdge.getBooleanValue();
       boolean isCurrentICPOKForToeOff = currentIcpIsFarEnoughFromTheToe.getBooleanValue() && currentIcpIsFarEnoughInside.getValue()
-                                        && currentIcpIsFarEnoughInsideOutsideEdge.getBooleanValue() && currentIcpIsFarEnoughInsideInsideEdge.getBooleanValue();
+                                        && currentIcpIsFarEnoughInsideOutsideEdge.getBooleanValue() && currentIcpIsFarEnoughInsideInsideEdge.getBooleanValue()
+                                        && !toeingOffLosesTooMuchControl.getBooleanValue();
 
       this.isCurrentICPOKForToeOff.set(isCurrentICPOKForToeOff);
       this.isDesiredICPOKForToeOff.set(isDesiredICPOKForToeOff);
@@ -182,7 +197,6 @@ public class DynamicStateInspector
       desiredIcpIsFarEnoughFromTheToe.set(distanceSquaredOfDesiredICPFromToe.getValue() > minDistanceSquared);
    }
 
-
    private void checkICPDistanceFromEdges(RobotSide trailingFootSide)
    {
       leadingFootPolygon.changeFrameAndProjectToXYPlane(worldFrame);
@@ -193,10 +207,11 @@ public class DynamicStateInspector
       computeEdgesOfToeOff(trailingFootSide);
 
       errorDirection.sub(currentICP, desiredICP);
-      errorDirection.normalize();
+      double errorMagnitude = errorDirection.length();
 
-      checkOutsideEdge(trailingFootSide);
-      checkInsideEdge(trailingFootSide);
+      checkOutsideEdge(trailingFootSide, errorMagnitude);
+      checkInsideEdge(trailingFootSide, errorMagnitude);
+      checkFullSupportPolygon(errorMagnitude);
    }
 
    private void computeEdgesOfToeOff(RobotSide trailingFootSide)
@@ -217,7 +232,7 @@ public class DynamicStateInspector
       }
    }
 
-   private void checkOutsideEdge(RobotSide trailingFootSide)
+   private void checkOutsideEdge(RobotSide trailingFootSide, double errorMagnitude)
    {
       double currentOrthogonalDistanceToOutsideEdge = outsideEdge.distance(currentICP);
       double desiredOrthogonalDistanceToOutsideEdge = outsideEdge.distance(desiredICP);
@@ -236,12 +251,19 @@ public class DynamicStateInspector
       this.currentOrthogonalDistanceToOutsideEdge.set(currentOrthogonalDistanceToOutsideEdge);
       this.errorDistanceToOutsideEdge.set(directionToEdgeInError);
 
+      normalizedErrorDistanceToOutsideEdge.set(errorDistanceToOutsideEdge.getValue() / errorMagnitude);
+
+      double minDistanceFromEdge = parameters.getMinDistanceFromOutsideEdge();
+      if (Double.isFinite(parameters.getMinNormalizedDistanceFromOutsideEdge()))
+         minDistanceFromEdge = Math.min(minDistanceFromEdge, -parameters.getMinNormalizedDistanceFromOutsideEdge() * errorMagnitude);
+
       desiredIcpIsFarEnoughInsideOutsideEdge.set(desiredOrthogonalDistanceToOutsideEdge < parameters.getMinOrthogonalDistanceFromOutsideEdge());
       currentIcpIsFarEnoughInsideOutsideEdge.set(currentOrthogonalDistanceToOutsideEdge < parameters.getMinOrthogonalDistanceFromOutsideEdge()
-                                                 && directionToEdgeInError < parameters.getMinDistanceFromOutsideEdge());
+                                                 && directionToEdgeInError < minDistanceFromEdge);
+
    }
 
-   private void checkInsideEdge(RobotSide trailingFootSide)
+   private void checkInsideEdge(RobotSide trailingFootSide, double errorMagnitude)
    {
       double currentOrthogonalDistanceToInsideEdge = insideEdge.distance(currentICP);
       double desiredOrthogonalDistanceToInsideEdge = insideEdge.distance(desiredICP);
@@ -260,29 +282,73 @@ public class DynamicStateInspector
       this.currentOrthogonalDistanceToInsideEdge.set(currentOrthogonalDistanceToInsideEdge);
       this.errorDistanceToInsideEdge.set(directionToEdgeInError);
 
+      normalizedErrorDistanceToInsideEdge.set(errorDistanceToInsideEdge.getValue() / errorMagnitude);
+
+      boolean currentIsFarEnoughInside = currentOrthogonalDistanceToInsideEdge < parameters.getMinOrthogonalDistanceFromInsideEdge();
+      double minDistanceFromEdge = parameters.getMinDistanceFromInsideEdge();
+      if (Double.isFinite(parameters.getMinNormalizedDistanceFromInsideEdge()))
+         minDistanceFromEdge = Math.min(minDistanceFromEdge, -parameters.getMinNormalizedDistanceFromInsideEdge() * errorMagnitude);
+      boolean dynamicsFarEnoughInside = directionToEdgeInError < minDistanceFromEdge;
+
       desiredIcpIsFarEnoughInsideInsideEdge.set(desiredOrthogonalDistanceToInsideEdge < parameters.getMinOrthogonalDistanceFromInsideEdge());
-      currentIcpIsFarEnoughInsideInsideEdge.set(currentOrthogonalDistanceToInsideEdge < parameters.getMinOrthogonalDistanceFromInsideEdge()
-                                                && directionToEdgeInError < parameters.getMinDistanceFromInsideEdge());
+      currentIcpIsFarEnoughInsideInsideEdge.set(currentIsFarEnoughInside && dynamicsFarEnoughInside);
+   }
+
+   private void checkFullSupportPolygon(double errorMagnitude)
+   {
+      if (Double.isFinite(parameters.getMaxRatioOfControlDecreaseFromToeingOff()) && supportPolygon.isPointInside(desiredICP) && supportPolygon.isPointInside(currentICP))
+      {
+         if (normalizedErrorDistanceToInsideEdge.getDoubleValue() > 0.0 || normalizedErrorDistanceToOutsideEdge.getDoubleValue() > 0.0)
+         {
+            toeingOffLosesTooMuchControl.set(true);
+         }
+         else
+         {
+            int intersections = EuclidGeometryPolygonTools.intersectionBetweenRay2DAndConvexPolygon2D(desiredICP,
+                                                                                                      errorDirection,
+                                                                                                      supportPolygon.getVertexBufferView(),
+                                                                                                      supportPolygon.getNumberOfVertices(),
+                                                                                                      supportPolygon.isClockwiseOrdered(),
+                                                                                                      tempPoint1,
+                                                                                                      tempPoint2);
+
+            errorDistanceToFullSupport.set(currentICP.distance(tempPoint1));
+            normalizedErrorDistanceToFullSupport.set(errorDistanceToFullSupport.getValue() / errorMagnitude);
+
+            // the error distance is negative, so cancel that
+            boolean insideEdgeWouldFail = -normalizedErrorDistanceToFullSupport.getValue() / normalizedErrorDistanceToInsideEdge.getDoubleValue() > parameters.getMaxRatioOfControlDecreaseFromToeingOff();
+            boolean outsideEdgeWouldFail = -normalizedErrorDistanceToFullSupport.getValue() / normalizedErrorDistanceToOutsideEdge.getDoubleValue() > parameters.getMaxRatioOfControlDecreaseFromToeingOff();
+
+            if (Double.isFinite(parameters.getMaxNecessaryNormalizedError()))
+            {
+               insideEdgeWouldFail &= -normalizedErrorDistanceToInsideEdge.getDoubleValue() < parameters.getMaxNecessaryNormalizedError();
+               outsideEdgeWouldFail &= -normalizedErrorDistanceToOutsideEdge.getDoubleValue() < parameters.getMaxNecessaryNormalizedError();
+            }
+            toeingOffLosesTooMuchControl.set(insideEdgeWouldFail || outsideEdgeWouldFail);
+         }
+      }
+      else
+      {
+         toeingOffLosesTooMuchControl.set(false);
+      }
    }
 
    private double rayDistance(FrameLine2DReadOnly lineToIntersection)
    {
-     boolean success = EuclidCoreMissingTools.intersectionBetweenRay2DAndLine2D(desiredICP,
-                                                                                errorDirection,
-                                                                                lineToIntersection.getPoint(),
-                                                                                lineToIntersection.getDirection(),
-                                                                                tempPoint);
+      boolean success = EuclidCoreMissingTools.intersectionBetweenRay2DAndLine2D(desiredICP,
+                                                                                 errorDirection,
+                                                                                 lineToIntersection.getPoint(),
+                                                                                 lineToIntersection.getDirection(), tempPoint1);
 
-     if (success)
-        return tempPoint.distance(currentICP);
+      if (success)
+         return tempPoint1.distance(currentICP);
 
-     return Double.POSITIVE_INFINITY;
+      return Double.POSITIVE_INFINITY;
    }
 
    private double computeDistanceToLeadingFoot()
    {
-      this.toeOffPoint.changeFrameAndProjectToXYPlane(leadingFootZUpFrame);
-
+      toeOffPoint.changeFrameAndProjectToXYPlane(leadingFootZUpFrame);
       return toeOffPoint.distanceFromOrigin();
    }
 

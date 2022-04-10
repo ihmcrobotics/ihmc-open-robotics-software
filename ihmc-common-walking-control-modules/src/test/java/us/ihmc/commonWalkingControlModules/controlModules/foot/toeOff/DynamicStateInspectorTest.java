@@ -161,11 +161,63 @@ public class DynamicStateInspectorTest
 
 //      visualize();
 
-      // test not really inside
+      // test falling behind outside outside support
       currentICP.set(desiredICP);
       currentICP.subX(0.15);
 
       inspector.checkICPLocations(RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, toePosition);
+
+      expectedICPX = 0.75 * stepLength - 0.15;
+      expectedICPY = 0.25 * stepWidth;
+
+      assertEquals(expectedICPX, currentICP.getX(), epsilon);
+      assertEquals(expectedICPY, currentICP.getY(), epsilon);
+
+      expectedDistanceAlongErrorToOutside = intersectionDistanceBetweenRay2DAndLineSegment2D(currentICP,
+                                                                                             errorLine.getPoint(),
+                                                                                             errorLine.getDirection(),
+                                                                                             toePosition,
+                                                                                             leftPolygon.getVertex(outsideVertexIdx));
+      expectedDistanceAlongErrorToInside = -intersectionDistanceBetweenRay2DAndLineSegment2D(currentICP,
+                                                                                             errorLine.getPoint(),
+                                                                                             errorLine.getDirection(),
+                                                                                             toePosition,
+                                                                                             leftPolygon.getVertex(insideVertexIdx));
+
+      assertTrue(!onToesPolygon.isPointInside(currentICP));
+      assertTrue(onToesPolygon.isPointInside(desiredICP));
+
+      assertEquals(EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(currentICP, toePosition, leftPolygon.getVertex(outsideVertexIdx)),
+                   inspector.getCurrentOrthogonalDistanceToOutsideEdge(),
+                   epsilon);
+      assertEquals(-EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(desiredICP, toePosition, leftPolygon.getVertex(outsideVertexIdx)),
+                   inspector.getDesiredOrthogonalDistanceToOutsideEdge(),
+                   epsilon);
+      assertEquals(-EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(currentICP, toePosition, leftPolygon.getVertex(insideVertexIdx)),
+                   inspector.getCurrentOrthogonalDistanceToInsideEdge(),
+                   epsilon);
+      assertEquals(-EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(desiredICP, toePosition, leftPolygon.getVertex(insideVertexIdx)),
+                   inspector.getDesiredOrthogonalDistanceToInsideEdge(),
+                   epsilon);
+      assertEquals(expectedICPY + 0.5 * stepWidth, inspector.getLateralDistanceOfDesiredICPInside(), epsilon);
+      assertEquals(expectedICPY + 0.5 * stepWidth, inspector.getLateralDistanceOfCurrentICPInside(), epsilon);
+      assertEquals(toePosition.distanceSquared(desiredICP), inspector.getDistanceSquaredOfDesiredICPFromToe(), epsilon);
+      assertEquals(toePosition.distanceSquared(currentICP), inspector.getDistanceSquaredOfCurrentICPFromToe(), epsilon);
+      assertEquals(expectedDistanceAlongErrorToOutside, inspector.getErrorDistanceToOutsideEdge(), epsilon);
+      assertEquals(Double.NEGATIVE_INFINITY, inspector.getErrorDistanceToInsideEdge(), epsilon);
+
+      assertFalse(inspector.isCurrentICPIsPastTheHeel());
+      assertTrue(inspector.isCurrentICPFarEnoughFromTheToe());
+      assertTrue(inspector.isDesiredICPFarEnoughFromTheToe());
+      assertTrue(inspector.isCurrentICPFarEnoughInside());
+      assertTrue(inspector.isDesiredICPFarEnoughInside());
+
+      // test error towards inside
+      currentICP.set(desiredICP);
+      currentICP.subY(0.05);
+
+      inspector.checkICPLocations(RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, toePosition);
+      visualize();
 
       expectedICPX = 0.75 * stepLength - 0.15;
       expectedICPY = 0.25 * stepWidth;

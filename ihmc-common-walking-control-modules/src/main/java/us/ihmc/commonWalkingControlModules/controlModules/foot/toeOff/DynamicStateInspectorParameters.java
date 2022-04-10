@@ -30,8 +30,18 @@ public class DynamicStateInspectorParameters
    private final YoDouble minDistanceFromInsideEdge = new YoDouble("minDistanceFromInsideEdge", registry);
    private final YoDouble minOrthogonalDistanceFromInsideEdge = new YoDouble("minOrthogonalDistanceFromInsideEdge", registry);
 
+   private final YoDouble minNormalizedDistanceFromOutsideEdge = new YoDouble("minNormalizedDistanceFromOutsideEdge", registry);
+   private final YoDouble minNormalizedDistanceFromInsideEdge = new YoDouble("minNormalizedDistanceFromInsideEdge", registry);
+   private final YoDouble maxRatioOfControlDecreaseFromToeingOff = new YoDouble("maxRatioOfControlDecreaseFromToeingOff", registry);
+   private final YoDouble maxNecessaryNormalizedError = new YoDouble("maxNecessaryNormalizedError", registry);
+
    public DynamicStateInspectorParameters(YoRegistry parentRegistry)
    {
+      minNormalizedDistanceFromOutsideEdge.setToNaN();
+      minNormalizedDistanceFromInsideEdge.setToNaN();
+      maxNecessaryNormalizedError.setToNaN();
+      maxRatioOfControlDecreaseFromToeingOff.set(Double.POSITIVE_INFINITY);
+
       parentRegistry.addChild(registry);
    }
 
@@ -60,6 +70,16 @@ public class DynamicStateInspectorParameters
       return minDistanceFromOutsideEdge.getDoubleValue();
    }
 
+   public double getMinNormalizedDistanceFromOutsideEdge()
+   {
+      return minNormalizedDistanceFromOutsideEdge.getDoubleValue();
+   }
+
+   public double getMinNormalizedDistanceFromInsideEdge()
+   {
+      return minNormalizedDistanceFromInsideEdge.getDoubleValue();
+   }
+
    public double getMinOrthogonalDistanceFromOutsideEdge()
    {
       return minOrthogonalDistanceFromOutsideEdge.getDoubleValue();
@@ -75,6 +95,16 @@ public class DynamicStateInspectorParameters
       return minOrthogonalDistanceFromInsideEdge.getDoubleValue();
    }
 
+   public double getMaxNecessaryNormalizedError()
+   {
+      return maxNecessaryNormalizedError.getDoubleValue();
+   }
+
+   public double getMaxRatioOfControlDecreaseFromToeingOff()
+   {
+      return maxRatioOfControlDecreaseFromToeingOff.getDoubleValue();
+   }
+
    public void attachParameterChangeListener(YoVariableChangedListener changedListener)
    {
       distanceForwardFromHeel.addListener(changedListener);
@@ -85,5 +115,9 @@ public class DynamicStateInspectorParameters
       minOrthogonalDistanceFromOutsideEdge.addListener(changedListener);
       minDistanceFromInsideEdge.addListener(changedListener);
       minOrthogonalDistanceFromInsideEdge.addListener(changedListener);
+      minNormalizedDistanceFromInsideEdge.addListener(changedListener);
+      minNormalizedDistanceFromOutsideEdge.addListener(changedListener);
+      maxRatioOfControlDecreaseFromToeingOff.addListener(changedListener);
+      maxNecessaryNormalizedError.addListener(changedListener);
    }
 }
