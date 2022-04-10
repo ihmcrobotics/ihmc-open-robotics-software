@@ -22,7 +22,7 @@ public class DoorFrameDefinition extends RigidBodyDefinition
       double sizeY = 0.0889;
       double sizeZ = 2.159;
 
-      setMass(100.0f);
+      setMass(300.0f);
       double radiusOfGyrationPercent = 0.8;
       setMomentOfInertia(MomentOfInertiaFactory.fromMassAndRadiiOfGyration(getMass(),
                                                                            radiusOfGyrationPercent * sizeX,
