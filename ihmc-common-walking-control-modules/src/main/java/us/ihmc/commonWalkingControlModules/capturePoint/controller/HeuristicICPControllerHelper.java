@@ -1,5 +1,8 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
+import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
+
 public class HeuristicICPControllerHelper
 {
 
@@ -10,9 +13,9 @@ public class HeuristicICPControllerHelper
     * @param adjustedICP         Where the ICP is with respect to the unconstrained CoP, but adjusted
     *                            based on the vector from perfect CoP to perfect CMP.
     * @param firstIntersection   Where the first foot intersection is along the line from unconstrained
-    *                            CoP to adjusted ICP.
+    *                            CoP to adjusted ICP. firstIntersection must be <= secondIntersection.
     * @param secondIntersection  Where the second foot intersection is along the line from
-    *                            unconstrained CoP to adjusted ICP.
+    *                            unconstrained CoP to adjusted ICP. secondIntersection must be >= firstIntersection.
     * @param firstPerfect        Where the first perfect boundary is along the line from unconstrained
     *                            CoP to adjusted ICP. Can just be set to the first intersection. Will
     *                            be ignored if before the first intersection.
@@ -37,20 +40,8 @@ public class HeuristicICPControllerHelper
                                                   double maxProjectionInside)
    {
       // Figure out the two boundaries, based on the perfect boundaries and the intersections.
-      double firstBoundary = firstPerfect;
-      double secondBoundary = secondPerfect;
-
-      if (firstBoundary < firstIntersection)
-         firstBoundary = firstIntersection;
-
-      if (secondBoundary < firstIntersection)
-         secondBoundary = firstIntersection;
-
-      if (firstBoundary > secondIntersection)
-         firstBoundary = secondIntersection;
-
-      if (secondBoundary > secondIntersection)
-         secondBoundary = secondIntersection;
+      double firstBoundary = MathTools.clamp(firstPerfect, firstIntersection, secondIntersection);
+      double secondBoundary = MathTools.clamp(secondPerfect, firstIntersection, secondIntersection);
 
       // For now if you are trying to slow down and you cannot because the unconstrained CoP is in front of the
       // second edge, just project it there.
@@ -58,35 +49,17 @@ public class HeuristicICPControllerHelper
          return secondBoundary;
 
       // Compute the best point to go towards.
-      double midPointOrPerfectBoundaryIfOutside = 0.5 * (firstIntersection + secondIntersection);
-
-      if (midPointOrPerfectBoundaryIfOutside < firstBoundary)
-         midPointOrPerfectBoundaryIfOutside = firstBoundary;
-      else if (midPointOrPerfectBoundaryIfOutside > secondBoundary)
-         midPointOrPerfectBoundaryIfOutside = secondBoundary;
+      double intersectionMidpoints = 0.5 * (firstIntersection + secondIntersection);
+      double midPointOrBestBoundaryIfOutside = MathTools.clamp(intersectionMidpoints, firstBoundary, secondBoundary);
 
       double maxLocationInside = firstIntersection + maxProjectionInside;
       double maxLocationBeforeICP = adjustedICP - minICPPushDelta;
 
-      double increaseToNoMoreThan = minimumOf(maxLocationInside, midPointOrPerfectBoundaryIfOutside, maxLocationBeforeICP);
-      if (increaseToNoMoreThan < 0.0)
-         increaseToNoMoreThan = 0.0;
+      double increaseToNoMoreThan = EuclidCoreTools.min(maxLocationInside, midPointOrBestBoundaryIfOutside, maxLocationBeforeICP);
+      increaseToNoMoreThan = MathTools.clamp(increaseToNoMoreThan, 0.0, secondIntersection);
 
-      if (increaseToNoMoreThan > secondIntersection)
-         increaseToNoMoreThan = secondIntersection;
-
-      double increaseToNoLessThan = firstIntersection;
-
-      if (increaseToNoMoreThan > increaseToNoLessThan)
-         return increaseToNoMoreThan;
-
-      else
-         return increaseToNoLessThan;
+      return Math.max(increaseToNoMoreThan, firstIntersection);
    }
 
-   private static final double minimumOf(double a, double b, double c)
-   {
-      return Math.min(Math.min(a, b), c);
-   }
 
 }
