@@ -75,7 +75,7 @@ public class DynamicStateInspectorTest
    public void testLeftStep()
    {
       DynamicStateInspectorParameters parameters = new DynamicStateInspectorParameters(registry);
-      DynamicStateInspector inspector = new DynamicStateInspector(parameters, registry);
+      DynamicStateInspector inspector = new DynamicStateInspector(registry);
 
       FramePose3D leftFootPose = new FramePose3D();
       FramePose3D rightFootPose = new FramePose3D();
@@ -104,7 +104,7 @@ public class DynamicStateInspectorTest
       currentICP.set(desiredICP);
       currentICP.subX(0.05);
 
-      inspector.checkICPLocations(RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, toePosition);
+      inspector.checkICPLocations(parameters, RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, toePosition);
 
       double expectedICPX = 0.75 * stepLength - 0.05;
       double expectedICPY = 0.25 * stepWidth;
@@ -165,7 +165,7 @@ public class DynamicStateInspectorTest
       currentICP.set(desiredICP);
       currentICP.subX(0.15);
 
-      inspector.checkICPLocations(RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, toePosition);
+      inspector.checkICPLocations(parameters, RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, toePosition);
 
       expectedICPX = 0.75 * stepLength - 0.15;
       expectedICPY = 0.25 * stepWidth;
@@ -216,7 +216,7 @@ public class DynamicStateInspectorTest
       currentICP.set(desiredICP);
       currentICP.subY(0.05);
 
-      inspector.checkICPLocations(RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, toePosition);
+      inspector.checkICPLocations(parameters, RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, toePosition);
       visualize();
 
       expectedICPX = 0.75 * stepLength - 0.15;
@@ -271,7 +271,7 @@ public class DynamicStateInspectorTest
    public void testLeftStepGrid()
    {
       DynamicStateInspectorParameters parameters = new DynamicStateInspectorParameters(registry);
-      DynamicStateInspector inspector = new DynamicStateInspector(parameters, registry);
+      DynamicStateInspector inspector = new DynamicStateInspector(registry);
 
       FramePose3D leftFootPose = new FramePose3D();
       FramePose3D rightFootPose = new FramePose3D();
@@ -298,7 +298,7 @@ public class DynamicStateInspectorTest
       desiredICP.interpolate(new FramePoint2D(rightFootPose.getPosition()), new FramePoint2D(leftFootPose.getPosition()), 0.75);
 
 
-      visualizeGrid(inspector, stepLength, stepWidth, leftFootPose);
+      visualizeGrid(parameters, inspector, stepLength, stepWidth, leftFootPose);
    }
 
    private static FrameConvexPolygon2D createFootPolygon(double length, double width)
@@ -365,7 +365,7 @@ public class DynamicStateInspectorTest
       ThreadTools.sleepForever();
    }
 
-   private void visualizeGrid(DynamicStateInspector inspector, double stepLength, double stepWidth, FramePose3D leadingFootPose)
+   private void visualizeGrid(DynamicStateInspectorParameters parameters, DynamicStateInspector inspector, double stepLength, double stepWidth, FramePose3D leadingFootPose)
    {
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("dummy"));
 
@@ -436,10 +436,10 @@ public class DynamicStateInspectorTest
 
       scs.startOnAThread();
 
-      YoVariableChangedListener changedListener = v -> updateListener(stepLength, stepWidth, inspector, leadingFootPose, validPoints, invalidPoints, scs);
-      inspector.attachParameterChangeListener(changedListener);
+      YoVariableChangedListener changedListener = v -> updateListener(stepLength, stepWidth, parameters, inspector, leadingFootPose, validPoints, invalidPoints, scs);
+      parameters.attachParameterChangeListener(changedListener);
 
-      updateListener(stepLength, stepWidth, inspector, leadingFootPose, validPoints, invalidPoints, scs);
+      updateListener(stepLength, stepWidth, parameters, inspector, leadingFootPose, validPoints, invalidPoints, scs);
 
 
 
@@ -450,7 +450,8 @@ public class DynamicStateInspectorTest
       ThreadTools.sleepForever();
    }
 
-   private void updateListener(double stepLength, double stepWidth, DynamicStateInspector inspector, FramePose3D leadingFootPose, List<YoFramePoint2D> validPoints,
+   private void updateListener(double stepLength, double stepWidth, DynamicStateInspectorParameters parameters, DynamicStateInspector inspector,
+                               FramePose3D leadingFootPose, List<YoFramePoint2D> validPoints,
                                List<YoFramePoint2D> invalidPoints, SimulationConstructionSet scs)
    {
       double gridWidth = stepWidth + footWidth;
@@ -473,7 +474,7 @@ public class DynamicStateInspectorTest
          for (int heightIdx = 0; heightIdx < heightTicks; heightIdx++)
          {
             FramePoint2D currentICP = new FramePoint2D(worldFrame, topLeftX - heightIdx * gridRez, topLeftY - widthIdx * gridRez);
-            inspector.checkICPLocations(RobotSide.RIGHT, leadingFootPose, desiredICP, currentICP, toePosition);
+            inspector.checkICPLocations(parameters, RobotSide.RIGHT, leadingFootPose, desiredICP, currentICP, toePosition);
 
             if (inspector.areDynamicsOkForToeOff())
             {

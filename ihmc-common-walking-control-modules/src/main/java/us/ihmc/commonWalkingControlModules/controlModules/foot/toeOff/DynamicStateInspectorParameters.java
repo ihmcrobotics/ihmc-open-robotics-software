@@ -6,37 +6,55 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DynamicStateInspectorParameters
 {
-   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   /**
-    * If the ICP is this distance based the heel of the elading foot, toe off should happen, regardless of any of the other conditions.
-    **/
-   private final YoDouble distanceForwardFromHeel = new YoDouble("distanceForwardFromHeel", registry);
+   /** If the ICP is this distance based the heel of the elading foot, toe off should happen, regardless of any of the other conditions. **/
+   private final YoDouble distanceForwardFromHeel;
 
-   /**
-    * This checks to make sure the ICP isn't falling to the outside of the trailing foot.
-    **/
-   private final YoDouble minLateralDistance = new YoDouble("minLateralDistance", registry);
+   /** This checks to make sure the ICP isn't falling to the outside of the trailing foot. **/
+   private final YoDouble minLateralDistance;
 
    /**
     * These variables make sure the ICP is far enough from the toe off point. If they're far enough, then there's probably enough control
     * authority to control them
     */
-   private final YoDouble minDistanceFromTheToe = new YoDouble("minDistanceFromTheToe", registry);
-   private final YoDouble minFractionOfStrideFromTheToe = new YoDouble("minFractionOfStrideFromTheToe", registry);
+   private final YoDouble minDistanceFromTheToe;
+   private final YoDouble minFractionOfStrideFromTheToe;
 
-   private final YoDouble minDistanceFromOutsideEdge = new YoDouble("minDistanceFromOutsideEdge", registry);
-   private final YoDouble minOrthogonalDistanceFromOutsideEdge = new YoDouble("minOrthogonalDistanceFromOutsideEdge", registry);
-   private final YoDouble minDistanceFromInsideEdge = new YoDouble("minDistanceFromInsideEdge", registry);
-   private final YoDouble minOrthogonalDistanceFromInsideEdge = new YoDouble("minOrthogonalDistanceFromInsideEdge", registry);
+   private final YoDouble minDistanceFromOutsideEdge;
+   private final YoDouble minOrthogonalDistanceFromOutsideEdge;
+   private final YoDouble minDistanceFromInsideEdge;
+   private final YoDouble minOrthogonalDistanceFromInsideEdge;
 
-   private final YoDouble minNormalizedDistanceFromOutsideEdge = new YoDouble("minNormalizedDistanceFromOutsideEdge", registry);
-   private final YoDouble minNormalizedDistanceFromInsideEdge = new YoDouble("minNormalizedDistanceFromInsideEdge", registry);
-   private final YoDouble maxRatioOfControlDecreaseFromToeingOff = new YoDouble("maxRatioOfControlDecreaseFromToeingOff", registry);
-   private final YoDouble maxNecessaryNormalizedError = new YoDouble("maxNecessaryNormalizedError", registry);
+   private final YoDouble minNormalizedDistanceFromOutsideEdge;
+   private final YoDouble minNormalizedDistanceFromInsideEdge;
+   private final YoDouble maxRatioOfControlDecreaseFromToeingOff;
+   private final YoDouble maxNecessaryNormalizedError;
 
    public DynamicStateInspectorParameters(YoRegistry parentRegistry)
    {
+      this("", parentRegistry);
+   }
+
+   public DynamicStateInspectorParameters(String suffix, YoRegistry parentRegistry)
+   {
+      YoRegistry registry = new YoRegistry(getClass().getSimpleName() + suffix);
+
+      distanceForwardFromHeel = new YoDouble("distanceForwardFromHeel" + suffix, registry);
+      minLateralDistance = new YoDouble("minLateralDistance" + suffix, registry);
+
+      minDistanceFromTheToe = new YoDouble("minDistanceFromTheToe" + suffix, registry);
+      minFractionOfStrideFromTheToe = new YoDouble("minFractionOfStrideFromTheToe" + suffix, registry);
+
+      minDistanceFromOutsideEdge = new YoDouble("minDistanceFromOutsideEdge" + suffix, registry);
+      minOrthogonalDistanceFromOutsideEdge = new YoDouble("minOrthogonalDistanceFromOutsideEdge" + suffix, registry);
+      minDistanceFromInsideEdge = new YoDouble("minDistanceFromInsideEdge" + suffix, registry);
+      minOrthogonalDistanceFromInsideEdge = new YoDouble("minOrthogonalDistanceFromInsideEdge" + suffix, registry);
+
+      minNormalizedDistanceFromOutsideEdge = new YoDouble("minNormalizedDistanceFromOutsideEdge" + suffix, registry);
+      minNormalizedDistanceFromInsideEdge = new YoDouble("minNormalizedDistanceFromInsideEdge" + suffix, registry);
+      maxRatioOfControlDecreaseFromToeingOff = new YoDouble("maxRatioOfControlDecreaseFromToeingOff" + suffix, registry);
+      maxNecessaryNormalizedError = new YoDouble("maxNecessaryNormalizedError" + suffix, registry);
+
       minNormalizedDistanceFromOutsideEdge.setToNaN();
       minNormalizedDistanceFromInsideEdge.setToNaN();
       maxNecessaryNormalizedError.setToNaN();
