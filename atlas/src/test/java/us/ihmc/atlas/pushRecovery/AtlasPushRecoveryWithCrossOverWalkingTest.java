@@ -2,14 +2,13 @@ package us.ihmc.atlas.pushRecovery;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.pushRecovery.AvatarLongPushRecoveryWalkingTest;
 import us.ihmc.avatar.pushRecovery.AvatarPushRecoveryWithCrossOverWalkingTest;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasPushRecoveryWithCrossOverWalkingTest extends AvatarPushRecoveryWithCrossOverWalkingTest
 {
@@ -52,7 +51,7 @@ public class AtlasPushRecoveryWithCrossOverWalkingTest extends AvatarPushRecover
    @Tag("humanoid-push-recovery")
    @Override
    @Test
-   public void testInwardPushInSwing() throws SimulationExceededMaximumTimeException
+   public void testInwardPushInSwing()
    {
       super.testInwardPushInSwing();
    }
@@ -60,7 +59,7 @@ public class AtlasPushRecoveryWithCrossOverWalkingTest extends AvatarPushRecover
    @Tag("humanoid-push-recovery")
    @Override
    @Test
-   public void testOutwardPushInSwing() throws SimulationExceededMaximumTimeException
+   public void testOutwardPushInSwing()
    {
       super.testOutwardPushInSwing();
    }
@@ -68,7 +67,7 @@ public class AtlasPushRecoveryWithCrossOverWalkingTest extends AvatarPushRecover
    @Tag("humanoid-push-recovery")
    @Override
    @Test
-   public void testForwardPushInSwing() throws SimulationExceededMaximumTimeException
+   public void testForwardPushInSwing()
    {
       super.testForwardPushInSwing();
    }
@@ -76,7 +75,7 @@ public class AtlasPushRecoveryWithCrossOverWalkingTest extends AvatarPushRecover
    @Tag("humanoid-push-recovery")
    @Override
    @Test
-   public void testBackwardPushInSwing() throws SimulationExceededMaximumTimeException
+   public void testBackwardPushInSwing()
    {
       super.testBackwardPushInSwing();
    }
