@@ -15,13 +15,12 @@ import us.ihmc.gdx.simulation.environment.object.objects.FlatGroundDefinition;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
-import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.tools.thread.StatelessNotification;
 
 import java.util.ArrayList;
-import java.util.function.Supplier;
+import java.util.function.BiConsumer;
 
 public class GDXSCS2EnvironmentManager
 {
@@ -35,21 +34,23 @@ public class GDXSCS2EnvironmentManager
    private boolean useVelocityAndHeadingScript;
    private GDXImGuiBasedUI baseUI;
    private int recordFrequency;
-   private Supplier<DRCRobotModel> robotModelSupplier;
    private DRCRobotModel robotModel;
    private CommunicationMode ros2CommunicationMode;
-   private final ArrayList<Robot> secondaryRobots = new ArrayList<>();
+   private final ArrayList<GDXSCS2SecondaryRobot> secondaryRobots = new ArrayList<>();
    private final ArrayList<String> robotsToHide = new ArrayList<>();
    private volatile boolean starting = false;
    private volatile boolean started = false;
    private ArrayList<Runnable> onSessionStartedRunnables = new ArrayList<>();
    private final StatelessNotification destroyedNotification = new StatelessNotification();
 
-   public void create(GDXImGuiBasedUI baseUI, Supplier<DRCRobotModel> robotModelSupplier, CommunicationMode ros2CommunicationMode)
+   public void create(GDXImGuiBasedUI baseUI, DRCRobotModel robotModel, CommunicationMode ros2CommunicationMode)
    {
       this.baseUI = baseUI;
-      this.robotModelSupplier = robotModelSupplier;
+      this.robotModel = robotModel;
       this.ros2CommunicationMode = ros2CommunicationMode;
+
+      double initialYaw = 0.3;
+      robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, initialYaw);
 
       //      recordFrequency = (int) Math.max(1.0, Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT()));
       recordFrequency = 1;
@@ -106,11 +107,6 @@ public class GDXSCS2EnvironmentManager
          if (waitForDestroy)
             destroyedNotification.blockingWait();
 
-         robotModel = robotModelSupplier.get();
-
-         double initialYaw = 0.3;
-         robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, initialYaw);
-
          realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(ros2CommunicationMode.getPubSubImplementation(),
                                                              "flat_ground_walking_track_simulation");
 
@@ -119,9 +115,9 @@ public class GDXSCS2EnvironmentManager
          avatarSimulationFactory.setRealtimeROS2Node(realtimeROS2Node);
          avatarSimulationFactory.setDefaultHighLevelHumanoidControllerFactory(useVelocityAndHeadingScript, walkingScriptParameters);
          avatarSimulationFactory.setTerrainObjectDefinition(new FlatGroundDefinition());
-         for (Robot secondaryRobot : secondaryRobots)
+         for (GDXSCS2SecondaryRobot secondaryRobot : secondaryRobots)
          {
-            avatarSimulationFactory.addSecondaryRobot(secondaryRobot);
+            avatarSimulationFactory.addSecondaryRobot(secondaryRobot.create());
          }
          avatarSimulationFactory.setRobotInitialSetup(robotInitialSetup);
          avatarSimulationFactory.setSimulationDataRecordTickPeriod(recordFrequency);
@@ -173,17 +169,14 @@ public class GDXSCS2EnvironmentManager
             avatarSimulation = null;
             scs2SimulationSession = null;
             realtimeROS2Node = null;
-            robotModel = null;
             destroyedNotification.notifyOtherThread();
          }, getClass().getSimpleName() + "Destroy");
       }
    }
 
-   public Robot addSecondaryRobot(RobotDefinition robotDefinition)
+   public void addSecondaryRobot(RobotDefinition robotDefinition, BiConsumer<RobotDefinition, Robot> robotSetup)
    {
-      Robot robot = new Robot(robotDefinition, SimulationSession.DEFAULT_INERTIAL_FRAME);
-      secondaryRobots.add(robot);
-      return robot;
+      secondaryRobots.add(new GDXSCS2SecondaryRobot(robotDefinition, robotSetup));
    }
 
    public GDXSCS2SimulationSession getSCS2SimulationSession()
