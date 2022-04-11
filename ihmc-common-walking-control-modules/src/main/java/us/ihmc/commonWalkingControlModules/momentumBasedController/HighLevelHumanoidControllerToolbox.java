@@ -520,6 +520,9 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
       filteredYoAngularMomentum.update();
       filteredYoLinearMomentum.update();
+
+      yoLinearMomentumRate.update();
+      yoAngularMomentumRate.update();
    }
 
    private final FramePoint2D localDesiredCapturePoint = new FramePoint2D();
