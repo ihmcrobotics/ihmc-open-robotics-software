@@ -12,7 +12,7 @@ import us.ihmc.scs2.definition.visual.VisualDefinition;
 
 public class DoorFrameDefinition extends RigidBodyDefinition
 {
-   private final boolean ENABLE_SUPPORT_BOARD_COLLISIONS = false;
+   private final boolean ENABLE_SUPPORT_BOARD_COLLISIONS = true;
 
    public DoorFrameDefinition()
    {
@@ -45,11 +45,11 @@ public class DoorFrameDefinition extends RigidBodyDefinition
 
       if (ENABLE_SUPPORT_BOARD_COLLISIONS)
       {
-         Point3D latchSideSupportBoardOffset = new Point3D();
-         latchSideSupportBoardOffset.add(0.0, -0.006064, 0.0);
-         latchSideSupportBoardOffset.add(0.0, -0.0889, 0.0);
-         latchSideSupportBoardOffset.add(0.0, -0.0381 / 2.0, 0.0889 / 2.0f);
-         addCollisionShape(1.016, 0.0381, 0.0889, latchSideSupportBoardOffset);
+         Point3D hingeSideSupportBoardOffset = new Point3D();
+         hingeSideSupportBoardOffset.add(0.0, -0.006064, 0.0);
+         hingeSideSupportBoardOffset.add(0.0, -0.0889, 0.0);
+         hingeSideSupportBoardOffset.add(0.0, -0.0381 / 2.0, 0.0889 / 2.0f);
+         addCollisionShape(1.016, 0.0381, 0.0889, hingeSideSupportBoardOffset);
       }
 
       Point3D hingeSidePostOffset = new Point3D();
@@ -59,11 +59,15 @@ public class DoorFrameDefinition extends RigidBodyDefinition
 
       if (ENABLE_SUPPORT_BOARD_COLLISIONS)
       {
-         Point3D hingeSideSupportBoardOffset = new Point3D();
-         hingeSideSupportBoardOffset.add(0.0, 0.93415, 0.0);
-         hingeSideSupportBoardOffset.add(0.0, 0.0889, 0.0);
-         hingeSideSupportBoardOffset.add(0.0, 0.0381 / 2.0, 0.0889 / 2.0f);
-         addCollisionShape(1.016, 0.0381, 0.0889, hingeSideSupportBoardOffset);
+         // shortened: 0.881195 long
+         // short edge 0.372505 from center
+         // scootch 0.0680925
+         Point3D latchSideSupportBoardOffset = new Point3D();
+         latchSideSupportBoardOffset.add(0.0, 0.93415, 0.0);
+         latchSideSupportBoardOffset.add(0.0, 0.0889, 0.0);
+         latchSideSupportBoardOffset.add(0.0680925, 0.0381 / 2.0, 0.0889 / 2.0f);
+//         addCollisionShape(1.016, 0.0381, 0.0889, latchSideSupportBoardOffset);
+         addCollisionShape(0.881195, 0.0381, 0.0889, latchSideSupportBoardOffset);
       }
    }
 
