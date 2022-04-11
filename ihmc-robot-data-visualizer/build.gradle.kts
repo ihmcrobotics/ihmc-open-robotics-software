@@ -19,7 +19,7 @@ mainDependencies {
    api("net.sourceforge.jmatio:jmatio:1.0")
 
    api("us.ihmc:euclid:0.17.2")
-   api("us.ihmc:ihmc-yovariables:0.9.11")
+   api("us.ihmc:ihmc-yovariables:0.9.12")
    api("us.ihmc:ihmc-video-codecs:2.1.6")
    api("us.ihmc:simulation-construction-set:0.21.16")
    api("us.ihmc:ihmc-javafx-toolkit:0.20.0")
