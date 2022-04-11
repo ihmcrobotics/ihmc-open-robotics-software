@@ -10,7 +10,7 @@ public class HeuristicICPControllerHelper
     * Computes how much to adjust the ICP and the CoP based on how a sequence of other points lines up.
     * All values are with respect to the unconstrained CoP, which is at 0.0 here.
     * 
-    * @param adjustedICP         Where the ICP is with respect to the unconstrained CoP, but adjusted
+    * @param momentumShiftedICP  Where the ICP is with respect to the unconstrained CoP, but shifted
     *                            based on the vector from perfect CoP to perfect CMP.
     * @param firstIntersection   Where the first foot intersection is along the line from unconstrained
     *                            CoP to adjusted ICP. firstIntersection must be <= secondIntersection.
@@ -31,7 +31,7 @@ public class HeuristicICPControllerHelper
     * @return How much to project the unconstrained CoP and unconstrained CMP along the vector from the
     *         unconstrained CMP to the current ICP.
     */
-   public static double computeAdjustmentDistance(double adjustedICP,
+   public static double computeAdjustmentDistance(double momentumShiftedICP,
                                                   double firstIntersection,
                                                   double secondIntersection,
                                                   double firstPerfect,
@@ -53,7 +53,7 @@ public class HeuristicICPControllerHelper
       double midPointOrBestBoundaryIfOutside = MathTools.clamp(intersectionMidpoints, firstBoundary, secondBoundary);
 
       double maxLocationInside = firstIntersection + maxProjectionInside;
-      double maxLocationBeforeICP = adjustedICP - minICPPushDelta;
+      double maxLocationBeforeICP = momentumShiftedICP - minICPPushDelta;
 
       double increaseToNoMoreThan = EuclidCoreTools.min(maxLocationInside, midPointOrBestBoundaryIfOutside, maxLocationBeforeICP);
       increaseToNoMoreThan = MathTools.clamp(increaseToNoMoreThan, 0.0, secondIntersection);

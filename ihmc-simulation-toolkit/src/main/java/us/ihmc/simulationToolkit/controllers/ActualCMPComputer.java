@@ -50,10 +50,8 @@ public class ActualCMPComputer extends SimpleRobotController
       simulateDT = scs.getDT();
       gravity = simulatedRobot.getGravityZ();
 
-      linearMomentumRateOfChange = FilteredVelocityYoFrameVector
-            .createFilteredVelocityYoFrameVector("SimRateOfChangeLinearMomentum", "", alpha, simulateDT, registry, yoLinearMomentum);
-      angularMomentumRateOfChange = FilteredVelocityYoFrameVector
-            .createFilteredVelocityYoFrameVector("SimRateOfChangeAngularMomentum", "", alpha, simulateDT, registry, yoAngularMomentum);
+      linearMomentumRateOfChange = new FilteredVelocityYoFrameVector("SimRateOfChangeLinearMomentum", "", alpha, simulateDT, registry, yoLinearMomentum);
+      angularMomentumRateOfChange = new FilteredVelocityYoFrameVector("SimRateOfChangeAngularMomentum", "", alpha, simulateDT, registry, yoAngularMomentum);
 
       if (createViz)
       {
