@@ -50,7 +50,8 @@ public class DoorDefinition extends RobotDefinition
       doorHingeJoint.getTransformToParent().getTranslation().add(0.0, 0.005, 0.02);
       initialHingeState = new OneDoFJointState();
       doorHingeJoint.setInitialJointState(initialHingeState);
-
+      doorHingeJoint.setPositionLowerLimit(-1.7);
+      doorHingeJoint.setPositionUpperLimit(1.7);
 
       doorPanelDefinition.build();
       doorHingeJoint.setSuccessor(doorPanelDefinition);
