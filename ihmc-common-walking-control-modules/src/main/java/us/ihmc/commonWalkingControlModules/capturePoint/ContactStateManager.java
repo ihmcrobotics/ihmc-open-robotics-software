@@ -69,6 +69,11 @@ public class ContactStateManager
       return totalStateDuration.getDoubleValue();
    }
 
+   public double getCurrentStateDuration()
+   {
+      return currentStateDuration.getDoubleValue();
+   }
+
    public double getAdjustedTimeRemainingInCurrentSupportSequence()
    {
       return adjustedRemainingTimeUnderDisturbance.getDoubleValue();
