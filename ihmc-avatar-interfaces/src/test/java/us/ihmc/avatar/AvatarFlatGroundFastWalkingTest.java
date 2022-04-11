@@ -41,14 +41,13 @@ public abstract class AvatarFlatGroundFastWalkingTest implements MultiRobotTestI
    @BeforeEach
    public void setup()
    {
-      simulationTestingParameters.setKeepSCSUp(true);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @AfterEach
    public void tearDown()
    {
-//      if (simulationTestingParameters.getKeepSCSUp())
+      if (simulationTestingParameters.getKeepSCSUp())
          ThreadTools.sleepForever();
 
       if (drcSimulationTestHelper != null)
@@ -80,7 +79,7 @@ public abstract class AvatarFlatGroundFastWalkingTest implements MultiRobotTestI
    public void testForwardWalking() throws Exception
    {
       setupSim(getRobotModel(), false, false, null);
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0));
 
       CommonHumanoidReferenceFrames referenceFrames = drcSimulationTestHelper.getReferenceFrames();
       MovingReferenceFrame midFootZUpGroundFrame = referenceFrames.getMidFootZUpGroundFrame();
