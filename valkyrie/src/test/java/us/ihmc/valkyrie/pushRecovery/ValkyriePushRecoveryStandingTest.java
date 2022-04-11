@@ -9,7 +9,6 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.pushRecovery.AvatarPushRecoveryStandingTest;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.parameters.ValkyrieSteppingParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
@@ -53,7 +52,7 @@ public class ValkyriePushRecoveryStandingTest extends AvatarPushRecoveryStanding
    @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
-   public void testControllerFailureKicksIn() throws SimulationExceededMaximumTimeException
+   public void testControllerFailureKicksIn() 
    {
       super.testControllerFailureKicksIn();
    }
@@ -61,7 +60,7 @@ public class ValkyriePushRecoveryStandingTest extends AvatarPushRecoveryStanding
    @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
-   public void testLongBackwardPushWhileStanding() throws SimulationExceededMaximumTimeException
+   public void testLongBackwardPushWhileStanding() 
    {
       super.testLongBackwardPushWhileStanding();
    }
@@ -69,7 +68,7 @@ public class ValkyriePushRecoveryStandingTest extends AvatarPushRecoveryStanding
    @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
-   public void testLongBackwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
+   public void testLongBackwardPushWhileStandingAfterControllerFailureKickedIn() 
    {
       setMagnitude(85.0);
       super.testLongBackwardPushWhileStandingAfterControllerFailureKickedIn();
@@ -78,7 +77,7 @@ public class ValkyriePushRecoveryStandingTest extends AvatarPushRecoveryStanding
    @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
-   public void testLongForwardPushWhileStanding() throws SimulationExceededMaximumTimeException
+   public void testLongForwardPushWhileStanding() 
    {
       super.testLongForwardPushWhileStanding();
    }
@@ -86,7 +85,7 @@ public class ValkyriePushRecoveryStandingTest extends AvatarPushRecoveryStanding
    @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
-   public void testLongForwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
+   public void testLongForwardPushWhileStandingAfterControllerFailureKickedIn() 
    {
       setMagnitude(90.0);
       super.testLongForwardPushWhileStandingAfterControllerFailureKickedIn();
@@ -94,21 +93,21 @@ public class ValkyriePushRecoveryStandingTest extends AvatarPushRecoveryStanding
 
    @Disabled
    @Test
-   public void testFailureAfterRecoveryStep() throws SimulationExceededMaximumTimeException
+   public void testFailureAfterRecoveryStep() 
    {
       super.testFailureAfterRecoveryStep();
    }
 
    @Disabled
    @Test
-   public void testRecoveryAngledWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
+   public void testRecoveryAngledWhileInFlamingoStance() 
    {
       super.testRecoveryAngledWhileInFlamingoStance();
    }
 
    @Disabled
    @Test
-   public void testRecoveryPushForwardWhileInFlamingoStanceAndAfterTouchDown() throws SimulationExceededMaximumTimeException
+   public void testRecoveryPushForwardWhileInFlamingoStanceAndAfterTouchDown() 
    {
       super.testRecoveryPushForwardWhileInFlamingoStanceAndAfterTouchDown();
    }
@@ -116,7 +115,7 @@ public class ValkyriePushRecoveryStandingTest extends AvatarPushRecoveryStanding
    @Tag("humanoid-push-recovery")
    @Override
    @Test
-   public void testPushWhileStanding() throws SimulationExceededMaximumTimeException
+   public void testPushWhileStanding() 
    {
       super.testPushWhileStanding();
    }
@@ -124,7 +123,7 @@ public class ValkyriePushRecoveryStandingTest extends AvatarPushRecoveryStanding
    @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
-   public void testPushWhileStandingRecoveringAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
+   public void testPushWhileStandingRecoveringAfterControllerFailureKickedIn() 
    {
       super.testPushWhileStandingRecoveringAfterControllerFailureKickedIn();
    }
@@ -132,7 +131,7 @@ public class ValkyriePushRecoveryStandingTest extends AvatarPushRecoveryStanding
    @Tag("humanoid-push-recovery")
    @Override
    @Test
-   public void testRecoveryWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
+   public void testRecoveryWhileInFlamingoStance() 
    {
       super.testRecoveryWhileInFlamingoStance();
    }
@@ -140,7 +139,7 @@ public class ValkyriePushRecoveryStandingTest extends AvatarPushRecoveryStanding
    @Tag("humanoid-push-recovery")
    @Override
    @Test
-   public void testRecoveryForwardWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
+   public void testRecoveryForwardWhileInFlamingoStance() 
    {
       super.testRecoveryForwardWhileInFlamingoStance();
    }
@@ -148,7 +147,7 @@ public class ValkyriePushRecoveryStandingTest extends AvatarPushRecoveryStanding
    @Tag("humanoid-push-recovery")
    @Override
    @Test
-   public void testRecoverySidewaysWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
+   public void testRecoverySidewaysWhileInFlamingoStance() 
    {
       super.testRecoverySidewaysWhileInFlamingoStance();
    }
