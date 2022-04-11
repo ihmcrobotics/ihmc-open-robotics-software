@@ -18,6 +18,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
+import javafx.stage.Window;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.scs2.SCS2AvatarSimulation;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
@@ -49,6 +50,7 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.session.SessionMode;
 import us.ihmc.scs2.session.tools.SCS1GraphicConversionTools;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizerControls;
+import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizerIOTools;
 import us.ihmc.scs2.sessionVisualizer.jfx.tools.JavaFXMissingTools;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.SimulationSessionControls;
@@ -504,7 +506,18 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
          JavaFXMissingTools.runAndWait(getClass(), () ->
          {
             if (!isVisualizerGoingDown.get())
-               new Alert(AlertType.INFORMATION, "Test complete!", ButtonType.OK).showAndWait();
+            {
+               Window primaryWindow = getSessionVisualizerControls().getPrimaryWindow();
+               primaryWindow.requestFocus();
+               Alert alert = new Alert(AlertType.INFORMATION, "Test complete!", ButtonType.OK);
+               SessionVisualizerIOTools.addSCSIconToDialog(alert);
+               alert.initOwner(primaryWindow);
+               JavaFXMissingTools.centerDialogInOwner(alert);
+               // TODO Seems that on Ubuntu the changes done to the window position/size are not processed properly until the window is showing.
+               // This may be related to the bug reported when using GTK3: https://github.com/javafxports/openjdk-jfx/pull/446, might be fixed in later version.
+               alert.setOnShown(e -> JavaFXMissingTools.runLater(getClass(), () -> JavaFXMissingTools.centerDialogInOwner(alert)));
+               alert.showAndWait();
+            }
          });
          getSessionVisualizerControls().waitUntilDown();
       }
