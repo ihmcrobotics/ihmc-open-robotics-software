@@ -41,6 +41,7 @@ import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerC
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
@@ -75,6 +76,11 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    private static final double CAMERA_DISTANCE_FROM_ROBOT = 6.0;
 
    private final SCS2AvatarSimulation avatarSimulation;
+
+   private final ControllerFailureListener exceptionOnFailureListener = fallingDirection ->
+   {
+      throw new ControllerFailureRuntimeException("Controller has failed!");
+   };
 
    private ROS2Node ros2Node;
    @SuppressWarnings("rawtypes")
@@ -151,14 +157,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    public void start(boolean cameraTracksPelvis)
    {
       getSimulationSessionControls().addSimulationThrowableListener(lastThrowable::set);
-
-      HighLevelHumanoidControllerFactory controllerFactory = getHighLevelHumanoidControllerFactory();
-      if (controllerFactory != null)
-      {
-         AtomicBoolean controllerFailed = new AtomicBoolean(false);
-         controllerFactory.attachControllerFailureListener(fallingDirection -> controllerFailed.set(true));
-         getSimulationSessionControls().addExternalTerminalCondition(() -> controllerFailed.get());
-      }
+      enableExceptionControllerFailure();
 
       // Necessary to be able to restart the GUI during a series of tests.
       avatarSimulation.setSystemExitOnDestroy(false);
@@ -180,6 +179,18 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
 
       // We park the simulation thread assuming that the calling test will need to run the simulation in their own thread to keep things synchronous.
       getSimulationSession().stopSessionThread();
+   }
+
+   public void enableExceptionControllerFailure()
+   {
+      if (getHighLevelHumanoidControllerFactory() != null)
+         getHighLevelHumanoidControllerFactory().attachControllerFailureListener(exceptionOnFailureListener);
+   }
+
+   public void disableExceptionControllerFailure()
+   {
+      if (getHighLevelHumanoidControllerFactory() != null)
+         getHighLevelHumanoidControllerFactory().detachControllerFailureListener(exceptionOnFailureListener);
    }
 
    private void initializeCamera(Orientation3DReadOnly robotOrientation, Tuple3DReadOnly robotPosition)
@@ -858,5 +869,20 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    public List<YoVariable> getVariables()
    {
       return getRootRegistry().getVariables();
+   }
+
+   public static class ControllerFailureRuntimeException extends RuntimeException
+   {
+      private static final long serialVersionUID = 2279107051689445347L;
+
+      public ControllerFailureRuntimeException(String message, Throwable cause)
+      {
+         super(message, cause);
+      }
+
+      public ControllerFailureRuntimeException(String message)
+      {
+         super(message);
+      }
    }
 }
