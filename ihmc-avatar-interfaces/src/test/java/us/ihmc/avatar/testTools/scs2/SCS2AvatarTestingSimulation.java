@@ -310,6 +310,32 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    }
 
    /**
+    * Simulate indefinitely.
+    * <p>
+    * WARNING: This will block the calling thread indefinitely. The caller needs to add an additional
+    * terminal condition beforehand to eventually stop the simulation.
+    * </p>
+    * <p>
+    * The method returns once the simulation is done.
+    * </p>
+    * <p>
+    * If an exception is thrown during the simulation, it can be retrieved via
+    * {@link #getLastThrownException()}.
+    * </p>
+    * 
+    * @param duration desired simulation duration in seconds.
+    * @return {@code true} if the simulation was successful, {@code false} if the simulation failed or
+    *         the controller threw an exception.
+    * @see #addSimulationTerminalCondition(BooleanSupplier)
+    */
+   public boolean simulateNow()
+   {
+      checkSimulationSessionAlive();
+      lastThrowable.set(null);
+      return getSimulationSessionControls().simulateNow();
+   }
+
+   /**
     * Gets the throwable (if any) that was thrown during the last simulation.
     * 
     * @return the exception thrown during the last simulation, or {@code null} if none was thrown.
