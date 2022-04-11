@@ -95,6 +95,15 @@ public class GDXHandPoseAction implements GDXBehaviorAction
    }
 
    @Override
+   public void calculate3DViewPick(ImGui3DViewInput input)
+   {
+      if (selected.get())
+      {
+         poseGizmo.calculate3DViewPick(input);
+      }
+   }
+
+   @Override
    public void process3DViewInput(ImGui3DViewInput input)
    {
       if (selected.get())

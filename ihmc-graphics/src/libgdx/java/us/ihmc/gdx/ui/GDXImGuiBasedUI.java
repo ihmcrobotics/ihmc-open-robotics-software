@@ -54,6 +54,7 @@ public class GDXImGuiBasedUI
    private String statusText = ""; // TODO: Add status at bottom of window
    private final ImGuiPanelSizeHandler view3DPanelSizeHandler = new ImGuiPanelSizeHandler();
    private ImGui3DViewInput inputCalculator;
+   private final ArrayList<Consumer<ImGui3DViewInput>> imgui3DViewPickCalculators = new ArrayList<>();
    private final ArrayList<Consumer<ImGui3DViewInput>> imgui3DViewInputProcessors = new ArrayList<>();
    private GLFrameBuffer frameBuffer;
    private float sizeX;
@@ -234,6 +235,11 @@ public class GDXImGuiBasedUI
       float renderSizeY = sizeY * ANTI_ALIASING;
 
       inputCalculator.compute();
+      for (Consumer<ImGui3DViewInput> imgui3DViewPickCalculator : imgui3DViewPickCalculators)
+      {
+         imgui3DViewPickCalculator.accept(inputCalculator);
+      }
+      inputCalculator.calculateClosestPick();
       for (Consumer<ImGui3DViewInput> imGuiInputProcessor : imgui3DViewInputProcessors)
       {
          imGuiInputProcessor.accept(inputCalculator);
@@ -310,6 +316,11 @@ public class GDXImGuiBasedUI
    public void addOnCloseRequestListener(Runnable onCloseRequest)
    {
       onCloseRequestListeners.add(onCloseRequest);
+   }
+
+   public void addImGui3DViewPickCalculator(Consumer<ImGui3DViewInput> calculate3DViewPick)
+   {
+      imgui3DViewPickCalculators.add(calculate3DViewPick);
    }
 
    public void addImGui3DViewInputProcessor(Consumer<ImGui3DViewInput> processImGuiInput)

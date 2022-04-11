@@ -26,6 +26,7 @@ import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewInput;
+import us.ihmc.gdx.input.ImGui3DViewPickResult;
 import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
@@ -66,6 +67,9 @@ public class GDXPathControlRingGizmo implements RenderableProvider
    private DynamicGDXModel negativeYArrowModel = new DynamicGDXModel();
    private final Point3D closestCollision = new Point3D();
    private int closestCollisionSelection = -1;
+   private double closestCollisionDistance;
+   private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
+   private boolean isMousePickSelected = false;
    private final HollowCylinderRayIntersection hollowCylinderIntersection = new HollowCylinderRayIntersection();
    private final DiscreteIsoscelesTriangularPrismRayIntersection positiveXArrowIntersection = new DiscreteIsoscelesTriangularPrismRayIntersection();
    private final DiscreteIsoscelesTriangularPrismRayIntersection positiveYArrowIntersection = new DiscreteIsoscelesTriangularPrismRayIntersection();
@@ -183,27 +187,42 @@ public class GDXPathControlRingGizmo implements RenderableProvider
       recreateGraphics();
    }
 
-   public void process3DViewInput(ImGui3DViewInput input)
+   public void calculate3DViewPick(ImGui3DViewInput input)
    {
       updateTransforms();
 
       boolean rightMouseDragging = input.isDragging(ImGuiMouseButton.Right);
       boolean middleMouseDragging = input.isDragging(ImGuiMouseButton.Middle);
-      boolean middleMouseDown = ImGui.getIO().getMouseDown(ImGuiMouseButton.Middle);
       boolean isWindowHovered = ImGui.isWindowHovered();
-      isBeingDragged = false;
 
       if (isWindowHovered && !rightMouseDragging && !middleMouseDragging)
       {
          Line3DReadOnly pickRay = input.getPickRayInWorld();
          determineCurrentSelectionFromPickRay(pickRay);
+      }
 
+      pickResult.setPickIntersects(closestCollisionSelection > -1);
+      pickResult.setDistanceToCamera(closestCollisionDistance);
+      input.getPickResults().add(pickResult);
+   }
+
+   public void process3DViewInput(ImGui3DViewInput input)
+   {
+      boolean rightMouseDragging = input.isDragging(ImGuiMouseButton.Right);
+      boolean middleMouseDragging = input.isDragging(ImGuiMouseButton.Middle);
+      boolean middleMouseDown = ImGui.getIO().getMouseDown(ImGuiMouseButton.Middle);
+      boolean isWindowHovered = ImGui.isWindowHovered();
+      isBeingDragged = false;
+      isMousePickSelected = pickResult == input.getClosestPick();
+
+      if (isMousePickSelected && isWindowHovered && !rightMouseDragging && !middleMouseDragging)
+      {
          if (middleMouseDown && closestCollisionSelection > -1)
          {
             clockFaceDragAlgorithm.reset();
          }
       }
-      if (rightMouseDragging || middleMouseDragging)
+      if (isMousePickSelected && (rightMouseDragging || middleMouseDragging))
       {
          Line3DReadOnly pickRay = input.getPickRayInWorld();
 
@@ -338,7 +357,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
       negativeXArrowIntersects = false;
       negativeYArrowIntersects = false;
       closestCollisionSelection = -1;
-      double closestCollisionDistance = Double.POSITIVE_INFINITY;
+      closestCollisionDistance = Double.POSITIVE_INFINITY;
 
       hollowCylinderIntersection.setup(discThickness.get(), discOuterRadius.get(), discInnerRadius.get(), 0.0, transformToWorld);
       double distance = hollowCylinderIntersection.intersect(pickRay);
@@ -414,11 +433,12 @@ public class GDXPathControlRingGizmo implements RenderableProvider
 
    private void updateMaterialHighlighting()
    {
-      discModel.setMaterial(highlightingEnabled && closestCollisionSelection == 0 ? highlightedDiscMaterial : normalDiscMaterial);
-      positiveXArrowModel.setMaterial(highlightingEnabled && closestCollisionSelection == 1 ? highlightedArrowMaterial : normalArrowMaterial);
-      positiveYArrowModel.setMaterial(highlightingEnabled && closestCollisionSelection == 2 ? highlightedArrowMaterial : normalArrowMaterial);
-      negativeXArrowModel.setMaterial(highlightingEnabled && closestCollisionSelection == 3 ? highlightedArrowMaterial : normalArrowMaterial);
-      negativeYArrowModel.setMaterial(highlightingEnabled && closestCollisionSelection == 4 ? highlightedArrowMaterial : normalArrowMaterial);
+      boolean prior = highlightingEnabled && isMousePickSelected;
+      discModel.setMaterial(prior && closestCollisionSelection == 0 ? highlightedDiscMaterial : normalDiscMaterial);
+      positiveXArrowModel.setMaterial(prior && closestCollisionSelection == 1 ? highlightedArrowMaterial : normalArrowMaterial);
+      positiveYArrowModel.setMaterial(prior && closestCollisionSelection == 2 ? highlightedArrowMaterial : normalArrowMaterial);
+      negativeXArrowModel.setMaterial(prior && closestCollisionSelection == 3 ? highlightedArrowMaterial : normalArrowMaterial);
+      negativeYArrowModel.setMaterial(prior && closestCollisionSelection == 4 ? highlightedArrowMaterial : normalArrowMaterial);
    }
 
    public ImGuiPanel createTunerPanel(String name)
@@ -490,39 +510,40 @@ public class GDXPathControlRingGizmo implements RenderableProvider
       return gizmoFrame;
    }
 
-   public boolean getIntersectsAny()
+   public boolean getAnyPartPickSelected()
    {
-      return hollowCylinderIntersects || positiveXArrowIntersects || positiveYArrowIntersects || negativeXArrowIntersects || negativeYArrowIntersects;
+      return isMousePickSelected
+             && (hollowCylinderIntersects || positiveXArrowIntersects || positiveYArrowIntersects || negativeXArrowIntersects || negativeYArrowIntersects);
    }
 
-   public boolean getIntersectsAnyArrow()
+   public boolean getAnyArrowPickSelected()
    {
-      return positiveXArrowIntersects || positiveYArrowIntersects || negativeXArrowIntersects || negativeYArrowIntersects;
+      return isMousePickSelected && (positiveXArrowIntersects || positiveYArrowIntersects || negativeXArrowIntersects || negativeYArrowIntersects);
    }
 
-   public boolean getHollowCylinderIntersects()
+   public boolean getHollowCylinderPickSelected()
    {
-      return hollowCylinderIntersects;
+      return isMousePickSelected && hollowCylinderIntersects;
    }
 
-   public boolean getPositiveXArrowIntersects()
+   public boolean getPositiveXArrowPickSelected()
    {
-      return positiveXArrowIntersects;
+      return isMousePickSelected && positiveXArrowIntersects;
    }
 
-   public boolean getPositiveYArrowIntersects()
+   public boolean getPositiveYArrowPickSelected()
    {
-      return positiveYArrowIntersects;
+      return isMousePickSelected && positiveYArrowIntersects;
    }
 
-   public boolean getNegativeXArrowIntersects()
+   public boolean getNegativeXArrowPickSelected()
    {
-      return negativeXArrowIntersects;
+      return isMousePickSelected && negativeXArrowIntersects;
    }
 
-   public boolean getNegativeYArrowIntersects()
+   public boolean getNegativeYArrowPickSelected()
    {
-      return negativeYArrowIntersects;
+      return isMousePickSelected && negativeYArrowIntersects;
    }
 
    public void setShowArrows(boolean showArrows)

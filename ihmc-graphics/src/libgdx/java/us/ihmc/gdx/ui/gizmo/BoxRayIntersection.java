@@ -9,7 +9,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
 public class BoxRayIntersection
 {
@@ -22,8 +22,9 @@ public class BoxRayIntersection
    private final FrameVector3D rayDirection = new FrameVector3D();
    private final Point3D boundingBoxMin = new Point3D();
    private final Point3D boundingBoxMax = new Point3D();
-   private Point3DBasics firstIntersectionToPack;
-   private Point3DBasics secondIntersectionToPack;
+   private final Point3D firstIntersectionToPack = new Point3D();
+   private final Point3D secondIntersectionToPack = new Point3D();
+   private boolean intersects = false;
 
    public boolean intersect(double sizeX, double sizeY, double sizeZ, Pose3DReadOnly poseInWorld, Line3DReadOnly pickRay)
    {
@@ -45,16 +46,22 @@ public class BoxRayIntersection
                                                                                                rayDirection,
                                                                                                firstIntersectionToPack,
                                                                                                secondIntersectionToPack);
-      return numberOfIntersections == 2;
+      intersects = numberOfIntersections == 2;
+      return intersects;
    }
 
-   public Point3DBasics getFirstIntersectionToPack()
+   public Point3DReadOnly getFirstIntersectionToPack()
    {
       return firstIntersectionToPack;
    }
 
-   public Point3DBasics getSecondIntersectionToPack()
+   public Point3DReadOnly getSecondIntersectionToPack()
    {
       return secondIntersectionToPack;
+   }
+
+   public boolean getIntersects()
+   {
+      return intersects;
    }
 }

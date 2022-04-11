@@ -12,6 +12,8 @@ public interface GDXBehaviorAction
 {
    public void update();
 
+   public void calculate3DViewPick(ImGui3DViewInput input);
+
    public void process3DViewInput(ImGui3DViewInput input);
 
    public void renderImGuiWidgets();

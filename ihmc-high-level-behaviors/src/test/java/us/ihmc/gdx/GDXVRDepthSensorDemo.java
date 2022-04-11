@@ -87,6 +87,7 @@ public class GDXVRDepthSensorDemo
 
             gizmo.create(baseUI.get3DSceneManager().getCamera3D());
             gizmo.getTransformToParent().set(initialCameraTransform);
+            baseUI.addImGui3DViewPickCalculator(gizmo::calculate3DViewPick);
             baseUI.addImGui3DViewInputProcessor(gizmo::process3DViewInput);
             baseUI.get3DSceneManager().addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
          }

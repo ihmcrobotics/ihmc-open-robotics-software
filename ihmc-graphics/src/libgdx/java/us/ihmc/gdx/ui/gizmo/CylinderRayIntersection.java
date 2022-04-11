@@ -11,6 +11,7 @@ public class CylinderRayIntersection
    private final Cylinder3D cylinder = new Cylinder3D();
    private final Point3D firstIntersectionToPack = new Point3D();
    private final Point3D secondIntersectionToPack = new Point3D();
+   private boolean intersects = false;
 
    public void setup(double length, double radius)
    {
@@ -43,7 +44,8 @@ public class CylinderRayIntersection
                                                                                             pickRay.getDirection(),
                                                                                             firstIntersectionToPack,
                                                                                             secondIntersectionToPack);
-      return numberOfIntersections == 2 ? firstIntersectionToPack.distance(pickRay.getPoint()) : Double.NaN;
+      intersects = numberOfIntersections == 2;
+      return intersects ? firstIntersectionToPack.distance(pickRay.getPoint()) : Double.NaN;
    }
 
    public Point3D getClosestIntersection()
@@ -54,5 +56,10 @@ public class CylinderRayIntersection
    public Cylinder3D getCylinder()
    {
       return cylinder;
+   }
+
+   public boolean getIntersects()
+   {
+      return intersects;
    }
 }
