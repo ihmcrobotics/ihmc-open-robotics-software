@@ -18,8 +18,10 @@ import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
+import us.ihmc.tools.thread.StatelessNotification;
 
 import java.util.ArrayList;
+import java.util.function.Supplier;
 
 public class GDXSCS2EnvironmentManager
 {
@@ -33,6 +35,7 @@ public class GDXSCS2EnvironmentManager
    private boolean useVelocityAndHeadingScript;
    private GDXImGuiBasedUI baseUI;
    private int recordFrequency;
+   private Supplier<DRCRobotModel> robotModelSupplier;
    private DRCRobotModel robotModel;
    private CommunicationMode ros2CommunicationMode;
    private final ArrayList<Robot> secondaryRobots = new ArrayList<>();
@@ -40,11 +43,12 @@ public class GDXSCS2EnvironmentManager
    private volatile boolean starting = false;
    private volatile boolean started = false;
    private ArrayList<Runnable> onSessionStartedRunnables = new ArrayList<>();
+   private final StatelessNotification destroyedNotification = new StatelessNotification();
 
-   public void create(GDXImGuiBasedUI baseUI, DRCRobotModel robotModel, CommunicationMode ros2CommunicationMode)
+   public void create(GDXImGuiBasedUI baseUI, Supplier<DRCRobotModel> robotModelSupplier, CommunicationMode ros2CommunicationMode)
    {
       this.baseUI = baseUI;
-      this.robotModel = robotModel;
+      this.robotModelSupplier = robotModelSupplier;
       this.ros2CommunicationMode = ros2CommunicationMode;
 
       //      recordFrequency = (int) Math.max(1.0, Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT()));
@@ -52,9 +56,6 @@ public class GDXSCS2EnvironmentManager
 
       useVelocityAndHeadingScript = true;
       walkingScriptParameters = new HeadingAndVelocityEvaluationScriptParameters();
-
-      double initialYaw = 0.3;
-      robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, initialYaw);
 
       baseUI.getImGuiPanelManager().addPanel(managerPanel);
    }
@@ -73,7 +74,7 @@ public class GDXSCS2EnvironmentManager
          if (ImGui.button(labels.get("Rebuild simulation")))
          {
             destroy();
-            buildSimulation();
+            buildSimulation(true);
          }
          ImGui.sameLine();
          if (ImGui.button(labels.get("Destroy")))
@@ -94,9 +95,22 @@ public class GDXSCS2EnvironmentManager
 
    public void buildSimulation()
    {
+      buildSimulation(false);
+   }
+
+   public void buildSimulation(boolean waitForDestroy)
+   {
       starting = true;
       ThreadTools.startAsDaemon(() ->
       {
+         if (waitForDestroy)
+            destroyedNotification.blockingWait();
+
+         robotModel = robotModelSupplier.get();
+
+         double initialYaw = 0.3;
+         robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, initialYaw);
+
          realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(ros2CommunicationMode.getPubSubImplementation(),
                                                              "flat_ground_walking_track_simulation");
 
@@ -159,6 +173,8 @@ public class GDXSCS2EnvironmentManager
             avatarSimulation = null;
             scs2SimulationSession = null;
             realtimeROS2Node = null;
+            robotModel = null;
+            destroyedNotification.notifyOtherThread();
          }, getClass().getSimpleName() + "Destroy");
       }
    }

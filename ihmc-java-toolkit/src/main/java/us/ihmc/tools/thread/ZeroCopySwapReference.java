@@ -61,6 +61,6 @@ public class ZeroCopySwapReference<T>
       consumer.accept(forHighPriorityThread);
 
       hightPriorityThreadIsAccessing = false;
-      notification.notifyThreadOne();
+      notification.notifyOtherThread();
    }
 }
