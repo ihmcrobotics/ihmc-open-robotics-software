@@ -70,8 +70,8 @@ public class HeuristicICPController implements ICPControllerInterface
    private final FramePoint2D currentCoMPosition = new FramePoint2D();
    private final FrameVector2D currentCoMVelocity = new FrameVector2D();
 
-   final YoFramePoint2D perfectCoP = new YoFramePoint2D(yoNamePrefix + "PerfectCoP", worldFrame, registry);
-   final YoFramePoint2D perfectCMP = new YoFramePoint2D(yoNamePrefix + "PerfectCMP", worldFrame, registry);
+   private final YoFramePoint2D perfectCoP = new YoFramePoint2D(yoNamePrefix + "PerfectCoP", worldFrame, registry);
+   private final YoFramePoint2D perfectCMP = new YoFramePoint2D(yoNamePrefix + "PerfectCMP", worldFrame, registry);
 
    // Feedback control computations before projection (unconstrained)
    final YoFrameVector2D icpError = new YoFrameVector2D(yoNamePrefix + "ICPError", "", worldFrame, registry);
@@ -96,7 +96,7 @@ public class HeuristicICPController implements ICPControllerInterface
 
    // Projection computation variables:
    private final YoDouble dotProductForFootEdgeProjection = new YoDouble(yoNamePrefix + "DotProductForFootEdgeProjection", registry);
-   private final YoDouble adjustedICPOnProjection = new YoDouble(yoNamePrefix + "AdjustedICPOnProjection", registry);
+   private final YoDouble momentumShiftedICPOnProjection = new YoDouble(yoNamePrefix + "momentumShiftedICPOnProjection", registry);
    private final YoDouble firstIntersectionOnProjection = new YoDouble(yoNamePrefix + "FirstIntersectionOnProjection", registry);
    private final YoDouble secondIntersectionOnProjection = new YoDouble(yoNamePrefix + "SecondIntersectionOnProjection", registry);
    private final YoDouble firstPerfectOnProjection = new YoDouble(yoNamePrefix + "FirstPerfectOnProjection", registry);
@@ -252,9 +252,7 @@ public class HeuristicICPController implements ICPControllerInterface
       icpPerpFeedback.set(MathTools.clamp(icpPerpFeedback.getValue(), feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion()));
 
       // Add the scaled amount of the feedforward to the feedback control based on the perpendicular error.
-      unconstrainedFeedback.set(pureFeedforwardControl);
-      unconstrainedFeedback.scale(1.0 - feedbackFeedforwardAlpha.getValue());
-      unconstrainedFeedback.add(pureFeedbackControl);
+      unconstrainedFeedback.scaleAdd(1.0 - feedbackFeedforwardAlpha.getValue(), pureFeedforwardControl, pureFeedbackControl);
 
       unconstrainedFeedbackCMP.add(currentICP, unconstrainedFeedback);
       unconstrainedFeedbackCoP.sub(unconstrainedFeedbackCMP, perfectCMPOffset);
@@ -303,12 +301,15 @@ public class HeuristicICPController implements ICPControllerInterface
       // Compute the projection vector and projection line. 
       projectionVector.sub(currentICP, unconstrainedFeedbackCMP);
 
-      adjustedICPOnProjection.set(projectionVector.length());
+      // Here we say momentumShifted in momentumShiftedICPOnProjection, since it is not the actual ICP with respect to the CoP, but instead 
+      // the ICP with respect to the CMP. So, when we are making the adjustment to keep the CoP inside the support polygon, 
+      // we are also taking into consideration how the adjusted CMP will be pushing on the ICP.
+      momentumShiftedICPOnProjection.set(projectionVector.length());
 
       // If the projection vector, and hence the error is small and already inside the foot, then do not project at all.
       // But if it is small and not inside the foot, then orthogonally project the CoP into the foot.
       // This prevents any NaN issues and any crazy discontinuities as you get near the foot.
-      if (adjustedICPOnProjection.getValue() < 0.002)
+      if (momentumShiftedICPOnProjection.getValue() < 0.002)
       {
          if (supportPolygonInWorld.isPointInside(unconstrainedFeedbackCoP))
          {
@@ -363,7 +364,7 @@ public class HeuristicICPController implements ICPControllerInterface
       firstPerfectOnProjection.set(firstIntersectionOnProjection.getValue());
       secondPerfectOnProjection.set(secondIntersectionOnProjection.getValue());
 
-      copAdjustmentAmount.set(HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICPOnProjection.getValue(),
+      copAdjustmentAmount.set(HeuristicICPControllerHelper.computeAdjustmentDistance(momentumShiftedICPOnProjection.getValue(),
                                                                                     firstIntersectionOnProjection.getValue(),
                                                                                     secondIntersectionOnProjection.getValue(),
                                                                                     firstPerfectOnProjection.getValue(),
@@ -371,9 +372,9 @@ public class HeuristicICPController implements ICPControllerInterface
                                                                                     minICPPushDelta.getValue(),
                                                                                     maxCoPProjectionInside.getValue()));
 
-      // If the adjustment distance is greater than the adjustedICP, then that means you are pushing directly backwards on the ICP. 
+      // If the adjustment distance is greater than the adjustedICPOnProjection, then that means you are pushing directly backwards on the ICP. 
       // Instead, in that case, do a smarter projection, as if the projectionLine does not intersect the foot.
-      if (copAdjustmentAmount.getValue() > adjustedICPOnProjection.getValue())
+      if (copAdjustmentAmount.getValue() > momentumShiftedICPOnProjection.getValue())
       {
          projectCoPWhenProjectionLineDoesNotIntersectFoot(supportPolygonInWorld);
          return;
@@ -437,13 +438,18 @@ public class HeuristicICPController implements ICPControllerInterface
          dotProductForFootEdgeProjection.mul(-1.0);
       }
 
+      // These parameters are to smooth the transition from jumping all the way to a line of sight point. Line of sight point will give the best angle,
+      // but at the expense of large distance, thereby speeding up the ICP a lot. So only move towards a line of sight point when the distance is going to 
+      // be large anyway. These parameters are not terribly critical and should not be user tuned since other high level things should be kicking in 
+      // instead when we are at this point. They are just here to help when the ICP is still close to the foot and therefore, slowing down the 
+      // velocity of the ICP might be beneficial to help provide time for a recovery step.
       double scaleDistanceFromICP = 2.5;
       double addDistanceToPerpendicular = 0.06;
+      double dotProductThresholdBeforeMovingInPerpendicularDirection = 0.25;
 
       double amountToMoveInPerpendicularDirection = (scaleDistanceFromICP * distanceFromProjectionToICP) + addDistanceToPerpendicular;
-      double amountToScaleFromDotProduct = (dotProductForFootEdgeProjection.getValue() - 0.25) / (1.0 - 0.25);
-      if (amountToScaleFromDotProduct < 0.0)
-         amountToScaleFromDotProduct = 0.0;
+      double amountToScaleFromDotProduct = (dotProductForFootEdgeProjection.getValue() - dotProductThresholdBeforeMovingInPerpendicularDirection) / (1.0 - dotProductThresholdBeforeMovingInPerpendicularDirection);
+      amountToScaleFromDotProduct = MathTools.clamp(amountToScaleFromDotProduct, 0.0, 1.0);
 
       amountToMoveInPerpendicularDirection = amountToMoveInPerpendicularDirection * amountToScaleFromDotProduct;
 
