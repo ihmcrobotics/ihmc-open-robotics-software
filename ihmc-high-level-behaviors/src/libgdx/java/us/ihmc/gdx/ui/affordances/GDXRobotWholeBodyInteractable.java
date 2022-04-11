@@ -15,6 +15,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
+import us.ihmc.gdx.input.ImGui3DViewPickResult;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -167,6 +168,28 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
          }
 
          walkPathControlRing.update();
+      }
+   }
+
+   public void calculate3DViewPick(ImGui3DViewInput input)
+   {
+      if (interactablesEnabled.get())
+      {
+         walkPathControlRing.calculate3DViewPick(input);
+         if (showSelfCollisionMeshes.get())
+         {
+            for (GDXRobotCollisionLink collisionLink : selfCollisionLinks)
+            {
+               collisionLink.calculatePick(input);
+            }
+         }
+         if (showEnvironmentCollisionMeshes.get())
+         {
+            for (GDXRobotCollisionLink collisionLink : environmentCollisionLinks)
+            {
+               collisionLink.calculatePick(input);
+            }
+         }
       }
    }
 

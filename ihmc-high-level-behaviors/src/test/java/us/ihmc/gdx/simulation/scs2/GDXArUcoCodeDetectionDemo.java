@@ -57,6 +57,7 @@ public class GDXArUcoCodeDetectionDemo
 
             sensorPoseGizmo.create(baseUI.get3DSceneManager().getCamera3D());
             sensorPoseGizmo.setResizeAutomatically(true);
+            baseUI.addImGui3DViewPickCalculator(sensorPoseGizmo::calculate3DViewPick);
             baseUI.addImGui3DViewInputProcessor(sensorPoseGizmo::process3DViewInput);
             baseUI.get3DSceneManager().addRenderableProvider(sensorPoseGizmo, GDXSceneLevel.VIRTUAL);
             sensorPoseGizmo.getTransformToParent().appendTranslation(0.0, 0.0, 1.0);

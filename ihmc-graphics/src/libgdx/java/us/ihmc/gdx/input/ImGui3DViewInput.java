@@ -9,6 +9,7 @@ import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.tools.GDXTools;
 
+import java.util.ArrayList;
 import java.util.function.Supplier;
 
 /**
@@ -34,6 +35,8 @@ public class ImGui3DViewInput
    private final Line3D pickRayInWorld = new Line3D();
    private boolean computedPickRay = false;
    private boolean initialized = false;
+   private final ArrayList<ImGui3DViewPickResult> pickResults = new ArrayList<>();
+   private ImGui3DViewPickResult closestPick = null;
 
    public ImGui3DViewInput(GDXFocusBasedCamera camera, Supplier<Float> viewportSizeXSupplier, Supplier<Float> viewportSizeYSupplier)
    {
@@ -58,6 +61,8 @@ public class ImGui3DViewInput
 
       for (ImGuiMouseDragData mouseDragDatum : mouseDragData)
          mouseDragDatum.update(isWindowHovered);
+
+      pickResults.clear();
    }
 
    public Line3DReadOnly getPickRayInWorld()
@@ -85,6 +90,25 @@ public class ImGui3DViewInput
       }
 
       return pickRayInWorld;
+   }
+
+   public void calculateClosestPick()
+   {
+      closestPick = null;
+      for (ImGui3DViewPickResult pickResult : pickResults)
+      {
+         if (pickResult.getPickIntersects())
+         {
+            if (closestPick == null)
+            {
+               closestPick = pickResult;
+            }
+            else if (pickResult.getDistanceToCamera() < closestPick.getDistanceToCamera())
+            {
+               closestPick = pickResult;
+            }
+         }
+      }
    }
 
    /**
@@ -128,5 +152,18 @@ public class ImGui3DViewInput
    public float getMouseWheelDelta()
    {
       return mouseWheelDelta;
+   }
+
+   public ArrayList<ImGui3DViewPickResult> getPickResults()
+   {
+      return pickResults;
+   }
+
+   /**
+    * null if no collisions
+    */
+   public ImGui3DViewPickResult getClosestPick()
+   {
+      return closestPick;
    }
 }

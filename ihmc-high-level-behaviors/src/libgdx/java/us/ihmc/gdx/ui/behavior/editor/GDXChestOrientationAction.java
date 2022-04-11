@@ -43,6 +43,12 @@ public class GDXChestOrientationAction implements GDXBehaviorAction
    }
 
    @Override
+   public void calculate3DViewPick(ImGui3DViewInput input)
+   {
+
+   }
+
+   @Override
    public void process3DViewInput(ImGui3DViewInput input)
    {
 

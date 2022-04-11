@@ -31,6 +31,7 @@ public class GDXFrameGizmoDemo
             transform.getTranslation().addX(0.5);
             GDXInteractableReferenceFrame interactableReferenceFrame = new GDXInteractableReferenceFrame();
             interactableReferenceFrame.create(referenceFrame, transform, 1.0, baseUI.get3DSceneManager().getCamera3D());
+            baseUI.addImGui3DViewPickCalculator(interactableReferenceFrame::calculate3DViewPick);
             baseUI.addImGui3DViewInputProcessor(interactableReferenceFrame::process3DViewInput);
             baseUI.get3DSceneManager().addRenderableProvider(interactableReferenceFrame::getVirtualRenderables);
 
@@ -39,11 +40,13 @@ public class GDXFrameGizmoDemo
             ReferenceFrame referenceFrame2 = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(referenceFrame, transform2);
             GDXInteractableReferenceFrame interactableReferenceFrame2 = new GDXInteractableReferenceFrame();
             interactableReferenceFrame2.create(referenceFrame2, transform2, 1.0, baseUI.get3DSceneManager().getCamera3D());
+            baseUI.addImGui3DViewPickCalculator(interactableReferenceFrame2::calculate3DViewPick);
             baseUI.addImGui3DViewInputProcessor(interactableReferenceFrame2::process3DViewInput);
             baseUI.get3DSceneManager().addRenderableProvider(interactableReferenceFrame2::getVirtualRenderables);
 
             GDXPose3DGizmo poseGizmo = new GDXPose3DGizmo(interactableReferenceFrame2.getSelectablePose3DGizmo().getPoseGizmo().getGizmoFrame());
             poseGizmo.create(baseUI.get3DSceneManager().getCamera3D());
+            baseUI.addImGui3DViewPickCalculator(poseGizmo::calculate3DViewPick);
             baseUI.addImGui3DViewInputProcessor(poseGizmo::process3DViewInput);
             baseUI.get3DSceneManager().addRenderableProvider(poseGizmo);
             baseUI.getImGuiPanelManager().addPanel(poseGizmo.createTunerPanel(GDXFrameGizmoDemo.class.getSimpleName()));
@@ -52,6 +55,7 @@ public class GDXFrameGizmoDemo
             GDXPathControlRingGizmo footstepRingGizmo
                   = new GDXPathControlRingGizmo(interactableReferenceFrame2.getSelectablePose3DGizmo().getPoseGizmo().getGizmoFrame());
             footstepRingGizmo.create(baseUI.get3DSceneManager().getCamera3D());
+            baseUI.addImGui3DViewPickCalculator(footstepRingGizmo::calculate3DViewPick);
             baseUI.addImGui3DViewInputProcessor(footstepRingGizmo::process3DViewInput);
             baseUI.get3DSceneManager().addRenderableProvider(footstepRingGizmo);
             baseUI.getImGuiPanelManager().addPanel(footstepRingGizmo.createTunerPanel(GDXFrameGizmoDemo.class.getSimpleName()));

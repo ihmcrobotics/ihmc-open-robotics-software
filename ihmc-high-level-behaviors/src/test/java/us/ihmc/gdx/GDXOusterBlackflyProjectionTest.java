@@ -68,6 +68,7 @@ public class GDXOusterBlackflyProjectionTest
             userReferenceFrameGraphic.setToReferenceFrame(userReferenceFrame);
 
             ousterPointInWorldGizmo.create(baseUI.get3DSceneManager().getCamera3D());
+            baseUI.addImGui3DViewPickCalculator(ousterPointInWorldGizmo::calculate3DViewPick);
             baseUI.addImGui3DViewInputProcessor(ousterPointInWorldGizmo::process3DViewInput);
             ousterPointInWorldGizmo.setResizeAutomatically(false);
 

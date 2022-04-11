@@ -35,6 +35,14 @@ public class GDXTransformTuner
       poseGizmo.create(camera3D);
    }
 
+   public void calculate3DViewPick(ImGui3DViewInput input)
+   {
+      if (showGizmo.get())
+      {
+         poseGizmo.calculate3DViewPick(input);
+      }
+   }
+
    // happens before renderImGuiWidgets
    public void process3DViewInput(ImGui3DViewInput input)
    {

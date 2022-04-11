@@ -114,6 +114,25 @@ public class GDXWalkAction implements GDXBehaviorAction
    }
 
    @Override
+   public void calculate3DViewPick(ImGui3DViewInput input)
+   {
+      if (selected.get())
+      {
+         boolean goalFootEditingEnabled = false;
+         for (RobotSide side : RobotSide.values)
+         {
+            if (editGoalFootPoses.get(side).get())
+            {
+               goalFootEditingEnabled = true;
+               editGoalFootGizmos.get(side).calculate3DViewPick(input);
+            }
+         }
+         if (!goalFootEditingEnabled)
+            footstepPlannerGoalGizmo.calculate3DViewPick(input);
+      }
+   }
+
+   @Override
    public void process3DViewInput(ImGui3DViewInput input)
    {
       if (selected.get())

@@ -40,6 +40,7 @@ public class GDXGizmoDemo
             baseUI.get3DSceneManager().addModelInstance(clockCenter);
 
             poseGizmo.create(focusBasedCamera);
+            baseUI.addImGui3DViewPickCalculator(poseGizmo::calculate3DViewPick);
             baseUI.addImGui3DViewInputProcessor(poseGizmo::process3DViewInput);
             baseUI.get3DSceneManager().addRenderableProvider(poseGizmo);
             baseUI.getImGuiPanelManager().addPanel(poseGizmo.createTunerPanel(GDXGizmoDemo.class.getSimpleName()));
@@ -47,6 +48,7 @@ public class GDXGizmoDemo
             poseGizmo.getTransformToParent().getTranslation().set(-1.0, -2.0, 0.1);
 
             footstepRingGizmo.create(focusBasedCamera);
+            baseUI.addImGui3DViewPickCalculator(footstepRingGizmo::calculate3DViewPick);
             baseUI.addImGui3DViewInputProcessor(footstepRingGizmo::process3DViewInput);
             baseUI.get3DSceneManager().addRenderableProvider(footstepRingGizmo);
             baseUI.getImGuiPanelManager().addPanel(footstepRingGizmo.createTunerPanel(GDXGizmoDemo.class.getSimpleName()));

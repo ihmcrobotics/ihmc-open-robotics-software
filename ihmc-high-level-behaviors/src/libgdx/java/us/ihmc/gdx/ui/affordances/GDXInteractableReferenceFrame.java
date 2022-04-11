@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.input.ImGui3DViewInput;
+import us.ihmc.gdx.input.ImGui3DViewPickResult;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.collidables.GDXCoordinateFrameIntersection;
 import us.ihmc.gdx.ui.graphics.GDXReferenceFrameGraphic;
@@ -25,8 +26,9 @@ public class GDXInteractableReferenceFrame
    private GDXReferenceFrameGraphic highlightReferenceFrameGraphic;
    private GDXCoordinateFrameIntersection coordinateFrameIntersection;
    private GDXModelInstanceScaler highlightReferenceFrameGraphicScaler;
-   private boolean mouseCollidesWithFrame;
+   private boolean isCoordinateFramePickSelected;
    private GDXSelectablePose3DGizmo selectablePose3DGizmo;
+   private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
 
    public void create(ReferenceFrame parentFrame, double length, GDXFocusBasedCamera camera3D)
    {
@@ -49,12 +51,22 @@ public class GDXInteractableReferenceFrame
       selectablePose3DGizmo.create(camera3D);
    }
 
+   public void calculate3DViewPick(ImGui3DViewInput input)
+   {
+      selectablePose3DGizmo.calculate3DViewPick(input);
+
+      Line3DReadOnly pickRay = input.getPickRayInWorld();
+      double closestCollisionDistance = coordinateFrameIntersection.intersect(representativeReferenceFrame, pickRay);
+      pickResult.setPickIntersects(!Double.isNaN(closestCollisionDistance));
+      pickResult.setDistanceToCamera(closestCollisionDistance);
+      input.getPickResults().add(pickResult);
+   }
+
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      Line3DReadOnly pickRay = input.getPickRayInWorld();
-      mouseCollidesWithFrame = !Double.isNaN(coordinateFrameIntersection.intersect(representativeReferenceFrame, pickRay));
+      isCoordinateFramePickSelected = pickResult == input.getClosestPick();
 
-      selectablePose3DGizmo.process3DViewInput(input, mouseCollidesWithFrame);
+      selectablePose3DGizmo.process3DViewInput(input, isCoordinateFramePickSelected);
       tempFramePose.setToZero(representativeReferenceFrame);
       tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
       tempFramePose.get(tempTransform);
@@ -66,7 +78,7 @@ public class GDXInteractableReferenceFrame
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       referenceFrameGraphic.getRenderables(renderables, pool);
-      if (mouseCollidesWithFrame || selectablePose3DGizmo.isSelected())
+      if (isCoordinateFramePickSelected || selectablePose3DGizmo.isSelected())
       {
          highlightReferenceFrameGraphic.getRenderables(renderables, pool);
       }

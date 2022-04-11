@@ -47,7 +47,7 @@ public class GDXWalkPathControlRing
    private final GDXPathControlRingGizmo footstepPlannerGoalGizmo = new GDXPathControlRingGizmo();
    private boolean selected = false;
    private boolean modified = false;
-   private boolean mouseIntersectsRing;
+   private boolean mouseRingPickSelected;
    private ROS2SyncedRobotModel syncedRobot;
    private ROS2ControllerHelper ros2Helper;
    private MovingReferenceFrame midFeetZUpFrame;
@@ -132,15 +132,20 @@ public class GDXWalkPathControlRing
       foostepPlanGraphic.update();
    }
 
+   public void calculate3DViewPick(ImGui3DViewInput input)
+   {
+      footstepPlannerGoalGizmo.calculate3DViewPick(input);
+   }
+
    // This happens after update.
    public void process3DViewInput(ImGui3DViewInput input)
    {
       boolean leftMouseReleasedWithoutDrag = input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
 
       footstepPlannerGoalGizmo.process3DViewInput(input);
-      mouseIntersectsRing = footstepPlannerGoalGizmo.getHollowCylinderIntersects();
+      mouseRingPickSelected = footstepPlannerGoalGizmo.getHollowCylinderPickSelected();
 
-      if (!modified && mouseIntersectsRing && leftMouseReleasedWithoutDrag)
+      if (!modified && mouseRingPickSelected && leftMouseReleasedWithoutDrag)
       {
          selected = true;
          modified = true;
@@ -148,11 +153,11 @@ public class GDXWalkPathControlRing
          updateStuff();
          queueFootstepPlan();
       }
-      if (selected && !footstepPlannerGoalGizmo.getIntersectsAny() && leftMouseReleasedWithoutDrag)
+      if (selected && !footstepPlannerGoalGizmo.getAnyPartPickSelected() && leftMouseReleasedWithoutDrag)
       {
          selected = false;
       }
-      if (modified && mouseIntersectsRing && leftMouseReleasedWithoutDrag)
+      if (modified && mouseRingPickSelected && leftMouseReleasedWithoutDrag)
       {
          selected = true;
       }
@@ -163,23 +168,23 @@ public class GDXWalkPathControlRing
       }
       if (selected && leftMouseReleasedWithoutDrag)
       {
-         if (footstepPlannerGoalGizmo.getPositiveXArrowIntersects())
+         if (footstepPlannerGoalGizmo.getPositiveXArrowPickSelected())
          {
             walkFacingDirection.set(Axis3D.Z, 0.0);
          }
-         else if (footstepPlannerGoalGizmo.getPositiveYArrowIntersects())
+         else if (footstepPlannerGoalGizmo.getPositiveYArrowPickSelected())
          {
             walkFacingDirection.set(Axis3D.Z, Math.PI / 2.0);
          }
-         else if (footstepPlannerGoalGizmo.getNegativeXArrowIntersects())
+         else if (footstepPlannerGoalGizmo.getNegativeXArrowPickSelected())
          {
             walkFacingDirection.set(Axis3D.Z, Math.PI);
          }
-         else if (footstepPlannerGoalGizmo.getNegativeYArrowIntersects())
+         else if (footstepPlannerGoalGizmo.getNegativeYArrowPickSelected())
          {
             walkFacingDirection.set(Axis3D.Z, -Math.PI / 2.0);
          }
-         if (footstepPlannerGoalGizmo.getIntersectsAnyArrow())
+         if (footstepPlannerGoalGizmo.getAnyArrowPickSelected())
          {
             footstepPlannerGoalGizmo.getTransformToParent().appendOrientation(walkFacingDirection);
             updateStuff();
@@ -316,7 +321,7 @@ public class GDXWalkPathControlRing
          rightGoalFootstepGraphic.getRenderables(renderables, pool);
          foostepPlanGraphic.getRenderables(renderables, pool);
       }
-      if (modified || mouseIntersectsRing)
+      if (modified || mouseRingPickSelected)
       {
          footstepPlannerGoalGizmo.getRenderables(renderables, pool);
       }

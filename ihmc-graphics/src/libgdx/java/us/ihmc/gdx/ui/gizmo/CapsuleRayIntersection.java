@@ -42,4 +42,34 @@ public class CapsuleRayIntersection
       intersects |= !Double.isNaN(closestDistance);
       return intersects;
    }
+
+   public double getDistanceToCollision(Line3DReadOnly pickRay)
+   {
+      double distanceToCollision = Double.POSITIVE_INFINITY;
+      if (sphereIntersectionPositiveEnd.getIntersects())
+      {
+         double distance = pickRay.getPoint().distance(sphereIntersectionPositiveEnd.getFirstIntersectionToPack());
+         if (distance < distanceToCollision)
+         {
+            distanceToCollision = distance;
+         }
+      }
+      if (sphereIntersectionNegativeEnd.getIntersects())
+      {
+         double distance = pickRay.getPoint().distance(sphereIntersectionNegativeEnd.getFirstIntersectionToPack());
+         if (distance < distanceToCollision)
+         {
+            distanceToCollision = distance;
+         }
+      }
+      if (cylinderIntersection.getIntersects())
+      {
+         double distance = pickRay.getPoint().distance(cylinderIntersection.getClosestIntersection());
+         if (distance < distanceToCollision)
+         {
+            distanceToCollision = distance;
+         }
+      }
+      return distanceToCollision;
+   }
 }

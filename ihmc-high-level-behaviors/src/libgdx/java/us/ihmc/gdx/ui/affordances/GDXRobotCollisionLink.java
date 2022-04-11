@@ -17,6 +17,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.gdx.input.ImGui3DViewInput;
+import us.ihmc.gdx.input.ImGui3DViewPickResult;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.gizmo.BoxRayIntersection;
@@ -33,15 +34,16 @@ public class GDXRobotCollisionLink implements RenderableProvider
    private final ReferenceFrame collisionMeshFrame;
    private final FramePose3D boxPose = new FramePose3D();
    private final Shape3DReadOnly shape;
+   private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
    private SphereRayIntersection sphereRayIntersection;
    private CapsuleRayIntersection capsuleIntersection;
    private BoxRayIntersection boxRayIntersection;
    private ModelInstance coordinateFrame;
-   private boolean intersects;
    private boolean useOverrideTransform = false;
    private final RigidBodyTransform overrideTransform = new RigidBodyTransform();
    private final ReferenceFrame overrideFrame;
    private final ReferenceFrame overrideMeshFrame;
+   private boolean pickSelected = false;
 
    public GDXRobotCollisionLink(us.ihmc.scs2.simulation.collision.Collidable collidable, Color color)
    {
@@ -145,13 +147,12 @@ public class GDXRobotCollisionLink implements RenderableProvider
       }
    }
 
-   // Happens after update
-   public void process3DViewInput(ImGui3DViewInput input)
+   public void calculatePick(ImGui3DViewInput input)
    {
       Line3DReadOnly pickRayInWorld = input.getPickRayInWorld();
       ReferenceFrame frameToUse = useOverrideTransform ? overrideMeshFrame : collisionMeshFrame;
       RigidBodyTransform transformToWorldFrame = frameToUse.getTransformToWorldFrame();
-      intersects = false;
+      pickResult.reset();
       if (shape instanceof Sphere3DReadOnly)
       {
          Sphere3DReadOnly sphere = (Sphere3DReadOnly) shape;
@@ -166,8 +167,10 @@ public class GDXRobotCollisionLink implements RenderableProvider
          double length = capsule.getLength();
          double radius = capsule.getRadius();
          capsuleIntersection.setup(radius, length, position, axis, transformToWorldFrame);
-         intersects = capsuleIntersection.intersect(pickRayInWorld);
-         GDXTools.setTransparency(modelInstance, intersects ? 1.0f : 0.4f);
+         if (capsuleIntersection.intersect(pickRayInWorld))
+         {
+            pickResult.addPickCollision(capsuleIntersection.getDistanceToCollision(input.getPickRayInWorld()));
+         }
       }
       else if (shape instanceof Box3DReadOnly)
       {
@@ -177,7 +180,10 @@ public class GDXRobotCollisionLink implements RenderableProvider
          double sizeX = box.getSizeX();
          double sizeY = box.getSizeY();
          double sizeZ = box.getSizeZ();
-         intersects = boxRayIntersection.intersect(sizeX, sizeY, sizeZ, boxPose, pickRayInWorld);
+         if (boxRayIntersection.intersect(sizeX, sizeY, sizeZ, boxPose, pickRayInWorld))
+         {
+            pickResult.addPickCollision(boxRayIntersection.getFirstIntersectionToPack().distance(input.getPickRayInWorld().getPoint()));
+         }
       }
       else if (shape instanceof PointShape3DReadOnly)
       {
@@ -187,7 +193,15 @@ public class GDXRobotCollisionLink implements RenderableProvider
       {
          LogTools.warn("Shape not handled: {}", shape);
       }
-      GDXTools.setTransparency(modelInstance, intersects ? 1.0f : 0.4f);
+
+      input.getPickResults().add(pickResult);
+   }
+
+   // Happens after update
+   public void process3DViewInput(ImGui3DViewInput input)
+   {
+      pickSelected = input.getClosestPick() == pickResult;
+      GDXTools.setTransparency(modelInstance, pickSelected ? 1.0f : 0.4f);
    }
 
    @Override
@@ -203,8 +217,8 @@ public class GDXRobotCollisionLink implements RenderableProvider
       return overrideTransform;
    }
 
-   public boolean getIntersects()
+   public boolean getPickSelected()
    {
-      return intersects;
+      return pickSelected;
    }
 }

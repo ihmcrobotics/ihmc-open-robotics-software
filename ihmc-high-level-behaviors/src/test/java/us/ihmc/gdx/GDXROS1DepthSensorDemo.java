@@ -38,6 +38,7 @@ public class GDXROS1DepthSensorDemo
 
             poseGizmo.create(baseUI.get3DSceneManager().getCamera3D());
             poseGizmo.setResizeAutomatically(false);
+            baseUI.addImGui3DViewPickCalculator(poseGizmo::calculate3DViewPick);
             baseUI.addImGui3DViewInputProcessor(poseGizmo::process3DViewInput);
             baseUI.get3DSceneManager().addRenderableProvider(poseGizmo, GDXSceneLevel.VIRTUAL);
             poseGizmo.getTransformToParent().appendTranslation(0.0, 0.0, 0.5);

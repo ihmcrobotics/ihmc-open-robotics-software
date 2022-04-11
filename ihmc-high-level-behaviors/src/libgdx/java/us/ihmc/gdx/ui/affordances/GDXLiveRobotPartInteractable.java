@@ -32,7 +32,7 @@ public class GDXLiveRobotPartInteractable
    private Runnable onSpacePressed;
    private GDXReferenceFrameGraphic graphicReferenceFrameGraphic;
    private GDXReferenceFrameGraphic controlReferenceFrameGraphic;
-   private boolean mouseIntersects;
+   private boolean pickSelected;
 
    public void create(GDXRobotCollisionLink collisionLink, ReferenceFrame controlFrame, String graphicFileName, GDXFocusBasedCamera camera3D)
    {
@@ -57,15 +57,20 @@ public class GDXLiveRobotPartInteractable
       controlReferenceFrameGraphic = new GDXReferenceFrameGraphic(0.2);
    }
 
+   public void calculate3DViewPick(ImGui3DViewInput input)
+   {
+
+   }
+
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      mouseIntersects = collisionLink.getIntersects();
-      boolean isClickedOn = mouseIntersects && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
+      pickSelected = collisionLink.getPickSelected();
+      boolean isClickedOn = pickSelected && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
       boolean isDeletedThisFrame = modified && selectablePose3DGizmo.isSelected() && ImGui.isKeyReleased(ImGuiTools.getDeleteKey());
-      boolean unmodifiedButHovered = !modified && mouseIntersects;
+      boolean unmodifiedButHovered = !modified && pickSelected;
       boolean becomesModified = unmodifiedButHovered && isClickedOn;
       boolean executeMotionKeyPressed = ImGui.isKeyReleased(ImGuiTools.getSpaceKey());
-      boolean modifiedButNotSelectedHovered = modified && !selectablePose3DGizmo.isSelected() && mouseIntersects;
+      boolean modifiedButNotSelectedHovered = modified && !selectablePose3DGizmo.isSelected() && pickSelected;
 
       if (isDeletedThisFrame)
       {
@@ -73,7 +78,7 @@ public class GDXLiveRobotPartInteractable
          collisionLink.setOverrideTransform(false);
       }
 
-      selectablePose3DGizmo.process3DViewInput(input, mouseIntersects);
+      selectablePose3DGizmo.process3DViewInput(input, pickSelected);
 
       if (unmodifiedButHovered)
       {
@@ -150,7 +155,7 @@ public class GDXLiveRobotPartInteractable
          controlReferenceFrameGraphic.getRenderables(renderables, pool);
       }
 
-      if (modified || mouseIntersects)
+      if (modified || pickSelected)
       {
          highlightModel.getRenderables(renderables, pool);
       }

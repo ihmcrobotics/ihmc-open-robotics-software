@@ -37,12 +37,20 @@ public class GDXSelectablePose3DGizmo
       poseGizmo.create(camera3D);
    }
 
-   public void process3DViewInput(ImGui3DViewInput input, boolean mouseIntersects)
+   public void calculate3DViewPick(ImGui3DViewInput input)
+   {
+      if (selected)
+      {
+         poseGizmo.calculate3DViewPick(input);
+      }
+   }
+
+   public void process3DViewInput(ImGui3DViewInput input, boolean isPickSelected)
    {
       // Process input
       boolean leftMouseReleasedWithoutDrag = input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
-      boolean isClickedOn = mouseIntersects && leftMouseReleasedWithoutDrag;
-      boolean somethingElseIsClickedOn = !mouseIntersects && leftMouseReleasedWithoutDrag;
+      boolean isClickedOn = isPickSelected && leftMouseReleasedWithoutDrag;
+      boolean somethingElseIsClickedOn = !isPickSelected && leftMouseReleasedWithoutDrag;
       boolean deselectionKeyPressed = ImGui.isKeyReleased(ImGuiTools.getDeleteKey()) || ImGui.isKeyReleased(ImGuiTools.getEscapeKey());
 
       // Determine selectedness

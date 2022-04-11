@@ -67,6 +67,7 @@ public class GDXFootstepPlannerPanel extends ImGuiPanel implements RenderablePro
    public void create(GDXImGuiBasedUI baseUI)
    {
       goalGizmo.create(baseUI.get3DSceneManager().getCamera3D());
+      baseUI.addImGui3DViewPickCalculator(goalGizmo::calculate3DViewPick);
       baseUI.addImGui3DViewInputProcessor(goalGizmo::process3DViewInput);
       baseUI.get3DSceneManager().addRenderableProvider(this, GDXSceneLevel.VIRTUAL);
       leftStanceFootstepGraphic.create();
