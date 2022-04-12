@@ -1,6 +1,7 @@
 package us.ihmc.gdx.ui.gizmo;
 
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Renderable;
@@ -13,23 +14,24 @@ import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import imgui.type.ImFloat;
 import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.gdx.FocusBasedGDXCamera;
+import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewInput;
+import us.ihmc.gdx.input.ImGui3DViewPickResult;
 import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
-public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
+public class GDXPathControlRingGizmo implements RenderableProvider
 {
    public static final Color LIGHT_GRAY = new Color().fromHsv(0.0f, 0.0f, 0.836f);
    public static final Color LIGHTER_GRAY = new Color().fromHsv(0.0f, 0.0f, 0.95f);
@@ -38,6 +40,7 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
    public static final Color DISC_HIGHLIGHTED_COLOR = LIGHTER_GRAY;
    public static final Color ARROW_NORMAL_COLOR = LIGHT_GRAY;
    public static final Color ARROW_HIGHLIGHTED_COLOR = LIGHTER_GRAY;
+
    static
    {
       DISC_NORMAL_COLOR.a = 0.4f;
@@ -45,6 +48,7 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
       DISC_HIGHLIGHTED_COLOR.a = 0.9f;
       ARROW_HIGHLIGHTED_COLOR.a = 0.9f;
    }
+
    private final double QUARTER_TURN = Math.PI / 2.0;
    private final ImFloat discOuterRadius = new ImFloat(0.426f);
    private final ImFloat discInnerRadius = new ImFloat(0.290f);
@@ -63,18 +67,29 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
    private DynamicGDXModel negativeYArrowModel = new DynamicGDXModel();
    private final Point3D closestCollision = new Point3D();
    private int closestCollisionSelection = -1;
+   private double closestCollisionDistance;
+   private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
+   private boolean isMousePickSelected = false;
    private final HollowCylinderRayIntersection hollowCylinderIntersection = new HollowCylinderRayIntersection();
    private final DiscreteIsoscelesTriangularPrismRayIntersection positiveXArrowIntersection = new DiscreteIsoscelesTriangularPrismRayIntersection();
    private final DiscreteIsoscelesTriangularPrismRayIntersection positiveYArrowIntersection = new DiscreteIsoscelesTriangularPrismRayIntersection();
    private final DiscreteIsoscelesTriangularPrismRayIntersection negativeXArrowIntersection = new DiscreteIsoscelesTriangularPrismRayIntersection();
    private final DiscreteIsoscelesTriangularPrismRayIntersection negativeYArrowIntersection = new DiscreteIsoscelesTriangularPrismRayIntersection();
-   private final Pose3D pose = new Pose3D();
-   /** The main, source, true, base transform that this thing represents. */
-   private final RigidBodyTransform transform = new RigidBodyTransform();
-   private final ReferenceFrame referenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
-                                                                                                                        transform);
-   private FocusBasedGDXCamera camera3D;
+   private final FramePose3D framePose3D = new FramePose3D();
+   private final FramePose3D tempFramePose3D = new FramePose3D();
+   /**
+    * The main, source, true, base transform that this thing represents.
+    */
+   private final RigidBodyTransform transformToParent;
+   private ReferenceFrame parentReferenceFrame;
+   private ReferenceFrame gizmoFrame;
+   private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
+   private GDXFocusBasedCamera camera3D;
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+   private final RigidBodyTransform transformFromKeyboardTransformationToWorld = new RigidBodyTransform();
+   private ReferenceFrame keyboardTransformationFrame;
    private final Point3D cameraPosition = new Point3D();
+   private double distanceToCamera;
    private double lastDistanceToCamera = -1.0;
    private final Plane3DMouseDragAlgorithm planeDragAlgorithm = new Plane3DMouseDragAlgorithm();
    private final ClockFaceRotation3DMouseDragAlgorithm clockFaceDragAlgorithm = new ClockFaceRotation3DMouseDragAlgorithm();
@@ -86,12 +101,29 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
    private boolean showArrows = true;
    private boolean highlightingEnabled = true;
    private boolean isBeingDragged;
+   private final double translateSpeedFactor = 0.5;
 
-   public GDXFootstepPlannerGoalGizmo()
+   public GDXPathControlRingGizmo()
    {
+      this(ReferenceFrame.getWorldFrame());
    }
 
-   public void create(FocusBasedGDXCamera camera3D)
+   public GDXPathControlRingGizmo(ReferenceFrame parentReferenceFrame)
+   {
+      this.parentReferenceFrame = parentReferenceFrame;
+      transformToParent = new RigidBodyTransform();
+      gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentReferenceFrame, transformToParent);
+      keyboardTransformationFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
+                                                                                                           transformFromKeyboardTransformationToWorld);
+   }
+
+   public void setParentFrame(ReferenceFrame parentReferenceFrame)
+   {
+      this.parentReferenceFrame = parentReferenceFrame;
+      gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentReferenceFrame, transformToParent);
+   }
+
+   public void create(GDXFocusBasedCamera camera3D)
    {
       this.camera3D = camera3D;
 
@@ -155,27 +187,42 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
       recreateGraphics();
    }
 
-   public void process3DViewInput(ImGui3DViewInput input)
+   public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      updateFromSourceTransform();
+      updateTransforms();
 
       boolean rightMouseDragging = input.isDragging(ImGuiMouseButton.Right);
       boolean middleMouseDragging = input.isDragging(ImGuiMouseButton.Middle);
-      boolean middleMouseDown = ImGui.getIO().getMouseDown(ImGuiMouseButton.Middle);
       boolean isWindowHovered = ImGui.isWindowHovered();
-      isBeingDragged = false;
 
       if (isWindowHovered && !rightMouseDragging && !middleMouseDragging)
       {
          Line3DReadOnly pickRay = input.getPickRayInWorld();
          determineCurrentSelectionFromPickRay(pickRay);
+      }
 
+      pickResult.setPickIntersects(closestCollisionSelection > -1);
+      pickResult.setDistanceToCamera(closestCollisionDistance);
+      input.addPickResult(pickResult);
+   }
+
+   public void process3DViewInput(ImGui3DViewInput input)
+   {
+      boolean rightMouseDragging = input.isDragging(ImGuiMouseButton.Right);
+      boolean middleMouseDragging = input.isDragging(ImGuiMouseButton.Middle);
+      boolean middleMouseDown = ImGui.getIO().getMouseDown(ImGuiMouseButton.Middle);
+      boolean isWindowHovered = ImGui.isWindowHovered();
+      isBeingDragged = false;
+      isMousePickSelected = pickResult == input.getClosestPick();
+
+      if (isMousePickSelected && isWindowHovered && !rightMouseDragging && !middleMouseDragging)
+      {
          if (middleMouseDown && closestCollisionSelection > -1)
          {
             clockFaceDragAlgorithm.reset();
          }
       }
-      if (rightMouseDragging || middleMouseDragging)
+      if (isMousePickSelected && (rightMouseDragging || middleMouseDragging))
       {
          Line3DReadOnly pickRay = input.getPickRayInWorld();
 
@@ -185,41 +232,121 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
             if (rightMouseDragging)
             {
                Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z);
-               transform.getTranslation().add(planarMotion);
+               tempFramePose3D.setToZero(gizmoFrame);
+               tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
+               tempFramePose3D.getPosition().add(planarMotion);
+               tempFramePose3D.changeFrame(parentReferenceFrame);
+               tempFramePose3D.get(transformToParent);
                closestCollision.add(planarMotion);
             }
             else // middleMouseDragging
             {
-               if (clockFaceDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z, transform))
+               if (clockFaceDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z, transformToWorld))
                {
-                  clockFaceDragAlgorithm.getMotion().transform(transform.getRotation());
+                  tempFramePose3D.setToZero(gizmoFrame);
+                  tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
+                  clockFaceDragAlgorithm.getMotion().transform(tempFramePose3D.getOrientation());
+                  tempFramePose3D.changeFrame(parentReferenceFrame);
+                  tempFramePose3D.get(transformToParent);
                }
             }
          }
       }
 
+      // keyboard based controls
+      boolean upArrowHeld = ImGui.isKeyDown(ImGuiTools.getUpArrowKey());
+      boolean downArrowHeld = ImGui.isKeyDown(ImGuiTools.getDownArrowKey());
+      boolean leftArrowHeld = ImGui.isKeyDown(ImGuiTools.getLeftArrowKey());
+      boolean rightArrowHeld = ImGui.isKeyDown(ImGuiTools.getRightArrowKey());
+      boolean anyArrowHeld = upArrowHeld || downArrowHeld || leftArrowHeld || rightArrowHeld;
+      if (anyArrowHeld) // only the arrow keys do the moving
+      {
+         boolean ctrlHeld = ImGui.getIO().getKeyCtrl();
+         boolean altHeld = ImGui.getIO().getKeyAlt();
+         boolean shiftHeld = ImGui.getIO().getKeyShift();
+         double deltaTime = Gdx.graphics.getDeltaTime();
+         if (altHeld) // orientation
+         {
+            double amount = deltaTime * (shiftHeld ? 0.2 : 1.0);
+            if (leftArrowHeld && ctrlHeld) // yaw +
+            {
+               transformToParent.getRotation().appendYawRotation(amount);
+            }
+            if (rightArrowHeld && ctrlHeld) // yaw -
+            {
+               transformToParent.getRotation().appendYawRotation(-amount);
+            }
+         }
+         else // translation
+         {
+            transformFromKeyboardTransformationToWorld.setToZero();
+            transformFromKeyboardTransformationToWorld.getRotation().setToYawOrientation(camera3D.getFocusPointPose().getYaw());
+            keyboardTransformationFrame.update();
+            tempFramePose3D.setToZero(keyboardTransformationFrame);
+
+            double amount = deltaTime * (shiftHeld ? 0.05 : 0.4);
+            if (upArrowHeld && !ctrlHeld) // x +
+            {
+               tempFramePose3D.getPosition().addX(getTranslateSpeedFactor() * amount);
+            }
+            if (downArrowHeld && !ctrlHeld) // x -
+            {
+               tempFramePose3D.getPosition().subX(getTranslateSpeedFactor() * amount);
+            }
+            if (leftArrowHeld) // y +
+            {
+               tempFramePose3D.getPosition().addY(getTranslateSpeedFactor() * amount);
+            }
+            if (rightArrowHeld) // y -
+            {
+               tempFramePose3D.getPosition().subY(getTranslateSpeedFactor() * amount);
+            }
+            if (upArrowHeld && ctrlHeld) // z +
+            {
+               tempFramePose3D.getPosition().addZ(getTranslateSpeedFactor() * amount);
+            }
+            if (downArrowHeld && ctrlHeld) // z -
+            {
+               tempFramePose3D.getPosition().subZ(getTranslateSpeedFactor() * amount);
+            }
+
+            tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
+            tempFramePose3D.get(tempTransform);
+            transformToParent.getTranslation().add(tempTransform.getTranslation());
+         }
+      }
+
       // after things have been modified, update the derivative stuff
-      updateFromSourceTransform();
+      updateTransforms();
 
       GDXTools.toEuclid(camera3D.position, cameraPosition);
-      double distanceToCamera = cameraPosition.distance(pose.getPosition());
+      distanceToCamera = cameraPosition.distance(framePose3D.getPosition());
       if (lastDistanceToCamera != distanceToCamera)
       {
          lastDistanceToCamera = distanceToCamera;
          recreateGraphics();
-         updateFromSourceTransform();
+         updateTransforms();
       }
    }
 
-   private void updateFromSourceTransform()
+   public void updateTransforms()
    {
-      pose.set(transform);
-      GDXTools.toGDX(transform, discModel.getOrCreateModelInstance().transform);
-      GDXTools.toGDX(transform, positiveXArrowModel.getOrCreateModelInstance().transform);
-      GDXTools.toGDX(transform, positiveYArrowModel.getOrCreateModelInstance().transform);
-      GDXTools.toGDX(transform, negativeXArrowModel.getOrCreateModelInstance().transform);
-      GDXTools.toGDX(transform, negativeYArrowModel.getOrCreateModelInstance().transform);
-      referenceFrame.update();
+      gizmoFrame.update();
+      // keeping the gizmo on the X-Y plane
+      tempFramePose3D.setToZero(gizmoFrame);
+      tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
+      tempFramePose3D.getOrientation().setToYawOrientation(tempFramePose3D.getOrientation().getYaw());
+      tempFramePose3D.changeFrame(parentReferenceFrame);
+      tempFramePose3D.get(transformToParent);
+      gizmoFrame.update();
+      framePose3D.setToZero(gizmoFrame);
+      framePose3D.changeFrame(ReferenceFrame.getWorldFrame());
+      framePose3D.get(transformToWorld);
+      GDXTools.toGDX(transformToWorld, discModel.getOrCreateModelInstance().transform);
+      GDXTools.toGDX(transformToWorld, positiveXArrowModel.getOrCreateModelInstance().transform);
+      GDXTools.toGDX(transformToWorld, positiveYArrowModel.getOrCreateModelInstance().transform);
+      GDXTools.toGDX(transformToWorld, negativeXArrowModel.getOrCreateModelInstance().transform);
+      GDXTools.toGDX(transformToWorld, negativeYArrowModel.getOrCreateModelInstance().transform);
    }
 
    private void determineCurrentSelectionFromPickRay(Line3DReadOnly pickRay)
@@ -230,9 +357,9 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
       negativeXArrowIntersects = false;
       negativeYArrowIntersects = false;
       closestCollisionSelection = -1;
-      double closestCollisionDistance = Double.POSITIVE_INFINITY;
+      closestCollisionDistance = Double.POSITIVE_INFINITY;
 
-      hollowCylinderIntersection.setup(discThickness.get(), discOuterRadius.get(), discInnerRadius.get(), 0.0, transform);
+      hollowCylinderIntersection.setup(discThickness.get(), discOuterRadius.get(), discInnerRadius.get(), 0.0, transformToWorld);
       double distance = hollowCylinderIntersection.intersect(pickRay);
       if (!Double.isNaN(distance) && distance < closestCollisionDistance)
       {
@@ -248,7 +375,7 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
                                           discThickness.get(),
                                           new Point3D(discOuterRadius.get() + arrowSpacing.get(), 0.0, 0.0),
                                           new YawPitchRoll(-QUARTER_TURN, 0.0, -QUARTER_TURN),
-                                          transform);
+                                          transformToWorld);
          distance = positiveXArrowIntersection.intersect(pickRay, 100);
          if (!Double.isNaN(distance) && distance < closestCollisionDistance)
          {
@@ -262,7 +389,7 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
                                           discThickness.get(),
                                           new Point3D(0.0, discOuterRadius.get() + arrowSpacing.get(), 0.0),
                                           new YawPitchRoll(0.0, 0.0, -QUARTER_TURN),
-                                          transform);
+                                          transformToWorld);
          distance = positiveYArrowIntersection.intersect(pickRay, 100);
          if (!Double.isNaN(distance) && distance < closestCollisionDistance)
          {
@@ -276,7 +403,7 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
                                           discThickness.get(),
                                           new Point3D(-discOuterRadius.get() - arrowSpacing.get(), 0.0, 0.0),
                                           new YawPitchRoll(QUARTER_TURN, 0.0, -QUARTER_TURN),
-                                          transform);
+                                          transformToWorld);
          distance = negativeXArrowIntersection.intersect(pickRay, 100);
          if (!Double.isNaN(distance) && distance < closestCollisionDistance)
          {
@@ -290,7 +417,7 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
                                           discThickness.get(),
                                           new Point3D(0.0, -discOuterRadius.get() - arrowSpacing.get(), 0.0),
                                           new YawPitchRoll(0.0, 0.0, QUARTER_TURN),
-                                          transform);
+                                          transformToWorld);
          distance = negativeYArrowIntersection.intersect(pickRay, 100);
          if (!Double.isNaN(distance) && distance < closestCollisionDistance)
          {
@@ -306,11 +433,12 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
 
    private void updateMaterialHighlighting()
    {
-      discModel.setMaterial(highlightingEnabled && closestCollisionSelection == 0 ? highlightedDiscMaterial : normalDiscMaterial);
-      positiveXArrowModel.setMaterial(highlightingEnabled && closestCollisionSelection == 1 ? highlightedArrowMaterial : normalArrowMaterial);
-      positiveYArrowModel.setMaterial(highlightingEnabled && closestCollisionSelection == 2 ? highlightedArrowMaterial : normalArrowMaterial);
-      negativeXArrowModel.setMaterial(highlightingEnabled && closestCollisionSelection == 3 ? highlightedArrowMaterial : normalArrowMaterial);
-      negativeYArrowModel.setMaterial(highlightingEnabled && closestCollisionSelection == 4 ? highlightedArrowMaterial : normalArrowMaterial);
+      boolean prior = highlightingEnabled && isMousePickSelected;
+      discModel.setMaterial(prior && closestCollisionSelection == 0 ? highlightedDiscMaterial : normalDiscMaterial);
+      positiveXArrowModel.setMaterial(prior && closestCollisionSelection == 1 ? highlightedArrowMaterial : normalArrowMaterial);
+      positiveYArrowModel.setMaterial(prior && closestCollisionSelection == 2 ? highlightedArrowMaterial : normalArrowMaterial);
+      negativeXArrowModel.setMaterial(prior && closestCollisionSelection == 3 ? highlightedArrowMaterial : normalArrowMaterial);
+      negativeYArrowModel.setMaterial(prior && closestCollisionSelection == 4 ? highlightedArrowMaterial : normalArrowMaterial);
    }
 
    public ImGuiPanel createTunerPanel(String name)
@@ -324,7 +452,7 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
 
       if (ImGui.button("Reset"))
       {
-         transform.setToZero();
+         transformToParent.setToZero();
       }
 
       ImGui.pushItemWidth(100.00f);
@@ -340,7 +468,7 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
       if (proportionsChanged)
          recreateGraphics();
 
-      updateFromSourceTransform();
+      updateTransforms();
    }
 
    private void recreateGraphics()
@@ -366,60 +494,66 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
       }
    }
 
-   public Pose3DReadOnly getPose()
+   public Pose3DReadOnly getPose3D()
    {
-      return pose;
+      return framePose3D;
    }
 
    // TODO: Make this transform the ground truth and give the pose as needed only
-   public RigidBodyTransform getTransform()
+   public RigidBodyTransform getTransformToParent()
    {
-      return transform;
+      return transformToParent;
    }
 
-   public ReferenceFrame getReferenceFrame()
+   public ReferenceFrame getGizmoFrame()
    {
-      return referenceFrame;
+      return gizmoFrame;
    }
 
-   public boolean getIntersectsAny()
+   public boolean getAnyPartPickSelected()
    {
-      return hollowCylinderIntersects || positiveXArrowIntersects || positiveYArrowIntersects || negativeXArrowIntersects || negativeYArrowIntersects;
+      return isMousePickSelected
+             && (hollowCylinderIntersects || positiveXArrowIntersects || positiveYArrowIntersects || negativeXArrowIntersects || negativeYArrowIntersects);
    }
 
-   public boolean getIntersectsAnyArrow()
+   public boolean getAnyArrowPickSelected()
    {
-      return positiveXArrowIntersects || positiveYArrowIntersects || negativeXArrowIntersects || negativeYArrowIntersects;
+      return isMousePickSelected && (positiveXArrowIntersects || positiveYArrowIntersects || negativeXArrowIntersects || negativeYArrowIntersects);
    }
 
-   public boolean getHollowCylinderIntersects()
+   public boolean getHollowCylinderPickSelected()
    {
-      return hollowCylinderIntersects;
+      return isMousePickSelected && hollowCylinderIntersects;
    }
 
-   public boolean getPositiveXArrowIntersects()
+   public boolean getPositiveXArrowPickSelected()
    {
-      return positiveXArrowIntersects;
+      return isMousePickSelected && positiveXArrowIntersects;
    }
 
-   public boolean getPositiveYArrowIntersects()
+   public boolean getPositiveYArrowPickSelected()
    {
-      return positiveYArrowIntersects;
+      return isMousePickSelected && positiveYArrowIntersects;
    }
 
-   public boolean getNegativeXArrowIntersects()
+   public boolean getNegativeXArrowPickSelected()
    {
-      return negativeXArrowIntersects;
+      return isMousePickSelected && negativeXArrowIntersects;
    }
 
-   public boolean getNegativeYArrowIntersects()
+   public boolean getNegativeYArrowPickSelected()
    {
-      return negativeYArrowIntersects;
+      return isMousePickSelected && negativeYArrowIntersects;
    }
 
    public void setShowArrows(boolean showArrows)
    {
       this.showArrows = showArrows;
+   }
+
+   private double getTranslateSpeedFactor()
+   {
+      return translateSpeedFactor * distanceToCamera;
    }
 
    public void setHighlightingEnabled(boolean highlightingEnabled)

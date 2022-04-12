@@ -26,6 +26,8 @@ public class GDXSCS2BulletPhysicsDoorDemo
             baseUI.create();
 
             DoorDefinition doorDefinition = new DoorDefinition();
+            doorDefinition.getDoorPanelDefinition().setAddFiducials(false);
+            doorDefinition.build();
             doorDefinition.getInitialSixDoFState().setConfiguration(new YawPitchRoll(0.1, 0.1, 0.1), new Point3D(0.0, 0.0, 0.5));
             doorDefinition.getInitialHingeState().setEffort(15.0);
             Robot doorRobot = scs2SimulationSession.addRobot(doorDefinition);

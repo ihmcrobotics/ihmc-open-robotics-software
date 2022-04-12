@@ -1,14 +1,13 @@
-package us.ihmc.gdx.perception;
+package us.ihmc.perception;
 
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencl._cl_mem;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.opencv_core.Mat;
-import us.ihmc.perception.OpenCLManager;
 
 import java.nio.FloatBuffer;
 
-public class GDXBytedecoFloatImage
+public class BytedecoFloatImage
 {
    private final FloatBuffer backingDirectFloatBuffer;
    private final FloatPointer bytedecoFloatBufferPointer;
@@ -19,7 +18,7 @@ public class GDXBytedecoFloatImage
    private final int imageHeight;
    private _cl_mem openCLImageObject;
 
-   public GDXBytedecoFloatImage(int imageWidth, int imageHeight, int cvMatType, FloatBuffer backingDirectFloatBuffer)
+   public BytedecoFloatImage(int imageWidth, int imageHeight, int cvMatType, FloatBuffer backingDirectFloatBuffer)
    {
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
