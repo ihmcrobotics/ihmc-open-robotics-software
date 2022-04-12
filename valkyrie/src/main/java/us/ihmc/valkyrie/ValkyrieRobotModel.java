@@ -48,16 +48,7 @@ import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrie.diagnostic.ValkyrieDiagnosticParameters;
 import us.ihmc.valkyrie.fingers.SimulatedValkyrieFingerControlThread;
 import us.ihmc.valkyrie.fingers.ValkyrieHandModel;
-import us.ihmc.valkyrie.parameters.ValkyrieCoPTrajectoryParameters;
-import us.ihmc.valkyrie.parameters.ValkyrieCollisionBoxProvider;
-import us.ihmc.valkyrie.parameters.ValkyrieContactPointParameters;
-import us.ihmc.valkyrie.parameters.ValkyrieFootstepPlannerParameters;
-import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
-import us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties;
-import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
-import us.ihmc.valkyrie.parameters.ValkyrieStateEstimatorParameters;
-import us.ihmc.valkyrie.parameters.ValkyrieUIParameters;
-import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
+import us.ihmc.valkyrie.parameters.*;
 import us.ihmc.valkyrie.sensors.ValkyrieSensorSuiteManager;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
@@ -521,6 +512,12 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
+   public FootstepPlannerParametersBasics getFootstepPlannerParameters(String fileNameSuffix)
+   {
+      return new ValkyrieFootstepPlannerParameters(fileNameSuffix);
+   }
+
+   @Override
    public VisibilityGraphsParametersBasics getVisibilityGraphsParameters()
    {
       return new DefaultVisibilityGraphParameters();
@@ -530,6 +527,12 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public SwingPlannerParametersBasics getSwingPlannerParameters()
    {
       return new DefaultSwingPlannerParameters();
+   }
+
+   @Override
+   public SwingPlannerParametersBasics getSwingPlannerParameters(String fileNameSuffix)
+   {
+      return new ValkyrieSwingPlannerParameters(fileNameSuffix);
    }
 
    @Override
