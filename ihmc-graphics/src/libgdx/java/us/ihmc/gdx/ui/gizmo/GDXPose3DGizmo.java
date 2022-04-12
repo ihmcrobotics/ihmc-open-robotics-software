@@ -174,7 +174,7 @@ public class GDXPose3DGizmo implements RenderableProvider
 
       pickResult.setPickIntersects(closestCollisionSelection != null);
       pickResult.setDistanceToCamera(closestCollisionDistance);
-      input.getPickResults().add(pickResult);
+      input.addPickResult(pickResult);
    }
 
    public void process3DViewInput(ImGui3DViewInput input)

@@ -59,7 +59,7 @@ public class GDXInteractableReferenceFrame
       double closestCollisionDistance = coordinateFrameIntersection.intersect(representativeReferenceFrame, pickRay);
       pickResult.setPickIntersects(!Double.isNaN(closestCollisionDistance));
       pickResult.setDistanceToCamera(closestCollisionDistance);
-      input.getPickResults().add(pickResult);
+      input.addPickResult(pickResult);
    }
 
    public void process3DViewInput(ImGui3DViewInput input)

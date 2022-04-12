@@ -59,7 +59,7 @@ public class GDXLiveRobotPartInteractable
 
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-
+      selectablePose3DGizmo.calculate3DViewPick(input);
    }
 
    public void process3DViewInput(ImGui3DViewInput input)

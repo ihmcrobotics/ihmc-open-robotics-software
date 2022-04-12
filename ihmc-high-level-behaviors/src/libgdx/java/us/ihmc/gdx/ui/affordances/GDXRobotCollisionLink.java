@@ -1,7 +1,6 @@
 package us.ihmc.gdx.ui.affordances;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
@@ -18,6 +17,7 @@ import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.input.ImGui3DViewPickResult;
+import us.ihmc.gdx.simulation.environment.GDXModelInstance;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.gizmo.BoxRayIntersection;
@@ -29,16 +29,18 @@ import us.ihmc.robotics.physics.Collidable;
 
 public class GDXRobotCollisionLink implements RenderableProvider
 {
-   private final ModelInstance modelInstance;
+   private final GDXModelInstance modelInstance;
    private final RigidBodyTransform transformToJoint;
    private final ReferenceFrame collisionMeshFrame;
    private final FramePose3D boxPose = new FramePose3D();
+   private final RigidBodyTransform boxCenterToWorldTransform = new RigidBodyTransform();
    private final Shape3DReadOnly shape;
+   private final MovingReferenceFrame frameAfterJoint;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
    private SphereRayIntersection sphereRayIntersection;
    private CapsuleRayIntersection capsuleIntersection;
    private BoxRayIntersection boxRayIntersection;
-   private ModelInstance coordinateFrame;
+   private GDXModelInstance coordinateFrame;
    private boolean useOverrideTransform = false;
    private final RigidBodyTransform overrideTransform = new RigidBodyTransform();
    private final ReferenceFrame overrideFrame;
@@ -70,6 +72,7 @@ public class GDXRobotCollisionLink implements RenderableProvider
                                 Color color)
    {
       this.shape = shape;
+      this.frameAfterJoint = frameAfterJoint;
       // TODO update every frame
       transformToJoint = new RigidBodyTransform(shapeFrame.getTransformToDesiredFrame(frameAfterJoint));
       collisionMeshFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("collisionMeshFrame" + rigidBodyName,
@@ -80,7 +83,7 @@ public class GDXRobotCollisionLink implements RenderableProvider
                                                                                       overrideTransform);
       overrideMeshFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("overrideMeshFrame" + rigidBodyName, overrideFrame, transformToJoint);
 
-      modelInstance = GDXModelPrimitives.buildModelInstance(meshBuilder ->
+      modelInstance = new GDXModelInstance(GDXModelPrimitives.buildModel(meshBuilder ->
       {
          if (shape instanceof Sphere3DReadOnly)
          {
@@ -124,10 +127,10 @@ public class GDXRobotCollisionLink implements RenderableProvider
          {
             LogTools.warn("Shape not handled: {}", shape);
          }
-      }, rigidBodyName);
+      }, rigidBodyName));
       GDXTools.setTransparency(modelInstance, color.a);
 
-      coordinateFrame = GDXModelPrimitives.createCoordinateFrameInstance(0.15);
+      coordinateFrame = new GDXModelInstance(GDXModelPrimitives.createCoordinateFrame(0.15));
    }
 
    public void update()
@@ -136,22 +139,21 @@ public class GDXRobotCollisionLink implements RenderableProvider
       {
          overrideFrame.update();
          overrideMeshFrame.update();
-         GDXTools.toGDX(overrideMeshFrame.getTransformToWorldFrame(), modelInstance.transform);
-         GDXTools.toGDX(overrideMeshFrame.getTransformToWorldFrame(), coordinateFrame.transform);
+         modelInstance.setTransformToReferenceFrame(overrideMeshFrame);
+         coordinateFrame.setTransformToReferenceFrame(overrideMeshFrame);
       }
       else
       {
          collisionMeshFrame.update();
-         GDXTools.toGDX(collisionMeshFrame.getTransformToWorldFrame(), modelInstance.transform);
-         GDXTools.toGDX(collisionMeshFrame.getTransformToWorldFrame(), coordinateFrame.transform);
+         modelInstance.setTransformToReferenceFrame(collisionMeshFrame);
+         coordinateFrame.setTransformToReferenceFrame(collisionMeshFrame);
       }
    }
 
    public void calculatePick(ImGui3DViewInput input)
    {
       Line3DReadOnly pickRayInWorld = input.getPickRayInWorld();
-      ReferenceFrame frameToUse = useOverrideTransform ? overrideMeshFrame : collisionMeshFrame;
-      RigidBodyTransform transformToWorldFrame = frameToUse.getTransformToWorldFrame();
+      ReferenceFrame frameAfterJointToUse = useOverrideTransform ? overrideMeshFrame : frameAfterJoint;
       pickResult.reset();
       if (shape instanceof Sphere3DReadOnly)
       {
@@ -166,7 +168,7 @@ public class GDXRobotCollisionLink implements RenderableProvider
          Point3DReadOnly position = capsule.getPosition();
          double length = capsule.getLength();
          double radius = capsule.getRadius();
-         capsuleIntersection.setup(radius, length, position, axis, transformToWorldFrame);
+         capsuleIntersection.setup(radius, length, position, axis, frameAfterJointToUse);
          if (capsuleIntersection.intersect(pickRayInWorld))
          {
             pickResult.addPickCollision(capsuleIntersection.getDistanceToCollision(input.getPickRayInWorld()));
@@ -175,14 +177,19 @@ public class GDXRobotCollisionLink implements RenderableProvider
       else if (shape instanceof Box3DReadOnly)
       {
          Box3DReadOnly box = (Box3DReadOnly) shape;
-         boxPose.setToZero(frameToUse);
+         boxPose.setToZero(frameAfterJointToUse);
+         if (!useOverrideTransform)
+            boxPose.set(box.getPose());
          boxPose.changeFrame(ReferenceFrame.getWorldFrame());
+         boxPose.get(boxCenterToWorldTransform);
          double sizeX = box.getSizeX();
          double sizeY = box.getSizeY();
          double sizeZ = box.getSizeZ();
-         if (boxRayIntersection.intersect(sizeX, sizeY, sizeZ, boxPose, pickRayInWorld))
+         if (boxRayIntersection.intersect(sizeX, sizeY, sizeZ, boxCenterToWorldTransform, pickRayInWorld))
          {
-            pickResult.addPickCollision(boxRayIntersection.getFirstIntersectionToPack().distance(input.getPickRayInWorld().getPoint()));
+            Point3DReadOnly boxIntersection = boxRayIntersection.getFirstIntersectionToPack();
+            Point3DReadOnly cameraPosition = input.getPickRayInWorld().getPoint();
+            pickResult.addPickCollision(boxIntersection.distance(cameraPosition));
          }
       }
       else if (shape instanceof PointShape3DReadOnly)
@@ -194,7 +201,7 @@ public class GDXRobotCollisionLink implements RenderableProvider
          LogTools.warn("Shape not handled: {}", shape);
       }
 
-      input.getPickResults().add(pickResult);
+      input.addPickResult(pickResult);
    }
 
    // Happens after update

@@ -11,16 +11,13 @@ import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.gdx.simulation.environment.object.objects.FlatGroundDefinition;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.scs2.definition.robot.RobotDefinition;
-import us.ihmc.scs2.simulation.robot.Robot;
+import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.tools.thread.StatelessNotification;
 
 import java.util.ArrayList;
-import java.util.function.BiConsumer;
 
 public class GDXSCS2EnvironmentManager
 {
@@ -37,6 +34,7 @@ public class GDXSCS2EnvironmentManager
    private DRCRobotModel robotModel;
    private CommunicationMode ros2CommunicationMode;
    private final ArrayList<GDXSCS2SecondaryRobot> secondaryRobots = new ArrayList<>();
+   private final ArrayList<TerrainObjectDefinition> terrainObjectDefinitions = new ArrayList<>();
    private final ArrayList<String> robotsToHide = new ArrayList<>();
    private volatile boolean starting = false;
    private volatile boolean started = false;
@@ -114,7 +112,10 @@ public class GDXSCS2EnvironmentManager
          avatarSimulationFactory.setRobotModel(robotModel);
          avatarSimulationFactory.setRealtimeROS2Node(realtimeROS2Node);
          avatarSimulationFactory.setDefaultHighLevelHumanoidControllerFactory(useVelocityAndHeadingScript, walkingScriptParameters);
-         avatarSimulationFactory.setTerrainObjectDefinition(new FlatGroundDefinition());
+         for (TerrainObjectDefinition terrainObjectDefinition : terrainObjectDefinitions)
+         {
+            avatarSimulationFactory.addTerrainObjectDefinition(terrainObjectDefinition);
+         }
          for (GDXSCS2SecondaryRobot secondaryRobot : secondaryRobots)
          {
             avatarSimulationFactory.addSecondaryRobot(secondaryRobot.create());
@@ -174,9 +175,14 @@ public class GDXSCS2EnvironmentManager
       }
    }
 
-   public void addSecondaryRobot(RobotDefinition robotDefinition, BiConsumer<RobotDefinition, Robot> robotSetup)
+   public ArrayList<GDXSCS2SecondaryRobot> getSecondaryRobots()
    {
-      secondaryRobots.add(new GDXSCS2SecondaryRobot(robotDefinition, robotSetup));
+      return secondaryRobots;
+   }
+
+   public ArrayList<TerrainObjectDefinition> getTerrainObjectDefinitions()
+   {
+      return terrainObjectDefinitions;
    }
 
    public GDXSCS2SimulationSession getSCS2SimulationSession()

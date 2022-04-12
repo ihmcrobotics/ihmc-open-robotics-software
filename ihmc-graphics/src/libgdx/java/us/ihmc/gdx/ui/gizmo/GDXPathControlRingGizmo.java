@@ -203,7 +203,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
 
       pickResult.setPickIntersects(closestCollisionSelection > -1);
       pickResult.setDistanceToCamera(closestCollisionDistance);
-      input.getPickResults().add(pickResult);
+      input.addPickResult(pickResult);
    }
 
    public void process3DViewInput(ImGui3DViewInput input)
