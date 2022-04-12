@@ -11,10 +11,20 @@ import us.ihmc.scs2.definition.visual.VisualDefinition;
 
 public class DoorPanelDefinition extends RigidBodyDefinition
 {
+   private boolean addFiducials = false;
+
    public DoorPanelDefinition()
    {
       super("panelBody");
+   }
 
+   public void setAddFiducials(boolean addFiducials)
+   {
+      this.addFiducials = addFiducials;
+   }
+
+   public void build()
+   {
       double sizeX = 0.0508; // centered on X
       double sizeY = 0.9144;
       double sizeZ = 2.0447;
@@ -37,6 +47,14 @@ public class DoorPanelDefinition extends RigidBodyDefinition
       ModelFileGeometryDefinition geometryDefinition = new ModelFileGeometryDefinition("environmentObjects/door/doorPanel/DoorPanel.g3dj");
       modelVisualDefinition.setGeometryDefinition(geometryDefinition);
       addVisualDefinition(modelVisualDefinition);
+
+      if (addFiducials)
+      {
+         VisualDefinition fiducialModelVisualDefinition = new VisualDefinition();
+         ModelFileGeometryDefinition fiducialGeometryDefinition = new ModelFileGeometryDefinition("environmentObjects/door/doorPanel/DoorPanelFiducials.g3dj");
+         fiducialModelVisualDefinition.setGeometryDefinition(fiducialGeometryDefinition);
+         addVisualDefinition(fiducialModelVisualDefinition);
+      }
 
       Point3D collisionShapeOffset = new Point3D(0.0, sizeY / 2.0 + 0.025, sizeZ / 2.0);
       CollisionShapeDefinition collisionShapeDefinition = new CollisionShapeDefinition();

@@ -46,7 +46,7 @@ public class GDXROS2VideoVisualizer extends ImGuiGDXVisualizer
       this.topic = topic;
       threadQueue = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
       new IHMCROS2Callback<>(ros2Node, topic, ROS2QosProfile.BEST_EFFORT(), this::acceptMessage);
-      boolean flipY = true;
+      boolean flipY = false;
       videoPanel = new ImGuiVideoPanel(ImGuiTools.uniqueLabel(this, topic.getName()), flipY);
    }
 

@@ -1,12 +1,12 @@
-package us.ihmc.gdx;
+package us.ihmc.gdx.ui.gizmo;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.affordances.GDXInteractableReferenceFrame;
-import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 public class GDXFrameGizmoDemo
@@ -31,6 +31,7 @@ public class GDXFrameGizmoDemo
             transform.getTranslation().addX(0.5);
             GDXInteractableReferenceFrame interactableReferenceFrame = new GDXInteractableReferenceFrame();
             interactableReferenceFrame.create(referenceFrame, transform, 1.0, baseUI.get3DSceneManager().getCamera3D());
+            baseUI.addImGui3DViewPickCalculator(interactableReferenceFrame::calculate3DViewPick);
             baseUI.addImGui3DViewInputProcessor(interactableReferenceFrame::process3DViewInput);
             baseUI.get3DSceneManager().addRenderableProvider(interactableReferenceFrame::getVirtualRenderables);
 
@@ -39,21 +40,25 @@ public class GDXFrameGizmoDemo
             ReferenceFrame referenceFrame2 = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(referenceFrame, transform2);
             GDXInteractableReferenceFrame interactableReferenceFrame2 = new GDXInteractableReferenceFrame();
             interactableReferenceFrame2.create(referenceFrame2, transform2, 1.0, baseUI.get3DSceneManager().getCamera3D());
+            baseUI.addImGui3DViewPickCalculator(interactableReferenceFrame2::calculate3DViewPick);
             baseUI.addImGui3DViewInputProcessor(interactableReferenceFrame2::process3DViewInput);
             baseUI.get3DSceneManager().addRenderableProvider(interactableReferenceFrame2::getVirtualRenderables);
 
             GDXPose3DGizmo poseGizmo = new GDXPose3DGizmo(interactableReferenceFrame2.getSelectablePose3DGizmo().getPoseGizmo().getGizmoFrame());
             poseGizmo.create(baseUI.get3DSceneManager().getCamera3D());
+            baseUI.addImGui3DViewPickCalculator(poseGizmo::calculate3DViewPick);
             baseUI.addImGui3DViewInputProcessor(poseGizmo::process3DViewInput);
             baseUI.get3DSceneManager().addRenderableProvider(poseGizmo);
             baseUI.getImGuiPanelManager().addPanel(poseGizmo.createTunerPanel(GDXFrameGizmoDemo.class.getSimpleName()));
             poseGizmo.getTransformToParent().getTranslation().add(0.5, 0.5, 0.5);
 
-//            footstepRingGizmo.create(baseUI.get3DSceneManager().getCamera3D());
-//            baseUI.addImGui3DViewInputProcessor(footstepRingGizmo::process3DViewInput);
-//            baseUI.get3DSceneManager().addRenderableProvider(footstepRingGizmo);
-//            baseUI.getImGuiPanelManager().addPanel(footstepRingGizmo.createTunerPanel(GDXFrameGizmoDemo.class.getSimpleName()));
-
+            GDXPathControlRingGizmo footstepRingGizmo
+                  = new GDXPathControlRingGizmo(interactableReferenceFrame2.getSelectablePose3DGizmo().getPoseGizmo().getGizmoFrame());
+            footstepRingGizmo.create(baseUI.get3DSceneManager().getCamera3D());
+            baseUI.addImGui3DViewPickCalculator(footstepRingGizmo::calculate3DViewPick);
+            baseUI.addImGui3DViewInputProcessor(footstepRingGizmo::process3DViewInput);
+            baseUI.get3DSceneManager().addRenderableProvider(footstepRingGizmo);
+            baseUI.getImGuiPanelManager().addPanel(footstepRingGizmo.createTunerPanel(GDXFrameGizmoDemo.class.getSimpleName()));
          }
 
          @Override

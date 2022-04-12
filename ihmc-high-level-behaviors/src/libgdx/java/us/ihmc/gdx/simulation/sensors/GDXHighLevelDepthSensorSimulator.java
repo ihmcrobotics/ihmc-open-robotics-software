@@ -18,7 +18,6 @@ import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -91,10 +90,6 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
    private boolean ros2IsLidarScan;
    private IHMCROS2Publisher<?> publisher;
    private IHMCROS2Publisher<VideoPacket> ros2VideoPublisher;
-   private ByteBuffer rgbaByteBuffer;
-   private BytePointer rgbaBytePointer;
-   private IntPointer fromABGRToRGBA;
-   private Mat remixedRGBAColorMat;
    private JPEGEncoder encoder;
    private RGBPicture rgbPicture;
    private ByteBuffer jpegOutputByteBuffer;
@@ -220,10 +215,6 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
          if (ros2Node != null)
          {
             NativeLibraryLoader.loadIHMCVideoCodecsLibrary();
-            rgbaByteBuffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * 4);
-            rgbaBytePointer = new BytePointer(rgbaByteBuffer);
-            fromABGRToRGBA = new IntPointer(0, 3, 1, 2, 2, 1, 3, 0);
-            remixedRGBAColorMat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, rgbaBytePointer);
             rgbPicture = new RGBPicture(imageWidth, imageHeight);
             encoder = new JPEGEncoder();
             YUVPicture yuvPictureForMaxSize = new YUVPicture(YUVPicture.YUVSubsamplingType.YUV420, imageWidth, imageHeight);
@@ -255,7 +246,7 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
 
          if (renderPointCloudDirectly.get())
          {
-            pointColorFromPicker.set(color[0], color[1], color[2], color[3]);
+            GDXTools.toGDX(color, pointColorFromPicker);
             Color pointColor = useSensorColor.get() ? null : pointColorFromPicker;
             depthSensorSimulator.render(sceneBasics, pointColor, pointSize.get());
             pointCloudRenderer.updateMeshFastest(imageWidth * imageHeight);
@@ -313,18 +304,6 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
    {
       if (!colorROS2Executor.isExecuting())
       {
-         /**
-          * This is how the source data is arranged:
-          * BytePointer pixel = depthSensorSimulator.getABGR8888ColorImage().getBytedecoOpenCVMat().ptr(0, i);
-          * int a = Byte.toUnsignedInt(pixel.get(0));
-          * int b = Byte.toUnsignedInt(pixel.get(1));
-          * int g = Byte.toUnsignedInt(pixel.get(2));
-          * int r = Byte.toUnsignedInt(pixel.get(3));
-          */
-
-         // OpenGL and OpenCV have different endianess; we need to flip ABGR to RGBA
-         opencv_core.mixChannels(depthSensorSimulator.getABGR8888ColorImage().getBytedecoOpenCVMat(), 1, remixedRGBAColorMat, 1, fromABGRToRGBA, 4);
-
          colorROS2Executor.execute(() ->
          {
             VideoPacket videoPacket = new VideoPacket();
@@ -341,8 +320,8 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
 
             // Note: OpenCV doesn't support encoding YUV to JPEG, so we need IHMC Video Codecs for this
             // See JPEGCompressor for more info
-            rgbaByteBuffer.rewind();
-            rgbPicture.putRGBA(rgbaByteBuffer);
+            depthSensorSimulator.getRGBA8888ColorImage().getBackingDirectByteBuffer().rewind();
+            rgbPicture.putRGBA(depthSensorSimulator.getRGBA8888ColorImage().getBackingDirectByteBuffer());
             // Probably the slowest part, but we need to modify the library to support memory reuse here
             // See https://bitbucket.ihmc.us/projects/LIBS/repos/ihmc-video-codecs/browse/csrc/RGBPicture.cpp#32
             YUVPicture yuvPicture = rgbPicture.toYUV(YUVPicture.YUVSubsamplingType.YUV420);
@@ -442,7 +421,7 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
          ImGui.checkbox(ImGuiTools.uniqueLabel(this, "ROS 1 Color image (" + ros1ColorImageTopic + ")"), publishColorImageROS1);
       if (ros2PointCloudTopic != null)
          ImGui.checkbox(ImGuiTools.uniqueLabel(this, "ROS 2 Point cloud (" + ros2PointCloudTopic + ")"), publishPointCloudROS2);
-      if (rgbaByteBuffer != null)
+      if (ros2Node != null)
       {
          ImGui.sameLine();
          ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Color image (ROS 2)"), publishColorImageROS2);
@@ -588,5 +567,10 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
    public Color getPointColorFromPicker()
    {
       return pointColorFromPicker;
+   }
+
+   public ReferenceFrame getSensorFrame()
+   {
+      return sensorFrame;
    }
 }

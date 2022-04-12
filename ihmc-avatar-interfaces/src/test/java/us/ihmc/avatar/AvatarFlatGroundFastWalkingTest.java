@@ -85,9 +85,9 @@ public abstract class AvatarFlatGroundFastWalkingTest implements MultiRobotTestI
       MovingReferenceFrame midFootZUpGroundFrame = referenceFrames.getMidFootZUpGroundFrame();
       FramePose3D startPose = new FramePose3D(midFootZUpGroundFrame);
       startPose.changeFrame(ReferenceFrame.getWorldFrame());
-      FootstepDataListMessage footsteps = forwardSteps(RobotSide.LEFT,
+      FootstepDataListMessage footsteps = EndToEndTestTools.generateForwardSteps(RobotSide.LEFT,
                                                        getNumberOfSteps(),
-                                                       trapezoidFunction(0.2, getMaxForwardStepLength(), 0.15, 0.85),
+                                                       EndToEndTestTools.trapezoidFunction(0.2, getMaxForwardStepLength(), 0.15, 0.85),
                                                        getFastStepWidth(),
                                                        getFastSwingTime(),
                                                        getFastTransferTime(),
@@ -140,59 +140,5 @@ public abstract class AvatarFlatGroundFastWalkingTest implements MultiRobotTestI
          stateVars.add(joint.getTauYoVariable().getFullNameString());
       }
       scs.setupVarGroup("RobotState", stateVars.toArray(new String[0]));
-   }
-
-   public static DoubleUnaryOperator trapezoidFunction(double bottomValue, double plateauValue, double startPlateau, double endPlateau)
-   {
-      return percent ->
-      {
-         if (percent < startPlateau)
-            return EuclidCoreTools.interpolate(bottomValue, plateauValue, percent / startPlateau);
-         else if (percent > endPlateau)
-            return EuclidCoreTools.interpolate(plateauValue, bottomValue, (percent - endPlateau) / (1.0 - endPlateau));
-         else
-            return plateauValue;
-      };
-   }
-
-   public static FootstepDataListMessage forwardSteps(RobotSide initialStepSide, int numberOfSteps, DoubleUnaryOperator stepLengthFunction, double stepWidth,
-                                                       double swingTime, double transferTime, Pose3DReadOnly startPose, boolean squareUp)
-   {
-      FootstepDataListMessage message = new FootstepDataListMessage();
-      FootstepDataMessage footstep = message.getFootstepDataList().add();
-
-      RobotSide stepSide = initialStepSide;
-      Pose3D stepPose = new Pose3D(startPose);
-      stepPose.appendTranslation(0.5 * stepLengthFunction.applyAsDouble(0.0), stepSide.negateIfRightSide(0.5 * stepWidth), 0.0);
-      footstep.setRobotSide(stepSide.toByte());
-      footstep.getLocation().set(stepPose.getPosition());
-      footstep.getOrientation().set(stepPose.getOrientation());
-      footstep.setSwingDuration(swingTime);
-
-      for (int i = 1; i < numberOfSteps; i++)
-      {
-         stepSide = stepSide.getOppositeSide();
-         stepPose.appendTranslation(stepLengthFunction.applyAsDouble(i / (numberOfSteps - 1.0)), stepSide.negateIfRightSide(stepWidth), 0.0);
-         footstep = message.getFootstepDataList().add();
-         footstep.setRobotSide(stepSide.toByte());
-         footstep.getLocation().set(stepPose.getPosition());
-         footstep.getOrientation().set(stepPose.getOrientation());
-         footstep.setTransferDuration(transferTime);
-         footstep.setSwingDuration(swingTime);
-      }
-
-      if (squareUp)
-      {
-         stepSide = stepSide.getOppositeSide();
-         stepPose.appendTranslation(0.0, stepSide.negateIfRightSide(stepWidth), 0.0);
-         footstep = message.getFootstepDataList().add();
-         footstep.setRobotSide(stepSide.toByte());
-         footstep.getLocation().set(stepPose.getPosition());
-         footstep.getOrientation().set(stepPose.getOrientation());
-         footstep.setTransferDuration(transferTime);
-         footstep.setSwingDuration(swingTime);
-      }
-
-      return message;
    }
 }

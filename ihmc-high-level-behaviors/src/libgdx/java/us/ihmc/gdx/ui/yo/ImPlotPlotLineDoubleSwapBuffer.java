@@ -2,21 +2,19 @@ package us.ihmc.gdx.ui.yo;
 
 import imgui.extension.implot.ImPlot;
 import us.ihmc.gdx.ui.tools.ImPlotTools;
+import us.ihmc.tools.thread.SwapReference;
 
 public class ImPlotPlotLineDoubleSwapBuffer implements ImPlotPlotLineSwapBuffer
 {
-   private Double[] yValuesA;
-   private Double[] yValuesB;
+   private SwapReference<Double[]> yValues;
    private int bufferSize;
    private double value = Double.NaN;
-   private boolean isA = true;
 
    @Override
    public void initialize(int bufferSize)
    {
       this.bufferSize = bufferSize;
-      yValuesA = ImPlotTools.newNaNFilledDoubleBuffer(bufferSize);
-      yValuesB = ImPlotTools.newNaNFilledDoubleBuffer(bufferSize);
+      yValues = new SwapReference<>(() -> ImPlotTools.newNaNFilledDoubleBuffer(bufferSize));
    }
 
    public void addValue(double value)
@@ -27,58 +25,44 @@ public class ImPlotPlotLineDoubleSwapBuffer implements ImPlotPlotLineSwapBuffer
    @Override
    public void setAValue(int index)
    {
-      yValuesA[index] = value;
+      yValues.getA()[index] = value;
    }
 
    @Override
    public void setPreviousValue(int index)
    {
-      if (isA)
-      {
-         yValuesA[index] = value;
-      }
-      else
-      {
-         yValuesB[index] = value;
-      }
+      yValues.getForThreadOne()[index] = value;
    }
 
    @Override
    public void setUpdatedValue(int index)
    {
-      if (isA)
-      {
-         yValuesB[index] = value;
-      }
-      else
-      {
-         yValuesA[index] = value;
-      }
+      yValues.getForThreadTwo()[index] = value;
    }
 
    @Override
    public void copyAToB()
    {
-      System.arraycopy(yValuesA, 0, yValuesB, 0, bufferSize);
+      System.arraycopy(yValues.getA(), 0, yValues.getB(), 0, bufferSize);
    }
 
    @Override
    public void copyPreviousToUpdated(int srcPos, int destPos, int length)
    {
-      Double[] previousValues = isA ? yValuesA : yValuesB;
-      Double[] updatedValues = isA ? yValuesB : yValuesA;
+      Double[] previousValues = yValues.getForThreadOne();
+      Double[] updatedValues = yValues.getForThreadTwo();
       System.arraycopy(previousValues, srcPos, updatedValues, 0, length);
-      isA = !isA;
+      yValues.swap();
    }
 
    @Override
    public void plot(String labelID, Integer[] xValues, int offset)
    {
-      ImPlot.plotLine(labelID, xValues, isA ? yValuesA : yValuesB, offset);
+      ImPlot.plotLine(labelID, xValues, yValues.getForThreadOne(), offset);
    }
 
    public double getValue(int bufferIndex)
    {
-      return isA ? yValuesA[bufferIndex] : yValuesB[bufferIndex];
+      return yValues.getForThreadOne()[bufferIndex];
    }
 }

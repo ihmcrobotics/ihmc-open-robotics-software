@@ -15,13 +15,24 @@ import us.ihmc.scs2.simulation.robot.multiBodySystem.SimRevoluteJoint;
 
 public class DoorDefinition extends RobotDefinition
 {
-   private final SixDoFJointState initialSixDoFState;
-   private final OneDoFJointState initialHingeState;
-   private final OneDoFJointState initialLeverState;
+   private SixDoFJointState initialSixDoFState;
+   private OneDoFJointState initialHingeState;
+   private OneDoFJointState initialLeverState;
+
+   private DoorPanelDefinition doorPanelDefinition = new DoorPanelDefinition();
 
    public DoorDefinition()
    {
       super("door");
+   }
+
+   public DoorPanelDefinition getDoorPanelDefinition()
+   {
+      return doorPanelDefinition;
+   }
+
+   public void build()
+   {
       RigidBodyDefinition rootBodyDefinition = new RigidBodyDefinition("doorRootBody");
 
       SixDoFJointDefinition rootJointDefinition = new SixDoFJointDefinition("doorRootJoint");
@@ -39,8 +50,10 @@ public class DoorDefinition extends RobotDefinition
       doorHingeJoint.getTransformToParent().getTranslation().add(0.0, 0.005, 0.02);
       initialHingeState = new OneDoFJointState();
       doorHingeJoint.setInitialJointState(initialHingeState);
+      doorHingeJoint.setPositionLowerLimit(-1.7);
+      doorHingeJoint.setPositionUpperLimit(1.7);
 
-      DoorPanelDefinition doorPanelDefinition = new DoorPanelDefinition();
+      doorPanelDefinition.build();
       doorHingeJoint.setSuccessor(doorPanelDefinition);
 
       RevoluteJointDefinition doorLeverJoint = new RevoluteJointDefinition("doorLeverJoint");
