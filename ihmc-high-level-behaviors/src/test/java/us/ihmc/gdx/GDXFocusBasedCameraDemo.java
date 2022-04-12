@@ -13,7 +13,6 @@ public class GDXFocusBasedCameraDemo
    private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
                                                               "ihmc-open-robotics-software",
                                                               "ihmc-high-level-behaviors/src/test/resources");
-
    private GDXFocusBasedCamera focusBasedCamera;
    private final Vector3D tempVector = new Vector3D();
    private GDXReferenceFrameGraphic cameraFrameGraphic;
@@ -64,10 +63,6 @@ public class GDXFocusBasedCameraDemo
             cameraFrameGraphic.getFramePose3D().getPosition().set(focusPointPoseGraphic.getFramePose3D().getPosition());
             cameraFrameGraphic.getFramePose3D().getPosition().add(tempVector);
             cameraFrameGraphic.updateFromFramePose();
-
-//            tempVector.scale(0.5);
-
-
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
