@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 public class NonPlanarLIPMWalkerRobotDescription extends RobotDescription
 {
-   private double bodyXRadius = 0.1, bodyYRadius = 0.2, bodyZRadius = 0.4;
+   private double bodyXRadius = 0.1, bodyYRadius = 0.2, bodyZRadius = 0.3;
    private double bodyRadiusOfGyrationY = 0.2;
    private double bodyRadiusOfGyrationZ = 0.2;
    private double bodyRadiusOfGyrationX = 0.2;
@@ -36,8 +36,8 @@ public class NonPlanarLIPMWalkerRobotDescription extends RobotDescription
    private double hipRadiusOfGyrationX = 0.005;
    private double hipRadiusOfGyrationY = 0.005;
    private double hipRadiusOfGyrationZ = 0.005;
-   private double hipLength = 0.2;
-   private double hipRadius = 0.05;
+   private double hipLength = 0.15;
+   private double hipRadius = 0.1;
 
    private final ArrayList<GroundContactPointDescription> gcPoints = new ArrayList<GroundContactPointDescription>(2);
 
@@ -59,22 +59,20 @@ public class NonPlanarLIPMWalkerRobotDescription extends RobotDescription
       bodyLink.setLinkGraphics(bodyLinkGraphics);
 
       leftHipPitchJoint = new PinJointDescription("leftHipPitch", new Vector3D(0.0, hipWidth / 2.0, 0.0), new Vector3D(0.0, 1.0, 0.0));
-      bodyJoint.addJoint(leftHipPitchJoint);
-
-      leftHipRollJoint = new PinJointDescription("leftHipRoll", new Vector3D(0.0, 0.0, 0.0), new Vector3D(1.0, 0.0, 0.0));
-      leftHipPitchJoint.addJoint(leftHipRollJoint);
-
       rightHipPitchJoint = new PinJointDescription("rightHipPitch", new Vector3D(0.0, -hipWidth / 2.0, 0.0), new Vector3D(0.0, 1.0, 0.0));
+      bodyJoint.addJoint(leftHipPitchJoint);
       bodyJoint.addJoint(rightHipPitchJoint);
 
-      rightHipRollJoint = new PinJointDescription("rightHipRoll", new Vector3D(0.0, 0.0, 0.0), new Vector3D(1.0, 0.0, 0.0));
-      rightHipPitchJoint.addJoint(rightHipRollJoint);
-
-      LinkDescription leftHipLink = createHipLink("leftHipLink", YoAppearance.Black());
+      LinkDescription leftHipLink = createHipLink("leftHipLink", YoAppearance.Brown());
       leftHipPitchJoint.setLink(leftHipLink);
 
-      LinkDescription rightHipLink = createHipLink("rightHipLink", YoAppearance.Black());
+      LinkDescription rightHipLink = createHipLink("rightHipLink", YoAppearance.Brown());
       rightHipPitchJoint.setLink(rightHipLink);
+
+      leftHipRollJoint = new PinJointDescription("leftHipRoll", new Vector3D(0.0, 0.0, 0.0), new Vector3D(1.0, 0.0, 0.0));
+      rightHipRollJoint = new PinJointDescription("rightHipRoll", new Vector3D(0.0, 0.0, 0.0), new Vector3D(1.0, 0.0, 0.0));
+      leftHipPitchJoint.addJoint(leftHipRollJoint);
+      rightHipPitchJoint.addJoint(rightHipRollJoint);
 
       LinkDescription leftThigh = createThighLink("leftThigh");
       leftHipRollJoint.setLink(leftThigh);
@@ -111,8 +109,7 @@ public class NonPlanarLIPMWalkerRobotDescription extends RobotDescription
       LinkDescription hipLinkDescription = new LinkDescription(hipLink);
       hipLinkDescription.setMassAndRadiiOfGyration(hipMass, hipRadiusOfGyrationX, hipRadiusOfGyrationY, hipRadiusOfGyrationZ);
       LinkGraphicsDescription hipGraphics = new LinkGraphicsDescription();
-      hipGraphics.addCylinder(hipLength, hipRadius, appearance);
-      hipGraphics.addSphere(hipRadius, YoAppearance.AluminumMaterial());
+      hipGraphics.addCube(hipRadius * 2.0, hipLength, hipRadius * 2.0, appearance);
       hipLinkDescription.setLinkGraphics(hipGraphics);
       return hipLinkDescription;
    }

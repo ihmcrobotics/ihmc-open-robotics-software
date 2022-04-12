@@ -32,7 +32,6 @@ public class NonPlanarLIPMWalkerRobot
    private double bodyRadiusOfGyrationZ = 0.2;
    private double bodyRadiusOfGyrationX = 0.2;
    private double bodyMass = 30.0;
-   private Robot robot;
    private double hipWidth = 0.3;
    private double thighMass = 0.2;
    private double thighRadiusOfGyrationX = 0.01;
@@ -47,14 +46,17 @@ public class NonPlanarLIPMWalkerRobot
    private double shinLength = 0.6;
    private double shinRadius = 0.03;
 
-   private final ArrayList<GroundContactPointDescription> gcPoints = new ArrayList<GroundContactPointDescription>(2);
+
+   private Robot robot;
 
    private FloatingJoint bodyJoint;
-   private PinJoint leftHipPitchJoint, rightHipPitchJoint;
+   private PinJoint leftHipPitchJoint, rightHipPitchJoint, leftHipRollJoint, rightHipRollJoint;
    private SliderJoint leftKneeJoint, rightKneeJoint;
-   private SideDependentList<PinJoint> hipPitchJoints;
+   private SideDependentList<PinJoint> hipPitchJoints, hipRollJoints;
    private SideDependentList<SliderJoint> kneeJoints;
    private SideDependentList<GroundContactPoint> heelPoints;
+
+   private final ArrayList<GroundContactPointDescription> gcPoints = new ArrayList<GroundContactPointDescription>(2);
 
    public NonPlanarLIPMWalkerRobot()
    {
@@ -65,8 +67,11 @@ public class NonPlanarLIPMWalkerRobot
 
       leftHipPitchJoint = (PinJoint) robot.getJoint("leftHipPitch");
       rightHipPitchJoint = (PinJoint) robot.getJoint("rightHipPitch");
-
       hipPitchJoints = new SideDependentList<>(leftHipPitchJoint, rightHipPitchJoint);
+
+      leftHipRollJoint = (PinJoint) robot.getJoint("leftHipRoll");
+      rightHipRollJoint = (PinJoint) robot.getJoint("rightHipRoll");
+      hipRollJoints = new SideDependentList<>(leftHipRollJoint, rightHipPitchJoint);
 
       leftKneeJoint = (SliderJoint) robot.getJoint("leftKnee");
       rightKneeJoint = (SliderJoint) robot.getJoint("rightKnee");
@@ -117,27 +122,42 @@ public class NonPlanarLIPMWalkerRobot
 
    public double getBodyXPosition()
    {
-      return 0.0;
+      return bodyJoint.getQx().getDoubleValue();
    }
 
    public double getBodyZPosition()
    {
-      return 0.0;
+      return bodyJoint.getQz().getDoubleValue();
    }
 
    public double getBodyPitchAngle()
    {
-      return 0.0;
+      return bodyJoint.getOrientation().getPitch();
    }
 
    public double getBodyPitchAngularVelocity()
    {
-      return 0.0;
+      return bodyJoint.getAngularVelocity().getY();
    }
 
-   public double getHipAngle(RobotSide robotSide)
+   public double getHipAngleRoll(RobotSide robotSide)
+   {
+      return hipRollJoints.get(robotSide).getQ();
+   }
+
+   public double getHipAnglePitch(RobotSide robotSide)
    {
       return hipPitchJoints.get(robotSide).getQ();
+   }
+
+   public double getHipVelocityPitch(RobotSide robotSide)
+   {
+      return hipPitchJoints.get(robotSide).getQD();
+   }
+
+   public double getHipVelocityRoll(RobotSide robotSide)
+   {
+      return hipRollJoints.get(robotSide).getQD();
    }
 
    public double getKneeLength(RobotSide robotSide)
@@ -145,19 +165,19 @@ public class NonPlanarLIPMWalkerRobot
       return kneeJoints.get(robotSide).getQ();
    }
 
-   public double getHipVelocity(RobotSide robotSide)
-   {
-      return hipPitchJoints.get(robotSide).getQD();
-   }
-
    public double getKneeVelocity(RobotSide robotSide)
    {
       return kneeJoints.get(robotSide).getQD();
    }
 
-   public void setHipTorque(RobotSide robotSide, double torque)
+   public void setHipTorquePitch(RobotSide robotSide, double torque)
    {
       hipPitchJoints.get(robotSide).setTau(torque);
+   }
+
+   public void setHipTorqueRoll(RobotSide robotSide, double torque)
+   {
+      hipRollJoints.get(robotSide).setTau(torque);
    }
 
    public void setKneeForce(RobotSide robotSide, double force)
@@ -193,7 +213,7 @@ public class NonPlanarLIPMWalkerRobot
    private void setupInitialConditions()
    {
       bodyJoint.setPosition(0.0, 0.0, 0.8);
-      bodyJoint.setVelocity(0.7, 0.0, 0.0);
+      bodyJoint.setVelocity(0.7, 0.12268, 0.0);
       bodyJoint.setYawPitchRoll(0.0, 0.0, 0.0);
 
       leftHipPitchJoint.setQ(0.0);

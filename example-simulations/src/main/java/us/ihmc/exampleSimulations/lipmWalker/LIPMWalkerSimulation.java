@@ -11,13 +11,13 @@ public class LIPMWalkerSimulation
    public LIPMWalkerSimulation()
    {
 
-//      NonPlanarLIPMWalkerRobot nonPlanarRobotConstructor = new NonPlanarLIPMWalkerRobot();
-//      Robot robot = nonPlanarRobotConstructor.getRobot();
-//      NonPlanarLIPMWalkerControllerBhavyansh controller = new NonPlanarLIPMWalkerControllerBhavyansh(nonPlanarRobotConstructor);
+      NonPlanarLIPMWalkerRobot nonPlanarRobotConstructor = new NonPlanarLIPMWalkerRobot();
+      Robot robot = nonPlanarRobotConstructor.getRobot();
+      NonPlanarLIPMWalkerControllerBhavyansh controller = new NonPlanarLIPMWalkerControllerBhavyansh(nonPlanarRobotConstructor);
 
-      LIPMWalkerRobot planarRobotConstructor = new LIPMWalkerRobot();
-      Robot robot = planarRobotConstructor.getRobot();
-      LIPMHoppingControllerBhavyansh controller = new LIPMHoppingControllerBhavyansh(planarRobotConstructor);
+//      LIPMWalkerRobot planarRobotConstructor = new LIPMWalkerRobot();
+//      Robot robot = planarRobotConstructor.getRobot();
+//      LIPMHoppingControllerBhavyansh controller = new LIPMHoppingControllerBhavyansh(planarRobotConstructor);
 //      LIPMWalkerControllerBhavyansh controller = new LIPMWalkerControllerBhavyansh(planarRobotConstructor);
 //      LIPMWalkerControllerTobi controller = new LIPMWalkerControllerTobi(planarRobotConstructor);
 //      LIPMWalkerController controller = new LIPMWalkerController(planarRobotConstructor);

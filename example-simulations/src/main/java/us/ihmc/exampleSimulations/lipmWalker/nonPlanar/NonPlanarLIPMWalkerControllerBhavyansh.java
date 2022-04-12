@@ -237,20 +237,20 @@ public class NonPlanarLIPMWalkerControllerBhavyansh implements RobotController
       
       
       
-      robot.setHipTorque(side, -kpBody.getValue() * (0.0 - robot.getBodyPitchAngle()) + kdBody.getValue() * robot.getBodyPitchAngularVelocity());
+      robot.setHipTorquePitch(side, -kpBody.getValue() * (0.0 - robot.getBodyPitchAngle()) + kdBody.getValue() * robot.getBodyPitchAngularVelocity());
 
-      worldHipAngles.get(side).set(robot.getHipAngle(side) + robot.getBodyPitchAngle());
+      worldHipAngles.get(side).set(robot.getHipAnglePitch(side) + robot.getBodyPitchAngle());
    }
 
    private void controlSwingLeg(RobotSide side, double timeInState)
    {
       double feedBackKneeForce;
 
-      double hipAngle = robot.getHipAngle(side) + robot.getBodyPitchAngle();
+      double hipAngle = robot.getHipAnglePitch(side) + robot.getBodyPitchAngle();
       worldHipAngles.get(side).set(hipAngle);
 
-      double supportHipAngle = robot.getHipAngle(side.getOppositeSide()) + robot.getBodyPitchAngle();
-      double hipVelocity = robot.getHipVelocity(side);
+      double supportHipAngle = robot.getHipAnglePitch(side.getOppositeSide()) + robot.getBodyPitchAngle();
+      double hipVelocity = robot.getHipVelocityPitch(side);
       double kneeLength = robot.getKneeLength(side);
       double kneeVelocity = robot.getKneeVelocity(side);
 
@@ -285,7 +285,7 @@ public class NonPlanarLIPMWalkerControllerBhavyansh implements RobotController
       /* ----------------------------------- Compute and set hip torque. --------------------------------------------*/
       double feedBackHipTorque = kpHip.getValue() * (desiredHipAngle - hipAngle) + kdHip.getValue() * (desiredHipVelocity - hipVelocity);
       desiredHipAngles.get(side).set(desiredHipAngle);
-      robot.setHipTorque(side, feedBackHipTorque);
+      robot.setHipTorquePitch(side, feedBackHipTorque);
 
       //      LogTools.info("CoMX: {}, KneeLength: {}, HipAngle: {}", comXPositionFromFoot.getValue(), desiredKneeLength, desiredHipAngle);
    }
