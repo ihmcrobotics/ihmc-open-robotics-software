@@ -30,7 +30,6 @@ import java.util.UUID;
 
 public class GDXFootstepAction implements GDXBehaviorAction
 {
-
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private GDXInteractableHighlightModel highlightModel;
    private final GDXPose3DGizmo poseGizmo = new GDXPose3DGizmo();
