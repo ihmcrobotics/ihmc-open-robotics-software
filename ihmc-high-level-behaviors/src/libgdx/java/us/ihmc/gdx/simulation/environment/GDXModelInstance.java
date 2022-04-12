@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
@@ -36,6 +37,12 @@ public class GDXModelInstance extends ModelInstance
       bounds.getCenter(center);
       bounds.getDimensions(dimensions);
       radius = dimensions.len() / 2f;
+   }
+
+   public void setTransformToReferenceFrame(ReferenceFrame referenceFrame)
+   {
+      referenceFrame.getTransformToDesiredFrame(tempTransform, ReferenceFrame.getWorldFrame());
+      GDXTools.toGDX(tempTransform, transform);
    }
 
    public void setTransformToWorldFrame(RigidBodyTransform transformToWorldFrame)

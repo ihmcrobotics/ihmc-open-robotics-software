@@ -92,6 +92,14 @@ public class ImGui3DViewInput
       return pickRayInWorld;
    }
 
+   public void addPickResult(ImGui3DViewPickResult pickResult)
+   {
+      if (pickResult.getPickIntersects())
+      {
+         pickResults.add(pickResult);
+      }
+   }
+
    public void calculateClosestPick()
    {
       closestPick = null;
@@ -152,11 +160,6 @@ public class ImGui3DViewInput
    public float getMouseWheelDelta()
    {
       return mouseWheelDelta;
-   }
-
-   public ArrayList<ImGui3DViewPickResult> getPickResults()
-   {
-      return pickResults;
    }
 
    /**

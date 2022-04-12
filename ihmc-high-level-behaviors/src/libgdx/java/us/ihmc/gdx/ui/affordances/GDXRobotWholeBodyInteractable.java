@@ -176,19 +176,30 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
       if (interactablesEnabled.get())
       {
          walkPathControlRing.calculate3DViewPick(input);
-         if (showSelfCollisionMeshes.get())
-         {
-            for (GDXRobotCollisionLink collisionLink : selfCollisionLinks)
-            {
-               collisionLink.calculatePick(input);
-            }
-         }
-         if (showEnvironmentCollisionMeshes.get())
-         {
+//         if (showSelfCollisionMeshes.get())
+//         {
+//            for (GDXRobotCollisionLink collisionLink : selfCollisionLinks)
+//            {
+//               collisionLink.calculatePick(input);
+//            }
+//         }
+//         if (showEnvironmentCollisionMeshes.get())
+//         {
             for (GDXRobotCollisionLink collisionLink : environmentCollisionLinks)
             {
                collisionLink.calculatePick(input);
             }
+//         }
+
+         pelvisInteractable.calculate3DViewPick(input);
+         for (GDXLiveRobotPartInteractable footInteractable : footInteractables)
+         {
+            footInteractable.calculate3DViewPick(input);
+         }
+         for (GDXLiveRobotPartInteractable handInteractable : handInteractables)
+         {
+            if (handInteractable != null)
+               handInteractable.calculate3DViewPick(input);
          }
       }
    }
@@ -199,14 +210,20 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
       if (interactablesEnabled.get())
       {
          walkPathControlRing.process3DViewInput(input);
-         for (GDXRobotCollisionLink collisionLink : selfCollisionLinks)
-         {
-            collisionLink.process3DViewInput(input);
-         }
-         for (GDXRobotCollisionLink collisionLink : environmentCollisionLinks)
-         {
-            collisionLink.process3DViewInput(input);
-         }
+//         if (showSelfCollisionMeshes.get())
+//         {
+//            for (GDXRobotCollisionLink collisionLink : selfCollisionLinks)
+//            {
+//               collisionLink.process3DViewInput(input);
+//            }
+//         }
+//         if (showEnvironmentCollisionMeshes.get())
+//         {
+            for (GDXRobotCollisionLink collisionLink : environmentCollisionLinks)
+            {
+               collisionLink.process3DViewInput(input);
+            }
+//         }
 
          pelvisInteractable.process3DViewInput(input);
          for (GDXLiveRobotPartInteractable footInteractable : footInteractables)
