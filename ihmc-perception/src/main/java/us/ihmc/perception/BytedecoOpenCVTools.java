@@ -4,9 +4,24 @@ import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Size;
 
 public class BytedecoOpenCVTools
 {
+   public static final int FLIP_Y = 0;
+   public static final int FLIP_X = 1;
+   public static final int FLIP_BOTH = -1;
+
+   public static int getImageWidth(Mat image)
+   {
+      return image.cols();
+   }
+
+   public static int getImageHeight(Mat image)
+   {
+      return image.rows();
+   }
+
    public static void clamp(Mat source, Mat destination, double min, double max)
    {
       int normType = opencv_core.NORM_MINMAX;
@@ -38,7 +53,7 @@ public class BytedecoOpenCVTools
 
    public static void flipY(Mat source, Mat destination)
    {
-      int flipCode = 0; // 0 flips X, 1 flips Y, -1 flips both
+      int flipCode = FLIP_Y;
       opencv_core.flip(source, destination, flipCode);
    }
 
@@ -51,5 +66,29 @@ public class BytedecoOpenCVTools
    {
       IntPointer fromABGRToRGBA = new IntPointer(0, 3, 1, 2, 2, 1, 3, 0);
       opencv_core.mixChannels(srcABGR, 1, dstRGBA, 1, fromABGRToRGBA, 4);
+   }
+
+   public static void convertRGBAToABGR(Mat srcRGBA, Mat dstABGR)
+   {
+      IntPointer fromABGRToRGBA = new IntPointer(0, 3, 1, 2, 2, 1, 3, 0);
+      opencv_core.mixChannels(srcRGBA, 1, dstABGR, 1, fromABGRToRGBA, 4);
+   }
+
+   public static void blur(Mat sourceImage, Mat destinationImage)
+   {
+      int gaussianSize = 6;
+      int size = gaussianSize * 2 + 1;
+      Size gaussianKernelSize = new Size();
+      gaussianKernelSize.width(size);
+      gaussianKernelSize.height(size);
+      double sigmaX = 4.74;
+      double sigmaY = sigmaX;
+      int borderType = opencv_core.BORDER_DEFAULT;
+      opencv_imgproc.GaussianBlur(sourceImage,
+                                  destinationImage,
+                                  gaussianKernelSize,
+                                  sigmaX,
+                                  sigmaY,
+                                  borderType);
    }
 }

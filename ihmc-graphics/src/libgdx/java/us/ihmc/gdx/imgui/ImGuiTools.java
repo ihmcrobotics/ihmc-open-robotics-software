@@ -3,7 +3,9 @@ package us.ihmc.gdx.imgui;
 import com.badlogic.gdx.Input;
 import imgui.*;
 import imgui.flag.ImGuiFreeTypeBuilderFlags;
+import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiKey;
+import imgui.type.ImString;
 import org.apache.commons.lang3.SystemUtils;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL41;
@@ -52,6 +54,13 @@ public class ImGuiTools
    {
       glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
       glClear(GL41.GL_COLOR_BUFFER_BIT);
+   }
+
+   public static boolean inputText(String label, ImString text)
+   {
+      int flags = ImGuiInputTextFlags.None;
+      flags += ImGuiInputTextFlags.CallbackResize;
+      return ImGui.inputText(label, text, flags);
    }
 
    public static String uniqueLabel(String label)

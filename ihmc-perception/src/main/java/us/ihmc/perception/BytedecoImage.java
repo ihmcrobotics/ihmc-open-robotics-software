@@ -1,16 +1,15 @@
-package us.ihmc.gdx.perception;
+package us.ihmc.perception;
 
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl._cl_mem;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
-import us.ihmc.perception.OpenCLManager;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-public class GDXBytedecoImage
+public class BytedecoImage
 {
    private ByteBuffer backingDirectByteBuffer;
    private BytePointer bytedecoByteBufferPointer;
@@ -25,12 +24,26 @@ public class GDXBytedecoImage
    private int openCLImageObjectFlags;
    private final boolean isBackedByExternalByteBuffer;
 
-   public GDXBytedecoImage(int imageWidth, int imageHeight, int cvMatType)
+   public BytedecoImage(int imageWidth, int imageHeight, int cvMatType)
    {
       this(imageWidth, imageHeight, cvMatType, null);
    }
 
-   public GDXBytedecoImage(int imageWidth, int imageHeight, int cvMatType, ByteBuffer backingDirectByteBuffer)
+   public BytedecoImage(int imageWidth, int imageHeight, int cvMatType, ByteBuffer backingDirectByteBuffer)
+   {
+      this(imageWidth, imageHeight, cvMatType, backingDirectByteBuffer, null);
+   }
+
+   public BytedecoImage(Mat suppliedMat)
+   {
+      this(BytedecoOpenCVTools.getImageWidth(suppliedMat),
+           BytedecoOpenCVTools.getImageHeight(suppliedMat),
+           suppliedMat.type(),
+           suppliedMat.data().asByteBuffer(),
+           suppliedMat);
+   }
+
+   public BytedecoImage(int imageWidth, int imageHeight, int cvMatType, ByteBuffer backingDirectByteBuffer, Mat suppliedMat)
    {
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
@@ -61,6 +74,12 @@ public class GDXBytedecoImage
          openCLChannelOrder = OpenCL.CL_R;
          openCLChannelDataType = OpenCL.CL_UNSIGNED_INT8;
       }
+      else if (cvMatType == opencv_core.CV_8UC3)
+      {
+         bytesPerPixel = 3;
+         openCLChannelOrder = OpenCL.CL_RGB;
+         openCLChannelDataType = OpenCL.CL_UNSIGNED_INT8;
+      }
       else if (cvMatType == opencv_core.CV_8UC4)
       {
          bytesPerPixel = 4;
@@ -84,7 +103,14 @@ public class GDXBytedecoImage
       }
 
       bytedecoByteBufferPointer = new BytePointer(this.backingDirectByteBuffer);
-      bytedecoOpenCVMat = new Mat(imageHeight, imageWidth, cvMatType, bytedecoByteBufferPointer);
+      if (suppliedMat != null)
+      {
+         bytedecoOpenCVMat = suppliedMat;
+      }
+      else
+      {
+         bytedecoOpenCVMat = new Mat(imageHeight, imageWidth, cvMatType, bytedecoByteBufferPointer);
+      }
    }
 
    public void createOpenCLImage(OpenCLManager openCLManager, int flags)
@@ -157,5 +183,15 @@ public class GDXBytedecoImage
    public _cl_mem getOpenCLImageObject()
    {
       return openCLImageObject;
+   }
+
+   public int getImageWidth()
+   {
+      return imageWidth;
+   }
+
+   public int getImageHeight()
+   {
+      return imageHeight;
    }
 }

@@ -13,6 +13,7 @@ public class SphereRayIntersection
    private final Point3D rayOriginInSphereFrame = new Point3D();
    private final Point3D firstIntersectionToPack = new Point3D();
    private final Point3D secondIntersectionToPack = new Point3D();
+   private boolean intersects = false;
 
    public void setup(double radius, RigidBodyTransformReadOnly transform)
    {
@@ -56,7 +57,8 @@ public class SphereRayIntersection
                                                                                              secondIntersectionToPack);
       firstIntersectionToPack.add(sphere.getPosition());
       secondIntersectionToPack.add(sphere.getPosition());
-      return numberOfIntersections == 2;
+      intersects = numberOfIntersections == 2;
+      return intersects;
    }
 
    public Point3DReadOnly getFirstIntersectionToPack()
@@ -67,5 +69,10 @@ public class SphereRayIntersection
    public Point3DReadOnly getSecondIntersectionToPack()
    {
       return secondIntersectionToPack;
+   }
+
+   public boolean getIntersects()
+   {
+      return intersects;
    }
 }

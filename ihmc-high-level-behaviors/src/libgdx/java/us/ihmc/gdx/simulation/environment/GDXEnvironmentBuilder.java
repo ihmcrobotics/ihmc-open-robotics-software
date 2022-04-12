@@ -85,6 +85,14 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
       baseUI.addImGui3DViewInputProcessor(this::process3DViewInput);
    }
 
+   public void calculate3DViewPick(ImGui3DViewInput input)
+   {
+      if (selectedObject != null && !isPlacing)
+      {
+         pose3DGizmo.calculate3DViewPick(input);
+      }
+   }
+
    public void process3DViewInput(ImGui3DViewInput viewInput)
    {
       if (selectedObject != null)
@@ -244,9 +252,7 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
             }
          }
       }
-      int flags = ImGuiInputTextFlags.None;
-      flags += ImGuiInputTextFlags.CallbackResize;
-      ImGui.inputText("###saveText", saveString, flags);
+      ImGuiTools.inputText("###saveText", saveString);
       ImGui.sameLine();
       if (ImGui.button("Save as"))
       {

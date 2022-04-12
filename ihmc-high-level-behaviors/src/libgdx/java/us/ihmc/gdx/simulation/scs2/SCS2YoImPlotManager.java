@@ -59,6 +59,7 @@ public class SCS2YoImPlotManager
       InputStream inputStream = configurationFile.getInputStream();
       if (inputStream != null)
       {
+         plotPanels.clear();
          JSONFileTools.load(inputStream, node ->
          {
             for (Iterator<JsonNode> panelNodeIterator = node.withArray("panels").elements(); panelNodeIterator.hasNext(); )
@@ -84,7 +85,7 @@ public class SCS2YoImPlotManager
    private void saveConfiguration(ImGuiConfigurationLocation configurationLocation)
    {
       configurationFile.setMode(configurationLocation.toHybridResourceMode());
-      if (configurationFile.isWorkspaceWritingAvailable())
+      if (configurationFile.isWorkspaceFileAccessAvailable())
       {
          Path fileForWriting = configurationFile.getFileForWriting();
          LogTools.info("Saving plot panels to {}", fileForWriting.toAbsolutePath().normalize().toString());
