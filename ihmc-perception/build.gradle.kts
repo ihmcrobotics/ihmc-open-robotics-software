@@ -13,7 +13,6 @@ plugins {
 
 ihmc {
    loadProductProperties("../product.properties")
-   repository("https://oss.sonatype.org/content/repositories/snapshots")
    configureDependencyResolution()
    configurePublications()
 }
@@ -49,29 +48,29 @@ mainDependencies {
    api("us.ihmc:ihmc-robot-models:source")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
-   api("org.bytedeco:librealsense2:2-2.50.0-1.5.7-20220107.104743-29")
-   api("org.bytedeco:librealsense2-platform:2.50.0-1.5.7-20220107.104604-25")
 }
 
 openpnpDependencies {
    api("org.openpnp:opencv:4.3.0-2")
 }
 
-val javaCPPVersion = "1.5.6"
+val javaCPPVersion = "1.5.7"
 
 bytedecoDependencies {
    apiBytedecoNatives("javacpp")
-   apiBytedecoNatives("openblas", "0.3.17-")
-   apiBytedecoNatives("opencv", "4.5.3-")
+   apiBytedecoNatives("openblas", "0.3.19-")
+   apiBytedecoNatives("opencv", "4.5.5-")
    apiBytedecoNatives("opencl", "3.0-")
+   apiBytedecoNatives("librealsense2", "2.50.0-")
 }
 
 javacvDependencies {
    apiBytedecoSelective("org.bytedeco:javacv:$javaCPPVersion")
    apiBytedecoNatives("javacpp")
-   apiBytedecoNatives("openblas", "0.3.17-")
-   apiBytedecoNatives("opencv", "4.5.3-")
+   apiBytedecoNatives("openblas", "0.3.19-")
+   apiBytedecoNatives("opencv", "4.5.5-")
    apiBytedecoNatives("opencl", "3.0-")
+   apiBytedecoNatives("librealsense2", "2.50.0-")
 }
 
 fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, versionPrefix: String = "")
