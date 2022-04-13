@@ -313,7 +313,7 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
       max.add(epsilon);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(new BoundingBox3D(min, max));
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 2);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    @Test

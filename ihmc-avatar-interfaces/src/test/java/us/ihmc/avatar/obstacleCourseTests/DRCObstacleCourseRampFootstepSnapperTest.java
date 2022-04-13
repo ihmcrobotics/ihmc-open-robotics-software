@@ -208,7 +208,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       // Check for success
       success = success && simulationTestHelper.simulateNow(16.0);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 2);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
 
       // simulationTestHelper.checkNothingChanged();
       assertTrue(success);

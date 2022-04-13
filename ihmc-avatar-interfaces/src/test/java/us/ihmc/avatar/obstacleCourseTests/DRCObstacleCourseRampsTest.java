@@ -112,7 +112,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
 
       success = success && simulationTestHelper.simulateNow(totalDuration);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       //      simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -289,7 +289,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
 
       success = success && simulationTestHelper.simulateNow(totalDuration);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 2);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
 
 //      simulationTestHelper.checkNothingChanged();
       assertTrue(success);

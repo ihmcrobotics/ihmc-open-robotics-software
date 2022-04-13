@@ -74,7 +74,7 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
       ThreadTools.sleep(1000);
       boolean success = simulationTestHelper.simulateNow(20.0);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
 //      simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -109,7 +109,7 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
 
       success = success && simulationTestHelper.simulateNow(10.0);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
 //      simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);

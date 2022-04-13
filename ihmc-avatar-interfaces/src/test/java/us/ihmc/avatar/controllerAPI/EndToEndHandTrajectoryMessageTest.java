@@ -217,7 +217,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
                                                            controllerDT);
       }
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 2);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    @Test
@@ -326,7 +326,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
                                                            controllerDT);
       }
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 2);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    @Test
@@ -406,7 +406,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          assertTrue(success);
       }
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 2);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
 
       // TODO: add assert to make sure the hand did not move significantly.
    }
@@ -618,7 +618,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
                                                            controllerDT);
       }
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 2);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    @Test
@@ -915,7 +915,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          startTime = endTime;
       }
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 2);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    @Test

@@ -104,7 +104,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       //      if (simulationTestingParameters.getCheckNothingChangedInSimulation())
       //         simulationTestHelper.checkNothingChanged();
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 2);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 

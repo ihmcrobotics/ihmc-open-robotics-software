@@ -87,7 +87,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
 
       success = success && simulationTestHelper.simulateNow(9.5);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       //      simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -169,7 +169,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       simulationTestHelper.publishToController(footstepDataListMessage2);
       success = success && simulationTestHelper.simulateNow(4.0);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       //      simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -212,7 +212,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       ThreadTools.sleep(0);
       assertTrue(simulationTestHelper.simulateNow(6.0));
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       //      simulationTestHelper.checkNothingChanged();
 
       Point3D center = new Point3D(13.10268850797296, 14.090724695197087, 1.146368436759061);

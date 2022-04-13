@@ -129,7 +129,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
                                                         1.0e-3,
                                                         controllerDT);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 2);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    public void testSingleWaypointWithControlFrame() throws SimulationExceededMaximumTimeException
@@ -214,7 +214,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       double pelvisHeight = fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getTranslationZ();
       assertEquals(desiredPosition.getZ(), pelvisHeight, 0.01);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 2);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    public void testSingleWaypointThenManualChange() throws Exception
