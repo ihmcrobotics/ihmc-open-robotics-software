@@ -19,7 +19,6 @@ import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
 
@@ -41,7 +40,11 @@ public class AtlasPointyRocksEnvironmentContactsTest extends HumanoidPointyRocks
    @Override
    protected DRCRobotModel getRobotModel(int xContactPoints, int yContactPoints, boolean createOnlyEdgePoints)
    {
-      FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, xContactPoints, yContactPoints, createOnlyEdgePoints, true);
+      FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values,
+                                                                                                     xContactPoints,
+                                                                                                     yContactPoints,
+                                                                                                     createOnlyEdgePoints,
+                                                                                                     true);
       AtlasRobotModel robotModel = new TestModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false, simulationContactPoints);
       return robotModel;
    }
@@ -49,7 +52,7 @@ public class AtlasPointyRocksEnvironmentContactsTest extends HumanoidPointyRocks
    @Override
    @Disabled
    @Test
-   public void testWalkingOnLinesInEnvironment() throws SimulationExceededMaximumTimeException
+   public void testWalkingOnLinesInEnvironment()
    {
       try
       {
@@ -70,7 +73,7 @@ public class AtlasPointyRocksEnvironmentContactsTest extends HumanoidPointyRocks
    @Override
    @Disabled
    @Test
-   public void testWalkingOnPointInEnvironment() throws SimulationExceededMaximumTimeException
+   public void testWalkingOnPointInEnvironment()
    {
       super.testWalkingOnPointInEnvironment();
    }
