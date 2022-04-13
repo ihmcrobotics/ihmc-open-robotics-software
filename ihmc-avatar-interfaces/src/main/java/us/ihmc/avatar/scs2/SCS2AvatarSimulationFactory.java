@@ -71,6 +71,7 @@ import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.session.Session;
 import us.ihmc.scs2.session.tools.SCS1GraphicConversionTools;
 import us.ihmc.scs2.simulation.SimulationSession;
+import us.ihmc.scs2.simulation.parameters.ContactParametersReadOnly;
 import us.ihmc.scs2.simulation.parameters.ContactPointBasedContactParameters;
 import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngineFactory;
 import us.ihmc.scs2.simulation.physicsEngine.contactPointBased.ContactPointBasedPhysicsEngine;
@@ -118,7 +119,8 @@ public class SCS2AvatarSimulationFactory
    protected final OptionalFactoryField<Boolean> showGUI = new OptionalFactoryField<>("showGUI", true);
    protected final OptionalFactoryField<Boolean> automaticallyStartSimulation = new OptionalFactoryField<>("automaticallyStartSimulation", false);
 
-   protected final OptionalFactoryField<Boolean> useImpulseBasePhysicsEngine = new OptionalFactoryField<>("useImpulseBasePhysicsEngine", false);
+   protected final OptionalFactoryField<Boolean> useImpulseBasedPhysicsEngine = new OptionalFactoryField<>("useImpulseBasePhysicsEngine", false);
+   protected final OptionalFactoryField<ContactParametersReadOnly> impulseBasedPhysicsEngineContactParameters = new OptionalFactoryField<>("impulseBasedPhysicsEngineParameters");
    protected final OptionalFactoryField<Boolean> enableSimulatedRobotDamping = new OptionalFactoryField<>("enableSimulatedRobotDamping", true);
    protected final OptionalFactoryField<List<Robot>> secondaryRobots = new OptionalFactoryField<>("secondaryRobots", new ArrayList<>());
    protected final OptionalFactoryField<String> simulationName = new OptionalFactoryField<>("simulationName");
@@ -206,9 +208,15 @@ public class SCS2AvatarSimulationFactory
 
       PhysicsEngineFactory physicsEngineFactory;
 
-      if (useImpulseBasePhysicsEngine.hasValue() && useImpulseBasePhysicsEngine.get())
+      if (useImpulseBasedPhysicsEngine.hasValue() && useImpulseBasedPhysicsEngine.get())
       {
-         physicsEngineFactory = (inertialFrame, rootRegistry) -> new ImpulseBasedPhysicsEngine(inertialFrame, rootRegistry);
+         physicsEngineFactory = (inertialFrame, rootRegistry) ->
+         {
+            ImpulseBasedPhysicsEngine physicsEngine = new ImpulseBasedPhysicsEngine(inertialFrame, rootRegistry);
+            if (impulseBasedPhysicsEngineContactParameters.hasValue())
+               physicsEngine.setGlobalContactParameters(impulseBasedPhysicsEngineContactParameters.get());
+            return physicsEngine;
+         };
       }
       else
       {
@@ -676,9 +684,14 @@ public class SCS2AvatarSimulationFactory
       this.externalPelvisCorrectorSubscriber.set(externalPelvisCorrectorSubscriber);
    }
 
-   public void setUseImpulseBasedPhysicsEngine(boolean useImpulseBasePhysicsEngine)
+   public void setUseImpulseBasedPhysicsEngine(boolean useImpulseBasedPhysicsEngine)
    {
-      this.useImpulseBasePhysicsEngine.set(useImpulseBasePhysicsEngine);
+      this.useImpulseBasedPhysicsEngine.set(useImpulseBasedPhysicsEngine);
+   }
+
+   public void setImpulseBasedPhysicsEngineContactParameters(ContactParametersReadOnly contactParameters)
+   {
+      this.impulseBasedPhysicsEngineContactParameters.set(contactParameters);
    }
 
    public void setEnableSimulatedRobotDamping(boolean enableSimulatedRobotDamping)

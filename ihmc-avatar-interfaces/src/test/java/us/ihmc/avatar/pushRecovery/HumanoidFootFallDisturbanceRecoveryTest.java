@@ -128,7 +128,7 @@ public abstract class HumanoidFootFallDisturbanceRecoveryTest implements MultiRo
          yoVariableMutator.accept(simulationTestHelper.getRootRegistry());
 
       assertTrue(simulationTestHelper.simulateNow(0.5));
-      simulationTestHelper.setBufferInPointIndexToCurrent();
+      simulationTestHelper.setInPoint();
 
       CommonHumanoidReferenceFrames referenceFrames = simulationTestHelper.getControllerReferenceFrames();
       MovingReferenceFrame midFootZUpGroundFrame = referenceFrames.getMidFootZUpGroundFrame();
@@ -184,7 +184,7 @@ public abstract class HumanoidFootFallDisturbanceRecoveryTest implements MultiRo
          yoVariableMutator.accept(simulationTestHelper.getRootRegistry());
 
       assertTrue(simulationTestHelper.simulateNow(0.5));
-      simulationTestHelper.setBufferInPointIndexToCurrent();
+      simulationTestHelper.setInPoint();
 
       CommonHumanoidReferenceFrames referenceFrames = simulationTestHelper.getControllerReferenceFrames();
       MovingReferenceFrame midFootZUpGroundFrame = referenceFrames.getMidFootZUpGroundFrame();
