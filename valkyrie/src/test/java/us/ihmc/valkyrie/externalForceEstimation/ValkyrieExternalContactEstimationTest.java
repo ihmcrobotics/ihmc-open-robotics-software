@@ -1,5 +1,8 @@
 package us.ihmc.valkyrie.externalForceEstimation;
 
+import static us.ihmc.avatar.testTools.scs2.YoGraphicDefinitionFactory.newYoGraphicArrow3DDefinition;
+import static us.ihmc.avatar.testTools.scs2.YoGraphicDefinitionFactory.newYoGraphicPoint3DDefinition;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -21,7 +24,6 @@ import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.Exte
 import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ExternalForceEstimationToolboxModule;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
-import us.ihmc.avatar.testTools.scs2.YoGraphicDefinitionFactory;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -156,18 +158,15 @@ public class ValkyrieExternalContactEstimationTest
          testConfig.externalWrenchPoint = scsEndEffector.getAuxialiryData().addExternalWrenchPoint(testConfig.externalWrenchPointDefinition);
 
          ColorDefinition simulatedForceColor = ColorDefinitions.Red();
-         simulationTestHelper.addYoGraphicDefinition(YoGraphicDefinitionFactory.newYoGraphicArrow3DDefinition("simulatedForceVector",
-                                                                                                              testConfig.externalWrenchPoint.getOffset()
-                                                                                                                                            .getPosition(),
-                                                                                                              testConfig.externalWrenchPoint.getWrench()
-                                                                                                                                            .getLinearPart(),
-                                                                                                              forceGraphicScale,
-                                                                                                              simulatedForceColor));
-         simulationTestHelper.addYoGraphicDefinition(YoGraphicDefinitionFactory.newYoGraphicPoint3DDefinition("simulatedForcePoint",
-                                                                                                              testConfig.externalWrenchPoint.getOffset()
-                                                                                                                                            .getPosition(),
-                                                                                                              0.025,
-                                                                                                              simulatedForceColor));
+         simulationTestHelper.addYoGraphicDefinition(newYoGraphicArrow3DDefinition("simulatedForceVector",
+                                                                                   testConfig.externalWrenchPoint.getOffset().getPosition(),
+                                                                                   testConfig.externalWrenchPoint.getWrench().getLinearPart(),
+                                                                                   forceGraphicScale,
+                                                                                   simulatedForceColor));
+         simulationTestHelper.addYoGraphicDefinition(newYoGraphicPoint3DDefinition("simulatedForcePoint",
+                                                                                   testConfig.externalWrenchPoint.getOffset().getPosition(),
+                                                                                   0.025,
+                                                                                   simulatedForceColor));
       }
 
       graphicsListRegistry.registerYoGraphicsList(externalForcePointViz);

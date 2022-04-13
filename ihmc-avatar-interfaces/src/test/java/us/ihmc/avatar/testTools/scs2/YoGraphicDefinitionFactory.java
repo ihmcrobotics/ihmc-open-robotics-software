@@ -43,6 +43,7 @@ public class YoGraphicDefinitionFactory
    {
       YoGraphicArrow3DDefinition definition = new YoGraphicArrow3DDefinition();
       definition.setName(name);
+      definition.setVisible(true);
       definition.setOrigin(newYoTuple3DDefinition(origin));
       definition.setDirection(newYoTuple3DDefinition(direction));
       definition.setScaleLength(scaleLength);
@@ -59,7 +60,9 @@ public class YoGraphicDefinitionFactory
    {
       YoGraphicPoint3DDefinition definition = new YoGraphicPoint3DDefinition();
       definition.setName(name);
+      definition.setVisible(true);
       definition.setPosition(newYoTuple3DDefinition(position));
+      definition.setSize(size);
       definition.setColor(color);
       return definition;
    }
