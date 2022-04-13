@@ -1,7 +1,7 @@
 package us.ihmc.avatar.behaviorTests;
 
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,8 +17,9 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule.KinematicsPlanningToolboxModule;
-import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
+import us.ihmc.avatar.testTools.scs2.SCS2BehaviorTestHelper;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -28,15 +29,15 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.KinematicsPlanningBehavior;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.visual.VisualDefinition;
+import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.ValkyrieEODObstacleCourseEnvironment;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 
@@ -44,7 +45,7 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private boolean isKinematicsPlanningToolboxVisualizerEnabled = false;
-   private DRCBehaviorTestHelper drcBehaviorTestHelper;
+   private SCS2BehaviorTestHelper behaviorTestHelper;
    private KinematicsPlanningToolboxModule kinematicsPlanningToolboxModule;
 
    private final FramePose3D desiredFramePose = new FramePose3D();
@@ -59,16 +60,11 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
    @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
-      {
-         ThreadTools.sleepForever();
-      }
-
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcBehaviorTestHelper != null)
+      if (behaviorTestHelper != null)
       {
-         drcBehaviorTestHelper.closeAndDispose();
-         drcBehaviorTestHelper = null;
+         behaviorTestHelper.finishTest();
+         behaviorTestHelper = null;
       }
 
       if (kinematicsPlanningToolboxModule != null)
@@ -89,7 +85,7 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
    }
 
    @Test
-   public void testReachToDoorKnob() throws SimulationExceededMaximumTimeException, IOException
+   public void testReachToDoorKnob()
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
@@ -104,19 +100,24 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
             return new OffsetAndYawRobotInitialSetup(new Vector3D(doorLocation.getX() - 0.2, doorLocation.getY() - 0.7, 0.0), Math.PI / 2);
          }
       };
-
-      drcBehaviorTestHelper = new DRCBehaviorTestHelper(envrionment, getSimpleRobotName(), startingLocation, simulationTestingParameters, getRobotModel());
+      SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(), envrionment, simulationTestingParameters);
+      simulationTestHelperFactory.setStartingLocationOffset(startingLocation.getStartingLocationOffset());
+      SCS2AvatarTestingSimulation simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+      simulationTestHelper.start();
+      behaviorTestHelper = new SCS2BehaviorTestHelper(simulationTestHelper);
 
       setUpCamera(startingLocation.getStartingLocationOffset().getAdditionalOffset());
 
-      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(2.5);
+      boolean success = behaviorTestHelper.simulateNow(2.5);
       assertTrue(success);
 
-      drcBehaviorTestHelper.updateRobotModel();
+      behaviorTestHelper.updateRobotModel();
 
-      FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
-      KinematicsPlanningBehavior behavior = new KinematicsPlanningBehavior(drcBehaviorTestHelper.getRobotName(), drcBehaviorTestHelper.getROS2Node(),
-                                                                           getRobotModel(), sdfFullRobotModel);
+      FullHumanoidRobotModel sdfFullRobotModel = behaviorTestHelper.getSDFFullRobotModel();
+      KinematicsPlanningBehavior behavior = new KinematicsPlanningBehavior(behaviorTestHelper.getRobotName(),
+                                                                           behaviorTestHelper.getROS2Node(),
+                                                                           getRobotModel(),
+                                                                           sdfFullRobotModel);
 
       double trajectoryTime = 5.0;
       int numberOfKeyFrames = 10;
@@ -134,24 +135,24 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
          double alpha = (i + 1) / (double) (numberOfKeyFrames);
          pose.interpolate(desiredPose, alpha);
          desiredPoses.add(pose);
-         drcBehaviorTestHelper.getSimulationConstructionSet().addStaticLinkGraphics(createEndEffectorKeyFrameVisualization(pose));
+         behaviorTestHelper.addStaticVisuals(createEndEffectorKeyFrameVisualization(pose));
       }
 
       behavior.setKeyFrameTimes(trajectoryTime, numberOfKeyFrames);
       behavior.setEndEffectorKeyFrames(robotSide, desiredPoses);
 
-      drcBehaviorTestHelper.updateRobotModel();
+      behaviorTestHelper.updateRobotModel();
 
-      drcBehaviorTestHelper.dispatchBehavior(behavior);
+      behaviorTestHelper.dispatchBehavior(behavior);
 
       double waitingTimeForPlanning = 3.0;
       double waitingTick = 0.01;
       for (int i = 0; i < (int) waitingTimeForPlanning / waitingTick; i++)
       {
-         drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(waitingTick);
+         behaviorTestHelper.simulateNow(waitingTick);
          if (behavior.getPlanningResult() == KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_OPTIMAL_SOLUTION)
          {
-            drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(behavior.getTrajectoryTime());
+            behaviorTestHelper.simulateNow(behavior.getTrajectoryTime());
             break;
          }
       }
@@ -159,16 +160,16 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
       Pose3D finalPose = new Pose3D(sdfFullRobotModel.getHand(robotSide).getBodyFixedFrame().getTransformToWorldFrame());
 
       double positionDistance = desiredFramePose.getPosition().distance(finalPose.getPosition());
-      assertEquals("Hand too far from doorknob", 0.0, positionDistance, 0.011);
+      assertEquals(0.0, positionDistance, 0.011, "Hand too far from doorknob");
       double orientationDistance = Math.abs(desiredFramePose.getPosition().distance(finalPose.getPosition()));
       double orientationDistanceRotation = Math.abs(desiredFramePose.getOrientation().distance(finalPose.getOrientation()) - Math.PI * 2);
-      assertTrue("orientation Distance: " + orientationDistance, orientationDistance < 0.1 || orientationDistanceRotation < 0.1);
+      assertTrue(orientationDistance < 0.1 || orientationDistanceRotation < 0.1, "orientation Distance: " + orientationDistance);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
-   public void testSingleKeyFrameInput() throws SimulationExceededMaximumTimeException, IOException
+   public void testSingleKeyFrameInput()
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
@@ -183,19 +184,24 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
             return new OffsetAndYawRobotInitialSetup(new Vector3D(doorLocation.getX() - 0.2, doorLocation.getY() - 0.7, 0.0), Math.PI / 2);
          }
       };
-
-      drcBehaviorTestHelper = new DRCBehaviorTestHelper(envrionment, getSimpleRobotName(), startingLocation, simulationTestingParameters, getRobotModel());
+      SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(), envrionment, simulationTestingParameters);
+      simulationTestHelperFactory.setStartingLocationOffset(startingLocation.getStartingLocationOffset());
+      SCS2AvatarTestingSimulation simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+      simulationTestHelper.start();
+      behaviorTestHelper = new SCS2BehaviorTestHelper(simulationTestHelper);
 
       setUpCamera(startingLocation.getStartingLocationOffset().getAdditionalOffset());
 
-      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(2.5);
+      boolean success = behaviorTestHelper.simulateNow(2.5);
       assertTrue(success);
 
-      drcBehaviorTestHelper.updateRobotModel();
+      behaviorTestHelper.updateRobotModel();
 
-      FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
-      KinematicsPlanningBehavior behavior = new KinematicsPlanningBehavior(drcBehaviorTestHelper.getRobotName(), drcBehaviorTestHelper.getROS2Node(),
-                                                                           getRobotModel(), sdfFullRobotModel);
+      FullHumanoidRobotModel sdfFullRobotModel = behaviorTestHelper.getSDFFullRobotModel();
+      KinematicsPlanningBehavior behavior = new KinematicsPlanningBehavior(behaviorTestHelper.getRobotName(),
+                                                                           behaviorTestHelper.getROS2Node(),
+                                                                           getRobotModel(),
+                                                                           sdfFullRobotModel);
 
       double trajectoryTime = 5.0;
       int numberOfKeyFrames = 2;
@@ -214,24 +220,24 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
          double alpha = (i + 1) / (double) (numberOfKeyFrames);
          pose.interpolate(desiredPose, alpha);
          desiredPoses.add(pose);
-         drcBehaviorTestHelper.getSimulationConstructionSet().addStaticLinkGraphics(createEndEffectorKeyFrameVisualization(pose));
+         behaviorTestHelper.addStaticVisuals(createEndEffectorKeyFrameVisualization(pose));
       }
 
       behavior.setKeyFrameTimes(trajectoryTime, numberOfKeyFrames);
       behavior.setEndEffectorKeyFrames(robotSide, desiredPoses);
 
-      drcBehaviorTestHelper.updateRobotModel();
+      behaviorTestHelper.updateRobotModel();
 
-      drcBehaviorTestHelper.dispatchBehavior(behavior);
+      behaviorTestHelper.dispatchBehavior(behavior);
 
       double waitingTimeForPlanning = 3.0;
       double waitingTick = 0.01;
       for (int i = 0; i < (int) waitingTimeForPlanning / waitingTick; i++)
       {
-         drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(waitingTick);
+         behaviorTestHelper.simulateNow(waitingTick);
          if (behavior.getPlanningResult() == KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_OPTIMAL_SOLUTION)
          {
-            drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(behavior.getTrajectoryTime());
+            behaviorTestHelper.simulateNow(behavior.getTrajectoryTime());
             break;
          }
       }
@@ -239,10 +245,10 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
       Pose3D finalPose = new Pose3D(sdfFullRobotModel.getHand(robotSide).getBodyFixedFrame().getTransformToWorldFrame());
 
       double positionDistance = desiredFramePose.getPosition().distance(finalPose.getPosition());
-      assertEquals("Hand too far from doorknob", 0.0, positionDistance, 0.011);
+      assertEquals(0.0, positionDistance, 0.011, "Hand too far from doorknob");
       double orientationDistance = Math.abs(desiredFramePose.getPosition().distance(finalPose.getPosition()));
       double orientationDistanceRotation = Math.abs(desiredFramePose.getOrientation().distance(finalPose.getOrientation()) - Math.PI * 2);
-      assertTrue("orientation Distance: " + orientationDistance, orientationDistance < 0.1 || orientationDistanceRotation < 0.1);
+      assertTrue(orientationDistance < 0.1 || orientationDistanceRotation < 0.1, "orientation Distance: " + orientationDistance);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
@@ -258,28 +264,29 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
    private void setupKinematicsPlanningToolboxModule() throws IOException
    {
       DRCRobotModel robotModel = getRobotModel();
-      kinematicsPlanningToolboxModule = new KinematicsPlanningToolboxModule(robotModel, isKinematicsPlanningToolboxVisualizerEnabled,
+      kinematicsPlanningToolboxModule = new KinematicsPlanningToolboxModule(robotModel,
+                                                                            isKinematicsPlanningToolboxVisualizerEnabled,
                                                                             PubSubImplementation.INTRAPROCESS);
    }
 
-   private static Graphics3DObject createEndEffectorKeyFrameVisualization(Pose3DReadOnly pose)
+   private static List<VisualDefinition> createEndEffectorKeyFrameVisualization(Pose3DReadOnly pose)
    {
-      Graphics3DObject object = new Graphics3DObject();
-      object.transform(new RigidBodyTransform(pose.getOrientation(), pose.getPosition()));
-      object.addSphere(0.01);
-      object.addCylinder(0.1, 0.005, YoAppearance.Blue());
+      VisualDefinitionFactory visualFactory = new VisualDefinitionFactory();
+      visualFactory.appendTransform(new RigidBodyTransform(pose.getOrientation(), pose.getPosition()));
+      visualFactory.addSphere(0.01);
+      visualFactory.addCylinder(0.1, 0.005, ColorDefinitions.Blue());
       RigidBodyTransform transformZToY = new RigidBodyTransform();
       transformZToY.appendRollRotation(Math.PI / 2);
-      object.transform(transformZToY);
-      object.addCylinder(0.1, 0.005, YoAppearance.Green());
+      visualFactory.appendTransform(transformZToY);
+      visualFactory.addCylinder(0.1, 0.005, ColorDefinitions.Green());
 
-      return object;
+      return visualFactory.getVisualDefinitions();
    }
 
    private void setUpCamera(Tuple3DReadOnly robotRootPosition)
    {
       Point3D cameraFix = new Point3D(robotRootPosition);
       Point3D cameraPosition = new Point3D(5.0, -10.0, 10.0);
-      drcBehaviorTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
+      behaviorTestHelper.setCamera(cameraFix, cameraPosition);
    }
 }

@@ -4,6 +4,7 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,6 +20,7 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -45,6 +47,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.yoVariables.registry.YoNamespace;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -611,5 +614,15 @@ public class SCS2BehaviorTestHelper implements YoVariableHolder
    public List<YoVariable> getVariables()
    {
       return getRootRegistry().getVariables();
+   }
+
+   public void addStaticVisuals(Collection<? extends VisualDefinition> visualDefinitions)
+   {
+      avatarTestingSimulation.addStaticVisuals(visualDefinitions);
+   }
+
+   public void setCamera(Point3DReadOnly cameraFocus, Point3DReadOnly cameraPosition)
+   {
+      avatarTestingSimulation.setCamera(cameraFocus, cameraPosition);
    }
 }
