@@ -96,7 +96,7 @@ public class AtlasFinalsWorldStairsTest
 
       success = success && simulationTestHelper.simulateNow(14.0);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
 
       assertTrue(success);
 
@@ -144,7 +144,7 @@ public class AtlasFinalsWorldStairsTest
 
       success = success && simulationTestHelper.simulateNow(12.0);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
 
       assertTrue(success);
 

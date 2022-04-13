@@ -96,7 +96,7 @@ public abstract class AvatarRangeOfMotionTests implements MultiRobotTestInterfac
       success = simulationTestHelper.simulateNow(5.0 + trajectoryTime);
       assertTrue(success);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 2);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    @Test
@@ -125,7 +125,7 @@ public abstract class AvatarRangeOfMotionTests implements MultiRobotTestInterfac
 
       success = success && simulationTestHelper.simulateNow(4.0);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
 
       assertTrue(success);
 
@@ -180,7 +180,7 @@ public abstract class AvatarRangeOfMotionTests implements MultiRobotTestInterfac
       success = simulationTestHelper.simulateNow(4.0 + trajectoryTime);
       assertTrue(success);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 2);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    @Test
@@ -213,7 +213,7 @@ public abstract class AvatarRangeOfMotionTests implements MultiRobotTestInterfac
       success = simulationTestHelper.simulateNow(4.0 + trajectoryTime);
       assertTrue(success);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 2);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    private void setupCameraForWalkingOffOfLargePlatform()

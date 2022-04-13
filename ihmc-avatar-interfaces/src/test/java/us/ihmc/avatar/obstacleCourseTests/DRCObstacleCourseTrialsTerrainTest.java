@@ -96,7 +96,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       setupCameraForWalkingOntoSlopes();
       ThreadTools.sleep(1000);
       boolean success = simulationTestHelper.simulateNow(21.0);
-      simulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       //      simulationTestHelper.checkNothingChanged();
       assertTrue(success);
 
@@ -141,7 +141,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       boolean success = simulationTestHelper.simulateNow(1.0);
       slipRandomOnEachStepPerturber.setProbabilityOfSlip(0.6);
       success = success && simulationTestHelper.simulateNow(20.0);
-      simulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       //      simulationTestHelper.checkNothingChanged();
       assertTrue(success);
 
@@ -172,7 +172,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       setupCameraForWalkingOverHurdles();
       ThreadTools.sleep(1000);
       boolean success = simulationTestHelper.simulateNow(8.0);
-      simulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
 //      simulationTestHelper.checkNothingChanged();
       assertTrue(success);
       Point3D center = new Point3D(4.437597506324034, 5.699204748831417, 0.8376763465412774);
@@ -210,7 +210,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       boolean success = simulationTestHelper.simulateNow(1.0);
       slipRandomOnEachStepPerturber.setProbabilityOfSlip(1.0);
       success = success && simulationTestHelper.simulateNow(6.5);
-      simulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
 //      simulationTestHelper.checkNothingChanged();
       assertTrue(success);
       Point3D center = new Point3D(4.433273741150176, 5.75375933959496, 0.8417057558698022);
@@ -245,7 +245,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       boolean success = simulationTestHelper.simulateNow(footstepDataList.getFootstepDataList().size() * stepTime + 2.0);
       assertTrue(success);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
 //      simulationTestHelper.checkNothingChanged();
       assertTrue(success);
       Point3D center = new Point3D(3.3267919256794363, 3.355608873842678, 0.9247970191596047);

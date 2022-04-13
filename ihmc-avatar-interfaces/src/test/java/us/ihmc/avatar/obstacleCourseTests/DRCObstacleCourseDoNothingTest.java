@@ -78,7 +78,7 @@ public abstract class DRCObstacleCourseDoNothingTest implements MultiRobotTestIn
       ThreadTools.sleep(100);
       boolean success = simulationTestHelper.simulateNow(0.5);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 2);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
       //      simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);

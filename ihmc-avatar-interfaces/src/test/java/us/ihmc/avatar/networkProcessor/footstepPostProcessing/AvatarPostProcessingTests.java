@@ -460,7 +460,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
 
       boolean success = simulationTestHelper.simulateNow(simulationTime);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       //      simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);

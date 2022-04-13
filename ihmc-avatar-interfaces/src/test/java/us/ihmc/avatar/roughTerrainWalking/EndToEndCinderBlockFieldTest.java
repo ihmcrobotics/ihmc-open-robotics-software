@@ -135,7 +135,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       max.add(margin);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(new BoundingBox3D(min, max));
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 2);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    public void testSteppingStonesA() throws Exception

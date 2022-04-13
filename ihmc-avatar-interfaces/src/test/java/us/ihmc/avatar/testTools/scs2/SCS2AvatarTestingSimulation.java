@@ -803,7 +803,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
       return getSimulationSession().getBufferRecordTimePeriod();
    }
 
-   public void createVideo(String simplifiedRobotModelName, int callStackHeight)
+   public void createBambooVideo(String simplifiedRobotModelName, int callStackHeight)
    {
       if (createVideo)
       {
@@ -818,7 +818,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
       }
    }
 
-   public void createVideo(String videoName)
+   public void createBambooVideo(String videoName)
    {
       if (createVideo)
       {

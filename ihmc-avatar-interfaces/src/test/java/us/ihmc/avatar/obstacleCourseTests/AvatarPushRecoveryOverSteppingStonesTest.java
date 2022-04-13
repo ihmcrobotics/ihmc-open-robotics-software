@@ -150,7 +150,7 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       double stepDuration = swingTime + transferTime;
       boolean success = simulationTestHelper.simulateNow(footstepDataList.getFootstepDataList().size() * stepDuration + 1.5);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       //      simulationTestHelper.checkNothingChanged();
 
       Point3D center = new Point3D(-10.241987629532595, -0.8330256660954483, 1.0893768421917251);

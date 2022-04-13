@@ -126,7 +126,7 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       success = simulationTestHelper.simulateNow(3.0);
       assertTrue(success);
       
-      simulationTestHelper.createVideo(getSimpleRobotName(), 2);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    public class TestingEnvironment implements CommonAvatarEnvironmentInterface

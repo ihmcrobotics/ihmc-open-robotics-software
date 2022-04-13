@@ -92,7 +92,7 @@ public abstract class DRCObstacleCourseFlatWithErrorsTest implements MultiRobotT
       loadScriptFileInLeftSoleFrame(scriptName);
       success = success && simulationTestHelper.simulateNow(16.0);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       //      simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -144,7 +144,7 @@ public abstract class DRCObstacleCourseFlatWithErrorsTest implements MultiRobotT
 
       success = success && simulationTestHelper.simulateNow(16.0);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       //      simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -193,7 +193,7 @@ public abstract class DRCObstacleCourseFlatWithErrorsTest implements MultiRobotT
       ThreadTools.sleep(1000);
       boolean success = simulationTestHelper.simulateNow(6.0);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       //      simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -224,7 +224,7 @@ public abstract class DRCObstacleCourseFlatWithErrorsTest implements MultiRobotT
 
       boolean success = simulationTestHelper.simulateNow(10.0);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       //      simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -301,7 +301,7 @@ public abstract class DRCObstacleCourseFlatWithErrorsTest implements MultiRobotT
       slipOnEachStepPerturber.setSlipNextStep(true);
       success = success && simulationTestHelper.simulateNow(14.0);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       //      simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -349,7 +349,7 @@ public abstract class DRCObstacleCourseFlatWithErrorsTest implements MultiRobotT
       slipRandomOnEachStepPerturber.setProbabilityOfSlip(0.5);
       success = success && simulationTestHelper.simulateNow(9.0);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       //      simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);

@@ -202,7 +202,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       simulationTestHelper.loadScriptFile(scriptInputStream, leftSoleFrame);
       success = success && simulationTestHelper.simulateNow(4.0);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       //      simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -305,7 +305,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       success = success && simulationTestHelper.simulateNow(simulationDuration + 1.5);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       //      simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -410,7 +410,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       success = success && simulationTestHelper.simulateNow(4.0);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       //      simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -469,7 +469,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       success = success && simulationTestHelper.simulateNow(6.0);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       //      simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -511,7 +511,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       success = success & simulationTestHelper.simulateNow(10.0);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       //      simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -545,7 +545,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       ThreadTools.sleep(1000);
       boolean success = simulationTestHelper.simulateNow(10.0);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       //      simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -591,7 +591,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       success = success && simulationTestHelper.simulateNow(stepDuration + 1.5);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       //      simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -616,7 +616,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       simulationTestHelper.publishToController(footstepDataList);
       success = success && simulationTestHelper.simulateNow(15.0);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       //      simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -701,7 +701,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       success = success && simulationTestHelper.simulateNow(8.0);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       //      simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -750,7 +750,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       success = success && simulationTestHelper.simulateNow(15.0);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       //      simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);

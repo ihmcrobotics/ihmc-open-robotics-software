@@ -167,7 +167,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
                                                         epsilon,
                                                         controllerDT);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 2);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    @Test
@@ -212,7 +212,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       String pelvisName = fullRobotModel.getPelvis().getName();
       EndToEndTestTools.assertCurrentDesiredsMatch(pelvisName, midFeetOrientation, zeroVector, epsilon, simulationTestHelper);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 2);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    @Test
@@ -245,7 +245,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       desiredAfterTrajectory.changeFrame(worldFrame);
       EndToEndTestTools.assertCurrentDesiredsMatch(pelvisName, desiredAfterTrajectory, zeroVector, epsilon, simulationTestHelper);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 2);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    @Test
@@ -342,7 +342,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
                                                         statusMessages.remove(0),
                                                         controllerDT);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 2);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    @Test
@@ -410,7 +410,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       String pelvisName = fullRobotModel.getPelvis().getName();
       EndToEndTestTools.assertCurrentDesiredsMatch(pelvisName, desiredChestOrientation, zeroVector, epsilon, simulationTestHelper);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 2);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    @Test

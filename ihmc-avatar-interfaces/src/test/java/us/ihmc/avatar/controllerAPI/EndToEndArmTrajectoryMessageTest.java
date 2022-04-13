@@ -149,7 +149,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
                                                             getRobotModel().getControllerDT());
       }
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 2);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    public void createSimulationTestHelper()
@@ -241,7 +241,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
                                                             1.0e-12,
                                                             getRobotModel().getControllerDT());
       }
-      simulationTestHelper.createVideo(getSimpleRobotName(), 2);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    @Test
@@ -368,7 +368,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
                                                             controllerDT);
       }
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 2);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    @Test
@@ -590,7 +590,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
                                                                     desiredJointVelocities,
                                                                     epsilon,
                                                                     simulationTestHelper);
-      simulationTestHelper.createVideo(getSimpleRobotName(), 2);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
 
       assertEquals(2 * armTrajectoryMessages.size(), statusMessages.size());
 

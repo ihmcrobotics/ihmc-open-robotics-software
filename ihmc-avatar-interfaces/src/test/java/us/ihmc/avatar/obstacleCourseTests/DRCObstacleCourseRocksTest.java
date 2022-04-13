@@ -83,7 +83,7 @@ public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterf
          success = success && simulationTestHelper.simulateNow(6.0);
       }
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       //      simulationTestHelper.checkNothingChanged();
 
       assertTrue("Caught Exception: " + simulationTestHelper.getLastThrownException(), success);

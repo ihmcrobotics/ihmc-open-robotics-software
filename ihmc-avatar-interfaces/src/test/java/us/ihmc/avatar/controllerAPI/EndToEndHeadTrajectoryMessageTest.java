@@ -84,7 +84,7 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
       desiredRandomChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
       assertSingleWaypointExecuted(desiredRandomChestOrientation, head.getName(), simulationTestHelper);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 2);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    public void testLookingLeftAndRight()
@@ -139,7 +139,7 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
       simulationTestHelper.publishToController(lookStraightAheadMessage);
       assertTrue(simulationTestHelper.simulateNow(trajectoryTime + 0.1));
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 2);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    private void setupTest()

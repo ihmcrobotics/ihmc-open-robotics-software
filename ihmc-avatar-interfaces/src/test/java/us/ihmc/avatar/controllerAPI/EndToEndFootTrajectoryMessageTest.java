@@ -245,7 +245,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          assertTrue(putFootOnGround(robotSide, foot, initialFootPosition));
       }
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 2);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    //Picks up a foot and puts it down. Done using both sides
@@ -279,7 +279,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          assertTrue(putFootOnGround(robotSide, foot, initialFootPosition));
       }
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 2);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    //picks up a foot, moves it around in a ribbon shape, then puts the foot down, Done using both sides
@@ -398,7 +398,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          putFootOnGround(robotSide, foot, initialFootPosition);
       }
 
-      simulationTestHelper.createVideo(robotModel.getSimpleRobotName(), 2);
+      simulationTestHelper.createBambooVideo(robotModel.getSimpleRobotName(), 2);
    }
 
    //moves each foot to a single position using a custom control point
@@ -457,7 +457,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       YoBoolean singularityEscape = (YoBoolean) simulationTestHelper.findVariable(namePrefix + className, namePrefix + "IsSwingSingularityAvoidanceUsed");
       assertFalse("Singularity escape should not be active.", singularityEscape.getBooleanValue());
 
-      simulationTestHelper.createVideo(robotModel.getSimpleRobotName(), 2);
+      simulationTestHelper.createBambooVideo(robotModel.getSimpleRobotName(), 2);
    }
 
    //picks up the left foot, moves the foot around a sphere (ribbons yawed around the circle center)
@@ -560,7 +560,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
-      simulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
 
       // check internal desired matches last trajectory point:
       String namespacePositionDesired = FeedbackControllerToolbox.class.getSimpleName();
@@ -604,7 +604,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          startTime = endTime;
       }
 
-      simulationTestHelper.createVideo(robotModel.getSimpleRobotName(), 2);
+      simulationTestHelper.createBambooVideo(robotModel.getSimpleRobotName(), 2);
    }
 
    //takes the trajectory points created from the eucledian traj generator and divides them up by the number of messages desired and sends them to the controller
