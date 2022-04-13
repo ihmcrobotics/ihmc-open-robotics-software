@@ -1,55 +1,50 @@
 package us.ihmc.valkyrie.externalForceEstimation;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
 import controller_msgs.msg.dds.ExternalForceEstimationConfigurationMessage;
 import controller_msgs.msg.dds.ExternalForceEstimationOutputStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.RobotDesiredConfigurationData;
-import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ExternalForceEstimationToolboxController;
 import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ExternalForceEstimationToolboxModule;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
+import us.ihmc.avatar.testTools.scs2.YoGraphicDefinitionFactory;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
+import us.ihmc.scs2.definition.robot.ExternalWrenchPointDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.simulation.robot.Robot;
+import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimJointBasics;
+import us.ihmc.scs2.simulation.robot.trackers.ExternalWrenchPoint;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
-import us.ihmc.simulationconstructionset.ExternalForcePoint;
-import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.yoVariables.registry.YoRegistry;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class ValkyrieExternalContactEstimationTest
 {
@@ -59,7 +54,7 @@ public class ValkyrieExternalContactEstimationTest
 
    private YoRegistry registry;
    private DRCRobotModel robotModel;
-   private DRCSimulationTestHelper drcSimulationTestHelper;
+   private SCS2AvatarTestingSimulation simulationTestHelper;
    private ExternalForceEstimationToolboxController toolboxController;
 
    private List<TestConfig> testConfigs;
@@ -86,27 +81,27 @@ public class ValkyrieExternalContactEstimationTest
 
    private static class TestConfig
    {
-      private final String endEffectorName;
-      private final ExternalForcePoint externalForcePoint;
+      private final String endEffectorJointName;
+      private final ExternalWrenchPointDefinition externalWrenchPointDefinition;
       private final Vector3D forceToApply;
 
-      private RigidBodyBasics endEffector;
+      private ExternalWrenchPoint externalWrenchPoint;
 
-      public TestConfig(String endEffectorName, int endEffectorIndex, Vector3D efpOffset, Vector3D forceToApply, YoRegistry registry)
+      public TestConfig(String endEffectorJointName, int endEffectorIndex, Vector3D efpOffset, Vector3D forceToApply, YoRegistry registry)
       {
-         this.endEffectorName = endEffectorName;
-         this.externalForcePoint = new ExternalForcePoint("efp_" + endEffectorName + endEffectorIndex, efpOffset, registry);
+         this.endEffectorJointName = endEffectorJointName;
+         this.externalWrenchPointDefinition = new ExternalWrenchPointDefinition("efp_" + endEffectorJointName + endEffectorIndex, efpOffset);
          this.forceToApply = forceToApply;
       }
 
       void enable()
       {
-         externalForcePoint.setForce(forceToApply);
+         externalWrenchPoint.getWrench().getLinearPart().setMatchingFrame(externalWrenchPoint.getFrame().getRootFrame(), forceToApply);
       }
 
       void disable()
       {
-         externalForcePoint.setForce(0.0, 0.0, 0.0);
+         externalWrenchPoint.getWrench().setToZero();
       }
    }
 
@@ -114,29 +109,22 @@ public class ValkyrieExternalContactEstimationTest
    {
       robotModel = newRobotModel();
       FlatGroundEnvironment testEnvironment = new FlatGroundEnvironment();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, newRobotModel(), testEnvironment);
+      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(robotModel, testEnvironment, simulationTestingParameters);
 
       AtomicBoolean initializeToolbox = new AtomicBoolean(true);
       AtomicBoolean updateToolbox = new AtomicBoolean();
 
-      Robot dummyRobot = new Robot("dummyRobot");
-      dummyRobot.setController(new RobotController()
+      simulationTestHelper.getRobot().addThrottledController(new Controller()
       {
          @Override
          public void doControl()
          {
-            if(toolboxController == null)
+            if (toolboxController == null)
                return;
-            if(initializeToolbox.getAndSet(false))
+            if (initializeToolbox.getAndSet(false))
                toolboxController.initialize();
-            if(updateToolbox.get())
+            if (updateToolbox.get())
                toolboxController.update();
-         }
-
-         @Override
-         public void initialize()
-         {
-
          }
 
          @Override
@@ -144,46 +132,42 @@ public class ValkyrieExternalContactEstimationTest
          {
             return new YoRegistry("toolboxUpdater");
          }
-      }, (int) (ExternalForceEstimationToolboxModule.UPDATE_PERIOD_MILLIS / (1000 * robotModel.getSimulateDT())));
-      testEnvironment.addEnvironmentRobot(dummyRobot);
+      }, ExternalForceEstimationToolboxModule.UPDATE_PERIOD_MILLIS * 1.0e-3);
 
-      drcSimulationTestHelper.createSimulation("external_force_estimation_test", false, true);
-      drcSimulationTestHelper.getYoVariableRegistry().addChild(registry);
+      simulationTestHelper.start();
+      simulationTestHelper.getRootRegistry().addChild(registry);
 
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-      YoRegistry scsRootRegistry = drcSimulationTestHelper.getAvatarSimulation().getSimulationConstructionSet().getRootRegistry();
+      YoRegistry scsRootRegistry = simulationTestHelper.getRootRegistry();
 
-      HumanoidFloatingRootJointRobot scsRobot = drcSimulationTestHelper.getRobot();
+      Robot scsRobot = simulationTestHelper.getRobot();
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       YoGraphicsList externalForcePointViz = new YoGraphicsList("externalForceVectors");
 
       TIntObjectHashMap<RigidBodyBasics> rigidBodyHashMap = new TIntObjectHashMap<>();
-      MultiBodySystemTools.getRootBody(fullRobotModel.getElevator())
-                          .subtreeIterable()
+      MultiBodySystemTools.getRootBody(fullRobotModel.getElevator()).subtreeIterable()
                           .forEach(rigidBody -> rigidBodyHashMap.put(rigidBody.hashCode(), rigidBody));
 
       for (int i = 0; i < testConfigs.size(); i++)
       {
          TestConfig testConfig = testConfigs.get(i);
 
-         Joint scsEndEffector = scsRobot.getJoint(testConfig.endEffectorName);
-         scsEndEffector.addExternalForcePoint(testConfig.externalForcePoint);
-         JointBasics joint = fullRobotModel.getOneDoFJointByName(testConfig.endEffectorName);
-         testConfig.endEffector = joint.getSuccessor();
+         SimJointBasics scsEndEffector = scsRobot.getJoint(testConfig.endEffectorJointName);
+         testConfig.externalWrenchPoint = scsEndEffector.getAuxialiryData().addExternalWrenchPoint(testConfig.externalWrenchPointDefinition);
 
-         AppearanceDefinition simulatedForceColor = YoAppearance.Red();
-         YoGraphicVector simulatedForceVector = new YoGraphicVector("simulatedForceVector",
-                                                                    testConfig.externalForcePoint.getYoPosition(),
-                                                                    testConfig.externalForcePoint.getYoForce(),
-                                                                    forceGraphicScale,
-                                                                    simulatedForceColor);
-         YoGraphicPosition simulatedForcePoint = new YoGraphicPosition("simulatedForcePoint",
-                                                                       testConfig.externalForcePoint.getYoPosition(),
-                                                                       0.025,
-                                                                       simulatedForceColor);
-
-         externalForcePointViz.add(simulatedForceVector);
-         externalForcePointViz.add(simulatedForcePoint);
+         ColorDefinition simulatedForceColor = ColorDefinitions.Red();
+         simulationTestHelper.addYoGraphicDefinition(YoGraphicDefinitionFactory.newYoGraphicArrow3DDefinition("simulatedForceVector",
+                                                                                                              testConfig.externalWrenchPoint.getOffset()
+                                                                                                                                            .getPosition(),
+                                                                                                              testConfig.externalWrenchPoint.getWrench()
+                                                                                                                                            .getLinearPart(),
+                                                                                                              forceGraphicScale,
+                                                                                                              simulatedForceColor));
+         simulationTestHelper.addYoGraphicDefinition(YoGraphicDefinitionFactory.newYoGraphicPoint3DDefinition("simulatedForcePoint",
+                                                                                                              testConfig.externalWrenchPoint.getOffset()
+                                                                                                                                            .getPosition(),
+                                                                                                              0.025,
+                                                                                                              simulatedForceColor));
       }
 
       graphicsListRegistry.registerYoGraphicsList(externalForcePointViz);
@@ -198,15 +182,14 @@ public class ValkyrieExternalContactEstimationTest
                                                                        ExternalForceEstimationToolboxModule.UPDATE_PERIOD_MILLIS,
                                                                        scsRootRegistry);
 
-      drcSimulationTestHelper.getAvatarSimulation().getSimulationConstructionSet().addYoGraphicsListRegistry(graphicsListRegistry);
-      drcSimulationTestHelper.createSubscriberFromController(RobotConfigurationData.class, toolboxController::updateRobotConfigurationData);
-      drcSimulationTestHelper.createSubscriberFromController(RobotDesiredConfigurationData.class, toolboxController::updateRobotDesiredConfigurationData);
-      drcSimulationTestHelper.getAvatarSimulation().start();
+      simulationTestHelper.addYoGraphicsListRegistry(graphicsListRegistry);
+      simulationTestHelper.createSubscriberFromController(RobotConfigurationData.class, toolboxController::updateRobotConfigurationData);
+      simulationTestHelper.createSubscriberFromController(RobotDesiredConfigurationData.class, toolboxController::updateRobotDesiredConfigurationData);
 
       AtomicReference<ExternalForceEstimationOutputStatus> outputStatusReference = new AtomicReference<>();
       statusOutputManager.attachStatusMessageListener(ExternalForceEstimationOutputStatus.class, outputStatusReference::set);
 
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      boolean success = simulationTestHelper.simulateNow(1.0);
       Assertions.assertTrue(success);
 
       for (int i = 0; i < testConfigs.size(); i++)
@@ -224,22 +207,22 @@ public class ValkyrieExternalContactEstimationTest
 
          initializeToolbox.set(true);
          updateToolbox.set(true);
-         drcSimulationTestHelper.simulateAndBlock(10.0);
+         simulationTestHelper.simulateNow(10.0);
 
-         Point3D actualContactPointInWorld = testConfig.externalForcePoint.getPositionCopy();
+         Point3D actualContactPointInWorld = new Point3D(testConfig.externalWrenchPoint.getFrame().getTransformToRoot().getTranslation());
 
          Point3D estimatedContactPoint = outputStatusReference.get().getContactPoint();
          int estimatedHashcode = outputStatusReference.get().getRigidBodyHashCode();
 
          RigidBodyBasics estimatedLink = rigidBodyHashMap.get(estimatedHashcode);
          if (estimatedLink == null)
-            Assertions.fail("Estimator did not converge for " + testConfig.endEffectorName);
+            Assertions.fail("Estimator did not converge for " + testConfig.endEffectorJointName);
 
          FramePoint3D estimatedFramePoint = new FramePoint3D(estimatedLink.getParentJoint().getFrameAfterJoint(), estimatedContactPoint);
          estimatedFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
 
          double distance = actualContactPointInWorld.distance(estimatedFramePoint);
-         Assertions.assertTrue(distance < distanceThreshold, "Estimated contact point too far away for " + testConfig.endEffectorName);
+         Assertions.assertTrue(distance < distanceThreshold, "Estimated contact point too far away for " + testConfig.endEffectorJointName);
 
          testConfigs.get(i).disable();
       }
@@ -248,10 +231,10 @@ public class ValkyrieExternalContactEstimationTest
    @AfterEach
    public void tearDown()
    {
-      drcSimulationTestHelper.destroySimulation();
+      simulationTestHelper.finishTest();
 
       robotModel = null;
-      drcSimulationTestHelper = null;
+      simulationTestHelper = null;
       toolboxController = null;
       testConfigs = null;
       registry = null;
