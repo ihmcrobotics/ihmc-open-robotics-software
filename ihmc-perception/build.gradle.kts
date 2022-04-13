@@ -13,7 +13,7 @@ plugins {
 
 ihmc {
    loadProductProperties("../product.properties")
-   
+   repository("https://oss.sonatype.org/content/repositories/snapshots")
    configureDependencyResolution()
    configurePublications()
 }
@@ -49,6 +49,8 @@ mainDependencies {
    api("us.ihmc:ihmc-robot-models:source")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
+   api("org.bytedeco:librealsense2:2-2.50.0-1.5.7-20220107.104743-29")
+   api("org.bytedeco:librealsense2-platform:2.50.0-1.5.7-20220107.104604-25")
 }
 
 openpnpDependencies {
