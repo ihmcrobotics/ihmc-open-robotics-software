@@ -4,6 +4,7 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import controller_msgs.msg.dds.BehaviorControlModePacket;
@@ -12,6 +13,7 @@ import controller_msgs.msg.dds.HumanoidBehaviorTypePacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -43,11 +45,15 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.scs2.simulation.robot.Robot;
+import us.ihmc.yoVariables.registry.YoNamespace;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.registry.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 @SuppressWarnings("rawtypes")
-public class SCS2BehaviorTestHelper
+public class SCS2BehaviorTestHelper implements YoVariableHolder
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoDouble yoTimeRobot;
@@ -545,5 +551,65 @@ public class SCS2BehaviorTestHelper
             ThreadTools.sleep(1);
          }
       }
+   }
+
+   public FullHumanoidRobotModel getControllerFullRobotModel()
+   {
+      return avatarTestingSimulation.getControllerFullRobotModel();
+   }
+
+   public boolean simulateNow(double duration)
+   {
+      return avatarTestingSimulation.simulateNow(duration);
+   }
+
+   public String getRobotName()
+   {
+      return avatarTestingSimulation.getRobotName();
+   }
+
+   public Robot getRobot()
+   {
+      return avatarTestingSimulation.getRobot();
+   }
+
+   public HighLevelHumanoidControllerFactory getHighLevelHumanoidControllerFactory()
+   {
+      return avatarTestingSimulation.getHighLevelHumanoidControllerFactory();
+   }
+
+   public YoRegistry getRootRegistry()
+   {
+      return avatarTestingSimulation.getRootRegistry();
+   }
+
+   @Override
+   public YoVariable findVariable(String namespace, String name)
+   {
+      return getRootRegistry().findVariable(namespace, name);
+   }
+
+   @Override
+   public List<YoVariable> findVariables(String namespaceEnding, String name)
+   {
+      return getRootRegistry().findVariables(namespaceEnding, name);
+   }
+
+   @Override
+   public List<YoVariable> findVariables(YoNamespace namespace)
+   {
+      return getRootRegistry().findVariables(namespace);
+   }
+
+   @Override
+   public boolean hasUniqueVariable(String namespaceEnding, String name)
+   {
+      return getRootRegistry().hasUniqueVariable(namespaceEnding, name);
+   }
+
+   @Override
+   public List<YoVariable> getVariables()
+   {
+      return getRootRegistry().getVariables();
    }
 }
