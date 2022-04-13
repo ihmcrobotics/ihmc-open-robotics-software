@@ -82,6 +82,7 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
       sceneManager.addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
 
       pose3DGizmo.create(sceneManager.getCamera3D());
+      baseUI.addImGui3DViewPickCalculator(this::calculate3DViewPick);
       baseUI.addImGui3DViewInputProcessor(this::process3DViewInput);
    }
 
