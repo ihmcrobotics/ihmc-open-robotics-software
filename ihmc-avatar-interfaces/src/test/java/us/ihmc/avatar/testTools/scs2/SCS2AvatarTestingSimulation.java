@@ -370,13 +370,19 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    }
 
    // Buffer controls:
-   public void setBufferInPointIndexToCurrent()
+   public void cropBuffer()
+   {
+      checkSimulationSessionAlive();
+      getSimulationSessionControls().cropBuffer();
+   }
+
+   public void setInPoint()
    {
       checkSimulationSessionAlive();
       getSimulationSessionControls().setBufferInPointIndexToCurrent();
    }
 
-   public void setBufferOutPointIndexToCurrent()
+   public void setOutPoint()
    {
       checkSimulationSessionAlive();
       getSimulationSessionControls().setBufferOutPointIndexToCurrent();
@@ -391,7 +397,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    public void gotoOutPoint()
    {
       checkSimulationSessionAlive();
-      getSimulationSessionControls().setBufferCurrentIndexToInPoint();
+      getSimulationSessionControls().setBufferCurrentIndexToOutPoint();
    }
 
    public void stepBufferIndexForward()
@@ -834,7 +840,6 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    {
       return new VideoAndDataExporter()
       {
-
          @Override
          public void writeData(File dataFile)
          {
@@ -851,10 +856,16 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
          public File createVideo(String string)
          {
             File videoFile = new File(string);
-            getSessionVisualizerControls().exportVideo(videoFile);
+            exportVideo(videoFile);
             return videoFile;
          }
       };
+   }
+
+   public void exportVideo(File videoFile)
+   {
+      getSimulationSession().startSessionThread();
+      getSessionVisualizerControls().exportVideo(videoFile);
    }
 
    public void addRegistry(YoRegistry registry)
