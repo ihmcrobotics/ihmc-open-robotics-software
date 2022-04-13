@@ -105,6 +105,14 @@ public class GDXBehaviorActionSequenceManager
       managerPanel.queueAddChild(editor.getPanel());
    }
 
+   public void calculate3DViewPick(ImGui3DViewInput input)
+   {
+      for (GDXBehaviorActionSequenceEditor editor : editors)
+      {
+         editor.calculate3DViewPick(input);
+      }
+   }
+
    public void process3DViewInput(ImGui3DViewInput input)
    {
       for (GDXBehaviorActionSequenceEditor editor : editors)

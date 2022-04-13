@@ -158,6 +158,14 @@ public class GDXBehaviorActionSequenceEditor
       }
    }
 
+   public void calculate3DViewPick(ImGui3DViewInput input)
+   {
+      for (GDXBehaviorAction action : actionSequence)
+      {
+         action.calculate3DViewPick(input);
+      }
+   }
+
    public void process3DViewInput(ImGui3DViewInput input)
    {
       for (GDXBehaviorAction action : actionSequence)
