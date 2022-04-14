@@ -40,10 +40,9 @@ public class OverhauledToeOffManager
    private final DynamicStateInspector dynamicStateInspector;
    private final LegJointLimitsInspector jointLimitsInspector;
 
-   private final DynamicStateInspectorParameters dynamicStateInspectorParameters;
-
    private final ToeOffCalculator toeOffCalculator;
 
+   private final DynamicStateInspectorParameters dynamicStateInspectorParameters;
    private final BooleanProvider doToeOffIfPossibleInDoubleSupport;
    private final BooleanProvider doToeOffIfPossibleInSingleSupport;
 
@@ -62,19 +61,38 @@ public class OverhauledToeOffManager
                                   ToeOffCalculator toeOffCalculator,
                                   YoRegistry parentRegistry)
    {
+      this(walkingControllerParameters.getToeOffParameters(),
+           walkingControllerParameters.getSteppingParameters(),
+           dynamicStateInspectorParameters,
+           soleZUpFrames,
+           footPolygonsInWorldFrame,
+           fullRobotModel,
+           toeOffCalculator,
+           parentRegistry);
+   }
+
+   public OverhauledToeOffManager(ToeOffParameters toeOffParameters,
+                                  SteppingParameters steppingParameters,
+                                  DynamicStateInspectorParameters dynamicStateInspectorParameters,
+                                  SideDependentList<MovingReferenceFrame> soleZUpFrames,
+                                  SideDependentList<? extends FrameConvexPolygon2DReadOnly> footPolygonsInWorldFrame,
+                                  FullHumanoidRobotModel fullRobotModel,
+                                  ToeOffCalculator toeOffCalculator,
+                                  YoRegistry parentRegistry)
+   {
       this.toeOffCalculator = toeOffCalculator;
       this.soleZUpFrames = soleZUpFrames;
       this.footPolygonsInWorldFrame = footPolygonsInWorldFrame;
       this.dynamicStateInspectorParameters = dynamicStateInspectorParameters;
 
-      ToeOffParameters toeOffParameters = walkingControllerParameters.getToeOffParameters();
-      SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
-
       double footLength = steppingParameters.getFootBackwardOffset() + steppingParameters.getFootForwardOffset();
 
       stepPositionInspector = new ToeOffStepPositionInspector(soleZUpFrames, toeOffParameters, steppingParameters.getInPlaceWidth(), footLength, registry);
-      jointLimitsInspector = new LegJointLimitsInspector(toeOffParameters, fullRobotModel, registry);
       dynamicStateInspector = new DynamicStateInspector(registry);
+      if (fullRobotModel != null)
+         jointLimitsInspector = new LegJointLimitsInspector(toeOffParameters, fullRobotModel, registry);
+      else
+         jointLimitsInspector = null;
 
       footDefaultPolygons = new SideDependentList<>();
       for (RobotSide robotSide : RobotSide.values)
@@ -164,11 +182,16 @@ public class OverhauledToeOffManager
    {
       dynamicStateInspector.setPolygons(leadingFootSupportPolygon, trailingFootSupportPolygon, onToesSupportPolygon);
       boolean wellPositioned = stepPositionInspector.isFrontFootWellPositionedForToeOff(trailingLeg, nextFrontFootPose);
-      jointLimitsInspector.updateToeOffConditions(trailingLeg);
       dynamicStateInspector.checkICPLocations(dynamicStateInspectorParameters, trailingLeg, nextFrontFootPose, desiredICP, currentICP, toeOffPoint);
 
+      boolean jointsNeedToeingOff = false;
+      if (jointLimitsInspector != null)
+      {
+         jointLimitsInspector.updateToeOffConditions(trailingLeg);
+         jointsNeedToeingOff = jointLimitsInspector.needToSwitchToToeOffDueToJointLimit();
+      }
       boolean doToeOff = allowToeOff && wellPositioned;
-      doToeOff &= (jointLimitsInspector.needToSwitchToToeOffDueToJointLimit() || dynamicStateInspector.areDynamicsOkForToeOff());
+      doToeOff &= (jointsNeedToeingOff || dynamicStateInspector.areDynamicsOkForToeOff());
 
       this.doToeOff.set(doToeOff);
    }
