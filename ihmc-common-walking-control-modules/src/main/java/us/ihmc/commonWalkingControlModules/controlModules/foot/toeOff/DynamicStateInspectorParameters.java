@@ -60,6 +60,8 @@ public class DynamicStateInspectorParameters
       maxNormalizedErrorNeededForControl.setToNaN();
       maxRatioOfControlDecreaseFromToeingOff.set(Double.POSITIVE_INFINITY);
 
+      minNormalizedDistanceFromInsideEdge.set(0.2);
+
       parentRegistry.addChild(registry);
    }
 
