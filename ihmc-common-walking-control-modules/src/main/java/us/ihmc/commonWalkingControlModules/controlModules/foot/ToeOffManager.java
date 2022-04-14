@@ -187,7 +187,7 @@ public class ToeOffManager
                         YoGraphicsListRegistry graphicsListRegistry)
    {
       ToeOffParameters toeOffParameters = walkingControllerParameters.getToeOffParameters();
-      legInspector = new LegJointLimitsInspector(toeOffParameters, parentRegistry);
+      legInspector = new LegJointLimitsInspector(toeOffParameters, fullRobotModel, parentRegistry);
 
       doToeOffIfPossibleInDoubleSupport = new BooleanParameter("doToeOffIfPossibleInDoubleSupport", registry, toeOffParameters.doToeOffIfPossible());
       doToeOffIfPossibleInSingleSupport = new BooleanParameter("doToeOffIfPossibleInSingleSupport",
