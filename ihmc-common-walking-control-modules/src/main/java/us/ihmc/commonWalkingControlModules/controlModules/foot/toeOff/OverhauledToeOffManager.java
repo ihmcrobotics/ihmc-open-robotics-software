@@ -3,13 +3,14 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeOffManager;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
@@ -28,8 +29,10 @@ public class OverhauledToeOffManager
    private Footstep nextFootstep;
    private Footstep nextNextFootstep;
 
-   private final SideDependentList<FrameConvexPolygon2D> footDefaultPolygons;
+   private final SideDependentList<ConvexPolygon2DReadOnly> footDefaultPolygons;
    private final SideDependentList<MovingReferenceFrame> soleZUpFrames;
+   SideDependentList<? extends FrameConvexPolygon2DReadOnly> footPolygonsInWorldFrame;
+
 
    private final FrameConvexPolygon2D leadingFootSupportPolygon = new FrameConvexPolygon2D();
    private final FrameConvexPolygon2D trailingFootSupportPolygon = new FrameConvexPolygon2D();
@@ -59,12 +62,17 @@ public class OverhauledToeOffManager
    private final FramePose3D nextFrontFootPose = new FramePose3D();
 
    public OverhauledToeOffManager(WalkingControllerParameters walkingControllerParameters,
+                                  DynamicStateInspectorParameters dynamicStateInspectorParameters,
                                   SideDependentList<MovingReferenceFrame> soleZUpFrames,
+                                  SideDependentList<? extends FrameConvexPolygon2DReadOnly> footPolygonsInWorldFrame,
+                                  FullHumanoidRobotModel fullRobotModel,
                                   ToeOffCalculator toeOffCalculator,
                                   YoRegistry parentRegistry)
    {
       this.toeOffCalculator = toeOffCalculator;
       this.soleZUpFrames = soleZUpFrames;
+      this.footPolygonsInWorldFrame = footPolygonsInWorldFrame;
+      this.dynamicStateInspectorParameters = dynamicStateInspectorParameters;
 
       ToeOffParameters toeOffParameters = walkingControllerParameters.getToeOffParameters();
       SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
@@ -75,13 +83,16 @@ public class OverhauledToeOffManager
                                                               toeOffParameters,
                                                               steppingParameters.getInPlaceWidth(),
                                                               footLength,
-                                                              parentRegistry);
-      jointLimitsInspector = new LegJointLimitsInspector(toeOffParameters, parentRegistry);
+                                                              registry);
+      jointLimitsInspector = new LegJointLimitsInspector(toeOffParameters, fullRobotModel, registry);
+      dynamicStateInspector = new DynamicStateInspector(registry);
 
       footDefaultPolygons = new SideDependentList<>();
       for (RobotSide robotSide : RobotSide.values)
       {
-         footDefaultPolygons.put(robotSide, new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(feet.get(robotSide).getContactPoints2d())));
+         FrameConvexPolygon2D polygon = new FrameConvexPolygon2D(footPolygonsInWorldFrame.get(robotSide));
+         polygon.changeFrameAndProjectToXYPlane(soleZUpFrames.get(robotSide));
+         footDefaultPolygons.put(robotSide, new ConvexPolygon2D(polygon));
       }
 
       useToeLineContactInSwing = new BooleanParameter("useToeLineContactInSwing", registry, toeOffParameters.useToeOffLineContactInSwing());
@@ -110,6 +121,7 @@ public class OverhauledToeOffManager
       setPolygonFromNextFootstep(nextFootSupportPolygon);
 
       RobotSide trailingLeg = nextFootstep.getRobotSide().getOppositeSide();
+      setPolygonFromSupportFoot(trailingLeg, trailingFootSupportPolygon);
 
       FramePoint2D toeOffPoint;
       if (useToeLineContactInSwing.getValue())
@@ -129,12 +141,6 @@ public class OverhauledToeOffManager
 //         onToesSupportPolygon.update();
 //      }
 
-      trailingFootSupportPolygon.clear(feet.get(trailingLeg).getSoleFrame());
-      for (int i = 0; i < feet.get(trailingLeg).getTotalNumberOfContactPoints(); i++)
-         trailingFootSupportPolygon.addVertex(feet.get(trailingLeg).getContactPoints2d().get(i));
-      trailingFootSupportPolygon.update();
-      trailingFootSupportPolygon.changeFrameAndProjectToXYPlane(worldFrame);
-
       updateToeOffConditions(trailingLeg,
                              desiredICP,
                              currentICP,
@@ -153,7 +159,8 @@ public class OverhauledToeOffManager
                                                FramePoint2DReadOnly currentICP,
                                                FramePoint2DReadOnly finalDesiredICP)
    {
-      setPolygonFromSupportFoot(trailingLeg, leadingFootSupportPolygon);
+      setPolygonFromSupportFoot(trailingLeg, trailingFootSupportPolygon);
+      setPolygonFromSupportFoot(trailingLeg.getOppositeSide(), leadingFootSupportPolygon);
 
       FramePoint2D toeOffPoint;
       if (useToeLineContactInTransfer.getValue())
@@ -172,12 +179,6 @@ public class OverhauledToeOffManager
 //         onToesSupportPolygon.addVertex(finalDesiredICP);
 //         onToesSupportPolygon.update();
 //      }
-
-      trailingFootSupportPolygon.clear(feet.get(trailingLeg).getSoleFrame());
-      for (int i = 0; i < feet.get(trailingLeg).getTotalNumberOfContactPoints(); i++)
-         trailingFootSupportPolygon.addVertex(feet.get(trailingLeg).getContactPoints2d().get(i));
-      trailingFootSupportPolygon.update();
-      trailingFootSupportPolygon.changeFrameAndProjectToXYPlane(worldFrame);
 
       nextFrontFootPose.setToZero(soleZUpFrames.get(trailingLeg.getOppositeSide()));
       nextFrontFootPose.changeFrame(worldFrame);
@@ -219,20 +220,15 @@ public class OverhauledToeOffManager
       doLineToeOff.set(doToeOff && !useToeLine);
    }
 
-   private void setPolygonFromSupportFoot(RobotSide trailingLeg, FrameConvexPolygon2DBasics polygonToPack)
+   private void setPolygonFromSupportFoot(RobotSide side, FrameConvexPolygon2DBasics polygonToPack)
    {
-      RobotSide leadingLeg = trailingLeg.getOppositeSide();
-      if (footContactStates != null && footContactStates.get(leadingLeg).getTotalNumberOfContactPoints() > 0)
+      if (footPolygonsInWorldFrame != null && footPolygonsInWorldFrame.get(side).getNumberOfVertices() > 0)
       {
-         footContactStates.get(leadingLeg).getContactFramePointsInContact(contactStatePoints);
-         polygonToPack.clear(worldFrame);
-         for (int i = 0; i < contactStatePoints.size(); i++)
-            polygonToPack.addVertexMatchingFrame(contactStatePoints.get(i));
-         polygonToPack.update();
+         polygonToPack.setIncludingFrame(footPolygonsInWorldFrame.get(side));
       }
       else
       {
-         polygonToPack.setIncludingFrame(footDefaultPolygons.get(leadingLeg));
+         polygonToPack.setIncludingFrame(soleZUpFrames.get(side), footDefaultPolygons.get(side));
          polygonToPack.changeFrameAndProjectToXYPlane(worldFrame);
       }
    }
@@ -275,15 +271,15 @@ public class OverhauledToeOffManager
 
       protected void computeToeContacts(RobotSide supportSide)
       {
-         FrameConvexPolygon2D footDefaultPolygon = footDefaultPolygons.get(supportSide);
-         ReferenceFrame referenceFrame = footDefaultPolygon.getReferenceFrame();
+         ConvexPolygon2DReadOnly footDefaultPolygon = footDefaultPolygons.get(supportSide);
+         ReferenceFrame referenceFrame = soleZUpFrames.get(supportSide);
          toeOffLine.getFirstEndpoint().set(referenceFrame, Double.NEGATIVE_INFINITY, 0.0);
          toeOffLine.getSecondEndpoint().set(referenceFrame, Double.NEGATIVE_INFINITY, 0.0);
 
          // gets the leading two toe points
          for (int i = 0; i < footDefaultPolygon.getNumberOfVertices(); i++)
          {
-            tmpPoint2d.setIncludingFrame(footDefaultPolygon.getVertex(i));
+            tmpPoint2d.setIncludingFrame(referenceFrame, footDefaultPolygon.getVertex(i));
             if (tmpPoint2d.getX() > toeOffLine.getFirstEndpoint().getX())
             { // further ahead than leading point
                toeOffLine.getSecondEndpoint().set(toeOffLine.getFirstEndpoint());
@@ -295,7 +291,7 @@ public class OverhauledToeOffManager
             }
          }
 
-         toeOffPoint.setToZero(footDefaultPolygon.getReferenceFrame());
+         toeOffPoint.setToZero(referenceFrame);
          toeOffLine.midpoint(toeOffPoint);
       }
 
