@@ -48,8 +48,8 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    private Map<String, Pose3D> bodyHomeConfiguration = null;
 
    private final ToeOffParameters toeOffParameters;
-   private final SwingTrajectoryParameters swingTrajectoryParameters;
-   private final ValkyrieSteppingParameters steppingParameters;
+   private SwingTrajectoryParameters swingTrajectoryParameters;
+   private ValkyrieSteppingParameters steppingParameters;
    private final ICPControllerParameters icpControllerParameters;
    private final StepAdjustmentParameters stepAdjustmentParameters;
 
@@ -62,6 +62,8 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    private final double nominalHeightAboveGround;
    private final double maximumHeightAboveGround;
 
+   private boolean doPrepareManipulationForLocomotion;
+
    public ValkyrieWalkingControllerParameters(ValkyrieJointMap jointMap, ValkyriePhysicalProperties physicalProperties)
    {
       this(jointMap, physicalProperties, RobotTarget.SCS);
@@ -72,6 +74,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       this.jointMap = jointMap;
       this.physicalProperties = physicalProperties;
       this.target = target;
+      doPrepareManipulationForLocomotion = target == RobotTarget.SCS;
 
       toeOffParameters = new ValkyrieToeOffParameters(physicalProperties, target);
       swingTrajectoryParameters = new ValkyrieSwingTrajectoryParameters(physicalProperties, target);
@@ -136,10 +139,12 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public boolean doPrepareManipulationForLocomotion()
    {
-      if (target == RobotTarget.SCS)
-         return true;
-      else
-         return false;
+      return doPrepareManipulationForLocomotion;
+   }
+
+   public void setDoPrepareManipulationForLocomotion(boolean doPrepareManipulationForLocomotion)
+   {
+      this.doPrepareManipulationForLocomotion = doPrepareManipulationForLocomotion;
    }
 
    @Override
@@ -686,11 +691,21 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       return swingTrajectoryParameters;
    }
 
+   public void setSwingTrajectoryParameters(SwingTrajectoryParameters swingTrajectoryParameters)
+   {
+      this.swingTrajectoryParameters = swingTrajectoryParameters;
+   }
+
    /** {@inheritDoc} */
    @Override
    public SteppingParameters getSteppingParameters()
    {
       return steppingParameters;
+   }
+
+   public void setSteppingParameters(ValkyrieSteppingParameters steppingParameters)
+   {
+      this.steppingParameters = steppingParameters;
    }
 
    @Override
