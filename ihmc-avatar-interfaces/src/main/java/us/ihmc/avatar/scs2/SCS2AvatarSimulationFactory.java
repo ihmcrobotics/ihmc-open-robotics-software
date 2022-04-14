@@ -69,6 +69,7 @@ import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.session.tools.SCS1GraphicConversionTools;
 import us.ihmc.scs2.simulation.SimulationSession;
+import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletMultiBodyParameters;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
 import us.ihmc.scs2.simulation.parameters.ContactPointBasedContactParameters;
 import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngineFactory;
@@ -84,6 +85,7 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
+import us.ihmc.tools.factories.FactoryFieldNotSetException;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
@@ -95,7 +97,7 @@ public class SCS2AvatarSimulationFactory
 {
    private final RequiredFactoryField<DRCRobotModel> robotModel = new RequiredFactoryField<>("robotModel");
    private final RequiredFactoryField<HighLevelHumanoidControllerFactory> highLevelHumanoidControllerFactory = new RequiredFactoryField<>("highLevelHumanoidControllerFactory");
-   private final RequiredFactoryField<TerrainObjectDefinition> terrainObjectDefinition = new RequiredFactoryField<>("terrainObjectDefinition");
+   private final ArrayList<TerrainObjectDefinition> terrainObjectDefinitions = new ArrayList<>();
    private final RequiredFactoryField<RealtimeROS2Node> realtimeROS2Node = new RequiredFactoryField<>("realtimeROS2Node");
 
    private final OptionalFactoryField<Double> simulationDT = new OptionalFactoryField<>("simulationDT");
@@ -218,7 +220,13 @@ public class SCS2AvatarSimulationFactory
       }
       else if (useBulletPhysicsEngine.hasValue() && useBulletPhysicsEngine.get())
       {
-         physicsEngineFactory = (inertialFrame, rootRegistry) -> new BulletPhysicsEngine(inertialFrame, rootRegistry);
+         physicsEngineFactory = (inertialFrame, rootRegistry) -> 
+         { 
+            BulletPhysicsEngine physicsEngine = new BulletPhysicsEngine(inertialFrame, rootRegistry);
+            BulletMultiBodyParameters bulletMultiBodyParameters = BulletMultiBodyParameters.defaultBulletMultiBodyParameters();
+            physicsEngine.setGlobalMultiBodyParameter(bulletMultiBodyParameters);
+            return physicsEngine;
+         };
       }
       else
       {
@@ -239,7 +247,12 @@ public class SCS2AvatarSimulationFactory
       simulationSession = new SimulationSession(physicsEngineFactory);
       simulationSession.initializeBufferSize(simulationDataBufferSize.get());
       simulationSession.initializeBufferRecordTickPeriod(simulationDataRecordTickPeriod.get());
-      simulationSession.addTerrainObject(terrainObjectDefinition.get());
+      if (terrainObjectDefinitions.isEmpty())
+         throw new FactoryFieldNotSetException("terrainObjectDefinitions");
+      for (TerrainObjectDefinition terrainObjectDefinition : terrainObjectDefinitions)
+      {
+         simulationSession.addTerrainObject(terrainObjectDefinition);
+      }
       robot = simulationSession.addRobot(robotDefinition);
       robot.getControllerManager()
            .addController(new SCS2StateEstimatorDebugVariables(simulationSession.getInertialFrame(),
@@ -572,14 +585,14 @@ public class SCS2AvatarSimulationFactory
       return highLevelHumanoidControllerFactory.get();
    }
 
-   public void setTerrainObjectDefinition(TerrainObjectDefinition terrainObjectDefinition)
+   public void addTerrainObjectDefinition(TerrainObjectDefinition terrainObjectDefinition)
    {
-      this.terrainObjectDefinition.set(terrainObjectDefinition);
+      terrainObjectDefinitions.add(terrainObjectDefinition);
    }
 
    public void setCommonAvatarEnvrionmentInterface(CommonAvatarEnvironmentInterface environment)
    {
-      setTerrainObjectDefinition(TerrainObjectDefinitionTools.toTerrainObjectDefinition(environment,
+      addTerrainObjectDefinition(TerrainObjectDefinitionTools.toTerrainObjectDefinition(environment,
                                                                                         collidableHelper,
                                                                                         terrainCollisionName,
                                                                                         robotCollisionName));
