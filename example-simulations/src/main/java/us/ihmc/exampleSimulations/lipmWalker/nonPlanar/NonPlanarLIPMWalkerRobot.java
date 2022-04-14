@@ -213,11 +213,14 @@ public class NonPlanarLIPMWalkerRobot
    private void setupInitialConditions()
    {
       bodyJoint.setPosition(0.0, 0.0, 0.8);
-      bodyJoint.setVelocity(0.7, 0.12268, 0.0);
+      bodyJoint.setVelocity(0.7, 0.1, 0.0);
       bodyJoint.setYawPitchRoll(0.0, 0.0, 0.0);
 
       leftHipPitchJoint.setQ(0.0);
       rightHipPitchJoint.setQ(0.0);
+
+      leftHipRollJoint.setQ(0.0);
+      rightHipRollJoint.setQ(0.0);
 
       leftKneeJoint.setQ(0.8);
       rightKneeJoint.setQ(0.6);

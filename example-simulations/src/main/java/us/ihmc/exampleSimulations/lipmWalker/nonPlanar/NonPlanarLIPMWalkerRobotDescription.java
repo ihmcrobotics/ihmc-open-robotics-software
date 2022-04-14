@@ -85,11 +85,11 @@ public class NonPlanarLIPMWalkerRobotDescription extends RobotDescription
 
       LinkDescription leftShin = createShinLink("leftShin", YoAppearance.Red());
       leftKneeJoint.setLink(leftShin);
-      leftHipPitchJoint.addJoint(leftKneeJoint);
+      leftHipRollJoint.addJoint(leftKneeJoint);
 
       LinkDescription rightShin = createShinLink("rightShin", YoAppearance.Green());
       rightKneeJoint.setLink(rightShin);
-      rightHipPitchJoint.addJoint(rightKneeJoint);
+      rightHipRollJoint.addJoint(rightKneeJoint);
 
       GroundContactPointDescription gc_rheel = new GroundContactPointDescription("gc_rheel", new Vector3D(0.0, 0.0, 0.0));
       GroundContactPointDescription gc_lheel = new GroundContactPointDescription("gc_lheel", new Vector3D(0.0, 0.0, 0.0));

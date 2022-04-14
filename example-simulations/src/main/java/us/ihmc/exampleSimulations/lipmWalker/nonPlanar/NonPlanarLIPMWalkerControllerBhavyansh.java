@@ -38,6 +38,8 @@ public class NonPlanarLIPMWalkerControllerBhavyansh implements RobotController
    private final YoDouble kdKnee = new YoDouble("kdKnee", registry);
    private final YoDouble kpHip = new YoDouble("kpHip", registry);
    private final YoDouble kdHip = new YoDouble("kdHip", registry);
+   private final YoDouble kpHipRoll = new YoDouble("kpHipRoll", registry);
+   private final YoDouble kdHipRoll = new YoDouble("kdHipRoll", registry);
 
    private final YoDouble q_d_leftKnee = new YoDouble("q_d_leftKnee", registry);
    private final YoDouble q_d_rightKnee = new YoDouble("q_d_rightKnee", registry);
@@ -121,6 +123,9 @@ public class NonPlanarLIPMWalkerControllerBhavyansh implements RobotController
 
       kpHip.set(1000.0);
       kdHip.set(10.0);
+
+      kpHipRoll.set(10.0);
+      kdHipRoll.set(5.0);
 
       q_d_leftKnee.set(0.8);
       q_d_rightKnee.set(0.7);
@@ -238,6 +243,7 @@ public class NonPlanarLIPMWalkerControllerBhavyansh implements RobotController
       
       
       robot.setHipTorquePitch(side, -kpBody.getValue() * (0.0 - robot.getBodyPitchAngle()) + kdBody.getValue() * robot.getBodyPitchAngularVelocity());
+      robot.setHipTorqueRoll(side, kpHipRoll.getValue() * (0.0 - robot.getHipAngleRoll(side) + kdHipRoll.getValue() * (0.0 - robot.getHipVelocityRoll(side))));
 
       worldHipAngles.get(side).set(robot.getHipAnglePitch(side) + robot.getBodyPitchAngle());
    }
@@ -286,6 +292,8 @@ public class NonPlanarLIPMWalkerControllerBhavyansh implements RobotController
       double feedBackHipTorque = kpHip.getValue() * (desiredHipAngle - hipAngle) + kdHip.getValue() * (desiredHipVelocity - hipVelocity);
       desiredHipAngles.get(side).set(desiredHipAngle);
       robot.setHipTorquePitch(side, feedBackHipTorque);
+
+      robot.setHipTorqueRoll(side, kpHipRoll.getValue() * (0.0 - robot.getHipAngleRoll(side) + kdHipRoll.getValue() * (0.0 - robot.getHipVelocityRoll(side))));
 
       //      LogTools.info("CoMX: {}, KneeLength: {}, HipAngle: {}", comXPositionFromFoot.getValue(), desiredKneeLength, desiredHipAngle);
    }
