@@ -112,7 +112,7 @@ public class OverhauledToeOffManager
 
          ConvexPolygon2DReadOnly defaultPolygon = new ConvexPolygon2D(polygon);
          footDefaultPolygons.put(robotSide, defaultPolygon);
-         defaultToeOffPoints.put(robotSide, new FramePoint2D(soleZUpFrames.get(robotSide), computeMiddleOfFrontEdge(defaultPolygon));
+         defaultToeOffPoints.put(robotSide, new FramePoint2D(soleZUpFrames.get(robotSide), computeMiddleOfFrontEdge(defaultPolygon)));
       }
 
       doToeOffIfPossibleInDoubleSupport = new BooleanParameter("doToeOffIfPossibleInDoubleSupport", registry, toeOffParameters.doToeOffIfPossible());

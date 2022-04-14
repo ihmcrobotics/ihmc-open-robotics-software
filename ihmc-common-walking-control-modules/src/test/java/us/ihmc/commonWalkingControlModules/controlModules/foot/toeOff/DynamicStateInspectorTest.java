@@ -266,6 +266,224 @@ public class DynamicStateInspectorTest
    }
 
    @Test
+   public void test20220206_164237_Nadia_HeuristicICPController_StepsAndFallCrop01()
+   {
+      DynamicStateInspectorParameters parameters = new DynamicStateInspectorParameters(registry);
+      DynamicStateInspector inspector = new DynamicStateInspector(registry);
+
+      leftPolygon.clear(worldFrame);
+      rightPolygon.clear(worldFrame);
+
+      leftPolygon.addVertex(-0.21496, -0.1422);
+      leftPolygon.addVertex(-0.2109, -0.0471);
+      leftPolygon.addVertex(0.0039, -0.0565);
+      leftPolygon.addVertex(-0.0002, -0.1514);
+      leftPolygon.update();
+
+      rightPolygon.addVertex(-0.4375, -0.2933);
+      rightPolygon.addVertex(-00.2314, -0.2321);
+      rightPolygon.addVertex(-0.2046, -0.3231);
+      rightPolygon.addVertex(-0.4106, -0.3843);
+      rightPolygon.update();
+
+      toePosition.setIncludingFrame(worldFrame, -0.2188, -0.2754);
+
+      onToesPolygon.clear(worldFrame);
+      onToesPolygon.addVertices(leftPolygon);
+      onToesPolygon.addVertex(toePosition);
+      onToesPolygon.update();
+
+      desiredICP.setIncludingFrame(worldFrame, -0.0952,  -0.1387);
+      currentICP.setIncludingFrame(worldFrame, -0.1589, -0.247);
+
+      FramePose3D leftFootPose = new FramePose3D();
+      leftFootPose.getPosition().set(-0.1057, -0.0995, 0.1598);
+      leftFootPose.getOrientation().set(0.006, -0.009, -0.0226, 0.9997);
+
+      inspector.setPolygons(leftPolygon, rightPolygon, onToesPolygon);
+      inspector.checkICPLocations(parameters, RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, toePosition);
+
+      assertFalse(inspector.areDynamicsOkForToeOff());
+
+      visualize();
+
+   }
+
+   @Test
+   public void test20220206_164237_Nadia_HeuristicICPController_StepsAndFallCrop02_6_99()
+   {
+      DynamicStateInspectorParameters parameters = new DynamicStateInspectorParameters(registry);
+      DynamicStateInspector inspector = new DynamicStateInspector(registry);
+
+      leftPolygon.clear(worldFrame);
+      rightPolygon.clear(worldFrame);
+
+      leftPolygon.addVertex(0.4577, -0.2276);
+      leftPolygon.addVertex(0.6708, -0.1995);
+      leftPolygon.addVertex(0.6832, -0.2936);
+      leftPolygon.addVertex(0.4701, -0.3217);
+      leftPolygon.update();
+
+      rightPolygon.addVertex(0.7722, -0.4052);
+      rightPolygon.addVertex(0.9845, -0.3713);
+      rightPolygon.addVertex(0.9995, -0.4651);
+      rightPolygon.addVertex(0.7872, -0.499);
+      rightPolygon.update();
+
+      toePosition.setIncludingFrame(worldFrame, 0.6762, -0.2465);
+
+      onToesPolygon.clear(worldFrame);
+      onToesPolygon.addVertices(rightPolygon);
+      onToesPolygon.addVertex(toePosition);
+      onToesPolygon.update();
+
+      desiredICP.setIncludingFrame(worldFrame, 0.7908,  -0.3611);
+      currentICP.setIncludingFrame(worldFrame, 0.771, -0.3625);
+
+      FramePose3D rightFootPose = new FramePose3D();
+      rightFootPose.getPosition().set(0.8859, -0.4352, 0.3122);
+      rightFootPose.getOrientation().set(-0.007, -0.0065, 0.079, 0.9968);
+
+      inspector.setPolygons(rightPolygon, leftPolygon, onToesPolygon);
+      inspector.checkICPLocations(parameters, RobotSide.LEFT, rightFootPose, desiredICP, currentICP, toePosition);
+
+      assertTrue(inspector.areDynamicsOkForToeOff());
+
+      visualize();
+
+   }
+
+   @Test
+   public void test20220206_164237_Nadia_HeuristicICPController_StepsAndFallCrop02_8_863()
+   {
+      DynamicStateInspectorParameters parameters = new DynamicStateInspectorParameters(registry);
+      DynamicStateInspector inspector = new DynamicStateInspector(registry);
+
+      leftPolygon.clear(worldFrame);
+      rightPolygon.clear(worldFrame);
+
+      leftPolygon.addVertex(0.4642, -0.4675);
+      leftPolygon.addVertex(0.6779, -0.4443);
+      leftPolygon.addVertex(0.6882, -0.5388);
+      leftPolygon.addVertex(0.4744, -0.562);
+      leftPolygon.update();
+
+      rightPolygon.addVertex(0.2512, -0.7194);
+      rightPolygon.addVertex(0.4662, -0.7136);
+      rightPolygon.addVertex(0.4687, -0.8086);
+      rightPolygon.addVertex(0.2538, -0.8143);
+      rightPolygon.update();
+
+      toePosition.setIncludingFrame(worldFrame, 0.4675, -0.7611);
+
+      onToesPolygon.clear(worldFrame);
+      onToesPolygon.addVertices(leftPolygon);
+      onToesPolygon.addVertex(toePosition);
+      onToesPolygon.update();
+
+      desiredICP.setIncludingFrame(worldFrame, 0.4901,  -0.5979);
+      currentICP.setIncludingFrame(worldFrame, 0.4808, -0.6091);
+
+      FramePose3D leftFootPose = new FramePose3D();
+      leftFootPose.getPosition().set(0.5762, -0.5031, 0.8193);
+      leftFootPose.getOrientation().set(0.0007, -0.0034, 0.054, 0.9985);
+
+      inspector.setPolygons(leftPolygon, rightPolygon, onToesPolygon);
+      inspector.checkICPLocations(parameters, RobotSide.LEFT, leftFootPose, desiredICP, currentICP, toePosition);
+
+      assertFalse(inspector.areDynamicsOkForToeOff());
+
+      visualize();
+
+   }
+
+   @Test
+   public void test20220208_110756_Nadia_HeuristicICPController_StepsAndFallCrop02_58_471()
+   {
+      DynamicStateInspectorParameters parameters = new DynamicStateInspectorParameters(registry);
+      DynamicStateInspector inspector = new DynamicStateInspector(registry);
+
+      leftPolygon.clear(worldFrame);
+      rightPolygon.clear(worldFrame);
+
+      leftPolygon.addVertex(8.567, 0.5775);
+      leftPolygon.addVertex(8.5894, 0.6696);
+      leftPolygon.addVertex(8.7984, 0.6189);
+      leftPolygon.addVertex(8.776, 0.5267);
+      leftPolygon.update();
+
+      rightPolygon.addVertex(8.247, 0.3501);
+      rightPolygon.addVertex(8.422, 0.4748);
+      rightPolygon.addVertex(8.477, 0.3974);
+      rightPolygon.addVertex(8.3019, 0.2727);
+      rightPolygon.update();
+
+      toePosition.setIncludingFrame(worldFrame, 8.4521, 0.4323);
+
+      onToesPolygon.clear(worldFrame);
+      onToesPolygon.addVertices(leftPolygon);
+      onToesPolygon.addVertex(toePosition);
+      onToesPolygon.update();
+
+      desiredICP.setIncludingFrame(worldFrame, 8.689,  0.5687);
+      currentICP.setIncludingFrame(worldFrame, 8.6432, 0.4951);
+
+      FramePose3D leftFootPose = new FramePose3D();
+      leftFootPose.getPosition().set(8.6826, 0.598, 0.8839);
+      leftFootPose.getOrientation().set(0.0286, -0.0021, -0.1191, 0.9925);
+
+      inspector.setPolygons(leftPolygon, rightPolygon, onToesPolygon);
+      inspector.checkICPLocations(parameters, RobotSide.LEFT, leftFootPose, desiredICP, currentICP, toePosition);
+
+      assertFalse(inspector.areDynamicsOkForToeOff());
+
+      visualize();
+   }
+
+   @Test
+   public void test20220208_110756_Nadia_HeuristicICPController_StepsAndFallCrop08_24_175()
+   {
+      DynamicStateInspectorParameters parameters = new DynamicStateInspectorParameters(registry);
+      DynamicStateInspector inspector = new DynamicStateInspector(registry);
+
+      leftPolygon.clear(worldFrame);
+      rightPolygon.clear(worldFrame);
+
+      leftPolygon.addVertex(80.8065, 2.0266);
+      leftPolygon.addVertex(80.8454, 2.1133);
+      leftPolygon.addVertex(81.0416, 2.0253);
+      leftPolygon.addVertex(81.0027, 1.9387);
+      leftPolygon.update();
+
+      rightPolygon.addVertex(80.5009, 1.9292);
+      rightPolygon.addVertex(80.7087, 1.9844);
+      rightPolygon.addVertex(80.7331, 1.8927);
+      rightPolygon.addVertex(80.5254, 1.8375);
+      rightPolygon.update();
+
+      toePosition.setIncludingFrame(worldFrame, 80.7219, 1.9349);
+
+      onToesPolygon.clear(worldFrame);
+      onToesPolygon.addVertices(leftPolygon);
+      onToesPolygon.addVertex(toePosition);
+      onToesPolygon.update();
+
+      desiredICP.setIncludingFrame(worldFrame, 80.8725,  1.9723);
+      currentICP.setIncludingFrame(worldFrame, 80.8416, 1.9398);
+
+      FramePose3D leftFootPose = new FramePose3D();
+      leftFootPose.getPosition().set(80.924, 2.0259, 3.4787);
+      leftFootPose.getOrientation().set(-0.0048, -0.0063, -0.21, 0.9777);
+
+      inspector.setPolygons(leftPolygon, rightPolygon, onToesPolygon);
+      inspector.checkICPLocations(parameters, RobotSide.LEFT, leftFootPose, desiredICP, currentICP, toePosition);
+
+      assertFalse(inspector.areDynamicsOkForToeOff());
+
+      visualize();
+   }
+
+   @Test
    public void testLeftStepGrid()
    {
       DynamicStateInspectorParameters parameters = new DynamicStateInspectorParameters(registry);
