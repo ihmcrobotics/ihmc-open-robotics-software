@@ -13,7 +13,6 @@ plugins {
 
 ihmc {
    loadProductProperties("../product.properties")
-   
    configureDependencyResolution()
    configurePublications()
 }
@@ -55,21 +54,23 @@ openpnpDependencies {
    api("org.openpnp:opencv:4.3.0-2")
 }
 
-val javaCPPVersion = "1.5.6"
+val javaCPPVersion = "1.5.7"
 
 bytedecoDependencies {
    apiBytedecoNatives("javacpp")
-   apiBytedecoNatives("openblas", "0.3.17-")
-   apiBytedecoNatives("opencv", "4.5.3-")
+   apiBytedecoNatives("openblas", "0.3.19-")
+   apiBytedecoNatives("opencv", "4.5.5-")
    apiBytedecoNatives("opencl", "3.0-")
+   apiBytedecoNatives("librealsense2", "2.50.0-")
 }
 
 javacvDependencies {
    apiBytedecoSelective("org.bytedeco:javacv:$javaCPPVersion")
    apiBytedecoNatives("javacpp")
-   apiBytedecoNatives("openblas", "0.3.17-")
-   apiBytedecoNatives("opencv", "4.5.3-")
+   apiBytedecoNatives("openblas", "0.3.19-")
+   apiBytedecoNatives("opencv", "4.5.5-")
    apiBytedecoNatives("opencl", "3.0-")
+   apiBytedecoNatives("librealsense2", "2.50.0-")
 }
 
 fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, versionPrefix: String = "")
