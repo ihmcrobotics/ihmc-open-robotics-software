@@ -41,6 +41,7 @@ libgdxDependencies {
    api("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:2.2.1")
    api("com.badlogicgames.gdx:gdx-bullet:1.10.0")
    api("com.badlogicgames.gdx:gdx-bullet-platform:1.10.0:natives-desktop")
+   api("commons-io:commons-io:2.11.0") // IOUtils method was old version without this
 }
 
 testDependencies {
