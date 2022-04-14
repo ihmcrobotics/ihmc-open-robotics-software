@@ -2,27 +2,17 @@ package us.ihmc.gdx.ui.missionControl;
 
 import imgui.ImGui;
 import imgui.flag.ImGuiInputTextFlags;
+import imgui.type.ImDouble;
 import imgui.type.ImInt;
 import imgui.type.ImString;
-import std_msgs.Char;
 import us.ihmc.avatar.ros2.networkTest.SSHJTools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.gdx.imgui.ImGuiGlfwWindow;
 import us.ihmc.gdx.imgui.ImGuiTools;
-import us.ihmc.gdx.ui.yo.ImPlotDoublePlotLine;
-import us.ihmc.gdx.ui.yo.ImPlotPlot;
-import us.ihmc.gdx.ui.yo.ImPlotPlotLine;
-import us.ihmc.log.LogTools;
-import us.ihmc.tools.thread.MissingThreadTools;
-import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.io.*;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.util.ArrayList;
 
 public class ImGuiSSHJShellUI
 {
@@ -30,19 +20,11 @@ public class ImGuiSSHJShellUI
    private final String REMOTE_USERNAME = System.getProperty("remote.username");
    private final ImInt bufferSize = new ImInt(10000);
    private final ImString consoleText = new ImString(bufferSize.get());
-   private final ByteBuffer consoleByteBuffer;
-   private final CharBuffer consoleCharBuffer;
-   private final StringBuilder consoleStringBuilder = new StringBuilder(bufferSize.get());
-   private final ResettableExceptionHandlingExecutorService readerService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
-   private BufferedInputStream stdinStream;
-   private InputStream standardError;
-   private BufferedReader standardOut;
-   private ArrayList<String> lines = new ArrayList<>();
-   boolean consoleChanged;
-   private ImPlotPlot readLinePlot = new ImPlotPlot();
-   private ImPlotDoublePlotLine readLinePlotLine = new ImPlotDoublePlotLine("readLine");
-   private Stopwatch stopwatch = new Stopwatch();
+   private final ImString command = new ImString(bufferSize.get());
+   private final ImDouble timeout = new ImDouble(0.0);
    private InputStream standardOutRaw;
+   private InputStream standardError;
+   private int exitStatus = -1;
 
    public ImGuiSSHJShellUI()
    {
@@ -52,19 +34,32 @@ public class ImGuiSSHJShellUI
                                                             "SSHJ Shell");
       imGuiGlfwWindow.runWithSinglePanel(this::renderImGuiWidgets);
 
-//      consoleByteBuffer = ByteBuffer.wrap(consoleText.getData());
-      consoleByteBuffer = ByteBuffer.allocate(bufferSize.get());
-      consoleCharBuffer = consoleByteBuffer.asCharBuffer();
-
-      readLinePlot.getPlotLines().add(readLinePlotLine);
+      command.set("ping -c 5 archlinux.org");
    }
 
    private void renderImGuiWidgets()
    {
-      if (ImGui.inputInt("Buffer size", bufferSize))
+      int inputIntFlags = ImGuiInputTextFlags.None;
+      inputIntFlags = ImGuiInputTextFlags.EnterReturnsTrue;
+      if (ImGui.inputInt("Buffer size", bufferSize, 1, 100, inputIntFlags))
       {
-         consoleText.resize(bufferSize.get());
+         if (bufferSize.get() > consoleText.getBufferSize())
+         {
+            consoleText.resize(bufferSize.get());
+         }
+         else
+         {
+            bufferSize.set(consoleText.getBufferSize());
+         }
       }
+
+      int inputTextFlags = ImGuiInputTextFlags.None;
+      inputTextFlags |= ImGuiInputTextFlags.CallbackResize;
+      ImGui.inputText("Command", command, inputTextFlags);
+
+      ImGui.inputDouble("Timeout", timeout);
+      ImGui.sameLine();
+      ImGui.text("(0 means no timeout)");
 
       if (ImGui.button("Run"))
       {
@@ -72,98 +67,43 @@ public class ImGuiSSHJShellUI
          {
             SSHJTools.session(REMOTE_HOSTNAME, REMOTE_USERNAME, sshj ->
             {
-               double noTimeout = 0.0;
-               int exitStatus = sshj.exec("ping -c 3 archlinux.org", noTimeout, sshjCommand ->
+               exitStatus = sshj.exec(command.get(), timeout.get(), sshjCommand ->
                {
-//                  outputStream = new BufferedOutputStream(sshjCommand.getOutputStream());
                   standardOutRaw = sshjCommand.getInputStream();
-//                  inputStream.
-//                  standardOut = new BufferedReader(new InputStreamReader(inputStream, sshjCommand.getRemoteCharset()));
-//                                                                               inputStream = sshjCommand.getInputStream();
-//                  in.
                   standardError = sshjCommand.getErrorStream();
-
-//                  sshjCommand.
                });
-//               standardOutRaw = null;
-//               standardError = null;
             });
          }, "SSHJCommand");
       }
-
-
-      consoleChanged = false;
-      if (standardOut != null)
+      if (exitStatus > -1)
       {
-//         boolean anyWereRead = false;
-//         int read;
-//         while ((read = ExceptionTools.handle(() -> standardOut.read(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE)) > -1)
-//         {
-//            consoleCharBuffer.put((char) read);
-//            anyWereRead = true;
-//         }
-//
-//         if (anyWereRead)
-//         {
-////            consoleStringBuilder.
-//            consoleText.set(consoleCharBuffer.toString());
-//         }
-
-
-//         standardOut.readLine()
-
-//         consoleStringBuilder.
-//         new String(consoleCharBuffer)
-//         consoleText.inputData.
-//
-//         standardOut.
-//
-//         consoleText.getData()
-//
-//
-
-//         readerService.clearQueueAndExecute(() ->
-//         {
-//            stopwatch.start();
-//            ExceptionTools.handle(() ->
-//            {
-//               String line;
-//               while ((line = standardOut.readLine()) != null)
-//               {
-//                  lines.add(line);
-//                  consoleChanged = true;
-//               }
-//
-//            }, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
-//            readLinePlotLine.addValue(stopwatch.totalElapsed());
-//
-//            if (consoleChanged)
-//            {
-//               for (String line : lines)
-//               {
-//                  consoleStringBuilder.append(line);
-//                  consoleStringBuilder.append('\n');
-//               }
-//               lines.clear();
-//            }
-//            consoleText.set(consoleStringBuilder.toString());
-//         });
-////         inputStream.
-
-
-
-      }
-      if (standardError != null)
-      {
-
+         ImGui.sameLine();
+         ImGui.text("Exit status: " + exitStatus);
       }
 
-      if (standardOutRaw != null)
+      readFromInputStream(standardOutRaw);
+      readFromInputStream(standardError);
+
+      ImGui.beginChild("###consoleArea");
+
+      inputTextFlags = ImGuiInputTextFlags.None;
+      inputTextFlags |= ImGuiInputTextFlags.CallbackResize;
+      inputTextFlags |= ImGuiInputTextFlags.ReadOnly;
+      ImGui.pushFont(ImGuiTools.getConsoleFont());
+      ImGui.inputTextMultiline("###console", consoleText, ImGui.getColumnWidth(), ImGui.getContentRegionAvailY(), inputTextFlags);
+      ImGui.popFont();
+
+      ImGui.endChild();
+   }
+
+   private void readFromInputStream(InputStream inputStream)
+   {
+      if (inputStream != null)
       {
-         int availableBytes = ExceptionTools.handle(standardOutRaw::available, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+         int availableBytes = ExceptionTools.handle(inputStream::available, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
          for (int i = 0; i < availableBytes; i++)
          {
-            int read = ExceptionTools.handle(() -> standardOutRaw.read(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+            int read = ExceptionTools.handle(() -> inputStream.read(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
 
             if (read > 0)
             {
@@ -171,22 +111,6 @@ public class ImGuiSSHJShellUI
             }
          }
       }
-
-
-
-      readLinePlot.render();
-
-      ImGui.beginChild("###consoleArea");
-
-      int inputTextFlags = ImGuiInputTextFlags.None;
-      inputTextFlags |= ImGuiInputTextFlags.CallbackResize;
-      inputTextFlags |= ImGuiInputTextFlags.ReadOnly;
-      ImGui.pushFont(ImGuiTools.getConsoleFont());
-//      ImGui.text(consoleText.get());
-      ImGui.inputTextMultiline("###console", consoleText, ImGui.getColumnWidth(), 500, inputTextFlags);
-      ImGui.popFont();
-
-      ImGui.endChild();
    }
 
    public static void main(String[] args)
