@@ -23,7 +23,6 @@ public class DynamicStateInspector
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private final YoDouble distanceOfCurrentICPPastHeel = new YoDouble("distOfCurrentICPPastHeel", registry);
    private final YoDouble distanceSquaredOfCurrentICPFromToe = new YoDouble("distSqCurrentICPFromToe", registry);
    private final YoDouble distanceSquaredOfDesiredICPFromToe = new YoDouble("distSqDesiredICPFromToe", registry);
    private final YoDouble currentICPLateralDistanceInside = new YoDouble("currentICPLatDistInside", registry);
@@ -42,7 +41,6 @@ public class DynamicStateInspector
    private final YoDouble distanceAlongErrorToFullSupport = new YoDouble("distAlongErrorToFS", registry);
    private final YoDouble normDistanceAlongErrorToFullSupport = new YoDouble("normDistAlongErrorToFS", registry);
 
-   private final YoBoolean currentIcpIsPastTheHeel = new YoBoolean("CurrentICPPastHeel", registry);
    private final YoBoolean currentIcpIsFarEnoughFromTheToe = new YoBoolean("currentIcpFarEnoughFromToe", registry);
    private final YoBoolean desiredIcpIsFarEnoughFromTheToe = new YoBoolean("desiredIcpFarEnoughFromToe", registry);
    private final YoBoolean currentIcpIsFarEnoughInside = new YoBoolean("currentIcpFarEnoughInside", registry);
@@ -62,6 +60,7 @@ public class DynamicStateInspector
    private final YoBoolean isCurrentICPOKForToeOff = new YoBoolean("isCurrentICPOKForToeOff", registry);
 
    private final YoBoolean dynamicsAreOkForToeOff = new YoBoolean("dynamicsAreOKForToeOff", registry);
+   private final YoBoolean dynamicsAreDefinitelyNotOKForToeOff = new YoBoolean("dynamicsAreDefinitelyNotOKForToeOff", registry);
 
    private final FrameConvexPolygon2D leadingFootPolygon = new FrameConvexPolygon2D();
    private final FrameConvexPolygon2D trailingFootPolygon = new FrameConvexPolygon2D();
@@ -117,8 +116,6 @@ public class DynamicStateInspector
 
       double pseudoStepLength = computeDistanceToLeadingFoot();
 
-      // If the ICP is far enough past the heel, should probably toe off.
-      checkIfICPIsSuperFarForward(parameters);
       // Check the IcP for not being too far towards the outside of the stance foot
       checkIfICPIsTooFarOutward(parameters, trailingFootSide);
       // Check to make sure the ICP is far enough from the toe, so that its control authority doesn't matter too much.
@@ -134,23 +131,17 @@ public class DynamicStateInspector
       this.isCurrentICPOKForToeOff.set(isCurrentICPOKForToeOff);
       this.isDesiredICPOKForToeOff.set(isDesiredICPOKForToeOff);
 
-      if (currentIcpIsPastTheHeel.getValue())
-         dynamicsAreOkForToeOff.set(true);
+      dynamicsAreOkForToeOff.set(isCurrentICPOKForToeOff && isDesiredICPOKForToeOff);
+
+      if (supportPolygon.isPointInside(currentICP) && supportPolygon.isPointInside(desiredICP))
+      {
+         dynamicsAreDefinitelyNotOKForToeOff.set(!dynamicsAreOkForToeOff.getBooleanValue());
+      }
       else
-         dynamicsAreOkForToeOff.set(isCurrentICPOKForToeOff && isDesiredICPOKForToeOff);
-   }
-
-   private void checkIfICPIsSuperFarForward(DynamicStateInspectorParameters parameters)
-   {
-      currentICP.changeFrame(leadingFootZUpFrame);
-      toeOffPoint.changeFrame(leadingFootZUpFrame);
-
-      leadingFootPolygon.changeFrameAndProjectToXYPlane(leadingFootZUpFrame);
-
-      double minXValue = Math.max(leadingFootPolygon.getMinX(), toeOffPoint.getX());
-      distanceOfCurrentICPPastHeel.set(currentICP.getX() - minXValue);
-
-      currentIcpIsPastTheHeel.set(distanceOfCurrentICPPastHeel.getValue() > parameters.getDistanceForwardFromHeel());
+      {
+         dynamicsAreDefinitelyNotOKForToeOff.set(
+               currentOrthogonalDistanceToInsideEdge.getDoubleValue() < 0.0 && desiredOrthogonalDistanceToInsideEdge.getDoubleValue() < 0.0);
+      }
    }
 
    private void checkIfICPIsTooFarOutward(DynamicStateInspectorParameters parameters, RobotSide trailingFootSide)
@@ -258,7 +249,6 @@ public class DynamicStateInspector
       desiredIcpIsFarEnoughInsideOutsideEdge.set(desiredOrthogonalDistanceToOutsideEdge < parameters.getMinOrthogonalDistanceFromOutsideEdge());
       currentIcpIsFarEnoughInsideOutsideEdge.set(currentOrthogonalDistanceToOutsideEdge < parameters.getMinOrthogonalDistanceFromOutsideEdge()
                                                  && distanceAlongErrorToOutsideEdge < minDistanceAlongEdge);
-
    }
 
    private void checkInsideEdge(DynamicStateInspectorParameters parameters, RobotSide trailingFootSide, double errorMagnitude)
@@ -294,7 +284,8 @@ public class DynamicStateInspector
 
    private void checkFullSupportPolygon(DynamicStateInspectorParameters parameters, double errorMagnitude)
    {
-      if (Double.isFinite(parameters.getMaxRatioOfControlDecreaseFromToeingOff()) && supportPolygon.isPointInside(desiredICP) && supportPolygon.isPointInside(currentICP))
+      if (Double.isFinite(parameters.getMaxRatioOfControlDecreaseFromToeingOff()) && supportPolygon.isPointInside(desiredICP) && supportPolygon.isPointInside(
+            currentICP))
       {
          if (normDistanceAlongErrorToInsideEdge.getDoubleValue() > 0.0 || normDistanceAlongErrorToOutsideEdge.getDoubleValue() > 0.0)
          {
@@ -338,7 +329,8 @@ public class DynamicStateInspector
       boolean success = EuclidCoreMissingTools.intersectionBetweenRay2DAndLine2D(desiredICP,
                                                                                  errorDirection,
                                                                                  lineToIntersection.getPoint(),
-                                                                                 lineToIntersection.getDirection(), tempPoint1);
+                                                                                 lineToIntersection.getDirection(),
+                                                                                 tempPoint1);
 
       if (success)
          return tempPoint1.distance(currentICP);
@@ -352,14 +344,14 @@ public class DynamicStateInspector
       return toeOffPoint.distanceFromOrigin();
    }
 
+   public boolean areDynamicsDefinitelyNotOkForToeOff()
+   {
+      return dynamicsAreDefinitelyNotOKForToeOff.getBooleanValue();
+   }
+
    public boolean areDynamicsOkForToeOff()
    {
       return dynamicsAreOkForToeOff.getValue();
-   }
-
-   boolean isCurrentICPIsPastTheHeel()
-   {
-      return currentIcpIsPastTheHeel.getBooleanValue();
    }
 
    boolean isCurrentICPFarEnoughFromTheToe()
@@ -410,11 +402,6 @@ public class DynamicStateInspector
    boolean isCurrentICPOKForToeOff()
    {
       return isCurrentICPOKForToeOff.getBooleanValue();
-   }
-
-   double getDistanceOfCurrentICPPastTheHeel()
-   {
-      return distanceOfCurrentICPPastHeel.getValue();
    }
 
    double getDistanceSquaredOfCurrentICPFromToe()

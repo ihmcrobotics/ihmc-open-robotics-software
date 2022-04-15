@@ -209,7 +209,7 @@ public class OverhauledToeOffManager
          jointLimitsInspector.updateToeOffConditions(trailingLeg);
          jointsNeedToeingOff = jointLimitsInspector.needToSwitchToToeOffDueToJointLimit();
       }
-      boolean doToeOff = allowToeOff && wellPositioned;
+      boolean doToeOff = allowToeOff && wellPositioned && !dynamicStateInspector.areDynamicsDefinitelyNotOkForToeOff();
       doToeOff &= (jointsNeedToeingOff || dynamicStateInspector.areDynamicsOkForToeOff());
 
       this.doToeOff.set(doToeOff);
