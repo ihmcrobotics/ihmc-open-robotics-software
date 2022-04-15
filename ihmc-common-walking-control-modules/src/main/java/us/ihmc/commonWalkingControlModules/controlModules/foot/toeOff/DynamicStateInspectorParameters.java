@@ -50,12 +50,22 @@ public class DynamicStateInspectorParameters
       maxRatioOfControlDecreaseFromToeingOff = new YoDouble("maxRatioOfControlDecreaseFromToeingOff" + suffix, registry);
       maxNormalizedErrorNeededForControl = new YoDouble("maxNormErrorNeededForControl" + suffix, registry);
 
-      minNormalizedDistanceFromOutsideEdge.setToNaN();
-      minNormalizedDistanceFromInsideEdge.setToNaN();
-      maxNormalizedErrorNeededForControl.setToNaN();
-      maxRatioOfControlDecreaseFromToeingOff.set(Double.POSITIVE_INFINITY);
+      maxNormalizedErrorNeededForControl.set(1.0);
+      maxRatioOfControlDecreaseFromToeingOff.set(2.0);
 
-      minNormalizedDistanceFromInsideEdge.set(0.2);
+      minDistanceAlongErrorFromInsideEdge.set(-0.01);
+      minOrthogonalDistanceFromInsideEdge.set(-0.0075);
+
+      minDistanceAlongErrorFromOutsideEdge.set(-0.025);
+      minOrthogonalDistanceFromOutsideEdge.set(-0.015);
+
+      minNormalizedDistanceFromInsideEdge.set(0.3);
+      minNormalizedDistanceFromOutsideEdge.set(0.35);
+
+      minLateralDistanceInside.set(0.05);
+      minFractionOfStrideFromTheToe.set(0.5);
+      minDistanceFromTheToe.set(0.05);
+
 
       parentRegistry.addChild(registry);
    }

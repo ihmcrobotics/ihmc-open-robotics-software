@@ -74,9 +74,12 @@ public class DynamicStateInspector
    private final PoseReferenceFrame leadingFootFrame = new PoseReferenceFrame("leadingFootFrame", worldFrame);
    private final ZUpFrame leadingFootZUpFrame = new ZUpFrame(leadingFootFrame, "leadingFootZUpFrame");
 
-   private final FrameLine2D insideEdge = new FrameLine2D();
-   private final FrameLine2D outsideEdge = new FrameLine2D();
+   final FrameLine2D insideEdge = new FrameLine2D();
+   final FrameLine2D outsideEdge = new FrameLine2D();
    private final FrameVector2D errorDirection = new FrameVector2D();
+
+   final FramePoint2D pointOnInsideEdge = new FramePoint2D();
+   final FramePoint2D pointOnOutsideEdge = new FramePoint2D();
 
    private final Point2DBasics tempPoint1 = new Point2D();
    private final Point2DBasics tempPoint2 = new Point2D();
@@ -146,7 +149,7 @@ public class DynamicStateInspector
 
    private void checkIfICPIsTooFarOutward(DynamicStateInspectorParameters parameters, RobotSide trailingFootSide)
    {
-      leadingFootPolygon.changeFrameAndProjectToXYPlane(leadingFootFrame);
+      leadingFootPolygon.changeFrame(leadingFootZUpFrame);
       currentICP.changeFrame(leadingFootZUpFrame);
       desiredICP.changeFrame(leadingFootZUpFrame);
       toeOffPoint.changeFrame(leadingFootZUpFrame);
@@ -197,6 +200,7 @@ public class DynamicStateInspector
 
       errorDirection.sub(currentICP, desiredICP);
       double errorMagnitude = errorDirection.length();
+      errorDirection.normalize();
 
       checkOutsideEdge(parameters, trailingFootSide, errorMagnitude);
       checkInsideEdge(parameters, trailingFootSide, errorMagnitude);
@@ -208,6 +212,7 @@ public class DynamicStateInspector
       int startIndex = leadingFootPolygon.lineOfSightStartIndex(toeOffPoint);
       int endIndex = leadingFootPolygon.lineOfSightEndIndex(toeOffPoint);
       boolean isClockwise = leadingFootPolygon.isClockwiseOrdered();
+      toeOffPoint.checkReferenceFrameMatch(leadingFootPolygon);
 
       if (isClockwise == (trailingFootSide == RobotSide.RIGHT))
       {
@@ -225,7 +230,7 @@ public class DynamicStateInspector
    {
       double currentOrthogonalDistanceToOutsideEdge = outsideEdge.distance(currentICP);
       double desiredOrthogonalDistanceToOutsideEdge = outsideEdge.distance(desiredICP);
-      double distanceAlongErrorToOutsideEdge = rayDistance(outsideEdge);
+      double distanceAlongErrorToOutsideEdge = rayDistance(outsideEdge, pointOnOutsideEdge);
 
       if (outsideEdge.isPointOnSideOfLine(currentICP, trailingFootSide == RobotSide.LEFT))
       {  // inside or outside
@@ -255,7 +260,7 @@ public class DynamicStateInspector
    {
       double currentOrthogonalDistanceToInsideEdge = insideEdge.distance(currentICP);
       double desiredOrthogonalDistanceToInsideEdge = insideEdge.distance(desiredICP);
-      double distanceAlongErrorToInsideEdge = rayDistance(insideEdge);
+      double distanceAlongErrorToInsideEdge = rayDistance(insideEdge, pointOnInsideEdge);
 
       if (insideEdge.isPointOnSideOfLine(currentICP, trailingFootSide == RobotSide.RIGHT))
       {  // inside or outside
@@ -324,17 +329,18 @@ public class DynamicStateInspector
       }
    }
 
-   private double rayDistance(FrameLine2DReadOnly lineToIntersection)
+   double rayDistance(FrameLine2DReadOnly lineToIntersection, Point2DBasics intersectionToPack)
    {
       boolean success = EuclidCoreMissingTools.intersectionBetweenRay2DAndLine2D(desiredICP,
                                                                                  errorDirection,
                                                                                  lineToIntersection.getPoint(),
                                                                                  lineToIntersection.getDirection(),
-                                                                                 tempPoint1);
+                                                                                 intersectionToPack);
 
       if (success)
-         return tempPoint1.distance(currentICP);
+         return intersectionToPack.distance(currentICP);
 
+      intersectionToPack.setToNaN();
       return Double.POSITIVE_INFINITY;
    }
 

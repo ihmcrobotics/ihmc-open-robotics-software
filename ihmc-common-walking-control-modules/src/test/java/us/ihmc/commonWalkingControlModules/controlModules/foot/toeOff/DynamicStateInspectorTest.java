@@ -17,12 +17,16 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLine2d;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLine2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLineSegment2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -218,7 +222,7 @@ public class DynamicStateInspectorTest
       currentICP.subY(0.05);
 
       inspector.checkICPLocations(parameters, RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, toePosition);
-      visualize();
+      visualize(inspector);
 
       expectedICPX = 0.75 * stepLength - 0.15;
       expectedICPY = 0.25 * stepWidth;
@@ -264,7 +268,7 @@ public class DynamicStateInspectorTest
       assertTrue(inspector.isCurrentICPFarEnoughInside());
       assertTrue(inspector.isDesiredICPFarEnoughInside());
 
-      visualize();
+      visualize(inspector);
    }
 
    @Test
@@ -307,7 +311,7 @@ public class DynamicStateInspectorTest
 
       assertFalse(inspector.areDynamicsOkForToeOff());
 
-      visualize();
+      visualize(inspector);
 
    }
 
@@ -351,7 +355,8 @@ public class DynamicStateInspectorTest
 
       assertTrue(inspector.areDynamicsOkForToeOff());
 
-      visualize();
+      visualize(inspector);
+
 
    }
 
@@ -391,11 +396,12 @@ public class DynamicStateInspectorTest
       leftFootPose.getOrientation().set(0.0007, -0.0034, 0.054, 0.9985);
 
       inspector.setPolygons(leftPolygon, rightPolygon, onToesPolygon);
-      inspector.checkICPLocations(parameters, RobotSide.LEFT, leftFootPose, desiredICP, currentICP, toePosition);
+      inspector.checkICPLocations(parameters, RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, toePosition);
+
+      visualize(inspector);
 
       assertFalse(inspector.areDynamicsOkForToeOff());
 
-      visualize();
 
    }
 
@@ -435,11 +441,12 @@ public class DynamicStateInspectorTest
       leftFootPose.getOrientation().set(0.0286, -0.0021, -0.1191, 0.9925);
 
       inspector.setPolygons(leftPolygon, rightPolygon, onToesPolygon);
-      inspector.checkICPLocations(parameters, RobotSide.LEFT, leftFootPose, desiredICP, currentICP, toePosition);
+      inspector.checkICPLocations(parameters, RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, toePosition);
+
+      visualize(inspector);
 
       assertFalse(inspector.areDynamicsOkForToeOff());
 
-      visualize();
    }
 
    @Test
@@ -478,11 +485,11 @@ public class DynamicStateInspectorTest
       leftFootPose.getOrientation().set(-0.0048, -0.0063, -0.21, 0.9777);
 
       inspector.setPolygons(leftPolygon, rightPolygon, onToesPolygon);
-      inspector.checkICPLocations(parameters, RobotSide.LEFT, leftFootPose, desiredICP, currentICP, toePosition);
+      inspector.checkICPLocations(parameters, RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, toePosition);
 
       assertFalse(inspector.areDynamicsOkForToeOff());
 
-      visualize();
+      visualize(inspector);
    }
 
    @Test
@@ -521,11 +528,11 @@ public class DynamicStateInspectorTest
       leftFootPose.getOrientation().set(0.0213, 0.0049, -0.0879, 0.9959);
 
       inspector.setPolygons(leftPolygon, rightPolygon, onToesPolygon);
-      inspector.checkICPLocations(parameters, RobotSide.LEFT, leftFootPose, desiredICP, currentICP, toePosition);
+      inspector.checkICPLocations(parameters, RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, toePosition);
 
       assertFalse(inspector.areDynamicsOkForToeOff());
 
-      visualize();
+      visualize(inspector);
    }
 
    @Test
@@ -564,11 +571,12 @@ public class DynamicStateInspectorTest
       leftFootPose.getOrientation().set(-0.0046, -0.013, -0.1571, 0.9875);
 
       inspector.setPolygons(leftPolygon, rightPolygon, onToesPolygon);
-      inspector.checkICPLocations(parameters, RobotSide.LEFT, leftFootPose, desiredICP, currentICP, toePosition);
+      inspector.checkICPLocations(parameters, RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, toePosition);
+
+      visualize(inspector);
 
       assertFalse(inspector.areDynamicsOkForToeOff());
 
-      visualize();
    }
 
    @Test
@@ -609,7 +617,7 @@ public class DynamicStateInspectorTest
       inspector.setPolygons(leftPolygon, rightPolygon, onToesPolygon);
       inspector.checkICPLocations(parameters, RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, toePosition);
 
-      visualize();
+      visualize(inspector);
       assertFalse(inspector.areDynamicsOkForToeOff());
 
    }
@@ -662,7 +670,7 @@ public class DynamicStateInspectorTest
    }
 
 
-   private void visualize()
+   private void visualize(DynamicStateInspector inspector)
    {
       if (!visualize)
          return;
@@ -677,6 +685,10 @@ public class DynamicStateInspectorTest
       YoFrameConvexPolygon2D yoRightFootPolygonViz = new YoFrameConvexPolygon2D("RightFootPolygon", "", worldFrame, 4, registry);
       YoFramePoint2D yoDesiredICP = new YoFramePoint2D("desiredICP", worldFrame, registry);
       YoFramePoint2D yoCurrentICP = new YoFramePoint2D("currentICP", worldFrame, registry);
+      YoFramePoint2D yoInsideIntersection = new YoFramePoint2D("insideIntersection", worldFrame, registry);
+      YoFramePoint2D yoOutsideIntersection = new YoFramePoint2D("outsideIntersection", worldFrame, registry);
+      YoFrameLine2D insideEdge = new YoFrameLine2D("insideEdge", worldFrame, registry);
+      YoFrameLine2D outsideEdge = new YoFrameLine2D("outsideEdge", worldFrame, registry);
 
       YoArtifactPolygon leftFootViz = new YoArtifactPolygon("Left Foot Polygon", yoLeftFootPolygonViz, defaultFeetColors.get(RobotSide.LEFT), false);
       YoArtifactPolygon rightFootViz = new YoArtifactPolygon("Right Foot Polygon", yoRightFootPolygonViz, defaultFeetColors.get(RobotSide.RIGHT), false);
@@ -684,6 +696,10 @@ public class DynamicStateInspectorTest
       YoArtifactPolygon toeOffPolygonArtifact = new YoArtifactPolygon("Toe Off Polygon", yoToeOffPolygonViz, Color.RED, false);
       YoGraphicPosition desiredICPArtifact = new YoGraphicPosition("Desired ICP", yoDesiredICP, 0.01, YoAppearance.Yellow(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
       YoGraphicPosition currentICPArtifact = new YoGraphicPosition("Current ICP", yoCurrentICP, 0.01, YoAppearance.Blue(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
+      YoGraphicPosition insideIntersectionArtifact = new YoGraphicPosition("Inside Intersection", yoInsideIntersection, 0.002, YoAppearance.Blue(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
+      YoGraphicPosition outsideIntersectionArtifact = new YoGraphicPosition("Outside Intersection", yoOutsideIntersection, 0.002, YoAppearance.Blue(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
+      YoArtifactLine2d insideEdgeArtifact = new YoArtifactLine2d("Inside Edge", insideEdge, Color.blue);
+      YoArtifactLine2d outsideEdgeArtifact = new YoArtifactLine2d("Outside Edge", outsideEdge,  Color.yellow);
 
       graphicsListRegistry.registerArtifact("test", leftFootViz);
       graphicsListRegistry.registerArtifact("test", rightFootViz);
@@ -691,6 +707,10 @@ public class DynamicStateInspectorTest
       graphicsListRegistry.registerArtifact("test", toeOffPolygonArtifact);
       graphicsListRegistry.registerArtifact("test", desiredICPArtifact.createArtifact());
       graphicsListRegistry.registerArtifact("test", currentICPArtifact.createArtifact());
+      graphicsListRegistry.registerArtifact("test", insideIntersectionArtifact.createArtifact());
+      graphicsListRegistry.registerArtifact("test", outsideIntersectionArtifact.createArtifact());
+      graphicsListRegistry.registerArtifact("test", insideEdgeArtifact);
+      graphicsListRegistry.registerArtifact("test", outsideEdgeArtifact);
 
       yoLeftFootPolygonViz.set(leftPolygon);
       yoRightFootPolygonViz.set(rightPolygon);
@@ -701,6 +721,10 @@ public class DynamicStateInspectorTest
       yoDesiredICP.set(desiredICP);
       yoCurrentICP.set(currentICP);
 
+      yoInsideIntersection.set(inspector.pointOnInsideEdge);
+      yoOutsideIntersection.set(inspector.pointOnOutsideEdge);
+      insideEdge.set(inspector.insideEdge);
+      outsideEdge.set(inspector.outsideEdge);
 
       scs.getRootRegistry().addChild(registry);
       scs.addYoGraphicsListRegistry(graphicsListRegistry);
