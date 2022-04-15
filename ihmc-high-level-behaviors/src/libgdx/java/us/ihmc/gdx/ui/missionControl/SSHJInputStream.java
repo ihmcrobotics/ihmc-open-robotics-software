@@ -1,6 +1,5 @@
 package us.ihmc.gdx.ui.missionControl;
 
-import imgui.type.ImString;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 
@@ -8,6 +7,7 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.function.Consumer;
 
 public class SSHJInputStream
 {
@@ -26,7 +26,7 @@ public class SSHJInputStream
       this.charset = charset;
    }
 
-   public void updateConsoleText(ImString consoleText)
+   public void updateConsoleText(Consumer<String> newTextConsumer)
    {
       if (inputStream != null)
       {
@@ -39,9 +39,11 @@ public class SSHJInputStream
             inputByteBuffer.put((byte) read);
          }
 
-         String newPart = new String(Arrays.copyOf(inputByteBuffer.array(), inputByteBuffer.position()), charset);
-         consoleText.set(consoleText.get() + newPart);
-         System.out.print(newPart);
+         if (inputByteBuffer.position() > 0)
+         {
+            String newPart = new String(Arrays.copyOf(inputByteBuffer.array(), inputByteBuffer.position()), charset);
+            newTextConsumer.accept(newPart);
+         }
       }
    }
 }
