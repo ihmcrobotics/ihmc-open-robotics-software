@@ -19,12 +19,12 @@ public class SSHJClientWithSFTP extends SSHJClient
    public void put(String source, String dest)
    {
       LogTools.info("Putting $source to ${ssh.remoteHostname}:$dest");
-      ExceptionTools.handle(() -> sftpClient.put(source, dest), DefaultExceptionHandler.RUNTIME_EXCEPTION);
+      ExceptionTools.handle(() -> sftpClient.put(source, dest), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
    }
 
    public void get(String source, String dest)
    {
       LogTools.info("Getting ${ssh.remoteHostname}:$source to $dest");
-      ExceptionTools.handle(() -> sftpClient.get(source, dest), DefaultExceptionHandler.RUNTIME_EXCEPTION);
+      ExceptionTools.handle(() -> sftpClient.get(source, dest), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
    }
 }

@@ -31,10 +31,9 @@ public class ImGuiSSHJShellUI
    private final SSHJInputStream standardOut = new SSHJInputStream();
    private final SSHJInputStream standardError = new SSHJInputStream();
    private Session.Command sshjCommand;
-   private boolean running = false;
    private final TextEditor textEditor = new TextEditor();
    private TextEditorLanguageDefinition textEditorLanguageDefinition = new TextEditorLanguageDefinition();
-
+   private Thread runThread;
 
    public ImGuiSSHJShellUI()
    {
@@ -46,7 +45,7 @@ public class ImGuiSSHJShellUI
 
       standardOut.resize(bufferSize.get());
       standardError.resize(bufferSize.get());
-      command.set("ping -c 5 archlinux.org");
+      command.set("sudo journalctl -ef -u sshd");
 
       int[] palette = new int[]
             {
@@ -120,28 +119,31 @@ public class ImGuiSSHJShellUI
          textEditor.setCursorPosition(lastLineIndex, endOfLastLineColumn);
       }
 
-      if (!running && ImGui.button("Run"))
+      if (!isRunning() && ImGui.button("Run"))
       {
-         ThreadTools.startAsDaemon(() ->
+         runThread = ThreadTools.startAsDaemon(() ->
          {
             SSHJTools.session(REMOTE_HOSTNAME, REMOTE_USERNAME, sshj ->
             {
-               running = true;
                exitStatus = sshj.exec(command.get(), timeout.get(), sshjCommand ->
                {
                   this.sshjCommand = sshjCommand;
                   standardOut.setInputStream(sshjCommand.getInputStream(), sshjCommand.getRemoteCharset());
                   standardError.setInputStream(sshjCommand.getErrorStream(), sshjCommand.getRemoteCharset());
                });
-               running = false;
             });
          }, "SSHJCommand");
       }
-      if (running)
+      if (isRunning())
       {
          if (ImGui.button("SIGINT"))
          {
             ExceptionTools.handle(() -> sshjCommand.signal(Signal.INT), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+         }
+         ImGui.sameLine();
+         if (ImGui.button("Type 'q'"))
+         {
+            ExceptionTools.handle(() -> sshjCommand.getOutputStream().write('q'), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
          }
       }
       if (exitStatus > -1)
@@ -156,6 +158,11 @@ public class ImGuiSSHJShellUI
       ImGui.pushFont(ImGuiTools.getConsoleFont());
       textEditor.render("Console");
       ImGui.popFont();
+   }
+
+   private boolean isRunning()
+   {
+      return runThread != null && runThread.isAlive();
    }
 
    private void acceptNewText(String newText)
