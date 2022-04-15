@@ -471,9 +471,8 @@ public class PlanarRegionsList
 
       for (PlanarRegion region : regions)
       {
-         if (region.getBoundingBox3dInWorld().containsNaN())
+         if (region.containsNaN())
          {
-            LogTools.error("Region bounding box contained NaN");
             placeholderForRemovingRegions.add(region);
          }
       }
