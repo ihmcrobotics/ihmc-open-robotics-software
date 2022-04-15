@@ -6,10 +6,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DynamicStateInspectorParameters
 {
-
-   /** If the ICP is this distance based the heel of the elading foot, toe off should happen, regardless of any of the other conditions. **/
-   private final YoDouble distanceForwardFromHeel;
-
    /** This checks to make sure the ICP isn't falling to the outside of the trailing foot. **/
    private final YoDouble minLateralDistanceInside;
 
@@ -39,7 +35,6 @@ public class DynamicStateInspectorParameters
    {
       YoRegistry registry = new YoRegistry(getClass().getSimpleName() + suffix);
 
-      distanceForwardFromHeel = new YoDouble("distForwardFromHeel" + suffix, registry);
       minLateralDistanceInside = new YoDouble("minLatDistInside" + suffix, registry);
 
       minDistanceFromTheToe = new YoDouble("minDistanceFromToe" + suffix, registry);
@@ -63,11 +58,6 @@ public class DynamicStateInspectorParameters
       minNormalizedDistanceFromInsideEdge.set(0.2);
 
       parentRegistry.addChild(registry);
-   }
-
-   public double getDistanceForwardFromHeel()
-   {
-      return distanceForwardFromHeel.getDoubleValue();
    }
 
    public double getMinLateralDistanceInside()
@@ -127,7 +117,6 @@ public class DynamicStateInspectorParameters
 
    public void attachParameterChangeListener(YoVariableChangedListener changedListener)
    {
-      distanceForwardFromHeel.addListener(changedListener);
       minLateralDistanceInside.addListener(changedListener);
       minDistanceFromTheToe.addListener(changedListener);
       minFractionOfStrideFromTheToe.addListener(changedListener);

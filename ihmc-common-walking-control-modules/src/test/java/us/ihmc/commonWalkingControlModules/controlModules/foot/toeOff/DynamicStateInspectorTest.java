@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -48,6 +49,8 @@ public class DynamicStateInspectorTest
    private FramePoint2D desiredICP;
    private FramePoint2D currentICP;
 
+   private static boolean visualize = false;
+
    @BeforeEach
    public void setup()
    {
@@ -60,6 +63,8 @@ public class DynamicStateInspectorTest
       currentICP = new FramePoint2D();
 
       toePosition = new FramePoint2D();
+
+      visualize &= !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
    }
 
    @AfterEach
@@ -151,7 +156,6 @@ public class DynamicStateInspectorTest
       assertEquals(expectedDistanceAlongErrorToOutside, inspector.getDistanceAlongErrorToOutsideEdge(), epsilon);
       assertEquals(Double.NEGATIVE_INFINITY, inspector.getDistanceAlongErrorToInsideEdge(), epsilon);
 
-      assertFalse(inspector.isCurrentICPIsPastTheHeel());
       assertTrue(inspector.isCurrentICPFarEnoughFromTheToe());
       assertTrue(inspector.isDesiredICPFarEnoughFromTheToe());
       assertTrue(inspector.isCurrentICPFarEnoughInside());
@@ -204,7 +208,6 @@ public class DynamicStateInspectorTest
       assertEquals(expectedDistanceAlongErrorToOutside, inspector.getDistanceAlongErrorToOutsideEdge(), epsilon);
       assertEquals(Double.NEGATIVE_INFINITY, inspector.getDistanceAlongErrorToInsideEdge(), epsilon);
 
-      assertFalse(inspector.isCurrentICPIsPastTheHeel());
       assertTrue(inspector.isCurrentICPFarEnoughFromTheToe());
       assertTrue(inspector.isDesiredICPFarEnoughFromTheToe());
       assertTrue(inspector.isCurrentICPFarEnoughInside());
@@ -256,7 +259,6 @@ public class DynamicStateInspectorTest
       assertEquals(expectedDistanceAlongErrorToOutside, inspector.getDistanceAlongErrorToOutsideEdge(), epsilon);
       assertEquals(Double.NEGATIVE_INFINITY, inspector.getDistanceAlongErrorToInsideEdge(), epsilon);
 
-      assertFalse(inspector.isCurrentICPIsPastTheHeel());
       assertTrue(inspector.isCurrentICPFarEnoughFromTheToe());
       assertTrue(inspector.isDesiredICPFarEnoughFromTheToe());
       assertTrue(inspector.isCurrentICPFarEnoughInside());
@@ -662,6 +664,9 @@ public class DynamicStateInspectorTest
 
    private void visualize()
    {
+      if (!visualize)
+         return;
+
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("dummy"));
 
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
@@ -713,6 +718,9 @@ public class DynamicStateInspectorTest
 
    private void visualizeGrid(DynamicStateInspectorParameters parameters, DynamicStateInspector inspector, double stepLength, double stepWidth, FramePose3D leadingFootPose)
    {
+      if (!visualize)
+         return;
+
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("dummy"));
 
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
