@@ -22,7 +22,7 @@ mainDependencies {
 
 javafxDependencies {
    api(ihmc.sourceSetProject("main"))
-   api("us.ihmc:ihmc-javafx-toolkit:0.20.0")
+   api("us.ihmc:ihmc-javafx-toolkit:0.21.0")
    api("us.ihmc:ihmc-graphics-javafx:source")
    api("us.ihmc:ihmc-graphics-jmonkeyengine:source")
    api("us.ihmc:ihmc-path-planning-visualizers:source")
@@ -36,7 +36,7 @@ libgdxDependencies {
    api("us.ihmc:ihmc-perception-javacv:source")
    api("us.ihmc:ihmc-graphics-libgdx:source")
    api("us.ihmc:scs2-simulation:0.5.1-bullet-alpha-1")
-   api("us.ihmc:mecano-graphviz:0.9.0")
+   api("us.ihmc:mecano-graphviz:0.10.0")
    api("com.badlogicgames.gdx-controllers:gdx-controllers-core:2.2.1")
    api("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:2.2.1")
    api("com.badlogicgames.gdx:gdx-bullet:1.10.0")

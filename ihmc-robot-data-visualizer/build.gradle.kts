@@ -22,7 +22,7 @@ mainDependencies {
    api("us.ihmc:ihmc-yovariables:0.9.12")
    api("us.ihmc:ihmc-video-codecs:2.1.6")
    api("us.ihmc:simulation-construction-set:0.21.16")
-   api("us.ihmc:ihmc-javafx-toolkit:0.20.0")
+   api("us.ihmc:ihmc-javafx-toolkit:0.21.0")
    api("us.ihmc:ihmc-graphics-description:0.19.4")
    api("us.ihmc:ihmc-robot-description:0.21.3")
    api("us.ihmc:ihmc-model-file-loader:source")
