@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
@@ -26,6 +25,7 @@ import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PID3DConfiguration;
 import us.ihmc.robotics.controllers.pidGains.implementations.PIDSE3Configuration;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public abstract class WalkingControllerParameters
 {
@@ -795,8 +795,8 @@ public abstract class WalkingControllerParameters
    {
       return Double.POSITIVE_INFINITY;
    }
-   
-   public HumanoidRobotNaturalPosture getNaturalPosture(FullHumanoidRobotModel fullRobotModel)
+
+   public HumanoidRobotNaturalPosture getNaturalPosture(FullHumanoidRobotModel fullRobotModel, YoRegistry registry)
    {
       return null;
    }

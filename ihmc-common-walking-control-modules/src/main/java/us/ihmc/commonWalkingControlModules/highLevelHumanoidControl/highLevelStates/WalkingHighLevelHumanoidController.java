@@ -273,7 +273,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       ControllerCoreOptimizationSettings defaultControllerCoreOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       controllerCoreOptimizationSettings = new ParameterizedControllerCoreOptimizationSettings(defaultControllerCoreOptimizationSettings, registry);
       
-      this.naturalPosture = walkingControllerParameters.getNaturalPosture(fullRobotModel);
+      this.naturalPosture = walkingControllerParameters.getNaturalPosture(fullRobotModel, registry);
    }
 
    private StateMachine<WalkingStateEnum, WalkingState> setupStateMachine()
