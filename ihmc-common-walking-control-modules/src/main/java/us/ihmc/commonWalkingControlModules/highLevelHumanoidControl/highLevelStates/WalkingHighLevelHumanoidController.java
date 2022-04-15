@@ -634,7 +634,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       if (ENABLE_LEG_ELASTICITY_DEBUGGATOR)
          legElasticityDebuggator.update();
       
-      double[] q = new double[fullRobotModel.getOneDoFJoints().length]; // GMN - this is NOT gonna work long term!
+      double[] q = new double[fullRobotModel.getOneDoFJoints().length];
       int i = 0; // GMN: HACK!
       for (OneDoFJointBasics joint : fullRobotModel.getOneDoFJoints())
       {
