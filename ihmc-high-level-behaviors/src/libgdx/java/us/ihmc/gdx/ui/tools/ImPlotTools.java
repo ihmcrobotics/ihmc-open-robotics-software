@@ -99,6 +99,20 @@ public final class ImPlotTools
       return buffer;
    }
 
+   public static Byte[] newZeroFilledByteBuffer(int bufferSize)
+   {
+      Byte[] buffer = new Byte[bufferSize];
+      Arrays.fill(buffer, (byte) 0);
+      return buffer;
+   }
+
+   public static Long[] newZeroFilledLongBuffer(int bufferSize)
+   {
+      Long[] buffer = new Long[bufferSize];
+      Arrays.fill(buffer, 0);
+      return buffer;
+   }
+
    public static <T extends Number> Integer[] createIndex(T[] array)
    {
       return createIndex(array, 0);

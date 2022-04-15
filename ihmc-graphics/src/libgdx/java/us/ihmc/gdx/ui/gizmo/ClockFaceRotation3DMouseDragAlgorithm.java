@@ -11,6 +11,8 @@ import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 public class ClockFaceRotation3DMouseDragAlgorithm
@@ -94,5 +96,15 @@ public class ClockFaceRotation3DMouseDragAlgorithm
    public AxisAngle getMotion()
    {
       return axisAngleToRotateBy;
+   }
+
+   Point3DReadOnly getClockHandTipInWorld()
+   {
+      return clockHandTipInWorld;
+   }
+
+   public Point3DReadOnly getClockCenter()
+   {
+      return pickClockPlane.getPoint();
    }
 }

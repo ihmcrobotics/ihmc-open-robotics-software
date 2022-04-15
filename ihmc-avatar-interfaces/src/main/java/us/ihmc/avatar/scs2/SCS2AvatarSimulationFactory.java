@@ -71,6 +71,7 @@ import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.session.Session;
 import us.ihmc.scs2.session.tools.SCS1GraphicConversionTools;
 import us.ihmc.scs2.simulation.SimulationSession;
+import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
 import us.ihmc.scs2.simulation.parameters.ContactParametersReadOnly;
 import us.ihmc.scs2.simulation.parameters.ContactPointBasedContactParameters;
 import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngineFactory;
@@ -86,6 +87,7 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
+import us.ihmc.tools.factories.FactoryFieldNotSetException;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
@@ -97,7 +99,7 @@ public class SCS2AvatarSimulationFactory
 {
    protected final RequiredFactoryField<DRCRobotModel> robotModel = new RequiredFactoryField<>("robotModel");
    protected final RequiredFactoryField<HighLevelHumanoidControllerFactory> highLevelHumanoidControllerFactory = new RequiredFactoryField<>("highLevelHumanoidControllerFactory");
-   protected final RequiredFactoryField<TerrainObjectDefinition> terrainObjectDefinition = new RequiredFactoryField<>("terrainObjectDefinition");
+   protected final ArrayList<TerrainObjectDefinition> terrainObjectDefinitions = new ArrayList<>();
    protected final RequiredFactoryField<RealtimeROS2Node> realtimeROS2Node = new RequiredFactoryField<>("realtimeROS2Node");
 
    protected final OptionalFactoryField<Double> simulationDT = new OptionalFactoryField<>("simulationDT");
@@ -120,8 +122,10 @@ public class SCS2AvatarSimulationFactory
    protected final OptionalFactoryField<Boolean> automaticallyStartSimulation = new OptionalFactoryField<>("automaticallyStartSimulation", false);
 
    protected final OptionalFactoryField<Boolean> useImpulseBasedPhysicsEngine = new OptionalFactoryField<>("useImpulseBasePhysicsEngine", false);
+   protected final OptionalFactoryField<Boolean> useBulletPhysicsEngine = new OptionalFactoryField<>("useBulletPhysicsEngine", false);
    protected final OptionalFactoryField<ContactParametersReadOnly> impulseBasedPhysicsEngineContactParameters = new OptionalFactoryField<>("impulseBasedPhysicsEngineParameters");
    protected final OptionalFactoryField<Boolean> enableSimulatedRobotDamping = new OptionalFactoryField<>("enableSimulatedRobotDamping", true);
+   protected final OptionalFactoryField<Boolean> useRobotDefinitionCollisions = new OptionalFactoryField<>("useRobotDefinitionCollisions", false);
    protected final OptionalFactoryField<List<Robot>> secondaryRobots = new OptionalFactoryField<>("secondaryRobots", new ArrayList<>());
    protected final OptionalFactoryField<String> simulationName = new OptionalFactoryField<>("simulationName");
 
@@ -187,6 +191,11 @@ public class SCS2AvatarSimulationFactory
 
       robotDefinition = robotModel.getRobotDefinition();
 
+      if (useBulletPhysicsEngine.get())
+      {
+         SCS2BulletSimulationTools.fixHumanoidCollisionGroupsMasksToPreventSelfCollision(robotDefinition);
+      }
+
       if (!enableSimulatedRobotDamping.get())
       {
          for (JointDefinition joint : robotDefinition.getAllJoints())
@@ -198,10 +207,14 @@ public class SCS2AvatarSimulationFactory
          }
       }
 
-      RobotCollisionModel collisionModel = robotModel.getSimulationRobotCollisionModel(collidableHelper, robotCollisionName, terrainCollisionName);
-      if (collisionModel != null)
-         RobotDefinitionTools.addCollisionsToRobotDefinition(collisionModel.getRobotCollidables(robotModel.createFullRobotModel().getElevator()),
-                                                             robotDefinition);
+      if (!useRobotDefinitionCollisions.get())
+      {
+         RobotCollisionModel collisionModel = robotModel.getSimulationRobotCollisionModel(collidableHelper, robotCollisionName, terrainCollisionName);
+         if (collisionModel != null)
+            RobotDefinitionTools.addCollisionsToRobotDefinition(collisionModel.getRobotCollidables(robotModel.createFullRobotModel().getElevator()),
+                                                                robotDefinition);
+      }
+
       robotInitialSetup.get().initializeRobotDefinition(robotDefinition);
       Set<String> lastSimulatedJoints = robotModel.getJointMap().getLastSimulatedJoints();
       lastSimulatedJoints.forEach(lastSimulatedJoint -> robotDefinition.addSubtreeJointsToIgnore(lastSimulatedJoint));
@@ -217,6 +230,10 @@ public class SCS2AvatarSimulationFactory
                physicsEngine.setGlobalContactParameters(impulseBasedPhysicsEngineContactParameters.get());
             return physicsEngine;
          };
+      }
+      else if (useBulletPhysicsEngine.hasValue() && useBulletPhysicsEngine.get())
+      {
+         physicsEngineFactory = (inertialFrame, rootRegistry) -> new BulletPhysicsEngine(inertialFrame, rootRegistry);
       }
       else
       {
@@ -238,7 +255,12 @@ public class SCS2AvatarSimulationFactory
       simulationSession = new SimulationSession(name, physicsEngineFactory);
       simulationSession.initializeBufferSize(simulationDataBufferSize.get());
       simulationSession.initializeBufferRecordTickPeriod(simulationDataRecordTickPeriod.get());
-      simulationSession.addTerrainObject(terrainObjectDefinition.get());
+      if (terrainObjectDefinitions.isEmpty())
+         throw new FactoryFieldNotSetException("terrainObjectDefinitions");
+      for (TerrainObjectDefinition terrainObjectDefinition : terrainObjectDefinitions)
+      {
+         simulationSession.addTerrainObject(terrainObjectDefinition);
+      }
       robot = simulationSession.addRobot(robotDefinition);
       robot.getControllerManager()
            .addController(new SCS2StateEstimatorDebugVariables(simulationSession.getInertialFrame(),
@@ -584,14 +606,14 @@ public class SCS2AvatarSimulationFactory
       return highLevelHumanoidControllerFactory.get();
    }
 
-   public void setTerrainObjectDefinition(TerrainObjectDefinition terrainObjectDefinition)
+   public void addTerrainObjectDefinition(TerrainObjectDefinition terrainObjectDefinition)
    {
-      this.terrainObjectDefinition.set(terrainObjectDefinition);
+      terrainObjectDefinitions.add(terrainObjectDefinition);
    }
 
    public void setCommonAvatarEnvrionmentInterface(CommonAvatarEnvironmentInterface environment)
    {
-      setTerrainObjectDefinition(TerrainObjectDefinitionTools.toTerrainObjectDefinition(environment,
+      addTerrainObjectDefinition(TerrainObjectDefinitionTools.toTerrainObjectDefinition(environment,
                                                                                         collidableHelper,
                                                                                         terrainCollisionName,
                                                                                         robotCollisionName));
@@ -694,9 +716,19 @@ public class SCS2AvatarSimulationFactory
       this.impulseBasedPhysicsEngineContactParameters.set(contactParameters);
    }
 
+   public void setUseBulletPhysicsEngine(boolean useBulletPhysicsEngine)
+   {
+      this.useBulletPhysicsEngine.set(useBulletPhysicsEngine);
+   }
+
    public void setEnableSimulatedRobotDamping(boolean enableSimulatedRobotDamping)
    {
       this.enableSimulatedRobotDamping.set(enableSimulatedRobotDamping);
+   }
+
+   public void setUseRobotDefinitionCollisions(boolean useRobotDefinitionCollisions)
+   {
+      this.useRobotDefinitionCollisions.set(useRobotDefinitionCollisions);
    }
 
    public void addSecondaryRobot(Robot secondaryRobot)

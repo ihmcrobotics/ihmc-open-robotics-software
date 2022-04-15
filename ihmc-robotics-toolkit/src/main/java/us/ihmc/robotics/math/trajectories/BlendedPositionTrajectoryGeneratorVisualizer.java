@@ -15,7 +15,7 @@ import java.awt.*;
 
 public class BlendedPositionTrajectoryGeneratorVisualizer
 {
-   private static final boolean useBagOfBalls = false;
+   private static final boolean useBagOfBalls = true;
 
    private static final int numberOfBalls = 25;
    private final DoubleProvider swingDuration;

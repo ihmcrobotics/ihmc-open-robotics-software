@@ -225,6 +225,14 @@ public class GDXVRManager
       return vrEnabled.get() && contextInitialized && context.getHeadset().isConnected();
    }
 
+   public void calculate3DViewPick(ImGui3DViewInput input)
+   {
+      if (isVRReady() && showScenePoseGizmo.get())
+      {
+         scenePoseGizmo.calculate3DViewPick(input);
+      }
+   }
+
    public void process3DViewInput(ImGui3DViewInput input)
    {
       if (isVRReady() && showScenePoseGizmo.get())

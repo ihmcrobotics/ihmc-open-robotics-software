@@ -59,7 +59,9 @@ public class SimulatedRobotiqHandsController implements RobotController
    private final YoDouble kpPalmFingerMiddleJoint = new YoDouble("kpPalmMiddleFingerJoint", registry);
    private final YoDouble kdPalmFingerMiddleJoint = new YoDouble("kdPalmMiddleFingerJoint", registry);
 
+   private final FullRobotModel fullRobotModel;
    private final JointDesiredOutputListBasics jointDesiredOutputList;
+   private final JointDesiredControlMode jointDesiredControlMode;
 
    public SimulatedRobotiqHandsController(FullRobotModel fullRobotModel,
                                           JointDesiredOutputListBasics jointDesiredOutputList,
@@ -68,7 +70,20 @@ public class SimulatedRobotiqHandsController implements RobotController
                                           ROS2Topic<?> outputTopic,
                                           ROS2Topic<?> inputTopic)
    {
+      this(fullRobotModel, jointDesiredOutputList, yoTime, realtimeROS2Node, outputTopic, inputTopic, JointDesiredControlMode.EFFORT);
+   }
+
+   public SimulatedRobotiqHandsController(FullRobotModel fullRobotModel,
+                                          JointDesiredOutputListBasics jointDesiredOutputList,
+                                          DoubleProvider yoTime,
+                                          RealtimeROS2Node realtimeROS2Node,
+                                          ROS2Topic<?> outputTopic,
+                                          ROS2Topic<?> inputTopic,
+                                          JointDesiredControlMode jointDesiredControlMode)
+   {
+      this.fullRobotModel = fullRobotModel;
       this.jointDesiredOutputList = jointDesiredOutputList;
+      this.jointDesiredControlMode = jointDesiredControlMode;
       sendFingerJointGains = new YoBoolean("sendFingerJointGains", registry);
       fingerTrajectoryTime = new YoDouble("FingerTrajectoryTime", registry);
 
@@ -226,13 +241,13 @@ public class SimulatedRobotiqHandsController implements RobotController
             for (OneDoFJointBasics joint : oneSideFingerJoints)
             {
                JointDesiredOutputBasics jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(joint);
-               jointDesiredOutput.setControlMode(JointDesiredControlMode.EFFORT);
+               jointDesiredOutput.setControlMode(jointDesiredControlMode);
                jointDesiredOutput.setStiffness(kpMap.get(joint).getDoubleValue());
                jointDesiredOutput.setDamping(kdMap.get(joint).getDoubleValue());
             }
 
             JointDesiredOutputBasics jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(palmMiddleFingerJoints.get(robotSide));
-            jointDesiredOutput.setControlMode(JointDesiredControlMode.EFFORT);
+            jointDesiredOutput.setControlMode(jointDesiredControlMode);
             jointDesiredOutput.setDesiredPosition(0.0);
             jointDesiredOutput.setDesiredVelocity(0.0);
             jointDesiredOutput.setStiffness(kpPalmFingerMiddleJoint.getValue());

@@ -9,7 +9,7 @@ import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.simulation.BoxRobotDefinition;
 import us.ihmc.gdx.simulation.SlopeGroundDefinition;
-import us.ihmc.gdx.simulation.scs2.GDXSCS2PhysicsSimulator;
+import us.ihmc.gdx.simulation.scs2.GDXSCS2SimulationSession;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.mecano.tools.MomentOfInertiaFactory;
 import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
@@ -32,7 +32,7 @@ public class GDXSCS2ImpulseBasedPhysicsTumblingBlocksDemo
    private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
                                                               "ihmc-open-robotics-software",
                                                               "ihmc-high-level-behaviors/src/test/resources");
-   private final GDXSCS2PhysicsSimulator physicsSimulator = new GDXSCS2PhysicsSimulator();
+   private final GDXSCS2SimulationSession physicsSimulator = new GDXSCS2SimulationSession();
 
    public GDXSCS2ImpulseBasedPhysicsTumblingBlocksDemo()
    {

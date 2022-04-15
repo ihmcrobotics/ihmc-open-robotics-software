@@ -1,7 +1,7 @@
 package us.ihmc.avatar;
 
-import static us.ihmc.robotics.Assert.assertTrue;
-import static us.ihmc.robotics.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.ArrayList;
 
@@ -15,6 +15,7 @@ import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.avatar.testTools.scs2.SCS2RunsSameWayTwiceVerifier;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotics.Assert;
@@ -39,9 +40,10 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
    private static final boolean CHECK_ICP_CONTINUITY = false;
 
    private static final double yawingTimeDuration = 0.5;
-   private static final double standingTimeDuration = 1.0;
+   private static final double standingTimeDuration = RigidBodyControlManager.INITIAL_GO_HOME_TIME;
    private static final double defaultWalkingTimeDuration = BambooTools.isEveryCommitBuild() ? 45.0 : 90.0;
    private static final boolean useVelocityAndHeadingScript = true;
+   private static String physicsEngineName;
 
    @BeforeEach
    public void showMemoryUsageBeforeTest()
@@ -77,22 +79,35 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
    @Test
    public void testFlatGroundWalking()
    {
-      runFlatGroundWalking();
+      runFlatGroundWalking(false);
    }
 
-   public void runFlatGroundWalking()
+   @Tag("humanoid-flat-ground-bullet")
+   @Test
+   public void testFlatGroundWalkingBullet()
    {
-      DRCRobotModel robotModel = getRobotModel();
+      runFlatGroundWalking(true);
+   }
+
+   public void runFlatGroundWalking(boolean useBulletPhysicsEngine)
+   {
       boolean doPelvisWarmup = doPelvisWarmup();
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       simulationTestingParameters.setUsePefectSensors(getUsePerfectSensors());
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
+      DRCRobotModel robotModel = getRobotModel();
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
                                                                                                                                              flatGround,
                                                                                                                                              simulationTestingParameters);
       simulationTestHelperFactory.setDefaultHighLevelHumanoidControllerFactory(useVelocityAndHeadingScript, getWalkingScriptParameters());
       simulationTestHelperFactory.getHighLevelHumanoidControllerFactory().createUserDesiredControllerCommandGenerator();
+      if (useBulletPhysicsEngine)
+      {
+         robotModel.getHumanoidRobotKinematicsCollisionModel();
+         simulationTestHelperFactory.setUseBulletPhysicsEngine(useBulletPhysicsEngine);
+      }
+      physicsEngineName = useBulletPhysicsEngine ? "Bullet Physics Engine: " : "SCS2 Physics Engine: ";
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       simulationTestHelper.start();
 
@@ -169,7 +184,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
          else
             icpError = Math.sqrt(controllerICPErrorX.getDoubleValue() * controllerICPErrorX.getDoubleValue()
                   + controllerICPErrorY.getDoubleValue() * controllerICPErrorY.getDoubleValue());
-         assertTrue(icpError < 0.005);
+         assertTrue(icpError < 0.005, physicsEngineName + "icsError < 0.005 for startingYaw + pi/4.0 test");
 
          userDesiredPelvisPoseYaw.set(startingYaw);
          userDoPelvisPose.set(true);
@@ -180,7 +195,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
          else
             icpError = Math.sqrt(controllerICPErrorX.getDoubleValue() * controllerICPErrorX.getDoubleValue()
                   + controllerICPErrorY.getDoubleValue() * controllerICPErrorY.getDoubleValue());
-         assertTrue(icpError < 0.005);
+         assertTrue(icpError < 0.005, physicsEngineName + "icsError < 0.005 for startingYaw test");
       }
 
       walk.set(true);
@@ -191,7 +206,8 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       {
          simulationTestHelper.simulateNow(timeIncrement);
          if (Math.abs(comError.getDoubleValue()) > 0.06)
-            fail("Math.abs(comError.getDoubleValue()) > 0.06: " + comError.getDoubleValue() + " at t = " + simulationTestHelper.getSimulationTime());
+            fail(physicsEngineName + "Math.abs(comError.getDoubleValue()) > 0.06: " + comError.getDoubleValue() + " at t = "
+                  + simulationTestHelper.getSimulationTime());
       }
    }
 
@@ -200,6 +216,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
    @AfterEach
    public void destroyOtherStuff()
    {
+
       if (avatarSimulation != null)
       {
          avatarSimulation.dispose();
@@ -255,7 +272,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       stringsToIgnore.add("Time");
 
       double maxPercentDifference = 0.000001;
-      assertTrue("Simulation did not run same way twice!", verifier.verifySimRunsSameWayTwice(maxPercentDifference, stringsToIgnore));
+      assertTrue(verifier.verifySimRunsSameWayTwice(maxPercentDifference, stringsToIgnore), "Simulation did not run same way twice!");
    }
 
    public SimulationTestingParameters getSimulationTestingParameters()

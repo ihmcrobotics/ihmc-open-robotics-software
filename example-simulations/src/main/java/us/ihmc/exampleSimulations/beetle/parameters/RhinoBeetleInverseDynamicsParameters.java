@@ -1,5 +1,6 @@
 package us.ihmc.exampleSimulations.beetle.parameters;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
@@ -103,5 +104,11 @@ public class RhinoBeetleInverseDynamicsParameters implements HexapodControllerPa
    public YoPIDSE3Gains getFootGains()
    {
       return footGains;
+   }
+
+   @Override
+   public WholeBodyControllerCoreMode getControlMode()
+   {
+      return WholeBodyControllerCoreMode.INVERSE_DYNAMICS;
    }
 }

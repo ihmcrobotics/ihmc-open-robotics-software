@@ -18,7 +18,7 @@ mainDependencies {
    api("net.wimpi:jamod:1.2")
    api("commons-collections:commons-collections:3.2.1")
 
-   api("us.ihmc:ihmc-yovariables:0.9.11")
+   api("us.ihmc:ihmc-yovariables:0.9.12")
    api("us.ihmc:simulation-construction-set:0.21.16")
    api("us.ihmc:ihmc-graphics-description:0.19.4")
    api("us.ihmc:ihmc-humanoid-robotics:source")

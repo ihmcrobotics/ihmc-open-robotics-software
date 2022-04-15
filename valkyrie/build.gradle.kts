@@ -28,7 +28,7 @@ mainDependencies {
    api("us.ihmc:euclid-frame-shape:0.17.2")
    api("us.ihmc:mecano:0.9.0")
    api("us.ihmc:mecano-yovariables:0.9.0")
-   api("us.ihmc:ihmc-yovariables:0.9.11")
+   api("us.ihmc:ihmc-yovariables:0.9.12")
    api("us.ihmc:ihmc-realtime:1.5.0")
    api("us.ihmc:ihmc-ros-control:0.6.0")
    api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.8")

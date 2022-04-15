@@ -792,6 +792,7 @@ public class ICPControllerQPSolver
     */
    private void addMaximumFeedbackRateConstraint()
    {
+      //FIXME: Need better conditions. Ask Sylvain about this...
       if (!Double.isFinite(maxFeedbackXMagnitude) && !Double.isFinite(maxFeedbackYMagnitude))
          return;
 

@@ -1,5 +1,8 @@
 package us.ihmc.gdx.simulation.scs2;
 
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -13,7 +16,8 @@ import java.util.stream.Stream;
 public class GDXRigidBody implements RigidBodyBasics
 {
    private final RigidBodyBasics rigidBody;
-   private FrameGDXNode node;
+   private FrameGDXGraphicsNode visualGraphicsNode;
+   private FrameGDXGraphicsNode collisionGraphicsNode;
 
    public GDXRigidBody(RigidBodyBasics rigidBody)
    {
@@ -30,19 +34,68 @@ public class GDXRigidBody implements RigidBodyBasics
 
    public void updateGraphics()
    {
-      if (node != null)
-         node.updatePose();
+      if (visualGraphicsNode != null)
+         visualGraphicsNode.updatePose();
+      if (collisionGraphicsNode != null)
+         collisionGraphicsNode.updatePose();
    }
 
-   public void setGraphics(FrameGDXNode graphics)
+   public void setVisualGraphics(FrameGDXGraphicsNode visualGraphicsNode)
    {
-      this.node = graphics;
+      this.visualGraphicsNode = visualGraphicsNode;
       // TODO: Set node ids to reflect the name of this rigid-body
    }
 
-   public FrameGDXNode getGraphics()
+   public void setCollisionGraphics(FrameGDXGraphicsNode collisionGraphicsNode)
    {
-      return node;
+      this.collisionGraphicsNode = collisionGraphicsNode;
+   }
+
+   public FrameGDXGraphicsNode getVisualGraphicsNode()
+   {
+      return visualGraphicsNode;
+   }
+
+   public FrameGDXGraphicsNode getCollisionGraphicsNode()
+   {
+      return collisionGraphicsNode;
+   }
+
+   public void getVisualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      for (GDXRigidBody rigidBody : subtreeIterable())
+      {
+         if (rigidBody.getVisualGraphicsNode() != null)
+         {
+            rigidBody.getVisualGraphicsNode().getRenderables(renderables, pool);
+         }
+      }
+   }
+
+   public void getCollisionMeshRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      for (GDXRigidBody rigidBody : subtreeIterable())
+      {
+         if (rigidBody.getCollisionGraphicsNode() != null)
+         {
+            rigidBody.getCollisionGraphicsNode().getRenderables(renderables, pool);
+         }
+      }
+   }
+
+   public void destroy()
+   {
+      for (GDXRigidBody rigidBody : subtreeIterable())
+      {
+         if (rigidBody.getVisualGraphicsNode() != null)
+         {
+            rigidBody.getVisualGraphicsNode().dispose();
+         }
+         if (rigidBody.getCollisionGraphicsNode() != null)
+         {
+            rigidBody.getCollisionGraphicsNode().dispose();
+         }
+      }
    }
 
    @Override
