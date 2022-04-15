@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleInput;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleOutput;
+import us.ihmc.commonWalkingControlModules.configurations.HumanoidRobotNaturalPosture;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
@@ -150,6 +151,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final YoBoolean enableHeightFeedbackControl = new YoBoolean("enableHeightFeedbackControl", registry);
 
    private boolean firstTick = true;
+   
+   private HumanoidRobotNaturalPosture naturalPosture;
 
    public WalkingHighLevelHumanoidController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                              HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
@@ -273,6 +276,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       ControllerCoreOptimizationSettings defaultControllerCoreOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       controllerCoreOptimizationSettings = new ParameterizedControllerCoreOptimizationSettings(defaultControllerCoreOptimizationSettings, registry);
+      
+      this.naturalPosture = walkingControllerParameters.getNaturalPosture(fullRobotModel);
    }
 
    private StateMachine<WalkingStateEnum, WalkingState> setupStateMachine()
@@ -640,7 +645,17 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       if (ENABLE_LEG_ELASTICITY_DEBUGGATOR)
          legElasticityDebuggator.update();
-
+      
+      double[] q = new double[fullRobotModel.getOneDoFJoints().length]; // GMN - this is NOT gonna work long term!
+      int i = 0; // GMN: HACK!
+      for (OneDoFJointBasics joint : fullRobotModel.getOneDoFJoints())
+      {
+         q[i] = joint.getQ();
+         i += 1;
+      }
+      Quaternion Qbase = new Quaternion(0,0,0,1);
+      naturalPosture.compute(q, Qbase);
+      
       firstTick = false;
    }
 
