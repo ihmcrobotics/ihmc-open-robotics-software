@@ -20,6 +20,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PID3DConfiguration;
@@ -793,5 +794,10 @@ public abstract class WalkingControllerParameters
    public double getSwingTimeOverrunToInitializeFreeFall()
    {
       return Double.POSITIVE_INFINITY;
+   }
+   
+   public HumanoidRobotNaturalPosture getNaturalPosture(FullHumanoidRobotModel fullRobotModel)
+   {
+      return null;
    }
 }
