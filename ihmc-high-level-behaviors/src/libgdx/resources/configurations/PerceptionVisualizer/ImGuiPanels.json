@@ -1,6 +1,7 @@
 {
   "dockspacePanels" : { },
   "windows" : {
+    "Constructor###java.lang.Class:Constructor" : true,
     "Environment###java.lang.Class:Environment" : true,
     "Global Visualizers" : true,
     "/camera/color/image_raw###us.ihmc.gdx.ui.graphics.live.GDXROS1VideoVisualizer:/camera/color/image_raw" : false,
