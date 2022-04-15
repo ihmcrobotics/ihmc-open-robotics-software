@@ -24,6 +24,7 @@ import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PID3DConfiguration;
 import us.ihmc.robotics.controllers.pidGains.implementations.PIDSE3Configuration;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public abstract class WalkingControllerParameters
 {
@@ -796,8 +797,8 @@ public abstract class WalkingControllerParameters
    {
       return Double.POSITIVE_INFINITY;
    }
-   
-   public HumanoidRobotNaturalPosture getNaturalPosture(FullHumanoidRobotModel fullRobotModel)
+
+   public HumanoidRobotNaturalPosture getNaturalPosture(FullHumanoidRobotModel fullRobotModel, YoRegistry registry)
    {
       return null;
    }
