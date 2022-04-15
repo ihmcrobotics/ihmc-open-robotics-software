@@ -70,6 +70,7 @@ import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.session.Session;
 import us.ihmc.scs2.session.tools.SCS1GraphicConversionTools;
+import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletMultiBodyParameters;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
 import us.ihmc.scs2.simulation.parameters.ContactParametersReadOnly;
 import us.ihmc.scs2.simulation.parameters.ContactPointBasedContactParameters;
@@ -236,7 +237,13 @@ public class SCS2AvatarSimulationFactory
       }
       else if (useBulletPhysicsEngine.hasValue() && useBulletPhysicsEngine.get())
       {
-         physicsEngineFactory = (inertialFrame, rootRegistry) -> new BulletPhysicsEngine(inertialFrame, rootRegistry);
+         physicsEngineFactory = (inertialFrame, rootRegistry) -> 
+         {
+            BulletPhysicsEngine physicsEngine = new BulletPhysicsEngine(inertialFrame, rootRegistry);
+            BulletMultiBodyParameters bulletMultiBodyParameters =  BulletMultiBodyParameters.defaultBulletMultiBodyParameters();
+            physicsEngine.setGlobalMultiBodyParameter(bulletMultiBodyParameters);
+            return physicsEngine;           
+         };
       }
       else
       {
