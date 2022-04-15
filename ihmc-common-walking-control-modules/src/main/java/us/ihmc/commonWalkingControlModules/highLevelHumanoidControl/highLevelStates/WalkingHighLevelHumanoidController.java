@@ -641,7 +641,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          q[i] = joint.getQ();
          i += 1;
       }
-      Quaternion Qbase = new Quaternion(0,0,0,1);
+      Quaternion Qbase = new Quaternion(fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToWorldFrame().getRotation());
       naturalPosture.compute(q, Qbase);
       
       firstTick = false;
