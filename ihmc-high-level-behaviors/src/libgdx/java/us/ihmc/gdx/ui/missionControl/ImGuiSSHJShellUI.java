@@ -5,26 +5,29 @@ import imgui.flag.ImGuiInputTextFlags;
 import imgui.type.ImDouble;
 import imgui.type.ImInt;
 import imgui.type.ImString;
+import net.schmizz.sshj.connection.channel.direct.Session;
+import net.schmizz.sshj.connection.channel.direct.Signal;
 import us.ihmc.avatar.ros2.networkTest.SSHJTools;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.gdx.imgui.ImGuiGlfwWindow;
 import us.ihmc.gdx.imgui.ImGuiTools;
 
-import java.io.*;
-
 public class ImGuiSSHJShellUI
 {
    private final String REMOTE_HOSTNAME = System.getProperty("remote.hostname");
    private final String REMOTE_USERNAME = System.getProperty("remote.username");
-   private final ImInt bufferSize = new ImInt(10000);
+   private final ImInt bufferSize = new ImInt(Conversions.megabytesToBytes(2));
    private final ImString consoleText = new ImString(bufferSize.get());
    private final ImString command = new ImString(bufferSize.get());
    private final ImDouble timeout = new ImDouble(0.0);
-   private InputStream standardOutRaw;
-   private InputStream standardError;
    private int exitStatus = -1;
+   private final SSHJInputStream standardOut = new SSHJInputStream();
+   private final SSHJInputStream standardError = new SSHJInputStream();
+   private Session.Command sshjCommand;
+   private boolean running = false;
 
    public ImGuiSSHJShellUI()
    {
@@ -34,6 +37,8 @@ public class ImGuiSSHJShellUI
                                                             "SSHJ Shell");
       imGuiGlfwWindow.runWithSinglePanel(this::renderImGuiWidgets);
 
+      standardOut.resize(bufferSize.get());
+      standardError.resize(bufferSize.get());
       command.set("ping -c 5 archlinux.org");
    }
 
@@ -46,6 +51,8 @@ public class ImGuiSSHJShellUI
          if (bufferSize.get() > consoleText.getBufferSize())
          {
             consoleText.resize(bufferSize.get());
+            standardOut.resize(bufferSize.get());
+            standardError.resize(bufferSize.get());
          }
          else
          {
@@ -61,19 +68,29 @@ public class ImGuiSSHJShellUI
       ImGui.sameLine();
       ImGui.text("(0 means no timeout)");
 
-      if (ImGui.button("Run"))
+      if (!running && ImGui.button("Run"))
       {
          ThreadTools.startAsDaemon(() ->
          {
             SSHJTools.session(REMOTE_HOSTNAME, REMOTE_USERNAME, sshj ->
             {
+               running = true;
                exitStatus = sshj.exec(command.get(), timeout.get(), sshjCommand ->
                {
-                  standardOutRaw = sshjCommand.getInputStream();
-                  standardError = sshjCommand.getErrorStream();
+                  this.sshjCommand = sshjCommand;
+                  standardOut.setInputStream(sshjCommand.getInputStream(), sshjCommand.getRemoteCharset());
+                  standardError.setInputStream(sshjCommand.getErrorStream(), sshjCommand.getRemoteCharset());
                });
+               running = false;
             });
          }, "SSHJCommand");
+      }
+      if (running)
+      {
+         if (ImGui.button("SIGINT"))
+         {
+            ExceptionTools.handle(() -> sshjCommand.signal(Signal.INT), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+         }
       }
       if (exitStatus > -1)
       {
@@ -81,36 +98,23 @@ public class ImGuiSSHJShellUI
          ImGui.text("Exit status: " + exitStatus);
       }
 
-      readFromInputStream(standardOutRaw);
-      readFromInputStream(standardError);
+      standardOut.updateConsoleText(consoleText);
+      standardError.updateConsoleText(consoleText);
 
-      ImGui.beginChild("###consoleArea");
+//      ImGui.beginChild("###consoleArea");
 
       inputTextFlags = ImGuiInputTextFlags.None;
       inputTextFlags |= ImGuiInputTextFlags.CallbackResize;
       inputTextFlags |= ImGuiInputTextFlags.ReadOnly;
       ImGui.pushFont(ImGuiTools.getConsoleFont());
-      ImGui.inputTextMultiline("###console", consoleText, ImGui.getColumnWidth(), ImGui.getContentRegionAvailY(), inputTextFlags);
+      int id = ImGui.getID("console");
+      ImGui.inputTextMultiline("console", consoleText, ImGui.getColumnWidth(), ImGui.getContentRegionAvailY(), inputTextFlags);
+//      ImGui.beginChild(id);
+//      ImGui.setScrollHereY();
+//      ImGui.endChild();
       ImGui.popFont();
 
-      ImGui.endChild();
-   }
-
-   private void readFromInputStream(InputStream inputStream)
-   {
-      if (inputStream != null)
-      {
-         int availableBytes = ExceptionTools.handle(inputStream::available, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
-         for (int i = 0; i < availableBytes; i++)
-         {
-            int read = ExceptionTools.handle(() -> inputStream.read(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
-
-            if (read > 0)
-            {
-               consoleText.set(consoleText.get() + (char) read);
-            }
-         }
-      }
+//      ImGui.endChild();
    }
 
    public static void main(String[] args)
