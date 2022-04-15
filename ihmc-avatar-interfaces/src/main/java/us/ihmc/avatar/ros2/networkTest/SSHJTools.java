@@ -22,20 +22,20 @@ public class SSHJTools
    {
       ExceptionTools.handle(() -> connectAndAuthenticateClientWithSFTP(address,
                                                                        sshClient -> ExceptionTools.handle(() -> sshClient.authPassword(username, password),
-                                                                                                          DefaultExceptionHandler.RUNTIME_EXCEPTION),
-                                                                       action), DefaultExceptionHandler.RUNTIME_EXCEPTION);
+                                                                                                          DefaultExceptionHandler.MESSAGE_AND_STACKTRACE),
+                                                                       action), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
    }
 
    public static void sessionWithSFTP(String address, String username, Consumer<SSHJClientWithSFTP> action)
    {
       ExceptionTools.handle(() -> connectAndAuthenticateClientWithSFTP(address, sshClient -> authWithSSHKey(username, sshClient), action),
-                            DefaultExceptionHandler.RUNTIME_EXCEPTION);
+                            DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
    }
 
    public static void session(String address, String username, Consumer<SSHJClient> action)
    {
       ExceptionTools.handle(() -> connectAndAuthenticateClient(address, sshClient -> authWithSSHKey(username, sshClient), action),
-                            DefaultExceptionHandler.RUNTIME_EXCEPTION);
+                            DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
    }
 
    /**
@@ -45,7 +45,7 @@ public class SSHJTools
    {
       Path userSSHConfigFolder = Paths.get(System.getProperty("user.home")).resolve(".ssh");
 
-      Stream<Path> list = ExceptionTools.handle(() -> Files.list(userSSHConfigFolder), DefaultExceptionHandler.RUNTIME_EXCEPTION);
+      Stream<Path> list = ExceptionTools.handle(() -> Files.list(userSSHConfigFolder), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
 
       ArrayList<String> privateKeyFiles = new ArrayList<>();
       for (Path path : list.collect(Collectors.toList()))
@@ -62,7 +62,7 @@ public class SSHJTools
 
       LogTools.info("Passing keys to authPublicKey: {}", privateKeyFiles);
 
-      ExceptionTools.handle(() -> sshClient.authPublickey(username, privateKeyFiles.toArray(new String[0])), DefaultExceptionHandler.RUNTIME_EXCEPTION);
+      ExceptionTools.handle(() -> sshClient.authPublickey(username, privateKeyFiles.toArray(new String[0])), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
    }
 
    public static void connectAndAuthenticateClientWithSFTP(String address,
@@ -71,7 +71,7 @@ public class SSHJTools
    {
       connectAndAuthenticateInternal(address, authenticate, sshClient ->
       {
-         SFTPClient sftpClient = ExceptionTools.handle(sshClient::newSFTPClient, DefaultExceptionHandler.RUNTIME_EXCEPTION);
+         SFTPClient sftpClient = ExceptionTools.handle(sshClient::newSFTPClient, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
          action.accept(new SSHJClientWithSFTP(sshClient, sftpClient));
       });
    }
@@ -84,9 +84,9 @@ public class SSHJTools
    private static void connectAndAuthenticateInternal(String address, Consumer<SSHClient> authenticate, Consumer<SSHClient> runnable) throws IOException
    {
       SSHClient sshClient = new SSHClient();
-      ExceptionTools.handle(() -> sshClient.loadKnownHosts(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
+      ExceptionTools.handle(() -> sshClient.loadKnownHosts(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
       sshClient.addHostKeyVerifier(new PromiscuousVerifier()); // TODO: Try removing this again
-      ExceptionTools.handle(() -> sshClient.connect(address), DefaultExceptionHandler.RUNTIME_EXCEPTION);
+      ExceptionTools.handle(() -> sshClient.connect(address), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
 
       try
       {

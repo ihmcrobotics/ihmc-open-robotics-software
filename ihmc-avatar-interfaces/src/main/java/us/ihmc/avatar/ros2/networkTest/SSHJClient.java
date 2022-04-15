@@ -34,8 +34,8 @@ public class SSHJClient
    {
       return exec(command, timeout, sshjCommand ->
       {
-         LogTools.info(ExceptionTools.handle(() -> IOUtils.readFully(sshjCommand.getInputStream()), DefaultExceptionHandler.RUNTIME_EXCEPTION).toString());
-         LogTools.error(ExceptionTools.handle(() -> IOUtils.readFully(sshjCommand.getErrorStream()), DefaultExceptionHandler.RUNTIME_EXCEPTION).toString());
+         LogTools.info(ExceptionTools.handle(() -> IOUtils.readFully(sshjCommand.getInputStream()), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE).toString());
+         LogTools.error(ExceptionTools.handle(() -> IOUtils.readFully(sshjCommand.getErrorStream()), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE).toString());
       });
    }
 
@@ -45,17 +45,18 @@ public class SSHJClient
       Session.Command sshjCommand;
       try
       {
-         session = ExceptionTools.handle(sshClient::startSession, DefaultExceptionHandler.RUNTIME_EXCEPTION);
+         session = ExceptionTools.handle(sshClient::startSession, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
          Session finalSession = session;
 
          LogTools.info("Executing on {}: {}", sshClient.getRemoteHostname(), command);
-         sshjCommand = ExceptionTools.handle(() -> finalSession.exec(command), DefaultExceptionHandler.RUNTIME_EXCEPTION);
+         sshjCommand = ExceptionTools.handle(() -> finalSession.exec(command), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
          LogTools.info("Done with exec");
          Session.Command finalSSHJCommand = sshjCommand;
 
          sshjCommandConsumer.accept(finalSSHJCommand);
 
-         ExceptionTools.handle(() -> finalSSHJCommand.join((long) (timeout * 1e9), TimeUnit.NANOSECONDS), DefaultExceptionHandler.RUNTIME_EXCEPTION);
+         ExceptionTools.handle(() -> finalSSHJCommand.join((long) (timeout * 1e9), TimeUnit.NANOSECONDS), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+         ExceptionTools.handle(finalSSHJCommand::close, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
          LogTools.info("** exit status: {}", sshjCommand.getExitStatus());
       }
       finally
@@ -72,6 +73,6 @@ public class SSHJClient
             // do nothing
          }
       }
-      return sshjCommand.getExitStatus();
+      return sshjCommand.getExitStatus() == null ? -1 : sshjCommand.getExitStatus();
    }
 }
