@@ -1,6 +1,8 @@
 package us.ihmc.gdx.ui.missionControl;
 
 import imgui.ImGui;
+import imgui.extension.texteditor.TextEditor;
+import imgui.extension.texteditor.TextEditorLanguageDefinition;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.type.ImDouble;
 import imgui.type.ImInt;
@@ -15,6 +17,8 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.gdx.imgui.ImGuiGlfwWindow;
 import us.ihmc.gdx.imgui.ImGuiTools;
 
+import java.util.HashMap;
+
 public class ImGuiSSHJShellUI
 {
    private final String REMOTE_HOSTNAME = System.getProperty("remote.hostname");
@@ -28,6 +32,9 @@ public class ImGuiSSHJShellUI
    private final SSHJInputStream standardError = new SSHJInputStream();
    private Session.Command sshjCommand;
    private boolean running = false;
+   private final TextEditor textEditor = new TextEditor();
+   private TextEditorLanguageDefinition textEditorLanguageDefinition = new TextEditorLanguageDefinition();
+
 
    public ImGuiSSHJShellUI()
    {
@@ -40,6 +47,44 @@ public class ImGuiSSHJShellUI
       standardOut.resize(bufferSize.get());
       standardError.resize(bufferSize.get());
       command.set("ping -c 5 archlinux.org");
+
+      int[] palette = new int[]
+            {
+                  0xffffffff,	// Default
+                  0xffd69c56,	// Keyword
+                  0xff00ff00,	// Number
+                  0xffffffff,	// String
+                  0xffffffff, // Char literal
+                  0xffffffff, // Punctuation
+                  0xff408080,	// Preprocessor
+                  0xffaaaaaa, // Identifier
+                  0xff9bc64d, // Known identifier
+                  0xffc040a0, // Preproc identifier
+                  0xff206020, // Comment (single line)
+                  0xffffffff, // Comment (multi line)
+                  0xff101010, // Background
+                  0xffe0e0e0, // Cursor
+                  0x80a06020, // Selection
+                  0x800020ff, // ErrorMarker
+                  0x40f08000, // Breakpoint
+                  0xff707000, // Line number
+                  0x40000000, // Current line fill
+                  0x40808080, // Current line fill (inactive)
+                  0x40a0a0a0, // Current line edge
+            };
+      textEditor.setPalette(palette);
+
+
+      HashMap<String, String> identifiers = new HashMap<>();
+      textEditorLanguageDefinition = new TextEditorLanguageDefinition();
+      textEditorLanguageDefinition.setIdentifiers(identifiers);
+      textEditor.setLanguageDefinition(textEditorLanguageDefinition);
+      textEditor.setColorizerEnable(true);
+
+      textEditor.setReadOnly(true);
+      textEditor.setShowWhitespaces(false);
+      textEditor.setHandleMouseInputs(true);
+//      textEditor.
    }
 
    private void renderImGuiWidgets()
@@ -67,6 +112,13 @@ public class ImGuiSSHJShellUI
       ImGui.inputDouble("Timeout", timeout);
       ImGui.sameLine();
       ImGui.text("(0 means no timeout)");
+
+      if (ImGui.button("Auto scroll"))
+      {
+         int lastLineIndex = textEditor.getTotalLines() - 1;
+         int endOfLastLineColumn = textEditor.getTextLines()[lastLineIndex].length();
+         textEditor.setCursorPosition(lastLineIndex, endOfLastLineColumn);
+      }
 
       if (!running && ImGui.button("Run"))
       {
@@ -98,23 +150,31 @@ public class ImGuiSSHJShellUI
          ImGui.text("Exit status: " + exitStatus);
       }
 
-      standardOut.updateConsoleText(consoleText);
-      standardError.updateConsoleText(consoleText);
+      standardOut.updateConsoleText(this::acceptNewText);
+      standardError.updateConsoleText(this::acceptNewText);
 
-//      ImGui.beginChild("###consoleArea");
-
-      inputTextFlags = ImGuiInputTextFlags.None;
-      inputTextFlags |= ImGuiInputTextFlags.CallbackResize;
-      inputTextFlags |= ImGuiInputTextFlags.ReadOnly;
       ImGui.pushFont(ImGuiTools.getConsoleFont());
-      int id = ImGui.getID("console");
-      ImGui.inputTextMultiline("console", consoleText, ImGui.getColumnWidth(), ImGui.getContentRegionAvailY(), inputTextFlags);
-//      ImGui.beginChild(id);
-//      ImGui.setScrollHereY();
-//      ImGui.endChild();
+      textEditor.render("Console");
       ImGui.popFont();
+   }
 
-//      ImGui.endChild();
+   private void acceptNewText(String newText)
+   {
+      consoleText.set(consoleText.get() + newText);
+
+      int previousCursorLine = textEditor.getCursorPositionLine();
+      int previousCursorColumn = textEditor.getCursorPositionColumn();
+      int lastLineIndex = textEditor.getTotalLines() - 1;
+      int endOfLastLineColumn = textEditor.getTextLines()[lastLineIndex].length();
+      boolean isAutoScroll = previousCursorLine == lastLineIndex && previousCursorColumn == endOfLastLineColumn;
+      textEditor.setCursorPosition(lastLineIndex, endOfLastLineColumn);
+      textEditor.setReadOnly(false);
+      textEditor.insertText(newText);
+      textEditor.setReadOnly(true);
+      if (!isAutoScroll)
+         textEditor.setCursorPosition(previousCursorLine, previousCursorColumn);
+
+      System.out.print(newText);
    }
 
    public static void main(String[] args)
