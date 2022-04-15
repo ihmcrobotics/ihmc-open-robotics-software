@@ -160,15 +160,23 @@ public class ImGuiTools
          nodeFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 26.0f, nodeFontConfig);
       }
       Path lucidaConsole = Paths.get(fontDir, "lucon.ttf");
+
+      ImFontGlyphRangesBuilder glyphRangesBuilder = new ImFontGlyphRangesBuilder();
+      glyphRangesBuilder.addRanges(ImGui.getIO().getFonts().getGlyphRangesDefault());
+      glyphRangesBuilder.addRanges(new short[] {0x2500, 0x257F, 0}); // Box drawing https://www.compart.com/en/unicode/block/U+2500
+      glyphRangesBuilder.addRanges(new short[] {0x2580, 0x259F, 0}); // Block elements https://www.compart.com/en/unicode/block/U+2580
+      glyphRangesBuilder.addRanges(new short[] {0x25A0, 0x25FF, 0}); // Geometric shapes https://www.compart.com/en/unicode/block/U+25A0
+      short[] glyphRanges = glyphRangesBuilder.buildRanges();
+
       if (Files.exists(lucidaConsole))
       {
          consoleFontConfig.setName("lucon.ttf, 12px");
-         consoleFont = io.getFonts().addFontFromFileTTF(lucidaConsole.toAbsolutePath().toString(), 12.0f, consoleFontConfig);
+         consoleFont = io.getFonts().addFontFromFileTTF(lucidaConsole.toAbsolutePath().toString(), 12.0f, consoleFontConfig, glyphRanges);
       }
       else
       {
          consoleFontConfig.setName("dejaVu/DejaVuSansMono.ttf, 12px");
-         consoleFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSansMono.ttf"), 12.0f, consoleFontConfig);
+         consoleFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSansMono.ttf"), 12.0f, consoleFontConfig, glyphRanges);
       }
 //      fontConfig.setName("Roboto-Regular.ttf, 14px"); // This name will be displayed in Style Editor
 //      fontToReturn = fontAtlas.addFontFromMemoryTTF(loadFromResources("Roboto-Regular.ttf"), size, fontConfig);
