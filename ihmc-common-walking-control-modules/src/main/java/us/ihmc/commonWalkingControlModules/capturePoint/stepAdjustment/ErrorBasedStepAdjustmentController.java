@@ -422,23 +422,23 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       {
          FixedFramePoint2DBasics point = shrunkSupport.getVertexUnsafe(i);
          if (point.getX() > 0.0)
-            point.subX(supportDistanceFromFront.getValue());
+            point.setX(Math.max(point.getX() - supportDistanceFromFront.getValue(), 0.0));
          else
-            point.addX(supportDistanceFromBack.getValue());
+            point.setX(Math.min(point.getX() + supportDistanceFromBack.getValue(), 0.0));
 
          if (supportSide == RobotSide.LEFT)
          {
             if (point.getY() > 0)
-               point.subY(supportDistanceFromOutside.getValue());
+               point.setY(Math.max(point.getY() - supportDistanceFromOutside.getValue(), 0.0));
             else
-               point.addY(supportDistanceFromInside.getValue());
+               point.setY(Math.min(point.getY() + supportDistanceFromInside.getValue(), 0.0));
          }
          else
          {
             if (point.getY() > 0)
-               point.subY(supportDistanceFromInside.getValue());
+               point.setY(Math.max(point.getY() - supportDistanceFromInside.getValue(), 0.0));
             else
-               point.addY(supportDistanceFromOutside.getValue());
+               point.setY(Math.min(point.getY() + supportDistanceFromOutside.getValue(), 0.0));
          }
       }
 
