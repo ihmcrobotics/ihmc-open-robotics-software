@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
@@ -796,8 +797,10 @@ public abstract class WalkingControllerParameters
       return Double.POSITIVE_INFINITY;
    }
 
-   public HumanoidRobotNaturalPosture getNaturalPosture(FullHumanoidRobotModel fullRobotModel, YoRegistry registry)
+   //TODO: Take out the registries here. They should be passed in wherever the HumanoidRobotNaturalPosture is made, which should not be here...
+   public HumanoidRobotNaturalPosture getNaturalPosture(FullHumanoidRobotModel fullRobotModel, YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       return null;
    }
+
 }
