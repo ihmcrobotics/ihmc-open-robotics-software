@@ -1,5 +1,6 @@
 package us.ihmc.gdx.simulation.bullet;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.math.Vector3;
@@ -45,7 +46,7 @@ public class GDXBulletPhysicsDebugger
                nextModel();
             }
 
-            currentModel.addLine(from, to, color);
+            currentModel.addLineGDX(from, to, new Color(color.x, color.y, color.z, 1.0f));
 
             ++lineDraws;
          }

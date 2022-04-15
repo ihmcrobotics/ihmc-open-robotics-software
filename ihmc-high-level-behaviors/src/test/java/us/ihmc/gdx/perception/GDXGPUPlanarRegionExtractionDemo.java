@@ -50,6 +50,7 @@ public class GDXGPUPlanarRegionExtractionDemo
             l515PoseGizmo = new GDXPose3DGizmo(robotInteractableReferenceFrame.getRepresentativeReferenceFrame());
             l515PoseGizmo.create(baseUI.get3DSceneManager().getCamera3D());
             l515PoseGizmo.setResizeAutomatically(false);
+            baseUI.addImGui3DViewPickCalculator(l515PoseGizmo::calculate3DViewPick);
             baseUI.addImGui3DViewInputProcessor(l515PoseGizmo::process3DViewInput);
             baseUI.get3DSceneManager().addRenderableProvider(l515PoseGizmo, GDXSceneLevel.VIRTUAL);
             l515PoseGizmo.getTransformToParent().appendPitchRotation(Math.toRadians(60.0));

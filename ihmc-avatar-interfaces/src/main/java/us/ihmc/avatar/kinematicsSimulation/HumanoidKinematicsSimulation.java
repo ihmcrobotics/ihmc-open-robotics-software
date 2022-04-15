@@ -93,6 +93,7 @@ public class HumanoidKinematicsSimulation
    private final IHMCROS2Publisher<RobotConfigurationData> robotConfigurationDataPublisher;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+   private final SimulatedHandKinematicController simulatedHandKinematicController;
    private volatile RobotMotionStatus robotMotionStatus;
    private double yoVariableServerTime = 0.0;
    private final Stopwatch monotonicTimer = new Stopwatch();
@@ -263,6 +264,9 @@ public class HumanoidKinematicsSimulation
                                                                        MessageUnpackingTools.createWholeBodyTrajectoryMessageUnpacker());
       controllerNetworkSubscriber.addMessageCollectors(ControllerAPIDefinition.createDefaultMessageIDExtractor(), 3);
       controllerNetworkSubscriber.addMessageValidator(ControllerAPIDefinition.createDefaultMessageValidation());
+
+      simulatedHandKinematicController = robotModel.createSimulatedHandKinematicController(fullRobotModel, realtimeROS2Node, yoTime);
+
       realtimeROS2Node.spin();
 
       WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(kinematicsSimulationParameters.getDt(),
@@ -361,6 +365,9 @@ public class HumanoidKinematicsSimulation
                                  HumanoidKinematicsSimulationContactStateHolder.holdAtCurrent(controllerToolbox.getFootContactStates().get(robotSide)));
       }
 
+      if (simulatedHandKinematicController != null)
+         simulatedHandKinematicController.initialize();
+
       monotonicTimer.start();
    }
 
@@ -440,6 +447,9 @@ public class HumanoidKinematicsSimulation
          RevoluteJoint revoluteHokuyoJoint = (RevoluteJoint) hokuyoJoint;
          revoluteHokuyoJoint.setQ(revoluteHokuyoJoint.getQ() + LIDAR_SPINDLE_SPEED * kinematicsSimulationParameters.getUpdatePeriod());
       }
+
+      if (simulatedHandKinematicController != null)
+         simulatedHandKinematicController.doControl();
 
       yoVariableServerTime += Conversions.millisecondsToSeconds(1);
       if (kinematicsSimulationParameters.getLogToFile())

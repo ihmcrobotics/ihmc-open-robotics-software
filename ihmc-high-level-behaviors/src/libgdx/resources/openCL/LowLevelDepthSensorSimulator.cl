@@ -100,15 +100,15 @@ kernel void lowLevelDepthSensorSimulator(read_only image2d_t normalizedDeviceCoo
          if (pointColorR < 0.0f)
          {
             uint4 rgba8888Color = read_imageui(rgba8888ColorImage, (int2) (x, y));
-            pointColorR = (rgba8888Color.w / 255.0f); // Bytes are in backwards order apparently
-            pointColorG = (rgba8888Color.z / 255.0f);
-            pointColorB = (rgba8888Color.y / 255.0f);
-            pointColorA = (rgba8888Color.x / 255.0f);
+            pointColorR = (rgba8888Color.x / 255.0f);
+            pointColorG = (rgba8888Color.y / 255.0f);
+            pointColorB = (rgba8888Color.z / 255.0f);
+            pointColorA = (rgba8888Color.w / 255.0f);
          }
 
          float zUp3DX = eyeDepth;
          float zUp3DY = -(x - principalOffsetXPixels) / focalLengthPixels * eyeDepth;
-         float zUp3DZ = (y - principalOffsetYPixels) / focalLengthPixels * eyeDepth;
+         float zUp3DZ = -(y - principalOffsetYPixels) / focalLengthPixels * eyeDepth;
          float4 worldFramePoint = transform(zUp3DX,
                                             zUp3DY,
                                             zUp3DZ,

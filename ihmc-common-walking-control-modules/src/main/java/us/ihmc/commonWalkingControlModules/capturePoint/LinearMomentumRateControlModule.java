@@ -6,7 +6,10 @@ import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkRed;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.HeuristicICPController;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPController;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerInterface;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
@@ -29,6 +32,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -118,7 +122,7 @@ public class LinearMomentumRateControlModule
    private boolean desiredCMPcontainedNaN = false;
    private boolean desiredCoPcontainedNaN = false;
 
-   private final ICPController icpController;
+   private final ICPControllerInterface icpController;
 
    private final ICPControlPlane icpControlPlane;
    private final BipedSupportPolygons bipedSupportPolygons;
@@ -227,13 +231,26 @@ public class LinearMomentumRateControlModule
       icpControlPolygons = new ICPControlPolygons(icpControlPlane, registry, yoGraphicsListRegistry);
       bipedSupportPolygons = new BipedSupportPolygons(referenceFrames, registry, null); // TODO: This is not being visualized since it is a duplicate for now.
 
-      icpController = new ICPController(walkingControllerParameters,
-                                        bipedSupportPolygons,
-                                        icpControlPolygons,
-                                        contactableFeet,
-                                        controlDT,
-                                        registry,
-                                        yoGraphicsListRegistry);
+      ICPControllerParameters icpControllerParameters = walkingControllerParameters.getICPControllerParameters();
+      
+      if (icpControllerParameters.getUseHeuristicICPController())
+      {
+         icpController = new HeuristicICPController(icpControllerParameters,
+                                                    controlDT,
+                                                    registry,
+                                                    yoGraphicsListRegistry);
+      }
+
+      else
+      {     
+         icpController = new ICPController(walkingControllerParameters,
+                                           bipedSupportPolygons,
+                                           icpControlPolygons,
+                                           contactableFeet,
+                                           controlDT,
+                                           registry,
+                                           yoGraphicsListRegistry);
+      }
 
       parentRegistry.addChild(registry);
    }
@@ -433,25 +450,30 @@ public class LinearMomentumRateControlModule
    private void updateICPControllerState()
    {
       if (initializeOnStateChange)
+      {
          icpController.initialize();
+      }
 
       icpController.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
    }
 
    private void computeICPController()
    {
+      FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
       if (perfectCoP.containsNaN())
       {
          perfectCMPDelta.setToZero();
-         icpController.compute(desiredCapturePoint, desiredCapturePointVelocity, perfectCMP, capturePoint, centerOfMass2d, omega0);
+         icpController.compute(supportPolygonInWorld, desiredCapturePoint, desiredCapturePointVelocity, perfectCMP, capturePoint, centerOfMass2d, omega0);
       }
       else
       {
          perfectCMPDelta.sub(perfectCMP, perfectCoP);
-         icpController.compute(desiredCapturePoint, desiredCapturePointVelocity, perfectCoP, perfectCMPDelta, capturePoint, centerOfMass2d, omega0);
+         icpController.compute(supportPolygonInWorld, desiredCapturePoint, desiredCapturePointVelocity, perfectCoP, perfectCMPDelta, capturePoint, centerOfMass2d, omega0);
       }
+
       icpController.getDesiredCMP(desiredCMP);
       icpController.getDesiredCoP(desiredCoP);
+      
    }
 
    private void checkAndPackOutputs()

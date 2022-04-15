@@ -3,7 +3,9 @@ package us.ihmc.gdx.imgui;
 import com.badlogic.gdx.Input;
 import imgui.*;
 import imgui.flag.ImGuiFreeTypeBuilderFlags;
+import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiKey;
+import imgui.type.ImString;
 import org.apache.commons.lang3.SystemUtils;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL41;
@@ -30,6 +32,7 @@ public class ImGuiTools
    public static final float FLOAT_MIN = -3.40282346638528859811704183484516925e+38F / 2.0f;
    public static final float FLOAT_MAX = 3.40282346638528859811704183484516925e+38F / 2.0f;
 
+   private static ImFont mediumFont;
    private static ImFont bigFont;
    private static ImFont nodeFont;
 
@@ -53,6 +56,13 @@ public class ImGuiTools
       glClear(GL41.GL_COLOR_BUFFER_BIT);
    }
 
+   public static boolean inputText(String label, ImString text)
+   {
+      int flags = ImGuiInputTextFlags.None;
+      flags += ImGuiInputTextFlags.CallbackResize;
+      return ImGui.inputText(label, text, flags);
+   }
+
    public static String uniqueLabel(String label)
    {
       return label + "###GlobalWidgetIndex:" + nextWidgetIndex() + ":" + label;
@@ -73,13 +83,19 @@ public class ImGuiTools
       return "###" + thisObject.getClass().getName() + ":" + label;
    }
 
+   public static ImFont setupFonts(ImGuiIO io)
+   {
+      return setupFonts(io, 1);
+   }
+
    /**
     * See https://github.com/ocornut/imgui/blob/master/docs/FONTS.md
     * and ImGuiGlfwFreeTypeDemo in this project
     */
-   public static ImFont setupFonts(ImGuiIO io)
+   public static ImFont setupFonts(ImGuiIO io, int fontSizeLevel)
    {
       final ImFontConfig fontConfig = new ImFontConfig(); // Natively allocated object, should be explicitly destroyed
+      final ImFontConfig mediumFontConfig = new ImFontConfig();
       final ImFontConfig bigFontConfig = new ImFontConfig();
       final ImFontConfig nodeFontConfig = new ImFontConfig();
 
@@ -97,10 +113,11 @@ public class ImGuiTools
 //      fontConfig.setRasterizerMultiply(2.0f);
 //      fontConfig.setPixelSnapH(true);
       fontConfig.setFontBuilderFlags(fontsFlags);
+      mediumFontConfig.setFontBuilderFlags(fontsFlags);
       bigFontConfig.setFontBuilderFlags(fontsFlags);
       nodeFontConfig.setFontBuilderFlags(fontsFlags);
 
-      ImFont fontToReturn;
+      ImFont smallFont;
 //      fontToReturn = fontAtlas.addFontDefault(); // Add a default font, which is 'ProggyClean.ttf, 13px'
 //      fontToReturn = fontAtlas.addFontFromMemoryTTF(loadFromResources("basis33.ttf"), 16, fontConfig);
       String fontDir;
@@ -114,7 +131,10 @@ public class ImGuiTools
       if (Files.exists(segoeui))
       {
          fontConfig.setName("segoeui.ttf, 16px");
-         fontToReturn = io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), 16.0f, fontConfig);
+         smallFont = io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), 16.0f, fontConfig);
+
+         fontConfig.setName("segoeui.ttf, 20px");
+         mediumFont = io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), 20.0f, mediumFontConfig);
 
          bigFontConfig.setName("segoeui.ttf, 38px");
          bigFont = io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), 38.0f, bigFontConfig);
@@ -125,7 +145,10 @@ public class ImGuiTools
       else
       {
          fontConfig.setName("DejaVuSans.ttf, 13px");
-         fontToReturn = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 13.0f, fontConfig);
+         smallFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 13.0f, fontConfig);
+
+         fontConfig.setName("DejaVuSans.ttf, 17px");
+         mediumFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 17.0f, mediumFontConfig);
 
          bigFontConfig.setName("DejaVuSans.ttf, 32px");
          bigFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 32.0f, bigFontConfig);
@@ -146,10 +169,16 @@ public class ImGuiTools
       ImGui.getIO().getFonts().build();
 
       fontConfig.destroy(); // After all fonts were added we don't need this config more
+      mediumFontConfig.destroy();
       bigFontConfig.destroy();
       nodeFontConfig.destroy();
 
-      return fontToReturn;
+      if (fontSizeLevel == 2)
+         return mediumFont;
+      if (fontSizeLevel == 3)
+         return bigFont;
+
+      return smallFont;
    }
 
    public static ImFont getBigFont() {

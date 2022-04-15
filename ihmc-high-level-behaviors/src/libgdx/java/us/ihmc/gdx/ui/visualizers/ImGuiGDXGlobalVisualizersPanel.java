@@ -25,6 +25,11 @@ public class ImGuiGDXGlobalVisualizersPanel extends ImGuiPanel implements Render
       this(new ROS1Helper("global_visualizers"));
    }
 
+   public ImGuiGDXGlobalVisualizersPanel(boolean enableROS1)
+   {
+      this(enableROS1 ? new ROS1Helper("global_visualizers") : null);
+   }
+
    public ImGuiGDXGlobalVisualizersPanel(ROS1Helper ros1Helper)
    {
       super(WINDOW_NAME);
@@ -55,7 +60,7 @@ public class ImGuiGDXGlobalVisualizersPanel extends ImGuiPanel implements Render
    {
       for (ImGuiGDXVisualizer visualizer : visualizers)
       {
-         if (visualizer instanceof ImGuiGDXROS1Visualizer)
+         if (visualizer instanceof ImGuiGDXROS1Visualizer && ros1Helper != null)
          {
             ((ImGuiGDXROS1Visualizer) visualizer).updateSubscribers(ros1Helper);
          }
@@ -70,7 +75,7 @@ public class ImGuiGDXGlobalVisualizersPanel extends ImGuiPanel implements Render
 
    public void renderImGuiWidgets()
    {
-      if (ImGui.button(labels.get("Reconnect ROS 1 Node")))
+      if (ros1Helper != null && ImGui.button(labels.get("Reconnect ROS 1 Node")))
       {
          ros1Helper.reconnectEverything();
       }

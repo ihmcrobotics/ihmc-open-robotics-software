@@ -3,6 +3,7 @@ package us.ihmc.gdx.ui.behavior;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import imgui.extension.imnodes.ImNodes;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
@@ -116,6 +117,8 @@ public class ImGuiGDXBehaviorUIManager
 
    public void create(GDXImGuiBasedUI baseUI)
    {
+      ImNodesTools.initialize();
+
       imNodeBehaviorTreeUI.create();
 
       highestLevelUI.create(baseUI);

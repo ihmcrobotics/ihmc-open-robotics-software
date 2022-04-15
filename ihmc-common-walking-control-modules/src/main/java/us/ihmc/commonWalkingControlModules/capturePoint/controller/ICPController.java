@@ -14,6 +14,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -40,7 +42,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
 
-public class ICPController
+public class ICPController implements ICPControllerInterface
 {
    private static final boolean VISUALIZE = true;
 
@@ -57,6 +59,8 @@ public class ICPController
    final YoFrameVector2D icpError = new YoFrameVector2D(yoNamePrefix + "ICPError", "", worldFrame, registry);
    private final YoFramePoint2D feedbackCoP = new YoFramePoint2D(yoNamePrefix + "FeedbackCoPSolution", worldFrame, registry);
    private final YoFramePoint2D feedbackCMP = new YoFramePoint2D(yoNamePrefix + "FeedbackCMPSolution", worldFrame, registry);
+   private final YoFrameVector2D expectedControlICPVelocity = new YoFrameVector2D(yoNamePrefix + "ExpectedControlICPVelocity", worldFrame, registry);
+
    private final YoFrameVector2D unconstrainedFeedback = new YoFrameVector2D(yoNamePrefix + "UnconstrainedFeedback", worldFrame, registry);
    private final YoFramePoint2D unconstrainedFeedbackCMP = new YoFramePoint2D(yoNamePrefix + "UnconstrainedFeedbackCMP", worldFrame, registry);
    final YoFramePoint2D perfectCoP = new YoFramePoint2D(yoNamePrefix + "PerfectCoP", worldFrame, registry);
@@ -223,24 +227,35 @@ public class ICPController
    }
 
    /** {@inheritDoc} */
+   @Override
    public void initialize()
    {
       integrator.reset();
    }
 
    /** {@inheritDoc} */
+   @Override
    public void getDesiredCMP(FixedFramePoint2DBasics desiredCMPToPack)
    {
       desiredCMPToPack.set(feedbackCMP);
    }
 
    /** {@inheritDoc} */
+   @Override
    public void getDesiredCoP(FixedFramePoint2DBasics desiredCoPToPack)
    {
       desiredCoPToPack.set(feedbackCoP);
    }
 
    /** {@inheritDoc} */
+   @Override
+   public void getExpectedControlICPVelocity(FixedFrameVector2DBasics expectedControlICPVelocityToPack)
+   {
+      expectedControlICPVelocityToPack.set(expectedControlICPVelocity);
+   }
+
+   /** {@inheritDoc} */
+   @Override
    public boolean useAngularMomentum()
    {
       return useAngularMomentum.getValue();
@@ -249,7 +264,9 @@ public class ICPController
    private final FrameVector2D desiredCMPOffsetToThrowAway = new FrameVector2D();
 
    /** {@inheritDoc} */
-   public void compute(FramePoint2DReadOnly desiredICP,
+   @Override
+   public void compute(FrameConvexPolygon2DReadOnly supportPolygonInWorld,
+                       FramePoint2DReadOnly desiredICP,
                        FrameVector2DReadOnly desiredICPVelocity,
                        FramePoint2DReadOnly perfectCoP,
                        FramePoint2DReadOnly currentICP,
@@ -257,11 +274,13 @@ public class ICPController
                        double omega0)
    {
       desiredCMPOffsetToThrowAway.setToZero(worldFrame);
-      compute(desiredICP, desiredICPVelocity, perfectCoP, desiredCMPOffsetToThrowAway, currentICP, currentCoMPosition, omega0);
+      compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, perfectCoP, desiredCMPOffsetToThrowAway, currentICP, currentCoMPosition, omega0);
    }
 
    /** {@inheritDoc} */
-   public void compute(FramePoint2DReadOnly desiredICP,
+   @Override
+   public void compute(FrameConvexPolygon2DReadOnly supportPolygonInWorld,
+                       FramePoint2DReadOnly desiredICP,
                        FrameVector2DReadOnly desiredICPVelocity,
                        FramePoint2DReadOnly perfectCoP,
                        FrameVector2DReadOnly perfectCMPOffset,
@@ -295,6 +314,9 @@ public class ICPController
       qpSolverTimer.stopMeasurement();
 
       extractSolutionsFromSolver(converged);
+
+      expectedControlICPVelocity.sub(currentICP, feedbackCMP);
+      expectedControlICPVelocity.scale(omega0);
 
       controllerTimer.stopMeasurement();
    }
@@ -401,11 +423,13 @@ public class ICPController
    }
 
    /** {@inheritDoc} */
+   @Override
    public void setKeepCoPInsideSupportPolygon(boolean keepCoPInsideSupportPolygon)
    {
       this.copConstraintHandler.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
    }
 
+   @Override
    public FrameVector2DReadOnly getResidualError()
    {
       return residualDynamicsErrorConservative;

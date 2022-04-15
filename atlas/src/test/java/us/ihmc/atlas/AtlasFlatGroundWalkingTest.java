@@ -15,11 +15,17 @@ import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 {
    private DRCRobotModel robotModel;
+   private boolean doPelvisWarmup;
 
    @Override
    public boolean doPelvisWarmup()
    {
-      return true;
+      return doPelvisWarmup;
+   }
+   
+   public void setDoPelvisWarmup(boolean doPelvisWarmup)
+   {
+      this.doPelvisWarmup = doPelvisWarmup;
    }
 
    @Tag("fast")
@@ -28,7 +34,17 @@ public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
    public void testFlatGroundWalking()
    {
       robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
+      setDoPelvisWarmup(true);
       super.testFlatGroundWalking();
+   }
+   
+   @Override
+   @Test
+   public void testFlatGroundWalkingBullet()
+   {
+      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
+      setDoPelvisWarmup(false);
+      super.testFlatGroundWalkingBullet();
    }
 
    @Tag("fast")
@@ -45,7 +61,7 @@ public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
    public void testAtlasFlatGroundWalkingWithShapeCollision()
    {
       robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false, false, true);
-      runFlatGroundWalking();
+      super.testFlatGroundWalking();
    }
 
    @Test

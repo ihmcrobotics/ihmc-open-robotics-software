@@ -20,7 +20,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.gdx.ui.gizmo.GDXFootstepPlannerGoalGizmo;
+import us.ihmc.gdx.ui.gizmo.GDXPathControlRingGizmo;
 import us.ihmc.gdx.ui.graphics.GDXFootstepGraphic;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -30,7 +30,7 @@ import java.util.ArrayList;
 
 public class GDXFootstepPlannerPanel extends ImGuiPanel implements RenderableProvider
 {
-   private final GDXFootstepPlannerGoalGizmo goalGizmo = new GDXFootstepPlannerGoalGizmo();
+   private final GDXPathControlRingGizmo goalGizmo = new GDXPathControlRingGizmo();
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final GDXFootstepGraphic leftStanceFootstepGraphic;
    private final GDXFootstepGraphic rightStanceFootstepGraphic;
@@ -57,7 +57,7 @@ public class GDXFootstepPlannerPanel extends ImGuiPanel implements RenderablePro
       leftGoalFootstepGraphic = new GDXFootstepGraphic(contactPoints, RobotSide.LEFT);
       rightGoalFootstepGraphic = new GDXFootstepGraphic(contactPoints, RobotSide.RIGHT);
 
-      goalFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("goalPose", ReferenceFrame.getWorldFrame(), goalGizmo.getTransform());
+      goalFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("goalPose", ReferenceFrame.getWorldFrame(), goalGizmo.getTransformToParent());
 
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
       foostepPlanGraphic = new GDXFootstepPlanGraphic(contactPoints);
@@ -67,6 +67,7 @@ public class GDXFootstepPlannerPanel extends ImGuiPanel implements RenderablePro
    public void create(GDXImGuiBasedUI baseUI)
    {
       goalGizmo.create(baseUI.get3DSceneManager().getCamera3D());
+      baseUI.addImGui3DViewPickCalculator(goalGizmo::calculate3DViewPick);
       baseUI.addImGui3DViewInputProcessor(goalGizmo::process3DViewInput);
       baseUI.get3DSceneManager().addRenderableProvider(this, GDXSceneLevel.VIRTUAL);
       leftStanceFootstepGraphic.create();
