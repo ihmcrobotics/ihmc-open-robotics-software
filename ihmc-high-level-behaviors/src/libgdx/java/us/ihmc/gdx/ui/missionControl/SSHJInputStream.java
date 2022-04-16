@@ -46,4 +46,9 @@ public class SSHJInputStream
          }
       }
    }
+
+   public int getBufferSize()
+   {
+      return inputByteBuffer.limit();
+   }
 }
