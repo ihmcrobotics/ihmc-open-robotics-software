@@ -6,11 +6,9 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Line2D;
+import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
@@ -20,6 +18,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLine2d;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -309,9 +309,71 @@ public class DynamicStateInspectorTest
       inspector.setPolygons(leftPolygon, rightPolygon, onToesPolygon);
       inspector.checkICPLocations(parameters, RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, toePosition);
 
+      visualize(inspector);
+
       assertFalse(inspector.areDynamicsOkForToeOff());
 
-      visualize(inspector);
+
+      PoseReferenceFrame frontFootFrame = new PoseReferenceFrame("frontFoot", worldFrame);
+      ZUpFrame frontFootZUpFrame = new ZUpFrame( frontFootFrame, "frontZUp");
+      frontFootFrame.setPoseAndUpdate(leftFootPose);
+      frontFootZUpFrame.update();
+
+      FrameConvexPolygon2D fullPolygon = new FrameConvexPolygon2D();
+      fullPolygon.addVertices(leftPolygon);
+      fullPolygon.addVertices(rightPolygon);
+      fullPolygon.update();
+
+      FrameLine2D outerEdge = new FrameLine2D();
+      FrameLine2D innerEdge = new FrameLine2D();
+
+      leftPolygon.addVertex(-0.21496, -0.1422);
+      leftPolygon.addVertex(-0.2109, -0.0471);
+      leftPolygon.addVertex(0.0039, -0.0565);
+      leftPolygon.addVertex(-0.0002, -0.1514);
+      leftPolygon.update();
+
+
+      innerEdge.set(new FramePoint2D(worldFrame, -0.0002, -0.1514), toePosition);
+      outerEdge.set(new FramePoint2D(worldFrame, -0.2109, -0.0471), toePosition);
+      outerEdge.set(new FramePoint2D(worldFrame, -0.21496, -0.1422), toePosition);
+
+      FrameLine2D errorLine = new FrameLine2D(desiredICP, currentICP);
+
+
+
+      assertEquals(inspector.getDistanceSquaredOfCurrentICPFromToe(), currentICP.distanceSquared(toePosition), epsilon);
+      assertEquals(inspector.getDistanceSquaredOfDesiredICPFromToe(), desiredICP.distanceSquared(toePosition), epsilon);
+
+      assertEquals(innerEdge.distance(currentICP), inspector.getCurrentOrthogonalDistanceToInsideEdge(), epsilon);
+      assertEquals(-innerEdge.distance(desiredICP), inspector.getDesiredOrthogonalDistanceToInsideEdge(), epsilon);
+
+      assertEquals(-outerEdge.distance(currentICP), inspector.getCurrentOrthogonalDistanceToOutsideEdge(), epsilon);
+      assertEquals(-outerEdge.distance(desiredICP), inspector.getDesiredOrthogonalDistanceToOutsideEdge(), 1e-3);
+
+      double distanceAlongErrorToOutsideEdge = -outerEdge.intersectionWith(errorLine).distance(currentICP);
+      double distanceAlongErrorToInsideEdge = innerEdge.intersectionWith(errorLine).distance(currentICP);
+      double distanceAlongErrorToFullSupport = 0.0; // current ICP is outside
+      double error = currentICP.distance(desiredICP);
+
+      assertEquals(distanceAlongErrorToOutsideEdge, inspector.getDistanceAlongErrorToOutsideEdge(), epsilon);
+      assertEquals(distanceAlongErrorToInsideEdge, inspector.getDistanceAlongErrorToInsideEdge(), epsilon);
+      assertEquals(distanceAlongErrorToFullSupport, inspector.getDistaneAlongErrorToFullSupport(), epsilon);
+
+      assertEquals(distanceAlongErrorToOutsideEdge / error, inspector.getNormalizedDistanceAlongErrorToOutsideEdge(), epsilon);
+      assertEquals(distanceAlongErrorToInsideEdge / error, inspector.getNormalizedDistanceAlongErrorToInsideEdge(), epsilon);
+      assertEquals(distanceAlongErrorToFullSupport / error, inspector.getNormalizedDistanceAlongErrorToFullSupport(), epsilon);
+
+      assertEquals(0.0, inspector.getControlRatioInsideEdge(), epsilon);
+      assertEquals(-distanceAlongErrorToFullSupport / distanceAlongErrorToOutsideEdge, inspector.getControlRatioOutsideEdge(), epsilon);
+
+      currentICP.changeFrame(frontFootZUpFrame);
+      desiredICP.changeFrame(frontFootZUpFrame);
+      toePosition.changeFrame(frontFootZUpFrame);
+
+      assertEquals(desiredICP.getY() - toePosition.getY(), inspector.getLateralDistanceOfDesiredICPInside(), epsilon);
+      assertEquals( currentICP.getY() - toePosition.getY(), inspector.getLateralDistanceOfCurrentICPInside(), epsilon);
+
 
    }
 
@@ -353,9 +415,63 @@ public class DynamicStateInspectorTest
       inspector.setPolygons(rightPolygon, leftPolygon, onToesPolygon);
       inspector.checkICPLocations(parameters, RobotSide.LEFT, rightFootPose, desiredICP, currentICP, toePosition);
 
+      visualize(inspector);
+
       assertTrue(inspector.areDynamicsOkForToeOff());
 
-      visualize(inspector);
+
+      PoseReferenceFrame frontFootFrame = new PoseReferenceFrame("frontFoot", worldFrame);
+      ZUpFrame frontFootZUpFrame = new ZUpFrame( frontFootFrame, "frontZUp");
+      frontFootFrame.setPoseAndUpdate(rightFootPose);
+      frontFootZUpFrame.update();
+
+      FrameConvexPolygon2D fullPolygon = new FrameConvexPolygon2D();
+      fullPolygon.addVertices(leftPolygon);
+      fullPolygon.addVertices(rightPolygon);
+      fullPolygon.update();
+
+      FrameLineSegment2D outerEdge = new FrameLineSegment2D();
+      FrameLineSegment2D innerEdge = new FrameLineSegment2D();
+
+      innerEdge.set(new FramePoint2D(worldFrame, 0.9845, -0.3713), toePosition);
+      outerEdge.set(new FramePoint2D(worldFrame, 0.7872, -0.499), toePosition);
+
+      FrameLine2D errorLine = new FrameLine2D(desiredICP, currentICP);
+
+
+
+      assertEquals(inspector.getDistanceSquaredOfCurrentICPFromToe(), currentICP.distanceSquared(toePosition), epsilon);
+      assertEquals(inspector.getDistanceSquaredOfDesiredICPFromToe(), desiredICP.distanceSquared(toePosition), epsilon);
+
+      assertEquals(-innerEdge.distance(currentICP), inspector.getCurrentOrthogonalDistanceToInsideEdge(), epsilon);
+      assertEquals(-innerEdge.distance(desiredICP), inspector.getDesiredOrthogonalDistanceToInsideEdge(), epsilon);
+
+      assertEquals(-outerEdge.distance(currentICP), inspector.getCurrentOrthogonalDistanceToOutsideEdge(), epsilon);
+      assertEquals(-outerEdge.distance(desiredICP), inspector.getDesiredOrthogonalDistanceToOutsideEdge(), epsilon);
+
+      double distanceAlongErrorToOutsideEdge = -outerEdge.intersectionWith(errorLine).distance(currentICP);
+      double distanceAlongErrorToInsideEdge = Double.NEGATIVE_INFINITY;
+      double distanceAlongErrorToFullSupport = fullPolygon.intersectionWithRay(errorLine)[0].distance(currentICP);
+      double error = currentICP.distance(desiredICP);
+
+      assertEquals(distanceAlongErrorToOutsideEdge, inspector.getDistanceAlongErrorToOutsideEdge(), epsilon);
+      assertEquals(distanceAlongErrorToInsideEdge, inspector.getDistanceAlongErrorToInsideEdge(), epsilon);
+      assertEquals(distanceAlongErrorToFullSupport, inspector.getDistaneAlongErrorToFullSupport(), epsilon);
+
+      assertEquals(distanceAlongErrorToOutsideEdge / error, inspector.getNormalizedDistanceAlongErrorToOutsideEdge(), epsilon);
+      assertEquals(Double.NEGATIVE_INFINITY, inspector.getNormalizedDistanceAlongErrorToInsideEdge(), epsilon);
+      assertEquals(distanceAlongErrorToFullSupport / error, inspector.getNormalizedDistanceAlongErrorToFullSupport(), epsilon);
+
+      assertEquals(0.0, inspector.getControlRatioInsideEdge(), epsilon);
+      assertEquals(-distanceAlongErrorToFullSupport / distanceAlongErrorToOutsideEdge, inspector.getControlRatioOutsideEdge(), epsilon);
+
+      currentICP.changeFrame(frontFootZUpFrame);
+      desiredICP.changeFrame(frontFootZUpFrame);
+      toePosition.changeFrame(frontFootZUpFrame);
+
+      assertEquals(toePosition.getY() - desiredICP.getY(), inspector.getLateralDistanceOfDesiredICPInside(), epsilon);
+      assertEquals(toePosition.getY() - currentICP.getY(), inspector.getLateralDistanceOfCurrentICPInside(), epsilon);
+
 
 
    }
@@ -403,6 +519,58 @@ public class DynamicStateInspectorTest
       assertFalse(inspector.areDynamicsOkForToeOff());
 
 
+      PoseReferenceFrame frontFootFrame = new PoseReferenceFrame("frontFoot", worldFrame);
+      ZUpFrame frontFootZUpFrame = new ZUpFrame( frontFootFrame, "frontZUp");
+      frontFootFrame.setPoseAndUpdate(leftFootPose);
+      frontFootZUpFrame.update();
+
+      FrameConvexPolygon2D fullPolygon = new FrameConvexPolygon2D();
+      fullPolygon.addVertices(leftPolygon);
+      fullPolygon.addVertices(rightPolygon);
+      fullPolygon.update();
+
+      FrameLineSegment2D outerEdge = new FrameLineSegment2D();
+      FrameLine2D innerEdge = new FrameLine2D();
+
+      innerEdge.set(new FramePoint2D(worldFrame, 0.6882, -0.5388), toePosition);
+      outerEdge.set(new FramePoint2D(worldFrame, 0.4642, -0.4675), toePosition);
+
+      FrameLine2D errorLine = new FrameLine2D(desiredICP, currentICP);
+
+
+
+      assertEquals(inspector.getDistanceSquaredOfCurrentICPFromToe(), currentICP.distanceSquared(toePosition), epsilon);
+      assertEquals(inspector.getDistanceSquaredOfDesiredICPFromToe(), desiredICP.distanceSquared(toePosition), epsilon);
+
+      assertEquals(-innerEdge.distance(currentICP), inspector.getCurrentOrthogonalDistanceToInsideEdge(), epsilon);
+      assertEquals(-innerEdge.distance(desiredICP), inspector.getDesiredOrthogonalDistanceToInsideEdge(), epsilon);
+
+      assertEquals(-outerEdge.distance(currentICP), inspector.getCurrentOrthogonalDistanceToOutsideEdge(), epsilon);
+      assertEquals(-outerEdge.distance(desiredICP), inspector.getDesiredOrthogonalDistanceToOutsideEdge(), epsilon);
+
+      double distanceAlongErrorToOutsideEdge = -outerEdge.intersectionWith(errorLine).distance(currentICP);
+      double distanceAlongErrorToInsideEdge = -innerEdge.intersectionWith(errorLine).distance(currentICP);
+      double distanceAlongErrorToFullSupport = fullPolygon.intersectionWithRay(errorLine)[0].distance(currentICP);
+      double error = currentICP.distance(desiredICP);
+
+      assertEquals(distanceAlongErrorToOutsideEdge, inspector.getDistanceAlongErrorToOutsideEdge(), epsilon);
+      assertEquals(distanceAlongErrorToInsideEdge, inspector.getDistanceAlongErrorToInsideEdge(), epsilon);
+      assertEquals(distanceAlongErrorToFullSupport, inspector.getDistaneAlongErrorToFullSupport(), epsilon);
+
+      assertEquals(distanceAlongErrorToOutsideEdge / error, inspector.getNormalizedDistanceAlongErrorToOutsideEdge(), epsilon);
+      assertEquals(distanceAlongErrorToInsideEdge / error, inspector.getNormalizedDistanceAlongErrorToInsideEdge(), epsilon);
+      assertEquals(distanceAlongErrorToFullSupport / error, inspector.getNormalizedDistanceAlongErrorToFullSupport(), epsilon);
+
+      assertEquals(-distanceAlongErrorToFullSupport / distanceAlongErrorToInsideEdge, inspector.getControlRatioInsideEdge(), epsilon);
+      assertEquals(-distanceAlongErrorToFullSupport / distanceAlongErrorToOutsideEdge, inspector.getControlRatioOutsideEdge(), epsilon);
+
+      currentICP.changeFrame(frontFootZUpFrame);
+      desiredICP.changeFrame(frontFootZUpFrame);
+      toePosition.changeFrame(frontFootZUpFrame);
+
+      assertEquals(desiredICP.getY() - toePosition.getY(), inspector.getLateralDistanceOfDesiredICPInside(), epsilon);
+      assertEquals(currentICP.getY() - toePosition.getY(), inspector.getLateralDistanceOfCurrentICPInside(), epsilon);
+
    }
 
    @Test
@@ -443,9 +611,69 @@ public class DynamicStateInspectorTest
       inspector.setPolygons(leftPolygon, rightPolygon, onToesPolygon);
       inspector.checkICPLocations(parameters, RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, toePosition);
 
+//      visualize = true;
       visualize(inspector);
 
       assertFalse(inspector.areDynamicsOkForToeOff());
+
+      PoseReferenceFrame frontFootFrame = new PoseReferenceFrame("frontFoot", worldFrame);
+      ZUpFrame frontFootZUpFrame = new ZUpFrame( frontFootFrame, "frontZUp");
+      frontFootFrame.setPoseAndUpdate(leftFootPose);
+      frontFootZUpFrame.update();
+
+      FrameConvexPolygon2D fullPolygon = new FrameConvexPolygon2D();
+      fullPolygon.addVertices(leftPolygon);
+      fullPolygon.addVertices(rightPolygon);
+      fullPolygon.update();
+
+      FrameLine2D outerEdge = new FrameLine2D();
+      FrameLine2D innerEdge = new FrameLine2D();
+
+
+      leftPolygon.addVertex(8.567, 0.5775);
+      leftPolygon.addVertex(8.5894, 0.6696);
+      leftPolygon.addVertex(8.7984, 0.6189);
+      leftPolygon.addVertex(8.776, 0.5267);
+      leftPolygon.update();
+
+      innerEdge.set(new FramePoint2D(worldFrame, 8.776, 0.5267), toePosition);
+      outerEdge.set(new FramePoint2D(worldFrame, 8.5894, 0.6696), toePosition);
+
+      FrameLine2D errorLine = new FrameLine2D(desiredICP, currentICP);
+
+
+
+      assertEquals(inspector.getDistanceSquaredOfCurrentICPFromToe(), currentICP.distanceSquared(toePosition), epsilon);
+      assertEquals(inspector.getDistanceSquaredOfDesiredICPFromToe(), desiredICP.distanceSquared(toePosition), epsilon);
+
+      assertEquals(-innerEdge.distance(currentICP), inspector.getCurrentOrthogonalDistanceToInsideEdge(), epsilon);
+      assertEquals(-innerEdge.distance(desiredICP), inspector.getDesiredOrthogonalDistanceToInsideEdge(), epsilon);
+
+      assertEquals(-outerEdge.distance(currentICP), inspector.getCurrentOrthogonalDistanceToOutsideEdge(), epsilon);
+      assertEquals(-outerEdge.distance(desiredICP), inspector.getDesiredOrthogonalDistanceToOutsideEdge(), epsilon);
+
+      double distanceAlongErrorToOutsideEdge = -outerEdge.intersectionWith(errorLine).distance(currentICP);
+      double distanceAlongErrorToInsideEdge = -innerEdge.intersectionWith(errorLine).distance(currentICP);
+      double distanceAlongErrorToFullSupport = fullPolygon.intersectionWithRay(errorLine)[0].distance(currentICP);
+      double error = currentICP.distance(desiredICP);
+
+      assertEquals(distanceAlongErrorToOutsideEdge, inspector.getDistanceAlongErrorToOutsideEdge(), epsilon);
+      assertEquals(distanceAlongErrorToInsideEdge, inspector.getDistanceAlongErrorToInsideEdge(), epsilon);
+      assertEquals(distanceAlongErrorToFullSupport, inspector.getDistaneAlongErrorToFullSupport(), epsilon);
+
+      assertEquals(distanceAlongErrorToOutsideEdge / error, inspector.getNormalizedDistanceAlongErrorToOutsideEdge(), epsilon);
+      assertEquals(distanceAlongErrorToInsideEdge / error, inspector.getNormalizedDistanceAlongErrorToInsideEdge(), epsilon);
+      assertEquals(distanceAlongErrorToFullSupport / error, inspector.getNormalizedDistanceAlongErrorToFullSupport(), epsilon);
+
+      assertEquals(-distanceAlongErrorToFullSupport / distanceAlongErrorToInsideEdge, inspector.getControlRatioInsideEdge(), epsilon);
+      assertEquals(-distanceAlongErrorToFullSupport / distanceAlongErrorToOutsideEdge, inspector.getControlRatioOutsideEdge(), epsilon);
+
+      currentICP.changeFrame(frontFootZUpFrame);
+      desiredICP.changeFrame(frontFootZUpFrame);
+      toePosition.changeFrame(frontFootZUpFrame);
+
+      assertEquals(desiredICP.getY() - toePosition.getY(), inspector.getLateralDistanceOfDesiredICPInside(), epsilon);
+      assertEquals(currentICP.getY() - toePosition.getY(), inspector.getLateralDistanceOfCurrentICPInside(), epsilon);
 
    }
 
@@ -490,6 +718,59 @@ public class DynamicStateInspectorTest
       assertFalse(inspector.areDynamicsOkForToeOff());
 
       visualize(inspector);
+
+
+      PoseReferenceFrame frontFootFrame = new PoseReferenceFrame("frontFoot", worldFrame);
+      ZUpFrame frontFootZUpFrame = new ZUpFrame( frontFootFrame, "frontZUp");
+      frontFootFrame.setPoseAndUpdate(leftFootPose);
+      frontFootZUpFrame.update();
+
+      FrameConvexPolygon2D fullPolygon = new FrameConvexPolygon2D();
+      fullPolygon.addVertices(leftPolygon);
+      fullPolygon.addVertices(rightPolygon);
+      fullPolygon.update();
+
+      FrameLine2D outerEdge = new FrameLine2D();
+      FrameLine2D innerEdge = new FrameLine2D();
+
+      innerEdge.set(new FramePoint2D(worldFrame, 81.0027, 1.9387), toePosition);
+      outerEdge.set(new FramePoint2D(worldFrame, 80.8454, 2.1133), toePosition);
+
+      FrameLine2D errorLine = new FrameLine2D(desiredICP, currentICP);
+
+
+
+      assertEquals(inspector.getDistanceSquaredOfCurrentICPFromToe(), currentICP.distanceSquared(toePosition), epsilon);
+      assertEquals(inspector.getDistanceSquaredOfDesiredICPFromToe(), desiredICP.distanceSquared(toePosition), epsilon);
+
+      assertEquals(-innerEdge.distance(currentICP), inspector.getCurrentOrthogonalDistanceToInsideEdge(), epsilon);
+      assertEquals(-innerEdge.distance(desiredICP), inspector.getDesiredOrthogonalDistanceToInsideEdge(), epsilon);
+
+      assertEquals(-outerEdge.distance(currentICP), inspector.getCurrentOrthogonalDistanceToOutsideEdge(), epsilon);
+      assertEquals(-outerEdge.distance(desiredICP), inspector.getDesiredOrthogonalDistanceToOutsideEdge(), epsilon);
+
+      double distanceAlongErrorToOutsideEdge = -outerEdge.intersectionWith(errorLine).distance(currentICP);
+      double distanceAlongErrorToInsideEdge = -innerEdge.intersectionWith(errorLine).distance(currentICP);
+      double distanceAlongErrorToFullSupport = fullPolygon.intersectionWithRay(errorLine)[0].distance(currentICP);
+      double error = currentICP.distance(desiredICP);
+
+      assertEquals(distanceAlongErrorToOutsideEdge, inspector.getDistanceAlongErrorToOutsideEdge(), epsilon);
+      assertEquals(distanceAlongErrorToInsideEdge, inspector.getDistanceAlongErrorToInsideEdge(), epsilon);
+      assertEquals(distanceAlongErrorToFullSupport, inspector.getDistaneAlongErrorToFullSupport(), epsilon);
+
+      assertEquals(distanceAlongErrorToOutsideEdge / error, inspector.getNormalizedDistanceAlongErrorToOutsideEdge(), epsilon);
+      assertEquals(distanceAlongErrorToInsideEdge / error, inspector.getNormalizedDistanceAlongErrorToInsideEdge(), epsilon);
+      assertEquals(distanceAlongErrorToFullSupport / error, inspector.getNormalizedDistanceAlongErrorToFullSupport(), epsilon);
+
+      assertEquals(-distanceAlongErrorToFullSupport / distanceAlongErrorToInsideEdge, inspector.getControlRatioInsideEdge(), epsilon);
+      assertEquals(-distanceAlongErrorToFullSupport / distanceAlongErrorToOutsideEdge, inspector.getControlRatioOutsideEdge(), epsilon);
+
+      currentICP.changeFrame(frontFootZUpFrame);
+      desiredICP.changeFrame(frontFootZUpFrame);
+      toePosition.changeFrame(frontFootZUpFrame);
+
+      assertEquals(desiredICP.getY() - toePosition.getY(), inspector.getLateralDistanceOfDesiredICPInside(), epsilon);
+      assertEquals(currentICP.getY() - toePosition.getY(), inspector.getLateralDistanceOfCurrentICPInside(), epsilon);
    }
 
    @Test
@@ -532,7 +813,69 @@ public class DynamicStateInspectorTest
 
       assertFalse(inspector.areDynamicsOkForToeOff());
 
+//      visualize = true;
+
       visualize(inspector);
+
+
+      PoseReferenceFrame frontFootFrame = new PoseReferenceFrame("frontFoot", worldFrame);
+      ZUpFrame frontFootZUpFrame = new ZUpFrame( frontFootFrame, "frontZUp");
+      frontFootFrame.setPoseAndUpdate(leftFootPose);
+      frontFootZUpFrame.update();
+
+      FrameConvexPolygon2D fullPolygon = new FrameConvexPolygon2D();
+      fullPolygon.addVertices(leftPolygon);
+      fullPolygon.addVertices(rightPolygon);
+      fullPolygon.update();
+
+      FrameLineSegment2D outerEdge = new FrameLineSegment2D();
+      FrameLineSegment2D innerEdge = new FrameLineSegment2D();
+
+      leftPolygon.addVertex(4.0375, -0.9215);
+      leftPolygon.addVertex(4.0541, -0.828);
+      leftPolygon.addVertex(4.2658, -0.8655);
+      leftPolygon.addVertex(4.2492, -0.959);
+      leftPolygon.update();
+
+      outerEdge.set(new FramePoint2D(worldFrame, 4.0541, -0.828), toePosition);
+      innerEdge.set(new FramePoint2D(worldFrame, 4.2492, -0.959), toePosition);
+
+      FrameLine2D errorLine = new FrameLine2D(desiredICP, currentICP);
+
+
+
+      assertEquals(inspector.getDistanceSquaredOfCurrentICPFromToe(), currentICP.distanceSquared(toePosition), epsilon);
+      assertEquals(inspector.getDistanceSquaredOfDesiredICPFromToe(), desiredICP.distanceSquared(toePosition), epsilon);
+
+      assertEquals(-innerEdge.distance(currentICP), inspector.getCurrentOrthogonalDistanceToInsideEdge(), epsilon);
+      assertEquals(-innerEdge.distance(desiredICP), inspector.getDesiredOrthogonalDistanceToInsideEdge(), epsilon);
+
+      assertEquals(-outerEdge.distance(currentICP), inspector.getCurrentOrthogonalDistanceToOutsideEdge(), epsilon);
+      assertEquals(-outerEdge.distance(desiredICP), inspector.getDesiredOrthogonalDistanceToOutsideEdge(), epsilon);
+
+      double distanceAlongErrorToOutsideEdge = Double.NEGATIVE_INFINITY;
+      double distanceAlongErrorToInsideEdge = -innerEdge.intersectionWith(errorLine).distance(currentICP);
+      double distanceAlongErrorToFullSupport = fullPolygon.intersectionWithRay(errorLine)[0].distance(currentICP);
+      double error = currentICP.distance(desiredICP);
+
+      assertEquals(distanceAlongErrorToOutsideEdge, inspector.getDistanceAlongErrorToOutsideEdge(), epsilon);
+      assertEquals(distanceAlongErrorToInsideEdge, inspector.getDistanceAlongErrorToInsideEdge(), epsilon);
+      assertEquals(distanceAlongErrorToFullSupport, inspector.getDistaneAlongErrorToFullSupport(), epsilon);
+
+      assertEquals(distanceAlongErrorToOutsideEdge / error, inspector.getNormalizedDistanceAlongErrorToOutsideEdge(), epsilon);
+      assertEquals(distanceAlongErrorToInsideEdge / error, inspector.getNormalizedDistanceAlongErrorToInsideEdge(), epsilon);
+      assertEquals(distanceAlongErrorToFullSupport / error, inspector.getNormalizedDistanceAlongErrorToFullSupport(), epsilon);
+
+      assertEquals(-distanceAlongErrorToFullSupport / distanceAlongErrorToInsideEdge, inspector.getControlRatioInsideEdge(), epsilon);
+      assertEquals(0.0, inspector.getControlRatioOutsideEdge(), epsilon);
+
+      currentICP.changeFrame(frontFootZUpFrame);
+      desiredICP.changeFrame(frontFootZUpFrame);
+      toePosition.changeFrame(frontFootZUpFrame);
+
+      assertEquals(desiredICP.getY() - toePosition.getY(), inspector.getLateralDistanceOfDesiredICPInside(), epsilon);
+      assertEquals(currentICP.getY() - toePosition.getY(), inspector.getLateralDistanceOfCurrentICPInside(), epsilon);
+
    }
 
    @Test
@@ -577,6 +920,63 @@ public class DynamicStateInspectorTest
 
       assertFalse(inspector.areDynamicsOkForToeOff());
 
+      PoseReferenceFrame frontFootFrame = new PoseReferenceFrame("frontFoot", worldFrame);
+      ZUpFrame frontFootZUpFrame = new ZUpFrame( frontFootFrame, "frontZUp");
+      frontFootFrame.setPoseAndUpdate(leftFootPose);
+      frontFootZUpFrame.update();
+
+      FrameConvexPolygon2D fullPolygon = new FrameConvexPolygon2D();
+      fullPolygon.addVertices(leftPolygon);
+      fullPolygon.addVertices(rightPolygon);
+      fullPolygon.update();
+
+      FrameLine2D outerEdge = new FrameLine2D();
+      FrameLine2D innerEdge = new FrameLine2D();
+
+      leftPolygon.addVertex(9.6133, -1.8032);
+      leftPolygon.addVertex(9.6427, -1.7129);
+      leftPolygon.addVertex(9.8471, -1.7796);
+      leftPolygon.addVertex(9.8176, -1.8699);
+      leftPolygon.update();
+
+
+      innerEdge.set(new FramePoint2D(worldFrame, 9.8176, -1.8699), toePosition);
+      outerEdge.set(new FramePoint2D(worldFrame, 9.6133, -1.8032), toePosition);
+
+      FrameLine2D errorLine = new FrameLine2D(desiredICP, currentICP);
+
+
+      assertEquals(inspector.getDistanceSquaredOfCurrentICPFromToe(), currentICP.distanceSquared(toePosition), epsilon);
+      assertEquals(inspector.getDistanceSquaredOfDesiredICPFromToe(), desiredICP.distanceSquared(toePosition), epsilon);
+
+      assertEquals(-innerEdge.distance(currentICP), inspector.getCurrentOrthogonalDistanceToInsideEdge(), epsilon);
+      assertEquals(-innerEdge.distance(desiredICP), inspector.getDesiredOrthogonalDistanceToInsideEdge(), epsilon);
+
+      assertEquals(-outerEdge.distance(currentICP), inspector.getCurrentOrthogonalDistanceToOutsideEdge(), epsilon);
+      assertEquals(-outerEdge.distance(desiredICP), inspector.getDesiredOrthogonalDistanceToOutsideEdge(), epsilon);
+
+      double distanceAlongErrorToOutsideEdge = -outerEdge.intersectionWith(errorLine).distance(currentICP);
+      double distanceAlongErrorToInsideEdge = -innerEdge.intersectionWith(errorLine).distance(currentICP);
+      double distanceAlongErrorToFullSupport = fullPolygon.intersectionWithRay(errorLine)[0].distance(currentICP);
+      double error = currentICP.distance(desiredICP);
+
+      assertEquals(distanceAlongErrorToOutsideEdge, inspector.getDistanceAlongErrorToOutsideEdge(), epsilon);
+      assertEquals(distanceAlongErrorToInsideEdge, inspector.getDistanceAlongErrorToInsideEdge(), epsilon);
+      assertEquals(distanceAlongErrorToFullSupport, inspector.getDistaneAlongErrorToFullSupport(), epsilon);
+
+      assertEquals(distanceAlongErrorToOutsideEdge / error, inspector.getNormalizedDistanceAlongErrorToOutsideEdge(), epsilon);
+      assertEquals(distanceAlongErrorToInsideEdge / error, inspector.getNormalizedDistanceAlongErrorToInsideEdge(), epsilon);
+      assertEquals(distanceAlongErrorToFullSupport / error, inspector.getNormalizedDistanceAlongErrorToFullSupport(), epsilon);
+
+      assertEquals(-distanceAlongErrorToFullSupport / distanceAlongErrorToInsideEdge, inspector.getControlRatioInsideEdge(), epsilon);
+      assertEquals(-distanceAlongErrorToFullSupport / distanceAlongErrorToOutsideEdge, inspector.getControlRatioOutsideEdge(), epsilon);
+
+      currentICP.changeFrame(frontFootZUpFrame);
+      desiredICP.changeFrame(frontFootZUpFrame);
+      toePosition.changeFrame(frontFootZUpFrame);
+
+      assertEquals(desiredICP.getY() - toePosition.getY(), inspector.getLateralDistanceOfDesiredICPInside(), epsilon);
+      assertEquals(currentICP.getY() - toePosition.getY(), inspector.getLateralDistanceOfCurrentICPInside(), epsilon);
    }
 
    @Test
@@ -620,8 +1020,63 @@ public class DynamicStateInspectorTest
       visualize(inspector);
       assertFalse(inspector.areDynamicsOkForToeOff());
 
-   }
 
+      PoseReferenceFrame frontFootFrame = new PoseReferenceFrame("frontFoot", worldFrame);
+      ZUpFrame frontFootZUpFrame = new ZUpFrame( frontFootFrame, "frontZUp");
+      frontFootFrame.setPoseAndUpdate(leftFootPose);
+      frontFootZUpFrame.update();
+
+      FrameConvexPolygon2D fullPolygon = new FrameConvexPolygon2D();
+      fullPolygon.addVertices(leftPolygon);
+      fullPolygon.addVertices(rightPolygon);
+      fullPolygon.update();
+
+      FrameLine2D outerEdge = new FrameLine2D();
+      FrameLineSegment2D innerEdge = new FrameLineSegment2D();
+
+      leftPolygon.addVertex(11.0325, -2.0592);
+      leftPolygon.addVertex(11.247, -2.0453);
+      leftPolygon.addVertex(11.2529, -2.1398);
+      leftPolygon.addVertex(11.0384, -2.1537);
+      leftPolygon.update();
+
+      innerEdge.set(new FramePoint2D(worldFrame, 11.2529, -2.1398), toePosition);
+      outerEdge.set(new FramePoint2D(worldFrame, 11.0325, -2.0592), toePosition);
+
+      FrameLine2D errorLine = new FrameLine2D(desiredICP, currentICP);
+
+      assertEquals(inspector.getDistanceSquaredOfCurrentICPFromToe(), currentICP.distanceSquared(toePosition), epsilon);
+      assertEquals(inspector.getDistanceSquaredOfDesiredICPFromToe(), desiredICP.distanceSquared(toePosition), epsilon);
+
+      assertEquals(-innerEdge.distance(currentICP), inspector.getCurrentOrthogonalDistanceToInsideEdge(), epsilon);
+      assertEquals(-innerEdge.distance(desiredICP), inspector.getDesiredOrthogonalDistanceToInsideEdge(), epsilon);
+
+      assertEquals(-outerEdge.distance(currentICP), inspector.getCurrentOrthogonalDistanceToOutsideEdge(), epsilon);
+      assertEquals(-outerEdge.distance(desiredICP), inspector.getDesiredOrthogonalDistanceToOutsideEdge(), epsilon);
+
+      double distanceAlongErrorToOutsideEdge = -outerEdge.intersectionWith(errorLine).distance(currentICP);
+      double distanceAlongErrorToInsideEdge = -innerEdge.intersectionWith(errorLine).distance(currentICP);
+      double distanceAlongErrorToFullSupport = fullPolygon.intersectionWithRay(errorLine)[0].distance(currentICP);
+      double error = currentICP.distance(desiredICP);
+
+      assertEquals(distanceAlongErrorToOutsideEdge, inspector.getDistanceAlongErrorToOutsideEdge(), epsilon);
+      assertEquals(distanceAlongErrorToInsideEdge, inspector.getDistanceAlongErrorToInsideEdge(), epsilon);
+      assertEquals(distanceAlongErrorToFullSupport, inspector.getDistaneAlongErrorToFullSupport(), epsilon);
+
+      assertEquals(distanceAlongErrorToOutsideEdge / error, inspector.getNormalizedDistanceAlongErrorToOutsideEdge(), epsilon);
+      assertEquals(distanceAlongErrorToInsideEdge / error, inspector.getNormalizedDistanceAlongErrorToInsideEdge(), epsilon);
+      assertEquals(distanceAlongErrorToFullSupport / error, inspector.getNormalizedDistanceAlongErrorToFullSupport(), epsilon);
+
+      assertEquals(-distanceAlongErrorToFullSupport / distanceAlongErrorToInsideEdge, inspector.getControlRatioInsideEdge(), epsilon);
+      assertEquals(-distanceAlongErrorToFullSupport / distanceAlongErrorToOutsideEdge, inspector.getControlRatioOutsideEdge(), epsilon);
+
+      currentICP.changeFrame(frontFootZUpFrame);
+      desiredICP.changeFrame(frontFootZUpFrame);
+      toePosition.changeFrame(frontFootZUpFrame);
+
+      assertEquals(desiredICP.getY() - toePosition.getY(), inspector.getLateralDistanceOfDesiredICPInside(), epsilon);
+      assertEquals(currentICP.getY() - toePosition.getY(), inspector.getLateralDistanceOfCurrentICPInside(), epsilon);
+   }
 
    @Test
    public void testLeftStepGrid()
