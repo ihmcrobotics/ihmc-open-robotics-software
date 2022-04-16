@@ -445,6 +445,11 @@ public class DynamicStateInspector
       return distanceAlongErrorToOutsideEdge.getDoubleValue();
    }
 
+   double getDistaneAlongErrorToFullSupport()
+   {
+      return distanceAlongErrorToFullSupport.getDoubleValue();
+   }
+
    double getCurrentOrthogonalDistanceToInsideEdge()
    {
       return currentOrthogonalDistanceToInsideEdge.getDoubleValue();
@@ -458,5 +463,30 @@ public class DynamicStateInspector
    double getDistanceAlongErrorToInsideEdge()
    {
       return distanceAlongErrorToInsideEdge.getDoubleValue();
+   }
+
+   double getNormalizedDistanceAlongErrorToOutsideEdge()
+   {
+      return normDistanceAlongErrorToOutsideEdge.getDoubleValue();
+   }
+
+   double getNormalizedDistanceAlongErrorToInsideEdge()
+   {
+      return normDistanceAlongErrorToInsideEdge.getDoubleValue();
+   }
+
+   double getNormalizedDistanceAlongErrorToFullSupport()
+   {
+      return normDistanceAlongErrorToFullSupport.getDoubleValue();
+   }
+
+   double getControlRatioInsideEdge()
+   {
+      return controlRatioInsideEdge.getDoubleValue();
+   }
+
+   double getControlRatioOutsideEdge()
+   {
+      return controlRatioOutsideEdge.getDoubleValue();
    }
 }
