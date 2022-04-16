@@ -13,6 +13,8 @@ public interface HumanoidRobotNaturalPosture
 
    public abstract Quaternion getNaturalPostureQuaternion();
 
+   public abstract Quaternion getNaturalPostureQuaternionrtBase();
+   
    public abstract DMatrixRMaj getNaturalPostureJacobian();
 
 }
