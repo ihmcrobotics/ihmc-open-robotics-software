@@ -214,7 +214,7 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
       if (!hasComputedToeOffContactPoint.getBooleanValue())
          computeToeOffContactPoint(null, trailingLeg);
 
-      contactPointToPack.set(toeOffContactPoint2d);
+      contactPointToPack.setIncludingFrame(toeOffContactPoint2d);
    }
 
    @Override

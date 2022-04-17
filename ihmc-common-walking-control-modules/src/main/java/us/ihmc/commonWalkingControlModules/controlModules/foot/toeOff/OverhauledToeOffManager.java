@@ -75,6 +75,7 @@ public class OverhauledToeOffManager
            dynamicStateInspectorParameters,
            controllerToolbox.getReferenceFrames().getSoleZUpFrames(),
            controllerToolbox.getBipedSupportPolygons().getFootPolygonsInWorldFrame(),
+           controllerToolbox.getDefaultFootPolygons(),
            controllerToolbox.getFullRobotModel(),
            toeOffCalculator,
            parentRegistry);
@@ -84,6 +85,7 @@ public class OverhauledToeOffManager
                                   DynamicStateInspectorParameters dynamicStateInspectorParameters,
                                   SideDependentList<MovingReferenceFrame> soleZUpFrames,
                                   SideDependentList<? extends FrameConvexPolygon2DReadOnly> footPolygonsInWorldFrame,
+                                  SideDependentList<? extends FrameConvexPolygon2DReadOnly> footDefaultPolygons,
                                   FullHumanoidRobotModel fullRobotModel,
                                   ToeOffCalculator toeOffCalculator,
                                   YoRegistry parentRegistry)
@@ -93,6 +95,7 @@ public class OverhauledToeOffManager
            dynamicStateInspectorParameters,
            soleZUpFrames,
            footPolygonsInWorldFrame,
+           footDefaultPolygons,
            fullRobotModel,
            toeOffCalculator,
            parentRegistry);
@@ -103,6 +106,7 @@ public class OverhauledToeOffManager
                                   DynamicStateInspectorParameters dynamicStateInspectorParameters,
                                   SideDependentList<MovingReferenceFrame> soleZUpFrames,
                                   SideDependentList<? extends FrameConvexPolygon2DReadOnly> footPolygonsInWorldFrame,
+                                  SideDependentList<? extends FrameConvexPolygon2DReadOnly> footDefaultPolygons,
                                   FullHumanoidRobotModel fullRobotModel,
                                   ToeOffCalculator toeOffCalculator,
                                   YoRegistry parentRegistry)
@@ -121,14 +125,16 @@ public class OverhauledToeOffManager
       else
          jointLimitsInspector = null;
 
-      footDefaultPolygons = new SideDependentList<>();
+      this.footDefaultPolygons = new SideDependentList<>();
       for (RobotSide robotSide : RobotSide.values)
       {
-         FrameConvexPolygon2D polygon = new FrameConvexPolygon2D(footPolygonsInWorldFrame.get(robotSide));
+         FrameConvexPolygon2D polygon = new FrameConvexPolygon2D(footDefaultPolygons.get(robotSide));
+         if (polygon.isEmpty())
+            throw new RuntimeException("No default polygon was specified.");
          polygon.changeFrameAndProjectToXYPlane(soleZUpFrames.get(robotSide));
 
          ConvexPolygon2DReadOnly defaultPolygon = new ConvexPolygon2D(polygon);
-         footDefaultPolygons.put(robotSide, defaultPolygon);
+         this.footDefaultPolygons.put(robotSide, defaultPolygon);
          defaultToeOffPoints.put(robotSide, new FramePoint2D(soleZUpFrames.get(robotSide), computeMiddleOfFrontEdge(defaultPolygon)));
       }
 
@@ -266,8 +272,8 @@ public class OverhauledToeOffManager
       else
       {
          polygonToPack.setIncludingFrame(soleZUpFrames.get(side), footDefaultPolygons.get(side));
-         polygonToPack.changeFrameAndProjectToXYPlane(worldFrame);
       }
+      polygonToPack.changeFrameAndProjectToXYPlane(worldFrame);
    }
 
    private void setLeadingPolygonFromNextFootstep(RobotSide stepSide,
