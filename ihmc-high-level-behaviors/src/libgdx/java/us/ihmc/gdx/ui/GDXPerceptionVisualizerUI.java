@@ -143,7 +143,8 @@ public class GDXPerceptionVisualizerUI
             environmentBuilder.loadEnvironment("DemoPullDoor.json");
 
             buildingConstructor.create(baseUI);
-            baseUI.get3DSceneManager().addRenderableProvider(buildingConstructor::getRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
+            baseUI.get3DSceneManager().addRenderableProvider(buildingConstructor::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+            baseUI.get3DSceneManager().addRenderableProvider(buildingConstructor::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
 
             globalVisualizersUI.create();
             //                l515Model = new GDXL515SensorObject();
