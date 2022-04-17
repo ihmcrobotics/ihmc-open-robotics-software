@@ -240,7 +240,6 @@ public class GDXSimpleObject
       GDXTools.toGDX(placementFramePose, tempTransform, realisticModelInstance.transform);
 
       placementFramePose.setFromReferenceFrame(collisionModelFrame);
-      LogTools.info("Update Poses: {} {} {}", placementFramePose, tempTransform, collisionModelInstance.transform);
       GDXTools.toGDX(placementFramePose, tempTransform, collisionModelInstance.transform);
       if (collisionGeometryObject.getPose() == null)
       {

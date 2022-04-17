@@ -13,25 +13,34 @@ import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.environment.object.GDXSimpleObject;
+import us.ihmc.gdx.simulation.environment.object.objects.GDXBuildingObject;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.gdx.ui.gizmo.StepCheckIsPointInsideAlgorithm;
+import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
 
 public class GDXBuildingConstructor extends ImGuiPanel
 {
+   private enum Mode
+   {
+      NONE, CONSTRUCTING, PLACING, DONE
+   }
 
    private final static String WINDOW_NAME = ImGuiTools.uniqueLabel(GDXEnvironmentBuilder.class, "Constructor");
    private final ArrayList<GDXSimpleObject> virtualObjects = new ArrayList<>();
+   private final ArrayList<GDXSimpleObject> realObjects = new ArrayList<>();
    private GDXSimpleObject selectedObject;
    private GDXSimpleObject intersectedObject;
    private final ImFloat ambientLightAmount = new ImFloat(0.4f);
@@ -40,8 +49,13 @@ public class GDXBuildingConstructor extends ImGuiPanel
 
    private final StepCheckIsPointInsideAlgorithm stepCheckIsPointInsideAlgorithm = new StepCheckIsPointInsideAlgorithm();
    private final GDX3DSceneManager sceneManager;
-   private boolean constructionIsInProgress = false;
    private final Point3D tempIntersection = new Point3D();
+
+   private Point3D lastPickPoint = new Point3D();
+
+   private GDXBuildingObject building;
+   private GDXSimpleObject lastWallBase;
+   private Mode mode = Mode.NONE;
 
    public GDXBuildingConstructor(GDX3DSceneManager sceneManager)
    {
@@ -53,12 +67,12 @@ public class GDXBuildingConstructor extends ImGuiPanel
 
    public void create(GDXImGuiBasedUI baseUI)
    {
-      sceneManager.addRenderableProvider(this::getRenderables, GDXSceneLevel.VIRTUAL);
+      sceneManager.addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
       pose3DGizmo.create(sceneManager.getCamera3D());
       baseUI.addImGui3DViewInputProcessor(this::process3DViewInput);
    }
 
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       for (GDXSimpleObject model : virtualObjects)
       {
@@ -73,23 +87,38 @@ public class GDXBuildingConstructor extends ImGuiPanel
          intersectedObject.getCollisionMeshRenderables(renderables, pool);
       }
    }
-   public void process3DViewInput(ImGui3DViewInput viewInput)
+
+   public void getRealRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
+      for (GDXSimpleObject model : realObjects)
+      {
+         model.getRealRenderables(renderables, pool);
+      }
       if (selectedObject != null)
       {
-         if (constructionIsInProgress)
-         {
-            Line3DReadOnly pickRay = viewInput.getPickRayInWorld();
-            Point3D pickPoint = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(EuclidCoreTools.origin3D,
-                                                                                        Axis3D.Z,
-                                                                                        pickRay.getPoint(),
-                                                                                        pickRay.getDirection());
-            selectedObject.setPositionInWorld(pickPoint);
-            pose3DGizmo.getTransformToParent().set(selectedObject.getObjectTransform());
+         pose3DGizmo.getRenderables(renderables, pool);
+      }
+      if (intersectedObject != null && intersectedObject != selectedObject)
+      {
+         intersectedObject.getCollisionMeshRenderables(renderables, pool);
+      }
+   }
 
+   public void process3DViewInput(ImGui3DViewInput viewInput)
+   {
+      constructionUpdate(viewInput);
+      if (selectedObject != null)
+      {
+         if (mode == Mode.PLACING)
+         {
+            if (viewInput.isWindowHovered() && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Right))
+            {
+               mode = Mode.DONE;
+            }
             if (viewInput.isWindowHovered() && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
-               constructionIsInProgress = false;
+               building.addCorner(lastPickPoint);
+               mode = Mode.CONSTRUCTING;
             }
          }
          else
@@ -113,7 +142,7 @@ public class GDXBuildingConstructor extends ImGuiPanel
       }
       else
       {
-         constructionIsInProgress = false;
+         mode = Mode.NONE;
          if (viewInput.isWindowHovered())
          {
             intersectedObject = calculatePickedObject(viewInput.getPickRayInWorld());
@@ -131,7 +160,7 @@ public class GDXBuildingConstructor extends ImGuiPanel
    {
       double closestDistance = Double.POSITIVE_INFINITY;
       GDXSimpleObject closestObject = null;
-      for (GDXSimpleObject object : virtualObjects)
+      for (GDXSimpleObject object : realObjects)
       {
          boolean intersects = object.intersect(pickRay, tempIntersection);
          double distance = tempIntersection.distance(pickRay.getPoint());
@@ -139,10 +168,98 @@ public class GDXBuildingConstructor extends ImGuiPanel
          {
             closestObject = object;
             closestDistance = distance;
-
          }
       }
       return closestObject;
+   }
+
+   private void constructionUpdate(ImGui3DViewInput viewInput)
+   {
+
+      if (mode != Mode.NONE)
+      {
+         LogTools.info("Corners {}", building.getCorners());
+         Line3DReadOnly pickRay = viewInput.getPickRayInWorld();
+         lastPickPoint = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(EuclidCoreTools.origin3D,
+                                                                                     Axis3D.Z,
+                                                                                     pickRay.getPoint(),
+                                                                                     pickRay.getDirection());
+
+         switch (mode)
+         {
+            case CONSTRUCTING:
+            {
+               GDXSimpleObject objectToPlace = new GDXSimpleObject("Corner");
+               Model objectModel = GDXModelPrimitives.createCylinder(0.15f, 0.25f, Color.BROWN).model;
+               Box3D collisionBox = new Box3D(1.0f, 1.0f, 0.5f);
+               objectToPlace.setRealisticModel(objectModel);
+               objectToPlace.setCollisionModel(objectModel);
+               objectToPlace.setCollisionGeometryObject(collisionBox);
+               virtualObjects.add(objectToPlace);
+               updateObjectSelected(selectedObject, objectToPlace);
+
+               mode = Mode.PLACING;
+               break;
+            }
+            case PLACING:
+            {
+               selectedObject.setPositionInWorld(lastPickPoint);
+               pose3DGizmo.getTransformToParent().set(selectedObject.getObjectTransform());
+
+               break;
+            }
+            case DONE:
+            {
+               for (int i = 0; i < building.getCorners().size(); i++)
+               {
+                  Point3D corner = building.getCorners().get( (i + 1) % building.getCorners().size());
+                  Point3D previousCorner = building.getCorners().get(i % building.getCorners().size());
+                  double yaw = EuclidGeometryTools.angleFromFirstToSecondVector3D(corner.getX() - previousCorner.getX(),
+                                                                                  corner.getY() - previousCorner.getY(),
+                                                                                  corner.getZ() - previousCorner.getZ(),
+                                                                                  1,
+                                                                                  0,
+                                                                                  0);
+                  float length = (float)EuclidGeometryTools.distanceBetweenPoint3Ds(corner.getX(),
+                                                                                corner.getY(),
+                                                                                corner.getZ(),
+                                                                                previousCorner.getX(),
+                                                                                previousCorner.getY(),
+                                                                                previousCorner.getZ());
+                  Point3D midPoint = new Point3D(0.0, 0.0, 0.0);
+                  midPoint.add(corner);
+                  midPoint.add(previousCorner);
+                  midPoint.scale(0.5);
+
+
+                  GDXSimpleObject objectToPlace = new GDXSimpleObject("BuildingWall_" + i);
+                  Model objectModel = GDXModelPrimitives.createBox(length, 0.1f, building.getHeight(), Color.LIGHT_GRAY).model;
+                  Box3D collisionBox = new Box3D(1.0f, 0.1f, building.getHeight());
+
+                  Vector3DBasics translation = objectToPlace.getObjectTransform().getTranslation();
+                  RigidBodyTransform transform = objectToPlace.getObjectTransform();
+                  RigidBodyTransform translationTransform = new RigidBodyTransform();
+                  translationTransform.setTranslationAndIdentityRotation(translation);
+                  objectToPlace.getObjectTransform().setRotationYawAndZeroTranslation(yaw);
+                  objectToPlace.getObjectTransform().multiply(translationTransform);
+                  objectToPlace.setRealisticModel(objectModel);
+                  objectToPlace.setCollisionModel(objectModel);
+                  objectToPlace.setCollisionGeometryObject(collisionBox);
+                  objectToPlace.getCollisionShapeOffset().getTranslation().add(0.0f, 0.0f, building.getHeight() / 2.0f);
+                  objectToPlace.getRealisticModelOffset().getTranslation().add(0.0f, 0.0f, building.getHeight() / 2.0f);
+                  objectToPlace.setPositionInWorld(midPoint);
+
+
+
+                  realObjects.add(objectToPlace);
+
+                  LogTools.info("{} {} Size: {}", previousCorner, corner, length);
+
+               } mode = Mode.NONE;
+               break;
+            }
+         }
+      }
    }
 
    public void renderImGuiWidgets()
@@ -153,21 +270,12 @@ public class GDXBuildingConstructor extends ImGuiPanel
          sceneManager.getSceneBasics().setAmbientLight(ambientLightAmount.get());
       }
       ImGui.separator();
-      if (!constructionIsInProgress)
+      if (mode == Mode.NONE)
       {
          if (ImGui.button("Create Building"))
          {
-            GDXSimpleObject objectToPlace = new GDXSimpleObject("Building");
-
-            Model objectModel = GDXModelPrimitives.createBox(1.0f, 1.0f, 1.0f, Color.CHARTREUSE).model;
-            Box3D collisionBox = new Box3D(1.0f, 1.0f, 1.0f);
-            objectToPlace.setRealisticModel(objectModel);
-            objectToPlace.setCollisionModel(objectModel);
-            objectToPlace.setCollisionGeometryObject(collisionBox);
-
-            virtualObjects.add(objectToPlace);
-            updateObjectSelected(selectedObject, objectToPlace);
-            constructionIsInProgress = true;
+            building = new GDXBuildingObject();
+            mode = Mode.CONSTRUCTING;
          }
 
          ImGui.separator();
