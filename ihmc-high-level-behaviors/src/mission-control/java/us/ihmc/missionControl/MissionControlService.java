@@ -5,6 +5,8 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 
+import java.util.ArrayList;
+
 public class MissionControlService
 {
    private final LinuxResourceMonitor linuxResourceMonitor = new LinuxResourceMonitor();
@@ -26,6 +28,12 @@ public class MissionControlService
       linuxResourceMonitor.update();
 
       LogTools.info("RAM: " + FormattingTools.getFormattedDecimal1D(linuxResourceMonitor.getUsedRAMGiB()) + " / " + FormattingTools.getFormattedDecimal1D(linuxResourceMonitor.getTotalRAMGiB()) + " GiB");
+      ArrayList<CPUCoreTracker> cpuCoreTrackers = linuxResourceMonitor.getCpuCoreTrackers();
+      for (int i = 0; i < cpuCoreTrackers.size(); i++)
+      {
+         CPUCoreTracker cpuCoreTracker = cpuCoreTrackers.get(i);
+         LogTools.info("CPU Core {}: {} %", i, FormattingTools.getFormattedDecimal1D(cpuCoreTracker.getPercentUsage()));
+      }
    }
 
    public static void main(String[] args)
