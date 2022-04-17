@@ -42,8 +42,8 @@ public class ImGuiSSHJMissionControlUI
    private final AtomicReference<ArrayList<Double>> cpuUsagesSubscription;
 
    private final ImPlotPlot ramPlot = new ImPlotPlot();
-   private final ImPlotDoublePlotLine ramUsagePlotLine = new ImPlotDoublePlotLine("RAM Usage GiB");
-   private final ImPlotDoublePlotLine ramTotalPlotLine = new ImPlotDoublePlotLine("RAM Total GiB");
+   private final ImPlotDoublePlotLine ramUsagePlotLine = new ImPlotDoublePlotLine("RAM Usage GiB", 30 * 5, 30.0);
+   private final ImPlotDoublePlotLine ramTotalPlotLine = new ImPlotDoublePlotLine("RAM Total GiB", 30 * 5, 30.0);
    private final ImPlotPlot cpuPlot = new ImPlotPlot();
 
    public ImGuiSSHJMissionControlUI()
@@ -73,22 +73,28 @@ public class ImGuiSSHJMissionControlUI
    {
       messagerManagerWidget.renderImGuiWidgets();
 
-      MutablePair<Double, Double> ramUsage = ramUsageSubscription.get();
-      double used = ramUsage.getLeft();
-      double total = ramUsage.getRight();
-      ramUsagePlotLine.addValue(used);
-      ramTotalPlotLine.addValue(total);
+      MutablePair<Double, Double> ramUsage = ramUsageSubscription.getAndSet(null);
+      if (ramUsage != null)
+      {
+         double used = ramUsage.getLeft();
+         double total = ramUsage.getRight();
+         ramUsagePlotLine.addValue(used);
+         ramTotalPlotLine.addValue(total);
+      }
       ramPlot.render();
 
-      ArrayList<Double> cpuUsages = cpuUsagesSubscription.get();
-      for (int i = 0; i < cpuUsages.size(); i++)
+      ArrayList<Double> cpuUsages = cpuUsagesSubscription.getAndSet(null);
+      if (cpuUsages != null)
       {
-         if (cpuPlot.getPlotLines().size() == i)
+         for (int i = 0; i < cpuUsages.size(); i++)
          {
-            cpuPlot.getPlotLines().add(new ImPlotDoublePlotLine("CPU Core " + i + " %"));
-         }
+            if (cpuPlot.getPlotLines().size() == i)
+            {
+               cpuPlot.getPlotLines().add(new ImPlotDoublePlotLine("CPU Core " + i + " %", 30 * 5, 30.0));
+            }
 
-         ((ImPlotDoublePlotLine)cpuPlot.getPlotLines().get(i)).addValue(cpuUsages.get(i));
+            ((ImPlotDoublePlotLine) cpuPlot.getPlotLines().get(i)).addValue(cpuUsages.get(i));
+         }
       }
       cpuPlot.render();
 
