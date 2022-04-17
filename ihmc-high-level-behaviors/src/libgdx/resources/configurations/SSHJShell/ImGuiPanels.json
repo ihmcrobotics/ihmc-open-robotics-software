@@ -1,6 +1,7 @@
 {
   "dockspacePanels" : { },
   "windows" : {
-    "Main Panel" : true
+    "Main Panel" : true,
+    "Mission Control Service Log" : true
   }
 }
