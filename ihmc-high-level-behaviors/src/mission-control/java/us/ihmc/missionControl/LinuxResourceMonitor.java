@@ -1,8 +1,7 @@
 package us.ihmc.missionControl;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import us.ihmc.tools.processManagement.ProcessTools;
+
 import java.util.ArrayList;
 
 public class LinuxResourceMonitor
@@ -25,7 +24,7 @@ public class LinuxResourceMonitor
 
    private void calculateRAMUsage()
    {
-      String free = execSimpleCommand("free --mebi");
+      String free = ProcessTools.execSimpleCommand("free --mebi");
       String[] lines = free.split("\\R");
       String[] amongSpaces = lines[1].split("\\s+");
       totalRAMGiB = Double.parseDouble(amongSpaces[1]) / 1000.0;
@@ -34,7 +33,7 @@ public class LinuxResourceMonitor
 
    private void calculateCPUUsage()
    {
-      String procStat = execSimpleCommand("cat /proc/stat");
+      String procStat = ProcessTools.execSimpleCommand("cat /proc/stat");
       String[] lines = procStat.split("\\R");
       cpuLines.clear();
       for (String line : lines)
@@ -67,32 +66,6 @@ public class LinuxResourceMonitor
 
          cpuCoreTrackers.get(i).update(timeInUserMode, timeNiceUserMode, timeInKernelCode, idleTime, ioWaitTime, interruptTime, softIRQTime);
       }
-   }
-
-   public static String execSimpleCommand(String command)
-   {
-      Runtime runtime = Runtime.getRuntime();
-      try
-      {
-         Process process = runtime.exec(command);
-         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-
-         StringBuilder output = new StringBuilder();
-         int read;
-         while ((read = bufferedReader.read()) > -1)
-         {
-            output.append((char) read);
-         }
-
-         process.waitFor();
-
-         return output.toString();
-      }
-      catch (IOException |InterruptedException e)
-      {
-         e.printStackTrace();
-      }
-      return null;
    }
 
    public ArrayList<CPUCoreTracker> getCpuCoreTrackers()
