@@ -69,23 +69,6 @@ val hostname: String by project
 val username: String by project
 val distFolder by lazy { ihmc.sourceSetProject("mission-control").tasks.named<Sync>("installDist").get().destinationDir.toString() }
 
-val missionControlServiceFile =
-"""
-   [Unit]
-   Description=Mission Control 2 Service
-   Wants=network-online.target
-   After=network-online.target
-
-   [Service]
-   User=$username
-   AmbientCapabilities=CAP_NET_RAW CAP_NET_ADMIN
-   Restart=always
-   ExecStart=/opt/ihmc/mission-control/bin/MissionControlService
-
-   [Install]
-   WantedBy=multi-user.target
-""".trimIndent()
-
 tasks.create("deploy") {
    dependsOn("ihmc-high-level-behaviors-mission-control:installDist")
 
@@ -103,9 +86,28 @@ tasks.create("deploy") {
          exec("sudo mv /home/$username/.ihmc/mission-control/lib /opt/ihmc/mission-control/.")
          exec("find /opt/ihmc/mission-control/bin -type f -exec chmod +x {} \\;")
 
-         exec("echo \"$missionControlServiceFile\" > ~/mission-control-2.service")
+         exec("echo \"${createMissionControlServiceFile(username)}\" > ~/mission-control-2.service")
          exec("sudo mv ~/mission-control-2.service /etc/systemd/system/.")
          exec("sudo systemctl daemon-reload")
       }
    }
+}
+
+fun createMissionControlServiceFile(username: String): String
+{
+   return """
+      [Unit]
+      Description=Mission Control 2 Service
+      Wants=network-online.target
+      After=network-online.target
+   
+      [Service]
+      User=$username
+      AmbientCapabilities=CAP_NET_RAW CAP_NET_ADMIN
+      Restart=always
+      ExecStart=/opt/ihmc/mission-control/bin/MissionControlService
+   
+      [Install]
+      WantedBy=multi-user.target
+   """.trimIndent()
 }
