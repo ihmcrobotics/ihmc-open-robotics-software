@@ -18,6 +18,7 @@ public class ImGuiSSHJMachine
    private final MessagerHelper messagerHelper;
 
    private final ImGuiMessagerManagerWidget messagerManagerWidget;
+   private final AtomicReference<String> serviceStatusSubscription;
    private final AtomicReference<MutablePair<Double, Double>> ramUsageSubscription;
    private final AtomicReference<ArrayList<Double>> cpuUsagesSubscription;
 
@@ -38,6 +39,7 @@ public class ImGuiSSHJMachine
 
       messagerHelper = new MessagerHelper(MissionControlService.API.create());
 
+      serviceStatusSubscription = messagerHelper.subscribeViaReference(MissionControlService.API.ServiceStatus, "Status not yet received.");
       ramUsageSubscription = messagerHelper.subscribeViaReference(MissionControlService.API.RAMUsage, MutablePair.of(0.0, 1.0));
       cpuUsagesSubscription = messagerHelper.subscribeViaReference(MissionControlService.API.CPUUsages, new ArrayList<>());
 
@@ -53,6 +55,8 @@ public class ImGuiSSHJMachine
       systemdServiceManager.renderImGuiWidgets();
 
       messagerManagerWidget.renderImGuiWidgets();
+
+      ImGui.text(serviceStatusSubscription.get());
 
       MutablePair<Double, Double> ramUsage = ramUsageSubscription.getAndSet(null);
       if (ramUsage != null)

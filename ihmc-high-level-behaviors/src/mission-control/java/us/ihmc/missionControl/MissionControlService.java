@@ -2,14 +2,15 @@ package us.ihmc.missionControl;
 
 import org.apache.commons.lang3.tuple.MutablePair;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.kryo.KryoMessager;
+import us.ihmc.tools.processManagement.ProcessTools;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 
 import java.util.ArrayList;
 
-import static us.ihmc.missionControl.MissionControlService.API.PORT;
-import static us.ihmc.missionControl.MissionControlService.API.RAMUsage;
+import static us.ihmc.missionControl.MissionControlService.API.*;
 
 public class MissionControlService
 {
@@ -38,8 +39,13 @@ public class MissionControlService
 //         LogTools.info("CPU Core {}: {} %", i, FormattingTools.getFormattedDecimal1D(cpuCoreTracker.getPercentUsage()));
 //      }
 
+
       if (kryoMessagerServer.isMessagerOpen())
       {
+         String statusOutput = ProcessTools.execSimpleCommand("systemctl status mission-control-2");
+         String[] lines = statusOutput.split("\\R");
+         kryoMessagerServer.submitMessage(ServiceStatus, lines[2].trim());
+
          kryoMessagerServer.submitMessage(RAMUsage, MutablePair.of(linuxResourceMonitor.getUsedRAMGiB(), linuxResourceMonitor.getTotalRAMGiB()));
          ArrayList<Double> cpuUsages = new ArrayList<>();
          for (CPUCoreTracker cpuCoreTracker : linuxResourceMonitor.getCpuCoreTrackers())
@@ -60,6 +66,7 @@ public class MissionControlService
 
       public static final MessagerAPIFactory.Topic<MutablePair<Double, Double>> RAMUsage = topic("RAMUsage");
       public static final MessagerAPIFactory.Topic<ArrayList<Double>> CPUUsages = topic("CPUUsages");
+      public static final MessagerAPIFactory.Topic<String> ServiceStatus = topic("ServiceStatus");
 
       private static <T> MessagerAPIFactory.Topic<T> topic(String name)
       {
