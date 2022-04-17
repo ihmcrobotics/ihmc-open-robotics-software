@@ -15,6 +15,7 @@ import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiTools;
@@ -51,7 +52,11 @@ public class GDXBuildingConstructor extends ImGuiPanel
    private final GDX3DSceneManager sceneManager;
    private final Point3D tempIntersection = new Point3D();
 
+   private final RigidBodyTransform translationTransform = new RigidBodyTransform();
+
    private Point3D lastPickPoint = new Point3D();
+
+   private Point3D cornerPoint;
 
    private GDXBuildingObject building;
    private GDXSimpleObject lastWallBase;
@@ -117,7 +122,7 @@ public class GDXBuildingConstructor extends ImGuiPanel
             }
             if (viewInput.isWindowHovered() && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
-               building.addCorner(lastPickPoint);
+               building.addCorner(cornerPoint);
                mode = Mode.CONSTRUCTING;
             }
          }
@@ -203,7 +208,10 @@ public class GDXBuildingConstructor extends ImGuiPanel
             }
             case PLACING:
             {
-               selectedObject.setPositionInWorld(lastPickPoint);
+
+               cornerPoint = building.getClosestRectangularCorner(lastPickPoint);
+
+               selectedObject.setPositionInWorld(cornerPoint);
                pose3DGizmo.getTransformToParent().set(selectedObject.getObjectTransform());
 
                break;
@@ -214,11 +222,9 @@ public class GDXBuildingConstructor extends ImGuiPanel
                {
                   Point3D corner = building.getCorners().get( (i + 1) % building.getCorners().size());
                   Point3D previousCorner = building.getCorners().get(i % building.getCorners().size());
-                  double yaw = EuclidGeometryTools.angleFromFirstToSecondVector3D(corner.getX() - previousCorner.getX(),
+                  double yaw = EuclidGeometryTools.angleFromFirstToSecondVector2D(corner.getX() - previousCorner.getX(),
                                                                                   corner.getY() - previousCorner.getY(),
-                                                                                  corner.getZ() - previousCorner.getZ(),
                                                                                   1,
-                                                                                  0,
                                                                                   0);
                   float length = (float)EuclidGeometryTools.distanceBetweenPoint3Ds(corner.getX(),
                                                                                 corner.getY(),
@@ -238,9 +244,9 @@ public class GDXBuildingConstructor extends ImGuiPanel
 
                   Vector3DBasics translation = objectToPlace.getObjectTransform().getTranslation();
                   RigidBodyTransform transform = objectToPlace.getObjectTransform();
-                  RigidBodyTransform translationTransform = new RigidBodyTransform();
+
                   translationTransform.setTranslationAndIdentityRotation(translation);
-                  objectToPlace.getObjectTransform().setRotationYawAndZeroTranslation(yaw);
+                  objectToPlace.getObjectTransform().setRotationYawAndZeroTranslation(-yaw);
                   objectToPlace.getObjectTransform().multiply(translationTransform);
                   objectToPlace.setRealisticModel(objectModel);
                   objectToPlace.setCollisionModel(objectModel);
