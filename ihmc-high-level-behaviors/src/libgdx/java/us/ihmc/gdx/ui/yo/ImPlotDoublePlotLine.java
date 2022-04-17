@@ -9,7 +9,12 @@ public class ImPlotDoublePlotLine extends ImPlotPlotLineBasics
 
    public ImPlotDoublePlotLine(String variableName)
    {
-      super(variableName, "NaN");
+      this(variableName, 100, 3.0);
+   }
+
+   public ImPlotDoublePlotLine(String variableName, int bufferSize, double history)
+   {
+      super(variableName, "NaN", bufferSize, history);
 
       doubleSwapBuffer = new ImPlotPlotLineDoubleSwapBuffer();
       setSwapBuffer(doubleSwapBuffer);
