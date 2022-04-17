@@ -8,7 +8,6 @@ import imgui.type.ImString;
 import net.schmizz.sshj.connection.channel.direct.Session;
 import net.schmizz.sshj.connection.channel.direct.Signal;
 import org.apache.commons.lang3.tuple.MutablePair;
-import std_msgs.msg.dds.Float64MultiArray;
 import us.ihmc.avatar.ros2.networkTest.SSHJTools;
 import us.ihmc.behaviors.tools.MessagerHelper;
 import us.ihmc.commons.Conversions;
@@ -38,16 +37,14 @@ public class ImGuiSSHJMissionControlUI
    private Session.Command sshjCommand;
    private final ImGuiConsoleArea consoleArea = new ImGuiConsoleArea();
    private Thread runThread;
-//   private final KryoMessager kryoMessagerClient;
    private final ImGuiMessagerManagerWidget messagerManagerWidget;
    private final AtomicReference<MutablePair<Double, Double>> ramUsageSubscription;
    private final AtomicReference<ArrayList<Double>> cpuUsagesSubscription;
 
-   private ImPlotPlot ramPlot = new ImPlotPlot();
-   private ImPlotDoublePlotLine ramUsagePlotLine = new ImPlotDoublePlotLine("RAM Usage GiB");
-   private ImPlotDoublePlotLine ramTotalPlotLine = new ImPlotDoublePlotLine("RAM Total GiB");
-   private ImPlotPlot cpuPlot = new ImPlotPlot();
-//   private final ROS2Input<Float64MultiArray> ramUsageSubscription;
+   private final ImPlotPlot ramPlot = new ImPlotPlot();
+   private final ImPlotDoublePlotLine ramUsagePlotLine = new ImPlotDoublePlotLine("RAM Usage GiB");
+   private final ImPlotDoublePlotLine ramTotalPlotLine = new ImPlotDoublePlotLine("RAM Total GiB");
+   private final ImPlotPlot cpuPlot = new ImPlotPlot();
 
    public ImGuiSSHJMissionControlUI()
    {
@@ -61,16 +58,6 @@ public class ImGuiSSHJMissionControlUI
       standardError.resize(bufferSize.get());
       command.set("sudo journalctl -ef -u mission-control-2");
 
-//      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "mission_control_ui");
-//      ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
-//      ramUsageSubscription = ros2Helper.subscribe(MissionControlService.RAM_USAGE_TOPIC);
-
-//      kryoMessagerClient = KryoMessager.createClient(MissionControlService.API.create(),
-//                                                     REMOTE_HOSTNAME,
-//                                                     MissionControlService.API.PORT,
-//                                                     "mission_control_ui",
-//                                                     100);
-
       ramPlot.getPlotLines().add(ramUsagePlotLine);
       ramPlot.getPlotLines().add(ramTotalPlotLine);
 
@@ -80,7 +67,6 @@ public class ImGuiSSHJMissionControlUI
       cpuUsagesSubscription = messagerHelper.subscribeViaReference(MissionControlService.API.CPUUsages, new ArrayList<>());
 
       messagerManagerWidget = new ImGuiMessagerManagerWidget(messagerHelper, () -> REMOTE_HOSTNAME, MissionControlService.API.PORT);
-      //      kryoMessagerClient.
    }
 
    private void renderImGuiWidgets()
