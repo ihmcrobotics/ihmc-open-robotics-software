@@ -15,11 +15,7 @@ public class MissionControlService
 {
    private final LinuxResourceMonitor linuxResourceMonitor = new LinuxResourceMonitor();
 
-//   public static final ROS2Topic<Float64MultiArray> RAM_USAGE_TOPIC
-//         = new ROS2Topic<>().withType(Float64MultiArray.class).withModule("missioncontrol").withSuffix("ramusage");
    private final KryoMessager kryoMessagerServer;
-
-   //   public static final Topic
 
    public MissionControlService()
    {
@@ -28,10 +24,6 @@ public class MissionControlService
       ExceptionHandlingThreadScheduler updateThreadScheduler = new ExceptionHandlingThreadScheduler("MissionControlUpdate",
                                                                                                     DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
       updateThreadScheduler.schedule(this::update, 0.2);
-
-//      ROS2Node ros2Node = new ROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "mission_control_service");
-
-      //      new KryoMessager()
    }
 
    private void update()
