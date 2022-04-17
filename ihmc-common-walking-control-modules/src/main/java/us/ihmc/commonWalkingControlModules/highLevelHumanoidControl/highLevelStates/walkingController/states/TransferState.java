@@ -220,7 +220,7 @@ public abstract class TransferState extends WalkingState
 
       double extraToeOffHeight = 0.0;
       if (feetManager.canDoDoubleSupportToeOff(null, transferToSide)) // FIXME should this be swing side?
-         extraToeOffHeight = feetManager.getToeOffManager().getExtraCoMMaxHeightWithToes();
+         extraToeOffHeight = feetManager.getExtraCoMMaxHeightWithToes();
 
       TransferToAndNextFootstepsData transferToAndNextFootstepsData = walkingMessageHandler.createTransferToAndNextFootstepDataForDoubleSupport(transferToSide);
       transferToAndNextFootstepsData.setComAtEndOfState(balanceManager.getFinalDesiredCoMPosition());

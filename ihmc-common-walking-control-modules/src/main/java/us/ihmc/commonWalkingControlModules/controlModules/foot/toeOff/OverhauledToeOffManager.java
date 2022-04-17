@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -62,6 +63,22 @@ public class OverhauledToeOffManager
    // temp objects
    private final PoseReferenceFrame nextStepFrame = new PoseReferenceFrame("nextStepFrame", worldFrame);
    private final FramePose3D nextFrontFootPose = new FramePose3D();
+
+   public OverhauledToeOffManager(HighLevelHumanoidControllerToolbox controllerToolbox,
+                                  WalkingControllerParameters walkingControllerParameters,
+                                  DynamicStateInspectorParameters dynamicStateInspectorParameters,
+                                  ToeOffCalculator toeOffCalculator,
+                                  YoRegistry parentRegistry)
+   {
+      this(walkingControllerParameters.getToeOffParameters(),
+           walkingControllerParameters.getSteppingParameters(),
+           dynamicStateInspectorParameters,
+           controllerToolbox.getReferenceFrames().getSoleZUpFrames(),
+           controllerToolbox.getBipedSupportPolygons().getFootPolygonsInWorldFrame(),
+           controllerToolbox.getFullRobotModel(),
+           toeOffCalculator,
+           parentRegistry);
+   }
 
    public OverhauledToeOffManager(WalkingControllerParameters walkingControllerParameters,
                                   DynamicStateInspectorParameters dynamicStateInspectorParameters,
@@ -147,6 +164,21 @@ public class OverhauledToeOffManager
       return frontEdge.midpoint();
    }
 
+   public boolean isSteppingUp()
+   {
+      return stepPositionInspector.isSteppingUp();
+   }
+
+   public void reset()
+   {
+      doToeOff.set(false);
+
+      jointLimitsInspector.reset();
+      stepPositionInspector.reset();
+      dynamicStateInspector.reset();
+   }
+
+
    public void updateToeOffStatusSingleSupport(RobotSide stepSide,
                                                FramePose3DReadOnly footstepPose,
                                                List<Point2D> predictedContactPoints,
@@ -190,6 +222,16 @@ public class OverhauledToeOffManager
                              toeOffPoint,
                              doToeOffIfPossibleInDoubleSupport.getValue(),
                              nextFrontFootPose);
+   }
+
+   public boolean areFeetWellPositionedForToeOff(RobotSide trailingLegSide, FramePose3DReadOnly nextFrontFootPose)
+   {
+      return stepPositionInspector.isFrontFootWellPositionedForToeOff(trailingLegSide, nextFrontFootPose);
+   }
+
+   public boolean doToeOff()
+   {
+      return doToeOff.getBooleanValue();
    }
 
    private void updateToeOffConditions(RobotSide trailingLeg,
@@ -250,7 +292,7 @@ public class OverhauledToeOffManager
       polygonToPack.changeFrameAndProjectToXYPlane(worldFrame);
    }
 
-   public FramePoint2DReadOnly computeOnToesSupportPolygon(FramePoint3DReadOnly exitCMP,
+   private FramePoint2DReadOnly computeOnToesSupportPolygon(FramePoint3DReadOnly exitCMP,
                                                            FramePoint2DReadOnly desiredECMP,
                                                            RobotSide trailingSide,
                                                            FrameConvexPolygon2DReadOnly leadingSupportPolygon)

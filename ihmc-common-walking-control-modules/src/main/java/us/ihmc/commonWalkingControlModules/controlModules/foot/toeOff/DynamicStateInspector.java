@@ -89,6 +89,28 @@ public class DynamicStateInspector
       parentRegistry.addChild(registry);
    }
 
+   public void reset()
+   {
+      currentIcpIsFarEnoughFromTheToe.set(false);
+      desiredIcpIsFarEnoughFromTheToe.set(false);
+      currentIcpIsFarEnoughInside.set(false);
+      desiredIcpIsFarEnoughInside.set(false);
+
+      currentIcpIsFarEnoughInsideOutsideEdge.set(false);
+      desiredIcpIsFarEnoughInsideOutsideEdge.set(false);
+
+      currentIcpIsFarEnoughInsideInsideEdge.set(false);
+      desiredIcpIsFarEnoughInsideInsideEdge.set(false);
+
+      toeingOffLosesTooMuchControl.set(false);
+
+      isDesiredICPOKForToeOff.set(false);
+      isCurrentICPOKForToeOff.set(false);
+
+      dynamicsAreOkForToeOff.set(false);
+      dynamicsAreDefinitelyNotOKForToeOff.set(true);
+   }
+
    public void setPolygons(FrameConvexPolygon2DReadOnly leadingFootPolygon,
                            FrameConvexPolygon2DReadOnly trailingFootPolygon,
                            FrameConvexPolygon2DReadOnly onToesPolygon)
