@@ -5,7 +5,7 @@ import us.ihmc.commons.FormattingTools;
 
 import java.lang.management.ManagementFactory;
 
-public class SystemResourceMonitor
+public class MXBeanResourceMonitor
 {
 
    private final OperatingSystemMXBean platformMXBean;
@@ -25,7 +25,7 @@ public class SystemResourceMonitor
    private int availableProcessors;
    private String systemCPUPercentageString;
 
-   public SystemResourceMonitor()
+   public MXBeanResourceMonitor()
    {
       platformMXBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
    }
