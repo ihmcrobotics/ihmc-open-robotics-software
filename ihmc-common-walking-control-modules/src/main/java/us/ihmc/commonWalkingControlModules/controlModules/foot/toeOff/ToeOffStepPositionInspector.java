@@ -58,6 +58,14 @@ public class ToeOffStepPositionInspector
       parentRegistry.addChild(registry);
    }
 
+   public void reset()
+   {
+      isSteppingUp.set(false);
+      isSteppingDown.set(false);
+      isStepLongEnough.set(false);
+      isStepFarEnoughForward.set(false);
+   }
+
    public boolean isFrontFootWellPositionedForToeOff(RobotSide trailingLeg, FramePose3DReadOnly frontFootPose)
    {
       ReferenceFrame trailingFootFrame = soleZUpFrames.get(trailingLeg);
@@ -96,5 +104,10 @@ public class ToeOffStepPositionInspector
          return true;
 
       return isStepLongEnough.getValue() && isStepFarEnoughForward.getValue();
+   }
+
+   public boolean isSteppingUp()
+   {
+      return isSteppingUp.getBooleanValue();
    }
 }
