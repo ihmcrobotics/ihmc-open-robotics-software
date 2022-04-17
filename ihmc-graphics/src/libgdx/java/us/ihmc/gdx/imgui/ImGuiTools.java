@@ -208,6 +208,11 @@ public class ImGuiTools
       return bigFont;
    }
 
+   public static ImFont getMediumFont()
+   {
+      return mediumFont;
+   }
+
    public static ImFont getNodeFont() {
       return nodeFont;
    }

@@ -3,6 +3,7 @@ package us.ihmc.gdx.ui.missionControl;
 import imgui.ImGui;
 import org.apache.commons.lang3.tuple.MutablePair;
 import us.ihmc.behaviors.tools.MessagerHelper;
+import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.ui.tools.ImGuiMessagerManagerWidget;
 import us.ihmc.gdx.ui.yo.ImPlotDoublePlotLine;
 import us.ihmc.gdx.ui.yo.ImPlotPlot;
@@ -13,6 +14,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class ImGuiSSHJMachine
 {
+   private final String machineName;
    private final MessagerHelper messagerHelper;
 
    private final ImGuiMessagerManagerWidget messagerManagerWidget;
@@ -28,6 +30,7 @@ public class ImGuiSSHJMachine
 
    public ImGuiSSHJMachine(String machineName, String hostname, String username)
    {
+      this.machineName = machineName;
       systemdServiceManager = new ImGuiSSHJSystemdServiceManager(machineName, "Mission Control Service", "mission-control-2", hostname, username);
 
       ramPlot.getPlotLines().add(ramUsagePlotLine);
@@ -43,6 +46,10 @@ public class ImGuiSSHJMachine
 
    public void renderImGuiWidgets()
    {
+      ImGui.pushFont(ImGuiTools.getMediumFont());
+      ImGui.text(machineName);
+      ImGui.popFont();
+
       systemdServiceManager.renderImGuiWidgets();
 
       messagerManagerWidget.renderImGuiWidgets();
