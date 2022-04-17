@@ -2,6 +2,6 @@
   "dockspacePanels" : { },
   "windows" : {
     "Main Panel" : true,
-    "Mission Control Service Log" : true
+    "Raspberry Pi Mission Control Service Log" : true
   }
 }

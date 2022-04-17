@@ -9,7 +9,7 @@ public class ImGuiSSHJMissionControlUI
    private final String REMOTE_USERNAME = System.getProperty("remote.username");
 
    private final ImGuiSSHJMachine raspberryPi;
-   private final ImGuiSSHJCommand missionControlServiceLogCommand;
+//   private final ImGuiSSHJCommand missionControlServiceLogCommand;
 
    public ImGuiSSHJMissionControlUI()
    {
@@ -19,14 +19,15 @@ public class ImGuiSSHJMissionControlUI
                                                             "SSHJ Shell");
       imGuiGlfwWindow.runWithSinglePanel(this::renderImGuiWidgets);
 
-      raspberryPi = new ImGuiSSHJMachine(REMOTE_HOSTNAME);
+      raspberryPi = new ImGuiSSHJMachine("Raspberry Pi", REMOTE_HOSTNAME, REMOTE_USERNAME);
+      imGuiGlfwWindow.getPanelManager().addPanel(raspberryPi.getSystemdServiceManager().getLogPanel());
 
-      missionControlServiceLogCommand = new ImGuiSSHJCommand("Mission Control Service",
-                                                             "sudo journalctl -ef -u mission-control-2",
-                                                             REMOTE_HOSTNAME,
-                                                             REMOTE_USERNAME);
-
-      imGuiGlfwWindow.getPanelManager().addPanel(missionControlServiceLogCommand.getLogPanel());
+//      missionControlServiceLogCommand = new ImGuiSSHJCommand("Mission Control Service",
+//                                                             "sudo journalctl -ef -u mission-control-2",
+//                                                             REMOTE_HOSTNAME,
+//                                                             REMOTE_USERNAME);
+//
+//      imGuiGlfwWindow.getPanelManager().addPanel(missionControlServiceLogCommand.getLogPanel());
    }
 
    private void renderImGuiWidgets()
@@ -35,7 +36,7 @@ public class ImGuiSSHJMissionControlUI
 
       ImGui.separator();
 
-      missionControlServiceLogCommand.renderImGuiWidgets();
+//      missionControlServiceLogCommand.renderImGuiWidgets();
    }
 
    public static void main(String[] args)

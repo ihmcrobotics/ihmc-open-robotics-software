@@ -24,8 +24,12 @@ public class ImGuiSSHJMachine
    private final ImPlotDoublePlotLine ramTotalPlotLine = new ImPlotDoublePlotLine("RAM Total GiB", 30 * 5, 30.0);
    private final ImPlotPlot cpuPlot = new ImPlotPlot();
 
-   public ImGuiSSHJMachine(String hostname)
+   private final ImGuiSSHJSystemdServiceManager systemdServiceManager;
+
+   public ImGuiSSHJMachine(String machineName, String hostname, String username)
    {
+      systemdServiceManager = new ImGuiSSHJSystemdServiceManager(machineName, "Mission Control Service", "mission-control-2", hostname, username);
+
       ramPlot.getPlotLines().add(ramUsagePlotLine);
       ramPlot.getPlotLines().add(ramTotalPlotLine);
 
@@ -39,7 +43,7 @@ public class ImGuiSSHJMachine
 
    public void renderImGuiWidgets()
    {
-
+      systemdServiceManager.renderImGuiWidgets();
 
       messagerManagerWidget.renderImGuiWidgets();
 
@@ -69,5 +73,10 @@ public class ImGuiSSHJMachine
          }
       }
       cpuPlot.render(ImGui.getColumnWidth(), 50.0f);
+   }
+
+   public ImGuiSSHJSystemdServiceManager getSystemdServiceManager()
+   {
+      return systemdServiceManager;
    }
 }
