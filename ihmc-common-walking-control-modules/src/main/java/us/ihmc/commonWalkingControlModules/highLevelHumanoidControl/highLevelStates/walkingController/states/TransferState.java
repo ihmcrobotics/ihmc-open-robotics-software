@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.commonWalkingControlModules.referenceFrames.WalkingTrajectoryPath;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -181,12 +182,12 @@ public abstract class TransferState extends WalkingState
                                                      balanceManager.getFinalDesiredICP(),
                                                      balanceManager.getPerfectCoP());
 
-         if (feetManager.okForPointToeOff())
+         if (feetManager.okForPointToeOff(false))
          {
             feetManager.requestPointToeOff(trailingLeg, trailingFootExitCMP, filteredDesiredCoP);
             return true;
          }
-         else if (feetManager.okForLineToeOff())
+         else if (feetManager.okForLineToeOff(false))
          {
             feetManager.requestLineToeOff(trailingLeg, trailingFootExitCMP, filteredDesiredCoP);
             return true;
@@ -203,6 +204,7 @@ public abstract class TransferState extends WalkingState
       return false;
    }
 
+   private final FramePose3D transferToPose = new FramePose3D();
    @Override
    public void onEntry()
    {
@@ -219,7 +221,9 @@ public abstract class TransferState extends WalkingState
       }
 
       double extraToeOffHeight = 0.0;
-      if (feetManager.canDoDoubleSupportToeOff(null, transferToSide)) // FIXME should this be swing side?
+
+      transferToPose.setFromReferenceFrame(controllerToolbox.getReferenceFrames().getSoleZUpFrame(transferToSide));
+      if (feetManager.canDoDoubleSupportToeOff(transferToPose, transferToSide)) // FIXME should this be swing side?
          extraToeOffHeight = feetManager.getExtraCoMMaxHeightWithToes();
 
       TransferToAndNextFootstepsData transferToAndNextFootstepsData = walkingMessageHandler.createTransferToAndNextFootstepDataForDoubleSupport(transferToSide);

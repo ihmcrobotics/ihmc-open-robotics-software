@@ -119,7 +119,7 @@ public class DynamicStateInspector
       this.trailingFootPolygon.setIncludingFrame(trailingFootPolygon);
       this.onToesPolygon.setIncludingFrame(onToesPolygon);
 
-      supportPolygon.clear();
+      supportPolygon.clear(worldFrame);
       supportPolygon.addVertices(leadingFootPolygon);
       supportPolygon.addVertices(trailingFootPolygon);
       supportPolygon.update();
