@@ -416,7 +416,7 @@ public class ICPController implements ICPControllerInterface
    private void computeCMPPositions()
    {
       if (parameters.getFeedbackAlphaCalculator() != null)
-         feedbackAlpha.set(parameters.getFeedbackAlphaCalculator().getValue());
+         feedbackAlpha.set(parameters.getFeedbackAlphaCalculator().computeAlpha(currentICP, copConstraintHandler.getCoPConstraint()));
       else
          feedbackAlpha.set(0.0);
 
