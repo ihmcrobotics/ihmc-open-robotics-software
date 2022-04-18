@@ -2,7 +2,6 @@ package us.ihmc.missionControl;
 
 import org.apache.commons.lang3.tuple.MutablePair;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.log.LogTools;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.kryo.KryoMessager;
 import us.ihmc.tools.processManagement.ProcessTools;
@@ -42,9 +41,9 @@ public class MissionControlService
 
       if (kryoMessagerServer.isMessagerOpen())
       {
-         String statusOutput = ProcessTools.execSimpleCommand("systemctl status mission-control-2");
-         String[] lines = statusOutput.split("\\R");
-         kryoMessagerServer.submitMessage(ServiceStatus, lines[2].trim());
+         publishStatus("mission-control-2", ServiceStatus);
+         publishStatus("mission-control-application-1", ExampleApplication1Status);
+         publishStatus("mission-control-application-2", ExampleApplication2Status);
 
          kryoMessagerServer.submitMessage(RAMUsage, MutablePair.of(linuxResourceMonitor.getUsedRAMGiB(), linuxResourceMonitor.getTotalRAMGiB()));
          ArrayList<Double> cpuUsages = new ArrayList<>();
@@ -54,6 +53,13 @@ public class MissionControlService
          }
          kryoMessagerServer.submitMessage(API.CPUUsages, cpuUsages);
       }
+   }
+
+   private void publishStatus(String serviceName, MessagerAPIFactory.Topic<String> topic)
+   {
+      String statusOutput = ProcessTools.execSimpleCommand("systemctl status " + serviceName);
+      String[] lines = statusOutput.split("\\R");
+      kryoMessagerServer.submitMessage(topic, lines[2].trim());
    }
 
    public static class API
@@ -67,6 +73,8 @@ public class MissionControlService
       public static final MessagerAPIFactory.Topic<MutablePair<Double, Double>> RAMUsage = topic("RAMUsage");
       public static final MessagerAPIFactory.Topic<ArrayList<Double>> CPUUsages = topic("CPUUsages");
       public static final MessagerAPIFactory.Topic<String> ServiceStatus = topic("ServiceStatus");
+      public static final MessagerAPIFactory.Topic<String> ExampleApplication1Status = topic("ExampleApplication1Status");
+      public static final MessagerAPIFactory.Topic<String> ExampleApplication2Status = topic("ExampleApplication2Status");
 
       private static <T> MessagerAPIFactory.Topic<T> topic(String name)
       {
