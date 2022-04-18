@@ -8,6 +8,8 @@ import us.ihmc.tools.processManagement.ProcessTools;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 
 import java.util.ArrayList;
+import java.util.TreeSet;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static us.ihmc.missionControl.MissionControlService.API.*;
 
@@ -16,7 +18,9 @@ public class MissionControlService
    private final LinuxResourceMonitor linuxResourceMonitor = new LinuxResourceMonitor();
 
    private final KryoMessager kryoMessagerServer;
-   private final ArrayList<String> servicesToTrack = new ArrayList<>();
+   private final TreeSet<String> servicesToTrack = new TreeSet<>();
+   private boolean firstConnectedTick = true;
+   private final ConcurrentLinkedQueue<String> servicesToTrackQueue = new ConcurrentLinkedQueue<>();
 
    public MissionControlService()
    {
@@ -25,6 +29,8 @@ public class MissionControlService
       ExceptionHandlingThreadScheduler updateThreadScheduler = new ExceptionHandlingThreadScheduler("MissionControlUpdate",
                                                                                                     DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
       updateThreadScheduler.schedule(this::update, 0.2);
+
+      servicesToTrack.add("mission-control-2");
    }
 
    private void update()
@@ -42,10 +48,21 @@ public class MissionControlService
 
       if (kryoMessagerServer.isMessagerOpen())
       {
-         ArrayList<MutablePair<String, String>> statuses = new ArrayList<>();
+         if (firstConnectedTick)
+         {
+            firstConnectedTick = false;
+            kryoMessagerServer.registerTopicListener(ServiceNameToTrack, servicesToTrackQueue::add);
+         }
+
+         while (!servicesToTrackQueue.isEmpty())
+         {
+            servicesToTrack.add(servicesToTrackQueue.poll());
+         }
+
+         ArrayList<String> statuses = new ArrayList<>();
          for (String serviceName : servicesToTrack)
          {
-            statuses.add(MutablePair.of(serviceName, getStatus(serviceName)));
+            statuses.add(serviceName + ":" + getStatus(serviceName));
          }
          kryoMessagerServer.submitMessage(ServiceStatuses, statuses);
 
@@ -76,7 +93,8 @@ public class MissionControlService
 
       public static final MessagerAPIFactory.Topic<MutablePair<Double, Double>> RAMUsage = topic("RAMUsage");
       public static final MessagerAPIFactory.Topic<ArrayList<Double>> CPUUsages = topic("CPUUsages");
-      public static final MessagerAPIFactory.Topic<ArrayList<MutablePair<String, String>>> ServiceStatuses = topic("ServiceStatuses");
+      public static final MessagerAPIFactory.Topic<String> ServiceNameToTrack = topic("ServiceNameToTrack");
+      public static final MessagerAPIFactory.Topic<ArrayList<String>> ServiceStatuses = topic("ServiceStatuses");
       private static <T> MessagerAPIFactory.Topic<T> topic(String name)
       {
          return RootCategory.child(MissionControlServiceTheme).topic(apiFactory.createTypedTopicTheme(name));
@@ -90,7 +108,6 @@ public class MissionControlService
 
    public static void main(String[] args)
    {
-
       new MissionControlService();
    }
 }
