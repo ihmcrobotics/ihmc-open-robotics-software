@@ -48,11 +48,11 @@ public class StereoPointCloudCompression
 
       private void initialize(int numberOfPoints)
       {
+         int pointCloudByteBufferSize = computePointByteBufferSize(numberOfPoints);
+         int colorByteBufferSize = computeColorByteBufferSize(numberOfPoints);
+
          if (this.numberOfPoints == -1 || this.numberOfPoints < numberOfPoints)
          {
-            this.numberOfPoints = numberOfPoints;
-            int pointCloudByteBufferSize = computePointByteBufferSize(numberOfPoints);
-            int colorByteBufferSize = computeColorByteBufferSize(numberOfPoints);
             rawPointCloudByteBuffer = ByteBuffer.allocateDirect(pointCloudByteBufferSize);
             rawColorByteBuffer = ByteBuffer.allocateDirect(colorByteBufferSize);
 
@@ -65,21 +65,31 @@ public class StereoPointCloudCompression
          }
          else
          {
-            this.numberOfPoints = numberOfPoints;
-            rawPointCloudByteBuffer.clear();
-            rawColorByteBuffer.clear();
             compressedPointCloudByteBuffer.clear();
             compressedColorByteBuffer.clear();
 
-            message.setSequenceId(-1);
-            message.setTimestamp(-1);
-            message.getSensorPosition().setToZero();
-            message.getSensorOrientation().setToZero();
-            message.setResolution(0.0);
-            message.setNumberOfPoints(0);
-            message.getPointCloud().reset();
-            message.getColors().reset();
+            rawPointCloudByteBuffer.limit(pointCloudByteBufferSize);
+            rawColorByteBuffer.limit(colorByteBufferSize);
+
+            rawPointCloudCharBuffer.limit(numberOfPoints * 3);
+            rawColorIntBuffer.limit(numberOfPoints);
+
+            rawPointCloudByteBuffer.position(0);
+            rawColorByteBuffer.position(0);
+
+            rawPointCloudCharBuffer.position(0);
+            rawColorIntBuffer.position(0);
          }
+
+         this.numberOfPoints = numberOfPoints;
+         message.setSequenceId(-1);
+         message.setTimestamp(-1);
+         message.getSensorPosition().setToZero();
+         message.getSensorOrientation().setToZero();
+         message.setResolution(0.0);
+         message.setNumberOfPoints(0);
+         message.getPointCloud().reset();
+         message.getColors().reset();
       }
    }
 
@@ -154,9 +164,6 @@ public class StereoPointCloudCompression
          compressedColorByteBuffer = ByteBuffer.allocate(colorByteBufferSize * 2);
          compressor = compressorThreadLocal.get();
       }
-
-      rawColorIntBuffer.position(0);
-      rawPointCloudCharBuffer.position(0);
 
       for (int i = 0; i < numberOfPoints; i++)
       {

@@ -59,9 +59,11 @@ public class StereoPointCloudCompressionTest
          {
             inputColors[j] = random.nextInt(bound);
          }
+         PointAccessor pointAccessor = PointAccessor.wrap(inputPointCloud);
+         ColorAccessor colorAccessor = ColorAccessor.wrapRGB(inputColors);
          StereoVisionPointCloudMessage message = StereoPointCloudCompression.compressPointCloudFast(inputTimestamp,
-                                                                                                    PointAccessor.wrap(inputPointCloud),
-                                                                                                    ColorAccessor.wrapRGB(inputColors),
+                                                                                                    pointAccessor,
+                                                                                                    colorAccessor,
                                                                                                     inputNumberOfPoints,
                                                                                                     minimumResolution,
                                                                                                     variablesPackage);
