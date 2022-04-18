@@ -34,14 +34,14 @@ public class ImGuiSSHJMissionControlUI
                                                                    REMOTE_HOSTNAME,
                                                                    REMOTE_USERNAME);
       imGuiGlfwWindow.getPanelManager().addPanel(exampleApplication1Manager.getLogPanel());
-      exampleApplication1Status = raspberryPi.subscribeToServiceStatus(MissionControlService.API.ExampleApplication1Status);
+      exampleApplication1Status = raspberryPi.subscribeToServiceStatus("mission-control-application-1");
 
       exampleApplication2Manager = new ImGuiSSHJApplicationService("Example Application 2",
                                                                    "mission-control-application-2",
                                                                    REMOTE_HOSTNAME,
                                                                    REMOTE_USERNAME);
       imGuiGlfwWindow.getPanelManager().addPanel(exampleApplication2Manager.getLogPanel());
-      exampleApplication2Status = raspberryPi.subscribeToServiceStatus(MissionControlService.API.ExampleApplication2Status);
+      exampleApplication2Status = raspberryPi.subscribeToServiceStatus("mission-control-application-2");
    }
 
    private void renderImGuiWidgets()

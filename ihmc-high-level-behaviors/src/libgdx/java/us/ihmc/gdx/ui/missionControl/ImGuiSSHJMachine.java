@@ -11,11 +11,11 @@ import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.ui.tools.ImGuiMessagerManagerWidget;
 import us.ihmc.gdx.ui.yo.ImPlotDoublePlotLine;
 import us.ihmc.gdx.ui.yo.ImPlotPlot;
-import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.missionControl.MissionControlService;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ImGuiSSHJMachine
@@ -24,7 +24,7 @@ public class ImGuiSSHJMachine
    private final MessagerHelper messagerHelper;
 
    private final ImGuiMessagerManagerWidget messagerManagerWidget;
-   private final AtomicReference<String> serviceStatusSubscription;
+   private final AtomicReference<ArrayList<MutablePair<String, String>>> serviceStatusSubscription;
    private final AtomicReference<MutablePair<Double, Double>> ramUsageSubscription;
    private final AtomicReference<ArrayList<Double>> cpuUsagesSubscription;
 
@@ -35,6 +35,7 @@ public class ImGuiSSHJMachine
    private final ImPlotPlot cpuPlot = new ImPlotPlot();
 
    private final ImGuiSSHJSystemdServiceManager systemdServiceManager;
+   private final HashMap<String, AtomicReference<String>> serviceStatuses = new HashMap<>();
 
    public ImGuiSSHJMachine(String machineName, String hostname, String username)
    {
@@ -72,7 +73,9 @@ public class ImGuiSSHJMachine
 
       messagerHelper = new MessagerHelper(MissionControlService.API.create());
 
-      serviceStatusSubscription = messagerHelper.subscribeViaReference(MissionControlService.API.ServiceStatus, "Status not yet received.");
+      ArrayList<MutablePair<String, String>> initialStatues = new ArrayList<>();
+      initialStatues.add(MutablePair.of("mission-control-2", "Status not yet received."));
+      serviceStatusSubscription = messagerHelper.subscribeViaReference(MissionControlService.API.ServiceStatuses, initialStatues);
       ramUsageSubscription = messagerHelper.subscribeViaReference(MissionControlService.API.RAMUsage, MutablePair.of(0.0, 1.0));
       cpuUsagesSubscription = messagerHelper.subscribeViaReference(MissionControlService.API.CPUUsages, new ArrayList<>());
 
@@ -89,7 +92,22 @@ public class ImGuiSSHJMachine
 
       messagerManagerWidget.renderImGuiWidgets();
 
-      ImGui.text(serviceStatusSubscription.get());
+      ArrayList<MutablePair<String, String>> statuses = serviceStatusSubscription.get();
+      for (MutablePair<String, String> status : statuses)
+      {
+         if (status.getLeft().equals("mission-control-2"))
+         {
+            ImGui.text(status.getRight());
+         }
+         else
+         {
+            AtomicReference<String> statusAtomicReference = serviceStatuses.get(status.getLeft());
+            if (statusAtomicReference != null)
+            {
+               statusAtomicReference.set(status.getRight());
+            }
+         }
+      }
 
       MutablePair<Double, Double> ramUsage = ramUsageSubscription.getAndSet(null);
       if (ramUsage != null)
@@ -124,8 +142,10 @@ public class ImGuiSSHJMachine
       return systemdServiceManager;
    }
 
-   public AtomicReference<String> subscribeToServiceStatus(MessagerAPIFactory.Topic<String> topic)
+   public AtomicReference<String> subscribeToServiceStatus(String serviceName)
    {
-      return messagerHelper.subscribeViaReference(topic, "Status not yet received.");
+      AtomicReference<String> atomicReference = new AtomicReference<>("Status not yet received.");
+      serviceStatuses.put(serviceName, atomicReference);
+      return atomicReference;
    }
 }
