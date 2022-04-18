@@ -175,6 +175,9 @@ public class HeuristicICPControllerTest
       FramePoint2D desiredICP = new FramePoint2D(worldFrame);
       FramePoint2D perfectCMP = new FramePoint2D(worldFrame);
 
+      FramePoint2D finalICP = new FramePoint2D();
+      finalICP.setToNaN();
+
       desiredICP.set(0.0, 0.12);
       perfectCMP.set(0.0, -0.15);
       FramePoint2D perfectCoP = new FramePoint2D(perfectCMP);
@@ -189,7 +192,7 @@ public class HeuristicICPControllerTest
          visualizer.updateInputs(omega, supportPolygonInWorld, desiredICP, desiredICPVelocity, perfectCMP, perfectCoP, currentICP, currentCoMPosition);
 
       controller.initialize();
-      controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition, omega);
+      controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, finalICP, perfectCMP, currentICP, currentCoMPosition, omega);
 
       FrameVector2D expectedControlICPVelocity = new FrameVector2D(worldFrame);
       FramePoint2D desiredCMP = new FramePoint2D(worldFrame);
@@ -264,6 +267,9 @@ public class HeuristicICPControllerTest
 
       FramePoint2D perfectCoP = new FramePoint2D(perfectCMP);
 
+      FramePoint2D finalICP = new FramePoint2D();
+      finalICP.setToNaN();
+
       FrameVector2D icpError = new FrameVector2D(desiredICPVelocity);
       icpError.normalize();
       icpError.scale(-0.1);
@@ -277,7 +283,7 @@ public class HeuristicICPControllerTest
          visualizer.updateInputs(omega, supportPolygonInWorld, desiredICP, desiredICPVelocity, perfectCMP, perfectCoP, currentICP, currentCoMPosition);
 
       controller.initialize();
-      controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition, omega);
+      controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, finalICP, perfectCMP, currentICP, currentCoMPosition, omega);
 
       FrameVector2D expectedControlICPVelocity = new FrameVector2D(worldFrame);
       FramePoint2D desiredCMP = new FramePoint2D(worldFrame);
@@ -333,6 +339,9 @@ public class HeuristicICPControllerTest
       FramePoint2D desiredICP = new FramePoint2D(worldFrame, 0.03, 0.06);
       FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.01, 0.04);
 
+      FramePoint2D finalICP = new FramePoint2D();
+      finalICP.setToNaN();
+
       desiredICP.set(0.03, 0.06);
       perfectCMP.set(0.01, 0.04);
 
@@ -347,7 +356,7 @@ public class HeuristicICPControllerTest
       FramePoint2D currentCoMPosition = new FramePoint2D(currentICP);
 
       controller.initialize();
-      controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition, omega);
+      controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, finalICP, perfectCMP, currentICP, currentCoMPosition, omega);
 
       FrameVector2D expectedControlICPVelocity = new FrameVector2D(worldFrame);
       FramePoint2D desiredCMP = new FramePoint2D(worldFrame);
@@ -399,6 +408,9 @@ public class HeuristicICPControllerTest
 
       double omega = 3.0;
 
+      FramePoint2D finalICP = new FramePoint2D();
+      finalICP.setToNaN();
+
       FramePoint2D desiredICP = new FramePoint2D(worldFrame, 0.03, 0.06);
       FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.01, 0.04);
       FrameVector2D desiredICPVelocity = new FrameVector2D();
@@ -412,7 +424,7 @@ public class HeuristicICPControllerTest
       FramePoint2D currentCoM = new FramePoint2D(currentICP);
 
       controller.initialize();
-      controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoM, omega);
+      controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, finalICP, perfectCMP, currentICP, currentCoM, omega);
 
       FramePoint2D desiredCMP = new FramePoint2D();
       controller.getDesiredCMP(desiredCMP);

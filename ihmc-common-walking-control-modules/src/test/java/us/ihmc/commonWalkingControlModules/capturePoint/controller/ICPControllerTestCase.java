@@ -18,6 +18,7 @@ public class ICPControllerTestCase
    private final FrameVector2D perfectCMPOffset = new FrameVector2D();
    private final FramePoint2D currentCoMPosition = new FramePoint2D();
    private final FramePoint2D currentICP = new FramePoint2D();
+   private final FramePoint2D finalICP = new FramePoint2D();
 
    private final FramePoint2D desiredCMP = new FramePoint2D();
    private final FramePoint2D desiredCoP = new FramePoint2D();
@@ -33,6 +34,7 @@ public class ICPControllerTestCase
       perfectCMPOffset.setToNaN();
       currentCoMPosition.setToNaN();
       currentICP.setToNaN();
+      finalICP.setToNaN();
       desiredCMP.setToNaN();
       desiredCoP.setToNaN();
       expectedControlICPVelocity.setToNaN();
@@ -48,6 +50,7 @@ public class ICPControllerTestCase
       this.setPerfectCMPOffset(testCase.getPerfectCMPOffset());
       this.setCurrentCoMPosition(testCase.getCurrentCoMPosition());
       this.setCurrentICP(testCase.getCurrentICP());
+      this.setFinalICP(testCase.getFinalICPPosition());
 
       desiredCMP.setToNaN();
       desiredCoP.setToNaN();
@@ -117,6 +120,16 @@ public class ICPControllerTestCase
    public FramePoint2DReadOnly getCurrentCoMPosition()
    {
       return currentCoMPosition;
+   }
+
+   public FramePoint2DReadOnly getFinalICPPosition()
+   {
+      return finalICP;
+   }
+
+   public void setFinalICP(FramePoint2DReadOnly finalICP)
+   {
+      this.finalICP.set(finalICP);
    }
 
    public void setCurrentCoMPosition(FramePoint2DReadOnly currentCoMPosition)
