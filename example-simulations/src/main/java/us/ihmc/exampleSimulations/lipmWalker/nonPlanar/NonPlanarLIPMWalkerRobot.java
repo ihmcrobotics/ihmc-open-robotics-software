@@ -135,9 +135,19 @@ public class NonPlanarLIPMWalkerRobot
       return bodyJoint.getOrientation().getPitch();
    }
 
+   public double getBodyRollAngle()
+   {
+      return bodyJoint.getOrientation().getRoll();
+   }
+
    public double getBodyPitchAngularVelocity()
    {
       return bodyJoint.getAngularVelocity().getY();
+   }
+
+   public double getBodyRollAngularVelocity()
+   {
+      return bodyJoint.getAngularVelocity().getX();
    }
 
    public double getHipAngleRoll(RobotSide robotSide)
@@ -296,7 +306,7 @@ public class NonPlanarLIPMWalkerRobot
       return thighLinkDescription;
    }
 
-   public double getCenterOfMassXDistanceFromSupportFoot()
+   public Point3D getCenterOfMassPositionFromSupportFoot()
    {
       Point3D leftFootPosition = getFootPosition(RobotSide.LEFT);
       Point3D rightFootPosition = getFootPosition(RobotSide.RIGHT);
@@ -310,7 +320,10 @@ public class NonPlanarLIPMWalkerRobot
          loadedFootPosition = rightFootPosition;
       }
 
-      return getCenterOfMassPosition().getX() - loadedFootPosition.getX();
+      Point3D result = new Point3D(0.0, 0.0, 0.0);
+      result.add(getCenterOfMassPosition());
+      result.sub(loadedFootPosition);
+      return result;
    }
 
    //   public double getCenterOfMassXDistanceFromSupportFoot(RobotSide stanceSide)
