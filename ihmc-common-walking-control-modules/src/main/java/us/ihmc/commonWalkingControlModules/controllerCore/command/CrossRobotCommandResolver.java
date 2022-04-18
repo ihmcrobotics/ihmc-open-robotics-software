@@ -856,6 +856,7 @@ public class CrossRobotCommandResolver
       out.setUseMomentumRecoveryMode(in.getUseMomentumRecoveryMode());
       resolveFrameTuple2D(in.getDesiredCapturePoint(), out.getDesiredCapturePoint());
       resolveFrameTuple2D(in.getDesiredCapturePointVelocity(), out.getDesiredCapturePointVelocity());
+      resolveFrameTuple2D(in.getDesiredCapturePointAtEndOfState(), out.getDesiredCapturePointAtEndOfState());
       resolveFrameTuple2D(in.getPerfectCMP(), out.getPerfectCMP());
       resolveFrameTuple2D(in.getPerfectCoP(), out.getPerfectCoP());
       out.setControlHeightWithMomentum(in.getControlHeightWithMomentum());

@@ -113,6 +113,7 @@ public class ICPController implements ICPControllerInterface
    private final ExecutionTimer controllerTimer = new ExecutionTimer("icpControllerTimer", 0.5, registry);
 
    private final FramePoint2D desiredICP = new FramePoint2D();
+   private final FramePoint2D finalICP = new FramePoint2D();
    private final FrameVector2D desiredICPVelocity = new FrameVector2D();
    private final FrameVector2D perfectCMPOffset = new FrameVector2D();
    private final FramePoint2D currentICP = new FramePoint2D();
@@ -275,13 +276,14 @@ public class ICPController implements ICPControllerInterface
    public void compute(FrameConvexPolygon2DReadOnly supportPolygonInWorld,
                        FramePoint2DReadOnly desiredICP,
                        FrameVector2DReadOnly desiredICPVelocity,
+                       FramePoint2DReadOnly finalICP,
                        FramePoint2DReadOnly perfectCoP,
                        FramePoint2DReadOnly currentICP,
                        FramePoint2DReadOnly currentCoMPosition,
                        double omega0)
    {
       desiredCMPOffsetToThrowAway.setToZero(worldFrame);
-      compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, perfectCoP, desiredCMPOffsetToThrowAway, currentICP, currentCoMPosition, omega0);
+      compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, finalICP, perfectCoP, desiredCMPOffsetToThrowAway, currentICP, currentCoMPosition, omega0);
    }
 
    /** {@inheritDoc} */
@@ -289,6 +291,7 @@ public class ICPController implements ICPControllerInterface
    public void compute(FrameConvexPolygon2DReadOnly supportPolygonInWorld,
                        FramePoint2DReadOnly desiredICP,
                        FrameVector2DReadOnly desiredICPVelocity,
+                       FramePoint2DReadOnly finalICP,
                        FramePoint2DReadOnly perfectCoP,
                        FrameVector2DReadOnly perfectCMPOffset,
                        FramePoint2DReadOnly currentICP,
@@ -298,6 +301,7 @@ public class ICPController implements ICPControllerInterface
       controllerTimer.startMeasurement();
 
       this.desiredICP.setMatchingFrame(desiredICP);
+      this.finalICP.setMatchingFrame(finalICP);
       this.desiredICPVelocity.setMatchingFrame(desiredICPVelocity);
       this.perfectCMPOffset.setMatchingFrame(perfectCMPOffset);
       this.currentICP.setMatchingFrame(currentICP);
@@ -421,7 +425,12 @@ public class ICPController implements ICPControllerInterface
          feedbackAlpha.set(0.0);
 
       if (parameters.getFeedForwardAlphaCalculator() != null)
-         feedForwardAlpha.set(parameters.getFeedForwardAlphaCalculator().getValue());
+         feedForwardAlpha.set(parameters.getFeedForwardAlphaCalculator().computeAlpha(currentICP,
+                                                                                      desiredICP,
+                                                                                      finalICP,
+                                                                                      perfectCMP,
+                                                                                      unconstrainedFeedbackCMP,
+                                                                                      copConstraintHandler.getCoPConstraint()));
       else
          feedForwardAlpha.set(0.0);
 
