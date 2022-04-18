@@ -5,6 +5,7 @@ import static us.ihmc.jOctoMap.tools.OcTreeKeyTools.computeCenterOffsetKey;
 import java.awt.Color;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
+import java.nio.IntBuffer;
 import java.util.function.IntConsumer;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
@@ -15,9 +16,6 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.jOctoMap.key.OcTreeKeyReadOnly;
-import us.ihmc.jOctoMap.tools.OcTreeKeyConversionTools;
-import us.ihmc.jOctoMap.tools.OcTreeKeyTools;
 import us.ihmc.tools.compression.LZ4CompressionImplementation;
 
 /**
@@ -37,10 +35,9 @@ public class StereoPointCloudCompression
       private ByteBuffer rawPointCloudByteBuffer;
       private ByteBuffer rawColorByteBuffer;
       private CharBuffer rawPointCloudCharBuffer;
+      private IntBuffer rawColorIntBuffer;
       private final LZ4CompressionImplementation compressor = new LZ4CompressionImplementation();
 
-      private ByteBufferedSequence byteBufferedPointCloud;
-      private ByteBufferedSequence byteBufferedColors;
       private ByteBuffer compressedPointCloudByteBuffer;
       private ByteBuffer compressedColorByteBuffer;
       private final StereoVisionPointCloudMessage message = new StereoVisionPointCloudMessage();
@@ -51,171 +48,49 @@ public class StereoPointCloudCompression
 
       private void initialize(int numberOfPoints)
       {
-         if (this.numberOfPoints == -1 || this.numberOfPoints != numberOfPoints)
+         if (this.numberOfPoints == -1 || this.numberOfPoints < numberOfPoints)
          {
             this.numberOfPoints = numberOfPoints;
-            int pointCloudByteBufferSize = numberOfPoints * 3 * 2;
-            int colorByteBufferSize = numberOfPoints * 3;
+            int pointCloudByteBufferSize = computePointByteBufferSize(numberOfPoints);
+            int colorByteBufferSize = computeColorByteBufferSize(numberOfPoints);
             rawPointCloudByteBuffer = ByteBuffer.allocateDirect(pointCloudByteBufferSize);
             rawColorByteBuffer = ByteBuffer.allocateDirect(colorByteBufferSize);
 
             rawPointCloudCharBuffer = rawPointCloudByteBuffer.asCharBuffer();
+            rawColorIntBuffer = rawColorByteBuffer.asIntBuffer();
 
-            byteBufferedPointCloud = new ByteBufferedSequence(numberOfPoints * 3 * 2 + numberOfPoints / 2, "type_9");
-            byteBufferedColors = new ByteBufferedSequence(message.colors_.capacity(), "type_9");
-
-            message.point_cloud_ = byteBufferedPointCloud;
-            message.colors_ = byteBufferedColors;
-            compressedPointCloudByteBuffer = byteBufferedPointCloud.byteBuffer;
-            compressedColorByteBuffer = byteBufferedColors.byteBuffer;
+            // LZ4 compression apparently needs some additional room to do its thing.
+            compressedPointCloudByteBuffer = ByteBuffer.allocate(pointCloudByteBufferSize * 2);
+            compressedColorByteBuffer = ByteBuffer.allocate(colorByteBufferSize * 2);
          }
          else
          {
+            this.numberOfPoints = numberOfPoints;
             rawPointCloudByteBuffer.clear();
             rawColorByteBuffer.clear();
-            byteBufferedPointCloud.reset();
-            byteBufferedColors.reset();
+            compressedPointCloudByteBuffer.clear();
+            compressedColorByteBuffer.clear();
+
+            message.setSequenceId(-1);
+            message.setTimestamp(-1);
+            message.getSensorPosition().setToZero();
+            message.getSensorOrientation().setToZero();
+            message.setResolution(0.0);
+            message.setNumberOfPoints(0);
+            message.getPointCloud().reset();
+            message.getColors().reset();
          }
       }
    }
 
-   public static class ByteBufferedSequence extends us.ihmc.idl.IDLSequence.Byte
+   public static int computeColorByteBufferSize(int numberOfPoints)
    {
-      private ByteBuffer byteBuffer;
-
-      public ByteBufferedSequence(int maxSize, String typeCode)
-      {
-         super(maxSize, typeCode);
-         byteBuffer = ByteBuffer.wrap(this._data);
-         reset();
-      }
-
-      @Override
-      public void reset()
-      {
-         super.reset();
-         byteBuffer.clear();
-         byteBuffer.position(0);
-      }
-
-      public void setPosition(int position)
-      {
-         _pos = position;
-      }
+      return numberOfPoints * 4;
    }
 
-   public static interface PointAccessor
+   public static int computePointByteBufferSize(int numberOfPoints)
    {
-      float getX(int pointIndex);
-
-      float getY(int pointIndex);
-
-      float getZ(int pointIndex);
-
-      static PointAccessor wrap(float[] buffer)
-      {
-         return new PointAccessor()
-         {
-            @Override
-            public float getX(int pointIndex)
-            {
-               return buffer[3 * pointIndex];
-            }
-
-            @Override
-            public float getY(int pointIndex)
-            {
-               return buffer[3 * pointIndex + 1];
-            }
-
-            @Override
-            public float getZ(int pointIndex)
-            {
-               return buffer[3 * pointIndex + 2];
-            }
-         };
-      }
-
-      static PointAccessor wrap(Point3DReadOnly[] pointcloud)
-      {
-         return new PointAccessor()
-         {
-            @Override
-            public float getX(int pointIndex)
-            {
-               return pointcloud[pointIndex].getX32();
-            }
-
-            @Override
-            public float getY(int pointIndex)
-            {
-               return pointcloud[pointIndex].getY32();
-            }
-
-            @Override
-            public float getZ(int pointIndex)
-            {
-               return pointcloud[pointIndex].getZ32();
-            };
-         };
-      }
-   }
-
-   public static interface ColorAccessor
-   {
-      byte getRed(int pointIndex);
-
-      byte getGreen(int pointIndex);
-
-      byte getBlue(int pointIndex);
-
-      public static ColorAccessor wrapRGB(int[] rgbBuffer)
-      {
-         return new ColorAccessor()
-         {
-            @Override
-            public byte getRed(int pointIndex)
-            {
-               return (byte) ((rgbBuffer[pointIndex] >> 16) & 0xFF);
-            }
-
-            @Override
-            public byte getGreen(int pointIndex)
-            {
-               return (byte) ((rgbBuffer[pointIndex] >> 8) & 0xFF);
-            }
-
-            @Override
-            public byte getBlue(int pointIndex)
-            {
-               return (byte) ((rgbBuffer[pointIndex] >> 0) & 0xFF);
-            }
-         };
-      }
-
-      public static ColorAccessor wrapRGB(byte[] rgbBuffer)
-      {
-         return new ColorAccessor()
-         {
-            @Override
-            public byte getRed(int pointIndex)
-            {
-               return rgbBuffer[3 * pointIndex];
-            }
-
-            @Override
-            public byte getGreen(int pointIndex)
-            {
-               return rgbBuffer[3 * pointIndex + 1];
-            }
-
-            @Override
-            public byte getBlue(int pointIndex)
-            {
-               return rgbBuffer[3 * pointIndex + 2];
-            }
-         };
-      }
+      return numberOfPoints * 3 * 2;
    }
 
    public static StereoVisionPointCloudMessage compressPointCloudFast(long timestamp,
@@ -251,6 +126,7 @@ public class StereoPointCloudCompression
       ByteBuffer rawPointCloudByteBuffer;
       ByteBuffer rawColorByteBuffer;
       CharBuffer rawPointCloudCharBuffer;
+      IntBuffer rawColorIntBuffer;
       ByteBuffer compressedPointCloudByteBuffer;
       ByteBuffer compressedColorByteBuffer;
       LZ4CompressionImplementation compressor;
@@ -261,30 +137,29 @@ public class StereoPointCloudCompression
          rawPointCloudByteBuffer = variablesPackage.rawPointCloudByteBuffer;
          rawColorByteBuffer = variablesPackage.rawColorByteBuffer;
          rawPointCloudCharBuffer = variablesPackage.rawPointCloudCharBuffer;
+         rawColorIntBuffer = variablesPackage.rawColorIntBuffer;
          compressedPointCloudByteBuffer = variablesPackage.compressedPointCloudByteBuffer;
          compressedColorByteBuffer = variablesPackage.compressedColorByteBuffer;
          compressor = variablesPackage.compressor;
       }
       else
       {
-         int pointCloudByteBufferSize = numberOfPoints * 3 * 2;
-         int colorByteBufferSize = numberOfPoints * 3;
+         int pointCloudByteBufferSize = computePointByteBufferSize(numberOfPoints);
+         int colorByteBufferSize = computeColorByteBufferSize(numberOfPoints);
          rawPointCloudByteBuffer = ByteBuffer.allocate(pointCloudByteBufferSize);
          rawColorByteBuffer = ByteBuffer.allocate(colorByteBufferSize);
          rawPointCloudCharBuffer = rawPointCloudByteBuffer.asCharBuffer();
-         compressedPointCloudByteBuffer = ByteBuffer.allocate(pointCloudByteBufferSize + numberOfPoints / 2);
-         compressedColorByteBuffer = ByteBuffer.allocate(colorByteBufferSize);
+         rawColorIntBuffer = rawColorByteBuffer.asIntBuffer();
+         compressedPointCloudByteBuffer = ByteBuffer.allocate(pointCloudByteBufferSize * 2);
+         compressedColorByteBuffer = ByteBuffer.allocate(colorByteBufferSize * 2);
          compressor = compressorThreadLocal.get();
       }
 
-      rawColorByteBuffer.position(0);
+      rawColorIntBuffer.position(0);
       rawPointCloudCharBuffer.position(0);
 
       for (int i = 0; i < numberOfPoints; i++)
       {
-         // int keyX = OcTreeKeyConversionTools.coordinateToKey((pointAccessor.getX(i) - centerX), octreeResolution, OCTREE_DEPTH);
-         // int keyY = OcTreeKeyConversionTools.coordinateToKey((pointAccessor.getY(i) - centerY), octreeResolution, OCTREE_DEPTH);
-         // int keyZ = OcTreeKeyConversionTools.coordinateToKey((pointAccessor.getZ(i) - centerZ), octreeResolution, OCTREE_DEPTH);
          int keyX = (int) ((pointAccessor.getX(i) - centerX) / octreeResolution) + centerOffsetKey;
          int keyY = (int) ((pointAccessor.getY(i) - centerY) / octreeResolution) + centerOffsetKey;
          int keyZ = (int) ((pointAccessor.getZ(i) - centerZ) / octreeResolution) + centerOffsetKey;
@@ -292,15 +167,12 @@ public class StereoPointCloudCompression
          rawPointCloudCharBuffer.put((char) keyY);
          rawPointCloudCharBuffer.put((char) keyZ);
 
-         rawColorByteBuffer.put(colorAccessor.getRed(i));
-         rawColorByteBuffer.put(colorAccessor.getGreen(i));
-         rawColorByteBuffer.put(colorAccessor.getBlue(i));
+         rawColorIntBuffer.put(colorAccessor.getRGB(i));
       }
 
-      int compressedPointCloudSize;
       try
       {
-         compressedPointCloudSize = compressor.compress(rawPointCloudByteBuffer, compressedPointCloudByteBuffer);
+         compressor.compress(rawPointCloudByteBuffer, compressedPointCloudByteBuffer);
       }
       catch (LZ4Exception e)
       {
@@ -308,10 +180,9 @@ public class StereoPointCloudCompression
          e.printStackTrace();
          return null;
       }
-      int compressedColorSize;
       try
       {
-         compressedColorSize = compressor.compress(rawColorByteBuffer, compressedColorByteBuffer);
+         compressor.compress(rawColorByteBuffer, compressedColorByteBuffer);
       }
       catch (LZ4Exception e)
       {
@@ -320,22 +191,17 @@ public class StereoPointCloudCompression
       }
 
       StereoVisionPointCloudMessage message;
+
       if (variablesPackage != null)
-      {
          message = variablesPackage.message;
-         variablesPackage.byteBufferedPointCloud.setPosition(compressedPointCloudSize);
-         variablesPackage.byteBufferedColors.setPosition(compressedColorSize);
-      }
       else
-      {
          message = new StereoVisionPointCloudMessage();
-         compressedPointCloudByteBuffer.flip();
-         message.getPointCloud().add(compressedPointCloudByteBuffer.array());
 
-         compressedColorByteBuffer.flip();
-         message.getColors().add(compressedColorByteBuffer.array());
-      }
+      compressedPointCloudByteBuffer.flip();
+      message.getPointCloud().add(compressedPointCloudByteBuffer.array());
 
+      compressedColorByteBuffer.flip();
+      message.getColors().add(compressedColorByteBuffer.array());
       message.setTimestamp(timestamp);
       message.setSensorPoseConfidence(1.0);
       boundingBox.getCenterPoint(message.getPointCloudCenter());
@@ -461,17 +327,16 @@ public class StereoPointCloudCompression
                                            PointCoordinateConsumer pointCoordinateConsumer)
    {
       ByteBuffer compressedPointCloudByteBuffer = ByteBuffer.wrap(compressedPointCloud.toArray());
-      ByteBuffer decompressedPointCloudByteBuffer = ByteBuffer.allocate(numberOfPoints * 3 * 4);
-      compressorThreadLocal.get().decompress(compressedPointCloudByteBuffer, decompressedPointCloudByteBuffer, numberOfPoints * 3 * 2);
+      ByteBuffer decompressedPointCloudByteBuffer = ByteBuffer.allocate(computePointByteBufferSize(numberOfPoints));
+      compressorThreadLocal.get().decompress(compressedPointCloudByteBuffer, decompressedPointCloudByteBuffer, computePointByteBufferSize(numberOfPoints));
       decompressedPointCloudByteBuffer.flip();
-      CharBuffer pointCloudIntBuffer = decompressedPointCloudByteBuffer.asCharBuffer();
+      CharBuffer pointCloudCharBuffer = decompressedPointCloudByteBuffer.asCharBuffer();
 
       for (int i = 0; i < numberOfPoints; i++)
       {
-         double x = OcTreeKeyConversionTools.keyToCoordinate(pointCloudIntBuffer.get(), resolution, OCTREE_DEPTH);
-         double y = OcTreeKeyConversionTools.keyToCoordinate(pointCloudIntBuffer.get(), resolution, OCTREE_DEPTH);
-         double z = OcTreeKeyConversionTools.keyToCoordinate(pointCloudIntBuffer.get(), resolution, OCTREE_DEPTH);
-
+         double x = ((int) pointCloudCharBuffer.get() - centerOffsetKey + 0.5) * resolution;
+         double y = ((int) pointCloudCharBuffer.get() - centerOffsetKey + 0.5) * resolution;
+         double z = ((int) pointCloudCharBuffer.get() - centerOffsetKey + 0.5) * resolution;
          pointCoordinateConsumer.accept(x + center.getX(), y + center.getY(), z + center.getZ());
       }
    }
@@ -532,73 +397,110 @@ public class StereoPointCloudCompression
    public static void decompressColors(TByteArrayList compressedColors, int numberOfPoints, IntConsumer colorConsumer)
    {
       ByteBuffer compressedColorByteBuffer = ByteBuffer.wrap(compressedColors.toArray());
-      ByteBuffer decompressedColorByteBuffer = ByteBuffer.allocate(numberOfPoints * 3);
-      compressorThreadLocal.get().decompress(compressedColorByteBuffer, decompressedColorByteBuffer, numberOfPoints * 3);
+      int colorByteBufferSize = computeColorByteBufferSize(numberOfPoints);
+      ByteBuffer decompressedColorByteBuffer = ByteBuffer.allocate(colorByteBufferSize);
+      compressorThreadLocal.get().decompress(compressedColorByteBuffer, decompressedColorByteBuffer, colorByteBufferSize);
       decompressedColorByteBuffer.flip();
+      IntBuffer colorIntBuffer = decompressedColorByteBuffer.asIntBuffer();
 
       for (int i = 0; i < numberOfPoints; i++)
       {
-         colorConsumer.accept(rgb(decompressedColorByteBuffer.get(), decompressedColorByteBuffer.get(), decompressedColorByteBuffer.get()));
+         colorConsumer.accept(colorIntBuffer.get());
       }
    }
 
-   private static int rgb(byte r, byte g, byte b)
+   public static interface PointAccessor
    {
-      return ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | ((b & 0xFF) << 0);
+      float getX(int pointIndex);
+
+      float getY(int pointIndex);
+
+      float getZ(int pointIndex);
+
+      static PointAccessor wrap(float[] buffer)
+      {
+         return new PointAccessor()
+         {
+            @Override
+            public float getX(int pointIndex)
+            {
+               return buffer[3 * pointIndex];
+            }
+
+            @Override
+            public float getY(int pointIndex)
+            {
+               return buffer[3 * pointIndex + 1];
+            }
+
+            @Override
+            public float getZ(int pointIndex)
+            {
+               return buffer[3 * pointIndex + 2];
+            }
+         };
+      }
+
+      static PointAccessor wrap(Point3DReadOnly[] pointcloud)
+      {
+         return new PointAccessor()
+         {
+            @Override
+            public float getX(int pointIndex)
+            {
+               return pointcloud[pointIndex].getX32();
+            }
+
+            @Override
+            public float getY(int pointIndex)
+            {
+               return pointcloud[pointIndex].getY32();
+            }
+
+            @Override
+            public float getZ(int pointIndex)
+            {
+               return pointcloud[pointIndex].getZ32();
+            };
+         };
+      }
+   }
+
+   public static interface ColorAccessor
+   {
+      int getRGB(int pointIndex);
+
+      public static ColorAccessor wrapRGB(int[] rgbBuffer)
+      {
+         return new ColorAccessor()
+         {
+            @Override
+            public int getRGB(int pointIndex)
+            {
+               return rgbBuffer[pointIndex];
+            }
+         };
+      }
+
+      public static ColorAccessor wrapRGB(byte[] rgbBuffer)
+      {
+         return new ColorAccessor()
+         {
+            @Override
+            public int getRGB(int pointIndex)
+            {
+               int index = pointIndex * 3;
+               byte r = rgbBuffer[index++];
+               byte g = rgbBuffer[index++];
+               byte b = rgbBuffer[index];
+               return ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | ((b & 0xFF) << 0);
+            }
+         };
+      }
    }
 
    public static interface PointCoordinateConsumer
    {
       void accept(double x, double y, double z);
-   }
-
-   private static class CompressionOctreeNode
-   {
-      private final int depth;
-      private CompressionOctreeNode[] children;
-
-      public CompressionOctreeNode(int depth)
-      {
-         this.depth = depth;
-      }
-
-      public boolean insertNode(OcTreeKeyReadOnly key, int treeDepth)
-      {
-         int childIndex = OcTreeKeyTools.computeChildIndex(key, depth, treeDepth);
-         CompressionOctreeNode child = getChild(childIndex);
-
-         boolean childCreated = child == null;
-
-         if (childCreated)
-            child = createChild(childIndex);
-
-         if (depth == treeDepth - 2)
-         {
-            // The child is a leaf.
-            return childCreated;
-         }
-         else
-         {
-            // Keep going down
-            return child.insertNode(key, treeDepth);
-         }
-      }
-
-      public CompressionOctreeNode getChild(int childIndex)
-      {
-         if (children == null)
-            return null;
-
-         return children[childIndex];
-      }
-
-      public CompressionOctreeNode createChild(int childIndex)
-      {
-         if (children == null)
-            children = new CompressionOctreeNode[8];
-         CompressionOctreeNode newChild = new CompressionOctreeNode(depth + 1);
-         children[childIndex] = newChild;
-         return newChild;
-      }
    }
 }
