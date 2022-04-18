@@ -75,20 +75,9 @@ public class ImGuiSSHJApplicationService
          runCommand("restart");
       }
 
-      if (!islogMonitorThreadRunning() && ImGui.button("Start Log Monitor"))
+      if (!islogMonitorThreadRunning() && ImGui.button("Start log monitor"))
       {
-         logMonitorRunThread = ThreadTools.startAsDaemon(() ->
-         {
-            SSHJTools.session(remoteHostname, remoteUsername, sshj ->
-            {
-               exitStatus = sshj.exec("sudo journalctl -ef -o cat -u " + serviceName, timeout, sshjCommand ->
-               {
-                  this.logMonitorSSHJCommand = sshjCommand;
-                  standardOut.setInputStream(sshjCommand.getInputStream(), sshjCommand.getRemoteCharset());
-                  standardError.setInputStream(sshjCommand.getErrorStream(), sshjCommand.getRemoteCharset());
-               });
-            });
-         }, "SSHJCommand");
+         startLogMonitor();
       }
       if (islogMonitorThreadRunning())
       {
@@ -108,7 +97,7 @@ public class ImGuiSSHJApplicationService
       }
 
       ImGui.sameLine();
-      if (ImGui.button(labels.get("Show Log")))
+      if (ImGui.button(labels.get("Show log panel")))
       {
          logPanel.getIsShowing().set(true);
       }
@@ -117,6 +106,25 @@ public class ImGuiSSHJApplicationService
 
       standardOut.updateConsoleText(this::acceptNewText);
       standardError.updateConsoleText(this::acceptNewText);
+   }
+
+   public void startLogMonitor()
+   {
+      if (!islogMonitorThreadRunning())
+      {
+         logMonitorRunThread = ThreadTools.startAsDaemon(() ->
+         {
+            SSHJTools.session(remoteHostname, remoteUsername, sshj ->
+            {
+               exitStatus = sshj.exec("sudo journalctl -ef -o cat -u " + serviceName, timeout, sshjCommand ->
+               {
+                  this.logMonitorSSHJCommand = sshjCommand;
+                  standardOut.setInputStream(sshjCommand.getInputStream(), sshjCommand.getRemoteCharset());
+                  standardError.setInputStream(sshjCommand.getErrorStream(), sshjCommand.getRemoteCharset());
+               });
+            });
+         }, "SSHJCommand");
+      }
    }
 
    private void runCommand(String verb)
