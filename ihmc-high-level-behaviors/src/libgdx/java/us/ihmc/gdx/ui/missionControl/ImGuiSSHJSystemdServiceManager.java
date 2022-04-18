@@ -101,7 +101,7 @@ public class ImGuiSSHJSystemdServiceManager
    private void acceptNewText(String newText)
    {
       consoleArea.acceptNewText(newText);
-      System.out.print(newText);
+//      System.out.print(newText);
    }
 
    public ImGuiPanel getLogPanel()

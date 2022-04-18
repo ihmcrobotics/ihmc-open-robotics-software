@@ -11,6 +11,7 @@ import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.ui.tools.ImGuiMessagerManagerWidget;
 import us.ihmc.gdx.ui.yo.ImPlotDoublePlotLine;
 import us.ihmc.gdx.ui.yo.ImPlotPlot;
+import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.missionControl.MissionControlService;
 
 import java.text.DecimalFormat;
@@ -121,5 +122,10 @@ public class ImGuiSSHJMachine
    public ImGuiSSHJSystemdServiceManager getSystemdServiceManager()
    {
       return systemdServiceManager;
+   }
+
+   public AtomicReference<String> subscribeToServiceStatus(MessagerAPIFactory.Topic<String> topic)
+   {
+      return messagerHelper.subscribeViaReference(topic, "Status not yet received.");
    }
 }

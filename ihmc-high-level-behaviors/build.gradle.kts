@@ -63,7 +63,18 @@ testDependencies {
    api("com.github.stephengold:Libbulletjme:12.6.0")
 }
 
-app.entrypoint(ihmc.sourceSetProject("mission-control"), "MissionControlService", "us.ihmc.missionControl.MissionControlService")
+app.entrypoint(ihmc.sourceSetProject("mission-control"),
+        "MissionControlService",
+        "us.ihmc.missionControl.MissionControlService",
+        listOf("-Dlog4j2.configurationFile=log4j2NoColor.yml"))
+app.entrypoint(ihmc.sourceSetProject("mission-control"),
+        "ExampleMissionControlApplication1",
+        "us.ihmc.missionControl.ExampleMissionControlApplication1",
+        listOf("-Dlog4j2.configurationFile=log4j2NoColor.yml"))
+app.entrypoint(ihmc.sourceSetProject("mission-control"),
+        "ExampleMissionControlApplication2",
+        "us.ihmc.missionControl.ExampleMissionControlApplication2",
+        listOf("-Dlog4j2.configurationFile=log4j2NoColor.yml"))
 
 val hostname: String by project
 val username: String by project
@@ -88,6 +99,13 @@ tasks.create("deploy") {
 
          exec("echo \"${createMissionControlServiceFile(username)}\" > ~/mission-control-2.service")
          exec("sudo mv ~/mission-control-2.service /etc/systemd/system/.")
+
+         exec("echo \"${createExampleApplication1File(username)}\" > ~/mission-control-application-1.service")
+         exec("sudo mv ~/mission-control-application-1.service /etc/systemd/system/.")
+
+         exec("echo \"${createExampleApplication2File(username)}\" > ~/mission-control-application-2.service")
+         exec("sudo mv ~/mission-control-application-2.service /etc/systemd/system/.")
+
          exec("sudo systemctl daemon-reload")
       }
    }
@@ -106,6 +124,44 @@ fun createMissionControlServiceFile(username: String): String
       AmbientCapabilities=CAP_NET_RAW CAP_NET_ADMIN
       Restart=always
       ExecStart=/opt/ihmc/mission-control/bin/MissionControlService
+   
+      [Install]
+      WantedBy=multi-user.target
+   """.trimIndent()
+}
+
+fun createExampleApplication1File(username: String): String
+{
+   return """
+      [Unit]
+      Description=Mission Control Application 1 Service
+      Wants=network-online.target
+      After=network-online.target
+   
+      [Service]
+      User=$username
+      AmbientCapabilities=CAP_NET_RAW CAP_NET_ADMIN
+      Restart=always
+      ExecStart=/opt/ihmc/mission-control/bin/ExampleMissionControlApplication1
+   
+      [Install]
+      WantedBy=multi-user.target
+   """.trimIndent()
+}
+
+fun createExampleApplication2File(username: String): String
+{
+   return """
+      [Unit]
+      Description=Mission Control Application 2 Service
+      Wants=network-online.target
+      After=network-online.target
+   
+      [Service]
+      User=$username
+      AmbientCapabilities=CAP_NET_RAW CAP_NET_ADMIN
+      Restart=always
+      ExecStart=/opt/ihmc/mission-control/bin/ExampleMissionControlApplication2
    
       [Install]
       WantedBy=multi-user.target
