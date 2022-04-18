@@ -38,6 +38,7 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
@@ -69,6 +70,9 @@ public class ICPController implements ICPControllerInterface
    final YoFrameVector2D feedbackCoPDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackCoPDeltaSolution", worldFrame, registry);
    final YoFrameVector2D feedbackCMPDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackCMPDeltaSolution", worldFrame, registry);
    private final DMatrixRMaj feedbackCMPDeltaMatrix = new DMatrixRMaj(2, 1);
+
+   private final YoDouble feedbackAlpha = new YoDouble(yoNamePrefix + "FeedbackAlpha", registry);
+   private final YoDouble feedForwardAlpha = new YoDouble(yoNamePrefix + "FeedForwardAlpha", registry);
 
    private final YoFrameVector2D residualDynamicsError = new YoFrameVector2D(yoNamePrefix + "ResidualDynamicsError", worldFrame, registry);
    private final YoFrameVector2D residualDynamicsErrorConservative = new YoFrameVector2D(yoNamePrefix + "ResidualDynamicsErrorConservative", worldFrame, registry);
@@ -115,6 +119,8 @@ public class ICPController implements ICPControllerInterface
    private final FramePoint2D currentCoMPosition = new FramePoint2D();
    private final FrameVector2D currentCoMVelocity = new FrameVector2D();
 
+   private final ICPControllerParameters parameters;
+
    private final double controlDT;
    private final double controlDTSquare;
 
@@ -147,6 +153,7 @@ public class ICPController implements ICPControllerInterface
                         YoRegistry parentRegistry,
                         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
+      this.parameters = icpOptimizationParameters;
       this.controlDT = controlDT;
       this.controlDTSquare = controlDT * controlDT;
 
@@ -315,6 +322,8 @@ public class ICPController implements ICPControllerInterface
 
       extractSolutionsFromSolver(converged);
 
+      computeCMPPositions();
+
       expectedControlICPVelocity.sub(currentICP, feedbackCMP);
       expectedControlICPVelocity.scale(omega0);
 
@@ -402,10 +411,24 @@ public class ICPController implements ICPControllerInterface
       }
 
       integrator.update(desiredICPVelocity, currentCoMVelocity, icpError);
+   }
 
-      feedbackCoP.add(perfectCoP, feedbackCoPDelta);
-      feedbackCMP.add(feedbackCoP, perfectCMPOffset);
-      feedbackCMP.add(feedbackCMPDelta);
+   private void computeCMPPositions()
+   {
+      if (parameters.getFeedbackAlphaCalculator() != null)
+         feedbackAlpha.set(parameters.getFeedbackAlphaCalculator().getValue());
+      else
+         feedbackAlpha.set(0.0);
+
+      if (parameters.getFeedForwardAlphaCalculator() != null)
+         feedForwardAlpha.set(parameters.getFeedForwardAlphaCalculator().getValue());
+      else
+         feedForwardAlpha.set(0.0);
+
+      feedbackCoP.setAndScale(1.0 - feedForwardAlpha.getValue(), perfectCoP);
+      feedbackCoP.scaleAdd(1.0 - feedbackAlpha.getValue(), feedbackCoPDelta, feedbackCoP);
+      feedbackCMP.scaleAdd(1.0 - feedForwardAlpha.getValue(), perfectCMPOffset, feedbackCoP);
+      feedbackCMP.scaleAdd(1.0 - feedbackAlpha.getValue(), feedbackCMPDelta, feedbackCMP);
       feedbackCMP.add(integrator.getFeedbackCMPIntegral());
    }
 

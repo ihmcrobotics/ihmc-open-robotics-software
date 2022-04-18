@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 
 /**
  * Parameters to tune the ICP Optimization based controller for each robot. The ICP Optimization
@@ -155,6 +156,16 @@ public abstract class ICPControllerParameters
    public double getMaxCoPProjectionInside()
    {
       return 0.04;
+   }
+
+   public DoubleProvider getFeedForwardAlphaCalculator()
+   {
+      return null;
+   }
+
+   public DoubleProvider getFeedbackAlphaCalculator()
+   {
+      return null;
    }
 
 }
