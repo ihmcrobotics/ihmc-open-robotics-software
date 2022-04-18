@@ -16,6 +16,7 @@ public class MissionControlService
    private final LinuxResourceMonitor linuxResourceMonitor = new LinuxResourceMonitor();
 
    private final KryoMessager kryoMessagerServer;
+   private final ArrayList<String> servicesToTrack = new ArrayList<>();
 
    public MissionControlService()
    {
@@ -41,9 +42,12 @@ public class MissionControlService
 
       if (kryoMessagerServer.isMessagerOpen())
       {
-         publishStatus("mission-control-2", ServiceStatus);
-         publishStatus("mission-control-application-1", ExampleApplication1Status);
-         publishStatus("mission-control-application-2", ExampleApplication2Status);
+         ArrayList<MutablePair<String, String>> statuses = new ArrayList<>();
+         for (String serviceName : servicesToTrack)
+         {
+            statuses.add(MutablePair.of(serviceName, getStatus(serviceName)));
+         }
+         kryoMessagerServer.submitMessage(ServiceStatuses, statuses);
 
          kryoMessagerServer.submitMessage(RAMUsage, MutablePair.of(linuxResourceMonitor.getUsedRAMGiB(), linuxResourceMonitor.getTotalRAMGiB()));
          ArrayList<Double> cpuUsages = new ArrayList<>();
@@ -55,11 +59,11 @@ public class MissionControlService
       }
    }
 
-   private void publishStatus(String serviceName, MessagerAPIFactory.Topic<String> topic)
+   private String getStatus(String serviceName)
    {
       String statusOutput = ProcessTools.execSimpleCommand("systemctl status " + serviceName);
       String[] lines = statusOutput.split("\\R");
-      kryoMessagerServer.submitMessage(topic, lines[2].trim());
+      return lines[2].trim();
    }
 
    public static class API
@@ -72,10 +76,7 @@ public class MissionControlService
 
       public static final MessagerAPIFactory.Topic<MutablePair<Double, Double>> RAMUsage = topic("RAMUsage");
       public static final MessagerAPIFactory.Topic<ArrayList<Double>> CPUUsages = topic("CPUUsages");
-      public static final MessagerAPIFactory.Topic<String> ServiceStatus = topic("ServiceStatus");
-      public static final MessagerAPIFactory.Topic<String> ExampleApplication1Status = topic("ExampleApplication1Status");
-      public static final MessagerAPIFactory.Topic<String> ExampleApplication2Status = topic("ExampleApplication2Status");
-
+      public static final MessagerAPIFactory.Topic<ArrayList<MutablePair<String, String>>> ServiceStatuses = topic("ServiceStatuses");
       private static <T> MessagerAPIFactory.Topic<T> topic(String name)
       {
          return RootCategory.child(MissionControlServiceTheme).topic(apiFactory.createTypedTopicTheme(name));
