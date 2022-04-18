@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
 /**
@@ -163,9 +165,13 @@ public abstract class ICPControllerParameters
       return null;
    }
 
-   public DoubleProvider getFeedbackAlphaCalculator()
+   public FeedbackAlphaCalculator getFeedbackAlphaCalculator()
    {
       return null;
    }
 
+   public interface FeedbackAlphaCalculator
+   {
+      double computeAlpha(FramePoint2DReadOnly currentICP, FrameConvexPolygon2DReadOnly supportPolygon);
+   }
 }
