@@ -4,7 +4,9 @@ import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * Parameters to tune the ICP Optimization based controller for each robot. The ICP Optimization
@@ -159,6 +161,14 @@ public abstract class ICPControllerParameters
    public double getMaxCoPProjectionInside()
    {
       return 0.04;
+   }
+
+   public void createFeedForwardAlphaCalculator(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+   }
+
+   public void createFeedbackAlphaCalculator(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
    }
 
    public FeedForwardAlphaCalculator getFeedForwardAlphaCalculator()
