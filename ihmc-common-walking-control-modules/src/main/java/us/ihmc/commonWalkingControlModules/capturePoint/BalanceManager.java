@@ -601,12 +601,15 @@ public class BalanceManager
       }
 
       comTrajectoryPlanner.solveForTrajectory(contactStateProviders);
+
+      comTrajectoryPlanner.compute(contactStateManager.getCurrentStateDuration());
+      yoFinalDesiredICP.set(comTrajectoryPlanner.getDesiredDCMPosition());
+
       comTrajectoryPlanner.compute(contactStateManager.getTotalStateDuration());
 
       yoFinalDesiredCoM.set(comTrajectoryPlanner.getDesiredCoMPosition());
       yoFinalDesiredCoMVelocity.set(comTrajectoryPlanner.getDesiredCoMVelocity());
       yoFinalDesiredCoMAcceleration.set(comTrajectoryPlanner.getDesiredCoMAcceleration());
-      yoFinalDesiredICP.set(comTrajectoryPlanner.getDesiredDCMPosition());
 
       comTrajectoryPlanner.compute(contactStateManager.getTimeInSupportSequence());
 
