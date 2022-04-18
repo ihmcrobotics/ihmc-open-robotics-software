@@ -61,7 +61,7 @@ public class StereoPointCloudCompressionTest
          }
          PointAccessor pointAccessor = PointAccessor.wrap(inputPointCloud);
          ColorAccessor colorAccessor = ColorAccessor.wrapRGB(inputColors);
-         StereoVisionPointCloudMessage message = StereoPointCloudCompression.compressPointCloudFast(inputTimestamp,
+         StereoVisionPointCloudMessage message = StereoPointCloudCompression.compressPointCloud(inputTimestamp,
                                                                                                     pointAccessor,
                                                                                                     colorAccessor,
                                                                                                     inputNumberOfPoints,
@@ -126,11 +126,12 @@ public class StereoPointCloudCompressionTest
          }
 
          long start = System.nanoTime();
-         StereoVisionPointCloudMessage message = StereoPointCloudCompression.compressPointCloudFast(-1,
+         StereoVisionPointCloudMessage message = StereoPointCloudCompression.compressPointCloud(-1,
                                                                                                     PointAccessor.wrap(inputPointCloud),
                                                                                                     ColorAccessor.wrapRGB(inputColors),
                                                                                                     inputNumberOfPoints,
                                                                                                     minimumResolution,
+                                                                                                    true,
                                                                                                     variablesPackage);
          long end = System.nanoTime();
          double timeElapsedMs = (end - start) * 1.0e-6;
@@ -139,8 +140,8 @@ public class StereoPointCloudCompressionTest
          else
             timeElapsedFiltered = EuclidCoreTools.interpolate(timeElapsedFiltered, timeElapsedMs, 0.1);
 
-         System.out.println("Time elapsed: " + EuclidCoreIOTools.getStringOf("[ms], filt.: ", timeElapsedMs, timeElapsedFiltered) + "[ms], "
-               + message.getPointCloud().size());
+         System.out.println("Time elapsed: " + EuclidCoreIOTools.getStringOf("[ms], filt.: ", timeElapsedMs, timeElapsedFiltered) + "[ms], comp. size: "
+               + message.getPointCloud().size() + ", raw size: " + StereoPointCloudCompression.computePointByteBufferSize(inputNumberOfPoints));
       }
    }
 
