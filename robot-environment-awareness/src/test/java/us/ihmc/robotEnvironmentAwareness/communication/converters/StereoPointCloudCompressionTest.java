@@ -20,6 +20,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression.ColorAccessor;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression.CompressionIntermediateVariablesPackage;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression.DiscretizationParameters;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression.PointAccessor;
 
 public class StereoPointCloudCompressionTest
@@ -62,11 +63,11 @@ public class StereoPointCloudCompressionTest
          PointAccessor pointAccessor = PointAccessor.wrap(inputPointCloud);
          ColorAccessor colorAccessor = ColorAccessor.wrapRGB(inputColors);
          StereoVisionPointCloudMessage message = StereoPointCloudCompression.compressPointCloud(inputTimestamp,
-                                                                                                    pointAccessor,
-                                                                                                    colorAccessor,
-                                                                                                    inputNumberOfPoints,
-                                                                                                    minimumResolution,
-                                                                                                    variablesPackage);
+                                                                                                pointAccessor,
+                                                                                                colorAccessor,
+                                                                                                inputNumberOfPoints,
+                                                                                                minimumResolution,
+                                                                                                variablesPackage);
 
          assertEquals(inputTimestamp, message.getTimestamp());
          assertEquals(inputNumberOfPoints, message.getNumberOfPoints());
@@ -127,12 +128,11 @@ public class StereoPointCloudCompressionTest
 
          long start = System.nanoTime();
          StereoVisionPointCloudMessage message = StereoPointCloudCompression.compressPointCloud(-1,
-                                                                                                    PointAccessor.wrap(inputPointCloud),
-                                                                                                    ColorAccessor.wrapRGB(inputColors),
-                                                                                                    inputNumberOfPoints,
-                                                                                                    minimumResolution,
-                                                                                                    true,
-                                                                                                    variablesPackage);
+                                                                                                PointAccessor.wrap(inputPointCloud),
+                                                                                                ColorAccessor.wrapRGB(inputColors),
+                                                                                                DiscretizationParameters.fixedDiscretizationParameters(null, minimumResolution),
+                                                                                                inputNumberOfPoints,
+                                                                                                variablesPackage);
          long end = System.nanoTime();
          double timeElapsedMs = (end - start) * 1.0e-6;
          if (timeElapsedFiltered == 0.0)
