@@ -54,34 +54,14 @@ public class StereoPointCloudCompressionTest
 
          Point3D[] inputPointCloud = pointSet.toArray(new Point3D[inputNumberOfPoints]);
          int[] inputColors = new int[inputNumberOfPoints];
-         //         StereoVisionPointCloudMessage message = StereoPointCloudCompression.compressPointCloud(inputTimestamp,
-         //                                                                                                inputPointCloud,
-         //                                                                                                inputColors,
-         //                                                                                                inputNumberOfPoints,
-         //                                                                                                minimumResolution,
-         //                                                                                                null);
+         int bound = 1 << 24;
+         for (int j = 0; j < inputColors.length; j++)
+         {
+            inputColors[j] = random.nextInt(bound);
+         }
          StereoVisionPointCloudMessage message = StereoPointCloudCompression.compressPointCloudFast(inputTimestamp,
                                                                                                     PointAccessor.wrap(inputPointCloud),
-                                                                                                    new ColorAccessor()
-                                                                                                   {
-                                                                                                      @Override
-                                                                                                      public byte getRed(int pointIndex)
-                                                                                                      {
-                                                                                                         return (byte) random.nextInt();
-                                                                                                      }
-                                                                                                      
-                                                                                                      @Override
-                                                                                                      public byte getGreen(int pointIndex)
-                                                                                                      {
-                                                                                                         return (byte) random.nextInt();
-                                                                                                      }
-                                                                                                      
-                                                                                                      @Override
-                                                                                                      public byte getBlue(int pointIndex)
-                                                                                                      {
-                                                                                                         return (byte) random.nextInt();
-                                                                                                      }
-                                                                                                   },
+                                                                                                    ColorAccessor.wrapRGB(inputColors),
                                                                                                     inputNumberOfPoints,
                                                                                                     minimumResolution,
                                                                                                     variablesPackage);
