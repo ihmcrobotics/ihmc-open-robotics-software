@@ -1,11 +1,9 @@
 package us.ihmc.robotEnvironmentAwareness.communication.converters;
 
-import static us.ihmc.jOctoMap.tools.OcTreeKeyTools.computeCenterOffsetKey;
-
 import java.awt.Color;
 import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
 import java.nio.IntBuffer;
+import java.nio.ShortBuffer;
 import java.util.function.IntConsumer;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
@@ -27,14 +25,12 @@ public class StereoPointCloudCompression
    private static final double OCTREE_RESOLUTION_TO_SIZE_RATIO = Math.pow(2.0, OCTREE_DEPTH) - 1;
    private static final ThreadLocal<LZ4CompressionImplementation> compressorThreadLocal = ThreadLocal.withInitial(LZ4CompressionImplementation::new);
 
-   private static final int centerOffsetKey = computeCenterOffsetKey(OCTREE_DEPTH);
-
    public static class CompressionIntermediateVariablesPackage
    {
       private int numberOfPoints = -1;
       private ByteBuffer rawPointCloudByteBuffer;
       private ByteBuffer rawColorByteBuffer;
-      private CharBuffer rawPointCloudCharBuffer;
+      private ShortBuffer rawPointCloudShortBuffer;
       private IntBuffer rawColorIntBuffer;
       private final LZ4CompressionImplementation compressor = new LZ4CompressionImplementation();
 
@@ -53,10 +49,10 @@ public class StereoPointCloudCompression
 
          if (this.numberOfPoints == -1 || this.numberOfPoints < numberOfPoints)
          {
-            rawPointCloudByteBuffer = ByteBuffer.allocateDirect(pointCloudByteBufferSize);
-            rawColorByteBuffer = ByteBuffer.allocateDirect(colorByteBufferSize);
+            rawPointCloudByteBuffer = ByteBuffer.allocate(pointCloudByteBufferSize);
+            rawColorByteBuffer = ByteBuffer.allocate(colorByteBufferSize);
 
-            rawPointCloudCharBuffer = rawPointCloudByteBuffer.asCharBuffer();
+            rawPointCloudShortBuffer = rawPointCloudByteBuffer.asShortBuffer();
             rawColorIntBuffer = rawColorByteBuffer.asIntBuffer();
 
             // LZ4 compression apparently needs some additional room to do its thing.
@@ -71,13 +67,13 @@ public class StereoPointCloudCompression
             rawPointCloudByteBuffer.limit(pointCloudByteBufferSize);
             rawColorByteBuffer.limit(colorByteBufferSize);
 
-            rawPointCloudCharBuffer.limit(numberOfPoints * 3);
+            rawPointCloudShortBuffer.limit(numberOfPoints * 3);
             rawColorIntBuffer.limit(numberOfPoints);
 
             rawPointCloudByteBuffer.position(0);
             rawColorByteBuffer.position(0);
 
-            rawPointCloudCharBuffer.position(0);
+            rawPointCloudShortBuffer.position(0);
             rawColorIntBuffer.position(0);
          }
 
@@ -103,12 +99,23 @@ public class StereoPointCloudCompression
       return numberOfPoints * 3 * 2;
    }
 
-   public static StereoVisionPointCloudMessage compressPointCloudFast(long timestamp,
-                                                                      PointAccessor pointAccessor,
-                                                                      ColorAccessor colorAccessor,
-                                                                      int numberOfPoints,
-                                                                      double minimumResolution,
-                                                                      CompressionIntermediateVariablesPackage variablesPackage)
+   public static StereoVisionPointCloudMessage compressPointCloud(long timestamp,
+                                                                  PointAccessor pointAccessor,
+                                                                  ColorAccessor colorAccessor,
+                                                                  int numberOfPoints,
+                                                                  double minimumResolution,
+                                                                  CompressionIntermediateVariablesPackage variablesPackage)
+   {
+      return compressPointCloud(timestamp, pointAccessor, colorAccessor, numberOfPoints, minimumResolution, true, variablesPackage);
+   }
+
+   public static StereoVisionPointCloudMessage compressPointCloud(long timestamp,
+                                                                  PointAccessor pointAccessor,
+                                                                  ColorAccessor colorAccessor,
+                                                                  int numberOfPoints,
+                                                                  double minimumResolution,
+                                                                  boolean useLZ4Compressor,
+                                                                  CompressionIntermediateVariablesPackage variablesPackage)
    {
       BoundingBox3D boundingBox = new BoundingBox3D();
       boundingBox.setToNaN();
@@ -135,7 +142,7 @@ public class StereoPointCloudCompression
       // 3- Last step: We pack the data in byte buffer and use LZ4CompressionImplementation to compress it.
       ByteBuffer rawPointCloudByteBuffer;
       ByteBuffer rawColorByteBuffer;
-      CharBuffer rawPointCloudCharBuffer;
+      ShortBuffer rawPointCloudShortBuffer;
       IntBuffer rawColorIntBuffer;
       ByteBuffer compressedPointCloudByteBuffer;
       ByteBuffer compressedColorByteBuffer;
@@ -146,7 +153,7 @@ public class StereoPointCloudCompression
          variablesPackage.initialize(numberOfPoints);
          rawPointCloudByteBuffer = variablesPackage.rawPointCloudByteBuffer;
          rawColorByteBuffer = variablesPackage.rawColorByteBuffer;
-         rawPointCloudCharBuffer = variablesPackage.rawPointCloudCharBuffer;
+         rawPointCloudShortBuffer = variablesPackage.rawPointCloudShortBuffer;
          rawColorIntBuffer = variablesPackage.rawColorIntBuffer;
          compressedPointCloudByteBuffer = variablesPackage.compressedPointCloudByteBuffer;
          compressedColorByteBuffer = variablesPackage.compressedColorByteBuffer;
@@ -158,7 +165,7 @@ public class StereoPointCloudCompression
          int colorByteBufferSize = computeColorByteBufferSize(numberOfPoints);
          rawPointCloudByteBuffer = ByteBuffer.allocate(pointCloudByteBufferSize);
          rawColorByteBuffer = ByteBuffer.allocate(colorByteBufferSize);
-         rawPointCloudCharBuffer = rawPointCloudByteBuffer.asCharBuffer();
+         rawPointCloudShortBuffer = rawPointCloudByteBuffer.asShortBuffer();
          rawColorIntBuffer = rawColorByteBuffer.asIntBuffer();
          compressedPointCloudByteBuffer = ByteBuffer.allocate(pointCloudByteBufferSize * 2);
          compressedColorByteBuffer = ByteBuffer.allocate(colorByteBufferSize * 2);
@@ -167,34 +174,10 @@ public class StereoPointCloudCompression
 
       for (int i = 0; i < numberOfPoints; i++)
       {
-         int keyX = (int) ((pointAccessor.getX(i) - centerX) / octreeResolution) + centerOffsetKey;
-         int keyY = (int) ((pointAccessor.getY(i) - centerY) / octreeResolution) + centerOffsetKey;
-         int keyZ = (int) ((pointAccessor.getZ(i) - centerZ) / octreeResolution) + centerOffsetKey;
-         rawPointCloudCharBuffer.put((char) keyX);
-         rawPointCloudCharBuffer.put((char) keyY);
-         rawPointCloudCharBuffer.put((char) keyZ);
-
+         rawPointCloudShortBuffer.put((short) ((pointAccessor.getX(i) - centerX) / octreeResolution));
+         rawPointCloudShortBuffer.put((short) ((pointAccessor.getY(i) - centerY) / octreeResolution));
+         rawPointCloudShortBuffer.put((short) ((pointAccessor.getZ(i) - centerZ) / octreeResolution));
          rawColorIntBuffer.put(colorAccessor.getRGB(i));
-      }
-
-      try
-      {
-         compressor.compress(rawPointCloudByteBuffer, compressedPointCloudByteBuffer);
-      }
-      catch (LZ4Exception e)
-      {
-         // TODO See why the compression would fail and how to fix it.
-         e.printStackTrace();
-         return null;
-      }
-      try
-      {
-         compressor.compress(rawColorByteBuffer, compressedColorByteBuffer);
-      }
-      catch (LZ4Exception e)
-      {
-         e.printStackTrace();
-         return null;
       }
 
       StereoVisionPointCloudMessage message;
@@ -204,11 +187,51 @@ public class StereoPointCloudCompression
       else
          message = new StereoVisionPointCloudMessage();
 
-      compressedPointCloudByteBuffer.flip();
-      message.getPointCloud().add(compressedPointCloudByteBuffer.array());
+      if (useLZ4Compressor)
+      {
+         int compressedPointCloudSize;
+         try
+         {
+            compressedPointCloudSize = compressor.compress(rawPointCloudByteBuffer, compressedPointCloudByteBuffer);
+         }
+         catch (LZ4Exception e)
+         {
+            // TODO See why the compression would fail and how to fix it.
+            e.printStackTrace();
+            return null;
+         }
+         int compressedColorSize;
+         try
+         {
+            compressedColorSize = compressor.compress(rawColorByteBuffer, compressedColorByteBuffer);
+         }
+         catch (LZ4Exception e)
+         {
+            e.printStackTrace();
+            return null;
+         }
 
-      compressedColorByteBuffer.flip();
-      message.getColors().add(compressedColorByteBuffer.array());
+         compressedPointCloudByteBuffer.flip();
+         for (int i = 0; i < compressedPointCloudSize; i++)
+            message.getPointCloud().add(compressedPointCloudByteBuffer.get());
+
+         compressedColorByteBuffer.flip();
+         for (int i = 0; i < compressedColorSize; i++)
+            message.getColors().add(compressedColorByteBuffer.get());
+      }
+      else
+      {
+         int pointCloudByteBufferSize = computePointByteBufferSize(numberOfPoints);
+         rawPointCloudByteBuffer.clear();
+         for (int i = 0; i < pointCloudByteBufferSize; i++)
+            message.getPointCloud().add(rawPointCloudByteBuffer.get());
+
+         int colorByteBufferSize = computeColorByteBufferSize(numberOfPoints);
+         rawColorByteBuffer.clear();
+         for (int i = 0; i < colorByteBufferSize; i++)
+            message.getColors().add(rawColorByteBuffer.get());
+      }
+
       message.setTimestamp(timestamp);
       message.setSensorPoseConfidence(1.0);
       boundingBox.getCenterPoint(message.getPointCloudCenter());
@@ -271,7 +294,7 @@ public class StereoPointCloudCompression
          }
       }
 
-      return compressPointCloudFast(timestamp, PointAccessor.wrap(pointCloud), ColorAccessor.wrapRGB(colors), numberOfPoints, minimumResolution, null);
+      return compressPointCloud(timestamp, PointAccessor.wrap(pointCloud), ColorAccessor.wrapRGB(colors), numberOfPoints, minimumResolution, null);
    }
 
    public static Point3D32[] decompressPointCloudToArray32(StereoVisionPointCloudMessage message)
@@ -337,13 +360,13 @@ public class StereoPointCloudCompression
       ByteBuffer decompressedPointCloudByteBuffer = ByteBuffer.allocate(computePointByteBufferSize(numberOfPoints));
       compressorThreadLocal.get().decompress(compressedPointCloudByteBuffer, decompressedPointCloudByteBuffer, computePointByteBufferSize(numberOfPoints));
       decompressedPointCloudByteBuffer.flip();
-      CharBuffer pointCloudCharBuffer = decompressedPointCloudByteBuffer.asCharBuffer();
+      ShortBuffer pointCloudShortBuffer = decompressedPointCloudByteBuffer.asShortBuffer();
 
       for (int i = 0; i < numberOfPoints; i++)
       {
-         double x = ((int) pointCloudCharBuffer.get() - centerOffsetKey + 0.5) * resolution;
-         double y = ((int) pointCloudCharBuffer.get() - centerOffsetKey + 0.5) * resolution;
-         double z = ((int) pointCloudCharBuffer.get() - centerOffsetKey + 0.5) * resolution;
+         double x = (pointCloudShortBuffer.get() + 0.5) * resolution;
+         double y = (pointCloudShortBuffer.get() + 0.5) * resolution;
+         double z = (pointCloudShortBuffer.get() + 0.5) * resolution;
          pointCoordinateConsumer.accept(x + center.getX(), y + center.getY(), z + center.getZ());
       }
    }
