@@ -85,8 +85,8 @@ public class StereoPointCloudCompression
          }
 
          this.numberOfPoints = numberOfPoints;
-         message.setSequenceId(-1);
-         message.setTimestamp(-1);
+         message.setSequenceId(0);
+         message.setTimestamp(0);
          message.getSensorPosition().setToZero();
          message.getSensorOrientation().setToZero();
          message.setResolution(0.0);
@@ -172,37 +172,18 @@ public class StereoPointCloudCompression
       double octreeResolution = Math.max(minimumResolution, octreeSize / OCTREE_RESOLUTION_TO_SIZE_RATIO);
 
       // 3- Last step: We pack the data in byte buffer and use LZ4CompressionImplementation to compress it.
-      ByteBuffer rawPointCloudByteBuffer;
-      ByteBuffer rawColorByteBuffer;
-      ShortBuffer rawPointCloudShortBuffer;
-      IntBuffer rawColorIntBuffer;
-      ByteBuffer compressedPointCloudByteBuffer;
-      ByteBuffer compressedColorByteBuffer;
-      LZ4CompressionImplementation compressor;
 
-      if (variablesPackage != null)
-      {
-         variablesPackage.initialize(numberOfPoints);
-         rawPointCloudByteBuffer = variablesPackage.rawPointCloudByteBuffer;
-         rawColorByteBuffer = variablesPackage.rawColorByteBuffer;
-         rawPointCloudShortBuffer = variablesPackage.rawPointCloudShortBuffer;
-         rawColorIntBuffer = variablesPackage.rawColorIntBuffer;
-         compressedPointCloudByteBuffer = variablesPackage.compressedPointCloudByteBuffer;
-         compressedColorByteBuffer = variablesPackage.compressedColorByteBuffer;
-         compressor = variablesPackage.compressor;
-      }
-      else
-      {
-         int pointCloudByteBufferSize = computePointByteBufferSize(numberOfPoints);
-         int colorByteBufferSize = computeColorByteBufferSize(numberOfPoints);
-         rawPointCloudByteBuffer = ByteBuffer.allocate(pointCloudByteBufferSize);
-         rawColorByteBuffer = ByteBuffer.allocate(colorByteBufferSize);
-         rawPointCloudShortBuffer = rawPointCloudByteBuffer.asShortBuffer();
-         rawColorIntBuffer = rawColorByteBuffer.asIntBuffer();
-         compressedPointCloudByteBuffer = ByteBuffer.allocate(pointCloudByteBufferSize * 2);
-         compressedColorByteBuffer = ByteBuffer.allocate(colorByteBufferSize * 2);
-         compressor = compressorThreadLocal.get();
-      }
+      if (variablesPackage == null)
+         new CompressionIntermediateVariablesPackage();
+
+      variablesPackage.initialize(numberOfPoints);
+      ByteBuffer rawPointCloudByteBuffer = variablesPackage.rawPointCloudByteBuffer;
+      ByteBuffer rawColorByteBuffer = variablesPackage.rawColorByteBuffer;
+      ShortBuffer rawPointCloudShortBuffer = variablesPackage.rawPointCloudShortBuffer;
+      IntBuffer rawColorIntBuffer = variablesPackage.rawColorIntBuffer;
+      ByteBuffer compressedPointCloudByteBuffer = variablesPackage.compressedPointCloudByteBuffer;
+      ByteBuffer compressedColorByteBuffer = variablesPackage.compressedColorByteBuffer;
+      LZ4CompressionImplementation compressor = variablesPackage.compressor;
 
       for (int i = 0; i < numberOfPoints; i++)
       {
@@ -212,12 +193,7 @@ public class StereoPointCloudCompression
          rawColorIntBuffer.put(colorAccessor.getRGB(i));
       }
 
-      StereoVisionPointCloudMessage message;
-
-      if (variablesPackage != null)
-         message = variablesPackage.message;
-      else
-         message = new StereoVisionPointCloudMessage();
+      StereoVisionPointCloudMessage message = variablesPackage.message;
 
       if (useLZ4Compressor)
       {
@@ -243,21 +219,8 @@ public class StereoPointCloudCompression
             return null;
          }
 
-         if (variablesPackage != null)
-         {
-            variablesPackage.byteBufferedPointCloud.setPosition(compressedPointCloudSize);
-            variablesPackage.byteBufferedColors.setPosition(compressedColorSize);
-         }
-         else
-         {
-            compressedPointCloudByteBuffer.flip();
-            for (int i = 0; i < compressedPointCloudSize; i++)
-               message.getPointCloud().add(compressedPointCloudByteBuffer.get());
-
-            compressedColorByteBuffer.flip();
-            for (int i = 0; i < compressedColorSize; i++)
-               message.getColors().add(compressedColorByteBuffer.get());
-         }
+         variablesPackage.byteBufferedPointCloud.setPosition(compressedPointCloudSize);
+         variablesPackage.byteBufferedColors.setPosition(compressedColorSize);
       }
       else
       {
