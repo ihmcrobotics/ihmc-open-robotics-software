@@ -204,6 +204,9 @@ public class ICPController implements ICPControllerInterface
                                                          hasICPControlPolygons,
                                                          registry);
 
+      parameters.createFeedForwardAlphaCalculator(registry, yoGraphicsListRegistry);
+      parameters.createFeedbackAlphaCalculator(registry, yoGraphicsListRegistry);
+
       if (yoGraphicsListRegistry != null)
          setupVisualizers(yoGraphicsListRegistry);
 
@@ -434,7 +437,7 @@ public class ICPController implements ICPControllerInterface
       else
          feedForwardAlpha.set(0.0);
 
-      feedbackCoP.setAndScale(1.0 - feedForwardAlpha.getValue(), perfectCoP);
+      feedbackCoP.interpolate(perfectCoP, currentICP, feedForwardAlpha.getDoubleValue());
       feedbackCoP.scaleAdd(1.0 - feedbackAlpha.getValue(), feedbackCoPDelta, feedbackCoP);
       feedbackCMP.scaleAdd(1.0 - feedForwardAlpha.getValue(), perfectCMPOffset, feedbackCoP);
       feedbackCMP.scaleAdd(1.0 - feedbackAlpha.getValue(), feedbackCMPDelta, feedbackCMP);
