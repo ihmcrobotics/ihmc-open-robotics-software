@@ -10,7 +10,11 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.gdx.imgui.ImGuiPanel;
+import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ImGuiSSHJApplicationService
 {
@@ -20,6 +24,7 @@ public class ImGuiSSHJApplicationService
    private final String remoteUsername;
    private final ImGuiConsoleArea consoleArea = new ImGuiConsoleArea();
    private final ImInt bufferSize = new ImInt(Conversions.megabytesToBytes(2));
+   private String applicationName;
    private final String serviceName;
    private final double timeout = 0.0;
    private int exitStatus = -1;
@@ -29,10 +34,13 @@ public class ImGuiSSHJApplicationService
    private Session.Command logMonitorSSHJCommand;
    private Thread managementRunThread;
    private Thread logMonitorRunThread;
+   private AtomicReference<String> serviceStatus = new AtomicReference<>("Status not subscribed to.");
+
 
    public ImGuiSSHJApplicationService(String applicationName, String serviceName, String remoteHostname, String remoteUsername)
    {
       this.logPanel = new ImGuiPanel(applicationName + " Log", consoleArea::renderImGuiWidgets);
+      this.applicationName = applicationName;
       this.serviceName = serviceName;
       this.remoteHostname = remoteHostname;
       this.remoteUsername = remoteUsername;
@@ -43,6 +51,12 @@ public class ImGuiSSHJApplicationService
 
    public void renderImGuiWidgets()
    {
+      ImGui.pushFont(ImGuiTools.getMediumFont());
+      ImGui.text(applicationName);
+      ImGui.popFont();
+
+      ImGui.text("Host: " + remoteHostname);
+      ImGui.sameLine();
       ImGui.text("Service name: " + serviceName);
 
       ImGui.sameLine();
@@ -80,7 +94,11 @@ public class ImGuiSSHJApplicationService
       {
          if (ImGui.button("SIGINT"))
          {
-            ExceptionTools.handle(() -> logMonitorSSHJCommand.signal(Signal.INT), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+            ExceptionTools.handle(() ->
+            {
+               logMonitorSSHJCommand.signal(Signal.INT);
+               logMonitorSSHJCommand.close();
+            }, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
          }
       }
       if (exitStatus > -1)
@@ -94,6 +112,8 @@ public class ImGuiSSHJApplicationService
       {
          logPanel.getIsShowing().set(true);
       }
+
+      ImGui.text(serviceStatus.get());
 
       standardOut.updateConsoleText(this::acceptNewText);
       standardError.updateConsoleText(this::acceptNewText);
@@ -130,6 +150,11 @@ public class ImGuiSSHJApplicationService
    {
       consoleArea.acceptNewText(newText);
 //      System.out.print(newText);
+   }
+
+   public void setServiceStatus(AtomicReference<String> serviceStatus)
+   {
+      this.serviceStatus = serviceStatus;
    }
 
    public ImGuiPanel getLogPanel()

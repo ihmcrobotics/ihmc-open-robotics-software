@@ -4,8 +4,11 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import net.schmizz.sshj.connection.channel.direct.Session;
+import net.schmizz.sshj.connection.channel.direct.Signal;
 import us.ihmc.avatar.ros2.networkTest.SSHJTools;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
@@ -45,24 +48,48 @@ public class ImGuiSSHJSystemdServiceManager
       ImGui.text(titleCasedServiceName + ": ");
 
       ImGui.sameLine();
-      if (ImGui.button(labels.get("Start")))
+      if (!isRunning())
       {
-         runCommand("start");
+         if (ImGui.button(labels.get("Start")))
+         {
+            runSystemctlCommand("start");
+         }
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Stop")))
+         {
+            runSystemctlCommand("stop");
+         }
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Restart")))
+         {
+            runSystemctlCommand("restart");
+         }
+//         ImGui.sameLine();
+//         if (ImGui.button(labels.get("Unmask")))
+//         {
+//            runSystemctlCommand("unmask");
+//         }
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Status")))
+         {
+            runSystemctlCommand("status");
+         }
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Journal")))
+         {
+            runCommand("sudo journalctl -ef -o cat -u");
+         }
       }
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Stop")))
+      else
       {
-         runCommand("stop");
-      }
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Restart")))
-      {
-         runCommand("restart");
-      }
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Status")))
-      {
-         runCommand("status");
+         if (ImGui.button("SIGINT"))
+         {
+            ExceptionTools.handle(() ->
+            {
+               sshjCommand.signal(Signal.INT);
+               sshjCommand.close();
+            }, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+         }
       }
       ImGui.sameLine();
       if (ImGui.button(labels.get("Show Log")))
@@ -74,7 +101,12 @@ public class ImGuiSSHJSystemdServiceManager
       standardError.updateConsoleText(this::acceptNewText);
    }
 
-   private void runCommand(String verb)
+   public void runSystemctlCommand(String verb)
+   {
+      runCommand("sudo systemctl " + verb);
+   }
+
+   private void runCommand(String command)
    {
       if (!isRunning())
       {
@@ -82,7 +114,7 @@ public class ImGuiSSHJSystemdServiceManager
          {
             SSHJTools.session(remoteHostname, remoteUsername, sshj ->
             {
-               exitStatus = sshj.exec("sudo systemctl " + verb + " " + serviceName, timeout, sshjCommand ->
+               exitStatus = sshj.exec(command + " " + serviceName, timeout, sshjCommand ->
                {
                   this.sshjCommand = sshjCommand;
                   standardOut.setInputStream(sshjCommand.getInputStream(), sshjCommand.getRemoteCharset());

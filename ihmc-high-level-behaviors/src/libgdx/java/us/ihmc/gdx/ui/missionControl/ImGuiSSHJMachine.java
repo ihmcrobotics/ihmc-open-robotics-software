@@ -24,7 +24,7 @@ public class ImGuiSSHJMachine
    private final MessagerHelper messagerHelper;
 
    private final ImGuiMessagerManagerWidget messagerManagerWidget;
-   private final AtomicReference<ArrayList<MutablePair<String, String>>> serviceStatusSubscription;
+   private final AtomicReference<ArrayList<String>> serviceStatusSubscription;
    private final AtomicReference<MutablePair<Double, Double>> ramUsageSubscription;
    private final AtomicReference<ArrayList<Double>> cpuUsagesSubscription;
 
@@ -73,9 +73,9 @@ public class ImGuiSSHJMachine
 
       messagerHelper = new MessagerHelper(MissionControlService.API.create());
 
-      ArrayList<MutablePair<String, String>> initialStatues = new ArrayList<>();
-      initialStatues.add(MutablePair.of("mission-control-2", "Status not yet received."));
-      serviceStatusSubscription = messagerHelper.subscribeViaReference(MissionControlService.API.ServiceStatuses, initialStatues);
+      ArrayList<String> initialStatuses = new ArrayList<>();
+      initialStatuses.add("mission-control-2:Status not yet received.");
+      serviceStatusSubscription = messagerHelper.subscribeViaReference(MissionControlService.API.ServiceStatuses, initialStatuses);
       ramUsageSubscription = messagerHelper.subscribeViaReference(MissionControlService.API.RAMUsage, MutablePair.of(0.0, 1.0));
       cpuUsagesSubscription = messagerHelper.subscribeViaReference(MissionControlService.API.CPUUsages, new ArrayList<>());
 
@@ -92,19 +92,20 @@ public class ImGuiSSHJMachine
 
       messagerManagerWidget.renderImGuiWidgets();
 
-      ArrayList<MutablePair<String, String>> statuses = serviceStatusSubscription.get();
-      for (MutablePair<String, String> status : statuses)
+      ArrayList<String> statuses = serviceStatusSubscription.get();
+      for (String status : statuses)
       {
-         if (status.getLeft().equals("mission-control-2"))
+         String[] split = status.split(":", 2);
+         if (split[0].equals("mission-control-2"))
          {
-            ImGui.text(status.getRight());
+            ImGui.text(split[1]);
          }
          else
          {
-            AtomicReference<String> statusAtomicReference = serviceStatuses.get(status.getLeft());
+            AtomicReference<String> statusAtomicReference = serviceStatuses.get(split[0]);
             if (statusAtomicReference != null)
             {
-               statusAtomicReference.set(status.getRight());
+               statusAtomicReference.set(split[1]);
             }
          }
       }
@@ -117,7 +118,7 @@ public class ImGuiSSHJMachine
          ramUsagePlotLine.addValue(used);
          ramTotalPlotLine.addValue(totalRAM);
       }
-      ramPlot.render(ImGui.getColumnWidth() / 2.0f, 50.0f);
+      ramPlot.render(ImGui.getColumnWidth() / 2.0f, 35.0f);
 
       ImGui.sameLine();
 
@@ -134,7 +135,7 @@ public class ImGuiSSHJMachine
             ((ImPlotDoublePlotLine) cpuPlot.getPlotLines().get(i)).addValue(cpuUsages.get(i));
          }
       }
-      cpuPlot.render(ImGui.getColumnWidth(), 50.0f);
+      cpuPlot.render(ImGui.getColumnWidth(), 35.0f);
    }
 
    public ImGuiSSHJSystemdServiceManager getSystemdServiceManager()
@@ -147,5 +148,15 @@ public class ImGuiSSHJMachine
       AtomicReference<String> atomicReference = new AtomicReference<>("Status not yet received.");
       serviceStatuses.put(serviceName, atomicReference);
       return atomicReference;
+   }
+
+   public ImGuiMessagerManagerWidget getMessagerManagerWidget()
+   {
+      return messagerManagerWidget;
+   }
+
+   public MessagerHelper getMessagerHelper()
+   {
+      return messagerHelper;
    }
 }
