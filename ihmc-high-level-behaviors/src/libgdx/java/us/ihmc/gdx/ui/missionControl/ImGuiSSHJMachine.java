@@ -82,30 +82,32 @@ public class ImGuiSSHJMachine
       messagerManagerWidget = new ImGuiMessagerManagerWidget(messagerHelper, () -> hostname, MissionControlService.API.PORT);
    }
 
-   public void renderImGuiWidgets()
+   public void renderImGuiWidgets(boolean condensedView)
    {
       ImGui.pushFont(ImGuiTools.getMediumFont());
       ImGui.text(machineName);
       ImGui.popFont();
 
-      systemdServiceManager.renderImGuiWidgets();
-
-      messagerManagerWidget.renderImGuiWidgets();
-
-      ArrayList<String> statuses = serviceStatusSubscription.get();
-      for (String status : statuses)
+      if (!condensedView)
       {
-         String[] split = status.split(":", 2);
-         if (split[0].equals("mission-control-2"))
+         systemdServiceManager.renderImGuiWidgets();
+         messagerManagerWidget.renderImGuiWidgets();
+
+         ArrayList<String> statuses = serviceStatusSubscription.get();
+         for (String status : statuses)
          {
-            ImGui.text(split[1]);
-         }
-         else
-         {
-            AtomicReference<String> statusAtomicReference = serviceStatuses.get(split[0]);
-            if (statusAtomicReference != null)
+            String[] split = status.split(":", 2);
+            if (split[0].equals("mission-control-2"))
             {
-               statusAtomicReference.set(split[1]);
+               ImGui.text(split[1]);
+            }
+            else
+            {
+               AtomicReference<String> statusAtomicReference = serviceStatuses.get(split[0]);
+               if (statusAtomicReference != null)
+               {
+                  statusAtomicReference.set(split[1]);
+               }
             }
          }
       }
@@ -129,7 +131,7 @@ public class ImGuiSSHJMachine
          {
             if (cpuPlot.getPlotLines().size() == i)
             {
-               cpuPlot.getPlotLines().add(new ImPlotDoublePlotLine("Core " + i + ":", 30 * 5, 30.0, new DecimalFormat("0.0")));
+               cpuPlot.getPlotLines().add(new ImPlotDoublePlotLine("Core " + i, 30 * 5, 30.0, new DecimalFormat("0.0")));
             }
 
             ((ImPlotDoublePlotLine) cpuPlot.getPlotLines().get(i)).addValue(cpuUsages.get(i));

@@ -44,7 +44,7 @@ public class ImGuiSSHJMissionControlUI
 
    private void renderImGuiWidgets()
    {
-      raspberryPi.renderImGuiWidgets();
+      raspberryPi.renderImGuiWidgets(false);
       ImGui.separator();
       exampleApplication1Manager.renderImGuiWidgets();
       ImGui.separator();
