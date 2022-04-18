@@ -201,6 +201,7 @@ public class StereoPointCloudCompression
       message.setTimestamp(timestamp);
       message.setSensorPoseConfidence(1.0);
       message.setNumberOfPoints(numberOfPoints);
+      message.setLz4Compressed(useLZ4Compressor);
 
       discretizationParameters.update(pointAccessor, numberOfPoints);
       discretizationParameters.getPointCloudCenter(message.getPointCloudCenter());
@@ -322,45 +323,41 @@ public class StereoPointCloudCompression
 
    public static Point3D32[] decompressPointCloudToArray32(StereoVisionPointCloudMessage message)
    {
-      return decompressPointCloudToArray32(message.getPointCloud(), message.getPointCloudCenter(), message.getResolution(), message.getNumberOfPoints());
+      return decompressPointCloudToArray32(message.getPointCloud(),
+                                           message.getPointCloudCenter(),
+                                           message.getResolution(),
+                                           message.getNumberOfPoints(),
+                                           message.getLz4Compressed());
    }
 
-   public static Point3D32[] decompressPointCloudToArray32(TByteArrayList compressedPointCloud, Point3D center, double resolution, int numberOfPoints)
+   public static Point3D32[] decompressPointCloudToArray32(TByteArrayList compressedPointCloud,
+                                                           Point3D center,
+                                                           double resolution,
+                                                           int numberOfPoints,
+                                                           boolean isLZ4Compressed)
    {
       Point3D32[] pointCloud = new Point3D32[numberOfPoints];
-      decompressPointCloud(compressedPointCloud, center, resolution, numberOfPoints, new PointCoordinateConsumer()
-      {
-         int index = 0;
-
-         @Override
-         public void accept(double x, double y, double z)
-         {
-            pointCloud[index] = new Point3D32((float) x, (float) y, (float) z);
-            index++;
-         }
-      });
+      decompressPointCloud(compressedPointCloud, center, resolution, numberOfPoints, isLZ4Compressed, PointCoordinateConsumer.toArray(pointCloud));
       return pointCloud;
    }
 
    public static Point3D[] decompressPointCloudToArray(StereoVisionPointCloudMessage message)
    {
-      return decompressPointCloudToArray(message.getPointCloud(), message.getPointCloudCenter(), message.getResolution(), message.getNumberOfPoints());
+      return decompressPointCloudToArray(message.getPointCloud(),
+                                         message.getPointCloudCenter(),
+                                         message.getResolution(),
+                                         message.getNumberOfPoints(),
+                                         message.getLz4Compressed());
    }
 
-   public static Point3D[] decompressPointCloudToArray(TByteArrayList compressedPointCloud, Point3D center, double resolution, int numberOfPoints)
+   public static Point3D[] decompressPointCloudToArray(TByteArrayList compressedPointCloud,
+                                                       Point3D center,
+                                                       double resolution,
+                                                       int numberOfPoints,
+                                                       boolean isLZ4Compressed)
    {
       Point3D[] pointCloud = new Point3D[numberOfPoints];
-      decompressPointCloud(compressedPointCloud, center, resolution, numberOfPoints, new PointCoordinateConsumer()
-      {
-         int index = 0;
-
-         @Override
-         public void accept(double x, double y, double z)
-         {
-            pointCloud[index] = new Point3D((float) x, (float) y, (float) z);
-            index++;
-         }
-      });
+      decompressPointCloud(compressedPointCloud, center, resolution, numberOfPoints, isLZ4Compressed, PointCoordinateConsumer.toArray(pointCloud));
       return pointCloud;
    }
 
@@ -370,6 +367,7 @@ public class StereoPointCloudCompression
                            message.getPointCloudCenter(),
                            message.getResolution(),
                            message.getNumberOfPoints(),
+                           message.getLz4Compressed(),
                            pointCoordinateConsumer);
    }
 
@@ -377,9 +375,10 @@ public class StereoPointCloudCompression
                                            Point3D center,
                                            double resolution,
                                            int numberOfPoints,
+                                           boolean isLZ4Compressed,
                                            PointCoordinateConsumer pointCoordinateConsumer)
    {
-      if (USE_LZ4_COMPRESSION_DEFAULT)
+      if (isLZ4Compressed)
       {
          ByteBuffer compressedPointCloudByteBuffer = ByteBuffer.wrap(compressedPointCloud.toArray());
          ByteBuffer decompressedPointCloudByteBuffer = ByteBuffer.allocate(computePointByteBufferSize(numberOfPoints));
@@ -411,14 +410,14 @@ public class StereoPointCloudCompression
 
    public static Color[] decompressColorsToAWTColorArray(StereoVisionPointCloudMessage message)
    {
-      return decompressColorsToAWTColorArray(message.getColors(), message.getNumberOfPoints());
+      return decompressColorsToAWTColorArray(message.getColors(), message.getNumberOfPoints(), message.getLz4Compressed());
    }
 
-   public static Color[] decompressColorsToAWTColorArray(TByteArrayList compressedColors, int numberOfPoints)
+   public static Color[] decompressColorsToAWTColorArray(TByteArrayList compressedColors, int numberOfPoints, boolean isLZ4Compressed)
    {
       Color[] colors = new Color[numberOfPoints];
 
-      decompressColors(compressedColors, numberOfPoints, new IntConsumer()
+      decompressColors(compressedColors, numberOfPoints, isLZ4Compressed, new IntConsumer()
       {
          int index = 0;
 
@@ -435,14 +434,14 @@ public class StereoPointCloudCompression
 
    public static int[] decompressColorsToIntArray(StereoVisionPointCloudMessage message)
    {
-      return decompressColorsToIntArray(message.getColors(), message.getNumberOfPoints());
+      return decompressColorsToIntArray(message.getColors(), message.getNumberOfPoints(), message.getLz4Compressed());
    }
 
-   public static int[] decompressColorsToIntArray(TByteArrayList compressedColors, int numberOfPoints)
+   public static int[] decompressColorsToIntArray(TByteArrayList compressedColors, int numberOfPoints, boolean isLZ4Compressed)
    {
       int[] colors = new int[numberOfPoints];
 
-      decompressColors(compressedColors, numberOfPoints, new IntConsumer()
+      decompressColors(compressedColors, numberOfPoints, isLZ4Compressed, new IntConsumer()
       {
          int index = 0;
 
@@ -459,12 +458,12 @@ public class StereoPointCloudCompression
 
    public static void decompressColors(StereoVisionPointCloudMessage message, IntConsumer colorConsumer)
    {
-      decompressColors(message.getColors(), message.getNumberOfPoints(), colorConsumer);
+      decompressColors(message.getColors(), message.getNumberOfPoints(), message.getLz4Compressed(), colorConsumer);
    }
 
-   public static void decompressColors(TByteArrayList compressedColors, int numberOfPoints, IntConsumer colorConsumer)
+   public static void decompressColors(TByteArrayList compressedColors, int numberOfPoints, boolean isLZ4Compressed, IntConsumer colorConsumer)
    {
-      if (USE_LZ4_COMPRESSION_DEFAULT)
+      if (isLZ4Compressed)
       {
          ByteBuffer compressedColorByteBuffer = ByteBuffer.wrap(compressedColors.toArray());
          int colorByteBufferSize = computeColorByteBufferSize(numberOfPoints);
@@ -716,5 +715,33 @@ public class StereoPointCloudCompression
    public static interface PointCoordinateConsumer
    {
       void accept(double x, double y, double z);
+
+      static PointCoordinateConsumer toArray(Point3D[] pointCloud)
+      {
+         return new PointCoordinateConsumer()
+         {
+            int index = 0;
+
+            @Override
+            public void accept(double x, double y, double z)
+            {
+               pointCloud[index++] = new Point3D(x, y, z);
+            }
+         };
+      }
+
+      static PointCoordinateConsumer toArray(Point3D32[] pointCloud)
+      {
+         return new PointCoordinateConsumer()
+         {
+            int index = 0;
+
+            @Override
+            public void accept(double x, double y, double z)
+            {
+               pointCloud[index++] = new Point3D32((float) x, (float) y, (float) z);
+            }
+         };
+      }
    }
 }
