@@ -9,7 +9,7 @@ import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 
 public class GDXReferenceFrameGraphic implements RenderableProvider
@@ -21,12 +21,12 @@ public class GDXReferenceFrameGraphic implements RenderableProvider
 
    public GDXReferenceFrameGraphic(double length)
    {
-      coordinateFrameInstance = GDXModelPrimitives.createCoordinateFrameInstance(length);
+      coordinateFrameInstance = GDXModelBuilder.createCoordinateFrameInstance(length);
    }
 
    public GDXReferenceFrameGraphic(double length, Color color)
    {
-      coordinateFrameInstance = GDXModelPrimitives.createCoordinateFrameInstance(length, color);
+      coordinateFrameInstance = GDXModelBuilder.createCoordinateFrameInstance(length, color);
    }
 
    public void setToReferenceFrame(ReferenceFrame referenceFrame)

@@ -17,7 +17,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.gdx.input.ImGui3DViewInput;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.gizmo.BoxRayIntersection;
 import us.ihmc.gdx.ui.gizmo.CapsuleRayIntersection;
@@ -78,7 +78,7 @@ public class GDXRobotCollisionLink implements RenderableProvider
                                                                                       overrideTransform);
       overrideMeshFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("overrideMeshFrame" + rigidBodyName, overrideFrame, transformToJoint);
 
-      modelInstance = GDXModelPrimitives.buildModelInstance(meshBuilder ->
+      modelInstance = GDXModelBuilder.buildModelInstance(meshBuilder ->
       {
          if (shape instanceof Sphere3DReadOnly)
          {
@@ -125,7 +125,7 @@ public class GDXRobotCollisionLink implements RenderableProvider
       }, rigidBodyName);
       GDXTools.setTransparency(modelInstance, color.a);
 
-      coordinateFrame = GDXModelPrimitives.createCoordinateFrameInstance(0.15);
+      coordinateFrame = GDXModelBuilder.createCoordinateFrameInstance(0.15);
    }
 
    public void update()

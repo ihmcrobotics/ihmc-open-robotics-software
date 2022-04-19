@@ -1,20 +1,33 @@
 package us.ihmc.gdx.simulation.environment.object.objects;
 
-
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.gdx.simulation.environment.object.GDXSimpleObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class GDXBuildingObject
 {
+   public enum ComponentType
+   {
+      WALL, DOOR, WINDOW, STAIRS, FLOORS
+   }
+
    private final ArrayList<Point3D> corners = new ArrayList<>();
+
+   private final ArrayList<GDXSimpleObject> allObjects = new ArrayList<>();
+   private final HashMap<ComponentType, ArrayList<GDXSimpleObject>> components = new HashMap<>();
+
    private float height = 5.0f;
 
    public GDXBuildingObject()
    {
-
+      for (ComponentType type : ComponentType.values())
+      {
+         components.put(type, new ArrayList<>());
+      }
    }
 
    public Point3D getClosestRectangularCorner(Point3D lastPickPoint)
@@ -75,5 +88,21 @@ public class GDXBuildingObject
    public float getHeight()
    {
       return height;
+   }
+
+   public void insertComponent(ComponentType type, GDXSimpleObject component)
+   {
+      components.get(type).add(component);
+      allObjects.add(component);
+   }
+
+   public HashMap<ComponentType, ArrayList<GDXSimpleObject>> getComponents()
+   {
+      return components;
+   }
+
+   public ArrayList<GDXSimpleObject> getAllObjects()
+   {
+      return allObjects;
    }
 }

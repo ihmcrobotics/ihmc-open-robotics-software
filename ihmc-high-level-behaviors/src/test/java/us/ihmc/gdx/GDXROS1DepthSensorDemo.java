@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.gdx.ui.graphics.live.GDXROS1VideoVisualizer;
@@ -33,7 +33,7 @@ public class GDXROS1DepthSensorDemo
          {
             baseUI.create();
 
-            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
+            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelBuilder.createCoordinateFrame(0.3)));
             baseUI.get3DSceneManager().addModelInstance(new DepthSensorDemoObjectsModel().newInstance());
 
             poseGizmo.create(baseUI.get3DSceneManager().getCamera3D());

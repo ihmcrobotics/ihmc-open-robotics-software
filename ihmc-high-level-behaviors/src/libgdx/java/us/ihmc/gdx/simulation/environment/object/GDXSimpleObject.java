@@ -4,14 +4,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
-import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
-import com.badlogic.gdx.physics.bullet.dynamics.btMultiBody;
-import com.badlogic.gdx.physics.bullet.dynamics.btMultiBodyLinkCollider;
-import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
-import com.badlogic.gdx.physics.bullet.dynamics.btTypedConstraint;
-import com.badlogic.gdx.physics.bullet.linearmath.btMotionState;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.commons.FormattingTools;
@@ -27,15 +19,12 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
-import us.ihmc.gdx.simulation.bullet.GDXBulletPhysicsManager;
 import us.ihmc.gdx.simulation.environment.GDXModelInstance;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.gizmo.StepCheckIsPointInsideAlgorithm;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.log.LogTools;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -134,7 +123,7 @@ public class GDXSimpleObject
 
    public void setCollisionModel(Consumer<GDXMultiColorMeshBuilder> meshBuilderConsumer)
    {
-      Model collisionGraphic = GDXModelPrimitives.buildModel(meshBuilderConsumer, pascalCasedName + "CollisionModel" + getObjectIndex());
+      Model collisionGraphic = GDXModelBuilder.buildModel(meshBuilderConsumer, pascalCasedName + "CollisionModel" + getObjectIndex());
       GDXTools.setTransparency(collisionGraphic, 0.4f);
       setCollisionModel(collisionGraphic);
    }

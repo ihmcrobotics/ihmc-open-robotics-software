@@ -43,7 +43,7 @@ import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.sceneManager.GDX3DSceneBasics;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
@@ -214,7 +214,7 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
       addChild(depthSensorSimulator.getColorPanel());
 
       if (debugCoordinateFrame.get())
-         coordinateFrame = GDXModelPrimitives.createCoordinateFrameInstance(0.2);
+         coordinateFrame = GDXModelBuilder.createCoordinateFrameInstance(0.2);
 
       depthCameraIntrinsics = new CameraPinholeBrown();
       updateCameraPinholeBrown();
@@ -565,7 +565,7 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
       if (debugCoordinateFrame.get())
       {
          if (coordinateFrame == null)
-            coordinateFrame = GDXModelPrimitives.createCoordinateFrameInstance(0.2);
+            coordinateFrame = GDXModelBuilder.createCoordinateFrameInstance(0.2);
          coordinateFrame.getRenderables(renderables, pool);
       }
       depthSensorSimulator.getVirtualRenderables(renderables, pool);
