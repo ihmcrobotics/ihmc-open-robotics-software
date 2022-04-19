@@ -33,7 +33,7 @@ public class CountdownTimer
       this.timeLeft.set(0.0);
 
       isStopped = new YoBoolean(name + "IsStopped", registry);
-      isStopped.set(false);
+      isStopped.set(true);
 
       startTime = 0.0;
    }
@@ -73,7 +73,7 @@ public class CountdownTimer
 
    public double checkTimeLeft()
    {
-      timeLeft.set(getCurrentAbsoluteTime() - (startTime + maxTime.getDoubleValue()));
+      timeLeft.set((startTime + maxTime.getDoubleValue()) - getCurrentAbsoluteTime());
       return timeLeft.getDoubleValue();
    }
 
