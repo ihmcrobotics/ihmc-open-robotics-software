@@ -138,13 +138,13 @@ public abstract class KryoObjectCommunicator implements NetworkedObjectCommunica
    public synchronized int send(Object object)
    {
 
-      if (!listeners.containsKey(object.getClass()))
-      {
-         if (throwExceptionForUnregisteredPackets.get())
-            throw new RuntimeException(object.getClass().getSimpleName() + " not registered with ObjectCommunicator");
-         else
-            return -1;
-      }
+//      if (!listeners.containsKey(object.getClass()))
+//      {
+//         if (throwExceptionForUnregisteredPackets.get())
+//            throw new RuntimeException(object.getClass().getSimpleName() + " not registered with ObjectCommunicator");
+//         else
+//            return -1;
+//      }
       int bytesSend = sendTCP(object);
       updateDataRateTable(object, bytesSend);
       return bytesSend;

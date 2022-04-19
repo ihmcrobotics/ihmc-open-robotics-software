@@ -3,6 +3,7 @@ package us.ihmc.robotEnvironmentAwareness.communication.converters;
 import static org.bytedeco.librealsense2.global.realsense2.rs2_release_frame;
 import static us.ihmc.pubsub.DomainFactory.PubSubImplementation.FAST_RTPS;
 
+import java.io.IOException;
 import java.util.function.Consumer;
 
 import org.apache.commons.lang.mutable.MutableBoolean;
@@ -25,9 +26,12 @@ import org.bytedeco.librealsense2.global.realsense2;
 
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
+import com.esotericsoftware.kryonet.Server;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.net.KryoObjectServer;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression.ColorAccessor;
@@ -63,41 +67,61 @@ public class StandAloneL515Streamer
    private static final int COLOR_STREAM_INDEX = -1;
    private static CompressionIntermediateVariablesPackage compressionIntermediateVariablesPackage = new CompressionIntermediateVariablesPackage();
 
-   public static void main(String[] args)
+   public static void main(String[] args) throws IOException
    {
       Consumer<StereoVisionPointCloudMessage> pointcloudPublisher;
 
       if (USE_KRYO)
       {
-         KryoAdapter adapter = KryoAdapter.createServer(6666);
-         MutableBoolean connected = new MutableBoolean(false);
-         adapter.getServer().addListener(new Listener()
-         {
-            @Override
-            public void connected(Connection connection)
-            {
-               connected.setValue(true);
-            }
+         //         KryoAdapter adapter = KryoAdapter.createServer(6666);
+         //         MutableBoolean connected = new MutableBoolean(false);
+         //         Server server = adapter.getServer();
+         //         server.addListener(new Listener()
+         //         {
+         //            @Override
+         //            public void connected(Connection connection)
+         //            {
+         //               connected.setValue(true);
+         //            }
+         //
+         //            public void disconnected(Connection connection)
+         //            {
+         //               connected.setValue(false);
+         //            };
+         //         });
+         //         //         ColorPointCloudKryoPacket packet = new ColorPointCloudKryoPacket();
+         //         pointcloudPublisher = msg ->
+         //         {
+         //            if (connected.booleanValue())
+         //            {
+         //               LogTools.info("Sending packet!!!!");
+         //               for (Connection connection : server.getConnections())
+         //               {
+         //                  // Do not send if the write buffer > 90% full
+         //                  if (((double) connection.getTcpWriteBufferSize()) / ((double) Conversions.megabytesToBytes(512)) > 0.9)
+         //                  {
+         //                     LogTools.error("Dropping the object of " + msg.getClass() + ", because the write buffer is > 90% full!");
+         //                     continue;
+         //                  }
+         //                  connection.sendTCP(msg);
+         //               }
+         //            }
+         //         };
+         //         adapter.connect();
 
-            public void disconnected(Connection connection)
-            {
-               connected.setValue(false);
-            };
-         });
-         //         ColorPointCloudKryoPacket packet = new ColorPointCloudKryoPacket();
+         ColorPointCloudKryoPacket packet = new ColorPointCloudKryoPacket();
+         KryoObjectServer server = new KryoObjectServer(6666, null);
+
          pointcloudPublisher = msg ->
          {
-            if (connected.booleanValue())
+            if (server.isConnected())
             {
-               LogTools.info("Sending packet!!!!");
-               //               packet.set(msg);
-               //               server.sendTCP(packet);
-               msg.getPointCloud().clear();
-               msg.getColors().clear();
-               adapter.sendTCP(msg);
+               packet.set(msg);
+               server.send(packet);
             }
          };
-         adapter.connect();
+
+         server.connect();
       }
       else
       {
