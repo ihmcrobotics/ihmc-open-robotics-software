@@ -67,16 +67,16 @@ public class NonPlanarLIPMWalkerRobot
 
       leftHipPitchJoint = (PinJoint) robot.getJoint("leftHipPitch");
       rightHipPitchJoint = (PinJoint) robot.getJoint("rightHipPitch");
-      hipPitchJoints = new SideDependentList<>(leftHipPitchJoint, rightHipPitchJoint);
 
       leftHipRollJoint = (PinJoint) robot.getJoint("leftHipRoll");
       rightHipRollJoint = (PinJoint) robot.getJoint("rightHipRoll");
-      hipRollJoints = new SideDependentList<>(leftHipRollJoint, rightHipPitchJoint);
 
       leftKneeJoint = (SliderJoint) robot.getJoint("leftKnee");
       rightKneeJoint = (SliderJoint) robot.getJoint("rightKnee");
 
       kneeJoints = new SideDependentList<>(leftKneeJoint, rightKneeJoint);
+      hipPitchJoints = new SideDependentList<>(leftHipPitchJoint, rightHipPitchJoint);
+      hipRollJoints = new SideDependentList<>(leftHipRollJoint, rightHipRollJoint);
 
       heelPoints = new SideDependentList<GroundContactPoint>();
 
