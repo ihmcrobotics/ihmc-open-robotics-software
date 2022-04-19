@@ -206,11 +206,11 @@ public class StereoPointCloudCompression
       discretizationParameters.update(pointAccessor, numberOfPoints);
       discretizationParameters.getPointCloudCenter(message.getPointCloudCenter());
 
-      double centerX = message.getPointCloudCenter().getX();
-      double centerY = message.getPointCloudCenter().getY();
-      double centerZ = message.getPointCloudCenter().getZ();
+      float centerX = message.getPointCloudCenter().getX32();
+      float centerY = message.getPointCloudCenter().getY32();
+      float centerZ = message.getPointCloudCenter().getZ32();
       message.setResolution(discretizationParameters.getResolution());
-      double invResolution = 1.0 / message.getResolution();
+      float invResolution = (float) (1.0 / message.getResolution());
 
       if (!useLZ4Compressor)
       {
@@ -396,16 +396,20 @@ public class StereoPointCloudCompression
       }
       else
       {
-         ShortBuffer pointCloudShortBuffer = ByteBuffer.wrap(compressedPointCloud.toArray()).asShortBuffer();
-
          for (int i = 0; i < numberOfPoints; i++)
          {
-            double x = (pointCloudShortBuffer.get() + 0.5) * resolution;
-            double y = (pointCloudShortBuffer.get() + 0.5) * resolution;
-            double z = (pointCloudShortBuffer.get() + 0.5) * resolution;
+            int bufferOffset = 6 * i;
+            double x = getPointCoordinate(compressedPointCloud.get(bufferOffset++), compressedPointCloud.get(bufferOffset++), resolution);
+            double y = getPointCoordinate(compressedPointCloud.get(bufferOffset++), compressedPointCloud.get(bufferOffset++), resolution);
+            double z = getPointCoordinate(compressedPointCloud.get(bufferOffset++), compressedPointCloud.get(bufferOffset), resolution);
             pointCoordinateConsumer.accept(x + center.getX(), y + center.getY(), z + center.getZ());
          }
       }
+   }
+
+   public static double getPointCoordinate(byte byteHi, byte byteLo, double resolution)
+   {
+      return (toShort(byteHi, byteLo) + 0.5) * resolution;
    }
 
    public static Color[] decompressColorsToAWTColorArray(StereoVisionPointCloudMessage message)
@@ -490,7 +494,12 @@ public class StereoPointCloudCompression
       }
    }
 
-   private static int rgb(byte r, byte g, byte b)
+   public static short toShort(byte byteHi, byte byteLo)
+   {
+      return (short) (((byteHi & 0xFF) << 8) | ((byteLo & 0xFF) << 0));
+   }
+
+   public static int rgb(byte r, byte g, byte b)
    {
       return ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | ((b & 0xFF) << 0);
    }
