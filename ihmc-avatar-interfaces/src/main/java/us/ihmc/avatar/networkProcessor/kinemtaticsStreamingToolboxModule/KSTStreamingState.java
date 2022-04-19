@@ -48,6 +48,7 @@ import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.tools.UnitConversions;
+import us.ihmc.yoVariables.euclid.YoVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
@@ -100,7 +101,7 @@ public class KSTStreamingState implements State
    private final YoDouble defaultNeckMessageWeight = new YoDouble("defaultNeckMessageWeight", registry);
    private final YoDouble defaultPelvisMessageLinearWeight = new YoDouble("defaultPelvisMessageLinearWeight", registry);
    private final YoDouble defaultPelvisMessageAngularWeight = new YoDouble("defaultPelvisMessageAngularWeight", registry);
-   private final YoDouble defaultChestMessageAngularWeight = new YoDouble("defaultChestMessageAngularWeight", registry);
+   private final YoVector3D defaultChestMessageAngularWeight = new YoVector3D("defaultChestMessageAngularWeight", registry);
 
    private final YoDouble defaultPelvisMessageLockWeight = new YoDouble("defaultPelvisMessageLockWeight", registry);
    private final YoDouble defaultChestMessageLockWeight = new YoDouble("defaultChestMessageLockWeight", registry);
@@ -207,7 +208,7 @@ public class KSTStreamingState implements State
       defaultNeckMessageWeight.set(10.0);
       defaultPelvisMessageLinearWeight.set(2.5);
       defaultPelvisMessageAngularWeight.set(1.0);
-      defaultChestMessageAngularWeight.set(0.75);
+      defaultChestMessageAngularWeight.set(0.15, 0.15, 0.02);
 
       defaultPelvisMessageLockWeight.set(1000.0);
       defaultChestMessageLockWeight.set(1000.0);
@@ -231,8 +232,8 @@ public class KSTStreamingState implements State
 
       publishingPeriod.set(5.0 * tools.getWalkingControllerPeriod());
 
-      defaultLinearRateLimit.set(1.5);
-      defaultAngularRateLimit.set(10.0);
+      defaultLinearRateLimit.set(3.0);
+      defaultAngularRateLimit.set(30.0);
       outputJointVelocityScale.set(0.75);
 
       streamingBlendingDuration.set(defautlInitialBlendDuration);
@@ -254,7 +255,7 @@ public class KSTStreamingState implements State
       Collection<? extends RigidBodyBasics> controllableRigidBodies = tools.getIKController().getControllableRigidBodies();
       DoubleProvider inputsAlphaProvider = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(inputsFilterBreakFrequency.getValue(),
                                                                                                                  toolboxControllerPeriod);
-      inputsFilterBreakFrequency.set(2.0);
+      inputsFilterBreakFrequency.set(4.0);
       inputVelocityDecayDuration.set(0.5);
 
       for (RigidBodyBasics rigidBody : controllableRigidBodies)
@@ -402,7 +403,7 @@ public class KSTStreamingState implements State
          defaultChestMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(false, false, false, worldFrame));
          defaultChestMessage.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, true, worldFrame));
          MessageTools.packWeightMatrix3DMessage(0.0, defaultChestMessage.getLinearWeightMatrix());
-         MessageTools.packWeightMatrix3DMessage(defaultChestMessageAngularWeight.getValue(), defaultChestMessage.getAngularWeightMatrix());
+         MessageTools.packWeightMatrix3DMessage(defaultChestMessageAngularWeight, defaultChestMessage.getAngularWeightMatrix());
       }
 
       for (RobotSide robotSide : RobotSide.values)
