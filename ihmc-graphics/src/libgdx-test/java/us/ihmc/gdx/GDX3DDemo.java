@@ -6,7 +6,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.tools.BoxesDemoModel;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 
 public class GDX3DDemo
 {
@@ -22,14 +22,14 @@ public class GDX3DDemo
 
             sceneManager.addCoordinateFrame(0.3);
             sceneManager.addModelInstance(new BoxesDemoModel().newInstance());
-            ModelInstance hollowCylinder = GDXModelPrimitives.buildModelInstance(meshBuilder ->
+            ModelInstance hollowCylinder = GDXModelBuilder.buildModelInstance(meshBuilder ->
             {
                meshBuilder.addHollowCylinder(0.1, 0.5, 0.4, new Point3D(), Color.YELLOW);
             }, "hollow");
             hollowCylinder.transform.translate(0.2f, 0.3f, 0.5f);
             sceneManager.addModelInstance(hollowCylinder);
 
-            ModelInstance symmetricTriangularPrism = GDXModelPrimitives.buildModelInstance(meshBuilder ->
+            ModelInstance symmetricTriangularPrism = GDXModelBuilder.buildModelInstance(meshBuilder ->
             {
                meshBuilder.addIsoscelesTriangularPrism(0.3, 0.15, 0.05, new Point3D(), Color.ORANGE);
             }, "wedge");

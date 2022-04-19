@@ -15,7 +15,7 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.sensors.GDXLowLevelDepthSensorSimulator;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
@@ -74,7 +74,7 @@ public class GDXVRDepthSensorDemo
 
             for (RobotSide side : RobotSide.values)
             {
-               ModelInstance coordinateFrameInstance = GDXModelPrimitives.createCoordinateFrameInstance(0.1);
+               ModelInstance coordinateFrameInstance = GDXModelBuilder.createCoordinateFrameInstance(0.1);
                controllerCoordinateFrames.put(side, coordinateFrameInstance);
                baseUI.get3DSceneManager().addModelInstance(coordinateFrameInstance, GDXSceneLevel.VIRTUAL);
             }

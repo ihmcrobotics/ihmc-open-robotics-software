@@ -15,7 +15,6 @@ import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiTools;
@@ -24,11 +23,10 @@ import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.environment.object.GDXSimpleObject;
 import us.ihmc.gdx.simulation.environment.object.objects.GDXBuildingObject;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.gdx.ui.gizmo.StepCheckIsPointInsideAlgorithm;
-import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
 
@@ -41,7 +39,6 @@ public class GDXBuildingConstructor extends ImGuiPanel
 
    private final static String WINDOW_NAME = ImGuiTools.uniqueLabel(GDXEnvironmentBuilder.class, "Constructor");
    private final ArrayList<GDXSimpleObject> virtualObjects = new ArrayList<>();
-   private final ArrayList<GDXSimpleObject> realObjects = new ArrayList<>();
    private GDXSimpleObject selectedObject;
    private GDXSimpleObject intersectedObject;
    private final ImFloat ambientLightAmount = new ImFloat(0.4f);
@@ -95,9 +92,12 @@ public class GDXBuildingConstructor extends ImGuiPanel
 
    public void getRealRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      for (GDXSimpleObject model : realObjects)
+      if(building != null)
       {
-         model.getRealRenderables(renderables, pool);
+         for (GDXSimpleObject model : building.getAllObjects())
+         {
+            model.getRealRenderables(renderables, pool);
+         }
       }
       if (selectedObject != null)
       {
@@ -165,7 +165,9 @@ public class GDXBuildingConstructor extends ImGuiPanel
    {
       double closestDistance = Double.POSITIVE_INFINITY;
       GDXSimpleObject closestObject = null;
-      for (GDXSimpleObject object : realObjects)
+
+
+      for (GDXSimpleObject object : virtualObjects)
       {
          boolean intersects = object.intersect(pickRay, tempIntersection);
          double distance = tempIntersection.distance(pickRay.getPoint());
@@ -183,19 +185,17 @@ public class GDXBuildingConstructor extends ImGuiPanel
 
       if (mode != Mode.NONE)
       {
-         LogTools.info("Corners {}", building.getCorners());
          Line3DReadOnly pickRay = viewInput.getPickRayInWorld();
          lastPickPoint = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(EuclidCoreTools.origin3D,
                                                                                      Axis3D.Z,
                                                                                      pickRay.getPoint(),
                                                                                      pickRay.getDirection());
-
          switch (mode)
          {
             case CONSTRUCTING:
             {
                GDXSimpleObject objectToPlace = new GDXSimpleObject("Corner");
-               Model objectModel = GDXModelPrimitives.createCylinder(0.15f, 0.25f, Color.BROWN).model;
+               Model objectModel = GDXModelBuilder.createCylinder(0.15f, 0.25f, Color.BROWN).model;
                Box3D collisionBox = new Box3D(1.0f, 1.0f, 0.5f);
                objectToPlace.setRealisticModel(objectModel);
                objectToPlace.setCollisionModel(objectModel);
@@ -239,7 +239,7 @@ public class GDXBuildingConstructor extends ImGuiPanel
 
 
                   GDXSimpleObject objectToPlace = new GDXSimpleObject("BuildingWall_" + i);
-                  Model objectModel = GDXModelPrimitives.createBox(length, 0.1f, building.getHeight(), Color.LIGHT_GRAY).model;
+                  Model objectModel = GDXModelBuilder.createBox(length, 0.1f, building.getHeight(), Color.LIGHT_GRAY).model;
                   Box3D collisionBox = new Box3D(1.0f, 0.1f, building.getHeight());
 
                   Vector3DBasics translation = objectToPlace.getObjectTransform().getTranslation();
@@ -255,13 +255,13 @@ public class GDXBuildingConstructor extends ImGuiPanel
                   objectToPlace.getRealisticModelOffset().getTranslation().add(0.0f, 0.0f, building.getHeight() / 2.0f);
                   objectToPlace.setPositionInWorld(midPoint);
 
+                  building.insertComponent(GDXBuildingObject.ComponentType.WALL, objectToPlace);
 
+               }
 
-                  realObjects.add(objectToPlace);
-
-                  LogTools.info("{} {} Size: {}", previousCorner, corner, length);
-
-               } mode = Mode.NONE;
+               selectedObject = null;
+               virtualObjects.clear();
+               mode = Mode.NONE;
                break;
             }
          }
@@ -282,6 +282,19 @@ public class GDXBuildingConstructor extends ImGuiPanel
          {
             building = new GDXBuildingObject();
             mode = Mode.CONSTRUCTING;
+         }
+
+         if(ImGui.button("Create Stairs"))
+         {
+            GDXSimpleObject stairsObject = new GDXSimpleObject("Stairs");
+            Model objectModel = GDXModelBuilder.createStairs(1.5f, 0.3f, 0.3f, 10, Color.BROWN).model;
+            Box3D collisionBox = new Box3D(30.0f, 1.5f, 30.0f);
+            stairsObject.setRealisticModel(objectModel);
+            stairsObject.setCollisionModel(objectModel);
+            stairsObject.setCollisionGeometryObject(collisionBox);
+
+            building.insertComponent(GDXBuildingObject.ComponentType.STAIRS, stairsObject);
+            updateObjectSelected(selectedObject, stairsObject);
          }
 
          ImGui.separator();
