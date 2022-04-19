@@ -204,8 +204,8 @@ public class ICPController implements ICPControllerInterface
                                                          hasICPControlPolygons,
                                                          registry);
 
-      parameters.createFeedForwardAlphaCalculator(registry, yoGraphicsListRegistry);
-      parameters.createFeedbackAlphaCalculator(registry, yoGraphicsListRegistry);
+      parameters.createFeedForwardAlphaCalculator(registry, null);
+      parameters.createFeedbackAlphaCalculator(registry, null);
 
       if (yoGraphicsListRegistry != null)
          setupVisualizers(yoGraphicsListRegistry);
