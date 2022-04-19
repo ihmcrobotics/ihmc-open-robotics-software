@@ -5,6 +5,7 @@ import static us.ihmc.pubsub.DomainFactory.PubSubImplementation.FAST_RTPS;
 
 import java.util.function.Consumer;
 
+import org.apache.commons.lang.mutable.MutableBoolean;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.MutableBytePointer;
@@ -22,9 +23,13 @@ import org.bytedeco.librealsense2.rs2_stream_profile;
 import org.bytedeco.librealsense2.rs2_vertex;
 import org.bytedeco.librealsense2.global.realsense2;
 
+import com.esotericsoftware.kryonet.Connection;
+import com.esotericsoftware.kryonet.Listener;
+
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression.ColorAccessor;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression.CompressionIntermediateVariablesPackage;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression.PointAccessor;
@@ -37,32 +42,71 @@ import us.ihmc.ros2.ROS2Topic;
  */
 public class StandAloneL515Streamer
 {
-   private static final int depthWidth = 1024;
-   private static final int depthHeight = 768;
+   private static final boolean USE_KRYO = true;
 
-   private static final int colorWidth = 1280;
-   private static final int colorHeight = 720;
-   
-//   private static final int depthWidth = 640;
-//   private static final int depthHeight = 480;
-//
-//   private static final int colorWidth = 640;
-//   private static final int colorHeight = 480;
+   //   private static final int depthWidth = 1024;
+   //   private static final int depthHeight = 768;
+   //
+   //   private static final int colorWidth = 1280;
+   //   private static final int colorHeight = 720;
+
+   private static final int depthWidth = 640;
+   private static final int depthHeight = 480;
+
+   private static final int colorWidth = 640;
+   private static final int colorHeight = 480;
 
    private static final int depthFps = 30;
    private static final int colorFps = 30;
 
    private static final int DEPTH_STREAM_INDEX = -1;
    private static final int COLOR_STREAM_INDEX = -1;
-   private static CompressionIntermediateVariablesPackage compressionIntermediateVariablesPackage  = new CompressionIntermediateVariablesPackage();
+   private static CompressionIntermediateVariablesPackage compressionIntermediateVariablesPackage = new CompressionIntermediateVariablesPackage();
 
    public static void main(String[] args)
    {
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(FAST_RTPS, "L515");
-      ROS2Topic<StereoVisionPointCloudMessage> topic = ROS2Tools.IHMC_ROOT.withTypeName(StereoVisionPointCloudMessage.class);
-      Consumer<StereoVisionPointCloudMessage> pointcloudPublisher = ROS2Tools.createPublisher(ros2Node, topic)::publish;
+      Consumer<StereoVisionPointCloudMessage> pointcloudPublisher;
 
-      System.out.println("Created Publisher on: " + topic.getName());
+      if (USE_KRYO)
+      {
+         KryoAdapter adapter = KryoAdapter.createServer(6666);
+         MutableBoolean connected = new MutableBoolean(false);
+         adapter.getServer().addListener(new Listener()
+         {
+            @Override
+            public void connected(Connection connection)
+            {
+               connected.setValue(true);
+            }
+
+            public void disconnected(Connection connection)
+            {
+               connected.setValue(false);
+            };
+         });
+         //         ColorPointCloudKryoPacket packet = new ColorPointCloudKryoPacket();
+         pointcloudPublisher = msg ->
+         {
+            if (connected.booleanValue())
+            {
+               LogTools.info("Sending packet!!!!");
+               //               packet.set(msg);
+               //               server.sendTCP(packet);
+               msg.getPointCloud().clear();
+               msg.getColors().clear();
+               adapter.sendTCP(msg);
+            }
+         };
+         adapter.connect();
+      }
+      else
+      {
+         ROS2Node ros2Node = ROS2Tools.createROS2Node(FAST_RTPS, "L515");
+         ROS2Topic<StereoVisionPointCloudMessage> topic = ROS2Tools.IHMC_ROOT.withTypeName(StereoVisionPointCloudMessage.class);
+         pointcloudPublisher = ROS2Tools.createPublisher(ros2Node, topic)::publish;
+
+         System.out.println("Created Publisher on: " + topic.getName());
+      }
 
       rs2_error e = new rs2_error();
       realsense2.rs2_log_to_console(realsense2.RS2_LOG_SEVERITY_ERROR, e);
@@ -104,10 +148,10 @@ public class StandAloneL515Streamer
 
       // Declare RealSense pipeline, encapsulating the actual device and sensors
       rs2_pipeline pipe = realsense2.rs2_create_pipeline(ctx, e);
-      
+
       //Create a configuration for configuring the pipeline with a non default profile
       rs2_config cfg = realsense2.rs2_create_config(e);
-      
+
       //Add desired streams to configuration
       realsense2.rs2_config_enable_stream(cfg,
                                           realsense2.RS2_STREAM_COLOR,
@@ -150,13 +194,13 @@ public class StandAloneL515Streamer
       {
          return;
       }
-      
+
       rs2_frame_queue align_queue = realsense2.rs2_create_frame_queue(1, e);
       if (!check_error(e))
       {
          return;
       }
-      
+
       realsense2.rs2_start_processing_queue(align_to_color, align_queue, e);
       if (!check_error(e))
       {
@@ -173,23 +217,23 @@ public class StandAloneL515Streamer
       IntPointer framerate = new IntPointer(psize);
       rs2_frame color_frame = null;
       rs2_frame depth_frame = null;
-      
+
       byte[] color_byte = null;
       float[] verticeArray = null;
-      
+
       MutableBytePointer color_pointer = null;
-      
+
       long averageComputeTime = 0;
       long totalComputeTime = 0;
       long numberOfIterations = 0;
-      
+
       System.out.println("Starting Stream");
       while (true)
       {
          rs2_frame tmpFrames = realsense2.rs2_pipeline_wait_for_frames(pipe, realsense2.RS2_DEFAULT_TIMEOUT, e);
          long startTime = System.nanoTime();
          numberOfIterations++;
-         
+
          if (!check_error(e))
          {
             continue;
@@ -218,17 +262,17 @@ public class StandAloneL515Streamer
             rs2_stream_profile mode = realsense2.rs2_get_frame_stream_profile(frame, e);
             realsense2.rs2_get_stream_profile_data(mode, stream, format, indexP, unique_id, framerate, e);
 
-            if(stream.get() == realsense2.RS2_STREAM_DEPTH)
+            if (stream.get() == realsense2.RS2_STREAM_DEPTH)
             {
                depth_frame = frame;
             }
 
-            if(stream.get() == realsense2.RS2_STREAM_COLOR)
+            if (stream.get() == realsense2.RS2_STREAM_COLOR)
             {
                color_frame = frame;
             }
          }
-         
+
          if (color_frame == null || depth_frame == null)
          {
             // release frames
@@ -245,7 +289,7 @@ public class StandAloneL515Streamer
 
          //get color data
          int color_data_size = realsense2.rs2_get_frame_data_size(color_frame, e);
-         if(color_pointer == null)
+         if (color_pointer == null)
          {
             color_pointer = new MutableBytePointer(realsense2.rs2_get_frame_data(color_frame, e));
             color_byte = new byte[color_data_size];
@@ -255,35 +299,33 @@ public class StandAloneL515Streamer
             long address = realsense2.rs2_get_frame_data_address(color_frame, e);
             color_pointer.setAddress(address);
          }
-         
+
          color_pointer.get(color_byte, 0, color_data_size);
 
          //get point cloud data
          rs2_vertex vertices = realsense2.rs2_get_frame_vertices(pointCloudFrame, e);
          FloatPointer verticePointer = new FloatPointer(vertices);
          int numberOfPoints = realsense2.rs2_get_frame_points_count(pointCloudFrame, e);
-         
-         if(verticeArray == null)
+
+         if (verticeArray == null)
          {
             verticeArray = new float[numberOfPoints * 3];
          }
-         
+
          verticePointer.get(verticeArray, 0, numberOfPoints * 3);
          verticePointer.close();
-         
-//         convertPointCloudToWorld.updatePointCoud(verticeArray, numberOfPoints);
 
-//         long startCompressTime = System.nanoTime();
+         //         convertPointCloudToWorld.updatePointCoud(verticeArray, numberOfPoints);
+
+         //         long startCompressTime = System.nanoTime();
          convertToStereoVisionPointCloudMessageFast(pointcloudPublisher, verticeArray, color_byte, numberOfPoints);
-//         long endTime = System.nanoTime() - startCompressTime;
-//         System.out.println(endTime);
-         
-         
-         
+         //         long endTime = System.nanoTime() - startCompressTime;
+         //         System.out.println(endTime);
+
          long computeTime = System.nanoTime() - startTime;
          totalComputeTime += computeTime;
-         
-         if(numberOfIterations == 30)
+
+         if (numberOfIterations == 30)
          {
             numberOfIterations = 0;
             averageComputeTime = totalComputeTime / 30;
@@ -335,12 +377,20 @@ public class StandAloneL515Streamer
                                                                   int numberOfPoints)
    {
 
-      StereoVisionPointCloudMessage msg = StereoPointCloudCompression.compressPointCloud(1l,
-                                                                                             PointAccessor.wrap(points),
-                                                                                             ColorAccessor.wrapRGB(rawColors),
-                                                                                             numberOfPoints,
-                                                                                             0.002,
-                                                                                             compressionIntermediateVariablesPackage);
+      StereoVisionPointCloudMessage msg = StereoPointCloudCompression.compressPointCloud(System.nanoTime(),
+                                                                                         PointAccessor.wrap(points),
+                                                                                         ColorAccessor.wrapRGB(rawColors),
+                                                                                         numberOfPoints,
+                                                                                         0.002,
+                                                                                         compressionIntermediateVariablesPackage);
+
+      //      System.out.println(msg.getPointCloud().size() + ", " + msg.getColors().size());
+      //      //      while (msg.getColors().size() > 100000)
+      //      //         msg.getColors().removeAt(msg.getColors().size() - 1);
+      //      msg.getPointCloud().clear();
+      //      msg.getColors().clear();
+      //      msg.getPointCloud().fill(0, 66416, (byte) 200);
+      //            msg.getColors().fill(0, 0000, (byte)200);
 
       pointcloudPublisher.accept(msg);
    }
