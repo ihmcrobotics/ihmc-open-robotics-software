@@ -7,7 +7,7 @@ import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.gdx.FocusBasedGDXCamera;
+import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
@@ -32,17 +32,25 @@ public class GDXSelectablePose3DGizmo
       poseGizmo = new GDXPose3DGizmo(gizmoFrame, gizmoTransformToParentFrameToModify);
    }
 
-   public void create(FocusBasedGDXCamera camera3D)
+   public void create(GDXFocusBasedCamera camera3D)
    {
       poseGizmo.create(camera3D);
    }
 
-   public void process3DViewInput(ImGui3DViewInput input, boolean mouseIntersects)
+   public void calculate3DViewPick(ImGui3DViewInput input)
+   {
+      if (selected)
+      {
+         poseGizmo.calculate3DViewPick(input);
+      }
+   }
+
+   public void process3DViewInput(ImGui3DViewInput input, boolean isPickSelected)
    {
       // Process input
       boolean leftMouseReleasedWithoutDrag = input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
-      boolean isClickedOn = mouseIntersects && leftMouseReleasedWithoutDrag;
-      boolean somethingElseIsClickedOn = !mouseIntersects && leftMouseReleasedWithoutDrag;
+      boolean isClickedOn = isPickSelected && leftMouseReleasedWithoutDrag;
+      boolean somethingElseIsClickedOn = !isPickSelected && leftMouseReleasedWithoutDrag;
       boolean deselectionKeyPressed = ImGui.isKeyReleased(ImGuiTools.getDeleteKey()) || ImGui.isKeyReleased(ImGuiTools.getEscapeKey());
 
       // Determine selectedness

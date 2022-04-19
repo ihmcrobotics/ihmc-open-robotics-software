@@ -1,5 +1,6 @@
 package us.ihmc.gdx.ui.yo;
 
+import imgui.internal.ImGui;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 
 import java.util.ArrayList;
@@ -24,7 +25,11 @@ public class ImPlotYoPlotPanel extends ImGuiPanel
 
    public void render()
    {
-      layout.render();
+      ImGui.beginMenuBar();
+      layout.renderLayoutMenu();
+      ImGui.endMenuBar();
+
+      layout.renderPlots();
    }
 
    public void setUpdate(boolean update)

@@ -1,6 +1,7 @@
 package us.ihmc.simulationToolkit.controllers;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
@@ -144,6 +145,8 @@ public class JointLowLevelJointControlSimulator implements RobotController
          }
 
          double desiredTau = jointPositionController.compute(currentPosition, desiredPosition, currentRate, desiredRate, controlDT);
+         desiredTau = EuclidCoreTools.clamp(desiredTau, simulatedJoint.getTorqueLimit());
+
          simulatedJoint.setTau(desiredTau);
       }
 

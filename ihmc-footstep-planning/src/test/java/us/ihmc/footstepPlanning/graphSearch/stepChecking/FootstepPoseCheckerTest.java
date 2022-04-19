@@ -1,7 +1,13 @@
 package us.ihmc.footstepPlanning.graphSearch.stepChecking;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static us.ihmc.robotics.Assert.assertEquals;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.jupiter.api.Test;
-import org.lwjgl.Sys;
+
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityLatticePoint;
 import us.ihmc.commons.InterpolationTools;
@@ -17,22 +23,12 @@ import us.ihmc.footstepPlanning.graphSearch.graph.LatticePoint;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.log.LogTools;
-import us.ihmc.robotics.Assert;
-import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertTrue;
 
 public class FootstepPoseCheckerTest
 {

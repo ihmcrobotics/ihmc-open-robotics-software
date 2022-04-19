@@ -6,13 +6,14 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.configurations.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -78,17 +79,13 @@ public class ICPControllerTest
          {
             return false;
          }
-
-         @Override
-         public boolean allowStepAdjustment()
-         {
-            return false;
-         }
       };
 
       TestWalkingControllerParameters walkingControllerParameters = new TestWalkingControllerParameters();
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
+      FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
+
       double controlDT = 0.001;
       ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters,
                                                                            bipedSupportPolygons, null, contactableFeet, controlDT, registry, null);
@@ -111,7 +108,7 @@ public class ICPControllerTest
       FramePoint2D currentCoMPosition = new FramePoint2D(currentICP);
 
       controller.initialize();
-      controller.compute(desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition, omega);
+      controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition, omega);
 
       FramePoint2D desiredCMP = new FramePoint2D();
       controller.getDesiredCMP(desiredCMP);
@@ -148,17 +145,13 @@ public class ICPControllerTest
          {
             return false;
          }
-
-         @Override
-         public boolean allowStepAdjustment()
-         {
-            return false;
-         }
       };
 
       TestWalkingControllerParameters walkingControllerParameters = new TestWalkingControllerParameters();
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
+      FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
+
       double controlDT = 0.001;
       ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters,
                                                                            bipedSupportPolygons, null, contactableFeet, controlDT, registry, null);
@@ -182,7 +175,7 @@ public class ICPControllerTest
       FramePoint2D currentCoM = new FramePoint2D(currentICP);
 
       controller.initialize();
-      controller.compute(desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoM, omega);
+      controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoM, omega);
 
       FramePoint2D desiredCMP = new FramePoint2D();
       controller.getDesiredCMP(desiredCMP);
@@ -219,18 +212,14 @@ public class ICPControllerTest
          {
             return false;
          }
-
-         @Override
-         public boolean allowStepAdjustment()
-         {
-            return false;
-         }
       };
 
       double footWidth = 0.1;
       TestWalkingControllerParameters walkingControllerParameters = new TestWalkingControllerParameters();
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, footWidth, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
+      FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
+
       double controlDT = 0.001;
       ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters,
                                                                            bipedSupportPolygons, null, contactableFeet, controlDT, registry, null);
@@ -253,7 +242,7 @@ public class ICPControllerTest
       FramePoint2D currentCoMPosition = new FramePoint2D(currentICP);
 
       controller.initialize();
-      controller.compute(desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition, omega);
+      controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition, omega);
 
       FramePoint2D desiredCMP = new FramePoint2D();
       controller.getDesiredCMP(desiredCMP);
@@ -301,17 +290,13 @@ public class ICPControllerTest
          {
             return false;
          }
-
-         @Override
-         public boolean allowStepAdjustment()
-         {
-            return false;
-         }
       };
 
       TestWalkingControllerParameters walkingControllerParameters = new TestWalkingControllerParameters();
          SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(10.0, 5.0, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
+      FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
+
       double controlDT = 0.001;
       ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters,
                                                    bipedSupportPolygons, null, contactableFeet, controlDT, registry, null);
@@ -334,7 +319,7 @@ public class ICPControllerTest
       FramePoint2D currentCoMPosition = new FramePoint2D(currentICP);
 
       controller.initialize();
-      controller.compute(desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition, omega);
+      controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition, omega);
 
       FramePoint2D desiredCMP = new FramePoint2D();
       controller.getDesiredCMP(desiredCMP);
@@ -391,17 +376,13 @@ public class ICPControllerTest
          {
             return 1.0;
          }
-
-         @Override
-         public boolean allowStepAdjustment()
-         {
-            return false;
-         }
       };
 
       TestWalkingControllerParameters walkingControllerParameters = new TestWalkingControllerParameters();
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
+      FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
+
       double controlDT = 0.001;
       ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters,
                                                                            bipedSupportPolygons, null, contactableFeet, controlDT, registry, null);
@@ -424,7 +405,7 @@ public class ICPControllerTest
       FramePoint2D currentCoMPosition = new FramePoint2D(currentICP);
 
       controller.initialize();
-      controller.compute(desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition, omega);
+      controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition, omega);
 
       FramePoint2D desiredCMP = new FramePoint2D();
       controller.getDesiredCMP(desiredCMP);
@@ -496,26 +477,8 @@ public class ICPControllerTest
       return bipedSupportPolygons;
    }
 
-   private class TestICPOptimizationParameters extends ICPOptimizationParameters
+   private class TestICPOptimizationParameters extends ICPControllerParameters
    {
-      @Override
-      public double getForwardFootstepWeight()
-      {
-         return 10.0;
-      }
-
-      @Override
-      public double getLateralFootstepWeight()
-      {
-         return 10.0;
-      }
-
-      @Override
-      public double getFootstepRateWeight()
-      {
-         return 0.0001;
-      }
-
       @Override
       public double getFeedbackForwardWeight()
       {
@@ -550,21 +513,9 @@ public class ICPControllerTest
       }
 
       @Override
-      public double getDynamicsObjectiveDoubleSupportWeightModifier()
-      {
-         return 1.0;
-      }
-
-      @Override
       public double getAngularMomentumMinimizationWeight()
       {
          return 50;
-      }
-
-      @Override
-      public boolean scaleStepRateWeightWithTime()
-      {
-         return false;
       }
 
       @Override
@@ -574,40 +525,9 @@ public class ICPControllerTest
       }
 
       @Override
-      public boolean useFeedbackRate()
-      {
-         return false;
-      }
-
-      @Override
-      public boolean allowStepAdjustment()
-      {
-         return false;
-      }
-
-      @Override
       public boolean useAngularMomentum()
       {
          return false;
-      }
-
-      @Override
-      public boolean useFootstepRate()
-      {
-         return false;
-      }
-
-
-      @Override
-      public double getMinimumTimeRemaining()
-      {
-         return 0.0001;
-      }
-
-      @Override
-      public double getAdjustmentDeadband()
-      {
-         return 0.03;
       }
 
       @Override
@@ -647,12 +567,6 @@ public class ICPControllerTest
       public boolean allowAutomaticManipulationAbort()
       {
          return false;
-      }
-
-      @Override
-      public ICPControlGains createICPControlGains()
-      {
-         return null;
       }
 
       @Override
@@ -764,9 +678,15 @@ public class ICPControllerTest
       }
 
       @Override
-      public ICPOptimizationParameters getICPOptimizationParameters()
+      public ICPControllerParameters getICPControllerParameters()
       {
          return new TestICPOptimizationParameters();
+      }
+
+      @Override
+      public StepAdjustmentParameters getStepAdjustmentParameters()
+      {
+         return null;
       }
 
       @Override

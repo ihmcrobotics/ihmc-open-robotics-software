@@ -1,5 +1,6 @@
 package us.ihmc.avatar.joystickBasedJavaFXController;
 
+import static us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXTopics.StepsAreAdjustable;
 import static us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXTopics.WalkingTrajectoryDuration;
 
 import java.io.IOException;
@@ -8,13 +9,9 @@ import java.util.function.Function;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.ListView;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.Slider;
-import javafx.scene.control.Spinner;
+import javafx.scene.control.*;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
-import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -48,6 +45,9 @@ public class StepGeneratorParametersPaneController
    private Spinner<Double> minStepWidthSpinner;
    @FXML
    private Spinner<Double> maxStepWidthSpinner;
+
+   @FXML
+   private CheckBox stepsAreAdjustable;
 
    @FXML
    private Slider swingHeightSlider;
@@ -145,6 +145,7 @@ public class StepGeneratorParametersPaneController
 
       messager.bindBidirectional(StepGeneratorJavaFXTopics.SteppingParameters, stepParametersProperty, true);
       messager.bindBidirectional(WalkingTrajectoryDuration, trajectoryDurationSlider.valueProperty(), createConverter(), true);
+      messager.bindBidirectional(StepsAreAdjustable, stepsAreAdjustable.selectedProperty(), true);
    }
 
    @FXML

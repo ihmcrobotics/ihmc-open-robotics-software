@@ -27,7 +27,7 @@ public class ValkyrieObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);
    }
 
-   @Tag("fast")
+   @Tag("humanoid-rough-terrain")
    @Override
    @Test
    public void testWalkingDownRampWithMediumSteps() throws SimulationExceededMaximumTimeException
@@ -35,7 +35,7 @@ public class ValkyrieObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
       super.testWalkingDownRampWithMediumSteps();
    }
 
-   @Tag("fast")
+   @Tag("humanoid-rough-terrain")
    @Override
    @Test
    public void testWalkingUpRampWithMediumSteps() throws SimulationExceededMaximumTimeException

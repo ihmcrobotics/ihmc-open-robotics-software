@@ -236,6 +236,11 @@ public class ROS2Tools
       return typeNamedTopic(RobotConfigurationData.class, getControllerOutputTopic(robotName));
    }
 
+   public static ROS2Topic<HandJointAnglePacket> getHandJointAnglePacketTopic(String robotName)
+   {
+      return typeNamedTopic(HandJointAnglePacket.class, getControllerOutputTopic(robotName));
+   }
+
    public static ROS2Topic<StampedPosePacket> getPoseCorrectionTopic(String robotName)
    {
       return getControllerInputTopic(robotName).withTypeName(StampedPosePacket.class);

@@ -1,5 +1,6 @@
 package us.ihmc.gdx.simulation.scs2;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -18,7 +19,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 public class GDXSimulatedRobot
 {
    private final RobotDefinition robotDefinition;
-   private final YoRegistry mirroredBoxRegistry;
+   private final YoRegistry mirroredRobotRegistry;
    private final RigidBodyBasics originalRigidBody;
    private GDXRigidBody rootBody;
    private LinkedYoRegistry robotLinkedYoRegistry;
@@ -27,7 +28,7 @@ public class GDXSimulatedRobot
    public GDXSimulatedRobot(RobotDefinition robotDefinition)
    {
       this.robotDefinition = robotDefinition;
-      mirroredBoxRegistry = SharedMemoryTools.newRegistryFromNamespace(SimulationSession.ROOT_REGISTRY_NAME, robotDefinition.getName());
+      mirroredRobotRegistry = SharedMemoryTools.newRegistryFromNamespace(SimulationSession.ROOT_REGISTRY_NAME, robotDefinition.getName());
       originalRigidBody = robotDefinition.newInstance(ReferenceFrameTools.constructARootFrame("dummy"));
    }
 
@@ -36,11 +37,12 @@ public class GDXSimulatedRobot
       rootBody = GDXMultiBodySystemFactories.toYoGDXMultiBodySystem(originalRigidBody,
                                                                     ReferenceFrame.getWorldFrame(),
                                                                     robotDefinition,
-                                                                    mirroredBoxRegistry);
-      robotLinkedYoRegistry = yoManager.newLinkedYoRegistry(mirroredBoxRegistry);
-      mirroredBoxRegistry.getVariables().forEach(var ->
+                                                                    mirroredRobotRegistry,
+                                                                    Gdx.app::postRunnable);
+      robotLinkedYoRegistry = yoManager.newLinkedYoRegistry(mirroredRobotRegistry);
+      mirroredRobotRegistry.getVariables().forEach(yoVariable ->
       {
-         LinkedYoVariable<YoVariable> linkYoVariable = robotLinkedYoRegistry.linkYoVariable(var);
+         LinkedYoVariable<YoVariable> linkYoVariable = robotLinkedYoRegistry.linkYoVariable(yoVariable);
          linkYoVariable.addUser(this);
       });
    }
@@ -57,12 +59,16 @@ public class GDXSimulatedRobot
 
    public void getRealRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      for (GDXRigidBody rigidBody : rootBody.subtreeIterable())
-      {
-         if (rigidBody.getGraphics() != null)
-         {
-            rigidBody.getGraphics().getRealRenderables(renderables, pool);
-         }
-      }
+      rootBody.getVisualRenderables(renderables, pool);
+   }
+
+   public void getCollisionMeshRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      rootBody.getCollisionMeshRenderables(renderables, pool);
+   }
+
+   public RobotDefinition getRobotDefinition()
+   {
+      return robotDefinition;
    }
 }

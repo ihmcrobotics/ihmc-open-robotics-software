@@ -5,7 +5,6 @@ import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManage
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
@@ -13,7 +12,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -40,9 +38,6 @@ public class TransferToStandingState extends WalkingState
    private final BalanceManager balanceManager;
    private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;
-   private final LegConfigurationManager legConfigurationManager;
-
-   private final FramePoint3D actualFootPositionInWorld = new FramePoint3D();
 
    private final Point3D midFootPosition = new Point3D();
 
@@ -62,7 +57,6 @@ public class TransferToStandingState extends WalkingState
       balanceManager = managerFactory.getOrCreateBalanceManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
-      legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
 
       doFootExplorationInTransferToStanding.set(false);
    }
@@ -201,22 +195,6 @@ public class TransferToStandingState extends WalkingState
       balanceManager.initializeICPPlanForTransferToStanding();
 
       touchdownErrorCompensator.clear();
-
-      if (previousSupportSide != null)
-      {
-         RobotSide previousSwingSide = previousSupportSide.getOppositeSide();
-
-         legConfigurationManager.setFullyExtendLeg(previousSwingSide, false);
-         legConfigurationManager.beginStraightening(previousSwingSide);
-      }
-      else
-      {
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            legConfigurationManager.setFullyExtendLeg(robotSide, false);
-            legConfigurationManager.setStraight(robotSide);
-         }
-      }
    }
 
    @Override

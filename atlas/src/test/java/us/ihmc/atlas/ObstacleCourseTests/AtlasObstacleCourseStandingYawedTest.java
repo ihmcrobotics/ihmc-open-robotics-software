@@ -1,5 +1,6 @@
 package us.ihmc.atlas.ObstacleCourseTests;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -25,6 +26,7 @@ public class AtlasObstacleCourseStandingYawedTest extends DRCObstacleCourseStand
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 
+   @Tag("humanoid-flat-ground")
    @Override
    @Test
    public void testStandingYawed() throws SimulationExceededMaximumTimeException

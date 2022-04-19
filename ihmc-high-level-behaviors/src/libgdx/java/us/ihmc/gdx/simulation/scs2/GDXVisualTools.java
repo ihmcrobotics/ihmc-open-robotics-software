@@ -2,9 +2,11 @@ package us.ihmc.gdx.simulation.scs2;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.gizmo.DynamicGDXModel;
@@ -85,6 +87,19 @@ public class GDXVisualTools
             return null;
 
          gdxModel.setModel(GDXModelLoader.loadG3DModel(modelFileName));
+
+         if (materialDefinition != null && materialDefinition.getDiffuseColor() != null)
+         {
+            for (Material material : gdxModel.getModel().materials)
+            {
+               Color color = toColor(materialDefinition.getDiffuseColor(), Color.WHITE);
+               material.set(ColorAttribute.createDiffuse(color));
+               if (materialDefinition.getDiffuseColor().getAlpha() < 1.0)
+               {
+                  material.set(new BlendingAttribute(true, (float) materialDefinition.getDiffuseColor().getAlpha()));
+               }
+            }
+         }
       }
       else
       {
@@ -100,10 +115,21 @@ public class GDXVisualTools
       if (materialDefinition == null)
          return DEFAULT_MATERIAL;
 
-      Color color = toColor(materialDefinition.getDiffuseColor());
+      Color color = toColor(materialDefinition.getDiffuseColor(), Color.WHITE);
+
       Material attributes = new Material(ColorAttribute.createDiffuse(color));
-      if (materialDefinition.getDiffuseColor().getAlpha() < 1.0)
+
+      if (materialDefinition.getDiffuseColor() != null && materialDefinition.getDiffuseColor().getAlpha() < 1.0)
+      {
          attributes.set(new BlendingAttribute(true, (float) materialDefinition.getDiffuseColor().getAlpha()));
+      }
+
+      if (materialDefinition.getDiffuseMap() != null && materialDefinition.getDiffuseMap().getFilename() != null)
+      {
+         Texture textureFromFile = new Texture(materialDefinition.getDiffuseMap().getFilename());
+         attributes.set(TextureAttribute.createDiffuse(textureFromFile));
+      }
+
       return attributes;
    }
 
