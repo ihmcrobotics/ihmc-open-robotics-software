@@ -2,8 +2,9 @@ package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationController;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.*;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.qpInput.ConstraintToConvexRegion;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.qpInput.ICPInequalityInput;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.qpInput.ICPQPInput;
 import us.ihmc.convexOptimization.quadraticProgram.AbstractSimpleActiveSetQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -791,6 +792,7 @@ public class ICPControllerQPSolver
     */
    private void addMaximumFeedbackRateConstraint()
    {
+      //FIXME: Need better conditions. Ask Sylvain about this...
       if (!Double.isFinite(maxFeedbackXMagnitude) && !Double.isFinite(maxFeedbackYMagnitude))
          return;
 

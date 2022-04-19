@@ -229,9 +229,15 @@ public class LookAndStepPlanarRegionsManager
          {
             PlanarRegionsList map = regionsToUseFromHistory.remove(0);
             while (!regionsToUseFromHistory.isEmpty())
+            {
                map = PlanarRegionSLAM.slam(map, regionsToUseFromHistory.remove(0), parameters).getMergedMap();
+            }
             while (!regionsCreatedLocally.isEmpty())
-               map = PlanarRegionSLAM.slam(map, regionsCreatedLocally.remove(0), parameters).getMergedMap();
+            {
+               PlanarRegionsList regionsCreatedLocallyRemoved = regionsCreatedLocally.remove(0);
+               regionsCreatedLocallyRemoved.removePlanarRegionsWithNaN();
+               map = PlanarRegionSLAM.slam(map, regionsCreatedLocallyRemoved, parameters).getMergedMap();
+            }
             planarRegionsForPlanning.add(map);
          }
       }

@@ -11,6 +11,8 @@ public class ContinuousStepGeneratorParameters implements ContinuousStepGenerato
    private double maxStepLength;
    private double defaultStepWidth, minStepWidth, maxStepWidth;
    private double turnMaxAngleInward, turnMaxAngleOutward;
+   private boolean stepsAreAdjustable = DEFAULT_STEPS_ARE_ADJUSTABLE;
+   private boolean shiftUpcomingStepsWithTouchdown = DEFAULT_SHIFT_UPCOMING_STEPS_WITH_TOUCHDOWN;
 
    public ContinuousStepGeneratorParameters()
    {
@@ -24,6 +26,18 @@ public class ContinuousStepGeneratorParameters implements ContinuousStepGenerato
    public ContinuousStepGeneratorParameters(ContinuousStepGeneratorParametersBasics other)
    {
       set(other);
+   }
+
+   @Override
+   public void setStepsAreAdjustable(boolean stepsAreAdjustable)
+   {
+      this.stepsAreAdjustable = stepsAreAdjustable;
+   }
+
+   @Override
+   public void setShiftUpcomingStepsWithTouchdown(boolean shiftUpcomingStepsWithTouchdown)
+   {
+      this.shiftUpcomingStepsWithTouchdown = shiftUpcomingStepsWithTouchdown;
    }
 
    @Override
@@ -156,6 +170,18 @@ public class ContinuousStepGeneratorParameters implements ContinuousStepGenerato
    public double getTurnMaxAngleOutward()
    {
       return turnMaxAngleOutward;
+   }
+
+   @Override
+   public boolean getStepsAreAdjustable()
+   {
+      return stepsAreAdjustable;
+   }
+
+   @Override
+   public boolean getShiftUpcomingStepsWithTouchdown()
+   {
+      return shiftUpcomingStepsWithTouchdown;
    }
 
    @Override

@@ -11,6 +11,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.math3.util.Pair;
 import us.ihmc.commons.nio.PathTools;
 import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.imgui.ImNodesTools;
 import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIInterface;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.JSONFileTools;
@@ -33,7 +34,7 @@ public class ImGuiImNodesBehaviorTreeUI
 
    public void create()
    {
-      ImNodes.createContext();
+      ImNodesTools.initialize();
 
       float backgroundColor;
       float gridColor;

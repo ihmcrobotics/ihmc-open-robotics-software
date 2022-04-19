@@ -14,7 +14,6 @@ import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
-import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
@@ -61,7 +60,6 @@ public class HighLevelControlManagerFactory
    private CenterOfMassHeightManager centerOfMassHeightManager;
    private FeetManager feetManager;
    private PelvisOrientationManager pelvisOrientationManager;
-   private LegConfigurationManager legConfigurationManager;
 
    private final Map<String, RigidBodyControlManager> rigidBodyManagerMapByBodyName = new HashMap<>();
 
@@ -293,28 +291,6 @@ public class HighLevelControlManagerFactory
       feetManager.setWeights(loadedFootAngularWeight, loadedFootLinearWeight, angularWeight, linearWeight);
 
       return feetManager;
-   }
-
-   @Deprecated
-   public LegConfigurationManager getOrCreateKneeAngleManager()
-   {
-      return getOrCreateLegConfigurationManager();
-   }
-
-   public LegConfigurationManager getOrCreateLegConfigurationManager()
-   {
-      if (legConfigurationManager != null)
-         return legConfigurationManager;
-
-      if (!hasHighLevelHumanoidControllerToolbox(LegConfigurationManager.class))
-         return null;
-      if (!hasWalkingControllerParameters(LegConfigurationManager.class))
-         return null;
-      if (!hasMomentumOptimizationSettings(LegConfigurationManager.class))
-         return null;
-
-      legConfigurationManager = new LegConfigurationManager(controllerToolbox, walkingControllerParameters, registry);
-      return legConfigurationManager;
    }
 
    public PelvisOrientationManager getOrCreatePelvisOrientationManager()

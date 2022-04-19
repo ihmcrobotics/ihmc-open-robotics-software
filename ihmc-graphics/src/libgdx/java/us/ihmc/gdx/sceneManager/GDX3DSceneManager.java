@@ -9,13 +9,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.gdx.FocusBasedGDXCamera;
+import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.input.GDXInputMode;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.log.LogTools;
@@ -28,7 +22,7 @@ public class GDX3DSceneManager
    private final GDX3DSceneBasics sceneBasics = new GDX3DSceneBasics();
 
    private InputMultiplexer inputMultiplexer;
-   private FocusBasedGDXCamera camera3D;
+   private GDXFocusBasedCamera camera3D;
    private ScreenViewport viewport;
 
    private int x = 0;
@@ -39,25 +33,6 @@ public class GDX3DSceneManager
    private boolean addFocusSphere = true;
    private Runnable onCreate;
    private GLProfiler glProfiler;
-
-   // TODO: Review and understand this better
-   // ReferenceFrame.getWorldFrame() is Z-up frame
-   // Finger axis definition is right hand, Thumb +Z, Index +X, Middle +Y
-   // The default orientation of the libGDX frame is such that
-   // your thumb is pointing forward away from your face and your index finger pointing left
-   // The default orientation of the IHMC Zup frame is such that
-   // your thumb is up and your index finger is pointing away from you
-   private final RigidBodyTransformReadOnly libGDXYUpToIHMCZUpSpace = new RigidBodyTransform(
-         new YawPitchRoll(          // For this transformation, we start with IHMC ZUp with index forward and thumb up
-            Math.toRadians(90.0),   // rotating around thumb, index goes forward to left
-            Math.toRadians(0.0),    // no rotation about middle finger
-            Math.toRadians(-90.0)   // rotating about index finger, thumb goes away from you
-         ),
-         new Point3D()
-   );
-   private final ReferenceFrame libGDXYUpFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("libGDXFrame",
-                                                                                                                   ReferenceFrame.getWorldFrame(),
-                                                                                                                   libGDXYUpToIHMCZUpSpace);
 
    public void create()
    {
@@ -71,7 +46,7 @@ public class GDX3DSceneManager
 
       GDXTools.syncLogLevelWithLogTools();
 
-      camera3D = new FocusBasedGDXCamera(libGDXYUpFrame);
+      camera3D = new GDXFocusBasedCamera();
       if (inputMode == GDXInputMode.libGDX)
       {
          inputMultiplexer = new InputMultiplexer();
@@ -198,7 +173,7 @@ public class GDX3DSceneManager
       return Gdx.graphics.getHeight();
    }
 
-   public FocusBasedGDXCamera getCamera3D()
+   public GDXFocusBasedCamera getCamera3D()
    {
       return camera3D;
    }

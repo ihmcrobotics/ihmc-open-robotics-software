@@ -85,7 +85,6 @@ public class GDXBulletPhysicsManager
          @Override
          public void onInternalTick(btDynamicsWorld dynamicsWorld, float timeStep)
          {
-            super.onInternalTick(dynamicsWorld, timeStep);
             for (Runnable postTickRunnable : postTickRunnables)
             {
                postTickRunnable.run();

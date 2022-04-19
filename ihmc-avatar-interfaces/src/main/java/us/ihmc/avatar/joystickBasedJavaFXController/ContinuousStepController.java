@@ -208,7 +208,7 @@ public class ContinuousStepController
          { // Touchdown may not have been made with the foot properly settled, so we update the support foot pose if its current pose is lower.
             FramePose3D footPose = new FramePose3D(footPoseProvider.getCurrentFootPose(robotSide));
             footPose.changeFrame(worldFrame);
-            if (footPose.getZ() < lastSupportFootPoses.get(robotSide).getZ())
+            if (!isWalking() || footPose.getZ() < lastSupportFootPoses.get(robotSide).getZ())
                lastSupportFootPoses.put(robotSide, footPose);
          }
       }

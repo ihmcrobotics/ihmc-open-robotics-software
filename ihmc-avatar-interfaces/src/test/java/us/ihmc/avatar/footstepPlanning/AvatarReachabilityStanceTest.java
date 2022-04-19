@@ -51,7 +51,7 @@ public abstract class AvatarReachabilityStanceTest implements MultiRobotTestInte
 
    private static final int numberOfStancesToCheck = 10;
    private static final double solutionQualityThreshold = 2.2;
-   private static final double simulationTime = 7.0;
+   private static final double simulationTime = 4.0;
    private static final Random random = new Random(3920);
 
    @BeforeEach

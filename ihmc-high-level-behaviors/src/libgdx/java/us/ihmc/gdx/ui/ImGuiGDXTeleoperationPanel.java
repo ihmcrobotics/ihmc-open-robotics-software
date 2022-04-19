@@ -66,17 +66,20 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
    private static final double MIN_CHEST_PITCH = Math.toRadians(-15.0);
    private static final double MAX_CHEST_PITCH = Math.toRadians(50.0);
    private static final double CHEST_PITCH_RANGE = MAX_CHEST_PITCH - MIN_CHEST_PITCH;
+   private static final double MIN_YAW_TORSO = Math.toRadians(-45.0);
+   private static final double MAX_YAW_TORSO = Math.toRadians(45.0);
+   private static final double YAW_TORSO_RANGE = MAX_YAW_TORSO - MIN_YAW_TORSO;
    private static final double SLIDER_RANGE = 100.0;
    private static final double ROBOT_DATA_EXPIRATION = 1.0;
    private final CommunicationHelper communicationHelper;
    private final ThrottledRobotStateCallback throttledRobotStateCallback;
    private final RobotLowLevelMessenger robotLowLevelMessenger;
-   private final ROS2SyncedRobotModel syncedRobotForHeightSlider;
-   private final ROS2SyncedRobotModel syncedRobotForChestSlider;
+   private final ROS2SyncedRobotModel syncedRobot;
    private final GDXFootstepPlanGraphic footstepPlanGraphic;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final float[] stanceHeightSliderValue = new float[1];
    private final float[] leanForwardSliderValue = new float[1];
+   private final float[] yawTorsoSliderValue = new float[1];
    private final float[] neckPitchSliderValue = new float[1];
    private final ImInt pumpPSI = new ImInt(1);
    private final String[] psiValues = new String[] {"1500", "2300", "2500", "2800"};
@@ -91,6 +94,8 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
    private final ROS2SyncedRobotModel syncedRobotForFootstepPlanning;
    private final SideDependentList<FramePose3D> startFootPoses = new SideDependentList<>();
    private final ImGuiMovingPlot statusReceivedPlot = new ImGuiMovingPlot("Hand", 1000, 230, 15);
+   private final SideDependentList<ImInt> handConfigurationIndices = new SideDependentList<>(new ImInt(6), new ImInt(6));
+   private final String[] handConfigurationNames = new String[HandConfiguration.values.length];
    private final ROS2Input<PlanarRegionsListMessage> lidarREARegions;
    private final ImBoolean showGraphics = new ImBoolean(true);
 
@@ -105,8 +110,7 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       DRCRobotModel robotModel = communicationHelper.getRobotModel();
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
 
-      syncedRobotForHeightSlider = communicationHelper.newSyncedRobot();
-      syncedRobotForChestSlider = communicationHelper.newSyncedRobot();
+      syncedRobot = communicationHelper.newSyncedRobot();
 
       robotLowLevelMessenger = communicationHelper.newRobotLowLevelMessenger();
 
@@ -140,6 +144,12 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
          double flippedChestSliderValue = 100.0 - newChestSliderValue;
          leanForwardSliderValue[0] = (float) flippedChestSliderValue;
 
+         double yawTorsoValue = chestFrame.getYaw();
+         double yawTorsoInRange = yawTorsoValue - MIN_YAW_TORSO;
+         double newYawTorsoValue = SLIDER_RANGE * yawTorsoInRange / YAW_TORSO_RANGE;
+         double flippedYawTorsoSliderValue = 100.0 - newYawTorsoValue;
+         yawTorsoSliderValue[0] = (float) flippedYawTorsoSliderValue;
+
 //         if (neckJoint != null)
 //         {
 //            double neckAngle = syncedRobot.getFullRobotModel().getNeckJoint(NeckJointName.PROXIMAL_NECK_PITCH).getQ();
@@ -161,6 +171,12 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       startFootPoses.put(RobotSide.LEFT, new FramePose3D());
       startFootPoses.put(RobotSide.RIGHT, new FramePose3D());
       lidarREARegions = communicationHelper.subscribe(ROS2Tools.LIDAR_REA_REGIONS);
+
+      HandConfiguration[] values = HandConfiguration.values;
+      for (int i = 0; i < values.length; i++)
+      {
+         handConfigurationNames[i] = values[i].name();
+      }
    }
 
    public void create(GDXImGuiBasedUI baseUI)
@@ -318,12 +334,12 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
 
       if (imGuiSlider("Height", stanceHeightSliderValue))
       {
-         if (syncedRobotForHeightSlider.getDataReceptionTimerSnapshot().isRunning(ROBOT_DATA_EXPIRATION))
+         if (syncedRobot.getDataReceptionTimerSnapshot().isRunning(ROBOT_DATA_EXPIRATION))
          {
-            syncedRobotForHeightSlider.update();
+            syncedRobot.update();
             double sliderValue = stanceHeightSliderValue[0];
-            double pelvisZ = syncedRobotForHeightSlider.getFramePoseReadOnly(HumanoidReferenceFrames::getPelvisZUpFrame).getZ();
-            double midFeetZ = syncedRobotForHeightSlider.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame).getZ();
+            double pelvisZ = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getPelvisZUpFrame).getZ();
+            double midFeetZ = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame).getZ();
             double desiredHeight = MIN_PELVIS_HEIGHT + PELVIS_HEIGHT_RANGE * sliderValue / SLIDER_RANGE;
             double desiredHeightInWorld = desiredHeight + midFeetZ;
             LogTools.info(StringTools.format3D("Commanding height trajectory. slider: {} desired: {} (pelvis - midFeetZ): {} in world: {}",
@@ -346,14 +362,14 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       }
       if (imGuiSlider("Lean Forward", leanForwardSliderValue))
       {
-         if (syncedRobotForChestSlider.getDataReceptionTimerSnapshot().isRunning(ROBOT_DATA_EXPIRATION))
+         if (syncedRobot.getDataReceptionTimerSnapshot().isRunning(ROBOT_DATA_EXPIRATION))
          {
-            syncedRobotForChestSlider.update();
+            syncedRobot.update();
             double sliderValue = 100.0 - leanForwardSliderValue[0];
             double desiredChestPitch = MIN_CHEST_PITCH + CHEST_PITCH_RANGE * sliderValue / SLIDER_RANGE;
 
-            FrameYawPitchRoll frameChestYawPitchRoll = new FrameYawPitchRoll(syncedRobotForChestSlider.getReferenceFrames().getChestFrame());
-            frameChestYawPitchRoll.changeFrame(syncedRobotForChestSlider.getReferenceFrames().getPelvisZUpFrame());
+            FrameYawPitchRoll frameChestYawPitchRoll = new FrameYawPitchRoll(syncedRobot.getReferenceFrames().getChestFrame());
+            frameChestYawPitchRoll.changeFrame(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
             frameChestYawPitchRoll.setPitch(desiredChestPitch);
             frameChestYawPitchRoll.changeFrame(ReferenceFrame.getWorldFrame());
 
@@ -364,7 +380,34 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
                    .set(HumanoidMessageTools.createSO3TrajectoryMessage(2.0,
                                                                         frameChestYawPitchRoll,
                                                                         EuclidCoreTools.zeroVector3D,
-                                                                        syncedRobotForChestSlider.getReferenceFrames().getPelvisZUpFrame()));
+                                                                        syncedRobot.getReferenceFrames().getPelvisZUpFrame()));
+            long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
+            message.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
+
+            communicationHelper.publishToController(message);
+         }
+      }
+      if (imGuiSlider("Yaw Torso", yawTorsoSliderValue))
+      {
+         if (syncedRobot.getDataReceptionTimerSnapshot().isRunning(ROBOT_DATA_EXPIRATION))
+         {
+            syncedRobot.update();
+            double sliderValue = 100.0 - yawTorsoSliderValue[0];
+            double desiredYawTorso = MIN_YAW_TORSO + YAW_TORSO_RANGE * sliderValue / SLIDER_RANGE;
+
+            FrameYawPitchRoll frameChestYawPitchRoll = new FrameYawPitchRoll(syncedRobot.getReferenceFrames().getChestFrame());
+            frameChestYawPitchRoll.changeFrame(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
+            frameChestYawPitchRoll.setYaw(desiredYawTorso);
+            frameChestYawPitchRoll.changeFrame(ReferenceFrame.getWorldFrame());
+
+            LogTools.info(StringTools.format3D("Commanding torso yaw. slider: {} yaw: {}", sliderValue, desiredYawTorso));
+
+            ChestTrajectoryMessage message = new ChestTrajectoryMessage();
+            message.getSo3Trajectory()
+                   .set(HumanoidMessageTools.createSO3TrajectoryMessage(2.0,
+                                                                        frameChestYawPitchRoll,
+                                                                        EuclidCoreTools.zeroVector3D,
+                                                                        syncedRobot.getReferenceFrames().getPelvisZUpFrame()));
             long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
             message.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
 
@@ -392,25 +435,40 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       ImGui.sameLine();
       footstepGoal.renderPlaceGoalButton();
 
-      ImGui.text("Right hand:");
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Calibrate")))
+      for (RobotSide side : RobotSide.values)
       {
-         communicationHelper.publish(ROS2Tools::getHandConfigurationTopic,
-                                     HumanoidMessageTools.createHandDesiredConfigurationMessage(RobotSide.RIGHT, HandConfiguration.CALIBRATE));
+         ImGui.text(side.getPascalCaseName() + " hand:");
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Calibrate", side.getCamelCaseName())))
+         {
+            communicationHelper.publish(ROS2Tools::getHandConfigurationTopic,
+                                        HumanoidMessageTools.createHandDesiredConfigurationMessage(side, HandConfiguration.CALIBRATE));
+         }
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Open", side.getCamelCaseName())))
+         {
+            communicationHelper.publish(ROS2Tools::getHandConfigurationTopic,
+                                        HumanoidMessageTools.createHandDesiredConfigurationMessage(side, HandConfiguration.OPEN));
+         }
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Close", side.getCamelCaseName())))
+         {
+            communicationHelper.publish(ROS2Tools::getHandConfigurationTopic,
+                                        HumanoidMessageTools.createHandDesiredConfigurationMessage(side, HandConfiguration.CLOSE));
+         }
+         ImGui.sameLine();
+         ImGui.pushItemWidth(100.0f);
+         ImGui.combo(labels.get("Grip", side.getCamelCaseName()), handConfigurationIndices.get(side), handConfigurationNames);
+         ImGui.popItemWidth();
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Send", side.getCamelCaseName())))
+         {
+            HandDesiredConfigurationMessage message
+                  = HumanoidMessageTools.createHandDesiredConfigurationMessage(side, HandConfiguration.values[handConfigurationIndices.get(side).get()]);
+            communicationHelper.publish(ROS2Tools::getHandConfigurationTopic, message);
+         }
       }
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Open")))
-      {
-         communicationHelper.publish(ROS2Tools::getHandConfigurationTopic,
-                                     HumanoidMessageTools.createHandDesiredConfigurationMessage(RobotSide.RIGHT, HandConfiguration.OPEN));
-      }
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Close")))
-      {
-         communicationHelper.publish(ROS2Tools::getHandConfigurationTopic,
-                                     HumanoidMessageTools.createHandDesiredConfigurationMessage(RobotSide.RIGHT, HandConfiguration.CLOSE));
-      }
+
       ImGui.text("Lidar REA:");
       ImGui.sameLine();
       if (ImGui.button(labels.get("Clear")))

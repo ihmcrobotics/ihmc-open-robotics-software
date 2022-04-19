@@ -5,12 +5,12 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -30,10 +30,11 @@ public class BlendedPositionTrajectoryGenerator implements FixedFramePositionTra
 
    private final Vector3D initialConstraintPositionError = new Vector3D();
    private final Vector3D initialConstraintVelocityError = new Vector3D();
+
    private final Vector3D finalConstraintPositionError = new Vector3D();
    private final Vector3D finalConstraintVelocityError = new Vector3D();
 
-   private final Vector3DReadOnly zeroVector = new Vector3D();
+   private static final Vector3DReadOnly zeroVector = EuclidCoreTools.zeroVector3D;
 
    private final FramePoint3D position = new FramePoint3D();
    private final FrameVector3D velocity = new FrameVector3D();
@@ -101,17 +102,17 @@ public class BlendedPositionTrajectoryGenerator implements FixedFramePositionTra
       computeInitialConstraintPolynomial(initialTime, blendDuration);
    }
 
-   public void blendFinalConstraint(FramePoint3DReadOnly finalPosition, double finalTime, double blendDuration)
-   {
-      clearFinalConstraint();
-      computeFinalConstraintError(finalPosition, finalTime);
-      computeFinalConstraintPolynomial(finalTime, blendDuration);
-   }
-
    public void blendFinalConstraint(FramePoint3DReadOnly finalPosition, FrameVector3DReadOnly finalVelocity, double finalTime, double blendDuration)
    {
       clearFinalConstraint();
       computeFinalConstraintError(finalPosition, finalVelocity, finalTime);
+      computeFinalConstraintPolynomial(finalTime, blendDuration);
+   }
+
+   public void blendFinalConstraint(FramePoint3DReadOnly finalPosition, double finalTime, double blendDuration)
+   {
+      clearFinalConstraint();
+      computeFinalConstraintError(finalPosition, finalTime);
       computeFinalConstraintPolynomial(finalTime, blendDuration);
    }
 
@@ -174,15 +175,6 @@ public class BlendedPositionTrajectoryGenerator implements FixedFramePositionTra
       velocity.changeFrame(trajectoryFrame);
       acceleration.changeFrame(trajectoryFrame);
 
-      trajectory.compute(time);
-      position.setIncludingFrame(trajectory.getPosition());
-      velocity.setIncludingFrame(trajectory.getVelocity());
-      acceleration.setIncludingFrame(trajectory.getAcceleration());
-
-      position.changeFrame(trajectoryFrame);
-      velocity.changeFrame(trajectoryFrame);
-      acceleration.changeFrame(trajectoryFrame);
-
       computeInitialConstraintOffset(time);
       position.add(initialConstraintPolynomial.getPosition());
       velocity.add(initialConstraintPolynomial.getVelocity());
@@ -202,53 +194,45 @@ public class BlendedPositionTrajectoryGenerator implements FixedFramePositionTra
 
    private void computeInitialConstraintError(FramePoint3DReadOnly initialPosition, double initialTime)
    {
-      trajectory.compute(initialTime);
-      trajectoryFrame.checkReferenceFrameMatch(initialPosition);
-
-      trajectory.compute(initialTime);
-      position.setIncludingFrame(trajectory.getPosition());
-      velocity.setIncludingFrame(trajectory.getVelocity());
-      acceleration.setIncludingFrame(trajectory.getAcceleration());
-
-      position.changeFrame(trajectoryFrame);
-      velocity.changeFrame(trajectoryFrame);
-      acceleration.changeFrame(trajectoryFrame);
-
-      LogTools.info("Position = " + position);
-
-      tempPosition.setIncludingFrame(trajectory.getPosition());
-      tempPosition.changeFrame(trajectoryFrame);
-      initialConstraintPositionError.sub(initialPosition, tempPosition);
+      computeConstraintPositionError(initialPosition, initialTime, initialConstraintPositionError);
    }
+
 
    private void computeInitialConstraintError(FramePoint3DReadOnly initialPosition, FrameVector3DReadOnly initialVelocity, double initialTime)
    {
       computeInitialConstraintError(initialPosition, initialTime);
-      trajectoryFrame.checkReferenceFrameMatch(initialVelocity);
-
-      tempVelocity.setIncludingFrame(trajectory.getVelocity());
-      tempVelocity.changeFrame(trajectoryFrame);
-      initialConstraintVelocityError.sub(initialVelocity, tempVelocity);
+      computeConstraintVelocityError(initialVelocity, initialConstraintVelocityError);
    }
+
 
    private void computeFinalConstraintError(FramePoint3DReadOnly finalPosition, double finalTime)
    {
-      trajectory.compute(finalTime);
-      trajectoryFrame.checkReferenceFrameMatch(finalPosition.getReferenceFrame());
-
-      tempPosition.setIncludingFrame(trajectory.getPosition());
-      tempPosition.changeFrame(trajectoryFrame);
-      finalConstraintPositionError.sub(finalPosition, tempPosition);
+      computeConstraintPositionError(finalPosition, finalTime, finalConstraintPositionError);
    }
 
    private void computeFinalConstraintError(FramePoint3DReadOnly finalPosition, FrameVector3DReadOnly finalVelocity, double finalTime)
    {
       computeFinalConstraintError(finalPosition, finalTime);
-      trajectoryFrame.checkReferenceFrameMatch(finalVelocity.getReferenceFrame());
+      computeConstraintVelocityError(finalVelocity, finalConstraintVelocityError);
+   }
+
+   private void computeConstraintPositionError(FramePoint3DReadOnly desiredPosition, double time, Vector3DBasics positionErrorToPack)
+   {
+      trajectory.compute(time);
+      trajectoryFrame.checkReferenceFrameMatch(desiredPosition.getReferenceFrame());
+
+      tempPosition.setIncludingFrame(trajectory.getPosition());
+      tempPosition.changeFrame(trajectoryFrame);
+      positionErrorToPack.sub(desiredPosition, tempPosition);
+   }
+
+   private void computeConstraintVelocityError(FrameVector3DReadOnly desiredVelocity, Vector3DBasics velocityErrorToPack)
+   {
+      trajectoryFrame.checkReferenceFrameMatch(desiredVelocity.getReferenceFrame());
 
       tempVelocity.setIncludingFrame(trajectory.getVelocity());
       tempVelocity.changeFrame(trajectoryFrame);
-      finalConstraintVelocityError.sub(finalVelocity, tempVelocity);
+      velocityErrorToPack.sub(desiredVelocity, tempVelocity);
    }
 
    private void computeInitialConstraintPolynomial(double initialTime, double blendDuration)
