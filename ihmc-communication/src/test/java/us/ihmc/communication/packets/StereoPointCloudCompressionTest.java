@@ -1,8 +1,9 @@
-package us.ihmc.robotEnvironmentAwareness.communication.converters;
+package us.ihmc.communication.packets;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.awt.Color;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
@@ -11,6 +12,10 @@ import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.commons.MathTools;
+import us.ihmc.communication.packets.StereoPointCloudCompression.ColorAccessor;
+import us.ihmc.communication.packets.StereoPointCloudCompression.CompressionIntermediateVariablesPackage;
+import us.ihmc.communication.packets.StereoPointCloudCompression.DiscretizationParameters;
+import us.ihmc.communication.packets.StereoPointCloudCompression.PointAccessor;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -18,10 +23,6 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression.ColorAccessor;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression.CompressionIntermediateVariablesPackage;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression.DiscretizationParameters;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression.PointAccessor;
 
 public class StereoPointCloudCompressionTest
 {
@@ -55,10 +56,10 @@ public class StereoPointCloudCompressionTest
 
          Point3D[] inputPointCloud = pointSet.toArray(new Point3D[inputNumberOfPoints]);
          int[] inputColors = new int[inputNumberOfPoints];
-         int bound = 1 << 24;
          for (int j = 0; j < inputColors.length; j++)
          {
-            inputColors[j] = random.nextInt(bound);
+            Color color = new Color(random.nextInt(256), random.nextInt(256), random.nextInt(256), 0);
+            inputColors[j] = color.getRGB();
          }
          PointAccessor pointAccessor = PointAccessor.wrap(inputPointCloud);
          ColorAccessor colorAccessor = ColorAccessor.wrapRGB(inputColors);
@@ -74,11 +75,10 @@ public class StereoPointCloudCompressionTest
          EuclidCoreTestTools.assertTuple3DEquals(center, message.getPointCloudCenter(), 1.0e-5);
 
          int[] outputColors = StereoPointCloudCompression.decompressColorsToIntArray(message);
+         assertEquals(inputNumberOfPoints, outputColors.length);
          assertArrayEquals(inputColors, outputColors);
 
          Point3D[] outputPointCloud = StereoPointCloudCompression.decompressPointCloudToArray(message);
-
-         assertEquals(inputNumberOfPoints, outputColors.length);
 
          for (int j = 0; j < inputNumberOfPoints; j++)
          {
@@ -130,7 +130,8 @@ public class StereoPointCloudCompressionTest
          StereoVisionPointCloudMessage message = StereoPointCloudCompression.compressPointCloud(-1,
                                                                                                 PointAccessor.wrap(inputPointCloud),
                                                                                                 ColorAccessor.wrapRGB(inputColors),
-                                                                                                DiscretizationParameters.fixedDiscretizationParameters(null, minimumResolution),
+                                                                                                DiscretizationParameters.fixedDiscretizationParameters(null,
+                                                                                                                                                       minimumResolution),
                                                                                                 inputNumberOfPoints,
                                                                                                 variablesPackage);
          long end = System.nanoTime();
@@ -140,8 +141,10 @@ public class StereoPointCloudCompressionTest
          else
             timeElapsedFiltered = EuclidCoreTools.interpolate(timeElapsedFiltered, timeElapsedMs, 0.1);
 
-         System.out.println("Time elapsed: " + EuclidCoreIOTools.getStringOf("[ms], filt.: ", timeElapsedMs, timeElapsedFiltered) + "[ms], comp. size: "
-               + message.getPointCloud().size() + ", raw size: " + StereoPointCloudCompression.computePointByteBufferSize(inputNumberOfPoints));
+         System.out.println("Time elapsed: " + EuclidCoreIOTools.getStringOf("[ms], filt.: ", timeElapsedMs, timeElapsedFiltered) + "[ms], PC size [comp.: "
+               + message.getPointCloud().size() + ", raw: " + StereoPointCloudCompression.computePointByteBufferSize(inputNumberOfPoints)
+               + "], color size [comp.: " + message.getColors().size() + ", raw: " + StereoPointCloudCompression.computeColorByteBufferSize(inputNumberOfPoints)
+               + "]");
       }
    }
 
