@@ -12,8 +12,6 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -47,7 +45,6 @@ public abstract class AvatarCustomSteppingStonesTest implements MultiRobotTestIn
    @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
-
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 
@@ -166,8 +163,6 @@ public abstract class AvatarCustomSteppingStonesTest implements MultiRobotTestIn
    {
       double stepWidth = 0.14;
 
-      ReferenceFrame pelvisFrame = simulationTestHelper.getControllerFullRobotModel().getPelvis().getBodyFixedFrame();
-
       FootstepDataListMessage footsteps = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
       RobotSide robotSide = nextSupportStepSide;
       double footstepX, footstepY;
@@ -177,8 +172,7 @@ public abstract class AvatarCustomSteppingStonesTest implements MultiRobotTestIn
          {
             robotSide = robotSide.getOppositeSide();
             footstepY = robotSide == RobotSide.LEFT ? (stepWidth + firstStepYOffset) : -stepWidth + firstStepYOffset;
-            FramePoint3D location = new FramePoint3D(pelvisFrame, 0.0, footstepY, stepHeight);
-            location.changeFrame(ReferenceFrame.getWorldFrame());
+            Point3D location = new Point3D(0.0, footstepY, stepHeight);
             Quaternion orientation = new Quaternion();
             FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(robotSide, location, orientation);
             footsteps.getFootstepDataList().add().set(footstepData);
@@ -190,8 +184,7 @@ public abstract class AvatarCustomSteppingStonesTest implements MultiRobotTestIn
          robotSide = robotSide.getOppositeSide();
          footstepY = robotSide == RobotSide.LEFT ? stepWidth + firstStepYOffset : -stepWidth + firstStepYOffset;
          footstepX = stepLength * i;
-         FramePoint3D location = new FramePoint3D(pelvisFrame, footstepX, footstepY, 0.0);
-         location.changeFrame(ReferenceFrame.getWorldFrame());
+         Point3D location = new Point3D(footstepX, footstepY, 0.0);
          location.setZ(i * stepHeight);
          Quaternion orientation = new Quaternion();
          FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(robotSide, location, orientation);
@@ -201,8 +194,7 @@ public abstract class AvatarCustomSteppingStonesTest implements MultiRobotTestIn
       robotSide = robotSide.getOppositeSide();
       footstepY = robotSide == RobotSide.LEFT ? stepWidth + firstStepYOffset : -stepWidth + firstStepYOffset;
       footstepX = stepLength * steps;
-      FramePoint3D location = new FramePoint3D(pelvisFrame, footstepX, footstepY, 0.0);
-      location.changeFrame(ReferenceFrame.getWorldFrame());
+      Point3D location = new Point3D(footstepX, footstepY, 0.0);
       location.setZ(steps * stepHeight);
       Quaternion orientation = new Quaternion();
       FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(robotSide, location, orientation);
