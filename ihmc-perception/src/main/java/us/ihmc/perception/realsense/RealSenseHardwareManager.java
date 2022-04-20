@@ -49,7 +49,7 @@ public class RealSenseHardwareManager
       parentRegistry.addChild(registry);
    }
 
-   public RealtimeL515 getL515(String prefix, String serialNumberToFind)
+   public RealtimeL515 createL515(String prefix, String serialNumberToFind)
    {
       int rs2DeviceCount = updateDeviceCount();
 
