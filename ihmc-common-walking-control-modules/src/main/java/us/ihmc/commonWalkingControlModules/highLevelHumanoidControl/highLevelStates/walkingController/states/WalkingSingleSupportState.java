@@ -122,6 +122,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
       balanceManager.computeICPPlan();
+      updateWalkingTrajectoryPath();
 
       super.doAction(timeInState);
 
@@ -191,6 +192,14 @@ public class WalkingSingleSupportState extends SingleSupportState
       walkingMessageHandler.clearFootTrajectory();
 
       switchToToeOffIfPossible(supportSide);
+   }
+
+   private void updateWalkingTrajectoryPath()
+   {
+      walkingTrajectoryPath.clearFootsteps();
+      walkingTrajectoryPath.addFootstep(nextFootstep, footstepTiming);
+      walkingTrajectoryPath.addFootsteps(walkingMessageHandler);
+      walkingTrajectoryPath.updateTrajectory(feetManager.getCurrentConstraintType(RobotSide.LEFT), feetManager.getCurrentConstraintType(RobotSide.RIGHT));
    }
 
    @Override
@@ -359,7 +368,7 @@ public class WalkingSingleSupportState extends SingleSupportState
          else if (feetManager.okForLineToeOff() && shouldComputeToeLineContact)
             feetManager.requestLineToeOff(supportSide, supportFootExitCMP, filteredDesiredCoP);
 
-//         updateHeightManager();
+         //         updateHeightManager();
       }
    }
 
@@ -374,7 +383,9 @@ public class WalkingSingleSupportState extends SingleSupportState
    private double requestSwingSpeedUpIfNeeded()
    {
       double remainingSwingTimeAccordingToPlan = balanceManager.getTimeRemainingInCurrentState();
-      double adjustedRemainingTime = Math.max(0.0, balanceManager.getAdjustedTimeRemainingInCurrentSupportSequence() - balanceManager.getExtraTimeAdjustmentForSwing());
+      double adjustedRemainingTime = Math.max(0.0,
+                                              balanceManager.getAdjustedTimeRemainingInCurrentSupportSequence()
+                                                    - balanceManager.getExtraTimeAdjustmentForSwing());
 
       if (adjustedRemainingTime > 1.0e-3)
       {
