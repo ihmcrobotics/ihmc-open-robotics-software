@@ -165,7 +165,7 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
                              .set(HumanoidMessageTools.createWrenchTrajectoryPointMessage(2.2, null, new Vector3D(150.0, 0.0, 75.0)));
       wrenchTrajectoryMessage.getWrenchTrajectoryPoints().add().set(HumanoidMessageTools.createWrenchTrajectoryPointMessage(2.7, null, null));
       wrenchTrajectoryMessage.setUseCustomControlFrame(true);
-      wrenchTrajectoryMessage.getControlFramePose().getPosition().set(-0.15, -0.11, 0.0);
+      wrenchTrajectoryMessage.getControlFramePose().getPosition().set(0.05, -0.11, 0.0);
 
       RobotSide side = RobotSide.RIGHT;
       HandTrajectoryMessage rightHandTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(side, se3TrajectoryMessage);
