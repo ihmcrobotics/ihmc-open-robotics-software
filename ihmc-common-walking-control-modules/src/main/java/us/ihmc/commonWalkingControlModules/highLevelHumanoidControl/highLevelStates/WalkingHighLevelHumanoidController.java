@@ -454,6 +454,13 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    public void initialize()
    {
       controllerCoreCommand.requestReinitialization();
+
+      if (!shouldKeepInitialContacts.getAndSet(false))
+      {
+         // Contact states need to be initialized before controllerToolbox initialize, as it updates the support polygons stuff.
+         initializeContacts();
+      }
+
       controllerToolbox.initialize();
       managerFactory.initializeManagers();
 
@@ -474,9 +481,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
          privilegedConfigurationCommand.addJoint(kneeJoint, walkingControllerParameters.getKneePrivilegedConfigurationParameters());
       }
-
-      if (!shouldKeepInitialContacts.getAndSet(false))
-         initializeContacts();
 
       for (RobotSide robotSide : RobotSide.values)
       {
