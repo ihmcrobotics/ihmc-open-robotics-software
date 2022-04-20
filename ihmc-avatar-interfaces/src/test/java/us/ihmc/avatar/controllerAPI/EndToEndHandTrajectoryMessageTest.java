@@ -185,7 +185,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          handTrajectoryMessage.getSe3Trajectory().getControlFramePose().getOrientation().setUnsafe(0.0, 0.0, 0.0, 0.0);
 
          simulationTestHelper.publishToController(handTrajectoryMessage);
-         success = simulationTestHelper.simulateNow(controllerDT);
+         success = simulationTestHelper.simulateNow(3 * controllerDT);
          humanoidReferenceFrames.updateFrames();
          String handName = fullRobotModel.getHand(robotSide).getName();
 
