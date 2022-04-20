@@ -24,6 +24,7 @@ import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.gizmo.StepCheckIsPointInsideAlgorithm;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.log.LogTools;
 
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;

@@ -8,6 +8,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import imgui.type.ImFloat;
+import rosgraph_msgs.Log;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -77,18 +78,18 @@ public class GDXBuildingConstructor extends ImGuiPanel
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      for (GDXSimpleObject model : virtualObjects)
-      {
-         model.getRealRenderables(renderables, pool);
-      }
-      if (selectedObject != null)
-      {
-         pose3DGizmo.getRenderables(renderables, pool);
-      }
-      if (intersectedObject != null && intersectedObject != selectedObject)
-      {
-         intersectedObject.getCollisionMeshRenderables(renderables, pool);
-      }
+         for (GDXSimpleObject model : virtualObjects)
+         {
+            model.getRealRenderables(renderables, pool);
+         }
+         if (selectedObject != null)
+         {
+            pose3DGizmo.getRenderables(renderables, pool);
+         }
+         if (intersectedObject != null && intersectedObject != selectedObject)
+         {
+            intersectedObject.getCollisionMeshRenderables(renderables, pool);
+         }
    }
 
    public void getRealRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
@@ -167,15 +168,17 @@ public class GDXBuildingConstructor extends ImGuiPanel
       double closestDistance = Double.POSITIVE_INFINITY;
       GDXSimpleObject closestObject = null;
 
-
-      for (GDXSimpleObject object : virtualObjects)
+      if(building != null)
       {
-         boolean intersects = object.intersect(pickRay, tempIntersection);
-         double distance = tempIntersection.distance(pickRay.getPoint());
-         if (intersects && (closestObject == null || distance < closestDistance))
+         for (GDXSimpleObject object : building.getAllObjects())
          {
-            closestObject = object;
-            closestDistance = distance;
+            boolean intersects = object.intersect(pickRay, tempIntersection);
+            double distance = tempIntersection.distance(pickRay.getPoint());
+            if (intersects && (closestObject == null || distance < closestDistance))
+            {
+               closestObject = object;
+               closestDistance = distance;
+            }
          }
       }
       return closestObject;
@@ -255,6 +258,7 @@ public class GDXBuildingConstructor extends ImGuiPanel
                   objectToPlace.getCollisionShapeOffset().getTranslation().add(0.0f, 0.0f, building.getHeight() / 2.0f);
                   objectToPlace.getRealisticModelOffset().getTranslation().add(0.0f, 0.0f, building.getHeight() / 2.0f);
                   objectToPlace.setPositionInWorld(midPoint);
+                  objectToPlace.getBoundingSphere().setRadius(building.getHeight() / 2.0f);
 
                   building.insertComponent(GDXBuildingObject.ComponentType.WALLS, objectToPlace);
 
