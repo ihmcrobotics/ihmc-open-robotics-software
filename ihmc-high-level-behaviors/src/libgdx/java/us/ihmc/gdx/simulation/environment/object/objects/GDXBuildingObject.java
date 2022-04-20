@@ -1,9 +1,13 @@
 package us.ihmc.gdx.simulation.environment.object.objects;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.Model;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.gdx.simulation.environment.object.GDXSimpleObject;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,7 +16,7 @@ public class GDXBuildingObject
 {
    public enum ComponentType
    {
-      WALL, DOOR, WINDOW, STAIRS, FLOORS
+      WALLS, DOORS, WINDOWS, STAIRS, FLOORS, PLATFORMS
    }
 
    private final ArrayList<Point3D> corners = new ArrayList<>();

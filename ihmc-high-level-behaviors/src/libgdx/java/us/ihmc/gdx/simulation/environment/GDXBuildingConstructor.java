@@ -27,6 +27,7 @@ import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.gdx.ui.gizmo.StepCheckIsPointInsideAlgorithm;
+import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
 
@@ -240,22 +241,22 @@ public class GDXBuildingConstructor extends ImGuiPanel
 
                   GDXSimpleObject objectToPlace = new GDXSimpleObject("BuildingWall_" + i);
                   Model objectModel = GDXModelBuilder.createBox(length, 0.1f, building.getHeight(), Color.LIGHT_GRAY).model;
-                  Box3D collisionBox = new Box3D(1.0f, 0.1f, building.getHeight());
 
                   Vector3DBasics translation = objectToPlace.getObjectTransform().getTranslation();
-                  RigidBodyTransform transform = objectToPlace.getObjectTransform();
-
                   translationTransform.setTranslationAndIdentityRotation(translation);
                   objectToPlace.getObjectTransform().setRotationYawAndZeroTranslation(-yaw);
                   objectToPlace.getObjectTransform().multiply(translationTransform);
                   objectToPlace.setRealisticModel(objectModel);
                   objectToPlace.setCollisionModel(objectModel);
+
+                  Box3D collisionBox = new Box3D(1.0f, 0.1f, building.getHeight());
                   objectToPlace.setCollisionGeometryObject(collisionBox);
+
                   objectToPlace.getCollisionShapeOffset().getTranslation().add(0.0f, 0.0f, building.getHeight() / 2.0f);
                   objectToPlace.getRealisticModelOffset().getTranslation().add(0.0f, 0.0f, building.getHeight() / 2.0f);
                   objectToPlace.setPositionInWorld(midPoint);
 
-                  building.insertComponent(GDXBuildingObject.ComponentType.WALL, objectToPlace);
+                  building.insertComponent(GDXBuildingObject.ComponentType.WALLS, objectToPlace);
 
                }
 
@@ -286,15 +287,7 @@ public class GDXBuildingConstructor extends ImGuiPanel
 
          if(ImGui.button("Create Stairs"))
          {
-            GDXSimpleObject stairsObject = new GDXSimpleObject("Stairs");
-            Model objectModel = GDXModelBuilder.createStairs(1.5f, 0.3f, 0.3f, 10, Color.BROWN).model;
-            Box3D collisionBox = new Box3D(30.0f, 1.5f, 30.0f);
-            stairsObject.setRealisticModel(objectModel);
-            stairsObject.setCollisionModel(objectModel);
-            stairsObject.setCollisionGeometryObject(collisionBox);
-
-            building.insertComponent(GDXBuildingObject.ComponentType.STAIRS, stairsObject);
-            updateObjectSelected(selectedObject, stairsObject);
+            constructStairwell(3, 4, 10, 3.0f, 3.0f, 12.0f);
          }
 
          ImGui.separator();
@@ -320,5 +313,50 @@ public class GDXBuildingConstructor extends ImGuiPanel
    {
       updateObjectSelected(selectedObject, null);
       intersectedObject = null;
+   }
+
+   public void constructStairwell(int floors, int sides, int numberOfStepsPerSide, float length, float width, float height)
+   {
+      if(building == null) return;
+
+      float[] xOffsets = {-width/2.0f, length/1.4f, width/2.0f, -length/1.4f};
+      float[] yOffsets = {width/1.4f, length/2.0f, -width/1.4f, -length/2.0f};
+
+      float[] xPlatformOffsets = {-width/2.0f, length/2.0f, width/2.0f, -length/2.0f};
+      float[] yPlatformOffsets = {width/2.0f, length/2.0f, -width/2.0f, -length/2.0f};
+
+      for(int i = 0; i<floors; i++)
+      {
+         for(int j = 0; j<sides; j++)
+         {
+            GDXSimpleObject stairsObject = new GDXSimpleObject("Stairs_" + ((sides * i) + j));
+            Model objectModel = GDXModelBuilder.createStairs(1.5f, 0.3f, 0.3f, 10, Color.BROWN).model;
+            stairsObject.setRealisticModel(objectModel);
+            stairsObject.setCollisionModel(objectModel);
+
+            Box3D collisionBox = new Box3D(1.0f, 0.1f, building.getHeight());
+            stairsObject.setCollisionGeometryObject(collisionBox);
+            stairsObject.getRealisticModelOffset().getRotation().appendYawRotation(-2.0f * Math.PI / (float)(sides) * j);
+
+            stairsObject.getRealisticModelOffset().getTranslation().add(xOffsets[j], yOffsets[j], 3.0f * (float)(i*sides + j) - 0.3f);
+            stairsObject.setPositionInWorld(new Point3D(0.0f, 0.0f, 0.0f));
+
+            building.insertComponent(GDXBuildingObject.ComponentType.STAIRS, stairsObject);
+
+            GDXSimpleObject platformObject = new GDXSimpleObject("Platform_" + ((sides * i) + j));
+            Model platformModel = GDXModelBuilder.createBox(3.0f, 1.5f, 0.3f, Color.GRAY).model;
+            platformObject.setRealisticModel(platformModel);
+            platformObject.setCollisionModel(platformModel);
+
+            Box3D platformCollisionBox = new Box3D(1.0f, 0.1f, building.getHeight());
+            platformObject.setCollisionGeometryObject(platformCollisionBox);
+            platformObject.getRealisticModelOffset().getRotation().appendYawRotation(-2.0f * Math.PI / (float)(sides) * j);
+
+            platformObject.getRealisticModelOffset().getTranslation().add(xOffsets[j], yOffsets[j], 3.0f * (float)(i*sides + j) - 0.45f);
+            platformObject.setPositionInWorld(new Point3D(0.0f, 0.0f, 0.0f));
+
+            building.insertComponent(GDXBuildingObject.ComponentType.PLATFORMS, platformObject);
+         }
+      }
    }
 }
