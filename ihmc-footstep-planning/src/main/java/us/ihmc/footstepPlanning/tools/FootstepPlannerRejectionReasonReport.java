@@ -25,12 +25,12 @@ public class FootstepPlannerRejectionReasonReport
    public FootstepPlannerRejectionReasonReport(FootstepPlanningModule footstepPlanningModule)
    {
       this.footstepPlanningModule = footstepPlanningModule;
-      VariableDescriptor rejectionReasonVariableDescriptor = footstepPlanningModule.getVariableDescriptors()
+      VariableDescriptor rejectionReasonVariableDescriptor = footstepPlanningModule.getFootstepPlanVariableDescriptors()
                                                                                    .stream()
                                                                                    .filter(v -> v.getName()
                                                                                                  .equalsIgnoreCase(FootstepChecker.rejectionReasonVariable))
                                                                                    .findFirst().get();
-      rejectionReasonIndex = footstepPlanningModule.getVariableDescriptors().indexOf(rejectionReasonVariableDescriptor);
+      rejectionReasonIndex = footstepPlanningModule.getFootstepPlanVariableDescriptors().indexOf(rejectionReasonVariableDescriptor);
    }
 
    public void update()

@@ -1,5 +1,6 @@
 package us.ihmc.exampleSimulations.beetle.parameters;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
@@ -102,5 +103,11 @@ public class RhinoBeetleVirtualModelControlParameters implements HexapodControll
    public double getTransferTime()
    {
       return 0;
+   }
+
+   @Override
+   public WholeBodyControllerCoreMode getControlMode()
+   {
+      return WholeBodyControllerCoreMode.VIRTUAL_MODEL;
    }
 }

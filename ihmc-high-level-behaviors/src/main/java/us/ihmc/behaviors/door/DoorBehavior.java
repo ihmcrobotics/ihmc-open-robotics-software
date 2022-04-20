@@ -31,9 +31,9 @@ import static us.ihmc.behaviors.door.DoorBehaviorAPI.*;
 public class DoorBehavior extends ResettingNode implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Door", DoorBehavior::new, DoorBehaviorAPI.create());
-   private final BehaviorHelper helper;
+   private BehaviorHelper helper;
    private ROS2SyncedRobotModel syncedRobot;
-   private final AtomicReference<Boolean> reviewEnabled;
+   private AtomicReference<Boolean> reviewEnabled;
    private boolean firstTick = true;
    private boolean doingBehavior = false;
    private final AtomicReference<CurrentBehaviorStatus> status = new AtomicReference<>();
@@ -43,7 +43,19 @@ public class DoorBehavior extends ResettingNode implements BehaviorInterface
    private boolean isFacingDoor = false;
    private final Timer doorDetectedTimer = new Timer();
 
+   public DoorBehavior(BehaviorHelper helper, ROS2SyncedRobotModel syncedRobot)
+   {
+      create(helper);
+      this.syncedRobot = syncedRobot;
+   }
+
    public DoorBehavior(BehaviorHelper helper)
+   {
+      create(helper);
+      syncedRobot = helper.newSyncedRobot();
+   }
+
+   private void create(BehaviorHelper helper)
    {
       this.helper = helper;
       helper.subscribeToBehaviorStatusViaCallback(status::set);
@@ -58,22 +70,17 @@ public class DoorBehavior extends ResettingNode implements BehaviorInterface
       {
          CurrentBehaviorStatus currentBehaviorStatus = CurrentBehaviorStatus.fromByte(status.getCurrentBehaviorStatus());
          if (currentBehaviorStatus == CurrentBehaviorStatus.BEHAVIOR_FINISHED_SUCCESS
-         || currentBehaviorStatus == CurrentBehaviorStatus.BEHAVIOR_FINISHED_FAILED)
+          || currentBehaviorStatus == CurrentBehaviorStatus.BEHAVIOR_FINISHED_FAILED)
          {
             doingBehavior = false;
          }
       });
       helper.getOrCreateControllerStatusTracker().addNotWalkingStateAnymoreCallback(() -> doingBehavior = false);
-//      helper.subscribeViaCallback(FiducialDetectorToolboxModule::getDetectedFiducialOutputTopic, detectedFiducialMessage ->
-//      {
-//         detectedFiducial.set(detectedFiducialMessage);
-//         helper.publish(DetectedDoorPose, new Pose3D(detectedFiducialMessage.getFiducialTransformToWorld()));
-//      });
-   }
-
-   public void setSyncedRobot(ROS2SyncedRobotModel syncedRobot)
-   {
-      this.syncedRobot = syncedRobot;
+      //      helper.subscribeViaCallback(FiducialDetectorToolboxModule::getDetectedFiducialOutputTopic, detectedFiducialMessage ->
+      //      {
+      //         detectedFiducial.set(detectedFiducialMessage);
+      //         helper.publish(DetectedDoorPose, new Pose3D(detectedFiducialMessage.getFiducialTransformToWorld()));
+      //      });
    }
 
    public boolean isDone()

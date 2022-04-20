@@ -233,9 +233,20 @@ public class FeetManager
       return footControlModules.get(robotSide).getCurrentConstraintType();
    }
 
-   public void adjustSwingTrajectory(RobotSide swingSide, Footstep adjustedFootstep, double swingTime)
+   public void adjustSwingTrajectory(RobotSide swingSide,
+                                     Footstep adjustedFootstep,
+                                     double swingTime)
    {
-      footControlModules.get(swingSide).setAdjustedFootstepAndTime(adjustedFootstep, swingTime);
+      adjustSwingTrajectory(swingSide, adjustedFootstep, null, null, swingTime);
+   }
+
+   public void adjustSwingTrajectory(RobotSide swingSide,
+                                     Footstep adjustedFootstep,
+                                     FrameVector3DReadOnly finalCoMVelocity,
+                                     FrameVector3DReadOnly finalCoMAcceleration,
+                                     double swingTime)
+   {
+      footControlModules.get(swingSide).setAdjustedFootstepAndTime(adjustedFootstep, finalCoMVelocity, finalCoMAcceleration, swingTime);
    }
 
    public void requestMoveStraightTouchdownForDisturbanceRecovery(RobotSide swingSide)

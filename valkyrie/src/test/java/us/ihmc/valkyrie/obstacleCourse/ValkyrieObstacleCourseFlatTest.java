@@ -32,7 +32,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    /**
     * Doesn't work with Valkyrie yet. Need to get it working some day.
     */
-   @Tag("fast")
+   @Tag("humanoid-flat-ground")
    @Override
    @Disabled
    @Test
@@ -49,7 +49,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
       super.testRotatedStepInTheAir();
    }
 
-   @Tag("fast")
+   @Tag("humanoid-flat-ground")
    @Test
    public void testSimpleScripts() throws SimulationExceededMaximumTimeException, IOException
    {
@@ -142,4 +142,13 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    {
       super.testPrepareForLocomotion();
    }
+
+   @Tag("humanoid-flat-ground")
+   @Override
+   @Test
+   public void testRepeatedWalking() throws SimulationExceededMaximumTimeException
+   {
+      super.testRepeatedWalking();
+   }
 }
+

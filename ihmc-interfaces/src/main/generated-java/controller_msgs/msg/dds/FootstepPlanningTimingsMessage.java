@@ -28,6 +28,10 @@ public class FootstepPlanningTimingsMessage extends Packet<FootstepPlanningTimin
             */
    public double time_planning_steps_seconds_;
    /**
+            * Number of iterations performed during path planning
+            */
+   public long path_planning_iterations_;
+   /**
             * Number of iterations performed during step planning
             */
    public long step_planning_iterations_;
@@ -51,6 +55,8 @@ public class FootstepPlanningTimingsMessage extends Packet<FootstepPlanningTimin
       time_planning_body_path_seconds_ = other.time_planning_body_path_seconds_;
 
       time_planning_steps_seconds_ = other.time_planning_steps_seconds_;
+
+      path_planning_iterations_ = other.path_planning_iterations_;
 
       step_planning_iterations_ = other.step_planning_iterations_;
 
@@ -117,6 +123,21 @@ public class FootstepPlanningTimingsMessage extends Packet<FootstepPlanningTimin
    }
 
    /**
+            * Number of iterations performed during path planning
+            */
+   public void setPathPlanningIterations(long path_planning_iterations)
+   {
+      path_planning_iterations_ = path_planning_iterations;
+   }
+   /**
+            * Number of iterations performed during path planning
+            */
+   public long getPathPlanningIterations()
+   {
+      return path_planning_iterations_;
+   }
+
+   /**
             * Number of iterations performed during step planning
             */
    public void setStepPlanningIterations(long step_planning_iterations)
@@ -157,6 +178,8 @@ public class FootstepPlanningTimingsMessage extends Packet<FootstepPlanningTimin
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.time_planning_steps_seconds_, other.time_planning_steps_seconds_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.path_planning_iterations_, other.path_planning_iterations_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.step_planning_iterations_, other.step_planning_iterations_, epsilon)) return false;
 
 
@@ -180,6 +203,8 @@ public class FootstepPlanningTimingsMessage extends Packet<FootstepPlanningTimin
 
       if(this.time_planning_steps_seconds_ != otherMyClass.time_planning_steps_seconds_) return false;
 
+      if(this.path_planning_iterations_ != otherMyClass.path_planning_iterations_) return false;
+
       if(this.step_planning_iterations_ != otherMyClass.step_planning_iterations_) return false;
 
 
@@ -200,6 +225,8 @@ public class FootstepPlanningTimingsMessage extends Packet<FootstepPlanningTimin
       builder.append(this.time_planning_body_path_seconds_);      builder.append(", ");
       builder.append("time_planning_steps_seconds=");
       builder.append(this.time_planning_steps_seconds_);      builder.append(", ");
+      builder.append("path_planning_iterations=");
+      builder.append(this.path_planning_iterations_);      builder.append(", ");
       builder.append("step_planning_iterations=");
       builder.append(this.step_planning_iterations_);
       builder.append("}");

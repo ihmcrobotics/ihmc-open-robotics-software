@@ -2,6 +2,7 @@ package us.ihmc.atlas;
 
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.TestAbortedException;
 
@@ -16,21 +17,39 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 {
    private DRCRobotModel robotModel;
+   private boolean doPelvisWarmup;
 
    @Override
    public boolean doPelvisWarmup()
    {
-      return true;
+      return doPelvisWarmup;
+   }
+   
+   public void setDoPelvisWarmup(boolean doPelvisWarmup)
+   {
+      this.doPelvisWarmup = doPelvisWarmup;
    }
 
+   @Tag("fast")
    @Override
    @Test
    public void testFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
+      setDoPelvisWarmup(true);
       super.testFlatGroundWalking();
    }
+   
+   @Override
+   @Test
+   public void testFlatGroundWalkingBullet() throws SimulationExceededMaximumTimeException, ControllerFailureException
+   {
+      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
+      setDoPelvisWarmup(false);
+      super.testFlatGroundWalkingBullet();
+   }
 
+   @Tag("fast")
    @Override
    @Test
    public void testReset() throws SimulationExceededMaximumTimeException, ControllerFailureException
@@ -44,7 +63,7 @@ public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
    public void testAtlasFlatGroundWalkingWithShapeCollision() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false, false, true);
-      runFlatGroundWalking();
+      super.testFlatGroundWalking();
    }
 
    @Test

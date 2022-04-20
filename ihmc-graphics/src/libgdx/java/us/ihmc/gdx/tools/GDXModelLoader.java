@@ -11,7 +11,10 @@ import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.loader.G3dModelLoader;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.SerializationException;
+import com.badlogic.gdx.utils.UBJsonReader;
+import us.ihmc.gdx.tools.assimp.GDXAssimpModelLoader;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.io.resources.ResourceTools;
 
 import java.util.HashMap;
 
@@ -19,6 +22,7 @@ public class GDXModelLoader
 {
    private static final GDXModelLoader modelLoader = new GDXModelLoader();
 
+   private final HashMap<String, Object> modelLoadingSynchronizers = new HashMap<>();
    private final HashMap<String, Model> loadedModels = new HashMap<>();
 
    private GDXModelLoader()
@@ -37,37 +41,71 @@ public class GDXModelLoader
 
    private Model loadOrGetModel(String modelFileName)
    {
-      Model model = loadedModels.get(modelFileName);
-      if (model == null)
+      modelFileName = ResourceTools.sanitizeResourcePath(modelFileName);
+
+      Object preventLoadingMoreThanOnceSynchronizer = modelLoadingSynchronizers.computeIfAbsent(modelFileName, key -> new Object());
+
+      Model model;
+      synchronized (preventLoadingMoreThanOnceSynchronizer)
       {
-         FileHandle fileHandle = Gdx.files.internal(modelFileName);
-         try
+         model = loadedModels.get(modelFileName);
+         if (model == null)
          {
-            Model loadedModel = new G3dModelLoader(new JsonReader()).loadModel(fileHandle);
-            for (Material material : loadedModel.materials)
+            LogTools.debug("Loading {}", modelFileName);
+            try
             {
-               if (!material.has(TextureAttribute.Diffuse))
+               if (!modelFileName.endsWith(".g3dj"))
                {
-                  LogTools.warn("Material \"" + material.id + "\" in model \"" + modelFileName + "\" does not contain TextureAttribute Diffuse. Creating...");
-
-                  Pixmap map = new Pixmap(100, 100, Pixmap.Format.RGBA8888);
-                  map.setColor(((ColorAttribute) material.get(ColorAttribute.Diffuse)).color);
-                  map.drawRectangle(0, 0, 100, 100);
-
-                  material.set(TextureAttribute.createDiffuse(new Texture(map)));
-
-                  map.dispose();
+                  String modelFileNameWithoutExtension = modelFileName.substring(0, modelFileName.lastIndexOf("."));
+                  FileHandle potentialFileHandle = Gdx.files.internal(modelFileNameWithoutExtension + ".g3dj");
+                  if (potentialFileHandle.exists())
+                  {
+                     LogTools.debug("Found G3DJ file as an alternative for {}", modelFileName);
+                     modelFileName = modelFileNameWithoutExtension + ".g3dj";
+                  }
                }
-            }
 
-            loadedModels.put(modelFileName, loadedModel);
-            return loadedModel;
-         }
-         catch (SerializationException | NullPointerException e)
-         {
-            return null;
+               if (modelFileName.endsWith(".g3dj"))
+               {
+                  FileHandle fileHandle = Gdx.files.internal(modelFileName);
+                  model = new G3dModelLoader(new JsonReader()).loadModel(fileHandle);
+               }
+               else if (modelFileName.endsWith(".g3db"))
+               {
+                  FileHandle fileHandle = Gdx.files.internal(modelFileName);
+                  model = new G3dModelLoader(new UBJsonReader()).loadModel(fileHandle);
+               }
+               else
+               {
+                  model = new GDXAssimpModelLoader(modelFileName).load();
+               }
+               for (Material material : model.materials)
+               {
+                  if (!material.has(TextureAttribute.Diffuse))
+                  {
+                     LogTools.debug(
+                           "Material \"" + material.id + "\" in model \"" + modelFileName + "\" does not contain TextureAttribute Diffuse. Creating...");
+
+                     Pixmap map = new Pixmap(100, 100, Pixmap.Format.RGBA8888);
+                     map.setColor(((ColorAttribute) material.get(ColorAttribute.Diffuse)).color);
+                     map.drawRectangle(0, 0, 100, 100);
+
+                     material.set(TextureAttribute.createDiffuse(new Texture(map)));
+
+                     map.dispose();
+                  }
+               }
+
+               loadedModels.put(modelFileName, model);
+            }
+            catch (SerializationException | NullPointerException e)
+            {
+               LogTools.error("Failed to load {}", modelFileName);
+               e.printStackTrace();
+            }
          }
       }
+
       return model;
    }
 
@@ -78,20 +116,5 @@ public class GDXModelLoader
          loadedModel.dispose();
       }
       loadedModels.clear();
-   }
-
-   /**
-    * TODO: Implement Collada, STL, etc model loaders
-    */
-   public static String modifyFileName(String modelFileName)
-   {
-      String lowerCase = modelFileName.toLowerCase();
-      if (!lowerCase.endsWith(".obj") && !lowerCase.endsWith(".stl"))
-      {
-         LogTools.warn("Model file \"{}\" is not an OBJ or STL. Skipping...", modelFileName);
-         return null;
-      }
-      String modifiedFileName = modelFileName.replace(".obj", "").replace(".STL", "") + ".g3dj";
-      return modifiedFileName;
    }
 }

@@ -8,8 +8,6 @@ import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateContro
 import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
@@ -28,6 +26,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -42,6 +41,7 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
@@ -67,7 +67,6 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
 
    private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;
-   private final LegConfigurationManager legConfigurationManager;
    private final PushRecoveryBalanceManager balanceManager;
    private final CenterOfMassHeightManager comHeightManager;
 
@@ -78,6 +77,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
    private final FullHumanoidRobotModel fullRobotModel;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final PushRecoveryControllerParameters pushRecoveryControllerParameters;
+   private final OneDoFJointPrivilegedConfigurationParameters kneePrivilegedConfigurationParameters;
 
    private final SideDependentList<? extends ContactablePlaneBody> feet;
 
@@ -109,9 +109,11 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
                                                   StatusMessageOutputManager statusOutputManager,
                                                   PushRecoveryControlManagerFactory managerFactory,
                                                   PushRecoveryControllerParameters pushRecoveryControllerParameters,
+                                                  OneDoFJointPrivilegedConfigurationParameters kneePrivilegedConfigurationParameters,
                                                   HighLevelHumanoidControllerToolbox controllerToolbox)
    {
       this.managerFactory = managerFactory;
+      this.kneePrivilegedConfigurationParameters = kneePrivilegedConfigurationParameters;
 
       // Getting parameters from the HighLevelHumanoidControllerToolbox
       this.controllerToolbox = controllerToolbox;
@@ -121,7 +123,6 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
       feet = controllerToolbox.getContactableFeet();
       this.pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       this.feetManager = managerFactory.getOrCreateFeetManager();
-      this.legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
 
       pushRecoveryControlModule = new MultiStepPushRecoveryControlModule(controllerToolbox.getFootContactStates(),
                                                                          controllerToolbox.getBipedSupportPolygons(),
@@ -321,6 +322,9 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
          ArmJointName[] armJointNames = fullRobotModel.getRobotSpecificJointNames().getArmJointNames();
          for (int i = 0; i < armJointNames.length; i++)
             privilegedConfigurationCommand.addJoint(fullRobotModel.getArmJoint(robotSide, armJointNames[i]), PrivilegedConfigurationOption.AT_MID_RANGE);
+
+         OneDoFJointBasics kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH);
+         privilegedConfigurationCommand.addJoint(kneeJoint, kneePrivilegedConfigurationParameters);
       }
 
       for (RobotSide robotSide : RobotSide.values)
@@ -416,7 +420,6 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
       double omega0 = controllerToolbox.getOmega0();
 
       feetManager.compute();
-      legConfigurationManager.compute();
 
       boolean bodyManagerIsLoadBearing = false;
       for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
@@ -538,9 +541,6 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
          controllerCoreCommand.addFeedbackControlCommand(feetManager.getFeedbackControlCommand(robotSide));
          controllerCoreCommand.addInverseDynamicsCommand(feetManager.getInverseDynamicsCommand(robotSide));
          controllerCoreCommand.completeLowLevelJointData(feetManager.getJointDesiredData(robotSide));
-
-         controllerCoreCommand.addFeedbackControlCommand(legConfigurationManager.getFeedbackControlCommand(robotSide));
-         controllerCoreCommand.addInverseDynamicsCommand(legConfigurationManager.getInverseDynamicsCommand(robotSide));
 
          YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
          PlaneContactStateCommand planeContactStateCommand = planeContactStateCommandPool.add();

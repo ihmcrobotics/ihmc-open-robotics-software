@@ -459,4 +459,21 @@ float64 shin_length
 # Field default value -11.1
 float64 shin_height_offet
 
+# When using a height map, maximum accepted rms error
+# Field default value -11.1
+float64 rms_error_threshold
+
+# When using a height map, cost of rms value
+# Field default value -11.1
+float64 rms_error_cost
+
+# When using a height map, minimum rms error to penalize
+# Field default value -11.1
+float64 rms_min_error_to_penalize
+
+# When using a height map, snapping is done by taking all the points inside the polygon, then removing points below
+# z_max - dz, where z_max is the highest point and dz is this value.
+# Field default value -11.1
+float64 height_map_snap_threshold
+
 

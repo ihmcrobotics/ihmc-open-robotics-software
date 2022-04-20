@@ -185,6 +185,11 @@ public class GDX3DSceneBasics
       renderables.get(sceneLevel).add(renderableProvider);
    }
 
+   public void removeRenderableProvider(RenderableProvider renderableProvider, GDXSceneLevel sceneLevel)
+   {
+      renderables.get(sceneLevel).remove(renderableProvider);
+   }
+
    public void addDefaultLighting()
    {
       setAmbientLight(0.914f);

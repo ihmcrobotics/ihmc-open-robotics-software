@@ -69,6 +69,7 @@ import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.session.tools.SCS1GraphicConversionTools;
 import us.ihmc.scs2.simulation.SimulationSession;
+import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
 import us.ihmc.scs2.simulation.parameters.ContactPointBasedContactParameters;
 import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngineFactory;
 import us.ihmc.scs2.simulation.physicsEngine.contactPointBased.ContactPointBasedPhysicsEngine;
@@ -83,6 +84,7 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
+import us.ihmc.tools.factories.FactoryFieldNotSetException;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
@@ -94,9 +96,10 @@ public class SCS2AvatarSimulationFactory
 {
    private final RequiredFactoryField<DRCRobotModel> robotModel = new RequiredFactoryField<>("robotModel");
    private final RequiredFactoryField<HighLevelHumanoidControllerFactory> highLevelHumanoidControllerFactory = new RequiredFactoryField<>("highLevelHumanoidControllerFactory");
-   private final RequiredFactoryField<TerrainObjectDefinition> terrainObjectDefinition = new RequiredFactoryField<>("terrainObjectDefinition");
+   private final ArrayList<TerrainObjectDefinition> terrainObjectDefinitions = new ArrayList<>();
    private final RequiredFactoryField<RealtimeROS2Node> realtimeROS2Node = new RequiredFactoryField<>("realtimeROS2Node");
 
+   private final OptionalFactoryField<Double> simulationDT = new OptionalFactoryField<>("simulationDT");
    private final OptionalFactoryField<RobotInitialSetup<HumanoidFloatingRootJointRobot>> robotInitialSetup = new OptionalFactoryField<>("robotInitialSetup");
    private final OptionalFactoryField<Double> gravity = new OptionalFactoryField<>("gravity", -9.81);
    private final OptionalFactoryField<Boolean> createYoVariableServer = new OptionalFactoryField<>("createYoVariableServer", false);
@@ -116,7 +119,9 @@ public class SCS2AvatarSimulationFactory
    private final OptionalFactoryField<Boolean> automaticallyStartSimulation = new OptionalFactoryField<>("automaticallyStartSimulation", false);
 
    private final OptionalFactoryField<Boolean> useImpulseBasePhysicsEngine = new OptionalFactoryField<>("useImpulseBasePhysicsEngine", false);
+   private final OptionalFactoryField<Boolean> useBulletPhysicsEngine = new OptionalFactoryField<>("useBulletPhysicsEngine", false);
    private final OptionalFactoryField<Boolean> enableSimulatedRobotDamping = new OptionalFactoryField<>("enableSimulatedRobotDamping", true);
+   private final OptionalFactoryField<Boolean> useRobotDefinitionCollisions = new OptionalFactoryField<>("useRobotDefinitionCollisions", false);
    private final OptionalFactoryField<List<Robot>> secondaryRobots = new OptionalFactoryField<>("secondaryRobots", new ArrayList<>());
 
    // TO CONSTRUCT
@@ -137,7 +142,7 @@ public class SCS2AvatarSimulationFactory
 
    public SCS2AvatarSimulation createAvatarSimulation()
    {
-      simulationDataRecordTickPeriod.setDefaultValue((int) Math.max(1.0, robotModel.get().getControllerDT() / robotModel.get().getSimulateDT()));
+      simulationDataRecordTickPeriod.setDefaultValue((int) Math.max(1.0, robotModel.get().getControllerDT() / simulationDT.get()));
 
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 
@@ -178,6 +183,11 @@ public class SCS2AvatarSimulationFactory
 
       robotDefinition = robotModel.getRobotDefinition();
 
+      if (useBulletPhysicsEngine.get())
+      {
+         SCS2BulletSimulationTools.fixHumanoidCollisionGroupsMasksToPreventSelfCollision(robotDefinition);
+      }
+
       if (!enableSimulatedRobotDamping.get())
       {
          for (JointDefinition joint : robotDefinition.getAllJoints())
@@ -189,10 +199,14 @@ public class SCS2AvatarSimulationFactory
          }
       }
 
-      RobotCollisionModel collisionModel = robotModel.getSimulationRobotCollisionModel(collidableHelper, robotCollisionName, terrainCollisionName);
-      if (collisionModel != null)
-         RobotDefinitionTools.addCollisionsToRobotDefinition(collisionModel.getRobotCollidables(robotModel.createFullRobotModel().getElevator()),
-                                                             robotDefinition);
+      if (!useRobotDefinitionCollisions.get())
+      {
+         RobotCollisionModel collisionModel = robotModel.getSimulationRobotCollisionModel(collidableHelper, robotCollisionName, terrainCollisionName);
+         if (collisionModel != null)
+            RobotDefinitionTools.addCollisionsToRobotDefinition(collisionModel.getRobotCollidables(robotModel.createFullRobotModel().getElevator()),
+                                                                robotDefinition);
+      }
+
       robotInitialSetup.get().initializeRobotDefinition(robotDefinition);
       Set<String> lastSimulatedJoints = robotModel.getJointMap().getLastSimulatedJoints();
       lastSimulatedJoints.forEach(lastSimulatedJoint -> robotDefinition.addSubtreeJointsToIgnore(lastSimulatedJoint));
@@ -202,6 +216,10 @@ public class SCS2AvatarSimulationFactory
       if (useImpulseBasePhysicsEngine.hasValue() && useImpulseBasePhysicsEngine.get())
       {
          physicsEngineFactory = (inertialFrame, rootRegistry) -> new ImpulseBasedPhysicsEngine(inertialFrame, rootRegistry);
+      }
+      else if (useBulletPhysicsEngine.hasValue() && useBulletPhysicsEngine.get())
+      {
+         physicsEngineFactory = (inertialFrame, rootRegistry) -> new BulletPhysicsEngine(inertialFrame, rootRegistry);
       }
       else
       {
@@ -222,7 +240,12 @@ public class SCS2AvatarSimulationFactory
       simulationSession = new SimulationSession(physicsEngineFactory);
       simulationSession.initializeBufferSize(simulationDataBufferSize.get());
       simulationSession.initializeBufferRecordTickPeriod(simulationDataRecordTickPeriod.get());
-      simulationSession.addTerrainObject(terrainObjectDefinition.get());
+      if (terrainObjectDefinitions.isEmpty())
+         throw new FactoryFieldNotSetException("terrainObjectDefinitions");
+      for (TerrainObjectDefinition terrainObjectDefinition : terrainObjectDefinitions)
+      {
+         simulationSession.addTerrainObject(terrainObjectDefinition);
+      }
       robot = simulationSession.addRobot(robotDefinition);
       robot.getControllerManager()
            .addController(new SCS2StateEstimatorDebugVariables(simulationSession.getInertialFrame(),
@@ -232,7 +255,7 @@ public class SCS2AvatarSimulationFactory
       for (Robot secondaryRobot : secondaryRobots.get())
          simulationSession.addRobot(secondaryRobot);
 
-      simulationSession.setSessionDTSeconds(robotModel.getSimulateDT());
+      simulationSession.setSessionDTSeconds(simulationDT.get());
    }
 
    private void setupYoVariableServer()
@@ -320,11 +343,11 @@ public class SCS2AvatarSimulationFactory
       HumanoidRobotContextData masterContext = new HumanoidRobotContextData(masterFullRobotModel);
 
       // Create the tasks that will be run on their own threads.
-      int estimatorDivisor = (int) Math.round(robotModel.getEstimatorDT() / robotModel.getSimulateDT());
-      int controllerDivisor = (int) Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT());
-      int handControlDivisor = (int) Math.round(robotModel.getSimulatedHandControlDT() / robotModel.getSimulateDT());
-      HumanoidRobotControlTask estimatorTask = new EstimatorTask(estimatorThread, estimatorDivisor, robotModel.getSimulateDT(), masterFullRobotModel);
-      HumanoidRobotControlTask controllerTask = new ControllerTask(controllerThread, controllerDivisor, robotModel.getSimulateDT(), masterFullRobotModel);
+      int estimatorDivisor = (int) Math.round(robotModel.getEstimatorDT() / simulationDT.get());
+      int controllerDivisor = (int) Math.round(robotModel.getControllerDT() / simulationDT.get());
+      int handControlDivisor = (int) Math.round(robotModel.getSimulatedHandControlDT() / simulationDT.get());
+      HumanoidRobotControlTask estimatorTask = new EstimatorTask(estimatorThread, estimatorDivisor, simulationDT.get(), masterFullRobotModel);
+      HumanoidRobotControlTask controllerTask = new ControllerTask(controllerThread, controllerDivisor, simulationDT.get(), masterFullRobotModel);
 
       AvatarSimulatedHandControlThread handControlThread = robotModel.createSimulatedHandController(realtimeROS2Node.get());
       SimulatedHandControlTask handControlTask = null;
@@ -335,7 +358,7 @@ public class SCS2AvatarSimulationFactory
          SimulatedHandSensorReader handSensorReader = new SCS2SimulatedHandSensorReader(robot.getControllerManager().getControllerInput(), fingerJointNames);
          SimulatedHandOutputWriter handOutputWriter = new SCS2SimulatedHandOutputWriter(robot.getControllerManager().getControllerInput(),
                                                                                         robot.getControllerManager().getControllerOutput());
-         handControlTask = new SimulatedHandControlTask(handSensorReader, handControlThread, handOutputWriter, handControlDivisor, robotModel.getSimulateDT());
+         handControlTask = new SimulatedHandControlTask(handSensorReader, handControlThread, handOutputWriter, handControlDivisor, simulationDT.get());
       }
 
       // Previously done in estimator thread write
@@ -379,7 +402,7 @@ public class SCS2AvatarSimulationFactory
       else
       {
          TaskOverrunBehavior overrunBehavior = TaskOverrunBehavior.BUSY_WAIT;
-         robotController = new BarrierScheduledRobotController(controllerName, tasks, masterContext, overrunBehavior, robotModel.getSimulateDT());
+         robotController = new BarrierScheduledRobotController(controllerName, tasks, masterContext, overrunBehavior, simulationDT.get());
          tasks.forEach(task -> new Thread(task, task.getClass().getSimpleName() + "Thread").start());
       }
 
@@ -451,7 +474,7 @@ public class SCS2AvatarSimulationFactory
                                                               controllerOutput,
                                                               lidarParameters.getLidarSpindleJointName(),
                                                               lidarParameters.getLidarSpindleVelocity(),
-                                                              robotModel.get().getSimulateDT()));
+                                                              simulationDT.get()));
       }
    }
 
@@ -474,13 +497,14 @@ public class SCS2AvatarSimulationFactory
 
    private void setupSimulatedRobotTimeProvider()
    {
-      simulatedRobotTimeProvider = new SimulatedDRCRobotTimeProvider(robotModel.get().getSimulateDT());
+      simulatedRobotTimeProvider = new SimulatedDRCRobotTimeProvider(simulationDT.get());
       robot.getControllerManager().addController(() -> simulatedRobotTimeProvider.doControl());
    }
 
    public void setRobotModel(DRCRobotModel robotModel)
    {
       this.robotModel.set(robotModel);
+      simulationDT.setDefaultValue(robotModel.getSimulateDT());
       robotInitialSetup.setDefaultValue(robotModel.getDefaultRobotInitialSetup(0, 0));
    }
 
@@ -540,8 +564,7 @@ public class SCS2AvatarSimulationFactory
                                                                                           HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters)
    {
       HighLevelHumanoidControllerFactory controllerFactory = setDefaultHighLevelHumanoidControllerFactory();
-      controllerFactory.setHeadingAndVelocityEvaluationScriptParameters(walkingScriptParameters);
-      controllerFactory.createComponentBasedFootstepDataMessageGenerator(useVelocityAndHeadingScript);
+      controllerFactory.createComponentBasedFootstepDataMessageGenerator(useVelocityAndHeadingScript, walkingScriptParameters);
       return controllerFactory;
    }
 
@@ -555,14 +578,14 @@ public class SCS2AvatarSimulationFactory
       return highLevelHumanoidControllerFactory.get();
    }
 
-   public void setTerrainObjectDefinition(TerrainObjectDefinition terrainObjectDefinition)
+   public void addTerrainObjectDefinition(TerrainObjectDefinition terrainObjectDefinition)
    {
-      this.terrainObjectDefinition.set(terrainObjectDefinition);
+      terrainObjectDefinitions.add(terrainObjectDefinition);
    }
 
    public void setCommonAvatarEnvrionmentInterface(CommonAvatarEnvironmentInterface environment)
    {
-      setTerrainObjectDefinition(TerrainObjectDefinitionTools.toTerrainObjectDefinition(environment,
+      addTerrainObjectDefinition(TerrainObjectDefinitionTools.toTerrainObjectDefinition(environment,
                                                                                         collidableHelper,
                                                                                         terrainCollisionName,
                                                                                         robotCollisionName));
@@ -580,6 +603,11 @@ public class SCS2AvatarSimulationFactory
       robotInitialSetup.get().setOffset(startingLocationOffset.getAdditionalOffset());
    }
 
+   public void setSimulationDT(double simulationDT)
+   {
+      this.simulationDT.set(simulationDT);
+   }
+
    public void setSimulationDataBufferSize(int simulationDataBufferSize)
    {
       this.simulationDataBufferSize.set(simulationDataBufferSize);
@@ -587,7 +615,7 @@ public class SCS2AvatarSimulationFactory
 
    public void setSimulationDataRecordTimePeriod(double simulationDataRecordTimePeriod)
    {
-      simulationDataRecordTickPeriod.set((int) Math.max(1.0, simulationDataRecordTimePeriod / robotModel.get().getSimulateDT()));
+      simulationDataRecordTickPeriod.set((int) Math.max(1.0, simulationDataRecordTimePeriod / simulationDT.get()));
    }
 
    public void setSimulationDataRecordTickPeriod(int simulationDataRecordTickPeriod)
@@ -655,9 +683,19 @@ public class SCS2AvatarSimulationFactory
       this.useImpulseBasePhysicsEngine.set(useImpulseBasePhysicsEngine);
    }
 
+   public void setUseBulletPhysicsEngine(boolean useBulletPhysicsEngine)
+   {
+      this.useBulletPhysicsEngine.set(useBulletPhysicsEngine);
+   }
+
    public void setEnableSimulatedRobotDamping(boolean enableSimulatedRobotDamping)
    {
       this.enableSimulatedRobotDamping.set(enableSimulatedRobotDamping);
+   }
+
+   public void setUseRobotDefinitionCollisions(boolean useRobotDefinitionCollisions)
+   {
+      this.useRobotDefinitionCollisions.set(useRobotDefinitionCollisions);
    }
 
    public void addSecondaryRobot(Robot secondaryRobot)

@@ -9,6 +9,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commons.thread.ThreadTools;
@@ -17,6 +18,8 @@ import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
+import us.ihmc.simulationconstructionset.FloatingJoint;
+import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.RobotController;
@@ -35,6 +38,7 @@ public class AvatarSimulation
    private SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
    private FullHumanoidRobotModel controllerFullRobotModel;
    private RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup;
+   private HumanoidRobotContextData masterContext;
    private DRCRobotModel robotModel;
 
    public void start()
@@ -58,7 +62,8 @@ public class AvatarSimulation
 
    public void dispose()
    {
-      robotController.dispose();
+      if (robotController != null)
+         robotController.dispose();
       robotController = null;
    }
 
@@ -67,6 +72,7 @@ public class AvatarSimulation
       dispose();
       if (yoVariableServer != null)
          yoVariableServer.close();
+      yoVariableServer = null;
       ThreadTools.startAsDaemon(() -> simulationConstructionSet.stopSimulationThread(), "WaitForSimulationThreadToStop");
       simulationConstructionSet.closeAndDispose();
    }
@@ -80,6 +86,9 @@ public class AvatarSimulation
    {
       simulationConstructionSet.stop();
 
+      if (robotController instanceof BarrierScheduledRobotController)
+         ((BarrierScheduledRobotController) robotController).waitUntilTasksDone();
+
       // TODO: instead of sleeping wait for all tasks in the barrier scheduler to finish.
       ThreadTools.sleep(100);
 
@@ -88,17 +97,34 @@ public class AvatarSimulation
 
       for (OneDegreeOfFreedomJoint joint : joints)
       {
+         joint.setQ(0.0);
          joint.setQd(0.0);
          joint.setQdd(0.0);
          joint.setTau(0.0);
       }
 
-      humanoidFloatingRootJointRobot.getRootJoint().setAngularVelocityInBody(new Vector3D());
-      humanoidFloatingRootJointRobot.getRootJoint().setVelocity(0, 0, 0);
+      FloatingJoint rootJoint = humanoidFloatingRootJointRobot.getRootJoint();
+      
+      rootJoint.setVelocity(new Vector3D());
+      rootJoint.setAcceleration(new Vector3D());
+      rootJoint.setAngularVelocityInBody(new Vector3D());
+      rootJoint.setAngularAccelerationInBody(new Vector3D());
+      
+      
+      List<GroundContactPoint> contactPoints = humanoidFloatingRootJointRobot.getAllGroundContactPoints();
+      
+      for (GroundContactPoint cp : contactPoints)
+      {
+         cp.setNotInContact();
+      }
 
       robotInitialSetup.initializeRobot(humanoidFloatingRootJointRobot);
       AvatarSimulationFactory.initializeEstimator(humanoidFloatingRootJointRobot, stateEstimationThread);
       controllerThread.initialize();
+
+      // Otehrwise the master context gets overridden by the estimator and controller contexts.
+      masterContext.setControllerRan(false);
+      masterContext.setEstimatorRan(false);
 
       if (simulateAfterReset)
          simulate();
@@ -228,5 +254,15 @@ public class AvatarSimulation
    public YoRegistry getControllerThreadRegistry()
    {
       return controllerThread.getYoVariableRegistry();
+   }
+
+   public void setMasterContext(HumanoidRobotContextData masterContext)
+   {
+      this.masterContext = masterContext;
+   }
+
+   public HumanoidRobotContextData getMasterContext()
+   {
+      return masterContext;
    }
 }

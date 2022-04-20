@@ -41,13 +41,15 @@ public class FootstepPlannerStatusBarController
    @FXML
    private Text bodyPathPlanTime;
    @FXML
+   private Text pathIterationsTaken;
+   @FXML
    private Text bodyPathPlanResult;
    @FXML
    private Text stepPlanResult;
    @FXML
    private Text footstepPlanTime;
    @FXML
-   private Text iterationsTaken;
+   private Text stepIterationsTaken;
 
    @FXML
    private Label worldFrameLabel;
@@ -91,7 +93,8 @@ public class FootstepPlannerStatusBarController
          totalPlanTime.setText(String.format("%.2f", timings.getTotalElapsedSeconds()));
          bodyPathPlanTime.setText(String.format("%.2f", timings.getTimePlanningBodyPathSeconds()));
          footstepPlanTime.setText(String.format("%.2f", timings.getTimePlanningStepsSeconds()));
-         iterationsTaken.setText(Long.toString(timings.getStepPlanningIterations()));
+         pathIterationsTaken.setText(Long.toString(timings.getPathPlanningIterations()));
+         stepIterationsTaken.setText(Long.toString(timings.getStepPlanningIterations()));
       });
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanResponse, footstepPlanResponse ->

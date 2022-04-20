@@ -37,11 +37,13 @@ public class VisualizationController
    @FXML
    private CheckBox showClusterNonNavigableExtrusionsToggleButton;
    @FXML
-   private CheckBox showOccupancyMap;
-   @FXML
    private CheckBox showSolution;
    @FXML
    private CheckBox showLogGraphics;
+   @FXML
+   private CheckBox showBodyPathLogGraphics;
+   @FXML
+   private CheckBox showHeightMap;
    @FXML
    private CheckBox showPostProcessingInfo;
    @FXML
@@ -63,6 +65,7 @@ public class VisualizationController
       messager.bindBidirectional(ShowStart, showStart.selectedProperty(), true);
       messager.bindBidirectional(ShowGoal, showGoal.selectedProperty(), true);
       messager.bindBidirectional(ShowCoordinateSystem, showCoordinateSystem.selectedProperty(), true);
+      messager.bindBidirectional(ShowHeightMap, showHeightMap.selectedProperty(), true);
 
       // Body path planner
       messager.bindBidirectional(ShowBodyPath, showBodyPathToggleButton.selectedProperty(), true);
@@ -73,10 +76,10 @@ public class VisualizationController
       messager.bindBidirectional(ShowGoalVisibilityMap, showGoalMapToggleButton.selectedProperty(), true);
       messager.bindBidirectional(ShowInterRegionVisibilityMap, showInterRegionMapToggleButton.selectedProperty(), true);
       messager.bindBidirectional(ShowNavigableRegionVisibilityMaps, showInnerRegionMapsToggleButton.selectedProperty(), true);
+      messager.bindBidirectional(ShowBodyPathLogGraphics, showBodyPathLogGraphics.selectedProperty(), true);
 
       // Footstep planner
       messager.bindBidirectional(ShowFootstepPlan, showSolution.selectedProperty(), true);
-      messager.bindBidirectional(ShowOccupancyMap, showOccupancyMap.selectedProperty(), true);
       messager.bindBidirectional(ShowLogGraphics, showLogGraphics.selectedProperty(), true);
       messager.bindBidirectional(ShowPostProcessingInfo, showPostProcessingInfo.selectedProperty(), true);
       messager.bindBidirectional(RenderShiftedWaypoints, renderAdjustedWaypoints.selectedProperty(), true);

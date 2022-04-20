@@ -36,7 +36,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -194,14 +193,14 @@ public class ValkyrieWalkingTrajectoryPathFrameEndToEndTest
       SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
       FramePose3D startPose = new FramePose3D(simulationTestHelper.getReferenceFrames().getMidFootZUpGroundFrame());
       startPose.changeFrame(worldFrame);
-      FootstepDataListMessage steps = EndToEndTestTools.forwardSteps(RobotSide.LEFT,
-                                                                     6,
-                                                                     a -> steppingParameters.getDefaultStepLength(),
-                                                                     steppingParameters.getInPlaceWidth(),
-                                                                     0.75,
-                                                                     0.25,
-                                                                     startPose,
-                                                                     true);
+      FootstepDataListMessage steps = EndToEndTestTools.generateForwardSteps(RobotSide.LEFT,
+                                                                             6,
+                                                                             a -> steppingParameters.getDefaultStepLength(),
+                                                                             steppingParameters.getInPlaceWidth(),
+                                                                             0.75,
+                                                                             0.25,
+                                                                             startPose,
+                                                                             true);
       simulationTestHelper.publishToController(steps);
 
       pendulumAttachmentController.oscillationCalculator.clear();
@@ -235,16 +234,16 @@ public class ValkyrieWalkingTrajectoryPathFrameEndToEndTest
       SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
       FramePose3D startPose = new FramePose3D(simulationTestHelper.getReferenceFrames().getMidFootZUpGroundFrame());
       startPose.changeFrame(worldFrame);
-      FootstepDataListMessage steps = EndToEndTestTools.circleSteps(RobotSide.LEFT,
-                                                                    10,
-                                                                    a -> steppingParameters.getDefaultStepLength(),
-                                                                    steppingParameters.getInPlaceWidth(),
-                                                                    0.75,
-                                                                    0.25,
-                                                                    startPose,
-                                                                    true,
-                                                                    RobotSide.RIGHT,
-                                                                    1.0);
+      FootstepDataListMessage steps = EndToEndTestTools.generateCircleSteps(RobotSide.LEFT,
+                                                                            10,
+                                                                            a -> steppingParameters.getDefaultStepLength(),
+                                                                            steppingParameters.getInPlaceWidth(),
+                                                                            0.75,
+                                                                            0.25,
+                                                                            startPose,
+                                                                            true,
+                                                                            RobotSide.RIGHT,
+                                                                            1.0);
       simulationTestHelper.publishToController(steps);
 
       pendulumAttachmentController.oscillationCalculator.clear();

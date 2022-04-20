@@ -4,13 +4,13 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
+import us.ihmc.atlas.parameters.AtlasICPControllerParameters;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.angularMomentumTest.AvatarAngularMomentumWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
@@ -29,9 +29,9 @@ public class AtlasAngularMomentumWalkingTest extends AvatarAngularMomentumWalkin
          return new AtlasWalkingControllerParameters(target, jointMap, getContactPointParameters())
          {
             @Override
-            public ICPOptimizationParameters getICPOptimizationParameters()
+            public ICPControllerParameters getICPControllerParameters()
             {
-               return new AtlasICPOptimizationParameters(false)
+               return new AtlasICPControllerParameters(false)
                {
                   @Override
                   public boolean useAngularMomentum()

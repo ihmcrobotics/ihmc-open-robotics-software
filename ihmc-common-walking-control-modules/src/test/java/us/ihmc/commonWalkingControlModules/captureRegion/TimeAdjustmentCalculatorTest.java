@@ -12,12 +12,12 @@ import static us.ihmc.robotics.Assert.assertEquals;
 
 public class TimeAdjustmentCalculatorTest
 {
-   private static boolean visualize = true;
+   private static boolean visualize = false;
 
    @BeforeEach
    public void setup()
    {
-      visualize = visualize |= !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+      visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
    }
 
    @Test

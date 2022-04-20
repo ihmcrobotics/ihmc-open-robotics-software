@@ -11,6 +11,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
@@ -18,6 +19,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.RigidBodyTransformGenerator;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.heightMap.HeightMapData;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -41,7 +43,10 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
 
    private final HashMap<DiscreteFootstep, FootstepSnapData> snapDataHolder = new HashMap<>();
    protected PlanarRegionsList planarRegionsList;
-   private final ConvexPolygon2D tempPolygon = new ConvexPolygon2D();
+
+   private HeightMapData heightMapData;
+   private final HeightMapPolygonSnapper heightMapSnapper = new HeightMapPolygonSnapper();
+
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
    // Use this by default
@@ -76,6 +81,11 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       snapDataHolder.clear();
    }
 
+   public void setHeightMapData(HeightMapData heightMapData)
+   {
+      this.heightMapData = heightMapData;
+   }
+
    public void setFlatGroundHeight(double flatGroundHeight)
    {
       this.flatGroundHeight = flatGroundHeight;
@@ -88,7 +98,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
 
    private boolean flatGroundMode()
    {
-      return planarRegionsList == null || planarRegionsList.isEmpty();
+      return (planarRegionsList == null || planarRegionsList.isEmpty()) && heightMapData == null;
    }
 
    public FootstepSnapData snapFootstep(DiscreteFootstep footstep)
@@ -148,7 +158,17 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       double maximumRegionHeightToConsider = getMaximumRegionHeightToConsider(stanceStep);
       DiscreteFootstepTools.getFootPolygon(footstepToSnap, footPolygonsInSoleFrame.get(footstepToSnap.getRobotSide()), footPolygon);
 
-      RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList, maximumRegionHeightToConsider, planarRegionToPack);
+      RigidBodyTransform snapTransform;
+
+      if (heightMapData == null)
+      {
+         snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList, maximumRegionHeightToConsider, planarRegionToPack);
+      }
+      else
+      {
+         snapTransform = heightMapSnapper.snapPolygonToHeightMap(footPolygon, heightMapData, parameters.getHeightMapSnapThreshold());
+      }
+
       if (snapTransform == null)
       {
          return FootstepSnapData.emptyData();
@@ -156,8 +176,19 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       else
       {
          FootstepSnapData snapData = new FootstepSnapData(snapTransform);
-         snapData.setRegionIndex(getIndex(planarRegionToPack, planarRegionsList));
-         computeCroppedFoothold(footstepToSnap, snapData);
+
+         if (planarRegionsList != null)
+         {
+            snapData.setRegionIndex(getIndex(planarRegionToPack, planarRegionsList));
+            computeCroppedFoothold(footstepToSnap, snapData);
+         }
+         if (heightMapData != null)
+         {
+            snapData.getWiggleTransformInWorld().setIdentity();
+            snapData.setRMSErrorHeightMap(heightMapSnapper.getRMSError());
+            snapData.setHeightMapArea(heightMapSnapper.getArea());
+         }
+
          return snapData;
       }
    }
@@ -344,28 +375,28 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
 
    private final RigidBodyTransform transform1 = new RigidBodyTransform();
    private final RigidBodyTransform transform2 = new RigidBodyTransform();
-   private final ConvexPolygon2D polyon1 = new ConvexPolygon2D();
-   private final ConvexPolygon2D polyon2 = new ConvexPolygon2D();
+   private final ConvexPolygon2D polygon1 = new ConvexPolygon2D();
+   private final ConvexPolygon2D polygon2 = new ConvexPolygon2D();
 
    /** Extracted to method for testing purposes */
    protected boolean stepsAreTooClose(DiscreteFootstep step1, FootstepSnapData snapData1, DiscreteFootstep step2, FootstepSnapData snapData2)
    {
-      DiscreteFootstepTools.getFootPolygon(step1, footPolygonsInSoleFrame.get(step1.getRobotSide()), polyon1);
-      DiscreteFootstepTools.getFootPolygon(step2, footPolygonsInSoleFrame.get(step2.getRobotSide()), polyon2);
+      DiscreteFootstepTools.getFootPolygon(step1, footPolygonsInSoleFrame.get(step1.getRobotSide()), polygon1);
+      DiscreteFootstepTools.getFootPolygon(step2, footPolygonsInSoleFrame.get(step2.getRobotSide()), polygon2);
 
       snapData1.packSnapAndWiggleTransform(transform1);
       snapData2.packSnapAndWiggleTransform(transform2);
 
-      polyon1.applyTransform(transform1, false);
-      polyon2.applyTransform(transform2, false);
+      polygon1.applyTransform(transform1, false);
+      polygon2.applyTransform(transform2, false);
 
-      boolean intersection = StepConstraintPolygonTools.arePolygonsIntersecting(polyon1, polyon2);
+      boolean intersection = StepConstraintPolygonTools.arePolygonsIntersecting(polygon1, polygon2);
       if (intersection)
       {
          return true;
       }
 
-      double distance = StepConstraintPolygonTools.distanceBetweenPolygons(polyon1, polyon2);
+      double distance = StepConstraintPolygonTools.distanceBetweenPolygons(polygon1, polygon2);
       return distance < parameters.getMinClearanceFromStance();
    }
 

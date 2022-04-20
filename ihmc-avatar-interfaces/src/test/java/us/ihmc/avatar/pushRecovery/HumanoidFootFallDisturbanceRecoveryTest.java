@@ -15,7 +15,6 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -135,7 +134,7 @@ public abstract class HumanoidFootFallDisturbanceRecoveryTest implements MultiRo
       MovingReferenceFrame midFootZUpGroundFrame = referenceFrames.getMidFootZUpGroundFrame();
       FramePose3D startPose = new FramePose3D(midFootZUpGroundFrame);
       startPose.changeFrame(ReferenceFrame.getWorldFrame());
-      FootstepDataListMessage footsteps = forwardSteps(RobotSide.LEFT, 6, 0.5, 0.25, swingDuration, transferDuration, startPose, true);
+      FootstepDataListMessage footsteps = EndToEndTestTools.generateForwardSteps(RobotSide.LEFT, 6, 0.5, 0.25, swingDuration, transferDuration, startPose, true);
       footsteps.setOffsetFootstepsHeightWithExecutionError(offsetFootstepsHeightWithExecutionError);
       footsteps.setAreFootstepsAdjustable(enableStepAdjustment);
       drcSimulationTestHelper.publishToController(footsteps);
@@ -190,7 +189,7 @@ public abstract class HumanoidFootFallDisturbanceRecoveryTest implements MultiRo
       MovingReferenceFrame midFootZUpGroundFrame = referenceFrames.getMidFootZUpGroundFrame();
       FramePose3D startPose = new FramePose3D(midFootZUpGroundFrame);
       startPose.changeFrame(ReferenceFrame.getWorldFrame());
-      FootstepDataListMessage footsteps = forwardSteps(RobotSide.LEFT, 6, 0.5, 0.25, swingDuration, transferDuration, startPose, true);
+      FootstepDataListMessage footsteps = EndToEndTestTools.generateForwardSteps(RobotSide.LEFT, 6, 0.5, 0.25, swingDuration, transferDuration, startPose, true);
       footsteps.setOffsetFootstepsHeightWithExecutionError(offsetFootstepsHeightWithExecutionError);
       footsteps.setAreFootstepsAdjustable(enableStepAdjustment);
       drcSimulationTestHelper.publishToController(footsteps);
@@ -199,17 +198,6 @@ public abstract class HumanoidFootFallDisturbanceRecoveryTest implements MultiRo
             * EndToEndTestTools.computeWalkingDuration(footsteps, robotModel.getWalkingControllerParameters())));
    }
 
-   private static FootstepDataListMessage forwardSteps(RobotSide initialStepSide,
-                                                       int numberOfSteps,
-                                                       double stepLength,
-                                                       double stepWidth,
-                                                       double swingTime,
-                                                       double transferTime,
-                                                       Pose3DReadOnly startPose,
-                                                       boolean squareUp)
-   {
-      return EndToEndTestTools.forwardSteps(initialStepSide, numberOfSteps, i -> stepLength, stepWidth, swingTime, transferTime, startPose, squareUp);
-   }
 
    private static class FlatGroundWithHoleEnvironment implements CommonAvatarEnvironmentInterface
    {

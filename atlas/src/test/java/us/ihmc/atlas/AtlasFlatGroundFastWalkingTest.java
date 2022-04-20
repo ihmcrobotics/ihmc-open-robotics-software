@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.Objects;
 
 import org.apache.commons.io.FilenameUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import javafx.application.Application;
@@ -158,6 +159,7 @@ public class AtlasFlatGroundFastWalkingTest extends AvatarFlatGroundFastWalkingT
       return 0.525;
    }
 
+   @Tag("humanoid-flat-ground")
    @Test
    @Override
    public void testForwardWalking() throws Exception

@@ -1,10 +1,8 @@
 package us.ihmc.tools.io;
 
 import us.ihmc.commons.nio.BasicPathVisitor;
-import us.ihmc.tools.io.resources.ResourceTools;
 
 import java.nio.file.Path;
-import java.util.TreeSet;
 import java.util.function.BiConsumer;
 
 /**
@@ -14,11 +12,8 @@ import java.util.function.BiConsumer;
  */
 public class HybridDirectory
 {
+   private final WorkspaceDirectory workspaceDirectory;
    private final Path externalDirectory;
-   private final Class<?> classForLoading;
-   private final Path workspaceDirectory;
-   private final String pathNecessaryForClasspathLoading;
-   private final String pathNecessaryForResourceExploring;
    private HybridResourceMode mode = HybridResourceMode.WORKSPACE;
 
    public HybridDirectory(Path externalDirectory,
@@ -54,67 +49,28 @@ public class HybridDirectory
                           Class<?> classForResourceDirectory,
                           String subsequentOrAbsoluteResourcePackagePath)
    {
+      this.workspaceDirectory = new WorkspaceDirectory(directoryNameToAssumePresent,
+                                                       subsequentPathToResourceFolder,
+                                                       classForResourceDirectory,
+                                                       subsequentOrAbsoluteResourcePackagePath);
+
       String subsequentExternalPath = subsequentOrAbsoluteResourcePackagePath;
       if (subsequentExternalPath.startsWith("/"))
          subsequentExternalPath = subsequentExternalPath.replaceFirst("/", "");
       this.externalDirectory = externalDirectory.resolve(subsequentExternalPath).toAbsolutePath().normalize();
-
-      this.classForLoading = classForResourceDirectory;
-      String putTogetherResourcePath = "";
-      boolean isAbsolute = subsequentOrAbsoluteResourcePackagePath.startsWith("/");
-      if (!isAbsolute && classForResourceDirectory != null)
-      {
-         putTogetherResourcePath += classForResourceDirectory.getPackage().getName().replaceAll("\\.", "/");
-         putTogetherResourcePath += "/";
-         putTogetherResourcePath += subsequentOrAbsoluteResourcePackagePath;
-      }
-      else if (isAbsolute)
-      {
-         putTogetherResourcePath += subsequentOrAbsoluteResourcePackagePath.replaceFirst("/", "");
-      }
-      pathNecessaryForClasspathLoading = subsequentOrAbsoluteResourcePackagePath;
-      String tempPathNecessaryForResourceExploring = pathNecessaryForClasspathLoading;
-      if (tempPathNecessaryForResourceExploring.startsWith("/"))
-         tempPathNecessaryForResourceExploring = tempPathNecessaryForResourceExploring.replaceFirst("/", "");
-      tempPathNecessaryForResourceExploring = tempPathNecessaryForResourceExploring.replaceAll("/", ".");
-      pathNecessaryForResourceExploring = tempPathNecessaryForResourceExploring;
-
-      workspaceDirectory = WorkspacePathTools.findPathToResource(directoryNameToAssumePresent,
-                                                                 subsequentPathToResourceFolder,
-                                                                 putTogetherResourcePath);
    }
 
    public void walkResourcesFlat(BiConsumer<String, BasicPathVisitor.PathType> pathVisitor)
    {
-      TreeSet<String> fileNames = new TreeSet<>();
-      TreeSet<String> directoryNames = new TreeSet<>();
-      for (String resourceEntry : ResourceTools.listResources(pathNecessaryForResourceExploring, ".*"))
-      {
-         if (resourceEntry.contains("/"))
-         {
-            directoryNames.add(resourceEntry.substring(0, resourceEntry.indexOf("/")));
-         }
-         else
-         {
-            fileNames.add(resourceEntry);
-         }
-      }
-      for (String fileName : fileNames)
-      {
-         pathVisitor.accept(fileName, BasicPathVisitor.PathType.FILE);
-      }
-      for (String directoryName : directoryNames)
-      {
-         pathVisitor.accept(directoryName, BasicPathVisitor.PathType.DIRECTORY);
-      }
+      workspaceDirectory.walkResourcesFlat(pathVisitor);
    }
 
-   /**
-    * i.e. Cannot write to resource directories inside JARs
-    */
-   public boolean isWorkspaceWritingAvailable()
+   /** If the directory is available for reading/writing using files.
+    *  If not, we are running from a JAR without the resource extracted,
+    *  or the working directory is wrong. */
+   public boolean isWorkspaceFileAccessAvailable()
    {
-      return workspaceDirectory != null;
+      return workspaceDirectory.isFileAccessAvailable();
    }
 
    public void setMode(HybridResourceMode mode)
@@ -129,12 +85,12 @@ public class HybridDirectory
 
    public Path getDirectoryForWriting()
    {
-      return mode == HybridResourceMode.WORKSPACE ? workspaceDirectory : externalDirectory;
+      return mode == HybridResourceMode.WORKSPACE ? workspaceDirectory.getDirectoryPath() : externalDirectory;
    }
 
    public Path getWorkspaceDirectory()
    {
-      return workspaceDirectory;
+      return workspaceDirectory.getDirectoryPath();
    }
 
    public Path getExternalDirectory()
@@ -144,16 +100,21 @@ public class HybridDirectory
 
    public Class<?> getClassForLoading()
    {
-      return classForLoading;
+      return workspaceDirectory.getClassForLoading();
    }
 
    public String getPathNecessaryForClasspathLoading()
    {
-      return pathNecessaryForClasspathLoading;
+      return workspaceDirectory.getPathNecessaryForClasspathLoading();
    }
 
    public String getPathNecessaryForResourceExploring()
    {
-      return pathNecessaryForResourceExploring;
+      return workspaceDirectory.getPathNecessaryForResourceExploring();
+   }
+
+   WorkspaceDirectory getInternalWorkspaceDirectory()
+   {
+      return workspaceDirectory;
    }
 }

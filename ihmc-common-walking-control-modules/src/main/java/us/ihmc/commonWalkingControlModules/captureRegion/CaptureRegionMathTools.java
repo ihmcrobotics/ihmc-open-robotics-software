@@ -1,16 +1,19 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
+import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple4D.Quaternion;
 
 public class CaptureRegionMathTools
 {
-   private final RigidBodyTransform rotation = new RigidBodyTransform();
-   private final FrameVector3D rotatedFromA = new FrameVector3D();
+   private final FrameVector2D rotatedFromA = new FrameVector2D();
 
    /**
    * Will return a point on a circle around the origin. The point will be in between the given directions and at
@@ -31,10 +34,8 @@ public class CaptureRegionMathTools
       double angleBetweenDirections = Math.abs(directionA.angle(directionB));
       double angleBetweenDirectionsToSetLine = -angleBetweenDirections * alpha;
 
-      rotatedFromA.setIncludingFrame(directionA, 0.0);
-
-      rotation.setRotationYawAndZeroTranslation(angleBetweenDirectionsToSetLine);
-      rotatedFromA.applyTransform(rotation);
+      rotatedFromA.setReferenceFrame(directionA.getReferenceFrame());
+      RotationMatrixTools.applyYawRotation(angleBetweenDirectionsToSetLine, directionA, rotatedFromA);
 
       rotatedFromA.scale(radius / rotatedFromA.length());
 

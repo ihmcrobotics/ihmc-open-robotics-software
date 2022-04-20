@@ -12,6 +12,9 @@ import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnviro
 
 public class AtlasFlatGroundWalkingTrackSCS2
 {
+   private static final boolean USE_STAND_PREP = true;
+   private static final boolean USE_IMPULSE_BASE_PHYSICS_ENGINE = true;
+
    private static boolean createYoVariableServer = System.getProperty("create.yovariable.server") != null
          && Boolean.parseBoolean(System.getProperty("create.yovariable.server"));
 
@@ -34,11 +37,15 @@ public class AtlasFlatGroundWalkingTrackSCS2
       SCS2AvatarSimulationFactory avatarSimulationFactory = new SCS2AvatarSimulationFactory();
       avatarSimulationFactory.setRobotModel(robotModel);
       avatarSimulationFactory.setRealtimeROS2Node(realtimeROS2Node);
-      avatarSimulationFactory.setDefaultHighLevelHumanoidControllerFactory(useVelocityAndHeadingScript, walkingScriptParameters);
+      if (USE_STAND_PREP)
+         AtlasFlatGroundWalkingTrackSCS2Bullet.setupStandPrepController(robotModel, realtimeROS2Node, avatarSimulationFactory);
+      else
+         avatarSimulationFactory.setDefaultHighLevelHumanoidControllerFactory(useVelocityAndHeadingScript, walkingScriptParameters);
       avatarSimulationFactory.setCommonAvatarEnvrionmentInterface(environment);
       avatarSimulationFactory.setRobotInitialSetup(robotInitialSetup);
       avatarSimulationFactory.setSimulationDataRecordTickPeriod(recordFrequency);
       avatarSimulationFactory.setCreateYoVariableServer(createYoVariableServer);
+      avatarSimulationFactory.setUseImpulseBasedPhysicsEngine(USE_IMPULSE_BASE_PHYSICS_ENGINE);
 
       SCS2AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
 

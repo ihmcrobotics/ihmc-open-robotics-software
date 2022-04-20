@@ -17,9 +17,14 @@ import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.graphics.GDXFootstepGraphic;
 import us.ihmc.gdx.vr.GDXVRContext;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.scs2.definition.geometry.ModelFileGeometryDefinition;
+import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.definition.visual.VisualDefinition;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -42,9 +47,24 @@ public class GDXVRHandPlacedFootstepMode
       this.robotModel = robotModel;
       this.controllerHelper = controllerHelper;
 
+      RobotDefinition robotDefinition = robotModel.getRobotDefinition();
       for (RobotSide side : RobotSide.values)
       {
-         footModels.put(side, GDXModelLoader.loadG3DModel(side.getSideNameFirstLowerCaseLetter() + "_foot.g3dj"));
+         RigidBodyDefinition footBody = robotDefinition.getRigidBodyDefinition(side.getSideNameFirstLowerCaseLetter() + "_foot");
+         ModelFileGeometryDefinition modelFileGeometryDefinition = null;
+         for (VisualDefinition visualDefinition : footBody.getVisualDefinitions())
+         {
+            if (visualDefinition.getGeometryDefinition() instanceof ModelFileGeometryDefinition)
+            {
+               modelFileGeometryDefinition = (ModelFileGeometryDefinition) visualDefinition.getGeometryDefinition();
+            }
+         }
+         if (modelFileGeometryDefinition == null)
+         {
+            throw new RuntimeException("Could not find a foot model visual");
+         }
+
+         footModels.put(side, GDXModelLoader.loadG3DModel(modelFileGeometryDefinition.getFileName()));
 //         unplacedFadeInFootsteps.set(side, new ModelInstance(footModels.get(side)));
       }
    }

@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.log;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.footstepPlanning.bodyPath.BodyPathLatticePoint;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
@@ -24,8 +25,15 @@ public class FootstepPlannerLog
    private final SwingPlannerParametersPacket swingPlannerParametersPacket = new SwingPlannerParametersPacket();
    private final FootstepPlanningToolboxOutputStatus statusPacket = new FootstepPlanningToolboxOutputStatus();
 
-   // Logged data
+   // Vis graph data
    private final VisibilityGraphHolder visibilityGraphHolder = new VisibilityGraphHolder();
+
+   // A* body path data
+   private final List<VariableDescriptor> bodyPathVariableDescriptors = new ArrayList<>();
+   private final Map<GraphEdge<BodyPathLatticePoint>, AStarBodyPathEdgeData> bodyPathEdgeDataMap = new HashMap<>();
+   private final List<AStarBodyPathIterationData> bodyPathIterationData = new ArrayList<>();
+
+   // A* footstep data
    private final List<VariableDescriptor> variableDescriptors = new ArrayList<>();
    private final Map<GraphEdge<FootstepGraphNode>, FootstepPlannerEdgeData> edgeDataMap = new HashMap<>();
    private final List<FootstepPlannerIterationData> iterationData = new ArrayList<>();
@@ -69,6 +77,21 @@ public class FootstepPlannerLog
    public VisibilityGraphHolder getVisibilityGraphHolder()
    {
       return visibilityGraphHolder;
+   }
+
+   public List<VariableDescriptor> getBodyPathVariableDescriptors()
+   {
+      return bodyPathVariableDescriptors;
+   }
+
+   public Map<GraphEdge<BodyPathLatticePoint>, AStarBodyPathEdgeData> getBodyPathEdgeDataMap()
+   {
+      return bodyPathEdgeDataMap;
+   }
+
+   public List<AStarBodyPathIterationData> getBodyPathIterationData()
+   {
+      return bodyPathIterationData;
    }
 
    public List<VariableDescriptor> getVariableDescriptors()

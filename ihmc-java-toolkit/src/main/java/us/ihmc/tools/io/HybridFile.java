@@ -1,48 +1,32 @@
 package us.ihmc.tools.io;
 
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
+
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.function.Supplier;
 
 public class HybridFile
 {
-   private final Supplier<InputStream> getResourceAsStream;
-   private final Supplier<URL> getResource;
+   private final WorkspaceFile workspaceFile;
    private final Path externalFile;
-   private final Path workspaceFile;
    private HybridResourceMode mode = HybridResourceMode.WORKSPACE;
 
    public HybridFile(HybridDirectory directory, String subsequentPathToFile)
    {
-      String pathForResourceLoading = Paths.get(directory.getPathNecessaryForClasspathLoading()).resolve(subsequentPathToFile).toString();
-      // Get rid of Windows \ slashes; they don't work with classloader
-      String pathForResourceLoadingPathFiltered = pathForResourceLoading.replaceAll("\\\\", "/");
-      if (directory.getClassForLoading() == null) // TODO: This is broken
-      {
-         getResourceAsStream = () -> ClassLoader.getSystemResourceAsStream(pathForResourceLoadingPathFiltered);
-         getResource = () -> ClassLoader.getSystemResource(pathForResourceLoadingPathFiltered);
-      }
-      else
-      {
-         getResourceAsStream = () -> directory.getClassForLoading().getResourceAsStream(pathForResourceLoadingPathFiltered);
-         getResource = () -> directory.getClassForLoading().getResource(pathForResourceLoadingPathFiltered);
-      }
-
+      workspaceFile = new WorkspaceFile(directory.getInternalWorkspaceDirectory(), subsequentPathToFile);
       externalFile = directory.getExternalDirectory().resolve(subsequentPathToFile);
-      if (directory.isWorkspaceWritingAvailable())
-         workspaceFile = directory.getWorkspaceDirectory().resolve(subsequentPathToFile);
-      else
-         workspaceFile = null;
    }
 
-   /**
-    * i.e. Cannot write to resource directories inside JARs
-    */
-   public boolean isWorkspaceWritingAvailable()
+   /** If the directory is available for reading/writing using files.
+    *  If not, we are running from a JAR without the resource extracted,
+    *  or the working directory is wrong. */
+   public boolean isWorkspaceFileAccessAvailable()
    {
-      return workspaceFile != null;
+      return workspaceFile.isFileAccessAvailable();
    }
 
    public void setMode(HybridResourceMode mode)
@@ -57,17 +41,64 @@ public class HybridFile
 
    public Path getFileForWriting()
    {
-      return mode == HybridResourceMode.WORKSPACE ? workspaceFile : externalFile;
+      return mode == HybridResourceMode.WORKSPACE ? workspaceFile.getFilePath() : externalFile;
+   }
+
+   public InputStream getInputStream()
+   {
+      return mode == HybridResourceMode.WORKSPACE ?
+            getClasspathResourceAsStream() :
+            ExceptionTools.handle(() -> new FileInputStream(externalFile.toFile()), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+   }
+
+   public boolean isInputStreamAvailable()
+   {
+      boolean isInputStreamAvailable;
+      if (mode == HybridResourceMode.WORKSPACE)
+      {
+         isInputStreamAvailable = workspaceFile.getClasspathResource() != null;
+      }
+      else
+      {
+         isInputStreamAvailable = Files.exists(externalFile);
+      }
+      return isInputStreamAvailable;
+   }
+
+   public boolean isWritingAvailable()
+   {
+      boolean isWritingAvailable;
+      if (mode == HybridResourceMode.WORKSPACE)
+      {
+         isWritingAvailable = isWorkspaceFileAccessAvailable();
+      }
+      else
+      {
+         isWritingAvailable = true; // Can always write externally
+      }
+      return isWritingAvailable;
+   }
+
+   public String getLocationOfResourceForReading()
+   {
+      if (mode == HybridResourceMode.WORKSPACE)
+      {
+         return "Resource: " + getPathForResourceLoadingPathFiltered();
+      }
+      else
+      {
+         return "File: " + externalFile.toString();
+      }
    }
 
    public InputStream getClasspathResourceAsStream()
    {
-      return getResourceAsStream.get();
+      return workspaceFile.getClasspathResourceAsStream();
    }
 
    public URL getClasspathResource()
    {
-      return getResource.get();
+      return workspaceFile.getClasspathResource();
    }
 
    public Path getExternalFile()
@@ -77,6 +108,11 @@ public class HybridFile
 
    public Path getWorkspaceFile()
    {
-      return workspaceFile;
+      return workspaceFile.getFilePath();
+   }
+
+   public String getPathForResourceLoadingPathFiltered()
+   {
+      return workspaceFile.getPathForResourceLoadingPathFiltered();
    }
 }

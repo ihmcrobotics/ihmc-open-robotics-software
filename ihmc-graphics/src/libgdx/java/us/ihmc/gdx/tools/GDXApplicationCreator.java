@@ -36,6 +36,7 @@ public class GDXApplicationCreator
       applicationConfiguration.useVsync(false); // vsync on seems to limit FPS to 30 so keep off
       applicationConfiguration.setBackBufferConfig(8, 8, 8, 8, 16, 0, 4);
       applicationConfiguration.useOpenGL3(true, 3, 3);
+      applicationConfiguration.setWindowIcon("icons/gdx-icon16.png", "icons/gdx-icon32.png", "icons/gdx-icon48.png");
       return applicationConfiguration;
    }
 

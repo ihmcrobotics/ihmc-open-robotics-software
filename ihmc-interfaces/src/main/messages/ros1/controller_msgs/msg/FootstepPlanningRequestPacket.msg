@@ -76,6 +76,9 @@ float64 horizon_length
 # Planar regions to use, if you don't want to assume flat ground
 controller_msgs/PlanarRegionsListMessage planar_regions_list_message
 
+# Height map data, optional
+controller_msgs/HeightMapMessage height_map_message
+
 # If true, steps are snapped assuming flat ground.
 # Note that collision checks will still be performed if enabled, such as FootstepPlannerParametersPacket.checkForBodyBoxCollisions
 bool assume_flat_ground

@@ -1,5 +1,9 @@
 package us.ihmc.avatar.simulationStarter;
 
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.DO_NOTHING_BEHAVIOR;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.PUSH_RECOVERY;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.WALKING;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -11,14 +15,15 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.avatar.factory.AvatarSimulationFactory;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
-import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessor;
 import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessorParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
@@ -26,6 +31,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidControllerPluginFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -46,6 +52,7 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataVisualizer.logger.BehaviorVisualizer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -57,10 +64,7 @@ import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvi
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.processManagement.JavaProcessSpawner;
-import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
-
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.*;
 
 public class DRCSimulationStarter implements SimulationStarterInterface
 {
@@ -116,6 +120,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    private final List<HighLevelControllerStateFactory> highLevelControllerFactories = new ArrayList<>();
    private final List<ControllerStateTransitionFactory<HighLevelControllerName>> controllerTransitionFactories = new ArrayList<>();
    private final ArrayList<ControllerFailureListener> controllerFailureListeners = new ArrayList<>();
+   private final List<HighLevelHumanoidControllerPluginFactory> highLevelControllerPluginFactories = new ArrayList<>();
 
    private final ConcurrentLinkedQueue<Command<?, ?>> controllerCommands = new ConcurrentLinkedQueue<>();
 
@@ -190,6 +195,17 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    {
       checkIfSimulationIsAlreadyCreated();
       this.controllerTransitionFactories.add(controllerStateTransitionFactory);
+   }
+
+   /**
+    * Registers a plugin to be created. A plugin is a module that is ran alongside the controller.
+    * 
+    * @param pluginFactory a factory to create the plugin.
+    */
+   public void registerHighLevelControllerPlugin(HighLevelHumanoidControllerPluginFactory pluginFactory)
+   {
+      checkIfSimulationIsAlreadyCreated();
+      this.highLevelControllerPluginFactories.add(pluginFactory);
    }
 
    /**
@@ -503,19 +519,21 @@ public class DRCSimulationStarter implements SimulationStarterInterface
          controllerFactory.addCustomControlState(highLevelControllerFactories.get(i));
       for (int i = 0; i < controllerTransitionFactories.size(); i++)
          controllerFactory.addCustomStateTransition(controllerTransitionFactories.get(i));
+      for (int i = 0; i < highLevelControllerPluginFactories.size(); i++)
+         controllerFactory.addControllerPlugin(highLevelControllerPluginFactories.get(i));
 
       controllerFactory.setInitialState(initialStateEnum);
 
       controllerFactory.createQueuedControllerCommandGenerator(controllerCommands);
 
-      controllerFactory.setHeadingAndVelocityEvaluationScriptParameters(walkingScriptParameters);
-
       controllerFactory.createUserDesiredControllerCommandGenerator();
 
       if (addFootstepMessageGenerator && cheatWithGroundHeightAtForFootstep)
-         controllerFactory.createComponentBasedFootstepDataMessageGenerator(useHeadingAndVelocityScript, scsInitialSetup.getHeightMap());
+         controllerFactory.createComponentBasedFootstepDataMessageGenerator(useHeadingAndVelocityScript,
+                                                                            scsInitialSetup.getHeightMap(),
+                                                                            walkingScriptParameters);
       else if (addFootstepMessageGenerator)
-         controllerFactory.createComponentBasedFootstepDataMessageGenerator(useHeadingAndVelocityScript);
+         controllerFactory.createComponentBasedFootstepDataMessageGenerator(useHeadingAndVelocityScript, walkingScriptParameters);
 
       AvatarSimulationFactory avatarSimulationFactory = new AvatarSimulationFactory();
       avatarSimulationFactory.setRobotModel(robotModel);
@@ -663,6 +681,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       if (realtimeROS2Node != null)
       {
          realtimeROS2Node.destroy();
+         realtimeROS2Node = null;
       }
 
       if (networkProcessor != null)
