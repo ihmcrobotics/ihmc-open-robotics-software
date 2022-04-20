@@ -49,7 +49,19 @@ public class RealSenseHardwareManager
       parentRegistry.addChild(registry);
    }
 
-   public RealtimeL515 createL515(String prefix, String serialNumberToFind)
+   public RealtimeL515 createRealtimeL515(String prefix, String serialNumberToFind)
+   {
+      String sanitizedSerialNumberToFind = serialNumberToFind.toLowerCase();
+      return new RealtimeL515(prefix, context, createDevice(sanitizedSerialNumberToFind), sanitizedSerialNumberToFind, registry, graphicsListRegistry);
+   }
+
+   public NonRealtimeL515 createNonRealtimeL515(String prefix, String serialNumberToFind)
+   {
+      String sanitizedSerialNumberToFind = serialNumberToFind.toLowerCase();
+      return new NonRealtimeL515(prefix, context, createDevice(sanitizedSerialNumberToFind), sanitizedSerialNumberToFind, registry, graphicsListRegistry);
+   }
+
+   public rs2_device createDevice(String serialNumberToFind)
    {
       int rs2DeviceCount = updateDeviceCount();
 
@@ -67,11 +79,11 @@ public class RealSenseHardwareManager
             checkError();
 
             String serialNumberFromRS2 = deviceSerialNumberBytePointer.getString();
-            LogTools.info("Realsense Sensor detected. Serial Number: = ", serialNumberFromRS2);
+            LogTools.info("Realsense Sensor detected. Serial Number: = {}", serialNumberFromRS2);
 
-            if (serialNumberFromRS2.contains(serialNumberToFind))
+            if (serialNumberFromRS2.contains(serialNumberToFind.toLowerCase()))
             {
-               return new RealtimeL515(prefix, context, rs2Device, registry, graphicsListRegistry);
+               return rs2Device;
             }
          }
       }
