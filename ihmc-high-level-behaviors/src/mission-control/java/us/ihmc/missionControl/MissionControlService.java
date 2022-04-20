@@ -16,6 +16,7 @@ import static us.ihmc.missionControl.MissionControlService.API.*;
 public class MissionControlService
 {
    private final LinuxResourceMonitor linuxResourceMonitor = new LinuxResourceMonitor();
+   private final NethogsNetworkMonitor nethogsNetworkMonitor = new NethogsNetworkMonitor();
 
    private final KryoMessager kryoMessagerServer;
    private final TreeSet<String> servicesToTrack = new TreeSet<>();
@@ -31,6 +32,8 @@ public class MissionControlService
       updateThreadScheduler.schedule(this::update, 0.2);
 
       servicesToTrack.add("mission-control-2");
+
+      nethogsNetworkMonitor.start();
    }
 
    private void update()
@@ -44,6 +47,8 @@ public class MissionControlService
 //         CPUCoreTracker cpuCoreTracker = cpuCoreTrackers.get(i);
 //         LogTools.info("CPU Core {}: {} %", i, FormattingTools.getFormattedDecimal1D(cpuCoreTracker.getPercentUsage()));
 //      }
+
+//      ProcessTools.execSimpleCommand()
 
 
       if (kryoMessagerServer.isMessagerOpen())
@@ -73,6 +78,10 @@ public class MissionControlService
             cpuUsages.add(cpuCoreTracker.getPercentUsage());
          }
          kryoMessagerServer.submitMessage(API.CPUUsages, cpuUsages);
+
+         kryoMessagerServer.submitMessage(API.NetworkUsage,
+                                          MutablePair.of(nethogsNetworkMonitor.getKilobytesPerSecondSent(),
+                                                         nethogsNetworkMonitor.getKilobytesPerSecondReceived()));
       }
    }
 
@@ -93,6 +102,7 @@ public class MissionControlService
 
       public static final MessagerAPIFactory.Topic<MutablePair<Double, Double>> RAMUsage = topic("RAMUsage");
       public static final MessagerAPIFactory.Topic<ArrayList<Double>> CPUUsages = topic("CPUUsages");
+      public static final MessagerAPIFactory.Topic<MutablePair<Double, Double>> NetworkUsage = topic("NetworkUsage");
       public static final MessagerAPIFactory.Topic<String> ServiceNameToTrack = topic("ServiceNameToTrack");
       public static final MessagerAPIFactory.Topic<ArrayList<String>> ServiceStatuses = topic("ServiceStatuses");
       private static <T> MessagerAPIFactory.Topic<T> topic(String name)
