@@ -15,6 +15,15 @@ import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 
 public class AtlasToeOffTest extends AvatarToeOffTest
 {
+   @Test
+   @Override
+   public void testShortSteps(TestInfo testInfo)
+   {
+      // The end of swing struggles because of the workspace limiter causing the foot to slow down way too much and delay touchdown
+      setStepHeight(-0.01);
+      super.testShortSteps(testInfo);
+   }
+
     @Test
     public void testToeOffWithDifferentStepLengths(TestInfo testInfo)
     {
