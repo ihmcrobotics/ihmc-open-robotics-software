@@ -1,42 +1,22 @@
 package us.ihmc.perception.realsense;
 
-import static org.bytedeco.librealsense2.global.realsense2.rs2_release_frame;
-
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.ShortBuffer;
-import java.util.ArrayList;
-import java.util.function.Supplier;
-
 import org.bytedeco.javacpp.MutableBytePointer;
-import org.bytedeco.librealsense2.rs2_config;
-import org.bytedeco.librealsense2.rs2_context;
-import org.bytedeco.librealsense2.rs2_device;
-import org.bytedeco.librealsense2.rs2_error;
-import org.bytedeco.librealsense2.rs2_frame;
-import org.bytedeco.librealsense2.rs2_intrinsics;
-import org.bytedeco.librealsense2.rs2_options;
-import org.bytedeco.librealsense2.rs2_pipeline;
-import org.bytedeco.librealsense2.rs2_pipeline_profile;
-import org.bytedeco.librealsense2.rs2_sensor;
-import org.bytedeco.librealsense2.rs2_sensor_list;
-import org.bytedeco.librealsense2.rs2_stream_profile;
+import org.bytedeco.librealsense2.*;
 import org.bytedeco.librealsense2.global.realsense2;
-
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.string.StringTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoLong;
 
-/**
- * Realsense2 API from bytedeco to poll depth data from an L515. See
- * http://bytedeco.org/javacpp-presets/librealsense2/apidocs/ for more info. It has been tested to be
- * garbage free and is required to be garbage free to run properly within a real time thread Please
- * profile if you make any changes. Most of the Realsense2 pointer methods return a new pointer and
- * are not real time compatible
- */
-public class RealtimeL515
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.ShortBuffer;
+import java.util.function.Supplier;
+
+import static org.bytedeco.librealsense2.global.realsense2.rs2_release_frame;
+
+public class NonRealtimeL515
 {
    protected final int width = 1024;
    protected final int height = 768;
@@ -74,32 +54,25 @@ public class RealtimeL515
    protected rs2_frame depthFrame = new rs2_frame();
    protected MutableBytePointer depthFrameData = null;
    protected byte[] depthBytes = null;
-   
+
    private ShortBuffer depthShortBuffer;
 
    // YoVariables
    protected long lastReceivedFrameTime;
    protected final YoLong timeBetweenFrames;
    protected final YoLong frameIndex;
-   
-   // objects that receive the depth data
-   protected final ArrayList<L515DepthImageReceiver> depthDataReceivers = new ArrayList<>();
 
    /**
     * This class uses the Realsense2 API from bytedeco to poll perceptoin data from an L515
-    * 
+    *
     * @param prefix               - prefix for yovariable names
     * @param context              - The Realsense library context
     * @param device               - the L515 Device
     * @param parentRegistry
     * @param graphicsListRegistry
     */
-   public RealtimeL515(String prefix,
-                       rs2_context context,
-                       rs2_device device,
-                       String serialNumber,
-                       YoRegistry parentRegistry,
-                       YoGraphicsListRegistry graphicsListRegistry)
+   public NonRealtimeL515(String prefix, rs2_context context, rs2_device device,
+                          String serialNumber, YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this.device = device;
       this.serialNumber = serialNumber;
@@ -186,7 +159,7 @@ public class RealtimeL515
 
             // get the actual depth data
             depthFrameData.get(depthBytes, 0, depthFrameDataSize);
-            
+
             // the depth data is a Little Indianess unsigned short
             if (depthShortBuffer == null)
             {
@@ -194,34 +167,13 @@ public class RealtimeL515
                depthShortBuffer = ByteBuffer.wrap(depthBytes).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer();
                // int val = Short.toUnsignedInt(shortBuffer.get(index));
             }
-            
-            // let the receiving classes get direct access to the depth data and the depth frame
-            for(int i = 0; i < depthDataReceivers.size(); i++)
-            {
-               depthDataReceivers.get(i).receivedDepthData(depthFrame, depthShortBuffer);
-            }
          }
 
          // This allows the C side to deallocate objects. Need to keep an eye on this and make sure we didn't miss anything.
          rs2_release_frame(depthFrame);
       }
    }
-   
-   /**
-    * Add a depth data receiver,
-    * This is essentially a call back once a depth image comes in
-    * @param receiver
-    */
-   public void addDepthDataReceiver(L515DepthImageReceiver receiver)
-   {
-      depthDataReceivers.add(receiver);
-   }
 
-   public void removeDepthDataReceiver(L515DepthImageReceiver receiver)
-   {
-      depthDataReceivers.remove(receiver);
-   }
-   
    public void deleteDevice()
    {
       realsense2.rs2_pipeline_stop(pipeline, error);
