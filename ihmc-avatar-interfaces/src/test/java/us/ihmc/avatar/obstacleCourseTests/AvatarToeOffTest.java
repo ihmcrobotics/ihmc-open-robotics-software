@@ -58,6 +58,8 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
    {
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+
+      stepHeight = 0.0;
    }
 
    @AfterEach
@@ -94,7 +96,7 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       setupTest(testInfo, flatGround);
 
-      walkForward(getStepLength(), getNumberOfSteps(), 0.0);
+      walkForward(getStepLength(), getNumberOfSteps(), 0.0, stepHeight);
       assertTrue(simulationTestHelper.simulateNow(4.0));
    }
 
