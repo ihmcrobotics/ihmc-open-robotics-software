@@ -1,5 +1,6 @@
 package us.ihmc.atlas;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
@@ -13,6 +14,7 @@ public class AtlasLiftOffAndTouchDownTest
 {
    private final double footLength = new AtlasPhysicalProperties().getFootLengthForControl();
 
+   @Tag("humanoid-flat-ground")
    @Test
    public void testForwardStepRotated() throws SimulationExceededMaximumTimeException
    {
@@ -30,6 +32,7 @@ public class AtlasLiftOffAndTouchDownTest
       Assert.assertTrue("A check failed. See console output.", success);
    }
 
+   @Tag("humanoid-flat-ground")
    @Test
    public void testForwardStepWithAdjustment() throws SimulationExceededMaximumTimeException
    {

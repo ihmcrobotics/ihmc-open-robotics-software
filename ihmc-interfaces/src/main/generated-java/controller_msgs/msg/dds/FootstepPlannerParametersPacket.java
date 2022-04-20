@@ -475,6 +475,23 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * Height offset of shin collidable cylinder
             */
    public double shin_height_offet_ = -11.1;
+   /**
+            * When using a height map, maximum accepted rms error
+            */
+   public double rms_error_threshold_ = -11.1;
+   /**
+            * When using a height map, cost of rms value
+            */
+   public double rms_error_cost_ = -11.1;
+   /**
+            * When using a height map, minimum rms error to penalize
+            */
+   public double rms_min_error_to_penalize_ = -11.1;
+   /**
+            * When using a height map, snapping is done by taking all the points inside the polygon, then removing points below
+            * z_max - dz, where z_max is the highest point and dz is this value.
+            */
+   public double height_map_snap_threshold_ = -11.1;
 
    public FootstepPlannerParametersPacket()
    {
@@ -631,6 +648,14 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       shin_length_ = other.shin_length_;
 
       shin_height_offet_ = other.shin_height_offet_;
+
+      rms_error_threshold_ = other.rms_error_threshold_;
+
+      rms_error_cost_ = other.rms_error_cost_;
+
+      rms_min_error_to_penalize_ = other.rms_min_error_to_penalize_;
+
+      height_map_snap_threshold_ = other.height_map_snap_threshold_;
 
    }
 
@@ -2012,6 +2037,68 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       return shin_height_offet_;
    }
 
+   /**
+            * When using a height map, maximum accepted rms error
+            */
+   public void setRmsErrorThreshold(double rms_error_threshold)
+   {
+      rms_error_threshold_ = rms_error_threshold;
+   }
+   /**
+            * When using a height map, maximum accepted rms error
+            */
+   public double getRmsErrorThreshold()
+   {
+      return rms_error_threshold_;
+   }
+
+   /**
+            * When using a height map, cost of rms value
+            */
+   public void setRmsErrorCost(double rms_error_cost)
+   {
+      rms_error_cost_ = rms_error_cost;
+   }
+   /**
+            * When using a height map, cost of rms value
+            */
+   public double getRmsErrorCost()
+   {
+      return rms_error_cost_;
+   }
+
+   /**
+            * When using a height map, minimum rms error to penalize
+            */
+   public void setRmsMinErrorToPenalize(double rms_min_error_to_penalize)
+   {
+      rms_min_error_to_penalize_ = rms_min_error_to_penalize;
+   }
+   /**
+            * When using a height map, minimum rms error to penalize
+            */
+   public double getRmsMinErrorToPenalize()
+   {
+      return rms_min_error_to_penalize_;
+   }
+
+   /**
+            * When using a height map, snapping is done by taking all the points inside the polygon, then removing points below
+            * z_max - dz, where z_max is the highest point and dz is this value.
+            */
+   public void setHeightMapSnapThreshold(double height_map_snap_threshold)
+   {
+      height_map_snap_threshold_ = height_map_snap_threshold;
+   }
+   /**
+            * When using a height map, snapping is done by taking all the points inside the polygon, then removing points below
+            * z_max - dz, where z_max is the highest point and dz is this value.
+            */
+   public double getHeightMapSnapThreshold()
+   {
+      return height_map_snap_threshold_;
+   }
+
 
    public static Supplier<FootstepPlannerParametersPacketPubSubType> getPubSubType()
    {
@@ -2174,6 +2261,14 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.shin_height_offet_, other.shin_height_offet_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.rms_error_threshold_, other.rms_error_threshold_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.rms_error_cost_, other.rms_error_cost_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.rms_min_error_to_penalize_, other.rms_min_error_to_penalize_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.height_map_snap_threshold_, other.height_map_snap_threshold_, epsilon)) return false;
+
 
       return true;
    }
@@ -2331,6 +2426,14 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if(this.shin_height_offet_ != otherMyClass.shin_height_offet_) return false;
 
+      if(this.rms_error_threshold_ != otherMyClass.rms_error_threshold_) return false;
+
+      if(this.rms_error_cost_ != otherMyClass.rms_error_cost_) return false;
+
+      if(this.rms_min_error_to_penalize_ != otherMyClass.rms_min_error_to_penalize_) return false;
+
+      if(this.height_map_snap_threshold_ != otherMyClass.height_map_snap_threshold_) return false;
+
 
       return true;
    }
@@ -2484,7 +2587,15 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append("shin_length=");
       builder.append(this.shin_length_);      builder.append(", ");
       builder.append("shin_height_offet=");
-      builder.append(this.shin_height_offet_);
+      builder.append(this.shin_height_offet_);      builder.append(", ");
+      builder.append("rms_error_threshold=");
+      builder.append(this.rms_error_threshold_);      builder.append(", ");
+      builder.append("rms_error_cost=");
+      builder.append(this.rms_error_cost_);      builder.append(", ");
+      builder.append("rms_min_error_to_penalize=");
+      builder.append(this.rms_min_error_to_penalize_);      builder.append(", ");
+      builder.append("height_map_snap_threshold=");
+      builder.append(this.height_map_snap_threshold_);
       builder.append("}");
       return builder.toString();
    }

@@ -269,33 +269,11 @@ public class SupportState extends AbstractFootControlState
          partialFootholdControlModule.clearCoPGrid();
       explorationHelper.compute(timeInState, contactStateHasChanged);
 
-      // toe contact point loading //// TODO: 6/5/17
-      if (supportStateParameters.rampUpAllowableToeLoadAfterContact() && timeInState < supportStateParameters.getToeLoadingDuration())
+      YoPlaneContactState planeContactState = controllerToolbox.getFootContactState(robotSide);
+      for (int i = 0; i < planeContactState.getTotalNumberOfContactPoints(); i++)
       {
-         double maxContactPointX = footPolygon.getMaxX();
-         double minContactPointX = footPolygon.getMinX();
-
-         double phaseInLoading = timeInState / supportStateParameters.getToeLoadingDuration();
-         double leadingToeMagnitude = InterpolationTools.linearInterpolate(0.0, supportStateParameters.getFullyLoadedMagnitude(), phaseInLoading);
-         YoPlaneContactState planeContactState = controllerToolbox.getFootContactState(robotSide);
-
-         for (int i = 0; i < planeContactState.getTotalNumberOfContactPoints(); i++)
-         {
-            YoContactPoint contactPoint = planeContactState.getContactPoints().get(i);
-            double percentAlongFoot = (contactPoint.getX() - minContactPointX) / (maxContactPointX - minContactPointX);
-            double contactPointMagnitude = InterpolationTools.linearInterpolate(supportStateParameters.getFullyLoadedMagnitude(), leadingToeMagnitude, percentAlongFoot);
-
-            planeContactState.setMaxContactPointNormalForce(contactPoint, contactPointMagnitude);
-         }
-      }
-      else
-      {
-         YoPlaneContactState planeContactState = controllerToolbox.getFootContactState(robotSide);
-         for (int i = 0; i < planeContactState.getTotalNumberOfContactPoints(); i++)
-         {
-            YoContactPoint contactPoint = planeContactState.getContactPoints().get(i);
-            planeContactState.setMaxContactPointNormalForce(contactPoint, Double.POSITIVE_INFINITY);
-         }
+         YoContactPoint contactPoint = planeContactState.getContactPoints().get(i);
+         planeContactState.setMaxContactPointNormalForce(contactPoint, Double.POSITIVE_INFINITY);
       }
 
       // determine foot state

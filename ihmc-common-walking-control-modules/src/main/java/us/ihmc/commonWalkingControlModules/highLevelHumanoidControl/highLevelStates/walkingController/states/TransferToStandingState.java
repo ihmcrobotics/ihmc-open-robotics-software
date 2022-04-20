@@ -5,7 +5,6 @@ import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManage
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
@@ -37,7 +36,6 @@ public class TransferToStandingState extends WalkingState
    private final BalanceManager balanceManager;
    private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;
-   private final LegConfigurationManager legConfigurationManager;
 
    private final Point3D midFootPosition = new Point3D();
 
@@ -60,7 +58,6 @@ public class TransferToStandingState extends WalkingState
       balanceManager = managerFactory.getOrCreateBalanceManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
-      legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
 
       doFootExplorationInTransferToStanding.set(false);
    }
@@ -201,22 +198,6 @@ public class TransferToStandingState extends WalkingState
       balanceManager.initializeICPPlanForTransferToStanding();
 
       touchdownErrorCompensator.clear();
-
-      if (previousSupportSide != null)
-      {
-         RobotSide previousSwingSide = previousSupportSide.getOppositeSide();
-
-         legConfigurationManager.setFullyExtendLeg(previousSwingSide, false);
-         legConfigurationManager.beginStraightening(previousSwingSide);
-      }
-      else
-      {
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            legConfigurationManager.setFullyExtendLeg(robotSide, false);
-            legConfigurationManager.setStraight(robotSide);
-         }
-      }
    }
 
    private void initializeWalkingTrajectoryPath()

@@ -11,9 +11,14 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanningToolboxOutputStatus> implements Settable<FootstepPlanningToolboxOutputStatus>, EpsilonComparable<FootstepPlanningToolboxOutputStatus>
 {
-   public static final byte BODY_PATH_PLANNING_RESULT_FOUND_SOLUTION = (byte) 0;
-   public static final byte BODY_PATH_PLANNING_RESULT_NO_PATH_EXISTS = (byte) 1;
-   public static final byte BODY_PATH_PLANNING_RESULT_EXCEPTION = (byte) 2;
+   public static final byte BODY_PATH_PLANNING_RESULT_PLANNING = (byte) 0;
+   public static final byte BODY_PATH_PLANNING_RESULT_FOUND_SOLUTION = (byte) 1;
+   public static final byte BODY_PATH_PLANNING_RESULT_TIMED_OUT_BEFORE_SOLUTION = (byte) 2;
+   public static final byte BODY_PATH_PLANNING_RESULT_NO_PATH_EXISTS = (byte) 3;
+   public static final byte BODY_PATH_PLANNING_RESULT_INVALID_GOAL = (byte) 4;
+   public static final byte BODY_PATH_PLANNING_RESULT_MAXIMUM_ITERATIONS_REACHED = (byte) 5;
+   public static final byte BODY_PATH_PLANNING_RESULT_EXCEPTION = (byte) 6;
+   public static final byte BODY_PATH_PLANNING_RESULT_HALTED = (byte) 7;
    public static final byte FOOTSTEP_PLANNING_RESULT_PLANNING = (byte) 0;
    public static final byte FOOTSTEP_PLANNING_RESULT_FOUND_SOLUTION = (byte) 1;
    public static final byte FOOTSTEP_PLANNING_RESULT_TIMED_OUT_BEFORE_SOLUTION = (byte) 2;
@@ -52,6 +57,10 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
             */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  body_path_;
    /**
+            * Planned body path before smoothing, used for debugging. Empty if planner failed
+            */
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  body_path_unsmoothed_;
+   /**
             * Goal pose used by the planner. This will be different from the requested goal pose if it's beyond the horizon length.
             */
    public us.ihmc.euclid.geometry.Pose3D goal_pose_;
@@ -70,6 +79,7 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
       footstep_data_list_ = new controller_msgs.msg.dds.FootstepDataListMessage();
       planar_regions_list_ = new controller_msgs.msg.dds.PlanarRegionsListMessage();
       body_path_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> (100, new geometry_msgs.msg.dds.PosePubSubType());
+      body_path_unsmoothed_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (100, new geometry_msgs.msg.dds.PointPubSubType());
       goal_pose_ = new us.ihmc.euclid.geometry.Pose3D();
       planner_timings_ = new controller_msgs.msg.dds.FootstepPlanningTimingsMessage();
       exception_message_ = new java.lang.StringBuilder(255);
@@ -96,6 +106,7 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
 
       controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.staticCopy(other.planar_regions_list_, planar_regions_list_);
       body_path_.set(other.body_path_);
+      body_path_unsmoothed_.set(other.body_path_unsmoothed_);
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.goal_pose_, goal_pose_);
       controller_msgs.msg.dds.FootstepPlanningTimingsMessagePubSubType.staticCopy(other.planner_timings_, planner_timings_);
       exception_message_.setLength(0);
@@ -193,6 +204,15 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
 
 
    /**
+            * Planned body path before smoothing, used for debugging. Empty if planner failed
+            */
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getBodyPathUnsmoothed()
+   {
+      return body_path_unsmoothed_;
+   }
+
+
+   /**
             * Goal pose used by the planner. This will be different from the requested goal pose if it's beyond the horizon length.
             */
    public us.ihmc.euclid.geometry.Pose3D getGoalPose()
@@ -274,6 +294,13 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
          {  if (!this.body_path_.get(i).epsilonEquals(other.body_path_.get(i), epsilon)) return false; }
       }
 
+      if (this.body_path_unsmoothed_.size() != other.body_path_unsmoothed_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.body_path_unsmoothed_.size(); i++)
+         {  if (!this.body_path_unsmoothed_.get(i).epsilonEquals(other.body_path_unsmoothed_.get(i), epsilon)) return false; }
+      }
+
       if (!this.goal_pose_.epsilonEquals(other.goal_pose_, epsilon)) return false;
       if (!this.planner_timings_.epsilonEquals(other.planner_timings_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.exception_message_, other.exception_message_, epsilon)) return false;
@@ -304,6 +331,7 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
 
       if (!this.planar_regions_list_.equals(otherMyClass.planar_regions_list_)) return false;
       if (!this.body_path_.equals(otherMyClass.body_path_)) return false;
+      if (!this.body_path_unsmoothed_.equals(otherMyClass.body_path_unsmoothed_)) return false;
       if (!this.goal_pose_.equals(otherMyClass.goal_pose_)) return false;
       if (!this.planner_timings_.equals(otherMyClass.planner_timings_)) return false;
       if (!us.ihmc.idl.IDLTools.equals(this.exception_message_, otherMyClass.exception_message_)) return false;
@@ -333,6 +361,8 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
       builder.append(this.planar_regions_list_);      builder.append(", ");
       builder.append("body_path=");
       builder.append(this.body_path_);      builder.append(", ");
+      builder.append("body_path_unsmoothed=");
+      builder.append(this.body_path_unsmoothed_);      builder.append(", ");
       builder.append("goal_pose=");
       builder.append(this.goal_pose_);      builder.append(", ");
       builder.append("planner_timings=");

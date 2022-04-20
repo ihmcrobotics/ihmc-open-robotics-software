@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.stepCost;
 
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapDataReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapperReadOnly;
@@ -11,6 +12,7 @@ import us.ihmc.footstepPlanning.graphSearch.stepExpansion.IdealStepCalculatorInt
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.heightMap.HeightMapData;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -33,6 +35,8 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
    private final YoDouble heuristicCost = new YoDouble("heuristicCost", registry);
    private final YoDouble idealStepHeuristicCost = new YoDouble("idealStepHeuristicCost", registry);
 
+   private HeightMapData heightMapData;
+
    public FootstepCostCalculator(FootstepPlannerParametersReadOnly parameters,
                                  FootstepSnapperReadOnly snapper,
                                  IdealStepCalculatorInterface idealStepCalculator,
@@ -54,7 +58,8 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
       DiscreteFootstep idealStep = idealStepCalculator.computeIdealStep(stanceStep, startOfSwing);
 
       DiscreteFootstepTools.getSnappedStepTransform(stanceStep, snapper.snapFootstep(stanceStep).getSnapTransform(), stanceStepTransform);
-      DiscreteFootstepTools.getSnappedStepTransform(candidateStep, snapper.snapFootstep(candidateStep).getSnapTransform(), candidateStepTransform);
+      FootstepSnapDataReadOnly candidateSnapData = snapper.snapFootstep(candidateStep);
+      DiscreteFootstepTools.getSnappedStepTransform(candidateStep, candidateSnapData.getSnapTransform(), candidateStepTransform);
       idealStepTransform.getTranslation().set(idealStep.getX(), idealStep.getY(), stanceStepTransform.getTranslationZ());
       idealStepTransform.getRotation().setToYawOrientation(idealStep.getYaw());
 
@@ -77,6 +82,16 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
       edgeCost.add(Math.abs(yawOffset * parameters.getYawWeight()));
       edgeCost.add(Math.abs(pitchOffset * parameters.getPitchWeight()));
       edgeCost.add(Math.abs(rollOffset * parameters.getRollWeight()));
+
+      if (heightMapData != null)
+      {
+         double rmsError = candidateSnapData.getRMSErrorHeightMap();
+         double rmsAlpha = EuclidCoreTools.clamp(
+               (rmsError - parameters.getRMSMinErrorToPenalize()) / (parameters.getRMSErrorThreshold() - parameters.getRMSMinErrorToPenalize()),
+               0.0,
+               1.0);
+         edgeCost.add(rmsAlpha * parameters.getRMSErrorCost());
+      }
 
       edgeCost.add(computeAreaCost(candidateStep));
       edgeCost.add(parameters.getCostPerStep());
@@ -105,18 +120,23 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
       FootstepSnapDataReadOnly snapData = snapper.snapFootstep(footstep);
       if (snapData != null)
       {
-         ConvexPolygon2DReadOnly footholdAfterSnap = snapData.getCroppedFoothold();
-         if(footholdAfterSnap.isEmpty() || footholdAfterSnap.containsNaN())
+         double area;
+         if (heightMapData == null)
          {
-            return 0.0;
+            ConvexPolygon2DReadOnly footholdAfterSnap = snapData.getCroppedFoothold();
+            if(footholdAfterSnap.isEmpty() || footholdAfterSnap.containsNaN())
+            {
+               return 0.0;
+            }
+
+            area = footholdAfterSnap.getArea();
+         }
+         else
+         {
+            area = snapData.getHeightMapArea();
          }
 
-         double area = footholdAfterSnap.getArea();
          double footArea = footPolygons.get(footstep.getRobotSide()).getArea();
-
-         if (footholdAfterSnap.isEmpty())
-            return 0.0;
-
          double percentAreaUnoccupied = Math.max(0.0, 1.0 - area / footArea);
          return percentAreaUnoccupied * parameters.getFootholdAreaWeight();
       }
@@ -124,6 +144,11 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
       {
          return 0.0;
       }
+   }
+
+   public void setHeightMapData(HeightMapData heightMapData)
+   {
+      this.heightMapData = heightMapData;
    }
 
    public void resetLoggedVariables()

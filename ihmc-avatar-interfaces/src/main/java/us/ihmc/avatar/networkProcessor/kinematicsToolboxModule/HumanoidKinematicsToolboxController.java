@@ -1,24 +1,6 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD;
-import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL;
-import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHands;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import controller_msgs.msg.dds.MultiContactBalanceStatus;
-import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.*;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
@@ -28,6 +10,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.MultiContactSupportRegionSolverInput;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.MultiContactSupportRegionSolver;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -37,6 +21,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -54,11 +42,19 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.*;
+
+import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD;
+import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL;
+import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHands;
 
 public class HumanoidKinematicsToolboxController extends KinematicsToolboxController
 {
@@ -108,6 +104,9 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     */
    private final YoFramePoint3D initialCenterOfMassPosition = new YoFramePoint3D("initialCenterOfMass", worldFrame, registry);
 
+   /** Multi-contact support region solver */
+   private final MultiContactSupportRegionSolver supportRegionSolver = new MultiContactSupportRegionSolver();
+   private final MultiContactSupportRegionSolverInput supportRegionSolverInput = new MultiContactSupportRegionSolverInput();
    /**
     * Indicates whether the rigid-bodies currently in contact as reported per:
     * {@link CapturabilityBasedStatus} or {@link MultiContactBalanceStatus} should be held in place for
@@ -155,6 +154,16 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    private final ConcurrentCopier<MultiContactBalanceStatus> concurrentMultiContactBalanceStatusCopier = new ConcurrentCopier<>(MultiContactBalanceStatus::new);
    private boolean hasMultiContactBalanceStatus = false;
    private final MultiContactBalanceStatus multiContactBalanceStatusInternal = new MultiContactBalanceStatus();
+   /**
+    * Visualization of multi-contact contact points and support region
+    */
+   private static final int maxMultiContactPoints = 20;
+   private final YoBoolean usingMultiContactSupportRegion = new YoBoolean("usingMultiContactSupportRegion", registry);
+   private final YoFramePoint3D[] multiContactPoints = new YoFramePoint3D[maxMultiContactPoints];
+   private final YoFrameVector3D[] multiContactNormals = new YoFrameVector3D[maxMultiContactPoints];
+   private final YoFrameConvexPolygon2D yoMultiContactSupportRegion;
+   private final YoGraphicPolygon multiContactSupportRegionGraphic;
+   private final YoFramePose3D multiContactSupportRegionOrigin;
 
    public HumanoidKinematicsToolboxController(CommandInputManager commandInputManager,
                                               StatusMessageOutputManager statusOutputManager,
@@ -212,6 +221,21 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       }
 
       populateJointLimitReductionFactors();
+
+      for (int i = 0; i < maxMultiContactPoints; i++)
+      {
+         multiContactPoints[i] = new YoFramePoint3D("mc_contactPoint" + i, ReferenceFrame.getWorldFrame(), parentRegistry);
+         multiContactNormals[i] = new YoFrameVector3D("mc_contactNormal" + i, ReferenceFrame.getWorldFrame(), parentRegistry);
+         YoGraphicPosition positionGraphic = new YoGraphicPosition("mc_contactPointGraphic" + i, multiContactPoints[i], 0.04, YoAppearance.Red());
+         YoGraphicVector normalGraphic = new YoGraphicVector("mc_contactNormalGraphic" + i, multiContactPoints[i], multiContactNormals[i], 0.24, YoAppearance.Red());
+         yoGraphicsListRegistry.registerYoGraphic("MultiContactStatus", positionGraphic);
+         yoGraphicsListRegistry.registerYoGraphic("MultiContactStatus", normalGraphic);
+      }
+
+      yoMultiContactSupportRegion = new YoFrameConvexPolygon2D("multiContactSupportRegion", ReferenceFrame.getWorldFrame(), 30, parentRegistry);
+      multiContactSupportRegionOrigin = new YoFramePose3D("origin", ReferenceFrame.getWorldFrame(), parentRegistry);
+      multiContactSupportRegionGraphic = new YoGraphicPolygon("multiContactSupportRegion", yoMultiContactSupportRegion, multiContactSupportRegionOrigin, 1.0, YoAppearance.Red());
+      yoGraphicsListRegistry.registerYoGraphic("SupportRegion", multiContactSupportRegionGraphic);
    }
 
    /**
@@ -297,6 +321,13 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          return false;
       }
 
+      for (int i = 0; i < maxMultiContactPoints; i++)
+      {
+         multiContactPoints[i].setToNaN();
+         multiContactNormals[i].setToNaN();
+      }
+      yoMultiContactSupportRegion.setToNaN();
+
       /*
        * Initialize the support conditions. There 2 scenarios: either the walking controller is running
        * and we use the CapturabilityBasedStatus to identify which foot is in support, or a multi-contact
@@ -324,13 +355,30 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       }
       else if (hasMultiContactBalanceStatus)
       {
-         Object<Point3D> supportPolygon = multiContactBalanceStatus.getSupportPolygon();
+         Object<Point3D> supportPolygon = multiContactBalanceStatus.getContactPointsInWorld();
          Integer supportRigidBodyIds = multiContactBalanceStatus.getSupportRigidBodyIds();
 
          for (int i = 0; i < supportPolygon.size(); i++)
          {
             ContactingRigidBody contactingRigidBody = contactingRigidBodies.add();
             contactingRigidBody.initialize(rigidBodyHashCodeMap.get(supportRigidBodyIds.get(i)), worldFrame, supportPolygon.get(i));
+         }
+
+         boolean hasSurfaceNormalData = multiContactBalanceStatusInternal.getSurfaceNormalsInWorld().size() == multiContactBalanceStatusInternal.getContactPointsInWorld().size();
+         if (hasSurfaceNormalData)
+         {
+            supportRegionSolverInput.clear();
+            for (int i = 0; i < multiContactBalanceStatusInternal.getContactPointsInWorld().size(); i++)
+            {
+               supportRegionSolverInput.addContactPoint(multiContactBalanceStatusInternal.getContactPointsInWorld().get(i),
+                                                        multiContactBalanceStatusInternal.getSurfaceNormalsInWorld().get(i));
+               multiContactPoints[i].set(multiContactBalanceStatusInternal.getContactPointsInWorld().get(i));
+               multiContactNormals[i].set(multiContactBalanceStatusInternal.getSurfaceNormalsInWorld().get(i));
+            }
+
+            supportRegionSolver.initialize(supportRegionSolverInput);
+            if (!supportRegionSolver.solve())
+               return false;
          }
 
          for (RobotSide robotSide : RobotSide.values)
@@ -346,7 +394,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       {
          if (hasMultiContactBalanceStatus)
             throw new UnsupportedOperationException("Initial robot configuration is not supported with multi-contact context.");
-
+         
          /*
           * Default initial configuration was provided and is set in the super class. The goal here, is to
           * recompute the pose of the root joint such that our initial configuration has its support feet as
@@ -419,6 +467,13 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       }
 
       super.updateInternal();
+
+      if (usingMultiContactSupportRegion.getValue())
+      { // project current and desired center of mass onto the support region
+         multiContactSupportRegionOrigin.getPosition().set(0.0, 0.0, supportRegionSolver.getAverageContactPointPosition().getZ());
+         yoDesiredCenterOfMass.setZ(supportRegionSolver.getAverageContactPointPosition().getZ());
+         yoCurrentCenterOfMass.setZ(supportRegionSolver.getAverageContactPointPosition().getZ());
+      }
    }
 
    /**
@@ -580,6 +635,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     */
    private void addLinearMomentumConvexConstraint2DCommand(InverseKinematicsCommandBuffer bufferToPack)
    {
+      usingMultiContactSupportRegion.set(false);
       if (!enableAutoSupportPolygon.getValue())
          return;
       if (!enableSupportPolygonConstraint.getValue())
@@ -600,12 +656,27 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       }
       else if (hasMultiContactBalanceStatus)
       {
-         Object<Point3D> supportPolygonFromStatus = multiContactBalanceStatusInternal.getSupportPolygon();
-         for (int i = 0; i < supportPolygonFromStatus.size(); i++)
-            activeContactPointPositions.add().setIncludingFrame(worldFrame, supportPolygonFromStatus.get(i));
+         boolean hasSurfaceNormalData = multiContactBalanceStatusInternal.getSurfaceNormalsInWorld().size() == multiContactBalanceStatusInternal.getContactPointsInWorld().size();
+         if (hasSurfaceNormalData)
+         {
+            usingMultiContactSupportRegion.set(true);
+            for (int i = 0; i < supportRegionSolver.getSupportRegionVertices().size(); i++)
+            {
+               activeContactPointPositions.add().set(supportRegionSolver.getSupportRegionVertices().get(i));
+            }
+         }
+         else
+         {
+            Object<Point3D> supportPolygonFromStatus = multiContactBalanceStatusInternal.getContactPointsInWorld();
+            for (int i = 0; i < supportPolygonFromStatus.size(); i++)
+               activeContactPointPositions.add().setIncludingFrame(worldFrame, supportPolygonFromStatus.get(i));
+         }
       }
 
       updateSupportPolygonConstraint(activeContactPointPositions, bufferToPack);
+
+      yoMultiContactSupportRegion.set(shrunkSupportPolygon);
+      multiContactSupportRegionGraphic.update();
    }
 
    @Override

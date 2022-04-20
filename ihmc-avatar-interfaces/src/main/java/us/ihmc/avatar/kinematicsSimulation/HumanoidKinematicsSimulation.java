@@ -33,6 +33,7 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.SettableFootSwitch;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -92,9 +93,11 @@ public class HumanoidKinematicsSimulation
    private final IHMCROS2Publisher<RobotConfigurationData> robotConfigurationDataPublisher;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+   private final SimulatedHandKinematicController simulatedHandKinematicController;
    private volatile RobotMotionStatus robotMotionStatus;
    private double yoVariableServerTime = 0.0;
    private final Stopwatch monotonicTimer = new Stopwatch();
+   private final Stopwatch updateTimer = new Stopwatch();
    private final YoDouble yoTime;
 
    private final FullHumanoidRobotModel fullRobotModel;
@@ -261,6 +264,9 @@ public class HumanoidKinematicsSimulation
                                                                        MessageUnpackingTools.createWholeBodyTrajectoryMessageUnpacker());
       controllerNetworkSubscriber.addMessageCollectors(ControllerAPIDefinition.createDefaultMessageIDExtractor(), 3);
       controllerNetworkSubscriber.addMessageValidator(ControllerAPIDefinition.createDefaultMessageValidation());
+
+      simulatedHandKinematicController = robotModel.createSimulatedHandKinematicController(fullRobotModel, realtimeROS2Node, yoTime);
+
       realtimeROS2Node.spin();
 
       WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(kinematicsSimulationParameters.getDt(),
@@ -359,17 +365,28 @@ public class HumanoidKinematicsSimulation
                                  HumanoidKinematicsSimulationContactStateHolder.holdAtCurrent(controllerToolbox.getFootContactStates().get(robotSide)));
       }
 
+      if (simulatedHandKinematicController != null)
+         simulatedHandKinematicController.initialize();
+
       monotonicTimer.start();
    }
 
    public void controllerTick()
    {
+      updateTimer.reset();
+
       doControl();
 
       RobotConfigurationData robotConfigurationData = extractRobotConfigurationData(fullRobotModel);
-      robotConfigurationData.setMonotonicTime(Conversions.secondsToNanoseconds(monotonicTimer.totalElapsed()));
+      robotConfigurationData.setMonotonicTime(Conversions.secondsToNanoseconds(yoTime.getValue()));
       robotConfigurationData.setRobotMotionStatus(robotMotionStatus.toByte());
       robotConfigurationDataPublisher.publish(robotConfigurationData);
+
+      if (kinematicsSimulationParameters.runNoFasterThanMaxRealtimeRate())
+      {
+         while (updateTimer.totalElapsed() < kinematicsSimulationParameters.getDt() / kinematicsSimulationParameters.getMaxRealtimeRate())
+            ThreadTools.sleep(1);
+      }
    }
 
    private void doControl()
@@ -430,6 +447,9 @@ public class HumanoidKinematicsSimulation
          RevoluteJoint revoluteHokuyoJoint = (RevoluteJoint) hokuyoJoint;
          revoluteHokuyoJoint.setQ(revoluteHokuyoJoint.getQ() + LIDAR_SPINDLE_SPEED * kinematicsSimulationParameters.getUpdatePeriod());
       }
+
+      if (simulatedHandKinematicController != null)
+         simulatedHandKinematicController.doControl();
 
       yoVariableServerTime += Conversions.millisecondsToSeconds(1);
       if (kinematicsSimulationParameters.getLogToFile())

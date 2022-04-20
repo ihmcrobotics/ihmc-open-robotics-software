@@ -2560,7 +2560,7 @@ public class HumanoidMessageTools
    public static double unpackJointAngle(HandJointAnglePacket handJointAnglePacket, HandJointName jointName)
    {
       int index = jointName.getIndex(RobotSide.fromByte(handJointAnglePacket.getRobotSide()));
-      if (index == -1)
+      if (index == -1 || index >= handJointAnglePacket.getJointAngles().size())
       {
          return 0;
       }

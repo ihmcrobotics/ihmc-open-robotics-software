@@ -1,7 +1,7 @@
 package us.ihmc.footstepPlanning.swing;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.configurations.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -46,12 +46,6 @@ public class ProxyAtlasWalkingControllerParameters extends WalkingControllerPara
    public boolean allowAutomaticManipulationAbort()
    {
       return false;
-   }
-
-   @Override
-   public ICPControlGains createICPControlGains()
-   {
-      return null;
    }
 
    @Override
@@ -121,6 +115,12 @@ public class ProxyAtlasWalkingControllerParameters extends WalkingControllerPara
    }
 
    @Override
+   public StepAdjustmentParameters getStepAdjustmentParameters()
+   {
+      return null;
+   }
+
+   @Override
    public ToeOffParameters getToeOffParameters()
    {
       return null;
@@ -133,7 +133,7 @@ public class ProxyAtlasWalkingControllerParameters extends WalkingControllerPara
    }
 
    @Override
-   public ICPOptimizationParameters getICPOptimizationParameters()
+   public ICPControllerParameters getICPControllerParameters()
    {
       return null;
    }
@@ -176,36 +176,6 @@ public class ProxyAtlasWalkingControllerParameters extends WalkingControllerPara
 
    private static class ProxyAtlasSwingTrajectoryParameters extends SwingTrajectoryParameters
    {
-      @Override
-      public boolean doToeTouchdownIfPossible()
-      {
-         return false;
-      }
-
-      @Override
-      public double getToeTouchdownAngle()
-      {
-         return Math.toRadians(20.0);
-      }
-
-      @Override
-      public boolean doHeelTouchdownIfPossible()
-      {
-         return false;
-      }
-
-      @Override
-      public double getHeelTouchdownAngle()
-      {
-         return Math.toRadians(-5.0);
-      }
-
-      @Override
-      public double getMinMechanicalLegLength()
-      {
-         return 0.420;
-      }
-
       @Override
       public double getDesiredTouchdownHeightOffset()
       {

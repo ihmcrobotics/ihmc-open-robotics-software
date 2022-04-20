@@ -159,6 +159,7 @@ public class JointAccelerationIntegrationCalculator
                   break;
             }
          }
+
          if (!lowLevelJointData.hasDesiredPosition() || resetIntegrators)
             lowLevelJointData.setDesiredPosition(positionReference);
 
@@ -185,5 +186,11 @@ public class JointAccelerationIntegrationCalculator
          lowLevelJointData.setDesiredVelocity(desiredVelocity);
          lowLevelJointData.setDesiredPosition(desiredPosition);
       }
+   }
+
+   public static void main(String[] args)
+   {
+      System.out.println(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.016, 3e-3));
+      System.out.println(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(2.7, 3e-3));
    }
 }

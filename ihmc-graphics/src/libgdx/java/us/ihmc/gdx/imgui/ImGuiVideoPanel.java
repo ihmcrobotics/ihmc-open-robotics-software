@@ -5,6 +5,9 @@ import imgui.internal.ImGui;
 
 public class ImGuiVideoPanel extends ImGuiPanel
 {
+   public static final boolean FLIP_Y = true;
+   public static final boolean DO_NOT_FLIP_Y = false;
+
    private Texture texture;
    private final boolean flipY;
 

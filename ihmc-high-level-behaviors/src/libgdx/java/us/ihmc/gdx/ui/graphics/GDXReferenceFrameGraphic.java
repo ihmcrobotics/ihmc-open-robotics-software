@@ -1,32 +1,27 @@
 package us.ihmc.gdx.ui.graphics;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.RenderableProvider;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.gdx.simulation.environment.GDXModelInstance;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 
-public class GDXReferenceFrameGraphic implements RenderableProvider
+public class GDXReferenceFrameGraphic extends GDXModelInstance
 {
    private final RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
    private final FramePose3D framePose3D = new FramePose3D();
-   private final ModelInstance coordinateFrameInstance;
    private ReferenceFrame referenceFrame;
 
    public GDXReferenceFrameGraphic(double length)
    {
-      coordinateFrameInstance = GDXModelPrimitives.createCoordinateFrameInstance(length);
+      super(GDXModelPrimitives.createCoordinateFrameInstance(length));
    }
 
    public GDXReferenceFrameGraphic(double length, Color color)
    {
-      coordinateFrameInstance = GDXModelPrimitives.createCoordinateFrameInstance(length, color);
+      super(GDXModelPrimitives.createCoordinateFrameInstance(length, color));
    }
 
    public void setToReferenceFrame(ReferenceFrame referenceFrame)
@@ -38,24 +33,23 @@ public class GDXReferenceFrameGraphic implements RenderableProvider
    public void updateFromLastGivenFrame()
    {
       framePose3D.setToZero(referenceFrame);
-      framePose3D.changeFrame(ReferenceFrame.getWorldFrame());
-      framePose3D.get(rigidBodyTransform);
-      GDXTools.toGDX(rigidBodyTransform, coordinateFrameInstance.transform);
+      updateFromFramePose();
    }
 
-   @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public FramePose3D getFramePose3D()
    {
-      coordinateFrameInstance.getRenderables(renderables, pool);
+      return framePose3D;
+   }
+
+   public void updateFromFramePose()
+   {
+      framePose3D.changeFrame(ReferenceFrame.getWorldFrame());
+      framePose3D.get(rigidBodyTransform);
+      GDXTools.toGDX(rigidBodyTransform, transform);
    }
 
    public void dispose()
    {
-      coordinateFrameInstance.model.dispose();
-   }
-
-   public ModelInstance getModelInstance()
-   {
-      return coordinateFrameInstance;
+      model.dispose();
    }
 }

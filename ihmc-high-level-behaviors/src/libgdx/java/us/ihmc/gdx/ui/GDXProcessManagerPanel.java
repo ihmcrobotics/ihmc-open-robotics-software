@@ -11,6 +11,7 @@ import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIRegistry;
@@ -50,14 +51,21 @@ public abstract class GDXProcessManagerPanel
 
    public GDXProcessManagerPanel()
    {
-      // TODO: Make into GUI selection
-      Pose3D startingPose = new Pose3D();
-//      startingPose.set(0.17, 0.17, 0.0, Math.toRadians(180.0), 0.0, 0.0);
-      environmentInitialSetup = new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::flatGround,
-                                                                                    startingPose.getZ(),
-                                                                                    Math.toRadians(0.0),
-                                                                                    startingPose.getX(),
-                                                                                    startingPose.getY());
+      this(new Pose3D());
+   }
+
+   public GDXProcessManagerPanel(Pose3DReadOnly startingPose)
+   {
+      this(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::flatGround,
+                                      startingPose.getZ(),
+                                      Math.toRadians(0.0),
+                                      startingPose.getX(),
+                                      startingPose.getY()));
+   }
+
+   public GDXProcessManagerPanel(EnvironmentInitialSetup environmentInitialSetup)
+   {
+      this.environmentInitialSetup = environmentInitialSetup;
 
       // TODO: GUI selection
       ImGuiGDXBehaviorUIRegistry behaviorRegistry = ImGuiGDXBehaviorUIRegistry.DEFAULT_BEHAVIORS;

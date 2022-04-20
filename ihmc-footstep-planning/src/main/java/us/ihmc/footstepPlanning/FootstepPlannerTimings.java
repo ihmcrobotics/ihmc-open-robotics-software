@@ -25,6 +25,11 @@ public class FootstepPlannerTimings
    private double timePlanningStepsSeconds;
 
    /**
+    * Number of iterations performed path planning
+    */
+   private long pathPlanningIterations;
+
+   /**
     * Number of iterations performed during step planning
     */
    private long stepPlanningIterations;
@@ -40,6 +45,7 @@ public class FootstepPlannerTimings
       timeBeforePlanningSeconds = -1.0;
       timePlanningBodyPathSeconds = -1.0;
       timePlanningStepsSeconds = -1.0;
+      pathPlanningIterations = -1;
       stepPlanningIterations = -1;
    }
 
@@ -61,6 +67,11 @@ public class FootstepPlannerTimings
    public void setTimePlanningStepsSeconds(double timePlanningStepsSeconds)
    {
       this.timePlanningStepsSeconds = timePlanningStepsSeconds;
+   }
+
+   public void setPathPlanningIterations(long pathPlanningIterations)
+   {
+      this.pathPlanningIterations = pathPlanningIterations;
    }
 
    public void setStepPlanningIterations(long stepPlanningIterations)
@@ -88,6 +99,11 @@ public class FootstepPlannerTimings
       return timePlanningStepsSeconds;
    }
 
+   public long getPathPlanningIterations()
+   {
+      return pathPlanningIterations;
+   }
+
    public long getStepPlanningIterations()
    {
       return stepPlanningIterations;
@@ -99,6 +115,7 @@ public class FootstepPlannerTimings
       setTimeBeforePlanningSeconds(packet.getTimeBeforePlanningSeconds());
       setTimePlanningBodyPathSeconds(packet.getTimePlanningBodyPathSeconds());
       setTimePlanningStepsSeconds(packet.getTimePlanningStepsSeconds());
+      setPathPlanningIterations(packet.getPathPlanningIterations());
       setStepPlanningIterations(packet.getStepPlanningIterations());
    }
 
@@ -108,6 +125,7 @@ public class FootstepPlannerTimings
       packet.setTimeBeforePlanningSeconds(getTimeBeforePlanningSeconds());
       packet.setTimePlanningBodyPathSeconds(getTimePlanningBodyPathSeconds());
       packet.setTimePlanningStepsSeconds(getTimePlanningStepsSeconds());
+      packet.setPathPlanningIterations(getPathPlanningIterations());
       packet.setStepPlanningIterations(getStepPlanningIterations());
    }
 }

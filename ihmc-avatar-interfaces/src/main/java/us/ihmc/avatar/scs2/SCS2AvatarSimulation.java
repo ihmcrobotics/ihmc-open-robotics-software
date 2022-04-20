@@ -46,14 +46,7 @@ public class SCS2AvatarSimulation
 
    public void start()
    {
-      if (intraprocessYoVariableLogger != null)
-      {
-         intraprocessYoVariableLogger.start();
-      }
-      if (yoVariableServer != null)
-      {
-         yoVariableServer.start();
-      }
+      beforeSessionThreadStart();
 
       simulationSession.setSessionState(SessionState.ACTIVE);
 
@@ -64,6 +57,24 @@ public class SCS2AvatarSimulation
       }
       if (automaticallyStartSimulation)
          simulationSession.setSessionMode(SessionMode.RUNNING);
+
+      afterSessionThreadStart();
+   }
+
+   public void beforeSessionThreadStart()
+   {
+      if (intraprocessYoVariableLogger != null)
+      {
+         intraprocessYoVariableLogger.start();
+      }
+      if (yoVariableServer != null)
+      {
+         yoVariableServer.start();
+      }
+   }
+
+   public void afterSessionThreadStart()
+   {
       if (realtimeROS2Node != null)
          realtimeROS2Node.spin();
    }

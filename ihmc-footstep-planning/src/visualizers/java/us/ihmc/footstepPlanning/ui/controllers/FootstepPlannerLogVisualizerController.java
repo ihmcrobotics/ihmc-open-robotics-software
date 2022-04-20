@@ -15,6 +15,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
@@ -315,8 +316,15 @@ public class FootstepPlannerLogVisualizerController
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLength, footstepPlannerLog.getRequestPacket().getHorizonLength());
       messager.submitMessage(FootstepPlannerMessagerAPI.AssumeFlatGround, footstepPlannerLog.getRequestPacket().getAssumeFlatGround());
       messager.submitMessage(FootstepPlannerMessagerAPI.SnapGoalSteps, footstepPlannerLog.getRequestPacket().getSnapGoalSteps());
+
       PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(footstepPlannerLog.getRequestPacket().getPlanarRegionsListMessage());
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, planarRegionsList);
+
+      if (!footstepPlannerLog.getRequestPacket().getHeightMapMessage().getHeights().isEmpty())
+      {
+         messager.submitMessage(FootstepPlannerMessagerAPI.HeightMapData, footstepPlannerLog.getRequestPacket().getHeightMapMessage());
+      }
+
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestId, footstepPlannerLog.getRequestPacket().getPlannerRequestId());
       messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootPose, footstepPlannerLog.getRequestPacket().getStartLeftFootPose());
       messager.submitMessage(FootstepPlannerMessagerAPI.RightFootPose, footstepPlannerLog.getRequestPacket().getStartRightFootPose());
@@ -338,21 +346,27 @@ public class FootstepPlannerLogVisualizerController
       messager.submitMessage(FootstepPlannerMessagerAPI.InterRegionVisibilityMap,
                              new VisibilityMapWrapper(visibilityGraphHolder.getInterRegionsMapId(), visibilityGraphHolder.getInterRegionsVisibilityMap()));
       messager.submitMessage(FootstepPlannerMessagerAPI.VisibilityMapWithNavigableRegionData, visibilityGraphHolder.getVisibilityMapsWithNavigableRegions());
-      messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathData, footstepPlannerLog.getStatusPacket().getBodyPath());
+      messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathData, Pair.of(footstepPlannerLog.getStatusPacket().getBodyPath(), footstepPlannerLog.getStatusPacket().getBodyPathUnsmoothed()));
 
       // set graphics
       messager.submitMessage(FootstepPlannerMessagerAPI.BindStartToRobot, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowRobot, false);
-      messager.submitMessage(FootstepPlannerMessagerAPI.ShowOccupancyMap, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowClusterNavigableExtrusions, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowClusterNonNavigableExtrusions, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowClusterRawPoints, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowStartVisibilityMap, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowFootstepPlan, false); // hide plan by default
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowLogGraphics, true);
+      messager.submitMessage(FootstepPlannerMessagerAPI.ShowBodyPathLogGraphics, true);
 
-      // set graph data
+      // set footstep graph data
       updateGraphData(planarRegionsList, footstepPlannerLog.getEdgeDataMap(), footstepPlannerLog.getIterationData(), footstepPlannerLog.getVariableDescriptors());
+
+      // set body path graph data
+      messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathGraphData,
+                             Triple.of(footstepPlannerLog.getBodyPathEdgeDataMap(),
+                                       footstepPlannerLog.getBodyPathIterationData(),
+                                       footstepPlannerLog.getBodyPathVariableDescriptors()));
    }
 
    private static class VisibilityMapWrapper implements VisibilityMapHolder

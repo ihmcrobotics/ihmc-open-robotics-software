@@ -80,7 +80,7 @@ public abstract class AvatarFlatGroundFastWalkingTest implements MultiRobotTestI
       MovingReferenceFrame midFootZUpGroundFrame = referenceFrames.getMidFootZUpGroundFrame();
       FramePose3D startPose = new FramePose3D(midFootZUpGroundFrame);
       startPose.changeFrame(ReferenceFrame.getWorldFrame());
-      FootstepDataListMessage footsteps = EndToEndTestTools.forwardSteps(RobotSide.LEFT,
+      FootstepDataListMessage footsteps = EndToEndTestTools.generateForwardSteps(RobotSide.LEFT,
                                                        getNumberOfSteps(),
                                                        EndToEndTestTools.trapezoidFunction(0.2, getMaxForwardStepLength(), 0.15, 0.85),
                                                        getFastStepWidth(),

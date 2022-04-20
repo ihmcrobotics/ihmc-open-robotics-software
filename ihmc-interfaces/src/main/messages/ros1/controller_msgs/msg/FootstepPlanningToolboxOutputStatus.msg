@@ -1,10 +1,20 @@
 # This message is part of the IHMC footstep planning module.
 
-int8 BODY_PATH_PLANNING_RESULT_FOUND_SOLUTION=0
+int8 BODY_PATH_PLANNING_RESULT_PLANNING=0
 
-int8 BODY_PATH_PLANNING_RESULT_NO_PATH_EXISTS=1
+int8 BODY_PATH_PLANNING_RESULT_FOUND_SOLUTION=1
 
-int8 BODY_PATH_PLANNING_RESULT_EXCEPTION=2
+int8 BODY_PATH_PLANNING_RESULT_TIMED_OUT_BEFORE_SOLUTION=2
+
+int8 BODY_PATH_PLANNING_RESULT_NO_PATH_EXISTS=3
+
+int8 BODY_PATH_PLANNING_RESULT_INVALID_GOAL=4
+
+int8 BODY_PATH_PLANNING_RESULT_MAXIMUM_ITERATIONS_REACHED=5
+
+int8 BODY_PATH_PLANNING_RESULT_EXCEPTION=6
+
+int8 BODY_PATH_PLANNING_RESULT_HALTED=7
 
 int8 FOOTSTEP_PLANNING_RESULT_PLANNING=0
 
@@ -47,6 +57,9 @@ controller_msgs/PlanarRegionsListMessage planar_regions_list
 
 # Planned body path. Empty if planner failed
 geometry_msgs/Pose[] body_path
+
+# Planned body path before smoothing, used for debugging. Empty if planner failed
+geometry_msgs/Point[] body_path_unsmoothed
 
 # Goal pose used by the planner. This will be different from the requested goal pose if it's beyond the horizon length.
 geometry_msgs/Pose goal_pose

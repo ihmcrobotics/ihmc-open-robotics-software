@@ -50,6 +50,8 @@ public class FootstepPlanningTimingsMessagePubSubType implements us.ihmc.pubsub.
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -62,6 +64,9 @@ public class FootstepPlanningTimingsMessagePubSubType implements us.ihmc.pubsub.
    public final static int getCdrSerializedSize(controller_msgs.msg.dds.FootstepPlanningTimingsMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -92,6 +97,8 @@ public class FootstepPlanningTimingsMessagePubSubType implements us.ihmc.pubsub.
 
       cdr.write_type_6(data.getTimePlanningStepsSeconds());
 
+      cdr.write_type_11(data.getPathPlanningIterations());
+
       cdr.write_type_11(data.getStepPlanningIterations());
 
    }
@@ -106,6 +113,8 @@ public class FootstepPlanningTimingsMessagePubSubType implements us.ihmc.pubsub.
       	
       data.setTimePlanningStepsSeconds(cdr.read_type_6());
       	
+      data.setPathPlanningIterations(cdr.read_type_11());
+      	
       data.setStepPlanningIterations(cdr.read_type_11());
       	
 
@@ -118,6 +127,7 @@ public class FootstepPlanningTimingsMessagePubSubType implements us.ihmc.pubsub.
       ser.write_type_6("time_before_planning_seconds", data.getTimeBeforePlanningSeconds());
       ser.write_type_6("time_planning_body_path_seconds", data.getTimePlanningBodyPathSeconds());
       ser.write_type_6("time_planning_steps_seconds", data.getTimePlanningStepsSeconds());
+      ser.write_type_11("path_planning_iterations", data.getPathPlanningIterations());
       ser.write_type_11("step_planning_iterations", data.getStepPlanningIterations());
    }
 
@@ -128,6 +138,7 @@ public class FootstepPlanningTimingsMessagePubSubType implements us.ihmc.pubsub.
       data.setTimeBeforePlanningSeconds(ser.read_type_6("time_before_planning_seconds"));
       data.setTimePlanningBodyPathSeconds(ser.read_type_6("time_planning_body_path_seconds"));
       data.setTimePlanningStepsSeconds(ser.read_type_6("time_planning_steps_seconds"));
+      data.setPathPlanningIterations(ser.read_type_11("path_planning_iterations"));
       data.setStepPlanningIterations(ser.read_type_11("step_planning_iterations"));
    }
 

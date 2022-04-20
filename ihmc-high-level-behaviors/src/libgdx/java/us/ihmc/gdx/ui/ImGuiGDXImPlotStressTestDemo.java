@@ -4,33 +4,30 @@ import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.extension.implot.ImPlot;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.gdx.ui.tools.ImPlotTools;
 import us.ihmc.log.LogTools;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class ImGuiGDXImPlotStressTestDemo //Seizure warning - this stress test generates rapidly flashing, random colors
+/**
+ * Seizure warning - this stress test generates rapidly flashing, random colors
+ */
+public class ImGuiGDXImPlotStressTestDemo
 {
-
    private final String WINDOW_NAME = "ImPlot Stress Test";
-
    private GDXImGuiBasedUI baseUI;
-
    private AtomicInteger numPlotsToShow = new AtomicInteger(50);
-
    private final Timer timer = new Timer();
-
    private final Double[] xs = new Double[500];
    private final Double[] ys = new Double[500];
-
    private final Random random = new Random();
-
    private boolean recalculate = true;
 
    public ImGuiGDXImPlotStressTestDemo()
    {
       LogTools.info("Starting UI");
-      baseUI = new GDXImGuiBasedUI(getClass(), "atlas-user-interface", "src/libgdx/resources", WINDOW_NAME);
+      baseUI = new GDXImGuiBasedUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/libgdx/resources", WINDOW_NAME);
    }
 
    public void launch()
@@ -41,7 +38,7 @@ public class ImGuiGDXImPlotStressTestDemo //Seizure warning - this stress test g
          public void create()
          {
             baseUI.create();
-            ImPlot.createContext();
+            ImPlotTools.ensureImPlotInitialized();
 
             timer.scheduleAtFixedRate(new TimerTask()
             {

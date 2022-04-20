@@ -154,18 +154,20 @@ public class GDXMultiBodySystemFactories
       List<DynamicGDXModel> collisionModels = GDXVisualTools.collectCollisionNodes(collisionShapeDefinitions);
       if (!visualModels.isEmpty() || !collisionModels.isEmpty())
       {
-         FrameGDXNode node = new FrameGDXNode(graphicFrame);
+         FrameGDXGraphicsNode visualGraphicsNode = new FrameGDXGraphicsNode(graphicFrame);
          int i = 0;
          for (DynamicGDXModel visualModel : visualModels)
          {
-            node.addModelPart(visualModel, gdxRigidBody.getName() + "Visual" + i);
+            visualGraphicsNode.addModelPart(visualModel, gdxRigidBody.getName() + "Visual" + i);
          }
+         gdxRigidBody.setVisualGraphics(visualGraphicsNode);
+         FrameGDXGraphicsNode collisionGraphicsNode = new FrameGDXGraphicsNode(graphicFrame);
          i = 0;
          for (DynamicGDXModel collisionModel : collisionModels)
          {
-            node.addModelPart(collisionModel, gdxRigidBody.getName() + "Collision" + i);
+            collisionGraphicsNode.addModelPart(collisionModel, gdxRigidBody.getName() + "Collision" + i);
          }
-         gdxRigidBody.setGraphics(node);
+         gdxRigidBody.setCollisionGraphics(collisionGraphicsNode);
       }
    }
 }

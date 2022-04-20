@@ -35,7 +35,10 @@ import us.ihmc.gdx.GDXPointCloudRenderer;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.gdx.imgui.ImGuiVideoPanel;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
+import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.robotEnvironmentAwareness.geometry.*;
@@ -105,18 +108,18 @@ public class GDXGPUPlanarRegionExtraction
    private final Stopwatch gpuDurationStopwatch = new Stopwatch();
    private final Stopwatch depthFirstSearchDurationStopwatch = new Stopwatch();
    private final Stopwatch planarRegionsSegmentationDurationStopwatch = new Stopwatch();
-   private GDXBytedecoImage inputFloatDepthImage;
-   private GDXBytedecoImage inputScaledFloatDepthImage;
-   private GDXBytedecoImage inputU16DepthImage;
-   private GDXBytedecoImage blurredDepthImage;
-   private GDXBytedecoImage filteredDepthImage;
-   private GDXBytedecoImage nxImage;
-   private GDXBytedecoImage nyImage;
-   private GDXBytedecoImage nzImage;
-   private GDXBytedecoImage cxImage;
-   private GDXBytedecoImage cyImage;
-   private GDXBytedecoImage czImage;
-   private GDXBytedecoImage graphImage;
+   private BytedecoImage inputFloatDepthImage;
+   private BytedecoImage inputScaledFloatDepthImage;
+   private BytedecoImage inputU16DepthImage;
+   private BytedecoImage blurredDepthImage;
+   private BytedecoImage filteredDepthImage;
+   private BytedecoImage nxImage;
+   private BytedecoImage nyImage;
+   private BytedecoImage nzImage;
+   private BytedecoImage cxImage;
+   private BytedecoImage cyImage;
+   private BytedecoImage czImage;
+   private BytedecoImage graphImage;
    private ImGuiPanel imguiPanel;
    private GDXCVImagePanel blurredDepthPanel;
    private GDXCVImagePanel filteredDepthPanel;
@@ -139,7 +142,7 @@ public class GDXGPUPlanarRegionExtraction
    private double maxSVDSolveTime = Double.NaN;
    private final int[] adjacentY = {-1, 0, 1, 1, 1, 0, -1, -1};
    private final int[] adjacentX = {-1, -1, -1, 0, 1, 1, 1, 0};
-   private final RecyclingArrayList<GDXGPUPlanarRegion> planarRegions = new RecyclingArrayList<>(GDXGPUPlanarRegion::new);
+   private final RecyclingArrayList<GDXGPUPlanarRegion> gpuPlanarRegions = new RecyclingArrayList<>(GDXGPUPlanarRegion::new);
    private final Comparator<GDXGPURegionRing> boundaryIndexComparator = Comparator.comparingInt(regionRing -> regionRing.getBoundaryIndices().size());
    private int imageWidth;
    private int imageHeight;
@@ -176,30 +179,30 @@ public class GDXGPUPlanarRegionExtraction
 
       parametersBuffer = new OpenCLFloatBuffer(16);
       calculateDerivativeParameters();
-      inputFloatDepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1, sourceDepthByteBufferOfFloats);
-      inputScaledFloatDepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1);
-      inputU16DepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_16UC1);
-      blurredDepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_16UC1);
-      filteredDepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_16UC1);
-      nxImage = new GDXBytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
-      nyImage = new GDXBytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
-      nzImage = new GDXBytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
-      cxImage = new GDXBytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
-      cyImage = new GDXBytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
-      czImage = new GDXBytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
-      graphImage = new GDXBytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_8UC1);
+      inputFloatDepthImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1, sourceDepthByteBufferOfFloats);
+      inputScaledFloatDepthImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1);
+      inputU16DepthImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_16UC1);
+      blurredDepthImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_16UC1);
+      filteredDepthImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_16UC1);
+      nxImage = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
+      nyImage = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
+      nzImage = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
+      cxImage = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
+      cyImage = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
+      czImage = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
+      graphImage = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_8UC1);
       gaussianKernelSize = new Size();
 
       imguiPanel = new ImGuiPanel("GPU Planar Region Extraction", this::renderImGuiWidgets);
-      blurredDepthPanel = new GDXCVImagePanel("Blurred Depth", imageWidth, imageHeight);
-      filteredDepthPanel = new GDXCVImagePanel("Filtered Depth", imageWidth, imageHeight);
-      nxImagePanel = new GDXCVImagePanel("Nx Image", patchImageWidth, patchImageHeight);
-      nyImagePanel = new GDXCVImagePanel("Ny Image", patchImageWidth, patchImageHeight);
-      nzImagePanel = new GDXCVImagePanel("Nz Image", patchImageWidth, patchImageHeight);
-      gxImagePanel = new GDXCVImagePanel("Gx Image", patchImageWidth, patchImageHeight);
-      gyImagePanel = new GDXCVImagePanel("Gy Image", patchImageWidth, patchImageHeight);
-      gzImagePanel = new GDXCVImagePanel("Gz Image", patchImageWidth, patchImageHeight);
-      debugExtractionPanel = new GDXCVImagePanel("Planar Region Extraction Image", patchImageWidth, patchImageHeight);
+      blurredDepthPanel = new GDXCVImagePanel("Blurred Depth", imageWidth, imageHeight, ImGuiVideoPanel.FLIP_Y);
+      filteredDepthPanel = new GDXCVImagePanel("Filtered Depth", imageWidth, imageHeight, ImGuiVideoPanel.FLIP_Y);
+      nxImagePanel = new GDXCVImagePanel("Nx Image", patchImageWidth, patchImageHeight, ImGuiVideoPanel.FLIP_Y);
+      nyImagePanel = new GDXCVImagePanel("Ny Image", patchImageWidth, patchImageHeight, ImGuiVideoPanel.FLIP_Y);
+      nzImagePanel = new GDXCVImagePanel("Nz Image", patchImageWidth, patchImageHeight, ImGuiVideoPanel.FLIP_Y);
+      gxImagePanel = new GDXCVImagePanel("Gx Image", patchImageWidth, patchImageHeight, ImGuiVideoPanel.FLIP_Y);
+      gyImagePanel = new GDXCVImagePanel("Gy Image", patchImageWidth, patchImageHeight, ImGuiVideoPanel.FLIP_Y);
+      gzImagePanel = new GDXCVImagePanel("Gz Image", patchImageWidth, patchImageHeight, ImGuiVideoPanel.FLIP_Y);
+      debugExtractionPanel = new GDXCVImagePanel("Planar Region Extraction Image", patchImageWidth, patchImageHeight, ImGuiVideoPanel.FLIP_Y);
       imguiPanel.addChild(blurredDepthPanel.getVideoPanel());
       imguiPanel.addChild(filteredDepthPanel.getVideoPanel());
       imguiPanel.addChild(nxImagePanel.getVideoPanel());
@@ -254,6 +257,8 @@ public class GDXGPUPlanarRegionExtraction
       if (!enabled.get())
          return;
 
+      setParametersFromImGuiWidgets();
+
       wholeAlgorithmDurationStopwatch.start();
       gpuDurationStopwatch.start();
 
@@ -268,6 +273,9 @@ public class GDXGPUPlanarRegionExtraction
       scaleFactor = 1.0;
       resultType = opencv_core.CV_16UC1;
       inputScaledFloatDepthImage.getBytedecoOpenCVMat().convertTo(inputU16DepthImage.getBytedecoOpenCVMat(), resultType, scaleFactor, delta);
+
+      // Flip so the Y+ goes up instead of down.
+      opencv_core.flip(inputU16DepthImage.getBytedecoOpenCVMat(), inputU16DepthImage.getBytedecoOpenCVMat(), BytedecoOpenCVTools.FLIP_Y);
 
       int size = gaussianSize.get() * 2 + 1;
       gaussianKernelSize.width(size);
@@ -408,7 +416,7 @@ public class GDXGPUPlanarRegionExtraction
    {
       int planarRegionIslandIndex = 0;
       regionMaxSearchDepth = 0;
-      planarRegions.clear();
+      gpuPlanarRegions.clear();
       regionVisitedMatrix.zero();
       boundaryMatrix.zero();
       regionMatrix.zero();
@@ -421,7 +429,7 @@ public class GDXGPUPlanarRegionExtraction
             if (!regionVisitedMatrix.get(row, column) && boundaryConnectionsEncodedAsOnes == 255) // all ones; fully connected
             {
                numberOfRegionPatches = 0; // also number of patches traversed
-               GDXGPUPlanarRegion planarRegion = planarRegions.add();
+               GDXGPUPlanarRegion planarRegion = gpuPlanarRegions.add();
                planarRegion.reset(planarRegionIslandIndex);
                regionsDepthFirstSearch(row, column, planarRegionIslandIndex, planarRegion, 1);
                if (numberOfRegionPatches >= regionMinPatches.get())
@@ -449,7 +457,7 @@ public class GDXGPUPlanarRegionExtraction
                }
                else
                {
-                  planarRegions.remove(planarRegions.size() - 1);
+                  gpuPlanarRegions.remove(gpuPlanarRegions.size() - 1);
                }
                if (numberOfRegionPatches > regionMaxSearchDepth)
                   regionMaxSearchDepth = numberOfRegionPatches;
@@ -504,7 +512,7 @@ public class GDXGPUPlanarRegionExtraction
       boundaryVisitedMatrix.zero();
       numberOfBoundaryPatchesInWholeImage = 0;
       boundaryMaxSearchDepth = 0;
-      planarRegions.parallelStream().forEach(planarRegion ->
+      gpuPlanarRegions.parallelStream().forEach(planarRegion ->
       {
          int leafPatchIndex = 0;
          int regionRingIndex = 0;
@@ -582,7 +590,7 @@ public class GDXGPUPlanarRegionExtraction
 
    private void growRegionBoundaries()
    {
-      planarRegions.forEach(planarRegion ->
+      gpuPlanarRegions.forEach(planarRegion ->
       {
          if (!planarRegion.getRegionRings().isEmpty())
          {
@@ -606,9 +614,9 @@ public class GDXGPUPlanarRegionExtraction
 
    private void computePlanarRegions(ReferenceFrame cameraFrame)
    {
-      List<List<PlanarRegion>> listOfListsOfRegions = planarRegions.parallelStream()
-         .filter(gpuPlanarRegion -> gpuPlanarRegion.getBoundaryVertices().size() >= polygonizerParameters.getMinNumberOfNodes())
-         .map(gpuPlanarRegion ->
+      List<List<PlanarRegion>> listOfListsOfRegions = gpuPlanarRegions.parallelStream()
+                                                                      .filter(gpuPlanarRegion -> gpuPlanarRegion.getBoundaryVertices().size() >= polygonizerParameters.getMinNumberOfNodes())
+                                                                      .map(gpuPlanarRegion ->
          {
             List<PlanarRegion> planarRegions = new ArrayList<>();
             try
@@ -682,7 +690,7 @@ public class GDXGPUPlanarRegionExtraction
             }
             return planarRegions;
          })
-         .collect(Collectors.toList());
+                                                                      .collect(Collectors.toList());
       planarRegionsList.clear();
       for (List<PlanarRegion> planarRegions : listOfListsOfRegions)
       {
@@ -718,7 +726,7 @@ public class GDXGPUPlanarRegionExtraction
       if (render3DBoundaries.get() || render3DGrownBoundaries.get())
       {
          boundaryPointCloud.prepareVertexBufferForAddingPoints();
-         for (GDXGPUPlanarRegion planarRegion : planarRegions)
+         for (GDXGPUPlanarRegion planarRegion : gpuPlanarRegions)
          {
             if (render3DBoundaries.get())
             {
@@ -729,7 +737,8 @@ public class GDXGPUPlanarRegionExtraction
                   {
                      int column = (int) boundaryIndex.getX() * patchWidth;
                      int row = (int) boundaryIndex.getY() * patchHeight;
-                     float z = inputFloatDepthImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
+                     // Note: We are flipping Y here because the input image has Y+ going down
+                     float z = inputFloatDepthImage.getBytedecoOpenCVMat().ptr(imageHeight - row, column).getFloat();
                      tempFramePoint.setIncludingFrame(cameraFrame, column, row, z);
                      ProjectionTools.projectDepthPixelToIHMCZUp3D(tempFramePoint,
                                                                   principalOffsetXPixels.get(),
@@ -775,7 +784,7 @@ public class GDXGPUPlanarRegionExtraction
       gpuDurationPlot.render(gpuDurationStopwatch.totalElapsed());
       depthFirstSearchDurationPlot.render(depthFirstSearchDurationStopwatch.totalElapsed());
       planarRegionsSegmentationDurationPlot.render(planarRegionsSegmentationDurationStopwatch.totalElapsed());
-      numberOfPlanarRegionsPlot.render((float) planarRegions.size());
+      numberOfPlanarRegionsPlot.render((float) gpuPlanarRegions.size());
       regionMaxSearchDepthPlot.render((float) regionMaxSearchDepth);
       numberOfBoundaryVerticesPlot.render((float) numberOfBoundaryPatchesInWholeImage);
       boundaryMaxSearchDepthPlot.render((float) boundaryMaxSearchDepth);
@@ -815,29 +824,36 @@ public class GDXGPUPlanarRegionExtraction
       ImGui.sliderFloat(labels.get("Principal offset Y (px)"), principalOffsetYPixels.getData(), -imageHeight, imageHeight);
 
       ImGui.sliderFloat("Edge Length Threshold", edgeLengthTresholdSlider.getData(), 0, 0.5f);
-      concaveHullFactoryParameters.setEdgeLengthThreshold(edgeLengthTresholdSlider.get());
       ImGui.sliderFloat("Triangulation Tolerance", triangulationToleranceSlider.getData(), 0, 0.3f);
-      concaveHullFactoryParameters.setTriangulationTolerance(triangulationToleranceSlider.get());
       ImGui.sliderInt("Max Number of Iterations", maxNumberOfIterationsSlider.getData(), 2000, 6000);
-      concaveHullFactoryParameters.setMaxNumberOfIterations(maxNumberOfIterationsSlider.get());
       ImGui.checkbox("Remove Degenerate Triangles", removeAllTrianglesWithTwoBorderEdgesChecked);
-      concaveHullFactoryParameters.setRemoveAllTrianglesWithTwoBorderEdges(removeAllTrianglesWithTwoBorderEdgesChecked.get());
       ImGui.checkbox("Split Concave Hull", allowSplittingConcaveHullChecked);
-      concaveHullFactoryParameters.setAllowSplittingConcaveHull(allowSplittingConcaveHullChecked.get());
 
       ImGui.sliderFloat("Concave Hull Threshold", concaveHullThresholdSlider.getData(), 0, 1);
-      polygonizerParameters.setConcaveHullThreshold(concaveHullThresholdSlider.get());
       ImGui.sliderFloat("Shallow Angle Threshold", shallowAngleThresholdSlider.getData(), 0, 2.0f * (float) Math.PI);
-      polygonizerParameters.setShallowAngleThreshold(shallowAngleThresholdSlider.get());
       ImGui.sliderFloat("Peak Angle Threshold", peakAngleThresholdSlider.getData(), 0, 2.0f * (float) Math.PI);
-      polygonizerParameters.setPeakAngleThreshold(peakAngleThresholdSlider.get());
       ImGui.sliderFloat("Length Threshold", lengthThresholdSlider.getData(), 0, 1);
-      polygonizerParameters.setLengthThreshold(lengthThresholdSlider.get());
       ImGui.sliderFloat("Depth Threshold", depthThresholdSlider.getData(), 0, 1);
-      polygonizerParameters.setDepthThreshold(depthThresholdSlider.get());
       ImGui.sliderInt("Min Number of Nodes", minNumberOfNodesSlider.getData(), 0, 100);
-      polygonizerParameters.setMinNumberOfNodes(minNumberOfNodesSlider.get());
       ImGui.checkbox("Cut Narrow Passage", cutNarrowPassageChecked);
+
+      setParametersFromImGuiWidgets();
+   }
+
+   private void setParametersFromImGuiWidgets()
+   {
+      concaveHullFactoryParameters.setEdgeLengthThreshold(edgeLengthTresholdSlider.get());
+      concaveHullFactoryParameters.setTriangulationTolerance(triangulationToleranceSlider.get());
+      concaveHullFactoryParameters.setMaxNumberOfIterations(maxNumberOfIterationsSlider.get());
+      concaveHullFactoryParameters.setRemoveAllTrianglesWithTwoBorderEdges(removeAllTrianglesWithTwoBorderEdgesChecked.get());
+      concaveHullFactoryParameters.setAllowSplittingConcaveHull(allowSplittingConcaveHullChecked.get());
+
+      polygonizerParameters.setConcaveHullThreshold(concaveHullThresholdSlider.get());
+      polygonizerParameters.setShallowAngleThreshold(shallowAngleThresholdSlider.get());
+      polygonizerParameters.setPeakAngleThreshold(peakAngleThresholdSlider.get());
+      polygonizerParameters.setLengthThreshold(lengthThresholdSlider.get());
+      polygonizerParameters.setDepthThreshold(depthThresholdSlider.get());
+      polygonizerParameters.setMinNumberOfNodes(minNumberOfNodesSlider.get());
       polygonizerParameters.setCutNarrowPassage(cutNarrowPassageChecked.get());
    }
 

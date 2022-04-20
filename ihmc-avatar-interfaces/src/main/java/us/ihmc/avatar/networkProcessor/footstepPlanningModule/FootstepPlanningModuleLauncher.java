@@ -2,31 +2,29 @@ package us.ihmc.avatar.networkProcessor.footstepPlanningModule;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.footstepPlanning.*;
-import us.ihmc.footstepPlanning.communication.FootstepPlannerAPI;
-import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
-import us.ihmc.footstepPlanning.swing.SwingPlannerType;
-import us.ihmc.log.LogTools;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeInterface;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.FootstepPlannerOccupancyMapAssembler;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerOccupancyMap;
+import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
+import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 import java.util.ArrayList;
@@ -104,7 +102,6 @@ public class FootstepPlanningModuleLauncher
       createParametersCallbacks(ros2Node, footstepPlanningModule, inputTopic);
       createRequestCallback(robotModel.getSimpleRobotName(), ros2Node, footstepPlanningModule, inputTopic, generateLog);
       createStatusPublisher(robotModel.getSimpleRobotName(), ros2Node, footstepPlanningModule, outputTopic);
-      createOccupancyGridCallback(ros2Node, footstepPlanningModule, outputTopic);
       createPlannerActionCallback(ros2Node, footstepPlanningModule, inputTopic, outputTopic);
       createLoggerCallback(footstepPlanningModule, generateLog);
 
@@ -191,27 +188,6 @@ public class FootstepPlanningModuleLauncher
       {
          footstepPlan.remove(footstepPlan.getNumberOfSteps() - 1);
       }
-   }
-
-   private static void createOccupancyGridCallback(ROS2NodeInterface ros2Node,
-                                                   FootstepPlanningModule footstepPlanningModule,
-                                                   ROS2Topic outputTopic)
-   {
-      IHMCROS2Publisher<FootstepPlannerOccupancyMapMessage> occupancyMapPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
-                                                                                                                       FootstepPlannerOccupancyMapMessage.class,
-                                                                                                                       outputTopic);
-      FootstepPlannerOccupancyMapAssembler occupancyMapAssembler = new FootstepPlannerOccupancyMapAssembler();
-      footstepPlanningModule.addRequestCallback(request -> occupancyMapAssembler.reset());
-      footstepPlanningModule.addIterationCallback(occupancyMapAssembler);
-      footstepPlanningModule.addStatusCallback(status ->
-                                               {
-                                                  PlannerOccupancyMap occupancyMap = occupancyMapAssembler.getOccupancyMap();
-                                                  if (!occupancyMap.isEmpty())
-                                                  {
-                                                     occupancyMapPublisher.publish(occupancyMap.getAsMessage());
-                                                     occupancyMapAssembler.getOccupancyMap().clear();
-                                                  }
-                                               });
    }
 
    private static void createPlannerActionCallback(ROS2NodeInterface ros2Node,

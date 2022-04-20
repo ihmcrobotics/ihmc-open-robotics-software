@@ -55,7 +55,7 @@ public class FootstepPlannerParametersUIController
 
    public void bindControls()
    {
-      tableViewWrapper = new StoredPropertyTableViewWrapper(380.0, 260.0, 4, parameterTable, javaFXStoredPropertyMap);
+      tableViewWrapper = new StoredPropertyTableViewWrapper(380.0, 260.0, 4, parameterTable, javaFXStoredPropertyMap, 5);
       tableViewWrapper.setTableUpdatedCallback(() ->
       {
          if (autoReplan.isSelected())
