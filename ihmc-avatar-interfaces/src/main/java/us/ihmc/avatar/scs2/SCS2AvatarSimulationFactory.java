@@ -239,9 +239,7 @@ public class SCS2AvatarSimulationFactory
       {
          physicsEngineFactory = (inertialFrame, rootRegistry) -> 
          {
-            BulletPhysicsEngine physicsEngine = new BulletPhysicsEngine(inertialFrame, rootRegistry);
-            BulletMultiBodyParameters bulletMultiBodyParameters =  BulletMultiBodyParameters.defaultBulletMultiBodyParameters();
-            physicsEngine.setGlobalMultiBodyParameter(bulletMultiBodyParameters);
+            BulletPhysicsEngine physicsEngine = new BulletPhysicsEngine(inertialFrame, rootRegistry, BulletMultiBodyParameters.defaultBulletMultiBodyParameters());
             return physicsEngine;           
          };
       }

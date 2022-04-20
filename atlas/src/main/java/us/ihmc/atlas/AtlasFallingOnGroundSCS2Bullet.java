@@ -56,13 +56,11 @@ public class AtlasFallingOnGroundSCS2Bullet
       Set<String> lastSimulatedJoints = robotModel.getJointMap().getLastSimulatedJoints();
       lastSimulatedJoints.forEach(robotDefinition::addSubtreeJointsToIgnore);
 
-      SimulationSession simulationSession = new SimulationSession((frame, rootRegistry) -> 
+      SimulationSession simulationSession = new SimulationSession((frame, rootRegistry) ->
       {
-       BulletPhysicsEngine physicsEngine = new BulletPhysicsEngine(frame, rootRegistry);
-       BulletMultiBodyParameters bulletMultiBodyParameters =  BulletMultiBodyParameters.defaultBulletMultiBodyParameters();
-       physicsEngine.setGlobalMultiBodyParameter(bulletMultiBodyParameters);
-       return physicsEngine;
-      });   
+         BulletPhysicsEngine physicsEngine = new BulletPhysicsEngine(frame, rootRegistry, BulletMultiBodyParameters.defaultBulletMultiBodyParameters());
+         return physicsEngine;
+      }); 
 //      SimulationSession simulationSession = new SimulationSession(BulletPhysicsEngine::new);
       simulationSession.addRobot(robotDefinition);
 
