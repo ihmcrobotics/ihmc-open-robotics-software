@@ -13,7 +13,6 @@ import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -68,11 +67,12 @@ public abstract class HumanoidExperimentalSimulationEndToEndTest implements Mult
 
       assertTrue(simulationTestHelper.simulateNow(3.0));
 
-      RigidBodyBasics elevator = simulationTestHelper.getControllerFullRobotModel().getElevator();
-      assertRigidBodiesAreAboveFlatGround(elevator,
+      RigidBodyBasics rootBody = simulationTestHelper.getRobot().getRootBody();
+      
+      assertRigidBodiesAreAboveFlatGround(rootBody,
                                           p -> testEnvironment.getTerrainObject3D().getHeightMapIfAvailable().heightAt(p.getX(), p.getY(), p.getZ()),
                                           3.0e-3);
-      assertOneDoFJointsAreWithingLimits(elevator, 2.0e-2);
+      assertOneDoFJointsAreWithingLimits(rootBody, 2.0e-2);
    }
 
    public static void assertRigidBodiesAreAboveFlatGround(RigidBodyBasics rootBody, ToDoubleFunction<Point3DReadOnly> groundHeightFunction, double epsilon)
@@ -83,7 +83,7 @@ public abstract class HumanoidExperimentalSimulationEndToEndTest implements Mult
             continue;
 
          FramePoint3D bodyCoM = new FramePoint3D(rigidBody.getBodyFixedFrame());
-         bodyCoM.changeFrame(ReferenceFrame.getWorldFrame());
+         bodyCoM.changeFrame(rigidBody.getBodyFixedFrame().getRootFrame());
          double groundHeight = groundHeightFunction.applyAsDouble(bodyCoM);
          assertTrue(bodyCoM.getZ() > groundHeight - epsilon,
                     "Rigid-body is below the ground: " + rigidBody.getName() + ", CoM: " + bodyCoM + ", groundHeight: " + groundHeight);
