@@ -28,7 +28,7 @@ public class HeavyBallOnTableEnvironment implements CommonAvatarEnvironmentInter
    private final CombinedTerrainObject3D terrain;
 
    private final double ballRadius = 0.25;
-   private final double ballMass = 25.0;
+   private final double ballMass = 15.0;
    private final Robot ballRobot;
 
    public HeavyBallOnTableEnvironment()
