@@ -114,7 +114,8 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
 
          // take steps
          walkForward(stepLength, numberOfSteps, initialXPosition);
-         initialXPosition += numberOfSteps * stepLength;
+         // This offset has become unnecessary since switching to SCS2, probably because some frames are now being updated properly.
+         // initialXPosition += numberOfSteps * stepLength;
          assertTrue(simulationTestHelper.simulateNow(numberOfSteps * (transferTime + swingTime) + 3.0));
       }
    }
