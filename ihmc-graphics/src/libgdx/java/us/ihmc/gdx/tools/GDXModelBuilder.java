@@ -186,12 +186,12 @@ public class GDXModelBuilder
    {
       return buildModelInstance(meshBuilder ->
                         {
-                           for(int i = 1; i<numberOfSteps; i++)
+                           for(int i = 1; i<numberOfSteps + 1; i++)
                            {
                               meshBuilder.addBox(stepWidth, width, stepHeight * (float) i, new Point3D(stepWidth * (float) i, 0.0f, (stepHeight * (float) i) / 2.0f), Color.GRAY);
                            }
 
-                           for(int i = 1; i<numberOfSteps; i++)
+                           for(int i = 1; i<numberOfSteps + 1; i++)
                            {
                               meshBuilder.addCylinder(1.0f, 0.02f, new Point3D(stepWidth * (float) i, -width * 0.45f, (stepHeight * (float) i)), Color.BROWN);
                               meshBuilder.addCylinder(1.0f, 0.02f, new Point3D(stepWidth * (float) i, width * 0.45f, (stepHeight * (float) i)), Color.BROWN);
