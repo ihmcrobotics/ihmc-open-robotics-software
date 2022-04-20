@@ -93,7 +93,7 @@ public class RealSenseHardwareManager
       return rs2DeviceCount;
    }
 
-   public void close()
+   public void deleteContext()
    {
       realsense2.rs2_delete_device_list(devices);
       realsense2.rs2_delete_context(context);
