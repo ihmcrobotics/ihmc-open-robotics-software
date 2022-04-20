@@ -1,4 +1,4 @@
-package us.ihmc.robotEnvironmentAwareness.communication.converters;
+package us.ihmc.communication.packets;
 
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 

@@ -8,10 +8,10 @@ import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import sensor_msgs.PointCloud2;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
+import us.ihmc.communication.packets.ScanPointFilter;
+import us.ihmc.communication.packets.StereoPointCloudCompression;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.ScanPointFilter;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointCloud;
 
