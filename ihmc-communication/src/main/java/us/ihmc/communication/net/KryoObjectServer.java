@@ -12,6 +12,8 @@ import com.esotericsoftware.kryonet.Server;
 
 import com.esotericsoftware.kryonet.serialization.KryoSerialization;
 import com.esotericsoftware.kryonet.serialization.Serialization;
+
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.log.LogTools;
 
@@ -26,13 +28,14 @@ public class KryoObjectServer extends KryoObjectCommunicator
 
    public KryoObjectServer(int tcpPort, NetClassList netClassList)
    {
-      this(tcpPort, netClassList, 2097152, 2097152);
+      this(tcpPort, netClassList, Conversions.megabytesToBytes(256), 2097152);
    }
 
    public KryoObjectServer(int tcpPort, NetClassList netClassList, int writeBufferSize, int receiveBufferSize)
    {
       this(tcpPort, netClassList, writeBufferSize, receiveBufferSize, new KryoSerialization());
-      netClassList.registerWithKryo(server.getKryo());
+      if (netClassList != null)
+         netClassList.registerWithKryo(server.getKryo());
    }
 
    public KryoObjectServer(int tcpPort, NetClassList netClassList, int writeBufferSize, int receiveBufferSize, Serialization serialization)
@@ -41,7 +44,9 @@ public class KryoObjectServer extends KryoObjectCommunicator
       this.writeBufferSize = writeBufferSize;
       this.tcpPort = tcpPort;
 
-      registerClassList(netClassList);
+      server.getKryo().setRegistrationRequired(false);
+      if (netClassList != null)
+         registerClassList(netClassList);
       createConnectionListener(server);
       createConnectionLimiter();
    }
