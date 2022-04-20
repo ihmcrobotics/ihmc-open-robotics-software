@@ -46,14 +46,14 @@ public class ThreePotatoAngularMomentumCalculator
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final boolean debug = false;
-   private static final boolean visualize = false;
+   private static final boolean visualize = true;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoDouble potatoMass = new YoDouble("PotatoMass", registry);
    private final DoubleProvider potatoMassFraction;
    private final double totalMass;
 
-   private final BooleanProvider useHeightScaledAngularMomentum = new BooleanParameter("useHeightScaledAngularMomentum", registry, true);
+   private final BooleanProvider useHeightScaledAngularMomentum = new BooleanParameter("useHeightScaledAngularMomentum", registry, false);
    private final DoubleProvider idealAngularMomentumSampleDt = new DoubleParameter("idealAngularMomentumSampleDt", registry, 0.05);
    private final IntegerProvider maxAngularMomentumSamplesPerSegment = new IntegerParameter("maxAngularMomentumSamplesPerSegment", registry, 8);
    private final IntegerProvider minAngularMomentumSamplesPerSegment = new IntegerParameter("minAngularMomentumSamplesPerSegment", registry, 5);
@@ -75,6 +75,14 @@ public class ThreePotatoAngularMomentumCalculator
    private final YoFrameVector3D predictedLeftFootVelocity = new YoFrameVector3D("predictedLeftFootVelocity", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D predictedRightFootPosition = new YoFramePoint3D("predictedRightFootPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D predictedRightFootVelocity = new YoFrameVector3D("predictedRightFootVelocity", ReferenceFrame.getWorldFrame(), registry);
+
+   private final YoFramePoint3D leftPotatoPosition = new YoFramePoint3D("leftPotatoPosition", ReferenceFrame.getWorldFrame(), registry);
+
+   private final YoFrameVector3D leftPotatoVelocity = new YoFrameVector3D("leftPotatoVelocity", ReferenceFrame.getWorldFrame(), registry);
+
+   private final YoFramePoint3D rightPotatoPosition = new YoFramePoint3D("rightPotatoPosition", ReferenceFrame.getWorldFrame(), registry);
+
+   private final YoFrameVector3D rightPotatoVelocity = new YoFrameVector3D("rightPotatoVelocity", ReferenceFrame.getWorldFrame(), registry);
 
    private final YoDouble comTrajectoryCurrentTime = new YoDouble("firstPotatoCurrentTrajectoryTime", registry);
    private final YoInteger comTrajectoryCurrentSegment = new YoInteger("firstPotatoCurrentSegmentIndex", registry);
@@ -201,15 +209,26 @@ public class ThreePotatoAngularMomentumCalculator
       totalAngularMomentum.setToZero();
       if (centerOfMassStateProvider != null && soleFrames != null)
       {
+         // CHANGE: this was moved outside of below for loop
+         FramePoint3DReadOnly comPosition = centerOfMassStateProvider.getCenterOfMassPosition();
+         FrameVector3DReadOnly comVelocity = centerOfMassStateProvider.getCenterOfMassVelocity();
          for (RobotSide robotSide : RobotSide.values)
          {
-            FramePoint3DReadOnly comPosition = centerOfMassStateProvider.getCenterOfMassPosition();
-            FrameVector3DReadOnly comVelocity = centerOfMassStateProvider.getCenterOfMassVelocity();
-
             potatoPosition.setToZero(soleFrames.get(robotSide));
             potatoPosition.changeFrame(ReferenceFrame.getWorldFrame());
             potatoVelocity.setIncludingFrame(soleFrames.get(robotSide).getTwistOfFrame().getLinearPart());
             potatoVelocity.changeFrame(ReferenceFrame.getWorldFrame());
+
+            if (robotSide == RobotSide.LEFT)
+            {
+               leftPotatoPosition.set(potatoPosition);
+               leftPotatoVelocity.set(potatoVelocity);
+            }
+            else
+            {
+               rightPotatoPosition.set(potatoPosition);
+               rightPotatoVelocity.set(potatoVelocity);
+            }
 
             computeAngularMomentumAtInstant(comPosition, comVelocity, potatoPosition, potatoVelocity, potatoMass.getDoubleValue(), angularMomentum);
             totalAngularMomentum.add(angularMomentum);
