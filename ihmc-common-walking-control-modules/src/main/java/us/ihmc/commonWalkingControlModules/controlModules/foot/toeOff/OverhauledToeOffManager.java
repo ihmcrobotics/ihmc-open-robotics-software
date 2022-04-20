@@ -230,6 +230,13 @@ public class OverhauledToeOffManager
                              nextFrontFootPose);
    }
 
+   public boolean areFeetWellPositionedForToeOff(RobotSide trailingLegSide)
+   {
+      nextFrontFootPose.setToZero(soleZUpFrames.get(trailingLegSide.getOppositeSide()));
+      nextFrontFootPose.changeFrame(worldFrame);
+      return areFeetWellPositionedForToeOff(trailingLegSide, nextFrontFootPose);
+   }
+
    public boolean areFeetWellPositionedForToeOff(RobotSide trailingLegSide, FramePose3DReadOnly nextFrontFootPose)
    {
       return stepPositionInspector.isFrontFootWellPositionedForToeOff(trailingLegSide, nextFrontFootPose);

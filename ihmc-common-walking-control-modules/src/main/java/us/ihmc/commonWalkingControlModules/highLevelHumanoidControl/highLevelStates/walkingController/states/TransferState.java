@@ -204,7 +204,6 @@ public abstract class TransferState extends WalkingState
       return false;
    }
 
-   private final FramePose3D transferToPose = new FramePose3D();
    @Override
    public void onEntry()
    {
@@ -222,8 +221,7 @@ public abstract class TransferState extends WalkingState
 
       double extraToeOffHeight = 0.0;
 
-      transferToPose.setFromReferenceFrame(controllerToolbox.getReferenceFrames().getSoleZUpFrame(transferToSide));
-      if (feetManager.canDoDoubleSupportToeOff(transferToPose, transferToSide)) // FIXME should this be swing side?
+      if (feetManager.canDoDoubleSupportToeOff(transferToSide)) // FIXME should this be swing side?
          extraToeOffHeight = feetManager.getExtraCoMMaxHeightWithToes();
 
       TransferToAndNextFootstepsData transferToAndNextFootstepsData = walkingMessageHandler.createTransferToAndNextFootstepDataForDoubleSupport(transferToSide);
