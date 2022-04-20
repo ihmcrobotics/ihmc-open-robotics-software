@@ -11,6 +11,9 @@ import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLManager;
 
+/**
+ * Possible to render grayscale images directly? Pixmap format Alpha texture?
+ */
 public class GDXCVImagePanel
 {
    private Pixmap pixmap;

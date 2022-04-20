@@ -61,6 +61,7 @@ public class NonRealtimeL515
    protected long lastReceivedFrameTime;
    protected final YoLong timeBetweenFrames;
    protected final YoLong frameIndex;
+   private ByteBuffer depthByteBuffer;
 
    /**
     * This class uses the Realsense2 API from bytedeco to poll perceptoin data from an L515
@@ -164,7 +165,8 @@ public class NonRealtimeL515
             if (depthShortBuffer == null)
             {
                // When using the short buffer, be sure to use an explicit call to deal with unsigned numbers. Java doesn't like them
-               depthShortBuffer = ByteBuffer.wrap(depthBytes).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer();
+               depthByteBuffer = ByteBuffer.wrap(depthBytes).order(ByteOrder.LITTLE_ENDIAN);
+               depthShortBuffer = depthByteBuffer.asShortBuffer();
                // int val = Short.toUnsignedInt(shortBuffer.get(index));
             }
          }
@@ -201,6 +203,16 @@ public class NonRealtimeL515
             throw new RuntimeException(errorMessage.get());
          }
       }
+   }
+
+   public ByteBuffer getDepthByteBuffer()
+   {
+      return depthByteBuffer;
+   }
+
+   public ShortBuffer getDepthShortBuffer()
+   {
+      return depthShortBuffer;
    }
 
    public double getDepthToMeterConversion()
