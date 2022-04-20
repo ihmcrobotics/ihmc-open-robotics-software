@@ -1,7 +1,10 @@
 package us.ihmc.gdx.simulation.environment.object;
 
 import us.ihmc.gdx.simulation.environment.object.objects.*;
-import us.ihmc.gdx.simulation.environment.object.objects.door.*;
+import us.ihmc.gdx.simulation.environment.object.objects.door.GDXDoorFrameObject;
+import us.ihmc.gdx.simulation.environment.object.objects.door.GDXDoorLeverHandleObject;
+import us.ihmc.gdx.simulation.environment.object.objects.door.GDXDoorObject;
+import us.ihmc.gdx.simulation.environment.object.objects.door.GDXDoorPanelObject;
 
 import java.util.ArrayList;
 
