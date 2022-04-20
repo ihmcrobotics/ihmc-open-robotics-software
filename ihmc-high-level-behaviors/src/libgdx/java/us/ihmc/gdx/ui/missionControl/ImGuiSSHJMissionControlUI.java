@@ -2,10 +2,6 @@ package us.ihmc.gdx.ui.missionControl;
 
 import imgui.ImGui;
 import us.ihmc.gdx.imgui.ImGuiGlfwWindow;
-import us.ihmc.gdx.imgui.ImGuiTools;
-import us.ihmc.missionControl.MissionControlService;
-
-import java.util.concurrent.atomic.AtomicReference;
 
 public class ImGuiSSHJMissionControlUI
 {

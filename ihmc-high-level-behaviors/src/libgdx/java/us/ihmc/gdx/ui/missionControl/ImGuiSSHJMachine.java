@@ -27,12 +27,16 @@ public class ImGuiSSHJMachine
    private final AtomicReference<ArrayList<String>> serviceStatusSubscription;
    private final AtomicReference<MutablePair<Double, Double>> ramUsageSubscription;
    private final AtomicReference<ArrayList<Double>> cpuUsagesSubscription;
+   private final AtomicReference<MutablePair<Double, Double>> networkUsageSubscription;
 
    private final ImPlotPlot ramPlot = new ImPlotPlot();
    private final ImPlotDoublePlotLine ramUsagePlotLine = new ImPlotDoublePlotLine("RAM Usage GiB", 30 * 5, 30.0, new DecimalFormat("0.0"));
    private final ImPlotDoublePlotLine ramTotalPlotLine = new ImPlotDoublePlotLine("RAM Total GiB", 30 * 5, 30.0, new DecimalFormat("0.0"));
    private double totalRAM = 1.0;
    private final ImPlotPlot cpuPlot = new ImPlotPlot();
+   private final ImPlotPlot networkPlot = new ImPlotPlot();
+   private final ImPlotDoublePlotLine networkSentPlotLine = new ImPlotDoublePlotLine("Network Sent KB/s", 30 * 5, 30.0, new DecimalFormat("0.000"));
+   private final ImPlotDoublePlotLine networkReceivedPlotLine = new ImPlotDoublePlotLine("Network Received KB/s", 30 * 5, 30.0, new DecimalFormat("0.000"));
 
    private final ImGuiSSHJSystemdServiceManager systemdServiceManager;
    private final HashMap<String, AtomicReference<String>> serviceStatuses = new HashMap<>();
@@ -53,6 +57,7 @@ public class ImGuiSSHJMachine
       xFlags += ImPlotAxisFlags.AutoFit;
       int yFlags = ImPlotAxisFlags.None;
       yFlags += ImPlotAxisFlags.NoDecorations;
+      yFlags += ImPlotAxisFlags.AutoFit;
       ramPlot.setFlags(flags);
       ramPlot.setXFlags(xFlags);
       ramPlot.setYFlags(yFlags);
@@ -68,8 +73,18 @@ public class ImGuiSSHJMachine
       cpuPlot.setYFlags(yFlags);
       cpuPlot.setCustomBeforePlotLogic(() ->
       {
-         ImPlot.setNextPlotLimitsY(0.0, 100.0, ImGuiCond.Always);
+         ImPlot.setNextPlotLimitsY(0.0, 103.0, ImGuiCond.Always);
       });
+
+      networkPlot.setFlags(flags);
+      networkPlot.setXFlags(xFlags);
+      networkPlot.setYFlags(yFlags);
+      networkPlot.setCustomBeforePlotLogic(() ->
+      {
+         ImPlot.setNextPlotLimitsY(0.0, 900000.0, ImGuiCond.Once);
+      });
+      networkPlot.getPlotLines().add(networkSentPlotLine);
+      networkPlot.getPlotLines().add(networkReceivedPlotLine);
 
       messagerHelper = new MessagerHelper(MissionControlService.API.create());
 
@@ -78,6 +93,7 @@ public class ImGuiSSHJMachine
       serviceStatusSubscription = messagerHelper.subscribeViaReference(MissionControlService.API.ServiceStatuses, initialStatuses);
       ramUsageSubscription = messagerHelper.subscribeViaReference(MissionControlService.API.RAMUsage, MutablePair.of(0.0, 1.0));
       cpuUsagesSubscription = messagerHelper.subscribeViaReference(MissionControlService.API.CPUUsages, new ArrayList<>());
+      networkUsageSubscription = messagerHelper.subscribeViaReference(MissionControlService.API.NetworkUsage, MutablePair.of(0.0, 0.0));
 
       messagerManagerWidget = new ImGuiMessagerManagerWidget(messagerHelper, () -> hostname, MissionControlService.API.PORT);
    }
@@ -120,7 +136,7 @@ public class ImGuiSSHJMachine
          ramUsagePlotLine.addValue(used);
          ramTotalPlotLine.addValue(totalRAM);
       }
-      ramPlot.render(ImGui.getColumnWidth() / 2.0f, 35.0f);
+      ramPlot.render(ImGui.getColumnWidth() / 3.0f, 35.0f);
 
       ImGui.sameLine();
 
@@ -137,7 +153,19 @@ public class ImGuiSSHJMachine
             ((ImPlotDoublePlotLine) cpuPlot.getPlotLines().get(i)).addValue(cpuUsages.get(i));
          }
       }
-      cpuPlot.render(ImGui.getColumnWidth(), 35.0f);
+      cpuPlot.render(ImGui.getColumnWidth() / 2.0f, 35.0f);
+
+      ImGui.sameLine();
+
+      MutablePair<Double, Double> networkUsage = networkUsageSubscription.getAndSet(null);
+      if (networkUsage != null)
+      {
+         double sent = networkUsage.getLeft();
+         double received = networkUsage.getRight();
+         networkSentPlotLine.addValue(sent);
+         networkReceivedPlotLine.addValue(received);
+      }
+      networkPlot.render(ImGui.getColumnWidth(), 35.0f);
    }
 
    public ImGuiSSHJSystemdServiceManager getSystemdServiceManager()
