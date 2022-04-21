@@ -8,6 +8,7 @@ import javafx.application.Platform;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.packets.StereoPointCloudCompression;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -15,7 +16,6 @@ import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class SLAMViewer
