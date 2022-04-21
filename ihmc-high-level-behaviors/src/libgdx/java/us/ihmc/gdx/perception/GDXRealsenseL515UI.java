@@ -14,7 +14,7 @@ import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoTools;
-import us.ihmc.perception.realsense.NonRealtimeL515;
+import us.ihmc.perception.realsense.BytedecoRealsenseL515;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
 import us.ihmc.tools.thread.Activator;
 import us.ihmc.tools.time.FrequencyCalculator;
@@ -32,7 +32,7 @@ public class GDXRealsenseL515UI
    private YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
    private YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private RealSenseHardwareManager realSenseHardwareManager;
-   private NonRealtimeL515 l515;
+   private BytedecoRealsenseL515 l515;
    private GDXCVImagePanel depthImagePanel;
    private Mat depthU16C1Image;
    private BytedecoImage depth32FC1Image;

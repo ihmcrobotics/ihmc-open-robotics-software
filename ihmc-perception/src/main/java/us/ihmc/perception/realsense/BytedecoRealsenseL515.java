@@ -12,7 +12,7 @@ import java.util.function.Supplier;
 
 import static org.bytedeco.librealsense2.global.realsense2.rs2_release_frame;
 
-public class NonRealtimeL515
+public class BytedecoRealsenseL515
 {
    protected final int width = 1024;
    protected final int height = 768;
@@ -39,12 +39,13 @@ public class NonRealtimeL515
    protected final YoLong timeBetweenFrames;
    protected final YoLong frameIndex;
    private int depthFrameDataSize;
+   private rs2_processing_block colorAlignProcessingBlock;
 
-   public NonRealtimeL515(String prefix,
-                          rs2_context context,
-                          rs2_device device,
-                          String serialNumber,
-                          YoRegistry parentRegistry)
+   public BytedecoRealsenseL515(String prefix,
+                                rs2_context context,
+                                rs2_device device,
+                                String serialNumber,
+                                YoRegistry parentRegistry)
    {
       this.device = device;
       this.serialNumber = serialNumber;
@@ -72,6 +73,8 @@ public class NonRealtimeL515
    {
       realsense2.rs2_config_enable_stream(config, realsense2.RS2_STREAM_COLOR, COLOR_STREAM_INDEX, width, height, realsense2.RS2_FORMAT_RGB8, fps, error);
       checkError(true, "Failed to enable stream.");
+
+
    }
 
    /**
@@ -85,12 +88,8 @@ public class NonRealtimeL515
       checkError(true, "Failed to set sync mode.");
    }
 
-   /**
-    * This starts the depth data streaming
-    */
    public void initialize()
    {
-      // Start streaming with default recommended configuration
       pipelineProfile = realsense2.rs2_pipeline_start_with_config(pipeline, config, error);
       checkError(true, "Error starting pipeline.");
    }
@@ -113,12 +112,9 @@ public class NonRealtimeL515
             lastReceivedFrameTime = nanoTime;
             frameIndex.increment();
 
-            // Stuff to make this garbage free. The deoth pointer is configured correctly on instantiation and then we can
-            // update the pointer reference from then on
             if (depthFrameData == null)
             {
                depthFrameData = new MutableBytePointer(realsense2.rs2_get_frame_data(depthFrame, error));
-//               depthBytes = new byte[depthFrameDataSize];
             }
             else
             {
@@ -126,8 +122,6 @@ public class NonRealtimeL515
                depthFrameData.setAddress(frameDataAddress);
             }
 
-            // Get the intrinsic parameters once so we can go in and out of pixel space
-            // Do it only once per session do avoid garbage
             if (frameStreamProfile == null)
             {
                frameStreamProfile = realsense2.rs2_get_frame_stream_profile(depthFrame, error);
@@ -138,7 +132,6 @@ public class NonRealtimeL515
             dataWasRead = true;
          }
 
-         // This allows the C side to deallocate objects. Need to keep an eye on this and make sure we didn't miss anything.
          rs2_release_frame(depthFrame);
       }
 
@@ -164,7 +157,6 @@ public class NonRealtimeL515
       realsense2.rs2_pipeline_stop(pipeline, error);
       checkError(false, "Error stopping pipeline.");
 
-      // Release resources
       realsense2.rs2_delete_pipeline_profile(pipelineProfile);
       realsense2.rs2_delete_config(config);
       realsense2.rs2_delete_pipeline(pipeline);
