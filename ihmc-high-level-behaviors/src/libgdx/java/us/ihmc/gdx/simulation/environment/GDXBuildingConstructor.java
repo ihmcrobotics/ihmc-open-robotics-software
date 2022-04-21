@@ -3,12 +3,12 @@ package us.ihmc.gdx.simulation.environment;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import imgui.type.ImFloat;
-import rosgraph_msgs.Log;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -28,7 +28,6 @@ import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.gdx.ui.gizmo.StepCheckIsPointInsideAlgorithm;
-import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
 
@@ -56,6 +55,8 @@ public class GDXBuildingConstructor extends ImGuiPanel
    private Point3D lastPickPoint = new Point3D();
 
    private Point3D cornerPoint;
+
+   private final ColorAttribute highlightColor = ColorAttribute.createDiffuse(0.8f, 0.6f, 0.2f, 1.0f);
 
    private GDXBuildingObject building;
    private GDXSimpleObject lastWallBase;
@@ -104,6 +105,7 @@ public class GDXBuildingConstructor extends ImGuiPanel
       if (selectedObject != null)
       {
          pose3DGizmo.getRenderables(renderables, pool);
+         selectedObject.getCollisionMeshRenderables(renderables, pool);
       }
       if (intersectedObject != null && intersectedObject != selectedObject)
       {
@@ -202,8 +204,9 @@ public class GDXBuildingConstructor extends ImGuiPanel
                Model objectModel = GDXModelBuilder.createCylinder(0.15f, 0.25f, Color.BROWN).model;
                Box3D collisionBox = new Box3D(1.0f, 1.0f, 0.5f);
                objectToPlace.setRealisticModel(objectModel);
-               objectToPlace.setCollisionModel(objectModel);
+//               objectToPlace.setCollisionModel(objectModel);
                objectToPlace.setCollisionGeometryObject(collisionBox);
+               objectToPlace.setCollisionModelColor(highlightColor, 0.2f);
                virtualObjects.add(objectToPlace);
                updateObjectSelected(selectedObject, objectToPlace);
 
@@ -250,10 +253,11 @@ public class GDXBuildingConstructor extends ImGuiPanel
                   objectToPlace.getObjectTransform().setRotationYawAndZeroTranslation(-yaw);
                   objectToPlace.getObjectTransform().multiply(translationTransform);
                   objectToPlace.setRealisticModel(objectModel);
-                  objectToPlace.setCollisionModel(objectModel);
+//                  objectToPlace.setCollisionModel(objectModel);
 
-                  Box3D collisionBox = new Box3D(1.0f, 0.1f, building.getHeight());
+                  Box3D collisionBox = new Box3D(length, 0.1f, building.getHeight());
                   objectToPlace.setCollisionGeometryObject(collisionBox);
+                  objectToPlace.setCollisionModelColor(highlightColor, 0.2f);
 
                   objectToPlace.getCollisionShapeOffset().getTranslation().add(0.0f, 0.0f, building.getHeight() / 2.0f);
                   objectToPlace.getRealisticModelOffset().getTranslation().add(0.0f, 0.0f, building.getHeight() / 2.0f);
@@ -334,7 +338,7 @@ public class GDXBuildingConstructor extends ImGuiPanel
          for(int j = 0; j<sides; j++)
          {
             GDXSimpleObject stairsObject = new GDXSimpleObject("Stairs_" + ((sides * i) + j));
-            Model objectModel = GDXModelBuilder.createStairs(1.5f, 0.3f, 0.3f, 10, Color.BROWN).model;
+            Model objectModel = GDXModelBuilder.createStairs(1.5f, 0.3f, 0.3f, 10, Color.GRAY).model;
             stairsObject.setRealisticModel(objectModel);
             stairsObject.setCollisionModel(objectModel);
 
