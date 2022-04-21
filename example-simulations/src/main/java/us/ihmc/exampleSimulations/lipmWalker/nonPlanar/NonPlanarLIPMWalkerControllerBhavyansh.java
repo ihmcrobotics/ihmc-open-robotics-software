@@ -14,6 +14,7 @@ import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -53,6 +54,7 @@ public class NonPlanarLIPMWalkerControllerBhavyansh implements RobotController
    private final YoDouble q_leftHipRollWorld = new YoDouble("q_leftHipRollWorld", registry);
 
    private final YoDouble footXTarget = new YoDouble("footXTarget", registry);
+   private final YoDouble footYTarget = new YoDouble("footYTarget", registry);
 
    private final YoDouble comHeight = new YoDouble("comHeight", registry);
 
@@ -162,8 +164,9 @@ public class NonPlanarLIPMWalkerControllerBhavyansh implements RobotController
 
       orbitalEnergyX.set(0.5 * 0.7 * 0.7);
       orbitalEnergyX.set(0.0);
-      calculateStepCoMPosition();
+      calculateStepCoMPosition(RobotSide.RIGHT);
       footXTarget.set(finalCoMPosition.getX());
+      footYTarget.set(finalCoMPosition.getY());
 
       calculateSwingTrajectories(RobotSide.RIGHT, finalCoMPosition, 0.0, 0.0, true);
 
@@ -220,7 +223,7 @@ public class NonPlanarLIPMWalkerControllerBhavyansh implements RobotController
       orbitalEnergyY.set(orbitalEnergyValueY);
    }
 
-   private void calculateStepCoMPosition()
+   private void calculateStepCoMPosition(RobotSide swingSide)
    {
       double energyX = orbitalEnergyX.getValue();
       double x_final = (strideLengthX.getValue() / 2) + (desiredHeight.getValue() / (g * strideLengthX.getValue()) * (desiredEnergyX.getValue() - energyX));
@@ -243,12 +246,12 @@ public class NonPlanarLIPMWalkerControllerBhavyansh implements RobotController
       double desiredHipAnglePitch = -EuclidCoreTools.atan2(distanceToNextStepX, desiredHeight.getValue());
       double desiredHipAngleRoll = -EuclidCoreTools.atan2(distanceToNextStepY, desiredHeight.getValue());
 
-      LogTools.info("Desired Hip Angle Roll: {} {}", distanceToNextStepY, desiredHipAngleRoll);
 
       if(swingSide.equals(RobotSide.LEFT))
       {
          desiredHipAngleRoll *= -1;
       }
+      LogTools.info("Desired Hip Angle Roll: SwingSide: {} {} {}", swingSide, distanceToNextStepY, desiredHipAngleRoll);
 
       double totalDistanceToNextStep = EuclidCoreTools.norm(distanceToNextStepX, distanceToNextStepY);
       double desiredKneeLength = EuclidCoreTools.squareRoot(
@@ -262,7 +265,7 @@ public class NonPlanarLIPMWalkerControllerBhavyansh implements RobotController
       double kneeLength = robot.getKneeLength(swingSide);
       trajectorySwingKneeLength.setQuintic(comPositionFromSupportFootX, finalCoMPosition.getX(), kneeLength, 0.0, 0.0, desiredKneeLength, 0.0, 0.0);
       trajectorySwingHipPitch.setQuintic(comPositionFromSupportFootX, finalCoMPosition.getX(), pitchAngle, 0.0, 0.0, desiredHipAnglePitch, 0.0, 0.0);
-      trajectorySwingHipRoll.setQuintic(comPositionFromSupportFootY, finalCoMPosition.getY(), rollAngle, 0.0, 0.0, desiredHipAngleRoll, 0.0, 0.0);
+//      trajectorySwingHipRoll.setQuintic(comPositionFromSupportFootY, finalCoMPosition.getY(), rollAngle, 0.0, 0.0, desiredHipAngleRoll, 0.0, 0.0);
    }
 
    private void controlSupportLeg(RobotSide side)
@@ -295,23 +298,19 @@ public class NonPlanarLIPMWalkerControllerBhavyansh implements RobotController
    {
       double feedBackKneeForce;
 
+      /* Get joint positions. */
       double hipPitchAngle = robot.getHipAnglePitch(side) + robot.getBodyPitchAngle();
       double hipRollAngle = robot.getHipAngleRoll(side) + robot.getBodyRollAngle();
+      double kneeLength = robot.getKneeLength(side);
+
+      /* Set world rotational hip joint positions. */
       worldHipPitchAngles.get(side).set(hipPitchAngle);
       worldHipRollAngles.get(side).set(hipRollAngle);
 
+      /* Get joint velocities. */
       double hipPitchVelocity = robot.getHipVelocityPitch(side);
       double hipRollVelocity = robot.getHipVelocityRoll(side);
-      double kneeLength = robot.getKneeLength(side);
       double kneeVelocity = robot.getKneeVelocity(side);
-
-      if (StrictMath.abs(comXPositionFromFoot.getValue()) < 0.01 && swingTrajectoriesCalculated.getValue() == false)
-      {
-         calculateStepCoMPosition();
-         footXTarget.set(finalCoMPosition.getX());
-         calculateSwingTrajectories(side, finalCoMPosition, robot.getCenterOfMassPositionFromSupportFoot().getX(), robot.getCenterOfMassPositionFromSupportFoot().getY(), false);
-         swingTrajectoriesCalculated.set(true);
-      }
 
       double desiredKneeLength = 0.6;
       double desiredKneeVelocity = 0.0;
@@ -320,31 +319,45 @@ public class NonPlanarLIPMWalkerControllerBhavyansh implements RobotController
       double desiredHipRollAngle = 0.0;
       double desiredHipRollVelocity = 0.0;
 
+      /* When the stance is almost vertical, calculate foot placement and swing trajectories. */
+      if (StrictMath.abs(comXPositionFromFoot.getValue()) < 0.01 && swingTrajectoriesCalculated.getValue() == false)
+      {
+         calculateStepCoMPosition(side);
+         footXTarget.set(finalCoMPosition.getX());
+         footYTarget.set(finalCoMPosition.getY());
+         calculateSwingTrajectories(side, finalCoMPosition, robot.getCenterOfMassPositionFromSupportFoot().getX(), robot.getCenterOfMassPositionFromSupportFoot().getY(), false);
+
+         swingTrajectoriesCalculated.set(true);
+      }
+
+
       if (comXPositionFromFoot.getValue() > 0.0)
       {
          trajectorySwingKneeLength.compute(comXPositionFromFoot.getValue());
          trajectorySwingHipPitch.compute(comXPositionFromFoot.getValue());
-         trajectorySwingHipRoll.compute(comYPositionFromFoot.getValue());
+         //         trajectorySwingHipRoll.compute(comYPositionFromFoot.getValue());
 
          desiredKneeLength = trajectorySwingKneeLength.getValue();
          desiredKneeVelocity = trajectorySwingKneeLength.getVelocity();
          desiredHipPitchAngle = trajectorySwingHipPitch.getValue();
          desiredHipPitchVelocity = trajectorySwingHipPitch.getVelocity();
-         desiredHipRollAngle = trajectorySwingHipRoll.getValue();
-         desiredHipRollVelocity = trajectorySwingHipRoll.getVelocity();
+         //         desiredHipRollAngle = trajectorySwingHipRoll.getValue();
+         //         desiredHipRollVelocity = trajectorySwingHipRoll.getVelocity();
+
       }
 
-      /* ----------------------------------- Compute and set knee force. ----------------------------------------------*/
+      /* ----------------------------------- Compute and set knee force based on desired values. ----------------------------------------------*/
       desiredKneeLengths.get(side).set(desiredKneeLength);
       feedBackKneeForce = 1300 * (desiredKneeLengths.get(side).getValue() - kneeLength) + 70 * (desiredKneeVelocity - kneeVelocity);
       robot.setKneeForce(side, feedBackKneeForce);
 
-      /* ----------------------------------- Compute and set hip torques. --------------------------------------------*/
+      /* ----------------------------------- Compute and set hip torques based on desired values. --------------------------------------------*/
       double feedBackHipTorquePitch = kpHip.getValue() * (desiredHipPitchAngle - hipPitchAngle) + kdHip.getValue() * (desiredHipPitchVelocity - hipPitchVelocity);
       desiredHipPitchAngles.get(side).set(desiredHipPitchAngle);
       robot.setHipTorquePitch(side, feedBackHipTorquePitch);
 
-      double feedBackHipTorqueRoll = 1000 * (desiredHipRollAngle - hipRollAngle) + 5 * (desiredHipRollVelocity - hipRollVelocity);
+      /*----------------------------------- Compute and set hip roll torque based on desired values. --------------------------------------------*/
+      double feedBackHipTorqueRoll = 600 * (desiredHipRollAngle - hipRollAngle) + 5 * (0.0 - hipRollVelocity);
       desiredHipRollAngles.get(side).set(desiredHipRollAngle);
       robot.setHipTorqueRoll(side, feedBackHipTorqueRoll);
 
