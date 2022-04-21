@@ -10,7 +10,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoLong;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 import java.util.function.Supplier;
 
@@ -53,7 +52,7 @@ public class NonRealtimeL515
    // Variables to avoid garbage
    protected rs2_frame depthFrame = new rs2_frame();
    protected MutableBytePointer depthFrameData = null;
-   protected byte[] depthBytes = null;
+//   protected byte[] depthBytes = null;
 
    private ShortBuffer depthShortBuffer;
 
@@ -62,6 +61,7 @@ public class NonRealtimeL515
    protected final YoLong timeBetweenFrames;
    protected final YoLong frameIndex;
    private ByteBuffer depthByteBuffer;
+   private int depthFrameDataSize;
 
    /**
     * This class uses the Realsense2 API from bytedeco to poll perceptoin data from an L515
@@ -121,13 +121,15 @@ public class NonRealtimeL515
       checkError(true, "Error starting pipeline.");
    }
 
-   public void update()
+   public boolean update()
    {
-      if (realsense2.rs2_pipeline_poll_for_frames(pipeline, depthFrame, error) == 1)
+      boolean dataWasRead = false;
+      boolean frameAvailable = realsense2.rs2_pipeline_poll_for_frames(pipeline, depthFrame, error) == 1;
+      if (frameAvailable)
       {
          checkError(false, "");
 
-         int depthFrameDataSize = realsense2.rs2_get_frame_data_size(depthFrame, error);
+         depthFrameDataSize = realsense2.rs2_get_frame_data_size(depthFrame, error);
          checkError(false, "");
 
          if (depthFrameDataSize > 0)
@@ -142,7 +144,7 @@ public class NonRealtimeL515
             if (depthFrameData == null)
             {
                depthFrameData = new MutableBytePointer(realsense2.rs2_get_frame_data(depthFrame, error));
-               depthBytes = new byte[depthFrameDataSize];
+//               depthBytes = new byte[depthFrameDataSize];
             }
             else
             {
@@ -159,21 +161,25 @@ public class NonRealtimeL515
             }
 
             // get the actual depth data
-            depthFrameData.get(depthBytes, 0, depthFrameDataSize);
+//            depthFrameData.get(depthBytes, 0, depthFrameDataSize);
 
-            // the depth data is a Little Indianess unsigned short
-            if (depthShortBuffer == null)
-            {
-               // When using the short buffer, be sure to use an explicit call to deal with unsigned numbers. Java doesn't like them
-               depthByteBuffer = ByteBuffer.wrap(depthBytes).order(ByteOrder.LITTLE_ENDIAN);
-               depthShortBuffer = depthByteBuffer.asShortBuffer();
-               // int val = Short.toUnsignedInt(shortBuffer.get(index));
-            }
+//            // the depth data is a Little Endianess unsigned short
+//            if (depthShortBuffer == null)
+//            {
+//               // When using the short buffer, be sure to use an explicit call to deal with unsigned numbers. Java doesn't like them
+//               depthByteBuffer = ByteBuffer.wrap(depthBytes).order(ByteOrder.LITTLE_ENDIAN);
+//               depthShortBuffer = depthByteBuffer.asShortBuffer();
+//               // int val = Short.toUnsignedInt(shortBuffer.get(index));
+//            }
+
+            dataWasRead = true;
          }
 
          // This allows the C side to deallocate objects. Need to keep an eye on this and make sure we didn't miss anything.
          rs2_release_frame(depthFrame);
       }
+
+      return dataWasRead;
    }
 
    public void deleteDevice()
@@ -203,6 +209,16 @@ public class NonRealtimeL515
             throw new RuntimeException(errorMessage.get());
          }
       }
+   }
+
+   public MutableBytePointer getDepthFrameData()
+   {
+      return depthFrameData;
+   }
+
+   public int getDepthFrameDataSize()
+   {
+      return depthFrameDataSize;
    }
 
    public ByteBuffer getDepthByteBuffer()
