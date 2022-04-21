@@ -1,10 +1,10 @@
 package us.ihmc.avatar.networkProcessor.lidarScanPublisher;
 
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.PointCloudData;
+import us.ihmc.communication.packets.ScanPointFilter;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.ScanPointFilter;
 
 public class ShadowScanPointFilter implements ScanPointFilter
 {
