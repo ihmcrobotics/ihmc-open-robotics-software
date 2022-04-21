@@ -2,6 +2,7 @@ package us.ihmc.gdx.perception;
 
 import imgui.ImGui;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
@@ -12,11 +13,10 @@ import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.realsense.NonRealtimeL515;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
 import us.ihmc.tools.thread.Activator;
+import us.ihmc.tools.time.FrequencyCalculator;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.ShortBuffer;
 
 public class GDXRealsenseL515UI
 {
@@ -30,8 +30,9 @@ public class GDXRealsenseL515UI
    private RealSenseHardwareManager realSenseHardwareManager;
    private NonRealtimeL515 l515;
    private GDXCVImagePanel depthImagePanel;
-   private BytedecoImage depthU16C1Image;
+   private Mat depthU16C1Image;
    private BytedecoImage depth32FC1Image;
+   private FrequencyCalculator frameReadFrequency = new FrequencyCalculator();
 
    public GDXRealsenseL515UI()
    {
@@ -61,33 +62,23 @@ public class GDXRealsenseL515UI
                   l515.initialize();
                }
 
-               l515.update();
-
-               if (depthImagePanel == null)
+               if (l515.update())
                {
-                  if (l515.getDepthByteBuffer() != null)
+                  if (depthImagePanel == null)
                   {
-                     depthU16C1Image = new BytedecoImage(l515.getDepthWidth(), l515.getDepthHeight(), opencv_core.CV_16UC1, l515.getDepthByteBuffer());
+                     depthU16C1Image = new Mat(l515.getDepthHeight(), l515.getDepthWidth(), opencv_core.CV_16UC1, l515.getDepthFrameData());
+
                      depth32FC1Image = new BytedecoImage(l515.getDepthWidth(), l515.getDepthHeight(), opencv_core.CV_32FC1);
                      depthImagePanel = new GDXCVImagePanel("L515 Depth", l515.getDepthWidth(), l515.getDepthHeight());
                      baseUI.getImGuiPanelManager().addPanel(depthImagePanel.getVideoPanel());
 
                      baseUI.getPerspectiveManager().reloadPerspective();
                   }
-               }
 
-               if (depthU16C1Image != null)
-               {
-                  depthU16C1Image.rewind();
-                  depth32FC1Image.rewind();
-                  depthU16C1Image.getBytedecoOpenCVMat().convertTo(depth32FC1Image.getBytedecoOpenCVMat(),
-                                                                   opencv_core.CV_32FC1,
-                                                                   l515.getDepthToMeterConversion(),
-                                                                   0.0);
+                  frameReadFrequency.ping();
+                  depthU16C1Image.convertTo(depth32FC1Image.getBytedecoOpenCVMat(), opencv_core.CV_32FC1, l515.getDepthToMeterConversion(), 0.0);
 
-                  depth32FC1Image.rewind();
-                  depthU16C1Image.rewind();
-                  depthImagePanel.drawFloatImage(depthU16C1Image.getBytedecoOpenCVMat());
+                  depthImagePanel.drawFloatImage(depth32FC1Image.getBytedecoOpenCVMat());
                }
             }
 
@@ -98,47 +89,36 @@ public class GDXRealsenseL515UI
          private void renderImGuiWidgets()
          {
             ImGui.text("System native byte order: " + ByteOrder.nativeOrder().toString());
-            ImGui.text("Sensor depth buffer shorts:");
 
-            if (l515 != null && depthU16C1Image != null)
+            if (depthImagePanel != null)
             {
+               ImGui.text("Depth frame data size: " + l515.getDepthFrameDataSize());
+               ImGui.text("Frame read frequency: " + frameReadFrequency.getFrequency());
                ImGui.text("Depth to meters conversion: " + l515.getDepthToMeterConversion());
+               ImGui.text("Unsigned 16 Depth:");
 
-               ShortBuffer depthShortBuffer = l515.getDepthShortBuffer();
-               if (depthShortBuffer != null)
+               for (int i = 0; i < 5; i++)
                {
-                  depthShortBuffer.rewind();
-                  for (int i = 0; i < 10; i++)
-                  {
-                     ImGui.text(depthShortBuffer.get() + " ");
-                  }
+                  ImGui.text(depthU16C1Image.ptr(0, i).getShort() + " ");
+               }
 
-                  ImGui.text("Unsigned 16 Depth:");
+               ImGui.text("Float 32 Meters:");
 
-                  depthU16C1Image.rewind();
-                  for (int i = 0; i < 10; i++)
-                  {
-                     ImGui.text(depthU16C1Image.getBackingDirectByteBuffer().getShort() + " ");
-                  }
+               depth32FC1Image.rewind();
+               for (int i = 0; i < 5; i++)
+               {
+                  ImGui.text(depth32FC1Image.getBackingDirectByteBuffer().getFloat() + " ");
+               }
 
-                  ImGui.text("Float 32 Meters:");
+               ImGui.text("R G B A:");
 
-                  depth32FC1Image.rewind();
-                  for (int i = 0; i < 10; i++)
-                  {
-                     ImGui.text(depth32FC1Image.getBackingDirectByteBuffer().getFloat() + " ");
-                  }
-
-                  ImGui.text("R G B A:");
-
-                  depthImagePanel.getBytedecoImage().rewind();
-                  for (int i = 0; i < 4; i++)
-                  {
-                     printBytes(depthImagePanel.getBytedecoImage().getBytedecoOpenCVMat().ptr(0, i).get(0),
-                                depthImagePanel.getBytedecoImage().getBytedecoOpenCVMat().ptr(0, i).get(1),
-                                depthImagePanel.getBytedecoImage().getBytedecoOpenCVMat().ptr(0, i).get(2),
-                                depthImagePanel.getBytedecoImage().getBytedecoOpenCVMat().ptr(0, i).get(3));
-                  }
+               depthImagePanel.getBytedecoImage().rewind();
+               for (int i = 0; i < 5; i++)
+               {
+                  printBytes(depthImagePanel.getBytedecoImage().getBytedecoOpenCVMat().ptr(0, i).get(0),
+                             depthImagePanel.getBytedecoImage().getBytedecoOpenCVMat().ptr(0, i).get(1),
+                             depthImagePanel.getBytedecoImage().getBytedecoOpenCVMat().ptr(0, i).get(2),
+                             depthImagePanel.getBytedecoImage().getBytedecoOpenCVMat().ptr(0, i).get(3));
                }
             }
          }
