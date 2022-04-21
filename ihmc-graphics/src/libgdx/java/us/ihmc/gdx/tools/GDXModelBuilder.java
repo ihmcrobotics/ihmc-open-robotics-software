@@ -188,7 +188,7 @@ public class GDXModelBuilder
                         {
                            for(int i = 1; i<numberOfSteps + 1; i++)
                            {
-                              meshBuilder.addBox(stepWidth, width, stepHeight * (float) i, new Point3D(stepWidth * (float) i, 0.0f, (stepHeight * (float) i) / 2.0f), Color.GRAY);
+                              meshBuilder.addBox(stepWidth, width, stepHeight * (float) i, new Point3D(stepWidth * (float) i, 0.0f, (stepHeight * (float) i) / 2.0f), color);
                            }
 
                            for(int i = 1; i<numberOfSteps + 1; i++)

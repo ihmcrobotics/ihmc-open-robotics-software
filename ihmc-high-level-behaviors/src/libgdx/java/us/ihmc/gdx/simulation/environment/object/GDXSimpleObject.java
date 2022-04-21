@@ -1,8 +1,10 @@
 package us.ihmc.gdx.simulation.environment.object;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.Attribute;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -31,7 +33,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-
 public class GDXSimpleObject
 {
    protected static final HashMap<String, AtomicInteger> OBJECT_INDEXES = new HashMap<>();
@@ -59,6 +60,8 @@ public class GDXSimpleObject
    protected ReferenceFrame collisionModelFrame;
    protected boolean isSelected = false;
 
+   protected Attribute originalColor;
+
    public GDXSimpleObject(String titleCasedName, GDXEnvironmentObjectFactory factory)
    {
       this.titleCasedName = titleCasedName;
@@ -75,14 +78,12 @@ public class GDXSimpleObject
       placementFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(pascalCasedName + "PlacementFrame" + objectIndex,
                                                                                        ReferenceFrame.getWorldFrame(),
                                                                                        placementTransform);
-      realisticModelFrame
-            = ReferenceFrameTools.constructFrameWithChangingTransformToParent(pascalCasedName + "RealisticModelFrame" + objectIndex,
-                                                                              placementFrame,
-                                                                              realisticModelOffset);
-      collisionModelFrame
-            = ReferenceFrameTools.constructFrameWithChangingTransformToParent(pascalCasedName + "CollisionModelFrame" + objectIndex,
-                                                                              placementFrame,
-                                                                              collisionShapeOffset);
+      realisticModelFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(pascalCasedName + "RealisticModelFrame" + objectIndex,
+                                                                                            placementFrame,
+                                                                                            realisticModelOffset);
+      collisionModelFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(pascalCasedName + "CollisionModelFrame" + objectIndex,
+                                                                                            placementFrame,
+                                                                                            collisionShapeOffset);
    }
 
    public GDXSimpleObject(String titleCasedName)
@@ -100,20 +101,19 @@ public class GDXSimpleObject
       placementFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(pascalCasedName + "PlacementFrame" + objectIndex,
                                                                                        ReferenceFrame.getWorldFrame(),
                                                                                        placementTransform);
-      realisticModelFrame
-            = ReferenceFrameTools.constructFrameWithChangingTransformToParent(pascalCasedName + "RealisticModelFrame" + objectIndex,
-                                                                              placementFrame,
-                                                                              realisticModelOffset);
-      collisionModelFrame
-            = ReferenceFrameTools.constructFrameWithChangingTransformToParent(pascalCasedName + "CollisionModelFrame" + objectIndex,
-                                                                              placementFrame,
-                                                                              collisionShapeOffset);
+      realisticModelFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(pascalCasedName + "RealisticModelFrame" + objectIndex,
+                                                                                            placementFrame,
+                                                                                            realisticModelOffset);
+      collisionModelFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(pascalCasedName + "CollisionModelFrame" + objectIndex,
+                                                                                            placementFrame,
+                                                                                            collisionShapeOffset);
    }
 
    public void setRealisticModel(Model realisticModel)
    {
       this.realisticModel = realisticModel;
       realisticModelInstance = new GDXModelInstance(realisticModel);
+      this.originalColor = realisticModelInstance.materials.get(0).get(ColorAttribute.Diffuse);
    }
 
    public void setCollisionModel(Model collisionGraphic)
@@ -137,20 +137,20 @@ public class GDXSimpleObject
       if (collisionMesh == null)
       {
          setCollisionModel(meshBuilder ->
-         {
-            Color color = GDXTools.toGDX(YoAppearance.LightSkyBlue());
-            if (collisionGeometryObject instanceof Box3D)
-            {
-               Box3D box3D = (Box3D) collisionGeometryObject;
-               meshBuilder.addBox((float) box3D.getSizeX(), (float) box3D.getSizeY(), (float) box3D.getSizeZ(), color);
-               meshBuilder.addMultiLineBox(box3D.getVertices(), 0.01, color); // so we can see it better
-            }
-            else if (collisionGeometryObject instanceof Sphere3D)
-            {
-               Sphere3D sphere3D = (Sphere3D) collisionGeometryObject;
-               meshBuilder.addSphere((float) sphere3D.getRadius(), color);
-            }
-         });
+                           {
+                              Color color = GDXTools.toGDX(YoAppearance.LightSkyBlue());
+                              if (collisionGeometryObject instanceof Box3D)
+                              {
+                                 Box3D box3D = (Box3D) collisionGeometryObject;
+                                 meshBuilder.addBox((float) box3D.getSizeX(), (float) box3D.getSizeY(), (float) box3D.getSizeZ(), color);
+                                 meshBuilder.addMultiLineBox(box3D.getVertices(), 0.01, color); // so we can see it better
+                              }
+                              else if (collisionGeometryObject instanceof Sphere3D)
+                              {
+                                 Sphere3D sphere3D = (Sphere3D) collisionGeometryObject;
+                                 meshBuilder.addSphere((float) sphere3D.getRadius(), color);
+                              }
+                           });
       }
    }
 
@@ -289,5 +289,11 @@ public class GDXSimpleObject
    public GDXModelInstance getRealisticModelInstance()
    {
       return realisticModelInstance;
+   }
+
+   public void setCollisionModelColor(ColorAttribute color, float transparency)
+   {
+      this.collisionModelInstance.materials.get(0).set(color);
+      this.collisionModelInstance.setTransparency(transparency);
    }
 }
