@@ -447,12 +447,9 @@ public class BalanceManager
       shouldAdjustTimeFromTrackingError.set(getICPErrorMagnitude() > icpErrorThresholdToAdjustTime.getDoubleValue());
       contactStateManager.updateTimeInState(timeShiftProvider, shouldAdjustTimeFromTrackingError.getBooleanValue());
 
-      decayDesiredICPVelocity();
-
       desiredCapturePoint2d.set(comTrajectoryPlanner.getDesiredDCMPosition());
       desiredCapturePointVelocity2d.set(comTrajectoryPlanner.getDesiredDCMVelocity());
-      if (!icpVelocityReductionFactor.isNaN())
-         desiredCapturePointVelocity2d.scale(icpVelocityReductionFactor.getValue());
+
       perfectCMP2d.set(comTrajectoryPlanner.getDesiredECMPPosition());
       desiredCoM2d.set(comTrajectoryPlanner.getDesiredCoMPosition());
       yoDesiredCoMVelocity.set(comTrajectoryPlanner.getDesiredCoMVelocity());
@@ -483,6 +480,10 @@ public class BalanceManager
          }
       }
 
+      decayDesiredICPVelocity();
+      if (!icpVelocityReductionFactor.isNaN())
+         desiredCapturePointVelocity2d.scale(icpVelocityReductionFactor.getValue());
+
       yoDesiredCapturePoint.set(desiredCapturePoint2d);
       yoDesiredICPVelocity.set(desiredCapturePointVelocity2d);
       yoDesiredCoMPosition.set(desiredCoM2d, comTrajectoryPlanner.getDesiredCoMPosition().getZ());
@@ -501,6 +502,8 @@ public class BalanceManager
          YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
          contactState.getPlaneContactStateCommand(contactStateCommands.get(robotSide));
       }
+
+
 
       if (heightControlCommand.getCommandType() == ControllerCoreCommandType.POINT)
       {
