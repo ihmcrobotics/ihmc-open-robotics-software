@@ -58,7 +58,7 @@ public class RealSenseHardwareManager
    public NonRealtimeL515 createNonRealtimeL515(String prefix, String serialNumberToFind)
    {
       String sanitizedSerialNumberToFind = serialNumberToFind.toLowerCase();
-      return new NonRealtimeL515(prefix, context, createDevice(sanitizedSerialNumberToFind), sanitizedSerialNumberToFind, registry, graphicsListRegistry);
+      return new NonRealtimeL515(prefix, context, createDevice(sanitizedSerialNumberToFind), sanitizedSerialNumberToFind, registry);
    }
 
    public rs2_device createDevice(String serialNumberToFind)
