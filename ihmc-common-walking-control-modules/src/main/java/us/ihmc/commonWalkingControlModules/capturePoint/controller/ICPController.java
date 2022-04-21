@@ -437,7 +437,7 @@ public class ICPController implements ICPControllerInterface
       else
          feedForwardAlpha.set(0.0);
 
-      feedbackCoP.interpolate(perfectCoP, currentICP, feedForwardAlpha.getDoubleValue());
+      feedbackCoP.interpolate(perfectCoP, desiredICP, feedForwardAlpha.getDoubleValue());
       feedbackCoP.scaleAdd(1.0 - feedbackAlpha.getValue(), feedbackCoPDelta, feedbackCoP);
       feedbackCMP.scaleAdd(1.0 - feedForwardAlpha.getValue(), perfectCMPOffset, feedbackCoP);
       feedbackCMP.scaleAdd(1.0 - feedbackAlpha.getValue(), feedbackCMPDelta, feedbackCMP);
