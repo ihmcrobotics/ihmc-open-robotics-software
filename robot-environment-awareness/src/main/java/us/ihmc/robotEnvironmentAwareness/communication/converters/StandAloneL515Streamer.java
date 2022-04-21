@@ -6,7 +6,6 @@ import static us.ihmc.pubsub.DomainFactory.PubSubImplementation.FAST_RTPS;
 import java.io.IOException;
 import java.util.function.Consumer;
 
-import org.apache.commons.lang.mutable.MutableBoolean;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.MutableBytePointer;
@@ -24,19 +23,11 @@ import org.bytedeco.librealsense2.rs2_stream_profile;
 import org.bytedeco.librealsense2.rs2_vertex;
 import org.bytedeco.librealsense2.global.realsense2;
 
-import com.esotericsoftware.kryonet.Connection;
-import com.esotericsoftware.kryonet.Listener;
-import com.esotericsoftware.kryonet.Server;
-
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.KryoObjectServer;
+import us.ihmc.communication.packets.StereoPointCloudCompression;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.log.LogTools;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression.ColorAccessor;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression.CompressionIntermediateVariablesPackage;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression.PointAccessor;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 
@@ -65,7 +56,8 @@ public class StandAloneL515Streamer
 
    private static final int DEPTH_STREAM_INDEX = -1;
    private static final int COLOR_STREAM_INDEX = -1;
-   private static CompressionIntermediateVariablesPackage compressionIntermediateVariablesPackage = new CompressionIntermediateVariablesPackage();
+   private static StereoPointCloudCompression.CompressionIntermediateVariablesPackage compressionIntermediateVariablesPackage
+         = new StereoPointCloudCompression.CompressionIntermediateVariablesPackage();
 
    public static void main(String[] args) throws IOException
    {
@@ -402,8 +394,8 @@ public class StandAloneL515Streamer
    {
 
       StereoVisionPointCloudMessage msg = StereoPointCloudCompression.compressPointCloud(System.nanoTime(),
-                                                                                         PointAccessor.wrap(points),
-                                                                                         ColorAccessor.wrapRGB(rawColors),
+                                                                                         StereoPointCloudCompression.PointAccessor.wrap(points),
+                                                                                         StereoPointCloudCompression.ColorAccessor.wrapRGB(rawColors),
                                                                                          numberOfPoints,
                                                                                          0.002,
                                                                                          compressionIntermediateVariablesPackage);
