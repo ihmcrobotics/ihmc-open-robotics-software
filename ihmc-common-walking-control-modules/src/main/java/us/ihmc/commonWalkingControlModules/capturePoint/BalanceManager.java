@@ -243,7 +243,7 @@ public class BalanceManager
       this.controllerToolbox = controllerToolbox;
       yoTime = controllerToolbox.getYoTime();
 
-      contactStateManager = new ContactStateManager(walkingControllerParameters, controllerToolbox.getControlDT(), registry);
+      contactStateManager = new ContactStateManager(yoTime, walkingControllerParameters, registry);
 
       angularMomentumHandler = new AngularMomentumHandler<>(totalMass,
                                                             gravityZ,

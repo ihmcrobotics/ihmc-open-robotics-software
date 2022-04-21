@@ -16,6 +16,7 @@ public class ContactStateManager
    private final YoBoolean inStanding = new YoBoolean("InStanding", registry);
    private final YoDouble currentStateDuration = new YoDouble("CurrentStateDuration", registry);
    private final YoDouble totalStateDuration = new YoDouble("totalStateDuration", registry);
+   private final YoDouble timeAtStartOfSupportSequence = new YoDouble("TimeAtStartOfSupportSequence", registry);
    private final YoDouble timeInSupportSequence = new YoDouble("TimeInSupportSequence", registry);
    private final YoDouble offsetTimeInState = new YoDouble("offsetTimeInState", registry);
 
@@ -38,18 +39,18 @@ public class ContactStateManager
 
    private final YoDouble timeAdjustmentForSwing = new YoDouble("extraTimeAdjustmentForSwing", registry);
 
-   private final double controlDt;
+   private final DoubleProvider time;
 
-   public ContactStateManager(WalkingControllerParameters walkingControllerParameters, double controlDt, YoRegistry parentRegistry)
+   public ContactStateManager(DoubleProvider time, WalkingControllerParameters walkingControllerParameters, YoRegistry parentRegistry)
    {
-      this(walkingControllerParameters.getMinimumSwingTimeForDisturbanceRecovery(), walkingControllerParameters.getMinimumTransferTime(), controlDt, parentRegistry);
+      this(time, walkingControllerParameters.getMinimumSwingTimeForDisturbanceRecovery(), walkingControllerParameters.getMinimumTransferTime(), parentRegistry);
    }
 
-   public ContactStateManager(double minimumSwingTime, double minimumTransferTime, double controlDt, YoRegistry parentRegistry)
+   public ContactStateManager(DoubleProvider time, double minimumSwingTime, double minimumTransferTime, YoRegistry parentRegistry)
    {
+      this.time = time;
       this.minimumSwingDuration.set(minimumSwingTime);
       this.minimumTransferDuration.set(minimumTransferTime);
-      this.controlDt = controlDt;
 
       parentRegistry.addChild(registry);
    }
@@ -96,6 +97,7 @@ public class ContactStateManager
 
    public void initialize()
    {
+      timeAtStartOfSupportSequence.set(time.getValue());
       timeInSupportSequence.set(0.0);
       adjustedTimeInSupportSequence.set(0.0);
       inSingleSupport.set(false);
@@ -109,9 +111,11 @@ public class ContactStateManager
 
    public void initializeForStanding()
    {
+
       inSingleSupport.set(false);
       inStanding.set(true);
 
+      timeAtStartOfSupportSequence.set(time.getValue());
       timeInSupportSequence.set(0.0);
       currentStateDuration.set(Double.POSITIVE_INFINITY);
       totalStateDuration.set(Double.POSITIVE_INFINITY);
@@ -128,6 +132,7 @@ public class ContactStateManager
 
    public void initializeForTransfer(double transferDuration, double swingDuration)
    {
+      timeAtStartOfSupportSequence.set(time.getValue());
       timeInSupportSequence.set(0.0);
       currentStateDuration.set(transferDuration);
       totalStateDuration.set(transferDuration + swingDuration);
@@ -150,6 +155,7 @@ public class ContactStateManager
       inStanding.set(false);
 
       double stepDuration = transferDuration + swingDuration;
+      timeAtStartOfSupportSequence.set(time.getValue() - transferDuration);
       timeInSupportSequence.set(transferDuration);
       currentStateDuration.set(stepDuration);
       totalStateDuration.set(stepDuration);
@@ -166,6 +172,7 @@ public class ContactStateManager
 
    public void initializeForTransferToStanding(double finalTransferDuration )
    {
+      timeAtStartOfSupportSequence.set(time.getValue());
       timeInSupportSequence.set(0.0);
       currentStateDuration.set(finalTransferDuration);
       totalStateDuration.set(finalTransferDuration);
@@ -186,7 +193,7 @@ public class ContactStateManager
    {
       // If this condition is false we are experiencing a late touchdown or a delayed liftoff. Do not advance the time in support sequence!
       if (inStanding.getBooleanValue() || !contactStateIsDone.getBooleanValue())
-         timeInSupportSequence.add(controlDt);
+         timeInSupportSequence.set(time.getValue() - timeAtStartOfSupportSequence.getValue());
 
       remainingTimeInContactSequence.set(currentStateDuration.getDoubleValue() - timeInSupportSequence.getDoubleValue());
 
