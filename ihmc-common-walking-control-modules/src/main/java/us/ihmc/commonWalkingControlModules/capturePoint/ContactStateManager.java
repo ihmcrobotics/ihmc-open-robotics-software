@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -33,9 +34,11 @@ public class ContactStateManager
    private final YoDouble minimumTransferDuration = new YoDouble("minTransferDurationUnderDisturbance", registry);
 
    private final BooleanParameter speedUpTransferDynamicsFromError = new BooleanParameter("speedUpTransferDynamicsFromError", registry, false);
-   private final BooleanParameter slowDownTransferDynamicsFromError = new BooleanParameter("slowDownTransferDynamicsFromError", registry, false);
+   private final BooleanParameter slowDownTransferDynamicsFromError = new BooleanParameter("slowDownTransferDynamicsFromError", registry, true);
    private final BooleanParameter speedUpSwingDynamicsFromError = new BooleanParameter("speedUpSwingDynamicsFromError", registry, false);
    private final BooleanParameter slowDownSwingDynamicsFromError = new BooleanParameter("slowDownSwingDynamicsFromError", registry, false);
+
+   private final DoubleProvider timeAdjustmentDiscountGain = new DoubleParameter("timeAdjustmentDiscountGain", registry, 0.8);
 
    private final YoDouble timeAdjustmentForSwing = new YoDouble("extraTimeAdjustmentForSwing", registry);
 
@@ -212,7 +215,7 @@ public class ContactStateManager
          {
             if ((isInSingleSupport() && speedUpSwingDynamicsFromError.getValue()) || (!isInSingleSupport() && speedUpTransferDynamicsFromError.getValue()))
             {
-               timeAdjustment.set(proposedAdjustment);
+               timeAdjustment.set(timeAdjustmentDiscountGain.getValue() * proposedAdjustment);
                timeAdjustmentForSwing.set(0.0);
             }
             else
@@ -225,7 +228,7 @@ public class ContactStateManager
          {
             if ((isInSingleSupport() && slowDownSwingDynamicsFromError.getValue()) || (!isInSingleSupport() && slowDownTransferDynamicsFromError.getValue()))
             {
-               timeAdjustment.set(proposedAdjustment);
+               timeAdjustment.set(timeAdjustmentDiscountGain.getValue() * proposedAdjustment);
                timeAdjustmentForSwing.set(0.0);
             }
             else
