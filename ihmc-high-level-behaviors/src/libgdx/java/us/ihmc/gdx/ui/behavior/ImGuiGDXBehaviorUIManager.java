@@ -3,7 +3,6 @@ package us.ihmc.gdx.ui.behavior;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import imgui.extension.imnodes.ImNodes;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
@@ -64,7 +63,9 @@ public class ImGuiGDXBehaviorUIManager
    {
       this.behaviorRegistry = behaviorRegistry;
       helper = new BehaviorHelper("Behaviors panel", robotModelSupplier.get(), ros2Node, enableROS1);
-      messagerManagerWidget = new ImGuiMessagerManagerWidget(helper.getMessagerHelper(), behaviorModuleHost::get);
+      messagerManagerWidget = new ImGuiMessagerManagerWidget(helper.getMessagerHelper(),
+                                                             behaviorModuleHost::get,
+                                                             NetworkPorts.BEHAVIOR_MODULE_MESSAGER_PORT.getPort());
       yoVariableClientManagerWidget = new ImGuiYoVariableClientManagerWidget(helper.getYoVariableClientHelper(),
                                                                              behaviorModuleHost::get,
                                                                              NetworkPorts.BEHAVIOR_MODULE_YOVARIABLESERVER_PORT.getPort());
