@@ -26,7 +26,7 @@ public class ContactStateManager
 
    private final YoBoolean contactStateIsDone = new YoBoolean("ContactStateIsDone", registry);
 
-   private final YoDouble remainingTimeInContactSequence = new YoDouble("remainingSwingTimeAccordingToPlan", registry);
+   private final YoDouble remainingTimeInContactSequence = new YoDouble("remainingTimeInContactSequence", registry);
    private final YoDouble adjustedRemainingTimeUnderDisturbance = new YoDouble("adjustedRemainingTimeUnderDisturbance", registry);
 
    private final YoDouble minimumSwingDuration = new YoDouble("minSwingDurationUnderDisturbance", registry);
