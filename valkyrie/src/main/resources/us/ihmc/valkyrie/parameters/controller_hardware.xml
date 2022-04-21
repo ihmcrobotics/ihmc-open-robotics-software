@@ -171,7 +171,6 @@
                            <parameter name="leftFootTaskspaceUseBaseFrameForControl" type="BooleanParameter" value="false" />
                         </registry>
                         <parameter name="maxContactPointRate" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-
                      </registry>
                      <registry name="rightFootControlModule">
                         <registry name="FootLeapOfFaithModule">
@@ -393,7 +392,7 @@
                   <parameter name="maxDerivativeErrorHandPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
                   <parameter name="maxProportionalErrorHandPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
                   <parameter name="maximumFeedbackHandPosition" type="DoubleParameter" min="0.0" max="1.0" value="10.0" />
-                  <parameter name="maximumFeedbackRateHandPosition" type="DoubleParameter" min="0.0" max="1.0" value="100.0" />
+                  <parameter name="maximumFeedbackRateHandPosition" type="DoubleParameter" min="0.0" max="1.0" value="1000.0" />
                </registry>
                <registry name="WalkingMessageHandler">
                   <parameter name="MinimumPauseTime" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />

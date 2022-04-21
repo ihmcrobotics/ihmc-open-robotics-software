@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManage
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commonWalkingControlModules.referenceFrames.WalkingTrajectoryPath;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -22,15 +23,17 @@ public abstract class SingleSupportState extends WalkingState
    protected final YoDouble minimumSwingFraction = new YoDouble("minimumSwingFraction", registry);
 
    protected final WalkingMessageHandler walkingMessageHandler;
+   protected final WalkingTrajectoryPath walkingTrajectoryPath;
    protected final SideDependentList<FootSwitchInterface> footSwitches;
    protected final FullHumanoidRobotModel fullRobotModel;
 
    protected final BalanceManager balanceManager;
    private final CenterOfMassHeightManager comHeightManager;
 
-
-   public SingleSupportState(WalkingStateEnum singleSupportStateEnum, WalkingMessageHandler walkingMessageHandler,
-                             HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
+   public SingleSupportState(WalkingStateEnum singleSupportStateEnum,
+                             WalkingMessageHandler walkingMessageHandler,
+                             HighLevelHumanoidControllerToolbox controllerToolbox,
+                             HighLevelControlManagerFactory managerFactory,
                              YoRegistry parentRegistry)
    {
       super(singleSupportStateEnum, parentRegistry);
@@ -41,6 +44,7 @@ public abstract class SingleSupportState extends WalkingState
       minimumSwingFraction.set(0.5);
 
       this.walkingMessageHandler = walkingMessageHandler;
+      walkingTrajectoryPath = controllerToolbox.getWalkingTrajectoryPath();
       footSwitches = controllerToolbox.getFootSwitches();
       fullRobotModel = controllerToolbox.getFullRobotModel();
 
@@ -85,10 +89,18 @@ public abstract class SingleSupportState extends WalkingState
       balanceManager.setHoldSplitFractions(false);
 
       comHeightManager.setSupportLeg(swingSide.getOppositeSide());
+      initializeWalkingTrajectoryPath();
    }
 
    @Override
    public void onExit(double timeInState)
    {
+   }
+
+   public void initializeWalkingTrajectoryPath()
+   {
+      walkingTrajectoryPath.clearFootsteps();
+      walkingTrajectoryPath.addFootsteps(walkingMessageHandler);
+      walkingTrajectoryPath.initializeSingleSupport(supportSide);
    }
 }
