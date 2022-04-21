@@ -202,7 +202,7 @@ public class GDXBuildingConstructor extends ImGuiPanel
             {
                GDXSimpleObject objectToPlace = new GDXSimpleObject("Corner");
                Model objectModel = GDXModelBuilder.createCylinder(0.15f, 0.25f, Color.BROWN).model;
-               Box3D collisionBox = new Box3D(1.0f, 1.0f, 0.5f);
+               Box3D collisionBox = new Box3D(0.25f, 0.25f, 0.15f);
                objectToPlace.setRealisticModel(objectModel);
 //               objectToPlace.setCollisionModel(objectModel);
                objectToPlace.setCollisionGeometryObject(collisionBox);
