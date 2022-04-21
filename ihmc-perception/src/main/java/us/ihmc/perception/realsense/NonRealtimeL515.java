@@ -3,14 +3,11 @@ package us.ihmc.perception.realsense;
 import org.bytedeco.javacpp.MutableBytePointer;
 import org.bytedeco.librealsense2.*;
 import org.bytedeco.librealsense2.global.realsense2;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.string.StringTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoLong;
 
-import java.nio.ByteBuffer;
-import java.nio.ShortBuffer;
 import java.util.function.Supplier;
 
 import static org.bytedeco.librealsense2.global.realsense2.rs2_release_frame;
@@ -21,67 +18,39 @@ public class NonRealtimeL515
    protected final int height = 768;
    protected final int fps = 30;
    protected final int DEPTH_STREAM_INDEX = -1;
+   protected final int COLOR_STREAM_INDEX = -1;
 
    protected final String name = getClass().getSimpleName();
    protected final YoRegistry registry;
 
-   // The device (a device contains sensors like cameras and IMUS)
-   protected final rs2_device device;
+   protected final rs2_device device; // The device (a device contains sensors like cameras and IMUS)
    private final String serialNumber;
-
-   // Declare RealSense pipeline, encapsulating the actual device and sensors
-   protected final rs2_pipeline pipeline;
-
-   // Create a configuration for configuring the pipeline with a non default profile
-   protected final rs2_config config;
-
-   // The depth sensor
-   protected rs2_sensor sensor;
-
-   // error pointer, have to check it after every call
-   protected final rs2_error error = new rs2_error();
-
-   // pipeline configuration
+   protected final rs2_pipeline pipeline; // Declare RealSense pipeline, encapsulating the actual device and sensors
+   protected final rs2_config config; // Create a configuration for configuring the pipeline with a non default profile
+   protected rs2_sensor sensor; // The depth sensor
+   protected final rs2_error error = new rs2_error(); // error pointer, have to check it after every call
    protected rs2_pipeline_profile pipelineProfile;
-
-   // camera intrinsic parameters
    protected rs2_intrinsics videoStreamIntrinsics = new rs2_intrinsics();
    protected rs2_stream_profile frameStreamProfile;
    protected double depthToMeterConversion;
-
-   // Variables to avoid garbage
    protected rs2_frame depthFrame = new rs2_frame();
    protected MutableBytePointer depthFrameData = null;
-//   protected byte[] depthBytes = null;
-
-   private ShortBuffer depthShortBuffer;
-
-   // YoVariables
    protected long lastReceivedFrameTime;
    protected final YoLong timeBetweenFrames;
    protected final YoLong frameIndex;
-   private ByteBuffer depthByteBuffer;
    private int depthFrameDataSize;
 
-   /**
-    * This class uses the Realsense2 API from bytedeco to poll perceptoin data from an L515
-    *
-    * @param prefix               - prefix for yovariable names
-    * @param context              - The Realsense library context
-    * @param device               - the L515 Device
-    * @param parentRegistry
-    * @param graphicsListRegistry
-    */
-   public NonRealtimeL515(String prefix, rs2_context context, rs2_device device,
-                          String serialNumber, YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   public NonRealtimeL515(String prefix,
+                          rs2_context context,
+                          rs2_device device,
+                          String serialNumber,
+                          YoRegistry parentRegistry)
    {
       this.device = device;
       this.serialNumber = serialNumber;
       pipeline = realsense2.rs2_create_pipeline(context, error);
       config = realsense2.rs2_create_config(error);
 
-      // Realsense Configuration
-      // Add desired streams to configuration
       realsense2.rs2_config_enable_stream(config, realsense2.RS2_STREAM_DEPTH, DEPTH_STREAM_INDEX, width, height, realsense2.RS2_FORMAT_Z16, fps, error);
       checkError(true, "Failed to enable stream.");
 
@@ -92,12 +61,17 @@ public class NonRealtimeL515
 
       LogTools.info("Configured Depth Stream of L515 Device. Serial number: {}", serialNumber);
 
-      // YoVariable Stuff
       registry = new YoRegistry(prefix + name + "_" + serialNumber);
       timeBetweenFrames = new YoLong(prefix + "timeBetweenFrames", registry);
       frameIndex = new YoLong(prefix + "frameIndex", registry);
 
       parentRegistry.addChild(registry);
+   }
+
+   public void enableColor(int width, int height, int fps)
+   {
+      realsense2.rs2_config_enable_stream(config, realsense2.RS2_STREAM_COLOR, COLOR_STREAM_INDEX, width, height, realsense2.RS2_FORMAT_RGB8, fps, error);
+      checkError(true, "Failed to enable stream.");
    }
 
    /**
@@ -160,17 +134,6 @@ public class NonRealtimeL515
                realsense2.rs2_get_video_stream_intrinsics(frameStreamProfile, videoStreamIntrinsics, error);
             }
 
-            // get the actual depth data
-//            depthFrameData.get(depthBytes, 0, depthFrameDataSize);
-
-//            // the depth data is a Little Endianess unsigned short
-//            if (depthShortBuffer == null)
-//            {
-//               // When using the short buffer, be sure to use an explicit call to deal with unsigned numbers. Java doesn't like them
-//               depthByteBuffer = ByteBuffer.wrap(depthBytes).order(ByteOrder.LITTLE_ENDIAN);
-//               depthShortBuffer = depthByteBuffer.asShortBuffer();
-//               // int val = Short.toUnsignedInt(shortBuffer.get(index));
-//            }
 
             dataWasRead = true;
          }
@@ -180,6 +143,20 @@ public class NonRealtimeL515
       }
 
       return dataWasRead;
+   }
+
+   public void setLaserPower(float laserPower)
+   {
+      rs2_options options = new rs2_options(sensor);
+      realsense2.rs2_set_option(options, realsense2.RS2_OPTION_LASER_POWER, laserPower, error);
+      checkError(true, "Failed to set laser power.");
+   }
+
+   public void setDigitalGail(int digitalGain)
+   {
+      rs2_options options = new rs2_options(sensor);
+      realsense2.rs2_set_option(options, realsense2.RS2_OPTION_DIGITAL_GAIN, digitalGain, error);
+      checkError(true, "");
    }
 
    public void deleteDevice()
@@ -219,16 +196,6 @@ public class NonRealtimeL515
    public int getDepthFrameDataSize()
    {
       return depthFrameDataSize;
-   }
-
-   public ByteBuffer getDepthByteBuffer()
-   {
-      return depthByteBuffer;
-   }
-
-   public ShortBuffer getDepthShortBuffer()
-   {
-      return depthShortBuffer;
    }
 
    public double getDepthToMeterConversion()

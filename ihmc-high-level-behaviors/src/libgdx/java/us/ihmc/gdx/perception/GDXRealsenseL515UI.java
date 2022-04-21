@@ -1,10 +1,14 @@
 package us.ihmc.gdx.perception;
 
 import imgui.ImGui;
+import imgui.type.ImFloat;
+import imgui.type.ImInt;
+import org.bytedeco.librealsense2.global.realsense2;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.imgui.ImGuiPanel;
+import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -33,6 +37,11 @@ public class GDXRealsenseL515UI
    private Mat depthU16C1Image;
    private BytedecoImage depth32FC1Image;
    private FrequencyCalculator frameReadFrequency = new FrequencyCalculator();
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ImFloat laserPower = new ImFloat(100.0f);
+   private final ImFloat receiverSensitivity = new ImFloat(0.5f);
+   private final ImInt digitalGain = new ImInt(realsense2.RS2_DIGITAL_GAIN_LOW);
+   private final String[] digitalGains = new String[] { "AUTO", "LOW", "HIGH" };
 
    public GDXRealsenseL515UI()
    {
@@ -95,6 +104,29 @@ public class GDXRealsenseL515UI
                ImGui.text("Depth frame data size: " + l515.getDepthFrameDataSize());
                ImGui.text("Frame read frequency: " + frameReadFrequency.getFrequency());
                ImGui.text("Depth to meters conversion: " + l515.getDepthToMeterConversion());
+
+               if (ImGui.sliderFloat(labels.get("Laser power"), laserPower.getData(), 0.0f, 100.0f))
+               {
+                  l515.setLaserPower(laserPower.get());
+               }
+
+               if (ImGui.combo(labels.get("Digital gain"), digitalGain, digitalGains))
+               {
+                  if (digitalGain.get() == 0)
+                  {
+                     l515.setDigitalGail(realsense2.RS2_DIGITAL_GAIN_AUTO);
+                  }
+                  else if (digitalGain.get() == 1)
+                  {
+                     l515.setDigitalGail(realsense2.RS2_DIGITAL_GAIN_LOW);
+                  }
+                  else
+                  {
+                     l515.setDigitalGail(realsense2.RS2_DIGITAL_GAIN_HIGH);
+                  }
+
+               }
+
                ImGui.text("Unsigned 16 Depth:");
 
                for (int i = 0; i < 5; i++)
