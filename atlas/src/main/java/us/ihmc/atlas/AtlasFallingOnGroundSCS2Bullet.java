@@ -22,6 +22,7 @@ import us.ihmc.scs2.definition.visual.*;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizer;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.AltBulletPhysicsEngine;
+import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletMultiBodyJointParameters;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletMultiBodyParameters;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
 import us.ihmc.simulationToolkit.RobotDefinitionTools;
@@ -58,7 +59,7 @@ public class AtlasFallingOnGroundSCS2Bullet
 
       SimulationSession simulationSession = new SimulationSession((frame, rootRegistry) ->
       {
-         BulletPhysicsEngine physicsEngine = new BulletPhysicsEngine(frame, rootRegistry, BulletMultiBodyParameters.defaultBulletMultiBodyParameters());
+         BulletPhysicsEngine physicsEngine = new BulletPhysicsEngine(frame, rootRegistry, BulletMultiBodyParameters.defaultBulletMultiBodyParameters(), BulletMultiBodyJointParameters.defaultBulletMultiBodyJointParameters());
          return physicsEngine;
       }); 
 //      SimulationSession simulationSession = new SimulationSession(BulletPhysicsEngine::new);
