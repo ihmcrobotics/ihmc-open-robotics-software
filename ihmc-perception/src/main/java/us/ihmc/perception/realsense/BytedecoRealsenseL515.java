@@ -1,12 +1,12 @@
 package us.ihmc.perception.realsense;
 
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.MutableBytePointer;
+import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.librealsense2.*;
 import org.bytedeco.librealsense2.global.realsense2;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.string.StringTools;
-import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoLong;
 
 import java.util.function.Supplier;
 
@@ -14,14 +14,13 @@ import static org.bytedeco.librealsense2.global.realsense2.rs2_release_frame;
 
 public class BytedecoRealsenseL515
 {
+   private static final int RS2_FRAME_POINTER_SIZE = Pointer.sizeof(rs2_frame.class);
+
    protected final int width = 1024;
    protected final int height = 768;
    protected final int fps = 30;
    protected final int DEPTH_STREAM_INDEX = -1;
    protected final int COLOR_STREAM_INDEX = -1;
-
-   protected final String name = getClass().getSimpleName();
-   protected final YoRegistry registry;
 
    protected final rs2_device device; // The device (a device contains sensors like cameras and IMUS)
    private final String serialNumber;
@@ -33,19 +32,19 @@ public class BytedecoRealsenseL515
    protected rs2_intrinsics videoStreamIntrinsics = new rs2_intrinsics();
    protected rs2_stream_profile frameStreamProfile;
    protected double depthToMeterConversion;
-   protected rs2_frame depthFrame = new rs2_frame();
+   protected rs2_frame syncedFrames = new rs2_frame();
+   protected mutable_rs2_frame depthFrame = new mutable_rs2_frame();
+   protected mutable_rs2_frame colorFrame = new mutable_rs2_frame();
    protected MutableBytePointer depthFrameData = null;
-   protected long lastReceivedFrameTime;
-   protected final YoLong timeBetweenFrames;
-   protected final YoLong frameIndex;
    private int depthFrameDataSize;
+   private int colorFrameDataSize;
    private rs2_processing_block colorAlignProcessingBlock;
+   private rs2_frame_queue colorFrameQueue;
+   private long frameDataAddress;
+   private boolean colorEnabled = false;
+   private long colorFrameAddress;
 
-   public BytedecoRealsenseL515(String prefix,
-                                rs2_context context,
-                                rs2_device device,
-                                String serialNumber,
-                                YoRegistry parentRegistry)
+   public BytedecoRealsenseL515(rs2_context context, rs2_device device, String serialNumber)
    {
       this.device = device;
       this.serialNumber = serialNumber;
@@ -61,12 +60,6 @@ public class BytedecoRealsenseL515
       depthToMeterConversion = realsense2.rs2_get_depth_scale(sensor, error);
 
       LogTools.info("Configured Depth Stream of L515 Device. Serial number: {}", serialNumber);
-
-      registry = new YoRegistry(prefix + name + "_" + serialNumber);
-      timeBetweenFrames = new YoLong(prefix + "timeBetweenFrames", registry);
-      frameIndex = new YoLong(prefix + "frameIndex", registry);
-
-      parentRegistry.addChild(registry);
    }
 
    public void enableColor(int width, int height, int fps)
@@ -74,7 +67,11 @@ public class BytedecoRealsenseL515
       realsense2.rs2_config_enable_stream(config, realsense2.RS2_STREAM_COLOR, COLOR_STREAM_INDEX, width, height, realsense2.RS2_FORMAT_RGB8, fps, error);
       checkError(true, "Failed to enable stream.");
 
+      colorAlignProcessingBlock = realsense2.rs2_create_align(realsense2.RS2_STREAM_COLOR, error);
+      checkError(true, "");
 
+      colorFrameQueue = realsense2.rs2_create_frame_queue(1, error);
+      checkError(true, "");
    }
 
    /**
@@ -92,34 +89,78 @@ public class BytedecoRealsenseL515
    {
       pipelineProfile = realsense2.rs2_pipeline_start_with_config(pipeline, config, error);
       checkError(true, "Error starting pipeline.");
-   }
 
-   public boolean update()
+      colorEnabled = colorAlignProcessingBlock != null;
+      if (colorEnabled)
+      {
+         realsense2.rs2_start_processing_queue(colorAlignProcessingBlock, colorFrameQueue, error);
+         checkError(true, "");
+      }
+   }
+   public boolean readFrameData()
    {
       boolean dataWasRead = false;
-      boolean frameAvailable = realsense2.rs2_pipeline_poll_for_frames(pipeline, depthFrame, error) == 1;
+      boolean frameAvailable = realsense2.rs2_pipeline_poll_for_frames(pipeline, syncedFrames, error) == 1;
+      checkError(false, "");
+
       if (frameAvailable)
       {
+         depthFrame.address(syncedFrames.address());
+         rs2_frame pointer = syncedFrames.getPointer(1);
+         long address = pointer.address();
+         System.out.println(address);
+         colorFrame.address(syncedFrames.address() + RS2_FRAME_POINTER_SIZE);
+
+         rs2_frame extractedFrame = realsense2.rs2_extract_frame(syncedFrames, 1, error);
+
+         BytePointer bytePointer = new BytePointer(pointer);
+         long mightBeAddress = bytePointer.getLong();
+         System.out.println(mightBeAddress);
+//         new Pointer
+//         BytePointer bytePointer = new BytePointer(pointer);
+//         long mightBeAddress = bytePointer.getLong();
+//         System.out.println(mightBeAddress);
+         //         syncedFrames.
+
+//         new rs2_frame
          checkError(false, "");
+
+
+         int numberOfFrames = realsense2.rs2_embedded_frames_count(syncedFrames, error);
+         checkError(false, "");
+
+         System.out.println(numberOfFrames);
+//         colorFrameAddress = colorFrame.address();
+
+         //         depthFrame.set(syncedFrames.address(), 0, rs2_frame.totalBytes(), rs2_frame.totalBytes());
+
+//            depthFrame = realsense2.rs2_extract_frame(syncedFrames, 0, error);
+//            checkError(true, "");
+
+
+
+//            if (colorEnabled)
+//            {
+////               colorFrame = realsense2.rs2_extract_frame(syncedFrames, 1, error);
+//               checkError(true, "");
+//            }
+//         realsense2.rs2_extract_frame()
 
          depthFrameDataSize = realsense2.rs2_get_frame_data_size(depthFrame, error);
          checkError(false, "");
 
+         colorFrameDataSize = realsense2.rs2_get_frame_data_size(extractedFrame, error);
+         checkError(false, "");
+
          if (depthFrameDataSize > 0)
          {
-            long nanoTime = System.nanoTime();
-            timeBetweenFrames.set(nanoTime - lastReceivedFrameTime);
-            lastReceivedFrameTime = nanoTime;
-            frameIndex.increment();
-
             if (depthFrameData == null)
             {
                depthFrameData = new MutableBytePointer(realsense2.rs2_get_frame_data(depthFrame, error));
             }
             else
             {
-               long frameDataAddress = realsense2.rs2_get_frame_data_address(depthFrame, error);
-               depthFrameData.setAddress(frameDataAddress);
+               frameDataAddress = realsense2.rs2_get_frame_data_address(depthFrame, error);
             }
 
             if (frameStreamProfile == null)
@@ -136,6 +177,11 @@ public class BytedecoRealsenseL515
       }
 
       return dataWasRead;
+   }
+
+   public void updateDataBytePointers()
+   {
+      depthFrameData.setAddress(frameDataAddress);
    }
 
    public void setLaserPower(float laserPower)
@@ -178,6 +224,11 @@ public class BytedecoRealsenseL515
             throw new RuntimeException(errorMessage.get());
          }
       }
+   }
+
+   private boolean getColorEnabled()
+   {
+      return colorEnabled;
    }
 
    public MutableBytePointer getDepthFrameData()
