@@ -67,11 +67,12 @@ public class GDXRealsenseL515UI
                {
                   realSenseHardwareManager = new RealSenseHardwareManager(yoRegistry, yoGraphicsListRegistry);
 
-                  l515 = realSenseHardwareManager.createNonRealtimeL515("demo_", "F1121365");
+                  l515 = realSenseHardwareManager.createFullFeaturedL515("F1121365");
+                  l515.enableColor(1920, 1080, 30);
                   l515.initialize();
                }
 
-               if (l515.update())
+               if (l515.readFrameData())
                {
                   if (depthImagePanel == null)
                   {

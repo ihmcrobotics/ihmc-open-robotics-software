@@ -55,10 +55,10 @@ public class RealSenseHardwareManager
       return new RealtimeL515(prefix, context, createDevice(sanitizedSerialNumberToFind), sanitizedSerialNumberToFind, registry, graphicsListRegistry);
    }
 
-   public BytedecoRealsenseL515 createNonRealtimeL515(String prefix, String serialNumberToFind)
+   public BytedecoRealsenseL515 createFullFeaturedL515(String serialNumberToFind)
    {
       String sanitizedSerialNumberToFind = serialNumberToFind.toLowerCase();
-      return new BytedecoRealsenseL515(prefix, context, createDevice(sanitizedSerialNumberToFind), sanitizedSerialNumberToFind, registry);
+      return new BytedecoRealsenseL515(context, createDevice(sanitizedSerialNumberToFind), sanitizedSerialNumberToFind);
    }
 
    public rs2_device createDevice(String serialNumberToFind)
