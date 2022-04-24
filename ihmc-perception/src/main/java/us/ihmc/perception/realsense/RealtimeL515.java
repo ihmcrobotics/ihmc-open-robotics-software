@@ -8,7 +8,7 @@ import java.nio.ShortBuffer;
 import java.util.ArrayList;
 import java.util.function.Supplier;
 
-import org.bytedeco.javacpp.MutableBytePointer;
+import us.ihmc.perception.MutableBytePointer;
 import org.bytedeco.librealsense2.rs2_config;
 import org.bytedeco.librealsense2.rs2_context;
 import org.bytedeco.librealsense2.rs2_device;
