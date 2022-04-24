@@ -1,7 +1,7 @@
 package us.ihmc.perception.realsense;
 
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacpp.MutableBytePointer;
+import us.ihmc.perception.MutableBytePointer;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.librealsense2.*;
 import org.bytedeco.librealsense2.global.realsense2;
@@ -115,7 +115,7 @@ public class BytedecoRealsenseL515
 
          BytePointer bytePointer = new BytePointer(pointer);
          long mightBeAddress = bytePointer.getLong();
-         System.out.println(mightBeAddress);
+//         System.out.println(mightBeAddress);
 //         new Pointer
 //         BytePointer bytePointer = new BytePointer(pointer);
 //         long mightBeAddress = bytePointer.getLong();
@@ -129,7 +129,7 @@ public class BytedecoRealsenseL515
          int numberOfFrames = realsense2.rs2_embedded_frames_count(syncedFrames, error);
          checkError(false, "");
 
-         System.out.println(numberOfFrames);
+//         System.out.println(numberOfFrames);
 //         colorFrameAddress = colorFrame.address();
 
          //         depthFrame.set(syncedFrames.address(), 0, rs2_frame.totalBytes(), rs2_frame.totalBytes());
