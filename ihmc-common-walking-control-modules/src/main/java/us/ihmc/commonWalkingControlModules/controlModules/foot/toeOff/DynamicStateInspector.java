@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
@@ -231,20 +232,56 @@ public class DynamicStateInspector
 
    private void computeEdgesOfToeOff(RobotSide trailingFootSide)
    {
-      int startIndex = leadingFootPolygon.lineOfSightStartIndex(toeOffPoint);
-      int endIndex = leadingFootPolygon.lineOfSightEndIndex(toeOffPoint);
-      boolean isClockwise = leadingFootPolygon.isClockwiseOrdered();
-      toeOffPoint.checkReferenceFrameMatch(leadingFootPolygon);
-
-      if (isClockwise == (trailingFootSide == RobotSide.RIGHT))
+      if (leadingFootPolygon.isPointInside(toeOffPoint))
       {
-         outsideEdge.setIncludingFrame(toeOffPoint, leadingFootPolygon.getVertex(endIndex));
-         insideEdge.setIncludingFrame(toeOffPoint, leadingFootPolygon.getVertex(startIndex));
+         // This is a bad situation, as it means that the robot will have overlapping footholds. However, it should be handled elsewhere in the controller.
+         leadingFootPolygon.changeFrame(leadingFootZUpFrame);
+         toeOffPoint.changeFrame(leadingFootZUpFrame);
+
+         outsideEdge.setReferenceFrame(leadingFootZUpFrame);
+         insideEdge.setReferenceFrame(leadingFootZUpFrame);
+         outsideEdge.getPoint().set(toeOffPoint);
+         insideEdge.getPoint().set(toeOffPoint);
+
+         outsideEdge.getDirection().setX(toeOffPoint.getX() - leadingFootPolygon.getMinX());
+         insideEdge.getDirection().setX(toeOffPoint.getX() - leadingFootPolygon.getMinX());
+
+         if (trailingFootSide == RobotSide.RIGHT)
+         {
+            outsideEdge.getDirection().setY(leadingFootPolygon.getMaxY() - toeOffPoint.getY());
+            insideEdge.getDirection().setY(leadingFootPolygon.getMinY() - toeOffPoint.getY());
+         }
+         else
+         {
+            insideEdge.getDirection().setY(leadingFootPolygon.getMaxY() - toeOffPoint.getY());
+            outsideEdge.getDirection().setY(leadingFootPolygon.getMinY() - toeOffPoint.getY());
+         }
+
+         leadingFootPolygon.changeFrameAndProjectToXYPlane(worldFrame);
+         outsideEdge.changeFrameAndProjectToXYPlane(worldFrame);
+         insideEdge.changeFrameAndProjectToXYPlane(worldFrame);
+         toeOffPoint.changeFrameAndProjectToXYPlane(worldFrame);
       }
       else
       {
-         outsideEdge.setIncludingFrame(toeOffPoint, leadingFootPolygon.getVertex(startIndex));
-         insideEdge.setIncludingFrame(toeOffPoint, leadingFootPolygon.getVertex(endIndex));
+         int startIndex = leadingFootPolygon.lineOfSightStartIndex(toeOffPoint);
+         int endIndex = leadingFootPolygon.lineOfSightEndIndex(toeOffPoint);
+         boolean isClockwise = leadingFootPolygon.isClockwiseOrdered();
+         toeOffPoint.checkReferenceFrameMatch(leadingFootPolygon);
+
+         if (startIndex == -1 || endIndex == -1)
+            throw new RuntimeException("This should not happen.");
+
+         if (isClockwise == (trailingFootSide == RobotSide.RIGHT))
+         {
+            outsideEdge.setIncludingFrame(toeOffPoint, leadingFootPolygon.getVertex(endIndex));
+            insideEdge.setIncludingFrame(toeOffPoint, leadingFootPolygon.getVertex(startIndex));
+         }
+         else
+         {
+            outsideEdge.setIncludingFrame(toeOffPoint, leadingFootPolygon.getVertex(startIndex));
+            insideEdge.setIncludingFrame(toeOffPoint, leadingFootPolygon.getVertex(endIndex));
+         }
       }
    }
 
