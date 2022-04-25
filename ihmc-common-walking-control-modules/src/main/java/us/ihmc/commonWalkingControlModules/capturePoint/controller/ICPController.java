@@ -66,6 +66,10 @@ public class ICPController implements ICPControllerInterface
    private final YoFramePoint2D unconstrainedFeedbackCMP = new YoFramePoint2D(yoNamePrefix + "UnconstrainedFeedbackCMP", worldFrame, registry);
    final YoFramePoint2D perfectCoP = new YoFramePoint2D(yoNamePrefix + "PerfectCoP", worldFrame, registry);
    final YoFramePoint2D perfectCMP = new YoFramePoint2D(yoNamePrefix + "PerfectCMP", worldFrame, registry);
+   
+   private final YoFramePoint2D referenceFeedForwardCoP = new YoFramePoint2D(yoNamePrefix + "ReferenceFeedForwardCoP", worldFrame, registry);
+   private final YoFrameVector2D referenceFeedForwardCMPOffset = new YoFrameVector2D(yoNamePrefix + "ReferenceFeedForwardCMPOffset", worldFrame, registry);
+
 
    final YoFrameVector2D feedbackCoPDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackCoPDeltaSolution", worldFrame, registry);
    final YoFrameVector2D feedbackCMPDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackCMPDeltaSolution", worldFrame, registry);
@@ -116,6 +120,7 @@ public class ICPController implements ICPControllerInterface
    private final FramePoint2D finalICP = new FramePoint2D();
    private final FrameVector2D desiredICPVelocity = new FrameVector2D();
    private final FrameVector2D perfectCMPOffset = new FrameVector2D();
+   
    private final FramePoint2D currentICP = new FramePoint2D();
    private final FramePoint2D currentCoMPosition = new FramePoint2D();
    private final FrameVector2D currentCoMVelocity = new FrameVector2D();
@@ -316,7 +321,7 @@ public class ICPController implements ICPControllerInterface
       this.perfectCMP.add(this.perfectCoP, this.perfectCMPOffset);
 
       this.icpError.sub(currentICP, desiredICP);
-
+      
       scaleFeedbackWeightWithGain();
 
       submitSolverTaskConditions();
@@ -354,7 +359,8 @@ public class ICPController implements ICPControllerInterface
                                         feedbackGains.getFeedbackPartMaxValueParallelToMotion(),
                                         feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion());
 
-      computeUnconstrainedFeedbackCMPGain();
+      computeUnconstrainedFeedbackCMP();
+      computeFeedForwardAndFeedBackAlphas();
 
       UnrolledInverseFromMinor_DDRM.inv(transformedGains, inverseTransformedGains);
 
@@ -376,7 +382,10 @@ public class ICPController implements ICPControllerInterface
 
    private boolean solveQP()
    {
-      boolean converged = solver.compute(icpError, perfectCoP, perfectCMPOffset);
+      referenceFeedForwardCMPOffset.setAndScale(1.0 - feedForwardAlpha.getDoubleValue(), perfectCMPOffset);
+      referenceFeedForwardCoP.interpolate(perfectCoP, desiredICP, feedForwardAlpha.getDoubleValue());
+
+      boolean converged = solver.compute(icpError, referenceFeedForwardCoP, referenceFeedForwardCMPOffset);
       previousTickFailed.set(solver.previousTickFailed());
       if (!converged)
       {
@@ -392,7 +401,7 @@ public class ICPController implements ICPControllerInterface
       return converged;
    }
 
-   private void computeUnconstrainedFeedbackCMPGain()
+   private void computeUnconstrainedFeedbackCMP()
    {
       unconstrainedFeedback.setX(transformedGains.get(0, 0) * icpError.getX() + transformedGains.get(0, 1) * icpError.getY());
       unconstrainedFeedback.setY(transformedGains.get(1, 0) * icpError.getX() + transformedGains.get(1, 1) * icpError.getY());
@@ -419,8 +428,8 @@ public class ICPController implements ICPControllerInterface
 
       integrator.update(desiredICPVelocity, currentCoMVelocity, icpError);
    }
-
-   private void computeCMPPositions()
+   
+   private void computeFeedForwardAndFeedBackAlphas()
    {
       if (parameters.getFeedbackAlphaCalculator() != null)
          feedbackAlpha.set(parameters.getFeedbackAlphaCalculator().computeAlpha(currentICP, copConstraintHandler.getCoPConstraint()));
@@ -436,10 +445,13 @@ public class ICPController implements ICPControllerInterface
                                                                                       copConstraintHandler.getCoPConstraint()));
       else
          feedForwardAlpha.set(0.0);
+   }
 
-      feedbackCoP.interpolate(perfectCoP, desiredICP, feedForwardAlpha.getDoubleValue());
+   private void computeCMPPositions()
+   {
+      feedbackCoP.set(referenceFeedForwardCoP);
       feedbackCoP.scaleAdd(1.0 - feedbackAlpha.getValue(), feedbackCoPDelta, feedbackCoP);
-      feedbackCMP.scaleAdd(1.0 - feedForwardAlpha.getValue(), perfectCMPOffset, feedbackCoP);
+      feedbackCMP.add(referenceFeedForwardCMPOffset, feedbackCoP);
       feedbackCMP.scaleAdd(1.0 - feedbackAlpha.getValue(), feedbackCMPDelta, feedbackCMP);
       feedbackCMP.add(integrator.getFeedbackCMPIntegral());
    }
