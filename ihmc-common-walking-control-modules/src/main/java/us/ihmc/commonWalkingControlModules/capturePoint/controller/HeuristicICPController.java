@@ -159,19 +159,21 @@ public class HeuristicICPController implements ICPControllerInterface
    public void compute(FrameConvexPolygon2DReadOnly supportPolygonInWorld,
                        FramePoint2DReadOnly desiredICP,
                        FrameVector2DReadOnly desiredICPVelocity,
+                       FramePoint2DReadOnly finalICP,
                        FramePoint2DReadOnly perfectCoP,
                        FramePoint2DReadOnly currentICP,
                        FramePoint2DReadOnly currentCoMPosition,
                        double omega0)
    {
       desiredCMPOffsetToThrowAway.setToZero(worldFrame);
-      compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, perfectCoP, desiredCMPOffsetToThrowAway, currentICP, currentCoMPosition, omega0);
+      compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, finalICP, perfectCoP, desiredCMPOffsetToThrowAway, currentICP, currentCoMPosition, omega0);
    }
 
    @Override
    public void compute(FrameConvexPolygon2DReadOnly supportPolygonInWorld,
                        FramePoint2DReadOnly desiredICP,
                        FrameVector2DReadOnly desiredICPVelocity,
+                       FramePoint2DReadOnly finalICP,
                        FramePoint2DReadOnly perfectCoP,
                        FrameVector2DReadOnly perfectCMPOffset,
                        FramePoint2DReadOnly currentICP,

@@ -17,7 +17,6 @@ import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
@@ -27,8 +26,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -65,9 +62,8 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
       DRCRobotModel robotModel = getRobotModel();
       createSimulationTestHelper(environment, location);
       simulationTestHelper.start();
-      setupCamera(simulationTestHelper);
       ThreadTools.sleep(1000);
-      assertTrue(simulationTestHelper.simulateAndWait(0.25));
+      assertTrue(simulationTestHelper.simulateNow(0.25));
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
@@ -142,12 +138,12 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
       {
          simulationTestHelper.publishToController(messages.get(messageIdx));
          expectedNumberOfSteps += messages.get(messageIdx).getFootstepDataList().size();
-         assertTrue(simulationTestHelper.simulateAndWait(timeBetweenSendingMessages));
+         assertTrue(simulationTestHelper.simulateNow(timeBetweenSendingMessages));
          assertEquals(expectedNumberOfSteps, (int) numberOfStepsInController.getValueAsLongBits());
          timeUntilDone -= timeBetweenSendingMessages;
       }
 
-      assertTrue(simulationTestHelper.simulateAndWait(timeUntilDone + 0.25));
+      assertTrue(simulationTestHelper.simulateNow(timeUntilDone + 0.25));
       assertEquals(0, (int) numberOfStepsInController.getValueAsLongBits());
    }
 
@@ -157,13 +153,13 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
       DRCStartingLocation location = DRCObstacleCourseStartingLocation.DEFAULT_BUT_ALMOST_PI;
       createSimulationTestHelper(environment, location);
       simulationTestHelper.start();
-      assertTrue(simulationTestHelper.simulateAndWait(0.25));
+      assertTrue(simulationTestHelper.simulateNow(0.25));
 
-      MovingReferenceFrame messageFrame = simulationTestHelper.getReferenceFrames().getMidFeetZUpFrame();
+      MovingReferenceFrame messageFrame = simulationTestHelper.getControllerReferenceFrames().getMidFeetZUpFrame();
       transformMessageToWorld(messageFrame, messageInMidFeetZUp);
 
       simulationTestHelper.publishToController(messageInMidFeetZUp);
-      assertTrue(simulationTestHelper.simulateAndWait(0.25));
+      assertTrue(simulationTestHelper.simulateNow(0.25));
 
       int steps = (int) simulationTestHelper.findVariable("currentNumberOfFootsteps").getValueAsDouble();
       assertEquals(messageInMidFeetZUp.getFootstepDataList().size(), steps);
@@ -183,18 +179,6 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
       }
    }
 
-   private static void setupCamera(SCS2AvatarTestingSimulation simulationTestHelper)
-   {
-      OffsetAndYawRobotInitialSetup startingLocationOffset = location.getStartingLocationOffset();
-      Point3D cameraFocus = new Point3D(startingLocationOffset.getAdditionalOffset());
-      cameraFocus.addZ(1.0);
-      RigidBodyTransform transform = new RigidBodyTransform();
-      transform.setRotationYawAndZeroTranslation(startingLocationOffset.getYaw());
-      Point3D cameraPosition = new Point3D(10.0, 5.0, cameraFocus.getZ() + 2.0);
-      transform.transform(cameraPosition);
-      simulationTestHelper.setCamera(cameraFocus, cameraPosition);
-   }
-
    @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
@@ -207,7 +191,7 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
       // Do this here in case a test fails. That way the memory will be recycled.
       if (simulationTestHelper != null)
       {
-         simulationTestHelper.finishTest(simulationTestingParameters.getKeepSCSUp());
+         simulationTestHelper.finishTest();
          simulationTestHelper = null;
       }
 

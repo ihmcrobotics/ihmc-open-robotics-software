@@ -5,7 +5,11 @@ import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.DoubleStream;
 
 import jxl.Cell;
 import jxl.Workbook;
@@ -19,55 +23,241 @@ import jxl.write.WritableFont;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 import jxl.write.WriteException;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.log.LogTools;
+import us.ihmc.robotics.screwTheory.TotalMassCalculator;
+import us.ihmc.scs2.sharedMemory.YoSharedBuffer;
+import us.ihmc.scs2.sharedMemory.YoVariableBuffer;
+import us.ihmc.scs2.simulation.robot.multiBodySystem.SimFloatingRootJoint;
+import us.ihmc.scs2.simulation.robot.multiBodySystem.SimRevoluteJoint;
+import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimJointBasics;
+import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimRigidBodyBasics;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Link;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.yoVariables.buffer.YoBuffer;
-import us.ihmc.yoVariables.buffer.YoBufferVariableEntry;
+import us.ihmc.yoVariables.buffer.interfaces.YoBufferVariableEntryReader;
+import us.ihmc.yoVariables.euclid.YoPoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class DataExporterExcelWorkbookCreator
 {
-   private static boolean DEBUG = false;
+   private final List<OneDoFJointData> pinJoints = new ArrayList<>();
+   private final List<JointInfo> allJoints = new ArrayList<>();
+   private final Function<YoVariable, VariableData> dataBuffer;
+   private final YoVariable timeVariable;
+   private final String robotName;
+   private final Class<?> robotType;
+   private final double robotMass;
+   private final Vector3D gravity = new Vector3D();
+   private final YoPoint3D robotPosition;
 
-   private final Robot robot;
-   private final List<PinJoint> pinJoints = new ArrayList<PinJoint>();
-   private final List<Joint> allJoints = new ArrayList<Joint>();
-   private final YoBuffer dataBuffer;
+   private static class JointInfo
+   {
+      final String jointName;
+      final String linkName;
+      final Vector3D jointOffset = new Vector3D();
+      final double linkMass;
+      final Vector3D linkCoM = new Vector3D();
+      final Matrix3D linkMomentOfInertia = new Matrix3D();
 
-   private final WritableCellFormat defaultFormat;
-   private final WritableCellFormat headerCellFormat;
-   private final WritableCellFormat defaultNumberFormat;
-   private final WritableCellFormat smallNumberFormat;
+      public JointInfo(Joint joint)
+      {
+         jointName = joint.getName();
+         Link link = joint.getLink();
+         linkName = link.getName();
+         joint.getOffset(jointOffset);
+         linkMass = link.getMass();
+         link.getComOffset(linkCoM);
+         link.getMomentOfInertia(linkMomentOfInertia);
+      }
 
-// TODO: currently only does PinJoints
+      public JointInfo(SimJointBasics joint)
+      {
+         jointName = joint.getName();
+         SimRigidBodyBasics link = joint.getSuccessor();
+         linkName = link.getName();
+         jointOffset.set(joint.getFrameBeforeJoint().getTransformToParent().getTranslation());
+         linkMass = link.getInertia().getMass();
+         linkCoM.set(link.getBodyFixedFrame().getTransformToParent().getTranslation());
+         linkMomentOfInertia.set(link.getInertia().getMomentOfInertia());
+      }
+   }
+
+   private static class OneDoFJointData
+   {
+      private final String name;
+      private final YoVariable position, speed, acceleration, torque;
+
+      public OneDoFJointData(OneDegreeOfFreedomJoint joint)
+      {
+         name = joint.getName();
+         position = joint.getQYoVariable();
+         speed = joint.getQDYoVariable();
+         acceleration = joint.getQDDYoVariable();
+         torque = joint.getTauYoVariable();
+      }
+
+      public OneDoFJointData(SimRevoluteJoint joint)
+      {
+         name = joint.getName();
+         position = joint.getYoQ();
+         speed = joint.getYoQd();
+         acceleration = joint.getYoQdd();
+         torque = joint.getYoTau();
+      }
+
+      public String getName()
+      {
+         return name;
+      }
+   }
+
+   private static class VariableData
+   {
+      final String variableName;
+      final double[] buffer;
+      final double lowerBound, upperBound;
+
+      public VariableData(YoBufferVariableEntryReader entry)
+      {
+         variableName = entry.getVariableName();
+         buffer = entry.getBuffer();
+         lowerBound = entry.getLowerBound();
+         upperBound = entry.getUpperBound();
+      }
+
+      public VariableData(YoVariableBuffer<?> entry)
+      {
+         variableName = entry.getYoVariable().getName();
+         buffer = entry.getAsDoubleBuffer();
+         lowerBound = DoubleStream.of(buffer).min().getAsDouble();
+         upperBound = DoubleStream.of(buffer).max().getAsDouble();
+      }
+
+      public double[] getBuffer()
+      {
+         return buffer;
+      }
+
+      public double getLowerBound()
+      {
+         return lowerBound;
+      }
+
+      public double getUpperBound()
+      {
+         return upperBound;
+      }
+   }
+
+   private final WritableCellFormat defaultFormat = new WritableCellFormat();
+   private final WritableCellFormat headerCellFormat = new WritableCellFormat(new WritableFont(WritableFont.ARIAL, 10, WritableFont.BOLD));
+   private final WritableCellFormat defaultNumberFormat = new WritableCellFormat(NumberFormats.FLOAT);
+   private final WritableCellFormat smallNumberFormat = new WritableCellFormat(NumberFormats.EXPONENTIAL);
+
+   // TODO: currently only does PinJoints
    public DataExporterExcelWorkbookCreator(Robot robot, YoBuffer dataBuffer)
    {
-      this.robot = robot;
+      robotName = robot.getName();
+      robotType = robot.getClass();
+      robotMass = robot.computeCenterOfMass(new Point3D());
+      robot.getGravity(gravity);
+      timeVariable = robot.getYoTime();
+
+      robotPosition = extractRobotPosition(robot);
+
+      List<Joint> jointList = new ArrayList<>();
 
       for (Joint rootJoint : robot.getRootJoints())
       {
-         recursivelyAddPinJoints(rootJoint, pinJoints);
-         recursivelyAddJoints(rootJoint, allJoints);
+         recursivelyAddJoints(rootJoint, jointList);
       }
 
-      this.dataBuffer = dataBuffer;
+      for (Joint joint : jointList)
+      {
+         allJoints.add(new JointInfo(joint));
 
-      defaultFormat = new WritableCellFormat();
+         if (joint instanceof PinJoint)
+         {
+            pinJoints.add(new OneDoFJointData((PinJoint) joint));
+         }
+      }
 
-      WritableFont headerFont = new WritableFont(WritableFont.ARIAL, 10, WritableFont.BOLD);
-      headerCellFormat = new WritableCellFormat(headerFont);
+      this.dataBuffer = new Function<YoVariable, VariableData>()
+      {
+         private Map<YoVariable, VariableData> cache = new HashMap<>();
 
-      defaultNumberFormat = new WritableCellFormat(NumberFormats.FLOAT);
-      smallNumberFormat = new WritableCellFormat(NumberFormats.EXPONENTIAL);
+         @Override
+         public VariableData apply(YoVariable var)
+         {
+            VariableData varData = cache.get(var);
+            if (varData == null)
+               varData = new VariableData(dataBuffer.getEntry(var));
+            return varData;
+         }
+      };
+   }
+
+   public DataExporterExcelWorkbookCreator(YoVariable time, us.ihmc.scs2.simulation.robot.Robot robot, YoSharedBuffer sharedBuffer)
+   {
+      robotName = robot.getName();
+      robotType = robot.getClass();
+      robotMass = TotalMassCalculator.computeSubTreeMass(robot.getRootBody());
+      gravity.set(0.0, 0.0, -9.81); // FIXME
+      timeVariable = time;
+
+      YoFramePoint3D position = ((SimFloatingRootJoint) robot.getFloatingRootJoint()).getJointPose().getPosition();
+      robotPosition = new YoPoint3D(position.getYoX(), position.getYoY(), position.getYoZ());
+
+      List<? extends SimJointBasics> jointList = robot.getAllJoints();
+
+      for (SimJointBasics joint : jointList)
+      {
+         allJoints.add(new JointInfo(joint));
+
+         if (joint instanceof SimRevoluteJoint)
+         {
+            pinJoints.add(new OneDoFJointData((SimRevoluteJoint) joint));
+         }
+      }
+
+      this.dataBuffer = new Function<YoVariable, VariableData>()
+      {
+         private Map<YoVariable, VariableData> cache = new HashMap<>();
+
+         @Override
+         public VariableData apply(YoVariable var)
+         {
+            VariableData varData = cache.get(var);
+            if (varData == null)
+               varData = new VariableData(sharedBuffer.getRegistryBuffer().findYoVariableBuffer(var));
+            return varData;
+         }
+      };
+   }
+
+   public YoPoint3D extractRobotPosition(Robot robot)
+   {
+      Joint rootJoint = robot.getRootJoints().get(0);
+      if (rootJoint instanceof FloatingJoint)
+      {
+         return new YoPoint3D(((FloatingJoint) rootJoint).getQx(), ((FloatingJoint) rootJoint).getQy(), ((FloatingJoint) rootJoint).getQz());
+      }
+      else
+      {
+         GroundContactPoint groundContactPoint = robot.getAllGroundContactPoints().get(0);
+         YoFramePoint3D yoPosition = groundContactPoint.getYoPosition();
+         return new YoPoint3D(yoPosition.getYoX(), yoPosition.getYoY(), yoPosition.getYoZ());
+      }
    }
 
    public void createAndSaveTorqueAndSpeedSpreadSheet(File dataAndVideosTagDirectory, String fileHeader)
@@ -92,7 +282,7 @@ public class DataExporterExcelWorkbookCreator
          }
          catch (Exception ex)
          {
-            PrintTools.error(this, "Trouble saving Excel workbook " + workbookFile.getAbsolutePath());
+            LogTools.error("Trouble saving Excel workbook " + workbookFile.getAbsolutePath());
          }
       }
    }
@@ -106,7 +296,7 @@ public class DataExporterExcelWorkbookCreator
       }
       catch (IOException ex)
       {
-         PrintTools.error(this, "Failed to open Excel workbook. " + workbookFile);
+         LogTools.error("Failed to open Excel workbook. " + workbookFile);
       }
 
       return writableWorkBook;
@@ -125,19 +315,19 @@ public class DataExporterExcelWorkbookCreator
       row++;
 
       addStringToSheet(infoSheet, labelColumn, row, "Robot type: ", headerCellFormat);
-      addStringToSheet(infoSheet, dataColumn, row, robot.getClass().getSimpleName());
+      addStringToSheet(infoSheet, dataColumn, row, robotType.getSimpleName());
       row++;
 
       addStringToSheet(infoSheet, labelColumn, row, "Robot name: ", headerCellFormat);
-      addStringToSheet(infoSheet, dataColumn, row, robot.getName());
+      addStringToSheet(infoSheet, dataColumn, row, robotName);
       row++;
 
       addStringToSheet(infoSheet, labelColumn, row, "Total mass [kg]: ", headerCellFormat);
-      addNumberToSheet(infoSheet, dataColumn, row, robot.computeCenterOfMass(new Point3D()));
+      addNumberToSheet(infoSheet, dataColumn, row, robotMass);
       row++;
 
       addStringToSheet(infoSheet, labelColumn, row, "Run time [s]: ", headerCellFormat);
-      addNumberToSheet(infoSheet, dataColumn, row, dataBuffer.getEntry(robot.getYoTime()).getUpperBound());
+      addNumberToSheet(infoSheet, dataColumn, row, dataBuffer.apply(timeVariable).getUpperBound());
       row++;
 
       addStringToSheet(infoSheet, labelColumn, row, "Mechanical cost of transport: ", headerCellFormat);
@@ -150,40 +340,40 @@ public class DataExporterExcelWorkbookCreator
       WritableSheet dataSheet = workbook.createSheet("Velocity and torque", workbook.getNumberOfSheets());
       int row = 1;
 
-      for (PinJoint joint : pinJoints)
+      for (OneDoFJointData jointData : pinJoints)
       {
          int column = 0;
 
-         YoBufferVariableEntry position = dataBuffer.getEntry(joint.getQYoVariable());
-         YoBufferVariableEntry speed = dataBuffer.getEntry(joint.getQDYoVariable());
-         YoBufferVariableEntry torque = dataBuffer.getEntry(joint.getTauYoVariable());
+         VariableData position = dataBuffer.apply(jointData.position);
+         VariableData speed = dataBuffer.apply(jointData.speed);
+         VariableData torque = dataBuffer.apply(jointData.torque);
 
          addHeaderEntry(dataSheet, column, "Joint");
-         String jointName = joint.getName();
-         addStringToSheet(dataSheet, column++, row, jointName); 
-         
+         String jointName = jointData.getName();
+         addStringToSheet(dataSheet, column++, row, jointName);
+
          addHeaderEntry(dataSheet, column, "Min joint position [rad]");
          addNumberToSheet(dataSheet, column++, row, position.getLowerBound());
-         
+
          addHeaderEntry(dataSheet, column, "Max joint position [rad]");
          addNumberToSheet(dataSheet, column++, row, position.getUpperBound());
 
          addHeaderEntry(dataSheet, column, "Min joint speed [rad / s]");
          addNumberToSheet(dataSheet, column++, row, speed.getLowerBound());
-         
+
          addHeaderEntry(dataSheet, column, "Max joint speed [rad / s]");
          addNumberToSheet(dataSheet, column++, row, speed.getUpperBound());
-         
+
          addHeaderEntry(dataSheet, column, "Min joint torque [Nm]");
          addNumberToSheet(dataSheet, column++, row, torque.getLowerBound());
 
          addHeaderEntry(dataSheet, column, "Max joint torque [Nm]");
          addNumberToSheet(dataSheet, column++, row, torque.getUpperBound());
- 
+
          addHeaderEntry(dataSheet, column, "Range of Motion [rad]");
          double rangeOfMotion = position.getUpperBound() - position.getLowerBound();
          addNumberToSheet(dataSheet, column++, row, rangeOfMotion);
-         
+
          addHeaderEntry(dataSheet, column, "Max unsigned speed [rad / s]");
          double maxUnsignedSpeed = Math.max(Math.abs(speed.getUpperBound()), Math.abs(speed.getLowerBound()));
          addNumberToSheet(dataSheet, column++, row, maxUnsignedSpeed);
@@ -217,33 +407,16 @@ public class DataExporterExcelWorkbookCreator
    private double computeMechanicalCostOfTransport()
    {
       double cot = computeTotalMechanicalEnergy();
-      double robotMass = robot.computeCenterOfMass(new Point3D());
-      Vector3D gravity = new Vector3D();
-      robot.getGravity(gravity);
       // Get the distance traveled through a random GroundContactPoint assuming it is attached to the robot
       // TODO: it would be way nicer to get access to the actual robot position
-      double[] xPosition;
-      double[] yPosition;
-      double[] zPosition;
-      try
-      {
-         xPosition = dataBuffer.findVariableEntry("q_x").getBuffer();
-         yPosition = dataBuffer.findVariableEntry("q_y").getBuffer();
-         zPosition = dataBuffer.findVariableEntry("q_z").getBuffer();
-      }
-      catch (NullPointerException e)
-      {
-         GroundContactPoint groundContactPoint = robot.getAllGroundContactPoints().get(0);
-         YoFramePoint3D yoPosition = groundContactPoint.getYoPosition();
-         xPosition = dataBuffer.getEntry(yoPosition.getYoX()).getBuffer();
-         yPosition = dataBuffer.getEntry(yoPosition.getYoY()).getBuffer();
-         zPosition = dataBuffer.getEntry(yoPosition.getYoZ()).getBuffer();
-      }
+      double[] xPosition = dataBuffer.apply(robotPosition.getYoX()).getBuffer();
+      double[] yPosition = dataBuffer.apply(robotPosition.getYoY()).getBuffer();
+      double[] zPosition = dataBuffer.apply(robotPosition.getYoZ()).getBuffer();
       int dataLength = xPosition.length;
       Vector3D totalDistance = new Vector3D();
-      totalDistance.setX(xPosition[dataLength-1]-xPosition[0]);
-      totalDistance.setY(yPosition[dataLength-1]-yPosition[0]);
-      totalDistance.setZ(zPosition[dataLength-1]-zPosition[0]);
+      totalDistance.setX(xPosition[dataLength - 1] - xPosition[0]);
+      totalDistance.setY(yPosition[dataLength - 1] - yPosition[0]);
+      totalDistance.setZ(zPosition[dataLength - 1] - zPosition[0]);
 
       cot = cot / (robotMass * gravity.length() * totalDistance.length());
 
@@ -254,8 +427,9 @@ public class DataExporterExcelWorkbookCreator
    {
       double ret = 0.0;
       double[] mechanicalPower = computeTotalUnsignedMechanicalPower();
-      double simulationTime = dataBuffer.getEntry(robot.getYoTime()).getUpperBound() - dataBuffer.getEntry(robot.getYoTime()).getLowerBound();
-      double simulationDT = simulationTime / dataBuffer.getBufferSize();
+      VariableData timeData = dataBuffer.apply(timeVariable);
+      double simulationTime = timeData.getUpperBound() - timeData.getLowerBound();
+      double simulationDT = simulationTime / timeData.getBuffer().length;
 
       for (int i = 0; i < mechanicalPower.length; i++)
       {
@@ -267,15 +441,15 @@ public class DataExporterExcelWorkbookCreator
 
    private double[] computeTotalUnsignedMechanicalPower()
    {
-      int dataLength = dataBuffer.getEntry(robot.getYoTime()).getBuffer().length;
+      int dataLength = dataBuffer.apply(timeVariable).getBuffer().length;
       double[] ret = new double[dataLength];
       for (int i = 0; i < dataLength; i++)
          ret[i] = 0.0;
 
-      for (PinJoint joint : pinJoints)
+      for (OneDoFJointData jointData : pinJoints)
       {
-         double[] speed = dataBuffer.getEntry(joint.getQDYoVariable()).getBuffer();
-         double[] torque = dataBuffer.getEntry(joint.getTauYoVariable()).getBuffer();
+         double[] speed = dataBuffer.apply(jointData.speed).getBuffer();
+         double[] torque = dataBuffer.apply(jointData.torque).getBuffer();
 
          double[] jointMechincalPower = computeMechanicalPower(speed, torque);
 
@@ -335,24 +509,22 @@ public class DataExporterExcelWorkbookCreator
       WritableSheet configDataSheet = workbook.createSheet("Robot Configuration", workbook.getNumberOfSheets());
 
       int row = 1;
-      for (Joint joint : allJoints)
+      for (JointInfo jointInfo : allJoints)
       {
-         Link link = joint.getLink();
          int column = 0;
 
          // joint name
          addHeaderEntry(configDataSheet, column, "Joint name");
-         String jointName = joint.getName();
+         String jointName = jointInfo.jointName;
          addStringToSheet(configDataSheet, column++, row, jointName);
 
          // link name
          addHeaderEntry(configDataSheet, column, "Link name");
-         String linkName = link.getName();
+         String linkName = jointInfo.linkName;
          addStringToSheet(configDataSheet, column++, row, linkName);
 
          // Link offset
-         Vector3D offset = new Vector3D();
-         joint.getOffset(offset);
+         Vector3D offset = jointInfo.jointOffset;
 
          for (Axis3D axis : Axis3D.values())
          {
@@ -361,13 +533,12 @@ public class DataExporterExcelWorkbookCreator
          }
 
          // Mass
-         Double mass = link.getMass();
+         Double mass = jointInfo.linkMass;
          addHeaderEntry(configDataSheet, column, "Mass");
          addNumberToSheet(configDataSheet, column++, row, mass);
 
          // CoM offset
-         Vector3D comOffset = new Vector3D();
-         link.getComOffset(comOffset);
+         Vector3D comOffset = jointInfo.linkCoM;
 
          for (Axis3D axis : Axis3D.values())
          {
@@ -376,8 +547,7 @@ public class DataExporterExcelWorkbookCreator
          }
 
          // Mass moment of inertia
-         Matrix3D momentOfInertia = new Matrix3D();
-         link.getMomentOfInertia(momentOfInertia);
+         Matrix3D momentOfInertia = jointInfo.linkMomentOfInertia;
 
          for (int i = 0; i < 3; i++)
          {
@@ -396,14 +566,14 @@ public class DataExporterExcelWorkbookCreator
    {
       WritableSheet jointDataSheet = workbook.createSheet("Joint Data", workbook.getNumberOfSheets());
       int column = 0;
-      writeJointDataColumn(jointDataSheet, column++, dataBuffer.findVariableEntry("t"), true);
-      
-      for (PinJoint joint : pinJoints)
+      writeJointDataColumn(jointDataSheet, column++, dataBuffer.apply(timeVariable), true);
+
+      for (OneDoFJointData joint : pinJoints)
       {
-         YoBufferVariableEntry position = dataBuffer.getEntry(joint.getQYoVariable());
-         YoBufferVariableEntry speed = dataBuffer.getEntry(joint.getQDYoVariable());
-         YoBufferVariableEntry torque = dataBuffer.getEntry(joint.getTauYoVariable());
-         YoBufferVariableEntry acceleration = dataBuffer.getEntry(joint.getQDDYoVariable());
+         VariableData position = dataBuffer.apply(joint.position);
+         VariableData speed = dataBuffer.apply(joint.speed);
+         VariableData torque = dataBuffer.apply(joint.torque);
+         VariableData acceleration = dataBuffer.apply(joint.acceleration);
 
          writeJointDataColumn(jointDataSheet, column++, position, false);
          writeJointDataColumn(jointDataSheet, column++, speed, false);
@@ -416,10 +586,10 @@ public class DataExporterExcelWorkbookCreator
       }
    }
 
-   private void writeJointDataColumn(WritableSheet dataSheet, int column, YoBufferVariableEntry dataBufferEntry, boolean unsigned)
+   private void writeJointDataColumn(WritableSheet dataSheet, int column, VariableData dataBufferEntry, boolean unsigned)
    {
       int row = 0;
-      String name = dataBufferEntry.getVariableName();
+      String name = dataBufferEntry.variableName;
       if (unsigned)
          name = name + " unsigned";
       addStringToSheet(dataSheet, column, row++, name);
@@ -433,7 +603,7 @@ public class DataExporterExcelWorkbookCreator
       }
    }
 
-   private void writeMechanicalPowerJointDataColumn(WritableSheet dataSheet, int column, YoBufferVariableEntry speed, YoBufferVariableEntry torque, String jointName)
+   private void writeMechanicalPowerJointDataColumn(WritableSheet dataSheet, int column, VariableData speed, VariableData torque, String jointName)
    {
       int row = 0;
       String name = jointName + " unsigned mechanical power";
@@ -490,19 +660,6 @@ public class DataExporterExcelWorkbookCreator
       catch (WriteException e)
       {
          e.printStackTrace();
-      }
-   }
-
-   private static void recursivelyAddPinJoints(Joint joint, List<PinJoint> pinJoints)
-   {
-      if (joint instanceof PinJoint)
-         pinJoints.add((PinJoint) joint);
-      else if (DEBUG && !(joint instanceof FloatingJoint))
-         PrintTools.error("Joint " + joint.getName() + " not currently handled by " + DataExporterExcelWorkbookCreator.class.getSimpleName());
-
-      for (Joint child : joint.getChildrenJoints())
-      {
-         recursivelyAddPinJoints(child, pinJoints);
       }
    }
 

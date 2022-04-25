@@ -12,7 +12,6 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasStepInPlaceTest extends AvatarStepInPlaceTest
 {
@@ -47,7 +46,7 @@ public class AtlasStepInPlaceTest extends AvatarStepInPlaceTest
 
    @Tag("humanoid-flat-ground-slow")
    @Override
-   public void testStepInPlace() throws SimulationExceededMaximumTimeException
+   public void testStepInPlace()
    {
       super.testStepInPlace();
    }
@@ -55,7 +54,7 @@ public class AtlasStepInPlaceTest extends AvatarStepInPlaceTest
    @Tag("humanoid-flat-ground")
    @Test
    @Override
-   public void testStepInPlaceWithPush() throws SimulationExceededMaximumTimeException
+   public void testStepInPlaceWithPush()
    {
       super.testStepInPlaceWithPush();
    }

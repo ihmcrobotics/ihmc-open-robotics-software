@@ -243,7 +243,7 @@ public class BalanceManager
       this.controllerToolbox = controllerToolbox;
       yoTime = controllerToolbox.getYoTime();
 
-      contactStateManager = new ContactStateManager(walkingControllerParameters, controllerToolbox.getControlDT(), registry);
+      contactStateManager = new ContactStateManager(yoTime, walkingControllerParameters, registry);
 
       angularMomentumHandler = new AngularMomentumHandler<>(totalMass,
                                                             gravityZ,
@@ -444,10 +444,12 @@ public class BalanceManager
    public void compute(RobotSide supportLeg, FeedbackControlCommand<?> heightControlCommand, boolean keepCoPInsideSupportPolygon,
                        boolean controlHeightWithMomentum)
    {
+      shouldAdjustTimeFromTrackingError.set(getICPErrorMagnitude() > icpErrorThresholdToAdjustTime.getDoubleValue());
+      contactStateManager.updateTimeInState(timeShiftProvider, shouldAdjustTimeFromTrackingError.getBooleanValue());
+
       desiredCapturePoint2d.set(comTrajectoryPlanner.getDesiredDCMPosition());
       desiredCapturePointVelocity2d.set(comTrajectoryPlanner.getDesiredDCMVelocity());
-      if (!icpVelocityReductionFactor.isNaN())
-         desiredCapturePointVelocity2d.scale(icpVelocityReductionFactor.getValue());
+
       perfectCMP2d.set(comTrajectoryPlanner.getDesiredECMPPosition());
       desiredCoM2d.set(comTrajectoryPlanner.getDesiredCoMPosition());
       yoDesiredCoMVelocity.set(comTrajectoryPlanner.getDesiredCoMVelocity());
@@ -478,6 +480,10 @@ public class BalanceManager
          }
       }
 
+      decayDesiredICPVelocity();
+      if (!icpVelocityReductionFactor.isNaN())
+         desiredCapturePointVelocity2d.scale(icpVelocityReductionFactor.getValue());
+
       yoDesiredCapturePoint.set(desiredCapturePoint2d);
       yoDesiredICPVelocity.set(desiredCapturePointVelocity2d);
       yoDesiredCoMPosition.set(desiredCoM2d, comTrajectoryPlanner.getDesiredCoMPosition().getZ());
@@ -496,6 +502,8 @@ public class BalanceManager
          YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
          contactState.getPlaneContactStateCommand(contactStateCommands.get(robotSide));
       }
+
+
 
       if (heightControlCommand.getCommandType() == ControllerCoreCommandType.POINT)
       {
@@ -527,6 +535,7 @@ public class BalanceManager
       linearMomentumRateControlModuleInput.setUseMomentumRecoveryMode(useMomentumRecoveryModeForBalance.getBooleanValue());
       linearMomentumRateControlModuleInput.setDesiredCapturePoint(desiredCapturePoint2d);
       linearMomentumRateControlModuleInput.setDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
+      linearMomentumRateControlModuleInput.setDesiredCapturePointAtEndOfState(yoFinalDesiredICP);
       linearMomentumRateControlModuleInput.setPerfectCMP(perfectCMP2d);
       linearMomentumRateControlModuleInput.setPerfectCoP(perfectCoP2d);
       linearMomentumRateControlModuleInput.setMinimizeAngularMomentumRateZ(minimizeAngularMomentumRateZ);
@@ -600,12 +609,15 @@ public class BalanceManager
       }
 
       comTrajectoryPlanner.solveForTrajectory(contactStateProviders);
+
+      comTrajectoryPlanner.compute(contactStateManager.getCurrentStateDuration());
+      yoFinalDesiredICP.set(comTrajectoryPlanner.getDesiredDCMPosition());
+
       comTrajectoryPlanner.compute(contactStateManager.getTotalStateDuration());
 
       yoFinalDesiredCoM.set(comTrajectoryPlanner.getDesiredCoMPosition());
       yoFinalDesiredCoMVelocity.set(comTrajectoryPlanner.getDesiredCoMVelocity());
       yoFinalDesiredCoMAcceleration.set(comTrajectoryPlanner.getDesiredCoMAcceleration());
-      yoFinalDesiredICP.set(comTrajectoryPlanner.getDesiredDCMPosition());
 
       comTrajectoryPlanner.compute(contactStateManager.getTimeInSupportSequence());
 
@@ -617,10 +629,7 @@ public class BalanceManager
          yoFinalDesiredCoMAcceleration.setToNaN();
       }
 
-      shouldAdjustTimeFromTrackingError.set(getICPErrorMagnitude() > icpErrorThresholdToAdjustTime.getDoubleValue());
-      contactStateManager.updateTimeInState(timeShiftProvider, shouldAdjustTimeFromTrackingError.getBooleanValue());
 
-      decayDesiredICPVelocity();
 
       plannerTimer.stopMeasurement();
    }

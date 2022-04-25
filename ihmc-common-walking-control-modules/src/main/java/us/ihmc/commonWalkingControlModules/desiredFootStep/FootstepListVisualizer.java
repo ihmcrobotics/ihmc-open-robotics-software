@@ -20,7 +20,7 @@ public class FootstepListVisualizer
    private static final int maxNumberOfFootstepsToVisualizePerSide = 2;
    public static final Color defaultLeftColor = new Color(0.85f, 0.35f, 0.65f, 1.0f);
    public static final Color defaultRightColor = new Color(0.15f, 0.8f, 0.15f, 1.0f);
-   public static final SideDependentList<Color> defaultFeetColors = new SideDependentList<Color>(defaultLeftColor, defaultRightColor);
+   public static final SideDependentList<Color> defaultFeetColors = new SideDependentList<>(defaultLeftColor, defaultRightColor);
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 

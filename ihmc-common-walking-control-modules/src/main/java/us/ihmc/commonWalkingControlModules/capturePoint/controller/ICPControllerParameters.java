@@ -1,6 +1,12 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * Parameters to tune the ICP Optimization based controller for each robot. The ICP Optimization
@@ -157,4 +163,36 @@ public abstract class ICPControllerParameters
       return 0.04;
    }
 
+   public void createFeedForwardAlphaCalculator(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+   }
+
+   public void createFeedbackAlphaCalculator(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+   }
+
+   public FeedForwardAlphaCalculator getFeedForwardAlphaCalculator()
+   {
+      return null;
+   }
+
+   public FeedbackAlphaCalculator getFeedbackAlphaCalculator()
+   {
+      return null;
+   }
+
+   public interface FeedForwardAlphaCalculator
+   {
+      double computeAlpha(FramePoint2DReadOnly currentICP,
+                          FramePoint2DReadOnly referenceICP,
+                          FramePoint2DReadOnly finalICP,
+                          FramePoint2DReadOnly referenceCMP,
+                          FramePoint2DReadOnly unconstrainedFeedbackCMP,
+                          FrameConvexPolygon2DReadOnly supportPolygon);
+   }
+
+   public interface FeedbackAlphaCalculator
+   {
+      double computeAlpha(FramePoint2DReadOnly currentICP, FrameConvexPolygon2DReadOnly supportPolygon);
+   }
 }
