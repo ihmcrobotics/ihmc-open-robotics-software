@@ -1,9 +1,9 @@
-package us.ihmc.gdx.perception;
+package us.ihmc.gdx.perception.gpuPlanarRegions;
 
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple2D.Vector2D;
 
-public class GDXGPURegionRing
+public class GPURegionRing
 {
    private final RecyclingArrayList<Vector2D> boundaryIndices = new RecyclingArrayList<>(Vector2D::new);
 
