@@ -10,6 +10,7 @@ import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -21,8 +22,8 @@ import us.ihmc.robotics.screwTheory.PointJacobian;
 
 public class ForcePolytopeCalculator
 {
+   private static final boolean debug = false;
    private static final double gravity = -9.81;
-   private static final double effortLimit = 16.0;
 
    private final RigidBodyBasics rootBody;
    private final RigidBodyBasics base;
@@ -108,23 +109,20 @@ public class ForcePolytopeCalculator
 
       for (int i = 0; i < joints.length; i++)
       {
-         tauLowerLimit.set(i, -gravityCompensationTorques.get(i) - effortLimit);
-         tauUpperLimit.set(i, -gravityCompensationTorques.get(i) + effortLimit);
-
-//         tauLowerLimit.set(i, gravityCompensationTorques.get(i) + joints[i].getEffortLimitLower());
-//         tauUpperLimit.set(i, gravityCompensationTorques.get(i) + joints[i].getEffortLimitUpper());
+         tauLowerLimit.set(i, -gravityCompensationTorques.get(i) + joints[i].getEffortLimitLower());
+         tauUpperLimit.set(i, -gravityCompensationTorques.get(i) + joints[i].getEffortLimitUpper());
       }
 
-      int r = jacobianTranspose.getNumRows();
-      int c = jacobianTranspose.getNumCols();
+      int rows = jacobianTranspose.getNumRows();
+      int cols = jacobianTranspose.getNumCols();
 
-      MatrixTools.setMatrixBlock(inequalityA, 0, 0, jacobianTranspose, 0, 0, r, c, 1.0);
-      MatrixTools.setMatrixBlock(inequalityA, 0, c, jacobianTranspose, 0, 0, r, c, -1.0);
-      MatrixTools.setMatrixBlock(inequalityA, r, 0, jacobianTranspose, 0, 0, r, c, -1.0);
-      MatrixTools.setMatrixBlock(inequalityA, r, c, jacobianTranspose, 0, 0, r, c, 1.0);
+      MatrixTools.setMatrixBlock(inequalityA, 0, 0, jacobianTranspose, 0, 0, rows, cols, 1.0);
+      MatrixTools.setMatrixBlock(inequalityA, 0, cols, jacobianTranspose, 0, 0, rows, cols, -1.0);
+      MatrixTools.setMatrixBlock(inequalityA, rows, 0, jacobianTranspose, 0, 0, rows, cols, -1.0);
+      MatrixTools.setMatrixBlock(inequalityA, rows, cols, jacobianTranspose, 0, 0, rows, cols, 1.0);
 
       MatrixTools.setMatrixBlock(inequalityB, 0, 0, tauUpperLimit, 0, 0, joints.length, 1, 1.0);
-      MatrixTools.setMatrixBlock(inequalityB, r, 0, tauLowerLimit, 0, 0, joints.length, 1, -1.0);
+      MatrixTools.setMatrixBlock(inequalityB, rows, 0, tauLowerLimit, 0, 0, joints.length, 1, -1.0);
 
       forcePolytope.clear();
       for (int i = 0; i < directionsToOptimize.length; i++)
@@ -145,10 +143,13 @@ public class ForcePolytopeCalculator
          }
       }
 
-      System.out.println("------- force polytope -------------");
-      for (int i = 0; i < forcePolytope.getNumberOfVertices(); i++)
+      if (debug)
       {
-         System.out.println(forcePolytope.getVertex(i));
+         LogTools.info("------- Force Polytope -------------");
+         for (int i = 0; i < forcePolytope.getNumberOfVertices(); i++)
+         {
+            LogTools.info(forcePolytope.getVertex(i));
+         }
       }
    }
 
