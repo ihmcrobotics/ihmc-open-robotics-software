@@ -360,6 +360,7 @@ public class MessageTools
       messageToPack.setYWeight(weight.getY());
       messageToPack.setZWeight(weight.getZ());
    }
+
    public static void packWeightMatrix3DMessage(double weight, WeightMatrix3DMessage messageToPack)
    {
       messageToPack.setWeightFrameId(MessageTools.toFrameId(null));

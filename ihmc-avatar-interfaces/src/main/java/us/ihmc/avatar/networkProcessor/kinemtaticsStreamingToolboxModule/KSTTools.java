@@ -51,6 +51,7 @@ public class KSTTools
    private final CommandInputManager commandInputManager;
    private final CommandInputManager ikCommandInputManager;
    private final StatusMessageOutputManager statusOutputManager;
+   private final KinematicsStreamingToolboxParameters parameters;
    private final FullHumanoidRobotModel desiredFullRobotModel;
    private final FullHumanoidRobotModelFactory fullRobotModelFactory;
    private final DoubleProvider time;
@@ -97,6 +98,7 @@ public class KSTTools
 
    public KSTTools(CommandInputManager commandInputManager,
                    StatusMessageOutputManager statusOutputManager,
+                   KinematicsStreamingToolboxParameters parameters,
                    FullHumanoidRobotModel desiredFullRobotModel,
                    FullHumanoidRobotModelFactory fullRobotModelFactory,
                    double walkingControllerPeriod,
@@ -107,6 +109,7 @@ public class KSTTools
    {
       this.commandInputManager = commandInputManager;
       this.statusOutputManager = statusOutputManager;
+      this.parameters = parameters;
       this.desiredFullRobotModel = desiredFullRobotModel;
       this.fullRobotModelFactory = fullRobotModelFactory;
       this.walkingControllerPeriod = walkingControllerPeriod;
@@ -217,6 +220,11 @@ public class KSTTools
       }
    }
 
+   public KinematicsStreamingToolboxParameters getParameters()
+   {
+      return parameters;
+   }
+
    public double getTime()
    {
       return time.getValue();
@@ -310,15 +318,15 @@ public class KSTTools
 
       for (RobotSide robotSide : RobotSide.values)
       {
-//         if (areHandTaskspaceOutputsEnabled.get(robotSide).getValue())
-//            streamingMessageFactory.computeHandStreamingMessage(robotSide, configurationCommand.getHandTrajectoryFrame(robotSide));
+         if (areHandTaskspaceOutputsEnabled.get(robotSide).getValue())
+            streamingMessageFactory.computeHandStreamingMessage(robotSide, configurationCommand.getHandTrajectoryFrame(robotSide));
 
          if (areArmJointspaceOutputsEnabled.get(robotSide).getValue())
             streamingMessageFactory.computeArmStreamingMessage(robotSide);
       }
 
-//      if (isNeckJointspaceOutputEnabled.getValue())
-//         streamingMessageFactory.computeNeckStreamingMessage();
+      if (isNeckJointspaceOutputEnabled.getValue())
+         streamingMessageFactory.computeNeckStreamingMessage();
       if (isChestTaskspaceOutputEnabled.getValue())
          streamingMessageFactory.computeChestStreamingMessage(configurationCommand.getChestTrajectoryFrame());
       if (isPelvisTaskspaceOutputEnabled.getValue())
@@ -342,15 +350,15 @@ public class KSTTools
 
       for (RobotSide robotSide : RobotSide.values)
       {
-//         if (areHandTaskspaceOutputsEnabled.get(robotSide).getValue())
-//            trajectoryMessageFactory.computeHandTrajectoryMessage(robotSide, configurationCommand.getHandTrajectoryFrame(robotSide));
+         if (areHandTaskspaceOutputsEnabled.get(robotSide).getValue())
+            trajectoryMessageFactory.computeHandTrajectoryMessage(robotSide, configurationCommand.getHandTrajectoryFrame(robotSide));
 
          if (areArmJointspaceOutputsEnabled.get(robotSide).getValue())
             trajectoryMessageFactory.computeArmTrajectoryMessage(robotSide);
       }
 
-//      if (isNeckJointspaceOutputEnabled.getValue())
-//         trajectoryMessageFactory.computeNeckTrajectoryMessage();
+      if (isNeckJointspaceOutputEnabled.getValue())
+         trajectoryMessageFactory.computeNeckTrajectoryMessage();
       if (isChestTaskspaceOutputEnabled.getValue())
          trajectoryMessageFactory.computeChestTrajectoryMessage(configurationCommand.getChestTrajectoryFrame());
       if (isPelvisTaskspaceOutputEnabled.getValue())
