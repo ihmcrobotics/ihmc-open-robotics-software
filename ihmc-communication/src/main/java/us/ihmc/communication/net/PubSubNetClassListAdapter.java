@@ -13,8 +13,8 @@ import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
+import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.pubsub.common.SerializedPayload;
 import us.ihmc.ros2.ROS2TopicNameTools;
@@ -56,6 +56,8 @@ public class PubSubNetClassListAdapter extends NetClassList
             e.printStackTrace();
          }
       }
+
+      pubSubKryoSerializerMap.put(StereoVisionPointCloudMessage.class, new StereoVisionPointCloudMessageSerializer());
    }
 
    @Override
