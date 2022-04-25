@@ -69,7 +69,10 @@ public class StandAloneL515Streamer
 
       if (USE_KRYO)
       {
-         KryoObjectServer server = new KryoObjectServer(6666, new PubSubNetClassListAdapter(), Conversions.megabytesToBytes(256), Conversions.megabytesToBytes(256));
+         KryoObjectServer server = new KryoObjectServer(6666,
+                                                        new PubSubNetClassListAdapter(),
+                                                        Conversions.megabytesToBytes(256),
+                                                        Conversions.megabytesToBytes(4));
 
          pointcloudPublisher = msg ->
          {
@@ -312,7 +315,7 @@ public class StandAloneL515Streamer
             numberOfIterations = 0;
             averageComputeTime = totalComputeTime / 30;
             totalComputeTime = 0;
-            System.out.println("averageComputeTime: " + averageComputeTime);
+            System.out.println("averageComputeTime: " + averageComputeTime * 1.0e-6 + "[ms]");
          }
 
          rs2_release_frame(pointCloudFrame);
