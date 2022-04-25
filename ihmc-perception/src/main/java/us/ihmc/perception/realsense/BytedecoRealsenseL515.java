@@ -1,6 +1,5 @@
 package us.ihmc.perception.realsense;
 
-import org.bytedeco.javacpp.BytePointer;
 import us.ihmc.perception.MutableBytePointer;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.librealsense2.*;
@@ -110,16 +109,21 @@ public class BytedecoRealsenseL515
 
       if (frameAvailable)
       {
-         depthFrame.address(syncedFrames.address());
-         rs2_frame pointer = syncedFrames.getPointer(1);
-         long address = pointer.address();
-         System.out.println(address);
-         colorFrame.address(syncedFrames.address() + RS2_FRAME_POINTER_SIZE);
+//         depthFrame.address(syncedFrames.address());
+//         rs2_frame pointer = syncedFrames.getPointer(1);
+//         long address = pointer.address();
+//         System.out.println(address);
+//         colorFrame.address(syncedFrames.address() + RS2_FRAME_POINTER_SIZE);
+//
+         rs2_frame extractedColorFrame = null;
+         if (colorEnabled)
+         {
+            extractedColorFrame = realsense2.rs2_extract_frame(syncedFrames, 1, error);
+         }
 
-         rs2_frame extractedColorFrame = realsense2.rs2_extract_frame(syncedFrames, 1, error);
-
-         BytePointer bytePointer = new BytePointer(pointer);
-         long mightBeAddress = bytePointer.getLong();
+//
+//         BytePointer bytePointer = new BytePointer(pointer);
+//         long mightBeAddress = bytePointer.getLong();
 //         System.out.println(mightBeAddress);
 //         new Pointer
 //         BytePointer bytePointer = new BytePointer(pointer);
@@ -128,11 +132,11 @@ public class BytedecoRealsenseL515
          //         syncedFrames.
 
 //         new rs2_frame
-         checkError(false, "");
-
-
-         int numberOfFrames = realsense2.rs2_embedded_frames_count(syncedFrames, error);
-         checkError(false, "");
+//         checkError(false, "");
+//
+//
+//         int numberOfFrames = realsense2.rs2_embedded_frames_count(syncedFrames, error);
+//         checkError(false, "");
 
 //         System.out.println(numberOfFrames);
 //         colorFrameAddress = colorFrame.address();
@@ -151,26 +155,29 @@ public class BytedecoRealsenseL515
 //            }
 //         realsense2.rs2_extract_frame()
 
-         depthFrameDataSize = realsense2.rs2_get_frame_data_size(depthFrame, error);
+         depthFrameDataSize = realsense2.rs2_get_frame_data_size(syncedFrames, error);
          checkError(false, "");
 
-         colorFrameDataSize = realsense2.rs2_get_frame_data_size(extractedColorFrame, error);
-         checkError(false, "");
+         if (colorEnabled)
+         {
+            colorFrameDataSize = realsense2.rs2_get_frame_data_size(extractedColorFrame, error);
+            checkError(false, "");
+         }
 
          if (depthFrameDataSize > 0)
          {
             if (depthFrameData == null)
             {
-               depthFrameData = new MutableBytePointer(realsense2.rs2_get_frame_data(depthFrame, error));
+               depthFrameData = new MutableBytePointer(realsense2.rs2_get_frame_data(syncedFrames, error));
             }
             else
             {
-               depthFrameDataAddress = realsense2.rs2_get_frame_data_address(depthFrame, error);
+               depthFrameDataAddress = realsense2.rs2_get_frame_data_address(syncedFrames, error);
             }
 
             if (depthFrameStreamProfile == null)
             {
-               depthFrameStreamProfile = realsense2.rs2_get_frame_stream_profile(depthFrame, error);
+               depthFrameStreamProfile = realsense2.rs2_get_frame_stream_profile(syncedFrames, error);
                realsense2.rs2_get_video_stream_intrinsics(depthFrameStreamProfile, depthStreamIntrinsics, error);
             }
 
@@ -195,7 +202,13 @@ public class BytedecoRealsenseL515
             dataWasRead = true;
          }
 
-         rs2_release_frame(depthFrame);
+//         rs2_release_frame(depthFrame);
+         rs2_release_frame(syncedFrames);
+
+         if (colorEnabled)
+         {
+            rs2_release_frame(extractedColorFrame);
+         }
       }
 
       return dataWasRead;
@@ -203,11 +216,13 @@ public class BytedecoRealsenseL515
 
    public void updateDataBytePointers()
    {
-      depthFrameData.setAddress(depthFrameDataAddress);
+      if (depthFrameDataAddress > 0)
+         depthFrameData.setAddress(depthFrameDataAddress);
 
       if (colorEnabled)
       {
-         colorFrameData.setAddress(colorFrameDataAddress);
+         if (colorFrameDataAddress > 0)
+            colorFrameData.setAddress(colorFrameDataAddress);
       }
    }
 
