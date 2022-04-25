@@ -11,10 +11,10 @@ import org.junit.jupiter.api.TestInfo;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -26,7 +26,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
@@ -36,7 +35,7 @@ public abstract class HumanoidFootFallDisturbanceRecoveryTest implements MultiRo
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
-   private DRCSimulationTestHelper drcSimulationTestHelper;
+   private SCS2AvatarTestingSimulation simulationTestHelper;
 
    private boolean useExperimentalPhysicsEngine = false;
    private boolean enableToeOffInSingleSupport = false;
@@ -57,13 +56,10 @@ public abstract class HumanoidFootFallDisturbanceRecoveryTest implements MultiRo
    @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
-         ThreadTools.sleepForever();
-
-      if (drcSimulationTestHelper != null)
+      if (simulationTestHelper != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
+         simulationTestHelper.finishTest();
+         simulationTestHelper = null;
       }
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
@@ -103,44 +99,45 @@ public abstract class HumanoidFootFallDisturbanceRecoveryTest implements MultiRo
       Vector3D holeSize = new Vector3D(1.10, 0.5, holeDepth);
       FlatGroundWithHoleEnvironment environment = new FlatGroundWithHoleEnvironment(holeCenter, holeSize);
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, environment);
-      drcSimulationTestHelper.getSCSInitialSetup().setUseExperimentalPhysicsEngine(useExperimentalPhysicsEngine);
-      drcSimulationTestHelper.createSimulation(testInfo.getTestClass().getClass().getSimpleName() + " " + testInfo.getTestMethod().get().getName());
-
-      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+      SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
+                                                                                                                                             environment,
+                                                                                                                                             simulationTestingParameters);
+      simulationTestHelperFactory.setUseImpulseBasedPhysicsEngine(useExperimentalPhysicsEngine);
+      simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+      simulationTestHelper.start();
 
       // Increase area as this test can trigger false positives from the controller failure detection.
-      scs.findVariable(WalkingFailureDetectionControlModule.class.getSimpleName(), "icpDistanceFromFootPolygonThreshold").setValueFromDouble(0.10);
+      simulationTestHelper.findVariable(WalkingFailureDetectionControlModule.class.getSimpleName(), "icpDistanceFromFootPolygonThreshold")
+                          .setValueFromDouble(0.10);
 
       if (enableToeOffInSingleSupport)
       {
-         scs.findVariable("doToeOffIfPossibleInSingleSupport").setValueFromDouble(1.0);
-         scs.findVariable("forceToeOffAtJointLimit").setValueFromDouble(1.0);
+         simulationTestHelper.findVariable("doToeOffIfPossibleInSingleSupport").setValueFromDouble(1.0);
+         simulationTestHelper.findVariable("forceToeOffAtJointLimit").setValueFromDouble(1.0);
       }
 
       if (enableStepAdjustment)
       {
-         scs.findVariable("controllerMaxReachabilityLength").setValueFromDouble(10.0);
-         scs.findVariable("controllerMaxReachabilityWidth").setValueFromDouble(10.0);
+         simulationTestHelper.findVariable("controllerMaxReachabilityLength").setValueFromDouble(10.0);
+         simulationTestHelper.findVariable("controllerMaxReachabilityWidth").setValueFromDouble(10.0);
       }
 
       if (yoVariableMutator != null)
-         yoVariableMutator.accept(scs.getRootRegistry());
+         yoVariableMutator.accept(simulationTestHelper.getRootRegistry());
 
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
-      scs.setInPoint();
+      assertTrue(simulationTestHelper.simulateNow(0.5));
+      simulationTestHelper.setInPoint();
 
-      CommonHumanoidReferenceFrames referenceFrames = drcSimulationTestHelper.getReferenceFrames();
+      CommonHumanoidReferenceFrames referenceFrames = simulationTestHelper.getControllerReferenceFrames();
       MovingReferenceFrame midFootZUpGroundFrame = referenceFrames.getMidFootZUpGroundFrame();
       FramePose3D startPose = new FramePose3D(midFootZUpGroundFrame);
       startPose.changeFrame(ReferenceFrame.getWorldFrame());
       FootstepDataListMessage footsteps = EndToEndTestTools.generateForwardSteps(RobotSide.LEFT, 6, 0.5, 0.25, swingDuration, transferDuration, startPose, true);
       footsteps.setOffsetFootstepsHeightWithExecutionError(offsetFootstepsHeightWithExecutionError);
       footsteps.setAreFootstepsAdjustable(enableStepAdjustment);
-      drcSimulationTestHelper.publishToController(footsteps);
+      simulationTestHelper.publishToController(footsteps);
 
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.3
-            * EndToEndTestTools.computeWalkingDuration(footsteps, robotModel.getWalkingControllerParameters())));
+      assertTrue(simulationTestHelper.simulateNow(1.3 * EndToEndTestTools.computeWalkingDuration(footsteps, robotModel.getWalkingControllerParameters())));
    }
 
    public void testBlindWalkOverStepDown(TestInfo testInfo, double swingDuration, double transferDuration, double stepHeight) throws Exception
@@ -158,44 +155,45 @@ public abstract class HumanoidFootFallDisturbanceRecoveryTest implements MultiRo
       DRCRobotModel robotModel = getRobotModel();
 
       FlatGroundSingleStepEnvironment environment = new FlatGroundSingleStepEnvironment(0.95, -Math.abs(stepHeight));
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, environment);
-      drcSimulationTestHelper.getSCSInitialSetup().setUseExperimentalPhysicsEngine(useExperimentalPhysicsEngine);
-      drcSimulationTestHelper.createSimulation(testInfo.getTestClass().getClass().getSimpleName() + " " + testInfo.getTestMethod().get().getName());
-
-      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+      SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
+                                                                                                                                             environment,
+                                                                                                                                             simulationTestingParameters);
+      simulationTestHelperFactory.setUseImpulseBasedPhysicsEngine(useExperimentalPhysicsEngine);
+      simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+      simulationTestHelper.start();
 
       // Increase area as this test can trigger false positives from the controller failure detection.
-      scs.findVariable(WalkingFailureDetectionControlModule.class.getSimpleName(), "icpDistanceFromFootPolygonThreshold").setValueFromDouble(0.10);
+      simulationTestHelper.findVariable(WalkingFailureDetectionControlModule.class.getSimpleName(), "icpDistanceFromFootPolygonThreshold")
+                          .setValueFromDouble(0.10);
 
       if (enableToeOffInSingleSupport)
       {
-         scs.findVariable("doToeOffIfPossibleInSingleSupport").setValueFromDouble(1.0);
-         scs.findVariable("forceToeOffAtJointLimit").setValueFromDouble(1.0);
+         simulationTestHelper.findVariable("doToeOffIfPossibleInSingleSupport").setValueFromDouble(1.0);
+         simulationTestHelper.findVariable("forceToeOffAtJointLimit").setValueFromDouble(1.0);
       }
 
       if (enableStepAdjustment)
       {
-         scs.findVariable("controllerMaxReachabilityLength").setValueFromDouble(10.0);
-         scs.findVariable("controllerMaxReachabilityWidth").setValueFromDouble(10.0);
+         simulationTestHelper.findVariable("controllerMaxReachabilityLength").setValueFromDouble(10.0);
+         simulationTestHelper.findVariable("controllerMaxReachabilityWidth").setValueFromDouble(10.0);
       }
 
       if (yoVariableMutator != null)
-         yoVariableMutator.accept(scs.getRootRegistry());
+         yoVariableMutator.accept(simulationTestHelper.getRootRegistry());
 
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
-      scs.setInPoint();
+      assertTrue(simulationTestHelper.simulateNow(0.5));
+      simulationTestHelper.setInPoint();
 
-      CommonHumanoidReferenceFrames referenceFrames = drcSimulationTestHelper.getReferenceFrames();
+      CommonHumanoidReferenceFrames referenceFrames = simulationTestHelper.getControllerReferenceFrames();
       MovingReferenceFrame midFootZUpGroundFrame = referenceFrames.getMidFootZUpGroundFrame();
       FramePose3D startPose = new FramePose3D(midFootZUpGroundFrame);
       startPose.changeFrame(ReferenceFrame.getWorldFrame());
       FootstepDataListMessage footsteps = EndToEndTestTools.generateForwardSteps(RobotSide.LEFT, 6, 0.5, 0.25, swingDuration, transferDuration, startPose, true);
       footsteps.setOffsetFootstepsHeightWithExecutionError(offsetFootstepsHeightWithExecutionError);
       footsteps.setAreFootstepsAdjustable(enableStepAdjustment);
-      drcSimulationTestHelper.publishToController(footsteps);
+      simulationTestHelper.publishToController(footsteps);
 
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.1
-            * EndToEndTestTools.computeWalkingDuration(footsteps, robotModel.getWalkingControllerParameters())));
+      assertTrue(simulationTestHelper.simulateNow(1.1 * EndToEndTestTools.computeWalkingDuration(footsteps, robotModel.getWalkingControllerParameters())));
    }
 
 

@@ -2,67 +2,103 @@ package us.ihmc.simulationConstructionSetTools.dataExporter;
 
 import java.awt.Color;
 import java.io.File;
+import java.util.function.Function;
 
-import us.ihmc.yoVariables.buffer.YoBuffer;
-import us.ihmc.yoVariables.buffer.YoBufferVariableEntry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.scs2.sharedMemory.YoSharedBuffer;
 import us.ihmc.simulationConstructionSetTools.util.graphs.JFreeGraph;
+import us.ihmc.yoVariables.buffer.YoBuffer;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class DataExporterGraphCreator
 {
-   protected final YoBuffer dataBuffer;
-   private final YoBufferVariableEntry timeEntry;
+   protected final Function<YoVariable, double[]> dataBuffer;
+   private final YoVariable timeVariable;
 
-   public DataExporterGraphCreator(YoDouble timeYoVariable, YoBuffer dataBuffer)
+   public DataExporterGraphCreator(YoVariable timeYoVariable, YoBuffer dataBuffer)
    {
-      this.dataBuffer = dataBuffer;
-      this.timeEntry = dataBuffer.getEntry(timeYoVariable);
+      this.dataBuffer = variable -> dataBuffer.getEntry(variable).getBuffer();
+      this.timeVariable = timeYoVariable;
    }
 
-   public void createDataVsTimeGraph(File directory, String fileHeader, YoBufferVariableEntry dataBufferEntry, boolean createJPG, boolean createPDF, Color color)
+   public DataExporterGraphCreator(YoVariable timeYoVariable, YoSharedBuffer dataBuffer)
    {
-      JFreeGraph graph = JFreeGraph.createDataVsTimeGraph(timeEntry, dataBufferEntry, color);
-      String graphName = fileHeader + "_" + dataBufferEntry.getVariable().getName();
-      saveGraphToFile(directory, graphName, graph, createJPG, createPDF);
-   }
-
-   public void createDataVsTimeGraph(File directory, String fileHeader, YoBufferVariableEntry dataBufferEntry, boolean createJPG, boolean createPDF, String xLabel, String yLabel, Color color)
-   {
-      JFreeGraph graph = JFreeGraph.createDataVsTimeGraph(timeEntry, dataBufferEntry, dataBufferEntry.getVariableName(), xLabel, yLabel, color);
-      String graphName = fileHeader + "_" + dataBufferEntry.getVariable().getName();
-      saveGraphToFile(directory, graphName, graph, createJPG, createPDF);
+      this.dataBuffer = variable -> dataBuffer.getRegistryBuffer().findYoVariableBuffer(variable).getAsDoubleBuffer();
+      this.timeVariable = timeYoVariable;
    }
 
    public void createDataVsTimeGraph(File directory, String fileHeader, YoVariable variable, boolean createJPG, boolean createPDF, Color color)
    {
-      YoBufferVariableEntry dataBufferEntry = dataBuffer.getEntry(variable);
-      createDataVsTimeGraph(directory, fileHeader, dataBufferEntry, createJPG, createPDF, color);
-   }
-
-   public void createDataOneVsDataTwoGraph(File directory, String fileHeader, YoBufferVariableEntry dataOneEntry, YoBufferVariableEntry dataTwoEntry, boolean createJPG,
-         boolean createPDF, Color color)
-   {
-      JFreeGraph graph = JFreeGraph.createDataOneVsDataTwoGraph(dataOneEntry, dataTwoEntry, color);
-      String graphName = fileHeader + "_" + dataOneEntry.getVariable().getName() + "_Vs_" + dataTwoEntry.getVariable().getName();
+      String variableName = variable.getName();
+      JFreeGraph graph = JFreeGraph.createDataVsTimeGraph(dataBuffer.apply(timeVariable), variableName, dataBuffer.apply(variable), color);
+      String graphName = fileHeader + "_" + variableName;
       saveGraphToFile(directory, graphName, graph, createJPG, createPDF);
    }
 
-   public void createDataOneVsDataTwoGraph(File directory, String fileHeader, YoBufferVariableEntry dataOneEntry, YoBufferVariableEntry dataTwoEntry, boolean createJPG,
-                                           boolean createPDF, String title, String xLabel, String yLabel, Color color)
+   public void createDataVsTimeGraph(File directory,
+                                     String fileHeader,
+                                     YoVariable variable,
+                                     boolean createJPG,
+                                     boolean createPDF,
+                                     String xLabel,
+                                     String yLabel,
+                                     Color color)
    {
-      JFreeGraph graph = JFreeGraph.createDataOneVsDataTwoGraph(dataOneEntry, dataTwoEntry, title, xLabel, yLabel, color);
-      String graphName = fileHeader + "_" + dataOneEntry.getVariable().getName() + "_Vs_" + dataTwoEntry.getVariable().getName();
+      String variableName = variable.getName();
+      JFreeGraph graph = JFreeGraph.createDataVsTimeGraph(dataBuffer.apply(timeVariable),
+                                                          variableName,
+                                                          dataBuffer.apply(variable),
+                                                          variableName,
+                                                          xLabel,
+                                                          yLabel,
+                                                          color);
+      String graphName = fileHeader + "_" + variableName;
       saveGraphToFile(directory, graphName, graph, createJPG, createPDF);
    }
-   
-   public void createDataOneVsDataTwoGraph(File directory, String fileHeader, YoVariable variableOne, YoVariable variableTwo, boolean createJPG,
-         boolean createPDF, Color color)
+
+   public void createDataOneVsDataTwoGraph(File directory,
+                                           String fileHeader,
+                                           YoVariable variableOne,
+                                           YoVariable variableTwo,
+                                           boolean createJPG,
+                                           boolean createPDF,
+                                           Color color)
    {
-      YoBufferVariableEntry dataOneEntry = dataBuffer.getEntry(variableOne);
-      YoBufferVariableEntry dataTwoEntry = dataBuffer.getEntry(variableTwo);
-      
-      createDataOneVsDataTwoGraph(directory, fileHeader, dataOneEntry, dataTwoEntry, createJPG, createPDF, color);
+      double[] variableOneData = dataBuffer.apply(variableOne);
+      double[] variableTwoData = dataBuffer.apply(variableTwo);
+      String variableOneName = variableOne.getName();
+      String variableTwoName = variableTwo.getName();
+
+      JFreeGraph graph = JFreeGraph.createDataOneVsDataTwoGraph(variableOneName, variableOneData, variableTwoName, variableTwoData, color);
+      String graphName = fileHeader + "_" + variableOneName + "_Vs_" + variableTwoName;
+      saveGraphToFile(directory, graphName, graph, createJPG, createPDF);
+   }
+
+   public void createDataOneVsDataTwoGraph(File directory,
+                                           String fileHeader,
+                                           YoVariable variableOne,
+                                           YoVariable variableTwo,
+                                           boolean createJPG,
+                                           boolean createPDF,
+                                           String title,
+                                           String xLabel,
+                                           String yLabel,
+                                           Color color)
+   {
+      String variableOneName = variableOne.getName();
+      String variableTwoName = variableTwo.getName();
+      double[] variableOneData = dataBuffer.apply(variableOne);
+      double[] variableTwoData = dataBuffer.apply(variableTwo);
+
+      JFreeGraph graph = JFreeGraph.createDataOneVsDataTwoGraph(variableOneName,
+                                                                variableOneData,
+                                                                variableTwoName,
+                                                                variableTwoData,
+                                                                title,
+                                                                xLabel,
+                                                                yLabel,
+                                                                color);
+      String graphName = fileHeader + "_" + variableOneName + "_Vs_" + variableTwoName;
+      saveGraphToFile(directory, graphName, graph, createJPG, createPDF);
    }
 
    private void saveGraphToFile(File directory, String graphName, JFreeGraph graph, boolean createJPG, boolean createPDF)
@@ -84,5 +120,4 @@ public class DataExporterGraphCreator
       File file = new File(directory, graphName + ".jpg");
       graph.saveToJPG(file, 1024, 768);
    }
-
 }

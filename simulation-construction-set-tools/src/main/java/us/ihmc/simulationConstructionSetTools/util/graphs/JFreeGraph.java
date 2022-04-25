@@ -46,7 +46,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 
-import us.ihmc.commons.PrintTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.yoVariables.buffer.YoBufferVariableEntry;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -130,13 +130,13 @@ public class JFreeGraph extends JPanel
       }
 
       graph = ChartFactory.createXYLineChart(title, // Title
-            xLabel, // x-axis Label
-            yLabel, // y-axis Label
-            xySeriesCollection, // Dataset
-            PlotOrientation.VERTICAL, // Plot Orientation
-            false, // Show Legend
-            true, // Use tooltips
-            false // Configure chart to generate URLs?
+                                             xLabel, // x-axis Label
+                                             yLabel, // y-axis Label
+                                             xySeriesCollection, // Dataset
+                                             PlotOrientation.VERTICAL, // Plot Orientation
+                                             false, // Show Legend
+                                             true, // Use tooltips
+                                             false // Configure chart to generate URLs?
       );
 
       // set style for graph
@@ -171,13 +171,13 @@ public class JFreeGraph extends JPanel
       ValueAxis axis;
       switch (xAxisScaling)
       {
-      case LOGARITHMIC:
-         axis = new LogarithmicAxis(xLabel);
-         break;
-      case CONSTANT:
-      default:
-         axis = new NumberAxis(xLabel);
-         break;
+         case LOGARITHMIC:
+            axis = new LogarithmicAxis(xLabel);
+            break;
+         case CONSTANT:
+         default:
+            axis = new NumberAxis(xLabel);
+            break;
       }
       graph.getXYPlot().setDomainAxis(0, axis);
    }
@@ -187,13 +187,13 @@ public class JFreeGraph extends JPanel
       ValueAxis axis;
       switch (yAxisScaling)
       {
-      case LOGARITHMIC:
-         axis = new LogarithmicAxis(xLabel);
-         break;
-      case CONSTANT:
-      default:
-         axis = new NumberAxis(xLabel);
-         break;
+         case LOGARITHMIC:
+            axis = new LogarithmicAxis(xLabel);
+            break;
+         case CONSTANT:
+         default:
+            axis = new NumberAxis(xLabel);
+            break;
       }
 
       graph.getXYPlot().setRangeAxis(0, axis);
@@ -313,10 +313,30 @@ public class JFreeGraph extends JPanel
       return createDataVsTimeGraph(timeEntry, dataEntry, dataEntry.getVariableName(), "time", dataEntry.getVariableName(), plotColor);
    }
 
-   public static JFreeGraph createDataVsTimeGraph(YoBufferVariableEntry timeEntry, YoBufferVariableEntry dataEntry, String title, String xLabel, String yLabel, Color plotColor)
+   public static JFreeGraph createDataVsTimeGraph(YoBufferVariableEntry timeEntry,
+                                                  YoBufferVariableEntry dataEntry,
+                                                  String title,
+                                                  String xLabel,
+                                                  String yLabel,
+                                                  Color plotColor)
    {
-      String variableName = dataEntry.getVariable().getName();
-      JFreePlot plot = new JFreePlot("time vs " + variableName, timeEntry, dataEntry);
+      return createDataVsTimeGraph(timeEntry.getBuffer(), dataEntry.getVariableName(), dataEntry.getBuffer(), title, xLabel, yLabel, plotColor);
+   }
+
+   public static JFreeGraph createDataVsTimeGraph(double[] timeData, String variableName, double[] variableData, Color plotColor)
+   {
+      return createDataVsTimeGraph(timeData, variableName, variableData, variableName, "time", variableName, plotColor);
+   }
+
+   public static JFreeGraph createDataVsTimeGraph(double[] timeData,
+                                                  String variableName,
+                                                  double[] variableData,
+                                                  String title,
+                                                  String xLabel,
+                                                  String yLabel,
+                                                  Color plotColor)
+   {
+      JFreePlot plot = new JFreePlot("time vs " + variableName, timeData, variableData);
       plot.setIsScatterPlot(false);
       plot.setColor(plotColor);
 
@@ -333,15 +353,57 @@ public class JFreeGraph extends JPanel
 
    public static JFreeGraph createDataOneVsDataTwoGraph(YoBufferVariableEntry dataOneEntry, YoBufferVariableEntry dataTwoEntry, Color plotColor)
    {
-      String dataOneVariableName = dataOneEntry.getVariable().getName();
-      String dataTwoVariableName = dataTwoEntry.getVariable().getName();
-      String title = dataOneVariableName + "_Vs_" + dataTwoVariableName;
-      return createDataOneVsDataTwoGraph(dataOneEntry, dataTwoEntry, title, dataOneEntry.getVariableName(), dataTwoEntry.getVariableName(), plotColor);
+      return createDataOneVsDataTwoGraph(dataOneEntry.getVariableName(),
+                                         dataOneEntry.getBuffer(),
+                                         dataTwoEntry.getVariableName(),
+                                         dataTwoEntry.getBuffer(),
+                                         plotColor);
    }
 
-   public static JFreeGraph createDataOneVsDataTwoGraph(YoBufferVariableEntry dataOneEntry, YoBufferVariableEntry dataTwoEntry, String title, String xLabel, String yLabel, Color plotColor)
+   public static JFreeGraph createDataOneVsDataTwoGraph(String variableOneName,
+                                                        double[] variableOneData,
+                                                        String variableTwoName,
+                                                        double[] variableTwoData,
+                                                        Color plotColor)
    {
-      JFreePlot plot = new JFreePlot(title, dataOneEntry, dataTwoEntry, false, true);
+      String title = variableOneName + "_Vs_" + variableTwoName;
+      return createDataOneVsDataTwoGraph(variableOneName,
+                                         variableOneData,
+                                         variableTwoName,
+                                         variableTwoData,
+                                         title,
+                                         variableOneName,
+                                         variableTwoName,
+                                         plotColor);
+   }
+
+   public static JFreeGraph createDataOneVsDataTwoGraph(YoBufferVariableEntry dataOneEntry,
+                                                        YoBufferVariableEntry dataTwoEntry,
+                                                        String title,
+                                                        String xLabel,
+                                                        String yLabel,
+                                                        Color plotColor)
+   {
+      return createDataOneVsDataTwoGraph(dataOneEntry.getVariableName(),
+                                         dataOneEntry.getBuffer(),
+                                         dataTwoEntry.getVariableName(),
+                                         dataTwoEntry.getBuffer(),
+                                         title,
+                                         xLabel,
+                                         yLabel,
+                                         plotColor);
+   }
+
+   public static JFreeGraph createDataOneVsDataTwoGraph(String variableOneName,
+                                                        double[] variableOneData,
+                                                        String variableTwoName,
+                                                        double[] variableTwoData,
+                                                        String title,
+                                                        String xLabel,
+                                                        String yLabel,
+                                                        Color plotColor)
+   {
+      JFreePlot plot = new JFreePlot(title, variableOneData, variableTwoData, false, true);
       plot.setIsScatterPlot(true);
       plot.setColor(plotColor);
 
@@ -418,7 +480,7 @@ public class JFreeGraph extends JPanel
       }
       catch (IOException | COSVisitorException e)
       {
-         PrintTools.error(this, "Could not save pdf to file " + pdfFileName);
+         LogTools.error("Could not save pdf to file " + pdfFileName);
       }
    }
 
@@ -459,7 +521,7 @@ public class JFreeGraph extends JPanel
       {
 
          XYShapeRenderer renderer = new XYShapeRenderer();
-         Shape shape  = new Ellipse2D.Double(-4, -4, 8, 8);
+         Shape shape = new Ellipse2D.Double(-4, -4, 8, 8);
          renderer.setBaseShape(shape);
          graph.getXYPlot().setRenderer(renderer);
       }
@@ -484,40 +546,40 @@ public class JFreeGraph extends JPanel
       legend.setItemFont(new Font("SansSerif", Font.PLAIN, 22));
       graph.addLegend(legend);
    }
-   
+
    public static void main(String[] args)
-   {      
+   {
       int numberOfPoints = 1000;
 
       YoRegistry registry = new YoRegistry("Registry");
       YoDouble variableOne = new YoDouble("variableOne", registry);
       YoDouble variableTwo = new YoDouble("variableTwo", registry);
-      
+
       YoBufferVariableEntry dataOneEntry = new YoBufferVariableEntry(variableOne, numberOfPoints);
       YoBufferVariableEntry dataTwoEntry = new YoBufferVariableEntry(variableTwo, numberOfPoints);
-      
-      for (int i=0; i<numberOfPoints; i++)
+
+      for (int i = 0; i < numberOfPoints; i++)
       {
          variableOne.set(Math.random());
          variableTwo.set(Math.random());
          dataOneEntry.writeIntoBufferAt(i);
          dataTwoEntry.writeIntoBufferAt(i);
       }
-      
+
       JFreeGraph jFreeGraphOne = JFreeGraph.createDataVsTimeGraph(dataOneEntry, dataTwoEntry, Color.orange);
       JFreeGraph jFreeGraphTwo = JFreeGraph.createDataOneVsDataTwoGraph(dataOneEntry, dataTwoEntry, Color.red);
-      
+
       JFrame window = new JFrame("TimePlot");
       window.getContentPane().add(jFreeGraphOne);
       window.pack();
       window.setSize(600, 400);
       window.setVisible(true);
-      
+
       window = new JFrame("DataPlot");
       window.getContentPane().add(jFreeGraphTwo);
       window.pack();
       window.setSize(600, 400);
-      window.setVisible(true);    
+      window.setVisible(true);
    }
 
 }

@@ -15,10 +15,10 @@ import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.controlModules.SwingTrajectoryCalculator;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionTiming;
@@ -32,19 +32,17 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
-import us.ihmc.simulationToolkit.controllers.PushRobotController;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationToolkit.controllers.PushRobotControllerSCS2;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.tools.YoGeometryNameTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -56,8 +54,8 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-   private DRCSimulationTestHelper drcSimulationTestHelper;
-   private PushRobotController pushController;
+   private SCS2AvatarTestingSimulation simulationTestHelper;
+   private PushRobotControllerSCS2 pushController;
 
    private Boolean pushAndAdjust;
 
@@ -68,29 +66,30 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
 
    /**
     * Method used to scale down trajectories for different robots.
+    * 
     * @return shinLength + thighLength of the robot
     */
    public abstract double getLegLength();
 
    @Test
-   public void testSwingTrajectoryTouchdownSpeed() throws SimulationExceededMaximumTimeException
+   public void testSwingTrajectoryTouchdownSpeed()
    {
       runTestTouchdownSpeed();
    }
 
    @Test
-   public void testSwingTrajectoryTouchdownWithAdjustment() throws SimulationExceededMaximumTimeException
+   public void testSwingTrajectoryTouchdownWithAdjustment()
    {
       runTestTouchdownSpeed();
    }
 
-   private void runTestTouchdownSpeed() throws SimulationExceededMaximumTimeException
+   private void runTestTouchdownSpeed()
    {
       DRCRobotModel robotModel = setup(DRCObstacleCourseStartingLocation.DEFAULT);
 
       // Step forward with a late touchdown.
       RobotSide robotSide = RobotSide.LEFT;
-      ReferenceFrame soleFrame = drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(robotSide);
+      ReferenceFrame soleFrame = simulationTestHelper.getControllerFullRobotModel().getSoleFrame(robotSide);
       FramePoint3D footPosition = new FramePoint3D(soleFrame);
       FrameQuaternion footOrientation = new FrameQuaternion(soleFrame);
       footPosition.changeFrame(worldFrame);
@@ -107,9 +106,9 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
       message.setExecutionTiming(ExecutionTiming.CONTROL_ABSOLUTE_TIMINGS.toByte());
       message.setAreFootstepsAdjustable(pushAndAdjust);
 
-      ((YoBoolean) drcSimulationTestHelper.getSimulationConstructionSet().findVariable("controllerSwingSpeedUpEnabled")).set(false);
-      ((YoBoolean) drcSimulationTestHelper.getSimulationConstructionSet().findVariable("leftFootSwingIsSpeedUpEnabled")).set(false);
-      ((YoBoolean) drcSimulationTestHelper.getSimulationConstructionSet().findVariable("rightFootSwingIsSpeedUpEnabled")).set(false);
+      ((YoBoolean) simulationTestHelper.findVariable("controllerSwingSpeedUpEnabled")).set(false);
+      ((YoBoolean) simulationTestHelper.findVariable("leftFootSwingIsSpeedUpEnabled")).set(false);
+      ((YoBoolean) simulationTestHelper.findVariable("rightFootSwingIsSpeedUpEnabled")).set(false);
 
       FootstepDataMessage footstep = message.getFootstepDataList().add();
       footstep.setRobotSide(robotSide.toByte());
@@ -151,8 +150,7 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
       touchdown.getLinearVelocity().set(0.0, 0.0, touchdownVelocity);
       touchdown.getAngularVelocity().setToZero();
 
-      YoVariable desiredVelocity = drcSimulationTestHelper.getSimulationConstructionSet().findVariable("leftFootControlModule",
-                                                                                                         "leftFootSwingDesiredSoleLinearVelocityInWorldZ");
+      YoVariable desiredVelocity = simulationTestHelper.findVariable("leftFootControlModule", "leftFootSwingDesiredSoleLinearVelocityInWorldZ");
 
       // Push the robot to trigger footstep adjustment.
       if (pushAndAdjust)
@@ -162,24 +160,23 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
          pushController.applyForceDelayed(time -> true, initialTransferTime + swingTime / 2.0, direction, 200.0, 0.1);
       }
 
-      drcSimulationTestHelper.publishToController(message);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(initialTransferTime + (1.0 - lastPortion / 2.0) * swingTime));
+      simulationTestHelper.publishToController(message);
+      assertTrue(simulationTestHelper.simulateNow(initialTransferTime + (1.0 - lastPortion / 2.0) * swingTime));
       Assert.assertEquals(touchdownVelocity, desiredVelocity.getValueAsDouble(), 1.0e-10);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(lastPortion));
+      assertTrue(simulationTestHelper.simulateNow(lastPortion));
       Assert.assertEquals(touchdownVelocity, desiredVelocity.getValueAsDouble(), 1.0e-10);
    }
 
    @Test
-   public void testSwingTrajectoryInWorld() throws SimulationExceededMaximumTimeException
+   public void testSwingTrajectoryInWorld()
    {
       DRCRobotModel robotModel = setup(DRCObstacleCourseStartingLocation.DEFAULT_BUT_ALMOST_PI);
-      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
 
       double robotScale = getLegLength();
       double pelvisTrajectoryTime = 0.5;
       PelvisHeightTrajectoryMessage pelvisHeightMessage = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(pelvisTrajectoryTime, 1.1 * robotScale);
-      drcSimulationTestHelper.publishToController(pelvisHeightMessage);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(pelvisTrajectoryTime));
+      simulationTestHelper.publishToController(pelvisHeightMessage);
+      assertTrue(simulationTestHelper.simulateNow(pelvisTrajectoryTime));
 
       double swingTime = 2.0;
       double transferTime = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
@@ -189,7 +186,7 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
 
       // step in place but do some fancy foot motion
       RobotSide robotSide = RobotSide.LEFT;
-      ReferenceFrame soleFrame = drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(robotSide);
+      ReferenceFrame soleFrame = simulationTestHelper.getControllerFullRobotModel().getSoleFrame(robotSide);
       FramePoint3D footPosition = new FramePoint3D(soleFrame);
       FrameQuaternion footOrientation = new FrameQuaternion(soleFrame);
 
@@ -245,10 +242,10 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
          waypoint.getLinearVelocity().set(waypointLinearVelocity);
          waypoint.getOrientation().set(waypointOrientation);
 
-         Graphics3DObject sphere = new Graphics3DObject();
-         sphere.translate(waypointPosition);
-         sphere.addSphere(0.01, new YoAppearanceRGBColor(FootstepListVisualizer.defaultFeetColors.get(robotSide), 0.0));
-         scs.addStaticLinkGraphics(sphere);
+         VisualDefinitionFactory visualFactory = new VisualDefinitionFactory();
+         visualFactory.appendTranslation(waypointPosition);
+         visualFactory.addSphere(0.01, ColorDefinitions.rgb(FootstepListVisualizer.defaultFeetColors.get(robotSide).getRGB()));
+         simulationTestHelper.addStaticVisuals(visualFactory.getVisualDefinitions());
 
          waypoints[i] = waypoint;
       }
@@ -260,8 +257,8 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
       MessageTools.copyData(waypoints, footstep.getSwingTrajectory());
 
       footstepDataList.getFootstepDataList().add().set(footstep);
-      drcSimulationTestHelper.publishToController(footstepDataList);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(initialTransferTime + getRobotModel().getControllerDT() * 4.0));
+      simulationTestHelper.publishToController(footstepDataList);
+      assertTrue(simulationTestHelper.simulateNow(initialTransferTime + getRobotModel().getControllerDT() * 4.0));
 
       String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
       String format = EuclidCoreIOTools.getStringFormat(6, 4);
@@ -276,17 +273,17 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
          String suffix = "AtWaypoint" + (i + 1);
 
          String positionPrefix = YoGeometryNameTools.assembleName(prefix, "position", "");
-         Point3D desiredPosition = EndToEndTestTools.findPoint3D(linearNamespace, positionPrefix, suffix, scs);
+         Point3D desiredPosition = EndToEndTestTools.findPoint3D(linearNamespace, positionPrefix, suffix, simulationTestHelper);
          String linearVelocityPrefix = YoGeometryNameTools.assembleName(prefix, "linearVelocity", "");
-         Vector3D desiredLinearVelocity = EndToEndTestTools.findVector3D(linearNamespace, linearVelocityPrefix, suffix, scs);
+         Vector3D desiredLinearVelocity = EndToEndTestTools.findVector3D(linearNamespace, linearVelocityPrefix, suffix, simulationTestHelper);
 
          EuclidCoreTestTools.assertTuple3DEquals("Position", waypoint.getPosition(), desiredPosition, 1.0E-10, format);
          EuclidCoreTestTools.assertTuple3DEquals("Linear Velocity", waypoint.getLinearVelocity(), desiredLinearVelocity, 1.0E-10, format);
 
          String orientationPrefix = YoGeometryNameTools.assembleName(prefix, "orientation", "");
-         Quaternion desiredOrientation = EndToEndTestTools.findQuaternion(angularNamespace, orientationPrefix, suffix, scs);
+         Quaternion desiredOrientation = EndToEndTestTools.findQuaternion(angularNamespace, orientationPrefix, suffix, simulationTestHelper);
          String angularVelocityPrefix = YoGeometryNameTools.assembleName(prefix, "angularVelocity", "");
-         Vector3D desiredAngularVelocity = EndToEndTestTools.findVector3D(angularNamespace, angularVelocityPrefix, suffix, scs);
+         Vector3D desiredAngularVelocity = EndToEndTestTools.findVector3D(angularNamespace, angularVelocityPrefix, suffix, simulationTestHelper);
 
          EuclidCoreTestTools.assertTuple4DEquals("Orientation", waypoint.getOrientation(), desiredOrientation, 1.0E-10, format);
          EuclidCoreTestTools.assertTuple3DEquals("Angular Velocity", waypoint.getAngularVelocity(), desiredAngularVelocity, 1.0E-10, format);
@@ -297,28 +294,32 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
       String typeName = sidePrefix + "FootSwing" + TrajectoryType.class.getSimpleName();
 
       @SuppressWarnings("unchecked")
-      YoEnum<TrajectoryType> currentTrajectoryType = (YoEnum<TrajectoryType>) scs.findVariable(swingStateNamespace, typeName);
-      YoVariable currentWaypointIndex = scs.findVariable(linearNamespace, currentIndexName);
+      YoEnum<TrajectoryType> currentTrajectoryType = (YoEnum<TrajectoryType>) simulationTestHelper.findVariable(swingStateNamespace, typeName);
+      YoVariable currentWaypointIndex = simulationTestHelper.findVariable(linearNamespace, currentIndexName);
 
       assertEquals("Unexpected Trajectory Type", TrajectoryType.WAYPOINTS, currentTrajectoryType.getEnumValue());
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(swingTime + transferTime));
+      assertTrue(simulationTestHelper.simulateNow(swingTime + transferTime));
       assertEquals("Swing Trajectory did not execute.", points, currentWaypointIndex.getValueAsLongBits());
    }
 
-   private DRCRobotModel setup(DRCStartingLocation startingLocation) throws SimulationExceededMaximumTimeException
+   private DRCRobotModel setup(DRCStartingLocation startingLocation)
    {
-      String className = getClass().getSimpleName();
       FlatGroundEnvironment environment = new FlatGroundEnvironment();
       DRCRobotModel robotModel = getRobotModel();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, environment);
-      drcSimulationTestHelper.setStartingLocation(startingLocation);
-      drcSimulationTestHelper.createSimulation(className);
-      drcSimulationTestHelper.getSimulationConstructionSet().setCameraPosition(0.0, -3.0, 1.0);
-      drcSimulationTestHelper.getSimulationConstructionSet().setCameraFix(0.0, 0.0, 0.2);
-      pushController = new PushRobotController(drcSimulationTestHelper.getRobot(), robotModel.createFullRobotModel().getChest().getParentJoint().getName(),
-                                               new Vector3D(0, 0, 0.15));
+      SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
+                                                                                                                                             environment,
+                                                                                                                                             simulationTestingParameters);
+      simulationTestHelperFactory.setStartingLocationOffset(startingLocation.getStartingLocationOffset());
+      simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+      simulationTestHelper.start();
+      simulationTestHelper.setCameraPosition(0.0, -3.0, 1.0);
+      simulationTestHelper.setCameraFocusPosition(0.0, 0.0, 0.2);
+      pushController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationSession().getTime(),
+                                                   simulationTestHelper.getRobot(),
+                                                   robotModel.createFullRobotModel().getChest().getParentJoint().getName(),
+                                                   new Vector3D(0, 0, 0.15));
       ThreadTools.sleep(1000);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
+      assertTrue(simulationTestHelper.simulateNow(0.5));
       return robotModel;
    }
 
@@ -332,16 +333,11 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
    @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
-      {
-         ThreadTools.sleepForever();
-      }
-
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcSimulationTestHelper != null)
+      if (simulationTestHelper != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
+         simulationTestHelper.finishTest();
+         simulationTestHelper = null;
       }
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());

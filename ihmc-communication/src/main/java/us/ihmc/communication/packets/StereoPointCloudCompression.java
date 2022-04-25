@@ -444,7 +444,7 @@ public class StereoPointCloudCompression
             byte r = decompressedColorByteBuffer.get();
             byte g = decompressedColorByteBuffer.get();
             byte b = decompressedColorByteBuffer.get();
-            colorConsumer.accept(r, g, b);
+            colorConsumer.accept(r & 0xFF, g & 0xFF, b & 0xFF);
          }
       }
       else
@@ -456,7 +456,7 @@ public class StereoPointCloudCompression
             byte r = compressedColors.get(offset++);
             byte g = compressedColors.get(offset++);
             byte b = compressedColors.get(offset++);
-            colorConsumer.accept(r, g, b);
+            colorConsumer.accept(r & 0xFF, g & 0xFF, b & 0xFF);
          }
       }
    }

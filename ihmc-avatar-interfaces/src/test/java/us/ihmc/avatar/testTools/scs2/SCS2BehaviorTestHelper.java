@@ -1,39 +1,44 @@
-package us.ihmc.avatar.testTools;
+package us.ihmc.avatar.testTools.scs2;
 
 import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import controller_msgs.msg.dds.BehaviorControlModePacket;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.HumanoidBehaviorTypePacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
-import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessorParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.commons.PrintTools;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorControlModeSubscriber;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDispatcher;
 import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorTypeSubscriber;
-import us.ihmc.humanoidBehaviors.utilities.*;
+import us.ihmc.humanoidBehaviors.utilities.CapturePointUpdatable;
+import us.ihmc.humanoidBehaviors.utilities.StopThreadUpdatable;
+import us.ihmc.humanoidBehaviors.utilities.TimeBasedStopThreadUpdatable;
+import us.ihmc.humanoidBehaviors.utilities.TrajectoryBasedStopThreadUpdatable;
+import us.ihmc.humanoidBehaviors.utilities.WristForceSensorFilteredUpdatable;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.humanoidRobotics.communication.subscribers.CapturabilityBasedStatusSubscriber;
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -42,22 +47,17 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
-import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
+import us.ihmc.scs2.definition.visual.VisualDefinition;
+import us.ihmc.scs2.simulation.robot.Robot;
+import us.ihmc.yoVariables.registry.YoNamespace;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.registry.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 
-/**
- * Do not execute more than one behavior thread at a time. Instead, run multiple behaviors in a
- * single thread.
- * 
- * @author cschmidt
- */
-public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
+@SuppressWarnings("rawtypes")
+public class SCS2BehaviorTestHelper implements YoVariableHolder
 {
-   private static final IHMCCommunicationKryoNetClassList NET_CLASS_LIST = new IHMCCommunicationKryoNetClassList();
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoDouble yoTimeRobot;
    private final YoDouble yoTimeBehaviorDispatcher;
@@ -77,48 +77,26 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 
    private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.INTRAPROCESS, "ihmc_behavior_test_helper");
    private final IHMCROS2Publisher<HumanoidBehaviorTypePacket> humanoidBehabiorTypePublisher;
+   private final String robotName;
+   private SCS2AvatarTestingSimulation avatarTestingSimulation;
 
-   public DRCBehaviorTestHelper(String name, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters,
-                                DRCRobotModel robotModel)
+   public SCS2BehaviorTestHelper(SCS2AvatarTestingSimulation avatarTestingSimulation)
    {
-      this(new DefaultCommonAvatarEnvironment(), name, selectedLocation, simulationTestingParameters, robotModel, true);
-   }
-
-   public DRCBehaviorTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, DRCStartingLocation selectedLocation,
-                                SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel)
-   {
-      this(commonAvatarEnvironmentInterface, name, selectedLocation, simulationTestingParameters, robotModel, true);
-   }
-
-   public DRCBehaviorTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, DRCStartingLocation selectedLocation,
-                                SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel, boolean automaticallySimulate)
-   {
-      this(commonAvatarEnvironmentInterface, name, selectedLocation, simulationTestingParameters, robotModel, null, automaticallySimulate);
-   }
-
-   public DRCBehaviorTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, DRCStartingLocation selectedLocation,
-                                SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel,
-                                HumanoidNetworkProcessorParameters networkModuleParameters, boolean automaticallySimulate)
-   {
-      super(simulationTestingParameters, robotModel);
-      super.setTestEnvironment(commonAvatarEnvironmentInterface);
-      super.setStartingLocation(selectedLocation);
-      if (networkModuleParameters != null)
-         super.setNetworkProcessorParameters(networkModuleParameters);
-      super.createSimulation(name, automaticallySimulate, true);
-
-      yoTimeRobot = getRobot().getYoTime();
+      this.avatarTestingSimulation = avatarTestingSimulation;
+      yoTimeRobot = avatarTestingSimulation.getSimulationSession().getTime();
       yoTimeBehaviorDispatcher = new YoDouble("yoTimeBehaviorDispatcher", registry);
 
-      this.drcRobotModel = robotModel;
-      this.fullRobotModel = robotModel.createFullRobotModel();
+      this.drcRobotModel = avatarTestingSimulation.getRobotModel();
+      robotName = drcRobotModel.getSimpleRobotName();
+      this.fullRobotModel = drcRobotModel.createFullRobotModel();
       yoTimeLastFullRobotModelUpdate = new YoDouble("yoTimeRobotModelUpdate", registry);
 
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
       robotDataReceiver = new HumanoidRobotDataReceiver(fullRobotModel, forceSensorDataHolder);
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    RobotConfigurationData.class, ROS2Tools.getControllerOutputTopic(robotName),
-                                           s -> robotDataReceiver.receivedPacket(s.takeNextData()));
+                                                    RobotConfigurationData.class,
+                                                    ROS2Tools.getControllerOutputTopic(robotName),
+                                                    s -> robotDataReceiver.receivedPacket(s.takeNextData()));
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
@@ -205,7 +183,8 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       robotDataReceiver.updateRobotModel();
    }
 
-   public void dispatchBehavior(AbstractBehavior behaviorToTest) throws SimulationExceededMaximumTimeException
+   @SuppressWarnings("unchecked")
+   public void dispatchBehavior(AbstractBehavior behaviorToTest)
    {
       HumanoidBehaviorType testBehaviorType = HumanoidBehaviorType.TEST;
       behaviorDispatcher.addBehavior(testBehaviorType, behaviorToTest);
@@ -215,11 +194,12 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       HumanoidBehaviorTypePacket requestTestBehaviorPacket = HumanoidMessageTools.createHumanoidBehaviorTypePacket(testBehaviorType);
       humanoidBehabiorTypePublisher.publish(requestTestBehaviorPacket);
 
-      boolean success = simulateAndBlockAndCatchExceptions(1.0);
+      boolean success = avatarTestingSimulation.simulateNow(1.0);
       assertTrue("Caught an exception when testing the behavior, the robot probably fell.", success);
    }
 
-   public void sendBehaviorToDispatcher(AbstractBehavior behaviorToTest) throws SimulationExceededMaximumTimeException
+   @SuppressWarnings("unchecked")
+   public void sendBehaviorToDispatcher(AbstractBehavior behaviorToTest)
    {
       HumanoidBehaviorType testBehaviorType = HumanoidBehaviorType.TEST;
       behaviorDispatcher.addBehavior(testBehaviorType, behaviorToTest);
@@ -228,20 +208,22 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       humanoidBehabiorTypePublisher.publish(requestTestBehaviorPacket);
    }
 
-   private BehaviorDispatcher setupBehaviorDispatcher(FullRobotModel fullRobotModel, ROS2Node ros2Node, HumanoidRobotDataReceiver robotDataReceiver,
+   private BehaviorDispatcher setupBehaviorDispatcher(FullRobotModel fullRobotModel,
+                                                      ROS2Node ros2Node,
+                                                      HumanoidRobotDataReceiver robotDataReceiver,
                                                       YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       BehaviorControlModeSubscriber desiredBehaviorControlSubscriber = new BehaviorControlModeSubscriber();
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     BehaviorControlModePacket.class,
                                                     IHMCHumanoidBehaviorManager.getInputTopic(robotName),
-                                           s -> desiredBehaviorControlSubscriber.receivedPacket(s.takeNextData()));
+                                                    s -> desiredBehaviorControlSubscriber.receivedPacket(s.takeNextData()));
 
       HumanoidBehaviorTypeSubscriber desiredBehaviorSubscriber = new HumanoidBehaviorTypeSubscriber();
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     HumanoidBehaviorTypePacket.class,
                                                     IHMCHumanoidBehaviorManager.getInputTopic(robotName),
-                                           s -> desiredBehaviorSubscriber.receivedPacket(s.takeNextData()));
+                                                    s -> desiredBehaviorSubscriber.receivedPacket(s.takeNextData()));
 
       YoVariableServer yoVariableServer = null;
       yoGraphicsListRegistry.setYoGraphicsUpdatedRemotely(false);
@@ -296,26 +278,31 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    {
       CapturabilityBasedStatusSubscriber capturabilityBasedStatusSubsrciber = new CapturabilityBasedStatusSubscriber();
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    CapturabilityBasedStatus.class, ROS2Tools.getControllerOutputTopic(robotName),
-                                           s -> capturabilityBasedStatusSubsrciber.receivedPacket(s.takeNextData()));
+                                                    CapturabilityBasedStatus.class,
+                                                    ROS2Tools.getControllerOutputTopic(robotName),
+                                                    s -> capturabilityBasedStatusSubsrciber.receivedPacket(s.takeNextData()));
 
       CapturePointUpdatable ret = new CapturePointUpdatable(capturabilityBasedStatusSubsrciber, yoGraphicsListRegistry, registry);
 
       return ret;
    }
 
-   public void closeAndDispose()
+   public void finishTest()
    {
+      if (avatarTestingSimulation != null)
+      {
+         avatarTestingSimulation.finishTest();
+         avatarTestingSimulation = null;
+      }
+
       if (behaviorDispatcher != null)
       {
          behaviorDispatcher.closeAndDispose();
       }
-
-      super.destroySimulation();
    }
 
    public boolean executeBehaviorsSimulateAndBlockAndCatchExceptions(final SideDependentList<AbstractBehavior> behaviors, double simulationRunTime)
-         throws SimulationExceededMaximumTimeException
+
    {
       ArrayList<AbstractBehavior> behaviorArrayList = new ArrayList<AbstractBehavior>();
 
@@ -329,19 +316,23 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    }
 
    public boolean executeBehaviorsSimulateAndBlockAndCatchExceptions(final ArrayList<AbstractBehavior> behaviors, double simulationRunTime)
-         throws SimulationExceededMaximumTimeException
+
    {
       BehaviorRunner behaviorRunner = startNewBehaviorRunnerThread(behaviors);
 
-      boolean ret = simulateAndBlockAndCatchExceptions(simulationRunTime);
+      boolean ret = avatarTestingSimulation.simulateNow(simulationRunTime);
       behaviorRunner.closeAndDispose();
 
       return ret;
    }
 
-   public StopThreadUpdatable executeBehaviorPauseAndResumeOrStop(final AbstractBehavior behavior, double pausePercent, double pauseDuration,
-                                                                  double stopPercent, FramePose3D poseAtTrajectoryEnd, ReferenceFrame frameToKeepTrackOf)
-         throws SimulationExceededMaximumTimeException
+   public StopThreadUpdatable executeBehaviorPauseAndResumeOrStop(final AbstractBehavior behavior,
+                                                                  double pausePercent,
+                                                                  double pauseDuration,
+                                                                  double stopPercent,
+                                                                  FramePose3D poseAtTrajectoryEnd,
+                                                                  ReferenceFrame frameToKeepTrackOf)
+
    {
       StopThreadUpdatable stopThreadUpdatable = new TrajectoryBasedStopThreadUpdatable(robotDataReceiver,
                                                                                        behavior,
@@ -357,9 +348,12 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       return stopThreadUpdatable;
    }
 
-   public StopThreadUpdatable executeBehaviorPauseAndResumeOrStop(final AbstractBehavior behavior, double pauseTime, double pauseDuration, double stopTime,
+   public StopThreadUpdatable executeBehaviorPauseAndResumeOrStop(final AbstractBehavior behavior,
+                                                                  double pauseTime,
+                                                                  double pauseDuration,
+                                                                  double stopTime,
                                                                   ReferenceFrame frameToKeepTrackOf)
-         throws SimulationExceededMaximumTimeException
+
    {
       StopThreadUpdatable stopThreadUpdatable = new TimeBasedStopThreadUpdatable(robotDataReceiver,
                                                                                  behavior,
@@ -375,7 +369,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    }
 
    public boolean executeBehaviorPauseAndResumeOrStop(AbstractBehavior behavior, StopThreadUpdatable stopThreadUpdatable)
-         throws SimulationExceededMaximumTimeException
+
    {
       StoppableBehaviorRunner behaviorRunner = new StoppableBehaviorRunner(behavior, stopThreadUpdatable);
       Thread behaviorThread = new Thread(behaviorRunner);
@@ -384,7 +378,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       boolean success = true;
       while (!stopThreadUpdatable.shouldBehaviorRunnerBeStopped() && success)
       {
-         success = simulateAndBlockAndCatchExceptions(1.0);
+         success = avatarTestingSimulation.simulateNow(1.0);
       }
       behaviorRunner.closeAndDispose();
 
@@ -394,24 +388,24 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    }
 
    public boolean executeBehaviorSimulateAndBlockAndCatchExceptions(final AbstractBehavior behavior, double simulationRunTime)
-         throws SimulationExceededMaximumTimeException
+
    {
       BehaviorRunner behaviorRunner = startNewBehaviorRunnerThread(behavior);
 
-      boolean ret = simulateAndBlockAndCatchExceptions(simulationRunTime);
+      boolean ret = avatarTestingSimulation.simulateNow(simulationRunTime);
       behaviorRunner.closeAndDispose();
 
       return ret;
    }
 
-   public boolean executeBehaviorUntilDone(final AbstractBehavior behavior) throws SimulationExceededMaximumTimeException
+   public boolean executeBehaviorUntilDone(final AbstractBehavior behavior)
    {
       BehaviorRunner behaviorRunner = startNewBehaviorRunnerThread(behavior);
 
       boolean success = true;
       while (!behavior.isDone() && success)
       {
-         success = simulateAndBlockAndCatchExceptions(1.0);
+         success = avatarTestingSimulation.simulateNow(1.0);
       }
 
       behaviorRunner.closeAndDispose();
@@ -419,17 +413,17 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       return success;
    }
 
-   public boolean executeBehaviorUntilDoneUsingBehaviorDispatcher(final AbstractBehavior behavior) throws SimulationExceededMaximumTimeException
+   public boolean executeBehaviorUntilDoneUsingBehaviorDispatcher(final AbstractBehavior behavior)
    {
       behaviorDispatcher.start();
 
       boolean success = true;
-      success = simulateAndBlockAndCatchExceptions(0.1);
+      success = avatarTestingSimulation.simulateNow(0.1);
       sendBehaviorToDispatcher(behavior);
 
       while (!behavior.isDone() && success)
       {
-         success = simulateAndBlockAndCatchExceptions(1.0);
+         success = avatarTestingSimulation.simulateNow(1.0);
       }
 
       return success;
@@ -529,7 +523,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 
             if (stopThreadUpdatable.shouldBehaviorRunnerBeStopped())
             {
-               PrintTools.debug(this, "Stopping Thread!");
+               LogTools.debug("Stopping Thread!");
                isRunning = false;
             }
             else if (requestedControlMode.equals(BehaviorControlModeEnum.PAUSE) && !currentControlMode.equals(BehaviorControlModeEnum.PAUSE))
@@ -560,5 +554,75 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
             ThreadTools.sleep(1);
          }
       }
+   }
+
+   public FullHumanoidRobotModel getControllerFullRobotModel()
+   {
+      return avatarTestingSimulation.getControllerFullRobotModel();
+   }
+
+   public boolean simulateNow(double duration)
+   {
+      return avatarTestingSimulation.simulateNow(duration);
+   }
+
+   public String getRobotName()
+   {
+      return avatarTestingSimulation.getRobotName();
+   }
+
+   public Robot getRobot()
+   {
+      return avatarTestingSimulation.getRobot();
+   }
+
+   public HighLevelHumanoidControllerFactory getHighLevelHumanoidControllerFactory()
+   {
+      return avatarTestingSimulation.getHighLevelHumanoidControllerFactory();
+   }
+
+   public YoRegistry getRootRegistry()
+   {
+      return avatarTestingSimulation.getRootRegistry();
+   }
+
+   @Override
+   public YoVariable findVariable(String namespace, String name)
+   {
+      return getRootRegistry().findVariable(namespace, name);
+   }
+
+   @Override
+   public List<YoVariable> findVariables(String namespaceEnding, String name)
+   {
+      return getRootRegistry().findVariables(namespaceEnding, name);
+   }
+
+   @Override
+   public List<YoVariable> findVariables(YoNamespace namespace)
+   {
+      return getRootRegistry().findVariables(namespace);
+   }
+
+   @Override
+   public boolean hasUniqueVariable(String namespaceEnding, String name)
+   {
+      return getRootRegistry().hasUniqueVariable(namespaceEnding, name);
+   }
+
+   @Override
+   public List<YoVariable> getVariables()
+   {
+      return getRootRegistry().getVariables();
+   }
+
+   public void addStaticVisuals(Collection<? extends VisualDefinition> visualDefinitions)
+   {
+      avatarTestingSimulation.addStaticVisuals(visualDefinitions);
+   }
+
+   public void setCamera(Point3DReadOnly cameraFocus, Point3DReadOnly cameraPosition)
+   {
+      avatarTestingSimulation.setCamera(cameraFocus, cameraPosition);
    }
 }
