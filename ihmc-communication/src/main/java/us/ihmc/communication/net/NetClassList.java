@@ -93,6 +93,29 @@ public class NetClassList
 
    public void registerWithKryo(Kryo kryo)
    {
+      kryo.register(float[].class);
+      kryo.register(double[].class);
+      kryo.register(boolean[].class);
+      kryo.register(int[].class);
+      kryo.register(long[].class);
+      kryo.register(byte[].class);
+      kryo.register(char[].class);
+      kryo.register(short[].class);
+
+      kryo.register(Quaternion.class);
+      kryo.register(Vector3D.class);
+      kryo.register(Point3D.class);
+      kryo.register(IMUPacket.class);
+      kryo.register(SpatialVectorMessage.class);
+      kryo.register(IDLSequence.Object.class);
+      kryo.register(RecyclingArrayList.class);
+      kryo.register(IDLSequence.Boolean.class);
+      kryo.register(IDLSequence.Double.class);
+      kryo.register(IDLSequence.Float.class);
+      kryo.register(IDLSequence.Integer.class);
+      kryo.register(IDLSequence.Byte.class);
+      kryo.register(IDLSequence.Long.class);
+
       kryo.addDefaultSerializer(Quaternion.class, QuaternionSerializer.class);
       kryo.addDefaultSerializer(Vector3D.class, Vector3DSerializer.class);
       kryo.addDefaultSerializer(Point3D.class, Point3DSerializer.class);
