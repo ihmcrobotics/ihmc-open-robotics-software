@@ -19,6 +19,11 @@ import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.pubsub.common.SerializedPayload;
 import us.ihmc.ros2.ROS2TopicNameTools;
 
+/**
+ * NetClassList to make {@link KryoObjectServer} and {@link KryoObjectClient} compatible with any
+ * pub-sub message. It's at the proof-of-concept stage, serialization and deserialization are
+ * inefficient and need to be improved, but it should be a good start.
+ */
 public class PubSubNetClassListAdapter extends NetClassList
 {
    private final Map<Class<?>, Serializer<?>> pubSubKryoSerializerMap = new LinkedHashMap<>();
