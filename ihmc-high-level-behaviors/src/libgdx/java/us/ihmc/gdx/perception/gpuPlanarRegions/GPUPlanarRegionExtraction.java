@@ -60,11 +60,6 @@ public class GPUPlanarRegionExtraction
    private int searchDepthLimit = 37000;
    private int regionMinPatches = 37;
    private int boundaryMinPatches = 20;
-   private boolean drawPatches = true;
-   private boolean drawBoundaries = true;
-   private boolean render3DPlanarRegions = true;
-   private boolean render3DBoundaries = true;
-   private boolean render3DGrownBoundaries = true;
    private float regionGrowthFactor = 0.051f;
    private float edgeLengthTresholdSlider = 0.224f;
    private float triangulationToleranceSlider = 0.0f;
@@ -98,7 +93,6 @@ public class GPUPlanarRegionExtraction
    private int numberOfRegionPatches = 0;
    private int regionMaxSearchDepth = 0;
    private int boundaryMaxSearchDepth = 0;
-   private int numberOfBoundaryPatchesInWholeImage = 0;
    private double maxSVDSolveTime = Double.NaN;
    private final int[] adjacentY = {-1, 0, 1, 1, 1, 0, -1, -1};
    private final int[] adjacentX = {-1, -1, -1, 0, 1, 1, 1, 0};
@@ -119,10 +113,8 @@ public class GPUPlanarRegionExtraction
    private int patchWidth;
    private int filterPatchImageHeight;
    private int filterPatchImageWidth;
-   private final Mat BLACK_OPAQUE_RGBA8888 = new Mat((byte) 0, (byte) 0, (byte) 0, (byte) 255);
    private final ConcaveHullFactoryParameters concaveHullFactoryParameters = new ConcaveHullFactoryParameters();
    private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
-   private final FramePoint3D tempFramePoint = new FramePoint3D();
    private final PlanarRegionsList planarRegionsList = new PlanarRegionsList();
    private boolean firstRun = true;
 
@@ -390,7 +382,6 @@ public class GPUPlanarRegionExtraction
    private void findBoundariesAndHoles()
    {
       boundaryVisitedMatrix.zero();
-      numberOfBoundaryPatchesInWholeImage = 0;
       boundaryMaxSearchDepth = 0;
       gpuPlanarRegions.parallelStream().forEach(planarRegion ->
       {
@@ -428,7 +419,6 @@ public class GPUPlanarRegionExtraction
       if (searchDepth > boundaryMaxSearchDepth)
          boundaryMaxSearchDepth = searchDepth;
 
-      ++numberOfBoundaryPatchesInWholeImage;
       boundaryVisitedMatrix.set(row, column, true);
       regionRing.getBoundaryIndices().add().set(column, row);
 
