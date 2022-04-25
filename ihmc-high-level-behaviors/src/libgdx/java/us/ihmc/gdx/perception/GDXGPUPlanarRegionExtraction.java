@@ -41,6 +41,8 @@ import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
+import us.ihmc.gdx.perception.gpuPlanarRegions.GPUPlanarRegion;
+import us.ihmc.gdx.perception.gpuPlanarRegions.GPURegionRing;
 import us.ihmc.robotEnvironmentAwareness.geometry.*;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerTools;
@@ -142,8 +144,8 @@ public class GDXGPUPlanarRegionExtraction
    private double maxSVDSolveTime = Double.NaN;
    private final int[] adjacentY = {-1, 0, 1, 1, 1, 0, -1, -1};
    private final int[] adjacentX = {-1, -1, -1, 0, 1, 1, 1, 0};
-   private final RecyclingArrayList<GDXGPUPlanarRegion> gpuPlanarRegions = new RecyclingArrayList<>(GDXGPUPlanarRegion::new);
-   private final Comparator<GDXGPURegionRing> boundaryIndexComparator = Comparator.comparingInt(regionRing -> regionRing.getBoundaryIndices().size());
+   private final RecyclingArrayList<GPUPlanarRegion> gpuPlanarRegions = new RecyclingArrayList<>(GPUPlanarRegion::new);
+   private final Comparator<GPURegionRing> boundaryIndexComparator = Comparator.comparingInt(regionRing -> regionRing.getBoundaryIndices().size());
    private int imageWidth;
    private int imageHeight;
    private Size gaussianKernelSize;
@@ -429,7 +431,7 @@ public class GDXGPUPlanarRegionExtraction
             if (!regionVisitedMatrix.get(row, column) && boundaryConnectionsEncodedAsOnes == 255) // all ones; fully connected
             {
                numberOfRegionPatches = 0; // also number of patches traversed
-               GDXGPUPlanarRegion planarRegion = gpuPlanarRegions.add();
+               GPUPlanarRegion planarRegion = gpuPlanarRegions.add();
                planarRegion.reset(planarRegionIslandIndex);
                regionsDepthFirstSearch(row, column, planarRegionIslandIndex, planarRegion, 1);
                if (numberOfRegionPatches >= regionMinPatches.get())
@@ -466,7 +468,7 @@ public class GDXGPUPlanarRegionExtraction
       }
    }
 
-   private void regionsDepthFirstSearch(int row, int column, int planarRegionIslandIndex, GDXGPUPlanarRegion planarRegion, int searchDepth)
+   private void regionsDepthFirstSearch(int row, int column, int planarRegionIslandIndex, GPUPlanarRegion planarRegion, int searchDepth)
    {
       if (regionVisitedMatrix.get(row, column) || searchDepth > searchDepthLimit.get())
          return;
@@ -518,7 +520,7 @@ public class GDXGPUPlanarRegionExtraction
          int regionRingIndex = 0;
          for (Point2D leafPatch : planarRegion.getBorderIndices())
          {
-            GDXGPURegionRing regionRing = planarRegion.getRegionRings().add();
+            GPURegionRing regionRing = planarRegion.getRegionRings().add();
             regionRing.reset();
             int numberOfBoundaryPatches = boundaryDepthFirstSearch((int) leafPatch.getY(),
                                                                    (int) leafPatch.getX(),
@@ -555,7 +557,7 @@ public class GDXGPUPlanarRegionExtraction
       });
    }
 
-   private int boundaryDepthFirstSearch(int row, int column, int planarRegionId, GDXGPURegionRing regionRing, int leafPatchIndex, int searchDepth)
+   private int boundaryDepthFirstSearch(int row, int column, int planarRegionId, GPURegionRing regionRing, int leafPatchIndex, int searchDepth)
    {
       if (boundaryVisitedMatrix.get(row, column) || searchDepth > searchDepthLimit.get())
          return 0;
@@ -594,7 +596,7 @@ public class GDXGPUPlanarRegionExtraction
       {
          if (!planarRegion.getRegionRings().isEmpty())
          {
-            GDXGPURegionRing firstRing = planarRegion.getRegionRings().get(0);
+            GPURegionRing firstRing = planarRegion.getRegionRings().get(0);
             for (Vector2D boundaryIndex : firstRing.getBoundaryIndices())
             {
                // kernel coordinates is in left-handed frame, so lets flip it to IHMC Z up
@@ -726,13 +728,13 @@ public class GDXGPUPlanarRegionExtraction
       if (render3DBoundaries.get() || render3DGrownBoundaries.get())
       {
          boundaryPointCloud.prepareVertexBufferForAddingPoints();
-         for (GDXGPUPlanarRegion planarRegion : gpuPlanarRegions)
+         for (GPUPlanarRegion planarRegion : gpuPlanarRegions)
          {
             if (render3DBoundaries.get())
             {
                if (!planarRegion.getRegionRings().isEmpty())
                {
-                  GDXGPURegionRing firstRing = planarRegion.getRegionRings().get(0);
+                  GPURegionRing firstRing = planarRegion.getRegionRings().get(0);
                   for (Vector2D boundaryIndex : firstRing.getBoundaryIndices())
                   {
                      int column = (int) boundaryIndex.getX() * patchWidth;
