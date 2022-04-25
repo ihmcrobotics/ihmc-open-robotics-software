@@ -31,6 +31,11 @@ public class RealSenseHardwareManager
    private final rs2_device_list devices;
    private final rs2_error error = new rs2_error();
 
+   public RealSenseHardwareManager()
+   {
+      this(null, null);
+   }
+
    public RealSenseHardwareManager(YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this.graphicsListRegistry = graphicsListRegistry;
@@ -46,7 +51,8 @@ public class RealSenseHardwareManager
 
       updateDeviceCount();
 
-      parentRegistry.addChild(registry);
+      if (parentRegistry != null)
+         parentRegistry.addChild(registry);
    }
 
    public RealtimeL515 createRealtimeL515(String prefix, String serialNumberToFind)
