@@ -55,7 +55,7 @@ public class FeetManager
 
    private final ToeOffParameters toeOffParameters;
    private final ToeOffCalculator toeOffCalculator;
-   private final OverhauledToeOffManager overhauledToeOffManager;
+   private final GeometricToeOffManager overhauledToeOffManager;
 
    private final SideDependentList<ContactableFoot> feet;
 
@@ -102,11 +102,11 @@ public class FeetManager
 
       toeOffCalculator = new WrapperForMultipleToeOffCalculators(toeOffCalculators, registry);
 
-      overhauledToeOffManager = new OverhauledToeOffManager(controllerToolbox,
-                                                            walkingControllerParameters,
-                                                            new DynamicStateInspectorParameters(registry),
-                                                            toeOffCalculator,
-                                                            registry);
+      overhauledToeOffManager = new GeometricToeOffManager(controllerToolbox,
+                                                           walkingControllerParameters,
+                                                           new DynamicStateInspectorParameters(registry),
+                                                           toeOffCalculator,
+                                                           registry);
 
       this.footSwitches = controllerToolbox.getFootSwitches();
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
@@ -552,7 +552,7 @@ public class FeetManager
     * FramePoint2DReadOnly, FramePoint2DReadOnly, FramePoint2DReadOnly, FramePoint2DReadOnly, FramePoint2DReadOnly, FramePoint2DReadOnly)} or
     * {@link #updateToeOffStatusSingleSupport(Footstep, Footstep, FramePoint3DReadOnly, FramePoint2DReadOnly, FramePoint2DReadOnly, FramePoint2DReadOnly,
     * FramePoint2DReadOnly, FramePoint2DReadOnly)}, based on the walking state.
-    * Calls {@link OverhauledToeOffManager#doToeOff()}}.
+    * Calls {@link GeometricToeOffManager#doToeOff()}}.
     */
    public boolean okForPointToeOff(boolean isInSingleSupport)
    {
@@ -571,7 +571,7 @@ public class FeetManager
     * FramePoint2DReadOnly, FramePoint2DReadOnly, FramePoint2DReadOnly, FramePoint2DReadOnly, FramePoint2DReadOnly, FramePoint2DReadOnly)} or
     * {@link #updateToeOffStatusSingleSupport(Footstep, Footstep, FramePoint3DReadOnly, FramePoint2DReadOnly, FramePoint2DReadOnly, FramePoint2DReadOnly,
     * FramePoint2DReadOnly, FramePoint2DReadOnly)}, based on the walking state.
-    * Calls {@link OverhauledToeOffManager#doToeOff()}}.
+    * Calls {@link GeometricToeOffManager#doToeOff()}}.
     */
    public boolean okForLineToeOff(boolean isInSingleSupport)
    {

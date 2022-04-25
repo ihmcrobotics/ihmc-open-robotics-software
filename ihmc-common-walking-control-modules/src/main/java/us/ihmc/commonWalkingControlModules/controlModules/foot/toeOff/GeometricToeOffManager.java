@@ -26,7 +26,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.List;
 
-public class OverhauledToeOffManager
+public class GeometricToeOffManager
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -64,11 +64,11 @@ public class OverhauledToeOffManager
    private final PoseReferenceFrame nextStepFrame = new PoseReferenceFrame("nextStepFrame", worldFrame);
    private final FramePose3D nextFrontFootPose = new FramePose3D();
 
-   public OverhauledToeOffManager(HighLevelHumanoidControllerToolbox controllerToolbox,
-                                  WalkingControllerParameters walkingControllerParameters,
-                                  DynamicStateInspectorParameters dynamicStateInspectorParameters,
-                                  ToeOffCalculator toeOffCalculator,
-                                  YoRegistry parentRegistry)
+   public GeometricToeOffManager(HighLevelHumanoidControllerToolbox controllerToolbox,
+                                 WalkingControllerParameters walkingControllerParameters,
+                                 DynamicStateInspectorParameters dynamicStateInspectorParameters,
+                                 ToeOffCalculator toeOffCalculator,
+                                 YoRegistry parentRegistry)
    {
       this(walkingControllerParameters.getToeOffParameters(),
            walkingControllerParameters.getSteppingParameters(),
@@ -81,14 +81,14 @@ public class OverhauledToeOffManager
            parentRegistry);
    }
 
-   public OverhauledToeOffManager(WalkingControllerParameters walkingControllerParameters,
-                                  DynamicStateInspectorParameters dynamicStateInspectorParameters,
-                                  SideDependentList<MovingReferenceFrame> soleZUpFrames,
-                                  SideDependentList<? extends FrameConvexPolygon2DReadOnly> footPolygonsInWorldFrame,
-                                  SideDependentList<? extends FrameConvexPolygon2DReadOnly> footDefaultPolygons,
-                                  FullHumanoidRobotModel fullRobotModel,
-                                  ToeOffCalculator toeOffCalculator,
-                                  YoRegistry parentRegistry)
+   public GeometricToeOffManager(WalkingControllerParameters walkingControllerParameters,
+                                 DynamicStateInspectorParameters dynamicStateInspectorParameters,
+                                 SideDependentList<MovingReferenceFrame> soleZUpFrames,
+                                 SideDependentList<? extends FrameConvexPolygon2DReadOnly> footPolygonsInWorldFrame,
+                                 SideDependentList<? extends FrameConvexPolygon2DReadOnly> footDefaultPolygons,
+                                 FullHumanoidRobotModel fullRobotModel,
+                                 ToeOffCalculator toeOffCalculator,
+                                 YoRegistry parentRegistry)
    {
       this(walkingControllerParameters.getToeOffParameters(),
            walkingControllerParameters.getSteppingParameters(),
@@ -101,15 +101,15 @@ public class OverhauledToeOffManager
            parentRegistry);
    }
 
-   public OverhauledToeOffManager(ToeOffParameters toeOffParameters,
-                                  SteppingParameters steppingParameters,
-                                  DynamicStateInspectorParameters dynamicStateInspectorParameters,
-                                  SideDependentList<MovingReferenceFrame> soleZUpFrames,
-                                  SideDependentList<? extends FrameConvexPolygon2DReadOnly> footPolygonsInWorldFrame,
-                                  SideDependentList<? extends FrameConvexPolygon2DReadOnly> footDefaultPolygons,
-                                  FullHumanoidRobotModel fullRobotModel,
-                                  ToeOffCalculator toeOffCalculator,
-                                  YoRegistry parentRegistry)
+   public GeometricToeOffManager(ToeOffParameters toeOffParameters,
+                                 SteppingParameters steppingParameters,
+                                 DynamicStateInspectorParameters dynamicStateInspectorParameters,
+                                 SideDependentList<MovingReferenceFrame> soleZUpFrames,
+                                 SideDependentList<? extends FrameConvexPolygon2DReadOnly> footPolygonsInWorldFrame,
+                                 SideDependentList<? extends FrameConvexPolygon2DReadOnly> footDefaultPolygons,
+                                 FullHumanoidRobotModel fullRobotModel,
+                                 ToeOffCalculator toeOffCalculator,
+                                 YoRegistry parentRegistry)
    {
       this.toeOffCalculator = toeOffCalculator;
       this.soleZUpFrames = soleZUpFrames;
