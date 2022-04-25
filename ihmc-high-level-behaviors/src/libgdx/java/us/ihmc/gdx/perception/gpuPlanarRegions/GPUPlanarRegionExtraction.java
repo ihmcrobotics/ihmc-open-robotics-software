@@ -36,6 +36,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static us.ihmc.gdx.perception.gpuPlanarRegions.GPUPlanarRegionExtractionParameters.*;
@@ -63,6 +64,7 @@ public class GPUPlanarRegionExtraction
    private int numberOfRegionPatches = 0;
    private int regionMaxSearchDepth = 0;
    private int boundaryMaxSearchDepth = 0;
+   private int numberOfBoundaryPatchesInWholeImage = 0;
    private double maxSVDSolveTime = Double.NaN;
    private final int[] adjacentY = {-1, 0, 1, 1, 1, 0, -1, -1};
    private final int[] adjacentX = {-1, -1, -1, 0, 1, 1, 1, 0};
@@ -86,6 +88,7 @@ public class GPUPlanarRegionExtraction
    private final ConcaveHullFactoryParameters concaveHullFactoryParameters = new ConcaveHullFactoryParameters();
    private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
    private final PlanarRegionsList planarRegionsList = new PlanarRegionsList();
+   private final GPUPlanarRegionIsland tempIsland = new GPUPlanarRegionIsland();
    private boolean firstRun = true;
 
    public void create(int imageWidth, int imageHeight, ByteBuffer sourceDepthByteBufferOfFloats, double fx, double fy, double cx, double cy)
@@ -139,7 +142,7 @@ public class GPUPlanarRegionExtraction
       //      ROSOpenCVTools.backMatWithNettyBuffer(inputDepthImageMat, image.getData());
    }
 
-   public void extractPlanarRegions(ReferenceFrame cameraFrame)
+   public void extractPlanarRegions(ReferenceFrame cameraFrame, Runnable onPatchSizeChanged)
    {
       calculateDerivativeParameters();
 
@@ -196,6 +199,7 @@ public class GPUPlanarRegionExtraction
          cyImage.resize(patchImageWidth, patchImageHeight, openCLManager, null);
          czImage.resize(patchImageWidth, patchImageHeight, openCLManager, null);
          graphImage.resize(patchImageWidth, patchImageHeight, openCLManager, null);
+         onPatchSizeChanged.run();
          regionVisitedMatrix.reshape(patchImageHeight, patchImageWidth);
          boundaryVisitedMatrix.reshape(patchImageHeight, patchImageWidth);
          boundaryMatrix.reshape(patchImageHeight, patchImageWidth);
@@ -263,15 +267,9 @@ public class GPUPlanarRegionExtraction
       openCLManager.enqueueReadImage(graphImage.getOpenCLImageObject(), patchImageWidth, patchImageHeight, graphImage.getBytedecoByteBufferPointer());
 
       openCLManager.finish();
-
-      findRegions();
-      findBoundariesAndHoles();
-      growRegionBoundaries();
-
-      computePlanarRegions(cameraFrame);
    }
 
-   private void findRegions()
+   public void findRegions(Consumer<GPUPlanarRegionIsland> forDrawingDebugPanel)
    {
       int planarRegionIslandIndex = 0;
       regionMaxSearchDepth = 0;
@@ -297,6 +295,10 @@ public class GPUPlanarRegionExtraction
                   planarRegion.update(parameters.getUseSVDNormals(), parameters.getSVDReductionFactor());
                   if (planarRegion.getSVDDuration() > maxSVDSolveTime)
                      maxSVDSolveTime = planarRegion.getSVDDuration();
+
+                  tempIsland.planarRegion = planarRegion;
+                  tempIsland.planarRegionIslandIndex = planarRegionIslandIndex;
+                  forDrawingDebugPanel.accept(tempIsland);
                }
                else
                {
@@ -350,7 +352,7 @@ public class GPUPlanarRegionExtraction
       }
    }
 
-   private void findBoundariesAndHoles()
+   public void findBoundariesAndHoles(Consumer<GPURegionRing> forDrawingDebugPanel)
    {
       boundaryVisitedMatrix.zero();
       boundaryMaxSearchDepth = 0;
@@ -362,6 +364,7 @@ public class GPUPlanarRegionExtraction
          {
             GPURegionRing regionRing = planarRegion.getRegionRings().add();
             regionRing.reset();
+            regionRing.setIndex(regionRingIndex);
             int numberOfBoundaryPatches = boundaryDepthFirstSearch((int) leafPatch.getY(),
                                                                    (int) leafPatch.getX(),
                                                                    planarRegion.getId(),
@@ -370,6 +373,7 @@ public class GPUPlanarRegionExtraction
                                                                    1);
             if (numberOfBoundaryPatches >= parameters.getBoundaryMinPatches())
             {
+               forDrawingDebugPanel.accept(regionRing);
                ++regionRingIndex;
             }
             else
@@ -390,6 +394,7 @@ public class GPUPlanarRegionExtraction
       if (searchDepth > boundaryMaxSearchDepth)
          boundaryMaxSearchDepth = searchDepth;
 
+      ++numberOfBoundaryPatchesInWholeImage;
       boundaryVisitedMatrix.set(row, column, true);
       regionRing.getBoundaryIndices().add().set(column, row);
 
@@ -414,7 +419,7 @@ public class GPUPlanarRegionExtraction
       return numberOfBoundaryPatches;
    }
 
-   private void growRegionBoundaries()
+   public void growRegionBoundaries()
    {
       gpuPlanarRegions.forEach(planarRegion ->
       {
@@ -438,7 +443,7 @@ public class GPUPlanarRegionExtraction
       });
    }
 
-   private void computePlanarRegions(ReferenceFrame cameraFrame)
+   public void computePlanarRegions(ReferenceFrame cameraFrame)
    {
       List<List<PlanarRegion>> listOfListsOfRegions = gpuPlanarRegions.parallelStream()
       .filter(gpuPlanarRegion -> gpuPlanarRegion.getBoundaryVertices().size() >= polygonizerParameters.getMinNumberOfNodes())
@@ -540,8 +545,128 @@ public class GPUPlanarRegionExtraction
       // TODO: Destroy the rest
    }
 
+   public void setPatchSizeChanged(boolean patchSizeChanged)
+   {
+      this.patchSizeChanged = patchSizeChanged;
+   }
+
    public PlanarRegionsList getPlanarRegionsList()
    {
       return planarRegionsList;
+   }
+
+   public int getPatchImageWidth()
+   {
+      return patchImageWidth;
+   }
+
+   public int getPatchImageHeight()
+   {
+      return patchImageHeight;
+   }
+
+   public OpenCLManager getOpenCLManager()
+   {
+      return openCLManager;
+   }
+
+   public int getNumberOfBoundaryPatchesInWholeImage()
+   {
+      return numberOfBoundaryPatchesInWholeImage;
+   }
+
+   public BytedecoImage getBlurredDepthImage()
+   {
+      return blurredDepthImage;
+   }
+
+   public BytedecoImage getFilteredDepthImage()
+   {
+      return filteredDepthImage;
+   }
+
+   public BytedecoImage getNxImage()
+   {
+      return nxImage;
+   }
+
+   public BytedecoImage getNyImage()
+   {
+      return nyImage;
+   }
+
+   public BytedecoImage getNzImage()
+   {
+      return nzImage;
+   }
+
+   public BytedecoImage getCxImage()
+   {
+      return cxImage;
+   }
+
+   public BytedecoImage getCyImage()
+   {
+      return cyImage;
+   }
+
+   public BytedecoImage getCzImage()
+   {
+      return czImage;
+   }
+
+   public RecyclingArrayList<GPUPlanarRegion> getGPUPlanarRegions()
+   {
+      return gpuPlanarRegions;
+   }
+
+   public int getPatchWidth()
+   {
+      return patchWidth;
+   }
+
+   public int getPatchHeight()
+   {
+      return patchHeight;
+   }
+
+   public BytedecoImage getInputFloatDepthImage()
+   {
+      return inputFloatDepthImage;
+   }
+
+   public int getImageWidth()
+   {
+      return imageWidth;
+   }
+
+   public int getImageHeight()
+   {
+      return imageHeight;
+   }
+
+   public ConcaveHullFactoryParameters getConcaveHullFactoryParameters()
+   {
+      return concaveHullFactoryParameters;
+   }
+
+   public PolygonizerParameters getPolygonizerParameters()
+   {
+      return polygonizerParameters;
+   }
+
+   public int getRegionMaxSearchDepth()
+   {
+      return regionMaxSearchDepth;
+   }
+
+   public int getBoundaryMaxSearchDepth()
+   {
+      return boundaryMaxSearchDepth;
+   }
+
+   public double getMaxSVDSolveTime()
+   {
+      return maxSVDSolveTime;
    }
 }
