@@ -319,6 +319,7 @@ public class StepGeneratorJavaFXController
       FootstepDataListMessage footstepsToSend = footstepsToSendReference.getAndSet(null);
       if (footstepsToSend != null && continuousStepController.isWalking())
       {
+//         footstepsToSend.setAreFootstepsAdjustable(true);
          footstepPublisher.publish(footstepsToSend);
       }
    }
