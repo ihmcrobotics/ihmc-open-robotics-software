@@ -406,6 +406,16 @@ public class ContinuousStepGenerator implements Updatable
       parameters.setSwingDuration(swingTime);
       parameters.setTransferDuration(transferTime);
    }
+   
+   public void setFootstepsAreAdjustable(boolean footstepsAreAdjustable)
+   {
+      parameters.setStepsAreAdjustable(footstepsAreAdjustable);
+   }
+   
+   public void setSwingHeight(double swingHeight)
+   {
+      parameters.setSwingHeight(swingHeight);
+   }
 
    /**
     * Sets the provider to use for getting every tick the desired turning velocity.
