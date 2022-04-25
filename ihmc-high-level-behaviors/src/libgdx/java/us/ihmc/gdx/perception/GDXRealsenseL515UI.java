@@ -74,6 +74,8 @@ public class GDXRealsenseL515UI
 
                if (l515.readFrameData())
                {
+                  l515.updateDataBytePointers();
+
                   if (depthImagePanel == null)
                   {
                      depthU16C1Image = new Mat(l515.getDepthHeight(), l515.getDepthWidth(), opencv_core.CV_16UC1, l515.getDepthFrameData());
