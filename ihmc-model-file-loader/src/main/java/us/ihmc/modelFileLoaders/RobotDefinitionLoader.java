@@ -282,7 +282,7 @@ public class RobotDefinitionLoader
          {
             VisualDefinitionFactory visualDefinitionFactory = new VisualDefinitionFactory();
             visualDefinitionFactory.appendTranslation(jointContactPoint.getRight());
-            visualDefinitionFactory.addSphere(0.01, new MaterialDefinition(ColorDefinitions.Orange()));
+            visualDefinitionFactory.addSphere(0.01, ColorDefinitions.Orange());
             jointDefinition.getSuccessor().getVisualDefinitions().addAll(visualDefinitionFactory.getVisualDefinitions());
          }
       }

@@ -5,13 +5,12 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.roughTerrainWalking.DRCSwingTrajectoryTest;
+import us.ihmc.avatar.roughTerrainWalking.HumanoidSwingTrajectoryTest;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 @Tag("humanoid-rough-terrain-slow")
-public class ValkyrieSwingTrajectoryTest extends DRCSwingTrajectoryTest
+public class ValkyrieSwingTrajectoryTest extends HumanoidSwingTrajectoryTest
 {
    private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
 
@@ -29,7 +28,7 @@ public class ValkyrieSwingTrajectoryTest extends DRCSwingTrajectoryTest
 
    @Override
    @Test
-   public void testSelfCollisionAvoidance() throws SimulationExceededMaximumTimeException
+   public void testSelfCollisionAvoidance()
    {
       super.testSelfCollisionAvoidance();
    }

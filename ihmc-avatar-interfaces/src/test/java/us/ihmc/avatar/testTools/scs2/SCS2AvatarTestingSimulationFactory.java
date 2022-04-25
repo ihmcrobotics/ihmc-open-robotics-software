@@ -11,7 +11,6 @@ import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.scs2.SCS2AvatarSimulation;
 import us.ihmc.avatar.scs2.SCS2AvatarSimulationFactory;
-import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -24,30 +23,32 @@ import us.ihmc.ros2.ROS2TopicNameTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
+import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.yoVariables.exceptions.IllegalOperationException;
 
 public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFactory
 {
-   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.INTRAPROCESS, "ihmc_simulation_test_helper");
+   private final OptionalFactoryField<Boolean> createVideo = new OptionalFactoryField<>("createVideo", false);
+   private final OptionalFactoryField<Boolean> keepSCSUp = new OptionalFactoryField<>("keepSCSUp", false);
+
+   private final PubSubImplementation pubSubImplementation = PubSubImplementation.INTRAPROCESS;
+   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "ihmc_simulation_test_helper");
 
    @SuppressWarnings("rawtypes")
    private final Map<Class<?>, IHMCROS2Publisher> defaultControllerPublishers = new HashMap<>();
 
-   private DRCRobotModel robotModel;
-   private ScriptedFootstepGenerator scriptedFootstepGenerator;
-
-   private boolean createVideo = false;
-
    public static SCS2AvatarTestingSimulation createDefaultTestSimulation(DRCRobotModel robotModel, SimulationTestingParameters simulationTestingParameters)
    {
-      return createDefaultTestSimulation(robotModel, null, simulationTestingParameters);
+      SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = createDefaultTestSimulationFactory(robotModel, simulationTestingParameters);
+      return simulationTestHelperFactory.createAvatarTestingSimulation();
    }
 
    public static SCS2AvatarTestingSimulation createDefaultTestSimulation(DRCRobotModel robotModel,
                                                                          CommonAvatarEnvironmentInterface environment,
                                                                          SimulationTestingParameters simulationTestingParameters)
    {
-      return createDefaultTestSimulationFactory(robotModel, environment, simulationTestingParameters).createAvatarTestingSimulation();
+      SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = createDefaultTestSimulationFactory(robotModel, environment, simulationTestingParameters);
+      return simulationTestHelperFactory.createAvatarTestingSimulation();
    }
 
    public static SCS2AvatarTestingSimulationFactory createDefaultTestSimulationFactory(DRCRobotModel robotModel,
@@ -73,7 +74,7 @@ public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFact
       setRobotModel(robotModel);
       setCommonAvatarEnvrionmentInterface(environment);
 
-      setRealtimeROS2Node(ROS2Tools.createRealtimeROS2Node(PubSubImplementation.INTRAPROCESS, "ihmc_simulation"));
+      setRealtimeROS2Node(ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "ihmc_simulation"));
 
       List<Class<? extends Command<?, ?>>> controllerSupportedCommands = ControllerAPIDefinition.getControllerSupportedCommands();
 
@@ -93,11 +94,54 @@ public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFact
 
    public SCS2AvatarTestingSimulation createAvatarTestingSimulation()
    {
+      return createAvatarTestingSimulation(null);
+   }
+
+   public SCS2AvatarTestingSimulation createAvatarTestingSimulation(String simulationName)
+   {
+      // Access the factory fields before they get disposed of.
+      boolean createVideo = this.createVideo.get();
+      boolean keepSCSUp = this.keepSCSUp.get();
+
+      setSimulationName(simulationName != null ? simulationName : retrieveCallingTestName());
       SCS2AvatarTestingSimulation avatarTestingSimulation = new SCS2AvatarTestingSimulation(super.createAvatarSimulation());
       avatarTestingSimulation.setROS2Node(ros2Node);
       avatarTestingSimulation.setDefaultControllerPublishers(defaultControllerPublishers);
       avatarTestingSimulation.setCreateVideo(createVideo);
+      avatarTestingSimulation.setKeepSCSUp(keepSCSUp);
+      // TODO This guy needs to be created before the robot is completely standing. Should cleanup QueuedControllerCommandGenerator, quite a mess.
+      avatarTestingSimulation.getQueuedControllerCommands();
       return avatarTestingSimulation;
+   }
+
+   public static String retrieveCallingTestName()
+   {
+      StackTraceElement[] stackTrace = new Throwable().getStackTrace();
+
+      StackTraceElement callingElement = null;
+
+      for (StackTraceElement candidate : stackTrace)
+      {
+         if (candidate.getClassName().startsWith("sun.reflect"))
+            break;
+         else if (candidate.getClassName().startsWith("java.lang"))
+            break;
+         else if (candidate.getClassName().startsWith("org.junit"))
+            break;
+         callingElement = candidate;
+      }
+
+      if (callingElement == null)
+      {
+         return "Unknown test simulation";
+      }
+      else
+      {
+         String className = callingElement.getClassName();
+         String methodName = callingElement.getMethodName();
+         String classSimpleName = className.substring(className.lastIndexOf(".") + 1);
+         return classSimpleName + "-" + methodName;
+      }
    }
 
    @Override
@@ -110,14 +154,6 @@ public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFact
    public void setRobotModel(DRCRobotModel robotModel)
    {
       super.setRobotModel(robotModel);
-      this.robotModel = robotModel;
-   }
-
-   public ScriptedFootstepGenerator getScriptedFootstepGenerator()
-   {
-      if (scriptedFootstepGenerator == null)
-         scriptedFootstepGenerator = new ScriptedFootstepGenerator(robotModel.createFullRobotModel());
-      return scriptedFootstepGenerator;
    }
 
    public void setup(SimulationTestingParameters parameters)
@@ -127,16 +163,22 @@ public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFact
       setRunMultiThreaded(parameters.getRunMultiThreaded());
       setSimulationDataBufferSize(parameters.getDataBufferSize());
       setCreateVideo(parameters.getCreateSCSVideos());
+      setKeepSCSUp(parameters.getKeepSCSUp());
    }
 
    public void setCreateVideo(boolean createVideo)
    {
-      this.createVideo = createVideo;
+      this.createVideo.set(createVideo);
+   }
+
+   public void setKeepSCSUp(boolean keepSCSUp)
+   {
+      this.keepSCSUp.set(keepSCSUp);
    }
 
    public <T> IHMCROS2Publisher<T> createPublisherForController(Class<T> messageType)
    {
-      return createPublisher(messageType, ROS2Tools.getControllerInputTopic(robotModel.getSimpleRobotName()));
+      return createPublisher(messageType, ROS2Tools.getControllerInputTopic(robotModel.get().getSimpleRobotName()));
    }
 
    public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, ROS2Topic<?> generator)
@@ -151,7 +193,7 @@ public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFact
 
    public <T> void createSubscriberFromController(Class<T> messageType, ObjectConsumer<T> consumer)
    {
-      createSubscriber(messageType, ROS2Tools.getControllerOutputTopic(robotModel.getSimpleRobotName()), consumer);
+      createSubscriber(messageType, ROS2Tools.getControllerOutputTopic(robotModel.get().getSimpleRobotName()), consumer);
    }
 
    public <T> void createSubscriber(Class<T> messageType, ROS2Topic<?> generator, ObjectConsumer<T> consumer)

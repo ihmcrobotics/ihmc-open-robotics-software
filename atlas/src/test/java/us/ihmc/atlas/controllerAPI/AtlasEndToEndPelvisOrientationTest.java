@@ -9,7 +9,6 @@ import us.ihmc.avatar.controllerAPI.EndToEndPelvisOrientationTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasEndToEndPelvisOrientationTest extends EndToEndPelvisOrientationTest
 {
@@ -18,7 +17,7 @@ public class AtlasEndToEndPelvisOrientationTest extends EndToEndPelvisOrientatio
    @Tag("controller-api-2")
    @Override
    @Test
-   public void testGoHome() throws SimulationExceededMaximumTimeException
+   public void testGoHome()
    {
       super.testGoHome();
    }
@@ -26,7 +25,7 @@ public class AtlasEndToEndPelvisOrientationTest extends EndToEndPelvisOrientatio
    @Tag("controller-api-2")
    @Override
    @Test
-   public void testSingleTrajectoryPoint() throws SimulationExceededMaximumTimeException
+   public void testSingleTrajectoryPoint()
    {
       super.testSingleTrajectoryPoint();
    }
@@ -34,7 +33,7 @@ public class AtlasEndToEndPelvisOrientationTest extends EndToEndPelvisOrientatio
    @Tag("controller-api-2")
    @Override
    @Test
-   public void testQueue() throws SimulationExceededMaximumTimeException
+   public void testQueue()
    {
       super.testQueue();
    }
@@ -42,7 +41,7 @@ public class AtlasEndToEndPelvisOrientationTest extends EndToEndPelvisOrientatio
    @Tag("controller-api-slow-2")
    @Override
    @Test
-   public void testWalking() throws SimulationExceededMaximumTimeException
+   public void testWalking()
    {
       super.testWalking();
    }
@@ -50,7 +49,7 @@ public class AtlasEndToEndPelvisOrientationTest extends EndToEndPelvisOrientatio
    @Tag("controller-api-slow-2")
    @Override
    @Test
-   public void testWalkingAfterTrajectory() throws SimulationExceededMaximumTimeException
+   public void testWalkingAfterTrajectory()
    {
       super.testWalkingAfterTrajectory();
    }
@@ -58,7 +57,7 @@ public class AtlasEndToEndPelvisOrientationTest extends EndToEndPelvisOrientatio
    @Tag("controller-api-2")
    @Override
    @Test
-   public void testMultipleTrajectoryPoints() throws SimulationExceededMaximumTimeException
+   public void testMultipleTrajectoryPoints()
    {
       super.testMultipleTrajectoryPoints();
    }
@@ -66,7 +65,7 @@ public class AtlasEndToEndPelvisOrientationTest extends EndToEndPelvisOrientatio
    @Tag("controller-api-slow-2")
    @Override
    @Test
-   public void testWalkingWithUserControl() throws SimulationExceededMaximumTimeException
+   public void testWalkingWithUserControl()
    {
       super.testWalkingWithUserControl();
    }
@@ -74,7 +73,7 @@ public class AtlasEndToEndPelvisOrientationTest extends EndToEndPelvisOrientatio
    @Tag("controller-api-slow-2")
    @Override
    @Test
-   public void testCustomControlFrame() throws SimulationExceededMaximumTimeException
+   public void testCustomControlFrame()
    {
       super.testCustomControlFrame();
    }

@@ -1,5 +1,6 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Random;
@@ -9,28 +10,31 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.euclid.yawPitchRoll.interfaces.YawPitchRollReadOnly;
-import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
+import us.ihmc.scs2.simulation.robot.Robot;
+import us.ihmc.scs2.simulation.robot.trackers.GroundContactPoint;
 import us.ihmc.simulationConstructionSetTools.util.perturbance.GroundContactPointsSlipper;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
+import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-public class SlipRandomOnNextStepPerturber extends ModularRobotController
+public class SlipRandomOnNextStepPerturber implements Controller
 {
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   private final List<Controller> subControllers = new ArrayList<>();
+
    private enum SlipState
    {
       NO_CONTACT, CONTACT_WILL_SLIP, CONTACT_SLIP, CONTACT_DONE_SLIP, CONTACT
    }
 
    private final SideDependentList<GroundContactPointsSlipper> groundContactPointsSlippers;
-   private final FloatingRootJointRobot robot;
    private final YoBoolean slipNextStep;
    private final YoDouble minSlipAfterTimeDelta, maxSlipAfterTimeDelta, nextSlipAfterTimeDelta;
    private final YoDouble minSlipPercentSlipPerTick, maxSlipPercentSlipPerTick, nextSlipPercentSlipPerTick;
@@ -47,20 +51,19 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
    private final YoFrameYawPitchRoll nextRotationToSlip;
 
    private double probabilitySlip = 0.0;
-   private final Random random = new Random();
+   private final Random random = new Random(1161);
+   private final DoubleProvider time;
 
-   public SlipRandomOnNextStepPerturber(HumanoidFloatingRootJointRobot robot, long randomSeed)
+   public SlipRandomOnNextStepPerturber(DoubleProvider time, Robot robot, SideDependentList<String> footNames, long randomSeed)
    {
-      this(robot);
+      this(time, robot, footNames);
       this.random.setSeed(randomSeed);
    }
 
-   public SlipRandomOnNextStepPerturber(HumanoidFloatingRootJointRobot robot)
+   public SlipRandomOnNextStepPerturber(DoubleProvider time, Robot robot, SideDependentList<String> footNames)
    {
-      super("SlipRandomOnNextStepPerturber");
+      this.time = time;
       String name = "SlipRandom";
-
-      this.robot = robot;
 
       groundContactPointsSlippers = new SideDependentList<GroundContactPointsSlipper>();
 
@@ -70,16 +73,15 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
                + robotSide.getCamelCaseNameForMiddleOfExpression(), registry);
          touchdownTimeForSlipMap.put(robotSide, touchdownTimeForSlip);
 
-         YoEnum<SlipState> slipState = new YoEnum<SlipState>(name + "SlipState" + robotSide.getCamelCaseNameForMiddleOfExpression(), registry,
-               SlipState.class);
+         YoEnum<SlipState> slipState = new YoEnum<SlipState>(name + "SlipState" + robotSide.getCamelCaseNameForMiddleOfExpression(), registry, SlipState.class);
          slipState.set(SlipState.NO_CONTACT);
          slipStateMap.put(robotSide, slipState);
 
-         groundContactPointsMap.put(robotSide, robot.getFootGroundContactPoints(robotSide));
-         
+         groundContactPointsMap.put(robotSide, robot.getRigidBody(footNames.get(robotSide)).getParentJoint().getAuxialiryData().getGroundContactPoints());
+
          GroundContactPointsSlipper groundContactPointsSlipper = new GroundContactPointsSlipper(robotSide.getLowerCaseName());
          groundContactPointsSlippers.put(robotSide, groundContactPointsSlipper);
-         this.addRobotController(groundContactPointsSlipper);
+         subControllers.add(groundContactPointsSlipper);
       }
 
       this.minSlipAfterTimeDelta = new YoDouble(name + "MinSlipAfterTimeDelta", registry);
@@ -99,15 +101,22 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
       minRotationToSlipNextStep = new YoFrameYawPitchRoll(name + "MinRotationToSlipNextStep", ReferenceFrame.getWorldFrame(), registry);
       nextRotationToSlip = new YoFrameYawPitchRoll(name + "NextRotationToSlip", ReferenceFrame.getWorldFrame(), registry);
 
-      setTranslationRangeToSlipNextStep(new double[] { 0.0, 0.0, 0.0 }, new double[] { 0.05, 0.05, 0.0 });
-      setRotationRangeToSlipNextStep(new double[] { 0.0, 0.0, 0.0 }, new double[] { 0.3, 0.15, 0.1 });
+      setTranslationRangeToSlipNextStep(new double[] {0.0, 0.0, 0.0}, new double[] {0.05, 0.05, 0.0});
+      setRotationRangeToSlipNextStep(new double[] {0.0, 0.0, 0.0}, new double[] {0.3, 0.15, 0.1});
       setSlipAfterStepTimeDeltaRange(0.01, 0.10);
       setSlipPercentSlipPerTickRange(0.01, 0.05);
       setProbabilityOfSlip(1.0);
    }
 
-   public void setSlipParameters(double[] slipXYZMin, double[] slipXYZMax, double[] slipYPRMin, double[] slipYPRMax, double minSlipAfterStepTimeDelta,
-         double maxSlipAfterStepTimeDelta, double minSlipPercentSlipPerTick, double maxSlipPercentSlipPerTick, double slipProbability)
+   public void setSlipParameters(double[] slipXYZMin,
+                                 double[] slipXYZMax,
+                                 double[] slipYPRMin,
+                                 double[] slipYPRMax,
+                                 double minSlipAfterStepTimeDelta,
+                                 double maxSlipAfterStepTimeDelta,
+                                 double minSlipPercentSlipPerTick,
+                                 double maxSlipPercentSlipPerTick,
+                                 double slipProbability)
    {
       setTranslationRangeToSlipNextStep(slipXYZMin, slipXYZMax);
       setRotationRangeToSlipNextStep(slipYPRMin, slipYPRMax);
@@ -172,7 +181,7 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
    @Override
    public void doControl()
    {
-      super.doControl();
+      subControllers.forEach(Controller::doControl);
 
       for (RobotSide robotSide : RobotSide.values())
       {
@@ -180,63 +189,63 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
 
          switch (slipStateMap.get(robotSide).getEnumValue())
          {
-         case NO_CONTACT:
-         {
-            if (footTouchedDown(robotSide))
+            case NO_CONTACT:
             {
-               if (doSlipThisStance())
+               if (footTouchedDown(robotSide))
                {
-                  slipStateMap.get(robotSide).set(SlipState.CONTACT_WILL_SLIP);
-                  touchdownTimeForSlipMap.get(robotSide).set(robot.getTime());
-               }
-               else
-               // Wait till foot lift back up before allowing a slip.
-               {
-                  slipStateMap.get(robotSide).set(SlipState.CONTACT);
-               }
-            }
-
-            break;
-         }
-
-         case CONTACT_WILL_SLIP:
-         {
-            if (robot.getTime() > (touchdownTimeForSlipMap.get(robotSide).getDoubleValue() + nextSlipAfterTimeDelta.getDoubleValue()))
-            {
-               if (slipStateMap.get(robotSide.getOppositeSide()).getEnumValue() == SlipState.CONTACT_SLIP)
-               {
-                  // Stop other foot from slipping, two slipping feet no implemented yet
-                  groundContactPointsSlipper.setDoSlip(false);
-                  slipStateMap.get(robotSide.getOppositeSide()).set(SlipState.CONTACT_DONE_SLIP);
+                  if (doSlipThisStance())
+                  {
+                     slipStateMap.get(robotSide).set(SlipState.CONTACT_WILL_SLIP);
+                     touchdownTimeForSlipMap.get(robotSide).set(time.getValue());
+                  }
+                  else
+                  // Wait till foot lift back up before allowing a slip.
+                  {
+                     slipStateMap.get(robotSide).set(SlipState.CONTACT);
+                  }
                }
 
-               slipStateMap.get(robotSide).set(SlipState.CONTACT_SLIP);
-               startSlipping(robotSide);
+               break;
             }
 
-            break;
-         }
-
-         case CONTACT_SLIP:
-         {
-            if (groundContactPointsSlipper.isDoneSlipping())
+            case CONTACT_WILL_SLIP:
             {
-               slipStateMap.get(robotSide).set(SlipState.CONTACT_DONE_SLIP);
+               if (time.getValue() > (touchdownTimeForSlipMap.get(robotSide).getDoubleValue() + nextSlipAfterTimeDelta.getDoubleValue()))
+               {
+                  if (slipStateMap.get(robotSide.getOppositeSide()).getEnumValue() == SlipState.CONTACT_SLIP)
+                  {
+                     // Stop other foot from slipping, two slipping feet no implemented yet
+                     groundContactPointsSlipper.setDoSlip(false);
+                     slipStateMap.get(robotSide.getOppositeSide()).set(SlipState.CONTACT_DONE_SLIP);
+                  }
+
+                  slipStateMap.get(robotSide).set(SlipState.CONTACT_SLIP);
+                  startSlipping(robotSide);
+               }
+
+               break;
             }
 
-            break;
-         }
-
-         case CONTACT_DONE_SLIP:
-         case CONTACT:
-         {
-            if (footLiftedUp(robotSide))
+            case CONTACT_SLIP:
             {
-               slipStateMap.get(robotSide).set(SlipState.NO_CONTACT);
+               if (groundContactPointsSlipper.isDoneSlipping())
+               {
+                  slipStateMap.get(robotSide).set(SlipState.CONTACT_DONE_SLIP);
+               }
+
+               break;
             }
 
-            break;
-         }
+            case CONTACT_DONE_SLIP:
+            case CONTACT:
+            {
+               if (footLiftedUp(robotSide))
+               {
+                  slipStateMap.get(robotSide).set(SlipState.NO_CONTACT);
+               }
+
+               break;
+            }
 
          }
       }
@@ -266,12 +275,11 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
       double randomSlipTranslateZ = pseudoRandomRealNumberWithinRange(minTranslationToSlipNextStep.getZ(), maxTranslationToSlipNextStep.getZ());
       nextTranslationToSlip.set(randomSlipTranslateX, randomSlipTranslateY, randomSlipTranslateZ);
 
-      nextRotationToSlip.set(pseudoRandomRealNumberWithinRange(minRotationToSlipNextStep,
-            maxRotationToSlipNextStep));
+      nextRotationToSlip.set(pseudoRandomRealNumberWithinRange(minRotationToSlipNextStep, maxRotationToSlipNextStep));
 
       double randomSlipAfterTimeDelta = pseudoRandomPositiveNumberWithinRange(minSlipAfterTimeDelta.getDoubleValue(), maxSlipAfterTimeDelta.getDoubleValue());
       double randomPercentToSlipPerTick = pseudoRandomPositiveNumberWithinRange(minSlipPercentSlipPerTick.getDoubleValue(),
-            maxSlipPercentSlipPerTick.getDoubleValue());
+                                                                                maxSlipPercentSlipPerTick.getDoubleValue());
 
       nextSlipAfterTimeDelta.set(randomSlipAfterTimeDelta);
       nextSlipPercentSlipPerTick.set(randomPercentToSlipPerTick);
@@ -312,7 +320,7 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
    {
       for (GroundContactPoint groundContactPoint : groundContactPointsMap.get(robotSide))
       {
-         if (groundContactPoint.isInContact())
+         if (groundContactPoint.getInContact().getValue())
             return true;
       }
 
@@ -323,7 +331,7 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
    {
       for (GroundContactPoint groundContactPoint : groundContactPointsMap.get(robotSide))
       {
-         if (groundContactPoint.isInContact())
+         if (groundContactPoint.getInContact().getValue())
             return false;
       }
 

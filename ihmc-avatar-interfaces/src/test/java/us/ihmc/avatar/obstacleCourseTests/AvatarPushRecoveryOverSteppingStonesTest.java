@@ -10,25 +10,24 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.PlanarRegionMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.avatar.testTools.EndToEndTestTools;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
@@ -36,9 +35,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationToolkit.controllers.PushRobotController;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationToolkit.controllers.PushRobotControllerSCS2;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -46,9 +43,9 @@ import us.ihmc.yoVariables.variable.YoEnum;
 public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-   
-   private DRCSimulationTestHelper drcSimulationTestHelper;
-   private PushRobotController pushRobotController;
+
+   private SCS2AvatarTestingSimulation simulationTestHelper;
+   private PushRobotControllerSCS2 pushRobotController;
 
    private SideDependentList<StateTransitionCondition> singleSupportStartConditions = new SideDependentList<>();
    private SideDependentList<StateTransitionCondition> doubleSupportStartConditions = new SideDependentList<>();
@@ -65,16 +62,11 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
    @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
-      {
-         ThreadTools.sleepForever();
-      }
-
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcSimulationTestHelper != null)
+      if (simulationTestHelper != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
+         simulationTestHelper.finishTest();
+         simulationTestHelper = null;
       }
 
       if (pushRobotController != null)
@@ -86,66 +78,66 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   private void setupTest() throws SimulationExceededMaximumTimeException
+   private void setupTest()
    {
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.EASY_STEPPING_STONES;
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.setStartingLocation(selectedLocation);
-      drcSimulationTestHelper.createSimulation("DRCSimpleFlatGroundScriptTest");
+      SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
+                                                                                                                                             simulationTestingParameters);
+      simulationTestHelperFactory.setStartingLocationOffset(selectedLocation.getStartingLocationOffset());
+      simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+      simulationTestHelper.start();
 
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.05));
+      assertTrue(simulationTestHelper.simulateNow(0.05));
       PlanarRegionsListMessage planarRegionsListMessage = createPlanarRegionsListMessage();
-      drcSimulationTestHelper.publishToController(planarRegionsListMessage);
+      simulationTestHelper.publishToController(planarRegionsListMessage);
 
       FullHumanoidRobotModel fullRobotModel = getRobotModel().createFullRobotModel();
       double z = getForcePointOffsetZInChestFrame();
-      pushRobotController = new PushRobotController(drcSimulationTestHelper.getRobot(), fullRobotModel.getChest().getParentJoint().getName(),
-                                                    new Vector3D(0, 0, z));
+      pushRobotController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationSession().getTime(),
+                                                        simulationTestHelper.getRobot(),
+                                                        fullRobotModel.getChest().getParentJoint().getName(),
+                                                        new Vector3D(0, 0, z));
 
-      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-
-      setupCameraForWalkingOverEasySteppingStones(scs);
+      setupCameraForWalkingOverEasySteppingStones();
 
       for (RobotSide robotSide : RobotSide.values)
       {
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          String footPrefix = sidePrefix + "Foot";
          @SuppressWarnings("unchecked")
-         final YoEnum<FootControlModule.ConstraintType> footConstraintType = (YoEnum<FootControlModule.ConstraintType>) scs.findVariable(sidePrefix + "FootControlModule", footPrefix + "CurrentState");
+         final YoEnum<FootControlModule.ConstraintType> footConstraintType = (YoEnum<FootControlModule.ConstraintType>) simulationTestHelper.findVariable(sidePrefix
+               + "FootControlModule", footPrefix + "CurrentState");
          @SuppressWarnings("unchecked")
-         final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.findVariable("WalkingHighLevelHumanoidController", "walkingCurrentState");
+         final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) simulationTestHelper.findVariable("WalkingHighLevelHumanoidController",
+                                                                                                                    "walkingCurrentState");
          singleSupportStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType));
          doubleSupportStartConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
       }
 
-      scs.addYoGraphic(pushRobotController.getForceVisualizer());
-
+      simulationTestHelper.addYoGraphicDefinition(pushRobotController.getForceVizDefinition());
 
       swingTime = getRobotModel().getWalkingControllerParameters().getDefaultSwingTime();
       double transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
       totalMass = fullRobotModel.getTotalMass();
 
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25));
+      assertTrue(simulationTestHelper.simulateNow(0.25));
 
       FootstepDataListMessage footstepDataList = createFootstepsForWalkingOverEasySteppingStones(swingTime, transferTime);
       footstepDataList.setAreFootstepsAdjustable(true);
-      drcSimulationTestHelper.publishToController(footstepDataList);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
+      simulationTestHelper.publishToController(footstepDataList);
+      assertTrue(simulationTestHelper.simulateNow(1.0));
    }
 
-
-
-	@Test
-   public void testWalkingOverSteppingStonesForwardPush() throws SimulationExceededMaximumTimeException
+   @Test
+   public void testWalkingOverSteppingStonesForwardPush()
    {
       setupTest();
       double transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
 
-
       FootstepDataListMessage footstepDataList = createFootstepsForWalkingOverEasySteppingStones(swingTime, transferTime);
       footstepDataList.setAreFootstepsAdjustable(true);
-      drcSimulationTestHelper.publishToController(footstepDataList);
+      simulationTestHelper.publishToController(footstepDataList);
 
       StateTransitionCondition firstPushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
       double delay = 0.5 * swingTime;
@@ -156,15 +148,15 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       pushRobotController.applyForceDelayed(firstPushCondition, delay, firstForceDirection, magnitude, duration);
 
       double stepDuration = swingTime + transferTime;
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(footstepDataList.getFootstepDataList().size() * stepDuration + 1.5);
+      boolean success = simulationTestHelper.simulateNow(footstepDataList.getFootstepDataList().size() * stepDuration + 1.5);
 
-      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
-      drcSimulationTestHelper.checkNothingChanged();
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
+      //      simulationTestHelper.checkNothingChanged();
 
       Point3D center = new Point3D(-10.241987629532595, -0.8330256660954483, 1.0893768421917251);
       Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
-      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+      simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
       assertTrue(success);
 
@@ -176,45 +168,29 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       return 0.3;
    }
 
- 
-   private void setupCameraForWalkingOverEasySteppingStones(SimulationConstructionSet scs)
+   private void setupCameraForWalkingOverEasySteppingStones()
    {
       Point3D cameraFix = new Point3D(-8.6, -0.1, 0.94);
       Point3D cameraPosition = new Point3D(-14.0, -5.0, 2.7);
 
-      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
+      simulationTestHelper.setCamera(cameraFix, cameraPosition);
    }
 
    private FootstepDataListMessage createFootstepsForWalkingOverEasySteppingStones(double swingTime, double transferTime)
    {
-      FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
-      List<Point3D> locations = new ArrayList<>();
-      locations.add(new Point3D(-7.75, -0.55, 0.3));
-      locations.add(new Point3D(-8.25, -0.95, 0.3));
-      locations.add(new Point3D(-8.75, -0.55, 0.3));
-      locations.add(new Point3D(-9.25, -0.95, 0.3));
-      locations.add(new Point3D(-9.75, -0.55, 0.3));
-      locations.add(new Point3D(-10.25, -1.0, 0.3));
-      locations.add(new Point3D(-10.25, -0.65, 0.3));
+      List<Pose3D> footstepPoses = new ArrayList<>();
+      footstepPoses.add(new Pose3D(new Point3D(-7.75, -0.55, 0.3), new Quaternion(0.0, 0.0, 1.0, 0.0)));
+      footstepPoses.add(new Pose3D(new Point3D(-8.25, -0.95, 0.3), new Quaternion(0.0, 0.0, 1.0, 0.0)));
+      footstepPoses.add(new Pose3D(new Point3D(-8.75, -0.55, 0.3), new Quaternion(0.0, 0.0, 1.0, 0.0)));
+      footstepPoses.add(new Pose3D(new Point3D(-9.25, -0.95, 0.3), new Quaternion(0.0, 0.0, 1.0, 0.0)));
+      footstepPoses.add(new Pose3D(new Point3D(-9.75, -0.55, 0.3), new Quaternion(0.0, 0.0, 1.0, 0.0)));
+      footstepPoses.add(new Pose3D(new Point3D(-10.25, -1.00, 0.3), new Quaternion(0.0, 0.0, 1.0, 0.0)));
+      footstepPoses.add(new Pose3D(new Point3D(-10.25, -0.65, 0.3), new Quaternion(0.0, 0.0, 1.0, 0.0)));
 
-      List<Quaternion> orientations = new ArrayList<>();
-      orientations.add(new Quaternion(0.0, 0.0, 1.0, 0.0));
-      orientations.add(new Quaternion(0.0, 0.0, 1.0, 0.0));
-      orientations.add(new Quaternion(0.0, 0.0, 1.0, 0.0));
-      orientations.add(new Quaternion(0.0, 0.0, 1.0, 0.0));
-      orientations.add(new Quaternion(0.0, 0.0, 1.0, 0.0));
-      orientations.add(new Quaternion(0.0, 0.0, 1.0, 0.0));
-      orientations.add(new Quaternion(0.0, 0.0, 1.0, 0.0));
+      for (Pose3D footstepPose : footstepPoses) // The footsteps were originally written in terms of desired ankle pose for Atlas, this transforms it to desired sole pose.
+         footstepPose.appendTranslation(0.025, 0.0, -0.084);
 
-      RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.RIGHT, locations.size());
-      for (int i = 0; i < locations.size(); i++)
-      {
-         FramePoint3D placeToStep = new FramePoint3D(ReferenceFrame.getWorldFrame(), locations.get(i));
-         FootstepDataMessage data = createFootstepDataMessage(robotSides[i], placeToStep, orientations.get(i));
-         message.getFootstepDataList().add().set(data);
-      }
-
-      return message;
+      return EndToEndTestTools.generateFootstepsFromPose3Ds(RobotSide.RIGHT, footstepPoses, swingTime, transferTime);
    }
 
    private PlanarRegionsListMessage createPlanarRegionsListMessage()
@@ -254,20 +230,6 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       PlanarRegionsListMessage messageList = PlanarRegionMessageConverter.createPlanarRegionsListMessage(planarRegionsAsMessages);
 
       return messageList;
-   }
-
-   private FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, FramePoint3D placeToStep, Quaternion orientation)
-   {
-      FootstepDataMessage footstepData = new FootstepDataMessage();
-
-      FramePoint3D placeToStepInWorld = new FramePoint3D(placeToStep);
-      placeToStepInWorld.changeFrame(ReferenceFrame.getWorldFrame());
-
-      footstepData.getLocation().set(placeToStepInWorld);
-      footstepData.getOrientation().set(orientation);
-      footstepData.setRobotSide(robotSide.toByte());
-
-      return footstepData;
    }
 
    private PlanarRegion createSteppingStonePlanarRegion(Point3D centered)
@@ -327,7 +289,6 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
 
       return points;
    }
-
 
    private class SingleSupportStartCondition implements StateTransitionCondition
    {

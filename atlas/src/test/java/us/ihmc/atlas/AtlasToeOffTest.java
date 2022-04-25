@@ -3,6 +3,7 @@ package us.ihmc.atlas;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+
 import us.ihmc.atlas.parameters.AtlasToeOffParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -11,19 +12,27 @@ import us.ihmc.avatar.obstacleCourseTests.AvatarToeOffTest;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 
 public class AtlasToeOffTest extends AvatarToeOffTest
 {
+   @Test
+   @Override
+   public void testShortSteps(TestInfo testInfo)
+   {
+      // The end of swing struggles because of the workspace limiter causing the foot to slow down way too much and delay touchdown
+      setStepHeight(-0.01);
+      super.testShortSteps(testInfo);
+   }
+
     @Test
-    public void testToeOffWithDifferentStepLengths(TestInfo testInfo) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
+    public void testToeOffWithDifferentStepLengths(TestInfo testInfo)
     {
         super.testToeOffWithDifferentStepLengths(testInfo);
     }
 
     @Test
     @Disabled
-    public void testToeOffTakingShortStepDownCheckingAnkleLimits(TestInfo testInfo) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
+    public void testToeOffTakingShortStepDownCheckingAnkleLimits(TestInfo testInfo)
     {
         setStepHeight(-0.1);
         setCheckAnkleLimits(true);
@@ -32,7 +41,7 @@ public class AtlasToeOffTest extends AvatarToeOffTest
 
     @Test
     @Disabled
-    public void testToeOffTakingShortStepDownCheckingAnkleLimitsWithExperimentalPhysicsEngine(TestInfo testInfo) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
+    public void testToeOffTakingShortStepDownCheckingAnkleLimitsWithExperimentalPhysicsEngine(TestInfo testInfo)
     {
         setUseExperimentalPhysicsEngine(true);
         setCheckAnkleLimits(true);
@@ -42,7 +51,7 @@ public class AtlasToeOffTest extends AvatarToeOffTest
 
     @Test
     @Disabled
-    public void testToeOffTakingMediumStepDownCheckingAnkleLimits(TestInfo testInfo) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
+    public void testToeOffTakingMediumStepDownCheckingAnkleLimits(TestInfo testInfo)
     {
         setStepHeight(-0.2);
         setCheckAnkleLimits(true);
@@ -51,7 +60,7 @@ public class AtlasToeOffTest extends AvatarToeOffTest
 
     @Test
     @Disabled
-    public void testToeOffTakingHighStepDownCheckingAnkleLimits(TestInfo testInfo) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
+    public void testToeOffTakingHighStepDownCheckingAnkleLimits(TestInfo testInfo)
     {
         setStepHeight(-0.3);
         setCheckAnkleLimits(true);

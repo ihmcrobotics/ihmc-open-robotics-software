@@ -6,12 +6,18 @@ import us.ihmc.avatar.scs2.SCS2AvatarSimulationFactory;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.scs2.simulation.SimulationSession;
+import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
+import us.ihmc.simulationToolkit.controllers.OscillateFeetPerturber;
 
 public class AtlasFlatGroundWalkingTrackSCS2
 {
+   private static final boolean USE_FEET_PERTURBER = false;
    private static final boolean USE_STAND_PREP = true;
    private static final boolean USE_IMPULSE_BASE_PHYSICS_ENGINE = true;
 
@@ -49,7 +55,32 @@ public class AtlasFlatGroundWalkingTrackSCS2
 
       SCS2AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
 
+      if (USE_FEET_PERTURBER)
+         createOscillateFeetPerturber(avatarSimulation);
+
       avatarSimulation.start();
+   }
+
+   private static void createOscillateFeetPerturber(SCS2AvatarSimulation avatarSimulation)
+   {
+      Robot robot = avatarSimulation.getRobot();
+      SimulationSession simulationSession = avatarSimulation.getSimulationSession();
+      SideDependentList<String> footNames = new SideDependentList<>(side -> avatarSimulation.getRobotModel().getJointMap().getFootName(side));
+
+      int ticksPerPerturbation = 10;
+      OscillateFeetPerturber oscillateFeetPerturber = new OscillateFeetPerturber(robot,
+                                                                                 footNames,
+                                                                                 simulationSession.getSessionDTSeconds() * ticksPerPerturbation);
+      oscillateFeetPerturber.setTranslationMagnitude(new double[] {0.01, 0.015, 0.005});
+      oscillateFeetPerturber.setRotationMagnitudeYawPitchRoll(new double[] {0.017, 0.012, 0.011});
+
+      oscillateFeetPerturber.setTranslationFrequencyHz(RobotSide.LEFT, new double[] {0.0, 0, 3.3});
+      oscillateFeetPerturber.setTranslationFrequencyHz(RobotSide.RIGHT, new double[] {0.0, 0, 1.3});
+
+      oscillateFeetPerturber.setRotationFrequencyHzYawPitchRoll(RobotSide.LEFT, new double[] {0.0, 0, 7.3});
+      oscillateFeetPerturber.setRotationFrequencyHzYawPitchRoll(RobotSide.RIGHT, new double[] {0., 0, 1.11});
+
+      robot.addThrottledController(oscillateFeetPerturber, simulationSession.getSessionDTSeconds() * ticksPerPerturbation);
    }
 
    public static void main(String[] args)

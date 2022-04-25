@@ -9,7 +9,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseStandingYawedTest;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasObstacleCourseStandingYawedTest extends DRCObstacleCourseStandingYawedTest
 {
@@ -29,7 +28,7 @@ public class AtlasObstacleCourseStandingYawedTest extends DRCObstacleCourseStand
    @Tag("humanoid-flat-ground")
    @Override
    @Test
-   public void testStandingYawed() throws SimulationExceededMaximumTimeException
+   public void testStandingYawed()
    {
       super.testStandingYawed();
    }

@@ -9,14 +9,13 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.roughTerrainWalking.AvatarSwingOverPlanarRegionsTest;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 @Tag("humanoid-rough-terrain")
 public class AtlasSwingOverPlanarRegionsTest extends AvatarSwingOverPlanarRegionsTest
 {
    @Override
    @Test
-   public void testSwingOverPlanarRegions() throws SimulationExceededMaximumTimeException
+   public void testSwingOverPlanarRegions()
    {
       super.testSwingOverPlanarRegions();
    }

@@ -10,25 +10,24 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commons.ContinuousIntegrationTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.PlanarRegionEnvironmentInterface;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class HumanoidPartialFootholdWalkingTest implements MultiRobotTestInterface
 {
-   private final static boolean visualize = true;
+   private final static boolean visualize = false;
    private final static SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-   private DRCSimulationTestHelper drcSimulationTestHelper;
+   private SCS2AvatarTestingSimulation simulationTestHelper;
 
    @BeforeEach
    public void setup()
@@ -38,7 +37,7 @@ public abstract class HumanoidPartialFootholdWalkingTest implements MultiRobotTe
    }
 
    @Test
-   public void testPartialFootholdField() throws SimulationExceededMaximumTimeException
+   public void testPartialFootholdField()
    {
       double stepWidth = 0.25;
       double stepLength = 0.3;
@@ -50,14 +49,14 @@ public abstract class HumanoidPartialFootholdWalkingTest implements MultiRobotTe
 
 
 
-      drcSimulationTestHelper.publishToController(environment.getSteps());
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(environment.getSteps().getFootstepDataList().size() * 1.5 + 2.0);
+      simulationTestHelper.publishToController(environment.getSteps());
+      boolean success = simulationTestHelper.simulateNow(environment.getSteps().getFootstepDataList().size() * 1.5 + 2.0);
       assertTrue(success);
    }
 
 
    @Test
-   public void testSteppingOntoWithInsideOfFoot() throws SimulationExceededMaximumTimeException
+   public void testSteppingOntoWithInsideOfFoot()
    {
       double stepWidth = 0.25;
 
@@ -76,13 +75,13 @@ public abstract class HumanoidPartialFootholdWalkingTest implements MultiRobotTe
       step.setRobotSide(FootstepDataMessage.ROBOT_SIDE_LEFT);
       step.getLocation().set(blockDistanceFromOrigin + 0.15, stepWidth / 2, topHeight);
 
-      drcSimulationTestHelper.publishToController(message);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
+      simulationTestHelper.publishToController(message);
+      boolean success = simulationTestHelper.simulateNow(4.0);
       assertTrue(success);
    }
 
    @Test
-   public void testSteppingOntoWithOutsideOfFoot() throws SimulationExceededMaximumTimeException
+   public void testSteppingOntoWithOutsideOfFoot()
    {
       double stepWidth = 0.25;
 
@@ -101,13 +100,13 @@ public abstract class HumanoidPartialFootholdWalkingTest implements MultiRobotTe
       step.setRobotSide(FootstepDataMessage.ROBOT_SIDE_LEFT);
       step.getLocation().set(blockDistanceFromOrigin + 0.15, stepWidth / 2, topHeight);
 
-      drcSimulationTestHelper.publishToController(message);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
+      simulationTestHelper.publishToController(message);
+      boolean success = simulationTestHelper.simulateNow(4.0);
       assertTrue(success);
    }
 
    @Test
-   public void testSteppingOntoBlock() throws SimulationExceededMaximumTimeException
+   public void testSteppingOntoBlock()
    {
       double blockWidth = 0.3;
       double blockDistanceFromOrigin = 0.2;
@@ -123,13 +122,13 @@ public abstract class HumanoidPartialFootholdWalkingTest implements MultiRobotTe
       step.setRobotSide(FootstepDataMessage.ROBOT_SIDE_LEFT);
       step.getLocation().set(blockDistanceFromOrigin + 0.05, width / 2, topHeight);
 
-      drcSimulationTestHelper.publishToController(message);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
+      simulationTestHelper.publishToController(message);
+      boolean success = simulationTestHelper.simulateNow(4.0);
       assertTrue(success);
    }
 
    @Test
-   public void testSteppingOntoNarrowBlock() throws SimulationExceededMaximumTimeException
+   public void testSteppingOntoNarrowBlock()
    {
       double blockDepth = 0.05;
       double blockWidth = 0.4;
@@ -150,13 +149,13 @@ public abstract class HumanoidPartialFootholdWalkingTest implements MultiRobotTe
       step2.setRobotSide(FootstepDataMessage.ROBOT_SIDE_RIGHT);
       step2.getLocation().set(2 * stepDistance, -width / 2, 0.0);
 
-      drcSimulationTestHelper.publishToController(message);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
+      simulationTestHelper.publishToController(message);
+      boolean success = simulationTestHelper.simulateNow(4.0);
       assertTrue(success);
    }
 
    @Test
-   public void testWalkingOverBlock() throws SimulationExceededMaximumTimeException
+   public void testWalkingOverBlock()
    {
       double blockWidth = 0.3;
       double blockDistanceFromOrigin = 0.2;
@@ -184,8 +183,8 @@ public abstract class HumanoidPartialFootholdWalkingTest implements MultiRobotTe
       step4.setRobotSide(FootstepDataMessage.ROBOT_SIDE_RIGHT);
       step4.getLocation().set(blockDistanceFromOrigin + 0.55, -width / 2, 0.0);
 
-      drcSimulationTestHelper.publishToController(message);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
+      simulationTestHelper.publishToController(message);
+      boolean success = simulationTestHelper.simulateNow(4.0);
       assertTrue(success);
    }
 
@@ -201,42 +200,36 @@ public abstract class HumanoidPartialFootholdWalkingTest implements MultiRobotTe
    @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
-      {
-         ThreadTools.sleepForever();
-      }
-
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcSimulationTestHelper != null)
+      if (simulationTestHelper != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
+         simulationTestHelper.finishTest();
+         simulationTestHelper = null;
       }
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   private void setupTest(CommonAvatarEnvironmentInterface environment) throws SimulationExceededMaximumTimeException
+   private void setupTest(CommonAvatarEnvironmentInterface environment)
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       // create simulation test helper
-      String className = getClass().getSimpleName();
       DRCRobotModel robotModel = getRobotModel();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, environment);
-      drcSimulationTestHelper.createSimulation(className);
+      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(robotModel, environment, simulationTestingParameters);
+      simulationTestHelper.start();
 
       // increase ankle damping to match the real robot better
-      YoDouble damping_l_akx = (YoDouble) drcSimulationTestHelper.getYoVariable("b_damp_l_leg_akx");
-      YoDouble damping_l_aky = (YoDouble) drcSimulationTestHelper.getYoVariable("b_damp_l_leg_aky");
-      YoDouble damping_r_akx = (YoDouble) drcSimulationTestHelper.getYoVariable("b_damp_r_leg_akx");
-      YoDouble damping_r_aky = (YoDouble) drcSimulationTestHelper.getYoVariable("b_damp_r_leg_aky");
+      YoDouble damping_l_akx = (YoDouble) simulationTestHelper.findVariable("damping_l_leg_akx");
+      YoDouble damping_l_aky = (YoDouble) simulationTestHelper.findVariable("damping_l_leg_aky");
+      YoDouble damping_r_akx = (YoDouble) simulationTestHelper.findVariable("damping_r_leg_akx");
+      YoDouble damping_r_aky = (YoDouble) simulationTestHelper.findVariable("damping_r_leg_aky");
       damping_l_akx.set(1.0);
       damping_l_aky.set(1.0);
       damping_r_akx.set(1.0);
       damping_r_aky.set(1.0);
 
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25);
+      simulationTestHelper.simulateNow(0.25);
    }
 
 

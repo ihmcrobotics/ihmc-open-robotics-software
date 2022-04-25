@@ -10,7 +10,6 @@ import us.ihmc.avatar.behaviorTests.HumanoidBehaviorDispatcherTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasBehaviorDispatcherTest extends HumanoidBehaviorDispatcherTest
 {
@@ -37,7 +36,7 @@ public class AtlasBehaviorDispatcherTest extends HumanoidBehaviorDispatcherTest
    @Tag("humanoid-behaviors")
    @Override
    @Test
-   public void testDispatchKarateKidDiagnosticBehavior() throws SimulationExceededMaximumTimeException
+   public void testDispatchKarateKidDiagnosticBehavior()
    {
       super.testDispatchKarateKidDiagnosticBehavior();
    }
@@ -45,7 +44,7 @@ public class AtlasBehaviorDispatcherTest extends HumanoidBehaviorDispatcherTest
    @Tag("humanoid-behaviors")
    @Override
    @Test
-   public void testDispatchPelvisPoseBehavior() throws SimulationExceededMaximumTimeException
+   public void testDispatchPelvisPoseBehavior()
    {
       super.testDispatchPelvisPoseBehavior();
    }
@@ -54,7 +53,7 @@ public class AtlasBehaviorDispatcherTest extends HumanoidBehaviorDispatcherTest
    @Override
    @Disabled
    @Test
-   public void testDispatchWalkToLocationBehavior() throws SimulationExceededMaximumTimeException
+   public void testDispatchWalkToLocationBehavior()
    {
       super.testDispatchWalkToLocationBehavior();
    }
@@ -62,7 +61,7 @@ public class AtlasBehaviorDispatcherTest extends HumanoidBehaviorDispatcherTest
    @Tag("humanoid-behaviors-slow")
    @Override
    @Test
-   public void testDispatchWalkToLocationBehaviorAndStop() throws SimulationExceededMaximumTimeException
+   public void testDispatchWalkToLocationBehaviorAndStop()
    {
       super.testDispatchWalkToLocationBehaviorAndStop();
    }
@@ -70,7 +69,7 @@ public class AtlasBehaviorDispatcherTest extends HumanoidBehaviorDispatcherTest
    @Tag("humanoid-behaviors-slow")
    @Override
    @Test
-   public void testDispatchWalkToLocationBehaviorPauseAndResume() throws SimulationExceededMaximumTimeException
+   public void testDispatchWalkToLocationBehaviorPauseAndResume()
    {
       super.testDispatchWalkToLocationBehaviorPauseAndResume();
    }
