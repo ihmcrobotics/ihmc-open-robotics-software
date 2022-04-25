@@ -30,6 +30,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLineSegment2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -103,6 +104,8 @@ public class DynamicStateInspectorTest
       onToesPolygon.addVertex(toePosition);
       onToesPolygon.update();
 
+      ((YoDouble) registry.findVariable("minFractionOfStrideFromToe")).set(0.2);
+
       inspector.setPolygons(leftPolygon, rightPolygon, onToesPolygon);
 
       desiredICP.interpolate(new FramePoint2D(rightFootPose.getPosition()), new FramePoint2D(leftFootPose.getPosition()), 0.75);
@@ -158,20 +161,20 @@ public class DynamicStateInspectorTest
       assertEquals(toePosition.distanceSquared(desiredICP), inspector.getDistanceSquaredOfDesiredICPFromToe(), epsilon);
       assertEquals(toePosition.distanceSquared(currentICP), inspector.getDistanceSquaredOfCurrentICPFromToe(), epsilon);
       assertEquals(expectedDistanceAlongErrorToOutside, inspector.getDistanceAlongErrorToOutsideEdge(), epsilon);
-      assertEquals(Double.NEGATIVE_INFINITY, inspector.getDistanceAlongErrorToInsideEdge(), epsilon);
+      assertEquals(expectedDistanceAlongErrorToInside, inspector.getDistanceAlongErrorToInsideEdge(), epsilon);
 
       assertTrue(inspector.isCurrentICPFarEnoughFromTheToe());
       assertTrue(inspector.isDesiredICPFarEnoughFromTheToe());
       assertTrue(inspector.isCurrentICPFarEnoughInside());
       assertTrue(inspector.isDesiredICPFarEnoughInside());
 
-//      visualize();
 
       // test falling behind outside outside support
       currentICP.set(desiredICP);
       currentICP.subX(0.15);
 
       inspector.checkICPLocations(parameters, RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, toePosition);
+//      visualize(inspector);
 
       expectedICPX = 0.75 * stepLength - 0.15;
       expectedICPY = 0.25 * stepWidth;
@@ -224,8 +227,8 @@ public class DynamicStateInspectorTest
       inspector.checkICPLocations(parameters, RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, toePosition);
       visualize(inspector);
 
-      expectedICPX = 0.75 * stepLength - 0.15;
-      expectedICPY = 0.25 * stepWidth;
+      expectedICPX = 0.75 * stepLength;
+      expectedICPY = 0.25 * stepWidth - 0.05;
 
       assertEquals(expectedICPX, currentICP.getX(), epsilon);
       assertEquals(expectedICPY, currentICP.getY(), epsilon);
@@ -241,10 +244,10 @@ public class DynamicStateInspectorTest
                                                                                              toePosition,
                                                                                              leftPolygon.getVertex(insideVertexIdx));
 
-      assertTrue(!onToesPolygon.isPointInside(currentICP));
+      assertTrue(onToesPolygon.isPointInside(currentICP));
       assertTrue(onToesPolygon.isPointInside(desiredICP));
 
-      assertEquals(EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(currentICP, toePosition, leftPolygon.getVertex(outsideVertexIdx)),
+      assertEquals(-EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(currentICP, toePosition, leftPolygon.getVertex(outsideVertexIdx)),
                    inspector.getCurrentOrthogonalDistanceToOutsideEdge(),
                    epsilon);
       assertEquals(-EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(desiredICP, toePosition, leftPolygon.getVertex(outsideVertexIdx)),
@@ -256,12 +259,11 @@ public class DynamicStateInspectorTest
       assertEquals(-EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(desiredICP, toePosition, leftPolygon.getVertex(insideVertexIdx)),
                    inspector.getDesiredOrthogonalDistanceToInsideEdge(),
                    epsilon);
-      assertEquals(expectedICPY + 0.5 * stepWidth, inspector.getLateralDistanceOfDesiredICPInside(), epsilon);
+      assertEquals(desiredICP.getY() + 0.5 * stepWidth, inspector.getLateralDistanceOfDesiredICPInside(), epsilon);
       assertEquals(expectedICPY + 0.5 * stepWidth, inspector.getLateralDistanceOfCurrentICPInside(), epsilon);
       assertEquals(toePosition.distanceSquared(desiredICP), inspector.getDistanceSquaredOfDesiredICPFromToe(), epsilon);
       assertEquals(toePosition.distanceSquared(currentICP), inspector.getDistanceSquaredOfCurrentICPFromToe(), epsilon);
-      assertEquals(expectedDistanceAlongErrorToOutside, inspector.getDistanceAlongErrorToOutsideEdge(), epsilon);
-      assertEquals(Double.NEGATIVE_INFINITY, inspector.getDistanceAlongErrorToInsideEdge(), epsilon);
+      assertEquals(Double.NEGATIVE_INFINITY, inspector.getDistanceAlongErrorToOutsideEdge(), epsilon);
 
       assertTrue(inspector.isCurrentICPFarEnoughFromTheToe());
       assertTrue(inspector.isDesiredICPFarEnoughFromTheToe());
