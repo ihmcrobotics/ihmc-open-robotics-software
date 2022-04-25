@@ -45,7 +45,7 @@ public class KinematicsStreamingToolboxParameters
       defaultNeckMessageWeight = 10.0;
       defaultPelvisMessageLinearWeight.set(2.5, 2.5, 2.5);
       defaultPelvisMessageAngularWeight.set(1.0, 1.0, 1.0);
-      defaultChestMessageAngularWeight.set(0.15, 0.15, 0.02); // TODO should be 0.75
+      defaultChestMessageAngularWeight.set(0.75, 0.75, 0.75);
 
       defaultPelvisMessageLockWeight = 1000.0;
       defaultChestMessageLockWeight = 1000.0;
@@ -53,8 +53,8 @@ public class KinematicsStreamingToolboxParameters
       defaultLinearWeight = 20.0;
       defaultAngularWeight = 1.0;
 
-      defaultLinearRateLimit = 3.0; // TODO should be 1.5
-      defaultAngularRateLimit = 30.0; // TODO should be 10.0
+      defaultLinearRateLimit = 1.5;
+      defaultAngularRateLimit = 10.0;
       outputJointVelocityScale = 0.75;
 
       defaultStreamingBlendingDuration = 2.0;
