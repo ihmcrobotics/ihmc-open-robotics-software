@@ -6,7 +6,6 @@ import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
-import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Size;
 import org.ejml.data.BMatrixRMaj;
 import org.ejml.data.DMatrixRMaj;
@@ -39,40 +38,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static us.ihmc.gdx.perception.gpuPlanarRegions.GPUPlanarRegionExtractionParameters.*;
+
 public class GPUPlanarRegionExtraction
 {
-   private float mergeDistanceThreshold = 0.016f;
-   private float mergeAngularThreshold = 0.82f;
-   private float filterDisparityThreshold = 2000.0f;
-   private int desiredPatchSize = 16;
-   private int patchSize = desiredPatchSize;
-   private int deadPixelFilterPatchSize = 4;
-   private float focalLengthXPixels = 0.0f;
-   private float focalLengthYPixels = 0.0f;
-   private float principalOffsetXPixels = 0.0f;
-   private float principalOffsetYPixels = 0.0f;
-   private boolean earlyGaussianBlur = true;
-   private boolean useFilteredImage = true;
-   private boolean useSVDNormals = true;
-   private int svdReductionFactor = 20;
-   private int gaussianSize = 6;
-   private float gaussianSigma = 4.74f;
-   private int searchDepthLimit = 37000;
-   private int regionMinPatches = 37;
-   private int boundaryMinPatches = 20;
-   private float regionGrowthFactor = 0.051f;
-   private float edgeLengthTresholdSlider = 0.224f;
-   private float triangulationToleranceSlider = 0.0f;
-   private int maxNumberOfIterationsSlider = 5000;
-   private boolean allowSplittingConcaveHullChecked = false;
-   private boolean removeAllTrianglesWithTwoBorderEdgesChecked = false;
-   private float concaveHullThresholdSlider = 0.15f;
-   private float shallowAngleThresholdSlider = (float) Math.toRadians(1.0);
-   private float peakAngleThresholdSlider = (float) Math.toRadians(170.0);
-   private float lengthThresholdSlider = 0.05f;
-   private float depthThresholdSlider = 0.10f;
-   private int minNumberOfNodesSlider = 10;
-   private boolean cutNarrowPassageChecked = true;
+   private GPUPlanarRegionExtractionParameters parameters;
    private BytedecoImage inputFloatDepthImage;
    private BytedecoImage inputScaledFloatDepthImage;
    private BytedecoImage inputU16DepthImage;
@@ -122,10 +92,11 @@ public class GPUPlanarRegionExtraction
    {
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
-      focalLengthXPixels = (float) fx;
-      focalLengthYPixels = (float) fy;
-      principalOffsetXPixels = (float) cx;
-      principalOffsetYPixels = (float) cy;
+      parameters = new GPUPlanarRegionExtractionParameters();
+      parameters.set(focalLengthXPixels, fx);
+      parameters.set(focalLengthYPixels, fy);
+      parameters.set(principalOffsetXPixels, cx);
+      parameters.set(principalOffsetYPixels, cy);
 
       parametersBuffer = new OpenCLFloatBuffer(16);
       calculateDerivativeParameters();
@@ -185,10 +156,10 @@ public class GPUPlanarRegionExtraction
       // Flip so the Y+ goes up instead of down.
       opencv_core.flip(inputU16DepthImage.getBytedecoOpenCVMat(), inputU16DepthImage.getBytedecoOpenCVMat(), BytedecoOpenCVTools.FLIP_Y);
 
-      int size = gaussianSize * 2 + 1;
+      int size = parameters.getGaussianSize() * 2 + 1;
       gaussianKernelSize.width(size);
       gaussianKernelSize.height(size);
-      double sigmaX = gaussianSigma;
+      double sigmaX = parameters.getGaussianSigma();
       double sigmaY = sigmaX;
       int borderType = opencv_core.BORDER_DEFAULT;
       opencv_imgproc.GaussianBlur(inputU16DepthImage.getBytedecoOpenCVMat(),
@@ -198,18 +169,18 @@ public class GPUPlanarRegionExtraction
                                   sigmaY,
                                   borderType);
 
-      parametersBuffer.getBytedecoFloatBufferPointer().put(0, filterDisparityThreshold);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(1, mergeAngularThreshold);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(2, mergeDistanceThreshold);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(0, (float) parameters.getFilterDisparityThreshold());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(1, (float) parameters.getMergeAngularThreshold());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(2, (float) parameters.getMergeDistanceThreshold());
       parametersBuffer.getBytedecoFloatBufferPointer().put(3, patchHeight);
       parametersBuffer.getBytedecoFloatBufferPointer().put(4, patchWidth);
       parametersBuffer.getBytedecoFloatBufferPointer().put(5, patchImageHeight);
       parametersBuffer.getBytedecoFloatBufferPointer().put(6, patchImageWidth);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(7, focalLengthXPixels);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(8, focalLengthYPixels);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(9, principalOffsetXPixels);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(10, principalOffsetYPixels);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(11, deadPixelFilterPatchSize);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(7, (float) parameters.getFocalLengthXPixels());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(8, (float) parameters.getFocalLengthYPixels());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(9, (float) parameters.getPrincipalOffsetXPixels());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(10, (float) parameters.getPrincipalOffsetYPixels());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(11, parameters.getDeadPixelFilterPatchSize());
       parametersBuffer.getBytedecoFloatBufferPointer().put(12, filterPatchImageHeight);
       parametersBuffer.getBytedecoFloatBufferPointer().put(13, filterPatchImageWidth);
       parametersBuffer.getBytedecoFloatBufferPointer().put(14, imageHeight);
@@ -252,14 +223,14 @@ public class GPUPlanarRegionExtraction
          parametersBuffer.writeOpenCLBufferObject(openCLManager);
       }
 
-      _cl_mem inputImage = earlyGaussianBlur ? blurredDepthImage.getOpenCLImageObject() : inputU16DepthImage.getOpenCLImageObject();
+      _cl_mem inputImage = parameters.getEarlyGaussianBlur() ? blurredDepthImage.getOpenCLImageObject() : inputU16DepthImage.getOpenCLImageObject();
 
       openCLManager.setKernelArgument(filterKernel, 0, inputImage);
       openCLManager.setKernelArgument(filterKernel, 1, filteredDepthImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(filterKernel, 2, nxImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(filterKernel, 3, parametersBuffer.getOpenCLBufferObject());
 
-      _cl_mem packKernelInputObject = useFilteredImage ? filteredDepthImage.getOpenCLImageObject() : inputU16DepthImage.getOpenCLImageObject();
+      _cl_mem packKernelInputObject = parameters.getUseFilteredImage() ? filteredDepthImage.getOpenCLImageObject() : inputU16DepthImage.getOpenCLImageObject();
       openCLManager.setKernelArgument(packKernel, 0, packKernelInputObject);
       openCLManager.setKernelArgument(packKernel, 1, nxImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(packKernel, 2, nyImage.getOpenCLImageObject());
@@ -320,10 +291,10 @@ public class GPUPlanarRegionExtraction
                GPUPlanarRegion planarRegion = gpuPlanarRegions.add();
                planarRegion.reset(planarRegionIslandIndex);
                regionsDepthFirstSearch(row, column, planarRegionIslandIndex, planarRegion, 1);
-               if (numberOfRegionPatches >= regionMinPatches)
+               if (numberOfRegionPatches >= parameters.getRegionMinPatches())
                {
                   ++planarRegionIslandIndex;
-                  planarRegion.update(useSVDNormals, svdReductionFactor);
+                  planarRegion.update(parameters.getUseSVDNormals(), parameters.getSVDReductionFactor());
                   if (planarRegion.getSVDDuration() > maxSVDSolveTime)
                      maxSVDSolveTime = planarRegion.getSVDDuration();
                }
@@ -340,7 +311,7 @@ public class GPUPlanarRegionExtraction
 
    private void regionsDepthFirstSearch(int row, int column, int planarRegionIslandIndex, GPUPlanarRegion planarRegion, int searchDepth)
    {
-      if (regionVisitedMatrix.get(row, column) || searchDepth > searchDepthLimit)
+      if (regionVisitedMatrix.get(row, column) || searchDepth > parameters.getSearchDepthLimit())
          return;
 
       if (searchDepth > regionMaxSearchDepth)
@@ -397,7 +368,7 @@ public class GPUPlanarRegionExtraction
                                                                    regionRing,
                                                                    leafPatchIndex,
                                                                    1);
-            if (numberOfBoundaryPatches >= boundaryMinPatches)
+            if (numberOfBoundaryPatches >= parameters.getBoundaryMinPatches())
             {
                ++regionRingIndex;
             }
@@ -413,7 +384,7 @@ public class GPUPlanarRegionExtraction
 
    private int boundaryDepthFirstSearch(int row, int column, int planarRegionId, GPURegionRing regionRing, int leafPatchIndex, int searchDepth)
    {
-      if (boundaryVisitedMatrix.get(row, column) || searchDepth > searchDepthLimit)
+      if (boundaryVisitedMatrix.get(row, column) || searchDepth > parameters.getSearchDepthLimit())
          return 0;
 
       if (searchDepth > boundaryMaxSearchDepth)
@@ -460,7 +431,7 @@ public class GPUPlanarRegionExtraction
                boundaryVertex.set(vertexX, vertexY, vertexZ);
                boundaryVertex.sub(planarRegion.getCenter());
                boundaryVertex.normalize();
-               boundaryVertex.scale(regionGrowthFactor);
+               boundaryVertex.scale(parameters.getRegionGrowthFactor());
                boundaryVertex.add(vertexX, vertexY, vertexZ);
             }
          }
@@ -555,12 +526,12 @@ public class GPUPlanarRegionExtraction
 
    private void calculateDerivativeParameters()
    {
-      patchHeight = patchSize;
-      patchWidth = patchSize;
+      patchHeight = parameters.getPatchSize();
+      patchWidth = parameters.getPatchSize();
       patchImageHeight = imageHeight / patchHeight;
       patchImageWidth = imageWidth / patchWidth;
-      filterPatchImageHeight = imageHeight / deadPixelFilterPatchSize;
-      filterPatchImageWidth = imageWidth / deadPixelFilterPatchSize;
+      filterPatchImageHeight = imageHeight / parameters.getDeadPixelFilterPatchSize();
+      filterPatchImageWidth = imageWidth / parameters.getDeadPixelFilterPatchSize();
    }
 
    public void destroy()

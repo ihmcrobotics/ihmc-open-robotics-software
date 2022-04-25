@@ -12,7 +12,6 @@ public class GPUPlanarRegionExtractionParameters extends StoredPropertySet imple
    public static final DoubleStoredPropertyKey mergeDistanceThreshold = keys.addDoubleKey("Merge distance threshold");
    public static final DoubleStoredPropertyKey mergeAngularThreshold = keys.addDoubleKey("Merge angular threshold");
    public static final DoubleStoredPropertyKey filterDisparityThreshold = keys.addDoubleKey("Filter disparity threshold");
-   public static final IntegerStoredPropertyKey desiredPatchSize = keys.addIntegerKey("Desired patch size");
    public static final IntegerStoredPropertyKey patchSize = keys.addIntegerKey("Patch size");
    public static final IntegerStoredPropertyKey deadPixelFilterPatchSize = keys.addIntegerKey("Dead pixel filter patch size");
    public static final DoubleStoredPropertyKey focalLengthXPixels = keys.addDoubleKey("Focal length X pixels");
@@ -29,7 +28,6 @@ public class GPUPlanarRegionExtractionParameters extends StoredPropertySet imple
    public static final IntegerStoredPropertyKey regionMinPatches = keys.addIntegerKey("Region min patches");
    public static final IntegerStoredPropertyKey boundaryMinPatches = keys.addIntegerKey("Boundary min patches");
    public static final DoubleStoredPropertyKey regionGrowthFactor = keys.addDoubleKey("Region growth factor");
-   public static final IntegerStoredPropertyKey minNumberOfNodesSlider = keys.addIntegerKey("Min number of nodes slider");
 
    public GPUPlanarRegionExtractionParameters()
    {

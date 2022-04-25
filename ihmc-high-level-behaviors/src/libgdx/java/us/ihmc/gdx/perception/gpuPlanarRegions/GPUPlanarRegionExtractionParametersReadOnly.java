@@ -21,11 +21,6 @@ public interface GPUPlanarRegionExtractionParametersReadOnly extends StoredPrope
       return get(filterDisparityThreshold);
    }
 
-   default int getDesiredPatchSize()
-   {
-      return get(desiredPatchSize);
-   }
-
    default int getPatchSize()
    {
       return get(patchSize);
@@ -104,10 +99,5 @@ public interface GPUPlanarRegionExtractionParametersReadOnly extends StoredPrope
    default double getRegionGrowthFactor()
    {
       return get(regionGrowthFactor);
-   }
-
-   default int getMinNumberOfNodesSlider()
-   {
-      return get(minNumberOfNodesSlider);
    }
 }
