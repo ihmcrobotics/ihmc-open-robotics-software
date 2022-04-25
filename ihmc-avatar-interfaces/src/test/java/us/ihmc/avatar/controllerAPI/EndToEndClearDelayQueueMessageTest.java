@@ -13,12 +13,10 @@ import controller_msgs.msg.dds.HandTrajectoryMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
-import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -46,9 +44,8 @@ public abstract class EndToEndClearDelayQueueMessageTest implements MultiRobotTe
       factory.setStartingLocationOffset(location.getStartingLocationOffset());
       simulationTestHelper = factory.createAvatarTestingSimulation();
       simulationTestHelper.start();
-      setupCamera(simulationTestHelper);
       ThreadTools.sleep(1000);
-      assertTrue(simulationTestHelper.simulateAndWait(0.1));
+      assertTrue(simulationTestHelper.simulateNow(0.1));
 
       String handName = simulationTestHelper.getControllerFullRobotModel().getHand(RobotSide.LEFT).getName();
       YoVariable footsteps = simulationTestHelper.findVariable(WalkingMessageHandler.class.getSimpleName(), "currentNumberOfFootsteps");
@@ -67,7 +64,7 @@ public abstract class EndToEndClearDelayQueueMessageTest implements MultiRobotTe
       footstepDataListMessage.getQueueingProperties().setExecutionDelayTime(0.1);
       simulationTestHelper.publishToController(handTrajectoryMessage);
       simulationTestHelper.publishToController(footstepDataListMessage);
-      assertTrue(simulationTestHelper.simulateAndWait(0.05));
+      assertTrue(simulationTestHelper.simulateNow(0.05));
 
       assertEquals(0, (int) footsteps.getValueAsLongBits());
       assertEquals(0, (int) handTrajectoryPoints.getValueAsLongBits());
@@ -75,22 +72,10 @@ public abstract class EndToEndClearDelayQueueMessageTest implements MultiRobotTe
       // clear hand trajectory
       ClearDelayQueueMessage clearHandTrajectory = HumanoidMessageTools.createClearDelayQueueMessage(HandTrajectoryMessage.class);
       simulationTestHelper.publishToController(clearHandTrajectory);
-      assertTrue(simulationTestHelper.simulateAndWait(0.1));
+      assertTrue(simulationTestHelper.simulateNow(0.1));
 
       assertEquals(10, (int) footsteps.getValueAsLongBits());
       assertEquals(0, (int) handTrajectoryPoints.getValueAsLongBits());
-   }
-
-   private static void setupCamera(SCS2AvatarTestingSimulation simulationTestHelper)
-   {
-      OffsetAndYawRobotInitialSetup startingLocationOffset = location.getStartingLocationOffset();
-      Point3D cameraFocus = new Point3D(startingLocationOffset.getAdditionalOffset());
-      cameraFocus.addZ(1.0);
-      RigidBodyTransform transform = new RigidBodyTransform();
-      transform.setRotationYawAndZeroTranslation(startingLocationOffset.getYaw());
-      Point3D cameraPosition = new Point3D(10.0, 5.0, cameraFocus.getZ() + 2.0);
-      transform.transform(cameraPosition);
-      simulationTestHelper.setCamera(cameraFocus, cameraPosition);
    }
 
    @BeforeEach
@@ -105,7 +90,7 @@ public abstract class EndToEndClearDelayQueueMessageTest implements MultiRobotTe
       // Do this here in case a test fails. That way the memory will be recycled.
       if (simulationTestHelper != null)
       {
-         simulationTestHelper.finishTest(simulationTestingParameters.getKeepSCSUp());
+         simulationTestHelper.finishTest();
          simulationTestHelper = null;
       }
 

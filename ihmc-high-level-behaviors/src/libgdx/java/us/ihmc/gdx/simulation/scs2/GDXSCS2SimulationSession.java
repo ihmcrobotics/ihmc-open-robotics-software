@@ -304,7 +304,7 @@ public class GDXSCS2SimulationSession
    public void setBufferRecordTickPeriod(int bufferRecordTickPeriod)
    {
       this.bufferRecordTickPeriod.set(bufferRecordTickPeriod);
-      simulationSession.submitBufferRecordTickPeriod(bufferRecordTickPeriod);
+      simulationSession.setBufferRecordTickPeriod(bufferRecordTickPeriod);
       changeBufferDuration(bufferDuration.get());
    }
 

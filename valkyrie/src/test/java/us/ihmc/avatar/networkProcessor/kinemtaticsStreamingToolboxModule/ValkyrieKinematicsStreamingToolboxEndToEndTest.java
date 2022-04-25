@@ -1,15 +1,15 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxEndToEndTest;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
-
-import java.io.IOException;
-import java.io.InputStream;
 
 public class ValkyrieKinematicsStreamingToolboxEndToEndTest extends KinematicsStreamingToolboxEndToEndTest
 {
@@ -23,7 +23,7 @@ public class ValkyrieKinematicsStreamingToolboxEndToEndTest extends KinematicsSt
 
    @Tag("humanoid-toolbox")
    @Test
-   public void testSimpleArmMotions() throws IOException, SimulationExceededMaximumTimeException
+   public void testSimpleArmMotions() throws IOException
    {
       String fileName = "20190926_102802_ValkyrieKinematicsStreamingToolbox_SimpleArmMotions.json";
       InputStream inputStream = loadInputStream(fileName);
@@ -32,7 +32,7 @@ public class ValkyrieKinematicsStreamingToolboxEndToEndTest extends KinematicsSt
 
    @Tag("humanoid-toolbox")
    @Test
-   public void testArmCollisions() throws IOException, SimulationExceededMaximumTimeException
+   public void testArmCollisions() throws IOException
    {
       String fileName = "20190926_101146_ValkyrieKinematicsStreamingToolbox_ArmCollisions.json";
       InputStream inputStream = loadInputStream(fileName);
@@ -41,7 +41,7 @@ public class ValkyrieKinematicsStreamingToolboxEndToEndTest extends KinematicsSt
 
    @Tag("humanoid-toolbox")
    @Test
-   public void testCrazyInputsLog() throws IOException, SimulationExceededMaximumTimeException
+   public void testCrazyInputsLog() throws IOException
    {
       String fileName = "20190926_103042_ValkyrieKinematicsStreamingToolbox_CrazyInputs.json";
       InputStream inputStream = loadInputStream(fileName);

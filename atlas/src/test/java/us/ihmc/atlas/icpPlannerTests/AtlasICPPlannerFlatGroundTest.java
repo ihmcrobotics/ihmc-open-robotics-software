@@ -14,7 +14,6 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.icpPlannerTests.AvatarICPPlannerFlatGroundTest;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 @Tag("humanoid-flat-ground")
 public class AtlasICPPlannerFlatGroundTest extends AvatarICPPlannerFlatGroundTest
@@ -25,7 +24,7 @@ public class AtlasICPPlannerFlatGroundTest extends AvatarICPPlannerFlatGroundTes
    @Disabled
    @Test
    /** {@inheritDoc} */
-   public void testChangeOfSupport() throws SimulationExceededMaximumTimeException, RuntimeException
+   public void testChangeOfSupport()
    {
       super.testChangeOfSupport();
    }
@@ -33,7 +32,7 @@ public class AtlasICPPlannerFlatGroundTest extends AvatarICPPlannerFlatGroundTes
    @Override
    @Test
    /** {@inheritDoc} */
-   public void testPauseWalkingInSwing() throws SimulationExceededMaximumTimeException, RuntimeException
+   public void testPauseWalkingInSwing()
    {
       super.testPauseWalkingInSwing();
    }
@@ -41,7 +40,7 @@ public class AtlasICPPlannerFlatGroundTest extends AvatarICPPlannerFlatGroundTes
    @Override
    @Test
    /** {@inheritDoc} */
-   public void testPauseWalkingInTransferFirstStep() throws SimulationExceededMaximumTimeException, RuntimeException
+   public void testPauseWalkingInTransferFirstStep()
    {
       super.testPauseWalkingInTransferFirstStep();
    }
@@ -49,7 +48,7 @@ public class AtlasICPPlannerFlatGroundTest extends AvatarICPPlannerFlatGroundTes
    @Override
    @Test
    /** {@inheritDoc} */
-   public void testPauseWalkingInTransfer() throws SimulationExceededMaximumTimeException, RuntimeException
+   public void testPauseWalkingInTransfer()
    {
       super.testPauseWalkingInTransfer();
    }
