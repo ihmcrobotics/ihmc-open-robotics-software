@@ -130,22 +130,25 @@ public abstract class TransferState extends WalkingState
          transferTimeElapsedUnderPrecomputedICPPlan = timeInState > walkingMessageHandler.getNextTransferTime();
       }
 
+      capturePoint2d.setIncludingFrame(balanceManager.getCapturePoint());
+      FrameConvexPolygon2DReadOnly supportPolygonInWorld = controllerToolbox.getBipedSupportPolygons().getSupportPolygonInWorld();
+      FrameConvexPolygon2DReadOnly nextPolygonInWorld = failureDetectionControlModule.getCombinedFootPolygonWithNextFootstep();
+
+      double distanceToSupport = supportPolygonInWorld.distance(capturePoint2d);
+      boolean isICPInsideNextSupportPolygon = nextPolygonInWorld.isPointInside(capturePoint2d);
+      
       if (balanceManager.isICPPlanDone() || transferTimeElapsedUnderPrecomputedICPPlan)
       {
-         capturePoint2d.setIncludingFrame(balanceManager.getCapturePoint());
-         FrameConvexPolygon2DReadOnly supportPolygonInWorld = controllerToolbox.getBipedSupportPolygons().getSupportPolygonInWorld();
-         FrameConvexPolygon2DReadOnly nextPolygonInWorld = failureDetectionControlModule.getCombinedFootPolygonWithNextFootstep();
-
-         double distanceToSupport = supportPolygonInWorld.distance(capturePoint2d);
-         boolean isICPInsideNextSupportPolygon = nextPolygonInWorld.isPointInside(capturePoint2d);
-
-         if (distanceToSupport > balanceManager.getICPDistanceOutsideSupportForStep() || (distanceToSupport > 0.0 && isICPInsideNextSupportPolygon))
+         if ((distanceToSupport > 0.0 && isICPInsideNextSupportPolygon))
             return true;
          else if (balanceManager.getNormalizedEllipticICPError() < 1.0)
             return true;
          else
             balanceManager.setUseMomentumRecoveryModeForBalance(true);
       }
+      
+      if (distanceToSupport > balanceManager.getICPDistanceOutsideSupportForStep() || (distanceToSupport > 0.0 && isICPInsideNextSupportPolygon))
+         return true;
 
       return false;
    }
