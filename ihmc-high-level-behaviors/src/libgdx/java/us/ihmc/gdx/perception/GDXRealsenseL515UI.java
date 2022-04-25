@@ -14,6 +14,7 @@ import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoTools;
+import us.ihmc.perception.MutableBytePointer;
 import us.ihmc.perception.realsense.BytedecoRealsenseL515;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
 import us.ihmc.tools.thread.Activator;
@@ -67,8 +68,9 @@ public class GDXRealsenseL515UI
                {
                   realSenseHardwareManager = new RealSenseHardwareManager(yoRegistry, yoGraphicsListRegistry);
 
-                  l515 = realSenseHardwareManager.createFullFeaturedL515("F1121365");
-                  l515.enableColor(1920, 1080, 30);
+//                  l515 = realSenseHardwareManager.createFullFeaturedL515("F1121365");
+                  l515 = realSenseHardwareManager.createFullFeaturedL515("F1120418");
+//                  l515.enableColor(1920, 1080, 30);
                   l515.initialize();
                }
 
@@ -78,7 +80,8 @@ public class GDXRealsenseL515UI
 
                   if (depthImagePanel == null)
                   {
-                     depthU16C1Image = new Mat(l515.getDepthHeight(), l515.getDepthWidth(), opencv_core.CV_16UC1, l515.getDepthFrameData());
+                     MutableBytePointer depthFrameData = l515.getDepthFrameData();
+                     depthU16C1Image = new Mat(l515.getDepthHeight(), l515.getDepthWidth(), opencv_core.CV_16UC1, depthFrameData);
 
                      depth32FC1Image = new BytedecoImage(l515.getDepthWidth(), l515.getDepthHeight(), opencv_core.CV_32FC1);
                      depthImagePanel = new GDXCVImagePanel("L515 Depth", l515.getDepthWidth(), l515.getDepthHeight());
