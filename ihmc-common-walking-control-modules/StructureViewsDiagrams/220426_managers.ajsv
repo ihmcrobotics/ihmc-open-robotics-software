@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!--AgileJ Ltd. (http://www.agilej.com)--><ajsv>
-    <diagram creationDate="2022-Apr-26 15:14" licenseGrade="single" licenseeName="AgileJ community member" licenseeOrganization="agilej-community" populationMethod="manual" version="1.9.2.v20190518-1152">
+    <diagram creationDate="2022-Apr-26 15:18" licenseGrade="single" licenseeName="AgileJ community member" licenseeOrganization="agilej-community" populationMethod="manual" version="1.9.2.v20190518-1152">
         <filterScript>
 
 hide all fields &#13;
@@ -16,7 +16,7 @@ hide all methods
         <class className="us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager" modelMemberId="us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager" project="ihmc-common-walking-control-modules" xLocation="857" yLocation="1006"/>
         <class className="us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand" modelMemberId="us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand" project="ihmc-common-walking-control-modules" xLocation="1149" yLocation="156"/>
         <class className="us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager" modelMemberId="us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager" project="ihmc-common-walking-control-modules" xLocation="608" yLocation="808"/>
-        <class className="us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingControllerState" modelMemberId="us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingControllerState" project="ihmc-common-walking-control-modules" xLocation="441" yLocation="82"/>
+        <class className="us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingControllerState" modelMemberId="us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingControllerState" project="ihmc-common-walking-control-modules" xLocation="421" yLocation="94"/>
         <class className="us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager" modelMemberId="us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager" project="ihmc-common-walking-control-modules" xLocation="273" yLocation="628"/>
         <class className="us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager" modelMemberId="us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager" project="ihmc-common-walking-control-modules" xLocation="553" yLocation="1007"/>
     </diagram>
