@@ -22,6 +22,7 @@ import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.imgui.ImGuiVideoPanel;
 import us.ihmc.gdx.perception.gpuPlanarRegions.GPUPlanarRegion;
 import us.ihmc.gdx.perception.gpuPlanarRegions.GPUPlanarRegionExtraction;
+import us.ihmc.gdx.perception.gpuPlanarRegions.GPUPlanarRegionExtractionParameters;
 import us.ihmc.gdx.perception.gpuPlanarRegions.GPURegionRing;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 import us.ihmc.perception.OpenCLManager;
@@ -327,6 +328,7 @@ public class GDXGPUPlanarRegionExtraction
       ImGui.sliderInt(labels.get("Search depth limit"), searchDepthLimit.getData(), 1, 50000);
       ImGui.sliderInt(labels.get("Region min patches"), regionMinPatches.getData(), 1, 1000);
       ImGui.sliderInt(labels.get("Boundary min patches"), boundaryMinPatches.getData(), 1, 1000);
+      ImGui.inputFloat(labels.get("Filter disparity threshold"), filterDisparityThreshold);
       ImGui.sliderFloat(labels.get("Region growth factor"), regionGrowthFactor.getData(), 0.005f, 0.1f);
       ImGui.checkbox(labels.get("Use SVD normals"), useSVDNormals);
       ImGui.sliderInt(labels.get("SVD reduction factor"), svdReductionFactor.getData(), 1, 100);
@@ -358,8 +360,69 @@ public class GDXGPUPlanarRegionExtraction
       setParametersFromImGuiWidgets();
    }
 
+   public void setImGuiWidgetsFromParameters()
+   {
+      GPUPlanarRegionExtractionParameters parameters = gpuPlanarRegionExtraction.getParameters();
+      mergeDistanceThreshold.set((float) parameters.getMergeDistanceThreshold());
+      mergeAngularThreshold.set((float) parameters.getMergeAngularThreshold());
+      filterDisparityThreshold.set((float) parameters.getFilterDisparityThreshold());
+      patchSize.set(parameters.getPatchSize());
+      deadPixelFilterPatchSize.set(parameters.getDeadPixelFilterPatchSize());
+      focalLengthXPixels.set((float) parameters.getFocalLengthXPixels());
+      focalLengthYPixels.set((float) parameters.getFocalLengthYPixels());
+      principalOffsetXPixels.set((float) parameters.getPrincipalOffsetXPixels());
+      principalOffsetYPixels.set((float) parameters.getPrincipalOffsetYPixels());
+      earlyGaussianBlur.set(parameters.getEarlyGaussianBlur());
+      useFilteredImage.set(parameters.getUseFilteredImage());
+      useSVDNormals.set(parameters.getUseSVDNormals());
+      svdReductionFactor.set(parameters.getSVDReductionFactor());
+      gaussianSize.set(parameters.getGaussianSize());
+      gaussianSigma.set((float) parameters.getGaussianSigma());
+      searchDepthLimit.set(parameters.getSearchDepthLimit());
+      regionMinPatches.set(parameters.getRegionMinPatches());
+      boundaryMinPatches.set(parameters.getBoundaryMinPatches());
+      regionGrowthFactor.set((float) parameters.getRegionGrowthFactor());
+
+      ConcaveHullFactoryParameters concaveHullFactoryParameters = gpuPlanarRegionExtraction.getConcaveHullFactoryParameters();
+      edgeLengthTresholdSlider.set((float) concaveHullFactoryParameters.getEdgeLengthThreshold());
+      triangulationToleranceSlider.set((float) concaveHullFactoryParameters.getTriangulationTolerance());
+      maxNumberOfIterationsSlider.set(concaveHullFactoryParameters.getMaxNumberOfIterations());
+      removeAllTrianglesWithTwoBorderEdgesChecked.set(concaveHullFactoryParameters.doRemoveAllTrianglesWithTwoBorderEdges());
+      allowSplittingConcaveHullChecked.set(concaveHullFactoryParameters.isSplittingConcaveHullAllowed());
+
+      PolygonizerParameters polygonizerParameters = gpuPlanarRegionExtraction.getPolygonizerParameters();
+      concaveHullThresholdSlider.set((float) polygonizerParameters.getConcaveHullThreshold());
+      shallowAngleThresholdSlider.set((float) polygonizerParameters.getShallowAngleThreshold());
+      peakAngleThresholdSlider.set((float) polygonizerParameters.getPeakAngleThreshold());
+      lengthThresholdSlider.set((float) polygonizerParameters.getLengthThreshold());
+      depthThresholdSlider.set((float) polygonizerParameters.getDepthThreshold());
+      minNumberOfNodesSlider.set(polygonizerParameters.getMinNumberOfNodes());
+      cutNarrowPassageChecked.set(polygonizerParameters.getCutNarrowPassage());
+   }
+
    private void setParametersFromImGuiWidgets()
    {
+      GPUPlanarRegionExtractionParameters parameters = gpuPlanarRegionExtraction.getParameters();
+      parameters.setMergeDistanceThreshold(mergeDistanceThreshold.get());
+      parameters.setMergeAngularThreshold(mergeAngularThreshold.get()):
+      parameters.setFilterDisparityThreshold(filterDisparityThreshold.get());
+      parameters.setPatchSize(patchSize.get());
+      parameters.setDeadPixelFilterPatchSize(deadPixelFilterPatchSize.get());
+      parameters.setFocalLengthXPixels(focalLengthXPixels.get());
+      parameters.setFocalLengthYPixels(focalLengthYPixels.get());
+      parameters.setPrincipalOffsetXPixels(principalOffsetXPixels.get());
+      parameters.setPrincipalOffsetYPixels(principalOffsetYPixels.get());
+      parameters.setEarlyGaussianBlur(earlyGaussianBlur.get());
+      parameters.setUseFilteredImage(useFilteredImage.get());
+      parameters.setUseSVDNormals(useSVDNormals.get());
+      parameters.setSVDReductionFactor(svdReductionFactor.get());
+      parameters.setGaussianSize(gaussianSize.get());
+      parameters.setGaussianSigma(gaussianSigma.get());
+      parameters.setSearchDepthLimit(searchDepthLimit.get());
+      parameters.setRegionMinPatches(regionMinPatches.get());
+      parameters.setBoundaryMinPatches(boundaryMinPatches.get());
+      parameters.setRegionGrowthFactor(regionGrowthFactor.get());
+
       ConcaveHullFactoryParameters concaveHullFactoryParameters = gpuPlanarRegionExtraction.getConcaveHullFactoryParameters();
       concaveHullFactoryParameters.setEdgeLengthThreshold(edgeLengthTresholdSlider.get());
       concaveHullFactoryParameters.setTriangulationTolerance(triangulationToleranceSlider.get());
