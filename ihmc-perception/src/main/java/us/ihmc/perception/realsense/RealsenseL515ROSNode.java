@@ -1,4 +1,4 @@
-package us.ihmc.gdx.perception;
+package us.ihmc.perception.realsense;
 
 import boofcv.struct.calib.CameraPinholeBrown;
 import org.bytedeco.opencv.global.opencv_core;
@@ -11,8 +11,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.MutableBytePointer;
-import us.ihmc.perception.realsense.BytedecoRealsenseL515;
-import us.ihmc.perception.realsense.RealSenseHardwareManager;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Activator;
 import us.ihmc.tools.thread.PausablePeriodicThread;
@@ -43,7 +41,7 @@ public class RealsenseL515ROSNode
 
    public RealsenseL515ROSNode()
    {
-      nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
+      nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
 
       ros1Helper = new ROS1Helper("l515_node");
 

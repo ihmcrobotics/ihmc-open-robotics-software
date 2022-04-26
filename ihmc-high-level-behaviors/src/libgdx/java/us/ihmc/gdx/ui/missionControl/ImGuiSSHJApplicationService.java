@@ -75,7 +75,7 @@ public class ImGuiSSHJApplicationService
          runCommand("restart");
       }
 
-      if (!islogMonitorThreadRunning() && ImGui.button("Start log monitor"))
+      if (!islogMonitorThreadRunning() && ImGui.button(labels.get("Start log monitor")))
       {
          startLogMonitor();
       }

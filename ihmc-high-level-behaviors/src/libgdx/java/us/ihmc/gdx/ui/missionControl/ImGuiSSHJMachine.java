@@ -108,22 +108,25 @@ public class ImGuiSSHJMachine
       {
          systemdServiceManager.renderImGuiWidgets();
          messagerManagerWidget.renderImGuiWidgets();
+      }
 
-         ArrayList<String> statuses = serviceStatusSubscription.get();
-         for (String status : statuses)
+      ArrayList<String> statuses = serviceStatusSubscription.get();
+      for (String status : statuses)
+      {
+         String[] split = status.split(":", 2);
+         if (split[0].equals("mission-control-2"))
          {
-            String[] split = status.split(":", 2);
-            if (split[0].equals("mission-control-2"))
+            if (!condensedView)
             {
                ImGui.text(split[1]);
             }
-            else
+         }
+         else
+         {
+            AtomicReference<String> statusAtomicReference = serviceStatuses.get(split[0]);
+            if (statusAtomicReference != null)
             {
-               AtomicReference<String> statusAtomicReference = serviceStatuses.get(split[0]);
-               if (statusAtomicReference != null)
-               {
-                  statusAtomicReference.set(split[1]);
-               }
+               statusAtomicReference.set(split[1]);
             }
          }
       }
