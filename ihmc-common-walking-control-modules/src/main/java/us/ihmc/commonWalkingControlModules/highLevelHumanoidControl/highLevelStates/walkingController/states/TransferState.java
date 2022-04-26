@@ -132,25 +132,27 @@ public abstract class TransferState extends WalkingState
 
       capturePoint2d.setIncludingFrame(balanceManager.getCapturePoint());
       FrameConvexPolygon2DReadOnly supportPolygonInWorld = controllerToolbox.getBipedSupportPolygons().getSupportPolygonInWorld();
-      FrameConvexPolygon2DReadOnly nextPolygonInWorld = failureDetectionControlModule.getCombinedFootPolygonWithNextFootstep();
 
       double distanceToSupport = supportPolygonInWorld.distance(capturePoint2d);
-      boolean isICPInsideNextSupportPolygon = nextPolygonInWorld.isPointInside(capturePoint2d);
-      
+
       if (balanceManager.isICPPlanDone() || transferTimeElapsedUnderPrecomputedICPPlan)
       {
+         FrameConvexPolygon2DReadOnly nextPolygonInWorld = failureDetectionControlModule.getCombinedFootPolygonWithNextFootstep();
+         boolean isICPInsideNextSupportPolygon = nextPolygonInWorld.isPointInside(capturePoint2d);
+
+         // if you're outside at all, but taking the next step will recover, go ahead and do it.
          if ((distanceToSupport > 0.0 && isICPInsideNextSupportPolygon))
             return true;
+         // if you're done, and your error is low, trigger the next step
          else if (balanceManager.getNormalizedEllipticICPError() < 1.0)
             return true;
+         // if you're done, and your error is too high, start using a higher momentum recovery
          else
             balanceManager.setUseMomentumRecoveryModeForBalance(true);
       }
-      
-      if (distanceToSupport > balanceManager.getICPDistanceOutsideSupportForStep() || (distanceToSupport > 0.0 && isICPInsideNextSupportPolygon))
-         return true;
 
-      return false;
+      // if you're too far outside, go ahead and trigger the next step
+      return distanceToSupport > balanceManager.getICPDistanceOutsideSupportForStep();
    }
 
    /**
