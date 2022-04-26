@@ -645,6 +645,11 @@ public class GPUPlanarRegionExtraction
       return imageHeight;
    }
 
+   public GPUPlanarRegionExtractionParameters getParameters()
+   {
+      return parameters;
+   }
+
    public ConcaveHullFactoryParameters getConcaveHullFactoryParameters()
    {
       return concaveHullFactoryParameters;
