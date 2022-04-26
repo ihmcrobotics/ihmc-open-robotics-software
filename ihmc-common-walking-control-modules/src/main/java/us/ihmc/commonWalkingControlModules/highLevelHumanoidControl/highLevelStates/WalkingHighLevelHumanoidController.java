@@ -274,6 +274,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       controllerCoreOptimizationSettings = new ParameterizedControllerCoreOptimizationSettings(defaultControllerCoreOptimizationSettings, registry);
       
       this.naturalPosture = walkingControllerParameters.getNaturalPosture(fullRobotModel, registry, controllerToolbox.getYoGraphicsListRegistry());
+      this.naturalPosture.initialize();
    }
 
    private StateMachine<WalkingStateEnum, WalkingState> setupStateMachine()
@@ -634,6 +635,11 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       if (ENABLE_LEG_ELASTICITY_DEBUGGATOR)
          legElasticityDebuggator.update();
       
+      if (firstTick)
+      {
+      // use the built-in pose:
+         naturalPosture.setNaturalPostureOffset(naturalPosture.getNominalStandingPoseQoffset()); 
+      }
       double[] q = new double[fullRobotModel.getOneDoFJoints().length];
       int i = 0; // GMN: HACK!
       for (OneDoFJointBasics joint : fullRobotModel.getOneDoFJoints())
@@ -643,12 +649,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       }
       Quaternion Qbase = new Quaternion(fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToWorldFrame().getRotation());
       naturalPosture.compute(q, Qbase);
-      if (firstTick)
-      {
-         Quaternion Qoffset = naturalPosture.getNaturalPostureQuaternionrtBase();
-         Qoffset.conjugate();
-         naturalPosture.setNaturalPostureOffset(Qoffset);
-      }
       
       firstTick = false;
    }
