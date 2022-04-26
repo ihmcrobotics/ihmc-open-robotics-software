@@ -136,10 +136,12 @@ public class KSTTools
                                                              yoGraphicsListRegistry,
                                                              registry);
 
-      commandInputManager.registerConversionHelper(new KinematicsStreamingToolboxCommandConverter(ikController.getCurrentFullRobotModel(),
-                                                                                                  ikController.getCurrentReferenceFrames(),
-                                                                                                  desiredFullRobotModel,
-                                                                                                  ikController.getDesiredReferenceFrames()));
+      KinematicsStreamingToolboxCommandConverter commandConversionHelper = new KinematicsStreamingToolboxCommandConverter(ikController.getCurrentFullRobotModel(),
+                                                                                                                          ikController.getCurrentReferenceFrames(),
+                                                                                                                          desiredFullRobotModel,
+                                                                                                                          ikController.getDesiredReferenceFrames());
+      commandInputManager.registerConversionHelper(commandConversionHelper);
+      commandConversionHelper.process(configurationCommand, parameters.getDefaultConfiguration()); // Initialize the configurationCommand from the parameters' message
 
       ikCommandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel, ikController.getDesiredReferenceFrames()));
 

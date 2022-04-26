@@ -1,5 +1,7 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
+import controller_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.tools.UnitConversions;
 
@@ -29,6 +31,8 @@ public class KinematicsStreamingToolboxParameters
    private double inputPoseLPFBreakFrequency;
    private double inputWeightDecayDuration;
    private double inputVelocityDecayDuration;
+
+   private final KinematicsStreamingToolboxConfigurationMessage defaultConfiguration = new KinematicsStreamingToolboxConfigurationMessage();
 
    public static KinematicsStreamingToolboxParameters defaultParameters()
    {
@@ -62,6 +66,20 @@ public class KinematicsStreamingToolboxParameters
       inputPoseLPFBreakFrequency = 4.0;
       inputWeightDecayDuration = 3.0;
       inputVelocityDecayDuration = 0.5;
+
+      defaultConfiguration.setLockPelvis(false);
+      defaultConfiguration.setLockChest(false);
+      defaultConfiguration.setEnableLeftArmJointspace(true);
+      defaultConfiguration.setEnableRightArmJointspace(true);
+      defaultConfiguration.setEnableNeckJointspace(true);
+      defaultConfiguration.setEnableLeftHandTaskspace(true);
+      defaultConfiguration.setEnableRightHandTaskspace(true);
+      defaultConfiguration.setEnableChestTaskspace(true);
+      defaultConfiguration.setEnablePelvisTaskspace(true);
+      defaultConfiguration.setLeftHandTrajectoryFrameId(ReferenceFrame.getWorldFrame().hashCode());
+      defaultConfiguration.setRightHandTrajectoryFrameId(ReferenceFrame.getWorldFrame().hashCode());
+      defaultConfiguration.setChestTrajectoryFrameId(ReferenceFrame.getWorldFrame().hashCode());
+      defaultConfiguration.setPelvisTrajectoryFrameId(ReferenceFrame.getWorldFrame().hashCode());
    }
 
    public double getCenterOfMassSafeMargin()
@@ -152,6 +170,11 @@ public class KinematicsStreamingToolboxParameters
    public double getInputVelocityDecayDuration()
    {
       return inputVelocityDecayDuration;
+   }
+
+   public KinematicsStreamingToolboxConfigurationMessage getDefaultConfiguration()
+   {
+      return defaultConfiguration;
    }
 
    public void setCenterOfMassSafeMargin(double centerOfMassSafeMargin)
