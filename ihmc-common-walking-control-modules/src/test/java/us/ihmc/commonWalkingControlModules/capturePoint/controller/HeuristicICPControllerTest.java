@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.qpInput.CoPProjectionTowardsMidpoint;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
@@ -78,6 +79,8 @@ public class HeuristicICPControllerTest
    {
       TestICPControllerParameters icpControllerParameters = new TestICPControllerParameters()
       {
+         private FeedbackProjectionOperator feedbackProjectionOperator;
+
          @Override
          public ICPControlGainsReadOnly getICPFeedbackGains()
          {
@@ -98,6 +101,18 @@ public class HeuristicICPControllerTest
          public boolean useAngularMomentum()
          {
             return false;
+         }
+
+         @Override
+         public void createFeedbackProjectionOperator(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+         {
+            feedbackProjectionOperator = new CoPProjectionTowardsMidpoint(registry, yoGraphicsListRegistry);
+         }
+
+         @Override
+         public FeedbackProjectionOperator getFeedbackProjectionOperator()
+         {
+            return feedbackProjectionOperator;
          }
       };
       
