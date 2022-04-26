@@ -2,7 +2,7 @@ package us.ihmc.gdx.perception.gpuPlanarRegions;
 
 import us.ihmc.tools.property.*;
 
-public class GPUPlanarRegionExtractionParameters extends StoredPropertySet implements GPUPlanarRegionExtractionParametersReadOnly
+public class GPUPlanarRegionExtractionParameters extends StoredPropertySet implements GPUPlanarRegionExtractionParametersBasics
 {
    public static final String PROJECT_NAME = "ihmc-open-robotics-software";
    public static final String TO_RESOURCE_FOLDER = "ihmc-high-level-behaviors/src/libgdx/resources";
