@@ -1,17 +1,31 @@
 package us.ihmc.javafx;
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+
+import org.apache.commons.lang3.mutable.MutableObject;
+
 import com.sun.javafx.application.PlatformImpl;
+
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.stage.Stage;
-
-import java.io.IOException;
-import java.net.URL;
+import us.ihmc.log.LogTools;
 
 public class JavaFXMissingTools
 {
+   public static void startup()
+   {
+      PlatformImpl.startup(() ->
+      {
+         // Just to make sure JavaFX thread has started. 
+      });
+   }
+
    public static void runNFramesLater(int numberOfFramesToWait, Runnable runnable)
    {
       new AnimationTimer()
@@ -81,6 +95,96 @@ public class JavaFXMissingTools
       catch (IOException e)
       {
          throw new RuntimeException(e);
+      }
+   }
+
+   public static void runAndWait(final Runnable runnable)
+   {
+      if (Platform.isFxApplicationThread())
+      {
+         try
+         {
+            runnable.run();
+         }
+         catch (Throwable t)
+         {
+            LogTools.error("Exception in runnable");
+            t.printStackTrace();
+         }
+      }
+      else
+      {
+         final CountDownLatch doneLatch = new CountDownLatch(1);
+
+         Platform.runLater(() ->
+         {
+            try
+            {
+               runnable.run();
+            }
+            finally
+            {
+               doneLatch.countDown();
+            }
+         });
+
+         try
+         {
+            doneLatch.await();
+         }
+         catch (InterruptedException ex)
+         {
+            ex.printStackTrace();
+         }
+      }
+   }
+
+   public static <R> R runAndWait(final Callable<R> callable)
+   {
+      if (Platform.isFxApplicationThread())
+      {
+         try
+         {
+            return callable.call();
+         }
+         catch (Throwable t)
+         {
+            LogTools.error("Exception in callable");
+            t.printStackTrace();
+            return null;
+         }
+      }
+      else
+      {
+         final CountDownLatch doneLatch = new CountDownLatch(1);
+         final MutableObject<R> result = new MutableObject<>();
+
+         Platform.runLater(() ->
+         {
+            try
+            {
+               result.setValue(callable.call());
+            }
+            catch (Exception e)
+            {
+               e.printStackTrace();
+            }
+            finally
+            {
+               doneLatch.countDown();
+            }
+         });
+
+         try
+         {
+            doneLatch.await();
+            return result.getValue();
+         }
+         catch (InterruptedException ex)
+         {
+            ex.printStackTrace();
+            return null;
+         }
       }
    }
 }

@@ -1,7 +1,5 @@
 package us.ihmc.avatar.reachabilityMap;
 
-import java.awt.FileDialog;
-import java.awt.Frame;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,19 +14,21 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
 import cern.colt.Arrays;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape.SphereVoxelType;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.javafx.JavaFXMissingTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizerIOTools;
 
 public class ReachabilityMapFileLoader
 {
@@ -79,22 +79,22 @@ public class ReachabilityMapFileLoader
 
    public static File selectionFileDialog()
    {
-      
-      final FileDialog fileDialog = new FileDialog((Frame) null, "Choose reachability map to load");
-      fileDialog.setMode(FileDialog.LOAD);
-
-      fileDialog.setVisible(true);
-      String directory = fileDialog.getDirectory();
-      String filename = fileDialog.getFile();
-      fileDialog.dispose();
-      if (directory != null && filename != null)
+      JavaFXMissingTools.startup();
+      return JavaFXMissingTools.runAndWait(() ->
       {
-         return new File(directory, filename);
-      }
-      else
-      {
-         return null;
-      }
+         FileChooser fileChooser = new FileChooser();
+         fileChooser.setTitle("Choose reachability map to load");
+         File initialDirectory = SessionVisualizerIOTools.getDefaultFilePath("humanoid-reachability-map-load");
+         if (initialDirectory == null)
+            initialDirectory = new File(".");
+         fileChooser.setInitialDirectory(initialDirectory);
+         fileChooser.getExtensionFilters().add(new ExtensionFilter("Spreadsheet", "*.xls"));
+         fileChooser.getExtensionFilters().add(new ExtensionFilter("All Files", "*.*"));
+         File result = fileChooser.showOpenDialog(null);
+         if (result != null)
+            SessionVisualizerIOTools.setDefaultFilePath("humanoid-reachability-map-load", result.getParentFile());
+         return result;
+      });
    }
 
    private void checkRobotMatchesData(String robotName, RigidBodyBasics rootBody, HSSFSheet descriptionSheet)
@@ -103,15 +103,16 @@ public class ReachabilityMapFileLoader
 
       if (!robotName.equals(robotNameInWorkbook))
       {
-         throw new RuntimeException("Trying to load the data for another robot: Loading data for " + robotName + ", workbook contains data for " + robotNameInWorkbook);
+         throw new RuntimeException("Trying to load the data for another robot: Loading data for " + robotName + ", workbook contains data for "
+               + robotNameInWorkbook);
       }
 
       ArrayList<String> jointNames = new ArrayList<>();
-      
+
       int currentIndexValue = 2;
       HSSFRow currentRow = descriptionSheet.getRow(11);
       HSSFCell currentCell = currentRow.getCell(currentIndexValue);
-      
+
       while (currentCell != null)
       {
          jointNames.add(currentCell.getStringCellValue());
@@ -119,7 +120,8 @@ public class ReachabilityMapFileLoader
          currentCell = currentRow.getCell(currentIndexValue);
       }
 
-      JointBasics[] joints = Stream.of(MultiBodySystemTools.collectSubtreeJoints(rootBody)).filter(joint -> jointNames.contains(joint.getName())).toArray(JointBasics[]::new);
+      JointBasics[] joints = Stream.of(MultiBodySystemTools.collectSubtreeJoints(rootBody)).filter(joint -> jointNames.contains(joint.getName()))
+                                   .toArray(JointBasics[]::new);
       OneDoFJointBasics[] oneDoFJoints = MultiBodySystemTools.filterJoints(joints, OneDoFJointBasics.class);
 
       if (oneDoFJoints.length != jointNames.size())
@@ -157,7 +159,11 @@ public class ReachabilityMapFileLoader
       double voxelSize = descriptionSheet.getRow(3).getCell(2).getNumericCellValue();
       int numberOfRaysPerVoxel = (int) descriptionSheet.getRow(4).getCell(2).getNumericCellValue();
       int numberOfRotationsPerRay = (int) descriptionSheet.getRow(5).getCell(2).getNumericCellValue();
-      SphereVoxelShape sphereVoxelShape = new SphereVoxelShape(gridFrame, voxelSize, numberOfRaysPerVoxel, numberOfRotationsPerRay, SphereVoxelType.graspOrigin);
+      SphereVoxelShape sphereVoxelShape = new SphereVoxelShape(gridFrame,
+                                                               voxelSize,
+                                                               numberOfRaysPerVoxel,
+                                                               numberOfRotationsPerRay,
+                                                               SphereVoxelType.graspOrigin);
       return new Voxel3DGrid(gridFrame, sphereVoxelShape, numberOfVoxelsPerDimension, voxelSize);
    }
 
@@ -214,7 +220,7 @@ public class ReachabilityMapFileLoader
 
          if (parentFrameName.equals(frameAfterJoint.getName()))
             return frameAfterJoint;
-         
+
          if (parentFrameName.equals(frameBeforeJoint.getName()))
             return frameBeforeJoint;
 
