@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--AgileJ Ltd. (http://www.agilej.com)--><ajsv>
+    <diagram creationDate="2022-Apr-26 14:14" licenseGrade="single" licenseeName="AgileJ community member" licenseeOrganization="agilej-community" populationMethod="manual" version="1.9.2.v20190518-1152">
+        <filterScript>
+
+hide all fields &#13;
+hide all methods
+
+</filterScript>
+        <class className="us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager" modelMemberId="us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager" project="ihmc-common-walking-control-modules" xLocation="513" yLocation="318"/>
+    </diagram>
+</ajsv>
