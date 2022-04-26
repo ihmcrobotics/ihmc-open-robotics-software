@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.qpInput.CoPProjectionTowardsMidpoint;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -13,6 +14,8 @@ import us.ihmc.yoVariables.registry.YoRegistry;
  */
 public abstract class ICPControllerParameters
 {
+   private FeedbackProjectionOperator feedbackProjectionOperator;
+
    /**
     * The weight for tracking the nominal desired CMP. This weight penalizes using a large amount of
     * CMP control. Setting this weight high will make the robot behave similar to using point feet
@@ -141,24 +144,6 @@ public abstract class ICPControllerParameters
       return 0.06;
    }
 
-   /**
-    * Minimum distance that the CMP can get towards the ICP when being projected into the foot, away
-    * from an edge. Once the CoP is inside the foot, and once the CMP gets this close to the ICP, do
-    * not push the CMP any closer towards the ICP.
-    */
-   public double getMinICPPushDelta()
-   {
-      return 0.05;
-   }
-
-   /**
-    * The maximum distance to project the CoP into the foot, away from the edge. Once it is projected
-    * this far, then do not push it any further inside the foot.
-    */
-   public double getMaxCoPProjectionInside()
-   {
-      return 0.04;
-   }
 
    public void createFeedForwardAlphaCalculator(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -170,6 +155,7 @@ public abstract class ICPControllerParameters
 
    public void createFeedbackProjectionOperator(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
+      feedbackProjectionOperator = new CoPProjectionTowardsMidpoint(registry, yoGraphicsListRegistry);
    }
 
    public FeedForwardAlphaCalculator getFeedForwardAlphaCalculator()
@@ -184,7 +170,7 @@ public abstract class ICPControllerParameters
 
    public FeedbackProjectionOperator getFeedbackProjectionOperator()
    {
-      return null;
+      return feedbackProjectionOperator;
    }
 
    public interface FeedForwardAlphaCalculator
