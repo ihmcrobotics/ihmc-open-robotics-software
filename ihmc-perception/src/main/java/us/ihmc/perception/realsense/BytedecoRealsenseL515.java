@@ -293,6 +293,26 @@ public class BytedecoRealsenseL515
       return depthStreamIntrinsics;
    }
 
+   public double getFocalLengthPixelsX()
+   {
+      return depthStreamIntrinsics.fx();
+   }
+
+   public double getFocalLengthPixelsY()
+   {
+      return depthStreamIntrinsics.fy();
+   }
+
+   public double getPrincipalOffsetXPixels()
+   {
+      return depthStreamIntrinsics.ppx();
+   }
+
+   public double getPrincipalOffsetYPixels()
+   {
+      return depthStreamIntrinsics.ppy();
+   }
+
    public int getDepthWidth()
    {
       return width;
