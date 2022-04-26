@@ -27,7 +27,7 @@ public class GDXGPUPlanarRegionExtractionL515HardwareDemo
    private Mat depthU16C1Image;
    private BytedecoImage depth32FC1Image;
    private GDXPose3DGizmo l515PoseGizmo = new GDXPose3DGizmo();
-   private GDXGPUPlanarRegionExtraction gpuPlanarRegionExtraction;
+   private GDXGPUPlanarRegionExtractionUI gpuPlanarRegionExtraction;
 
    public GDXGPUPlanarRegionExtractionL515HardwareDemo()
    {
@@ -77,7 +77,7 @@ public class GDXGPUPlanarRegionExtractionL515HardwareDemo
 
                      depth32FC1Image = new BytedecoImage(l515.getDepthWidth(), l515.getDepthHeight(), opencv_core.CV_32FC1);
 
-                     gpuPlanarRegionExtraction = new GDXGPUPlanarRegionExtraction();
+                     gpuPlanarRegionExtraction = new GDXGPUPlanarRegionExtractionUI();
                      gpuPlanarRegionExtraction.create(l515.getDepthWidth(),
                                                       l515.getDepthHeight(),
                                                       depth32FC1Image.getBackingDirectByteBuffer(),
