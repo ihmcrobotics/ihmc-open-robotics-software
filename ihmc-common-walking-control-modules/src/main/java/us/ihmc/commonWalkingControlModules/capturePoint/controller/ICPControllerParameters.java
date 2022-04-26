@@ -14,8 +14,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
  */
 public abstract class ICPControllerParameters
 {
-   private FeedbackProjectionOperator feedbackProjectionOperator;
-
    /**
     * The weight for tracking the nominal desired CMP. This weight penalizes using a large amount of
     * CMP control. Setting this weight high will make the robot behave similar to using point feet
@@ -155,7 +153,6 @@ public abstract class ICPControllerParameters
 
    public void createFeedbackProjectionOperator(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      feedbackProjectionOperator = new CoPProjectionTowardsMidpoint(registry, yoGraphicsListRegistry);
    }
 
    public FeedForwardAlphaCalculator getFeedForwardAlphaCalculator()
@@ -170,7 +167,7 @@ public abstract class ICPControllerParameters
 
    public FeedbackProjectionOperator getFeedbackProjectionOperator()
    {
-      return feedbackProjectionOperator;
+      return null;
    }
 
    public interface FeedForwardAlphaCalculator
