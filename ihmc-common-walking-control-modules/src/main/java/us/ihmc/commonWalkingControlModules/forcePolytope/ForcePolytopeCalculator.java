@@ -165,4 +165,19 @@ public class ForcePolytopeCalculator
    {
       this.contactPointInParentFrameAfterJoint.set(contactPoint);
    }
+
+   public RigidBodyBasics getBase()
+   {
+      return base;
+   }
+
+   public RigidBodyBasics getEndEffector()
+   {
+      return endEffector;
+   }
+
+   public Point3D getContactPoint()
+   {
+      return contactPointInParentFrameAfterJoint;
+   }
 }
