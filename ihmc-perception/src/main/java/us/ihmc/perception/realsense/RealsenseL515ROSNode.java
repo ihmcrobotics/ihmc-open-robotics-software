@@ -94,26 +94,30 @@ public class RealsenseL515ROSNode
 
             if (ros1DepthPublisher.isConnected() && ros1DepthCameraInfoPublisher.isConnected())
             {
-               depthU16C1Image.convertTo(depth32FC1Image.getBytedecoOpenCVMat(), opencv_core.CV_32FC1, l515.getDepthToMeterConversion(), 0.0);
-               depth32FC1Image.rewind();
-               ByteBuffer depthFloatBuffer = depth32FC1Image.getBackingDirectByteBuffer();
+//               depthU16C1Image.convertTo(depth32FC1Image.getBytedecoOpenCVMat(), opencv_core.CV_32FC1, l515.getDepthToMeterConversion(), 0.0);
+//               depth32FC1Image.rewind();
+//               ByteBuffer depthFloatBuffer = depth32FC1Image.getBackingDirectByteBuffer();
 
                ros1DepthChannelBuffer.clear();
                int size = 2 * depthWidth * depthHeight;
-               for (int y = 0; y < depthHeight; y++)
-               {
-                  for (int x = 0; x < depthWidth; x++)
-                  {
-                     float eyeDepthMeters = depthFloatBuffer.getFloat();
+//               for (int y = 0; y < depthHeight; y++)
+//               {
+//                  for (int x = 0; x < depthWidth; x++)
+//                  {
+//                     float eyeDepthMeters = depthFloatBuffer.getFloat();
+//
+//                     int row = y + 1;
+//                     int backForY = row * depthWidth * 2;
+//                     int forwardForX = x * 2;
+//                     int index = size - backForY + forwardForX;
+//                     char depthChar16 = (char) Math.round(eyeDepthMeters * 1000.0f); // 1000 is 1 meter
+//                     ros1DepthChannelBuffer.setChar(index, depthChar16);
+//                  }
+//               }
 
-                     int row = y + 1;
-                     int backForY = row * depthWidth * 2;
-                     int forwardForX = x * 2;
-                     int index = size - backForY + forwardForX;
-                     char depthChar16 = (char) Math.round(eyeDepthMeters * 1000.0f); // 1000 is 1 meter
-                     ros1DepthChannelBuffer.setChar(index, depthChar16);
-                  }
-               }
+//               l515.getDepthFrameData().asByteBuffer()
+
+               ros1DepthChannelBuffer.writeBytes(depthU16C1Image.asByteBuffer());
 
                ros1DepthChannelBuffer.readerIndex(0);
                ros1DepthChannelBuffer.writerIndex(size);
