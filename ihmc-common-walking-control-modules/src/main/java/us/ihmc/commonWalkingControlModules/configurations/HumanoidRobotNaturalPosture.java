@@ -7,6 +7,10 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
 public interface HumanoidRobotNaturalPosture
 {
+   public abstract void initialize();
+   
+   public abstract Quaternion getNominalStandingPoseQoffset();
+   
    public abstract void setNaturalPostureOffset(QuaternionReadOnly Qoffset);
 
    public abstract void compute(double[] q, QuaternionReadOnly Qbase);
