@@ -1,11 +1,8 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
@@ -171,12 +168,21 @@ public abstract class ICPControllerParameters
    {
    }
 
+   public void createFeedbackProjectionOperator(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+   }
+
    public FeedForwardAlphaCalculator getFeedForwardAlphaCalculator()
    {
       return null;
    }
 
    public FeedbackAlphaCalculator getFeedbackAlphaCalculator()
+   {
+      return null;
+   }
+
+   public FeedbackProjectionOperator getFeedbackProjectionOperator()
    {
       return null;
    }
@@ -194,5 +200,15 @@ public abstract class ICPControllerParameters
    public interface FeedbackAlphaCalculator
    {
       double computeAlpha(FramePoint2DReadOnly currentICP, FrameConvexPolygon2DReadOnly supportPolygon);
+   }
+
+   public interface FeedbackProjectionOperator
+   {
+      void projectFeedback(FramePoint2DReadOnly currentICP,
+                           FramePoint2DReadOnly unconstrainedFeedbackCMP,
+                           FrameVector2DReadOnly cmpOffset,
+                           FrameConvexPolygon2DReadOnly supportPolygonInWorld,
+                           FixedFramePoint2DBasics feedbackCoPToPack,
+                           FixedFramePoint2DBasics feedbackCMPToPack);
    }
 }
