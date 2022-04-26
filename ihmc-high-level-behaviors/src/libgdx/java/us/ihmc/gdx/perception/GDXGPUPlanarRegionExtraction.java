@@ -404,7 +404,7 @@ public class GDXGPUPlanarRegionExtraction
    {
       GPUPlanarRegionExtractionParameters parameters = gpuPlanarRegionExtraction.getParameters();
       parameters.setMergeDistanceThreshold(mergeDistanceThreshold.get());
-      parameters.setMergeAngularThreshold(mergeAngularThreshold.get()):
+      parameters.setMergeAngularThreshold(mergeAngularThreshold.get());
       parameters.setFilterDisparityThreshold(filterDisparityThreshold.get());
       parameters.setPatchSize(patchSize.get());
       parameters.setDeadPixelFilterPatchSize(deadPixelFilterPatchSize.get());
