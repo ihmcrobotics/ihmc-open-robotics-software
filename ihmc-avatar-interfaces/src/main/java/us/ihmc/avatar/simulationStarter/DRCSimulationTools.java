@@ -106,7 +106,7 @@ public abstract class DRCSimulationTools
          networkProcessorParameters.setUseZeroPoseRobotConfigurationPublisherModule(modulesToStart.contains(Modules.ZERO_POSE_PRODUCER));
          networkProcessorParameters.setUseROSModule(modulesToStart.contains(Modules.ROS_MODULE));
          networkProcessorParameters.setUseKinematicsToolboxModule(modulesToStart.contains(Modules.KINEMATICS_TOOLBOX));
-//         networkProcessorParameters.setUseKinematicsStreamingToolboxModule(modulesToStart.contains(Modules.KINEMATICS_TOOLBOX));
+         networkProcessorParameters.setUseKinematicsStreamingToolboxModule(modulesToStart.contains(Modules.KINEMATICS_TOOLBOX));
          networkProcessorParameters.setUseFootstepPlanningToolboxModule(modulesToStart.contains(Modules.FOOTSTEP_PLANNING_TOOLBOX));
          networkProcessorParameters.setUseWholeBodyTrajectoryToolboxModule(modulesToStart.contains(Modules.WHOLE_BODY_TRAJECTORY_TOOLBOX));
          networkProcessorParameters.setUseKinematicsPlanningToolboxModule(modulesToStart.contains(Modules.KINEMATICS_PLANNING_TOOLBOX));
