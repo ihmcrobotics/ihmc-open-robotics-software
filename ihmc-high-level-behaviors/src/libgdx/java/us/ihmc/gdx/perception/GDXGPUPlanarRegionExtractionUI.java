@@ -33,7 +33,7 @@ import us.ihmc.robotics.perception.ProjectionTools;
 
 import java.nio.ByteBuffer;
 
-public class GDXGPUPlanarRegionExtraction
+public class GDXGPUPlanarRegionExtractionUI
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean enabled = new ImBoolean(false);
