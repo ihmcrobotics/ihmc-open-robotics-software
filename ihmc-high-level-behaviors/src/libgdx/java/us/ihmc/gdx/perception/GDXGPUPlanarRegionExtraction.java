@@ -38,31 +38,31 @@ public class GDXGPUPlanarRegionExtraction
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean enabled = new ImBoolean(false);
    private final GPUPlanarRegionExtraction gpuPlanarRegionExtraction = new GPUPlanarRegionExtraction();
-   private final ImFloat mergeDistanceThreshold = new ImFloat(0.016f);
-   private final ImFloat mergeAngularThreshold = new ImFloat(0.82f);
-   private final ImFloat filterDisparityThreshold = new ImFloat(2000);
-   private final ImInt desiredPatchSize = new ImInt(16);
+   private final ImFloat mergeDistanceThreshold = new ImFloat();
+   private final ImFloat mergeAngularThreshold = new ImFloat();
+   private final ImFloat filterDisparityThreshold = new ImFloat();
+   private final ImInt desiredPatchSize = new ImInt();
    private final ImInt patchSize = new ImInt(desiredPatchSize.get());
-   private final ImInt deadPixelFilterPatchSize = new ImInt(4);
-   private final ImFloat focalLengthXPixels = new ImFloat(0);
-   private final ImFloat focalLengthYPixels = new ImFloat(0);
-   private final ImFloat principalOffsetXPixels = new ImFloat(0);
-   private final ImFloat principalOffsetYPixels = new ImFloat(0);
-   private final ImBoolean earlyGaussianBlur = new ImBoolean(true);
-   private final ImBoolean useFilteredImage = new ImBoolean(true);
-   private final ImBoolean useSVDNormals = new ImBoolean(true);
-   private final ImInt svdReductionFactor = new ImInt(20);
-   private final ImInt gaussianSize = new ImInt(6);
-   private final ImFloat gaussianSigma = new ImFloat(4.74f);
-   private final ImInt searchDepthLimit = new ImInt(37000);
-   private final ImInt regionMinPatches = new ImInt(37);
-   private final ImInt boundaryMinPatches = new ImInt(20);
+   private final ImInt deadPixelFilterPatchSize = new ImInt();
+   private final ImFloat focalLengthXPixels = new ImFloat();
+   private final ImFloat focalLengthYPixels = new ImFloat();
+   private final ImFloat principalOffsetXPixels = new ImFloat();
+   private final ImFloat principalOffsetYPixels = new ImFloat();
+   private final ImBoolean earlyGaussianBlur = new ImBoolean();
+   private final ImBoolean useFilteredImage = new ImBoolean();
+   private final ImBoolean useSVDNormals = new ImBoolean();
+   private final ImInt svdReductionFactor = new ImInt();
+   private final ImInt gaussianSize = new ImInt();
+   private final ImFloat gaussianSigma = new ImFloat();
+   private final ImInt searchDepthLimit = new ImInt();
+   private final ImInt regionMinPatches = new ImInt();
+   private final ImInt boundaryMinPatches = new ImInt();
    private final ImBoolean drawPatches = new ImBoolean(true);
    private final ImBoolean drawBoundaries = new ImBoolean(true);
    private final ImBoolean render3DPlanarRegions = new ImBoolean(true);
    private final ImBoolean render3DBoundaries = new ImBoolean(true);
    private final ImBoolean render3DGrownBoundaries = new ImBoolean(true);
-   private final ImFloat regionGrowthFactor = new ImFloat(0.051f);
+   private final ImFloat regionGrowthFactor = new ImFloat();
    private final ImFloat edgeLengthTresholdSlider = new ImFloat(0.224f);
    private final ImFloat triangulationToleranceSlider = new ImFloat(0.0f);
    private final ImInt maxNumberOfIterationsSlider = new ImInt(5000);
@@ -106,6 +106,8 @@ public class GDXGPUPlanarRegionExtraction
    public void create(int imageWidth, int imageHeight, ByteBuffer sourceDepthByteBufferOfFloats, double fx, double fy, double cx, double cy)
    {
       gpuPlanarRegionExtraction.create(imageWidth, imageHeight, sourceDepthByteBufferOfFloats, fx, fy, cx, cy);
+
+      setImGuiWidgetsFromParameters();
 
       imguiPanel = new ImGuiPanel("GPU Planar Region Extraction", this::renderImGuiWidgets);
       blurredDepthPanel = new GDXCVImagePanel("Blurred Depth", imageWidth, imageHeight, ImGuiVideoPanel.FLIP_Y);
