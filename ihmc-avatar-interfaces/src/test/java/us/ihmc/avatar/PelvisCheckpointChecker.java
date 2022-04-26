@@ -1,22 +1,22 @@
 package us.ihmc.avatar;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.ArrayList;
 
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.commons.PrintTools;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.log.LogTools;
+import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
-import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class PelvisCheckpointChecker extends SimpleRobotController
 {
-   private final HumanoidFloatingRootJointRobot humanoidRobotModel;
+   private final Robot humanoidRobotModel;
 
    private ArrayList<YoBoolean> footCheckPointFlag;
    private ArrayList<BoundingBox3D> footCheckPoint;
@@ -25,14 +25,14 @@ public class PelvisCheckpointChecker extends SimpleRobotController
 
    private YoRegistry circleWalkRegistry;
 
-   public PelvisCheckpointChecker(DRCSimulationTestHelper drcSimulationTestHelper)
+   public PelvisCheckpointChecker(SCS2AvatarTestingSimulation simulationTestHelper)
    {
-      humanoidRobotModel = drcSimulationTestHelper.getRobot();
+      humanoidRobotModel = simulationTestHelper.getRobot();
       position = new Point3D();
       footStepCheckPointIndex = 0;
 
       circleWalkRegistry = new YoRegistry("WalkingTest");
-      drcSimulationTestHelper.addRobotControllerOnControllerThread(this);
+      simulationTestHelper.addRobotControllerOnControllerThread(this);
    }
 
    @Override
@@ -43,7 +43,7 @@ public class PelvisCheckpointChecker extends SimpleRobotController
 
    private void checkFootCheckPoints()
    {
-      humanoidRobotModel.getRootJoint().getPosition(position);
+      position.set(humanoidRobotModel.getFloatingRootJoint().getJointPose().getPosition());
       if (footStepCheckPointIndex < footCheckPoint.size() && footCheckPoint.get(footStepCheckPointIndex).isInsideInclusive(position))
       {
          footCheckPointFlag.get(footStepCheckPointIndex).set(true);
@@ -80,7 +80,7 @@ public class PelvisCheckpointChecker extends SimpleRobotController
             reachedAllCheckpoints = false;
             Point3DBasics center = new Point3D();
             footCheckPoint.get(i).getCenterPoint(center);
-            PrintTools.info("Pelvis did not reach checkpoint " + i + " at position " + center);
+            LogTools.info("Pelvis did not reach checkpoint " + i + " at position " + center);
          }
       }
       assertTrue(reachedAllCheckpoints);

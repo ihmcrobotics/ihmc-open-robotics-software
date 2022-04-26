@@ -14,21 +14,20 @@ import us.ihmc.avatar.roughTerrainWalking.AvatarAbsoluteStepTimingsTest;
 import us.ihmc.avatar.roughTerrainWalking.AvatarFootstepDataMessageSwingTrajectoryTest;
 import us.ihmc.robotics.Assert;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 @Tag("humanoid-rough-terrain")
 public class AtlasFootstepDataMessageSwingTrajectoryTest extends AvatarFootstepDataMessageSwingTrajectoryTest
 {
    @Override
    @Test
-   public void testSwingTrajectoryInWorld() throws SimulationExceededMaximumTimeException
+   public void testSwingTrajectoryInWorld() 
    {
       super.testSwingTrajectoryInWorld();
    }
 
    @Override
    @Test
-   public void testSwingTrajectoryTouchdownSpeed() throws SimulationExceededMaximumTimeException
+   public void testSwingTrajectoryTouchdownSpeed() 
    {
       setPushAndAdjust(false);
       super.testSwingTrajectoryTouchdownSpeed();
@@ -36,7 +35,7 @@ public class AtlasFootstepDataMessageSwingTrajectoryTest extends AvatarFootstepD
 
    @Override
    @Test
-   public void testSwingTrajectoryTouchdownWithAdjustment() throws SimulationExceededMaximumTimeException
+   public void testSwingTrajectoryTouchdownWithAdjustment() 
    {
       setPushAndAdjust(true);
       super.testSwingTrajectoryTouchdownWithAdjustment();

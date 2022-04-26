@@ -232,11 +232,23 @@ public class ContinuousStepController
       continuousStepGenerator.setMaxStepLength(joystickStepParameters.getMaxStepLength());
       continuousStepGenerator.update(Double.NaN);
 
-      if (!isWalking.getValue() && !hasSuccessfullyStoppedWalking.getValue())
+      if (!isWalking.getValue())
       {
-         // Only send pause request if we think the command has not been executed yet. This is to be more robust in case packets are dropped.
-         stopWalkingMessenger.submitStopWalkingRequest();
+         if (!hasSuccessfullyStoppedWalking.getValue())
+         { // Only send pause request if we think the command has not been executed yet. This is to be more robust in case packets are dropped.
+            stopWalkingMessenger.submitStopWalkingRequest();
+         }
+         else
+         { // Reset so the foot poses get updated.
+            reset();
+         }
       }
+   }
+
+   public void reset()
+   {
+      supportFootPosesInitialized = false;
+      setContactState(false, false);
    }
 
    public boolean isInDoubleSupport()
@@ -322,7 +334,7 @@ public class ContinuousStepController
          return;
       if (newStatus == null)
          return;
-      if (newStatus == RobotMotionStatus.STANDING)
+      if (newStatus != RobotMotionStatus.IN_MOTION)
          hasSuccessfullyStoppedWalking.set(true);
    }
 

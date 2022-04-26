@@ -17,8 +17,9 @@ import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import controller_msgs.msg.dds.SpineTrajectoryMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointspaceControlState;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
 import us.ihmc.commons.MathTools;
@@ -44,13 +45,12 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.registry.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -63,7 +63,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private final Random random = new Random(1991L);
-   private DRCSimulationTestHelper drcSimulationTestHelper;
+   private SCS2AvatarTestingSimulation simulationTestHelper;
 
    private RigidBodyBasics pelvis;
    private RigidBodyBasics chest;
@@ -73,11 +73,9 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
 
    /**
     * This tests the execution of a single spine waypoint.
-    * 
-    * @throws SimulationExceededMaximumTimeException
     */
    @Test
-   public void testSingleWaypoint() throws SimulationExceededMaximumTimeException
+   public void testSingleWaypoint()
    {
       setupTest();
 
@@ -93,11 +91,9 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
    /**
     * This tests that the switching between jointspace and taskspace control modes works properly. It
     * does not test that the desired joint positions are continuous over the state switches anymore.
-    * 
-    * @throws SimulationExceededMaximumTimeException
     */
    @Test
-   public void testSwitchingBetweenControlModes() throws SimulationExceededMaximumTimeException
+   public void testSwitchingBetweenControlModes()
    {
       setupTest();
 
@@ -115,11 +111,9 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
 
    /**
     * This tests that the joint desireds are continuous when sending multiple joint space messages.
-    * 
-    * @throws SimulationExceededMaximumTimeException
     */
    @Test
-   public void testDesiredsAreContinuous() throws SimulationExceededMaximumTimeException
+   public void testDesiredsAreContinuous()
    {
       setupTest();
 
@@ -136,11 +130,9 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
 
    /**
     * This tests a trajectory with multiple waypoints. This will execute a spine yaw sine wave.
-    * 
-    * @throws SimulationExceededMaximumTimeException
     */
    @Test
-   public void testMultipleWaypoints() throws SimulationExceededMaximumTimeException
+   public void testMultipleWaypoints()
    {
       setupTest();
 
@@ -182,11 +174,9 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
    /**
     * This tests a trajectory a lot of waypoints. The message does not do anything except testing that
     * the controller does not blow up.
-    * 
-    * @throws SimulationExceededMaximumTimeException
     */
    @Test
-   public void testLongMessage() throws SimulationExceededMaximumTimeException
+   public void testLongMessage()
    {
       setupTest();
 
@@ -210,11 +200,9 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
    /**
     * Tests that messages queue properly and the body manager has the correct number of waypoints after
     * queuing.
-    * 
-    * @throws SimulationExceededMaximumTimeException
     */
    @Test
-   public void testMessageQueuing() throws SimulationExceededMaximumTimeException
+   public void testMessageQueuing()
    {
       setupTest();
 
@@ -276,28 +264,34 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       }
 
       // send messages
-      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       double controllerDT = getRobotModel().getControllerDT();
       for (int msgIdx = 0; msgIdx < numberOfMessages; msgIdx++)
       {
-         drcSimulationTestHelper.publishToController(messages[msgIdx]);
-         drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 * controllerDT);
+         simulationTestHelper.publishToController(messages[msgIdx]);
+         simulationTestHelper.simulateNow(2.0 * controllerDT);
 
          for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
-            EndToEndTestTools.assertTotalNumberOfWaypointsInJointspaceManager((msgIdx + 1) * numberOfPoints + 1, chest.getName(),
-                                                                              spineJoints[jointIdx].getName(), scs);
+            EndToEndTestTools.assertTotalNumberOfWaypointsInJointspaceManager((msgIdx + 1) * numberOfPoints + 1,
+                                                                              chest.getName(),
+                                                                              spineJoints[jointIdx].getName(),
+                                                                              simulationTestHelper);
       }
 
       int expectedPointsInGenerator = Math.min(numberOfPoints + 1, RigidBodyJointspaceControlState.maxPointsInGenerator);
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
-         EndToEndTestTools.assertNumberOfWaypointsInJointspaceManagerGenerator(expectedPointsInGenerator, chest.getName(), spineJoints[jointIdx].getName(),
-                                                                               scs);
+         EndToEndTestTools.assertNumberOfWaypointsInJointspaceManagerGenerator(expectedPointsInGenerator,
+                                                                               chest.getName(),
+                                                                               spineJoints[jointIdx].getName(),
+                                                                               simulationTestHelper);
 
       int expectedPointsInQueue = numberOfMessages * numberOfPoints - expectedPointsInGenerator + 1;
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
-         EndToEndTestTools.assertNumberOfWaypointsInJointspaceManagerQueue(expectedPointsInQueue, chest.getName(), spineJoints[jointIdx].getName(), scs);
+         EndToEndTestTools.assertNumberOfWaypointsInJointspaceManagerQueue(expectedPointsInQueue,
+                                                                           chest.getName(),
+                                                                           spineJoints[jointIdx].getName(),
+                                                                           simulationTestHelper);
 
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(totalTime + 1.0);
+      simulationTestHelper.simulateNow(totalTime + 1.0);
       assertControlWasConsistent(controllerSpy);
       assertDesiredsContinous(controllerSpy);
    }
@@ -305,11 +299,9 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
    /**
     * Tests that messages queue properly and the body manager has the correct number of waypoints after
     * queuing.
-    * 
-    * @throws SimulationExceededMaximumTimeException
     */
    @Test
-   public void testMessageWithDifferentTrajectoryLengthsPerJoint() throws SimulationExceededMaximumTimeException
+   public void testMessageWithDifferentTrajectoryLengthsPerJoint()
    {
       setupTest();
       Random random = new Random(845278L);
@@ -341,18 +333,20 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       }
 
       // send message
-      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       double controllerDT = getRobotModel().getControllerDT();
-      drcSimulationTestHelper.publishToController(message);
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0 * controllerDT);
+      simulationTestHelper.publishToController(message);
+      simulationTestHelper.simulateNow(3.0 * controllerDT);
 
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
          OneDoFJointBasics joint = spineJoints[jointIdx];
-         EndToEndTestTools.assertTotalNumberOfWaypointsInJointspaceManager(numberOfPoints[jointIdx] + 1, chest.getName(), joint.getName(), scs);
+         EndToEndTestTools.assertTotalNumberOfWaypointsInJointspaceManager(numberOfPoints[jointIdx] + 1,
+                                                                           chest.getName(),
+                                                                           joint.getName(),
+                                                                           simulationTestHelper);
       }
 
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(maxTime);
+      simulationTestHelper.simulateNow(maxTime);
 
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
@@ -361,7 +355,10 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
 
          if (totalPointsForJoint <= maxPointsInGenerator)
          {
-            EndToEndTestTools.assertNumberOfWaypointsInJointspaceManagerGenerator(totalPointsForJoint, chest.getName(), spineJoints[jointIdx].getName(), scs);
+            EndToEndTestTools.assertNumberOfWaypointsInJointspaceManagerGenerator(totalPointsForJoint,
+                                                                                  chest.getName(),
+                                                                                  spineJoints[jointIdx].getName(),
+                                                                                  simulationTestHelper);
          }
          else
          {
@@ -369,12 +366,14 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
             while (pointsInLastTrajectory > (maxPointsInGenerator - 1))
                pointsInLastTrajectory -= (maxPointsInGenerator - 1); // keep filling the generator
             pointsInLastTrajectory++;
-            EndToEndTestTools.assertNumberOfWaypointsInJointspaceManagerGenerator(pointsInLastTrajectory, chest.getName(), spineJoints[jointIdx].getName(),
-                                                                                  scs);
+            EndToEndTestTools.assertNumberOfWaypointsInJointspaceManagerGenerator(pointsInLastTrajectory,
+                                                                                  chest.getName(),
+                                                                                  spineJoints[jointIdx].getName(),
+                                                                                  simulationTestHelper);
          }
       }
 
-      assertDesiredsMatchAfterExecution(message, spineJoints, scs);
+      assertDesiredsMatchAfterExecution(message, spineJoints, simulationTestHelper);
       assertControlWasConsistent(controllerSpy);
       assertDesiredsContinous(controllerSpy);
    }
@@ -388,20 +387,18 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
 
       YoRegistry testRegistry = new YoRegistry("testStreaming");
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
-      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-      scs.addYoRegistry(testRegistry);
+      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
+      simulationTestHelper.start();
+      simulationTestHelper.getRootRegistry().addChild(testRegistry);
 
       ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
+      boolean success = simulationTestHelper.simulateNow(1.5);
       assertTrue(success);
 
-      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
 
       YoDouble startTime = new YoDouble("startTime", testRegistry);
-      YoDouble yoTime = drcSimulationTestHelper.getAvatarSimulation().getHighLevelHumanoidControllerFactory().getHighLevelHumanoidControllerToolbox()
-                                               .getYoTime();
+      YoDouble yoTime = simulationTestHelper.getHighLevelHumanoidControllerFactory().getHighLevelHumanoidControllerToolbox().getYoTime();
       startTime.set(yoTime.getValue());
       YoDouble trajectoryTime = new YoDouble("trajectoryTime", testRegistry);
       trajectoryTime.set(2.0);
@@ -430,7 +427,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
          desiredSpineJointVelocities[i] = qDDesired;
       }
 
-      drcSimulationTestHelper.addRobotControllerOnControllerThread(new RobotController()
+      simulationTestHelper.addRobotControllerOnControllerThread(new RobotController()
       {
          @Override
          public void initialize()
@@ -471,7 +468,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
             SpineTrajectoryMessage message = HumanoidMessageTools.createSpineTrajectoryMessage(0.0, qDesireds, qDDesireds, null);
             message.getJointspaceTrajectory().getQueueingProperties().setExecutionMode(ExecutionMode.STREAM.toByte());
             message.getJointspaceTrajectory().getQueueingProperties().setStreamIntegrationDuration(0.01);
-            drcSimulationTestHelper.publishToController(message);
+            simulationTestHelper.publishToController(message);
          }
 
          @Override
@@ -493,14 +490,14 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
          }
       });
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5 * trajectoryTime.getValue());
+      success = simulationTestHelper.simulateNow(0.5 * trajectoryTime.getValue());
       assertTrue(success);
 
       double desiredEpsilon = 5.0e-3;
       double trackingEpsilon = 5.0e-2;
 
-      double[] controllerDesiredPositions = EndToEndArmTrajectoryMessageTest.findControllerDesiredPositions(spineJoints, scs);
-      double[] controllerDesiredVelocities = EndToEndArmTrajectoryMessageTest.findControllerDesiredVelocities(spineJoints, scs);
+      double[] controllerDesiredPositions = EndToEndArmTrajectoryMessageTest.findControllerDesiredPositions(spineJoints, simulationTestHelper);
+      double[] controllerDesiredVelocities = EndToEndArmTrajectoryMessageTest.findControllerDesiredVelocities(spineJoints, simulationTestHelper);
 
       for (int i = 0; i < spineJoints.length; i++)
       {
@@ -527,15 +524,15 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
                             + Math.abs(controllerDesiredVelocities[i] - spineJoints[i].getQd()));
       }
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5 * trajectoryTime.getValue() + 1.5);
+      success = simulationTestHelper.simulateNow(0.5 * trajectoryTime.getValue() + 1.5);
 
       assertTrue(success);
 
       desiredEpsilon = 1.0e-7;
       trackingEpsilon = 5.0e-3;
 
-      controllerDesiredPositions = EndToEndArmTrajectoryMessageTest.findControllerDesiredPositions(spineJoints, scs);
-      controllerDesiredVelocities = EndToEndArmTrajectoryMessageTest.findControllerDesiredVelocities(spineJoints, scs);
+      controllerDesiredPositions = EndToEndArmTrajectoryMessageTest.findControllerDesiredPositions(spineJoints, simulationTestHelper);
+      controllerDesiredVelocities = EndToEndArmTrajectoryMessageTest.findControllerDesiredVelocities(spineJoints, simulationTestHelper);
 
       for (int i = 0; i < spineJoints.length; i++)
       {
@@ -590,7 +587,9 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       FrameQuaternion desiredRandomChestOrientation = new FrameQuaternion(chestClone.getBodyFixedFrame());
       desiredRandomChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
       Quaternion desiredOrientation = new Quaternion(desiredRandomChestOrientation);
-      return HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, desiredOrientation, ReferenceFrame.getWorldFrame(),
+      return HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime,
+                                                               desiredOrientation,
+                                                               ReferenceFrame.getWorldFrame(),
                                                                ReferenceFrame.getWorldFrame());
    }
 
@@ -606,10 +605,10 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       assertTrue(maxSpeed < MAX_SPEED_FOR_CONTINOUS, errorMessage);
    }
 
-   private void executeMessage(SpineTrajectoryMessage message) throws SimulationExceededMaximumTimeException
+   private void executeMessage(SpineTrajectoryMessage message)
    {
       double controllerDT = getRobotModel().getControllerDT();
-      drcSimulationTestHelper.publishToController(message);
+      simulationTestHelper.publishToController(message);
 
       double trajectoryTime = 0.0;
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
@@ -619,71 +618,70 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
          if (jointTrajectoryTime > trajectoryTime)
             trajectoryTime = jointTrajectoryTime;
       }
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 5.0 * controllerDT));
-      assertDesiredsMatchAfterExecution(message, spineJoints, drcSimulationTestHelper.getSimulationConstructionSet());
+      assertTrue(simulationTestHelper.simulateNow(trajectoryTime + 5.0 * controllerDT));
+      assertDesiredsMatchAfterExecution(message, spineJoints, simulationTestHelper);
    }
 
-   private static void assertDesiredsMatchAfterExecution(SpineTrajectoryMessage message, OneDoFJointBasics[] spineJoints, SimulationConstructionSet scs)
+   private static void assertDesiredsMatchAfterExecution(SpineTrajectoryMessage message, OneDoFJointBasics[] spineJoints, YoVariableHolder yoVariableHolder)
    {
       for (int jointIdx = 0; jointIdx < spineJoints.length; jointIdx++)
       {
          OneDoFJointTrajectoryMessage jointTrajectory = message.getJointspaceTrajectory().getJointTrajectoryMessages().get(jointIdx);
          double desired = jointTrajectory.getTrajectoryPoints().getLast().getPosition();
          OneDoFJointBasics joint = spineJoints[jointIdx];
-         EndToEndTestTools.assertOneDoFJointFeedbackControllerDesiredPosition(joint.getName(), desired, DESIRED_EPSILON, scs);
+         EndToEndTestTools.assertOneDoFJointFeedbackControllerDesiredPosition(joint.getName(), desired, DESIRED_EPSILON, yoVariableHolder);
       }
    }
 
-   private void executeMessage(ChestTrajectoryMessage message, RigidBodyBasics chest) throws SimulationExceededMaximumTimeException
+   private void executeMessage(ChestTrajectoryMessage message, RigidBodyBasics chest)
    {
       double controllerDT = getRobotModel().getControllerDT();
-      drcSimulationTestHelper.publishToController(message);
+      simulationTestHelper.publishToController(message);
 
       double trajectoryTime = message.getSo3Trajectory().getTaskspaceTrajectoryPoints().getLast().getTime();
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 5.0 * controllerDT));
+      assertTrue(simulationTestHelper.simulateNow(trajectoryTime + 5.0 * controllerDT));
 
       Quaternion desired = new Quaternion(message.getSo3Trajectory().getTaskspaceTrajectoryPoints().getLast().getOrientation());
-      assertChestDesired(drcSimulationTestHelper.getSimulationConstructionSet(), desired, chest);
+      assertChestDesired(simulationTestHelper, desired, chest);
    }
 
-   private static void assertChestDesired(SimulationConstructionSet scs, Quaternion desired, RigidBodyBasics chest)
+   private static void assertChestDesired(YoVariableHolder yoVariableHolder, Quaternion desired, RigidBodyBasics chest)
    {
-      QuaternionReadOnly controllerDesired = EndToEndTestTools.findFeedbackControllerDesiredOrientation(chest.getName(), scs);
+      QuaternionReadOnly controllerDesired = EndToEndTestTools.findFeedbackControllerDesiredOrientation(chest.getName(), yoVariableHolder);
       EuclidCoreTestTools.assertQuaternionEquals(desired, controllerDesired, DESIRED_QUAT_EPSILON);
    }
 
-   private static YoBoolean findOrientationControlEnabled(SimulationConstructionSet scs, RigidBodyBasics body)
+   private static YoBoolean findOrientationControlEnabled(YoVariableHolder yoVariableHolder, RigidBodyBasics body)
    {
       String bodyName = body.getName();
       String namespace = bodyName + "OrientationFBController";
       String variable = bodyName + "IsOrientationFBControllerEnabled";
-      return EndToEndTestTools.findYoBoolean(namespace, variable, scs);
+      return EndToEndTestTools.findYoBoolean(namespace, variable, yoVariableHolder);
    }
 
-   private static YoBoolean findJointControlEnabled(SimulationConstructionSet scs, OneDoFJointBasics joint)
+   private static YoBoolean findJointControlEnabled(YoVariableHolder yoVariableHolder, OneDoFJointBasics joint)
    {
       String jointName = joint.getName();
       String namespace = jointName + "PDController";
       String variable = "control_enabled_" + jointName;
-      return EndToEndTestTools.findYoBoolean(namespace, variable, scs);
+      return EndToEndTestTools.findYoBoolean(namespace, variable, yoVariableHolder);
    }
 
-   private void setupTest() throws SimulationExceededMaximumTimeException
+   private void setupTest()
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
+      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
+      simulationTestHelper.start();
       ThreadTools.sleep(1000);
-      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
       pelvis = fullRobotModel.getPelvis();
       chest = fullRobotModel.getChest();
       spineJoints = MultiBodySystemTools.createOneDoFJointPath(pelvis, chest);
       numberOfJoints = spineJoints.length;
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
+      assertTrue(simulationTestHelper.simulateNow(1.0));
 
-      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-      controllerSpy = new ControllerSpy(spineJoints, scs, getRobotModel().getControllerDT());
-      drcSimulationTestHelper.addRobotControllerOnControllerThread(controllerSpy);
+      controllerSpy = new ControllerSpy(spineJoints, simulationTestHelper, getRobotModel().getControllerDT());
+      simulationTestHelper.addRobotControllerOnControllerThread(controllerSpy);
    }
 
    @BeforeEach
@@ -695,16 +693,11 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
    @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
-      {
-         ThreadTools.sleepForever();
-      }
-
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcSimulationTestHelper != null)
+      if (simulationTestHelper != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
+         simulationTestHelper.finishTest();
+         simulationTestHelper = null;
       }
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
@@ -731,7 +724,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
 
       private final QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
 
-      public ControllerSpy(OneDoFJointBasics[] spineJoints, SimulationConstructionSet scs, double controllerDT)
+      public ControllerSpy(OneDoFJointBasics[] spineJoints, YoVariableHolder yoVariableHolder, double controllerDT)
       {
          this.spineJoints = spineJoints;
          this.controllerDT = controllerDT;
@@ -741,11 +734,11 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
          for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
          {
             OneDoFJointBasics joint = spineJoints[jointIdx];
-            jointDesiredsMap.put(joint, EndToEndTestTools.findOneDoFJointFeedbackControllerDesiredPosition(joint.getName(), scs));
-            jointControlEnabled.put(joint, findJointControlEnabled(scs, joint));
+            jointDesiredsMap.put(joint, EndToEndTestTools.findOneDoFJointFeedbackControllerDesiredPosition(joint.getName(), yoVariableHolder));
+            jointControlEnabled.put(joint, findJointControlEnabled(yoVariableHolder, joint));
          }
-         orientationControlEnabled = findOrientationControlEnabled(scs, chest);
-         desiredOrientation = EndToEndTestTools.findFeedbackControllerDesiredOrientation(chest.getName(), scs);
+         orientationControlEnabled = findOrientationControlEnabled(yoVariableHolder, chest);
+         desiredOrientation = EndToEndTestTools.findFeedbackControllerDesiredOrientation(chest.getName(), yoVariableHolder);
          inconsistentControl.set(false);
          maxSpeed.set(0.0);
       }

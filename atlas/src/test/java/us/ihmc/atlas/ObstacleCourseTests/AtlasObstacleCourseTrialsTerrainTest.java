@@ -11,7 +11,6 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseTrialsTerrainTest;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
 
@@ -40,21 +39,21 @@ public class AtlasObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTrial
    }
 
    @Test
-   public void testTrialsTerrainSlopeScript() throws SimulationExceededMaximumTimeException
+   public void testTrialsTerrainSlopeScript()
    {
       super.testTrialsTerrainSlopeScript(0.0);
    }
 
    @Override
    @Test
-   public void testTrialsTerrainSlopeScriptRandomFootSlip() throws SimulationExceededMaximumTimeException
+   public void testTrialsTerrainSlopeScriptRandomFootSlip()
    {
       super.testTrialsTerrainSlopeScriptRandomFootSlip();
    }
 
    @Override
    @Test
-   public void testTrialsTerrainZigzagHurdlesScript() throws SimulationExceededMaximumTimeException
+   public void testTrialsTerrainZigzagHurdlesScript()
    {
       super.testTrialsTerrainZigzagHurdlesScript();
    }
@@ -62,14 +61,14 @@ public class AtlasObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTrial
    @Override
    @Disabled
    @Test
-   public void testTrialsTerrainZigzagHurdlesScriptRandomFootSlip() throws SimulationExceededMaximumTimeException
+   public void testTrialsTerrainZigzagHurdlesScriptRandomFootSlip()
    {
       super.testTrialsTerrainZigzagHurdlesScriptRandomFootSlip();
    }
 
    @Override
    @Test
-   public void testWalkingOntoAndOverSlopesSideways() throws SimulationExceededMaximumTimeException
+   public void testWalkingOntoAndOverSlopesSideways()
    {
       super.testWalkingOntoAndOverSlopesSideways();
    }
