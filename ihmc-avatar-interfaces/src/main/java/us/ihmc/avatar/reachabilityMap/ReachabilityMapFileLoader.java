@@ -16,6 +16,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import cern.colt.Arrays;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
+import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DData;
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape.SphereVoxelType;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -191,7 +192,8 @@ public class ReachabilityMapFileLoader
             int rayIndex = (int) currentRow.getCell(cellIndex++).getNumericCellValue();
             int rotationAroundRayIndex = (int) currentRow.getCell(cellIndex++).getNumericCellValue();
 
-            loadedGrid.registerReachablePose(xIndex, yIndex, zIndex, rayIndex, rotationAroundRayIndex);
+            Voxel3DData voxel = loadedGrid.getOrCreateVoxel(xIndex, yIndex, zIndex);
+            voxel.registerReachablePose(rayIndex, rotationAroundRayIndex);
             currentRow = currentDataSheet.getRow(currentRowIndex++);
          }
 
