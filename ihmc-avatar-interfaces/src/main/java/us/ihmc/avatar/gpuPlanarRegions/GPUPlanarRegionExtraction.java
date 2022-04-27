@@ -1,4 +1,4 @@
-package us.ihmc.gdx.perception.gpuPlanarRegions;
+package us.ihmc.avatar.gpuPlanarRegions;
 
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_mem;
@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static us.ihmc.gdx.perception.gpuPlanarRegions.GPUPlanarRegionExtractionParameters.*;
+import static us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegionExtractionParameters.*;
 
 public class GPUPlanarRegionExtraction
 {

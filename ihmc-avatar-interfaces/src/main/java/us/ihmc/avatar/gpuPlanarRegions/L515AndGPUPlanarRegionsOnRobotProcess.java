@@ -1,17 +1,17 @@
-package us.ihmc.gdx.perception;
+package us.ihmc.avatar.gpuPlanarRegions;
 
 import boofcv.struct.calib.CameraPinholeBrown;
 import controller_msgs.msg.dds.VideoPacket;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.gdx.perception.gpuPlanarRegions.GPUPlanarRegionExtraction;
-import us.ihmc.gdx.perception.gpuPlanarRegions.GPUPlanarRegionIsland;
-import us.ihmc.gdx.perception.gpuPlanarRegions.GPURegionRing;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.MutableBytePointer;
@@ -33,6 +33,7 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
    private final PausablePeriodicThread thread;
    private final Activator nativesLoadedActivator;
    private final ROS2Helper ros2Helper;
+   private final ROS2SyncedRobotModel syncedRobot;
    private RealSenseHardwareManager realSenseHardwareManager;
    private BytedecoRealsenseL515 l515;
    private Mat depthU16C1Image;
@@ -45,12 +46,13 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
    private Consumer<GPURegionRing> doNothingRingConsumer = ring -> { };
    private Consumer<GPUPlanarRegionIsland> doNothingIslandConsumer = island -> { };
 
-   public L515AndGPUPlanarRegionsOnRobotProcess()
+   public L515AndGPUPlanarRegionsOnRobotProcess(DRCRobotModel robotModel)
    {
       nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
 
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "l515_node");
-      ros2Helper = new ROS2Helper(ros2Node);
+      ros2Helper = new ROS2ControllerHelper(ros2Node, robotModel);
+      syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
 
       thread = new PausablePeriodicThread("L515Node", UnitConversions.hertzToSeconds(31.0), false, this::update);
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "L515Shutdown"));
@@ -106,7 +108,9 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
 
             depthU16C1Image.convertTo(depth32FC1Image.getBytedecoOpenCVMat(), opencv_core.CV_32FC1, l515.getDepthToMeterConversion(), 0.0);
 
-            ReferenceFrame cameraFrame = ReferenceFrame.getWorldFrame(); // TODO: Figure this out!
+            syncedRobot.update();
+            ReferenceFrame cameraFrame =
+                  syncedRobot.hasReceivedFirstMessage() ? syncedRobot.getReferenceFrames().getSteppingCameraFrame() : ReferenceFrame.getWorldFrame();
             gpuPlanarRegionExtraction.extractPlanarRegions(cameraFrame, doNothingRunnable);
             gpuPlanarRegionExtraction.findRegions(doNothingIslandConsumer);
             gpuPlanarRegionExtraction.findBoundariesAndHoles(doNothingRingConsumer);
@@ -134,10 +138,5 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
       gpuPlanarRegionExtraction.destroy();
       l515.deleteDevice();
       realSenseHardwareManager.deleteContext();
-   }
-
-   public static void main(String[] args)
-   {
-      new L515AndGPUPlanarRegionsOnRobotProcess();
    }
 }

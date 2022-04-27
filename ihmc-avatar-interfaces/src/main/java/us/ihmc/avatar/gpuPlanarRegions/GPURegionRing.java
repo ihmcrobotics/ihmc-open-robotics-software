@@ -1,4 +1,4 @@
-package us.ihmc.gdx.perception.gpuPlanarRegions;
+package us.ihmc.avatar.gpuPlanarRegions;
 
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple2D.Vector2D;
