@@ -16,6 +16,7 @@ import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiVideoPanel;
 import us.ihmc.gdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
+import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
@@ -26,6 +27,7 @@ public class GDXROS2VideoVisualizer extends ImGuiGDXVisualizer
 {
    private final ROS2Node ros2Node;
    private final ROS2Topic<VideoPacket> topic;
+   private final ROS2VideoFormat format;
    private final ResettableExceptionHandlingExecutorService threadQueue;
    private Pixmap pixmap;
    private Texture texture;
@@ -33,17 +35,20 @@ public class GDXROS2VideoVisualizer extends ImGuiGDXVisualizer
 
    private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
    private DetectedFiducialPacket latestDetectedFiducial;
-   private final Mat inputJPEGYUVI420Mat = new Mat(1, 1, opencv_core.CV_8UC1);
-   private final Mat bgr8Mat = new Mat(100); // allocate any amount of data, it'll be resized later
+   private Mat inputJPEGYUVI420Mat;
+   private Mat input16UC1Mat;
+   private Mat input8UC1Mat;
+   private Mat bgr8Mat;
    private Mat rgba8Mat;
    private boolean needNewTexture = false;
    private BytePointer rgba8888BytePointer;
 
-   public GDXROS2VideoVisualizer(String title, ROS2Node ros2Node, ROS2Topic<VideoPacket> topic)
+   public GDXROS2VideoVisualizer(String title, ROS2Node ros2Node, ROS2Topic<VideoPacket> topic, ROS2VideoFormat format)
    {
       super(title);
       this.ros2Node = ros2Node;
       this.topic = topic;
+      this.format = format;
       threadQueue = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
       new IHMCROS2Callback<>(ros2Node, topic, ROS2QosProfile.BEST_EFFORT(), this::acceptMessage);
       boolean flipY = false;
@@ -62,18 +67,53 @@ public class GDXROS2VideoVisualizer extends ImGuiGDXVisualizer
       {
          threadQueue.clearQueueAndExecute(() ->
          {
-            BytePointer jpegDataBytePointer = new BytePointer(videoPacket.getData().toArray());
-            inputJPEGYUVI420Mat.cols(videoPacket.getData().size());
-            inputJPEGYUVI420Mat.data(jpegDataBytePointer);
+            if (bgr8Mat == null)
+               bgr8Mat = new Mat(1); // allocate any amount of data, it'll be resized later
 
-            // Converts image to 3 channel BGR color image.
-            // This should handle JPEG encoded YUV I420 and output BGR
-            opencv_imgcodecs.imdecode(inputJPEGYUVI420Mat, opencv_imgcodecs.IMREAD_COLOR, bgr8Mat);
+            byte[] dataArray = videoPacket.getData().toArray();
+            BytePointer dataBytePointer = new BytePointer(dataArray);
+            if (format == ROS2VideoFormat.JPEGYUVI420)
+            {
+               if (inputJPEGYUVI420Mat == null)
+                  inputJPEGYUVI420Mat = new Mat(1, 1, opencv_core.CV_8UC1);
+
+               inputJPEGYUVI420Mat.cols(videoPacket.getData().size());
+               inputJPEGYUVI420Mat.data(dataBytePointer);
+
+               // Converts image to 3 channel BGR color image.
+               // This should handle JPEG encoded YUV I420 and output BGR
+               opencv_imgcodecs.imdecode(inputJPEGYUVI420Mat, opencv_imgcodecs.IMREAD_COLOR, bgr8Mat);
+            }
+            else // if (format == ROS2VideoFormat.CV16UC1)
+            {
+               if (input16UC1Mat == null)
+               {
+                  int imageHeight = videoPacket.getImageHeight();
+                  int imageWidth = videoPacket.getImageWidth();
+                  input16UC1Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_16UC1);
+                  input8UC1Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC1);
+               }
+
+               input16UC1Mat.data(dataBytePointer);
+
+               BytedecoOpenCVTools.clampTo8BitUnsignedChar(input16UC1Mat, input8UC1Mat, 0.0, 255.0);
+            }
 
             synchronized (this)
             {
-               int imageWidth = bgr8Mat.cols();
-               int imageHeight = bgr8Mat.rows();
+               int imageWidth;
+               int imageHeight;
+               if (format == ROS2VideoFormat.JPEGYUVI420)
+               {
+                  imageWidth = bgr8Mat.cols();
+                  imageHeight = bgr8Mat.rows();
+               }
+               else
+               {
+                  imageWidth = input16UC1Mat.cols();
+                  imageHeight = input16UC1Mat.rows();
+               }
+
                if (rgba8Mat == null || pixmap.getWidth() < imageWidth || pixmap.getHeight() < imageHeight)
                {
                   if (pixmap != null)
@@ -87,7 +127,14 @@ public class GDXROS2VideoVisualizer extends ImGuiGDXVisualizer
                   needNewTexture = true;
                }
 
-               opencv_imgproc.cvtColor(bgr8Mat, rgba8Mat, opencv_imgproc.COLOR_BGR2BGRA);
+               if (format == ROS2VideoFormat.JPEGYUVI420)
+               {
+                  opencv_imgproc.cvtColor(bgr8Mat, rgba8Mat, opencv_imgproc.COLOR_BGR2BGRA);
+               }
+               else
+               {
+                  opencv_imgproc.cvtColor(input8UC1Mat, rgba8Mat, opencv_imgproc.COLOR_GRAY2RGBA);
+               }
             }
          });
       }
