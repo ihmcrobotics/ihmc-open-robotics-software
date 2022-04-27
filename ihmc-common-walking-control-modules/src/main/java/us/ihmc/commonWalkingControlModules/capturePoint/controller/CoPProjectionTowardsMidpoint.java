@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.capturePoint.controller.qpInput;
+package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.HeuristicICPControllerHelper;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
@@ -25,7 +25,7 @@ public class CoPProjectionTowardsMidpoint implements ICPControllerParameters.Fee
    private static final boolean VISUALIZE = true;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final String yoNamePrefix = "heuristic";
+   private static final String yoNamePrefix = "copProjection";
 
    private final DoubleProvider minICPPushDelta;
    private final DoubleProvider maxCoPProjectionInside;
