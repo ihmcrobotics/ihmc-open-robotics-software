@@ -322,4 +322,9 @@ public class BytedecoRealsenseL515
    {
       return height;
    }
+
+   public rs2_device getDevice()
+   {
+      return device;
+   }
 }

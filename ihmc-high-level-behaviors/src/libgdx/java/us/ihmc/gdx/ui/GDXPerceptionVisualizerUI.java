@@ -69,6 +69,7 @@ public class GDXPerceptionVisualizerUI
         globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("L515 Color Video", RosTools.L515_VIDEO));
         globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("L515 Depth Video", RosTools.L515_DEPTH));
         globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("L515 Compressed Video", RosTools.L515_COMPRESSED_VIDEO));
+        globalVisualizersUI.addVisualizer(new GDXROS2VideoVisualizer("L515 Depth Video", ros2Node, ROS2Tools.L515_DEPTH, ROS2VideoFormat.CV16UC1));
 
         globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("D435 Compressed Color", RosTools.D435_VIDEO_COMPRESSED));
         globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("D435 Color", RosTools.D435_VIDEO));

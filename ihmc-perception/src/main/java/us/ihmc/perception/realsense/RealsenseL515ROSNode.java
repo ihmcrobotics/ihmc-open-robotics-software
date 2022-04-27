@@ -1,6 +1,7 @@
 package us.ihmc.perception.realsense;
 
 import boofcv.struct.calib.CameraPinholeBrown;
+import controller_msgs.msg.dds.VideoPacket;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -46,6 +47,7 @@ public class RealsenseL515ROSNode
    private int depthWidth;
    private int depthHeight;
    private CameraPinholeBrown depthCameraIntrinsics;
+   private static final boolean useROS1 = false;
 
    public RealsenseL515ROSNode()
    {
@@ -69,19 +71,27 @@ public class RealsenseL515ROSNode
          {
             realSenseHardwareManager = new RealSenseHardwareManager();
             l515 = realSenseHardwareManager.createFullFeaturedL515(SERIAL_NUMBER);
+            if (l515.getDevice() == null)
+            {
+               thread.stop();
+               throw new RuntimeException("Device not found. Set -Dl515.serial.number=F0000000");
+            }
             l515.initialize();
 
             depthWidth = l515.getDepthWidth();
             depthHeight = l515.getDepthHeight();
 
-            String ros1DepthImageTopic = RosTools.L515_DEPTH;
-            String ros1DepthCameraInfoTopic = RosTools.L515_DEPTH_CAMERA_INFO;
-            LogTools.info("Publishing ROS 1 depth: {} {}", ros1DepthImageTopic, ros1DepthCameraInfoTopic);
-            ros1DepthPublisher = new RosImagePublisher();
-            ros1DepthCameraInfoPublisher = new RosCameraInfoPublisher();
-            ros1Helper.attachPublisher(ros1DepthCameraInfoTopic, ros1DepthCameraInfoPublisher);
-            ros1Helper.attachPublisher(ros1DepthImageTopic, ros1DepthPublisher);
-            ros1DepthChannelBuffer = ros1DepthPublisher.getChannelBufferFactory().getBuffer(2 * depthWidth * depthHeight);
+            if (useROS1)
+            {
+               String ros1DepthImageTopic = RosTools.L515_DEPTH;
+               String ros1DepthCameraInfoTopic = RosTools.L515_DEPTH_CAMERA_INFO;
+               LogTools.info("Publishing ROS 1 depth: {} {}", ros1DepthImageTopic, ros1DepthCameraInfoTopic);
+               ros1DepthPublisher = new RosImagePublisher();
+               ros1DepthCameraInfoPublisher = new RosCameraInfoPublisher();
+               ros1Helper.attachPublisher(ros1DepthCameraInfoTopic, ros1DepthCameraInfoPublisher);
+               ros1Helper.attachPublisher(ros1DepthImageTopic, ros1DepthPublisher);
+               ros1DepthChannelBuffer = ros1DepthPublisher.getChannelBufferFactory().getBuffer(2 * depthWidth * depthHeight);
+            }
 
             depthCameraIntrinsics = new CameraPinholeBrown();
          }
@@ -103,7 +113,19 @@ public class RealsenseL515ROSNode
                depthCameraIntrinsics.setCy(l515.getPrincipalOffsetYPixels());
             }
 
-            if (ros1DepthPublisher.isConnected() && ros1DepthCameraInfoPublisher.isConnected())
+
+            VideoPacket videoPacket = new VideoPacket();
+            videoPacket.setImageHeight(depthHeight);
+            videoPacket.setImageWidth(depthWidth);
+            BytePointer dataPointer = depthU16C1Image.ptr();
+            int depthFrameDataSize = l515.getDepthFrameDataSize();
+            for (int i = 0; i < depthFrameDataSize; i++)
+            {
+               videoPacket.getData().add(dataPointer.get(i));
+            }
+            ros2Helper.publish(ROS2Tools.L515_DEPTH, videoPacket);
+
+            if (useROS1 && ros1DepthPublisher.isConnected() && ros1DepthCameraInfoPublisher.isConnected())
             {
 //               depthU16C1Image.convertTo(depth32FC1Image.getBytedecoOpenCVMat(), opencv_core.CV_32FC1, l515.getDepthToMeterConversion(), 0.0);
 //               depth32FC1Image.rewind();
@@ -111,7 +133,7 @@ public class RealsenseL515ROSNode
 
                ros1DepthChannelBuffer.clear();
                int size = 2 * depthWidth * depthHeight;
-               BytePointer dataPointer = depthU16C1Image.ptr();
+//               BytePointer dataPointer = depthU16C1Image.ptr();
                for (int y = 0; y < depthHeight; y++)
                {
                   for (int x = 0; x < depthWidth; x++)
