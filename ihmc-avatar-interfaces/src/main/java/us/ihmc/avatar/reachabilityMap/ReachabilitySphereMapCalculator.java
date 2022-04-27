@@ -16,10 +16,13 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ReachabilitySphereMapCalculator
 {
@@ -41,15 +44,22 @@ public class ReachabilitySphereMapCalculator
 
    private final PoseReferenceFrame gridFrame = new PoseReferenceFrame("gridFrame", ReferenceFrame.getWorldFrame());
    private final YoGraphicReferenceFrame gridFrameViz = new YoGraphicReferenceFrame(gridFrame, registry, true, 0.5, YoAppearance.Blue());
-   private final YoGraphicCoordinateSystem currentEvaluationPose = new YoGraphicCoordinateSystem("currentEvaluationPose", "", registry, true, 0.15,
+   private final YoGraphicCoordinateSystem currentEvaluationPose = new YoGraphicCoordinateSystem("currentEvaluationPose",
+                                                                                                 "",
+                                                                                                 registry,
+                                                                                                 true,
+                                                                                                 0.15,
                                                                                                  YoAppearance.HotPink());
-   private final YoGraphicPosition currentEvaluationPosition = new YoGraphicPosition("currentEvaluationPosition", "", registry, 0.0125,
+   private final YoGraphicPosition currentEvaluationPosition = new YoGraphicPosition("currentEvaluationPosition",
+                                                                                     "",
+                                                                                     registry,
+                                                                                     0.0125,
                                                                                      YoAppearance.DeepPink());
 
    public ReachabilitySphereMapCalculator(OneDoFJointBasics[] robotArmJoints, SimulationConstructionSet scs)
    {
       this.scs = scs;
-      solver = new ReachabilityMapSolver(robotArmJoints, null, registry);
+      solver = new ReachabilityMapSolver(robotArmJoints, new YoGraphicsListRegistry(), registry);
 
       FramePose3D gridFramePose = new FramePose3D(ReferenceFrame.getWorldFrame(), robotArmJoints[0].getFrameBeforeJoint().getTransformToWorldFrame());
       gridFramePose.appendTranslation(getGridSizeInMeters() / 2.5, 0.0, 0.0);
@@ -66,14 +76,14 @@ public class ReachabilitySphereMapCalculator
    /**
     * Configure the space and resolution for the exploration of the arm reachability.
     * 
-    * @param gridSizeInNumberOfVoxels the region explored is a cube of size
-    *           {@code gridSizeInNumberOfVoxels * vozelSize}.
-    * @param voxelSize directly relates to the resolution of the exploration.
-    * @param numberOfRays sets for each voxel the number of directions that are to be explored with
-    *           the x-axis.
+    * @param gridSizeInNumberOfVoxels   the region explored is a cube of size
+    *                                   {@code gridSizeInNumberOfVoxels * vozelSize}.
+    * @param voxelSize                  directly relates to the resolution of the exploration.
+    * @param numberOfRays               sets for each voxel the number of directions that are to be
+    *                                   explored with the x-axis.
     * @param numberOfRotationsAroundRay sets the number of rotations to explore about each ray. The
-    *           total number of orientations explored at each voxel is
-    *           {@code numberOfRays * numberOfRotationsAroundRay}.
+    *                                   total number of orientations explored at each voxel is
+    *                                   {@code numberOfRays * numberOfRotationsAroundRay}.
     */
    public void setGridParameters(int gridSizeInNumberOfVoxels, double voxelSize, int numberOfRays, int numberOfRotationsAroundRay)
    {
@@ -87,12 +97,12 @@ public class ReachabilitySphereMapCalculator
     * Sets the transform of the end-effector's frame of interest with respect to the end-effector's
     * body-fixed frame.
     * <p>
-    * It is recommended to align the x-axis of the control frame with the vector that is orthogonal
-    * to the palm.
+    * It is recommended to align the x-axis of the control frame with the vector that is orthogonal to
+    * the palm.
     * </p>
     * 
-    * @param controlFramePose the transform from the control frame with respect to the
-    *           end-effector's body-fixed frame.
+    * @param controlFramePose the transform from the control frame with respect to the end-effector's
+    *                         body-fixed frame.
     */
    public void setControlFramePose(RigidBodyTransform controlFramePose)
    {
@@ -124,10 +134,10 @@ public class ReachabilitySphereMapCalculator
    }
 
    /**
-    * Sets up the calculator so it exports the result in an Excel file. That file can later be
-    * loaded using {@link ReachabilityMapFileLoader}.
+    * Sets up the calculator so it exports the result in an Excel file. That file can later be loaded
+    * using {@link ReachabilityMapFileLoader}.
     * 
-    * @param robotName the robot name.
+    * @param robotName        the robot name.
     * @param classForFilePath this can be the class of the caller of this method.
     */
    public void setupCalculatorToRecordInFile(String robotName, Class<?> classForFilePath) throws IOException
@@ -141,8 +151,8 @@ public class ReachabilitySphereMapCalculator
    }
 
    /**
-    * Attaches a listener that is to be notified every time a pose is successfully reached. Can be
-    * used to visualize to robot doing something, decrease boredom when watching progress.
+    * Attaches a listener that is to be notified every time a pose is successfully reached. Can be used
+    * to visualize to robot doing something, decrease boredom when watching progress.
     * 
     * @param listener the listener to attach.
     */
@@ -153,6 +163,11 @@ public class ReachabilitySphereMapCalculator
 
    private void initialize()
    {
+      if (isInitialized.getValue())
+         return;
+
+      isInitialized.set(true);
+
       sphereVoxelShape = new SphereVoxelShape(gridFrame, voxelSize, numberOfRays, numberOfRotationsAroundRay, SphereVoxelType.graspOrigin);
       voxel3dGrid = new Voxel3DGrid(gridFrame, sphereVoxelShape, gridSizeInNumberOfVoxels, voxelSize);
       if (reachabilityMapFileWriter != null)
@@ -161,21 +176,33 @@ public class ReachabilitySphereMapCalculator
       scs.addStaticLinkGraphics(ReachabilityMapTools.createBoundingBoxGraphics(voxel3dGrid.getMinPoint(), voxel3dGrid.getMaxPoint()));
    }
 
-   /**
-    * Starts the exploration of the reachable space of the arm. This can take a looooooong time.
-    */
-   public void buildReachabilitySpace()
+   private final YoBoolean isInitialized = new YoBoolean("isInitialized", registry);
+   private final YoBoolean isDone = new YoBoolean("isDone", registry);
+   private final YoInteger currentXIndex = new YoInteger("currentXIndex", registry);
+   private final YoInteger currentYIndex = new YoInteger("currentYIndex", registry);
+   private final YoInteger currentZIndex = new YoInteger("currentZIndex", registry);
+
+   private final FrameVector3D translationFromVoxelOrigin = new FrameVector3D();
+   private final FrameQuaternion orientation = new FrameQuaternion();
+
+   public void computeNext()
    {
+      if (isDone.getValue())
+         return;
+
       initialize();
 
-      FrameVector3D translationFromVoxelOrigin = new FrameVector3D();
-      FrameQuaternion orientation = new FrameQuaternion();
+      int xIndex = currentXIndex.getValue();
+      int yIndex = currentYIndex.getValue();
+      int zIndex = currentZIndex.getValue();
 
-      for (int xIndex = 0; xIndex < gridSizeInNumberOfVoxels; xIndex++)
+      boolean hasReachNext = false;
+
+      for (; xIndex < gridSizeInNumberOfVoxels; xIndex++)
       {
-         for (int yIndex = 0; yIndex < gridSizeInNumberOfVoxels; yIndex++)
+         for (; yIndex < gridSizeInNumberOfVoxels; yIndex++)
          {
-            for (int zIndex = 0; zIndex < gridSizeInNumberOfVoxels; zIndex++)
+            for (; zIndex < gridSizeInNumberOfVoxels; zIndex++)
             {
                if (!isPositionReachable(xIndex, yIndex, zIndex))
                   continue;
@@ -208,7 +235,8 @@ public class ReachabilitySphereMapCalculator
                            reachabilityMapListeners.get(i).hasReachedNewConfiguration();
                         }
 
-                        scs.tickAndUpdate();
+                        //                        scs.tickAndUpdate();
+                        hasReachNext = true;
                         break;
                      }
                   }
@@ -221,13 +249,43 @@ public class ReachabilitySphereMapCalculator
                   Graphics3DObject voxelViz = sphereVoxelShape.createVisualization(voxelLocation, 0.25, reachabilityValue);
                   scs.addStaticLinkGraphics(voxelViz);
                }
+
+               if (hasReachNext)
+                  break;
             }
+            if (hasReachNext)
+               break;
+            else
+               zIndex = 0;
          }
+         if (hasReachNext)
+            break;
+         else
+            yIndex = 0;
       }
 
-      if (reachabilityMapFileWriter != null)
-         reachabilityMapFileWriter.exportAndClose();
-      System.out.println("Done!");
+      if (!hasReachNext)
+      {
+         xIndex = 0;
+         isDone.set(true);
+
+         if (reachabilityMapFileWriter != null)
+            reachabilityMapFileWriter.exportAndClose();
+         System.out.println("Done!");
+      }
+
+      currentXIndex.set(xIndex);
+      currentYIndex.set(yIndex);
+      currentZIndex.set(zIndex);
+   }
+
+   /**
+    * Starts the exploration of the reachable space of the arm. This can take a looooooong time.
+    */
+   public void buildReachabilitySpace()
+   {
+      while (!isDone.getValue())
+         computeNext();
    }
 
    private boolean isPositionReachable(int xIndex, int yIndex, int zIndex)
