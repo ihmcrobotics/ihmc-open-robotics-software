@@ -1,7 +1,6 @@
 package us.ihmc.avatar.reachabilityMap;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape.SphereVoxelType;
@@ -20,11 +19,12 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class ReachabilitySphereMapCalculator
+public class ReachabilitySphereMapCalculator implements RobotController
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private Voxel3DGrid voxel3dGrid;
@@ -37,7 +37,6 @@ public class ReachabilitySphereMapCalculator
    private int numberOfRotationsAroundRay = 1;
    private final FramePoint3D voxelLocation = new FramePoint3D();
    private final FramePoint3D modifiableVoxelLocation = new FramePoint3D();
-   private final ArrayList<ReachabilityMapListener> reachabilityMapListeners = new ArrayList<>();
 
    private final ReachabilityMapSolver solver;
    private ReachabilityMapFileWriter reachabilityMapFileWriter;
@@ -70,7 +69,6 @@ public class ReachabilitySphereMapCalculator
       scs.addYoGraphic(gridFrameViz);
       scs.addYoGraphic(currentEvaluationPose);
       scs.addYoGraphic(currentEvaluationPosition);
-      scs.addYoRegistry(registry);
    }
 
    /**
@@ -150,18 +148,10 @@ public class ReachabilitySphereMapCalculator
       reachabilityMapFileWriter = new ReachabilityMapFileWriter(robotName, classForFilePath);
    }
 
-   /**
-    * Attaches a listener that is to be notified every time a pose is successfully reached. Can be used
-    * to visualize to robot doing something, decrease boredom when watching progress.
-    * 
-    * @param listener the listener to attach.
-    */
-   public void attachReachabilityMapListener(ReachabilityMapListener listener)
-   {
-      reachabilityMapListeners.add(listener);
-   }
+   private final YoBoolean isInitialized = new YoBoolean("isInitialized", registry);
 
-   private void initialize()
+   @Override
+   public void initialize()
    {
       if (isInitialized.getValue())
          return;
@@ -176,7 +166,12 @@ public class ReachabilitySphereMapCalculator
       scs.addStaticLinkGraphics(ReachabilityMapTools.createBoundingBoxGraphics(voxel3dGrid.getMinPoint(), voxel3dGrid.getMaxPoint()));
    }
 
-   private final YoBoolean isInitialized = new YoBoolean("isInitialized", registry);
+   @Override
+   public void doControl()
+   {
+      computeNext();
+   }
+
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
    private final YoInteger currentXIndex = new YoInteger("currentXIndex", registry);
    private final YoInteger currentYIndex = new YoInteger("currentYIndex", registry);
@@ -229,11 +224,6 @@ public class ReachabilitySphereMapCalculator
                         voxel3dGrid.registerReachablePose(xIndex, yIndex, zIndex, rayIndex, rotationAroundRayIndex);
                         if (reachabilityMapFileWriter != null)
                            reachabilityMapFileWriter.registerReachablePose(xIndex, yIndex, zIndex, rayIndex, rotationAroundRayIndex);
-
-                        for (int i = 0; i < reachabilityMapListeners.size(); i++)
-                        {
-                           reachabilityMapListeners.get(i).hasReachedNewConfiguration();
-                        }
 
                         //                        scs.tickAndUpdate();
                         hasReachNext = true;
@@ -302,5 +292,16 @@ public class ReachabilitySphereMapCalculator
    public double getGridSizeInMeters()
    {
       return gridSizeInNumberOfVoxels * voxelSize;
+   }
+
+   public boolean isDone()
+   {
+      return isDone.getValue();
+   }
+
+   @Override
+   public YoRegistry getYoRegistry()
+   {
+      return registry;
    }
 }

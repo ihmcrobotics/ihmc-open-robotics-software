@@ -1,12 +1,13 @@
 package us.ihmc.avatar.reachabilityMap.example;
 
-import us.ihmc.avatar.reachabilityMap.ReachabilityMapListener;
 import us.ihmc.avatar.reachabilityMap.ReachabilitySphereMapCalculator;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
+import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ReachabilitySphereMapExample
 {
@@ -24,16 +25,29 @@ public class ReachabilitySphereMapExample
       OneDoFJointBasics[] armJoints = MultiBodySystemTools.filterJoints(robot.getJacobian().getJointsInOrder(), OneDoFJointBasics.class);
       ReachabilitySphereMapCalculator reachabilitySphereMapCalculator = new ReachabilitySphereMapCalculator(armJoints, scs);
 //      reachabilitySphereMapCalculator.setControlFrameFixedInEndEffector(robot.getControlFrame());
-      ReachabilityMapListener listener = new ReachabilityMapListener()
+      robot.setController(reachabilitySphereMapCalculator);
+      robot.setController(new RobotController()
       {
          @Override
-         public void hasReachedNewConfiguration()
+         public void initialize()
+         {
+         }
+
+         @Override
+         public YoRegistry getYoRegistry()
+         {
+            return new YoRegistry("dummy");
+         }
+
+         @Override
+         public void doControl()
          {
             robot.copyRevoluteJointConfigurationToPinJoints();
          }
-      };
-      reachabilitySphereMapCalculator.attachReachabilityMapListener(listener);
-      reachabilitySphereMapCalculator.buildReachabilitySpace();
+      });
+
+      scs.setSimulateDoneCriterion(() -> reachabilitySphereMapCalculator.isDone());
+      scs.simulate();
    }
 
    public static void main(String[] args)
