@@ -61,6 +61,7 @@ public class GDXPerceptionVisualizerUI
         globalVisualizersUI = new ImGuiGDXGlobalVisualizersPanel();
 
         globalVisualizersUI.addVisualizer(new GDXROS2PlanarRegionsVisualizer("Lidar REA planar regions", ros2Node, ROS2Tools.LIDAR_REA_REGIONS));
+        globalVisualizersUI.addVisualizer(new GDXROS2PlanarRegionsVisualizer("Mapsense planar regions", ros2Node, ROS2Tools.MAPSENSE_REGIONS));
         GDXROS1PlanarRegionsVisualizer mapsenseRegionsVisualizer = new GDXROS1PlanarRegionsVisualizer("MapSense Planar Regions",
                                                                                                       ros2Node,
                                                                                                       RosTools.MAPSENSE_REGIONS);

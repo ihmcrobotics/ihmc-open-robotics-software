@@ -2,8 +2,6 @@ package us.ihmc.gdx.perception.gpuPlanarRegions;
 
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
-import static us.ihmc.gdx.perception.gpuPlanarRegions.GPUPlanarRegionExtractionParameters.*;
-
 public interface GPUPlanarRegionExtractionParametersBasics extends GPUPlanarRegionExtractionParametersReadOnly, StoredPropertySetBasics
 {
    default void setMergeDistanceThreshold(double mergeDistanceThreshold)
