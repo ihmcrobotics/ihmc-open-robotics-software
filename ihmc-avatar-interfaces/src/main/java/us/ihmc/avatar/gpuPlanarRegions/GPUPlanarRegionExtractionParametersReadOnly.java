@@ -1,8 +1,8 @@
-package us.ihmc.gdx.perception.gpuPlanarRegions;
+package us.ihmc.avatar.gpuPlanarRegions;
 
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
-import static us.ihmc.gdx.perception.gpuPlanarRegions.GPUPlanarRegionExtractionParameters.*;
+import static us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegionExtractionParameters.*;
 
 public interface GPUPlanarRegionExtractionParametersReadOnly extends StoredPropertySetReadOnly
 {

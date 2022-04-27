@@ -1,4 +1,4 @@
-package us.ihmc.gdx.perception.gpuPlanarRegions;
+package us.ihmc.avatar.gpuPlanarRegions;
 
 import us.ihmc.tools.property.*;
 
