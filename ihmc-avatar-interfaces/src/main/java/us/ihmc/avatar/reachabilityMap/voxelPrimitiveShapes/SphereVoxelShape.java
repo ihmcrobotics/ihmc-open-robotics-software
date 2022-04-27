@@ -16,6 +16,7 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
 import us.ihmc.scs2.definition.geometry.Sphere3DDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
@@ -125,8 +126,11 @@ public class SphereVoxelShape
       FramePoint3D voxelLocationLocal = new FramePoint3D(voxelLocation);
       voxelLocationLocal.changeFrame(ReferenceFrame.getWorldFrame());
 
-      return new VisualDefinition(voxelLocationLocal,
-                                  new Sphere3DDefinition(scale * voxelSize / 2.0, 32),
-                                  new MaterialDefinition(ColorDefinitions.hsb(0.7 * reachabilityValue * 360.0, 1, 1)));
+      ColorDefinition color;
+      if (reachabilityValue == -1.0)
+         color = ColorDefinitions.Black();
+      else
+         color = ColorDefinitions.hsb(0.7 * reachabilityValue * 360.0, 1, 1);
+      return new VisualDefinition(voxelLocationLocal, new Sphere3DDefinition(scale * voxelSize / 2.0, 32), new MaterialDefinition(color));
    }
 }
