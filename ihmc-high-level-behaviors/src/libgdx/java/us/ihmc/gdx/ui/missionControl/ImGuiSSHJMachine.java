@@ -81,7 +81,7 @@ public class ImGuiSSHJMachine
       networkPlot.setYFlags(yFlags);
       networkPlot.setCustomBeforePlotLogic(() ->
       {
-         ImPlot.setNextPlotLimitsY(0.0, 900000.0, ImGuiCond.Once);
+         ImPlot.setNextPlotLimitsY(-3000.0, 103000.0, ImGuiCond.Always);
       });
       networkPlot.getPlotLines().add(networkSentPlotLine);
       networkPlot.getPlotLines().add(networkReceivedPlotLine);
