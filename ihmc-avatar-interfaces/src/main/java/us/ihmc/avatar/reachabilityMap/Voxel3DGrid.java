@@ -8,10 +8,14 @@ import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameFactories;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
 
 public class Voxel3DGrid implements ReferenceFrameHolder
@@ -24,8 +28,7 @@ public class Voxel3DGrid implements ReferenceFrameHolder
    private final int numberOfVoxelsPerDimension;
    private final int totalNumberOfVoxels;
 
-   private final boolean[][][][] isRayReachable;
-   private final boolean[][][][][] isPoseReachable;
+   private final Voxel3DData[] voxels;
 
    public Voxel3DGrid(ReferenceFrame referenceFrame, SphereVoxelShape sphereVoxelShape, int gridSizeInNumberOfVoxels, double voxelSize)
    {
@@ -36,73 +39,57 @@ public class Voxel3DGrid implements ReferenceFrameHolder
       totalNumberOfVoxels = numberOfVoxelsPerDimension * numberOfVoxelsPerDimension * numberOfVoxelsPerDimension;
       gridSize = voxelSize * gridSizeInNumberOfVoxels;
       boundingBox = new BoundingBox3D(-gridSize / 2.0, -gridSize / 2.0, -gridSize / 2.0, gridSize / 2.0, gridSize / 2.0, gridSize / 2.0);
-
-      int numberOfRays = sphereVoxelShape.getNumberOfRays();
-      int numberOfRotationsAroundRay = sphereVoxelShape.getNumberOfRotationsAroundRay();
-
-      isRayReachable = new boolean[numberOfVoxelsPerDimension][numberOfVoxelsPerDimension][numberOfVoxelsPerDimension][numberOfRays];
-      isPoseReachable = new boolean[numberOfVoxelsPerDimension][numberOfVoxelsPerDimension][numberOfVoxelsPerDimension][numberOfRays][numberOfRotationsAroundRay];
+      voxels = new Voxel3DData[numberOfVoxelsPerDimension * numberOfVoxelsPerDimension * numberOfVoxelsPerDimension];
    }
 
-   public void getVoxel(FramePoint3D voxelLocationToPack, int xIndex, int yIndex, int zIndex)
+   public Voxel3DData getVoxel(FrameTuple3DReadOnly query)
    {
-      voxelLocationToPack.setToZero(referenceFrame);
-      voxelLocationToPack.setX(getCoordinateFromIndex(xIndex));
-      voxelLocationToPack.setY(getCoordinateFromIndex(yIndex));
-      voxelLocationToPack.setZ(getCoordinateFromIndex(zIndex));
+      checkReferenceFrameMatch(query);
+      return getVoxel((Tuple3DReadOnly) query);
    }
 
-   public void getClosestVoxel(FramePoint3D voxelLocationToPack, FramePoint3D inputPoint)
+   public Voxel3DData getVoxel(Tuple3DReadOnly query)
    {
-      checkReferenceFrameMatch(inputPoint);
-      if (!boundingBox.isInsideInclusive(inputPoint))
-         throw new RuntimeException("The given point is outside the grid");
-      voxelLocationToPack.setToZero(getReferenceFrame());
-      voxelLocationToPack.setX(getCoordinateFromIndexUnsafe(getIndexFromCoordinateUnsafe(inputPoint.getX())));
-      voxelLocationToPack.setY(getCoordinateFromIndexUnsafe(getIndexFromCoordinateUnsafe(inputPoint.getY())));
-      voxelLocationToPack.setZ(getCoordinateFromIndexUnsafe(getIndexFromCoordinateUnsafe(inputPoint.getZ())));
+      return getVoxel(query.getX(), query.getY(), query.getZ());
    }
 
-   private double getCoordinateFromIndex(int index)
+   public Voxel3DData getVoxel(double x, double y, double z)
    {
-      if (index >= numberOfVoxelsPerDimension)
-         throw new ArrayIndexOutOfBoundsException(index);
-      return getCoordinateFromIndexUnsafe(index);
+      if (!boundingBox.isInsideInclusive(x, y, z))
+         throw new IllegalArgumentException("The given point is outside the grid");
+      return getVoxel(toIndex(x), toIndex(y), toIndex(z));
    }
 
-   private int getIndexFromCoordinate(double coordinate)
+   public Voxel3DData getVoxel(int xIndex, int yIndex, int zIndex)
    {
-      int index = (int) (coordinate / voxelSize + numberOfVoxelsPerDimension / 2 - 1);
-      if (index >= numberOfVoxelsPerDimension)
-         throw new ArrayIndexOutOfBoundsException(index);
-      return index;
+      return voxels[(xIndex * numberOfVoxelsPerDimension + yIndex) * numberOfVoxelsPerDimension + zIndex];
    }
 
-   private double getCoordinateFromIndexUnsafe(int index)
+   public Voxel3DData getOrCreateVoxel(int xIndex, int yIndex, int zIndex)
    {
-      double coordinate = -gridSize / 2.0 + (index + 0.5) * voxelSize;
-      return coordinate;
-   }
-
-   private int getIndexFromCoordinateUnsafe(double coordinate)
-   {
-      int index = (int) (coordinate / voxelSize + numberOfVoxelsPerDimension / 2 - 1);
-      return index;
-   }
-
-   public void registerReachablePose(int xIndex, int yIndex, int zIndex, int rayIndex, int rotationAroundRayIndex)
-   {
-      boolean poseHasAlreadyBeenRegistered = isPoseReachable[xIndex][yIndex][zIndex][rayIndex][rotationAroundRayIndex];
-      if (!poseHasAlreadyBeenRegistered)
+      int index = (xIndex * numberOfVoxelsPerDimension + yIndex) * numberOfVoxelsPerDimension + zIndex;
+      Voxel3DData voxel = voxels[index];
+      if (voxel == null)
       {
-         isPoseReachable[xIndex][yIndex][zIndex][rayIndex][rotationAroundRayIndex] = true;
-         registerReachableRay(xIndex, yIndex, zIndex, rayIndex);
+         voxel = new Voxel3DData(xIndex, yIndex, zIndex);
+         voxels[index] = voxel;
       }
+      return voxel;
    }
 
-   public void registerReachableRay(int xIndex, int yIndex, int zIndex, int rayIndex)
+   public void destroy(Voxel3DData voxel)
    {
-      isRayReachable[xIndex][yIndex][zIndex][rayIndex] = true;
+      voxels[(voxel.xIndex * numberOfVoxelsPerDimension + voxel.yIndex) * numberOfVoxelsPerDimension + voxel.zIndex] = null;
+   }
+
+   private double toCoordinate(int index)
+   {
+      return (index + 0.5) * voxelSize - 0.5 * gridSize;
+   }
+
+   private int toIndex(double coordinate)
+   {
+      return (int) (coordinate / voxelSize + numberOfVoxelsPerDimension / 2 - 1);
    }
 
    /**
@@ -116,17 +103,8 @@ public class Voxel3DGrid implements ReferenceFrameHolder
     */
    public double getD(int xIndex, int yIndex, int zIndex)
    {
-      double d = 0;
-      int numberOfRays = sphereVoxelShape.getNumberOfRays();
-      for (int i = 0; i < numberOfRays; i++)
-      {
-         if (isRayReachable[xIndex][yIndex][zIndex][i])
-            d += 1.0;
-      }
-
-      d /= (double) numberOfRays;
-
-      return d;
+      Voxel3DData voxel = getVoxel(xIndex, yIndex, zIndex);
+      return voxel == null ? 0 : voxel.getD();
    }
 
    /**
@@ -140,23 +118,8 @@ public class Voxel3DGrid implements ReferenceFrameHolder
     */
    public double getD0(int xIndex, int yIndex, int zIndex)
    {
-      double d0 = 0;
-      int numberOfRays = sphereVoxelShape.getNumberOfRays();
-      int numberOfRotationsAroundRay = sphereVoxelShape.getNumberOfRotationsAroundRay();
-
-      for (int i = 0; i < numberOfRays; i++)
-      {
-         for (int j = 0; j < numberOfRotationsAroundRay; j++)
-         {
-            if (isPoseReachable[xIndex][yIndex][zIndex][i][j])
-               d0 += 1.0;
-         }
-      }
-
-      d0 /= (double) numberOfRays;
-      d0 /= (double) numberOfRotationsAroundRay;
-
-      return d0;
+      Voxel3DData voxel = getVoxel(xIndex, yIndex, zIndex);
+      return voxel == null ? 0 : voxel.getD0();
    }
 
    private final PrincipalComponentAnalysis3D pca = new PrincipalComponentAnalysis3D();
@@ -164,7 +127,7 @@ public class Voxel3DGrid implements ReferenceFrameHolder
    // FIXME Still in development
    private void fitCone(int xIndex, int yIndex, int zIndex)
    {
-      boolean[] isRayReachable = this.isRayReachable[xIndex][yIndex][zIndex];
+      boolean[] isRayReachable = getVoxel(xIndex, yIndex, zIndex).isRayReachable;
 
       List<Point3D> reachablePointsOnly = new ArrayList<>();
       for (int i = 0; i < sphereVoxelShape.getNumberOfRays(); i++)
@@ -182,8 +145,7 @@ public class Voxel3DGrid implements ReferenceFrameHolder
       Vector3D thirdAxis = new Vector3D();
       coneRotation.getColumn(2, thirdAxis);
 
-      FramePoint3D voxelLocation = new FramePoint3D();
-      getVoxel(voxelLocation, xIndex, yIndex, zIndex);
+      FramePoint3D voxelLocation = new FramePoint3D(getVoxel(xIndex, yIndex, zIndex).getPosition());
       Vector3D mean = new Vector3D();
       sphereOriginToAverage.sub(mean, voxelLocation);
 
@@ -265,5 +227,114 @@ public class Voxel3DGrid implements ReferenceFrameHolder
    public FramePoint3D getMaxPoint()
    {
       return new FramePoint3D(referenceFrame, boundingBox.getMaxPoint());
+   }
+
+   public class Voxel3DData
+   {
+      private final int xIndex, yIndex, zIndex;
+      private final FramePoint3DReadOnly position;
+
+      private boolean[] isRayReachable;
+      private boolean[][] isPoseReachable;
+
+      public Voxel3DData(int xIndex, int yIndex, int zIndex)
+      {
+         if (xIndex >= numberOfVoxelsPerDimension)
+            throw new ArrayIndexOutOfBoundsException(xIndex);
+         if (yIndex >= numberOfVoxelsPerDimension)
+            throw new ArrayIndexOutOfBoundsException(yIndex);
+         if (zIndex >= numberOfVoxelsPerDimension)
+            throw new ArrayIndexOutOfBoundsException(zIndex);
+
+         this.xIndex = xIndex;
+         this.yIndex = yIndex;
+         this.zIndex = zIndex;
+
+         position = EuclidFrameFactories.newLinkedFramePoint3DReadOnly(Voxel3DGrid.this,
+                                                                       () -> toCoordinate(xIndex),
+                                                                       () -> toCoordinate(yIndex),
+                                                                       () -> toCoordinate(zIndex));
+      }
+
+      public void registerReachablePose(int rayIndex, int rotationAroundRayIndex)
+      {
+         if (isPoseReachable == null)
+            isPoseReachable = new boolean[sphereVoxelShape.getNumberOfRays()][sphereVoxelShape.getNumberOfRotationsAroundRay()];
+
+         boolean poseHasAlreadyBeenRegistered = isPoseReachable[rayIndex][rotationAroundRayIndex];
+
+         if (!poseHasAlreadyBeenRegistered)
+         {
+            isPoseReachable[rayIndex][rotationAroundRayIndex] = true;
+            registerReachableRay(rayIndex);
+         }
+      }
+
+      public void registerReachableRay(int rayIndex)
+      {
+         if (isRayReachable == null)
+            isRayReachable = new boolean[sphereVoxelShape.getNumberOfRays()];
+         isRayReachable[rayIndex] = true;
+      }
+
+      /**
+       * Return the D reachability value in percent for this voxel based on the number of the rays that
+       * have been reached.
+       * 
+       * @return The D reachability
+       */
+      public double getD()
+      {
+         if (isRayReachable == null)
+            return 0;
+
+         double d = 0;
+         int numberOfRays = sphereVoxelShape.getNumberOfRays();
+
+         for (int i = 0; i < numberOfRays; i++)
+         {
+            if (isRayReachable[i])
+               d += 1.0;
+         }
+
+         d /= (double) numberOfRays;
+
+         return d;
+      }
+
+      /**
+       * Return the D0 reachability value in percent for this voxel based on the number of the
+       * orientations (number of rays times number of rotations around rays) that have been reached.
+       * 
+       * @return The D0 reachability
+       */
+      public double getD0()
+      {
+         if (isPoseReachable == null)
+            return 0;
+
+         double d0 = 0;
+         int numberOfRays = sphereVoxelShape.getNumberOfRays();
+         int numberOfRotationsAroundRay = sphereVoxelShape.getNumberOfRotationsAroundRay();
+
+         for (int i = 0; i < numberOfRays; i++)
+         {
+            for (int j = 0; j < numberOfRotationsAroundRay; j++)
+            {
+               if (isPoseReachable[i][j])
+                  d0 += 1.0;
+            }
+         }
+
+         d0 /= (double) numberOfRays;
+         d0 /= (double) numberOfRotationsAroundRay;
+
+         return d0;
+      }
+
+      public FramePoint3DReadOnly getPosition()
+      {
+         return position;
+      }
    }
 }

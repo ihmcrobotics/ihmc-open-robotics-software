@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DData;
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape.SphereVoxelType;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -16,6 +17,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
@@ -36,7 +38,7 @@ public class ReachabilitySphereMapCalculator implements Controller
    private final ControllerOutput controllerOutput;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-   private Voxel3DGrid voxel3dGrid;
+   private Voxel3DGrid voxel3DGrid;
    private SphereVoxelShape sphereVoxelShape;
 
    private Consumer<VisualDefinition> staticVisualConsumer;
@@ -46,8 +48,7 @@ public class ReachabilitySphereMapCalculator implements Controller
    private double voxelSize = 0.05;
    private int numberOfRays = 50;
    private int numberOfRotationsAroundRay = 1;
-   private final FramePoint3D voxelLocation = new FramePoint3D();
-   private final FramePoint3D modifiableVoxelLocation = new FramePoint3D();
+   private final FramePoint3D desiredPosition = new FramePoint3D();
 
    private final ReachabilityMapSolver solver;
    private ReachabilityMapFileWriter reachabilityMapFileWriter;
@@ -181,10 +182,10 @@ public class ReachabilitySphereMapCalculator implements Controller
       isInitialized.set(true);
 
       sphereVoxelShape = new SphereVoxelShape(gridFrame, voxelSize, numberOfRays, numberOfRotationsAroundRay, SphereVoxelType.graspOrigin);
-      voxel3dGrid = new Voxel3DGrid(gridFrame, sphereVoxelShape, gridSizeInNumberOfVoxels, voxelSize);
+      voxel3DGrid = new Voxel3DGrid(gridFrame, sphereVoxelShape, gridSizeInNumberOfVoxels, voxelSize);
       if (reachabilityMapFileWriter != null)
-         reachabilityMapFileWriter.initialize(solver.getRobotArmJoints(), voxel3dGrid);
-      ReachabilityMapTools.createBoundingBoxVisuals(voxel3dGrid.getMinPoint(), voxel3dGrid.getMaxPoint()).forEach(staticVisualConsumer);
+         reachabilityMapFileWriter.initialize(solver.getRobotArmJoints(), voxel3DGrid);
+      ReachabilityMapTools.createBoundingBoxVisuals(voxel3DGrid.getMinPoint(), voxel3DGrid.getMaxPoint()).forEach(staticVisualConsumer);
    }
 
    @Override
@@ -223,9 +224,11 @@ public class ReachabilitySphereMapCalculator implements Controller
          {
             for (; zIndex < gridSizeInNumberOfVoxels; zIndex++)
             {
+               Voxel3DData voxel = voxel3DGrid.getOrCreateVoxel(xIndex, yIndex, zIndex);
+
                if (!currentVoxelReachComputed.getValue())
                {
-                  if (isPositionReachable(xIndex, yIndex, zIndex))
+                  if (isPositionReachable(voxel))
                   {
                      currentVoxelReachComputed.set(true);
                   }
@@ -233,35 +236,34 @@ public class ReachabilitySphereMapCalculator implements Controller
                   {
                      if (showUnreachableVoxels)
                      {
-                        voxel3dGrid.getVoxel(voxelLocation, xIndex, yIndex, zIndex);
-                        LogTools.info("Unreachable voxel: ({}, {}, {})", xIndex, yIndex, zIndex);
-                        staticVisualConsumer.accept(sphereVoxelShape.createVisual(voxelLocation, 0.1, -1));
+                        LogTools.info("Unreachable voxel: ({}), position: {}", EuclidCoreIOTools.getStringOf(", ", xIndex, yIndex, zIndex), voxel.getPosition());
+                        staticVisualConsumer.accept(sphereVoxelShape.createVisual(voxel.getPosition(), 0.1, -1));
                      }
+
+                     voxel3DGrid.destroy(voxel);
                      currentVoxelReachComputed.set(false);
                      continue;
                   }
                }
-
-               voxel3dGrid.getVoxel(voxelLocation, xIndex, yIndex, zIndex);
 
                for (; rayIndex < numberOfRays && !hasReachNext; rayIndex++)
                {
 
                   for (int rotationAroundRayIndex = 0; rotationAroundRayIndex < numberOfRotationsAroundRay; rotationAroundRayIndex++)
                   {
-                     modifiableVoxelLocation.setIncludingFrame(voxelLocation);
+                     desiredPosition.setIncludingFrame(voxel.getPosition());
                      sphereVoxelShape.getPose(translationFromVoxelOrigin, orientation, rayIndex, rotationAroundRayIndex);
-                     modifiableVoxelLocation.add(translationFromVoxelOrigin);
+                     desiredPosition.add(translationFromVoxelOrigin);
 
-                     modifiableVoxelLocation.changeFrame(ReferenceFrame.getWorldFrame());
+                     desiredPosition.changeFrame(ReferenceFrame.getWorldFrame());
                      orientation.changeFrame(ReferenceFrame.getWorldFrame());
-                     currentEvaluationPose.set(modifiableVoxelLocation, orientation);
+                     currentEvaluationPose.set(desiredPosition, orientation);
 
-                     boolean success = solver.solveFor(modifiableVoxelLocation, orientation);
+                     boolean success = solver.solveFor(desiredPosition, orientation);
 
                      if (success)
                      {
-                        voxel3dGrid.registerReachablePose(xIndex, yIndex, zIndex, rayIndex, rotationAroundRayIndex);
+                        voxel.registerReachablePose(rayIndex, rotationAroundRayIndex);
                         if (reachabilityMapFileWriter != null)
                            reachabilityMapFileWriter.registerReachablePose(xIndex, yIndex, zIndex, rayIndex, rotationAroundRayIndex);
 
@@ -279,10 +281,10 @@ public class ReachabilitySphereMapCalculator implements Controller
                if (hasReachNext)
                   break;
 
-               double reachabilityValue = voxel3dGrid.getD(xIndex, yIndex, zIndex);
+               double reachabilityValue = voxel.getD();
 
                if (reachabilityValue > 1e-3)
-                  staticVisualConsumer.accept(sphereVoxelShape.createVisual(voxelLocation, 0.25, reachabilityValue));
+                  staticVisualConsumer.accept(sphereVoxelShape.createVisual(voxel.getPosition(), 0.25, reachabilityValue));
 
                rayIndex = 0;
                currentVoxelReachComputed.set(false);
@@ -326,15 +328,11 @@ public class ReachabilitySphereMapCalculator implements Controller
          computeNext();
    }
 
-   private boolean isPositionReachable(int xIndex, int yIndex, int zIndex)
+   private boolean isPositionReachable(Voxel3DData voxel)
    {
-      voxel3dGrid.getVoxel(voxelLocation, xIndex, yIndex, zIndex);
-      modifiableVoxelLocation.setIncludingFrame(voxelLocation);
-      modifiableVoxelLocation.changeFrame(ReferenceFrame.getWorldFrame());
-      currentEvaluationPose.getPosition().set(modifiableVoxelLocation);
+      currentEvaluationPose.getPosition().setMatchingFrame(voxel.getPosition());
       currentEvaluationPose.getOrientation().setToZero();
-
-      return solver.solveFor(voxelLocation);
+      return solver.solveFor(voxel.getPosition());
    }
 
    public double getGridSizeInMeters()

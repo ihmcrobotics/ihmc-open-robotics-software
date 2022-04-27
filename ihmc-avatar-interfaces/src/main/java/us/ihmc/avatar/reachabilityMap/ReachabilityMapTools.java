@@ -3,6 +3,7 @@ package us.ihmc.avatar.reachabilityMap;
 import java.awt.Color;
 import java.util.List;
 
+import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DData;
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -151,7 +152,6 @@ public class ReachabilityMapTools
       int numberOfVoxel = grid.getNumberOfVoxelsPerDimension();
       grid.getReferenceFrame().update();
       System.out.println(grid.getReferenceFrame().getTransformToWorldFrame());
-      FramePoint3D voxelLocation = new FramePoint3D();
    
       for (int xIndex = 0; xIndex < numberOfVoxel; xIndex++)
       {
@@ -163,9 +163,9 @@ public class ReachabilityMapTools
    
                if (reachabilityValue > 0.001)
                {
-                  grid.getVoxel(voxelLocation, xIndex, yIndex, zIndex);
-                  System.out.println("xIndex: " + xIndex + ", yIndex: " + yIndex + ", zIndex: " + zIndex + ", voxel location: " + voxelLocation);
-                  allVisuals.add(sphereVoxelShape.createVisual(voxelLocation, 0.25, reachabilityValue));
+                  Voxel3DData voxel = grid.getVoxel(xIndex, yIndex, zIndex);
+                  System.out.println("xIndex: " + xIndex + ", yIndex: " + yIndex + ", zIndex: " + zIndex + ", voxel location: " + voxel.getPosition());
+                  allVisuals.add(sphereVoxelShape.createVisual(voxel.getPosition(), 0.25, reachabilityValue));
                }
             }
          }
