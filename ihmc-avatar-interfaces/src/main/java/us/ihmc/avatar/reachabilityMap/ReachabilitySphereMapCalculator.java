@@ -22,6 +22,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ReachabilitySphereMapCalculator implements RobotController
@@ -164,6 +165,8 @@ public class ReachabilitySphereMapCalculator implements RobotController
          reachabilityMapFileWriter.initialize(solver.getRobotArmJoints(), voxel3dGrid);
       gridFrameViz.update();
       scs.addStaticLinkGraphics(ReachabilityMapTools.createBoundingBoxGraphics(voxel3dGrid.getMinPoint(), voxel3dGrid.getMaxPoint()));
+
+      currentReachState.set(VoxelPositionReachState.UNKNOWN);
    }
 
    @Override
@@ -172,10 +175,17 @@ public class ReachabilitySphereMapCalculator implements RobotController
       computeNext();
    }
 
+   private enum VoxelPositionReachState
+   {
+      UNKNOWN, REACHABLE, UNREACHABLE;
+   };
+
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
    private final YoInteger currentXIndex = new YoInteger("currentXIndex", registry);
    private final YoInteger currentYIndex = new YoInteger("currentYIndex", registry);
    private final YoInteger currentZIndex = new YoInteger("currentZIndex", registry);
+   private final YoEnum<VoxelPositionReachState> currentReachState = new YoEnum<>("currentVoxelPositionReachState", registry, VoxelPositionReachState.class);
+   private final YoInteger currentRayIndex = new YoInteger("currentRayIndex", registry);
 
    private final FrameVector3D translationFromVoxelOrigin = new FrameVector3D();
    private final FrameQuaternion orientation = new FrameQuaternion();
@@ -190,6 +200,7 @@ public class ReachabilitySphereMapCalculator implements RobotController
       int xIndex = currentXIndex.getValue();
       int yIndex = currentYIndex.getValue();
       int zIndex = currentZIndex.getValue();
+      int rayIndex = currentRayIndex.getValue();
 
       boolean hasReachNext = false;
 
@@ -199,12 +210,18 @@ public class ReachabilitySphereMapCalculator implements RobotController
          {
             for (; zIndex < gridSizeInNumberOfVoxels; zIndex++)
             {
-               if (!isPositionReachable(xIndex, yIndex, zIndex))
+               if (currentReachState.getValue() == VoxelPositionReachState.UNKNOWN)
+               {
+                  currentReachState.set(isPositionReachable(xIndex, yIndex, zIndex) ? VoxelPositionReachState.REACHABLE : VoxelPositionReachState.UNREACHABLE);
+               }
+
+               if (currentReachState.getValue() == VoxelPositionReachState.UNREACHABLE)
                   continue;
 
-               for (int rayIndex = 0; rayIndex < numberOfRays; rayIndex++)
+               voxel3dGrid.getVoxel(voxelLocation, xIndex, yIndex, zIndex);
+
+               for (; rayIndex < numberOfRays && !hasReachNext; rayIndex++)
                {
-                  voxel3dGrid.getVoxel(voxelLocation, xIndex, yIndex, zIndex);
 
                   for (int rotationAroundRayIndex = 0; rotationAroundRayIndex < numberOfRotationsAroundRay; rotationAroundRayIndex++)
                   {
@@ -232,6 +249,9 @@ public class ReachabilitySphereMapCalculator implements RobotController
                   }
                }
 
+               if (hasReachNext)
+                  break;
+
                double reachabilityValue = voxel3dGrid.getD(xIndex, yIndex, zIndex);
 
                if (reachabilityValue > 1e-3)
@@ -240,18 +260,21 @@ public class ReachabilitySphereMapCalculator implements RobotController
                   scs.addStaticLinkGraphics(voxelViz);
                }
 
-               if (hasReachNext)
-                  break;
+               rayIndex = 0;
+               currentReachState.set(VoxelPositionReachState.UNKNOWN);
             }
+
             if (hasReachNext)
                break;
-            else
-               zIndex = 0;
+
+            zIndex = 0;
+            currentReachState.set(VoxelPositionReachState.UNKNOWN);
          }
          if (hasReachNext)
             break;
-         else
-            yIndex = 0;
+
+         yIndex = 0;
+         currentReachState.set(VoxelPositionReachState.UNKNOWN);
       }
 
       if (!hasReachNext)
@@ -267,6 +290,7 @@ public class ReachabilitySphereMapCalculator implements RobotController
       currentXIndex.set(xIndex);
       currentYIndex.set(yIndex);
       currentZIndex.set(zIndex);
+      currentRayIndex.set(rayIndex);
    }
 
    /**
