@@ -1,16 +1,22 @@
 package us.ihmc.perception.realsense;
 
 import boofcv.struct.calib.CameraPinholeBrown;
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.message.Time;
 import sensor_msgs.Image;
+import sun.misc.Unsafe;
 import us.ihmc.commons.Conversions;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.MutableBytePointer;
+import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Activator;
 import us.ihmc.tools.thread.PausablePeriodicThread;
@@ -20,6 +26,7 @@ import us.ihmc.utilities.ros.publisher.RosCameraInfoPublisher;
 import us.ihmc.utilities.ros.publisher.RosImagePublisher;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 public class RealsenseL515ROSNode
 {
@@ -28,6 +35,7 @@ public class RealsenseL515ROSNode
    private final PausablePeriodicThread thread;
    private final Activator nativesLoadedActivator;
    private final ROS1Helper ros1Helper;
+   private final ROS2Helper ros2Helper;
    private RealSenseHardwareManager realSenseHardwareManager;
    private BytedecoRealsenseL515 l515;
    private RosImagePublisher ros1DepthPublisher;
@@ -44,6 +52,9 @@ public class RealsenseL515ROSNode
       nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
 
       ros1Helper = new ROS1Helper("l515_node");
+
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "l515_node");
+      ros2Helper = new ROS2Helper(ros2Node);
 
       thread = new PausablePeriodicThread("L515Node", UnitConversions.hertzToSeconds(31.0), false, this::update);
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "L515Shutdown"));
@@ -100,10 +111,11 @@ public class RealsenseL515ROSNode
 
                ros1DepthChannelBuffer.clear();
                int size = 2 * depthWidth * depthHeight;
-//               for (int y = 0; y < depthHeight; y++)
-//               {
-//                  for (int x = 0; x < depthWidth; x++)
-//                  {
+               BytePointer dataPointer = depthU16C1Image.ptr();
+               for (int y = 0; y < depthHeight; y++)
+               {
+                  for (int x = 0; x < depthWidth; x++)
+                  {
 //                     float eyeDepthMeters = depthFloatBuffer.getFloat();
 //
 //                     int row = y + 1;
@@ -112,12 +124,26 @@ public class RealsenseL515ROSNode
 //                     int index = size - backForY + forwardForX;
 //                     char depthChar16 = (char) Math.round(eyeDepthMeters * 1000.0f); // 1000 is 1 meter
 //                     ros1DepthChannelBuffer.setChar(index, depthChar16);
-//                  }
-//               }
 
-//               l515.getDepthFrameData().asByteBuffer()
+                     ros1DepthChannelBuffer.writeShort(Short.toUnsignedInt(dataPointer.getShort(depthWidth + depthHeight * depthWidth)));
+                  }
+               }
 
-               ros1DepthChannelBuffer.writeBytes(depthU16C1Image.asByteBuffer());
+//               ByteBuffer depthImageByteBuffer = l515.getDepthFrameData().asByteBuffer();
+//               depthImageByteBuffer.limit(l515.getDepthFrameDataSize());
+//               ByteBuffer.allocateDirect(l515.getDepthFrameDataSize());
+
+//               Unsafe.getUnsafe().
+
+//               Arrays.copyOf().
+
+
+//               ByteBuffer.
+
+//               ByteBuffer depthImageByteBuffer = depthU16C1Image.asByteBuffer();
+//               ros1DepthChannelBuffer.writeBytes(depthImageByteBuffer);
+
+//               ros
 
                ros1DepthChannelBuffer.readerIndex(0);
                ros1DepthChannelBuffer.writerIndex(size);
