@@ -1,6 +1,12 @@
 package us.ihmc.avatar.reachabilityMap;
 
+import static us.ihmc.avatar.scs2.YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3DDefinition;
+import static us.ihmc.avatar.scs2.YoGraphicDefinitionFactory.newYoGraphicPoint3DDefinition;
+
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape.SphereVoxelType;
@@ -9,29 +15,33 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.scs2.definition.controller.ControllerOutput;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.visual.VisualDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class ReachabilitySphereMapCalculator implements RobotController
+public class ReachabilitySphereMapCalculator implements Controller
 {
+   private final ControllerOutput controllerOutput;
+
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private Voxel3DGrid voxel3dGrid;
    private SphereVoxelShape sphereVoxelShape;
 
-   private final SimulationConstructionSet scs;
+   private Consumer<VisualDefinition> staticVisualConsumer;
+
+   private boolean showUnreachableVoxels = false;
    private int gridSizeInNumberOfVoxels = 25;
    private double voxelSize = 0.05;
    private int numberOfRays = 50;
@@ -42,34 +52,46 @@ public class ReachabilitySphereMapCalculator implements RobotController
    private final ReachabilityMapSolver solver;
    private ReachabilityMapFileWriter reachabilityMapFileWriter;
 
-   private final PoseReferenceFrame gridFrame = new PoseReferenceFrame("gridFrame", ReferenceFrame.getWorldFrame());
-   private final YoGraphicReferenceFrame gridFrameViz = new YoGraphicReferenceFrame(gridFrame, registry, true, 0.5, YoAppearance.Blue());
-   private final YoGraphicCoordinateSystem currentEvaluationPose = new YoGraphicCoordinateSystem("currentEvaluationPose",
-                                                                                                 "",
-                                                                                                 registry,
-                                                                                                 true,
-                                                                                                 0.15,
-                                                                                                 YoAppearance.HotPink());
-   private final YoGraphicPosition currentEvaluationPosition = new YoGraphicPosition("currentEvaluationPosition",
-                                                                                     "",
-                                                                                     registry,
-                                                                                     0.0125,
-                                                                                     YoAppearance.DeepPink());
-
-   public ReachabilitySphereMapCalculator(OneDoFJointBasics[] robotArmJoints, SimulationConstructionSet scs)
+   private final YoFramePose3D gridFramePose = new YoFramePose3D("gridFramePose", ReferenceFrame.getWorldFrame(), registry);
+   private final ReferenceFrame gridFrame = new ReferenceFrame("gridFrame", ReferenceFrame.getWorldFrame())
    {
-      this.scs = scs;
+      {
+         gridFramePose.attachVariableChangedListener(v -> update());
+      }
+
+      @Override
+      protected void updateTransformToParent(RigidBodyTransform transformToParent)
+      {
+         gridFramePose.get(transformToParent);
+      }
+   };
+   private final YoFramePose3D currentEvaluationPose = new YoFramePose3D("currentEvaluationPose", ReferenceFrame.getWorldFrame(), registry);
+
+   public ReachabilitySphereMapCalculator(OneDoFJointBasics[] robotArmJoints, ControllerOutput controllerOutput)
+   {
+      this.controllerOutput = controllerOutput;
       solver = new ReachabilityMapSolver(robotArmJoints, new YoGraphicsListRegistry(), registry);
 
       FramePose3D gridFramePose = new FramePose3D(ReferenceFrame.getWorldFrame(), robotArmJoints[0].getFrameBeforeJoint().getTransformToWorldFrame());
       gridFramePose.appendTranslation(getGridSizeInMeters() / 2.5, 0.0, 0.0);
       setGridFramePose(gridFramePose);
+   }
 
-      scs.addStaticLinkGraphics(ReachabilityMapTools.createReachibilityColorScale());
+   public void setStaticVisualConsumer(Consumer<VisualDefinition> staticVisualConsumer)
+   {
+      ReachabilityMapTools.createReachibilityColorScaleVisuals().forEach(staticVisualConsumer);
+      this.staticVisualConsumer = staticVisualConsumer;
+   }
 
-      scs.addYoGraphic(gridFrameViz);
-      scs.addYoGraphic(currentEvaluationPose);
-      scs.addYoGraphic(currentEvaluationPosition);
+   public YoGraphicDefinition getYoGraphicVisuals()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition("ReachabilityCalcualtorVisuals");
+      List<YoGraphicDefinition> yoGraphics = new ArrayList<>();
+      yoGraphics.add(newYoGraphicCoordinateSystem3DDefinition("gridFramePose", gridFramePose, 0.5, ColorDefinitions.Blue()));
+      yoGraphics.add(newYoGraphicCoordinateSystem3DDefinition("currentEvaluationPose", currentEvaluationPose, 0.15, ColorDefinitions.HotPink()));
+      yoGraphics.add(newYoGraphicPoint3DDefinition("currentEvaluationPosition", currentEvaluationPose.getPosition(), 0.0125, ColorDefinitions.DeepPink()));
+      group.setChildren(yoGraphics);
+      return group;
    }
 
    /**
@@ -124,12 +146,11 @@ public class ReachabilitySphereMapCalculator implements RobotController
    /**
     * Sets the center and orientation of the grid.
     * 
-    * @param pose the pose of the grid expressed in world.
+    * @param pose the pose of the grid.
     */
-   public void setGridFramePose(FramePose3D pose)
+   public void setGridFramePose(FramePose3DReadOnly pose)
    {
-      pose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      gridFrame.setPoseAndUpdate(pose);
+      gridFramePose.setMatchingFrame(pose);
    }
 
    /**
@@ -163,10 +184,7 @@ public class ReachabilitySphereMapCalculator implements RobotController
       voxel3dGrid = new Voxel3DGrid(gridFrame, sphereVoxelShape, gridSizeInNumberOfVoxels, voxelSize);
       if (reachabilityMapFileWriter != null)
          reachabilityMapFileWriter.initialize(solver.getRobotArmJoints(), voxel3dGrid);
-      gridFrameViz.update();
-      scs.addStaticLinkGraphics(ReachabilityMapTools.createBoundingBoxGraphics(voxel3dGrid.getMinPoint(), voxel3dGrid.getMaxPoint()));
-
-      currentReachState.set(VoxelPositionReachState.UNKNOWN);
+      ReachabilityMapTools.createBoundingBoxVisuals(voxel3dGrid.getMinPoint(), voxel3dGrid.getMaxPoint()).forEach(staticVisualConsumer);
    }
 
    @Override
@@ -175,16 +193,11 @@ public class ReachabilitySphereMapCalculator implements RobotController
       computeNext();
    }
 
-   private enum VoxelPositionReachState
-   {
-      UNKNOWN, REACHABLE, UNREACHABLE;
-   };
-
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
    private final YoInteger currentXIndex = new YoInteger("currentXIndex", registry);
    private final YoInteger currentYIndex = new YoInteger("currentYIndex", registry);
    private final YoInteger currentZIndex = new YoInteger("currentZIndex", registry);
-   private final YoEnum<VoxelPositionReachState> currentReachState = new YoEnum<>("currentVoxelPositionReachState", registry, VoxelPositionReachState.class);
+   private final YoBoolean currentVoxelReachComputed = new YoBoolean("currentVoxelReachComputed", registry);
    private final YoInteger currentRayIndex = new YoInteger("currentRayIndex", registry);
 
    private final FrameVector3D translationFromVoxelOrigin = new FrameVector3D();
@@ -210,13 +223,24 @@ public class ReachabilitySphereMapCalculator implements RobotController
          {
             for (; zIndex < gridSizeInNumberOfVoxels; zIndex++)
             {
-               if (currentReachState.getValue() == VoxelPositionReachState.UNKNOWN)
+               if (!currentVoxelReachComputed.getValue())
                {
-                  currentReachState.set(isPositionReachable(xIndex, yIndex, zIndex) ? VoxelPositionReachState.REACHABLE : VoxelPositionReachState.UNREACHABLE);
+                  if (isPositionReachable(xIndex, yIndex, zIndex))
+                  {
+                     currentVoxelReachComputed.set(true);
+                  }
+                  else
+                  {
+                     if (showUnreachableVoxels)
+                     {
+                        voxel3dGrid.getVoxel(voxelLocation, xIndex, yIndex, zIndex);
+                        LogTools.info("Unreachable voxel: ({}, {}, {})", xIndex, yIndex, zIndex);
+                        staticVisualConsumer.accept(sphereVoxelShape.createVisual(voxelLocation, 0.1, -1));
+                     }
+                     currentVoxelReachComputed.set(false);
+                     continue;
+                  }
                }
-
-               if (currentReachState.getValue() == VoxelPositionReachState.UNREACHABLE)
-                  continue;
 
                voxel3dGrid.getVoxel(voxelLocation, xIndex, yIndex, zIndex);
 
@@ -231,8 +255,7 @@ public class ReachabilitySphereMapCalculator implements RobotController
 
                      modifiableVoxelLocation.changeFrame(ReferenceFrame.getWorldFrame());
                      orientation.changeFrame(ReferenceFrame.getWorldFrame());
-                     currentEvaluationPose.setPose(new FramePose3D(modifiableVoxelLocation, orientation));
-                     currentEvaluationPose.update();
+                     currentEvaluationPose.set(modifiableVoxelLocation, orientation);
 
                      boolean success = solver.solveFor(modifiableVoxelLocation, orientation);
 
@@ -242,7 +265,11 @@ public class ReachabilitySphereMapCalculator implements RobotController
                         if (reachabilityMapFileWriter != null)
                            reachabilityMapFileWriter.registerReachablePose(xIndex, yIndex, zIndex, rayIndex, rotationAroundRayIndex);
 
-                        //                        scs.tickAndUpdate();
+                        for (OneDoFJointBasics joint : solver.getRobotArmJoints())
+                        {
+                           controllerOutput.getOneDoFJointOutput(joint).setConfiguration(joint);
+                        }
+
                         hasReachNext = true;
                         break;
                      }
@@ -255,26 +282,23 @@ public class ReachabilitySphereMapCalculator implements RobotController
                double reachabilityValue = voxel3dGrid.getD(xIndex, yIndex, zIndex);
 
                if (reachabilityValue > 1e-3)
-               {
-                  Graphics3DObject voxelViz = sphereVoxelShape.createVisualization(voxelLocation, 0.25, reachabilityValue);
-                  scs.addStaticLinkGraphics(voxelViz);
-               }
+                  staticVisualConsumer.accept(sphereVoxelShape.createVisual(voxelLocation, 0.25, reachabilityValue));
 
                rayIndex = 0;
-               currentReachState.set(VoxelPositionReachState.UNKNOWN);
+               currentVoxelReachComputed.set(false);
             }
 
             if (hasReachNext)
                break;
 
             zIndex = 0;
-            currentReachState.set(VoxelPositionReachState.UNKNOWN);
+            currentVoxelReachComputed.set(false);
          }
          if (hasReachNext)
             break;
 
          yIndex = 0;
-         currentReachState.set(VoxelPositionReachState.UNKNOWN);
+         currentVoxelReachComputed.set(false);
       }
 
       if (!hasReachNext)
@@ -307,8 +331,8 @@ public class ReachabilitySphereMapCalculator implements RobotController
       voxel3dGrid.getVoxel(voxelLocation, xIndex, yIndex, zIndex);
       modifiableVoxelLocation.setIncludingFrame(voxelLocation);
       modifiableVoxelLocation.changeFrame(ReferenceFrame.getWorldFrame());
-      currentEvaluationPosition.setPosition(modifiableVoxelLocation);
-      currentEvaluationPosition.update();
+      currentEvaluationPose.getPosition().set(modifiableVoxelLocation);
+      currentEvaluationPose.getOrientation().setToZero();
 
       return solver.solveFor(voxelLocation);
    }
@@ -321,6 +345,11 @@ public class ReachabilitySphereMapCalculator implements RobotController
    public boolean isDone()
    {
       return isDone.getValue();
+   }
+
+   public YoFramePose3D getGridFramePose()
+   {
+      return gridFramePose;
    }
 
    @Override

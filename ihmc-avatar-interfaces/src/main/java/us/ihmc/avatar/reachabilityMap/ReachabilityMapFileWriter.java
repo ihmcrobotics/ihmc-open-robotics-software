@@ -17,7 +17,7 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
-import us.ihmc.avatar.reachabilityMap.example.RobotArm;
+import us.ihmc.avatar.reachabilityMap.example.RobotArmDefinition;
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape.SphereVoxelType;
 import us.ihmc.commons.nio.FileTools;
@@ -26,7 +26,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 
 public class ReachabilityMapFileWriter
 {
@@ -231,8 +232,9 @@ public class ReachabilityMapFileWriter
       ReferenceFrame gridFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("blop", ReferenceFrame.getWorldFrame(), transformToParent);
       SphereVoxelShape sphereVoxelShape = new SphereVoxelShape(gridFrame, 0.1, 10, 12, SphereVoxelType.graspOrigin);
       Voxel3DGrid voxel3dGrid = new Voxel3DGrid(gridFrame, sphereVoxelShape, 10, 0.1);
-      RobotArm robot = new RobotArm();
-      OneDoFJointBasics[] armJoints = MultiBodySystemTools.filterJoints(robot.getJacobian().getJointsInOrder(), OneDoFJointBasics.class);
+      RobotArmDefinition robot = new RobotArmDefinition();
+      RigidBodyBasics rootBody = robot.newInstance(ReferenceFrame.getWorldFrame());
+      OneDoFJointBasics[] armJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).toArray(OneDoFJointBasics[]::new);
       ReachabilityMapFileWriter reachabilityMapFileWriter = new ReachabilityMapFileWriter(robot.getName(), ReachabilityMapFileWriter.class);
       reachabilityMapFileWriter.initialize(armJoints, voxel3dGrid);
 
