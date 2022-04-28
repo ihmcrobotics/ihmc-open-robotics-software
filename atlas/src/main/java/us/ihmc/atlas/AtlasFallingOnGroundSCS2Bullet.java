@@ -8,7 +8,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.mecano.tools.MomentOfInertiaFactory;
-import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
 import us.ihmc.scs2.definition.geometry.Box3DDefinition;
@@ -48,12 +47,12 @@ public class AtlasFallingOnGroundSCS2Bullet
       }
       else
       {
-         setCollisionMasks(robotDefinition);
+         SCS2BulletSimulationTools.fixHumanoidCollisionGroupsMasksToPreventSelfCollision(robotDefinition);
       }
 
       Set<String> lastSimulatedJoints = robotModel.getJointMap().getLastSimulatedJoints();
       lastSimulatedJoints.forEach(robotDefinition::addSubtreeJointsToIgnore);
- 
+
       SimulationSession simulationSession = new SimulationSession(BulletPhysicsEngine::new);
       simulationSession.addRobot(robotDefinition);
 
@@ -88,103 +87,6 @@ public class AtlasFallingOnGroundSCS2Bullet
       sessionVisualizer.getSessionVisualizerControls().setCameraFocusPosition(0.3, 0.0, 1.0);
       sessionVisualizer.getSessionVisualizerControls().setCameraPosition(7.0, 4.0, 3.0);
       sessionVisualizer.getToolkit().getSession().runTick();
-   }
-
-   private void setCollisionMasks(RobotDefinition robotDefinition)
-   {
-      String defaultFilter = "DefaultFilter";
-      String staticFilter = "StaticFilter";
-      String kinematicFilter = "KinematicFilter";
-      String debrisFilter = "DebrisFilter";
-      String sensorTrigger = "SensorTrigger";
-      String characterFilter = "CharacterFilter";
-      String bodyName = "Body"; 
-      String pelvis = "Pelvis";
-      String rightLeg = "RightLeg";
-      String leftLeg = "LeftLeg";
-      String rightArm = "RightArm";
-      String leftArm = "LeftArm";
-      long bulletCollisionGroup;
-      long bulletCollideMask;
-
-      CollidableHelper helper = new CollidableHelper();
-
-      // Set default Bullet collision groups/masks
-      bulletCollisionGroup = helper.getCollisionMask(defaultFilter);
-      bulletCollisionGroup = helper.getCollisionMask(staticFilter);
-      bulletCollisionGroup = helper.getCollisionMask(kinematicFilter);
-      bulletCollisionGroup = helper.getCollisionMask(debrisFilter);
-      bulletCollisionGroup = helper.getCollisionMask(sensorTrigger);
-      bulletCollisionGroup = helper.getCollisionMask(characterFilter);
-      
-      for (RigidBodyDefinition rigidBodyDefinition : robotDefinition.getAllRigidBodies())
-      {
-         for (CollisionShapeDefinition shapeDefinition : rigidBodyDefinition.getCollisionShapeDefinitions())
-         {
-            if (shapeDefinition.getName().contains("pelvis")
-                  || shapeDefinition.getName().contains("uglut")
-                  || shapeDefinition.getName().contains("lglut")
-                  )
-            {
-               bulletCollisionGroup = helper.getCollisionMask(pelvis);
-               bulletCollideMask = helper.createCollisionGroup(defaultFilter, staticFilter, bodyName, leftArm, rightArm);
-
-            }
-            else if (shapeDefinition.getName().contains("utorso")
-                  || shapeDefinition.getName().contains("hokuyo") 
-                  || shapeDefinition.getName().contains("head"))
-            {
-               bulletCollisionGroup = helper.getCollisionMask(bodyName);
-               bulletCollideMask = helper.createCollisionGroup(defaultFilter, staticFilter, rightLeg, leftLeg, rightArm, leftArm);
-            }
-            else if (shapeDefinition.getName().contains("l_uleg")
-                  || shapeDefinition.getName().contains("l_lleg")
-                  || shapeDefinition.getName().contains("l_talus")
-                  || shapeDefinition.getName().contains("l_foot"))
-            {
-               bulletCollisionGroup = helper.getCollisionMask(leftLeg);
-               bulletCollideMask = helper.createCollisionGroup(defaultFilter, staticFilter, bodyName, rightLeg, leftArm);
-
-            }
-            else if (shapeDefinition.getName().contains("r_uleg")
-                  || shapeDefinition.getName().contains("r_lleg")
-                  || shapeDefinition.getName().contains("r_talus")
-                  || shapeDefinition.getName().contains("r_foot"))
-            {
-               bulletCollisionGroup = helper.getCollisionMask(rightLeg);
-               bulletCollideMask = helper.createCollisionGroup(defaultFilter, staticFilter, bodyName, leftLeg, leftArm);
-            }
-            else if (shapeDefinition.getName().contains("l_uarm")
-                  || shapeDefinition.getName().contains("l_clav")
-                  || shapeDefinition.getName().contains("l_scap")
-                  || shapeDefinition.getName().contains("l_larm")
-                  || shapeDefinition.getName().contains("l_ufarm")
-                  || shapeDefinition.getName().contains("l_lfarm"))
-            {
-               bulletCollisionGroup = helper.getCollisionMask(leftArm);
-               bulletCollideMask = helper.createCollisionGroup(defaultFilter, staticFilter, bodyName, pelvis, leftLeg, rightLeg, rightArm);
-            }
-            else if (shapeDefinition.getName().contains("r_uarm")
-                  || shapeDefinition.getName().contains("r_clav")
-                  || shapeDefinition.getName().contains("r_scap")
-                  || shapeDefinition.getName().contains("r_larm")
-                  || shapeDefinition.getName().contains("r_ufarm")
-                  || shapeDefinition.getName().contains("r_lfarm"))
-            {
-               bulletCollisionGroup = helper.getCollisionMask(rightArm);
-               bulletCollideMask = helper.createCollisionGroup(defaultFilter, staticFilter, bodyName, pelvis, leftLeg, rightLeg, leftArm);
-            }
-            else
-            {
-               bulletCollisionGroup = 1;
-               bulletCollideMask = 1 + 2;
-            }
-
-            //bullet has it the opposite names as CollidableHelper e.g. a collisionMask is a collisionGroup in bullet
-            shapeDefinition.setCollisionMask(bulletCollisionGroup);
-            shapeDefinition.setCollisionGroup(bulletCollideMask);
-         }
-      }
    }
 
    public static RigidBodyDefinition newBoxRigidBody(String rigidBodyName,

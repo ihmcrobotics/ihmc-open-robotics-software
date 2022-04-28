@@ -62,7 +62,6 @@ public class AtlasFlatGroundWalkingTrackSCS2Bullet
       avatarSimulationFactory.setCommonAvatarEnvrionmentInterface(environment);
       
       avatarSimulationFactory.setRobotInitialSetup(robotInitialSetup);
-      //avatarSimulationFactory.setSimulationDataRecordTimePeriod(robotModel.getControllerDT());
       avatarSimulationFactory.setCreateYoVariableServer(createYoVariableServer);
       avatarSimulationFactory.setUseBulletPhysicsEngine(true);
       avatarSimulationFactory.setBulletCollisionMutator(AtlasSCS2BulletSimulationTools::fixHumanoidCollisionGroupsMasksToPreventSelfCollision);
