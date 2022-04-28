@@ -19,7 +19,6 @@ ihmc {
    description = "Robot Environment Awareness is a library meant to provide interpretation to point cloud data such as identifying planar regions that can be used to planify footsteps for a bipedal robot."
    openSource = true
    
-   repository("https://oss.sonatype.org/content/repositories/snapshots")
    configureDependencyResolution()
    configurePublications()
 }
@@ -43,7 +42,6 @@ mainDependencies {
    apiBytedecoNatives("javacpp")
    apiBytedecoNatives("openblas", "0.3.19-")
    apiBytedecoNatives("opencv", "4.5.5-")
-   apiBytedecoNatives("librealsense2", "2.50.0-")
 }
 
 fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, versionPrefix: String = "")
