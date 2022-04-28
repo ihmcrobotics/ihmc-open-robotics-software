@@ -12,6 +12,7 @@ import std_msgs.Header;
 import us.ihmc.utilities.ros.RosTools;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.Vector;
 
@@ -20,10 +21,21 @@ public class ROSOpenCVTools
    public static void backMatWithNettyBuffer(Mat mat, ChannelBuffer channelBuffer)
    {
       ByteBuffer slicedBuffer = RosTools.sliceNettyBuffer(channelBuffer);
+      ByteBuffer slicedDirectBuffer;
       if (!slicedBuffer.isDirect())
-         throw new RuntimeException("Netty buffer is not direct somehow.");
+      {
+         //         throw new RuntimeException("Netty buffer is not direct somehow.");
+         slicedDirectBuffer = ByteBuffer.allocateDirect(slicedBuffer.capacity());
+         slicedDirectBuffer.order(ByteOrder.nativeOrder());
+         slicedBuffer.rewind();
+         slicedDirectBuffer.put(slicedBuffer);
+      }
+      else
+      {
+         slicedDirectBuffer = slicedBuffer;
+      }
 
-      BytePointer imageDataPointer = new BytePointer(slicedBuffer);
+      BytePointer imageDataPointer = new BytePointer(slicedDirectBuffer);
       mat.data(imageDataPointer);
    }
 

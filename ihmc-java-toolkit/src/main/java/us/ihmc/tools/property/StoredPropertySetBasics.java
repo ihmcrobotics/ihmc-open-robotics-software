@@ -40,11 +40,5 @@ public interface StoredPropertySetBasics extends StoredPropertySetReadOnly
 
    String getCurrentVersionSuffix();
 
-   Class<?> getClassForLoading();
-
    String getUncapitalizedClassName();
-
-   String getDirectoryNameToAssumePresent();
-
-   String getSubsequentPathToResourceFolder();
 }

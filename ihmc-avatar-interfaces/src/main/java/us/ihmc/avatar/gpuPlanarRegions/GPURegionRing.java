@@ -1,11 +1,12 @@
-package us.ihmc.gdx.perception;
+package us.ihmc.avatar.gpuPlanarRegions;
 
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple2D.Vector2D;
 
-public class GDXGPURegionRing
+public class GPURegionRing
 {
    private final RecyclingArrayList<Vector2D> boundaryIndices = new RecyclingArrayList<>(Vector2D::new);
+   private int index;
 
    public void reset()
    {
@@ -15,5 +16,15 @@ public class GDXGPURegionRing
    public RecyclingArrayList<Vector2D> getBoundaryIndices()
    {
       return boundaryIndices;
+   }
+
+   public void setIndex(int index)
+   {
+      this.index = index;
+   }
+
+   public int getIndex()
+   {
+      return index;
    }
 }
