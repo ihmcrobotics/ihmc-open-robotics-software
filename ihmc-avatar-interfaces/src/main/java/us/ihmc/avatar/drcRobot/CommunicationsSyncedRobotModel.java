@@ -26,7 +26,7 @@ import java.util.function.Function;
 public abstract class CommunicationsSyncedRobotModel
 {
    private final FullHumanoidRobotModel fullRobotModel;
-   private final HandModel handModel;
+   private final SideDependentList<HandModel> handModels;
    private final Timer dataReceptionTimer;
    protected RobotConfigurationData robotConfigurationData;
    protected SideDependentList<HandJointAnglePacket> handJointAnglePackets = new SideDependentList<>();
@@ -36,16 +36,16 @@ public abstract class CommunicationsSyncedRobotModel
    private final HumanoidReferenceFrames referenceFrames;
    private final FramePose3D temporaryPoseForQuickReading = new FramePose3D();
 
-   public CommunicationsSyncedRobotModel(FullHumanoidRobotModel fullRobotModel, HandModel handModel, HumanoidRobotSensorInformation sensorInformation)
+   public CommunicationsSyncedRobotModel(FullHumanoidRobotModel fullRobotModel, SideDependentList<HandModel> handModels, HumanoidRobotSensorInformation sensorInformation)
    {
       this.fullRobotModel = fullRobotModel;
-      this.handModel = handModel;
+      this.handModels = handModels;
       robotConfigurationData = new RobotConfigurationData();
       referenceFrames = new HumanoidReferenceFrames(fullRobotModel, sensorInformation);
       allJoints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
 
-      if (handModel != null)
-         HandModelUtils.getHandJoints(handModel, fullRobotModel, handJoints);
+      if (handModels != null)
+         HandModelUtils.getHandJoints(handModels, fullRobotModel, handJoints);
 
       jointNameHash = RobotConfigurationDataFactory.calculateJointNameHash(allJoints,
                                                                            fullRobotModel.getForceSensorDefinitions(),
@@ -86,9 +86,9 @@ public abstract class CommunicationsSyncedRobotModel
          allJoints[i].setQ(robotConfigurationData.getJointAngles().get(i));
       }
 
-      if (handModel != null)
+      if (handModels != null)
       {
-         HandModelUtils.copyHandJointAnglesFromMessagesToOneDoFJoints(handModel, handJoints, handJointAnglePackets);
+         HandModelUtils.copyHandJointAnglesFromMessagesToOneDoFJoints(handModels, handJoints, handJointAnglePackets);
       }
 
       fullRobotModel.getElevator().updateFramesRecursively();
