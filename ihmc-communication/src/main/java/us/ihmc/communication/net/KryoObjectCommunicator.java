@@ -32,32 +32,34 @@ public abstract class KryoObjectCommunicator implements NetworkedObjectCommunica
 
    private final ArrayList<GlobalObjectConsumer> globalListeners = new ArrayList<GlobalObjectConsumer>();
 
-   // Stuff for data count table 
+   // Stuff for data count table
    private DefaultTableModel dataRateTable;
    private LinkedHashMap<Class<?>, TableData> dataCounts;
    private long startTime = 0;
 
+
    public void showBandwidthDialog(String name)
    {
-      if (dataRateTable == null)
+      if(dataRateTable == null)
       {
          dataCounts = new LinkedHashMap<Class<?>, TableData>();
          JFrame jFrame = new JFrame(name);
          Container contentPane = jFrame.getContentPane();
 
-         dataRateTable = new DefaultTableModel(new Object[] {"Object", "Total bits", "bps"}, 0);
+         dataRateTable = new DefaultTableModel(new Object[]{"Object", "Total bits", "bps"}, 0);
 
          int rowNumber = 0;
-         for (Class<?> clazz : listeners.keySet())
+         for(Class<?> clazz : listeners.keySet())
          {
             dataCounts.put(clazz, new TableData(rowNumber));
-            dataRateTable.addRow(new Object[] {clazz.getSimpleName(), 0, 0});
+            dataRateTable.addRow(new Object[] { clazz.getSimpleName(), 0, 0 });
             rowNumber++;
          }
 
          JTable table = new JTable(dataRateTable);
          JScrollPane scrollPane = new JScrollPane(table);
          contentPane.add(scrollPane);
+
 
          jFrame.pack();
          jFrame.setSize(400, 500);
@@ -68,12 +70,12 @@ public abstract class KryoObjectCommunicator implements NetworkedObjectCommunica
 
    protected void registerClassList(NetClassList classList)
    {
-      if (!listeners.containsKey(Object.class))
+      if(!listeners.containsKey(Object.class))
       {
          listeners.put(Object.class, new ArrayList<ObjectConsumer<?>>());
       }
 
-      for (Class<?> clazz : classList.getPacketClassList())
+      for(Class<?> clazz : classList.getPacketClassList())
       {
          listeners.put(clazz, new ArrayList<ObjectConsumer<?>>());
          listenerExecutors.put(clazz, Executors.newFixedThreadPool(1, ThreadTools.getNamedThreadFactory("Kryo" + clazz.getSimpleName() + "Listener")));
@@ -95,15 +97,20 @@ public abstract class KryoObjectCommunicator implements NetworkedObjectCommunica
    @Override
    public <T> void attachListener(Class<T> clazz, ObjectConsumer<T> listener)
    {
-      if (!listeners.containsKey(clazz))
-         listeners.put(clazz, new ArrayList<>());
-      listeners.get(clazz).add(listener);
+      if(listeners.containsKey(clazz))
+      {
+         listeners.get(clazz).add(listener);
+      }
+      else
+      {
+         throw new RuntimeException("Class " + clazz.getSimpleName() + " is not registered with ObjectCommunicator");
+      }
    }
 
    @Override
    public <T> void detachListener(Class<T> clazz, ObjectConsumer<T> listener)
    {
-      if (listeners.containsKey(clazz))
+      if(listeners.containsKey(clazz))
       {
          ArrayList<ObjectConsumer<?>> listenerList = listeners.get(clazz);
          if (listenerList.contains(listener))
@@ -138,13 +145,13 @@ public abstract class KryoObjectCommunicator implements NetworkedObjectCommunica
    public synchronized int send(Object object)
    {
 
-//      if (!listeners.containsKey(object.getClass()))
-//      {
-//         if (throwExceptionForUnregisteredPackets.get())
-//            throw new RuntimeException(object.getClass().getSimpleName() + " not registered with ObjectCommunicator");
-//         else
-//            return -1;
-//      }
+      if (!listeners.containsKey(object.getClass()))
+      {
+         if (throwExceptionForUnregisteredPackets.get())
+            throw new RuntimeException(object.getClass().getSimpleName() + " not registered with ObjectCommunicator");
+         else
+            return -1;
+      }
       int bytesSend = sendTCP(object);
       updateDataRateTable(object, bytesSend);
       return bytesSend;
@@ -157,9 +164,9 @@ public abstract class KryoObjectCommunicator implements NetworkedObjectCommunica
 
    private void updateDataRateTable(Object object, int bytesSend)
    {
-      if (dataRateTable != null)
+      if(dataRateTable != null)
       {
-         if (startTime == 0)
+         if(startTime == 0)
          {
             startTime = System.nanoTime();
          }
@@ -182,7 +189,7 @@ public abstract class KryoObjectCommunicator implements NetworkedObjectCommunica
          {
             final Class<? extends Object> classType = object.getClass();
             ExecutorService executorService = listenerExecutors.get(classType);
-            if (executorService != null)
+            if(executorService != null)
             {
                executorService.execute(new Runnable()
                {
@@ -190,7 +197,7 @@ public abstract class KryoObjectCommunicator implements NetworkedObjectCommunica
                   @Override
                   public void run()
                   {
-                     for (int i = 0; i < globalListeners.size(); i++)
+                     for(int i = 0; i < globalListeners.size(); i++)
                      {
                         globalListeners.get(i).consumeObject(object);
                      }
@@ -215,6 +222,7 @@ public abstract class KryoObjectCommunicator implements NetworkedObjectCommunica
             }
          }
 
+
          @Override
          public void connected(Connection connection)
          {
@@ -223,7 +231,7 @@ public abstract class KryoObjectCommunicator implements NetworkedObjectCommunica
                tcpStateListeners.get(i).connected(connection);
             }
 
-            for (int i = 0; i < stateListeners.size(); i++)
+            for(int i = 0; i< stateListeners.size(); i++)
             {
                stateListeners.get(i).connected();
             }
@@ -237,7 +245,7 @@ public abstract class KryoObjectCommunicator implements NetworkedObjectCommunica
                tcpStateListeners.get(i).disconnected(connection);
             }
 
-            for (int i = 0; i < stateListeners.size(); i++)
+            for(int i = 0; i< stateListeners.size(); i++)
             {
                stateListeners.get(i).disconnected();
             }
@@ -257,7 +265,7 @@ public abstract class KryoObjectCommunicator implements NetworkedObjectCommunica
    public final void disconnect()
    {
       closeConnection();
-      for (ExecutorService executor : listenerExecutors.values())
+      for(ExecutorService executor : listenerExecutors.values())
       {
          executor.shutdownNow();
       }
@@ -273,8 +281,7 @@ public abstract class KryoObjectCommunicator implements NetworkedObjectCommunica
    public abstract boolean isConnected();
 
    /**
-    * Disconnect the connection, but leave the executor listeners alive. This allows re-connecting at a
-    * later moment.
+    * Disconnect the connection, but leave the executor listeners alive. This allows re-connecting at a later moment.
     */
    @Override
    public abstract void closeConnection();
@@ -293,7 +300,7 @@ public abstract class KryoObjectCommunicator implements NetworkedObjectCommunica
       public void addData(int bits, double wallTime)
       {
          totalBits += bits;
-         bitsPerSecond = totalBits / wallTime;
+         bitsPerSecond = totalBits/wallTime;
       }
 
       public long getTotalBits()

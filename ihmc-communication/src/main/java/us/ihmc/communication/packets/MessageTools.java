@@ -353,6 +353,14 @@ public class MessageTools
       return message;
    }
 
+   public static void packWeightMatrix3DMessage(Tuple3DReadOnly weight, WeightMatrix3DMessage messageToPack)
+   {
+      messageToPack.setWeightFrameId(MessageTools.toFrameId(null));
+      messageToPack.setXWeight(weight.getX());
+      messageToPack.setYWeight(weight.getY());
+      messageToPack.setZWeight(weight.getZ());
+   }
+
    public static void packWeightMatrix3DMessage(double weight, WeightMatrix3DMessage messageToPack)
    {
       messageToPack.setWeightFrameId(MessageTools.toFrameId(null));

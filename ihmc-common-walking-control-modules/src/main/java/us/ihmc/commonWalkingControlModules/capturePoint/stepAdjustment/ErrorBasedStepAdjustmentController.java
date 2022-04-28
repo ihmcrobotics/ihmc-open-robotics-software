@@ -359,7 +359,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       RobotSide swingSide = upcomingFootstepSide.getEnumValue();
       RobotSide stanceSide = swingSide.getOppositeSide();
       captureRegionCalculator.calculateCaptureRegion(swingSide,
-                                                     timeRemainingInState.getDoubleValue(),
+                                                     Math.max(timeRemainingInState.getDoubleValue(), 0.0),
                                                      currentICP,
                                                      omega0,
                                                      allowableAreaForCoP);
