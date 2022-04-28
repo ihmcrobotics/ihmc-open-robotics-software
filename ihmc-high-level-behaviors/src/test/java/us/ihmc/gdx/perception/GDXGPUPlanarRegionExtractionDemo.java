@@ -22,7 +22,7 @@ public class GDXGPUPlanarRegionExtractionDemo
    private GDXInteractableReferenceFrame robotInteractableReferenceFrame;
    private GDXPose3DGizmo l515PoseGizmo = new GDXPose3DGizmo();
    private GDXEnvironmentBuilder environmentBuilder;
-   private GDXGPUPlanarRegionExtraction gpuPlanarRegionExtraction;
+   private GDXGPUPlanarRegionExtractionUI gpuPlanarRegionExtraction;
 
    public GDXGPUPlanarRegionExtractionDemo()
    {
@@ -101,7 +101,7 @@ public class GDXGPUPlanarRegionExtractionDemo
                   CameraPinholeBrown cameraIntrinsics = l515.getDepthCameraIntrinsics();
                   baseUI.get3DSceneManager().addRenderableProvider(l515, GDXSceneLevel.VIRTUAL);
 
-                  gpuPlanarRegionExtraction = new GDXGPUPlanarRegionExtraction();
+                  gpuPlanarRegionExtraction = new GDXGPUPlanarRegionExtractionUI();
                   gpuPlanarRegionExtraction.create(imageWidth,
                                                    imageHeight,
                                                    l515.getLowLevelSimulator().getMetersDepthFloatBuffer(),

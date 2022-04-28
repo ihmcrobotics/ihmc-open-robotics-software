@@ -1,4 +1,4 @@
-package us.ihmc.gdx.perception;
+package us.ihmc.avatar.gpuPlanarRegions;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.decomposition.svd.SvdImplicitQrDecompose_DDRM;
@@ -12,7 +12,7 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 
-public class GDXGPUPlanarRegion
+public class GPUPlanarRegion
 {
    private final Vector3D32 normalAverage = new Vector3D32();
    private final Vector3D32 normalSVD = new Vector3D32();
@@ -24,7 +24,7 @@ public class GDXGPUPlanarRegion
    private final RigidBodyTransform transformToWorldFrame = new RigidBodyTransform();
    private final RecyclingArrayList<Point2D> borderIndices = new RecyclingArrayList<>(Point2D::new);
    private final RecyclingArrayList<Vector3D> boundaryVertices = new RecyclingArrayList<>(Vector3D::new);
-   private final RecyclingArrayList<GDXGPURegionRing> regionRings = new RecyclingArrayList<>(GDXGPURegionRing::new);
+   private final RecyclingArrayList<GPURegionRing> regionRings = new RecyclingArrayList<>(GPURegionRing::new);
    // TODO: kd tree
    private int numberOfPatches;
    private int id;
@@ -72,7 +72,7 @@ public class GDXGPUPlanarRegion
       return borderIndices;
    }
 
-   public RecyclingArrayList<GDXGPURegionRing> getRegionRings()
+   public RecyclingArrayList<GPURegionRing> getRegionRings()
    {
       return regionRings;
    }
