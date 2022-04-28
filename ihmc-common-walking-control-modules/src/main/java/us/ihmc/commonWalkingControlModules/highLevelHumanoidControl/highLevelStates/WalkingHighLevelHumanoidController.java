@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
-import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
+import us.ihmc.commonWalkingControlModules.capturePoint.HeightManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleInput;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleOutput;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -96,7 +96,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;
    private final BalanceManager balanceManager;
-   private final CenterOfMassHeightManager comHeightManager;
+   private final HeightManager comHeightManager;
 
    private final TouchdownErrorCompensator touchdownErrorCompensator;
 

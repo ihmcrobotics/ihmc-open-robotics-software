@@ -7,6 +7,7 @@ import java.util.Map;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
+import us.ihmc.commonWalkingControlModules.capturePoint.HeightManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.DefaultSplitFractionCalculatorParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
@@ -57,7 +58,7 @@ public class HighLevelControlManagerFactory
    private final YoRegistry comHeightGainRegistry = new YoRegistry(comHeightGainRegistryName);
 
    private BalanceManager balanceManager;
-   private CenterOfMassHeightManager centerOfMassHeightManager;
+   private HeightManager centerOfMassHeightManager;
    private FeetManager feetManager;
    private PelvisOrientationManager pelvisOrientationManager;
 
@@ -166,7 +167,7 @@ public class HighLevelControlManagerFactory
       return balanceManager;
    }
 
-   public CenterOfMassHeightManager getOrCreateCenterOfMassHeightManager()
+   public HeightManager getOrCreateCenterOfMassHeightManager()
    {
       if (centerOfMassHeightManager != null)
          return centerOfMassHeightManager;

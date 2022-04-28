@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
-import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
+import us.ihmc.commonWalkingControlModules.capturePoint.HeightManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -28,7 +28,7 @@ public abstract class SingleSupportState extends WalkingState
    protected final FullHumanoidRobotModel fullRobotModel;
 
    protected final BalanceManager balanceManager;
-   private final CenterOfMassHeightManager comHeightManager;
+   private final HeightManager comHeightManager;
 
    public SingleSupportState(WalkingStateEnum singleSupportStateEnum,
                              WalkingMessageHandler walkingMessageHandler,

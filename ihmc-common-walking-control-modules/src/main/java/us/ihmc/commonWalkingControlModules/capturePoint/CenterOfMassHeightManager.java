@@ -35,14 +35,15 @@ import us.ihmc.yoVariables.variable.YoEnum;
  * The PelvisHeightTrajectoryCommand uses a pdController to compute the Linear Momentum Z and sends a momentum command to the controller core
  * If you want to the controller to manage the pelvis height while walking use the PelvisHeightTrajectoryCommand.
  */
-public class CenterOfMassHeightManager
+public class CenterOfMassHeightManager implements HeightManager
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final StateMachine<PelvisHeightControlMode, PelvisAndCenterOfMassHeightControlState> stateMachine;
    private final YoEnum<PelvisHeightControlMode> requestedState;
 
    /** Manages the height of the robot by default, Tries to adjust the pelvis based on the nominal height requested **/
-   private final CenterOfMassHeightControlState centerOfMassHeightControlState;
+//   private final CenterOfMassHeightControlState centerOfMassHeightControlState;
+   private final HeightThroughKneeControlState centerOfMassHeightControlState;
 
    /** User Controlled Pelvis Height Mode, tries to achieve a desired pelvis height regardless of the robot configuration**/
    private final PelvisHeightControlState pelvisHeightControlState;
@@ -65,7 +66,10 @@ public class CenterOfMassHeightManager
       YoDouble yoTime = controllerToolbox.getYoTime();
       String namePrefix = getClass().getSimpleName();
       requestedState = new YoEnum<>(namePrefix + "RequestedControlMode", registry, PelvisHeightControlMode.class, true);
-      centerOfMassHeightControlState = new CenterOfMassHeightControlState(controllerToolbox, walkingControllerParameters, registry);
+//      centerOfMassHeightControlState = new CenterOfMassHeightControlState(controllerToolbox, walkingControllerParameters, registry);
+
+      centerOfMassHeightControlState = new HeightThroughKneeControlState(controllerToolbox, walkingControllerParameters, registry);
+
       stateMachine = setupStateMachine(namePrefix, yoTime);
    }
 

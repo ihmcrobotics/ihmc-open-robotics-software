@@ -4,7 +4,7 @@ import java.util.List;
 
 import controller_msgs.msg.dds.ManipulationAbortedStatus;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
-import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
+import us.ihmc.commonWalkingControlModules.capturePoint.HeightManager;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
@@ -83,7 +83,7 @@ public class WalkingCommandConsumer
    private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;
    private final BalanceManager balanceManager;
-   private final CenterOfMassHeightManager comHeightManager;
+   private final HeightManager comHeightManager;
 
    private final RigidBodyControlManager chestManager;
    private final RigidBodyControlManager headManager;
