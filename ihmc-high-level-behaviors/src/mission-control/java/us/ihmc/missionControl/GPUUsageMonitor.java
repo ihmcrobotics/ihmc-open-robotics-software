@@ -1,5 +1,6 @@
 package us.ihmc.missionControl;
 
+import us.ihmc.log.LogTools;
 import us.ihmc.tools.processManagement.ProcessTools;
 
 public class GPUUsageMonitor
@@ -20,6 +21,12 @@ public class GPUUsageMonitor
             }
          }
       }
+      String nvidiaSMI = ProcessTools.execSimpleCommand("nvidia-smi");
+      if (nvidiaSMI != null && !nvidiaSMI.isEmpty())
+      {
+         hasNvidiaGPU = true;
+      }
+      LogTools.info("Has NVIDIA GPU: {}", hasNvidiaGPU);
    }
 
    public double getGPUUsage()
