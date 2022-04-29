@@ -18,6 +18,9 @@ public class ImGuiSSHJMissionControlUI
                                                             "ihmc-open-robotics-software",
                                                             "ihmc-high-level-behaviors/src/libgdx/resources",
                                                             "Mission Control 2");
+      imGuiGlfwWindow.setIcons("icons/mission-control-2-icon16.png",
+                               "icons/mission-control-2-icon32.png",
+                               "icons/mission-control-2-icon48.png");
       imGuiGlfwWindow.runWithSinglePanel(this::renderImGuiWidgets);
 
       raspberryPi = new ImGuiSSHJMachine("Raspberry Pi", REMOTE_HOSTNAME, REMOTE_USERNAME);
