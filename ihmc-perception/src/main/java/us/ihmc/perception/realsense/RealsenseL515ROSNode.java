@@ -8,7 +8,6 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.message.Time;
 import sensor_msgs.Image;
-import sun.misc.Unsafe;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -25,9 +24,6 @@ import us.ihmc.utilities.ros.ROS1Helper;
 import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.publisher.RosCameraInfoPublisher;
 import us.ihmc.utilities.ros.publisher.RosImagePublisher;
-
-import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 public class RealsenseL515ROSNode
 {
@@ -47,7 +43,7 @@ public class RealsenseL515ROSNode
    private int depthWidth;
    private int depthHeight;
    private CameraPinholeBrown depthCameraIntrinsics;
-   private static final boolean useROS1 = true;
+   private static final boolean publishROS1 = true;
 
    public RealsenseL515ROSNode()
    {
@@ -81,7 +77,7 @@ public class RealsenseL515ROSNode
             depthWidth = l515.getDepthWidth();
             depthHeight = l515.getDepthHeight();
 
-            if (useROS1)
+            if (publishROS1)
             {
                String ros1DepthImageTopic = RosTools.L515_DEPTH;
                String ros1DepthCameraInfoTopic = RosTools.L515_DEPTH_CAMERA_INFO;
@@ -113,7 +109,6 @@ public class RealsenseL515ROSNode
                depthCameraIntrinsics.setCy(l515.getPrincipalOffsetYPixels());
             }
 
-
             VideoPacket videoPacket = new VideoPacket();
             videoPacket.setImageHeight(depthHeight);
             videoPacket.setImageWidth(depthWidth);
@@ -125,53 +120,13 @@ public class RealsenseL515ROSNode
             }
             ros2Helper.publish(ROS2Tools.L515_DEPTH, videoPacket);
 
-            if (useROS1 && ros1DepthPublisher.isConnected() && ros1DepthCameraInfoPublisher.isConnected())
+            if (publishROS1 && ros1DepthPublisher.isConnected() && ros1DepthCameraInfoPublisher.isConnected())
             {
-//               depthU16C1Image.convertTo(depth32FC1Image.getBytedecoOpenCVMat(), opencv_core.CV_32FC1, l515.getDepthToMeterConversion(), 0.0);
-//               depth32FC1Image.rewind();
-//               ByteBuffer depthFloatBuffer = depth32FC1Image.getBackingDirectByteBuffer();
-
                ros1DepthChannelBuffer.clear();
                for (int i = 0; i < depthFrameDataSize; i++)
                {
                   ros1DepthChannelBuffer.writeByte(dataPointer.get(i));
                }
-
-
-//               int size = 2 * depthWidth * depthHeight;
-////               BytePointer dataPointer = depthU16C1Image.ptr();
-//               for (int y = 0; y < depthHeight; y++)
-//               {
-//                  for (int x = 0; x < depthWidth; x++)
-//                  {
-////                     float eyeDepthMeters = depthFloatBuffer.getFloat();
-////
-////                     int row = y + 1;
-////                     int backForY = row * depthWidth * 2;
-////                     int forwardForX = x * 2;
-////                     int index = size - backForY + forwardForX;
-////                     char depthChar16 = (char) Math.round(eyeDepthMeters * 1000.0f); // 1000 is 1 meter
-////                     ros1DepthChannelBuffer.setChar(index, depthChar16);
-//
-//                     ros1DepthChannelBuffer.writeShort(Short.toUnsignedInt(dataPointer.getShort(depthWidth + depthHeight * depthWidth)));
-//                  }
-//               }
-
-//               ByteBuffer depthImageByteBuffer = l515.getDepthFrameData().asByteBuffer();
-//               depthImageByteBuffer.limit(l515.getDepthFrameDataSize());
-//               ByteBuffer.allocateDirect(l515.getDepthFrameDataSize());
-
-//               Unsafe.getUnsafe().
-
-//               Arrays.copyOf().
-
-
-//               ByteBuffer.
-
-//               ByteBuffer depthImageByteBuffer = depthU16C1Image.asByteBuffer();
-//               ros1DepthChannelBuffer.writeBytes(depthImageByteBuffer);
-
-//               ros
 
                ros1DepthChannelBuffer.readerIndex(0);
                ros1DepthChannelBuffer.writerIndex(depthFrameDataSize);
