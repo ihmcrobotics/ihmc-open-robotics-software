@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
+import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape.SphereVoxelType;
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -13,32 +15,53 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 public class Voxel3DGrid implements ReferenceFrameHolder
 {
    public static final int MAX_GRID_SIZE_VOXELS = (int) Math.pow(Integer.MAX_VALUE, 1.0 / 3.0);
 
-   private final ReferenceFrame referenceFrame;
    private final BoundingBox3D boundingBox;
    private final SphereVoxelShape sphereVoxelShape;
    private final double voxelSize;
    private final double gridSizeMeters;
    private final int gridSizeVoxels;
    private final int numberOfVoxels;
-
    private final Voxel3DData[] voxels;
 
-   public Voxel3DGrid(ReferenceFrame referenceFrame, SphereVoxelShape sphereVoxelShape, int gridSizeInNumberOfVoxels, double voxelSize)
+   private final PoseReferenceFrame referenceFrame;
+
+   public static Voxel3DGrid newVoxel3DGrid(int gridSizeInNumberOfVoxels, double voxelSize, int numberOfRays, int numberOfRotationsAroundRay)
+   {
+      return newVoxel3DGrid(ReferenceFrame.getWorldFrame(), gridSizeInNumberOfVoxels, voxelSize, numberOfRays, numberOfRotationsAroundRay);
+   }
+
+   public static Voxel3DGrid newVoxel3DGrid(ReferenceFrame parentFrame,
+                                            int gridSizeInNumberOfVoxels,
+                                            double voxelSize,
+                                            int numberOfRays,
+                                            int numberOfRotationsAroundRay)
+   {
+      SphereVoxelShape sphereVoxelShape = new SphereVoxelShape(voxelSize, numberOfRays, numberOfRotationsAroundRay, SphereVoxelType.graspOrigin);
+      return new Voxel3DGrid(parentFrame, sphereVoxelShape, gridSizeInNumberOfVoxels, voxelSize);
+   }
+
+   public Voxel3DGrid(SphereVoxelShape sphereVoxelShape, int gridSizeInNumberOfVoxels, double voxelSize)
+   {
+      this(ReferenceFrame.getWorldFrame(), sphereVoxelShape, gridSizeInNumberOfVoxels, voxelSize);
+   }
+
+   public Voxel3DGrid(ReferenceFrame parentFrame, SphereVoxelShape sphereVoxelShape, int gridSizeInNumberOfVoxels, double voxelSize)
    {
       if (gridSizeInNumberOfVoxels > MAX_GRID_SIZE_VOXELS)
          throw new IllegalArgumentException("Grid size is too big: " + gridSizeInNumberOfVoxels + " [max=" + MAX_GRID_SIZE_VOXELS + "]");
 
       this.sphereVoxelShape = sphereVoxelShape;
-      this.referenceFrame = referenceFrame;
       this.voxelSize = voxelSize;
       gridSizeVoxels = gridSizeInNumberOfVoxels;
 
@@ -48,6 +71,8 @@ public class Voxel3DGrid implements ReferenceFrameHolder
       double halfSize = gridSizeMeters / 2.0;
       boundingBox = new BoundingBox3D(-halfSize, -halfSize, -halfSize, halfSize, halfSize, halfSize);
       voxels = new Voxel3DData[numberOfVoxels];
+      referenceFrame = new PoseReferenceFrame("voxel3DGridFrame", parentFrame);
+      sphereVoxelShape.setReferenceFrame(referenceFrame);
    }
 
    public Voxel3DData getVoxel(FrameTuple3DReadOnly query)
@@ -179,8 +204,18 @@ public class Voxel3DGrid implements ReferenceFrameHolder
       coneTransform.getTranslation().set(voxelLocation);
    }
 
+   public void setGridPose(RigidBodyTransformReadOnly pose)
+   {
+      referenceFrame.setPoseAndUpdate(pose);
+   }
+
+   public void setGridPose(Pose3DReadOnly pose)
+   {
+      referenceFrame.setPoseAndUpdate(pose);
+   }
+
    @Override
-   public ReferenceFrame getReferenceFrame()
+   public PoseReferenceFrame getReferenceFrame()
    {
       return referenceFrame;
    }

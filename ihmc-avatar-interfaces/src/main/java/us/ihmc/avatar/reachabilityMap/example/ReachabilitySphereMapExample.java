@@ -1,6 +1,7 @@
 package us.ihmc.avatar.reachabilityMap.example;
 
 import us.ihmc.avatar.reachabilityMap.ReachabilitySphereMapCalculator;
+import us.ihmc.avatar.reachabilityMap.Voxel3DGrid;
 import us.ihmc.avatar.reachabilityMap.example.RobotParameters.RobotArmJointParameters;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -26,7 +27,7 @@ public class ReachabilitySphereMapExample
       SimulationSession session = new SimulationSession("Reachability Analysis - Example");
       session.initializeBufferSize(16000);
       Robot robot = session.addRobot(robotDefinition);
-      ReachabilitySphereMapCalculator reachabilitySphereMapCalculator = new ReachabilitySphereMapCalculator(armJoints, robot.getControllerOutput());
+      ReachabilitySphereMapCalculator reachabilitySphereMapCalculator = new ReachabilitySphereMapCalculator(armJoints, robot.getControllerOutput(), Voxel3DGrid.newVoxel3DGrid(25, 0.05, 50, 1));
       robot.addController(reachabilitySphereMapCalculator);
       session.addYoGraphicDefinition(reachabilitySphereMapCalculator.getYoGraphicVisuals());
 
@@ -40,6 +41,7 @@ public class ReachabilitySphereMapExample
       SimulationSessionControls simControls = session.getSimulationSessionControls();
       simControls.addExternalTerminalCondition(reachabilitySphereMapCalculator::isDone);
       simControls.simulate(Integer.MAX_VALUE);
+      guiControls.waitUntilDown();
    }
 
    public static void main(String[] args)
