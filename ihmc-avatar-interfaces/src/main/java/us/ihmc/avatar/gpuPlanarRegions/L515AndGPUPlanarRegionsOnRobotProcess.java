@@ -136,6 +136,7 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
             syncedRobot.update();
             ReferenceFrame cameraFrame =
                   syncedRobot.hasReceivedFirstMessage() ? syncedRobot.getReferenceFrames().getSteppingCameraFrame() : ReferenceFrame.getWorldFrame();
+            // TODO: Wait for frame at time of data aquisition?
             gpuPlanarRegionExtraction.extractPlanarRegions(cameraFrame, doNothingRunnable);
             gpuPlanarRegionExtraction.findRegions(doNothingIslandConsumer);
             gpuPlanarRegionExtraction.findBoundariesAndHoles(doNothingRingConsumer);
