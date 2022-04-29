@@ -64,8 +64,6 @@ public class ReachabilitySphereMapCalculator implements Controller
 
    public void setStaticVisualConsumer(Consumer<VisualDefinition> staticVisualConsumer)
    {
-      ReachabilityMapTools.createReachibilityColorScaleVisuals().forEach(staticVisualConsumer);
-      ReachabilityMapTools.createBoundingBoxVisuals(voxel3DGrid.getMinPoint(), voxel3DGrid.getMaxPoint()).forEach(staticVisualConsumer);
       this.staticVisualConsumer = staticVisualConsumer;
    }
 
@@ -284,6 +282,11 @@ public class ReachabilitySphereMapCalculator implements Controller
    public boolean isDone()
    {
       return isDone.getValue();
+   }
+
+   public Voxel3DGrid getVoxel3DGrid()
+   {
+      return voxel3DGrid;
    }
 
    public YoFramePose3D getGridFramePose()
