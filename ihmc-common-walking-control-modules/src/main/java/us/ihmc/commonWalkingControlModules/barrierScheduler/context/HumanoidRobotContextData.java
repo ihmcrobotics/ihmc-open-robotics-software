@@ -62,6 +62,11 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
    private boolean controllerRan = false;
 
    /**
+    * Serves to inform the estimator and controller that the perception ran. Set by the perception.
+    */
+   private boolean perceptionRan = false;
+
+   /**
     * The controller desired center of pressure. Set by the controller.
     */
    private final CenterOfPressureDataHolder centerOfPressureDataHolder;
@@ -174,6 +179,7 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       schedulerTick = src.schedulerTick;
       controllerRan = src.controllerRan;
       estimatorRan = src.estimatorRan;
+      perceptionRan = src.perceptionRan;
       processedJointData.set(src.processedJointData);
       forceSensorDataHolder.set(src.forceSensorDataHolder);
       centerOfMassDataHolder.set(src.centerOfMassDataHolder);
@@ -211,6 +217,16 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
    public boolean getControllerRan()
    {
       return controllerRan;
+   }
+   
+   public void setPerceptionRan(boolean perceptionRan)
+   {
+      this.perceptionRan = perceptionRan;
+   }
+   
+   public boolean getPerceptionRan()
+   {
+      return perceptionRan;
    }
 
    public void setEstimatorRan(boolean estimatorRan)

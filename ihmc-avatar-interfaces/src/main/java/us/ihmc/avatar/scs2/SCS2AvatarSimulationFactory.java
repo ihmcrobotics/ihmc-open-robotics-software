@@ -362,7 +362,7 @@ public class SCS2AvatarSimulationFactory
       int controllerDivisor = (int) Math.round(robotModel.getControllerDT() / simulationDT.get());
       int handControlDivisor = (int) Math.round(robotModel.getSimulatedHandControlDT() / simulationDT.get());
       HumanoidRobotControlTask estimatorTask = new EstimatorTask(estimatorThread, estimatorDivisor, simulationDT.get(), masterFullRobotModel);
-      HumanoidRobotControlTask controllerTask = new ControllerTask(controllerThread, controllerDivisor, simulationDT.get(), masterFullRobotModel);
+      HumanoidRobotControlTask controllerTask = new ControllerTask("Controller", controllerThread, controllerDivisor, simulationDT.get(), masterFullRobotModel);
 
       AvatarSimulatedHandControlThread handControlThread = robotModel.createSimulatedHandController(realtimeROS2Node.get());
       SimulatedHandControlTask handControlTask = null;

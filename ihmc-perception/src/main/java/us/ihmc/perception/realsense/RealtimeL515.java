@@ -23,6 +23,7 @@ import org.bytedeco.librealsense2.rs2_sensor_list;
 import org.bytedeco.librealsense2.rs2_stream_profile;
 import org.bytedeco.librealsense2.global.realsense2;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.string.StringTools;
@@ -84,6 +85,7 @@ public class RealtimeL515
    
    // objects that receive the depth data
    protected final ArrayList<L515DepthImageReceiver> depthDataReceivers = new ArrayList<>();
+   private ReferenceFrame sensorFrame;
 
    /**
     * This class uses the Realsense2 API from bytedeco to poll perceptoin data from an L515
@@ -269,5 +271,15 @@ public class RealtimeL515
    public int getDepthHeight()
    {
       return height;
+   }
+   
+   public void setSensorFrame(ReferenceFrame sensorFrame)
+   {
+      this.sensorFrame = sensorFrame;
+   }
+
+   public ReferenceFrame getSensorFrame()
+   {
+      return sensorFrame;
    }
 }
