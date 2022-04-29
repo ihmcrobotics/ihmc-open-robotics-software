@@ -22,13 +22,13 @@ public class ROSOpenCVTools
    {
       ByteBuffer slicedBuffer = RosTools.sliceNettyBuffer(channelBuffer);
       ByteBuffer slicedDirectBuffer;
-      if (!slicedBuffer.isDirect())
+      if (!slicedBuffer.isDirect()) // TODO: How to get Netty to receive via direct buffers?
       {
-         //         throw new RuntimeException("Netty buffer is not direct somehow.");
          slicedDirectBuffer = ByteBuffer.allocateDirect(slicedBuffer.capacity());
          slicedDirectBuffer.order(ByteOrder.nativeOrder());
          slicedBuffer.rewind();
          slicedDirectBuffer.put(slicedBuffer);
+         slicedDirectBuffer.rewind();
       }
       else
       {
