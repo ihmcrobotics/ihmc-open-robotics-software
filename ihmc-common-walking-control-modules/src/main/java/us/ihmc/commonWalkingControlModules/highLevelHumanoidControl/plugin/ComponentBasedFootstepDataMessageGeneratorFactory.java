@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.Con
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGeneratorParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.DesiredTurningVelocityProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.DesiredVelocityProvider;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScript;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.StopWalkingMessenger;
@@ -41,6 +42,7 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
    private final OptionalFactoryField<HeadingAndVelocityEvaluationScriptParameters> headingAndVelocityEvaluationScriptParametersField = new OptionalFactoryField<>("headingAndVelocityEvaluationScriptParameters");
    private final OptionalFactoryField<HeightMap> heightMapField = new OptionalFactoryField<>("heightMap");
    private final OptionalFactoryField<CSGCommandInputManager> csgCommandInputManagerField = new OptionalFactoryField<>("csgCommandInputManagerField");
+   private final OptionalFactoryField<FootstepAdjustment> footstepAdjusterField= new OptionalFactoryField<>("csgFootstepAdjusterField");
 
    public ComponentBasedFootstepDataMessageGeneratorFactory()
    {
@@ -59,6 +61,11 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
    public void setHeightMap(HeightMap heightMap)
    {
       heightMapField.set(heightMap);
+   }
+
+   public void setFootStepAdjustment(FootstepAdjustment footStepAdjustment)
+   {
+      footstepAdjusterField.set(footStepAdjustment);
    }
 
    public void setUseHeadingAndVelocityScript(boolean useHeadingAndVelocityScript)
@@ -97,7 +104,8 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
       DoubleProvider timeProvider = controllerToolbox.getYoTime();
 
       ContinuousStepGenerator continuousStepGenerator = new ContinuousStepGenerator(registryField.get());
-
+      
+      continuousStepGenerator.setFootstepAdjustment(footstepAdjusterField.get());
       continuousStepGenerator.setFootstepStatusListener(statusMessageOutputManager);
       continuousStepGenerator.setFrameBasedFootPoseProvider(referenceFrames.getSoleZUpFrames());
       continuousStepGenerator.configureWith(walkingControllerParameters);
