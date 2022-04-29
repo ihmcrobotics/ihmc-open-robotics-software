@@ -1,5 +1,6 @@
 package us.ihmc.avatar.reachabilityMap.example;
 
+import us.ihmc.avatar.reachabilityMap.ReachabilityMapTools;
 import us.ihmc.avatar.reachabilityMap.ReachabilitySphereMapCalculator;
 import us.ihmc.avatar.reachabilityMap.Voxel3DGrid;
 import us.ihmc.avatar.reachabilityMap.example.RobotParameters.RobotArmJointParameters;
@@ -27,19 +28,21 @@ public class ReachabilitySphereMapExample
       SimulationSession session = new SimulationSession("Reachability Analysis - Example");
       session.initializeBufferSize(16000);
       Robot robot = session.addRobot(robotDefinition);
-      ReachabilitySphereMapCalculator reachabilitySphereMapCalculator = new ReachabilitySphereMapCalculator(armJoints, robot.getControllerOutput(), Voxel3DGrid.newVoxel3DGrid(25, 0.05, 50, 1));
-      robot.addController(reachabilitySphereMapCalculator);
-      session.addYoGraphicDefinition(reachabilitySphereMapCalculator.getYoGraphicVisuals());
+      ReachabilitySphereMapCalculator calculator = new ReachabilitySphereMapCalculator(armJoints, robot.getControllerOutput(), Voxel3DGrid.newVoxel3DGrid(25, 0.05, 50, 1));
+      robot.addController(calculator);
+      session.addYoGraphicDefinition(calculator.getYoGraphicVisuals());
 
       SessionVisualizerControls guiControls = SessionVisualizer.startSessionVisualizer(session);
       VisualDefinitionFactory visualDefinitionFactory = new VisualDefinitionFactory();
       visualDefinitionFactory.appendTranslation(RobotArmJointParameters.getRootJoint().getJointOffset());
       visualDefinitionFactory.addCoordinateSystem(1.0);
       guiControls.addStaticVisuals(visualDefinitionFactory.getVisualDefinitions());
-      reachabilitySphereMapCalculator.setStaticVisualConsumer(guiControls::addStaticVisual);
+      guiControls.addStaticVisuals(ReachabilityMapTools.createReachibilityColorScaleVisuals());
+      guiControls.addStaticVisuals(ReachabilityMapTools.createBoundingBoxVisuals(calculator.getVoxel3DGrid()));
+      calculator.setStaticVisualConsumer(guiControls::addStaticVisual);
 
       SimulationSessionControls simControls = session.getSimulationSessionControls();
-      simControls.addExternalTerminalCondition(reachabilitySphereMapCalculator::isDone);
+      simControls.addExternalTerminalCondition(calculator::isDone);
       simControls.simulate(Integer.MAX_VALUE);
       guiControls.waitUntilDown();
    }
