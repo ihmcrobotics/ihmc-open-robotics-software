@@ -9,7 +9,6 @@ import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
 import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DData;
-import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DKey;
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -17,7 +16,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -28,7 +27,6 @@ import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.scs2.definition.controller.ControllerOutput;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
-import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
@@ -45,11 +43,10 @@ public class ReachabilitySphereMapCalculator implements Controller
    };
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-   private final Voxel3DGrid voxel3DGrid;
+   private Voxel3DGrid voxel3DGrid;
 
-   private Consumer<VisualDefinition> staticVisualConsumer;
-
-   private boolean showUnreachableVoxels = false;
+   private Consumer<Voxel3DData> voxelUnreachableListener = null;
+   private Consumer<Voxel3DData> voxelCompletedListener = null;
 
    private final ReachabilityMapSolver[] solvers;
 
@@ -83,11 +80,18 @@ public class ReachabilitySphereMapCalculator implements Controller
          solvers[i] = new ReachabilityMapSolver(solverJoints, new YoGraphicsListRegistry(), solverRegistry);
       }
 
-      gridFramePose.attachVariableChangedListener(v -> voxel3DGrid.setGridPose(gridFramePose));
+      gridFramePose.attachVariableChangedListener(v -> this.voxel3DGrid.setGridPose(gridFramePose));
       FramePose3D gridFramePose = new FramePose3D(ReferenceFrame.getWorldFrame(), robotArmJoints[0].getFrameBeforeJoint().getTransformToWorldFrame());
       gridFramePose.appendTranslation(getGridSizeInMeters() / 2.5, 0.0, 0.0);
       setGridFramePose(gridFramePose);
       stateMachine = setupStateMachine();
+   }
+
+   public void setVoxel3DGrid(Voxel3DGrid voxel3DGrid)
+   {
+      if (this.voxel3DGrid != null)
+         voxel3DGrid.getReferenceFrame().setPoseAndUpdate(this.voxel3DGrid.getReferenceFrame().getTransformToParent());
+      this.voxel3DGrid = voxel3DGrid;
    }
 
    private StateMachine<CalculatorState, State> setupStateMachine()
@@ -100,9 +104,14 @@ public class ReachabilitySphereMapCalculator implements Controller
       return factory.build(CalculatorState.VOXEL_REACH);
    }
 
-   public void setStaticVisualConsumer(Consumer<VisualDefinition> staticVisualConsumer)
+   public void setVoxelUnreachableListener(Consumer<Voxel3DData> voxelUnreachableListener)
    {
-      this.staticVisualConsumer = staticVisualConsumer;
+      this.voxelUnreachableListener = voxelUnreachableListener;
+   }
+
+   public void setVoxelCompletedListener(Consumer<Voxel3DData> voxelCompletedListener)
+   {
+      this.voxelCompletedListener = voxelCompletedListener;
    }
 
    public YoGraphicDefinition getYoGraphicVisuals()
@@ -132,11 +141,30 @@ public class ReachabilitySphereMapCalculator implements Controller
     * @param controlFramePose the transform from the control frame with respect to the end-effector's
     *                         body-fixed frame.
     */
-   public void setControlFramePose(RigidBodyTransform controlFramePose)
+   public void setControlFramePoseInBody(RigidBodyTransformReadOnly controlFramePose)
    {
       for (ReachabilityMapSolver solver : solvers)
       {
-         solver.setControlFramePose(controlFramePose);
+         solver.setControlFramePoseInBody(controlFramePose);
+      }
+   }
+
+   /**
+    * Sets the transform of the end-effector's frame of interest with respect to the end-effector's
+    * parent joint frame.
+    * <p>
+    * It is recommended to align the x-axis of the control frame with the vector that is orthogonal to
+    * the palm.
+    * </p>
+    * 
+    * @param controlFramePose the transform from the control frame with respect to the end-effector's
+    *                         parent joint frame.
+    */
+   public void setControlFramePoseInParentJoint(RigidBodyTransformReadOnly controlFramePose)
+   {
+      for (ReachabilityMapSolver solver : solvers)
+      {
+         solver.setControlFramePoseInParentJoint(controlFramePose);
       }
    }
 
@@ -170,7 +198,6 @@ public class ReachabilitySphereMapCalculator implements Controller
    public void doControl()
    {
       stateMachine.doActionAndTransition();
-      //      computeNext();
    }
 
    private final YoInteger currentVoxelIndex = new YoInteger("currentVoxelIndex", registry);
@@ -202,7 +229,6 @@ public class ReachabilitySphereMapCalculator implements Controller
                return;
 
             Voxel3DData voxel = voxel3DGrid.getOrCreateVoxel(voxelIndex);
-            Voxel3DKey key = voxel.getKey();
 
             if (solverIndex == 0)
             {
@@ -214,7 +240,7 @@ public class ReachabilitySphereMapCalculator implements Controller
             {
                if (solverIndex == 0)
                {
-                  for (OneDoFJointBasics joint : solvers[0].getRobotArmJoints())
+                  for (OneDoFJointBasics joint : solvers[solverIndex].getRobotArmJoints())
                   {
                      controllerOutput.getOneDoFJointOutput(joint).setConfiguration(joint);
                   }
@@ -222,12 +248,8 @@ public class ReachabilitySphereMapCalculator implements Controller
             }
             else
             {
-               if (showUnreachableVoxels)
-               {
-                  LogTools.info("Unreachable voxel, key: {}, position: {}", key, voxel.getPosition());
-                  SphereVoxelShape sphereVoxelShape = voxel3DGrid.getSphereVoxelShape();
-                  staticVisualConsumer.accept(sphereVoxelShape.createVisual(voxel.getPosition(), 0.1, -1));
-               }
+               if (voxelUnreachableListener != null)
+                  voxelUnreachableListener.accept(voxel);
 
                voxel3DGrid.destroy(voxel);
             }
@@ -277,8 +299,6 @@ public class ReachabilitySphereMapCalculator implements Controller
       @Override
       public void doAction(double timeInState)
       {
-         SphereVoxelShape sphereVoxelShape = voxel3DGrid.getSphereVoxelShape();
-
          IntStream.range(0, solvers.length).parallel().forEach(solverIndex ->
          {
             int voxelIndex = currentVoxelIndex.getValue() + solverIndex;
@@ -292,9 +312,8 @@ public class ReachabilitySphereMapCalculator implements Controller
 
             computeVoxel(voxel, solverIndex);
 
-            double reachabilityValue = voxel.getD();
-            if (reachabilityValue > 1e-3)
-               staticVisualConsumer.accept(sphereVoxelShape.createVisual(voxel.getPosition(), 0.25, reachabilityValue));
+            if (voxelCompletedListener != null)
+               voxelCompletedListener.accept(voxel);
          });
 
          currentVoxelIndex.add(solvers.length);
