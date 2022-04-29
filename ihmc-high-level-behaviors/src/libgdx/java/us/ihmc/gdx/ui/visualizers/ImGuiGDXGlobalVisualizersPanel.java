@@ -60,9 +60,9 @@ public class ImGuiGDXGlobalVisualizersPanel extends ImGuiPanel implements Render
    {
       for (ImGuiGDXVisualizer visualizer : visualizers)
       {
-         if (visualizer instanceof ImGuiGDXROS1Visualizer && ros1Helper != null)
+         if (visualizer instanceof ImGuiGDXROS1VisualizerInterface && ros1Helper != null)
          {
-            ((ImGuiGDXROS1Visualizer) visualizer).updateSubscribers(ros1Helper);
+            ((ImGuiGDXROS1VisualizerInterface) visualizer).updateSubscribers(ros1Helper);
          }
          if (visualizer.getPanel() != null)
             visualizer.getPanel().getIsShowing().set(visualizer.isActive());
