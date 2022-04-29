@@ -362,8 +362,12 @@ public class ValkyrieRobotModel implements DRCRobotModel
       return valkyrieInitialSetup;
    }
 
-   @Override
    public ValkyrieHandModel getHandModel()
+   {
+      return getHandModel(null);
+   }
+
+   public ValkyrieHandModel getHandModel(RobotSide side)
    {
       return new ValkyrieHandModel();
    }
