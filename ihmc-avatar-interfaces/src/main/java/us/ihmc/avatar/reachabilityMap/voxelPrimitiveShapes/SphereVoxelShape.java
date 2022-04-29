@@ -46,18 +46,22 @@ public class SphereVoxelShape
    private final int numberOfRotationsAroundRay;
 
    private final SphereVoxelType type;
-   private final ReferenceFrame parentFrame;
+   private ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
 
-   public SphereVoxelShape(ReferenceFrame parentFrame, double voxelSize, int numberOfRays, int numberOfRotationsAroundRay, SphereVoxelType type)
+   public SphereVoxelShape(double voxelSize, int numberOfRays, int numberOfRotationsAroundRay, SphereVoxelType type)
    {
       this.voxelSize = voxelSize;
-      this.parentFrame = parentFrame;
       this.type = type;
       this.numberOfRays = numberOfRays;
       this.numberOfRotationsAroundRay = numberOfRotationsAroundRay;
 
       pointsOnSphere = SpiralBasedAlgorithm.generatePointsOnSphere(sphereOrigin, voxelSize, numberOfRays);
       rotations = SpiralBasedAlgorithm.generateOrientations(numberOfRays, numberOfRotationsAroundRay);
+   }
+
+   public void setReferenceFrame(ReferenceFrame referenceFrame)
+   {
+      this.referenceFrame = referenceFrame;
    }
 
    public int getNumberOfRays()
@@ -83,7 +87,7 @@ public class SphereVoxelShape
       MathTools.checkIntervalContains(rayIndex, 0, numberOfRays - 1);
       MathTools.checkIntervalContains(rotationAroundRayIndex, 0, numberOfRotationsAroundRay - 1);
 
-      orientation.setIncludingFrame(parentFrame, rotations[rayIndex][rotationAroundRayIndex]);
+      orientation.setIncludingFrame(referenceFrame, rotations[rayIndex][rotationAroundRayIndex]);
    }
 
    public void getPose(FrameVector3D translationFromVoxelOrigin, FrameQuaternion orientation, int rayIndex, int rotationAroundRayIndex)
@@ -92,10 +96,10 @@ public class SphereVoxelShape
       MathTools.checkIntervalContains(rotationAroundRayIndex, 0, numberOfRotationsAroundRay - 1);
 
       if (type == SphereVoxelType.graspAroundSphere)
-         translationFromVoxelOrigin.setIncludingFrame(parentFrame, pointsOnSphere[rayIndex]);
+         translationFromVoxelOrigin.setIncludingFrame(referenceFrame, pointsOnSphere[rayIndex]);
       else
-         translationFromVoxelOrigin.setToZero(parentFrame);
-      orientation.setIncludingFrame(parentFrame, rotations[rayIndex][rotationAroundRayIndex]);
+         translationFromVoxelOrigin.setToZero(referenceFrame);
+      orientation.setIncludingFrame(referenceFrame, rotations[rayIndex][rotationAroundRayIndex]);
    }
 
    public Point3D[] getPointsOnSphere()

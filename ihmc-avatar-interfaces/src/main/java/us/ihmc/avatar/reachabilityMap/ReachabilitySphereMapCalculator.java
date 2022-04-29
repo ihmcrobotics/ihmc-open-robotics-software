@@ -11,7 +11,6 @@ import java.util.function.Consumer;
 import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DData;
 import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DKey;
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
-import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape.SphereVoxelType;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -38,41 +37,26 @@ public class ReachabilitySphereMapCalculator implements Controller
    private final ControllerOutput controllerOutput;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-   private Voxel3DGrid voxel3DGrid;
-   private SphereVoxelShape sphereVoxelShape;
+   private final Voxel3DGrid voxel3DGrid;
 
    private Consumer<VisualDefinition> staticVisualConsumer;
 
    private boolean showUnreachableVoxels = false;
-   private int gridSizeInNumberOfVoxels = 25;
-   private double voxelSize = 0.05;
-   private int numberOfRays = 50;
-   private int numberOfRotationsAroundRay = 1;
    private final FramePoint3D desiredPosition = new FramePoint3D();
 
    private final ReachabilityMapSolver solver;
    private ReachabilityMapFileWriter reachabilityMapFileWriter;
 
    private final YoFramePose3D gridFramePose = new YoFramePose3D("gridFramePose", ReferenceFrame.getWorldFrame(), registry);
-   private final ReferenceFrame gridFrame = new ReferenceFrame("gridFrame", ReferenceFrame.getWorldFrame())
-   {
-      {
-         gridFramePose.attachVariableChangedListener(v -> update());
-      }
-
-      @Override
-      protected void updateTransformToParent(RigidBodyTransform transformToParent)
-      {
-         gridFramePose.get(transformToParent);
-      }
-   };
    private final YoFramePose3D currentEvaluationPose = new YoFramePose3D("currentEvaluationPose", ReferenceFrame.getWorldFrame(), registry);
 
-   public ReachabilitySphereMapCalculator(OneDoFJointBasics[] robotArmJoints, ControllerOutput controllerOutput)
+   public ReachabilitySphereMapCalculator(OneDoFJointBasics[] robotArmJoints, ControllerOutput controllerOutput, Voxel3DGrid voxel3DGrid)
    {
       this.controllerOutput = controllerOutput;
-      solver = new ReachabilityMapSolver(robotArmJoints, new YoGraphicsListRegistry(), registry);
+      this.voxel3DGrid = voxel3DGrid;
 
+      solver = new ReachabilityMapSolver(robotArmJoints, new YoGraphicsListRegistry(), registry);
+      gridFramePose.attachVariableChangedListener(v -> voxel3DGrid.setGridPose(gridFramePose));
       FramePose3D gridFramePose = new FramePose3D(ReferenceFrame.getWorldFrame(), robotArmJoints[0].getFrameBeforeJoint().getTransformToWorldFrame());
       gridFramePose.appendTranslation(getGridSizeInMeters() / 2.5, 0.0, 0.0);
       setGridFramePose(gridFramePose);
@@ -81,6 +65,7 @@ public class ReachabilitySphereMapCalculator implements Controller
    public void setStaticVisualConsumer(Consumer<VisualDefinition> staticVisualConsumer)
    {
       ReachabilityMapTools.createReachibilityColorScaleVisuals().forEach(staticVisualConsumer);
+      ReachabilityMapTools.createBoundingBoxVisuals(voxel3DGrid.getMinPoint(), voxel3DGrid.getMaxPoint()).forEach(staticVisualConsumer);
       this.staticVisualConsumer = staticVisualConsumer;
    }
 
@@ -93,26 +78,6 @@ public class ReachabilitySphereMapCalculator implements Controller
       yoGraphics.add(newYoGraphicPoint3DDefinition("currentEvaluationPosition", currentEvaluationPose.getPosition(), 0.0125, ColorDefinitions.DeepPink()));
       group.setChildren(yoGraphics);
       return group;
-   }
-
-   /**
-    * Configure the space and resolution for the exploration of the arm reachability.
-    * 
-    * @param gridSizeInNumberOfVoxels   the region explored is a cube of size
-    *                                   {@code gridSizeInNumberOfVoxels * vozelSize}.
-    * @param voxelSize                  directly relates to the resolution of the exploration.
-    * @param numberOfRays               sets for each voxel the number of directions that are to be
-    *                                   explored with the x-axis.
-    * @param numberOfRotationsAroundRay sets the number of rotations to explore about each ray. The
-    *                                   total number of orientations explored at each voxel is
-    *                                   {@code numberOfRays * numberOfRotationsAroundRay}.
-    */
-   public void setGridParameters(int gridSizeInNumberOfVoxels, double voxelSize, int numberOfRays, int numberOfRotationsAroundRay)
-   {
-      this.gridSizeInNumberOfVoxels = gridSizeInNumberOfVoxels;
-      this.voxelSize = voxelSize;
-      this.numberOfRays = numberOfRays;
-      this.numberOfRotationsAroundRay = numberOfRotationsAroundRay;
    }
 
    /**
@@ -181,11 +146,8 @@ public class ReachabilitySphereMapCalculator implements Controller
 
       isInitialized.set(true);
 
-      sphereVoxelShape = new SphereVoxelShape(gridFrame, voxelSize, numberOfRays, numberOfRotationsAroundRay, SphereVoxelType.graspOrigin);
-      voxel3DGrid = new Voxel3DGrid(gridFrame, sphereVoxelShape, gridSizeInNumberOfVoxels, voxelSize);
       if (reachabilityMapFileWriter != null)
          reachabilityMapFileWriter.initialize(solver.getRobotArmJoints(), voxel3DGrid);
-      ReachabilityMapTools.createBoundingBoxVisuals(voxel3DGrid.getMinPoint(), voxel3DGrid.getMaxPoint()).forEach(staticVisualConsumer);
    }
 
    @Override
@@ -209,6 +171,7 @@ public class ReachabilitySphereMapCalculator implements Controller
 
       initialize();
 
+      SphereVoxelShape sphereVoxelShape = voxel3DGrid.getSphereVoxelShape();
       int voxelIndex = currentVoxelIndex.getValue();
       int rayIndex = currentRayIndex.getValue();
 
@@ -239,10 +202,10 @@ public class ReachabilitySphereMapCalculator implements Controller
             }
          }
 
-         for (; rayIndex < numberOfRays && !hasReachNext; rayIndex++)
+         for (; rayIndex < sphereVoxelShape.getNumberOfRays() && !hasReachNext; rayIndex++)
          {
 
-            for (int rotationAroundRayIndex = 0; rotationAroundRayIndex < numberOfRotationsAroundRay; rotationAroundRayIndex++)
+            for (int rotationAroundRayIndex = 0; rotationAroundRayIndex < sphereVoxelShape.getNumberOfRotationsAroundRay(); rotationAroundRayIndex++)
             {
                desiredPosition.setIncludingFrame(voxel.getPosition());
                sphereVoxelShape.getPose(translationFromVoxelOrigin, orientation, rayIndex, rotationAroundRayIndex);
@@ -315,7 +278,7 @@ public class ReachabilitySphereMapCalculator implements Controller
 
    public double getGridSizeInMeters()
    {
-      return gridSizeInNumberOfVoxels * voxelSize;
+      return voxel3DGrid.getGridSizeMeters();
    }
 
    public boolean isDone()

@@ -17,10 +17,7 @@ import cern.colt.Arrays;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DData;
-import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
-import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape.SphereVoxelType;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.javafx.JavaFXMissingTools;
@@ -69,9 +66,7 @@ public class ReachabilityMapFileLoader
 
       checkRobotMatchesData(robotName, rootBody, descriptionSheet);
 
-      ReferenceFrame gridFrame = createGridReferenceFrame(rootBody, referenceFrames, descriptionSheet);
-
-      loadedGrid = createGrid(descriptionSheet, gridFrame);
+      loadedGrid = createGrid(rootBody, referenceFrames, descriptionSheet);
 
       loadData();
 
@@ -131,9 +126,8 @@ public class ReachabilityMapFileLoader
       }
    }
 
-   private ReferenceFrame createGridReferenceFrame(RigidBodyBasics rootBody, HumanoidReferenceFrames referenceFrames, HSSFSheet descriptionSheet)
+   private Voxel3DGrid createGrid(RigidBodyBasics rootBody, HumanoidReferenceFrames referenceFrames, HSSFSheet descriptionSheet)
    {
-      String gridFrameName = descriptionSheet.getRow(6).getCell(2).getStringCellValue();
       String parentFrameName = descriptionSheet.getRow(7).getCell(2).getStringCellValue();
       DMatrixRMaj transformToParentFrameAsDenseMatrix = CommonOps_DDRM.identity(4);
       int row = 0;
@@ -147,25 +141,16 @@ public class ReachabilityMapFileLoader
          }
          row++;
       }
-      RigidBodyTransform transformToParentFrame = new RigidBodyTransform(transformToParentFrameAsDenseMatrix);
       ReferenceFrame parentFrame = searchParentFrameInCommonRobotFrames(parentFrameName, referenceFrames, rootBody);
 
-      ReferenceFrame gridFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(gridFrameName, parentFrame, transformToParentFrame);
-      return gridFrame;
-   }
-
-   private Voxel3DGrid createGrid(HSSFSheet descriptionSheet, ReferenceFrame gridFrame)
-   {
       int numberOfVoxelsPerDimension = (int) descriptionSheet.getRow(2).getCell(1).getNumericCellValue();
       double voxelSize = descriptionSheet.getRow(3).getCell(2).getNumericCellValue();
       int numberOfRaysPerVoxel = (int) descriptionSheet.getRow(4).getCell(2).getNumericCellValue();
       int numberOfRotationsPerRay = (int) descriptionSheet.getRow(5).getCell(2).getNumericCellValue();
-      SphereVoxelShape sphereVoxelShape = new SphereVoxelShape(gridFrame,
-                                                               voxelSize,
-                                                               numberOfRaysPerVoxel,
-                                                               numberOfRotationsPerRay,
-                                                               SphereVoxelType.graspOrigin);
-      return new Voxel3DGrid(gridFrame, sphereVoxelShape, numberOfVoxelsPerDimension, voxelSize);
+
+      Voxel3DGrid grid = Voxel3DGrid.newVoxel3DGrid(parentFrame, numberOfVoxelsPerDimension, voxelSize, numberOfRaysPerVoxel, numberOfRotationsPerRay);
+      grid.setGridPose(new RigidBodyTransform(transformToParentFrameAsDenseMatrix));
+      return grid;
    }
 
    private void loadData()
