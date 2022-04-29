@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DData;
+import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DKey;
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape.SphereVoxelType;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -17,7 +18,6 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
@@ -195,9 +195,7 @@ public class ReachabilitySphereMapCalculator implements Controller
    }
 
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
-   private final YoInteger currentXIndex = new YoInteger("currentXIndex", registry);
-   private final YoInteger currentYIndex = new YoInteger("currentYIndex", registry);
-   private final YoInteger currentZIndex = new YoInteger("currentZIndex", registry);
+   private final YoInteger currentVoxelIndex = new YoInteger("currentVoxelIndex", registry);
    private final YoBoolean currentVoxelReachComputed = new YoBoolean("currentVoxelReachComputed", registry);
    private final YoInteger currentRayIndex = new YoInteger("currentRayIndex", registry);
 
@@ -211,101 +209,83 @@ public class ReachabilitySphereMapCalculator implements Controller
 
       initialize();
 
-      int xIndex = currentXIndex.getValue();
-      int yIndex = currentYIndex.getValue();
-      int zIndex = currentZIndex.getValue();
+      int voxelIndex = currentVoxelIndex.getValue();
       int rayIndex = currentRayIndex.getValue();
 
       boolean hasReachNext = false;
 
-      for (; xIndex < gridSizeInNumberOfVoxels; xIndex++)
+      for (; voxelIndex < voxel3DGrid.getNumberOfVoxels(); voxelIndex++)
       {
-         for (; yIndex < gridSizeInNumberOfVoxels; yIndex++)
+         Voxel3DData voxel = voxel3DGrid.getOrCreateVoxel(voxelIndex);
+         Voxel3DKey key = voxel.getKey();
+
+         if (!currentVoxelReachComputed.getValue())
          {
-            for (; zIndex < gridSizeInNumberOfVoxels; zIndex++)
+            if (isPositionReachable(voxel))
             {
-               Voxel3DData voxel = voxel3DGrid.getOrCreateVoxel(xIndex, yIndex, zIndex);
-
-               if (!currentVoxelReachComputed.getValue())
-               {
-                  if (isPositionReachable(voxel))
-                  {
-                     currentVoxelReachComputed.set(true);
-                  }
-                  else
-                  {
-                     if (showUnreachableVoxels)
-                     {
-                        LogTools.info("Unreachable voxel: ({}), position: {}", EuclidCoreIOTools.getStringOf(", ", xIndex, yIndex, zIndex), voxel.getPosition());
-                        staticVisualConsumer.accept(sphereVoxelShape.createVisual(voxel.getPosition(), 0.1, -1));
-                     }
-
-                     voxel3DGrid.destroy(voxel);
-                     currentVoxelReachComputed.set(false);
-                     continue;
-                  }
-               }
-
-               for (; rayIndex < numberOfRays && !hasReachNext; rayIndex++)
-               {
-
-                  for (int rotationAroundRayIndex = 0; rotationAroundRayIndex < numberOfRotationsAroundRay; rotationAroundRayIndex++)
-                  {
-                     desiredPosition.setIncludingFrame(voxel.getPosition());
-                     sphereVoxelShape.getPose(translationFromVoxelOrigin, orientation, rayIndex, rotationAroundRayIndex);
-                     desiredPosition.add(translationFromVoxelOrigin);
-
-                     desiredPosition.changeFrame(ReferenceFrame.getWorldFrame());
-                     orientation.changeFrame(ReferenceFrame.getWorldFrame());
-                     currentEvaluationPose.set(desiredPosition, orientation);
-
-                     boolean success = solver.solveFor(desiredPosition, orientation);
-
-                     if (success)
-                     {
-                        voxel.registerReachablePose(rayIndex, rotationAroundRayIndex);
-                        if (reachabilityMapFileWriter != null)
-                           reachabilityMapFileWriter.registerReachablePose(xIndex, yIndex, zIndex, rayIndex, rotationAroundRayIndex);
-
-                        for (OneDoFJointBasics joint : solver.getRobotArmJoints())
-                        {
-                           controllerOutput.getOneDoFJointOutput(joint).setConfiguration(joint);
-                        }
-
-                        hasReachNext = true;
-                        break;
-                     }
-                  }
-               }
-
-               if (hasReachNext)
-                  break;
-
-               double reachabilityValue = voxel.getD();
-
-               if (reachabilityValue > 1e-3)
-                  staticVisualConsumer.accept(sphereVoxelShape.createVisual(voxel.getPosition(), 0.25, reachabilityValue));
-
-               rayIndex = 0;
-               currentVoxelReachComputed.set(false);
+               currentVoxelReachComputed.set(true);
             }
+            else
+            {
+               if (showUnreachableVoxels)
+               {
+                  LogTools.info("Unreachable voxel, key: {}, position: {}", key, voxel.getPosition());
+                  staticVisualConsumer.accept(sphereVoxelShape.createVisual(voxel.getPosition(), 0.1, -1));
+               }
 
-            if (hasReachNext)
-               break;
-
-            zIndex = 0;
-            currentVoxelReachComputed.set(false);
+               voxel3DGrid.destroy(voxel);
+               currentVoxelReachComputed.set(false);
+               continue;
+            }
          }
+
+         for (; rayIndex < numberOfRays && !hasReachNext; rayIndex++)
+         {
+
+            for (int rotationAroundRayIndex = 0; rotationAroundRayIndex < numberOfRotationsAroundRay; rotationAroundRayIndex++)
+            {
+               desiredPosition.setIncludingFrame(voxel.getPosition());
+               sphereVoxelShape.getPose(translationFromVoxelOrigin, orientation, rayIndex, rotationAroundRayIndex);
+               desiredPosition.add(translationFromVoxelOrigin);
+
+               desiredPosition.changeFrame(ReferenceFrame.getWorldFrame());
+               orientation.changeFrame(ReferenceFrame.getWorldFrame());
+               currentEvaluationPose.set(desiredPosition, orientation);
+
+               boolean success = solver.solveFor(desiredPosition, orientation);
+
+               if (success)
+               {
+                  voxel.registerReachablePose(rayIndex, rotationAroundRayIndex);
+                  if (reachabilityMapFileWriter != null)
+                     reachabilityMapFileWriter.registerReachablePose(key, rayIndex, rotationAroundRayIndex);
+
+                  for (OneDoFJointBasics joint : solver.getRobotArmJoints())
+                  {
+                     controllerOutput.getOneDoFJointOutput(joint).setConfiguration(joint);
+                  }
+
+                  hasReachNext = true;
+                  break;
+               }
+            }
+         }
+
          if (hasReachNext)
             break;
 
-         yIndex = 0;
+         double reachabilityValue = voxel.getD();
+
+         if (reachabilityValue > 1e-3)
+            staticVisualConsumer.accept(sphereVoxelShape.createVisual(voxel.getPosition(), 0.25, reachabilityValue));
+
+         rayIndex = 0;
          currentVoxelReachComputed.set(false);
       }
 
       if (!hasReachNext)
       {
-         xIndex = 0;
+         voxelIndex = 0;
          isDone.set(true);
 
          if (reachabilityMapFileWriter != null)
@@ -313,9 +293,7 @@ public class ReachabilitySphereMapCalculator implements Controller
          System.out.println("Done!");
       }
 
-      currentXIndex.set(xIndex);
-      currentYIndex.set(yIndex);
-      currentZIndex.set(zIndex);
+      currentVoxelIndex.set(voxelIndex);
       currentRayIndex.set(rayIndex);
    }
 

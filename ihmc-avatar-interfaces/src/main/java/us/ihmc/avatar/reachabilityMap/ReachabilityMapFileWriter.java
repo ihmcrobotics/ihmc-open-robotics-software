@@ -17,17 +17,12 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
-import us.ihmc.avatar.reachabilityMap.example.RobotArmDefinition;
-import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
-import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape.SphereVoxelType;
+import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DKey;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 
 public class ReachabilityMapFileWriter
 {
@@ -90,12 +85,12 @@ public class ReachabilityMapFileWriter
       currentCellIndex = 0;
       currentRow = descriptionSheet.createRow(currentRowIndex++);
       currentRow.createCell(currentCellIndex++).setCellValue("Grid size = ");
-      currentRow.createCell(currentCellIndex++).setCellValue(gridToWrite.getGridSize());
+      currentRow.createCell(currentCellIndex++).setCellValue(gridToWrite.getGridSizeMeters());
 
       currentCellIndex = 0;
       currentRow = descriptionSheet.createRow(currentRowIndex++);
       currentRow.createCell(currentCellIndex++).setCellValue("Number of voxels per dimension = ");
-      currentRow.createCell(currentCellIndex++).setCellValue((double) gridToWrite.getNumberOfVoxelsPerDimension());
+      currentRow.createCell(currentCellIndex++).setCellValue((double) gridToWrite.getGridSizeVoxels());
 
       currentCellIndex = 0;
       currentRow = descriptionSheet.createRow(currentRowIndex++);
@@ -178,7 +173,7 @@ public class ReachabilityMapFileWriter
       return dateAsString + fileName;
    }
 
-   public void registerReachablePose(int xIndex, int yIndex, int zIndex, int rayIndex, int rotationAroundRayIndex)
+   public void registerReachablePose(Voxel3DKey key, int rayIndex, int rotationAroundRayIndex)
    {
       if (currentDataRow > MAX_NUMBER_OF_ROWS)
       {
@@ -187,9 +182,9 @@ public class ReachabilityMapFileWriter
 
       HSSFRow row = currentDataSheet.createRow(currentDataRow++);
       int cellIndex = 0;
-      row.createCell(cellIndex++).setCellValue((double) xIndex);
-      row.createCell(cellIndex++).setCellValue((double) yIndex);
-      row.createCell(cellIndex++).setCellValue((double) zIndex);
+      row.createCell(cellIndex++).setCellValue((double) key.getX());
+      row.createCell(cellIndex++).setCellValue((double) key.getY());
+      row.createCell(cellIndex++).setCellValue((double) key.getZ());
       row.createCell(cellIndex++).setCellValue((double) rayIndex);
       row.createCell(cellIndex++).setCellValue((double) rotationAroundRayIndex);
    }
@@ -218,28 +213,5 @@ public class ReachabilityMapFileWriter
       {
          e.printStackTrace();
       }
-   }
-
-   public static void main(String[] args) throws IOException
-   {
-      FramePose3D framePose = new FramePose3D();
-      framePose.getOrientation().setYawPitchRoll(1.0, 0.8, -1.1);
-      framePose.getPosition().set(3.1, 0.1, 1.0);
-      System.out.println(framePose.getOrientation());
-
-      RigidBodyTransform transformToParent = new RigidBodyTransform();
-      framePose.get(transformToParent);
-      ReferenceFrame gridFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("blop", ReferenceFrame.getWorldFrame(), transformToParent);
-      SphereVoxelShape sphereVoxelShape = new SphereVoxelShape(gridFrame, 0.1, 10, 12, SphereVoxelType.graspOrigin);
-      Voxel3DGrid voxel3dGrid = new Voxel3DGrid(gridFrame, sphereVoxelShape, 10, 0.1);
-      RobotArmDefinition robot = new RobotArmDefinition();
-      RigidBodyBasics rootBody = robot.newInstance(ReferenceFrame.getWorldFrame());
-      OneDoFJointBasics[] armJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).toArray(OneDoFJointBasics[]::new);
-      ReachabilityMapFileWriter reachabilityMapFileWriter = new ReachabilityMapFileWriter(robot.getName(), ReachabilityMapFileWriter.class);
-      reachabilityMapFileWriter.initialize(armJoints, voxel3dGrid);
-
-      for (int i = 0; i < 70000; i++)
-         reachabilityMapFileWriter.registerReachablePose(0, 1, 2, 3, 4);
-      reachabilityMapFileWriter.exportAndClose();
    }
 }
