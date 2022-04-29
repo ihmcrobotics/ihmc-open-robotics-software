@@ -20,6 +20,7 @@ public class MissionControlService
    private final LinuxResourceMonitor linuxResourceMonitor = new LinuxResourceMonitor();
    private final NethogsNetworkMonitor nethogsNetworkMonitor = new NethogsNetworkMonitor();
    private final ChronyStatusMonitor chronyStatusMonitor = new ChronyStatusMonitor();
+   private final GPUUsageMonitor gpuUsageMonitor = new GPUUsageMonitor();
 
    private final KryoMessager kryoMessagerServer;
    private final ExceptionHandlingThreadScheduler updateThreadScheduler;
@@ -91,6 +92,11 @@ public class MissionControlService
                                                          nethogsNetworkMonitor.getKilobytesPerSecondReceived()));
 
          kryoMessagerServer.submitMessage(ChronySelectedServerStatus, chronyStatusMonitor.getChronycBestSourceStatus());
+
+         if (gpuUsageMonitor.getHasNvidiaGPU())
+         {
+            kryoMessagerServer.submitMessage(GPUUsage, gpuUsageMonitor.getGPUUsage());
+         }
       }
    }
 
@@ -124,6 +130,7 @@ public class MissionControlService
       public static final MessagerAPIFactory.Topic<String> ServiceNameToTrack = topic("ServiceNameToTrack");
       public static final MessagerAPIFactory.Topic<ArrayList<String>> ServiceStatuses = topic("ServiceStatuses");
       public static final MessagerAPIFactory.Topic<String> ChronySelectedServerStatus = topic("ChronySelectedServerStatus");
+      public static final MessagerAPIFactory.Topic<Double> GPUUsage = topic("GPUUsage");
       private static <T> MessagerAPIFactory.Topic<T> topic(String name)
       {
          return RootCategory.child(MissionControlServiceTheme).topic(apiFactory.createTypedTopicTheme(name));
