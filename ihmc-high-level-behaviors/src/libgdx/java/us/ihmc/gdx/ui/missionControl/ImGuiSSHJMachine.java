@@ -28,6 +28,7 @@ public class ImGuiSSHJMachine
    private final AtomicReference<MutablePair<Double, Double>> ramUsageSubscription;
    private final AtomicReference<ArrayList<Double>> cpuUsagesSubscription;
    private final AtomicReference<MutablePair<Double, Double>> networkUsageSubscription;
+   private final AtomicReference<String> chronySourceStatusSubscription;
 
    private final ImPlotPlot ramPlot = new ImPlotPlot();
    private final ImPlotDoublePlotLine ramUsagePlotLine = new ImPlotDoublePlotLine("RAM Usage GiB", 30 * 5, 30.0, new DecimalFormat("0.0"));
@@ -94,6 +95,8 @@ public class ImGuiSSHJMachine
       ramUsageSubscription = messagerHelper.subscribeViaReference(MissionControlService.API.RAMUsage, MutablePair.of(0.0, 1.0));
       cpuUsagesSubscription = messagerHelper.subscribeViaReference(MissionControlService.API.CPUUsages, new ArrayList<>());
       networkUsageSubscription = messagerHelper.subscribeViaReference(MissionControlService.API.NetworkUsage, MutablePair.of(0.0, 0.0));
+      chronySourceStatusSubscription = messagerHelper.subscribeViaReference(MissionControlService.API.ChronySelectedServerStatus,
+                                                                            "Chrony status not yet received.");
 
       messagerManagerWidget = new ImGuiMessagerManagerWidget(messagerHelper, () -> hostname, MissionControlService.API.PORT);
    }
@@ -169,6 +172,8 @@ public class ImGuiSSHJMachine
          networkReceivedPlotLine.addValue(received);
       }
       networkPlot.render(ImGui.getColumnWidth(), 35.0f);
+
+      ImGui.text("Chrony status: " + chronySourceStatusSubscription.get());
    }
 
    public ImGuiSSHJSystemdServiceManager getSystemdServiceManager()
