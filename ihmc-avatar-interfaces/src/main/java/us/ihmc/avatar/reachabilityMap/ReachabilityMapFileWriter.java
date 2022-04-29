@@ -17,7 +17,9 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
+import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DData;
 import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DKey;
+import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -37,6 +39,14 @@ public class ReachabilityMapFileWriter
 
    private final String robotName;
 
+   public static void exportVoxel3DGridToFile(String robotName, Class<?> classForFilePath, OneDoFJointBasics[] robotArmJoints, Voxel3DGrid gridToWrite)
+         throws IOException
+   {
+      ReachabilityMapFileWriter writer = new ReachabilityMapFileWriter(robotName, classForFilePath);
+      writer.write(robotArmJoints, gridToWrite);
+      writer.exportAndClose();
+   }
+
    public ReachabilityMapFileWriter(String robotName, Class<?> classForFilePath) throws IOException
    {
       this.robotName = robotName;
@@ -54,11 +64,34 @@ public class ReachabilityMapFileWriter
       }
    }
 
-   public void initialize(OneDoFJointBasics[] robotArmJoints, Voxel3DGrid gridToWrite)
+   public void write(OneDoFJointBasics[] robotArmJoints, Voxel3DGrid gridToWrite)
    {
       createDescriptionSheet(robotName, robotArmJoints, gridToWrite);
-
       addDataSheet();
+
+      for (int voxelIndex = 0; voxelIndex < gridToWrite.getNumberOfVoxels(); voxelIndex++)
+      {
+         Voxel3DData voxel = gridToWrite.getVoxel(voxelIndex);
+
+         if (voxel == null || !voxel.atLeastOneReachableRay())
+            continue;
+
+         SphereVoxelShape sphereVoxelShape = gridToWrite.getSphereVoxelShape();
+         int numberOfRays = sphereVoxelShape.getNumberOfRays();
+         int numberOfRotations = sphereVoxelShape.getNumberOfRotationsAroundRay();
+
+         for (int rayIndex = 0; rayIndex < numberOfRays; rayIndex++)
+         {
+            if (!voxel.isRayReachable(rayIndex))
+               continue;
+
+            for (int rotationIndex = 0; rotationIndex < numberOfRotations; rotationIndex++)
+            {
+               if (voxel.isPoseReachable(rayIndex, rotationIndex))
+                  registerReachablePose(voxel.getKey(), rayIndex, rotationIndex);
+            }
+         }
+      }
    }
 
    public static Path deriveResourcesPath(Class<?> clazz)
