@@ -149,7 +149,7 @@ public class ReachabilityMapTools
    
       List<VisualDefinition> allVisuals = createReachibilityColorScaleVisuals();
    
-      int numberOfVoxel = grid.getNumberOfVoxelsPerDimension();
+      int numberOfVoxel = grid.getGridSizeVoxels();
       grid.getReferenceFrame().update();
       System.out.println(grid.getReferenceFrame().getTransformToWorldFrame());
    
@@ -159,11 +159,12 @@ public class ReachabilityMapTools
          {
             for (int zIndex = 0; zIndex < numberOfVoxel; zIndex++)
             {
-               double reachabilityValue = grid.getD(xIndex, yIndex, zIndex);
+               Voxel3DData voxel = grid.getVoxel(xIndex, yIndex, zIndex);
+
+               double reachabilityValue = voxel.getD();
    
                if (reachabilityValue > 0.001)
                {
-                  Voxel3DData voxel = grid.getVoxel(xIndex, yIndex, zIndex);
                   System.out.println("xIndex: " + xIndex + ", yIndex: " + yIndex + ", zIndex: " + zIndex + ", voxel location: " + voxel.getPosition());
                   allVisuals.add(sphereVoxelShape.createVisual(voxel.getPosition(), 0.25, reachabilityValue));
                }

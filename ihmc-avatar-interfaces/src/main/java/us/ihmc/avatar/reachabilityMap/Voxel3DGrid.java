@@ -11,7 +11,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
-import us.ihmc.euclid.referenceFrame.tools.EuclidFrameFactories;
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -20,26 +20,34 @@ import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
 
 public class Voxel3DGrid implements ReferenceFrameHolder
 {
+   public static final int MAX_GRID_SIZE_VOXELS = (int) Math.pow(Integer.MAX_VALUE, 1.0 / 3.0);
+
    private final ReferenceFrame referenceFrame;
    private final BoundingBox3D boundingBox;
    private final SphereVoxelShape sphereVoxelShape;
-   private final double gridSize;
    private final double voxelSize;
-   private final int numberOfVoxelsPerDimension;
-   private final int totalNumberOfVoxels;
+   private final double gridSizeMeters;
+   private final int gridSizeVoxels;
+   private final int numberOfVoxels;
 
    private final Voxel3DData[] voxels;
 
    public Voxel3DGrid(ReferenceFrame referenceFrame, SphereVoxelShape sphereVoxelShape, int gridSizeInNumberOfVoxels, double voxelSize)
    {
+      if (gridSizeInNumberOfVoxels > MAX_GRID_SIZE_VOXELS)
+         throw new IllegalArgumentException("Grid size is too big: " + gridSizeInNumberOfVoxels + " [max=" + MAX_GRID_SIZE_VOXELS + "]");
+
       this.sphereVoxelShape = sphereVoxelShape;
       this.referenceFrame = referenceFrame;
       this.voxelSize = voxelSize;
-      numberOfVoxelsPerDimension = gridSizeInNumberOfVoxels;
-      totalNumberOfVoxels = numberOfVoxelsPerDimension * numberOfVoxelsPerDimension * numberOfVoxelsPerDimension;
-      gridSize = voxelSize * gridSizeInNumberOfVoxels;
-      boundingBox = new BoundingBox3D(-gridSize / 2.0, -gridSize / 2.0, -gridSize / 2.0, gridSize / 2.0, gridSize / 2.0, gridSize / 2.0);
-      voxels = new Voxel3DData[numberOfVoxelsPerDimension * numberOfVoxelsPerDimension * numberOfVoxelsPerDimension];
+      gridSizeVoxels = gridSizeInNumberOfVoxels;
+
+      numberOfVoxels = gridSizeVoxels * gridSizeVoxels * gridSizeVoxels;
+
+      gridSizeMeters = voxelSize * gridSizeInNumberOfVoxels;
+      double halfSize = gridSizeMeters / 2.0;
+      boundingBox = new BoundingBox3D(-halfSize, -halfSize, -halfSize, halfSize, halfSize, halfSize);
+      voxels = new Voxel3DData[numberOfVoxels];
    }
 
    public Voxel3DData getVoxel(FrameTuple3DReadOnly query)
@@ -62,16 +70,29 @@ public class Voxel3DGrid implements ReferenceFrameHolder
 
    public Voxel3DData getVoxel(int xIndex, int yIndex, int zIndex)
    {
-      return voxels[(xIndex * numberOfVoxelsPerDimension + yIndex) * numberOfVoxelsPerDimension + zIndex];
+      return voxels[Voxel3DKey.toArrayIndex(xIndex, yIndex, zIndex, gridSizeVoxels)];
+   }
+
+   public Voxel3DData getOrCreateVoxel(int index)
+   {
+      Voxel3DData voxel = voxels[index];
+
+      if (voxel == null)
+      {
+         voxel = new Voxel3DData(new Voxel3DKey(index, gridSizeVoxels));
+         voxels[index] = voxel;
+      }
+
+      return voxel;
    }
 
    public Voxel3DData getOrCreateVoxel(int xIndex, int yIndex, int zIndex)
    {
-      int index = (xIndex * numberOfVoxelsPerDimension + yIndex) * numberOfVoxelsPerDimension + zIndex;
+      int index = Voxel3DKey.toArrayIndex(xIndex, yIndex, zIndex, gridSizeVoxels);
       Voxel3DData voxel = voxels[index];
       if (voxel == null)
       {
-         voxel = new Voxel3DData(xIndex, yIndex, zIndex);
+         voxel = new Voxel3DData(new Voxel3DKey(xIndex, yIndex, zIndex, gridSizeVoxels));
          voxels[index] = voxel;
       }
       return voxel;
@@ -79,47 +100,17 @@ public class Voxel3DGrid implements ReferenceFrameHolder
 
    public void destroy(Voxel3DData voxel)
    {
-      voxels[(voxel.xIndex * numberOfVoxelsPerDimension + voxel.yIndex) * numberOfVoxelsPerDimension + voxel.zIndex] = null;
+      voxels[voxel.getKey().getIndex()] = null;
    }
 
    private double toCoordinate(int index)
    {
-      return (index + 0.5) * voxelSize - 0.5 * gridSize;
+      return (index + 0.5) * voxelSize - 0.5 * gridSizeMeters;
    }
 
    private int toIndex(double coordinate)
    {
-      return (int) (coordinate / voxelSize + numberOfVoxelsPerDimension / 2 - 1);
-   }
-
-   /**
-    * Return the D reachability value in percent for this voxel based on the number of the rays that
-    * have been reached.
-    * 
-    * @param xIndex voxel x index
-    * @param yIndex voxel y index
-    * @param zIndex voxel z index
-    * @return The D reachability
-    */
-   public double getD(int xIndex, int yIndex, int zIndex)
-   {
-      Voxel3DData voxel = getVoxel(xIndex, yIndex, zIndex);
-      return voxel == null ? 0 : voxel.getD();
-   }
-
-   /**
-    * Return the D0 reachability value in percent for this voxel based on the number of the
-    * orientations (number of rays times number of rotations around rays) that have been reached.
-    * 
-    * @param xIndex voxel x index
-    * @param yIndex voxel y index
-    * @param zIndex voxel z index
-    * @return The D0 reachability
-    */
-   public double getD0(int xIndex, int yIndex, int zIndex)
-   {
-      Voxel3DData voxel = getVoxel(xIndex, yIndex, zIndex);
-      return voxel == null ? 0 : voxel.getD0();
+      return (int) (coordinate / voxelSize + gridSizeVoxels / 2 - 1);
    }
 
    private final PrincipalComponentAnalysis3D pca = new PrincipalComponentAnalysis3D();
@@ -199,24 +190,24 @@ public class Voxel3DGrid implements ReferenceFrameHolder
       return sphereVoxelShape;
    }
 
-   public double getGridSize()
-   {
-      return gridSize;
-   }
-
    public double getVoxelSize()
    {
       return voxelSize;
    }
 
-   public int getNumberOfVoxelsPerDimension()
+   public double getGridSizeMeters()
    {
-      return numberOfVoxelsPerDimension;
+      return gridSizeMeters;
    }
 
-   public int getTotalNumberOfVoxels()
+   public int getGridSizeVoxels()
    {
-      return totalNumberOfVoxels;
+      return gridSizeVoxels;
+   }
+
+   public int getNumberOfVoxels()
+   {
+      return numberOfVoxels;
    }
 
    public FramePoint3D getMinPoint()
@@ -231,43 +222,24 @@ public class Voxel3DGrid implements ReferenceFrameHolder
 
    public class Voxel3DData
    {
-      private final int xIndex, yIndex, zIndex;
+      private final Voxel3DKey key;
       private final FramePoint3DReadOnly position;
 
       private boolean[] isRayReachable;
       private boolean[][] isPoseReachable;
 
-      public Voxel3DData(int xIndex, int yIndex, int zIndex)
+      public Voxel3DData(Voxel3DKey key)
       {
-         if (xIndex >= numberOfVoxelsPerDimension)
-            throw new ArrayIndexOutOfBoundsException(xIndex);
-         if (yIndex >= numberOfVoxelsPerDimension)
-            throw new ArrayIndexOutOfBoundsException(yIndex);
-         if (zIndex >= numberOfVoxelsPerDimension)
-            throw new ArrayIndexOutOfBoundsException(zIndex);
-
-         this.xIndex = xIndex;
-         this.yIndex = yIndex;
-         this.zIndex = zIndex;
-
-         position = EuclidFrameFactories.newLinkedFramePoint3DReadOnly(Voxel3DGrid.this,
-                                                                       () -> toCoordinate(xIndex),
-                                                                       () -> toCoordinate(yIndex),
-                                                                       () -> toCoordinate(zIndex));
+         this.key = key;
+         position = new FramePoint3D(getReferenceFrame(), toCoordinate(key.x), toCoordinate(key.y), toCoordinate(key.z));
       }
 
       public void registerReachablePose(int rayIndex, int rotationAroundRayIndex)
       {
          if (isPoseReachable == null)
             isPoseReachable = new boolean[sphereVoxelShape.getNumberOfRays()][sphereVoxelShape.getNumberOfRotationsAroundRay()];
-
-         boolean poseHasAlreadyBeenRegistered = isPoseReachable[rayIndex][rotationAroundRayIndex];
-
-         if (!poseHasAlreadyBeenRegistered)
-         {
-            isPoseReachable[rayIndex][rotationAroundRayIndex] = true;
-            registerReachableRay(rayIndex);
-         }
+         isPoseReachable[rayIndex][rotationAroundRayIndex] = true;
+         registerReachableRay(rayIndex);
       }
 
       public void registerReachableRay(int rayIndex)
@@ -332,9 +304,116 @@ public class Voxel3DGrid implements ReferenceFrameHolder
          return d0;
       }
 
+      public Voxel3DKey getKey()
+      {
+         return key;
+      }
+
       public FramePoint3DReadOnly getPosition()
       {
          return position;
+      }
+   }
+
+   public static class Voxel3DKey
+   {
+      private int x, y, z;
+      private int index;
+
+      public Voxel3DKey(int x, int y, int z, int gridSizeVoxels)
+      {
+         if (x >= gridSizeVoxels)
+            throw new ArrayIndexOutOfBoundsException(x);
+         if (y >= gridSizeVoxels)
+            throw new ArrayIndexOutOfBoundsException(y);
+         if (z >= gridSizeVoxels)
+            throw new ArrayIndexOutOfBoundsException(z);
+
+         this.x = x;
+         this.y = y;
+         this.z = z;
+         index = toArrayIndex(x, y, z, gridSizeVoxels);
+      }
+
+      public Voxel3DKey(int index, int gridSizeVoxels)
+      {
+         this.index = index;
+         x = toXindex(index, gridSizeVoxels);
+         y = toYindex(index, gridSizeVoxels);
+         z = toZindex(index, gridSizeVoxels);
+
+         if (x >= gridSizeVoxels)
+            throw new ArrayIndexOutOfBoundsException(x);
+         if (y >= gridSizeVoxels)
+            throw new ArrayIndexOutOfBoundsException(y);
+         if (z >= gridSizeVoxels)
+            throw new ArrayIndexOutOfBoundsException(z);
+      }
+
+      public static int toArrayIndex(int x, int y, int z, int gridSizeVoxels)
+      {
+         return (x * gridSizeVoxels + y) * gridSizeVoxels + z;
+      }
+
+      public static int toXindex(int arrayIndex, int gridSizeVoxels)
+      {
+         return arrayIndex / gridSizeVoxels / gridSizeVoxels;
+      }
+
+      public static int toYindex(int arrayIndex, int gridSizeVoxels)
+      {
+         return (arrayIndex / gridSizeVoxels) % gridSizeVoxels;
+      }
+
+      public static int toZindex(int arrayIndex, int gridSizeVoxels)
+      {
+         return arrayIndex % gridSizeVoxels;
+      }
+
+      @Override
+      public int hashCode()
+      {
+         return index;
+      }
+
+      @Override
+      public boolean equals(Object object)
+      {
+         if (object instanceof Voxel3DKey)
+         {
+            Voxel3DKey other = (Voxel3DKey) object;
+            return x == other.x && y == other.y && z == other.z;
+         }
+         else
+         {
+            return false;
+         }
+      }
+
+      public int getX()
+      {
+         return x;
+      }
+
+      public int getY()
+      {
+         return y;
+      }
+
+      public int getZ()
+      {
+         return z;
+      }
+
+      public int getIndex()
+      {
+         return index;
+      }
+
+      @Override
+      public String toString()
+      {
+         return EuclidCoreIOTools.getStringOf("(", ")", ", ", x, y, z);
       }
    }
 }
