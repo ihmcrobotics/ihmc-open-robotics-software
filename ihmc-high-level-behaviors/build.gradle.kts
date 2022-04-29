@@ -85,7 +85,7 @@ tasks.create("deploy") {
 
    doLast {
       remote.session(hostname, username) {
-         exec("sudo systemctl stop mission-control-application-2")
+         exec("sudo systemctl stop mission-control-2")
 
          exec("mkdir -p /home/$username/.ihmc/mission-control")
          exec("sudo mkdir -p /opt/ihmc/mission-control")
@@ -110,7 +110,7 @@ tasks.create("deploy") {
 
          exec("sudo systemctl daemon-reload")
 
-         exec("sudo systemctl start mission-control-application-2")
+         exec("sudo systemctl start mission-control-2")
       }
    }
 }
