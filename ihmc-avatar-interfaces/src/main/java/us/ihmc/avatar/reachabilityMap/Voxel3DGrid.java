@@ -98,6 +98,11 @@ public class Voxel3DGrid implements ReferenceFrameHolder
       return voxels[Voxel3DKey.toArrayIndex(xIndex, yIndex, zIndex, gridSizeVoxels)];
    }
 
+   public Voxel3DData getVoxel(int index)
+   {
+      return voxels[index];
+   }
+
    public Voxel3DData getOrCreateVoxel(int index)
    {
       Voxel3DData voxel = voxels[index];
@@ -347,6 +352,28 @@ public class Voxel3DGrid implements ReferenceFrameHolder
       public FramePoint3DReadOnly getPosition()
       {
          return position;
+      }
+
+      public boolean atLeastOneReachableRay()
+      {
+         if (isRayReachable == null)
+            return false;
+         for (boolean value : isRayReachable)
+         {
+            if (value)
+               return true;
+         }
+         return false;
+      }
+
+      public boolean isRayReachable(int rayIndex)
+      {
+         return isRayReachable == null ? false : isRayReachable[rayIndex];
+      }
+
+      public boolean isPoseReachable(int rayIndex, int rotationIndex)
+      {
+         return isPoseReachable[rayIndex][rotationIndex];
       }
    }
 

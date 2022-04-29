@@ -3,7 +3,6 @@ package us.ihmc.avatar.reachabilityMap;
 import static us.ihmc.avatar.scs2.YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3DDefinition;
 import static us.ihmc.avatar.scs2.YoGraphicDefinitionFactory.newYoGraphicPoint3DDefinition;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -45,7 +44,6 @@ public class ReachabilitySphereMapCalculator implements Controller
    private final FramePoint3D desiredPosition = new FramePoint3D();
 
    private final ReachabilityMapSolver solver;
-   private ReachabilityMapFileWriter reachabilityMapFileWriter;
 
    private final YoFramePose3D gridFramePose = new YoFramePose3D("gridFramePose", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePose3D currentEvaluationPose = new YoFramePose3D("currentEvaluationPose", ReferenceFrame.getWorldFrame(), registry);
@@ -76,6 +74,11 @@ public class ReachabilitySphereMapCalculator implements Controller
       yoGraphics.add(newYoGraphicPoint3DDefinition("currentEvaluationPosition", currentEvaluationPose.getPosition(), 0.0125, ColorDefinitions.DeepPink()));
       group.setChildren(yoGraphics);
       return group;
+   }
+
+   public OneDoFJointBasics[] getRobotArmJoints()
+   {
+      return solver.getRobotArmJoints();
    }
 
    /**
@@ -115,37 +118,6 @@ public class ReachabilitySphereMapCalculator implements Controller
    public void setGridFramePose(FramePose3DReadOnly pose)
    {
       gridFramePose.setMatchingFrame(pose);
-   }
-
-   /**
-    * Sets up the calculator so it exports the result in an Excel file. That file can later be loaded
-    * using {@link ReachabilityMapFileLoader}.
-    * 
-    * @param robotName        the robot name.
-    * @param classForFilePath this can be the class of the caller of this method.
-    */
-   public void setupCalculatorToRecordInFile(String robotName, Class<?> classForFilePath) throws IOException
-   {
-      if (robotName == null || robotName.isEmpty())
-      {
-         System.err.println("Invalid robot name (either null or empty)");
-         return;
-      }
-      reachabilityMapFileWriter = new ReachabilityMapFileWriter(robotName, classForFilePath);
-   }
-
-   private final YoBoolean isInitialized = new YoBoolean("isInitialized", registry);
-
-   @Override
-   public void initialize()
-   {
-      if (isInitialized.getValue())
-         return;
-
-      isInitialized.set(true);
-
-      if (reachabilityMapFileWriter != null)
-         reachabilityMapFileWriter.initialize(solver.getRobotArmJoints(), voxel3DGrid);
    }
 
    @Override
@@ -218,8 +190,6 @@ public class ReachabilitySphereMapCalculator implements Controller
                if (success)
                {
                   voxel.registerReachablePose(rayIndex, rotationAroundRayIndex);
-                  if (reachabilityMapFileWriter != null)
-                     reachabilityMapFileWriter.registerReachablePose(key, rayIndex, rotationAroundRayIndex);
 
                   for (OneDoFJointBasics joint : solver.getRobotArmJoints())
                   {
@@ -248,9 +218,6 @@ public class ReachabilitySphereMapCalculator implements Controller
       {
          voxelIndex = 0;
          isDone.set(true);
-
-         if (reachabilityMapFileWriter != null)
-            reachabilityMapFileWriter.exportAndClose();
          System.out.println("Done!");
       }
 
