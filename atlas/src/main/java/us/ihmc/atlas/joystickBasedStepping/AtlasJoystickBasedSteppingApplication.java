@@ -33,7 +33,7 @@ public class AtlasJoystickBasedSteppingApplication extends Application
       PrintTools.info("-------------------------------------------------------------------");
       PrintTools.info("  -------- Loading parameters for RobotTarget: " + robotTarget + "  -------");
       PrintTools.info("-------------------------------------------------------------------");
-      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, robotTarget, false);
+      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_LEFT_NUB_RIGHT_ROBOTIQ, robotTarget, false);
       String robotName = robotModel.getSimpleRobotName();
       bdiBehaviorcommandPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, BDIBehaviorCommandPacket.class, ROS2Tools.getControllerInputTopic(robotName));
       AtlasKickAndPunchMessenger atlasKickAndPunchMessenger = new AtlasKickAndPunchMessenger(ros2Node, robotName);
