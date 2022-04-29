@@ -9,6 +9,7 @@ import us.ihmc.gdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.gdx.ui.graphics.live.GDXROS2VideoVisualizer;
+import us.ihmc.gdx.ui.graphics.live.ROS2VideoFormat;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXGlobalVisualizersPanel;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
@@ -51,7 +52,7 @@ public class GDXROS2VideoSensorDemo
             ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.INTRAPROCESS, "test_node");
 
             globalVisualizersPanel = new ImGuiGDXGlobalVisualizersPanel(false);
-            GDXROS2VideoVisualizer videoVisualizer = new GDXROS2VideoVisualizer("Video", ros2Node, ROS2Tools.VIDEO);
+            GDXROS2VideoVisualizer videoVisualizer = new GDXROS2VideoVisualizer("Video", ros2Node, ROS2Tools.VIDEO, ROS2VideoFormat.JPEGYUVI420);
             globalVisualizersPanel.addVisualizer(videoVisualizer);
             globalVisualizersPanel.create();
             baseUI.getImGuiPanelManager().addPanel(globalVisualizersPanel);

@@ -1,0 +1,16 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "GPU Planar Region Extraction" : true,
+    "Blurred Depth" : true,
+    "Filtered Depth" : true,
+    "Gx Image" : false,
+    "Gy Image" : false,
+    "Gz Image" : false,
+    "Nx Image" : false,
+    "Ny Image" : false,
+    "Nz Image" : false,
+    "Planar Region Extraction Image" : true,
+    "VR Thread Debugger" : false
+  }
+}

@@ -11,6 +11,9 @@ import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLManager;
 
+/**
+ * Possible to render grayscale images directly? Pixmap format Alpha texture?
+ */
 public class GDXCVImagePanel
 {
    private Pixmap pixmap;
@@ -67,7 +70,7 @@ public class GDXCVImagePanel
    {
       if (videoPanel.getIsShowing().get())
       {
-         BytedecoOpenCVTools.clamp32BitFloatTo8BitUnsignedChar(floatImage, normalizedScaledImage.getBytedecoOpenCVMat(), 0.0, 255.0);
+         BytedecoOpenCVTools.clampTo8BitUnsignedChar(floatImage, normalizedScaledImage.getBytedecoOpenCVMat(), 0.0, 255.0);
          BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(normalizedScaledImage.getBytedecoOpenCVMat(), bytedecoImage.getBytedecoOpenCVMat());
          draw();
       }

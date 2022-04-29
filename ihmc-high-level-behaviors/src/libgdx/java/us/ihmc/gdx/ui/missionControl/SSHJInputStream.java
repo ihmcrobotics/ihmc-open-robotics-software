@@ -4,6 +4,7 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 
 import java.io.InputStream;
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -36,7 +37,17 @@ public class SSHJInputStream
          for (int i = 0; i < availableBytes; i++)
          {
             int read = ExceptionTools.handle(() -> inputStream.read(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
-            inputByteBuffer.put((byte) read);
+            try
+            {
+               inputByteBuffer.put((byte) read);
+            }
+            catch (BufferOverflowException e)
+            {
+               int half = inputByteBuffer.capacity() / 2;
+               System.arraycopy(inputByteBuffer.array(), half, inputByteBuffer.array(), 0, half);
+               inputByteBuffer.position(half);
+               inputByteBuffer.put((byte) read);
+            }
          }
 
          if (inputByteBuffer.position() > 0)
