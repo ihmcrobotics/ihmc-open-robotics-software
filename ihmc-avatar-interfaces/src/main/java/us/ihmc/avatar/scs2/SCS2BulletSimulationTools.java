@@ -11,7 +11,7 @@ public class SCS2BulletSimulationTools
    public static SessionVisualizer startSessionVisualizerWithDebugDrawing(SimulationSession simulationSession)
    {
       BulletPhysicsEngine bulletPhysicsEngine = (BulletPhysicsEngine) simulationSession.getPhysicsEngine();
-      BulletDebugDrawingNode bulletDebugDrawingNode = new BulletDebugDrawingNode(bulletPhysicsEngine.getMultiBodyDynamicsWorld());
+      BulletDebugDrawingNode bulletDebugDrawingNode = new BulletDebugDrawingNode(bulletPhysicsEngine.getBulletMultiBodyDynamicsWorld());
       simulationSession.getRootRegistry().addChild(bulletDebugDrawingNode.getYoRegistry());
 
       simulationSession.initializeBufferSize(24000);
