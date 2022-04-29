@@ -69,7 +69,7 @@ public class ReachabilitySphereMapCalculator implements Controller
 
    public YoGraphicDefinition getYoGraphicVisuals()
    {
-      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition("ReachabilityCalcualtorVisuals");
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition("ReachabilityCalculatorVisuals");
       List<YoGraphicDefinition> yoGraphics = new ArrayList<>();
       yoGraphics.add(newYoGraphicCoordinateSystem3DDefinition("gridFramePose", gridFramePose, 0.5, ColorDefinitions.Blue()));
       yoGraphics.add(newYoGraphicCoordinateSystem3DDefinition("currentEvaluationPose", currentEvaluationPose, 0.15, ColorDefinitions.HotPink()));
