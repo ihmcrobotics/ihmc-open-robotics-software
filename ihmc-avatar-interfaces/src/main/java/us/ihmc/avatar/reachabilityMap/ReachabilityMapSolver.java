@@ -13,11 +13,12 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -54,7 +55,7 @@ public class ReachabilityMapSolver
    private final StatusMessageOutputManager statusOutputManager = new StatusMessageOutputManager(KinematicsToolboxModule.supportedStatus());
    private final RigidBodyBasics endEffector;
    private final OneDoFJointBasics[] robotArmJoints;
-   private final RigidBodyTransform controlFramePoseInEndEffector = new RigidBodyTransform();
+   private final FramePose3D controlFramePoseInEndEffector = new FramePose3D();
    private final SelectionMatrix3D angularSelection = new SelectionMatrix3D(null, true, true, true);
    private final RobotConfigurationData defaultArmConfiguration;
 
@@ -83,9 +84,15 @@ public class ReachabilityMapSolver
       parentRegistry.addChild(registry);
    }
 
-   public void setControlFramePose(RigidBodyTransform controlFramePose)
+   public void setControlFramePoseInBody(RigidBodyTransformReadOnly controlFramePose)
    {
-      controlFramePoseInEndEffector.set(controlFramePose);
+      controlFramePoseInEndEffector.setIncludingFrame(endEffector.getBodyFixedFrame(), controlFramePose);
+   }
+
+   public void setControlFramePoseInParentJoint(RigidBodyTransformReadOnly controlFramePose)
+   {
+      controlFramePoseInEndEffector.setIncludingFrame(endEffector.getParentJoint().getFrameAfterJoint(), controlFramePose);
+      controlFramePoseInEndEffector.changeFrame(endEffector.getBodyFixedFrame());
    }
 
    public void setAngularSelection(boolean selectX, boolean selectY, boolean selectZ)
@@ -103,8 +110,8 @@ public class ReachabilityMapSolver
       KinematicsToolboxRigidBodyMessage message = MessageTools.createKinematicsToolboxRigidBodyMessage(endEffector, desiredPosition, desiredOrientation);
       message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(1.0));
       message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(1.0));
-      message.getControlFramePositionInEndEffector().set(controlFramePoseInEndEffector.getTranslation());
-      message.getControlFrameOrientationInEndEffector().set(controlFramePoseInEndEffector.getRotation());
+      message.getControlFramePositionInEndEffector().set(controlFramePoseInEndEffector.getPosition());
+      message.getControlFrameOrientationInEndEffector().set(controlFramePoseInEndEffector.getOrientation());
       message.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(angularSelection));
       commandInputManager.submitMessage(message);
 
@@ -118,8 +125,8 @@ public class ReachabilityMapSolver
       desiredPosition.changeFrame(ReferenceFrame.getWorldFrame());
       KinematicsToolboxRigidBodyMessage message = MessageTools.createKinematicsToolboxRigidBodyMessage(endEffector, desiredPosition);
       message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(1.0));
-      message.getControlFramePositionInEndEffector().set(controlFramePoseInEndEffector.getTranslation());
-      message.getControlFrameOrientationInEndEffector().set(controlFramePoseInEndEffector.getRotation());
+      message.getControlFramePositionInEndEffector().set(controlFramePoseInEndEffector.getPosition());
+      message.getControlFrameOrientationInEndEffector().set(controlFramePoseInEndEffector.getOrientation());
       commandInputManager.submitMessage(message);
 
       return solveAndRetry(50);
