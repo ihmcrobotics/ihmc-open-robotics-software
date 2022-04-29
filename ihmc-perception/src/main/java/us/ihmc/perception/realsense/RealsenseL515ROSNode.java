@@ -47,7 +47,7 @@ public class RealsenseL515ROSNode
    private int depthWidth;
    private int depthHeight;
    private CameraPinholeBrown depthCameraIntrinsics;
-   private static final boolean useROS1 = false;
+   private static final boolean useROS1 = true;
 
    public RealsenseL515ROSNode()
    {
@@ -132,24 +132,30 @@ public class RealsenseL515ROSNode
 //               ByteBuffer depthFloatBuffer = depth32FC1Image.getBackingDirectByteBuffer();
 
                ros1DepthChannelBuffer.clear();
-               int size = 2 * depthWidth * depthHeight;
-//               BytePointer dataPointer = depthU16C1Image.ptr();
-               for (int y = 0; y < depthHeight; y++)
+               for (int i = 0; i < depthFrameDataSize; i++)
                {
-                  for (int x = 0; x < depthWidth; x++)
-                  {
-//                     float eyeDepthMeters = depthFloatBuffer.getFloat();
-//
-//                     int row = y + 1;
-//                     int backForY = row * depthWidth * 2;
-//                     int forwardForX = x * 2;
-//                     int index = size - backForY + forwardForX;
-//                     char depthChar16 = (char) Math.round(eyeDepthMeters * 1000.0f); // 1000 is 1 meter
-//                     ros1DepthChannelBuffer.setChar(index, depthChar16);
-
-                     ros1DepthChannelBuffer.writeShort(Short.toUnsignedInt(dataPointer.getShort(depthWidth + depthHeight * depthWidth)));
-                  }
+                  ros1DepthChannelBuffer.writeByte(dataPointer.get(i));
                }
+
+
+//               int size = 2 * depthWidth * depthHeight;
+////               BytePointer dataPointer = depthU16C1Image.ptr();
+//               for (int y = 0; y < depthHeight; y++)
+//               {
+//                  for (int x = 0; x < depthWidth; x++)
+//                  {
+////                     float eyeDepthMeters = depthFloatBuffer.getFloat();
+////
+////                     int row = y + 1;
+////                     int backForY = row * depthWidth * 2;
+////                     int forwardForX = x * 2;
+////                     int index = size - backForY + forwardForX;
+////                     char depthChar16 = (char) Math.round(eyeDepthMeters * 1000.0f); // 1000 is 1 meter
+////                     ros1DepthChannelBuffer.setChar(index, depthChar16);
+//
+//                     ros1DepthChannelBuffer.writeShort(Short.toUnsignedInt(dataPointer.getShort(depthWidth + depthHeight * depthWidth)));
+//                  }
+//               }
 
 //               ByteBuffer depthImageByteBuffer = l515.getDepthFrameData().asByteBuffer();
 //               depthImageByteBuffer.limit(l515.getDepthFrameDataSize());
@@ -168,14 +174,16 @@ public class RealsenseL515ROSNode
 //               ros
 
                ros1DepthChannelBuffer.readerIndex(0);
-               ros1DepthChannelBuffer.writerIndex(size);
+               ros1DepthChannelBuffer.writerIndex(depthFrameDataSize);
 
-               ros1DepthCameraInfoPublisher.publish("camera_depth_optical_frame", depthCameraIntrinsics, new Time());
-               Image message = ros1DepthPublisher.createMessage(depthWidth, depthHeight, 2, "16UC1", ros1DepthChannelBuffer); // maybe need to copy here if there are errors
-
+               double now = Conversions.nanosecondsToSeconds(System.nanoTime());
+               ros1DepthCameraInfoPublisher.publish("camera_depth_optical_frame", depthCameraIntrinsics, new Time(now));
+               // maybe need to copy here if there are errors
+               int bytesPerValue = 2;
+               Image message = ros1DepthPublisher.createMessage(depthWidth, depthHeight, bytesPerValue, "16UC1", ros1DepthChannelBuffer);
 //               if(timestampSupplier != null)
 //                  message.getHeader().setStamp(new Time(Conversions.nanosecondsToSeconds(timestampSupplier.getAsLong())));
-               message.getHeader().setStamp(new Time(Conversions.nanosecondsToSeconds(System.nanoTime())));
+               message.getHeader().setStamp(new Time(now));
 
                ros1DepthPublisher.publish(message);
             }
