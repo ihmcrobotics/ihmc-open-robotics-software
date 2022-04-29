@@ -1,60 +1,39 @@
 package us.ihmc.gdx.ui.graphics.live;
 
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import imgui.internal.ImGui;
-import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.jboss.netty.buffer.ChannelBuffer;
 import sensor_msgs.CompressedImage;
 import sensor_msgs.Image;
-import us.ihmc.gdx.imgui.ImGuiTools;
-import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.gdx.imgui.ImGuiVideoPanel;
-import us.ihmc.gdx.ui.visualizers.ImGuiFrequencyPlot;
-import us.ihmc.gdx.ui.visualizers.ImGuiGDXROS1Visualizer;
+import us.ihmc.gdx.ui.visualizers.ImGuiGDXROS1VisualizerInterface;
 import us.ihmc.perception.BytedecoOpenCVTools;
+import us.ihmc.perception.ImageEncodingTools;
 import us.ihmc.perception.ROSOpenCVImage;
 import us.ihmc.perception.ROSOpenCVTools;
-import us.ihmc.perception.ImageEncodingTools;
-import us.ihmc.tools.thread.MissingThreadTools;
-import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 import java.nio.Buffer;
-import java.nio.ByteBuffer;
 
-public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
+public class GDXROS1VideoVisualizer extends GDXOpenCVVideoVisualizer implements ImGuiGDXROS1VisualizerInterface
 {
    private final boolean isCompressed;
    private AbstractRosTopicSubscriber<Image> subscriber;
    private AbstractRosTopicSubscriber<CompressedImage> compressedSubscriber;
-   private final ResettableExceptionHandlingExecutorService threadQueue;
    private final String topic;
-   private Pixmap pixmap;
-   private Texture texture;
-   private Mat rgba8Mat;
    private Mat input8UC1Mat;
-   private BytePointer rgba8888BytePointer;
-   private final ImGuiVideoPanel videoPanel;
-   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
    private Mat input16UC1Mat;
    private Mat decodedImageMat;
    private Mat resizedImageMat;
-   private boolean needNewTexture = false;
+   private boolean currentlySubscribed = false;
 
    public GDXROS1VideoVisualizer(String title, String topic)
    {
-      super(title);
+      super(title, topic, false);
       this.topic = topic;
-      threadQueue = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
       isCompressed = topic.endsWith("compressed");
-      videoPanel = new ImGuiVideoPanel(ImGuiTools.uniqueLabel(this, topic), false);
    }
 
    @Override
@@ -67,11 +46,6 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
             @Override
             public void onNewMessage(CompressedImage image)
             {
-               frequencyPlot.recordEvent();
-               if (isActive())
-               {
-//                  threadQueue.clearQueueAndExecute(() -> processIncomingMessageOnThread(null, image));
-               }
             }
          };
          ros1Node.attachSubscriber(topic, compressedSubscriber);
@@ -83,11 +57,7 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
             @Override
             public void onNewMessage(Image image)
             {
-               frequencyPlot.recordEvent();
-               if (isActive())
-               {
-                  threadQueue.clearQueueAndExecute(() -> processIncomingMessageOnThread(image, null));
-               }
+               doReceiveMessageOnThread(() -> processIncomingMessageOnThread(image, null));
             }
          };
          ros1Node.attachSubscriber(topic, subscriber);
@@ -141,20 +111,9 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
 //            imageHeight = input16UC1Mat.rows();
 //         }
 
-         if (rgba8Mat == null || pixmap.getWidth() < imageWidth || pixmap.getHeight() < imageHeight)
-         {
-            if (pixmap != null)
-            {
-               pixmap.dispose();
-            }
+         updateImageDimensions(imageWidth, imageHeight);
 
-            pixmap = new Pixmap(imageWidth, imageHeight, Pixmap.Format.RGBA8888);
-            rgba8888BytePointer = new BytePointer(pixmap.getPixels());
-            rgba8Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, rgba8888BytePointer);
-            needNewTexture = true;
-         }
-
-         opencv_imgproc.cvtColor(input8UC1Mat, rgba8Mat, opencv_imgproc.COLOR_GRAY2RGBA);
+         opencv_imgproc.cvtColor(input8UC1Mat, getRGBA8Mat(), opencv_imgproc.COLOR_GRAY2RGBA);
       }
    }
 
@@ -176,7 +135,7 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
    {
       super.renderImGuiWidgets();
       ImGui.text(topic);
-      frequencyPlot.renderImGuiWidgets();
+      getFrequencyPlot().renderImGuiWidgets();
       ImGui.sameLine();
    }
 
@@ -217,7 +176,7 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
       else
          decodedImageMat.convertTo(resizedImageMat, opencv_core.CV_8UC4); // TODO: Necessary?
 
-      pixmap.setPixels((ByteBuffer) resizedImageMat.createBuffer());
+//      pixmap.setPixels((ByteBuffer) resizedImageMat.createBuffer());
    }
 
    private void decompressAndDecodeUsingOpenCV(CompressedImage compressedImage)
@@ -226,8 +185,8 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
       {
          ROSOpenCVImage ROSOpenCVImage = ROSOpenCVTools.toCvCopy(compressedImage, ImageEncodingTools.RGBA8);
          Buffer buffer = ROSOpenCVImage.image.createBuffer();
-         ensureTextureReady(ROSOpenCVImage.image.cols(), ROSOpenCVImage.image.rows());
-         pixmap.setPixels((ByteBuffer) buffer);
+//         ensureTextureReady(ROSOpenCVImage.image.cols(), ROSOpenCVImage.image.rows());
+//         pixmap.setPixels((ByteBuffer) buffer);
       }
       catch (Exception e)
       {
@@ -235,54 +194,20 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
       }
    }
 
-   @Override
-   public void update()
+   public void updateSubscribers(RosNodeInterface ros1Node)
    {
-      super.update();
-      if (isActive())
+      boolean active = isActive();
+      if (active != currentlySubscribed)
       {
-         synchronized (this)
+         if (active)
          {
-            if (rgba8Mat != null)
-            {
-               if (texture == null || needNewTexture)
-               {
-                  needNewTexture = false;
-                  if (texture != null)
-                  {
-                     texture.dispose();
-                  }
-
-                  texture = new Texture(new PixmapTextureData(pixmap, null, false, false));
-                  videoPanel.setTexture(texture);
-               }
-
-               texture.draw(pixmap, 0, 0);
-            }
+            subscribe(ros1Node);
+         }
+         else
+         {
+            unsubscribe(ros1Node);
          }
       }
-   }
-
-   private void ensureTextureReady(int width, int height)
-   {
-      if (texture == null || texture.getWidth() < width || texture.getHeight() < height)
-      {
-         if (texture != null)
-         {
-            texture.dispose();
-//            pixmap.dispose();
-         }
-
-         pixmap = new Pixmap(width, height, Pixmap.Format.RGBA8888);
-         texture = new Texture(new PixmapTextureData(pixmap, null, false, false));
-
-         videoPanel.setTexture(texture);
-      }
-   }
-
-   @Override
-   public ImGuiVideoPanel getPanel()
-   {
-      return videoPanel;
+      currentlySubscribed = active;
    }
 }
