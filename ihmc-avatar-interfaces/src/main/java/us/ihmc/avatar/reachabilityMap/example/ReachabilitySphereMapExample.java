@@ -28,11 +28,15 @@ public class ReachabilitySphereMapExample
       SimulationSession session = new SimulationSession("Reachability Analysis - Example");
       session.initializeBufferSize(16000);
       Robot robot = session.addRobot(robotDefinition);
-      ReachabilitySphereMapCalculator calculator = new ReachabilitySphereMapCalculator(armJoints, robot.getControllerOutput(), Voxel3DGrid.newVoxel3DGrid(25, 0.05, 50, 1));
+      ReachabilitySphereMapCalculator calculator = new ReachabilitySphereMapCalculator(armJoints,
+                                                                                       robot.getControllerOutput(),
+                                                                                       Voxel3DGrid.newVoxel3DGrid(25, 0.05, 50, 1));
       robot.addController(calculator);
       session.addYoGraphicDefinition(calculator.getYoGraphicVisuals());
 
       SessionVisualizerControls guiControls = SessionVisualizer.startSessionVisualizer(session);
+      guiControls.setCameraFocusPosition(calculator.getGridFramePose().getX(), calculator.getGridFramePose().getY(), calculator.getGridFramePose().getZ());
+      guiControls.setCameraOrientation(Math.toRadians(15.0), Math.toRadians(170.0), 0.0);
       VisualDefinitionFactory visualDefinitionFactory = new VisualDefinitionFactory();
       visualDefinitionFactory.appendTranslation(RobotArmJointParameters.getRootJoint().getJointOffset());
       visualDefinitionFactory.addCoordinateSystem(1.0);
