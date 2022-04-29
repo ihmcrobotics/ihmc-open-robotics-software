@@ -6,9 +6,11 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import imgui.type.ImFloat;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -48,6 +50,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
    private final ImBoolean showSelfCollisionMeshes = new ImBoolean();
    private final ImBoolean showEnvironmentCollisionMeshes = new ImBoolean();
    private final ImBoolean interactablesEnabled = new ImBoolean(false);
+   private final ImFloat trajectoryTime = new ImFloat(1.2f);
 
    private final SideDependentList<GDXLiveRobotPartInteractable> footInteractables = new SideDependentList<>();
    private final SideDependentList<GDXLiveRobotPartInteractable> handInteractables = new SideDependentList<>();
@@ -98,7 +101,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
                                       baseUI.get3DSceneManager().getCamera3D());
             pelvisInteractable.setOnSpacePressed(() ->
             {
-               ros2Helper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(1.2, pelvisInteractable.getPose()));
+               ros2Helper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(trajectoryTime.get(), pelvisInteractable.getPose()));
             });
          }
          for (RobotSide side : RobotSide.values)
@@ -114,7 +117,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
                                        baseUI.get3DSceneManager().getCamera3D());
                interactableFoot.setOnSpacePressed(() ->
                {
-                  ros2Helper.publishToController(HumanoidMessageTools.createFootTrajectoryMessage(side, 1.2, interactableFoot.getPose()));
+                  ros2Helper.publishToController(HumanoidMessageTools.createFootTrajectoryMessage(side, trajectoryTime.get(), interactableFoot.getPose()));
                });
                footInteractables.put(side, interactableFoot);
             }
@@ -142,7 +145,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
                interactableHand.setOnSpacePressed(() ->
                {
                   ros2Helper.publishToController(HumanoidMessageTools.createHandTrajectoryMessage(side,
-                                                                                                  1.2,
+                                                                                                  trajectoryTime.get(),
                                                                                                   interactableHand.getPose(),
                                                                                                   ReferenceFrame.getWorldFrame()));
                });
@@ -244,6 +247,14 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
       ImGui.sameLine();
       if (ImGui.button(labels.get("Clear graphics")))
          walkPathControlRing.clearGraphics();
+      ImGui.text("Trajectory time:");
+      ImGui.sameLine();
+      ImGui.pushItemWidth(100.0f);
+      if (ImGui.inputFloat(labels.get("s", "Trajectory time"), trajectoryTime, 0.1f))
+      {
+         trajectoryTime.set((float) MathTools.clamp(trajectoryTime.get(), 0.0, 30.0));
+      }
+      ImGui.popItemWidth();
       ImGui.text("Walk path control ring:");
       walkPathControlRing.renderImGuiWidgets();
       ImGui.checkbox("Show self collision meshes", showSelfCollisionMeshes);
