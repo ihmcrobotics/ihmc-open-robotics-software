@@ -1,6 +1,7 @@
 package us.ihmc.avatar.gpuPlanarRegions;
 
 import boofcv.struct.calib.CameraPinholeBrown;
+import controller_msgs.msg.dds.StoredPropertySetMessage;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -13,6 +14,7 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.communication.property.StoredPropertySetMessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
@@ -23,6 +25,7 @@ import us.ihmc.perception.realsense.BytedecoRealsenseL515;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Activator;
@@ -46,6 +49,7 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
    private ChannelBuffer ros1DepthChannelBuffer;
    private final ROS2Helper ros2Helper;
    private final ROS2SyncedRobotModel syncedRobot;
+   private final ROS2Input<StoredPropertySetMessage> parametersSubscription;
    private RealSenseHardwareManager realSenseHardwareManager;
    private BytedecoRealsenseL515 l515;
    private Mat depthU16C1Image;
@@ -67,6 +71,8 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "l515_node");
       ros2Helper = new ROS2ControllerHelper(ros2Node, robotModel);
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
+
+      parametersSubscription = ros2Helper.subscribe(GPUPlanarRegionExtractionComms.PARAMETERS);
 
       thread = new PausablePeriodicThread("L515Node", UnitConversions.hertzToSeconds(31.0), false, this::update);
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "L515Shutdown"));
@@ -137,6 +143,14 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
             ReferenceFrame cameraFrame =
                   syncedRobot.hasReceivedFirstMessage() ? syncedRobot.getReferenceFrames().getSteppingCameraFrame() : ReferenceFrame.getWorldFrame();
             // TODO: Wait for frame at time of data aquisition?
+
+            if (parametersSubscription.getMessageNotification().poll())
+            {
+               StoredPropertySetMessageTools.copyToStoredPropertySet(parametersSubscription.getMessageNotification().read(),
+                                                                     gpuPlanarRegionExtraction.getParameters(),
+                                                                     () -> LogTools.info("Accepted new parameters."));
+            }
+
             gpuPlanarRegionExtraction.extractPlanarRegions(cameraFrame, doNothingRunnable);
             gpuPlanarRegionExtraction.findRegions(doNothingIslandConsumer);
             gpuPlanarRegionExtraction.findBoundariesAndHoles(doNothingRingConsumer);
