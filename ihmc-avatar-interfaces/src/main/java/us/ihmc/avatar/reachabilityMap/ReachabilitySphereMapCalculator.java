@@ -4,6 +4,7 @@ import static us.ihmc.avatar.scs2.YoGraphicDefinitionFactory.newYoGraphicCoordin
 import static us.ihmc.avatar.scs2.YoGraphicDefinitionFactory.newYoGraphicPoint3DDefinition;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
@@ -20,21 +21,27 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.scs2.definition.controller.ControllerOutput;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
+import us.ihmc.scs2.session.tools.SCS1GraphicConversionTools;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ReachabilitySphereMapCalculator implements Controller
 {
+   private static final boolean VISUALIZE_ALL_SOLVERS = false;
+
    private final ControllerOutput controllerOutput;
 
    public enum CalculatorState
@@ -54,6 +61,8 @@ public class ReachabilitySphereMapCalculator implements Controller
    private final YoFramePose3D currentEvaluationPose = new YoFramePose3D("currentEvaluationPose", ReferenceFrame.getWorldFrame(), registry);
    private final StateMachine<CalculatorState, State> stateMachine;
 
+   private final List<YoGraphicGroupDefinition> solverYoGraphicGroupDefinitions = new ArrayList<>();
+
    public ReachabilitySphereMapCalculator(OneDoFJointBasics[] robotArmJoints, ControllerOutput controllerOutput, Voxel3DGrid voxel3DGrid)
    {
       this(robotArmJoints, controllerOutput, voxel3DGrid, 20);
@@ -71,13 +80,32 @@ public class ReachabilitySphereMapCalculator implements Controller
          registry.addChild(solverRegistry);
 
          OneDoFJointBasics[] solverJoints;
+         String cloneSuffix;
 
          if (i == 0)
+         {
             solverJoints = robotArmJoints;
+            cloneSuffix = "";
+         }
          else
-            solverJoints = MultiBodySystemFactories.cloneOneDoFJointKinematicChain(robotArmJoints);
+         {
+            RigidBodyBasics originalRootBody = MultiBodySystemTools.getRootBody(robotArmJoints[0].getPredecessor());
+            cloneSuffix = "-solver" + i;
+            RigidBodyBasics solverRootBody = MultiBodySystemFactories.cloneMultiBodySystem(originalRootBody, ReferenceFrame.getWorldFrame(), cloneSuffix);
+            solverJoints = Arrays.stream(robotArmJoints)
+                                 .map(originalJoint -> MultiBodySystemTools.findJoint(solverRootBody, originalJoint.getName() + cloneSuffix))
+                                 .toArray(OneDoFJointBasics[]::new);
+         }
 
-         solvers[i] = new ReachabilityMapSolver(solverJoints, new YoGraphicsListRegistry(), solverRegistry);
+         YoGraphicsListRegistry solverGraphicsRegistry = new YoGraphicsListRegistry();
+         solvers[i] = new ReachabilityMapSolver(cloneSuffix, solverJoints, solverGraphicsRegistry, solverRegistry);
+
+         if (i == 0 || VISUALIZE_ALL_SOLVERS)
+         {
+            YoGraphicGroupDefinition solverYoGraphicGroup = new YoGraphicGroupDefinition("solver" + i);
+            solverYoGraphicGroup.setChildren(SCS1GraphicConversionTools.toYoGraphicDefinitions(solverGraphicsRegistry));
+            solverYoGraphicGroupDefinitions.add(solverYoGraphicGroup);
+         }
       }
 
       gridFramePose.attachVariableChangedListener(v -> this.voxel3DGrid.setGridPose(gridFramePose));
@@ -85,6 +113,14 @@ public class ReachabilitySphereMapCalculator implements Controller
       gridFramePose.appendTranslation(getGridSizeInMeters() / 2.5, 0.0, 0.0);
       setGridFramePose(gridFramePose);
       stateMachine = setupStateMachine();
+   }
+
+   public void setRobotCollisionModel(RobotDefinition robotDefinition)
+   {
+      for (ReachabilityMapSolver solver : solvers)
+      {
+         solver.setCollisionModel(robotDefinition);
+      }
    }
 
    public void setVoxel3DGrid(Voxel3DGrid voxel3DGrid)
@@ -121,6 +157,7 @@ public class ReachabilitySphereMapCalculator implements Controller
       yoGraphics.add(newYoGraphicCoordinateSystem3DDefinition("gridFramePose", gridFramePose, 0.5, ColorDefinitions.Blue()));
       yoGraphics.add(newYoGraphicCoordinateSystem3DDefinition("currentEvaluationPose", currentEvaluationPose, 0.15, ColorDefinitions.HotPink()));
       yoGraphics.add(newYoGraphicPoint3DDefinition("currentEvaluationPosition", currentEvaluationPose.getPosition(), 0.0125, ColorDefinitions.DeepPink()));
+      yoGraphics.addAll(solverYoGraphicGroupDefinitions);
       group.setChildren(yoGraphics);
       return group;
    }

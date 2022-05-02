@@ -1,7 +1,10 @@
 package us.ihmc.avatar.reachabilityMap;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Random;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
@@ -18,16 +21,23 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
+import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.simulation.collision.CollisionTools;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -58,9 +68,14 @@ public class ReachabilityMapSolver
    private final FramePose3D controlFramePoseInEndEffector = new FramePose3D();
    private final SelectionMatrix3D angularSelection = new SelectionMatrix3D(null, true, true, true);
    private final RobotConfigurationData defaultArmConfiguration;
+   private final String cloneSuffix;
 
-   public ReachabilityMapSolver(OneDoFJointBasics[] robotArmJoints, YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
+   public ReachabilityMapSolver(String cloneSuffix,
+                                OneDoFJointBasics[] robotArmJoints,
+                                YoGraphicsListRegistry yoGraphicsListRegistry,
+                                YoRegistry parentRegistry)
    {
+      this.cloneSuffix = cloneSuffix;
       this.robotArmJoints = robotArmJoints;
       endEffector = robotArmJoints[robotArmJoints.length - 1].getSuccessor();
       kinematicsToolboxController = new KinematicsToolboxController(commandInputManager,
@@ -82,6 +97,36 @@ public class ReachabilityMapSolver
       solutionMinimumProgression.set(DEFAULT_MIN_PROGRESSION);
 
       parentRegistry.addChild(registry);
+   }
+
+   public void setCollisionModel(RobotDefinition robotDefinition)
+   {
+      Set<RigidBodyBasics> solverRigidBodies = Arrays.stream(robotArmJoints).map(JointBasics::getSuccessor).collect(Collectors.toSet());
+      //    solverRigidBodies.add(robotArmJoints[0].getPredecessor());
+
+      RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(endEffector);
+
+      for (RigidBodyDefinition rigidBodyDef : robotDefinition.getAllRigidBodies())
+      {
+         if (rigidBodyDef.getCollisionShapeDefinitions() == null)
+            continue;
+
+         RigidBodyBasics rigidBody = MultiBodySystemTools.findRigidBody(rootBody, rigidBodyDef.getName() + cloneSuffix);
+         boolean staticCollidable = !solverRigidBodies.contains(rigidBody);
+         ReferenceFrame shapeFrame = rigidBody.isRootBody() ? rigidBody.getBodyFixedFrame() : rigidBody.getParentJoint().getFrameAfterJoint();
+
+         for (CollisionShapeDefinition collisionDef : rigidBodyDef.getCollisionShapeDefinitions())
+         {
+            FrameShape3DReadOnly shape = CollisionTools.toFrameShape3D(collisionDef.getOriginPose(), shapeFrame, collisionDef.getGeometryDefinition());
+            long collisionMask = collisionDef.getCollisionMask();
+            long collisionGroup = collisionDef.getCollisionGroup();
+
+            if (staticCollidable)
+               kinematicsToolboxController.registerStaticCollidable(new Collidable(null, collisionMask, collisionGroup, shape));
+            else
+               kinematicsToolboxController.registerRobotCollidable(new Collidable(rigidBody, collisionMask, collisionGroup, shape));
+         }
+      }
    }
 
    public void setControlFramePoseInBody(RigidBodyTransformReadOnly controlFramePose)
