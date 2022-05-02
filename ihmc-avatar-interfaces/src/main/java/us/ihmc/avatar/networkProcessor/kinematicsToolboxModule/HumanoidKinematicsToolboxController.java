@@ -1,6 +1,24 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import controller_msgs.msg.dds.*;
+import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD;
+import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL;
+import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHands;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
+import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import controller_msgs.msg.dds.MultiContactBalanceStatus;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
@@ -10,8 +28,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
-import us.ihmc.commonWalkingControlModules.staticEquilibrium.MultiContactSupportRegionSolverInput;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.MultiContactSupportRegionSolver;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.MultiContactSupportRegionSolverInput;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -49,12 +67,6 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import java.util.*;
-
-import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD;
-import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL;
-import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHands;
 
 public class HumanoidKinematicsToolboxController extends KinematicsToolboxController
 {
@@ -304,7 +316,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    public void setCollisionModel(RobotCollisionModel collisionModel)
    {
       if (collisionModel != null)
-         registerCollidables(collisionModel.getRobotCollidables(getDesiredFullRobotModel().getElevator()));
+         registerRobotCollidables(collisionModel.getRobotCollidables(getDesiredFullRobotModel().getElevator()));
    }
 
    @Override
