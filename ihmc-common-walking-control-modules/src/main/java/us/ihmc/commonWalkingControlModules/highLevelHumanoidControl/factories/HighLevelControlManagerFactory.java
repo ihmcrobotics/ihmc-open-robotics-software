@@ -9,10 +9,12 @@ import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.DefaultSplitFractionCalculatorParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
+import us.ihmc.commonWalkingControlModules.configurations.HumanoidRobotNaturalPosture;
 import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.NaturalPosture.NaturalPostureManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
@@ -60,6 +62,7 @@ public class HighLevelControlManagerFactory
    private CenterOfMassHeightManager centerOfMassHeightManager;
    private FeetManager feetManager;
    private PelvisOrientationManager pelvisOrientationManager;
+   private NaturalPostureManager naturalPostureManager;
 
    private final Map<String, RigidBodyControlManager> rigidBodyManagerMapByBodyName = new HashMap<>();
 
@@ -319,6 +322,29 @@ public class HighLevelControlManagerFactory
       pelvisOrientationManager.setWeights(pelvisAngularWeight);
       pelvisOrientationManager.setPrepareForLocomotion(walkingControllerParameters.doPreparePelvisForLocomotion());
       return pelvisOrientationManager;
+   }
+
+   public NaturalPostureManager getOrCreateNaturalPostureManager()
+   {
+      if (naturalPostureManager != null)
+         return naturalPostureManager;
+
+      if (!hasHighLevelHumanoidControllerToolbox(NaturalPostureManager.class))
+         return null;
+      if (!hasWalkingControllerParameters(NaturalPostureManager.class))
+         return null;
+
+      String npName = "naturalPosture";
+      PID3DGainsReadOnly naturalPostureGains = taskspaceOrientationGainMap.get(npName);
+      Vector3DReadOnly naturalPostureAngularWeight = taskspaceAngularWeightMap.get(npName);
+      
+      HumanoidRobotNaturalPosture naturalPostureMeasurement = walkingControllerParameters.getNaturalPosture(controllerToolbox.getFullRobotModel(),
+                                                                                                            registry,
+                                                                                                            controllerToolbox.getYoGraphicsListRegistry());
+
+      naturalPostureManager = new NaturalPostureManager(naturalPostureMeasurement, naturalPostureGains, controllerToolbox, registry);
+      naturalPostureManager.setWeights(naturalPostureAngularWeight);
+      return naturalPostureManager;
    }
 
    private boolean hasHighLevelHumanoidControllerToolbox(Class<?> managerClass)
