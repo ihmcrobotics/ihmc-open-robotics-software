@@ -106,7 +106,7 @@ public class ReachabilityMapTools
             {
                Voxel3DData voxel = grid.getVoxel(xIndex, yIndex, zIndex);
 
-               double reachabilityValue = voxel.getD();
+               double reachabilityValue = voxel == null ? 0.0 : voxel.getD();
 
                if (reachabilityValue > 0.001)
                {
