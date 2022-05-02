@@ -3,91 +3,36 @@ package us.ihmc.robotEnvironmentAwareness.geometry;
 import java.util.Scanner;
 
 import us.ihmc.jOctoMap.tools.ScannerTools;
+import us.ihmc.tools.property.*;
 
-public class ConcaveHullFactoryParameters
+public class ConcaveHullFactoryParameters extends StoredPropertySet implements ConcaveHullFactoryParametersBasics
 {
-   private double edgeLengthThreshold;
-   private boolean removeAllTrianglesWithTwoBorderEdges;
-   private boolean allowSplittingConcaveHull;
-   private int maxNumberOfIterations;
-   private double triangulationTolerance;
+   public static final String PROJECT_NAME = "ihmc-open-robotics-software";
+   public static final String TO_RESOURCE_FOLDER = "robot-environment-awareness/src/main/resources";
+
+   public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
+
+   public static final DoubleStoredPropertyKey edgeLengthThreshold = keys.addDoubleKey("Edge length threshold");
+   public static final BooleanStoredPropertyKey removeAllTrianglesWithTwoBorderEdges = keys.addBooleanKey("Remove all triangles with two border edges");
+   public static final BooleanStoredPropertyKey allowSplittingConcaveHull = keys.addBooleanKey("Allow splitting concave hull");
+   public static final IntegerStoredPropertyKey maxNumberOfIterations = keys.addIntegerKey("Max number of iterations");
+   public static final DoubleStoredPropertyKey triangulationTolerance = keys.addDoubleKey("Triangulation tolerance");
 
    public ConcaveHullFactoryParameters()
    {
-      setDefaultParameters();
+      super(keys, ConcaveHullFactoryParameters.class, PROJECT_NAME, TO_RESOURCE_FOLDER);
+      load();
    }
 
    public ConcaveHullFactoryParameters(ConcaveHullFactoryParameters other)
    {
+      super(keys, ConcaveHullFactoryParameters.class, PROJECT_NAME, TO_RESOURCE_FOLDER);
       set(other);
    }
 
    public void set(ConcaveHullFactoryParameters other)
    {
-      edgeLengthThreshold = other.edgeLengthThreshold;
-      removeAllTrianglesWithTwoBorderEdges = other.removeAllTrianglesWithTwoBorderEdges;
-      allowSplittingConcaveHull = other.allowSplittingConcaveHull;
-      maxNumberOfIterations = other.maxNumberOfIterations;
-      triangulationTolerance = other.triangulationTolerance;
-   }
-
-   public void setDefaultParameters()
-   {
-      edgeLengthThreshold = 0.10;
-      removeAllTrianglesWithTwoBorderEdges = true;
-      allowSplittingConcaveHull = true;
-      maxNumberOfIterations = 5000;
-      triangulationTolerance = 0.0;
-   }
-
-   public double getEdgeLengthThreshold()
-   {
-      return edgeLengthThreshold;
-   }
-
-   public boolean doRemoveAllTrianglesWithTwoBorderEdges()
-   {
-      return removeAllTrianglesWithTwoBorderEdges;
-   }
-
-   public boolean isSplittingConcaveHullAllowed()
-   {
-      return allowSplittingConcaveHull;
-   }
-
-   public int getMaxNumberOfIterations()
-   {
-      return maxNumberOfIterations;
-   }
-
-   public double getTriangulationTolerance()
-   {
-      return triangulationTolerance;
-   }
-
-   public void setEdgeLengthThreshold(double edgeLengthThreshold)
-   {
-      this.edgeLengthThreshold = edgeLengthThreshold;
-   }
-
-   public void setRemoveAllTrianglesWithTwoBorderEdges(boolean removeAllTrianglesWithTwoBorderEdges)
-   {
-      this.removeAllTrianglesWithTwoBorderEdges = removeAllTrianglesWithTwoBorderEdges;
-   }
-
-   public void setAllowSplittingConcaveHull(boolean allowSplittingConcaveHull)
-   {
-      this.allowSplittingConcaveHull = allowSplittingConcaveHull;
-   }
-
-   public void setMaxNumberOfIterations(int maxNumberOfIterations)
-   {
-      this.maxNumberOfIterations = maxNumberOfIterations;
-   }
-
-   public void setTriangulationTolerance(double triangulationTolerance)
-   {
-      this.triangulationTolerance = triangulationTolerance;
+      setAll(other.getAll());
    }
 
    @Override
@@ -115,5 +60,12 @@ public class ConcaveHullFactoryParameters
       ConcaveHullFactoryParameters parameters = new ConcaveHullFactoryParameters();
       parameters.setFromString(parametersAsString);
       return parameters;
+   }
+
+   public static void main(String[] args)
+   {
+      StoredPropertySet parameters = new StoredPropertySet(keys, ConcaveHullFactoryParameters.class, PROJECT_NAME, TO_RESOURCE_FOLDER);
+      parameters.loadUnsafe();
+      parameters.save();
    }
 }
