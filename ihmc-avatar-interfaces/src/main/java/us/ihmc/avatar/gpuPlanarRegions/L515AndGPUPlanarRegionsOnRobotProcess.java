@@ -30,6 +30,7 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Activator;
 import us.ihmc.tools.thread.PausablePeriodicThread;
+import us.ihmc.tools.thread.Throttler;
 import us.ihmc.utilities.ros.ROS1Helper;
 import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.publisher.RosCameraInfoPublisher;
@@ -61,6 +62,7 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
    private Runnable doNothingRunnable = () -> { };
    private Consumer<GPURegionRing> doNothingRingConsumer = ring -> { };
    private Consumer<GPUPlanarRegionIsland> doNothingIslandConsumer = island -> { };
+   private Throttler parameterOutputThrottler = new Throttler();
 
    public L515AndGPUPlanarRegionsOnRobotProcess(DRCRobotModel robotModel)
    {
@@ -72,7 +74,7 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
       ros2Helper = new ROS2ControllerHelper(ros2Node, robotModel);
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
 
-      parametersSubscription = ros2Helper.subscribe(GPUPlanarRegionExtractionComms.PARAMETERS);
+      parametersSubscription = ros2Helper.subscribe(GPUPlanarRegionExtractionComms.PARAMETERS_INPUT);
 
       thread = new PausablePeriodicThread("L515Node", UnitConversions.hertzToSeconds(31.0), false, this::update);
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "L515Shutdown"));
@@ -149,6 +151,16 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
                StoredPropertySetMessageTools.copyToStoredPropertySet(parametersSubscription.getMessageNotification().read(),
                                                                      gpuPlanarRegionExtraction.getParameters(),
                                                                      () -> LogTools.info("Accepted new parameters."));
+            }
+            if (parameterOutputThrottler.run(1.0))
+            {
+               ros2Helper.publish(GPUPlanarRegionExtractionComms.PARAMETERS_OUTPUT,
+                                  StoredPropertySetMessageTools.newMessage(gpuPlanarRegionExtraction.getParameters()));
+               ros2Helper.publish(GPUPlanarRegionExtractionComms.CONVEX_HULL_FACTORY_PARAMETERS_OUTPUT,
+                                  StoredPropertySetMessageTools.newMessage(gpuPlanarRegionExtraction.getConcaveHullFactoryParameters()));
+               ros2Helper.publish(GPUPlanarRegionExtractionComms.POLYGONIZER_PARAMETERS_OUTPUT,
+                                  StoredPropertySetMessageTools.newMessage(gpuPlanarRegionExtraction.getPolygonizerParameters()));
+
             }
 
             gpuPlanarRegionExtraction.extractPlanarRegions(cameraFrame, doNothingRunnable);
