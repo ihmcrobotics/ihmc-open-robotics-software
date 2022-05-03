@@ -16,6 +16,9 @@ public interface ForcePolytopeSolver
     */
    void solve(DMatrixRMaj jacobian, DMatrixRMaj tauLowerLimit, DMatrixRMaj tauUpperLimit, ConvexPolytope3D polytopeToPack);
 
+   /**
+    * All vertices added to the polytope, for debugging
+    */
    default List<Point3D> getVertices()
    {
       return null;
@@ -25,5 +28,10 @@ public interface ForcePolytopeSolver
     * Interior point solve parameters
     */
    Point3D[] directionsToOptimize = SpiralBasedAlgorithm.generatePointsOnSphere(1.0, 50);
+
+   /**
+    * For implementations using SVD, this is the cutoff for singular vectors
+    */
+   double singularValueThreshold = 0.05;
 
 }
