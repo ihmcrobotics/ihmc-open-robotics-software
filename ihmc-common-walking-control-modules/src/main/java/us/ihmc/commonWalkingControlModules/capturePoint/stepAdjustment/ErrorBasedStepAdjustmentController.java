@@ -342,7 +342,8 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                        FramePoint2DReadOnly desiredICP,
                        FramePoint2DReadOnly currentICP,
                        FrameVector2DReadOnly residualICPError,
-                       double omega0)
+                       double omega0,
+                       int numberOfStepsInQueue)
    {
       if (!isInSwing.getBooleanValue())
          return;
@@ -372,7 +373,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 //                                               captureRegionCalculator.getCaptureRegion(),
                                                nextFootstepTiming == null ? Double.NaN : nextFootstepTiming.getStepTime(),
                                                omega0,
-                                               nextFootstep == null ? 1 : 2); // fixme hardcoded.
+                                               numberOfStepsInQueue);
 
       if (!useStepAdjustment.getBooleanValue())
          return;

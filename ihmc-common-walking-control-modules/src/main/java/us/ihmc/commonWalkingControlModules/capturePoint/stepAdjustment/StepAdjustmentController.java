@@ -25,10 +25,11 @@ public interface StepAdjustmentController
    void initialize(double initialTime, RobotSide supportSide);
 
    void compute(double currentTime,
-                       FramePoint2DReadOnly desiredICP,
-                       FramePoint2DReadOnly currentICP,
-                       FrameVector2DReadOnly residualICPError,
-                       double omega0);
+                FramePoint2DReadOnly desiredICP,
+                FramePoint2DReadOnly currentICP,
+                FrameVector2DReadOnly residualICPError,
+                double omega0,
+                int numberOfStepsInQueue);
 
    FramePose3DReadOnly getFootstepSolution();
 
