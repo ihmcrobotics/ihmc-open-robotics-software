@@ -25,13 +25,15 @@ public class PlanarRegionsListNode extends Node
    {
       List<PlanarRegionNode> planarRegionNodes = new ArrayList<>();
 
-      while (randomColors.size() < planarRegionsList.getNumberOfPlanarRegions())
-         randomColors.add(ColorRGBA.randomColor());
+      randomColors.add(new ColorRGBA(0.7f, 0.7f, 0.7f, 0.3f));
+      randomColors.add(new ColorRGBA(0.75f, 0.65f, 0.65f, 0.3f));
+      randomColors.add(new ColorRGBA(0.65f, 0.75f, 0.65f, 0.3f));
+      randomColors.add(new ColorRGBA(0.65f, 0.65f, 0.75f, 0.3f));
 
       for (int regionIndex = 0; regionIndex < planarRegionsList.getNumberOfPlanarRegions(); regionIndex++)
       {
          PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(regionIndex);
-         ColorRGBA color = randomColors.get(regionIndex);
+         ColorRGBA color = randomColors.get(regionIndex % randomColors.size());
          PlanarRegionNode planarRegionNode = new PlanarRegionNode(regionIndex, planarRegion, color, assetManager);
 
          planarRegionNodes.add(planarRegionNode);

@@ -12,28 +12,27 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.roughTerrainWalking.AvatarAbsoluteStepTimingsTest;
 import us.ihmc.robotics.Assert;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 @Tag("humanoid-rough-terrain")
 public class AtlasAbsoluteStepTimingsTest extends AvatarAbsoluteStepTimingsTest
 {
    @Override
    @Test
-   public void testTakingStepsWithAbsoluteTimings() throws SimulationExceededMaximumTimeException
+   public void testTakingStepsWithAbsoluteTimings()
    {
       super.testTakingStepsWithAbsoluteTimings();
    }
 
    @Override
    @Test
-   public void testMinimumTransferTimeIsRespected() throws SimulationExceededMaximumTimeException
+   public void testMinimumTransferTimeIsRespected()
    {
       super.testMinimumTransferTimeIsRespected();
    }
 
    @Override
    @Test
-   public void testPausingWalkDuringLongTransfers() throws SimulationExceededMaximumTimeException
+   public void testPausingWalkDuringLongTransfers()
    {
       super.testPausingWalkDuringLongTransfers();
    }

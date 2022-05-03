@@ -260,6 +260,11 @@ public class AtlasRobotModel implements DRCRobotModel
       return robotDefinitionWithSDFCollision;
    }
 
+   public void disableOneDoFJointDamping()
+   {
+      setRobotDefinitionMutator(getRobotDefinitionMutator().andThen(def -> def.forEachOneDoFJointDefinition(joint -> joint.setDamping(0.0))));
+   }
+
    public void setRobotDefinitionMutator(Consumer<RobotDefinition> robotDefinitionMutator)
    {
       if (robotDefinition != null)
@@ -356,9 +361,9 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
-   public HandModel getHandModel()
+   public HandModel getHandModel(RobotSide side)
    {
-      if (selectedVersion.hasRobotiqHands())
+      if (selectedVersion.hasRobotiqHands(side))
          return new RobotiqHandModel();
 
       return null;
@@ -511,16 +516,25 @@ public class AtlasRobotModel implements DRCRobotModel
    @Override
    public SimulatedRobotiqHandsControlThread createSimulatedHandController(RealtimeROS2Node realtimeROS2Node)
    {
-      switch (selectedVersion.getHandModel())
+      if (selectedVersion == AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ)
       {
-         case ROBOTIQ:
-            return new SimulatedRobotiqHandsControlThread(createFullRobotModel(),
-                                                          realtimeROS2Node,
-                                                          ROS2Tools.getControllerOutputTopic(getSimpleRobotName()),
-                                                          ROS2Tools.getControllerInputTopic(getSimpleRobotName()));
-
-         default:
-            return null;
+         return new SimulatedRobotiqHandsControlThread(createFullRobotModel(),
+                                                       realtimeROS2Node,
+                                                       ROS2Tools.getControllerOutputTopic(getSimpleRobotName()),
+                                                       ROS2Tools.getControllerInputTopic(getSimpleRobotName()),
+                                                       RobotSide.values);
+      }
+      else if (selectedVersion == AtlasRobotVersion.ATLAS_UNPLUGGED_V5_LEFT_NUB_RIGHT_ROBOTIQ)
+      {
+         return new SimulatedRobotiqHandsControlThread(createFullRobotModel(),
+                                                       realtimeROS2Node,
+                                                       ROS2Tools.getControllerOutputTopic(getSimpleRobotName()),
+                                                       ROS2Tools.getControllerInputTopic(getSimpleRobotName()),
+                                                       new RobotSide[] {RobotSide.RIGHT});
+      }
+      else
+      {
+         return null;
       }
    }
 
@@ -529,12 +543,21 @@ public class AtlasRobotModel implements DRCRobotModel
                                                                                   RealtimeROS2Node realtimeROS2Node,
                                                                                   DoubleProvider controllerTime)
    {
-      switch (selectedVersion.getHandModel())
+      if (selectedVersion == AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ)
       {
-         case ROBOTIQ:
-            return new SimulatedRobotiqHandKinematicController(getSimpleRobotName(), fullHumanoidRobotModel, realtimeROS2Node, controllerTime);
-         default:
-            return null;
+         return new SimulatedRobotiqHandKinematicController(getSimpleRobotName(), fullHumanoidRobotModel, realtimeROS2Node, controllerTime, RobotSide.values);
+      }
+      else if (selectedVersion == AtlasRobotVersion.ATLAS_UNPLUGGED_V5_LEFT_NUB_RIGHT_ROBOTIQ)
+      {
+         return new SimulatedRobotiqHandKinematicController(getSimpleRobotName(),
+                                                            fullHumanoidRobotModel,
+                                                            realtimeROS2Node,
+                                                            controllerTime,
+                                                            new RobotSide[] {RobotSide.RIGHT});
+      }
+      else
+      {
+         return null;
       }
    }
 

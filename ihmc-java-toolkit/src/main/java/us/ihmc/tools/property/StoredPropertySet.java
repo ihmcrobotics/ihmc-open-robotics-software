@@ -6,11 +6,12 @@ import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.WriteOption;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.io.WorkspaceDirectory;
+import us.ihmc.tools.io.WorkspaceFile;
 
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URL;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -31,12 +32,11 @@ public class StoredPropertySet implements StoredPropertySetBasics
 {
    private final StoredPropertyKeyList keys;
    private final Object[] values;
-   private final Class<?> classForLoading;
-   private final String uncapitalizedClassName;
-   private final String directoryNameToAssumePresent;
-   private final String subsequentPathToResourceFolder;
    private String saveFileName;
    private String currentVersionSuffix;
+   private final WorkspaceDirectory workspaceDirectory;
+   private final String uncapitalizedClassName;
+   private WorkspaceFile workspaceFile;
 
    private final Map<StoredPropertyKey, List<Runnable>> propertyChangedListeners = new HashMap<>();
 
@@ -55,13 +55,10 @@ public class StoredPropertySet implements StoredPropertySetBasics
                             String versionSuffix)
    {
       this.keys = keys;
-      this.classForLoading = classForLoading;
       this.uncapitalizedClassName = StringUtils.uncapitalize(classForLoading.getSimpleName());
-      this.directoryNameToAssumePresent = directoryNameToAssumePresent;
-      this.subsequentPathToResourceFolder = subsequentPathToResourceFolder;
+      workspaceDirectory = new WorkspaceDirectory(directoryNameToAssumePresent, subsequentPathToResourceFolder, classForLoading);
 
       updateBackingSaveFile(versionSuffix);
-
       values = new Object[keys.keys().size()];
 
       for (StoredPropertyKey<?> key : keys.keys())
@@ -225,6 +222,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
    {
       currentVersionSuffix = versionSuffix;
       saveFileName = uncapitalizedClassName + currentVersionSuffix + ".ini";
+      workspaceFile = new WorkspaceFile(workspaceDirectory, saveFileName);
    }
 
    @Override
@@ -242,11 +240,11 @@ public class StoredPropertySet implements StoredPropertySetBasics
    @Override
    public void load(String fileName, boolean crashIfMissingKeys)
    {
-      if (!fileName.startsWith(StringUtils.uncapitalize(classForLoading.getSimpleName())))
+      if (!fileName.startsWith(StringUtils.uncapitalize(workspaceDirectory.getClassForLoading().getSimpleName())))
          throw new RuntimeException("This filename " + fileName +
                                     " breaks the contract of the StoredPropertySet API. The filename should be the class name + suffix.");
       fileName = fileName.replace(".ini", "");
-      updateBackingSaveFile(fileName.substring(StringUtils.uncapitalize(classForLoading.getSimpleName()).length()));
+      updateBackingSaveFile(fileName.substring(StringUtils.uncapitalize(workspaceDirectory.getClassForLoading().getSimpleName()).length()));
       load(crashIfMissingKeys);
    }
 
@@ -260,7 +258,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
       ExceptionTools.handle(() ->
       {
          Properties properties = new Properties();
-         InputStream streamForLoading = accessStreamForLoading();
+         InputStream streamForLoading = workspaceFile.getClasspathResourceAsStream();
 
          if (streamForLoading == null)
          {
@@ -281,7 +279,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
                      continue;
                   }
 
-                  throw new RuntimeException(accessUrlForLoading() + " does not contain key: " + key.getCamelCasedName());
+                  throw new RuntimeException(workspaceFile.getClasspathResource() + " does not contain key: " + key.getCamelCasedName());
                }
 
                String stringValue = (String) properties.get(key.getCamelCasedName());
@@ -386,71 +384,26 @@ public class StoredPropertySet implements StoredPropertySetBasics
       }
    }
 
-   private InputStream accessStreamForLoading()
-   {
-      return classForLoading.getResourceAsStream(saveFileName);
-   }
-
-   private URL accessUrlForLoading()
-   {
-      return classForLoading.getResource(saveFileName);
-   }
-
    public Path findFileForSaving()
    {
       return findSaveFileDirectory().resolve(saveFileName);
    }
 
+   /**
+    * Find, for example, ihmc-open-robotics-software/ihmc-footstep-planning/src/main/java/us/ihmc/footstepPlanning/graphSearch/parameters
+    * or just save the file in the working directory.
+    */
    @Override
    public Path findSaveFileDirectory()
    {
-      // find, for example, ihmc-open-robotics-software/ihmc-footstep-planning/src/main/java/us/ihmc/footstepPlanning/graphSearch/parameters
-      // of just save the file in the working directory
-
-      // TODO: This should probably use PathTools#findDirectoryInline
-
-      Path absoluteWorkingDirectory = Paths.get(".").toAbsolutePath().normalize();
-
-      Path reworkedPath = Paths.get("/").toAbsolutePath().normalize(); // start with system root
-      boolean directoryFound = false;
-      for (Path path : absoluteWorkingDirectory)
+      if (workspaceDirectory.isFileAccessAvailable())
       {
-         reworkedPath = reworkedPath.resolve(path); // building up the path
-
-         if (path.toString().equals(directoryNameToAssumePresent))
-         {
-            directoryFound = true;
-            break;
-         }
+         return workspaceDirectory.getDirectoryPath();
       }
-
-      if (!directoryFound && Files.exists(reworkedPath.resolve(directoryNameToAssumePresent))) // working directory is workspace
+      else
       {
-         reworkedPath = reworkedPath.resolve(directoryNameToAssumePresent);
-         directoryFound = true;
+         return Paths.get("");
       }
-
-      if (!directoryFound)
-      {
-         LogTools.warn("Directory {} could not be found to save parameters. Using working directory {}. Reworked path: {}",
-                       directoryNameToAssumePresent,
-                       absoluteWorkingDirectory,
-                       reworkedPath);
-         return absoluteWorkingDirectory;
-      }
-
-      String packageName = classForLoading.getPackage().toString();
-      LogTools.debug(packageName);
-      String packagePath = packageName.split(" ")[1].replaceAll("\\.", "/");
-      LogTools.debug(packagePath);
-
-      Path subPath = Paths.get(subsequentPathToResourceFolder, packagePath);
-
-      Path finalPath = reworkedPath.resolve(subPath);
-
-      FileTools.ensureDirectoryExists(finalPath, DefaultExceptionHandler.PRINT_STACKTRACE);
-
-      return finalPath;
    }
 
    @Override
@@ -482,20 +435,5 @@ public class StoredPropertySet implements StoredPropertySetBasics
    public String getUncapitalizedClassName()
    {
       return uncapitalizedClassName;
-   }
-
-   public Class<?> getClassForLoading()
-   {
-      return classForLoading;
-   }
-
-   public String getDirectoryNameToAssumePresent()
-   {
-      return directoryNameToAssumePresent;
-   }
-
-   public String getSubsequentPathToResourceFolder()
-   {
-      return subsequentPathToResourceFolder;
    }
 }

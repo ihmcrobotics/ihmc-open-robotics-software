@@ -22,13 +22,15 @@ public class VideoPacket extends Packet<VideoPacket> implements Settable<VideoPa
    public byte video_source_ = (byte) 255;
    public long timestamp_;
    public us.ihmc.idl.IDLSequence.Byte  data_;
+   public int image_width_;
+   public int image_height_;
    public us.ihmc.euclid.tuple3D.Point3D position_;
    public us.ihmc.euclid.tuple4D.Quaternion orientation_;
    public controller_msgs.msg.dds.IntrinsicParametersMessage intrinsic_parameters_;
 
    public VideoPacket()
    {
-      data_ = new us.ihmc.idl.IDLSequence.Byte (262144, "type_9");
+      data_ = new us.ihmc.idl.IDLSequence.Byte (2000000, "type_9");
 
       position_ = new us.ihmc.euclid.tuple3D.Point3D();
       orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
@@ -50,6 +52,10 @@ public class VideoPacket extends Packet<VideoPacket> implements Settable<VideoPa
       timestamp_ = other.timestamp_;
 
       data_.set(other.data_);
+      image_width_ = other.image_width_;
+
+      image_height_ = other.image_height_;
+
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.position_, position_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.orientation_, orientation_);
       controller_msgs.msg.dds.IntrinsicParametersMessagePubSubType.staticCopy(other.intrinsic_parameters_, intrinsic_parameters_);
@@ -92,6 +98,24 @@ public class VideoPacket extends Packet<VideoPacket> implements Settable<VideoPa
    public us.ihmc.idl.IDLSequence.Byte  getData()
    {
       return data_;
+   }
+
+   public void setImageWidth(int image_width)
+   {
+      image_width_ = image_width;
+   }
+   public int getImageWidth()
+   {
+      return image_width_;
+   }
+
+   public void setImageHeight(int image_height)
+   {
+      image_height_ = image_height;
+   }
+   public int getImageHeight()
+   {
+      return image_height_;
    }
 
 
@@ -138,6 +162,10 @@ public class VideoPacket extends Packet<VideoPacket> implements Settable<VideoPa
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.data_, other.data_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.image_width_, other.image_width_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.image_height_, other.image_height_, epsilon)) return false;
+
       if (!this.position_.epsilonEquals(other.position_, epsilon)) return false;
       if (!this.orientation_.epsilonEquals(other.orientation_, epsilon)) return false;
       if (!this.intrinsic_parameters_.epsilonEquals(other.intrinsic_parameters_, epsilon)) return false;
@@ -161,6 +189,10 @@ public class VideoPacket extends Packet<VideoPacket> implements Settable<VideoPa
       if(this.timestamp_ != otherMyClass.timestamp_) return false;
 
       if (!this.data_.equals(otherMyClass.data_)) return false;
+      if(this.image_width_ != otherMyClass.image_width_) return false;
+
+      if(this.image_height_ != otherMyClass.image_height_) return false;
+
       if (!this.position_.equals(otherMyClass.position_)) return false;
       if (!this.orientation_.equals(otherMyClass.orientation_)) return false;
       if (!this.intrinsic_parameters_.equals(otherMyClass.intrinsic_parameters_)) return false;
@@ -182,6 +214,10 @@ public class VideoPacket extends Packet<VideoPacket> implements Settable<VideoPa
       builder.append(this.timestamp_);      builder.append(", ");
       builder.append("data=");
       builder.append(this.data_);      builder.append(", ");
+      builder.append("image_width=");
+      builder.append(this.image_width_);      builder.append(", ");
+      builder.append("image_height=");
+      builder.append(this.image_height_);      builder.append(", ");
       builder.append("position=");
       builder.append(this.position_);      builder.append(", ");
       builder.append("orientation=");

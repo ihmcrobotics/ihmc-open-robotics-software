@@ -1,0 +1,269 @@
+package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
+
+import controller_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.tools.UnitConversions;
+
+public class KinematicsStreamingToolboxParameters
+{
+   private double centerOfMassSafeMargin;
+   private double publishingSolutionPeriod;
+
+   private double defaultArmMessageWeight;
+   private double defaultNeckMessageWeight;
+   private final Vector3D defaultPelvisMessageLinearWeight = new Vector3D();
+   private final Vector3D defaultPelvisMessageAngularWeight = new Vector3D();
+   private final Vector3D defaultChestMessageAngularWeight = new Vector3D();
+
+   private double defaultPelvisMessageLockWeight;
+   private double defaultChestMessageLockWeight;
+
+   private double defaultLinearWeight;
+   private double defaultAngularWeight;
+
+   private double defaultLinearRateLimit;
+   private double defaultAngularRateLimit;
+   private double outputJointVelocityScale;
+
+   private double defaultStreamingBlendingDuration;
+
+   private double inputPoseLPFBreakFrequency;
+   private double inputWeightDecayDuration;
+   private double inputVelocityDecayDuration;
+
+   private final KinematicsStreamingToolboxConfigurationMessage defaultConfiguration = new KinematicsStreamingToolboxConfigurationMessage();
+
+   public static KinematicsStreamingToolboxParameters defaultParameters()
+   {
+      KinematicsStreamingToolboxParameters parameters = new KinematicsStreamingToolboxParameters();
+      parameters.setDefault();
+      return parameters;
+   }
+
+   public void setDefault()
+   {
+      centerOfMassSafeMargin = 0.05;
+      publishingSolutionPeriod = UnitConversions.hertzToSeconds(60.0);
+      defaultArmMessageWeight = 10.0;
+      defaultNeckMessageWeight = 10.0;
+      defaultPelvisMessageLinearWeight.set(2.5, 2.5, 2.5);
+      defaultPelvisMessageAngularWeight.set(1.0, 1.0, 1.0);
+      defaultChestMessageAngularWeight.set(0.75, 0.75, 0.75);
+
+      defaultPelvisMessageLockWeight = 1000.0;
+      defaultChestMessageLockWeight = 1000.0;
+
+      defaultLinearWeight = 20.0;
+      defaultAngularWeight = 1.0;
+
+      defaultLinearRateLimit = 1.5;
+      defaultAngularRateLimit = 10.0;
+      outputJointVelocityScale = 0.75;
+
+      defaultStreamingBlendingDuration = 2.0;
+
+      inputPoseLPFBreakFrequency = 4.0;
+      inputWeightDecayDuration = 3.0;
+      inputVelocityDecayDuration = 0.5;
+
+      defaultConfiguration.setLockPelvis(false);
+      defaultConfiguration.setLockChest(false);
+      defaultConfiguration.setEnableLeftArmJointspace(true);
+      defaultConfiguration.setEnableRightArmJointspace(true);
+      defaultConfiguration.setEnableNeckJointspace(true);
+      defaultConfiguration.setEnableLeftHandTaskspace(true);
+      defaultConfiguration.setEnableRightHandTaskspace(true);
+      defaultConfiguration.setEnableChestTaskspace(true);
+      defaultConfiguration.setEnablePelvisTaskspace(true);
+      defaultConfiguration.setLeftHandTrajectoryFrameId(ReferenceFrame.getWorldFrame().hashCode());
+      defaultConfiguration.setRightHandTrajectoryFrameId(ReferenceFrame.getWorldFrame().hashCode());
+      defaultConfiguration.setChestTrajectoryFrameId(ReferenceFrame.getWorldFrame().hashCode());
+      defaultConfiguration.setPelvisTrajectoryFrameId(ReferenceFrame.getWorldFrame().hashCode());
+   }
+
+   public double getCenterOfMassSafeMargin()
+   {
+      return centerOfMassSafeMargin;
+   }
+
+   public double getPublishingSolutionPeriod()
+   {
+      return publishingSolutionPeriod;
+   }
+
+   public double getDefaultArmMessageWeight()
+   {
+      return defaultArmMessageWeight;
+   }
+
+   public double getDefaultNeckMessageWeight()
+   {
+      return defaultNeckMessageWeight;
+   }
+
+   public Vector3D getDefaultPelvisMessageLinearWeight()
+   {
+      return defaultPelvisMessageLinearWeight;
+   }
+
+   public Vector3D getDefaultPelvisMessageAngularWeight()
+   {
+      return defaultPelvisMessageAngularWeight;
+   }
+
+   public Vector3D getDefaultChestMessageAngularWeight()
+   {
+      return defaultChestMessageAngularWeight;
+   }
+
+   public double getDefaultPelvisMessageLockWeight()
+   {
+      return defaultPelvisMessageLockWeight;
+   }
+
+   public double getDefaultChestMessageLockWeight()
+   {
+      return defaultChestMessageLockWeight;
+   }
+
+   public double getDefaultLinearWeight()
+   {
+      return defaultLinearWeight;
+   }
+
+   public double getDefaultAngularWeight()
+   {
+      return defaultAngularWeight;
+   }
+
+   public double getDefaultLinearRateLimit()
+   {
+      return defaultLinearRateLimit;
+   }
+
+   public double getDefaultAngularRateLimit()
+   {
+      return defaultAngularRateLimit;
+   }
+
+   public double getOutputJointVelocityScale()
+   {
+      return outputJointVelocityScale;
+   }
+
+   public double getDefaultStreamingBlendingDuration()
+   {
+      return defaultStreamingBlendingDuration;
+   }
+
+   public double getInputPoseLPFBreakFrequency()
+   {
+      return inputPoseLPFBreakFrequency;
+   }
+
+   public double getInputWeightDecayDuration()
+   {
+      return inputWeightDecayDuration;
+   }
+
+   public double getInputVelocityDecayDuration()
+   {
+      return inputVelocityDecayDuration;
+   }
+
+   public KinematicsStreamingToolboxConfigurationMessage getDefaultConfiguration()
+   {
+      return defaultConfiguration;
+   }
+
+   public void setCenterOfMassSafeMargin(double centerOfMassSafeMargin)
+   {
+      this.centerOfMassSafeMargin = centerOfMassSafeMargin;
+   }
+
+   public void setPublishingSolutionPeriod(double publishingSolutionPeriod)
+   {
+      this.publishingSolutionPeriod = publishingSolutionPeriod;
+   }
+
+   public void setDefaultArmMessageWeight(double defaultArmMessageWeight)
+   {
+      this.defaultArmMessageWeight = defaultArmMessageWeight;
+   }
+
+   public void setDefaultNeckMessageWeight(double defaultNeckMessageWeight)
+   {
+      this.defaultNeckMessageWeight = defaultNeckMessageWeight;
+   }
+
+   public void setDefaultPelvisMessageLinearWeight(double xWeight, double yWeight, double zWeight)
+   {
+      this.defaultPelvisMessageLinearWeight.set(xWeight, yWeight, zWeight);
+   }
+
+   public void setDefaultPelvisMessageAngularWeight(double xWeight, double yWeight, double zWeight)
+   {
+      this.defaultPelvisMessageAngularWeight.set(xWeight, yWeight, zWeight);
+   }
+
+   public void setDefaultChestMessageAngularWeight(double xWeight, double yWeight, double zWeight)
+   {
+      this.defaultChestMessageAngularWeight.set(xWeight, yWeight, zWeight);
+   }
+
+   public void setDefaultPelvisMessageLockWeight(double defaultPelvisMessageLockWeight)
+   {
+      this.defaultPelvisMessageLockWeight = defaultPelvisMessageLockWeight;
+   }
+
+   public void setDefaultChestMessageLockWeight(double defaultChestMessageLockWeight)
+   {
+      this.defaultChestMessageLockWeight = defaultChestMessageLockWeight;
+   }
+
+   public void setDefaultLinearWeight(double defaultLinearWeight)
+   {
+      this.defaultLinearWeight = defaultLinearWeight;
+   }
+
+   public void setDefaultAngularWeight(double defaultAngularWeight)
+   {
+      this.defaultAngularWeight = defaultAngularWeight;
+   }
+
+   public void setDefaultLinearRateLimit(double defaultLinearRateLimit)
+   {
+      this.defaultLinearRateLimit = defaultLinearRateLimit;
+   }
+
+   public void setDefaultAngularRateLimit(double defaultAngularRateLimit)
+   {
+      this.defaultAngularRateLimit = defaultAngularRateLimit;
+   }
+
+   public void setOutputJointVelocityScale(double outputJointVelocityScale)
+   {
+      this.outputJointVelocityScale = outputJointVelocityScale;
+   }
+
+   public void setDefaultStreamingBlendingDuration(double defaultStreamingBlendingDuration)
+   {
+      this.defaultStreamingBlendingDuration = defaultStreamingBlendingDuration;
+   }
+
+   public void setInputPoseLPFBreakFrequency(double inputPoseLPFBreakFrequency)
+   {
+      this.inputPoseLPFBreakFrequency = inputPoseLPFBreakFrequency;
+   }
+
+   public void setInputWeightDecayDuration(double inputWeightDecayDuration)
+   {
+      this.inputWeightDecayDuration = inputWeightDecayDuration;
+   }
+
+   public void setInputVelocityDecayDuration(double inputVelocityDecayDuration)
+   {
+      this.inputVelocityDecayDuration = inputVelocityDecayDuration;
+   }
+}

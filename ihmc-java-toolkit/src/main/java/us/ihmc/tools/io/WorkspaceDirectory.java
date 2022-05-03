@@ -28,8 +28,8 @@ public class WorkspaceDirectory
                              Class<?> classForResourceDirectory)
    {
       this(directoryNameToAssumePresent, subsequentPathToResourceFolder, classForResourceDirectory, "");
-
    }
+
    public WorkspaceDirectory(String directoryNameToAssumePresent,
                              String subsequentPathToResourceFolder,
                              String subsequentOrAbsoluteResourcePackagePath)

@@ -3,13 +3,12 @@ package us.ihmc.valkyrie.pushRecovery;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.avatar.pushRecovery.AvatarQuickPushRecoveryWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.pushRecovery.AvatarQuickPushRecoveryWalkingTest;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.parameters.ValkyrieSteppingParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
@@ -52,7 +51,7 @@ public class ValkyrieQuickPushRecoveryWalkingTest extends AvatarQuickPushRecover
    @Tag("humanoid-push-recovery")
    @Override
    @Test
-   public void testOutwardPushInitialTransferToLeftStateAndLeftMidSwing() throws SimulationExceededMaximumTimeException
+   public void testOutwardPushInitialTransferToLeftStateAndLeftMidSwing()
    {
       setPushChangeInVelocity(0.5);
       super.testOutwardPushInitialTransferToLeftStateAndLeftMidSwing();
@@ -61,7 +60,7 @@ public class ValkyrieQuickPushRecoveryWalkingTest extends AvatarQuickPushRecover
    @Tag("humanoid-push-recovery")
    @Override
    @Test
-   public void testOutwardPushLeftSwingAtDifferentTimes() throws SimulationExceededMaximumTimeException
+   public void testOutwardPushLeftSwingAtDifferentTimes()
    {
       setPushChangeInVelocity(0.45);
       super.testOutwardPushLeftSwingAtDifferentTimes();
@@ -70,7 +69,7 @@ public class ValkyrieQuickPushRecoveryWalkingTest extends AvatarQuickPushRecover
    @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
-   public void testPushOutwardInRightThenLeftMidSwing() throws SimulationExceededMaximumTimeException
+   public void testPushOutwardInRightThenLeftMidSwing()
    {
       setPushChangeInVelocity(0.5);
       super.testPushOutwardInRightThenLeftMidSwing();
@@ -79,7 +78,7 @@ public class ValkyrieQuickPushRecoveryWalkingTest extends AvatarQuickPushRecover
    @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
-   public void testOutwardPushTransferToLeftState() throws SimulationExceededMaximumTimeException
+   public void testOutwardPushTransferToLeftState()
    {
       setPushChangeInVelocity(0.4);
       super.testOutwardPushTransferToLeftState();
@@ -88,7 +87,7 @@ public class ValkyrieQuickPushRecoveryWalkingTest extends AvatarQuickPushRecover
    @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
-   public void testBackwardPushInLeftSwingAtDifferentTimes() throws SimulationExceededMaximumTimeException
+   public void testBackwardPushInLeftSwingAtDifferentTimes()
    {
       setPushChangeInVelocity(0.6);
       super.testBackwardPushInLeftSwingAtDifferentTimes();
@@ -97,7 +96,7 @@ public class ValkyrieQuickPushRecoveryWalkingTest extends AvatarQuickPushRecover
    @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
-   public void testForwardPushInLeftSwingAtDifferentTimes() throws SimulationExceededMaximumTimeException
+   public void testForwardPushInLeftSwingAtDifferentTimes()
    {
       setPushChangeInVelocity(0.6);
       super.testForwardPushInLeftSwingAtDifferentTimes();
@@ -106,7 +105,7 @@ public class ValkyrieQuickPushRecoveryWalkingTest extends AvatarQuickPushRecover
    @Tag("humanoid-push-recovery")
    @Override
    @Test
-   public void testInwardPushLeftAtDifferentTimes() throws SimulationExceededMaximumTimeException
+   public void testInwardPushLeftAtDifferentTimes()
    {
       setPushChangeInVelocity(0.25);
       super.testInwardPushLeftAtDifferentTimes();
@@ -115,7 +114,7 @@ public class ValkyrieQuickPushRecoveryWalkingTest extends AvatarQuickPushRecover
    @Tag("humanoid-push-recovery")
    @Override
    @Test
-   public void testForwardAndOutwardPushInLeftSwing() throws SimulationExceededMaximumTimeException
+   public void testForwardAndOutwardPushInLeftSwing()
    {
       setPushChangeInVelocity(0.55);
       super.testForwardAndOutwardPushInLeftSwing();

@@ -9,7 +9,6 @@ import us.ihmc.avatar.behaviorTests.DRCFootstepListBehaviorTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasFootstepListBehaviorTest extends DRCFootstepListBehaviorTest
 {
@@ -35,7 +34,7 @@ public class AtlasFootstepListBehaviorTest extends DRCFootstepListBehaviorTest
    @Tag("humanoid-behaviors")
    @Override
    @Test
-   public void testSideStepping() throws SimulationExceededMaximumTimeException
+   public void testSideStepping()
    {
       super.testSideStepping();
    }
@@ -43,7 +42,7 @@ public class AtlasFootstepListBehaviorTest extends DRCFootstepListBehaviorTest
    @Tag("humanoid-behaviors")
    @Override
    @Test
-   public void testStepLongerThanMaxStepLength() throws SimulationExceededMaximumTimeException
+   public void testStepLongerThanMaxStepLength()
    {
       super.testStepLongerThanMaxStepLength();
    }
@@ -51,7 +50,7 @@ public class AtlasFootstepListBehaviorTest extends DRCFootstepListBehaviorTest
    @Tag("humanoid-behaviors")
    @Override
    @Test
-   public void testStop() throws SimulationExceededMaximumTimeException
+   public void testStop()
    {
       super.testStop();
    }
@@ -59,7 +58,7 @@ public class AtlasFootstepListBehaviorTest extends DRCFootstepListBehaviorTest
    @Tag("humanoid-behaviors-slow")
    @Override
    @Test
-   public void testTwoStepsForwards() throws SimulationExceededMaximumTimeException
+   public void testTwoStepsForwards()
    {
       super.testTwoStepsForwards();
    }

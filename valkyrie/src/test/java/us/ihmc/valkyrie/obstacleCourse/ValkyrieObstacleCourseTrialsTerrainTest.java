@@ -9,7 +9,6 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseTrialsTerrainTest;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 
@@ -48,27 +47,27 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    @Disabled // SCS ground contact points are really not adequate for that kind of test.
    @Override
    @Test
-   public void testTrialsTerrainZigzagHurdlesScript() throws SimulationExceededMaximumTimeException
+   public void testTrialsTerrainZigzagHurdlesScript()
    {
       super.testTrialsTerrainZigzagHurdlesScript();
    }
 
    @Override
    @Test
-   public void testWalkingOntoAndOverSlopesSideways() throws SimulationExceededMaximumTimeException
+   public void testWalkingOntoAndOverSlopesSideways()
    {
       super.testWalkingOntoAndOverSlopesSideways();
    }
 
    @Override
    @Test
-   public void testTrialsTerrainSlopeScriptRandomFootSlip() throws SimulationExceededMaximumTimeException
+   public void testTrialsTerrainSlopeScriptRandomFootSlip()
    {
       super.testTrialsTerrainSlopeScriptRandomFootSlip();
    }
 
    @Test
-   public void testTrialsTerrainSlopeScript() throws SimulationExceededMaximumTimeException
+   public void testTrialsTerrainSlopeScript()
    {
       super.testTrialsTerrainSlopeScript(0.05);
    }
@@ -81,7 +80,7 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    @Override
    @Disabled
    @Test
-   public void testTrialsTerrainZigzagHurdlesScriptRandomFootSlip() throws SimulationExceededMaximumTimeException
+   public void testTrialsTerrainZigzagHurdlesScriptRandomFootSlip()
    {
       super.testTrialsTerrainZigzagHurdlesScriptRandomFootSlip();
    }

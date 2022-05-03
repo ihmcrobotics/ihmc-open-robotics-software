@@ -9,35 +9,34 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.roughTerrainWalking.AvatarSwingWithWaypointsTest;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 @Tag("humanoid-rough-terrain")
 public class AtlasSwingWithWaypointsTest extends AvatarSwingWithWaypointsTest
 {
    @Override
    @Test
-   public void testSwingWithWaypointsAndNotTrustingHeight() throws SimulationExceededMaximumTimeException
+   public void testSwingWithWaypointsAndNotTrustingHeight()
    {
       super.testSwingWithWaypointsAndNotTrustingHeight();
    }
 
    @Override
    @Test
-   public void testCrazySwingIsRejected() throws SimulationExceededMaximumTimeException
+   public void testCrazySwingIsRejected()
    {
       super.testCrazySwingIsRejected();
    }
 
    @Override
    @Test
-   public void testRegularSwingWithWaypoints() throws SimulationExceededMaximumTimeException
+   public void testRegularSwingWithWaypoints()
    {
       super.testRegularSwingWithWaypoints();
    }
 
    @Override
    @Test
-   public void testSwingWithWaypointsRotated() throws SimulationExceededMaximumTimeException
+   public void testSwingWithWaypointsRotated()
    {
       super.testSwingWithWaypointsRotated();
    }
