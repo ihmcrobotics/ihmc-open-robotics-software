@@ -46,6 +46,7 @@ public class GDXROS1VideoVisualizer extends GDXOpenCVVideoVisualizer implements 
             @Override
             public void onNewMessage(CompressedImage image)
             {
+               doReceiveMessageOnThread(() -> processIncomingMessageOnThread(image));
             }
          };
          ros1Node.attachSubscriber(topic, compressedSubscriber);
@@ -57,63 +58,68 @@ public class GDXROS1VideoVisualizer extends GDXOpenCVVideoVisualizer implements 
             @Override
             public void onNewMessage(Image image)
             {
-               doReceiveMessageOnThread(() -> processIncomingMessageOnThread(image, null));
+               doReceiveMessageOnThread(() -> processIncomingMessageOnThread(image));
             }
          };
          ros1Node.attachSubscriber(topic, subscriber);
       }
    }
 
-   private void processIncomingMessageOnThread(Image image, CompressedImage compressedImage)
+   private void processIncomingMessageOnThread(CompressedImage compressedImage)
    {
-      ChannelBuffer nettyChannelBuffer = image == null ? compressedImage.getData() : image.getData();
+//      ChannelBuffer nettyChannelBuffer = compressedImage.getData();
+
+
+      //         decodedImageMat = new Mat(image.getHeight(), image.getWidth(), opencv_core.CV_8UC4);
+      //         resizedImageMat = new Mat(image.getHeight(), image.getWidth(), opencv_core.CV_8UC4);
+
+      try
+      {
+         ROSOpenCVImage ROSOpenCVImage = ROSOpenCVTools.toCvCopy(compressedImage, ImageEncodingTools.RGBA8);
+         Buffer buffer = ROSOpenCVImage.image.createBuffer();
+         //         ensureTextureReady(ROSOpenCVImage.image.cols(), ROSOpenCVImage.image.rows());
+         //         pixmap.setPixels((ByteBuffer) buffer);
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
+
+   }
+
+   private void processIncomingMessageOnThread(Image image)
+   {
+      ChannelBuffer nettyChannelBuffer = image.getData();
 
       int imageWidth = image.getWidth();
       int imageHeight = image.getHeight();
       String encoding = image.getEncoding();
-      if (input16UC1Mat == null)
+      int cvType = ImageEncodingTools.getCvType(encoding);
+
+      if (cvType == opencv_core.CV_16UC1)
       {
-         int cvType = ImageEncodingTools.getCvType(encoding);
-         input16UC1Mat = new Mat(imageHeight, imageWidth, cvType);
-         input8UC1Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC1);
-//         decodedImageMat = new Mat(image.getHeight(), image.getWidth(), opencv_core.CV_8UC4);
-//         resizedImageMat = new Mat(image.getHeight(), image.getWidth(), opencv_core.CV_8UC4);
+         if (input16UC1Mat == null)
+         {
+            input16UC1Mat = new Mat(imageHeight, imageWidth, cvType);
+            input8UC1Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC1);
+         }
+
+         ROSOpenCVTools.backMatWithNettyBuffer(input16UC1Mat, nettyChannelBuffer);
+         BytedecoOpenCVTools.clampTo8BitUnsignedChar(input16UC1Mat, input8UC1Mat, 0.0, 255.0);
       }
-
-      ROSOpenCVTools.backMatWithNettyBuffer(input16UC1Mat, nettyChannelBuffer);
-      BytedecoOpenCVTools.clampTo8BitUnsignedChar(input16UC1Mat, input8UC1Mat, 0.0, 255.0);
-
-
-//      if (isCompressed && compressedImage != null)
-//      {
-//         decompressAndDecodeUsingOpenCV(compressedImage);
-//         texture.draw(pixmap, 0, 0);
-//      }
-//      else if (image != null)
-//      {
-//         ensureTextureReady(image.getWidth(), image.getHeight());
-//         decodeUsingOpenCV(image);
-//         texture.draw(pixmap, 0, 0);
-//      }
 
       synchronized (this)
       {
-//         int imageWidth;
-//         int imageHeight;
-//         if (format == ROS2VideoFormat.JPEGYUVI420)
-//         {
-//            imageWidth = bgr8Mat.cols();
-//            imageHeight = bgr8Mat.rows();
-//         }
-//         else
-//         {
-//            imageWidth = input16UC1Mat.cols();
-//            imageHeight = input16UC1Mat.rows();
-//         }
-
          updateImageDimensions(imageWidth, imageHeight);
 
-         opencv_imgproc.cvtColor(input8UC1Mat, getRGBA8Mat(), opencv_imgproc.COLOR_GRAY2RGBA);
+         if (cvType == opencv_core.CV_16UC1)
+         {
+            opencv_imgproc.cvtColor(input8UC1Mat, getRGBA8Mat(), opencv_imgproc.COLOR_GRAY2RGBA);
+         }
+         else if (cvType == opencv_core.CV_8UC4)
+         {
+            ROSOpenCVTools.backMatWithNettyBuffer(getRGBA8Mat(), nettyChannelBuffer);
+         }
       }
    }
 
@@ -177,21 +183,6 @@ public class GDXROS1VideoVisualizer extends GDXOpenCVVideoVisualizer implements 
          decodedImageMat.convertTo(resizedImageMat, opencv_core.CV_8UC4); // TODO: Necessary?
 
 //      pixmap.setPixels((ByteBuffer) resizedImageMat.createBuffer());
-   }
-
-   private void decompressAndDecodeUsingOpenCV(CompressedImage compressedImage)
-   {
-      try
-      {
-         ROSOpenCVImage ROSOpenCVImage = ROSOpenCVTools.toCvCopy(compressedImage, ImageEncodingTools.RGBA8);
-         Buffer buffer = ROSOpenCVImage.image.createBuffer();
-//         ensureTextureReady(ROSOpenCVImage.image.cols(), ROSOpenCVImage.image.rows());
-//         pixmap.setPixels((ByteBuffer) buffer);
-      }
-      catch (Exception e)
-      {
-         e.printStackTrace();
-      }
    }
 
    public void updateSubscribers(RosNodeInterface ros1Node)
