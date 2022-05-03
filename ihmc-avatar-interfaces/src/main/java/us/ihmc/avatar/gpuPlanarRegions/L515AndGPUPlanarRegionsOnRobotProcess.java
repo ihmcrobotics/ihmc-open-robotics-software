@@ -234,12 +234,13 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
             {
                ros1DebugExtractionImageChannelBuffer.clear();
                debugExtractionImage.rewind();
-               for (int i = 0; i < debugExtractionImage.getBackingDirectByteBuffer().limit(); i++)
+               int imageSizeInBytes = debugExtractionImage.getBackingDirectByteBuffer().limit();
+               for (int i = 0; i < imageSizeInBytes; i++)
                {
                   ros1DebugExtractionImageChannelBuffer.writeByte(debugExtractionImage.getBackingDirectByteBuffer().get());
                }
                ros1DebugExtractionImageChannelBuffer.readerIndex(0);
-               ros1DebugExtractionImageChannelBuffer.writerIndex(depthFrameDataSize);
+               ros1DebugExtractionImageChannelBuffer.writerIndex(imageSizeInBytes);
 
                int bytesPerValue = 4;
                Image message = ros1DebugExtractionImagePublisher.createMessage(debugExtractionImage.getImageWidth(),
