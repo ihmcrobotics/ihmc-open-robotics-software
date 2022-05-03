@@ -12,6 +12,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.property.StoredPropertySetMessageTools;
@@ -27,7 +28,6 @@ import us.ihmc.perception.realsense.BytedecoRealsenseL515;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Activator;
@@ -55,9 +55,12 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
    private ChannelBuffer ros1DebugExtractionImageChannelBuffer;
    private final ROS2Helper ros2Helper;
    private final ROS2SyncedRobotModel syncedRobot;
-   private final ROS2Input<StoredPropertySetMessage> parametersSubscription;
-   private final ROS2Input<StoredPropertySetMessage> polygonizerParametersSubscription;
-   private final ROS2Input<StoredPropertySetMessage> concaveHullFactorySubscription;
+//   private final ROS2Input<StoredPropertySetMessage> parametersSubscription;
+//   private final ROS2Input<StoredPropertySetMessage> polygonizerParametersSubscription;
+//   private final ROS2Input<StoredPropertySetMessage> concaveHullFactorySubscription;
+   private final TypedNotification<StoredPropertySetMessage> parametersNotification = new TypedNotification<>();
+   private final TypedNotification<StoredPropertySetMessage> polygonizerParametersNotification = new TypedNotification<>();
+   private final TypedNotification<StoredPropertySetMessage> concaveHullFactoryNotification = new TypedNotification<>();
    private RealSenseHardwareManager realSenseHardwareManager;
    private BytedecoRealsenseL515 l515;
    private Mat depthU16C1Image;
@@ -82,9 +85,12 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
       ros2Helper = new ROS2ControllerHelper(ros2Node, robotModel);
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
 
-      parametersSubscription = ros2Helper.subscribe(GPUPlanarRegionExtractionComms.PARAMETERS_INPUT);
-      polygonizerParametersSubscription = ros2Helper.subscribe(GPUPlanarRegionExtractionComms.PARAMETERS_INPUT);
-      concaveHullFactorySubscription = ros2Helper.subscribe(GPUPlanarRegionExtractionComms.PARAMETERS_INPUT);
+//      parametersSubscription = ros2Helper.subscribe(GPUPlanarRegionExtractionComms.PARAMETERS_INPUT);
+//      polygonizerParametersSubscription = ros2Helper.subscribe(GPUPlanarRegionExtractionComms.POLYGONIZER_PARAMETERS_INPUT);
+//      concaveHullFactorySubscription = ros2Helper.subscribe(GPUPlanarRegionExtractionComms.CONVEX_HULL_FACTORY_PARAMETERS_INPUT);
+      ros2Helper.subscribeViaCallback(GPUPlanarRegionExtractionComms.PARAMETERS_INPUT, parametersNotification::set);
+      ros2Helper.subscribeViaCallback(GPUPlanarRegionExtractionComms.POLYGONIZER_PARAMETERS_INPUT, polygonizerParametersNotification::set);
+      ros2Helper.subscribeViaCallback(GPUPlanarRegionExtractionComms.CONVEX_HULL_FACTORY_PARAMETERS_INPUT, concaveHullFactoryNotification::set);
 
       thread = new PausablePeriodicThread("L515Node", UnitConversions.hertzToSeconds(31.0), false, this::update);
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "L515Shutdown"));
@@ -160,21 +166,21 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
                   syncedRobot.hasReceivedFirstMessage() ? syncedRobot.getReferenceFrames().getSteppingCameraFrame() : ReferenceFrame.getWorldFrame();
             // TODO: Wait for frame at time of data aquisition?
 
-            if (parametersSubscription.getMessageNotification().poll())
+            if (parametersNotification.poll())
             {
-               StoredPropertySetMessageTools.copyToStoredPropertySet(parametersSubscription.getMessageNotification().read(),
+               StoredPropertySetMessageTools.copyToStoredPropertySet(parametersNotification.read(),
                                                                      gpuPlanarRegionExtraction.getParameters(),
                                                                      () -> LogTools.info("Accepted new parameters."));
             }
-            if (polygonizerParametersSubscription.getMessageNotification().poll())
+            if (polygonizerParametersNotification.poll())
             {
-               StoredPropertySetMessageTools.copyToStoredPropertySet(polygonizerParametersSubscription.getMessageNotification().read(),
+               StoredPropertySetMessageTools.copyToStoredPropertySet(polygonizerParametersNotification.read(),
                                                                      gpuPlanarRegionExtraction.getPolygonizerParameters(),
                                                                      () -> LogTools.info("Accepted new polygonizer parameters."));
             }
-            if (concaveHullFactorySubscription.getMessageNotification().poll())
+            if (concaveHullFactoryNotification.poll())
             {
-               StoredPropertySetMessageTools.copyToStoredPropertySet(concaveHullFactorySubscription.getMessageNotification().read(),
+               StoredPropertySetMessageTools.copyToStoredPropertySet(concaveHullFactoryNotification.read(),
                                                                      gpuPlanarRegionExtraction.getConcaveHullFactoryParameters(),
                                                                      () -> LogTools.info("Accepted new concave hull factory parameters."));
             }

@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.StoredPropertySetMessage;
 import imgui.ImGui;
 import us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegionExtractionComms;
 import us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegionExtractionParameters;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.property.StoredPropertySetMessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.gdx.imgui.ImGuiPanel;
@@ -26,9 +27,12 @@ public class GDXRemoteGPUPlanarRegionExtractionUI
    private final ImGuiStoredPropertySetTuner gpuPlanarRegionsParametersTuner = new ImGuiStoredPropertySetTuner("GPU Planar Regions Parameters");
    private final ImGuiStoredPropertySetTuner polygonizerParametersTuner = new ImGuiStoredPropertySetTuner("Polygonizer Parameters");
    private final ImGuiStoredPropertySetTuner concaveHullFactoryParametersTuner = new ImGuiStoredPropertySetTuner("Concave Hull Factory Parameters");
-   private final ROS2Input<StoredPropertySetMessage> gpuRegionParametersROS2Input;
-   private final ROS2Input<StoredPropertySetMessage> polygonizerParametersROS2Input;
-   private final ROS2Input<StoredPropertySetMessage> concaveHullFactoryParametersROS2Input;
+//   private final ROS2Input<StoredPropertySetMessage> gpuRegionParametersROS2Input;
+//   private final ROS2Input<StoredPropertySetMessage> polygonizerParametersROS2Input;
+//   private final ROS2Input<StoredPropertySetMessage> concaveHullFactoryParametersROS2Input;
+   private final TypedNotification<StoredPropertySetMessage> gpuRegionParametersROS2Notification = new TypedNotification<>();
+   private final TypedNotification<StoredPropertySetMessage> polygonizerParametersROS2Notification = new TypedNotification<>();
+   private final TypedNotification<StoredPropertySetMessage> concaveHullFactoryParametersROS2Notification = new TypedNotification<>();
    private boolean gpuRegionParametersHaveBeenReceived = false;
    private boolean polygonizerParametersHaveBeenReceived = false;
    private boolean concaveHullFactoryParametersHaveBeenReceived = false;
@@ -54,9 +58,12 @@ public class GDXRemoteGPUPlanarRegionExtractionUI
                                                () -> ros2Helper.publish(GPUPlanarRegionExtractionComms.CONVEX_HULL_FACTORY_PARAMETERS_INPUT,
                                                                         StoredPropertySetMessageTools.newMessage(concaveHullFactoryParameters)));
 
-      gpuRegionParametersROS2Input = ros2Helper.subscribe(GPUPlanarRegionExtractionComms.PARAMETERS_OUTPUT);
-      polygonizerParametersROS2Input = ros2Helper.subscribe(GPUPlanarRegionExtractionComms.POLYGONIZER_PARAMETERS_OUTPUT);
-      concaveHullFactoryParametersROS2Input = ros2Helper.subscribe(GPUPlanarRegionExtractionComms.CONVEX_HULL_FACTORY_PARAMETERS_OUTPUT);
+      ros2Helper.subscribeViaCallback(GPUPlanarRegionExtractionComms.PARAMETERS_OUTPUT, gpuRegionParametersROS2Notification::set);
+      ros2Helper.subscribeViaCallback(GPUPlanarRegionExtractionComms.POLYGONIZER_PARAMETERS_OUTPUT, polygonizerParametersROS2Notification::set);
+      ros2Helper.subscribeViaCallback(GPUPlanarRegionExtractionComms.CONVEX_HULL_FACTORY_PARAMETERS_OUTPUT, concaveHullFactoryParametersROS2Notification::set);
+//      gpuRegionParametersROS2Input = ros2Helper.subscribe(GPUPlanarRegionExtractionComms.PARAMETERS_OUTPUT);
+//      polygonizerParametersROS2Input = ros2Helper.subscribe(GPUPlanarRegionExtractionComms.POLYGONIZER_PARAMETERS_OUTPUT);
+//      concaveHullFactoryParametersROS2Input = ros2Helper.subscribe(GPUPlanarRegionExtractionComms.CONVEX_HULL_FACTORY_PARAMETERS_OUTPUT);
    }
 
    public void update()
@@ -71,9 +78,10 @@ public class GDXRemoteGPUPlanarRegionExtractionUI
 
       ImGui.separator();
 
-      if (!gpuRegionParametersHaveBeenReceived && gpuRegionParametersROS2Input.getMessageNotification().poll())
+//      if (!gpuRegionParametersHaveBeenReceived && gpuRegionParametersROS2Input.getMessageNotification().poll())
+      if (!gpuRegionParametersHaveBeenReceived && gpuRegionParametersROS2Notification.poll())
       {
-         StoredPropertySetMessageTools.copyToStoredPropertySet(gpuRegionParametersROS2Input.getMessageNotification().read(),
+         StoredPropertySetMessageTools.copyToStoredPropertySet(gpuRegionParametersROS2Notification.read(),
                                                                gpuRegionParameters,
                                                                () -> LogTools.info("Updating GPU planar regions parameters from remote."));
          gpuRegionParametersHaveBeenReceived = true;
@@ -91,9 +99,9 @@ public class GDXRemoteGPUPlanarRegionExtractionUI
 
       ImGui.separator();
 
-      if (!polygonizerParametersHaveBeenReceived && polygonizerParametersROS2Input.getMessageNotification().poll())
+      if (!polygonizerParametersHaveBeenReceived && polygonizerParametersROS2Notification.poll())
       {
-         StoredPropertySetMessageTools.copyToStoredPropertySet(polygonizerParametersROS2Input.getMessageNotification().read(),
+         StoredPropertySetMessageTools.copyToStoredPropertySet(polygonizerParametersROS2Notification.read(),
                                                                polygonizerParameters,
                                                                () -> LogTools.info("Updating polygonizer parameters from remote."));
          polygonizerParametersHaveBeenReceived = true;
@@ -111,9 +119,9 @@ public class GDXRemoteGPUPlanarRegionExtractionUI
 
       ImGui.separator();
 
-      if (!concaveHullFactoryParametersHaveBeenReceived && concaveHullFactoryParametersROS2Input.getMessageNotification().poll())
+      if (!concaveHullFactoryParametersHaveBeenReceived && concaveHullFactoryParametersROS2Notification.poll())
       {
-         StoredPropertySetMessageTools.copyToStoredPropertySet(concaveHullFactoryParametersROS2Input.getMessageNotification().read(),
+         StoredPropertySetMessageTools.copyToStoredPropertySet(concaveHullFactoryParametersROS2Notification.read(),
                                                                concaveHullFactoryParameters,
                                                                () -> LogTools.info("Updating concave hull factory parameters from remote."));
          concaveHullFactoryParametersHaveBeenReceived = true;
