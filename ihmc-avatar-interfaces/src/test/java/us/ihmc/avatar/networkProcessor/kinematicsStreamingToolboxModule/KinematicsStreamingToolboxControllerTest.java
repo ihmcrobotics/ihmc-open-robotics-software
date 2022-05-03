@@ -7,7 +7,6 @@ import static us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKi
 import static us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData;
 import static us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.RelativeEndEffectorControlTest.circlePositionAt;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -29,11 +28,11 @@ import controller_msgs.msg.dds.ToolboxStateMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.RobotDefinitionTools;
-import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.KSTState;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -42,26 +41,22 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.collision.EuclidFrameShape3DCollisionResult;
-import us.ihmc.euclid.shape.primitives.interfaces.Capsule3DReadOnly;
 import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
-import us.ihmc.euclid.shape.primitives.interfaces.Sphere3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPBox3DReadOnly;
+import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.CollisionResult;
 import us.ihmc.robotics.physics.RobotCollisionModel;
@@ -70,17 +65,17 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
+import us.ihmc.scs2.definition.controller.interfaces.ControllerOutputBasics;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
+import us.ihmc.scs2.definition.visual.VisualDefinition;
+import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
+import us.ihmc.scs2.simulation.SimulationSession;
+import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
-import us.ihmc.simulationconstructionset.Link;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
@@ -97,10 +92,6 @@ public abstract class KinematicsStreamingToolboxControllerTest
    protected static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    protected static final MaterialDefinition ghostMaterial = new MaterialDefinition(ColorDefinitions.Yellow().derive(0, 1, 1, 0.25));
    protected static final boolean visualize = simulationTestingParameters.getCreateGUI();
-   static
-   {
-      simulationTestingParameters.setDataBufferSize(1 << 16);
-   }
 
    protected CommandInputManager commandInputManager;
    protected StatusMessageOutputManager statusOutputManager;
@@ -109,16 +100,16 @@ public abstract class KinematicsStreamingToolboxControllerTest
    protected FullHumanoidRobotModel desiredFullRobotModel;
    protected KinematicsStreamingToolboxController toolboxController;
 
-   protected SimulationConstructionSet scs;
-   protected DRCSimulationTestHelper drcSimulationTestHelper;
-   protected HumanoidFloatingRootJointRobot robot, ghost;
+   protected SCS2AvatarTestingSimulation simulationTestHelper;
+
+   protected Robot robot, ghost;
    protected ROS2Node ros2Node;
    protected IHMCROS2Publisher<KinematicsStreamingToolboxInputMessage> inputPublisher;
    protected IHMCROS2Publisher<ToolboxStateMessage> statePublisher;
-   protected ROS2Topic controllerInputTopic;
-   protected ROS2Topic controllerOutputTopic;
-   protected ROS2Topic toolboxInputTopic;
-   protected ROS2Topic toolboxOutputTopic;
+   protected ROS2Topic<?> controllerInputTopic;
+   protected ROS2Topic<?> controllerOutputTopic;
+   protected ROS2Topic<?> toolboxInputTopic;
+   protected ROS2Topic<?> toolboxOutputTopic;
    protected ScheduledExecutorService executor;
 
    /**
@@ -127,21 +118,30 @@ public abstract class KinematicsStreamingToolboxControllerTest
     */
    public abstract DRCRobotModel newRobotModel();
 
-   public void setupWithWalkingController(RobotController... additionalGhostControllers)
+   public void setupWithWalkingController(Controller... additionalGhostControllers)
    {
-      DRCRobotModel ghostRobotModel = newRobotModel();
-      String robotName = ghostRobotModel.getSimpleRobotName();
-      ghost = createSCSRobot(ghostRobotModel, "ghost", ghostMaterial);
-      hideRobot(ghost);
-      ghost.setDynamic(false);
-      ghost.setGravity(0);
-      FlatGroundEnvironment testEnvironment = new FlatGroundEnvironment();
-      testEnvironment.addEnvironmentRobot(ghost);
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, newRobotModel(), testEnvironment);
-      createToolboxController(ghostRobotModel);
-      setupCollisions(ghostRobotModel.getHumanoidRobotKinematicsCollisionModel(), ghost);
+      DRCRobotModel robotModel = newRobotModel();
+      RobotCollisionModel collisionModel = robotModel.getHumanoidRobotKinematicsCollisionModel();
 
-      ros2Node = drcSimulationTestHelper.getROS2Node();
+      String robotName = robotModel.getSimpleRobotName();
+
+      RobotDefinition ghostDefinition = new RobotDefinition(robotModel.getRobotDefinition());
+      RobotDefinitionTools.setRobotDefinitionMaterial(ghostDefinition, ghostMaterial);
+      ghostDefinition.ignoreAllJoints();
+      ghostDefinition.setName("ghost");
+      addCollisionVisuals(robotModel, collisionModel, ghostDefinition);
+      ghost = new Robot(ghostDefinition, SimulationSession.DEFAULT_INERTIAL_FRAME);
+      hideRobot(ghost);
+
+      FlatGroundEnvironment testEnvironment = new FlatGroundEnvironment();
+      SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
+                                                                                                                                             testEnvironment,
+                                                                                                                                             simulationTestingParameters);
+      simulationTestHelperFactory.addSecondaryRobot(ghost);
+      simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+      createToolboxController(robotModel, collisionModel);
+
+      ros2Node = simulationTestHelper.getROS2Node();
 
       controllerInputTopic = ROS2Tools.getControllerInputTopic(robotName);
       controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
@@ -158,11 +158,11 @@ public abstract class KinematicsStreamingToolboxControllerTest
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     RobotConfigurationData.class,
                                                     controllerOutputTopic,
-                                           s -> toolboxController.updateRobotConfigurationData(s.takeNextData()));
+                                                    s -> toolboxController.updateRobotConfigurationData(s.takeNextData()));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     CapturabilityBasedStatus.class,
                                                     controllerOutputTopic,
-                                           s -> toolboxController.updateCapturabilityBasedStatus(s.takeNextData()));
+                                                    s -> toolboxController.updateCapturabilityBasedStatus(s.takeNextData()));
 
       inputPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, KinematicsStreamingToolboxInputMessage.class, toolboxInputTopic);
       statePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, toolboxInputTopic);
@@ -170,23 +170,20 @@ public abstract class KinematicsStreamingToolboxControllerTest
       AtomicReference<KinematicsToolboxOutputStatus> toolboxViz = new AtomicReference<>(null);
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, KinematicsToolboxOutputStatus.class, toolboxOutputTopic, s -> toolboxViz.set(s.takeNextData()));
 
-      ghost.setController(new RobotController()
+      Controller toolboxUpdater = new Controller()
       {
-         private final JointAnglesWriter jointAnglesWriter = new JointAnglesWriter(ghost, desiredFullRobotModel);
-
-         @Override
-         public void initialize()
-         {
-         }
+         private final JointReadOnly[] desiredJoints = MultiBodySystemTools.collectSubtreeJoints(desiredFullRobotModel.getElevator());
+         private final ControllerOutputBasics scsInput = ghost.getControllerOutput();
 
          @Override
          public void doControl()
          {
             toolboxController.update();
 
-            jointAnglesWriter.setWriteJointVelocities(false);
-            jointAnglesWriter.setWriteJointAccelerations(false);
-            jointAnglesWriter.updateRobotConfigurationBasedOnFullRobotModel();
+            for (JointReadOnly joint : desiredJoints)
+            {
+               scsInput.getJointOutput(joint).setConfiguration(joint);
+            }
          }
 
          @Override
@@ -194,17 +191,17 @@ public abstract class KinematicsStreamingToolboxControllerTest
          {
             return toolboxRegistry;
          }
-      }, (int) (toolboxControllerPeriod / ghostRobotModel.getSimulateDT()));
+      };
+      ghost.addThrottledController(toolboxUpdater, toolboxControllerPeriod);
 
       if (additionalGhostControllers != null)
       {
-         for (RobotController ghostController : additionalGhostControllers)
-            ghost.setController(ghostController, (int) (toolboxControllerPeriod / ghostRobotModel.getSimulateDT()));
+         for (Controller ghostController : additionalGhostControllers)
+            ghost.addThrottledController(ghostController, toolboxControllerPeriod);
       }
 
       toolboxROS2Node.spin();
-      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
-      scs = drcSimulationTestHelper.getSimulationConstructionSet();
+      simulationTestHelper.start();
    }
 
    public void setupNoWalkingController(RobotCollisionModel collisionModel)
@@ -214,55 +211,56 @@ public abstract class KinematicsStreamingToolboxControllerTest
       DRCRobotModel robotModel = newRobotModel();
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      robot = robotModel.createHumanoidFloatingRootJointRobot(false);
-      createToolboxController(robotModel);
-      setupCollisions(collisionModel, robot);
+      RobotDefinition robotDefinition = new RobotDefinition(robotModel.getRobotDefinition());
+      robotDefinition.ignoreAllJoints();
+      addCollisionVisuals(robotModel, collisionModel, robotDefinition);
+      robot = new Robot(robotDefinition, SimulationSession.DEFAULT_INERTIAL_FRAME);
+      createToolboxController(robotModel, collisionModel);
 
-      robot.setDynamic(false);
-      robot.setGravity(0);
-
-      ghost = createSCSRobot(newRobotModel(), "ghost", ghostMaterial);
+      RobotDefinition ghostDefinition = new RobotDefinition(robotModel.getRobotDefinition());
+      RobotDefinitionTools.setRobotDefinitionMaterial(ghostDefinition, ghostMaterial);
+      ghostDefinition.ignoreAllJoints();
+      ghostDefinition.setName("ghost");
+      ghost = new Robot(ghostDefinition, SimulationSession.DEFAULT_INERTIAL_FRAME);
       hideRobot(ghost);
-      ghost.setDynamic(false);
-      ghost.setGravity(0);
 
       if (visualize)
       {
-         Robot[] robots = ghost != null ? new Robot[] {robot, ghost} : new Robot[] {robot};
-         scs = new SimulationConstructionSet(robots, simulationTestingParameters);
-         scs.addYoRegistry(toolboxRegistry);
-         scs.addYoGraphicsListRegistry(yoGraphicsListRegistry, true);
-         scs.setCameraFix(0.0, 0.0, 1.0);
-         scs.setCameraPosition(8.0, 0.0, 3.0);
-         scs.setDT(toolboxControllerPeriod, 1);
-         scs.startOnAThread();
+         SimulationSession session = new SimulationSession();
+         session.addRobot(robot);
+         if (ghost != null)
+            session.addRobot(ghost);
+         session.getRootRegistry().addChild(toolboxRegistry);
+         session.setSessionDTSeconds(toolboxControllerPeriod);
+         session.initializeBufferRecordTickPeriod(1);
+
+         simulationTestHelper = new SCS2AvatarTestingSimulation(session,
+                                                                robotModel,
+                                                                desiredFullRobotModel,
+                                                                yoGraphicsListRegistry,
+                                                                simulationTestingParameters);
+         simulationTestHelper.setKeepSCSUp(simulationTestingParameters.getKeepSCSUp());
+         simulationTestHelper.start(false);
+         simulationTestHelper.setCamera(new Point3D(0, 0, 1), new Point3D(6, 0, 1));
       }
    }
 
-   private void setupCollisions(RobotCollisionModel collisionModel, HumanoidFloatingRootJointRobot robot)
+   private void addCollisionVisuals(FullHumanoidRobotModelFactory fullRobotModelFactory, RobotCollisionModel collisionModel, RobotDefinition robotDefinition)
    {
-      toolboxController.setCollisionModel(collisionModel);
-
       if (collisionModel != null)
       {
-         List<Collidable> collidables = collisionModel.getRobotCollidables(desiredFullRobotModel.getElevator());
+         RigidBodyBasics elevator = fullRobotModelFactory.createFullRobotModel().getElevator();
+         List<Collidable> collidables = collisionModel.getRobotCollidables(elevator);
 
          for (Collidable collidable : collidables)
          {
-            Graphics3DObject graphics = getGraphics(collidable);
-            Link link = robot.getLink(collidable.getRigidBody().getName());
-            Graphics3DObject linkGraphics = link.getLinkGraphics();
-            if (linkGraphics == null)
-            {
-               linkGraphics = new Graphics3DObject();
-               link.setLinkGraphics(linkGraphics);
-            }
-            linkGraphics.combine(graphics);
+            List<VisualDefinition> visuals = getCollisionVisuals(collidable);
+            robotDefinition.getRigidBodyDefinition(collidable.getRigidBody().getName()).getVisualDefinitions().addAll(visuals);
          }
       }
    }
 
-   private void createToolboxController(DRCRobotModel robotModel)
+   private void createToolboxController(DRCRobotModel robotModel, RobotCollisionModel collisionModel)
    {
       desiredFullRobotModel = robotModel.createFullRobotModel();
       toolboxRegistry = new YoRegistry("toolboxMain");
@@ -278,26 +276,16 @@ public abstract class KinematicsStreamingToolboxControllerTest
                                                                    toolboxControllerPeriod,
                                                                    yoGraphicsListRegistry,
                                                                    toolboxRegistry);
+      toolboxController.setCollisionModel(collisionModel);
    }
 
    @AfterEach
    public void tearDown()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
+      if (simulationTestHelper != null)
       {
-         ThreadTools.sleepForever();
-      }
-
-      if (drcSimulationTestHelper != null)
-      {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
-         scs = null;
-      }
-      else if (scs != null)
-      {
-         scs.closeAndDispose();
-         scs = null;
+         simulationTestHelper.finishTest();
+         simulationTestHelper = null;
       }
 
       desiredFullRobotModel = null;
@@ -322,27 +310,28 @@ public abstract class KinematicsStreamingToolboxControllerTest
       FullHumanoidRobotModel fullRobotModelAtInitialConfiguration = createFullRobotModelAtInitialConfiguration(robotModel);
       toolboxController.updateRobotConfigurationData(extractRobotConfigurationData(fullRobotModelAtInitialConfiguration));
       toolboxController.updateCapturabilityBasedStatus(createCapturabilityBasedStatus(fullRobotModelAtInitialConfiguration, robotModel, true, true));
-   
+
       List<Collidable> collidables = robotModel.getHumanoidRobotKinematicsCollisionModel().getRobotCollidables(desiredFullRobotModel.getElevator());
-   
+
       assertTrue(toolboxController.initialize());
       snapSCSRobotToFullRobotModel(toolboxController.getDesiredFullRobotModel(), robot);
+
       if (visualize)
-         scs.tickAndUpdate();
-   
+         simulationTestHelper.simulateOneTickNow();
+
       double circleRadius = 0.25;
       double circleFrequency = 0.25;
       SideDependentList<Point3D> circleCenters = new SideDependentList<>(side -> new Point3D(0.2, side.negateIfRightSide(0.225), 1.0));
       SideDependentList<Vector3D> circleCenterVelocities = new SideDependentList<>(side -> side == RobotSide.LEFT ? new Vector3D(0.0, 0.0, 0.0)
             : new Vector3D());
-   
+
       double toolboxControllerPeriod = toolboxController.getTools().getToolboxControllerPeriod();
-   
-      for (double t = 0.0; t < 100.0; t += toolboxControllerPeriod)
+
+      for (double t = 0.0; t < 30.0; t += toolboxControllerPeriod)
       {
          KinematicsStreamingToolboxInputMessage input = new KinematicsStreamingToolboxInputMessage();
          input.getInputs().add().set(KinematicsToolboxMessageFactory.holdRigidBodyCurrentPose(fullRobotModelAtInitialConfiguration.getPelvis()));
-   
+
          for (RobotSide robotSide : RobotSide.values)
          {
             FramePoint3D position = circlePositionAt(t,
@@ -354,29 +343,28 @@ public abstract class KinematicsStreamingToolboxControllerTest
                                                                                                              position);
             input.getInputs().add().set(message);
          }
-   
+
          commandInputManager.submitMessage(input);
          toolboxController.update();
          snapSCSRobotToFullRobotModel(desiredFullRobotModel, robot);
+
          if (visualize)
-         {
-            Arrays.asList(scs.getRobots()).forEach(robot -> robot.getYoTime().add(toolboxControllerPeriod));
-            scs.tickAndUpdate();
-         }
-   
+            simulationTestHelper.simulateOneTickNow();
+
          for (int collidable1Index = 0; collidable1Index < collidables.size(); collidable1Index++)
          {
             Collidable collidable1 = collidables.get(collidable1Index);
-   
+
             for (int collidable2Index = 0; collidable2Index < collidables.size(); collidable2Index++)
             {
                Collidable collidable2 = collidables.get(collidable2Index);
-   
+
                if (collidable1.isCollidableWith(collidable2))
                {
                   CollisionResult collision = collidable1.evaluateCollision(collidable2);
                   EuclidFrameShape3DCollisionResult collisionData = collision.getCollisionData();
-                  assertTrue(collisionData.getSignedDistance() > -1.5e-3, collidable1.getRigidBody().getName() + ", " + collidable2.getRigidBody().getName() + ": " + collisionData.getSignedDistance());
+                  assertTrue(collisionData.getSignedDistance() > -1.5e-3,
+                             collidable1.getRigidBody().getName() + ", " + collidable2.getRigidBody().getName() + ": " + collisionData.getSignedDistance());
                }
             }
          }
@@ -401,11 +389,11 @@ public abstract class KinematicsStreamingToolboxControllerTest
    {
       if (executor == null)
          executor = ThreadTools.newSingleDaemonThreadScheduledExecutor("inputs-generator");
-   
+
       return executor.scheduleAtFixedRate(new Runnable()
       {
          double time = 0.0;
-   
+
          @Override
          public void run()
          {
@@ -418,13 +406,13 @@ public abstract class KinematicsStreamingToolboxControllerTest
    }
 
    @Test
-   public void testStreamingToController() throws SimulationExceededMaximumTimeException
+   public void testStreamingToController()
    {
       YoRegistry spyRegistry = new YoRegistry("spy");
       YoDouble handPositionMeanError = new YoDouble("HandsPositionMeanError", spyRegistry);
       YoDouble handOrientationMeanError = new YoDouble("HandsOrientationMeanError", spyRegistry);
-   
-      setupWithWalkingController(new RobotController()
+
+      setupWithWalkingController(new Controller()
       {
          private final SideDependentList<YoFramePose3D> handDesiredPoses = new SideDependentList<>(side -> new YoFramePose3D(side.getCamelCaseName()
                + "HandDesired", worldFrame, spyRegistry));
@@ -440,57 +428,57 @@ public abstract class KinematicsStreamingToolboxControllerTest
          private YoDouble streamingBlendingDuration;
          private YoDouble mainStateMachineSwitchTime;
          private YoEnum<KSTState> mainStateMachineCurrentState;
-   
+
          private boolean needsToInitialize = true;
-   
+
          @SuppressWarnings("unchecked")
          @Override
          public void initialize()
          {
             if (!needsToInitialize)
                return;
-   
+
             time = (YoDouble) toolboxRegistry.findVariable("time");
             isStreaming = (YoBoolean) toolboxRegistry.findVariable("isStreaming");
             streamingStartTime = (YoDouble) toolboxRegistry.findVariable("streamingStartTime");
             streamingBlendingDuration = (YoDouble) toolboxRegistry.findVariable("streamingBlendingDuration");
             mainStateMachineSwitchTime = (YoDouble) toolboxRegistry.findVariable("mainStateMachineSwitchTime");
             mainStateMachineCurrentState = (YoEnum<KSTState>) toolboxRegistry.findVariable("mainStateMachineCurrentState");
-   
+
             needsToInitialize = false;
          }
-   
+
          private final Mean positionMean = new Mean();
          private final Mean orientationMean = new Mean();
-   
+
          @Override
          public void doControl()
          {
             initialize();
-   
+
             if (mainStateMachineCurrentState.getEnumValue() != KSTState.STREAMING || !isStreaming.getValue())
             {
                handDesiredPoses.values().forEach(YoFramePose3D::setToNaN);
                handCurrentPoses.values().forEach(YoFramePose3D::setToNaN);
                return;
             }
-   
+
             double timeInStream = time.getValue() - mainStateMachineSwitchTime.getValue() - streamingStartTime.getValue();
-   
+
             if (timeInStream < streamingBlendingDuration.getValue() + 10.0 * toolboxControllerPeriod)
             {
                handDesiredPoses.values().forEach(YoFramePose3D::setToNaN);
                handCurrentPoses.values().forEach(YoFramePose3D::setToNaN);
                return;
             }
-   
+
             for (RobotSide robotSide : RobotSide.values)
             {
                YoFramePose3D handDesiredPose = handDesiredPoses.get(robotSide);
                YoFramePose3D handCurrentPose = handCurrentPoses.get(robotSide);
                YoDouble handPositionError = handPositionErrors.get(robotSide);
                YoDouble handOrientationError = handOrientationErrors.get(robotSide);
-   
+
                handDesiredPose.setFromReferenceFrame(desiredFullRobotModel.getHandControlFrame(robotSide));
                handCurrentPose.setFromReferenceFrame(toolboxController.getTools().getCurrentFullRobotModel().getHandControlFrame(robotSide));
                handPositionError.set(handDesiredPose.getPositionDistance(handCurrentPose));
@@ -498,38 +486,38 @@ public abstract class KinematicsStreamingToolboxControllerTest
                positionMean.increment(handPositionError.getValue());
                orientationMean.increment(handOrientationError.getValue());
             }
-   
+
             handPositionMeanError.set(positionMean.getResult());
             handOrientationMeanError.set(orientationMean.getResult());
          }
-   
+
          @Override
          public YoRegistry getYoRegistry()
          {
             return spyRegistry;
          }
       });
-   
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
-   
+
       wakeupToolbox();
-   
+
       ScheduledFuture<?> scheduleMessageGenerator = scheduleMessageGenerator(0.01, circleMessageGenerator(newRobotModel().createFullRobotModel(), true, 0.125));
-   
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10.0);
+
+      success = simulationTestHelper.simulateNow(10.0);
       assertTrue(success);
-   
+
       scheduleMessageGenerator.cancel(true);
-   
+
       KinematicsStreamingToolboxInputMessage message = new KinematicsStreamingToolboxInputMessage();
       message.setStreamToController(false);
       inputPublisher.publish(message);
-   
+
       sleepToolbox();
-   
+
       executor.shutdownNow();
-   
+
       // Asserts that the spy did run and that the toolbox or something did not just hang
       assertNotEquals(0.0, handPositionMeanError.getValue());
       assertNotEquals(0.0, handOrientationMeanError.getValue());
@@ -539,13 +527,15 @@ public abstract class KinematicsStreamingToolboxControllerTest
       assertTrue(handOrientationMeanError.getValue() < 0.25, "Mean orientation error is: " + handOrientationMeanError.getValue());
    }
 
-   public static DoubleFunction<KinematicsStreamingToolboxInputMessage> circleMessageGenerator(FullHumanoidRobotModel fullRobotModel, boolean streamToController, double frequency)
+   public static DoubleFunction<KinematicsStreamingToolboxInputMessage> circleMessageGenerator(FullHumanoidRobotModel fullRobotModel,
+                                                                                               boolean streamToController,
+                                                                                               double frequency)
    {
       double circleRadius = 0.25;
       SideDependentList<Point3D> circleCenters = new SideDependentList<>(side -> new Point3D(0.3, side.negateIfRightSide(0.225), 1.0));
       SideDependentList<Vector3D> circleCenterVelocities = new SideDependentList<>(side -> side == RobotSide.LEFT ? new Vector3D(0.0, 0.0, 0.0)
             : new Vector3D());
-   
+
       return new DoubleFunction<KinematicsStreamingToolboxInputMessage>()
       {
          @Override
@@ -553,7 +543,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
          {
             KinematicsStreamingToolboxInputMessage input = new KinematicsStreamingToolboxInputMessage();
             input.setStreamToController(streamToController);
-   
+
             for (RobotSide robotSide : RobotSide.values)
             {
                FramePoint3D position = circlePositionAt(time,
@@ -569,28 +559,17 @@ public abstract class KinematicsStreamingToolboxControllerTest
       };
    }
 
-   protected static HumanoidFloatingRootJointRobot createSCSRobot(DRCRobotModel ghostRobotModel, String robotName, MaterialDefinition robotMaterial)
+   protected static void hideRobot(Robot robot)
    {
-      RobotDefinition robotDefinition = ghostRobotModel.getRobotDefinition();
-      robotDefinition.setName(robotName);
-      RobotDefinitionTools.setRobotDefinitionMaterial(robotDefinition, robotMaterial);
-      HumanoidFloatingRootJointRobot scsRobot = ghostRobotModel.createHumanoidFloatingRootJointRobot(false);
-      scsRobot.getRootJoint().setPinned(true);
-      scsRobot.setDynamic(false);
-      scsRobot.setGravity(0);
-      return scsRobot;
+      robot.getFloatingRootJoint().getJointPose().getPosition().set(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
    }
 
-   protected static void hideRobot(HumanoidFloatingRootJointRobot robot)
+   protected static void snapSCSRobotToFullRobotModel(FullHumanoidRobotModel fullHumanoidRobotModel, Robot robotToSnap)
    {
-      robot.setPositionInWorld(new Point3D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY));
-   }
-
-   protected static void snapSCSRobotToFullRobotModel(FullHumanoidRobotModel fullHumanoidRobotModel, HumanoidFloatingRootJointRobot robotToSnap)
-   {
-      JointAnglesWriter jointAnglesWriter = new JointAnglesWriter(robotToSnap, fullHumanoidRobotModel);
-      jointAnglesWriter.setWriteJointVelocities(false);
-      jointAnglesWriter.updateRobotConfigurationBasedOnFullRobotModel();
+      MultiBodySystemTools.copyJointsState(fullHumanoidRobotModel.getRootJoint().subtreeList(),
+                                           robotToSnap.getFloatingRootJoint().subtreeList(),
+                                           JointStateType.CONFIGURATION);
+      robotToSnap.updateFrames();
    }
 
    public static void copyFullRobotModelState(FullHumanoidRobotModel source, FullHumanoidRobotModel destination)
@@ -599,46 +578,15 @@ public abstract class KinematicsStreamingToolboxControllerTest
          MultiBodySystemTools.copyJointsState(source.getRootJoint().subtreeList(), destination.getRootJoint().subtreeList(), stateSelection);
    }
 
-   public static Graphics3DObject getGraphics(Collidable collidable)
+   public static List<VisualDefinition> getCollisionVisuals(Collidable collidable)
    {
       Shape3DReadOnly shape = collidable.getShape();
       RigidBodyTransform transformToParentJoint = collidable.getShape().getReferenceFrame()
                                                             .getTransformToDesiredFrame(collidable.getRigidBody().getParentJoint().getFrameAfterJoint());
-      Graphics3DObject graphics = new Graphics3DObject();
-      graphics.transform(transformToParentJoint);
-      AppearanceDefinition appearance = YoAppearance.DarkGreen();
-      appearance.setTransparency(0.5);
-
-      if (shape instanceof Sphere3DReadOnly)
-      {
-         Sphere3DReadOnly sphere = (Sphere3DReadOnly) shape;
-         graphics.translate(sphere.getPosition());
-         graphics.addSphere(sphere.getRadius(), appearance);
-      }
-      else if (shape instanceof Capsule3DReadOnly)
-      {
-         Capsule3DReadOnly capsule = (Capsule3DReadOnly) shape;
-         RigidBodyTransform transform = new RigidBodyTransform();
-         EuclidGeometryTools.orientation3DFromZUpToVector3D(capsule.getAxis(), transform.getRotation());
-         transform.getTranslation().set(capsule.getPosition());
-         graphics.transform(transform);
-         graphics.addCapsule(capsule.getRadius(),
-                             capsule.getLength() + 2.0 * capsule.getRadius(), // the 2nd term is removed internally.
-                             appearance);
-      }
-      else if (shape instanceof FrameSTPBox3DReadOnly)
-      {
-         FrameSTPBox3DReadOnly box = (FrameSTPBox3DReadOnly) shape;
-         RigidBodyTransform transform = new RigidBodyTransform();
-         transform.getRotation().set(box.getOrientation());
-         transform.getTranslation().set(box.getPosition());
-         graphics.transform(transform);
-         graphics.addCube(box.getSizeX(), box.getSizeY(), box.getSizeZ(), appearance);
-      }
-      else
-      {
-         throw new UnsupportedOperationException("Unsupported shape: " + shape.getClass().getSimpleName());
-      }
-      return graphics;
+      VisualDefinitionFactory visualFactory = new VisualDefinitionFactory();
+      visualFactory.appendTransform(transformToParentJoint);
+      visualFactory.setDefaultMaterial(ColorDefinitions.DarkGreen().derive(0, 1, 1, 0.5));
+      visualFactory.addShape(shape);
+      return visualFactory.getVisualDefinitions();
    }
 }

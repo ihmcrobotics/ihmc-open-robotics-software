@@ -20,9 +20,9 @@ import us.ihmc.avatar.initialSetup.HumanoidRobotInitialSetup;
 import us.ihmc.avatar.multiContact.KinematicsToolboxSnapshotDescription;
 import us.ihmc.avatar.multiContact.SixDoFMotionControlAnchorDescription;
 import us.ihmc.avatar.reachabilityMap.footstep.StepReachabilityIOHelper;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commons.ContinuousIntegrationTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -52,7 +52,7 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
 
    private static final boolean visualize = true;
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-   private DRCSimulationTestHelper drcSimulationTestHelper;
+   private SCS2AvatarTestingSimulation simulationTestHelper;
 
    private static final int numberOfStancesToCheck = 1;
    private static final int numberOfStepsToTake = 4;
@@ -75,14 +75,13 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
       stepReachabilityIOHelper.loadStepReachability(robotModel);
       List<KinematicsToolboxSnapshotDescription> snapShots = stepReachabilityIOHelper.getReachabilityIKData();
       LogTools.info("Filtering feasible solutions");
-      feasibleSolutions = snapShots.stream()
-                                   .filter(snapshot -> snapshot.getIkSolution().getSolutionQuality() < solutionQualityThreshold)
+      feasibleSolutions = snapShots.stream().filter(snapshot -> snapshot.getIkSolution().getSolutionQuality() < solutionQualityThreshold)
                                    .collect(Collectors.toList());
       LogTools.info(feasibleSolutions.size() + " feasible solutions found");
       if (feasibleSolutions.size() < numberOfStancesToCheck)
       {
          LogTools.error("Not enough feasible solutions found to check. Wanted to test " + numberOfStancesToCheck + " but only " + feasibleSolutions.size()
-                        + " found with solution quality of " + solutionQualityThreshold + ". Increase solution quality.");
+               + " found with solution quality of " + solutionQualityThreshold + ". Increase solution quality.");
          fail();
       }
    }
@@ -90,14 +89,11 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
    @AfterEach
    public void tearDown()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
-         ThreadTools.sleepForever();
-
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcSimulationTestHelper != null)
+      if (simulationTestHelper != null)
       {
          /* destroy simulation is already called below */
-         drcSimulationTestHelper = null;
+         simulationTestHelper = null;
       }
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
@@ -275,17 +271,20 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
 
       HumanoidRobotInitialSetup initialSetup = createInitialSetup(robotModel.getJointMap());
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, environment);
-      drcSimulationTestHelper.setInitialSetup(initialSetup);
-      drcSimulationTestHelper.createSimulation(robotModel.getSimpleRobotName() + "FlatGroundWalking");
+      SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
+                                                                                                                                             environment,
+                                                                                                                                             simulationTestingParameters);
+      simulationTestHelperFactory.setRobotInitialSetup(initialSetup);
+      simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+      simulationTestHelper.start();
 
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(initialStanceTime);
+      boolean success = simulationTestHelper.simulateNow(initialStanceTime);
       if (!visualize)
          assertTrue(success);
 
-      drcSimulationTestHelper.publishToController(footstepDataListMessage);
+      simulationTestHelper.publishToController(footstepDataListMessage);
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(stepTime);
+      success = simulationTestHelper.simulateNow(stepTime);
       if (!visualize)
          assertTrue(success);
    }
@@ -353,9 +352,10 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
 
    public void endDRCSimulationTest()
    {
-      drcSimulationTestHelper.getBlockingSimulationRunner().destroySimulation();
-      drcSimulationTestHelper.getAvatarSimulation().dispose();
-      drcSimulationTestHelper.getSimulationStarter().close();
-      drcSimulationTestHelper.getROS2Node().destroy();
+      if (simulationTestHelper != null)
+      {
+         simulationTestHelper.finishTest();
+         simulationTestHelper = null;
+      }
    }
 }

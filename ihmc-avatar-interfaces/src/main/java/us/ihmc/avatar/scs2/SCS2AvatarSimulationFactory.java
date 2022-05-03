@@ -1,6 +1,7 @@
 package us.ihmc.avatar.scs2;
 
 import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.DO_NOTHING_BEHAVIOR;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.PUSH_RECOVERY;
 import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.WALKING;
 
 import java.util.ArrayList;
@@ -67,9 +68,11 @@ import us.ihmc.scs2.definition.robot.JointDefinition;
 import us.ihmc.scs2.definition.robot.OneDoFJointDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
+import us.ihmc.scs2.session.Session;
 import us.ihmc.scs2.session.tools.SCS1GraphicConversionTools;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
+import us.ihmc.scs2.simulation.parameters.ContactParametersReadOnly;
 import us.ihmc.scs2.simulation.parameters.ContactPointBasedContactParameters;
 import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngineFactory;
 import us.ihmc.scs2.simulation.physicsEngine.contactPointBased.ContactPointBasedPhysicsEngine;
@@ -94,51 +97,54 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SCS2AvatarSimulationFactory
 {
-   private final RequiredFactoryField<DRCRobotModel> robotModel = new RequiredFactoryField<>("robotModel");
-   private final RequiredFactoryField<HighLevelHumanoidControllerFactory> highLevelHumanoidControllerFactory = new RequiredFactoryField<>("highLevelHumanoidControllerFactory");
-   private final ArrayList<TerrainObjectDefinition> terrainObjectDefinitions = new ArrayList<>();
-   private final RequiredFactoryField<RealtimeROS2Node> realtimeROS2Node = new RequiredFactoryField<>("realtimeROS2Node");
+   protected final RequiredFactoryField<DRCRobotModel> robotModel = new RequiredFactoryField<>("robotModel");
+   protected final RequiredFactoryField<HighLevelHumanoidControllerFactory> highLevelHumanoidControllerFactory = new RequiredFactoryField<>("highLevelHumanoidControllerFactory");
+   protected final ArrayList<TerrainObjectDefinition> terrainObjectDefinitions = new ArrayList<>();
+   protected final RequiredFactoryField<RealtimeROS2Node> realtimeROS2Node = new RequiredFactoryField<>("realtimeROS2Node");
 
-   private final OptionalFactoryField<Double> simulationDT = new OptionalFactoryField<>("simulationDT");
-   private final OptionalFactoryField<RobotInitialSetup<HumanoidFloatingRootJointRobot>> robotInitialSetup = new OptionalFactoryField<>("robotInitialSetup");
-   private final OptionalFactoryField<Double> gravity = new OptionalFactoryField<>("gravity", -9.81);
-   private final OptionalFactoryField<Boolean> createYoVariableServer = new OptionalFactoryField<>("createYoVariableServer", false);
-   private final OptionalFactoryField<Boolean> logToFile = new OptionalFactoryField<>("logToFile", false);
-   private final OptionalFactoryField<PelvisPoseCorrectionCommunicatorInterface> externalPelvisCorrectorSubscriber = new OptionalFactoryField<>("externalPelvisCorrectorSubscriber");
-   private final OptionalFactoryField<Integer> simulationDataBufferSize = new OptionalFactoryField<>("simulationDataBufferSize", 8192);
-   private final OptionalFactoryField<Integer> simulationDataRecordTickPeriod = new OptionalFactoryField<>("simulationDataRecordTickPeriod");
-   private final OptionalFactoryField<Boolean> usePerfectSensors = new OptionalFactoryField<>("usePerfectSensors", false);
-   private final OptionalFactoryField<SCS2JointDesiredOutputWriterFactory> outputWriterFactory = new OptionalFactoryField<>("outputWriterFactory",
-                                                                                                                            (in,
-                                                                                                                             out) -> new SCS2OutputWriter(in,
-                                                                                                                                                          out,
-                                                                                                                                                          true));
-   private final OptionalFactoryField<Boolean> runMultiThreaded = new OptionalFactoryField<>("runMultiThreaded", true);
-   private final OptionalFactoryField<Boolean> initializeEstimatorToActual = new OptionalFactoryField<>("initializeEstimatorToActual", true);
-   private final OptionalFactoryField<Boolean> showGUI = new OptionalFactoryField<>("showGUI", true);
-   private final OptionalFactoryField<Boolean> automaticallyStartSimulation = new OptionalFactoryField<>("automaticallyStartSimulation", false);
+   protected final OptionalFactoryField<Double> simulationDT = new OptionalFactoryField<>("simulationDT");
+   protected final OptionalFactoryField<RobotInitialSetup<HumanoidFloatingRootJointRobot>> robotInitialSetup = new OptionalFactoryField<>("robotInitialSetup");
+   protected final OptionalFactoryField<Double> gravity = new OptionalFactoryField<>("gravity", -9.81);
+   protected final OptionalFactoryField<Boolean> createYoVariableServer = new OptionalFactoryField<>("createYoVariableServer", false);
+   protected final OptionalFactoryField<Boolean> logToFile = new OptionalFactoryField<>("logToFile", false);
+   protected final OptionalFactoryField<PelvisPoseCorrectionCommunicatorInterface> externalPelvisCorrectorSubscriber = new OptionalFactoryField<>("externalPelvisCorrectorSubscriber");
+   protected final OptionalFactoryField<Integer> simulationDataBufferSize = new OptionalFactoryField<>("simulationDataBufferSize", 8192);
+   protected final OptionalFactoryField<Integer> simulationDataRecordTickPeriod = new OptionalFactoryField<>("simulationDataRecordTickPeriod");
+   protected final OptionalFactoryField<Boolean> usePerfectSensors = new OptionalFactoryField<>("usePerfectSensors", false);
+   protected final OptionalFactoryField<SCS2JointDesiredOutputWriterFactory> outputWriterFactory = new OptionalFactoryField<>("outputWriterFactory",
+                                                                                                                              (in,
+                                                                                                                               out) -> new SCS2OutputWriter(in,
+                                                                                                                                                            out,
+                                                                                                                                                            true));
+   protected final OptionalFactoryField<Boolean> runMultiThreaded = new OptionalFactoryField<>("runMultiThreaded", true);
+   protected final OptionalFactoryField<Boolean> initializeEstimatorToActual = new OptionalFactoryField<>("initializeEstimatorToActual", true);
+   protected final OptionalFactoryField<Boolean> showGUI = new OptionalFactoryField<>("showGUI", true);
+   protected final OptionalFactoryField<Boolean> automaticallyStartSimulation = new OptionalFactoryField<>("automaticallyStartSimulation", false);
 
-   private final OptionalFactoryField<Boolean> useImpulseBasePhysicsEngine = new OptionalFactoryField<>("useImpulseBasePhysicsEngine", false);
-   private final OptionalFactoryField<Boolean> useBulletPhysicsEngine = new OptionalFactoryField<>("useBulletPhysicsEngine", false);
-   private final OptionalFactoryField<Boolean> enableSimulatedRobotDamping = new OptionalFactoryField<>("enableSimulatedRobotDamping", true);
-   private final OptionalFactoryField<Boolean> useRobotDefinitionCollisions = new OptionalFactoryField<>("useRobotDefinitionCollisions", false);
-   private final OptionalFactoryField<List<Robot>> secondaryRobots = new OptionalFactoryField<>("secondaryRobots", new ArrayList<>());
+   protected final OptionalFactoryField<Boolean> useImpulseBasedPhysicsEngine = new OptionalFactoryField<>("useImpulseBasePhysicsEngine", false);
+   protected final OptionalFactoryField<Boolean> useBulletPhysicsEngine = new OptionalFactoryField<>("useBulletPhysicsEngine", false);
+   protected final OptionalFactoryField<ContactParametersReadOnly> impulseBasedPhysicsEngineContactParameters = new OptionalFactoryField<>("impulseBasedPhysicsEngineParameters");
+   protected final OptionalFactoryField<Boolean> enableSimulatedRobotDamping = new OptionalFactoryField<>("enableSimulatedRobotDamping", true);
+   protected final OptionalFactoryField<Boolean> useRobotDefinitionCollisions = new OptionalFactoryField<>("useRobotDefinitionCollisions", false);
+   protected final OptionalFactoryField<List<Robot>> secondaryRobots = new OptionalFactoryField<>("secondaryRobots", new ArrayList<>());
+   protected final OptionalFactoryField<String> simulationName = new OptionalFactoryField<>("simulationName");
 
    // TO CONSTRUCT
-   private RobotDefinition robotDefinition;
-   private Robot robot;
-   private YoVariableServer yoVariableServer;
-   private IntraprocessYoVariableLogger intraprocessYoVariableLogger;
-   private SimulationSession simulationSession;
-   private JointDesiredOutputWriter simulationOutputWriter;
-   private AvatarEstimatorThread estimatorThread;
-   private AvatarControllerThread controllerThread;
-   private DisposableRobotController robotController;
-   private SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
+   protected RobotDefinition robotDefinition;
+   protected Robot robot;
+   protected YoVariableServer yoVariableServer;
+   protected IntraprocessYoVariableLogger intraprocessYoVariableLogger;
+   protected SimulationSession simulationSession;
+   protected JointDesiredOutputWriter simulationOutputWriter;
+   protected HumanoidRobotContextData masterContext;
+   protected AvatarEstimatorThread estimatorThread;
+   protected AvatarControllerThread controllerThread;
+   protected DisposableRobotController robotController;
+   protected SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
 
-   private final CollidableHelper collidableHelper = new CollidableHelper();
-   private final String robotCollisionName = "robot";
-   private final String terrainCollisionName = "terrain";
+   protected final CollidableHelper collidableHelper = new CollidableHelper();
+   protected final String robotCollisionName = "robot";
+   protected final String terrainCollisionName = "terrain";
 
    public SCS2AvatarSimulation createAvatarSimulation()
    {
@@ -158,10 +164,12 @@ public class SCS2AvatarSimulationFactory
 
       SCS2AvatarSimulation avatarSimulation = new SCS2AvatarSimulation();
       avatarSimulation.setRobotModel(robotModel.get());
+      avatarSimulation.setRobotInitialSetup(robotInitialSetup.get());
       avatarSimulation.setSimulationSession(simulationSession);
       avatarSimulation.setHighLevelHumanoidControllerFactory(highLevelHumanoidControllerFactory.get());
       avatarSimulation.setYoVariableServer(yoVariableServer);
       avatarSimulation.setIntraprocessYoVariableLogger(intraprocessYoVariableLogger);
+      avatarSimulation.setMasterContext(masterContext);
       avatarSimulation.setControllerThread(controllerThread);
       avatarSimulation.setEstimatorThread(estimatorThread);
       avatarSimulation.setRobotController(robotController);
@@ -213,9 +221,15 @@ public class SCS2AvatarSimulationFactory
 
       PhysicsEngineFactory physicsEngineFactory;
 
-      if (useImpulseBasePhysicsEngine.hasValue() && useImpulseBasePhysicsEngine.get())
+      if (useImpulseBasedPhysicsEngine.hasValue() && useImpulseBasedPhysicsEngine.get())
       {
-         physicsEngineFactory = (inertialFrame, rootRegistry) -> new ImpulseBasedPhysicsEngine(inertialFrame, rootRegistry);
+         physicsEngineFactory = (inertialFrame, rootRegistry) ->
+         {
+            ImpulseBasedPhysicsEngine physicsEngine = new ImpulseBasedPhysicsEngine(inertialFrame, rootRegistry);
+            if (impulseBasedPhysicsEngineContactParameters.hasValue())
+               physicsEngine.setGlobalContactParameters(impulseBasedPhysicsEngineContactParameters.get());
+            return physicsEngine;
+         };
       }
       else if (useBulletPhysicsEngine.hasValue() && useBulletPhysicsEngine.get())
       {
@@ -237,7 +251,8 @@ public class SCS2AvatarSimulationFactory
          };
       }
 
-      simulationSession = new SimulationSession(physicsEngineFactory);
+      String name = simulationName.hasValue() ? simulationName.get() : Session.retrieveCallerName();
+      simulationSession = new SimulationSession(name, physicsEngineFactory);
       simulationSession.initializeBufferSize(simulationDataBufferSize.get());
       simulationSession.initializeBufferRecordTickPeriod(simulationDataRecordTickPeriod.get());
       if (terrainObjectDefinitions.isEmpty())
@@ -340,7 +355,7 @@ public class SCS2AvatarSimulationFactory
       // Create intermediate data buffer for threading.
       FullHumanoidRobotModel masterFullRobotModel = robotModel.createFullRobotModel();
       robotInitialSetup.get().initializeFullRobotModel(masterFullRobotModel);
-      HumanoidRobotContextData masterContext = new HumanoidRobotContextData(masterFullRobotModel);
+      masterContext = new HumanoidRobotContextData(masterFullRobotModel);
 
       // Create the tasks that will be run on their own threads.
       int estimatorDivisor = (int) Math.round(robotModel.getEstimatorDT() / simulationDT.get());
@@ -501,6 +516,11 @@ public class SCS2AvatarSimulationFactory
       robot.getControllerManager().addController(() -> simulatedRobotTimeProvider.doControl());
    }
 
+   public void setSimulationName(String simulationName)
+   {
+      this.simulationName.set(simulationName);
+   }
+
    public void setRobotModel(DRCRobotModel robotModel)
    {
       this.robotModel.set(robotModel);
@@ -545,9 +565,12 @@ public class SCS2AvatarSimulationFactory
       HighLevelControllerName fallbackControllerState = highLevelControllerParameters.getFallbackControllerState();
       controllerFactory.useDefaultDoNothingControlState();
       controllerFactory.useDefaultWalkingControlState();
+      controllerFactory.useDefaultPushRecoveryControlState();
 
       controllerFactory.addRequestableTransition(DO_NOTHING_BEHAVIOR, WALKING);
       controllerFactory.addRequestableTransition(WALKING, DO_NOTHING_BEHAVIOR);
+      controllerFactory.addRequestableTransition(WALKING, PUSH_RECOVERY);
+      controllerFactory.addFinishedTransition(PUSH_RECOVERY, WALKING);
 
       controllerFactory.addControllerFailureTransition(DO_NOTHING_BEHAVIOR, fallbackControllerState);
       controllerFactory.addControllerFailureTransition(WALKING, fallbackControllerState);
@@ -563,7 +586,12 @@ public class SCS2AvatarSimulationFactory
    public HighLevelHumanoidControllerFactory setDefaultHighLevelHumanoidControllerFactory(boolean useVelocityAndHeadingScript,
                                                                                           HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters)
    {
-      HighLevelHumanoidControllerFactory controllerFactory = setDefaultHighLevelHumanoidControllerFactory();
+      HighLevelHumanoidControllerFactory controllerFactory;
+
+      if (highLevelHumanoidControllerFactory.hasBeenSet())
+         controllerFactory = highLevelHumanoidControllerFactory.get();
+      else
+         controllerFactory = setDefaultHighLevelHumanoidControllerFactory();
       controllerFactory.createComponentBasedFootstepDataMessageGenerator(useVelocityAndHeadingScript, walkingScriptParameters);
       return controllerFactory;
    }
@@ -678,9 +706,14 @@ public class SCS2AvatarSimulationFactory
       this.externalPelvisCorrectorSubscriber.set(externalPelvisCorrectorSubscriber);
    }
 
-   public void setUseImpulseBasedPhysicsEngine(boolean useImpulseBasePhysicsEngine)
+   public void setUseImpulseBasedPhysicsEngine(boolean useImpulseBasedPhysicsEngine)
    {
-      this.useImpulseBasePhysicsEngine.set(useImpulseBasePhysicsEngine);
+      this.useImpulseBasedPhysicsEngine.set(useImpulseBasedPhysicsEngine);
+   }
+
+   public void setImpulseBasedPhysicsEngineContactParameters(ContactParametersReadOnly contactParameters)
+   {
+      this.impulseBasedPhysicsEngineContactParameters.set(contactParameters);
    }
 
    public void setUseBulletPhysicsEngine(boolean useBulletPhysicsEngine)

@@ -11,8 +11,7 @@ import us.ihmc.avatar.obstacleCourseTests.DRCPelvisLowGainsTest;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.yoVariables.registry.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest
@@ -44,15 +43,15 @@ public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest
    @Tag("humanoid-flat-ground-slow-4")
    @Override
    @Test
-   public void testStandingWithLowPelvisOrientationGains() throws SimulationExceededMaximumTimeException
+   public void testStandingWithLowPelvisOrientationGains()
    {
       super.testStandingWithLowPelvisOrientationGains();
    }
 
    @Override
-   protected YoDouble getPelvisOrientationErrorVariableName(SimulationConstructionSet scs)
+   protected YoDouble getPelvisOrientationErrorVariableName(YoVariableHolder yoVariableHolder)
    {
 
-      return (YoDouble) scs.findVariable(FeedbackControllerToolbox.class.getSimpleName(), "pelvisErrorRotationVectorZ");
+      return (YoDouble) yoVariableHolder.findVariable(FeedbackControllerToolbox.class.getSimpleName(), "pelvisErrorRotationVectorZ");
    }
 }

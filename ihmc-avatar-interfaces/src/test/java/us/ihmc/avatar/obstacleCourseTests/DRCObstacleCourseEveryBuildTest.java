@@ -1,6 +1,6 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.io.InputStream;
 
@@ -10,29 +10,27 @@ import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
+import us.ihmc.avatar.testTools.EndToEndTestTools;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
 
 public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestInterface
 {
    private SimulationTestingParameters simulationTestingParameters;
-   
-   private DRCSimulationTestHelper drcSimulationTestHelper;
+
+   private SCS2AvatarTestingSimulation simulationTestHelper;
 
    @BeforeEach
    public void showMemoryUsageBeforeTest()
@@ -44,26 +42,20 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
    @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
+      // Do this here in case a test fails. That way the memory will be recycled.
+      if (simulationTestHelper != null)
       {
-         ThreadTools.sleepForever();
+         simulationTestHelper.finishTest();
+         simulationTestHelper = null;
       }
 
-      // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcSimulationTestHelper != null)
-      {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
-      }
-      
       simulationTestingParameters = null;
-      
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-
-	@Test
-   public void testSimpleFlatGroundScript() throws SimulationExceededMaximumTimeException
+   @Test
+   public void testSimpleFlatGroundScript()
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
@@ -71,122 +63,93 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.setTestEnvironment(flatGround);
-      drcSimulationTestHelper.createSimulation("DRCSimpleFlatGroundScriptTest");
-      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.001);
+      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), flatGround, simulationTestingParameters);
+      simulationTestHelper.start();
+      simulationTestHelper.simulateNow(0.001);
       InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
-      drcSimulationTestHelper.loadScriptFile(scriptInputStream, ReferenceFrame.getWorldFrame());
-      
-      SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
-      setupCameraForWalkingUpToRamp(simulationConstructionSet);
+      simulationTestHelper.loadScriptFile(scriptInputStream, ReferenceFrame.getWorldFrame());
+
+      setupCameraForWalkingUpToRamp();
 
       ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(20.0);
+      boolean success = simulationTestHelper.simulateNow(20.0);
 
-      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
-      drcSimulationTestHelper.checkNothingChanged();
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
+//      simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
 
       Point3D center = new Point3D(1.121, -0.092, 0.7102);
       Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
-      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-
-
-
+      simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@Test
-   public void testWalkingUpToRampWithLongSteps() throws SimulationExceededMaximumTimeException
+   @Test
+   public void testWalkingUpToRampWithLongSteps()
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.setTestEnvironment(flatGround);
-      drcSimulationTestHelper.createSimulation("DRCWalkingUpToRampLongStepsTest");
+      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), flatGround, simulationTestingParameters);
+      simulationTestHelper.start();
 
-      SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
-      ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
-
-      setupCameraForWalkingUpToRamp(simulationConstructionSet);
+      setupCameraForWalkingUpToRamp();
 
       ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      boolean success = simulationTestHelper.simulateNow(2.0);
 
-      FootstepDataListMessage footstepDataList = createFootstepsForWalkingOnFlatLongSteps(scriptedFootstepGenerator);
+      FootstepDataListMessage footstepDataList = createFootstepsForWalkingOnFlatLongSteps();
 
-      // FootstepDataList footstepDataList = createFootstepsForTwoLongFlatSteps(scriptedFootstepGenerator);
-      drcSimulationTestHelper.publishToController(footstepDataList);
+      // FootstepDataList footstepDataList = createFootstepsForTwoLongFlatSteps();
+      simulationTestHelper.publishToController(footstepDataList);
 
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10.0);
+      success = success && simulationTestHelper.simulateNow(10.0);
 
-      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
-      drcSimulationTestHelper.checkNothingChanged();
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
+//      simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
 
       Point3D center = new Point3D(3.106182296217929, 0.019198891341144136, 0.7894546312193843);
       Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
-      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-
-
+      simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-
-
-
-   private void setupCameraForWalkingUpToRamp(SimulationConstructionSet scs)
+   private void setupCameraForWalkingUpToRamp()
    {
       Point3D cameraFix = new Point3D(1.8375, -0.16, 0.89);
       Point3D cameraPosition = new Point3D(1.10, 8.30, 1.37);
 
-      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
+      simulationTestHelper.setCamera(cameraFix, cameraPosition);
    }
 
-
-
-   private FootstepDataListMessage createFootstepsForWalkingOnFlatLongSteps(ScriptedFootstepGenerator scriptedFootstepGenerator)
+   private FootstepDataListMessage createFootstepsForWalkingOnFlatLongSteps()
    {
-      double[][][] footstepLocationsAndOrientations = new double[][][]
-      {
-         {
-            {0.5909646234016005, 0.10243127081250579, 0.08400000000000002},
-            {3.5805394102331502E-22, -1.0841962601668662E-19, 0.003302464707320093, 0.99999454684856}
-         },
-         {
-            {1.212701966120992, -0.09394691394679651, 0.084}, {1.0806157207566333E-19, 1.0877767995770995E-19, 0.0033024647073200924, 0.99999454684856}
-         },
-         {
-            {1.8317941784239657, 0.11014657591704705, 0.08619322927296164},
-            {8.190550851520344E-19, 1.5693991726842814E-18, 0.003302464707320093, 0.99999454684856}
-         },
-         {
-            {2.4535283480857237, -0.08575120920059497, 0.08069788195751608},
-            {-2.202407644730947E-19, -8.117149793610565E-19, 0.0033024647073200924, 0.99999454684856}
-         },
-         {
-            {3.073148474156348, 0.11833676240086898, 0.08590468550531082},
-            {4.322378465953267E-5, 0.003142233766871708, 0.0033022799833692306, 0.9999896096688056}
-         },
-         {
-            {3.0729346702590505, -0.0816428320664241, 0.0812390388356}, {-8.243740658642556E-5, -0.005993134849034999, 0.003301792738040525, 0.999976586577641}
-         }
-      };
+      Pose3D[] footstepPoses = {
+            new Pose3D(new Point3D(0.5909646234016005, 0.10243127081250579, 0.08400000000000002),
+                       new Quaternion(3.5805394102331502E-22, -1.0841962601668662E-19, 0.003302464707320093, 0.99999454684856)),
+            new Pose3D(new Point3D(1.212701966120992, -0.09394691394679651, 0.084),
+                       new Quaternion(1.0806157207566333E-19, 1.0877767995770995E-19, 0.0033024647073200924, 0.99999454684856)),
+            new Pose3D(new Point3D(1.8317941784239657, 0.11014657591704705, 0.08619322927296164),
+                       new Quaternion(8.190550851520344E-19, 1.5693991726842814E-18, 0.003302464707320093, 0.99999454684856)),
+            new Pose3D(new Point3D(2.4535283480857237, -0.08575120920059497, 0.08069788195751608),
+                       new Quaternion(-2.202407644730947E-19, -8.117149793610565E-19, 0.0033024647073200924, 0.99999454684856)),
+            new Pose3D(new Point3D(3.073148474156348, 0.11833676240086898, 0.08590468550531082),
+                       new Quaternion(4.322378465953267E-5, 0.003142233766871708, 0.0033022799833692306, 0.9999896096688056)),
+            new Pose3D(new Point3D(3.0729346702590505, -0.0816428320664241, 0.0812390388356),
+                       new Quaternion(-8.243740658642556E-5, -0.005993134849034999, 0.003301792738040525, 0.999976586577641))};
 
-      RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.LEFT, footstepLocationsAndOrientations.length);
+      for (Pose3D footstepPose : footstepPoses) // The footsteps were originally written in terms of desired ankle pose for Atlas, this transforms it to desired sole pose.
+         footstepPose.appendTranslation(0.025, 0.0, -0.084);
 
-      return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
+      return EndToEndTestTools.generateFootstepsFromPose3Ds(RobotSide.LEFT, footstepPoses);
    }
-
 
 }

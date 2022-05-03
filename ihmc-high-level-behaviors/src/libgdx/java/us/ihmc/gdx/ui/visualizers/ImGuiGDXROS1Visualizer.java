@@ -2,7 +2,7 @@ package us.ihmc.gdx.ui.visualizers;
 
 import us.ihmc.utilities.ros.RosNodeInterface;
 
-public abstract class ImGuiGDXROS1Visualizer extends ImGuiGDXVisualizer
+public abstract class ImGuiGDXROS1Visualizer extends ImGuiGDXVisualizer implements ImGuiGDXROS1VisualizerInterface
 {
    private boolean currentlySubscribed = false;
 

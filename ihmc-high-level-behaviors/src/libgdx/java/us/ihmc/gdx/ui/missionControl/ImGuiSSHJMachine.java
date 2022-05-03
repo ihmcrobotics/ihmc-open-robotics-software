@@ -28,6 +28,8 @@ public class ImGuiSSHJMachine
    private final AtomicReference<MutablePair<Double, Double>> ramUsageSubscription;
    private final AtomicReference<ArrayList<Double>> cpuUsagesSubscription;
    private final AtomicReference<MutablePair<Double, Double>> networkUsageSubscription;
+   private final AtomicReference<String> chronySourceStatusSubscription;
+   private final AtomicReference<Double> gpuUsageSubscription;
 
    private final ImPlotPlot ramPlot = new ImPlotPlot();
    private final ImPlotDoublePlotLine ramUsagePlotLine = new ImPlotDoublePlotLine("RAM Usage GiB", 30 * 5, 30.0, new DecimalFormat("0.0"));
@@ -37,6 +39,8 @@ public class ImGuiSSHJMachine
    private final ImPlotPlot networkPlot = new ImPlotPlot();
    private final ImPlotDoublePlotLine networkSentPlotLine = new ImPlotDoublePlotLine("Network Sent KB/s", 30 * 5, 30.0, new DecimalFormat("0.000"));
    private final ImPlotDoublePlotLine networkReceivedPlotLine = new ImPlotDoublePlotLine("Network Received KB/s", 30 * 5, 30.0, new DecimalFormat("0.000"));
+   private final ImPlotPlot gpuPlot = new ImPlotPlot();
+   private final ImPlotDoublePlotLine gpuUsagePlotLine = new ImPlotDoublePlotLine("GPU Usage %", 30 * 5, 30.0, new DecimalFormat("0.0"));
 
    private final ImGuiSSHJSystemdServiceManager systemdServiceManager;
    private final HashMap<String, AtomicReference<String>> serviceStatuses = new HashMap<>();
@@ -81,10 +85,19 @@ public class ImGuiSSHJMachine
       networkPlot.setYFlags(yFlags);
       networkPlot.setCustomBeforePlotLogic(() ->
       {
-         ImPlot.setNextPlotLimitsY(0.0, 900000.0, ImGuiCond.Once);
+         ImPlot.setNextPlotLimitsY(-3000.0, 103000.0, ImGuiCond.Always);
       });
       networkPlot.getPlotLines().add(networkSentPlotLine);
       networkPlot.getPlotLines().add(networkReceivedPlotLine);
+
+      gpuPlot.setFlags(flags);
+      gpuPlot.setXFlags(xFlags);
+      gpuPlot.setYFlags(yFlags);
+      gpuPlot.setCustomBeforePlotLogic(() ->
+      {
+         ImPlot.setNextPlotLimitsY(0.0, 103.0, ImGuiCond.Always);
+      });
+      gpuPlot.getPlotLines().add(gpuUsagePlotLine);
 
       messagerHelper = new MessagerHelper(MissionControlService.API.create());
 
@@ -94,6 +107,9 @@ public class ImGuiSSHJMachine
       ramUsageSubscription = messagerHelper.subscribeViaReference(MissionControlService.API.RAMUsage, MutablePair.of(0.0, 1.0));
       cpuUsagesSubscription = messagerHelper.subscribeViaReference(MissionControlService.API.CPUUsages, new ArrayList<>());
       networkUsageSubscription = messagerHelper.subscribeViaReference(MissionControlService.API.NetworkUsage, MutablePair.of(0.0, 0.0));
+      chronySourceStatusSubscription = messagerHelper.subscribeViaReference(MissionControlService.API.ChronySelectedServerStatus,
+                                                                            "Chrony status not yet received.");
+      gpuUsageSubscription = messagerHelper.subscribeViaReference(MissionControlService.API.GPUUsage, Double.NaN);
 
       messagerManagerWidget = new ImGuiMessagerManagerWidget(messagerHelper, () -> hostname, MissionControlService.API.PORT);
    }
@@ -108,25 +124,32 @@ public class ImGuiSSHJMachine
       {
          systemdServiceManager.renderImGuiWidgets();
          messagerManagerWidget.renderImGuiWidgets();
+      }
 
-         ArrayList<String> statuses = serviceStatusSubscription.get();
-         for (String status : statuses)
+      ArrayList<String> statuses = serviceStatusSubscription.get();
+      for (String status : statuses)
+      {
+         String[] split = status.split(":", 2);
+         if (split[0].equals("mission-control-2"))
          {
-            String[] split = status.split(":", 2);
-            if (split[0].equals("mission-control-2"))
+            if (!condensedView)
             {
                ImGui.text(split[1]);
             }
-            else
+         }
+         else
+         {
+            AtomicReference<String> statusAtomicReference = serviceStatuses.get(split[0]);
+            if (statusAtomicReference != null)
             {
-               AtomicReference<String> statusAtomicReference = serviceStatuses.get(split[0]);
-               if (statusAtomicReference != null)
-               {
-                  statusAtomicReference.set(split[1]);
-               }
+               statusAtomicReference.set(split[1]);
             }
          }
       }
+
+      Double gpuUsage = gpuUsageSubscription.get();
+      boolean gpuUsageEnabled = !Double.isNaN(gpuUsage);
+      float plotWidth = gpuUsageEnabled ? 4.0f : 3.0f;
 
       MutablePair<Double, Double> ramUsage = ramUsageSubscription.getAndSet(null);
       if (ramUsage != null)
@@ -136,7 +159,8 @@ public class ImGuiSSHJMachine
          ramUsagePlotLine.addValue(used);
          ramTotalPlotLine.addValue(totalRAM);
       }
-      ramPlot.render(ImGui.getColumnWidth() / 3.0f, 35.0f);
+      ramPlot.render(ImGui.getColumnWidth() / plotWidth, 35.0f);
+      plotWidth -= 1.0f;
 
       ImGui.sameLine();
 
@@ -153,7 +177,8 @@ public class ImGuiSSHJMachine
             ((ImPlotDoublePlotLine) cpuPlot.getPlotLines().get(i)).addValue(cpuUsages.get(i));
          }
       }
-      cpuPlot.render(ImGui.getColumnWidth() / 2.0f, 35.0f);
+      cpuPlot.render(ImGui.getColumnWidth() / plotWidth, 35.0f);
+      plotWidth -= 1.0f;
 
       ImGui.sameLine();
 
@@ -165,7 +190,19 @@ public class ImGuiSSHJMachine
          networkSentPlotLine.addValue(sent);
          networkReceivedPlotLine.addValue(received);
       }
-      networkPlot.render(ImGui.getColumnWidth(), 35.0f);
+      networkPlot.render(ImGui.getColumnWidth() / plotWidth, 35.0f);
+      plotWidth -= 1.0f;
+
+      if (gpuUsageEnabled)
+      {
+         ImGui.sameLine();
+
+         gpuUsagePlotLine.addValue(gpuUsage);
+         gpuPlot.render(ImGui.getColumnWidth() / plotWidth, 35.0f);
+         plotWidth -= 1.0f;
+      }
+
+      ImGui.text("Chrony status: " + chronySourceStatusSubscription.get());
    }
 
    public ImGuiSSHJSystemdServiceManager getSystemdServiceManager()

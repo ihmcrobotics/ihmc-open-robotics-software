@@ -26,6 +26,7 @@ public class ImGuiGlfwWindow
    private final HybridDirectory configurationBaseDirectory;
    private HybridFile windowSettingsFile;
    private final Stopwatch runTime = new Stopwatch().start();
+   private String[] iconPaths = null;
    private final GlfwWindowForImGui glfwWindowForImGui;
    private final GDXImGuiWindowAndDockSystem imGuiWindowAndDockSystem;
    private final GDXImGuiPerspectiveManager perspectiveManager;
@@ -84,6 +85,8 @@ public class ImGuiGlfwWindow
       });
 
       glfwWindowForImGui.create();
+      if (iconPaths != null)
+         glfwWindowForImGui.setIcon(iconPaths);
 
       long windowHandle = glfwWindowForImGui.getWindowHandle();
 
@@ -152,10 +155,12 @@ public class ImGuiGlfwWindow
       ImGuiPanel mainPanel = new ImGuiPanel("Main Panel", renderImGuiWidgets);
       mainPanel.getIsShowing().set(true);
       imGuiWindowAndDockSystem.getPanelManager().addPanel(mainPanel);
-      ThreadTools.startAThread(() ->
-      {
-         run(() -> { }, () -> System.exit(0));
-      }, glfwWindowForImGui.getWindowTitle());
+      ThreadTools.startAThread(() -> run(() -> { }, () -> System.exit(0)), glfwWindowForImGui.getWindowTitle());
+   }
+
+   public void setIcons(String... iconPaths)
+   {
+      this.iconPaths = iconPaths;
    }
 
    public ImGuiPanelManager getPanelManager()

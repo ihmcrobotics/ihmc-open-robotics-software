@@ -40,6 +40,7 @@ import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
+import us.ihmc.simulationConstructionSetTools.util.planarRegions.PlanarRegionsListExamples;
 import us.ihmc.tools.io.WorkspacePathTools;
 import us.ihmc.valkyrie.ValkyrieInitialSetupFactories;
 import us.ihmc.valkyrie.ValkyrieMutableInitialSetup;
@@ -74,7 +75,7 @@ public class ValkyriePlanarRegionPositionControlSimulation
 
    public ValkyriePlanarRegionPositionControlSimulation(boolean headless)
    {
-      PlanarRegionsList planarRegionsList = ValkyrieMultiContactEnvironment.createPlanarRegions();
+      PlanarRegionsList planarRegionsList = PlanarRegionsListExamples.createFlatGround();
       PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment(planarRegionsList, 0.01, false);
 
       groundPlaneMessage.getRegionNormal().set(Axis3D.Z);
