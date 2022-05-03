@@ -77,7 +77,7 @@ public class ReachabilitySphereMapSimulationHelper
       calculator.setControlFramePoseInParentJoint(controlFramePoseInParentJointFrame);
    }
 
-   public void start()
+   public boolean start()
    {
       SessionVisualizerControls guiControls = SessionVisualizer.startSessionVisualizer(session);
       guiControls.setCameraFocusPosition(calculator.getGridFramePose().getX(), calculator.getGridFramePose().getY(), calculator.getGridFramePose().getZ());
@@ -111,6 +111,7 @@ public class ReachabilitySphereMapSimulationHelper
       SimulationSessionControls simControls = session.getSimulationSessionControls();
       simControls.addExternalTerminalCondition(calculator::isDone);
       simControls.simulateNow();
+      return calculator.isDone();
    }
 
    public void exportDataToFile(String robotName, Class<?> classForFilePath) throws IOException
