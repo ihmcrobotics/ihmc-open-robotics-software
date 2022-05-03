@@ -96,6 +96,11 @@ public class GDXOpenCVVideoVisualizer extends ImGuiGDXVisualizer
       return rgba8Mat;
    }
 
+   public BytePointer getRgba8888BytePointer()
+   {
+      return rgba8888BytePointer;
+   }
+
    protected ResettableExceptionHandlingExecutorService getThreadQueue()
    {
       return threadQueue;

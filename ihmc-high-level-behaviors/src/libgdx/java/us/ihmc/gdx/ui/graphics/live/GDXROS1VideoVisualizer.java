@@ -1,6 +1,7 @@
 package us.ihmc.gdx.ui.graphics.live;
 
 import imgui.internal.ImGui;
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -13,9 +14,11 @@ import us.ihmc.perception.ImageEncodingTools;
 import us.ihmc.perception.ROSOpenCVImage;
 import us.ihmc.perception.ROSOpenCVTools;
 import us.ihmc.utilities.ros.RosNodeInterface;
+import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 import java.nio.Buffer;
+import java.nio.ByteBuffer;
 
 public class GDXROS1VideoVisualizer extends GDXOpenCVVideoVisualizer implements ImGuiGDXROS1VisualizerInterface
 {
@@ -68,8 +71,6 @@ public class GDXROS1VideoVisualizer extends GDXOpenCVVideoVisualizer implements 
    private void processIncomingMessageOnThread(CompressedImage compressedImage)
    {
 //      ChannelBuffer nettyChannelBuffer = compressedImage.getData();
-
-
       //         decodedImageMat = new Mat(image.getHeight(), image.getWidth(), opencv_core.CV_8UC4);
       //         resizedImageMat = new Mat(image.getHeight(), image.getWidth(), opencv_core.CV_8UC4);
 
@@ -84,7 +85,6 @@ public class GDXROS1VideoVisualizer extends GDXOpenCVVideoVisualizer implements 
       {
          e.printStackTrace();
       }
-
    }
 
    private void processIncomingMessageOnThread(Image image)
@@ -118,7 +118,12 @@ public class GDXROS1VideoVisualizer extends GDXOpenCVVideoVisualizer implements 
          }
          else if (cvType == opencv_core.CV_8UC4)
          {
-            ROSOpenCVTools.backMatWithNettyBuffer(getRGBA8Mat(), nettyChannelBuffer);
+            ByteBuffer inputByteBuffer = RosTools.sliceNettyBuffer(nettyChannelBuffer);
+            BytePointer rgba8888BytePointer = getRgba8888BytePointer();
+            for (int i = 0; i < inputByteBuffer.limit(); i++)
+            {
+               rgba8888BytePointer.put(i, inputByteBuffer.get());
+            }
          }
       }
    }
