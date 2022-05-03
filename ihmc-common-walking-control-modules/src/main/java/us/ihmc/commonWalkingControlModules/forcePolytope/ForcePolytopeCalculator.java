@@ -2,32 +2,22 @@ package us.ihmc.commonWalkingControlModules.forcePolytope;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import us.ihmc.convexOptimization.exceptions.NoConvergenceException;
-import us.ihmc.convexOptimization.linearProgram.LinearProgramSolver;
-import us.ihmc.convexOptimization.quadraticProgram.QuadProgSolver;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.log.LogTools;
-import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculator;
 import us.ihmc.robotics.screwTheory.PointJacobian;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class ForcePolytopeCalculator
 {
-   private static final SolveMethod solveMethod = SolveMethod.SVD;
+   private static final SolveMethod solveMethod = SolveMethod.SVD_PROJECTION;
    private static final boolean debug = true;
    private static final double gravity = -9.81;
 
@@ -35,7 +25,8 @@ public class ForcePolytopeCalculator
    {
       LP_INTERIOR_POINT,
       QP_INTERIOR_POINT,
-      SVD
+      SVD_ITERATIVE,
+      SVD_PROJECTION
    }
 
    private final RigidBodyBasics rootBody;
@@ -61,7 +52,8 @@ public class ForcePolytopeCalculator
 
    private final LPInteriorPointForcePolytopeSolver lpSolver;
    private final QPInteriorPointForcePolytopeSolver qpSolver;
-   private final SVDForcePolytopeSolver svdSolver;
+   private final SVDVertexIterationForcePolytopeSolver svdIterativeSolver;
+   private final SVDProjectionForcePolytopeSolver svdProjectionSolver;
 
    public ForcePolytopeCalculator(RigidBodyBasics base, RigidBodyBasics endEffector)
    {
@@ -91,7 +83,8 @@ public class ForcePolytopeCalculator
 
       lpSolver = new LPInteriorPointForcePolytopeSolver(joints.length);
       qpSolver = new QPInteriorPointForcePolytopeSolver(joints.length);
-      svdSolver = new SVDForcePolytopeSolver(joints.length);
+      svdIterativeSolver = new SVDVertexIterationForcePolytopeSolver(joints.length);
+      svdProjectionSolver = new SVDProjectionForcePolytopeSolver(joints.length);
    }
 
    public void update()
@@ -132,9 +125,13 @@ public class ForcePolytopeCalculator
       {
          qpSolver.solve(jacobianMatrix, tauLowerLimit, tauUpperLimit, forcePolytope);
       }
-      else if (solveMethod == SolveMethod.SVD)
+      else if (solveMethod == SolveMethod.SVD_ITERATIVE)
       {
-         svdSolver.solve(jacobianMatrix, tauLowerLimit, tauUpperLimit, forcePolytope);
+         svdIterativeSolver.solve(jacobianMatrix, tauLowerLimit, tauUpperLimit, forcePolytope);
+      }
+      else if (solveMethod == SolveMethod.SVD_PROJECTION)
+      {
+         svdProjectionSolver.solve(jacobianMatrix, tauLowerLimit, tauUpperLimit, forcePolytope);
       }
    }
 
@@ -176,8 +173,8 @@ public class ForcePolytopeCalculator
       return qpSolver;
    }
 
-   public SVDForcePolytopeSolver getSvdSolver()
+   public SVDVertexIterationForcePolytopeSolver getSvdIterativeSolver()
    {
-      return svdSolver;
+      return svdIterativeSolver;
    }
 }

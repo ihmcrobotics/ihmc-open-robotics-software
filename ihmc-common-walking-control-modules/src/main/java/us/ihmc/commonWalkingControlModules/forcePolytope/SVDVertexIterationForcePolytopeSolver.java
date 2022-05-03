@@ -22,10 +22,9 @@ import us.ihmc.matrixlib.MatrixTools;
  * See "Force polytope and force ellipsoid for redundant manipulators"
  * https://doi.org/10.1002/(SICI)1097-4563(199708)14:8<613::AID-ROB3>3.0.CO;2-P
  */
-class SVDForcePolytopeSolver implements ForcePolytopeSolver
+class SVDVertexIterationForcePolytopeSolver implements ForcePolytopeSolver
 {
    // TODO tune
-   private static double singularValueThreshold = 0.05;
    private static final boolean debug = false;
 
    private final SvdImplicitQrDecompose_DDRM svdSolver = new SvdImplicitQrDecompose_DDRM(false, true, true, false);
@@ -51,7 +50,7 @@ class SVDForcePolytopeSolver implements ForcePolytopeSolver
    private int[] AtoASub;
    private int[] ASubToA;
 
-   public SVDForcePolytopeSolver(int dofs)
+   public SVDVertexIterationForcePolytopeSolver(int dofs)
    {
       this.dofs = dofs;
       jacobianTranspose.reshape(dofs, 3);
