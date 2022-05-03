@@ -72,6 +72,7 @@ javacvDependencies {
    apiBytedecoNatives("opencv", "4.5.5-")
    apiBytedecoNatives("opencl", "3.0-")
    apiBytedecoNatives("librealsense2", "2.50.0-")
+   apiBytedecoNatives("spinnaker", "2.4.0.143-")
 }
 
 fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, versionPrefix: String = "")
