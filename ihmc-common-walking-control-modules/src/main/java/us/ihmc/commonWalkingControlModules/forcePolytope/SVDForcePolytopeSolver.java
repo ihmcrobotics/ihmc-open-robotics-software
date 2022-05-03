@@ -7,9 +7,11 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.decomposition.svd.SvdImplicitQrDecompose_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.dense.row.linsol.svd.SolvePseudoInverseSvd_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
 import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
 
 /**
@@ -24,8 +26,10 @@ class SVDForcePolytopeSolver implements ForcePolytopeSolver
 {
    // TODO tune
    private static double singularValueThreshold = 0.05;
+   private static final boolean debug = false;
 
    private final SvdImplicitQrDecompose_DDRM svdSolver = new SvdImplicitQrDecompose_DDRM(false, true, true, false);
+   private final SolvePseudoInverseSvd_DDRM psuedoInverseSolver = new SolvePseudoInverseSvd_DDRM();
    private final LinearSolverDense<DMatrixRMaj> solver;
 
    private final TDoubleArrayList singularValues = new TDoubleArrayList();
@@ -34,9 +38,10 @@ class SVDForcePolytopeSolver implements ForcePolytopeSolver
    private final DMatrixRMaj Asub = new DMatrixRMaj(0);
    private final DMatrixRMaj b = new DMatrixRMaj(0);
    private final DMatrixRMaj V = new DMatrixRMaj(0);
-   private final DMatrixRMaj I = new DMatrixRMaj(0);
+   private final DMatrixRMaj I;
    private final DMatrixRMaj x = new DMatrixRMaj(0);
    private final DMatrixRMaj jacobianTranspose = new DMatrixRMaj(0);
+   private final DMatrixRMaj jacobianTransposeInv = new DMatrixRMaj(0);
    private final DMatrixRMaj tau = new DMatrixRMaj(0);
    private final DMatrixRMaj f = new DMatrixRMaj(0);
    private final DMatrixRMaj alpha = new DMatrixRMaj(0);
@@ -50,12 +55,14 @@ class SVDForcePolytopeSolver implements ForcePolytopeSolver
    {
       this.dofs = dofs;
       jacobianTranspose.reshape(dofs, 3);
+      jacobianTransposeInv.reshape(3, dofs);
       Asub.reshape(2 * dofs, 2 * dofs);
       b.reshape(2 * dofs, 1);
-      I.reshape(dofs, dofs);
+      I = CommonOps_DDRM.identity(dofs);
       solver = LinearSolverFactory_DDRM.linear(2 * dofs);
       tau.reshape(dofs, 1);
       f.reshape(3, 1);
+      psuedoInverseSolver.setThreshold(singularValueThreshold);
    }
 
    @Override
@@ -69,6 +76,9 @@ class SVDForcePolytopeSolver implements ForcePolytopeSolver
       }
 
       CommonOps_DDRM.transpose(jacobianTranspose, jacobian);
+      psuedoInverseSolver.setA(jacobianTranspose);
+      psuedoInverseSolver.invert(jacobianTransposeInv);
+
       double[] singularValuesNonThresholded = svdSolver.getSingularValues();
       singularValues.clear();
 
@@ -136,36 +146,40 @@ class SVDForcePolytopeSolver implements ForcePolytopeSolver
                continue;
 
             MatrixTools.setMatrixBlock(Asub, 0, aSubIndex, A, 0, numSingularValues + j, A.getNumRows(), 1, 1.0);
-            solver.setA(Asub);
-            solver.solve(b, x);
+         }
 
-            boolean isValid = true;
-            for (int k = numSingularValues; k < 2 * dofs; k++)
+         solver.setA(Asub);
+         solver.solve(b, x);
+
+         boolean isValid = true;
+         for (int k = numSingularValues; k < 2 * dofs; k++)
+         {
+            if (x.get(k) < 0.0)
             {
-               if (x.get(k) < 0.0)
-               {
-                  isValid = false;
-                  break;
-               }
+               isValid = false;
+               break;
+            }
+         }
+
+         if (isValid)
+         {
+            tau.zero();
+            for (int k = 0; k < numSingularValues; k++)
+            {
+               alpha.set(k, 0, x.get(k, 0));
             }
 
-            if (isValid)
+            CommonOps_DDRM.mult(V, alpha, tau);
+            CommonOps_DDRM.mult(jacobianTransposeInv, tau, f);
+
+            Point3D vertex = new Point3D();
+            vertex.set(f);
+            if (polytopeToPack.signedDistance(vertex) > 1e-3)
             {
-               tau.zero();
-               for (int k = 0; k < numSingularValues; k++)
-               {
-                  alpha.set(k, 0, x.get(k, 0));
-               }
+               polytopeToPack.addVertex(vertex);
 
-               CommonOps_DDRM.mult(V, alpha, tau);
-
-               solver.setA(jacobianTranspose);
-               CommonOps_DDRM.mult(jacobianTranspose, tau, f);
-
-               Point3D vertex = new Point3D();
-               vertex.set(f);
-               if (polytopeToPack.signedDistance(vertex) > 1e-3)
-                  polytopeToPack.addVertex(vertex);
+               if (debug)
+                  LogTools.info("Adding vertex \t" + vertex);
             }
          }
       }
@@ -183,15 +197,8 @@ class SVDForcePolytopeSolver implements ForcePolytopeSolver
          }
          else
          {
-            try
-            {
-               AtoASub[numSingularValues + j] = numSingularValues + j - counter;
-               ASubToA[numSingularValues + j - counter] = numSingularValues + j;
-            }
-            catch (Exception e)
-            {
-               System.out.println(e);
-            }
+            AtoASub[numSingularValues + j] = numSingularValues + j - counter;
+            ASubToA[numSingularValues + j - counter] = numSingularValues + j;
          }
       }
    }
@@ -221,5 +228,32 @@ class SVDForcePolytopeSolver implements ForcePolytopeSolver
             digits++;
       }
       return digits;
+   }
+
+   public static void main(String[] args)
+   {
+      DMatrixRMaj J = new DMatrixRMaj(3, 4);
+
+      J.set(0, 0, 1.0);
+      J.set(1, 1, 1.0);
+      J.set(2, 2, 1.0);
+
+      J.set(0, 3, 1.0);
+      J.set(1, 3, 1.0);
+      J.set(2, 3, 1.0);
+
+      DMatrixRMaj JT = new DMatrixRMaj(4, 3);
+      DMatrixRMaj JTInv = new DMatrixRMaj(3, 4);
+      CommonOps_DDRM.transpose(J, JT);
+
+      System.out.println("JT:");
+      System.out.println(JT);
+
+      SolvePseudoInverseSvd_DDRM psuedoInverseSolver = new SolvePseudoInverseSvd_DDRM();
+      psuedoInverseSolver.setA(JT);
+      psuedoInverseSolver.invert(JTInv);
+
+      System.out.println("JTInv");
+      System.out.println(JTInv);
    }
 }
