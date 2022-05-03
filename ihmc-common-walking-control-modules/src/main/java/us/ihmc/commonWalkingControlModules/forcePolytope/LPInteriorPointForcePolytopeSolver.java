@@ -24,7 +24,6 @@ class LPInteriorPointForcePolytopeSolver implements ForcePolytopeSolver
       jacobianTranspose.reshape(dofs, 3);
       lpInequalityA.reshape(2 * dofs, 6);
       lpInequalityB.reshape(2 * dofs, 1);
-
    }
 
    @Override
