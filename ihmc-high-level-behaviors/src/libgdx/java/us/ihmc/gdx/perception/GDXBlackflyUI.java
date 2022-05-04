@@ -15,14 +15,15 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.MutableBytePointer;
-import us.ihmc.perception.spinnaker.BytedecoBlackflyS;
+import us.ihmc.perception.spinnaker.BytedecoBlackfly;
+import us.ihmc.perception.spinnaker.SpinnakerHardwareManager;
 import us.ihmc.tools.thread.Activator;
 import us.ihmc.tools.time.FrequencyCalculator;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.nio.ByteOrder;
 
-public class GDXBlackflySUI
+public class GDXBlackflyUI
 {
    private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
                                                               "ihmc-open-robotics-software",
@@ -31,11 +32,10 @@ public class GDXBlackflySUI
    private final GDXPose3DGizmo sensorPoseGizmo = new GDXPose3DGizmo();
    private YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
    private YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-   private RealSenseHardwareManager realSenseHardwareManager;
-   private BytedecoBlackfly l515;
-   private GDXCVImagePanel depthImagePanel;
+   private BytedecoBlackfly blackfly;
+   private SpinnakerHardwareManager spinnakerHardwareManager;
+   private GDXCVImagePanel imagePanel;
    private Mat depthU16C1Image;
-   private BytedecoImage depth32FC1Image;
    private FrequencyCalculator frameReadFrequency = new FrequencyCalculator();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImFloat laserPower = new ImFloat(100.0f);
@@ -43,7 +43,7 @@ public class GDXBlackflySUI
    private final ImInt digitalGain = new ImInt(realsense2.RS2_DIGITAL_GAIN_LOW);
    private final String[] digitalGains = new String[] { "AUTO", "LOW", "HIGH" };
 
-   public GDXBlackflySUI()
+   public GDXBlackflyUI()
    {
       nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
 
@@ -54,7 +54,7 @@ public class GDXBlackflySUI
          {
             baseUI.create();
 
-            ImGuiPanel panel = new ImGuiPanel("L515", this::renderImGuiWidgets);
+            ImGuiPanel panel = new ImGuiPanel("Blackfly", this::renderImGuiWidgets);
             baseUI.getImGuiPanelManager().addPanel(panel);
          }
 
@@ -65,34 +65,27 @@ public class GDXBlackflySUI
             {
                if (nativesLoadedActivator.isNewlyActivated())
                {
-                  realSenseHardwareManager = new RealSenseHardwareManager(yoRegistry, yoGraphicsListRegistry);
-
-                  //                  l515 = realSenseHardwareManager.createFullFeaturedL515("F1121365");
-                  l515 = realSenseHardwareManager.createFullFeaturedL515("F1120418");
-                  //                  l515.enableColor(1920, 1080, 30);
-                  l515.initialize();
+                  spinnakerHardwareManager = SpinnakerHardwareManager.getInstance();
+                  blackfly = spinnakerHardwareManager.buildBlackfly("Serial number goes here"); //TODO serial number
+                  blackfly.initialize();
                }
 
-               if (l515.readFrameData())
+               if (blackfly.readFrameData())
                {
-                  l515.updateDataBytePointers();
+                  blackfly.updateDataBytePointers();
 
-                  if (depthImagePanel == null)
+                  if (imagePanel == null)
                   {
-                     MutableBytePointer depthFrameData = l515.getDepthFrameData();
-                     depthU16C1Image = new Mat(l515.getDepthHeight(), l515.getDepthWidth(), opencv_core.CV_16UC1, depthFrameData);
+                     MutableBytePointer frameData = blackfly.getFrameData();
+                     depthU16C1Image = new Mat(blackfly.getHeight(), blackfly.getWidth(), opencv_core.CV_16UC1, frameData);
 
-                     depth32FC1Image = new BytedecoImage(l515.getDepthWidth(), l515.getDepthHeight(), opencv_core.CV_32FC1);
-                     depthImagePanel = new GDXCVImagePanel("L515 Depth", l515.getDepthWidth(), l515.getDepthHeight());
-                     baseUI.getImGuiPanelManager().addPanel(depthImagePanel.getVideoPanel());
+                     imagePanel = new GDXCVImagePanel("Blackfly Image", blackfly.getWidth(), blackfly.getHeight());
+                     baseUI.getImGuiPanelManager().addPanel(imagePanel.getVideoPanel());
 
                      baseUI.getPerspectiveManager().reloadPerspective();
                   }
 
                   frameReadFrequency.ping();
-                  depthU16C1Image.convertTo(depth32FC1Image.getBytedecoOpenCVMat(), opencv_core.CV_32FC1, l515.getDepthToMeterConversion(), 0.0);
-
-                  depthImagePanel.drawFloatImage(depth32FC1Image.getBytedecoOpenCVMat());
                }
             }
 
@@ -104,33 +97,9 @@ public class GDXBlackflySUI
          {
             ImGui.text("System native byte order: " + ByteOrder.nativeOrder().toString());
 
-            if (depthImagePanel != null)
+            if (imagePanel != null)
             {
-               ImGui.text("Depth frame data size: " + l515.getDepthFrameDataSize());
                ImGui.text("Frame read frequency: " + frameReadFrequency.getFrequency());
-               ImGui.text("Depth to meters conversion: " + l515.getDepthToMeterConversion());
-
-               if (ImGui.sliderFloat(labels.get("Laser power"), laserPower.getData(), 0.0f, 100.0f))
-               {
-                  l515.setLaserPower(laserPower.get());
-               }
-
-               if (ImGui.combo(labels.get("Digital gain"), digitalGain, digitalGains))
-               {
-                  if (digitalGain.get() == 0)
-                  {
-                     l515.setDigitalGail(realsense2.RS2_DIGITAL_GAIN_AUTO);
-                  }
-                  else if (digitalGain.get() == 1)
-                  {
-                     l515.setDigitalGail(realsense2.RS2_DIGITAL_GAIN_LOW);
-                  }
-                  else
-                  {
-                     l515.setDigitalGail(realsense2.RS2_DIGITAL_GAIN_HIGH);
-                  }
-
-               }
 
                ImGui.text("Unsigned 16 Depth:");
 
@@ -141,21 +110,15 @@ public class GDXBlackflySUI
 
                ImGui.text("Float 32 Meters:");
 
-               depth32FC1Image.rewind();
-               for (int i = 0; i < 5; i++)
-               {
-                  ImGui.text(depth32FC1Image.getBackingDirectByteBuffer().getFloat() + " ");
-               }
-
                ImGui.text("R G B A:");
 
-               depthImagePanel.getBytedecoImage().rewind();
+               imagePanel.getBytedecoImage().rewind();
                for (int i = 0; i < 5; i++)
                {
-                  printBytes(depthImagePanel.getBytedecoImage().getBytedecoOpenCVMat().ptr(0, i).get(0),
-                             depthImagePanel.getBytedecoImage().getBytedecoOpenCVMat().ptr(0, i).get(1),
-                             depthImagePanel.getBytedecoImage().getBytedecoOpenCVMat().ptr(0, i).get(2),
-                             depthImagePanel.getBytedecoImage().getBytedecoOpenCVMat().ptr(0, i).get(3));
+                  printBytes(imagePanel.getBytedecoImage().getBytedecoOpenCVMat().ptr(0, i).get(0),
+                             imagePanel.getBytedecoImage().getBytedecoOpenCVMat().ptr(0, i).get(1),
+                             imagePanel.getBytedecoImage().getBytedecoOpenCVMat().ptr(0, i).get(2),
+                             imagePanel.getBytedecoImage().getBytedecoOpenCVMat().ptr(0, i).get(3));
                }
             }
          }
@@ -177,8 +140,7 @@ public class GDXBlackflySUI
          public void dispose()
          {
             baseUI.dispose();
-            l515.deleteDevice();
-            realSenseHardwareManager.deleteContext();
+            blackfly.destroy();
          }
       });
    }
