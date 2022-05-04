@@ -16,7 +16,8 @@ import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class ControllerNaturalPostureManager implements NaturalPostureControlState
+public class ControllerNaturalPostureManager 
+//public class ControllerNaturalPostureManager implements NaturalPostureControlState
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -54,7 +55,7 @@ public class ControllerNaturalPostureManager implements NaturalPostureControlSta
       
       this.robotNaturalPosture = robotNaturalPosture;
       npQPobjective.reshape(3, 1);
-      npQPjacobian.reshape(3,3+fullRobotModel.getOneDoFJoints().length);
+      npQPjacobian.reshape(3,6+fullRobotModel.getOneDoFJoints().length);
       npQPweightMatrix.reshape(3, 3);
       npQPselectionMatrix.reshape(3, 3);
       CommonOps_DDRM.setIdentity(npQPselectionMatrix);
@@ -70,14 +71,16 @@ public class ControllerNaturalPostureManager implements NaturalPostureControlSta
 //      this.selectionMatrix.set(selectionMatrix);
 //   }
 
-   @Override
-   public void doAction(double timeInState)
+//   @Override
+//   public void doAction(double timeInState)
+   public void compute()
    {
       // POPULATE QP MATRICES HERE:
       
       for (int i=0; i<3; i++)
       {
          npQPweightMatrix.set(i,i,naturalPostureAngularWeight.getElement(i));
+//         npQPweightMatrix.set(i,i,0.0);
       }
       
       // Get current NP:   GMN - we're assuming NP compute() is getting called somewhere else?
@@ -101,7 +104,8 @@ public class ControllerNaturalPostureManager implements NaturalPostureControlSta
       Dnp.set(1,0, cbe*sal); Dnp.set(1,1, cal);  Dnp.set(1,2,0.0);
       Dnp.set(2,0, cbe*cal); Dnp.set(2,1,-sal);  Dnp.set(2,2,0.0);
       
-      double[] kp = gains.getProportionalGains();
+//      double[] kp = gains.getProportionalGains();
+      double[] kp = new double[] {0,0,0};
       tau.set(0,0,kp[0]*(0 - npYaw));
       tau.set(1,0,kp[1]*(0 - npPitch));
       tau.set(2,0,kp[2]*(0 - npRoll));
@@ -120,7 +124,7 @@ public class ControllerNaturalPostureManager implements NaturalPostureControlSta
       naturalPostureControlCommand.getWeightMatrix().set(npQPweightMatrix);
    }
 
-   @Override
+//   @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
       return naturalPostureControlCommand;

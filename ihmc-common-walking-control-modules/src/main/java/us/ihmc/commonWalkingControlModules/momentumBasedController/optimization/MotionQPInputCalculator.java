@@ -339,8 +339,8 @@ public class MotionQPInputCalculator
 
       CommonOps_DDRM.mult(selectionMatrix, objective, qpInputToPack.taskObjective);
 
-      tempTaskJacobian.reshape(taskSize, jacobianCalculator.getNumberOfDegreesOfFreedom());
-      CommonOps_DDRM.mult(selectionMatrix, jacobian, tempTaskJacobian);
+//      tempTaskJacobian.reshape(taskSize, jacobianCalculator.getNumberOfDegreesOfFreedom());
+      CommonOps_DDRM.mult(selectionMatrix, jacobian, qpInputToPack.taskJacobian);
 
       recordTaskJacobian(qpInputToPack.taskJacobian);
       return true;

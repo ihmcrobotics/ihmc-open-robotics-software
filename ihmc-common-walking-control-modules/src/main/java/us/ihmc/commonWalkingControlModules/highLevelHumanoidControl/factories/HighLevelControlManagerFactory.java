@@ -334,9 +334,12 @@ public class HighLevelControlManagerFactory
       if (!hasWalkingControllerParameters(NaturalPostureManager.class))
          return null;
 
-      String npName = "naturalPosture";
-      PID3DGainsReadOnly naturalPostureGains = taskspaceOrientationGainMap.get(npName);
-      Vector3DReadOnly naturalPostureAngularWeight = taskspaceAngularWeightMap.get(npName);
+//      String npName = "naturalPosture";
+//      PID3DGainsReadOnly naturalPostureGains = taskspaceOrientationGainMap.get(npName);
+      String pelvisName = controllerToolbox.getFullRobotModel().getPelvis().getName();
+      PID3DGainsReadOnly naturalPostureGains = taskspaceOrientationGainMap.get(pelvisName); // GMN: borrow pelvis gains
+//      Vector3DReadOnly naturalPostureAngularWeight = taskspaceAngularWeightMap.get(npName);
+      Vector3DReadOnly naturalPostureAngularWeight = taskspaceAngularWeightMap.get(pelvisName); // GMN: borrow pelvis weights
       
       HumanoidRobotNaturalPosture naturalPostureMeasurement = walkingControllerParameters.getNaturalPosture(controllerToolbox.getFullRobotModel(),
                                                                                                             registry,

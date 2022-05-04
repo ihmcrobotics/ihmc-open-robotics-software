@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.NaturalPosture;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.QPObjectiveCommand;
 import us.ihmc.robotics.stateMachine.core.State;
 
 public interface NaturalPostureControlState extends State
