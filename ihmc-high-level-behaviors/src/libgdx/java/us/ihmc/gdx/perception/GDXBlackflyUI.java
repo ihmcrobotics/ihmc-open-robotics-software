@@ -1,25 +1,18 @@
 package us.ihmc.gdx.perception;
 
 import imgui.ImGui;
-import imgui.type.ImFloat;
-import imgui.type.ImInt;
-import org.bytedeco.librealsense2.global.realsense2;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.MutableBytePointer;
 import us.ihmc.perception.spinnaker.BytedecoBlackfly;
 import us.ihmc.perception.spinnaker.SpinnakerHardwareManager;
 import us.ihmc.tools.thread.Activator;
 import us.ihmc.tools.time.FrequencyCalculator;
-import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.nio.ByteOrder;
 
@@ -29,19 +22,11 @@ public class GDXBlackflyUI
                                                               "ihmc-open-robotics-software",
                                                               "ihmc-high-level-behaviors/src/main/resources");
    private final Activator nativesLoadedActivator;
-   private final GDXPose3DGizmo sensorPoseGizmo = new GDXPose3DGizmo();
-   private YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
-   private YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private BytedecoBlackfly blackfly;
    private SpinnakerHardwareManager spinnakerHardwareManager;
    private GDXCVImagePanel imagePanel;
-   private Mat depthU16C1Image;
    private FrequencyCalculator frameReadFrequency = new FrequencyCalculator();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImFloat laserPower = new ImFloat(100.0f);
-   private final ImFloat receiverSensitivity = new ImFloat(0.5f);
-   private final ImInt digitalGain = new ImInt(realsense2.RS2_DIGITAL_GAIN_LOW);
-   private final String[] digitalGains = new String[] { "AUTO", "LOW", "HIGH" };
 
    public GDXBlackflyUI()
    {
@@ -77,7 +62,6 @@ public class GDXBlackflyUI
                   if (imagePanel == null)
                   {
                      MutableBytePointer frameData = blackfly.getFrameData();
-                     depthU16C1Image = new Mat(blackfly.getHeight(), blackfly.getWidth(), opencv_core.CV_16UC1, frameData);
 
                      imagePanel = new GDXCVImagePanel("Blackfly Image", blackfly.getWidth(), blackfly.getHeight());
                      baseUI.getImGuiPanelManager().addPanel(imagePanel.getVideoPanel());
@@ -100,15 +84,6 @@ public class GDXBlackflyUI
             if (imagePanel != null)
             {
                ImGui.text("Frame read frequency: " + frameReadFrequency.getFrequency());
-
-               ImGui.text("Unsigned 16 Depth:");
-
-               for (int i = 0; i < 5; i++)
-               {
-                  ImGui.text(depthU16C1Image.ptr(0, i).getShort() + " ");
-               }
-
-               ImGui.text("Float 32 Meters:");
 
                ImGui.text("R G B A:");
 
@@ -147,6 +122,6 @@ public class GDXBlackflyUI
 
    public static void main(String[] args)
    {
-      new GDXRealsenseL515UI();
+      new GDXBlackflyUI();
    }
 }
