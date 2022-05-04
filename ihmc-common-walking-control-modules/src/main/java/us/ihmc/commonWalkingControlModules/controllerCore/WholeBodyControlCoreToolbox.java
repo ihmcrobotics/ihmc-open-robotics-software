@@ -143,9 +143,14 @@ public class WholeBodyControlCoreToolbox
     * @param parentRegistry                     registry to which this toolbox will attach its own
     *                                           registry.
     */
-   public WholeBodyControlCoreToolbox(double controlDT, double gravityZ, FloatingJointBasics rootJoint, JointBasics[] controlledJoints,
-                                      ReferenceFrame centerOfMassFrame, ControllerCoreOptimizationSettings controllerCoreOptimizationSettings,
-                                      YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
+   public WholeBodyControlCoreToolbox(double controlDT,
+                                      double gravityZ,
+                                      FloatingJointBasics rootJoint,
+                                      JointBasics[] controlledJoints,
+                                      ReferenceFrame centerOfMassFrame,
+                                      ControllerCoreOptimizationSettings controllerCoreOptimizationSettings,
+                                      YoGraphicsListRegistry yoGraphicsListRegistry,
+                                      YoRegistry parentRegistry)
    {
       this.controlDT = controlDT;
       this.gravityZ = gravityZ;
@@ -489,7 +494,7 @@ public class WholeBodyControlCoreToolbox
    {
       return getPlaneContactWrenchProcessor().getDesiredCenterOfPressureDataHolder();
    }
-   
+
    public DesiredExternalWrenchHolder getDesiredExternalWrenchHolder()
    {
       return getPlaneContactWrenchProcessor().getDesiredExternalWrenchHolder();
