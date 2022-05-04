@@ -19,14 +19,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.stateMachine.core.State;
-import us.ihmc.robotics.stateMachine.core.StateMachine;
-import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.scs2.definition.controller.ControllerOutput;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
@@ -36,6 +32,7 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.scs2.session.tools.SCS1GraphicConversionTools;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ReachabilitySphereMapCalculator implements Controller
@@ -44,22 +41,20 @@ public class ReachabilitySphereMapCalculator implements Controller
 
    private final ControllerOutput controllerOutput;
 
-   public enum CalculatorState
-   {
-      VOXEL_REACH, RAY_REACH, DONE;
-   };
-
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private Voxel3DGrid voxel3DGrid;
 
    private Consumer<Voxel3DData> voxelUnreachableListener = null;
    private Consumer<Voxel3DData> voxelCompletedListener = null;
 
+   private final FramePoint3D[] desiredPosition;
+   private final FrameQuaternion[] orientation;
+   private final FrameVector3D[] translationFromVoxelOrigin;
    private final ReachabilityMapSolver[] solvers;
 
    private final YoFramePose3D gridFramePose = new YoFramePose3D("gridFramePose", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePose3D currentEvaluationPose = new YoFramePose3D("currentEvaluationPose", ReferenceFrame.getWorldFrame(), registry);
-   private final StateMachine<CalculatorState, State> stateMachine;
+   private final YoBoolean isDone = new YoBoolean("isDone", registry);
 
    private final List<YoGraphicGroupDefinition> solverYoGraphicGroupDefinitions = new ArrayList<>();
 
@@ -74,6 +69,11 @@ public class ReachabilitySphereMapCalculator implements Controller
       this.voxel3DGrid = voxel3DGrid;
 
       solvers = new ReachabilityMapSolver[numberOfThreads];
+
+      desiredPosition = new FramePoint3D[solvers.length];
+      orientation = new FrameQuaternion[solvers.length];
+      translationFromVoxelOrigin = new FrameVector3D[solvers.length];
+
       for (int i = 0; i < numberOfThreads; i++)
       {
          YoRegistry solverRegistry = new YoRegistry("solverRegistry" + i);
@@ -106,13 +106,15 @@ public class ReachabilitySphereMapCalculator implements Controller
             solverYoGraphicGroup.setChildren(SCS1GraphicConversionTools.toYoGraphicDefinitions(solverGraphicsRegistry));
             solverYoGraphicGroupDefinitions.add(solverYoGraphicGroup);
          }
+         desiredPosition[i] = new FramePoint3D();
+         orientation[i] = new FrameQuaternion();
+         translationFromVoxelOrigin[i] = new FrameVector3D();
       }
 
       gridFramePose.attachVariableChangedListener(v -> this.voxel3DGrid.setGridPose(gridFramePose));
       FramePose3D gridFramePose = new FramePose3D(ReferenceFrame.getWorldFrame(), robotArmJoints[0].getFrameBeforeJoint().getTransformToWorldFrame());
       gridFramePose.appendTranslation(getGridSizeInMeters() / 2.5, 0.0, 0.0);
       setGridFramePose(gridFramePose);
-      stateMachine = setupStateMachine();
    }
 
    public void setRobotCollisionModel(RobotDefinition robotDefinition)
@@ -128,16 +130,6 @@ public class ReachabilitySphereMapCalculator implements Controller
       if (this.voxel3DGrid != null)
          voxel3DGrid.getReferenceFrame().setPoseAndUpdate(this.voxel3DGrid.getReferenceFrame().getTransformToParent());
       this.voxel3DGrid = voxel3DGrid;
-   }
-
-   private StateMachine<CalculatorState, State> setupStateMachine()
-   {
-      StateMachineFactory<CalculatorState, State> factory = new StateMachineFactory<>(CalculatorState.class);
-      factory.setNamePrefix("reachabilityCalculatorStateMachine").setRegistry(registry);
-      factory.addStateAndDoneTransition(CalculatorState.VOXEL_REACH, new VoxelReachState(), CalculatorState.RAY_REACH);
-      factory.addStateAndDoneTransition(CalculatorState.RAY_REACH, new RayReachState(), CalculatorState.DONE);
-      factory.addState(CalculatorState.DONE, new DoneState());
-      return factory.build(CalculatorState.VOXEL_REACH);
    }
 
    public void setVoxelUnreachableListener(Consumer<Voxel3DData> voxelUnreachableListener)
@@ -239,13 +231,86 @@ public class ReachabilitySphereMapCalculator implements Controller
       gridFramePose.setMatchingFrame(pose);
    }
 
+   private final YoInteger currentVoxelIndex = new YoInteger("currentVoxelIndex", registry);
+
    @Override
    public void doControl()
    {
-      stateMachine.doActionAndTransition();
+      if (isDone.getValue())
+         return;
+
+      IntStream.range(0, solvers.length).parallel().forEach(solverIndex ->
+      {
+         int voxelIndex = currentVoxelIndex.getValue() + solverIndex;
+         if (voxelIndex >= voxel3DGrid.getNumberOfVoxels())
+            return;
+
+         Voxel3DData voxel = voxel3DGrid.getOrCreateVoxel(voxelIndex);
+
+         if (solverIndex == 0)
+         {
+            currentEvaluationPose.getPosition().setMatchingFrame(voxel.getPosition());
+            currentEvaluationPose.getOrientation().setToZero();
+         }
+
+         if (solvers[solverIndex].solveFor(voxel.getPosition()))
+         {
+            computeVoxel(voxel, solverIndex);
+
+            if (voxelCompletedListener != null)
+               voxelCompletedListener.accept(voxel);
+         }
+         else
+         {
+            if (voxelUnreachableListener != null)
+               voxelUnreachableListener.accept(voxel);
+
+            voxel3DGrid.destroy(voxel);
+            return;
+         }
+      });
+
+      currentVoxelIndex.add(solvers.length);
+
+      if (currentVoxelIndex.getValue() >= voxel3DGrid.getNumberOfVoxels())
+         isDone.set(true);
    }
 
-   private final YoInteger currentVoxelIndex = new YoInteger("currentVoxelIndex", registry);
+   private void computeVoxel(Voxel3DData voxel, int solverIndex)
+   {
+      SphereVoxelShape sphereVoxelShape = voxel3DGrid.getSphereVoxelShape();
+
+      for (int rayIndex = 0; rayIndex < sphereVoxelShape.getNumberOfRays(); rayIndex++)
+      {
+         for (int rotationAroundRayIndex = 0; rotationAroundRayIndex < sphereVoxelShape.getNumberOfRotationsAroundRay(); rotationAroundRayIndex++)
+         {
+            desiredPosition[solverIndex].setIncludingFrame(voxel.getPosition());
+            sphereVoxelShape.getPose(translationFromVoxelOrigin[solverIndex], orientation[solverIndex], rayIndex, rotationAroundRayIndex);
+            desiredPosition[solverIndex].add(translationFromVoxelOrigin[solverIndex]);
+
+            desiredPosition[solverIndex].changeFrame(ReferenceFrame.getWorldFrame());
+            orientation[solverIndex].changeFrame(ReferenceFrame.getWorldFrame());
+            if (solverIndex == 0)
+               currentEvaluationPose.set(desiredPosition[solverIndex], orientation[solverIndex]);
+
+            boolean success = solvers[solverIndex].solveFor(desiredPosition[solverIndex], orientation[solverIndex]);
+
+            if (success)
+            {
+               voxel.registerReachablePose(rayIndex, rotationAroundRayIndex);
+
+               if (solverIndex == 0)
+               {
+                  for (OneDoFJointBasics joint : solvers[solverIndex].getRobotArmJoints())
+                  {
+                     controllerOutput.getOneDoFJointOutput(joint).setConfiguration(joint);
+                  }
+               }
+               break;
+            }
+         }
+      }
+   }
 
    /**
     * Starts the exploration of the reachable space of the arm. This can take a looooooong time.
@@ -256,181 +321,6 @@ public class ReachabilitySphereMapCalculator implements Controller
          doControl();
    }
 
-   private class VoxelReachState implements State
-   {
-      @Override
-      public void onEntry()
-      {
-         currentVoxelIndex.set(0);
-      }
-
-      @Override
-      public void doAction(double timeInState)
-      {
-         IntStream.range(0, solvers.length).parallel().forEach(solverIndex ->
-         {
-            int voxelIndex = currentVoxelIndex.getValue() + solverIndex;
-            if (voxelIndex >= voxel3DGrid.getNumberOfVoxels())
-               return;
-
-            Voxel3DData voxel = voxel3DGrid.getOrCreateVoxel(voxelIndex);
-
-            if (solverIndex == 0)
-            {
-               currentEvaluationPose.getPosition().setMatchingFrame(voxel.getPosition());
-               currentEvaluationPose.getOrientation().setToZero();
-            }
-
-            if (solvers[solverIndex].solveFor(voxel.getPosition()))
-            {
-               if (solverIndex == 0)
-               {
-                  for (OneDoFJointBasics joint : solvers[solverIndex].getRobotArmJoints())
-                  {
-                     controllerOutput.getOneDoFJointOutput(joint).setConfiguration(joint);
-                  }
-               }
-            }
-            else
-            {
-               if (voxelUnreachableListener != null)
-                  voxelUnreachableListener.accept(voxel);
-
-               voxel3DGrid.destroy(voxel);
-            }
-         });
-
-         currentVoxelIndex.add(solvers.length);
-      }
-
-      @Override
-      public void onExit(double timeInState)
-      {
-      }
-
-      @Override
-      public boolean isDone(double timeInState)
-      {
-         return currentVoxelIndex.getValue() >= voxel3DGrid.getNumberOfVoxels();
-      }
-   }
-
-   private class RayReachState implements State
-   {
-      private final FramePoint3D[] desiredPosition;
-      private final FrameQuaternion[] orientation;
-      private final FrameVector3D[] translationFromVoxelOrigin;
-
-      public RayReachState()
-      {
-         desiredPosition = new FramePoint3D[solvers.length];
-         orientation = new FrameQuaternion[solvers.length];
-         translationFromVoxelOrigin = new FrameVector3D[solvers.length];
-
-         for (int i = 0; i < solvers.length; i++)
-         {
-            desiredPosition[i] = new FramePoint3D();
-            orientation[i] = new FrameQuaternion();
-            translationFromVoxelOrigin[i] = new FrameVector3D();
-         }
-      }
-
-      @Override
-      public void onEntry()
-      {
-         currentVoxelIndex.set(0);
-      }
-
-      @Override
-      public void doAction(double timeInState)
-      {
-         IntStream.range(0, solvers.length).parallel().forEach(solverIndex ->
-         {
-            int voxelIndex = currentVoxelIndex.getValue() + solverIndex;
-            if (voxelIndex >= voxel3DGrid.getNumberOfVoxels())
-               return;
-
-            Voxel3DData voxel = voxel3DGrid.getVoxel(voxelIndex);
-
-            if (voxel == null)
-               return;
-
-            computeVoxel(voxel, solverIndex);
-
-            if (voxelCompletedListener != null)
-               voxelCompletedListener.accept(voxel);
-         });
-
-         currentVoxelIndex.add(solvers.length);
-      }
-
-      private void computeVoxel(Voxel3DData voxel, int solverIndex)
-      {
-         SphereVoxelShape sphereVoxelShape = voxel3DGrid.getSphereVoxelShape();
-
-         for (int rayIndex = 0; rayIndex < sphereVoxelShape.getNumberOfRays(); rayIndex++)
-         {
-            for (int rotationAroundRayIndex = 0; rotationAroundRayIndex < sphereVoxelShape.getNumberOfRotationsAroundRay(); rotationAroundRayIndex++)
-            {
-               desiredPosition[solverIndex].setIncludingFrame(voxel.getPosition());
-               sphereVoxelShape.getPose(translationFromVoxelOrigin[solverIndex], orientation[solverIndex], rayIndex, rotationAroundRayIndex);
-               desiredPosition[solverIndex].add(translationFromVoxelOrigin[solverIndex]);
-
-               desiredPosition[solverIndex].changeFrame(ReferenceFrame.getWorldFrame());
-               orientation[solverIndex].changeFrame(ReferenceFrame.getWorldFrame());
-               if (solverIndex == 0)
-                  currentEvaluationPose.set(desiredPosition[solverIndex], orientation[solverIndex]);
-
-               boolean success = solvers[solverIndex].solveFor(desiredPosition[solverIndex], orientation[solverIndex]);
-
-               if (success)
-               {
-                  voxel.registerReachablePose(rayIndex, rotationAroundRayIndex);
-
-                  if (solverIndex == 0)
-                  {
-                     for (OneDoFJointBasics joint : solvers[solverIndex].getRobotArmJoints())
-                     {
-                        controllerOutput.getOneDoFJointOutput(joint).setConfiguration(joint);
-                     }
-                  }
-                  break;
-               }
-            }
-         }
-      }
-
-      @Override
-      public void onExit(double timeInState)
-      {
-      }
-
-      @Override
-      public boolean isDone(double timeInState)
-      {
-         return currentVoxelIndex.getValue() >= voxel3DGrid.getNumberOfVoxels();
-      }
-   }
-
-   private class DoneState implements State
-   {
-      @Override
-      public void onEntry()
-      {
-         LogTools.info("Done!!");
-      }
-
-      @Override
-      public void doAction(double timeInState)
-      {
-      }
-
-      @Override
-      public void onExit(double timeInState)
-      {
-      }
-   }
-
    public double getGridSizeInMeters()
    {
       return voxel3DGrid.getGridSizeMeters();
@@ -438,7 +328,7 @@ public class ReachabilitySphereMapCalculator implements Controller
 
    public boolean isDone()
    {
-      return stateMachine.isCurrentStateTerminal();
+      return isDone.getValue();
    }
 
    public Voxel3DGrid getVoxel3DGrid()
