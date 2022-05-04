@@ -21,6 +21,8 @@ public class SpinnakerHardwareManager
    private spinSystem system;
    private spinCameraList cameras;
 
+   private boolean isDestroyed = false;
+
    private SpinnakerHardwareManager()
    {
       system = new spinSystem();
@@ -53,10 +55,19 @@ public class SpinnakerHardwareManager
       }
    }
 
+   /**
+    * The Spinnaker hardware manager SHOULD NOT be destroyed prior to the destruction of ALL cameras
+    * Calling destroy after the instance is already destroyed will do nothing.
+    */
    public void destroy()
    {
-      spinCameraListClear(cameras);
-      spinCameraListDestroy(cameras);
-      spinSystemReleaseInstance(system);
+      if (!isDestroyed)
+      {
+         spinCameraListClear(cameras);
+         spinCameraListDestroy(cameras);
+         spinSystemReleaseInstance(system);
+
+         isDestroyed = true;
+      }
    }
 }
