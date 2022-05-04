@@ -48,7 +48,7 @@ public class GDXBlackflyUI
                if (nativesLoadedActivator.isNewlyActivated())
                {
                   spinnakerHardwareManager = SpinnakerHardwareManager.getInstance();
-                  blackfly = spinnakerHardwareManager.buildBlackfly("Serial number goes here"); //TODO serial number
+                  blackfly = spinnakerHardwareManager.buildBlackfly("17403057");
                   blackfly.initialize();
                }
 
