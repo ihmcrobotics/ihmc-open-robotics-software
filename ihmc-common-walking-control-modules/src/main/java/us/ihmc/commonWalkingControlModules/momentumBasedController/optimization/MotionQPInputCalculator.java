@@ -31,6 +31,7 @@ import us.ihmc.matrixlib.NativeNullspaceProjector;
 import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
 import us.ihmc.mecano.algorithms.CentroidalMomentumRateCalculator;
 import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
+import us.ihmc.mecano.algorithms.MultiBodyGravityGradientCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.KinematicLoopFunction;
@@ -64,6 +65,7 @@ public class MotionQPInputCalculator
 
    private final CentroidalMomentumCalculator centroidalMomentumCalculator;
    private final CentroidalMomentumRateCalculator centroidalMomentumRateCalculator;
+   private final MultiBodyGravityGradientCalculator gravityGradientCalculator;
 
    private final JointPrivilegedConfigurationHandler privilegedConfigurationHandler;
 
@@ -98,30 +100,46 @@ public class MotionQPInputCalculator
 
    public MotionQPInputCalculator(ReferenceFrame centerOfMassFrame,
                                   CentroidalMomentumRateCalculator centroidalMomentumRateCalculator,
+                                  MultiBodyGravityGradientCalculator gravityGradientCalculator,
                                   JointIndexHandler jointIndexHandler,
                                   JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters,
                                   YoRegistry parentRegistry)
    {
-      this(centerOfMassFrame, null, centroidalMomentumRateCalculator, jointIndexHandler, jointPrivilegedConfigurationParameters, parentRegistry);
+      this(centerOfMassFrame,
+           null,
+           centroidalMomentumRateCalculator,
+           gravityGradientCalculator,
+           jointIndexHandler,
+           jointPrivilegedConfigurationParameters,
+           parentRegistry);
    }
 
    public MotionQPInputCalculator(ReferenceFrame centerOfMassFrame,
                                   CentroidalMomentumCalculator centroidalMomentumCalculator,
+                                  MultiBodyGravityGradientCalculator gravityGradientCalculator,
                                   JointIndexHandler jointIndexHandler,
                                   JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters,
                                   YoRegistry parentRegistry)
    {
-      this(centerOfMassFrame, centroidalMomentumCalculator, null, jointIndexHandler, jointPrivilegedConfigurationParameters, parentRegistry);
+      this(centerOfMassFrame,
+           centroidalMomentumCalculator,
+           null,
+           gravityGradientCalculator,
+           jointIndexHandler,
+           jointPrivilegedConfigurationParameters,
+           parentRegistry);
    }
 
    private MotionQPInputCalculator(ReferenceFrame centerOfMassFrame,
                                    CentroidalMomentumCalculator centroidalMomentumCalculator,
                                    CentroidalMomentumRateCalculator centroidalMomentumRateCalculator,
+                                   MultiBodyGravityGradientCalculator gravityGradientCalculator,
                                    JointIndexHandler jointIndexHandler,
                                    JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters,
                                    YoRegistry parentRegistry)
    {
       this.centerOfMassFrame = centerOfMassFrame;
+      this.gravityGradientCalculator = gravityGradientCalculator;
       this.jointIndexHandler = jointIndexHandler;
       this.centroidalMomentumCalculator = centroidalMomentumCalculator;
       this.centroidalMomentumRateCalculator = centroidalMomentumRateCalculator;
@@ -157,6 +175,8 @@ public class MotionQPInputCalculator
          centroidalMomentumRateCalculator.reset();
       else
          centroidalMomentumCalculator.reset();
+      if (gravityGradientCalculator != null)
+         gravityGradientCalculator.reset();
       allTaskJacobian.reshape(0, numberOfDoFs);
    }
 
@@ -257,6 +277,35 @@ public class MotionQPInputCalculator
                                                nullspaceProjectionAlpha.getValue());
       projectedTaskJacobian.get(qpInputToPack.taskJacobian);
 
+      return true;
+   }
+
+   public boolean computeGravityCompensationMinimization(QPInputTypeA qpInputToPack, double weight, boolean projectIntoNullspace)
+   {
+      if (weight <= 0.0)
+         return false;
+
+      qpInputToPack.reshape(numberOfDoFs);
+      qpInputToPack.taskJacobian.set(gravityGradientCalculator.getGravityGradientMatrix());
+      qpInputToPack.taskObjective.set(gravityGradientCalculator.getGravityMatrix());
+      CommonOps_DDRM.changeSign(qpInputToPack.taskObjective);
+      qpInputToPack.setUseWeightScalar(true);
+      qpInputToPack.setWeight(weight);
+
+      if (projectIntoNullspace)
+      {
+         tempTaskVelocityJacobianNative.set(qpInputToPack.taskJacobian);
+         allTaskJacobianNative.set(allTaskJacobian);
+         velocityNativeNullspaceProjector.project(tempTaskVelocityJacobianNative,
+                                                  allTaskJacobianNative,
+                                                  projectedTaskJacobian,
+                                                  nullspaceProjectionAlpha.getValue());
+         projectedTaskJacobian.get(qpInputToPack.taskJacobian);
+      }
+      else
+      {
+         recordTaskJacobian(qpInputToPack.taskJacobian);
+      }
       return true;
    }
 

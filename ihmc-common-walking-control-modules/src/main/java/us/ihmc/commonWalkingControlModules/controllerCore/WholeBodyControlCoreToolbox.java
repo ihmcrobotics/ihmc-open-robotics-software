@@ -28,6 +28,7 @@ import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
 import us.ihmc.mecano.algorithms.CentroidalMomentumRateCalculator;
 import us.ihmc.mecano.algorithms.CompositeRigidBodyMassMatrixCalculator;
 import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
+import us.ihmc.mecano.algorithms.MultiBodyGravityGradientCalculator;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -65,6 +66,10 @@ public class WholeBodyControlCoreToolbox
    private CompositeRigidBodyMassMatrixCalculator massMatrixCalculator;
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
    private final RigidBodyAccelerationProvider rigidBodyAccelerationProvider;
+   /**
+    * Calculator used to formulate minimization of the joint torques due to gravity compensation.
+    */
+   private MultiBodyGravityGradientCalculator gravityGradientCalculator;
    /**
     * Calculator used to formulate the torque minimization objective. Allows to evaluate the joint
     * efforts due to: gravity, Coriolis, and centrifugal accelerations and external wrenches that are
@@ -330,6 +335,7 @@ public class WholeBodyControlCoreToolbox
          {
             motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame,
                                                                   centroidalMomentumRateCalculator,
+                                                                  getGravityGradientCalculator(),
                                                                   jointIndexHandler,
                                                                   jointPrivilegedConfigurationParameters,
                                                                   registry);
@@ -340,6 +346,7 @@ public class WholeBodyControlCoreToolbox
 
             motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame,
                                                                   centroidalMomentumCalculator,
+                                                                  getGravityGradientCalculator(),
                                                                   jointIndexHandler,
                                                                   jointPrivilegedConfigurationParameters,
                                                                   registry);
@@ -398,6 +405,16 @@ public class WholeBodyControlCoreToolbox
          gravityCoriolisExternalWrenchMatrixCalculator.setGravitionalAcceleration(-Math.abs(gravityZ));
       }
       return gravityCoriolisExternalWrenchMatrixCalculator;
+   }
+
+   public MultiBodyGravityGradientCalculator getGravityGradientCalculator()
+   {
+      if (gravityGradientCalculator == null)
+      {
+         gravityGradientCalculator = new MultiBodyGravityGradientCalculator(multiBodySystemInput);
+         gravityGradientCalculator.setGravitionalAcceleration(-Math.abs(gravityZ));
+      }
+      return gravityGradientCalculator;
    }
 
    public ContactWrenchMatrixCalculator getContactWrenchMatrixCalculator()
