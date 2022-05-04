@@ -49,7 +49,7 @@ public class BytedecoBlackfly
       spinNodeHandle setAcquisitionMode = new spinNodeHandle();
       assertNoError(spinEnumerationGetEntryByName(camAcquisitionMode, new BytePointer(acquisitionMode), setAcquisitionMode), "Unable to set acquisition mode");
       LongPointer ptrAcquisitionMode = new LongPointer(1);
-      assertNoError(spinEnumerationEntryGetIntValue(camAcquisitionMode, ptrAcquisitionMode), "Unable to set acquisition mode (int value retrieval)");
+      assertNoError(spinEnumerationEntryGetIntValue(setAcquisitionMode, ptrAcquisitionMode), "Unable to set acquisition mode (int value retrieval)");
       assertNoError(spinEnumerationSetIntValue(camAcquisitionMode, ptrAcquisitionMode.get()), "Unable to set acquisition mode (int value set)");
 
       assertNoError(spinCameraBeginAcquisition(camera), "Failed to begin acquiring images");
