@@ -10,7 +10,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.matrixlib.MatrixTools;
 
-class LPInteriorPointForcePolytopeSolver implements ForcePolytopeSolver
+class LPSupportingVertexForcePolytopeSolver implements ForcePolytopeSolver
 {
    private final LinearProgramSolver lpSolver = new LinearProgramSolver();
    private final SvdImplicitQrDecompose_DDRM svdSolver = new SvdImplicitQrDecompose_DDRM(false, true, true, false);
@@ -26,7 +26,7 @@ class LPInteriorPointForcePolytopeSolver implements ForcePolytopeSolver
    private final DMatrixRMaj lpCost = new DMatrixRMaj(6, 1);
    private final DMatrixRMaj lpSolution = new DMatrixRMaj(3, 1);
 
-   public LPInteriorPointForcePolytopeSolver(int dofs)
+   public LPSupportingVertexForcePolytopeSolver(int dofs)
    {
       this.dofs = dofs;
       jacobianTranspose.reshape(dofs, 3);
