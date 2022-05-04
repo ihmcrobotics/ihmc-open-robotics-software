@@ -153,11 +153,13 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final YoBoolean enableHeightFeedbackControl = new YoBoolean("enableHeightFeedbackControl", registry);
 
    private boolean firstTick = true;
-   
+
    private HumanoidRobotNaturalPosture naturalPosture;
 
-   public WalkingHighLevelHumanoidController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
-                                             HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
+   public WalkingHighLevelHumanoidController(CommandInputManager commandInputManager,
+                                             StatusMessageOutputManager statusOutputManager,
+                                             HighLevelControlManagerFactory managerFactory,
+                                             WalkingControllerParameters walkingControllerParameters,
                                              HighLevelHumanoidControllerToolbox controllerToolbox)
    {
       this.managerFactory = managerFactory;
@@ -241,7 +243,11 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       failureDetectionControlModule = controllerToolbox.getFailureDetectionControlModule();
 
       walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
-      commandConsumer = new WalkingCommandConsumer(commandInputManager, statusOutputManager, controllerToolbox, managerFactory, walkingControllerParameters,
+      commandConsumer = new WalkingCommandConsumer(commandInputManager,
+                                                   statusOutputManager,
+                                                   controllerToolbox,
+                                                   managerFactory,
+                                                   walkingControllerParameters,
                                                    registry);
 
       touchdownErrorCompensator = new TouchdownErrorCompensator(walkingMessageHandler, controllerToolbox.getReferenceFrames().getSoleFrames(), registry);
@@ -279,7 +285,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       ControllerCoreOptimizationSettings defaultControllerCoreOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       controllerCoreOptimizationSettings = new ParameterizedControllerCoreOptimizationSettings(defaultControllerCoreOptimizationSettings, registry);
-      
+
       this.naturalPosture = walkingControllerParameters.getNaturalPosture(fullRobotModel, registry, controllerToolbox.getYoGraphicsListRegistry());
       this.naturalPosture.initialize();
    }
@@ -289,10 +295,20 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       StateMachineFactory<WalkingStateEnum, WalkingState> factory = new StateMachineFactory<>(WalkingStateEnum.class);
       factory.setNamePrefix("walking").setRegistry(registry).buildYoClock(yoTime);
 
-      StandingState standingState = new StandingState(commandInputManager, walkingMessageHandler, touchdownErrorCompensator, controllerToolbox, managerFactory,
-                                                      failureDetectionControlModule, walkingControllerParameters, registry);
-      TransferToStandingState toStandingState = new TransferToStandingState(walkingMessageHandler, touchdownErrorCompensator, controllerToolbox, managerFactory,
-                                                                            failureDetectionControlModule, registry);
+      StandingState standingState = new StandingState(commandInputManager,
+                                                      walkingMessageHandler,
+                                                      touchdownErrorCompensator,
+                                                      controllerToolbox,
+                                                      managerFactory,
+                                                      failureDetectionControlModule,
+                                                      walkingControllerParameters,
+                                                      registry);
+      TransferToStandingState toStandingState = new TransferToStandingState(walkingMessageHandler,
+                                                                            touchdownErrorCompensator,
+                                                                            controllerToolbox,
+                                                                            managerFactory,
+                                                                            failureDetectionControlModule,
+                                                                            registry);
       factory.addState(WalkingStateEnum.TO_STANDING, toStandingState);
       factory.addState(WalkingStateEnum.STANDING, standingState);
 
@@ -303,10 +319,17 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       for (RobotSide transferToSide : RobotSide.values)
       {
          WalkingStateEnum stateEnum = WalkingStateEnum.getWalkingTransferState(transferToSide);
-         TransferToWalkingSingleSupportState transferState = new TransferToWalkingSingleSupportState(stateEnum, walkingMessageHandler, touchdownErrorCompensator,
-                                                                                                     controllerToolbox, managerFactory, walkingControllerParameters,
-                                                                                                     failureDetectionControlModule, minimumTransferTime,
-                                                                                                     unloadFraction, rhoMin, registry);
+         TransferToWalkingSingleSupportState transferState = new TransferToWalkingSingleSupportState(stateEnum,
+                                                                                                     walkingMessageHandler,
+                                                                                                     touchdownErrorCompensator,
+                                                                                                     controllerToolbox,
+                                                                                                     managerFactory,
+                                                                                                     walkingControllerParameters,
+                                                                                                     failureDetectionControlModule,
+                                                                                                     minimumTransferTime,
+                                                                                                     unloadFraction,
+                                                                                                     rhoMin,
+                                                                                                     registry);
          walkingTransferStates.put(transferToSide, transferState);
          factory.addState(stateEnum, transferState);
       }
@@ -316,9 +339,14 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       for (RobotSide supportSide : RobotSide.values)
       {
          WalkingStateEnum stateEnum = WalkingStateEnum.getWalkingSingleSupportState(supportSide);
-         WalkingSingleSupportState singleSupportState = new WalkingSingleSupportState(stateEnum, walkingMessageHandler, touchdownErrorCompensator,
-                                                                                      controllerToolbox, managerFactory, walkingControllerParameters,
-                                                                                      failureDetectionControlModule, registry);
+         WalkingSingleSupportState singleSupportState = new WalkingSingleSupportState(stateEnum,
+                                                                                      walkingMessageHandler,
+                                                                                      touchdownErrorCompensator,
+                                                                                      controllerToolbox,
+                                                                                      managerFactory,
+                                                                                      walkingControllerParameters,
+                                                                                      failureDetectionControlModule,
+                                                                                      registry);
          walkingSingleSupportStates.put(supportSide, singleSupportState);
          factory.addState(stateEnum, singleSupportState);
       }
@@ -328,9 +356,14 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       for (RobotSide transferToSide : RobotSide.values)
       {
          WalkingStateEnum stateEnum = WalkingStateEnum.getFlamingoTransferState(transferToSide);
-         TransferToFlamingoStanceState transferState = new TransferToFlamingoStanceState(stateEnum, walkingMessageHandler,
-                                                                                         controllerToolbox, managerFactory, failureDetectionControlModule, null,
-                                                                                         rhoMin, registry);
+         TransferToFlamingoStanceState transferState = new TransferToFlamingoStanceState(stateEnum,
+                                                                                         walkingMessageHandler,
+                                                                                         controllerToolbox,
+                                                                                         managerFactory,
+                                                                                         failureDetectionControlModule,
+                                                                                         null,
+                                                                                         rhoMin,
+                                                                                         registry);
          flamingoTransferStates.put(transferToSide, transferState);
          factory.addState(stateEnum, transferState);
       }
@@ -340,8 +373,12 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       for (RobotSide supportSide : RobotSide.values)
       {
          WalkingStateEnum stateEnum = WalkingStateEnum.getFlamingoSingleSupportState(supportSide);
-         FlamingoStanceState singleSupportState = new FlamingoStanceState(stateEnum, walkingMessageHandler, controllerToolbox, managerFactory,
-                                                                          failureDetectionControlModule, registry);
+         FlamingoStanceState singleSupportState = new FlamingoStanceState(stateEnum,
+                                                                          walkingMessageHandler,
+                                                                          controllerToolbox,
+                                                                          managerFactory,
+                                                                          failureDetectionControlModule,
+                                                                          registry);
          flamingoSingleSupportStates.put(supportSide, singleSupportState);
          factory.addState(stateEnum, singleSupportState);
       }
@@ -358,14 +395,16 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          WalkingStateEnum singleSupportStateEnum = singleSupportState.getStateEnum();
 
          // Start walking
-         factory.addTransition(Arrays.asList(WalkingStateEnum.STANDING, WalkingStateEnum.TO_STANDING), transferStateEnum,
+         factory.addTransition(Arrays.asList(WalkingStateEnum.STANDING, WalkingStateEnum.TO_STANDING),
+                               transferStateEnum,
                                new StartWalkingCondition(transferStateEnum.getTransferToSide(), walkingMessageHandler));
 
          // Stop walking when in transfer
          factory.addTransition(transferStateEnum, WalkingStateEnum.TO_STANDING, new StopWalkingFromTransferCondition(transferState, walkingMessageHandler));
 
          // Stop walking when in single support
-         factory.addTransition(singleSupportStateEnum, WalkingStateEnum.TO_STANDING,
+         factory.addTransition(singleSupportStateEnum,
+                               WalkingStateEnum.TO_STANDING,
                                new StopWalkingFromSingleSupportCondition(singleSupportState, walkingMessageHandler));
       }
 
@@ -392,7 +431,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
             TransferToWalkingSingleSupportState transferState = walkingTransferStates.get(robotSide);
             WalkingStateEnum transferStateEnum = transferState.getStateEnum();
 
-            factory.addTransition(singleSupportStateEnum, transferStateEnum,
+            factory.addTransition(singleSupportStateEnum,
+                                  transferStateEnum,
                                   new SingleSupportToTransferToCondition(singleSupportState, transferState, walkingMessageHandler));
          }
 
@@ -401,7 +441,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
             TransferToWalkingSingleSupportState transferState = walkingTransferStates.get(robotSide.getOppositeSide());
             WalkingStateEnum transferStateEnum = transferState.getStateEnum();
 
-            factory.addTransition(singleSupportStateEnum, transferStateEnum,
+            factory.addTransition(singleSupportStateEnum,
+                                  transferStateEnum,
                                   new SingleSupportToTransferToCondition(singleSupportState, transferState, walkingMessageHandler));
          }
       }
@@ -416,7 +457,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          WalkingStateEnum singleSupportStateEnum = singleSupportState.getStateEnum();
 
          // Start flamingo
-         factory.addTransition(Arrays.asList(WalkingStateEnum.STANDING, WalkingStateEnum.TO_STANDING), transferStateEnum,
+         factory.addTransition(Arrays.asList(WalkingStateEnum.STANDING, WalkingStateEnum.TO_STANDING),
+                               transferStateEnum,
                                new StartFlamingoCondition(transferState.getTransferToSide(), walkingMessageHandler));
 
          // Stop flamingo
@@ -530,10 +572,9 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
             bodyManager.initialize();
       }
 
-
       pelvisOrientationManager.initialize();
-      naturalPostureManager.initialize();
-//      balanceManager.initialize();  // already initialized, so don't run it again, or else the state machine gets reset.
+      //      naturalPostureManager.initialize();
+      //      balanceManager.initialize();  // already initialized, so don't run it again, or else the state machine gets reset.
       feetManager.initialize();
       comHeightManager.initialize();
       feetManager.resetHeightCorrectionParametersForSingularityAvoidance();
@@ -653,8 +694,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       if (firstTick)
       {
-      // use the built-in pose:
-         naturalPosture.setNaturalPostureOffset(naturalPosture.getNominalStandingPoseQoffset()); 
+         // use the built-in pose:
+         naturalPosture.setNaturalPostureOffset(naturalPosture.getNominalStandingPoseQoffset());
       }
       double[] q = new double[fullRobotModel.getOneDoFJoints().length];
       int i = 0; // GMN: HACK!
@@ -665,7 +706,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       }
       Quaternion Qbase = new Quaternion(fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToWorldFrame().getRotation());
       naturalPosture.compute(q, Qbase);
-      
+
       firstTick = false;
    }
 
@@ -698,7 +739,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
          commandInputManager.clearAllCommands();
 
-         boolean isInSwing = stateMachine.getCurrentStateKey() == WalkingStateEnum.WALKING_LEFT_SUPPORT || stateMachine.getCurrentStateKey() == WalkingStateEnum.WALKING_RIGHT_SUPPORT;
+         boolean isInSwing = stateMachine.getCurrentStateKey() == WalkingStateEnum.WALKING_LEFT_SUPPORT
+               || stateMachine.getCurrentStateKey() == WalkingStateEnum.WALKING_RIGHT_SUPPORT;
          if (enablePushRecoveryOnFailure.getBooleanValue() && !isInSwing)
          {
             commandInputManager.submitMessage(HumanoidMessageTools.createHighLevelStateMessage(HighLevelControllerName.PUSH_RECOVERY));
@@ -736,11 +778,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       pelvisOrientationManager.compute();
       naturalPostureManager.compute();
 
-      comHeightManager.compute(balanceManager.getDesiredICPVelocity(),
-                               desiredCoMVelocityAsFrameVector,
-                               isInDoubleSupport,
-                               omega0,
-                               feetManager);
+      comHeightManager.compute(balanceManager.getDesiredICPVelocity(), desiredCoMVelocityAsFrameVector, isInDoubleSupport, omega0, feetManager);
       FeedbackControlCommand<?> heightControlCommand = comHeightManager.getHeightControlCommand();
 
       // the comHeightManager can control the pelvis with a feedback controller and doesn't always need the z component of the momentum command. It would be better to remove the coupling between these two modules
@@ -849,7 +887,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    {
       planeContactStateCommandPool.clear();
 
-      controllerCoreCommand.addInverseDynamicsCommand(privilegedConfigurationCommand);
+//      controllerCoreCommand.addInverseDynamicsCommand(privilegedConfigurationCommand);
       if (!limitCommandSent.getBooleanValue())
       {
          controllerCoreCommand.addInverseDynamicsCommand(jointLimitEnforcementMethodCommand);
@@ -886,8 +924,9 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          }
       }
 
-      controllerCoreCommand.addFeedbackControlCommand(pelvisOrientationManager.getFeedbackControlCommand());
-      controllerCoreCommand.addInverseDynamicsCommand(pelvisOrientationManager.getInverseDynamicsCommand());
+//            controllerCoreCommand.addFeedbackControlCommand(pelvisOrientationManager.getFeedbackControlCommand());
+      //      controllerCoreCommand.addInverseDynamicsCommand(pelvisOrientationManager.getInverseDynamicsCommand());
+      controllerCoreCommand.addInverseDynamicsCommand(naturalPostureManager.getQPObjectiveCommand());
       controllerCoreCommand.addFeedbackControlCommand(comHeightManager.getFeedbackControlCommand());
 
       controllerCoreCommand.addInverseDynamicsCommand(controllerCoreOptimizationSettings.getCommand());
