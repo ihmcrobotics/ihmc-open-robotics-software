@@ -23,8 +23,7 @@ public class GDXRemoteGPUPlanarRegionExtractionUI
    private final GPUPlanarRegionExtractionParameters gpuRegionParameters = new GPUPlanarRegionExtractionParameters();
    private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
    private final ConcaveHullFactoryParameters concaveHullFactoryParameters = new ConcaveHullFactoryParameters();
-   private final GDXROS1VideoVisualizer debugExtractionPanel = new GDXROS1VideoVisualizer("GPU Planar Regions Debug Image",
-                                                                                    GPUPlanarRegionExtractionComms.DEBUG_EXTRACTION_IMAGE);
+   private final GDXROS1VideoVisualizer debugExtractionPanel;
    private final ImGuiPanel panel = new ImGuiPanel("GPU Planar Regions", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImFloat mergeDistanceThreshold = new ImFloat();
@@ -76,9 +75,10 @@ public class GDXRemoteGPUPlanarRegionExtractionUI
    {
       this.ros1Helper = ros1Helper;
       this.ros2Helper = ros2Helper;
-      panel.addChild(debugExtractionPanel.getPanel());
 
+      debugExtractionPanel = new GDXROS1VideoVisualizer("GPU Planar Regions Debug Image", GPUPlanarRegionExtractionComms.DEBUG_EXTRACTION_IMAGE);
       debugExtractionPanel.create();
+      panel.addChild(debugExtractionPanel.getPanel());
 
       ros2Helper.subscribeViaCallback(GPUPlanarRegionExtractionComms.PARAMETERS_OUTPUT, gpuRegionParametersROS2Notification::set);
       ros2Helper.subscribeViaCallback(GPUPlanarRegionExtractionComms.POLYGONIZER_PARAMETERS_OUTPUT, polygonizerParametersROS2Notification::set);
@@ -172,7 +172,8 @@ public class GDXRemoteGPUPlanarRegionExtractionUI
       anyChanged |= ImGui.checkbox(labels.get("Early gaussian blur"), earlyGaussianBlur);
       anyChanged |= ImGui.sliderInt(labels.get("Gaussian size"), gaussianSize.getData(), 1, 20);
       anyChanged |= ImGui.sliderFloat(labels.get("Gaussian sigma"), gaussianSigma.getData(), 0.23f, 10.0f);
-      anyChanged |= ImGui.sliderInt(labels.get("Patch size"), patchSize.getData(), 2, 20);
+//      anyChanged |= ImGui.sliderInt(labels.get("Patch size"), patchSize.getData(), 2, 20);
+      ImGui.text("Patch size: " + patchSize.get());
       anyChanged |= ImGui.sliderInt(labels.get("Dead pixel filter patch size"), deadPixelFilterPatchSize.getData(), 1, 20);
       anyChanged |= ImGui.checkbox(labels.get("Use filtered image"), useFilteredImage);
       anyChanged |= ImGui.sliderFloat(labels.get("Merge distance threshold"), mergeDistanceThreshold.getData(), 0.0f, 0.1f);
