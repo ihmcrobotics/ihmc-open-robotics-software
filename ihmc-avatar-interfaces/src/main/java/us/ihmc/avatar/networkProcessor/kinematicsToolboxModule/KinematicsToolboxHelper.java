@@ -132,6 +132,8 @@ public class KinematicsToolboxHelper
 
             joint.setQ(data.getDesiredPosition());
             joint.setQd(data.getDesiredVelocity());
+            if (data.hasDesiredTorque())
+               joint.setTau(data.getDesiredTorque());
          }
       }
 
