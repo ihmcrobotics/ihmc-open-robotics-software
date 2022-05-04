@@ -30,13 +30,15 @@ public class BytedecoBlackfly
 
    spinImage currentImage = null;
 
-   protected BytedecoBlackfly(spinCamera camera, String acqMode, String serial) {
+   protected BytedecoBlackfly(spinCamera camera, String acqMode, String serial)
+   {
       this.camera = camera;
       this.acquisitionMode = acqMode;
       this.serial = serial;
    }
 
-   public void initialize() {
+   public void initialize()
+   {
       nmTLDevice = new spinNodeMapHandle();
       camNodeMap = new spinNodeMapHandle();
       assertNoError(spinCameraGetTLDeviceNodeMap(camera, nmTLDevice), "Unable to get TL device nodemap");
@@ -57,16 +59,20 @@ public class BytedecoBlackfly
       //Image acquisition needs to run on a different thread so that the whole program doesn't need to wait for new images
       doImageAcquisition = new AtomicBoolean(true);
       currentUnprocessedImage = new AtomicReference<>(null);
-      imageAcquisitionThread = new Thread(new Runnable() {
+      imageAcquisitionThread = new Thread(new Runnable()
+      {
          @Override
-         public void run() {
-            while (doImageAcquisition.get()) {
+         public void run()
+         {
+            while (doImageAcquisition.get())
+            {
                spinImage image = new spinImage();
                spinCameraGetNextImage(camera, image);
 
                BytePointer isIncomplete = new BytePointer(1);
                spinImageIsIncomplete(image, isIncomplete);
-               if (isIncomplete.getBool()) {
+               if (isIncomplete.getBool())
+               {
                   LogTools.warn("Camera " + serial + " returned incomplete image");
                   spinImageRelease(image);
                   continue;
@@ -83,6 +89,7 @@ public class BytedecoBlackfly
 
    public MutableBytePointer getFrameData()
    {
+      return null;
    }
 
    public void updateDataBytePointers()
@@ -96,7 +103,7 @@ public class BytedecoBlackfly
 
       SizeTPointer val = new SizeTPointer();
       spinImageGetHeight(currentImage, val);
-      return (int)val.get();
+      return (int) val.get();
    }
 
    public int getWidth()
@@ -106,7 +113,7 @@ public class BytedecoBlackfly
 
       SizeTPointer val = new SizeTPointer();
       spinImageGetWidth(currentImage, val);
-      return (int)val.get();
+      return (int) val.get();
    }
 
    public boolean readFrameData()
@@ -133,14 +140,18 @@ public class BytedecoBlackfly
       {
          imageAcquisitionThread.wait();
       }
-      catch (InterruptedException ex) {} //this is probably fine
+      catch (InterruptedException ex)
+      {
+      } //this is probably fine
       spinImageRelease(currentUnprocessedImage.get());
 
       spinCameraRelease(camera);
    }
 
-   private static void assertNoError(spinError error, String errorMessage) {
-      if (error.value != spinError.SPINNAKER_ERR_SUCCESS.value) {
+   private static void assertNoError(spinError error, String errorMessage)
+   {
+      if (error.value != spinError.SPINNAKER_ERR_SUCCESS.value)
+      {
          LogTools.fatal(errorMessage);
          throw new RuntimeException(String.valueOf(error.value));
       }
