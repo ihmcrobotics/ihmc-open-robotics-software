@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
@@ -12,6 +13,7 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxCommandConverter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand.ActivationState;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
@@ -26,6 +28,7 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
@@ -69,6 +72,8 @@ public class ReachabilityMapSolver
    private final SelectionMatrix3D angularSelection = new SelectionMatrix3D(null, true, true, true);
    private final RobotConfigurationData defaultArmConfiguration;
    private final String cloneSuffix;
+
+   private Predicate<OneDoFJointReadOnly[]> solutionValidityChecker = null;
 
    public ReachabilityMapSolver(String cloneSuffix,
                                 OneDoFJointBasics[] robotArmJoints,
@@ -143,6 +148,34 @@ public class ReachabilityMapSolver
    public void setAngularSelection(boolean selectX, boolean selectY, boolean selectZ)
    {
       angularSelection.setAxisSelection(selectX, selectY, selectZ);
+   }
+
+   public void enableJointTorqueAnalysis(boolean considerJointTorqueLimits)
+   {
+      kinematicsToolboxController.getActiveOptimizationSettings().setComputeJointTorques(ActivationState.ENABLED);
+      kinematicsToolboxController.getActiveOptimizationSettings().setJointTorqueWeight(0.01);
+      if (considerJointTorqueLimits)
+      {
+         addSolutionValidityChecker(joints ->
+         {
+            for (OneDoFJointReadOnly joint : joints)
+            {
+               if (joint.getTau() > joint.getEffortLimitUpper())
+                  return false;
+               if (joint.getTau() < joint.getEffortLimitLower())
+                  return false;
+            }
+            return true;
+         });
+      }
+   }
+
+   public void addSolutionValidityChecker(Predicate<OneDoFJointReadOnly[]> checker)
+   {
+      if (solutionValidityChecker == null)
+         solutionValidityChecker = checker;
+      else
+         solutionValidityChecker = solutionValidityChecker.and(checker);
    }
 
    public boolean solveFor(FramePoint3DReadOnly position, FrameQuaternionReadOnly orientation)
@@ -239,10 +272,18 @@ public class ReachabilityMapSolver
             break;
       }
 
+      if (isSolutionGood && solutionValidityChecker != null)
+      {
+         isSolutionGood = solutionValidityChecker.test(kinematicsToolboxController.getDesiredOneDoFJoint());
+      }
+
       if (isSolutionGood)
       {
          for (int i = 0; i < robotArmJoints.length; i++)
+         {
             robotArmJoints[i].setQ(kinematicsToolboxController.getDesiredOneDoFJoint()[i].getQ());
+            robotArmJoints[i].setTau(kinematicsToolboxController.getDesiredOneDoFJoint()[i].getTau());
+         }
       }
 
       return isSolutionGood;

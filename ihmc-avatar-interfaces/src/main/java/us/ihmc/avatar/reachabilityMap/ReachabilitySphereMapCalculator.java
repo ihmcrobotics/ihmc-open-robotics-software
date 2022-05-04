@@ -221,6 +221,14 @@ public class ReachabilitySphereMapCalculator implements Controller
       }
    }
 
+   public void enableJointTorqueAnalysis(boolean considerJointTorqueLimits)
+   {
+      for (ReachabilityMapSolver solver : solvers)
+      {
+         solver.enableJointTorqueAnalysis(considerJointTorqueLimits);
+      }
+   }
+
    /**
     * Sets the center and orientation of the grid.
     * 
