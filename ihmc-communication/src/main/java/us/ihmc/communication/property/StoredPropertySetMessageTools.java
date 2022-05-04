@@ -14,8 +14,8 @@ public class StoredPropertySetMessageTools
 
       if (!setToPack.getAllAsStrings().equals(values))
       {
-         runIfChanged.run();
          setToPack.setAllFromStrings(values);
+         runIfChanged.run();
       }
    }
 
