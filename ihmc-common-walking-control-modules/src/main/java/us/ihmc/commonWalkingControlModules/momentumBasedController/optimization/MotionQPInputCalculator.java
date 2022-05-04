@@ -95,24 +95,31 @@ public class MotionQPInputCalculator
 
    private final NativeNullspaceProjector accelerationNativeNullspaceProjector;
    private final NativeNullspaceProjector velocityNativeNullspaceProjector;
-   
-   public MotionQPInputCalculator(ReferenceFrame centerOfMassFrame, CentroidalMomentumRateCalculator centroidalMomentumRateCalculator,
-                                  JointIndexHandler jointIndexHandler, JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters,
+
+   public MotionQPInputCalculator(ReferenceFrame centerOfMassFrame,
+                                  CentroidalMomentumRateCalculator centroidalMomentumRateCalculator,
+                                  JointIndexHandler jointIndexHandler,
+                                  JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters,
                                   YoRegistry parentRegistry)
    {
       this(centerOfMassFrame, null, centroidalMomentumRateCalculator, jointIndexHandler, jointPrivilegedConfigurationParameters, parentRegistry);
    }
 
-   public MotionQPInputCalculator(ReferenceFrame centerOfMassFrame, CentroidalMomentumCalculator centroidalMomentumCalculator,
-                                  JointIndexHandler jointIndexHandler, JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters,
+   public MotionQPInputCalculator(ReferenceFrame centerOfMassFrame,
+                                  CentroidalMomentumCalculator centroidalMomentumCalculator,
+                                  JointIndexHandler jointIndexHandler,
+                                  JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters,
                                   YoRegistry parentRegistry)
    {
       this(centerOfMassFrame, centroidalMomentumCalculator, null, jointIndexHandler, jointPrivilegedConfigurationParameters, parentRegistry);
    }
 
-   private MotionQPInputCalculator(ReferenceFrame centerOfMassFrame, CentroidalMomentumCalculator centroidalMomentumCalculator,
-                                   CentroidalMomentumRateCalculator centroidalMomentumRateCalculator, JointIndexHandler jointIndexHandler,
-                                   JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters, YoRegistry parentRegistry)
+   private MotionQPInputCalculator(ReferenceFrame centerOfMassFrame,
+                                   CentroidalMomentumCalculator centroidalMomentumCalculator,
+                                   CentroidalMomentumRateCalculator centroidalMomentumRateCalculator,
+                                   JointIndexHandler jointIndexHandler,
+                                   JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters,
+                                   YoRegistry parentRegistry)
    {
       this.centerOfMassFrame = centerOfMassFrame;
       this.jointIndexHandler = jointIndexHandler;
@@ -137,7 +144,7 @@ public class MotionQPInputCalculator
       allTaskJacobian = new DMatrixRMaj(numberOfDoFs, numberOfDoFs);
       allTaskJacobianNative = new NativeMatrix(numberOfDoFs, numberOfDoFs);
       secondaryTaskJointsWeight.set(1.0); // TODO Needs to be rethought, it doesn't seem to be that useful.
-      
+
       accelerationNativeNullspaceProjector = new NativeNullspaceProjector(numberOfDoFs);
       velocityNativeNullspaceProjector = new NativeNullspaceProjector(numberOfDoFs);
 
@@ -199,8 +206,11 @@ public class MotionQPInputCalculator
          {
             qpInputToPack.reshape(robotTaskSize);
             allTaskJacobianNative.set(allTaskJacobian);
-            accelerationNativeNullspaceProjector.project(tempTaskJacobianNative, allTaskJacobianNative, projectedTaskJacobian, nullspaceProjectionAlpha.getValue());
-//            NativeCommonOps.projectOnNullspace(tempTaskJacobian, allTaskJacobian, projectedTaskJacobian, nullspaceProjectionAlpha.getValue());
+            accelerationNativeNullspaceProjector.project(tempTaskJacobianNative,
+                                                         allTaskJacobianNative,
+                                                         projectedTaskJacobian,
+                                                         nullspaceProjectionAlpha.getValue());
+            //            NativeCommonOps.projectOnNullspace(tempTaskJacobian, allTaskJacobian, projectedTaskJacobian, nullspaceProjectionAlpha.getValue());
 
             projectedTaskJacobian.extract(qpInputToPack.taskJacobian, taskSize, 0);
             CommonOps_DDRM.insert(privilegedConfigurationHandler.getPrivilegedJointAccelerations(), qpInputToPack.taskObjective, taskSize, 0);
@@ -241,7 +251,10 @@ public class MotionQPInputCalculator
 
       tempTaskVelocityJacobianNative.set(qpInputToPack.taskJacobian);
       allTaskJacobianNative.set(allTaskJacobian);
-      velocityNativeNullspaceProjector.project(tempTaskVelocityJacobianNative, allTaskJacobianNative, projectedTaskJacobian, nullspaceProjectionAlpha.getValue());;
+      velocityNativeNullspaceProjector.project(tempTaskVelocityJacobianNative,
+                                               allTaskJacobianNative,
+                                               projectedTaskJacobian,
+                                               nullspaceProjectionAlpha.getValue());
       projectedTaskJacobian.get(qpInputToPack.taskJacobian);
 
       return true;
@@ -613,7 +626,6 @@ public class MotionQPInputCalculator
       DMatrixRMaj centroidalMomentumMatrix = getCentroidalMomentumMatrix();
       CommonOps_DDRM.mult(tempSelectionMatrix, centroidalMomentumMatrix, qpInputToPack.taskJacobian);
 
-
       // Compute the gradient: g = S * g
       CommonOps_DDRM.multTransB(tempSelectionMatrix, commandToConvert.getMomentumRateGradient(), qpInputToPack.directCostGradient);
 
@@ -673,8 +685,8 @@ public class MotionQPInputCalculator
    }
 
    /**
-    * Converts a {@link LinearMomentumConvexConstraint2DCommand} into a {@link QPInputTypeA} intended to be
-    * consumed by {@link InverseKinematicsQPSolver}.
+    * Converts a {@link LinearMomentumConvexConstraint2DCommand} into a {@link QPInputTypeA} intended
+    * to be consumed by {@link InverseKinematicsQPSolver}.
     * <p>
     * The resulting output is an {@link ConstraintType#LEQ_INEQUALITY} constraining the x and y
     * components of the linear momentum to remain on the right side of a set of 2D lines defined by
@@ -732,8 +744,8 @@ public class MotionQPInputCalculator
    }
 
    /**
-    * Sets up the {@link QPInputTypeA#taskJacobian} and {@link QPInputTypeA#taskObjective} to formulate a
-    * constraint with respect to 2D line going through {@code firstPointOnLine} and
+    * Sets up the {@link QPInputTypeA#taskJacobian} and {@link QPInputTypeA#taskObjective} to formulate
+    * a constraint with respect to 2D line going through {@code firstPointOnLine} and
     * {@code secondPointOnLine}.
     * <p>
     * This method can be used for three applications:
@@ -758,8 +770,11 @@ public class MotionQPInputCalculator
     *                                         {@code qpInputToPack.taskJacobian} and
     *                                         {@code qpInputToPack.taskObjective}. Modified.
     */
-   private void setupLineConstraint(int constraintIndex, Tuple2DReadOnly firstPointOnLine, Tuple2DReadOnly secondPointOnLine,
-                                    DMatrixRMaj centroidalMomemtumMatrixLinearXY, QPInputTypeA qpInputToPack)
+   private void setupLineConstraint(int constraintIndex,
+                                    Tuple2DReadOnly firstPointOnLine,
+                                    Tuple2DReadOnly secondPointOnLine,
+                                    DMatrixRMaj centroidalMomemtumMatrixLinearXY,
+                                    QPInputTypeA qpInputToPack)
    {
       double directionX = secondPointOnLine.getX() - firstPointOnLine.getX();
       double directionY = secondPointOnLine.getY() - firstPointOnLine.getY();

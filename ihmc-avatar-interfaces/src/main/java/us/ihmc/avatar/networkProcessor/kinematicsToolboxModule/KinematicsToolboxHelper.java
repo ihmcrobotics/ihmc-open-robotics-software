@@ -53,7 +53,8 @@ public class KinematicsToolboxHelper
       return feedbackControlCommand;
    }
 
-   static void consumeCenterOfMassCommand(KinematicsToolboxCenterOfMassCommand command, PID3DGains gains,
+   static void consumeCenterOfMassCommand(KinematicsToolboxCenterOfMassCommand command,
+                                          PID3DGains gains,
                                           CenterOfMassFeedbackControlCommand feedbackControlCommandToPack)
    {
       feedbackControlCommandToPack.setGains(gains);
@@ -78,7 +79,9 @@ public class KinematicsToolboxHelper
       return feedbackControlCommand;
    }
 
-   public static void consumeRigidBodyCommand(KinematicsToolboxRigidBodyCommand command, RigidBodyBasics base, PIDSE3Gains gains,
+   public static void consumeRigidBodyCommand(KinematicsToolboxRigidBodyCommand command,
+                                              RigidBodyBasics base,
+                                              PIDSE3Gains gains,
                                               SpatialFeedbackControlCommand feedbackControlCommandToPack)
    {
       feedbackControlCommandToPack.set(base, command.getEndEffector());
@@ -89,7 +92,8 @@ public class KinematicsToolboxHelper
       feedbackControlCommandToPack.setControlFrameFixedInEndEffector(command.getControlFramePose());
    }
 
-   public static void consumeJointCommand(KinematicsToolboxOneDoFJointCommand command, PIDGainsReadOnly gains,
+   public static void consumeJointCommand(KinematicsToolboxOneDoFJointCommand command,
+                                          PIDGainsReadOnly gains,
                                           OneDoFJointFeedbackControlCommand feedbackControlCommandToPack)
    {
       feedbackControlCommandToPack.setJoint(command.getJoint());
@@ -107,7 +111,8 @@ public class KinematicsToolboxHelper
     * @param rootJoint            the floating joint to update. Modified.
     * @param oneDoFJoints         the one degree-of-freedom joints to update. Modified.
     */
-   public static void setRobotStateFromControllerCoreOutput(ControllerCoreOutputReadOnly controllerCoreOutput, FloatingJointBasics rootJoint,
+   public static void setRobotStateFromControllerCoreOutput(ControllerCoreOutputReadOnly controllerCoreOutput,
+                                                            FloatingJointBasics rootJoint,
                                                             OneDoFJointBasics[] oneDoFJoints)
    {
       RootJointDesiredConfigurationDataReadOnly outputForRootJoint = controllerCoreOutput.getRootJointDesiredConfigurationData();
@@ -148,7 +153,8 @@ public class KinematicsToolboxHelper
     * @param rootJoint              the floating joint to update. Modified.
     * @param oneDoFJoints           the one degree-of-freedom joints to update. Modified.
     */
-   public static void setRobotStateFromRobotConfigurationData(RobotConfigurationData robotConfigurationData, FloatingJointBasics rootJoint,
+   public static void setRobotStateFromRobotConfigurationData(RobotConfigurationData robotConfigurationData,
+                                                              FloatingJointBasics rootJoint,
                                                               OneDoFJointBasics[] oneDoFJoints)
    {
       TFloatArrayList newJointAngles = robotConfigurationData.getJointAngles();
@@ -172,7 +178,9 @@ public class KinematicsToolboxHelper
       }
    }
 
-   public static void setRobotStateFromRawData(Pose3DReadOnly pelvisPose, List<Double> jointAngles, FloatingJointBasics desiredRootJoint,
+   public static void setRobotStateFromRawData(Pose3DReadOnly pelvisPose,
+                                               List<Double> jointAngles,
+                                               FloatingJointBasics desiredRootJoint,
                                                OneDoFJointBasics[] oneDoFJoints)
    {
       for (int i = 0; i < jointAngles.size(); i++)
