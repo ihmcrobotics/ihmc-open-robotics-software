@@ -91,7 +91,7 @@ public class BytedecoBlackfly
          return 0;
 
       SizeTPointer val = new SizeTPointer();
-      spinImageGetHeight(currentImage, val);
+      assertNoError(spinImageGetHeight(currentImage, val), "Height could not be determined");
       return (int) val.get();
    }
 
@@ -101,7 +101,7 @@ public class BytedecoBlackfly
          return 0;
 
       SizeTPointer val = new SizeTPointer();
-      spinImageGetWidth(currentImage, val);
+      assertNoError(spinImageGetWidth(currentImage, val), "Width could not be determined");
       return (int) val.get();
    }
 
