@@ -168,9 +168,22 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
 
             if (parametersNotification.poll())
             {
+               int previousPatchSize = gpuPlanarRegionExtraction.getParameters().getPatchSize();
                StoredPropertySetMessageTools.copyToStoredPropertySet(parametersNotification.read(),
                                                                      gpuPlanarRegionExtraction.getParameters(),
                                                                      () -> LogTools.info("Accepted new parameters."));
+               int newPatchSize = gpuPlanarRegionExtraction.getParameters().getPatchSize();
+               if (previousPatchSize != newPatchSize)
+               {
+                  if (depthWidth % newPatchSize == 0 && depthHeight % newPatchSize == 0)
+                  {
+                     gpuPlanarRegionExtraction.setPatchSizeChanged(true);
+                  }
+                  else
+                  {
+                     gpuPlanarRegionExtraction.getParameters().setPatchSize(previousPatchSize);
+                  }
+               }
             }
             if (polygonizerParametersNotification.poll())
             {
