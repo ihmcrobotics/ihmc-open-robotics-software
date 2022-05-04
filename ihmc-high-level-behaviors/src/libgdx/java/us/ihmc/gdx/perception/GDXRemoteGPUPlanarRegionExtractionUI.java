@@ -30,8 +30,7 @@ public class GDXRemoteGPUPlanarRegionExtractionUI
    private final ImFloat mergeDistanceThreshold = new ImFloat();
    private final ImFloat mergeAngularThreshold = new ImFloat();
    private final ImFloat filterDisparityThreshold = new ImFloat();
-   private final ImInt desiredPatchSize = new ImInt();
-   private final ImInt patchSize = new ImInt(desiredPatchSize.get());
+   private final ImInt patchSize = new ImInt();
    private final ImInt deadPixelFilterPatchSize = new ImInt();
    private final ImFloat focalLengthXPixels = new ImFloat();
    private final ImFloat focalLengthYPixels = new ImFloat();
@@ -96,9 +95,15 @@ public class GDXRemoteGPUPlanarRegionExtractionUI
    {
       debugExtractionPanel.renderImGuiWidgets();
 
+      if (ImGui.button("Update parameters from remote"))
+      {
+         gpuRegionParametersHaveBeenReceived = false;
+         polygonizerParametersHaveBeenReceived = false;
+         concaveHullFactoryParametersHaveBeenReceived = false;
+      }
+
       ImGui.separator();
 
-//      if (!gpuRegionParametersHaveBeenReceived && gpuRegionParametersROS2Input.getMessageNotification().poll())
       if (!gpuRegionParametersHaveBeenReceived && gpuRegionParametersROS2Notification.poll())
       {
          StoredPropertySetMessageTools.copyToStoredPropertySet(gpuRegionParametersROS2Notification.read(),
@@ -167,7 +172,7 @@ public class GDXRemoteGPUPlanarRegionExtractionUI
       anyChanged |= ImGui.checkbox(labels.get("Early gaussian blur"), earlyGaussianBlur);
       anyChanged |= ImGui.sliderInt(labels.get("Gaussian size"), gaussianSize.getData(), 1, 20);
       anyChanged |= ImGui.sliderFloat(labels.get("Gaussian sigma"), gaussianSigma.getData(), 0.23f, 10.0f);
-      anyChanged |= ImGui.sliderInt(labels.get("Patch size"), desiredPatchSize.getData(), 2, 20);
+      anyChanged |= ImGui.sliderInt(labels.get("Patch size"), patchSize.getData(), 2, 20);
       anyChanged |= ImGui.sliderInt(labels.get("Dead pixel filter patch size"), deadPixelFilterPatchSize.getData(), 1, 20);
       anyChanged |= ImGui.checkbox(labels.get("Use filtered image"), useFilteredImage);
       anyChanged |= ImGui.sliderFloat(labels.get("Merge distance threshold"), mergeDistanceThreshold.getData(), 0.0f, 0.1f);
