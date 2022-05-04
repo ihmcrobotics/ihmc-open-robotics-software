@@ -23,6 +23,7 @@ import us.ihmc.commonWalkingControlModules.inverseKinematics.InverseKinematicsQP
 import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConfigurationHandler;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
@@ -314,6 +315,12 @@ public class MotionQPInputCalculator
 
    public boolean convertQPObjectiveCommand(QPObjectiveCommand commandToConvert, QPInputTypeA qpInputToPack)
    {
+      LogTools.info("-------------------------WBCC------------------------------------");
+      LogTools.info("-------------------------WBCC------------------------------------");
+      LogTools.info(EuclidCoreIOTools.getArrayString(", ", jointIndexHandler.getIndexedJoints(), j -> j.getName()));
+      LogTools.info("-------------------------WBCC------------------------------------");
+      LogTools.info("-------------------------WBCC------------------------------------");
+      LogTools.info("-------------------------WBCC------------------------------------");
       DMatrixRMaj jacobian = commandToConvert.getJacobian();
       DMatrixRMaj objective = commandToConvert.getObjective();
       DMatrixRMaj selectionMatrix = commandToConvert.getSelectionMatrix();
