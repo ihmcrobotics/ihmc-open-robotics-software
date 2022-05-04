@@ -114,10 +114,13 @@ public class BytedecoBlackfly
       spinImageCreateEmpty(image);
       spinImageConvert(currentUnprocessedImage.get(), spinPixelFormatEnums.PixelFormat_RGBa8, image);
 
-      if (currentImage != null)
-         spinImageRelease(currentImage);
+      spinImage oldImage = currentImage;
 
+      previousImage = currentUnprocessedImage.get();
       currentImage = image;
+
+      if (oldImage != null)
+         spinImageDestroy(oldImage);
 
       return true;
    }
