@@ -228,31 +228,4 @@ class SVDVertexIterationForcePolytopeSolver implements ForcePolytopeSolver
       }
       return digits;
    }
-
-   public static void main(String[] args)
-   {
-      DMatrixRMaj J = new DMatrixRMaj(3, 4);
-
-      J.set(0, 0, 1.0);
-      J.set(1, 1, 1.0);
-      J.set(2, 2, 1.0);
-
-      J.set(0, 3, 1.0);
-      J.set(1, 3, 1.0);
-      J.set(2, 3, 1.0);
-
-      DMatrixRMaj JT = new DMatrixRMaj(4, 3);
-      DMatrixRMaj JTInv = new DMatrixRMaj(3, 4);
-      CommonOps_DDRM.transpose(J, JT);
-
-      System.out.println("JT:");
-      System.out.println(JT);
-
-      SolvePseudoInverseSvd_DDRM psuedoInverseSolver = new SolvePseudoInverseSvd_DDRM();
-      psuedoInverseSolver.setA(JT);
-      psuedoInverseSolver.invert(JTInv);
-
-      System.out.println("JTInv");
-      System.out.println(JTInv);
-   }
 }

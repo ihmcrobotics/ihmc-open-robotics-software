@@ -17,7 +17,7 @@ import us.ihmc.robotics.screwTheory.PointJacobian;
 
 public class ForcePolytopeCalculator
 {
-   private static final SolveMethod solveMethod = SolveMethod.SVD_PROJECTION;
+   private static final SolveMethod defaultSolveMethod = SolveMethod.SVD_PROJECTION;
    private static final boolean debug = true;
    private static final double gravity = -9.81;
 
@@ -29,6 +29,7 @@ public class ForcePolytopeCalculator
       SVD_PROJECTION
    }
 
+   private final SolveMethod solveMethod;
    private final RigidBodyBasics rootBody;
    private final RigidBodyBasics base;
    private final RigidBodyBasics endEffector;
@@ -50,13 +51,19 @@ public class ForcePolytopeCalculator
    private final FramePoint3D tempPoint = new FramePoint3D();
    private final ReferenceFrame contactPointFrame;
 
-   private final LPInteriorPointForcePolytopeSolver lpSolver;
-   private final QPInteriorPointForcePolytopeSolver qpSolver;
+   private final LPSupportingVertexForcePolytopeSolver lpSolver;
+   private final QPSupportingVertexForcePolytopeSolver qpSolver;
    private final SVDVertexIterationForcePolytopeSolver svdIterativeSolver;
    private final SVDProjectionForcePolytopeSolver svdProjectionSolver;
 
    public ForcePolytopeCalculator(RigidBodyBasics base, RigidBodyBasics endEffector)
    {
+      this(base, endEffector, defaultSolveMethod);
+   }
+
+   public ForcePolytopeCalculator(RigidBodyBasics base, RigidBodyBasics endEffector, SolveMethod solveMethod)
+   {
+      this.solveMethod = solveMethod;
       this.rootBody = MultiBodySystemTools.getRootBody(base);
       this.base = base;
       this.endEffector = endEffector;
@@ -81,8 +88,8 @@ public class ForcePolytopeCalculator
       jacobianTranspose.reshape(joints.length, 3);
       calculator.setGravitionalAcceleration(gravity);
 
-      lpSolver = new LPInteriorPointForcePolytopeSolver(joints.length);
-      qpSolver = new QPInteriorPointForcePolytopeSolver(joints.length);
+      lpSolver = new LPSupportingVertexForcePolytopeSolver(joints.length);
+      qpSolver = new QPSupportingVertexForcePolytopeSolver(joints.length);
       svdIterativeSolver = new SVDVertexIterationForcePolytopeSolver(joints.length);
       svdProjectionSolver = new SVDProjectionForcePolytopeSolver(joints.length);
    }
@@ -163,12 +170,12 @@ public class ForcePolytopeCalculator
       return contactPointInParentFrameAfterJoint;
    }
 
-   public LPInteriorPointForcePolytopeSolver getLpSolver()
+   public LPSupportingVertexForcePolytopeSolver getLpSolver()
    {
       return lpSolver;
    }
 
-   public QPInteriorPointForcePolytopeSolver getQpSolver()
+   public QPSupportingVertexForcePolytopeSolver getQpSolver()
    {
       return qpSolver;
    }

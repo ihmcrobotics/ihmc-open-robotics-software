@@ -11,7 +11,7 @@ import us.ihmc.matrixlib.MatrixTools;
 import java.util.ArrayList;
 import java.util.List;
 
-class QPInteriorPointForcePolytopeSolver implements ForcePolytopeSolver
+class QPSupportingVertexForcePolytopeSolver implements ForcePolytopeSolver
 {
    private final int dofs;
 
@@ -27,7 +27,7 @@ class QPInteriorPointForcePolytopeSolver implements ForcePolytopeSolver
 
    private final List<Point3D> vertices = new ArrayList<>();
 
-   public QPInteriorPointForcePolytopeSolver(int dofs)
+   public QPSupportingVertexForcePolytopeSolver(int dofs)
    {
       this.dofs = dofs;
 

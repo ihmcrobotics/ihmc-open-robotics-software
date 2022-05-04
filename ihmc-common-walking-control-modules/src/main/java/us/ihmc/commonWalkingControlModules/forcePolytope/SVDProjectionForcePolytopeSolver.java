@@ -7,7 +7,7 @@ import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
-public class SVDProjectionForcePolytopeSolver implements ForcePolytopeSolver
+class SVDProjectionForcePolytopeSolver implements ForcePolytopeSolver
 {
    private final int dofs;
    private final DMatrixRMaj jacobianTranspose = new DMatrixRMaj(0);
