@@ -6,7 +6,6 @@ import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacpp.SizeTPointer;
 import org.bytedeco.spinnaker.Spinnaker_C.*;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.MutableBytePointer;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -27,7 +26,6 @@ public class BytedecoBlackfly
 
    AtomicReference<spinImage> currentUnprocessedImage;
    spinImage previousImage = null;
-
    spinImage currentImage = null;
 
    protected BytedecoBlackfly(spinCamera camera, String acqMode, String serial)
@@ -87,15 +85,6 @@ public class BytedecoBlackfly
       imageAcquisitionThread.start();
    }
 
-   public MutableBytePointer getFrameData()
-   {
-      return null;
-   }
-
-   public void updateDataBytePointers()
-   {
-   }
-
    public int getHeight()
    {
       if (currentImage == null)
@@ -123,7 +112,7 @@ public class BytedecoBlackfly
 
       spinImage image = new spinImage();
       spinImageCreateEmpty(image);
-      spinImageConvert(currentUnprocessedImage.get(), spinPixelFormatEnums.PixelFormat_Mono8, image);
+      spinImageConvert(currentUnprocessedImage.get(), spinPixelFormatEnums.PixelFormat_RGBa8, image);
 
       if (currentImage != null)
          spinImageRelease(currentImage);
@@ -131,6 +120,11 @@ public class BytedecoBlackfly
       currentImage = image;
 
       return true;
+   }
+
+   public void getImageData(Pointer pointer)
+   {
+      spinImageGetData(currentImage, pointer);
    }
 
    public void destroy()
