@@ -4,7 +4,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 
 public class InverseKinematicsOptimizationSettingsCommand implements InverseKinematicsCommand<InverseKinematicsOptimizationSettingsCommand>
 {
-   public enum JointVelocityLimitMode
+   public enum ActivationState
    {
       ENABLED, DISABLED
    };
@@ -12,7 +12,7 @@ public class InverseKinematicsOptimizationSettingsCommand implements InverseKine
    private int commandId;
    private double jointVelocityWeight = Double.NaN;
    private double jointAccelerationWeight = Double.NaN;
-   public JointVelocityLimitMode jointVelocityLimitMode = null;
+   private ActivationState jointVelocityLimitMode = null;
 
    /**
     * Sets the weight specifying how much high joint velocity values should be penalized in the
@@ -50,7 +50,7 @@ public class InverseKinematicsOptimizationSettingsCommand implements InverseKine
     * 
     * @param jointVelocityLimitMode the new value for considering joint velocity limits.
     */
-   public void setJointVelocityLimitMode(JointVelocityLimitMode jointVelocityLimitMode)
+   public void setJointVelocityLimitMode(ActivationState jointVelocityLimitMode)
    {
       this.jointVelocityLimitMode = jointVelocityLimitMode;
    }
@@ -123,9 +123,9 @@ public class InverseKinematicsOptimizationSettingsCommand implements InverseKine
     * 
     * @return the new value for {@code jointVelocityLimitMode}.
     * @see #hashJointVelocityLimitMode()
-    * @see #setJointVelocityLimitMode(JointVelocityLimitMode)
+    * @see #setJointVelocityLimitMode(ActivationState)
     */
-   public JointVelocityLimitMode getJointVelocityLimitMode()
+   public ActivationState getJointVelocityLimitMode()
    {
       return jointVelocityLimitMode;
    }
