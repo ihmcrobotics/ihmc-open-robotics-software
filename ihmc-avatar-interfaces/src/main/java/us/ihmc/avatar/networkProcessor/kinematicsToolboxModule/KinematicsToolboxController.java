@@ -110,6 +110,8 @@ import us.ihmc.yoVariables.variable.YoInteger;
  */
 public class KinematicsToolboxController extends ToolboxController
 {
+   private static final double GRAVITY = 9.81;
+
    private static final double GLOBAL_PROPORTIONAL_GAIN = 1200.0;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -647,7 +649,7 @@ public class KinematicsToolboxController extends ToolboxController
          controlledJoints = oneDoFJoints;
       }
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(updateDT,
-                                                                            0.0,
+                                                                            GRAVITY,
                                                                             rootJoint,
                                                                             controlledJoints,
                                                                             centerOfMassFrame,
@@ -1554,6 +1556,11 @@ public class KinematicsToolboxController extends ToolboxController
    public void minimizeAngularMomentum(boolean enable)
    {
       minimizeAngularMomentum.set(enable);
+   }
+
+   public InverseKinematicsOptimizationSettingsCommand getActiveOptimizationSettings()
+   {
+      return activeOptimizationSettings;
    }
 
    public double getUpdateDT()
