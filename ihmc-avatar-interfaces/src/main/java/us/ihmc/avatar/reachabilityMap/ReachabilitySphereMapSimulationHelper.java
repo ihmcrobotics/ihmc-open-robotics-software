@@ -51,6 +51,11 @@ public class ReachabilitySphereMapSimulationHelper
       calculator.setAngularSelection(selectX, selectY, selectZ);
    }
 
+   public void enableJointTorqueAnalysis(boolean considerJointTorqueLimits)
+   {
+      calculator.enableJointTorqueAnalysis(considerJointTorqueLimits);
+   }
+
    public void setGridPose(RigidBodyTransformReadOnly pose)
    {
       calculator.getGridFramePose().set(pose);
