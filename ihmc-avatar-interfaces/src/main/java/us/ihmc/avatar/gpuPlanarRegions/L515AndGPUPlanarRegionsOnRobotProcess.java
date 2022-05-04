@@ -55,9 +55,6 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
    private ChannelBuffer ros1DebugExtractionImageChannelBuffer;
    private final ROS2Helper ros2Helper;
    private final ROS2SyncedRobotModel syncedRobot;
-//   private final ROS2Input<StoredPropertySetMessage> parametersSubscription;
-//   private final ROS2Input<StoredPropertySetMessage> polygonizerParametersSubscription;
-//   private final ROS2Input<StoredPropertySetMessage> concaveHullFactorySubscription;
    private final TypedNotification<StoredPropertySetMessage> parametersNotification = new TypedNotification<>();
    private final TypedNotification<StoredPropertySetMessage> polygonizerParametersNotification = new TypedNotification<>();
    private final TypedNotification<StoredPropertySetMessage> concaveHullFactoryNotification = new TypedNotification<>();
@@ -85,14 +82,11 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
       ros2Helper = new ROS2ControllerHelper(ros2Node, robotModel);
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
 
-//      parametersSubscription = ros2Helper.subscribe(GPUPlanarRegionExtractionComms.PARAMETERS_INPUT);
-//      polygonizerParametersSubscription = ros2Helper.subscribe(GPUPlanarRegionExtractionComms.POLYGONIZER_PARAMETERS_INPUT);
-//      concaveHullFactorySubscription = ros2Helper.subscribe(GPUPlanarRegionExtractionComms.CONVEX_HULL_FACTORY_PARAMETERS_INPUT);
       ros2Helper.subscribeViaCallback(GPUPlanarRegionExtractionComms.PARAMETERS_INPUT, parametersNotification::set);
       ros2Helper.subscribeViaCallback(GPUPlanarRegionExtractionComms.POLYGONIZER_PARAMETERS_INPUT, polygonizerParametersNotification::set);
       ros2Helper.subscribeViaCallback(GPUPlanarRegionExtractionComms.CONVEX_HULL_FACTORY_PARAMETERS_INPUT, concaveHullFactoryNotification::set);
 
-      thread = new PausablePeriodicThread("L515Node", UnitConversions.hertzToSeconds(31.0), false, this::update);
+      thread = new PausablePeriodicThread("L515Node", UnitConversions.hertzToSeconds(31.0), 1, false, this::update);
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "L515Shutdown"));
       thread.start();
    }
@@ -171,19 +165,23 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
                int previousPatchSize = gpuPlanarRegionExtraction.getParameters().getPatchSize();
                StoredPropertySetMessageTools.copyToStoredPropertySet(parametersNotification.read(),
                                                                      gpuPlanarRegionExtraction.getParameters(),
-                                                                     () -> LogTools.info("Accepted new parameters."));
-               int newPatchSize = gpuPlanarRegionExtraction.getParameters().getPatchSize();
-               if (previousPatchSize != newPatchSize)
+                                                                     () ->
                {
-                  if (depthWidth % newPatchSize == 0 && depthHeight % newPatchSize == 0)
+                  int newPatchSize = gpuPlanarRegionExtraction.getParameters().getPatchSize();
+                  LogTools.info("Accepted new parameters.");
+                  if (previousPatchSize != newPatchSize)
                   {
-                     gpuPlanarRegionExtraction.setPatchSizeChanged(true);
+                     if (depthWidth % newPatchSize == 0 && depthHeight % newPatchSize == 0)
+                     {
+                        LogTools.info("New patch size accepted: {}", newPatchSize);
+                        gpuPlanarRegionExtraction.setPatchSizeChanged(true);
+                     }
+                     else
+                     {
+                        gpuPlanarRegionExtraction.getParameters().setPatchSize(previousPatchSize);
+                     }
                   }
-                  else
-                  {
-                     gpuPlanarRegionExtraction.getParameters().setPatchSize(previousPatchSize);
-                  }
-               }
+               });
             }
             if (polygonizerParametersNotification.poll())
             {

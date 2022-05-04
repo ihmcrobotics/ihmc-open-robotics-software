@@ -147,7 +147,6 @@ public class GDXROS1VideoVisualizer extends GDXOpenCVVideoVisualizer implements 
       super.renderImGuiWidgets();
       ImGui.text(topic);
       getFrequencyPlot().renderImGuiWidgets();
-      ImGui.sameLine();
    }
 
    private void decodeUsingOpenCV(Image image)
