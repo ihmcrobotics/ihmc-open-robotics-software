@@ -43,6 +43,7 @@ public class BytedecoBlackfly
       assertNoError(spinCameraInit(camera), "Unable to initialize camera");
       assertNoError(spinCameraGetNodeMap(camera, camNodeMap), "Unable to retrieve GenICam nodemap");
 
+      //Acquisition mode
       spinNodeHandle camAcquisitionMode = new spinNodeHandle();
       assertNoError(spinNodeMapGetNode(camNodeMap, new BytePointer("AcquisitionMode"), camAcquisitionMode), "Unable to set acquisition mode");
 
@@ -51,6 +52,16 @@ public class BytedecoBlackfly
       LongPointer ptrAcquisitionMode = new LongPointer(1);
       assertNoError(spinEnumerationEntryGetIntValue(setAcquisitionMode, ptrAcquisitionMode), "Unable to set acquisition mode (int value retrieval)");
       assertNoError(spinEnumerationSetIntValue(camAcquisitionMode, ptrAcquisitionMode.get()), "Unable to set acquisition mode (int value set)");
+
+      //Pixel format
+      spinNodeHandle camPixelFormat = new spinNodeHandle();
+      assertNoError(spinNodeMapGetNode(camNodeMap, new BytePointer("PixelFormat"), camPixelFormat), "Unable to set pixel format");
+
+      spinNodeHandle setPixelFormat = new spinNodeHandle();
+      assertNoError(spinEnumerationGetEntryByName(camPixelFormat, new BytePointer("RGB8"), setPixelFormat), "Unable to set pixel format");
+      LongPointer ptrPixelFormat = new LongPointer(1);
+      assertNoError(spinEnumerationEntryGetIntValue(setPixelFormat, ptrPixelFormat), "Unable to set pixel format (int value retrieval)");
+      assertNoError(spinEnumerationSetIntValue(camPixelFormat, ptrPixelFormat.get()), "Unable to set pixel format (int value set)");
 
       assertNoError(spinCameraBeginAcquisition(camera), "Failed to begin acquiring images");
 
