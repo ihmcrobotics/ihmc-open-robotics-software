@@ -1,14 +1,11 @@
 package us.ihmc.gdx.perception;
 
 import imgui.ImGui;
-import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.perception.BytedecoTools;
-import us.ihmc.perception.MutableBytePointer;
 import us.ihmc.perception.spinnaker.BytedecoBlackfly;
 import us.ihmc.perception.spinnaker.SpinnakerHardwareManager;
 import us.ihmc.tools.thread.Activator;
@@ -57,12 +54,8 @@ public class GDXBlackflyUI
 
                if (blackfly.readFrameData())
                {
-                  blackfly.updateDataBytePointers();
-
                   if (imagePanel == null)
                   {
-                     MutableBytePointer frameData = blackfly.getFrameData();
-
                      imagePanel = new GDXCVImagePanel("Blackfly Image", blackfly.getWidth(), blackfly.getHeight());
                      baseUI.getImGuiPanelManager().addPanel(imagePanel.getVideoPanel());
 
@@ -70,6 +63,8 @@ public class GDXBlackflyUI
                   }
 
                   frameReadFrequency.ping();
+                  imagePanel.getBytedecoImage().rewind();
+                  blackfly.getImageData(imagePanel.getBytedecoImage().getBytedecoByteBufferPointer());
                }
             }
 
@@ -114,8 +109,8 @@ public class GDXBlackflyUI
          @Override
          public void dispose()
          {
-            baseUI.dispose();
             blackfly.destroy();
+            baseUI.dispose();
          }
       });
    }
