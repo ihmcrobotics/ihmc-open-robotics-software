@@ -12,7 +12,9 @@ public class InverseKinematicsOptimizationSettingsCommand implements InverseKine
    private int commandId;
    private double jointVelocityWeight = Double.NaN;
    private double jointAccelerationWeight = Double.NaN;
+   private double jointTorqueWeight = Double.NaN;
    private ActivationState jointVelocityLimitMode = null;
+   private ActivationState computeJointTorques = null;
 
    /**
     * Sets the weight specifying how much high joint velocity values should be penalized in the
@@ -45,6 +47,11 @@ public class InverseKinematicsOptimizationSettingsCommand implements InverseKine
       this.jointAccelerationWeight = jointAccelerationWeight;
    }
 
+   public void setJointTorqueWeight(double jointTorqueWeight)
+   {
+      this.jointTorqueWeight = jointTorqueWeight;
+   }
+
    /**
     * Sets whether the joint velocity limits should be considered or not.
     * 
@@ -53,6 +60,11 @@ public class InverseKinematicsOptimizationSettingsCommand implements InverseKine
    public void setJointVelocityLimitMode(ActivationState jointVelocityLimitMode)
    {
       this.jointVelocityLimitMode = jointVelocityLimitMode;
+   }
+
+   public void setComputeJointTorques(ActivationState computeJointTorques)
+   {
+      this.computeJointTorques = computeJointTorques;
    }
 
    /**
@@ -75,6 +87,11 @@ public class InverseKinematicsOptimizationSettingsCommand implements InverseKine
       return !Double.isNaN(jointAccelerationWeight);
    }
 
+   public boolean hasJointTorqueWeight()
+   {
+      return !Double.isNaN(jointTorqueWeight);
+   }
+
    /**
     * Whether this command holds onto a new value for {@code jointVelocityLimitMode} or not.
     * 
@@ -83,6 +100,11 @@ public class InverseKinematicsOptimizationSettingsCommand implements InverseKine
    public boolean hashJointVelocityLimitMode()
    {
       return jointVelocityLimitMode != null;
+   }
+
+   public boolean hasComputeJointTorques()
+   {
+      return computeJointTorques != null;
    }
 
    /**
@@ -115,6 +137,11 @@ public class InverseKinematicsOptimizationSettingsCommand implements InverseKine
       return jointAccelerationWeight;
    }
 
+   public double getJointTorqueWeight()
+   {
+      return jointTorqueWeight;
+   }
+
    /**
     * Gets the value for {@code jointVelocityLimitMode}.
     * <p>
@@ -130,13 +157,20 @@ public class InverseKinematicsOptimizationSettingsCommand implements InverseKine
       return jointVelocityLimitMode;
    }
 
+   public ActivationState getComputeJointTorques()
+   {
+      return computeJointTorques;
+   }
+
    @Override
    public void set(InverseKinematicsOptimizationSettingsCommand other)
    {
       commandId = other.commandId;
       jointVelocityWeight = other.jointVelocityWeight;
       jointAccelerationWeight = other.jointAccelerationWeight;
+      jointTorqueWeight = other.jointTorqueWeight;
       jointVelocityLimitMode = other.jointVelocityLimitMode;
+      computeJointTorques = other.computeJointTorques;
    }
 
    @Override
@@ -174,7 +208,11 @@ public class InverseKinematicsOptimizationSettingsCommand implements InverseKine
             return false;
          if (Double.compare(jointAccelerationWeight, other.jointAccelerationWeight) != 0)
             return false;
+         if (Double.compare(jointTorqueWeight, other.jointTorqueWeight) != 0)
+            return false;
          if (jointVelocityLimitMode != other.jointVelocityLimitMode)
+            return false;
+         if (computeJointTorques != other.computeJointTorques)
             return false;
 
          return true;

@@ -9,6 +9,7 @@ public class InverseKinematicsSolution
 {
    private final JointBasics[] jointsToOptimizeFor;
    private DMatrixRMaj jointVelocities;
+   private DMatrixRMaj jointTorques;
    private MomentumReadOnly centroidalMomentumSolution;
 
    public InverseKinematicsSolution(JointBasics[] jointsToOptimizeFor)
@@ -29,6 +30,16 @@ public class InverseKinematicsSolution
    public DMatrixRMaj getJointVelocities()
    {
       return jointVelocities;
+   }
+
+   public void setJointTorques(DMatrixRMaj jointTorques)
+   {
+      this.jointTorques = jointTorques;
+   }
+
+   public DMatrixRMaj getJointTorques()
+   {
+      return jointTorques;
    }
 
    public void setCentroidalMomentumSolution(MomentumReadOnly centroidalMomentumSolution)
