@@ -309,6 +309,37 @@ public class MotionQPInputCalculator
       return true;
    }
 
+   public boolean computeGravityCompensationMinimization(QPInputTypeA qpInputToPack,
+                                                         JointTorqueMinimizationWeightCalculator weightCalculator,
+                                                         boolean projectIntoNullspace)
+   {
+      if (weightCalculator.isWeightZero())
+         return false;
+
+      qpInputToPack.reshape(numberOfDoFs);
+      qpInputToPack.taskJacobian.set(gravityGradientCalculator.getGravityGradientMatrix());
+      qpInputToPack.taskObjective.set(gravityGradientCalculator.getGravityMatrix());
+      CommonOps_DDRM.changeSign(qpInputToPack.taskObjective);
+      qpInputToPack.taskWeightMatrix.zero();
+      weightCalculator.computeWeightMatrix(gravityGradientCalculator.getGravityMatrix(), qpInputToPack.taskWeightMatrix);
+
+      if (projectIntoNullspace)
+      {
+         tempTaskVelocityJacobianNative.set(qpInputToPack.taskJacobian);
+         allTaskJacobianNative.set(allTaskJacobian);
+         velocityNativeNullspaceProjector.project(tempTaskVelocityJacobianNative,
+                                                  allTaskJacobianNative,
+                                                  projectedTaskJacobian,
+                                                  nullspaceProjectionAlpha.getValue());
+         projectedTaskJacobian.get(qpInputToPack.taskJacobian);
+      }
+      else
+      {
+         recordTaskJacobian(qpInputToPack.taskJacobian);
+      }
+      return true;
+   }
+
    /**
     * Configures the appropriate variable substitution to perform in the QP for satisfying the physical
     * constraint for a kinematic loop.
