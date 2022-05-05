@@ -304,6 +304,7 @@ public class ReachabilitySphereMapCalculator implements Controller
                   for (OneDoFJointBasics joint : solvers[solverIndex].getRobotArmJoints())
                   {
                      controllerOutput.getOneDoFJointOutput(joint).setConfiguration(joint);
+                     controllerOutput.getOneDoFJointOutput(joint).setEffort(joint);
                   }
                }
                break;
