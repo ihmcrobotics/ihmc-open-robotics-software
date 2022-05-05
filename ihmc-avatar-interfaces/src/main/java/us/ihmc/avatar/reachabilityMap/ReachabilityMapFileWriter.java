@@ -19,6 +19,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DData;
 import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DKey;
+import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.VoxelPose3DData;
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -87,8 +88,10 @@ public class ReachabilityMapFileWriter
 
             for (int rotationIndex = 0; rotationIndex < numberOfRotations; rotationIndex++)
             {
-               if (voxel.isPoseReachable(rayIndex, rotationIndex))
-                  registerReachablePose(voxel.getKey(), rayIndex, rotationIndex);
+               VoxelPose3DData poseData = voxel.getPoseData(rayIndex, rotationIndex);
+
+               if (poseData != null)
+                  registerReachablePose(voxel.getKey(), rayIndex, rotationIndex, poseData);
             }
          }
       }
@@ -206,7 +209,7 @@ public class ReachabilityMapFileWriter
       return dateAsString + fileName;
    }
 
-   public void registerReachablePose(Voxel3DKey key, int rayIndex, int rotationAroundRayIndex)
+   public void registerReachablePose(Voxel3DKey key, int rayIndex, int rotationAroundRayIndex, VoxelPose3DData poseData)
    {
       if (currentDataRow > MAX_NUMBER_OF_ROWS)
       {
@@ -220,6 +223,8 @@ public class ReachabilityMapFileWriter
       row.createCell(cellIndex++).setCellValue((double) key.getZ());
       row.createCell(cellIndex++).setCellValue((double) rayIndex);
       row.createCell(cellIndex++).setCellValue((double) rotationAroundRayIndex);
+      row.createCell(cellIndex++).setCellValue(Arrays.toString(poseData.getJointPositions()));
+      row.createCell(cellIndex++).setCellValue(Arrays.toString(poseData.getJointTorques()));
    }
 
    private void addDataSheet()
@@ -233,6 +238,8 @@ public class ReachabilityMapFileWriter
       headerRow.createCell(currentCellIndex++).setCellValue("zIndex");
       headerRow.createCell(currentCellIndex++).setCellValue("rayIndex");
       headerRow.createCell(currentCellIndex++).setCellValue("rotationAroundRayIndex");
+      headerRow.createCell(currentCellIndex++).setCellValue("positions");
+      headerRow.createCell(currentCellIndex++).setCellValue("torques");
    }
 
    public void exportAndClose()
