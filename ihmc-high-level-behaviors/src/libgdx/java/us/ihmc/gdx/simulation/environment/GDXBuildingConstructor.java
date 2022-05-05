@@ -28,6 +28,7 @@ import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.gdx.ui.gizmo.StepCheckIsPointInsideAlgorithm;
+import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
 
@@ -161,6 +162,25 @@ public class GDXBuildingConstructor extends ImGuiPanel
                updateObjectSelected(selectedObject, intersectedObject);
                pose3DGizmo.getTransformToParent().set(selectedObject.getObjectTransform());
             }
+
+
+
+//            if(viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Right))
+//            {
+//               float value = 0.0f;
+//               if (ImGui.beginChild("item context menu"))
+//               {
+//                  if(ImGui.beginPopupContextWindow())
+//                  {
+//                     if (ImGui.selectable("Copy")) value = 0.0f;
+//                     if (ImGui.selectable("Paste")) value = 3.1415f;
+//                     ImGui.endPopup();
+//                  }
+//                  ImGui.endChild();
+//               }
+//               LogTools.info("Click Registered: {}", value);
+//
+//            }
          }
       }
    }
