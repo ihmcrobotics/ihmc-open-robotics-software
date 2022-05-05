@@ -144,8 +144,8 @@ public class InverseKinematicsOptimizationControlModule
       {
          if (!hasNotConvergedInPast.getBooleanValue())
          {
-            e.printStackTrace();
-            LogTools.warn("Only showing the stack trace of the first " + e.getClass().getSimpleName() + ". This may be happening more than once.");
+            LogTools.warn("First failure for the optimization " + e.getClass().getSimpleName() + ". Only reporting the first failure, see failure counter: "
+                  + hasNotConvergedCounts.getFullNameString());
          }
 
          hasNotConvergedInPast.set(true);
