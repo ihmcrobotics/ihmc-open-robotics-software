@@ -103,7 +103,7 @@ public class HeuristicICPControllerTest
          @Override
          public void createFeedForwardAlphaCalculator(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
          {
-            feedForwardAlphaCalculator = new ErrorBasedFeedForwardAlphaCalculator(registry);
+            feedForwardAlphaCalculator = new ErrorBasedFeedForwardAlphaCalculator("", registry);
          }
 
          @Override
