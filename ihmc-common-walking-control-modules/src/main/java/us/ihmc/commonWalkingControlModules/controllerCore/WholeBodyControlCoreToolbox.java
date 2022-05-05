@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackContr
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ContactWrenchMatrixCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointTorqueMinimizationWeightCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
@@ -66,6 +67,7 @@ public class WholeBodyControlCoreToolbox
    private CompositeRigidBodyMassMatrixCalculator massMatrixCalculator;
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
    private final RigidBodyAccelerationProvider rigidBodyAccelerationProvider;
+   private JointTorqueMinimizationWeightCalculator jointTorqueMinimizationWeightCalculator;
    /**
     * Calculator used to formulate minimization of the joint torques due to gravity compensation.
     */
@@ -256,10 +258,28 @@ public class WholeBodyControlCoreToolbox
     */
    public void setupForInverseKinematicsSolver()
    {
+      setupForInverseKinematicsSolver(null);
+   }
+
+   /**
+    * Notices the {@link WholeBodyControllerCore} at construction time that the inverse kinematics
+    * module has to be created.
+    * <p>
+    * WARNING: This method has be to called BEFORE creating the {@link WholeBodyControllerCore}.
+    * </p>
+    */
+   public void setupForInverseKinematicsSolver(JointTorqueMinimizationWeightCalculator calculator)
+   {
       enableInverseKinematicsModule = true;
       // TODO add tools specific to the inverse kinematics module here.
       if (centroidalMomentumRateCalculator == null)
          centroidalMomentumCalculator = new CentroidalMomentumCalculator(multiBodySystemInput, centerOfMassFrame);
+      if (calculator != null)
+      {
+         jointTorqueMinimizationWeightCalculator = calculator;
+         if (calculator.getRegistry() != null)
+            registry.addChild(calculator.getRegistry());
+      }
    }
 
    /**
@@ -395,6 +415,11 @@ public class WholeBodyControlCoreToolbox
    public InverseDynamicsCalculator getInverseDynamicsCalculator()
    {
       return inverseDynamicsCalculator;
+   }
+
+   public JointTorqueMinimizationWeightCalculator getJointTorqueMinimizationWeightCalculator()
+   {
+      return jointTorqueMinimizationWeightCalculator;
    }
 
    public GravityCoriolisExternalWrenchMatrixCalculator getGravityCoriolisExternalWrenchMatrixCalculator()

@@ -41,6 +41,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.data.FBPoint3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.FBQuaternion3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.Type;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointTorqueSoftLimitWeightCalculator;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.ListWrappingIndexTools;
@@ -148,6 +149,8 @@ public class KinematicsToolboxController extends ToolboxController
    private final YoPIDSE3Gains spatialGains = new DefaultYoPIDSE3Gains("GenericSpatialGains", GainCoupling.XYZ, false, registry);
    /** The same set of gains is used for controlling any joint of the desired robot body. */
    private final YoPIDGains jointGains = new YoPIDGains("GenericJointGains", registry);
+
+   private JointTorqueSoftLimitWeightCalculator jointTorqueMinimizationWeightCalculator;
    /**
     * Default settings for the solver. The joint velocity/acceleration weights can be modified at
     * runtime using {@link KinematicsToolboxConfigurationMessage}.
@@ -657,7 +660,9 @@ public class KinematicsToolboxController extends ToolboxController
                                                                             null,
                                                                             registry);
       toolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());
-      toolbox.setupForInverseKinematicsSolver();
+      jointTorqueMinimizationWeightCalculator = new JointTorqueSoftLimitWeightCalculator(toolbox.getJointIndexHandler());
+      jointTorqueMinimizationWeightCalculator.setParameters(0.0, 0.001, 0.10);
+      toolbox.setupForInverseKinematicsSolver(jointTorqueMinimizationWeightCalculator);
       FeedbackControllerTemplate controllerCoreTemplate = createFeedbackControllerTemplate(controllableRigidBodies, 1);
       JointDesiredOutputList lowLevelControllerOutput = new JointDesiredOutputList(oneDoFJoints);
       return new WholeBodyControllerCore(toolbox, controllerCoreTemplate, lowLevelControllerOutput, registry);
@@ -1561,6 +1566,11 @@ public class KinematicsToolboxController extends ToolboxController
    public InverseKinematicsOptimizationSettingsCommand getActiveOptimizationSettings()
    {
       return activeOptimizationSettings;
+   }
+
+   public JointTorqueSoftLimitWeightCalculator getJointTorqueMinimizationWeightCalculator()
+   {
+      return jointTorqueMinimizationWeightCalculator;
    }
 
    public double getUpdateDT()
