@@ -51,6 +51,8 @@ public class ReachabilitySphereMapCalculator implements Controller
    private final FrameQuaternion[] orientation;
    private final FrameVector3D[] translationFromVoxelOrigin;
    private final ReachabilityMapSolver[] solvers;
+   private final boolean[] solverResults;
+   private final Voxel3DData[] solverVoxels;
 
    private final YoFramePose3D gridFramePose = new YoFramePose3D("gridFramePose", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePose3D currentEvaluationPose = new YoFramePose3D("currentEvaluationPose", ReferenceFrame.getWorldFrame(), registry);
@@ -58,17 +60,18 @@ public class ReachabilitySphereMapCalculator implements Controller
 
    private final List<YoGraphicGroupDefinition> solverYoGraphicGroupDefinitions = new ArrayList<>();
 
-   public ReachabilitySphereMapCalculator(OneDoFJointBasics[] robotArmJoints, ControllerOutput controllerOutput, Voxel3DGrid voxel3DGrid)
+   public ReachabilitySphereMapCalculator(OneDoFJointBasics[] robotArmJoints, ControllerOutput controllerOutput)
    {
-      this(robotArmJoints, controllerOutput, voxel3DGrid, 20);
+      this(robotArmJoints, controllerOutput, 20);
    }
 
-   public ReachabilitySphereMapCalculator(OneDoFJointBasics[] robotArmJoints, ControllerOutput controllerOutput, Voxel3DGrid voxel3DGrid, int numberOfThreads)
+   public ReachabilitySphereMapCalculator(OneDoFJointBasics[] robotArmJoints, ControllerOutput controllerOutput, int numberOfThreads)
    {
       this.controllerOutput = controllerOutput;
-      this.voxel3DGrid = voxel3DGrid;
 
       solvers = new ReachabilityMapSolver[numberOfThreads];
+      solverResults = new boolean[numberOfThreads];
+      solverVoxels = new Voxel3DData[numberOfThreads];
 
       desiredPosition = new FramePoint3D[solvers.length];
       orientation = new FrameQuaternion[solvers.length];
@@ -112,9 +115,12 @@ public class ReachabilitySphereMapCalculator implements Controller
          translationFromVoxelOrigin[i] = new FrameVector3D();
       }
 
-      gridFramePose.attachVariableChangedListener(v -> this.voxel3DGrid.setGridPose(gridFramePose));
+      gridFramePose.attachVariableChangedListener(v ->
+      {
+         if (voxel3DGrid != null)
+            voxel3DGrid.setGridPose(gridFramePose);
+      });
       FramePose3D gridFramePose = new FramePose3D(ReferenceFrame.getWorldFrame(), firstJoint.getFrameBeforeJoint().getTransformToRoot());
-      gridFramePose.appendTranslation(getGridSizeInMeters() / 2.5, 0.0, 0.0);
       setGridFramePose(gridFramePose);
    }
 
@@ -128,9 +134,8 @@ public class ReachabilitySphereMapCalculator implements Controller
 
    public void setVoxel3DGrid(Voxel3DGrid voxel3DGrid)
    {
-      if (this.voxel3DGrid != null)
-         voxel3DGrid.getReferenceFrame().setPoseAndUpdate(this.voxel3DGrid.getReferenceFrame().getTransformToParent());
       this.voxel3DGrid = voxel3DGrid;
+      voxel3DGrid.setGridPose(gridFramePose);
    }
 
    public void setVoxelUnreachableListener(Consumer<Voxel3DData> voxelUnreachableListener)
@@ -248,9 +253,13 @@ public class ReachabilitySphereMapCalculator implements Controller
       {
          int voxelIndex = currentVoxelIndex.getValue() + solverIndex;
          if (voxelIndex >= voxel3DGrid.getNumberOfVoxels())
+         {
+            solverVoxels[solverIndex] = null;
             return;
+         }
 
          Voxel3DData voxel = voxel3DGrid.getOrCreateVoxel(voxelIndex);
+         solverVoxels[solverIndex] = voxel;
 
          if (solverIndex == 0)
          {
@@ -258,22 +267,32 @@ public class ReachabilitySphereMapCalculator implements Controller
             currentEvaluationPose.getOrientation().setToZero();
          }
 
-         if (solvers[solverIndex].solveFor(voxel.getPosition()))
-         {
-            computeVoxel(voxel, solverIndex);
+         boolean success = solvers[solverIndex].solveFor(voxel.getPosition());
+         solverResults[solverIndex] = success;
 
+         if (success)
+            computeVoxel(voxel, solverIndex);
+      });
+
+      for (int solverIndex = 0; solverIndex < solverResults.length; solverIndex++)
+      {
+         boolean solverResult = solverResults[solverIndex];
+
+         if (solverResult)
+         {
             if (voxelCompletedListener != null)
-               voxelCompletedListener.accept(voxel);
+               voxelCompletedListener.accept(solverVoxels[solverIndex]);
          }
          else
          {
             if (voxelUnreachableListener != null)
-               voxelUnreachableListener.accept(voxel);
+               voxelUnreachableListener.accept(solverVoxels[solverIndex]);
 
-            voxel3DGrid.destroy(voxel);
-            return;
+            voxel3DGrid.destroy(solverVoxels[solverIndex]);
          }
-      });
+
+         solverVoxels[solverIndex] = null;
+      }
 
       currentVoxelIndex.add(solvers.length);
 
