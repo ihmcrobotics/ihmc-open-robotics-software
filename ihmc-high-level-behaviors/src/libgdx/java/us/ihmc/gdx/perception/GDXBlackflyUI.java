@@ -1,6 +1,7 @@
 package us.ihmc.gdx.perception;
 
 import imgui.ImGui;
+import org.bytedeco.javacpp.BytePointer;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
@@ -22,6 +23,7 @@ public class GDXBlackflyUI
    private BytedecoBlackfly blackfly;
    private SpinnakerHardwareManager spinnakerHardwareManager;
    private GDXCVImagePanel imagePanel;
+   private BytePointer imageData;
    private FrequencyCalculator frameReadFrequency = new FrequencyCalculator();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
@@ -59,12 +61,16 @@ public class GDXBlackflyUI
                      imagePanel = new GDXCVImagePanel("Blackfly Image", blackfly.getWidth(), blackfly.getHeight());
                      baseUI.getImGuiPanelManager().addPanel(imagePanel.getVideoPanel());
 
+                     imageData = new BytePointer((long) blackfly.getWidth() * blackfly.getHeight() * 4); //Each pixel has 4 bytes of data, hence *4
+
                      baseUI.getPerspectiveManager().reloadPerspective();
                   }
 
                   frameReadFrequency.ping();
                   imagePanel.getBytedecoImage().rewind();
-                  blackfly.getImageData(imagePanel.getBytedecoImage().getBytedecoByteBufferPointer());
+
+                  blackfly.getImageData(imageData);
+                  imagePanel.getBytedecoImage().getBackingDirectByteBuffer().put(imageData.asByteBuffer());
                }
 
                if (imagePanel != null)
