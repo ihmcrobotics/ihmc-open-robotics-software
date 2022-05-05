@@ -76,6 +76,7 @@ public class HeuristicICPControllerTest
       TestICPControllerParameters icpControllerParameters = new TestICPControllerParameters()
       {
          private FeedbackProjectionOperator feedbackProjectionOperator;
+         private FeedForwardAlphaCalculator feedForwardAlphaCalculator;
 
          @Override
          public ICPControlGainsReadOnly getICPFeedbackGains()
@@ -100,6 +101,12 @@ public class HeuristicICPControllerTest
          }
 
          @Override
+         public void createFeedForwardAlphaCalculator(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+         {
+            feedForwardAlphaCalculator = new ErrorBasedFeedForwardAlphaCalculator("", registry);
+         }
+
+         @Override
          public void createFeedbackProjectionOperator(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
          {
             feedbackProjectionOperator = new CoPProjectionTowardsMidpoint(registry, yoGraphicsListRegistry);
@@ -109,6 +116,12 @@ public class HeuristicICPControllerTest
          public FeedbackProjectionOperator getFeedbackProjectionOperator()
          {
             return feedbackProjectionOperator;
+         }
+
+         @Override
+         public FeedForwardAlphaCalculator getFeedForwardAlphaCalculator()
+         {
+            return feedForwardAlphaCalculator;
          }
       };
       

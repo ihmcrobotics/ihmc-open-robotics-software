@@ -99,6 +99,7 @@ public class HeuristicICPController implements ICPControllerInterface
    private final ExecutionTimer controllerTimer = new ExecutionTimer("icpControllerTimer", 0.5, registry);
 
    private final ICPControllerParameters.FeedbackProjectionOperator feedbackProjectionOperator;
+   private final ICPControllerParameters.FeedForwardAlphaCalculator feedForwardAlphaCalculator;
 
    public HeuristicICPController(ICPControllerParameters icpControllerParameters,
                                  double controlDT,
@@ -113,7 +114,9 @@ public class HeuristicICPController implements ICPControllerInterface
       feedbackGains = new ParameterizedICPControlGains("", icpControllerParameters.getICPFeedbackGains(), registry);
 
       icpControllerParameters.createFeedbackProjectionOperator(registry, yoGraphicsListRegistry);
+      icpControllerParameters.createFeedForwardAlphaCalculator(registry, yoGraphicsListRegistry);
       feedbackProjectionOperator = icpControllerParameters.getFeedbackProjectionOperator();
+      feedForwardAlphaCalculator = icpControllerParameters.getFeedForwardAlphaCalculator();
 
       if (yoGraphicsListRegistry != null)
          setupVisualizers(yoGraphicsListRegistry);
@@ -213,15 +216,15 @@ public class HeuristicICPController implements ICPControllerInterface
       pureFeedforwardControl.sub(perfectCMP, desiredICP);
       pureFeedforwardMagnitude.set(pureFeedforwardControl.length());
 
-      // Compute feedbackFeedforwardAlpha, which if 1.0 means to ignore the feedforward terms from the perfectCoP/CMP.
-      // If it equals 0.0, then use all of the feedforward.
-      // As the perpendicular error grows, start ignoring the feedforward at a certain percentage of the threshold.
-      // Ignore the feedforward more and more as the perpendicular error grows. If the perpendicular error is greater
-      // than pureFeedbackErrorThreshold, then apply only feedback.
-      double percentOfPerpendicularThresholdToStartIgnoringFeedforward = 0.5;
-      double perpendicularErrorToStartIgnoringFeedforward = pureFeedbackErrorThreshold.getValue() * percentOfPerpendicularThresholdToStartIgnoringFeedforward;
-      double perpendicularErrorMagnitude = Math.abs(icpPerpError.getValue());
-      feedbackFeedforwardAlpha.set(computePercentageOfRangeClampedBetweenZeroAndOne(perpendicularErrorMagnitude, perpendicularErrorToStartIgnoringFeedforward, pureFeedbackErrorThreshold.getValue()));
+      // Add the scaled amount of the feedforward to the feedback control based on the perpendicular error.
+      unconstrainedFeedback.add(pureFeedforwardControl, pureFeedbackControl);
+      unconstrainedFeedbackCMP.add(currentICP, unconstrainedFeedback);
+
+      feedbackFeedforwardAlpha.set(0.0);
+      if (feedForwardAlphaCalculator != null)
+      {
+         feedbackFeedforwardAlpha.set(feedForwardAlphaCalculator.computeAlpha(currentICP, desiredICP, finalICP, perfectCMP, unconstrainedFeedbackCMP, supportPolygonInWorld));
+      }
 
       icpParallelFeedback.set(MathTools.clamp(icpParallelFeedback.getValue(), feedbackGains.getFeedbackPartMaxValueParallelToMotion()));
       icpPerpFeedback.set(MathTools.clamp(icpPerpFeedback.getValue(), feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion()));
