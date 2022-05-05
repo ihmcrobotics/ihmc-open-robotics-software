@@ -216,10 +216,14 @@ public class HeuristicICPController implements ICPControllerInterface
       pureFeedforwardControl.sub(perfectCMP, desiredICP);
       pureFeedforwardMagnitude.set(pureFeedforwardControl.length());
 
+      // Add the scaled amount of the feedforward to the feedback control based on the perpendicular error.
+      unconstrainedFeedback.add(pureFeedforwardControl, pureFeedbackControl);
+      unconstrainedFeedbackCMP.add(currentICP, unconstrainedFeedback);
+
       feedbackFeedforwardAlpha.set(0.0);
       if (feedForwardAlphaCalculator != null)
       {
-         feedbackFeedforwardAlpha.set(feedForwardAlphaCalculator.computeAlpha(currentICP, desiredICP, finalICP, perfectCMP, null, supportPolygonInWorld));
+         feedbackFeedforwardAlpha.set(feedForwardAlphaCalculator.computeAlpha(currentICP, desiredICP, finalICP, perfectCMP, unconstrainedFeedbackCMP, supportPolygonInWorld));
       }
 
       icpParallelFeedback.set(MathTools.clamp(icpParallelFeedback.getValue(), feedbackGains.getFeedbackPartMaxValueParallelToMotion()));
