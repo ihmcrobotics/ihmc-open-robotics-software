@@ -66,6 +66,9 @@ public class GDXBlackflyUI
                   imagePanel.getBytedecoImage().rewind();
                   blackfly.getImageData(imagePanel.getBytedecoImage().getBytedecoByteBufferPointer());
                }
+
+               if (imagePanel != null)
+                  imagePanel.draw();
             }
 
             baseUI.renderBeforeOnScreenUI();
