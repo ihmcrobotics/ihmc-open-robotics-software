@@ -102,6 +102,7 @@ public class CoPProjectionTowardsMidpoint implements ICPControllerParameters.Fee
 
       yoGraphicsListRegistry.registerArtifactList(artifactList);
    }
+
    @Override
    public void projectFeedback(FramePoint2DReadOnly currentICP,
                                FramePoint2DReadOnly unconstrainedFeedbackCMP,
