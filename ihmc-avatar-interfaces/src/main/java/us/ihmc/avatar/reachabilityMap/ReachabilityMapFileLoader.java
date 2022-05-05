@@ -3,6 +3,7 @@ package us.ihmc.avatar.reachabilityMap;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.stream.Stream;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
@@ -19,13 +20,11 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DData;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.javafx.JavaFXMissingTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizerIOTools;
 
 public class ReachabilityMapFileLoader
@@ -40,7 +39,7 @@ public class ReachabilityMapFileLoader
       this(robotName, rootBody, null);
    }
 
-   public ReachabilityMapFileLoader(String robotName, RigidBodyBasics rootBody, HumanoidReferenceFrames referenceFrames)
+   public ReachabilityMapFileLoader(String robotName, RigidBodyBasics rootBody, Collection<ReferenceFrame> referenceFrames)
    {
       this(selectionFileDialog(), robotName, rootBody, referenceFrames);
    }
@@ -50,7 +49,7 @@ public class ReachabilityMapFileLoader
       this(selectionFileDialog(), robotName, rootBody, null);
    }
 
-   public ReachabilityMapFileLoader(File fileToLoad, String robotName, RigidBodyBasics rootBody, HumanoidReferenceFrames referenceFrames)
+   public ReachabilityMapFileLoader(File fileToLoad, String robotName, RigidBodyBasics rootBody, Collection<ReferenceFrame> referenceFrames)
    {
       try
       {
@@ -126,7 +125,7 @@ public class ReachabilityMapFileLoader
       }
    }
 
-   private Voxel3DGrid createGrid(RigidBodyBasics rootBody, HumanoidReferenceFrames referenceFrames, HSSFSheet descriptionSheet)
+   private Voxel3DGrid createGrid(RigidBodyBasics rootBody, Collection<ReferenceFrame> referenceFrames, HSSFSheet descriptionSheet)
    {
       String parentFrameName = descriptionSheet.getRow(7).getCell(2).getStringCellValue();
       DMatrixRMaj transformToParentFrameAsDenseMatrix = CommonOps_DDRM.identity(4);
@@ -191,7 +190,7 @@ public class ReachabilityMapFileLoader
       return loadedGrid;
    }
 
-   private ReferenceFrame searchParentFrameInCommonRobotFrames(String parentFrameName, HumanoidReferenceFrames referenceFrames, RigidBodyBasics rootBody)
+   private ReferenceFrame searchParentFrameInCommonRobotFrames(String parentFrameName, Collection<ReferenceFrame> referenceFrames, RigidBodyBasics rootBody)
    {
       if (parentFrameName.equals(worldFrame.getName()))
          return worldFrame;
@@ -219,34 +218,13 @@ public class ReachabilityMapFileLoader
          }
       }
 
-      if (referenceFrames == null)
+      if (referenceFrames == null || referenceFrames.isEmpty())
          return null;
 
-      ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
-      if (parentFrameName.equals(pelvisZUpFrame.getName()))
-         return pelvisZUpFrame;
-
-      ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
-      if (parentFrameName.equals(midFeetZUpFrame.getName()))
-         return midFeetZUpFrame;
-
-      ReferenceFrame centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-      if (parentFrameName.equals(centerOfMassFrame.getName()))
-         return centerOfMassFrame;
-
-      for (RobotSide robotSide : RobotSide.values)
+      for (ReferenceFrame referenceFrame : referenceFrames)
       {
-         ReferenceFrame soleFrame = referenceFrames.getSoleFrame(robotSide);
-         if (parentFrameName.equals(soleFrame.getName()))
-            return soleFrame;
-
-         ReferenceFrame ankleZUpFrame = referenceFrames.getAnkleZUpFrame(robotSide);
-         if (parentFrameName.equals(ankleZUpFrame.getName()))
-            return ankleZUpFrame;
-
-         ReferenceFrame handFrame = referenceFrames.getHandFrame(robotSide);
-         if (parentFrameName.equals(handFrame.getName()))
-            return handFrame;
+         if (parentFrameName.equals(referenceFrame.getName()))
+            return referenceFrame;
       }
 
       return null;

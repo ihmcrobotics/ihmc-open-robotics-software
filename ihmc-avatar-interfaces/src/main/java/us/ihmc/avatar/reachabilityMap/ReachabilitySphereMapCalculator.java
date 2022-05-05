@@ -74,6 +74,7 @@ public class ReachabilitySphereMapCalculator implements Controller
       orientation = new FrameQuaternion[solvers.length];
       translationFromVoxelOrigin = new FrameVector3D[solvers.length];
 
+      OneDoFJointBasics firstJoint = robotArmJoints[0];
       for (int i = 0; i < numberOfThreads; i++)
       {
          YoRegistry solverRegistry = new YoRegistry("solverRegistry" + i);
@@ -89,7 +90,7 @@ public class ReachabilitySphereMapCalculator implements Controller
          }
          else
          {
-            RigidBodyBasics originalRootBody = MultiBodySystemTools.getRootBody(robotArmJoints[0].getPredecessor());
+            RigidBodyBasics originalRootBody = MultiBodySystemTools.getRootBody(firstJoint.getPredecessor());
             cloneSuffix = "-solver" + i;
             RigidBodyBasics solverRootBody = MultiBodySystemFactories.cloneMultiBodySystem(originalRootBody, ReferenceFrame.getWorldFrame(), cloneSuffix);
             solverJoints = Arrays.stream(robotArmJoints)
@@ -112,7 +113,7 @@ public class ReachabilitySphereMapCalculator implements Controller
       }
 
       gridFramePose.attachVariableChangedListener(v -> this.voxel3DGrid.setGridPose(gridFramePose));
-      FramePose3D gridFramePose = new FramePose3D(ReferenceFrame.getWorldFrame(), robotArmJoints[0].getFrameBeforeJoint().getTransformToWorldFrame());
+      FramePose3D gridFramePose = new FramePose3D(ReferenceFrame.getWorldFrame(), firstJoint.getFrameBeforeJoint().getTransformToRoot());
       gridFramePose.appendTranslation(getGridSizeInMeters() / 2.5, 0.0, 0.0);
       setGridFramePose(gridFramePose);
    }
@@ -149,6 +150,10 @@ public class ReachabilitySphereMapCalculator implements Controller
       yoGraphics.add(newYoGraphicCoordinateSystem3DDefinition("gridFramePose", gridFramePose, 0.5, ColorDefinitions.Blue()));
       yoGraphics.add(newYoGraphicCoordinateSystem3DDefinition("currentEvaluationPose", currentEvaluationPose, 0.15, ColorDefinitions.HotPink()));
       yoGraphics.add(newYoGraphicPoint3DDefinition("currentEvaluationPosition", currentEvaluationPose.getPosition(), 0.0125, ColorDefinitions.DeepPink()));
+      yoGraphics.add(newYoGraphicCoordinateSystem3DDefinition("controlFrame",
+                                                              solvers[0].getControlFramePoseInEndEffector(),
+                                                              0.05,
+                                                              ColorDefinitions.parse("#A1887F")));
       yoGraphics.addAll(solverYoGraphicGroupDefinitions);
       group.setChildren(yoGraphics);
       return group;

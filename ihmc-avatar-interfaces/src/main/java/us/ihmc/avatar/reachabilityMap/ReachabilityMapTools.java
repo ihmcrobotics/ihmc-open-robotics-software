@@ -1,5 +1,7 @@
 package us.ihmc.avatar.reachabilityMap;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DData;
@@ -9,7 +11,9 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
@@ -83,9 +87,33 @@ public class ReachabilityMapTools
    public static void loadVisualizeReachabilityMap(String robotName, RobotDefinition robotDefinition, FullHumanoidRobotModel fullRobotModel)
    {
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      List<ReferenceFrame> frameList = new ArrayList<>();
+      frameList.add(referenceFrames.getPelvisZUpFrame());
+      frameList.add(referenceFrames.getMidFeetZUpFrame());
+      frameList.add(referenceFrames.getCenterOfMassFrame());
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         frameList.add(referenceFrames.getSoleFrame(robotSide));
+         frameList.add(referenceFrames.getAnkleZUpFrame(robotSide));
+         frameList.add(referenceFrames.getHandFrame(robotSide));
+      }
+
+   }
+
+   public static void loadVisualizeReachabilityMap(String robotName, RobotDefinition robotDefinition)
+   {
+      loadVisualizeReachabilityMap(robotName, robotDefinition, robotDefinition.newInstance(ReferenceFrame.getWorldFrame()), null);
+   }
+
+   public static void loadVisualizeReachabilityMap(String robotName,
+                                                   RobotDefinition robotDefinition,
+                                                   RigidBodyBasics rootBody,
+                                                   Collection<ReferenceFrame> referenceFrames)
+   {
       long startTime = System.nanoTime();
       System.out.println("Loading reachability map");
-      ReachabilityMapFileLoader reachabilityMapFileLoader = new ReachabilityMapFileLoader(robotName, fullRobotModel.getElevator(), referenceFrames);
+      ReachabilityMapFileLoader reachabilityMapFileLoader = new ReachabilityMapFileLoader(robotName, rootBody, referenceFrames);
 
       System.out.println("Done loading reachability map. Took: " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime) + " seconds.");
 
