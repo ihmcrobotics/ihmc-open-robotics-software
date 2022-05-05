@@ -31,7 +31,7 @@ public class ReachabilitySphereMapSimulationHelper
    {
       robotDefinition.ignoreAllJoints();
 
-      RigidBodyBasics rootBody = robotDefinition.newInstance(ReferenceFrame.getWorldFrame());
+      RigidBodyBasics rootBody = robotDefinition.newInstance(Robot.createRobotRootFrame(robotDefinition, ReferenceFrame.getWorldFrame())); // This allows to visualize YoGraphics in frames other than world
       RigidBodyBasics base = MultiBodySystemTools.findRigidBody(rootBody, baseName);
       RigidBodyBasics endEffector = MultiBodySystemTools.findRigidBody(rootBody, endEffectorName);
       OneDoFJointBasics[] armJoints = MultiBodySystemTools.createOneDoFJointPath(base, endEffector);
@@ -43,7 +43,6 @@ public class ReachabilitySphereMapSimulationHelper
       calculator = new ReachabilitySphereMapCalculator(armJoints, robot.getControllerOutput(), voxel3DGrid);
       calculator.setRobotCollisionModel(robotDefinition);
       robot.addController(calculator);
-      session.addYoGraphicDefinition(calculator.getYoGraphicVisuals());
    }
 
    public void setAngularSelection(boolean selectX, boolean selectY, boolean selectZ)
@@ -84,6 +83,7 @@ public class ReachabilitySphereMapSimulationHelper
 
    public boolean start()
    {
+      session.addYoGraphicDefinition(calculator.getYoGraphicVisuals());
       SessionVisualizerControls guiControls = SessionVisualizer.startSessionVisualizer(session);
       guiControls.setCameraFocusPosition(calculator.getGridFramePose().getX(), calculator.getGridFramePose().getY(), calculator.getGridFramePose().getZ());
       guiControls.setCameraOrientation(Math.toRadians(15.0), Math.toRadians(170.0), 0.0);

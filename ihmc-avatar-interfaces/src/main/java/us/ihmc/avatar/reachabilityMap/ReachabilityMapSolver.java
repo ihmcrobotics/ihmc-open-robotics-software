@@ -293,4 +293,9 @@ public class ReachabilityMapSolver
    {
       return robotArmJoints;
    }
+
+   public FramePose3D getControlFramePoseInEndEffector()
+   {
+      return controlFramePoseInEndEffector;
+   }
 }
