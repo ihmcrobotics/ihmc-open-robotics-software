@@ -1,6 +1,7 @@
 package us.ihmc.avatar.gpuPlanarRegions;
 
 import controller_msgs.msg.dds.StoredPropertySetMessage;
+import std_msgs.msg.dds.Empty;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ros2.ROS2Topic;
 
@@ -18,6 +19,7 @@ public class GPUPlanarRegionExtractionComms
          = BASE_TOPIC.withType(StoredPropertySetMessage.class).withSuffix("polygonizer_parameters");
    public static final ROS2Topic<StoredPropertySetMessage> POLYGONIZER_PARAMETERS_INPUT = POLYGONIZER_PARAMETERS.withInput();
    public static final ROS2Topic<StoredPropertySetMessage> POLYGONIZER_PARAMETERS_OUTPUT = POLYGONIZER_PARAMETERS.withOutput();
+   public static final ROS2Topic<Empty> RECONNECT_ROS1_NODE = BASE_TOPIC.withType(Empty.class).withSuffix("reconnect_ros1_node");
 
    public static final String DEBUG_EXTRACTION_IMAGE = "/gpu_planar_region_extraction/debug_extraction_image";
 
