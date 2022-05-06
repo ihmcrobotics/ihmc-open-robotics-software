@@ -76,7 +76,7 @@ public class GDXRemoteGPUPlanarRegionExtractionUI
       this.ros1Helper = ros1Helper;
       this.ros2Helper = ros2Helper;
 
-      debugExtractionPanel = new GDXROS1VideoVisualizer("GPU Planar Regions Debug Image", GPUPlanarRegionExtractionComms.DEBUG_EXTRACTION_IMAGE);
+      debugExtractionPanel = new GDXROS1VideoVisualizer("GPU Planar Regions Debug Image", GPUPlanarRegionExtractionComms.DEBUG_EXTRACTION_IMAGE, true);
       debugExtractionPanel.create();
       panel.addChild(debugExtractionPanel.getPanel());
 
@@ -100,6 +100,11 @@ public class GDXRemoteGPUPlanarRegionExtractionUI
          gpuRegionParametersHaveBeenReceived = false;
          polygonizerParametersHaveBeenReceived = false;
          concaveHullFactoryParametersHaveBeenReceived = false;
+      }
+
+      if (ImGui.button("Reconnect remote ROS 1 node"))
+      {
+         ros2Helper.publish(GPUPlanarRegionExtractionComms.RECONNECT_ROS1_NODE);
       }
 
       ImGui.separator();
@@ -172,8 +177,7 @@ public class GDXRemoteGPUPlanarRegionExtractionUI
       anyChanged |= ImGui.checkbox(labels.get("Early gaussian blur"), earlyGaussianBlur);
       anyChanged |= ImGui.sliderInt(labels.get("Gaussian size"), gaussianSize.getData(), 1, 20);
       anyChanged |= ImGui.sliderFloat(labels.get("Gaussian sigma"), gaussianSigma.getData(), 0.23f, 10.0f);
-//      anyChanged |= ImGui.sliderInt(labels.get("Patch size"), patchSize.getData(), 2, 20);
-      ImGui.text("Patch size: " + patchSize.get());
+      anyChanged |= ImGui.sliderInt(labels.get("Patch size"), patchSize.getData(), 2, 20);
       anyChanged |= ImGui.sliderInt(labels.get("Dead pixel filter patch size"), deadPixelFilterPatchSize.getData(), 1, 20);
       anyChanged |= ImGui.checkbox(labels.get("Use filtered image"), useFilteredImage);
       anyChanged |= ImGui.sliderFloat(labels.get("Merge distance threshold"), mergeDistanceThreshold.getData(), 0.0f, 0.1f);
