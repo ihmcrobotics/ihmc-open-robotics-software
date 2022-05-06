@@ -27,7 +27,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class CoPProjectionTowardsMidpoint implements ICPControllerParameters.FeedbackProjectionOperator
 {
    private static final boolean VISUALIZE = true;
-   private static final boolean WHEN_PROJECTING_GO_TO_VERTEX = true;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final String yoNamePrefix = "copProjection";
@@ -105,7 +104,7 @@ public class CoPProjectionTowardsMidpoint implements ICPControllerParameters.Fee
 
       artifactList.add(firstIntersectionViz.createArtifact());
       artifactList.add(secondIntersectionViz.createArtifact());
-      //      artifactList.add(copProjectionViz.createArtifact());
+      artifactList.add(projectionLineViz);
       artifactList.add(icpProjectionViz.createArtifact());
 
       artifactList.setVisible(VISUALIZE);
@@ -169,7 +168,7 @@ public class CoPProjectionTowardsMidpoint implements ICPControllerParameters.Fee
       // do a different projection that finds a suitable point on the edge of the foot polygon.
       if (firstProjectionIntersection.containsNaN() || (secondProjectionIntersection.containsNaN()))
       {
-         projectCoPWhenProjectionLineDoesNotIntersectFoot(currentICP, unconstrainedFeedbackCoP, supportPolygonInWorld, feedbackCoPToPack);
+         projectCoPToVertex(supportPolygonInWorld, feedbackCoPToPack);
          feedbackCMPToPack.add(feedbackCoPToPack, cmpOffset);
 
          return;
@@ -225,19 +224,7 @@ public class CoPProjectionTowardsMidpoint implements ICPControllerParameters.Fee
 
 
 
-   private void projectCoPWhenProjectionLineDoesNotIntersectFoot(FramePoint2DReadOnly currentICP,
-                                                                 FramePoint2DReadOnly unconstrainedFeedbackCoP,
-                                                                 FrameConvexPolygon2DReadOnly supportPolygonInWorld,
-                                                                 FixedFramePoint2DBasics feedbackCoPToPack)
-   {
-      if (WHEN_PROJECTING_GO_TO_VERTEX)
-         projectCoPSimply(supportPolygonInWorld, feedbackCoPToPack);
-      else
-         projectCoPFancily(currentICP, unconstrainedFeedbackCoP, supportPolygonInWorld, feedbackCoPToPack);
-   }
-
-
-   private void projectCoPSimply(FrameConvexPolygon2DReadOnly supportPolygonInWorld, FixedFramePoint2DBasics feedbackCoPToPack)
+   private void projectCoPToVertex(FrameConvexPolygon2DReadOnly supportPolygonInWorld, FixedFramePoint2DBasics feedbackCoPToPack)
    {
       supportPolygonInWorld.getClosestVertex(projectionLine, feedbackCoPToPack);
    }
@@ -264,7 +251,7 @@ public class CoPProjectionTowardsMidpoint implements ICPControllerParameters.Fee
     * ignores the difference between the perfectCMP and the perfectCoP and just finds a CoP that is not
     * horrible, given the circumstances.
     */
-   private void projectCoPFancily(FramePoint2DReadOnly currentICP,
+   private void projectCoPWhenProjectionLineDoesNotIntersectFoot(FramePoint2DReadOnly currentICP,
                                                                  FramePoint2DReadOnly unconstrainedFeedbackCoP,
                                                                  FrameConvexPolygon2DReadOnly supportPolygonInWorld,
                                                                  FixedFramePoint2DBasics feedbackCoPToPack)
