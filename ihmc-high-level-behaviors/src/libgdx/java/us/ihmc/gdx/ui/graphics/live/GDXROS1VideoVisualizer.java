@@ -9,10 +9,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import sensor_msgs.CompressedImage;
 import sensor_msgs.Image;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXROS1VisualizerInterface;
-import us.ihmc.perception.BytedecoOpenCVTools;
-import us.ihmc.perception.ImageEncodingTools;
-import us.ihmc.perception.ROSOpenCVImage;
-import us.ihmc.perception.ROSOpenCVTools;
+import us.ihmc.perception.*;
 import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
@@ -31,10 +28,17 @@ public class GDXROS1VideoVisualizer extends GDXOpenCVVideoVisualizer implements 
    private Mat decodedImageMat;
    private Mat resizedImageMat;
    private boolean currentlySubscribed = false;
+   private final String name;
 
    public GDXROS1VideoVisualizer(String title, String topic)
    {
-      super(title, topic, false);
+      this(title, topic, false);
+   }
+
+   public GDXROS1VideoVisualizer(String title, String topic, boolean flipY)
+   {
+      super(title + " (ROS 1)", topic, flipY);
+      name = title;
       this.topic = topic;
       isCompressed = topic.endsWith("compressed");
    }
@@ -98,7 +102,7 @@ public class GDXROS1VideoVisualizer extends GDXOpenCVVideoVisualizer implements 
 
       if (cvType == opencv_core.CV_16UC1)
       {
-         if (input16UC1Mat == null)
+         if (input16UC1Mat == null || input16UC1Mat.rows() != imageHeight || input16UC1Mat.cols() != imageWidth)
          {
             input16UC1Mat = new Mat(imageHeight, imageWidth, cvType);
             input8UC1Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC1);
