@@ -43,7 +43,7 @@ public class GDXOpenCVVideoVisualizer extends ImGuiGDXVisualizer
 
    protected void updateImageDimensions(int imageWidth, int imageHeight)
    {
-      if (rgba8Mat == null || pixmap.getWidth() < imageWidth || pixmap.getHeight() < imageHeight)
+      if (rgba8Mat == null || pixmap.getWidth() != imageWidth || pixmap.getHeight() != imageHeight)
       {
          if (pixmap != null)
          {
