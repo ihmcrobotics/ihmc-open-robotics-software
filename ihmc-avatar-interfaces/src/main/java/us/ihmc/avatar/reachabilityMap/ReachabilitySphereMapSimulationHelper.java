@@ -9,6 +9,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import us.ihmc.avatar.reachabilityMap.example.RobotParameters.RobotArmJointParameters;
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -32,7 +33,7 @@ public class ReachabilitySphereMapSimulationHelper
 
    public enum VisualizationType
    {
-      DReach, WristManipulability, Unreachable;
+      PositionReach, DReach, D0Reach, WristManipulability, Unreachable;
    };
 
    private final Map<VisualizationType, ObservableList<VisualDefinition>> voxelVisualization = new EnumMap<>(VisualizationType.class);
@@ -63,14 +64,27 @@ public class ReachabilitySphereMapSimulationHelper
       currentVisualizationType.set(VisualizationType.DReach);
    }
 
-   public void setAngularSelection(boolean selectX, boolean selectY, boolean selectZ)
+   /**
+    * Specifies while axis is orthogonal to the palm.
+    */
+   public void setPalmOrthogonalAxis(Axis3D axis)
    {
-      calculator.setAngularSelection(selectX, selectY, selectZ);
+      calculator.setPalmOrthogonalAxis(axis);
    }
 
    public void enableJointTorqueAnalysis(boolean considerJointTorqueLimits)
    {
       calculator.enableJointTorqueAnalysis(considerJointTorqueLimits);
+   }
+
+   public void setEvaluateDReachability(boolean enable)
+   {
+      calculator.setEvaluateDReachability(enable);
+   }
+
+   public void setEvaluateD0Reachability(boolean enable)
+   {
+      calculator.setEvaluateD0Reachability(enable);
    }
 
    public void setGridPose(RigidBodyTransformReadOnly pose)
@@ -155,17 +169,22 @@ public class ReachabilitySphereMapSimulationHelper
 
       calculator.setVoxelUnreachableListener(voxel ->
       {
-         voxelVisualization.get(VisualizationType.Unreachable).add(sphereVoxelShape.createVisual(voxel.getPosition(), 0.1, -1));
+         voxelVisualization.get(VisualizationType.Unreachable).add(sphereVoxelShape.createDReachabilityVisual(voxel.getPosition(), 0.1, -1));
       });
 
       calculator.setVoxelCompletedListener(voxel ->
       {
-         double reachabilityValue = voxel.getD();
+         voxelVisualization.get(VisualizationType.PositionReach).add(sphereVoxelShape.createPositionReachabilityVisual(voxel.getPosition(), 0.2, true));
 
-         if (reachabilityValue > 1e-3)
-            voxelVisualization.get(VisualizationType.DReach).add(sphereVoxelShape.createVisual(voxel.getPosition(), 0.25, reachabilityValue));
+         if (voxel.getD() > 1e-3)
+         {
+            voxelVisualization.get(VisualizationType.DReach).add(sphereVoxelShape.createDReachabilityVisual(voxel.getPosition(), 0.25, voxel.getD()));
+            voxelVisualization.get(VisualizationType.D0Reach).add(sphereVoxelShape.createDReachabilityVisual(voxel.getPosition(), 0.25, voxel.getD0()));
+         }
          else
-            voxelVisualization.get(VisualizationType.Unreachable).add(sphereVoxelShape.createVisual(voxel.getPosition(), 0.1, -1));
+         {
+            voxelVisualization.get(VisualizationType.Unreachable).add(sphereVoxelShape.createDReachabilityVisual(voxel.getPosition(), 0.1, -1));
+         }
       });
 
       currentVisualizationType.addListener(v ->

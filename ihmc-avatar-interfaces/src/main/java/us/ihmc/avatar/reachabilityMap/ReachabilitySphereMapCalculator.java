@@ -11,9 +11,8 @@ import java.util.stream.IntStream;
 
 import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DData;
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -47,8 +46,7 @@ public class ReachabilitySphereMapCalculator implements Controller
    private Consumer<Voxel3DData> voxelUnreachableListener = null;
    private Consumer<Voxel3DData> voxelCompletedListener = null;
 
-   private final FramePoint3D[] desiredPosition;
-   private final FrameQuaternion[] orientation;
+   private final FramePose3D[] solverInputs;
    private final FrameVector3D[] translationFromVoxelOrigin;
    private final ReachabilityMapSolver[] solvers;
    private final boolean[] solverResults;
@@ -57,6 +55,9 @@ public class ReachabilitySphereMapCalculator implements Controller
    private final YoFramePose3D gridFramePose = new YoFramePose3D("gridFramePose", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePose3D currentEvaluationPose = new YoFramePose3D("currentEvaluationPose", ReferenceFrame.getWorldFrame(), registry);
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
+
+   private final YoBoolean evaluateDReachability = new YoBoolean("evaluateDReachability", registry);
+   private final YoBoolean evaluateD0Reachability = new YoBoolean("evaluateD0Reachability", registry);
 
    private final List<YoGraphicGroupDefinition> solverYoGraphicGroupDefinitions = new ArrayList<>();
 
@@ -73,8 +74,7 @@ public class ReachabilitySphereMapCalculator implements Controller
       solverResults = new boolean[numberOfThreads];
       solverVoxels = new Voxel3DData[numberOfThreads];
 
-      desiredPosition = new FramePoint3D[solvers.length];
-      orientation = new FrameQuaternion[solvers.length];
+      solverInputs = new FramePose3D[solvers.length];
       translationFromVoxelOrigin = new FrameVector3D[solvers.length];
 
       OneDoFJointBasics firstJoint = robotArmJoints[0];
@@ -110,8 +110,7 @@ public class ReachabilitySphereMapCalculator implements Controller
             solverYoGraphicGroup.setChildren(SCS1GraphicConversionTools.toYoGraphicDefinitions(solverGraphicsRegistry));
             solverYoGraphicGroupDefinitions.add(solverYoGraphicGroup);
          }
-         desiredPosition[i] = new FramePoint3D();
-         orientation[i] = new FrameQuaternion();
+         solverInputs[i] = new FramePose3D();
          translationFromVoxelOrigin[i] = new FrameVector3D();
       }
 
@@ -136,6 +135,16 @@ public class ReachabilitySphereMapCalculator implements Controller
    {
       this.voxel3DGrid = voxel3DGrid;
       voxel3DGrid.setGridPose(gridFramePose);
+   }
+
+   public void setEvaluateDReachability(boolean enable)
+   {
+      evaluateDReachability.set(enable);
+   }
+
+   public void setEvaluateD0Reachability(boolean enable)
+   {
+      evaluateD0Reachability.set(enable);
    }
 
    public void setVoxelUnreachableListener(Consumer<Voxel3DData> voxelUnreachableListener)
@@ -208,18 +217,13 @@ public class ReachabilitySphereMapCalculator implements Controller
    }
 
    /**
-    * By default all the axes are selected. For faster exploration, deselect the axis that is
-    * orthogonal to the palm.
-    * 
-    * @param selectX whether to control the orientation around the x-axis of the control frame.
-    * @param selectY whether to control the orientation around the y-axis of the control frame.
-    * @param selectZ whether to control the orientation around the z-axis of the control frame.
+    * Specifies while axis is orthogonal to the palm.
     */
-   public void setAngularSelection(boolean selectX, boolean selectY, boolean selectZ)
+   public void setPalmOrthogonalAxis(Axis3D axis)
    {
       for (ReachabilityMapSolver solver : solvers)
       {
-         solver.setAngularSelection(selectX, selectY, selectZ);
+         solver.setRayAxis(axis);
       }
    }
 
@@ -271,7 +275,12 @@ public class ReachabilitySphereMapCalculator implements Controller
          solverResults[solverIndex] = success;
 
          if (success)
+         {
+            voxel.registerReachablePosition(solvers[solverIndex].getRobotArmJoints());
+            if (solverIndex == 0)
+               writeSolverSolution(solvers[solverIndex], controllerOutput);
             computeVoxel(voxel, solverIndex);
+         }
       });
 
       for (int solverIndex = 0; solverIndex < solverResults.length; solverIndex++)
@@ -302,38 +311,62 @@ public class ReachabilitySphereMapCalculator implements Controller
 
    private void computeVoxel(Voxel3DData voxel, int solverIndex)
    {
+      FramePose3D solverInput = solverInputs[solverIndex];
+      ReachabilityMapSolver solver = solvers[solverIndex];
+
       SphereVoxelShape sphereVoxelShape = voxel3DGrid.getSphereVoxelShape();
 
       for (int rayIndex = 0; rayIndex < sphereVoxelShape.getNumberOfRays(); rayIndex++)
       {
-         for (int rotationAroundRayIndex = 0; rotationAroundRayIndex < sphereVoxelShape.getNumberOfRotationsAroundRay(); rotationAroundRayIndex++)
+         if (evaluateDReachability.getValue())
          {
-            desiredPosition[solverIndex].setIncludingFrame(voxel.getPosition());
-            sphereVoxelShape.getPose(translationFromVoxelOrigin[solverIndex], orientation[solverIndex], rayIndex, rotationAroundRayIndex);
-            desiredPosition[solverIndex].add(translationFromVoxelOrigin[solverIndex]);
+            sphereVoxelShape.getPose(solverInput, rayIndex, 0);
+            solverInput.getPosition().add(voxel.getPosition());
+            solverInput.changeFrame(ReferenceFrame.getWorldFrame());
 
-            desiredPosition[solverIndex].changeFrame(ReferenceFrame.getWorldFrame());
-            orientation[solverIndex].changeFrame(ReferenceFrame.getWorldFrame());
-            if (solverIndex == 0)
-               currentEvaluationPose.set(desiredPosition[solverIndex], orientation[solverIndex]);
-
-            boolean success = solvers[solverIndex].solveFor(desiredPosition[solverIndex], orientation[solverIndex]);
-
-            if (success)
+            if (solver.solveForRay(solverInput))
             {
-               voxel.registerReachablePose(rayIndex, rotationAroundRayIndex);
+               voxel.registerReachableRay(rayIndex, solver.getRobotArmJoints());
 
                if (solverIndex == 0)
-               {
-                  for (OneDoFJointBasics joint : solvers[solverIndex].getRobotArmJoints())
-                  {
-                     controllerOutput.getOneDoFJointOutput(joint).setConfiguration(joint);
-                     controllerOutput.getOneDoFJointOutput(joint).setEffort(joint);
-                  }
-               }
-               break;
+                  writeSolverSolution(solver, controllerOutput);
+            }
+            else
+            {
+               continue;
             }
          }
+
+         if (evaluateD0Reachability.getValue())
+         {
+            for (int rotationAroundRayIndex = 0; rotationAroundRayIndex < sphereVoxelShape.getNumberOfRotationsAroundRay(); rotationAroundRayIndex++)
+            {
+               sphereVoxelShape.getPose(solverInput, rayIndex, rotationAroundRayIndex);
+               solverInput.getPosition().add(voxel.getPosition());
+               solverInput.changeFrame(ReferenceFrame.getWorldFrame());
+
+               if (solverIndex == 0)
+                  currentEvaluationPose.set(solverInput);
+
+               if (solver.solveForPose(solverInput))
+               {
+                  voxel.registerReachablePose(rayIndex, rotationAroundRayIndex, solver.getRobotArmJoints());
+
+                  if (solverIndex == 0)
+                     writeSolverSolution(solver, controllerOutput);
+                  break;
+               }
+            }
+         }
+      }
+   }
+
+   public static void writeSolverSolution(ReachabilityMapSolver solver, ControllerOutput controllerOutput)
+   {
+      for (OneDoFJointBasics joint : solver.getRobotArmJoints())
+      {
+         controllerOutput.getOneDoFJointOutput(joint).setConfiguration(joint);
+         controllerOutput.getOneDoFJointOutput(joint).setEffort(joint);
       }
    }
 

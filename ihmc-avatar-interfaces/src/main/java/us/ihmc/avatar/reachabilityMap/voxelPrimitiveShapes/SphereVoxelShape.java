@@ -5,9 +5,9 @@ import java.awt.Color;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -90,16 +90,20 @@ public class SphereVoxelShape
       orientation.setIncludingFrame(referenceFrame, rotations[rayIndex][rotationAroundRayIndex]);
    }
 
-   public void getPose(FrameVector3D translationFromVoxelOrigin, FrameQuaternion orientation, int rayIndex, int rotationAroundRayIndex)
+   public void getPose(FramePose3DBasics pose, int rayIndex, int rotationAroundRayIndex)
    {
       MathTools.checkIntervalContains(rayIndex, 0, numberOfRays - 1);
       MathTools.checkIntervalContains(rotationAroundRayIndex, 0, numberOfRotationsAroundRay - 1);
 
       if (type == SphereVoxelType.graspAroundSphere)
-         translationFromVoxelOrigin.setIncludingFrame(referenceFrame, pointsOnSphere[rayIndex]);
+      {
+         pose.setIncludingFrame(referenceFrame, pointsOnSphere[rayIndex], rotations[rayIndex][rotationAroundRayIndex]);
+      }
       else
-         translationFromVoxelOrigin.setToZero(referenceFrame);
-      orientation.setIncludingFrame(referenceFrame, rotations[rayIndex][rotationAroundRayIndex]);
+      {
+         pose.setToZero(referenceFrame);
+         pose.getOrientation().set(rotations[rayIndex][rotationAroundRayIndex]);
+      }
    }
 
    public Point3D[] getPointsOnSphere()
@@ -125,7 +129,21 @@ public class SphereVoxelShape
       return voxelViz;
    }
 
-   public VisualDefinition createVisual(FramePoint3DReadOnly voxelLocation, double scale, double reachabilityValue)
+   public VisualDefinition createPositionReachabilityVisual(FramePoint3DReadOnly voxelLocation, double scale, boolean reachable)
+   {
+      FramePoint3D voxelLocationLocal = new FramePoint3D(voxelLocation);
+      voxelLocationLocal.changeFrame(ReferenceFrame.getWorldFrame());
+
+      ColorDefinition color;
+      if (reachable)
+         color = ColorDefinitions.Chartreuse();
+      else
+         color = ColorDefinitions.DarkRed();
+      MaterialDefinition materialDefinition = new MaterialDefinition(color);
+      materialDefinition.setShininess(10);
+      return new VisualDefinition(voxelLocationLocal, new Sphere3DDefinition(scale * voxelSize / 2.0, 16), materialDefinition);
+   }
+   public VisualDefinition createDReachabilityVisual(FramePoint3DReadOnly voxelLocation, double scale, double reachabilityValue)
    {
       FramePoint3D voxelLocationLocal = new FramePoint3D(voxelLocation);
       voxelLocationLocal.changeFrame(ReferenceFrame.getWorldFrame());
@@ -135,6 +153,6 @@ public class SphereVoxelShape
          color = ColorDefinitions.Black();
       else
          color = ColorDefinitions.hsb(0.7 * reachabilityValue * 360.0, 1, 1);
-      return new VisualDefinition(voxelLocationLocal, new Sphere3DDefinition(scale * voxelSize / 2.0, 32), new MaterialDefinition(color));
+      return new VisualDefinition(voxelLocationLocal, new Sphere3DDefinition(scale * voxelSize / 2.0, 16), new MaterialDefinition(color));
    }
 }
