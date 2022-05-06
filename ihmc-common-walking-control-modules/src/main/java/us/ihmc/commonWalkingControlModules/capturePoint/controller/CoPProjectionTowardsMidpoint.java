@@ -67,7 +67,7 @@ public class CoPProjectionTowardsMidpoint implements ICPControllerParameters.Fee
                                                    "When projecting the CoP into the foot, move up to this far from the edge if possible",
                                                    registry,
                                                    0.04);
-      useCoPProjection = new BooleanParameter(yoNamePrefix + "UseCoPProjection", registry, false);
+      useCoPProjection = new BooleanParameter(yoNamePrefix + "UseCoPProjection", registry, true);
 
       dotProductForFootEdgeProjection = new YoDouble(yoNamePrefix + "DotProductForFootEdgeProjection", registry);
       momentumShiftedICPOnProjection = new YoDouble(yoNamePrefix + "momentumShiftedICPOnProjection", registry);
@@ -83,6 +83,9 @@ public class CoPProjectionTowardsMidpoint implements ICPControllerParameters.Fee
       firstProjectionIntersection = new YoFramePoint2D(yoNamePrefix + "FirstIntersection", worldFrame, registry);
       secondProjectionIntersection = new YoFramePoint2D(yoNamePrefix + "SecondIntersection", worldFrame, registry);
       icpProjection = new YoFramePoint2D(yoNamePrefix + "ICPProjection", worldFrame, registry);
+
+      if (yoGraphicsListRegistry == null)
+         return;
 
       ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
 
