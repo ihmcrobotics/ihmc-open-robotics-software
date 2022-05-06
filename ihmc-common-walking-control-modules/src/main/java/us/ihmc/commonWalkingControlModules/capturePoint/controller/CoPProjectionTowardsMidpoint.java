@@ -66,7 +66,7 @@ public class CoPProjectionTowardsMidpoint implements ICPControllerParameters.Fee
                                                    "When projecting the CoP into the foot, move up to this far from the edge if possible",
                                                    registry,
                                                    0.04);
-      useCoPProjection = new BooleanParameter(yoNamePrefix + "UseCoPProjection", registry, true);
+      useCoPProjection = new BooleanParameter(yoNamePrefix + "UseCoPProjection", registry, false);
 
       dotProductForFootEdgeProjection = new YoDouble(yoNamePrefix + "DotProductForFootEdgeProjection", registry);
       momentumShiftedICPOnProjection = new YoDouble(yoNamePrefix + "momentumShiftedICPOnProjection", registry);
