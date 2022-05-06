@@ -12,6 +12,7 @@ import java.util.stream.IntStream;
 import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DData;
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
 import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -63,7 +64,7 @@ public class ReachabilitySphereMapCalculator implements Controller
 
    public ReachabilitySphereMapCalculator(OneDoFJointBasics[] robotArmJoints, ControllerOutput controllerOutput)
    {
-      this(robotArmJoints, controllerOutput, 20);
+      this(robotArmJoints, controllerOutput, 1);
    }
 
    public ReachabilitySphereMapCalculator(OneDoFJointBasics[] robotArmJoints, ControllerOutput controllerOutput, int numberOfThreads)
@@ -178,6 +179,11 @@ public class ReachabilitySphereMapCalculator implements Controller
       return solvers[0].getRobotArmJoints();
    }
 
+   public FramePose3DReadOnly getControlFramePose()
+   {
+      return solvers[0].getControlFramePoseInEndEffector();
+   }
+
    /**
     * Sets the transform of the end-effector's frame of interest with respect to the end-effector's
     * body-fixed frame.
@@ -247,11 +253,17 @@ public class ReachabilitySphereMapCalculator implements Controller
 
    private final YoInteger currentVoxelIndex = new YoInteger("currentVoxelIndex", registry);
 
+   
+   private final FramePoint3D current = new FramePoint3D();
+   private final FrameVector3D error = new FrameVector3D();
+
    @Override
    public void doControl()
    {
       if (isDone.getValue())
          return;
+
+      Arrays.fill(solverResults, false);
 
       IntStream.range(0, solvers.length).parallel().forEach(solverIndex ->
       {
@@ -271,12 +283,21 @@ public class ReachabilitySphereMapCalculator implements Controller
             currentEvaluationPose.getOrientation().setToZero();
          }
 
-         boolean success = solvers[solverIndex].solveFor(voxel.getPosition());
+         FramePose3D solverInput = solverInputs[solverIndex];
+         solverInput.setReferenceFrame(ReferenceFrame.getWorldFrame());
+         solverInput.getPosition().setMatchingFrame(voxel.getPosition());
+
+         boolean success = solvers[solverIndex].solveFor(solverInput.getPosition());
          solverResults[solverIndex] = success;
 
          if (success)
          {
-            voxel.registerReachablePosition(solvers[solverIndex].getRobotArmJoints());
+            current.setIncludingFrame(solvers[solverIndex].getControlFramePoseInEndEffector().getPosition());
+            current.changeFrame(ReferenceFrame.getWorldFrame());
+            error.sub(solverInput.getPosition(), current);
+            System.out.println(error.length());
+            
+            voxel.registerReachablePosition(solverInput.getPosition(), solvers[solverIndex].getRobotArmJoints());
             if (solverIndex == 0)
                writeSolverSolution(solvers[solverIndex], controllerOutput);
             computeVoxel(voxel, solverIndex);
@@ -292,7 +313,7 @@ public class ReachabilitySphereMapCalculator implements Controller
             if (voxelCompletedListener != null)
                voxelCompletedListener.accept(solverVoxels[solverIndex]);
          }
-         else
+         else if (solverVoxels[solverIndex] != null)
          {
             if (voxelUnreachableListener != null)
                voxelUnreachableListener.accept(solverVoxels[solverIndex]);
@@ -326,7 +347,7 @@ public class ReachabilitySphereMapCalculator implements Controller
 
             if (solver.solveForRay(solverInput))
             {
-               voxel.registerReachableRay(rayIndex, solver.getRobotArmJoints());
+               voxel.registerReachableRay(rayIndex, solverInput, solver.getRobotArmJoints());
 
                if (solverIndex == 0)
                   writeSolverSolution(solver, controllerOutput);
@@ -350,7 +371,7 @@ public class ReachabilitySphereMapCalculator implements Controller
 
                if (solver.solveForPose(solverInput))
                {
-                  voxel.registerReachablePose(rayIndex, rotationAroundRayIndex, solver.getRobotArmJoints());
+                  voxel.registerReachablePose(rayIndex, rotationAroundRayIndex, solverInput, solver.getRobotArmJoints());
 
                   if (solverIndex == 0)
                      writeSolverSolution(solver, controllerOutput);

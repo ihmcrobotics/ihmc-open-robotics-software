@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
@@ -18,8 +19,12 @@ import cern.colt.Arrays;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DData;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.javafx.JavaFXMissingTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -33,6 +38,12 @@ public class ReachabilityMapFileLoader
    private NPOIFSFileSystem fileSystem;
    private HSSFWorkbook workBookToLoad;
    private final Voxel3DGrid loadedGrid;
+
+   private Consumer<Voxel3DData> voxel3DPositionDataLoadedListener = null;
+   private Consumer<Voxel3DData> voxel3DRayDataLoadedListener = null;
+   private Consumer<Voxel3DData> voxel3DPoseDataLoadedListener = null;
+
+   private final FramePose3D controlFramePose;
 
    public ReachabilityMapFileLoader(String robotName, RigidBodyBasics rootBody)
    {
@@ -67,9 +78,45 @@ public class ReachabilityMapFileLoader
 
       loadedGrid = createGrid(rootBody, referenceFrames, descriptionSheet);
 
+      controlFramePose = loadControlFramePose(rootBody, descriptionSheet);
+
       loadData();
 
       close();
+   }
+
+   public FramePose3D getControlFramePose()
+   {
+      return controlFramePose;
+   }
+
+   private FramePose3D loadControlFramePose(RigidBodyBasics rootBody, HSSFSheet descriptionSheet)
+   {
+      RigidBodyBasics endEffector = MultiBodySystemTools.collectSubtreeEndEffectors(rootBody)[0];
+
+      HSSFCell positionCell = descriptionSheet.getRow(16).getCell(2);
+      HSSFCell orientationCell = descriptionSheet.getRow(16).getCell(4);
+
+      FramePose3D controlFramePose = new FramePose3D(endEffector.getParentJoint().getFrameAfterJoint());
+      controlFramePose.getPosition().set(parseDoubleArray(positionCell.getStringCellValue()));
+      controlFramePose.getOrientation().set(new YawPitchRoll(parseDoubleArray(orientationCell.getStringCellValue())));
+
+      return controlFramePose;
+   }
+
+   public void setVoxel3DPositionDataLoadedListener(Consumer<Voxel3DData> voxel3dPositionDataLoadedListener)
+   {
+      voxel3DPositionDataLoadedListener = voxel3dPositionDataLoadedListener;
+   }
+
+   public void setVoxel3DRayDataLoadedListener(Consumer<Voxel3DData> voxel3dRayDataLoadedListener)
+   {
+      voxel3DRayDataLoadedListener = voxel3dRayDataLoadedListener;
+   }
+
+   public void setVoxel3DPoseDataLoadedListener(Consumer<Voxel3DData> voxel3dPoseDataLoadedListener)
+   {
+      voxel3DPoseDataLoadedListener = voxel3dPoseDataLoadedListener;
    }
 
    public static File selectionFileDialog()
@@ -180,11 +227,15 @@ public class ReachabilityMapFileLoader
             int xIndex = (int) currentRow.getCell(cellIndex++).getNumericCellValue();
             int yIndex = (int) currentRow.getCell(cellIndex++).getNumericCellValue();
             int zIndex = (int) currentRow.getCell(cellIndex++).getNumericCellValue();
+            Point3D desiredPosition = new Point3D(parseDoubleArray(currentRow.getCell(cellIndex++).getStringCellValue()));
             float[] jointPositions = parseFloatArray(currentRow.getCell(cellIndex++).getStringCellValue());
             float[] jointTorques = parseFloatArray(currentRow.getCell(cellIndex++).getStringCellValue());
-
             Voxel3DData voxel = loadedGrid.getOrCreateVoxel(xIndex, yIndex, zIndex);
-            voxel.registerReachablePosition(jointPositions, jointTorques);
+            voxel.registerReachablePosition(desiredPosition, jointPositions, jointTorques);
+
+            if (voxel3DPositionDataLoadedListener != null)
+               voxel3DPositionDataLoadedListener.accept(voxel);
+
             currentRow = currentDataSheet.getRow(currentRowIndex++);
          }
 
@@ -214,11 +265,17 @@ public class ReachabilityMapFileLoader
             int yIndex = (int) currentRow.getCell(cellIndex++).getNumericCellValue();
             int zIndex = (int) currentRow.getCell(cellIndex++).getNumericCellValue();
             int rayIndex = (int) currentRow.getCell(cellIndex++).getNumericCellValue();
+            Point3D desiredPosition = new Point3D(parseDoubleArray(currentRow.getCell(cellIndex++).getStringCellValue()));
+            YawPitchRoll desiredOrientation = new YawPitchRoll(parseDoubleArray(currentRow.getCell(cellIndex++).getStringCellValue()));
             float[] jointPositions = parseFloatArray(currentRow.getCell(cellIndex++).getStringCellValue());
             float[] jointTorques = parseFloatArray(currentRow.getCell(cellIndex++).getStringCellValue());
 
             Voxel3DData voxel = loadedGrid.getOrCreateVoxel(xIndex, yIndex, zIndex);
-            voxel.registerReachableRay(rayIndex, jointPositions, jointTorques);
+            voxel.registerReachableRay(rayIndex, new Pose3D(desiredPosition, desiredOrientation), jointPositions, jointTorques);
+
+            if (voxel3DRayDataLoadedListener != null)
+               voxel3DRayDataLoadedListener.accept(voxel);
+
             currentRow = currentDataSheet.getRow(currentRowIndex++);
          }
 
@@ -249,11 +306,17 @@ public class ReachabilityMapFileLoader
             int zIndex = (int) currentRow.getCell(cellIndex++).getNumericCellValue();
             int rayIndex = (int) currentRow.getCell(cellIndex++).getNumericCellValue();
             int rotationIndex = (int) currentRow.getCell(cellIndex++).getNumericCellValue();
+            Point3D desiredPosition = new Point3D(parseDoubleArray(currentRow.getCell(cellIndex++).getStringCellValue()));
+            YawPitchRoll desiredOrientation = new YawPitchRoll(parseDoubleArray(currentRow.getCell(cellIndex++).getStringCellValue()));
             float[] jointPositions = parseFloatArray(currentRow.getCell(cellIndex++).getStringCellValue());
             float[] jointTorques = parseFloatArray(currentRow.getCell(cellIndex++).getStringCellValue());
 
             Voxel3DData voxel = loadedGrid.getOrCreateVoxel(xIndex, yIndex, zIndex);
-            voxel.registerReachablePose(rayIndex, rotationIndex, jointPositions, jointTorques);
+            voxel.registerReachablePose(rayIndex, rotationIndex, new Pose3D(desiredPosition, desiredOrientation), jointPositions, jointTorques);
+
+            if (voxel3DPoseDataLoadedListener != null)
+               voxel3DPoseDataLoadedListener.accept(voxel);
+
             currentRow = currentDataSheet.getRow(currentRowIndex++);
          }
 
@@ -273,9 +336,30 @@ public class ReachabilityMapFileLoader
 
       String[] elements = string.split(",");
       float[] array = new float[elements.length];
+
       for (int i = 0; i < elements.length; i++)
       {
-         array[i] = Float.parseFloat(string);
+         array[i] = Float.parseFloat(elements[i].trim());
+      }
+      return array;
+   }
+
+   private double[] parseDoubleArray(String string)
+   {
+      if (string == null)
+         return null;
+
+      string = string.replace("[", "").replace("]", "").trim();
+
+      if (string.isEmpty())
+         return null;
+
+      String[] elements = string.split(",");
+      double[] array = new double[elements.length];
+
+      for (int i = 0; i < elements.length; i++)
+      {
+         array[i] = Double.parseDouble(elements[i].trim());
       }
       return array;
    }

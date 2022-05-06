@@ -19,11 +19,15 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DData;
 import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DKey;
-import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.VoxelJointData;
+import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.VoxelExtraData;
 import us.ihmc.commons.nio.FileTools;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 
 public class ReachabilityMapFileWriter
@@ -47,11 +51,15 @@ public class ReachabilityMapFileWriter
 
    private final String robotName;
 
-   public static void exportVoxel3DGridToFile(String robotName, Class<?> classForFilePath, OneDoFJointBasics[] robotArmJoints, Voxel3DGrid gridToWrite)
+   public static void exportVoxel3DGridToFile(String robotName,
+                                              Class<?> classForFilePath,
+                                              OneDoFJointBasics[] robotArmJoints,
+                                              FramePose3DReadOnly controlFramePose,
+                                              Voxel3DGrid gridToWrite)
          throws IOException
    {
       ReachabilityMapFileWriter writer = new ReachabilityMapFileWriter(robotName, classForFilePath);
-      writer.write(robotArmJoints, gridToWrite);
+      writer.write(robotArmJoints, controlFramePose, gridToWrite);
       writer.exportAndClose();
    }
 
@@ -72,9 +80,9 @@ public class ReachabilityMapFileWriter
       }
    }
 
-   public void write(OneDoFJointBasics[] robotArmJoints, Voxel3DGrid gridToWrite)
+   public void write(OneDoFJointBasics[] robotArmJoints, FramePose3DReadOnly controlFramePose, Voxel3DGrid gridToWrite)
    {
-      createDescriptionSheet(robotName, robotArmJoints, gridToWrite);
+      createDescriptionSheet(robotName, robotArmJoints, controlFramePose, gridToWrite);
 
       for (int voxelIndex = 0; voxelIndex < gridToWrite.getNumberOfVoxels(); voxelIndex++)
       {
@@ -94,7 +102,7 @@ public class ReachabilityMapFileWriter
       return Paths.get("resources", pathNames.toArray(new String[0]));
    }
 
-   private void createDescriptionSheet(String robotName, OneDoFJointBasics[] robotArmJoints, Voxel3DGrid gridToWrite)
+   private void createDescriptionSheet(String robotName, OneDoFJointBasics[] robotArmJoints, FramePose3DReadOnly controlFramePose, Voxel3DGrid gridToWrite)
    {
       HSSFSheet descriptionSheet = workbook.createSheet("Description");
       int currentRowIndex = 0;
@@ -168,21 +176,38 @@ public class ReachabilityMapFileWriter
       currentRow.createCell(currentCellIndex++).setCellValue(transformToParent.getM22());
       currentRow.createCell(currentCellIndex++).setCellValue(transformToParent.getM23());
 
-      currentCellIndex = 1;
+      currentCellIndex = 0;
       currentRow = descriptionSheet.createRow(currentRowIndex++);
-      HSSFRow lowerLimitRow = descriptionSheet.createRow(currentRowIndex++);
-      HSSFRow upperLimitRow = descriptionSheet.createRow(currentRowIndex++);
+      HSSFRow positionLowerLimitRow = descriptionSheet.createRow(currentRowIndex++);
+      HSSFRow positionUpperLimitRow = descriptionSheet.createRow(currentRowIndex++);
+      HSSFRow effortLowerLimitRow = descriptionSheet.createRow(currentRowIndex++);
+      HSSFRow effortUpperLimitRow = descriptionSheet.createRow(currentRowIndex++);
 
       currentRow.createCell(currentCellIndex).setCellValue("Kinematic chain joints:");
-      lowerLimitRow.createCell(currentCellIndex).setCellValue("lower limit:");
-      upperLimitRow.createCell(currentCellIndex++).setCellValue("upper limit:");
+      positionLowerLimitRow.createCell(currentCellIndex).setCellValue("position lower limit:");
+      positionUpperLimitRow.createCell(currentCellIndex).setCellValue("position upper limit:");
+      effortLowerLimitRow.createCell(currentCellIndex).setCellValue("effort lower limit:");
+      effortUpperLimitRow.createCell(currentCellIndex++).setCellValue("effort upper limit:");
 
       for (int i = 0; i < robotArmJoints.length; i++)
       {
          currentRow.createCell(currentCellIndex).setCellValue(robotArmJoints[i].getName());
-         lowerLimitRow.createCell(currentCellIndex).setCellValue(robotArmJoints[i].getJointLimitLower());
-         upperLimitRow.createCell(currentCellIndex++).setCellValue(robotArmJoints[i].getJointLimitUpper());
+         positionLowerLimitRow.createCell(currentCellIndex).setCellValue(robotArmJoints[i].getJointLimitLower());
+         positionUpperLimitRow.createCell(currentCellIndex).setCellValue(robotArmJoints[i].getJointLimitUpper());
+         effortLowerLimitRow.createCell(currentCellIndex).setCellValue(robotArmJoints[i].getEffortLimitLower());
+         effortUpperLimitRow.createCell(currentCellIndex++).setCellValue(robotArmJoints[i].getEffortLimitUpper());
       }
+
+      currentRow = descriptionSheet.createRow(currentRowIndex++);
+      FramePose3D controlFramePoseInParentJoint = new FramePose3D(controlFramePose);
+      controlFramePoseInParentJoint.changeFrame(robotArmJoints[robotArmJoints.length - 1].getFrameAfterJoint());
+      currentCellIndex = 0;
+      currentRow.createCell(currentCellIndex++).setCellValue("Control frame pose in parent joint:");
+      currentRow.createCell(currentCellIndex++).setCellValue("position (xyz)=");
+      currentRow.createCell(currentCellIndex++).setCellValue(printPosition(controlFramePoseInParentJoint.getPosition()));
+      currentRow.createCell(currentCellIndex++).setCellValue("orientation (ypr)=");
+      currentRow.createCell(currentCellIndex++).setCellValue(printOrientation(controlFramePoseInParentJoint.getOrientation()));
+
    }
 
    private static String prependDateToFileName(String fileName)
@@ -205,19 +230,20 @@ public class ReachabilityMapFileWriter
 
    private void writePositionData(Voxel3DData voxel3DData)
    {
-      if (poseDataSheet == null || positionDataRow > MAX_NUMBER_OF_ROWS)
+      if (positionDataSheet == null || positionDataRow > MAX_NUMBER_OF_ROWS)
          addPositionDataSheet();
 
       Voxel3DKey key = voxel3DData.getKey();
-      VoxelJointData positionJointData = voxel3DData.getPositionJointData();
+      VoxelExtraData positionExtraData = voxel3DData.getPositionExtraData();
 
       HSSFRow row = positionDataSheet.createRow(positionDataRow++);
       int cellIndex = 0;
       row.createCell(cellIndex++).setCellValue((double) key.getX());
       row.createCell(cellIndex++).setCellValue((double) key.getY());
       row.createCell(cellIndex++).setCellValue((double) key.getZ());
-      row.createCell(cellIndex++).setCellValue(Arrays.toString(positionJointData.getJointPositions()));
-      row.createCell(cellIndex++).setCellValue(Arrays.toString(positionJointData.getJointTorques()));
+      row.createCell(cellIndex++).setCellValue(printPosition(positionExtraData.getDesiredPosition()));
+      row.createCell(cellIndex++).setCellValue(Arrays.toString(positionExtraData.getJointPositions()));
+      row.createCell(cellIndex++).setCellValue(Arrays.toString(positionExtraData.getJointTorques()));
    }
 
    private void writeRayData(Voxel3DData voxel3DData)
@@ -230,11 +256,14 @@ public class ReachabilityMapFileWriter
 
       for (int rayIndex = 0; rayIndex < voxel3DData.getNumberOfRays(); rayIndex++)
       {
+         if (!voxel3DData.isRayReachable(rayIndex))
+            continue;
+
          if (rayDataRow > MAX_NUMBER_OF_ROWS)
             addRayDataSheet();
 
          Voxel3DKey key = voxel3DData.getKey();
-         VoxelJointData rayJointData = voxel3DData.getRayJointData(rayIndex);
+         VoxelExtraData rayExtraData = voxel3DData.getRayExtraData(rayIndex);
 
          HSSFRow row = rayDataSheet.createRow(rayDataRow++);
          int cellIndex = 0;
@@ -242,8 +271,10 @@ public class ReachabilityMapFileWriter
          row.createCell(cellIndex++).setCellValue((double) key.getY());
          row.createCell(cellIndex++).setCellValue((double) key.getZ());
          row.createCell(cellIndex++).setCellValue((double) rayIndex);
-         row.createCell(cellIndex++).setCellValue(Arrays.toString(rayJointData.getJointPositions()));
-         row.createCell(cellIndex++).setCellValue(Arrays.toString(rayJointData.getJointTorques()));
+         row.createCell(cellIndex++).setCellValue(printPosition(rayExtraData.getDesiredPosition()));
+         row.createCell(cellIndex++).setCellValue(printOrientation(rayExtraData.getDesiredOrientation()));
+         row.createCell(cellIndex++).setCellValue(Arrays.toString(rayExtraData.getJointPositions()));
+         row.createCell(cellIndex++).setCellValue(Arrays.toString(rayExtraData.getJointTorques()));
       }
    }
 
@@ -259,11 +290,14 @@ public class ReachabilityMapFileWriter
       {
          for (int rotationIndex = 0; rotationIndex < voxel3DData.getNumberOfRotationsAroundRay(); rotationIndex++)
          {
+            if (!voxel3DData.isPoseReachable(rayIndex, rotationIndex))
+               continue;
+
             if (poseDataRow > MAX_NUMBER_OF_ROWS)
                addPoseDataSheet();
 
             Voxel3DKey key = voxel3DData.getKey();
-            VoxelJointData poseJointData = voxel3DData.getPoseJointData(rayIndex, rotationIndex);
+            VoxelExtraData poseExtraData = voxel3DData.getPoseExtraData(rayIndex, rotationIndex);
 
             HSSFRow row = poseDataSheet.createRow(poseDataRow++);
             int cellIndex = 0;
@@ -272,10 +306,22 @@ public class ReachabilityMapFileWriter
             row.createCell(cellIndex++).setCellValue((double) key.getZ());
             row.createCell(cellIndex++).setCellValue((double) rayIndex);
             row.createCell(cellIndex++).setCellValue((double) rotationIndex);
-            row.createCell(cellIndex++).setCellValue(Arrays.toString(poseJointData.getJointPositions()));
-            row.createCell(cellIndex++).setCellValue(Arrays.toString(poseJointData.getJointTorques()));
+            row.createCell(cellIndex++).setCellValue(printPosition(poseExtraData.getDesiredPosition()));
+            row.createCell(cellIndex++).setCellValue(printOrientation(poseExtraData.getDesiredOrientation()));
+            row.createCell(cellIndex++).setCellValue(Arrays.toString(poseExtraData.getJointPositions()));
+            row.createCell(cellIndex++).setCellValue(Arrays.toString(poseExtraData.getJointTorques()));
          }
       }
+   }
+
+   private static String printPosition(Point3DReadOnly point)
+   {
+      return EuclidCoreIOTools.getStringOf("[", "]", ", ", point.getX(), point.getY(), point.getZ());
+   }
+
+   private static String printOrientation(Orientation3DReadOnly orientation)
+   {
+      return EuclidCoreIOTools.getStringOf("[", "]", ", ", orientation.getYaw(), orientation.getPitch(), orientation.getRoll());
    }
 
    private void addPositionDataSheet()
@@ -287,22 +333,25 @@ public class ReachabilityMapFileWriter
       headerRow.createCell(currentCellIndex++).setCellValue("xIndex");
       headerRow.createCell(currentCellIndex++).setCellValue("yIndex");
       headerRow.createCell(currentCellIndex++).setCellValue("zIndex");
-      headerRow.createCell(currentCellIndex++).setCellValue("positions");
-      headerRow.createCell(currentCellIndex++).setCellValue("torques");
+      headerRow.createCell(currentCellIndex++).setCellValue("desired position (xyz)");
+      headerRow.createCell(currentCellIndex++).setCellValue("joint positions");
+      headerRow.createCell(currentCellIndex++).setCellValue("joint torques");
    }
 
    private void addRayDataSheet()
    {
       rayDataSheet = workbook.createSheet(getRayDataSheetName(rayDataSheetNameIndex++));
       rayDataRow = 0;
-      HSSFRow headerRow = positionDataSheet.createRow(rayDataRow++);
+      HSSFRow headerRow = rayDataSheet.createRow(rayDataRow++);
       int currentCellIndex = 0;
       headerRow.createCell(currentCellIndex++).setCellValue("xIndex");
       headerRow.createCell(currentCellIndex++).setCellValue("yIndex");
       headerRow.createCell(currentCellIndex++).setCellValue("zIndex");
       headerRow.createCell(currentCellIndex++).setCellValue("rayIndex");
-      headerRow.createCell(currentCellIndex++).setCellValue("positions");
-      headerRow.createCell(currentCellIndex++).setCellValue("torques");
+      headerRow.createCell(currentCellIndex++).setCellValue("desired position (xyz)");
+      headerRow.createCell(currentCellIndex++).setCellValue("desired orientation (ypr)");
+      headerRow.createCell(currentCellIndex++).setCellValue("joint positions");
+      headerRow.createCell(currentCellIndex++).setCellValue("joint torques");
    }
 
    private void addPoseDataSheet()
@@ -316,8 +365,10 @@ public class ReachabilityMapFileWriter
       headerRow.createCell(currentCellIndex++).setCellValue("zIndex");
       headerRow.createCell(currentCellIndex++).setCellValue("rayIndex");
       headerRow.createCell(currentCellIndex++).setCellValue("rotationAroundRayIndex");
-      headerRow.createCell(currentCellIndex++).setCellValue("positions");
-      headerRow.createCell(currentCellIndex++).setCellValue("torques");
+      headerRow.createCell(currentCellIndex++).setCellValue("desired position (xyz)");
+      headerRow.createCell(currentCellIndex++).setCellValue("desired orientation (ypr)");
+      headerRow.createCell(currentCellIndex++).setCellValue("joint positions");
+      headerRow.createCell(currentCellIndex++).setCellValue("joint torques");
    }
 
    public static String getPositionDataSheetName(int sheetIndex)
