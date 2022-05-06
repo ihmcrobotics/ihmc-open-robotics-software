@@ -328,6 +328,7 @@ public class KinematicsToolboxController extends ToolboxController
     * burden.
     */
    private final YoDouble collisionActivationDistanceThreshold = new YoDouble("collisionActivationDistanceThreshold", registry);
+   private final YoDouble collisionMinDistance = new YoDouble("collisionMinDistance", registry);
    private final YoDouble maxSelfCollisionResolutionVelocity = new YoDouble("maxSelfCollisionResolutionVelocity", registry);
    private final YoDouble maxStaticCollisionResolutionVelocity = new YoDouble("maxStaticCollisionResolutionVelocity", registry);
    /** Sets the maximum number of collisions to create YoVariables for. */
@@ -437,6 +438,7 @@ public class KinematicsToolboxController extends ToolboxController
       enableSelfCollisionAvoidance.set(true);
       enableStaticCollisionAvoidance.set(true);
       collisionActivationDistanceThreshold.set(0.10);
+      collisionMinDistance.set(0.001);
       maxSelfCollisionResolutionVelocity.set(0.10);
       maxStaticCollisionResolutionVelocity.set(100.0);
       setupCollisionVisualization();
@@ -1335,7 +1337,7 @@ public class KinematicsToolboxController extends ToolboxController
          RigidBodyBasics bodyB = collidableB.getRigidBody();
 
          // Compute the desired velocity magnitude to resolve the collision in 1 tick.
-         double sigma = -collisionData.getSignedDistance();
+         double sigma = -(collisionData.getSignedDistance() - collisionMinDistance.getValue());
          double sigmaDot = sigma / updateDT;
          if (bodyB != null)
             sigmaDot = Math.min(sigmaDot, maxSelfCollisionResolutionVelocity.getValue());
