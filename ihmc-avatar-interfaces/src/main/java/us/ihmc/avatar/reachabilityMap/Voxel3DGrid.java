@@ -18,7 +18,9 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -132,6 +134,11 @@ public class Voxel3DGrid implements ReferenceFrameHolder
    public void destroy(Voxel3DData voxel)
    {
       voxels[voxel.getKey().getIndex()] = null;
+   }
+
+   public FramePoint3DReadOnly getVoxelPosition(int index)
+   {
+      return new Voxel3DData(new Voxel3DKey(index, gridSizeVoxels)).getPosition();
    }
 
    private double toCoordinate(int index)
@@ -266,9 +273,9 @@ public class Voxel3DGrid implements ReferenceFrameHolder
       private final Voxel3DKey key;
       private final FramePoint3DReadOnly position;
 
-      private VoxelJointData positionJointData;
-      private VoxelJointData[] rayJointData;
-      private VoxelJointData[] poseJointData;
+      private VoxelExtraData positionExtraData;
+      private VoxelExtraData[] rayExtraData;
+      private VoxelExtraData[] poseExtraData;
 
       public Voxel3DData(Voxel3DKey key)
       {
@@ -276,71 +283,77 @@ public class Voxel3DGrid implements ReferenceFrameHolder
          position = new FramePoint3D(getReferenceFrame(), toCoordinate(key.x), toCoordinate(key.y), toCoordinate(key.z));
       }
 
-      public void registerReachablePosition(float[] jointPositions, float[] jointTorques)
+      public void registerReachablePosition(Point3DReadOnly desiredPosition, float[] jointPositions, float[] jointTorques)
       {
          if ((jointPositions == null || jointPositions.length == 0) && (jointTorques == null || jointTorques.length == 0))
             return;
 
-         positionJointData = new VoxelJointData();
-         positionJointData.jointPositions = jointPositions;
-         positionJointData.jointTorques = jointTorques;
+         positionExtraData = new VoxelExtraData();
+         positionExtraData.setDesiredPosition(desiredPosition);
+         positionExtraData.jointPositions = jointPositions;
+         positionExtraData.jointTorques = jointTorques;
       }
 
-      public void registerReachablePosition(OneDoFJointReadOnly[] joints)
+      public void registerReachablePosition(Point3DReadOnly desiredPosition, OneDoFJointReadOnly[] joints)
       {
-         positionJointData = new VoxelJointData();
-         positionJointData.setJointPositions(joints);
-         positionJointData.setJointTorques(joints);
+         positionExtraData = new VoxelExtraData();
+         positionExtraData.setDesiredPosition(desiredPosition);
+         positionExtraData.setJointPositions(joints);
+         positionExtraData.setJointTorques(joints);
       }
 
-      public void registerReachableRay(int rayIndex, float[] jointPositions, float[] jointTorques)
+      public void registerReachableRay(int rayIndex, Pose3DReadOnly desiredPose, float[] jointPositions, float[] jointTorques)
       {
-         if ((jointPositions == null || jointPositions.length == 0) && (jointTorques == null || jointTorques.length == 0))
+         if (desiredPose == null && (jointPositions == null || jointPositions.length == 0) && (jointTorques == null || jointTorques.length == 0))
             return;
 
-         if (rayJointData == null)
-            rayJointData = new VoxelJointData[sphereVoxelShape.getNumberOfRays()];
+         if (rayExtraData == null)
+            rayExtraData = new VoxelExtraData[sphereVoxelShape.getNumberOfRays()];
 
-         VoxelJointData jointData = new VoxelJointData();
+         VoxelExtraData jointData = new VoxelExtraData();
+         jointData.setDesiredPose(desiredPose);
          jointData.jointPositions = jointPositions;
          jointData.jointTorques = jointTorques;
-         rayJointData[rayIndex] = jointData;
+         rayExtraData[rayIndex] = jointData;
       }
 
-      public void registerReachableRay(int rayIndex, OneDoFJointReadOnly[] joints)
+      public void registerReachableRay(int rayIndex, Pose3DReadOnly desiredPose, OneDoFJointReadOnly[] joints)
       {
-         if (rayJointData == null)
-            rayJointData = new VoxelJointData[sphereVoxelShape.getNumberOfRays()];
+         if (rayExtraData == null)
+            rayExtraData = new VoxelExtraData[sphereVoxelShape.getNumberOfRays()];
 
-         VoxelJointData jointData = new VoxelJointData();
-         jointData.setJointPositions(joints);
-         jointData.setJointTorques(joints);
-         rayJointData[rayIndex] = jointData;
+         VoxelExtraData extraData = new VoxelExtraData();
+         extraData.setDesiredPose(desiredPose);
+         extraData.setJointPositions(joints);
+         extraData.setJointTorques(joints);
+         rayExtraData[rayIndex] = extraData;
       }
 
-      public void registerReachablePose(int rayIndex, int rotationAroundRayIndex, float[] jointPositions, float[] jointTorques)
+      public void registerReachablePose(int rayIndex, int rotationAroundRayIndex, Pose3DReadOnly desiredPose, float[] jointPositions, float[] jointTorques)
       {
-         if ((jointPositions == null || jointPositions.length == 0) && (jointTorques == null || jointTorques.length == 0))
+         if (desiredPose == null && (jointPositions == null || jointPositions.length == 0) && (jointTorques == null || jointTorques.length == 0))
             return;
 
-         if (poseJointData == null)
-            poseJointData = new VoxelJointData[sphereVoxelShape.getNumberOfRays() * sphereVoxelShape.getNumberOfRotationsAroundRay()];
+         if (poseExtraData == null)
+            poseExtraData = new VoxelExtraData[sphereVoxelShape.getNumberOfRays() * sphereVoxelShape.getNumberOfRotationsAroundRay()];
 
-         VoxelJointData jointData = new VoxelJointData();
-         jointData.jointPositions = jointPositions;
-         jointData.jointTorques = jointTorques;
-         poseJointData[rayIndex * sphereVoxelShape.getNumberOfRotationsAroundRay() + rotationAroundRayIndex] = jointData;
+         VoxelExtraData extraData = new VoxelExtraData();
+         extraData.setDesiredPose(desiredPose);
+         extraData.jointPositions = jointPositions;
+         extraData.jointTorques = jointTorques;
+         poseExtraData[rayIndex * sphereVoxelShape.getNumberOfRotationsAroundRay() + rotationAroundRayIndex] = extraData;
       }
 
-      public void registerReachablePose(int rayIndex, int rotationAroundRayIndex, OneDoFJointReadOnly[] joints)
+      public void registerReachablePose(int rayIndex, int rotationAroundRayIndex, Pose3DReadOnly desiredPose, OneDoFJointReadOnly[] joints)
       {
-         if (poseJointData == null)
-            poseJointData = new VoxelJointData[sphereVoxelShape.getNumberOfRays() * sphereVoxelShape.getNumberOfRotationsAroundRay()];
+         if (poseExtraData == null)
+            poseExtraData = new VoxelExtraData[sphereVoxelShape.getNumberOfRays() * sphereVoxelShape.getNumberOfRotationsAroundRay()];
 
-         VoxelJointData jointData = new VoxelJointData();
-         jointData.setJointPositions(joints);
-         jointData.setJointTorques(joints);
-         poseJointData[rayIndex * sphereVoxelShape.getNumberOfRotationsAroundRay() + rotationAroundRayIndex] = jointData;
+         VoxelExtraData extraData = new VoxelExtraData();
+         extraData.setDesiredPose(desiredPose);
+         extraData.setJointPositions(joints);
+         extraData.setJointTorques(joints);
+         poseExtraData[rayIndex * sphereVoxelShape.getNumberOfRotationsAroundRay() + rotationAroundRayIndex] = extraData;
       }
 
       /**
@@ -351,7 +364,7 @@ public class Voxel3DGrid implements ReferenceFrameHolder
        */
       public double getD()
       {
-         if (rayJointData == null)
+         if (rayExtraData == null)
             return 0;
 
          double d = 0;
@@ -376,7 +389,7 @@ public class Voxel3DGrid implements ReferenceFrameHolder
        */
       public double getD0()
       {
-         if (poseJointData == null)
+         if (poseExtraData == null)
             return 0;
 
          double d0 = 0;
@@ -420,9 +433,9 @@ public class Voxel3DGrid implements ReferenceFrameHolder
 
       public boolean atLeastOneReachableRay()
       {
-         if (rayJointData == null)
+         if (rayExtraData == null)
             return false;
-         for (VoxelJointData jointData : rayJointData)
+         for (VoxelExtraData jointData : rayExtraData)
          {
             if (jointData != null)
                return true;
@@ -432,14 +445,14 @@ public class Voxel3DGrid implements ReferenceFrameHolder
 
       public boolean isRayReachable(int rayIndex)
       {
-         return rayJointData == null ? false : rayJointData[rayIndex] != null;
+         return rayExtraData == null ? false : rayExtraData[rayIndex] != null;
       }
 
       public boolean atLeastOneReachablePose()
       {
-         if (poseJointData == null)
+         if (poseExtraData == null)
             return false;
-         for (VoxelJointData jointData : poseJointData)
+         for (VoxelExtraData jointData : poseExtraData)
          {
             if (jointData != null)
                return true;
@@ -449,34 +462,50 @@ public class Voxel3DGrid implements ReferenceFrameHolder
 
       public boolean isPoseReachable(int rayIndex, int rotationIndex)
       {
-         return getPoseJointData(rayIndex, rotationIndex) != null;
+         return getPoseExtraData(rayIndex, rotationIndex) != null;
       }
 
-      public VoxelJointData getPositionJointData()
+      public VoxelExtraData getPositionExtraData()
       {
-         return positionJointData;
+         return positionExtraData;
       }
 
-      public VoxelJointData getRayJointData(int rayIndex)
+      public VoxelExtraData getRayExtraData(int rayIndex)
       {
-         return rayJointData[rayIndex];
-      }
-
-      public VoxelJointData getPoseJointData(int rayIndex, int rotationIndex)
-      {
-         if (poseJointData == null)
+         if (rayExtraData == null)
             return null;
-         return poseJointData[rayIndex * sphereVoxelShape.getNumberOfRotationsAroundRay() + rotationIndex];
+         return rayExtraData[rayIndex];
+      }
+
+      public VoxelExtraData getPoseExtraData(int rayIndex, int rotationIndex)
+      {
+         if (poseExtraData == null)
+            return null;
+         return poseExtraData[rayIndex * sphereVoxelShape.getNumberOfRotationsAroundRay() + rotationIndex];
       }
    }
 
-   public static class VoxelJointData
+   public static class VoxelExtraData
    {
+      private Point3D desiredPosition;
+      private Quaternion desiredOrientation;
       private float[] jointPositions;
       private float[] jointTorques;
 
-      public VoxelJointData()
+      public VoxelExtraData()
       {
+      }
+
+      public void setDesiredPosition(Point3DReadOnly desiredPosition)
+      {
+         this.desiredPosition = new Point3D(desiredPosition);
+         this.desiredOrientation = null;
+      }
+
+      public void setDesiredPose(Pose3DReadOnly desiredPose)
+      {
+         this.desiredPosition = new Point3D(desiredPose.getPosition());
+         this.desiredOrientation = new Quaternion(desiredPose.getOrientation());
       }
 
       public void setJointPositions(OneDoFJointReadOnly[] joints)
@@ -497,6 +526,16 @@ public class Voxel3DGrid implements ReferenceFrameHolder
          {
             jointTorques[i] = (float) joints[i].getTau();
          }
+      }
+
+      public Point3D getDesiredPosition()
+      {
+         return desiredPosition;
+      }
+
+      public Quaternion getDesiredOrientation()
+      {
+         return desiredOrientation;
       }
 
       public float[] getJointPositions()

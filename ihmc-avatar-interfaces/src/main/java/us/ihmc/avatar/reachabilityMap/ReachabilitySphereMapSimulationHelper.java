@@ -3,11 +3,11 @@ package us.ihmc.avatar.reachabilityMap;
 import java.io.IOException;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import us.ihmc.avatar.reachabilityMap.example.RobotParameters.RobotArmJointParameters;
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -17,7 +17,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
-import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizer;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizerControls;
 import us.ihmc.scs2.simulation.SimulationSession;
@@ -33,13 +32,13 @@ public class ReachabilitySphereMapSimulationHelper
 
    public enum VisualizationType
    {
-      PositionReach, DReach, D0Reach, WristManipulability, Unreachable;
+      PositionReach, RayReach, PoseReach, WristManipulability, Unreachable;
    };
 
    private final Map<VisualizationType, ObservableList<VisualDefinition>> voxelVisualization = new EnumMap<>(VisualizationType.class);
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-   private final YoEnum<VisualizationType> previousVisualizationType = new YoEnum<>("previousVisualizationType", registry, VisualizationType.class);
+   private final AtomicReference<VisualizationType> previousVisualizationType = new AtomicReference<>(VisualizationType.RayReach);
    private final YoEnum<VisualizationType> currentVisualizationType = new YoEnum<>("currentVisualizationType", registry, VisualizationType.class);
 
    public ReachabilitySphereMapSimulationHelper(RobotDefinition robotDefinition, String baseName, String endEffectorName)
@@ -60,8 +59,8 @@ public class ReachabilitySphereMapSimulationHelper
       calculator.setRobotCollisionModel(robotDefinition);
       robot.addController(calculator);
 
-      previousVisualizationType.set(VisualizationType.DReach);
-      currentVisualizationType.set(VisualizationType.DReach);
+      previousVisualizationType.set(VisualizationType.RayReach);
+      currentVisualizationType.set(VisualizationType.RayReach);
    }
 
    /**
@@ -134,10 +133,6 @@ public class ReachabilitySphereMapSimulationHelper
 
    private void setupVisualization()
    {
-      VisualDefinitionFactory visualDefinitionFactory = new VisualDefinitionFactory();
-      visualDefinitionFactory.appendTranslation(RobotArmJointParameters.getRootJoint().getJointOffset());
-      visualDefinitionFactory.addCoordinateSystem(1.0);
-      guiControls.addStaticVisuals(visualDefinitionFactory.getVisualDefinitions());
       guiControls.addStaticVisuals(ReachabilityMapTools.createReachibilityColorScaleVisuals());
       guiControls.addStaticVisuals(ReachabilityMapTools.createBoundingBoxVisuals(calculator.getVoxel3DGrid()));
 
@@ -178,8 +173,8 @@ public class ReachabilitySphereMapSimulationHelper
 
          if (voxel.getD() > 1e-3)
          {
-            voxelVisualization.get(VisualizationType.DReach).add(sphereVoxelShape.createDReachabilityVisual(voxel.getPosition(), 0.25, voxel.getD()));
-            voxelVisualization.get(VisualizationType.D0Reach).add(sphereVoxelShape.createDReachabilityVisual(voxel.getPosition(), 0.25, voxel.getD0()));
+            voxelVisualization.get(VisualizationType.RayReach).add(sphereVoxelShape.createDReachabilityVisual(voxel.getPosition(), 0.25, voxel.getD()));
+            voxelVisualization.get(VisualizationType.PoseReach).add(sphereVoxelShape.createDReachabilityVisual(voxel.getPosition(), 0.25, voxel.getD0()));
          }
          else
          {
@@ -189,7 +184,7 @@ public class ReachabilitySphereMapSimulationHelper
 
       currentVisualizationType.addListener(v ->
       {
-         guiControls.removeStaticVisuals(voxelVisualization.get(previousVisualizationType.getValue()));
+         guiControls.removeStaticVisuals(voxelVisualization.get(previousVisualizationType.get()));
          guiControls.addStaticVisuals(voxelVisualization.get(currentVisualizationType.getValue()));
          previousVisualizationType.set(currentVisualizationType.getValue());
       });
@@ -197,7 +192,11 @@ public class ReachabilitySphereMapSimulationHelper
 
    public void exportDataToFile(String robotName, Class<?> classForFilePath) throws IOException
    {
-      ReachabilityMapFileWriter.exportVoxel3DGridToFile(robotName, classForFilePath, calculator.getRobotArmJoints(), calculator.getVoxel3DGrid());
+      ReachabilityMapFileWriter.exportVoxel3DGridToFile(robotName,
+                                                        classForFilePath,
+                                                        calculator.getRobotArmJoints(),
+                                                        calculator.getControlFramePose(),
+                                                        calculator.getVoxel3DGrid());
    }
 
    public ReachabilitySphereMapCalculator getCalculator()
