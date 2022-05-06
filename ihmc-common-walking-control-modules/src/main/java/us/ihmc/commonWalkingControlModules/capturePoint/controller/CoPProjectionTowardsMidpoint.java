@@ -17,7 +17,9 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLine2d;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLine2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -32,6 +34,7 @@ public class CoPProjectionTowardsMidpoint implements ICPControllerParameters.Fee
 
    private final DoubleProvider minICPPushDelta;
    private final DoubleProvider maxCoPProjectionInside;
+   private final BooleanProvider useCoPProjection;
 
    private final YoDouble dotProductForFootEdgeProjection;
    private final YoDouble momentumShiftedICPOnProjection;
@@ -64,6 +67,7 @@ public class CoPProjectionTowardsMidpoint implements ICPControllerParameters.Fee
                                                    "When projecting the CoP into the foot, move up to this far from the edge if possible",
                                                    registry,
                                                    0.04);
+      useCoPProjection = new BooleanParameter(yoNamePrefix + "UseCoPProjection", registry, false);
 
       dotProductForFootEdgeProjection = new YoDouble(yoNamePrefix + "DotProductForFootEdgeProjection", registry);
       momentumShiftedICPOnProjection = new YoDouble(yoNamePrefix + "momentumShiftedICPOnProjection", registry);
@@ -120,6 +124,9 @@ public class CoPProjectionTowardsMidpoint implements ICPControllerParameters.Fee
       secondProjectionIntersection.setToNaN();
       projectionVector.setToNaN();
       projectionLine.setToNaN();
+
+      if (!useCoPProjection.getValue())
+         return;
 
       // Compute the projection vector and projection line.
       projectionVector.sub(currentICP, unconstrainedFeedbackCMP);
