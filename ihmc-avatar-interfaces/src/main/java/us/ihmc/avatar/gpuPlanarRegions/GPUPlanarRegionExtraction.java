@@ -22,6 +22,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.OpenCLFloatBuffer;
@@ -192,6 +193,7 @@ public class GPUPlanarRegionExtraction
       if (patchSizeChanged)
       {
          patchSizeChanged = false;
+         LogTools.info("Resizing patch image to {}x{}", patchImageWidth, patchImageHeight);
          nxImage.resize(patchImageWidth, patchImageHeight, openCLManager, null);
          nyImage.resize(patchImageWidth, patchImageHeight, openCLManager, null);
          nzImage.resize(patchImageWidth, patchImageHeight, openCLManager, null);
@@ -531,12 +533,44 @@ public class GPUPlanarRegionExtraction
 
    private void calculateDerivativeParameters()
    {
+      int previousPatchHeight = patchHeight;
+      int previousPatchWidth = patchWidth;
+      int previousPatchImageHeight = patchImageHeight;
+      int previousPatchImageWidth = patchImageWidth;
+      int previousFilterPatchImageHeight = filterPatchImageHeight;
+      int previousFilterPatchImageWidth = filterPatchImageWidth;
+
       patchHeight = parameters.getPatchSize();
       patchWidth = parameters.getPatchSize();
       patchImageHeight = imageHeight / patchHeight;
       patchImageWidth = imageWidth / patchWidth;
       filterPatchImageHeight = imageHeight / parameters.getDeadPixelFilterPatchSize();
       filterPatchImageWidth = imageWidth / parameters.getDeadPixelFilterPatchSize();
+
+      int newPatchHeight = patchHeight;
+      int newPatchWidth = patchWidth;
+      int newPatchImageHeight = patchImageHeight;
+      int newPatchImageWidth = patchImageWidth;
+      int newFilterPatchImageHeight = filterPatchImageHeight;
+      int newFilterPatchImageWidth = filterPatchImageWidth;
+
+      boolean changed = previousPatchHeight != newPatchHeight;
+      changed |= previousPatchWidth != newPatchWidth;
+      changed |= previousPatchImageHeight != newPatchImageHeight;
+      changed |= previousPatchImageWidth != newPatchImageWidth;
+      changed |= previousFilterPatchImageHeight != newFilterPatchImageHeight;
+      changed |= previousFilterPatchImageWidth != newFilterPatchImageWidth;
+
+      if (changed)
+      {
+         LogTools.info("Updated patch sizes:");
+         LogTools.info("newPatchHeight: {} -> {}", previousPatchHeight, newPatchHeight);
+         LogTools.info("newPatchWidth: {} -> {}", previousPatchWidth, newPatchWidth);
+         LogTools.info("newPatchImageHeight: {} -> {}", previousPatchImageHeight, newPatchImageHeight);
+         LogTools.info("newPatchImageWidth: {} -> {}", previousPatchImageWidth, newPatchImageWidth);
+         LogTools.info("newFilterPatchImageHeight: {} -> {}", previousFilterPatchImageHeight, newFilterPatchImageHeight);
+         LogTools.info("newFilterPatchImageWidth: {} -> {}", previousFilterPatchImageWidth, newFilterPatchImageWidth);
+      }
    }
 
    public void destroy()
