@@ -8,6 +8,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.message.Time;
 import sensor_msgs.Image;
+import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -58,6 +59,7 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
    private final TypedNotification<StoredPropertySetMessage> parametersNotification = new TypedNotification<>();
    private final TypedNotification<StoredPropertySetMessage> polygonizerParametersNotification = new TypedNotification<>();
    private final TypedNotification<StoredPropertySetMessage> concaveHullFactoryNotification = new TypedNotification<>();
+   private final TypedNotification<Empty> reconnectROS1Notification = new TypedNotification<>();
    private RealSenseHardwareManager realSenseHardwareManager;
    private BytedecoRealsenseL515 l515;
    private Mat depthU16C1Image;
@@ -85,6 +87,7 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
       ros2Helper.subscribeViaCallback(GPUPlanarRegionExtractionComms.PARAMETERS_INPUT, parametersNotification::set);
       ros2Helper.subscribeViaCallback(GPUPlanarRegionExtractionComms.POLYGONIZER_PARAMETERS_INPUT, polygonizerParametersNotification::set);
       ros2Helper.subscribeViaCallback(GPUPlanarRegionExtractionComms.CONVEX_HULL_FACTORY_PARAMETERS_INPUT, concaveHullFactoryNotification::set);
+      ros2Helper.subscribeViaCallback(GPUPlanarRegionExtractionComms.RECONNECT_ROS1_NODE, reconnectROS1Notification::set);
 
       thread = new PausablePeriodicThread("L515Node", UnitConversions.hertzToSeconds(31.0), 1, false, this::update);
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "L515Shutdown"));
@@ -228,6 +231,11 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
 //            }
 //            ros2Helper.publish(ROS2Tools.L515_DEPTH, videoPacket);
 
+            if (reconnectROS1Notification.poll())
+            {
+               ros1Helper.reconnectEverything();
+            }
+
             if (ros1DepthPublisher.isConnected() && ros1DepthCameraInfoPublisher.isConnected())
             {
                ros1DepthChannelBuffer.clear();
@@ -275,10 +283,10 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
 
    private void onPatchSizeResized()
    {
-      int patchWidth = gpuPlanarRegionExtraction.getPatchWidth();
-      int patchHeight = gpuPlanarRegionExtraction.getPatchHeight();
-      debugExtractionImage = new BytedecoImage(patchWidth, patchHeight, opencv_core.CV_8UC4);
-      int numberOfBytes = 4 * patchWidth * patchHeight;
+      int patchImageWidth = gpuPlanarRegionExtraction.getPatchImageWidth();
+      int patchImageHeight = gpuPlanarRegionExtraction.getPatchImageHeight();
+      debugExtractionImage = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_8UC4);
+      int numberOfBytes = 4 * patchImageWidth * patchImageHeight;
       ros1DebugExtractionImageChannelBuffer = ros1DebugExtractionImagePublisher.getChannelBufferFactory().getBuffer(numberOfBytes);
    }
 
