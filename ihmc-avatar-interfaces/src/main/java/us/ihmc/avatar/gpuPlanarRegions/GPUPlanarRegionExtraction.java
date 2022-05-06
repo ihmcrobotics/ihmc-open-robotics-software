@@ -14,6 +14,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.matrix.LinearTransform3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -454,8 +455,11 @@ public class GPUPlanarRegionExtraction
          List<PlanarRegion> planarRegions = new ArrayList<>();
          try
          {
+            // Going through LinearTransform3D first prevents NotARotationMatrix exceptions.
+            LinearTransform3D linearTransform3D = new LinearTransform3D(EuclidGeometryTools.axisAngleFromZUpToVector3D(gpuPlanarRegion.getNormal()));
+            linearTransform3D.normalize();
             FrameQuaternion orientation = new FrameQuaternion();
-            orientation.setIncludingFrame(cameraFrame, EuclidGeometryTools.axisAngleFromZUpToVector3D(gpuPlanarRegion.getNormal()));
+            orientation.setIncludingFrame(cameraFrame, linearTransform3D.getAsQuaternion());
             orientation.changeFrame(ReferenceFrame.getWorldFrame());
 
             // First compute the set of concave hulls for this region
