@@ -154,11 +154,51 @@ public class ReachabilityMapFileLoader
 
    private void loadData()
    {
+      loadPositionData();
+      loadRayData();
+      loadPoseData();
+   }
+
+   private void loadPositionData()
+   {
       HSSFRow currentRow;
       HSSFSheet currentDataSheet;
 
       int currentDataSheetNameIndex = 1;
-      currentDataSheet = workBookToLoad.getSheet("Data" + currentDataSheetNameIndex++);
+      currentDataSheet = workBookToLoad.getSheet(ReachabilityMapFileWriter.getPositionDataSheetName(currentDataSheetNameIndex++));
+
+      while (currentDataSheet != null)
+      {
+         int currentRowIndex = 1;
+         currentRow = currentDataSheet.getRow(currentRowIndex++);
+
+         int cellIndex = 0;
+
+         while (currentRow != null)
+         {
+            cellIndex = 0;
+            int xIndex = (int) currentRow.getCell(cellIndex++).getNumericCellValue();
+            int yIndex = (int) currentRow.getCell(cellIndex++).getNumericCellValue();
+            int zIndex = (int) currentRow.getCell(cellIndex++).getNumericCellValue();
+            float[] jointPositions = parseFloatArray(currentRow.getCell(cellIndex++).getStringCellValue());
+            float[] jointTorques = parseFloatArray(currentRow.getCell(cellIndex++).getStringCellValue());
+
+            Voxel3DData voxel = loadedGrid.getOrCreateVoxel(xIndex, yIndex, zIndex);
+            voxel.registerReachablePosition(jointPositions, jointTorques);
+            currentRow = currentDataSheet.getRow(currentRowIndex++);
+         }
+
+         currentDataSheet = workBookToLoad.getSheet(ReachabilityMapFileWriter.getPositionDataSheetName(currentDataSheetNameIndex++));
+      }
+   }
+
+   private void loadRayData()
+   {
+      HSSFRow currentRow;
+      HSSFSheet currentDataSheet;
+
+      int currentDataSheetNameIndex = 1;
+      currentDataSheet = workBookToLoad.getSheet(ReachabilityMapFileWriter.getRayDataSheetName(currentDataSheetNameIndex++));
 
       while (currentDataSheet != null)
       {
@@ -174,15 +214,70 @@ public class ReachabilityMapFileLoader
             int yIndex = (int) currentRow.getCell(cellIndex++).getNumericCellValue();
             int zIndex = (int) currentRow.getCell(cellIndex++).getNumericCellValue();
             int rayIndex = (int) currentRow.getCell(cellIndex++).getNumericCellValue();
-            int rotationAroundRayIndex = (int) currentRow.getCell(cellIndex++).getNumericCellValue();
+            float[] jointPositions = parseFloatArray(currentRow.getCell(cellIndex++).getStringCellValue());
+            float[] jointTorques = parseFloatArray(currentRow.getCell(cellIndex++).getStringCellValue());
 
             Voxel3DData voxel = loadedGrid.getOrCreateVoxel(xIndex, yIndex, zIndex);
-            voxel.registerReachablePose(rayIndex, rotationAroundRayIndex);
+            voxel.registerReachableRay(rayIndex, jointPositions, jointTorques);
             currentRow = currentDataSheet.getRow(currentRowIndex++);
          }
 
-         currentDataSheet = workBookToLoad.getSheet("Data" + currentDataSheetNameIndex++);
+         currentDataSheet = workBookToLoad.getSheet(ReachabilityMapFileWriter.getRayDataSheetName(currentDataSheetNameIndex++));
       }
+   }
+
+   private void loadPoseData()
+   {
+      HSSFRow currentRow;
+      HSSFSheet currentDataSheet;
+
+      int currentDataSheetNameIndex = 1;
+      currentDataSheet = workBookToLoad.getSheet(ReachabilityMapFileWriter.getPoseDataSheetName(currentDataSheetNameIndex++));
+
+      while (currentDataSheet != null)
+      {
+         int currentRowIndex = 1;
+         currentRow = currentDataSheet.getRow(currentRowIndex++);
+
+         int cellIndex = 0;
+
+         while (currentRow != null)
+         {
+            cellIndex = 0;
+            int xIndex = (int) currentRow.getCell(cellIndex++).getNumericCellValue();
+            int yIndex = (int) currentRow.getCell(cellIndex++).getNumericCellValue();
+            int zIndex = (int) currentRow.getCell(cellIndex++).getNumericCellValue();
+            int rayIndex = (int) currentRow.getCell(cellIndex++).getNumericCellValue();
+            int rotationIndex = (int) currentRow.getCell(cellIndex++).getNumericCellValue();
+            float[] jointPositions = parseFloatArray(currentRow.getCell(cellIndex++).getStringCellValue());
+            float[] jointTorques = parseFloatArray(currentRow.getCell(cellIndex++).getStringCellValue());
+
+            Voxel3DData voxel = loadedGrid.getOrCreateVoxel(xIndex, yIndex, zIndex);
+            voxel.registerReachablePose(rayIndex, rotationIndex, jointPositions, jointTorques);
+            currentRow = currentDataSheet.getRow(currentRowIndex++);
+         }
+
+         currentDataSheet = workBookToLoad.getSheet(ReachabilityMapFileWriter.getPoseDataSheetName(currentDataSheetNameIndex++));
+      }
+   }
+
+   private float[] parseFloatArray(String string)
+   {
+      if (string == null)
+         return null;
+
+      string = string.replace("[", "").replace("]", "").trim();
+
+      if (string.isEmpty())
+         return null;
+
+      String[] elements = string.split(",");
+      float[] array = new float[elements.length];
+      for (int i = 0; i < elements.length; i++)
+      {
+         array[i] = Float.parseFloat(string);
+      }
+      return array;
    }
 
    public Voxel3DGrid getLoadedGrid()

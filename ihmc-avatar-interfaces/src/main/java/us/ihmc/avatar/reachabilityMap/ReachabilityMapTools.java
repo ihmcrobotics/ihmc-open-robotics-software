@@ -139,7 +139,7 @@ public class ReachabilityMapTools
                if (reachabilityValue > 0.001)
                {
                   System.out.println("xIndex: " + xIndex + ", yIndex: " + yIndex + ", zIndex: " + zIndex + ", voxel location: " + voxel.getPosition());
-                  allVisuals.add(sphereVoxelShape.createVisual(voxel.getPosition(), 0.25, reachabilityValue));
+                  allVisuals.add(sphereVoxelShape.createDReachabilityVisual(voxel.getPosition(), 0.25, reachabilityValue));
                }
             }
          }

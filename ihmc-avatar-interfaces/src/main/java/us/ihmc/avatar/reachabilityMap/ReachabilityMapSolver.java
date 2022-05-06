@@ -17,12 +17,12 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -69,7 +69,7 @@ public class ReachabilityMapSolver
    private final RigidBodyBasics endEffector;
    private final OneDoFJointBasics[] robotArmJoints;
    private final FramePose3D controlFramePoseInEndEffector = new FramePose3D();
-   private final SelectionMatrix3D angularSelection = new SelectionMatrix3D(null, true, true, true);
+   private final SelectionMatrix3D rayAngularSelection = new SelectionMatrix3D(null, false, true, true); // Assume by default that X is orthogonal to the palm
    private final RobotConfigurationData defaultArmConfiguration;
    private final String cloneSuffix;
 
@@ -145,9 +145,14 @@ public class ReachabilityMapSolver
       controlFramePoseInEndEffector.changeFrame(endEffector.getBodyFixedFrame());
    }
 
-   public void setAngularSelection(boolean selectX, boolean selectY, boolean selectZ)
+   public void setRayAxis(Axis3D rayAxis)
    {
-      angularSelection.setAxisSelection(selectX, selectY, selectZ);
+      rayAngularSelection.setAxisSelection(rayAxis == Axis3D.X, rayAxis == Axis3D.Y, rayAxis == Axis3D.Z);
+   }
+
+   public void setRaySolveAngularSelection(boolean selectX, boolean selectY, boolean selectZ)
+   {
+      rayAngularSelection.setAxisSelection(selectX, selectY, selectZ);
    }
 
    public void enableJointTorqueAnalysis(boolean considerJointTorqueLimits)
@@ -178,19 +183,33 @@ public class ReachabilityMapSolver
          solutionValidityChecker = solutionValidityChecker.and(checker);
    }
 
-   public boolean solveFor(FramePoint3DReadOnly position, FrameQuaternionReadOnly orientation)
+   public boolean solveForRay(FramePose3DReadOnly pose)
    {
+      return solveFor(pose, true);
+   }
+
+   public boolean solveForPose(FramePose3DReadOnly pose)
+   {
+      return solveFor(pose, false);
+   }
+
+   private boolean solveFor(FramePose3DReadOnly pose, boolean solverForRay)
+   {
+      pose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       kinematicsToolboxController.requestInitialize();
-      FramePoint3D desiredPosition = new FramePoint3D(position);
-      desiredPosition.changeFrame(ReferenceFrame.getWorldFrame());
-      FrameQuaternion desiredOrientation = new FrameQuaternion(orientation);
-      desiredOrientation.changeFrame(ReferenceFrame.getWorldFrame());
-      KinematicsToolboxRigidBodyMessage message = MessageTools.createKinematicsToolboxRigidBodyMessage(endEffector, desiredPosition, desiredOrientation);
+
+      KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
+      message.setEndEffectorHashCode(endEffector.hashCode());
+      pose.get(message.getDesiredPositionInWorld(), message.getDesiredOrientationInWorld());
+
       message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(1.0));
       message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(1.0));
       message.getControlFramePositionInEndEffector().set(controlFramePoseInEndEffector.getPosition());
       message.getControlFrameOrientationInEndEffector().set(controlFramePoseInEndEffector.getOrientation());
-      message.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(angularSelection));
+      if (solverForRay)
+         message.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(rayAngularSelection));
+      else
+         MessageTools.packSelectionMatrix3DMessage(true, message.getAngularSelectionMatrix());
       commandInputManager.submitMessage(message);
 
       return solveAndRetry(maximumNumberOfIterations.getIntegerValue());
