@@ -36,6 +36,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class HeuristicICPControllerTest
 {
@@ -186,6 +187,7 @@ public class HeuristicICPControllerTest
                                                               registry,
                                                               yoGraphicsListRegistry);
       new DefaultParameterReader().readParametersInRegistry(registry);
+      ((YoBoolean) registry.findVariable("copProjectionUseCoPProjection")).set(true);
 
       ICPControllerTestVisualizer visualizer = null;
       if (visualize)
@@ -271,6 +273,7 @@ public class HeuristicICPControllerTest
                                                               registry,
                                                               yoGraphicsListRegistry);
       new DefaultParameterReader().readParametersInRegistry(registry);
+      ((YoBoolean) registry.findVariable("copProjectionUseCoPProjection")).set(true);
 
       ICPControllerTestVisualizer visualizer = null;
       if (visualize)
@@ -356,6 +359,7 @@ public class HeuristicICPControllerTest
                                                               registry,
                                                               yoGraphicsListRegistry);
       new DefaultParameterReader().readParametersInRegistry(registry);
+      ((YoBoolean) registry.findVariable("copProjectionUseCoPProjection")).set(true);
 
       double omega = 3.0;
 
@@ -429,6 +433,7 @@ public class HeuristicICPControllerTest
                                                               registry,
                                                               yoGraphicsListRegistry);
       new DefaultParameterReader().readParametersInRegistry(registry);
+      ((YoBoolean) registry.findVariable("copProjectionUseCoPProjection")).set(true);
 
       double omega = 3.0;
 
