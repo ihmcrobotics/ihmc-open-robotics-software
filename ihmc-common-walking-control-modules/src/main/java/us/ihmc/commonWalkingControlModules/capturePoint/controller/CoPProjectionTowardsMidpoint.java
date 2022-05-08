@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.HeuristicICPControllerHelper;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -15,7 +17,9 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLine2d;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLine2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -29,6 +33,7 @@ public class CoPProjectionTowardsMidpoint implements ICPControllerParameters.Fee
 
    private final DoubleProvider minICPPushDelta;
    private final DoubleProvider maxCoPProjectionInside;
+   private final BooleanProvider useCoPProjection;
 
    private final YoDouble dotProductForFootEdgeProjection;
    private final YoDouble momentumShiftedICPOnProjection;
@@ -61,6 +66,7 @@ public class CoPProjectionTowardsMidpoint implements ICPControllerParameters.Fee
                                                    "When projecting the CoP into the foot, move up to this far from the edge if possible",
                                                    registry,
                                                    0.04);
+      useCoPProjection = new BooleanParameter(yoNamePrefix + "UseCoPProjection", registry, false);
 
       dotProductForFootEdgeProjection = new YoDouble(yoNamePrefix + "DotProductForFootEdgeProjection", registry);
       momentumShiftedICPOnProjection = new YoDouble(yoNamePrefix + "momentumShiftedICPOnProjection", registry);
@@ -76,6 +82,9 @@ public class CoPProjectionTowardsMidpoint implements ICPControllerParameters.Fee
       firstProjectionIntersection = new YoFramePoint2D(yoNamePrefix + "FirstIntersection", worldFrame, registry);
       secondProjectionIntersection = new YoFramePoint2D(yoNamePrefix + "SecondIntersection", worldFrame, registry);
       icpProjection = new YoFramePoint2D(yoNamePrefix + "ICPProjection", worldFrame, registry);
+
+      if (yoGraphicsListRegistry == null)
+         return;
 
       ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
 
@@ -95,7 +104,7 @@ public class CoPProjectionTowardsMidpoint implements ICPControllerParameters.Fee
 
       artifactList.add(firstIntersectionViz.createArtifact());
       artifactList.add(secondIntersectionViz.createArtifact());
-      //      artifactList.add(copProjectionViz.createArtifact());
+      artifactList.add(projectionLineViz);
       artifactList.add(icpProjectionViz.createArtifact());
 
       artifactList.setVisible(VISUALIZE);
@@ -117,6 +126,9 @@ public class CoPProjectionTowardsMidpoint implements ICPControllerParameters.Fee
       secondProjectionIntersection.setToNaN();
       projectionVector.setToNaN();
       projectionLine.setToNaN();
+
+      if (!useCoPProjection.getValue())
+         return;
 
       // Compute the projection vector and projection line.
       projectionVector.sub(currentICP, unconstrainedFeedbackCMP);
@@ -156,7 +168,7 @@ public class CoPProjectionTowardsMidpoint implements ICPControllerParameters.Fee
       // do a different projection that finds a suitable point on the edge of the foot polygon.
       if (firstProjectionIntersection.containsNaN() || (secondProjectionIntersection.containsNaN()))
       {
-         projectCoPWhenProjectionLineDoesNotIntersectFoot(currentICP, unconstrainedFeedbackCoP, supportPolygonInWorld, feedbackCoPToPack);
+         projectCoPToVertex(supportPolygonInWorld, feedbackCoPToPack);
          feedbackCMPToPack.add(feedbackCoPToPack, cmpOffset);
 
          return;
@@ -202,11 +214,19 @@ public class CoPProjectionTowardsMidpoint implements ICPControllerParameters.Fee
       if (copAdjustmentAmount.getValue() > momentumShiftedICPOnProjection.getValue())
       {
          projectCoPWhenProjectionLineDoesNotIntersectFoot(currentICP, unconstrainedFeedbackCoP, supportPolygonInWorld, feedbackCoPToPack);
+         feedbackCMPToPack.add(feedbackCoPToPack, cmpOffset);
          return;
       }
 
       feedbackCoPToPack.scaleAdd(copAdjustmentAmount.getValue(), projectionVector, unconstrainedFeedbackCoP);
       feedbackCMPToPack.add(feedbackCoPToPack, cmpOffset);
+   }
+
+
+
+   private void projectCoPToVertex(FrameConvexPolygon2DReadOnly supportPolygonInWorld, FixedFramePoint2DBasics feedbackCoPToPack)
+   {
+      supportPolygonInWorld.getClosestVertex(projectionLine, feedbackCoPToPack);
    }
 
    /**
