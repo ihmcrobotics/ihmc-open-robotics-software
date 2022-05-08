@@ -240,20 +240,11 @@ public class HeuristicICPController implements ICPControllerInterface
          feedbackProjectionOperator.projectFeedback(currentICP, unconstrainedFeedbackCMP, perfectCMPOffset, supportPolygonInWorld, feedbackCoP, feedbackCMP);
       }
 
-      feedbackCMP.add(feedbackCoP, perfectCMPOffset);
-
       expectedControlICPVelocity.sub(currentICP, feedbackCMP);
       expectedControlICPVelocity.scale(omega0);
 
       controllerTimer.stopMeasurement();
    }
-   
-   private static double computePercentageOfRangeClampedBetweenZeroAndOne(double value, double lowerBoundOfRange, double upperBoundOfRange)
-   {
-      double percent = (value - lowerBoundOfRange) / (upperBoundOfRange - lowerBoundOfRange);
-      return EuclidCoreTools.clamp(percent, 0.0, 1.0);
-   }
-
 
    private void setupVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
