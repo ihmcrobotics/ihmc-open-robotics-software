@@ -1,7 +1,6 @@
 package us.ihmc.avatar.reachabilityMap;
 
 import static us.ihmc.avatar.scs2.YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3DDefinition;
-import static us.ihmc.avatar.scs2.YoGraphicDefinitionFactory.newYoGraphicPoint3DDefinition;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,7 +11,6 @@ import java.util.stream.IntStream;
 import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DData;
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
 import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -54,7 +52,7 @@ public class ReachabilitySphereMapCalculator implements Controller
    private final Voxel3DData[] solverVoxels;
 
    private final YoFramePose3D gridFramePose = new YoFramePose3D("gridFramePose", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePose3D currentEvaluationPose = new YoFramePose3D("currentEvaluationPose", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePose3D evaluatedPose = new YoFramePose3D("evaluatedPose", ReferenceFrame.getWorldFrame(), registry);
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
 
    private final YoBoolean evaluateDReachability = new YoBoolean("evaluateDReachability", registry);
@@ -64,7 +62,7 @@ public class ReachabilitySphereMapCalculator implements Controller
 
    public ReachabilitySphereMapCalculator(OneDoFJointBasics[] robotArmJoints, ControllerOutput controllerOutput)
    {
-      this(robotArmJoints, controllerOutput, 1);
+      this(robotArmJoints, controllerOutput, 20);
    }
 
    public ReachabilitySphereMapCalculator(OneDoFJointBasics[] robotArmJoints, ControllerOutput controllerOutput, int numberOfThreads)
@@ -163,8 +161,7 @@ public class ReachabilitySphereMapCalculator implements Controller
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition("ReachabilityCalculatorVisuals");
       List<YoGraphicDefinition> yoGraphics = new ArrayList<>();
       yoGraphics.add(newYoGraphicCoordinateSystem3DDefinition("gridFramePose", gridFramePose, 0.5, ColorDefinitions.Blue()));
-      yoGraphics.add(newYoGraphicCoordinateSystem3DDefinition("currentEvaluationPose", currentEvaluationPose, 0.15, ColorDefinitions.HotPink()));
-      yoGraphics.add(newYoGraphicPoint3DDefinition("currentEvaluationPosition", currentEvaluationPose.getPosition(), 0.0125, ColorDefinitions.DeepPink()));
+      yoGraphics.add(newYoGraphicCoordinateSystem3DDefinition("evaluatedPose", evaluatedPose, 0.15, ColorDefinitions.HotPink()));
       yoGraphics.add(newYoGraphicCoordinateSystem3DDefinition("controlFrame",
                                                               solvers[0].getControlFramePoseInEndEffector(),
                                                               0.05,
@@ -253,10 +250,6 @@ public class ReachabilitySphereMapCalculator implements Controller
 
    private final YoInteger currentVoxelIndex = new YoInteger("currentVoxelIndex", registry);
 
-   
-   private final FramePoint3D current = new FramePoint3D();
-   private final FrameVector3D error = new FrameVector3D();
-
    @Override
    public void doControl()
    {
@@ -279,8 +272,8 @@ public class ReachabilitySphereMapCalculator implements Controller
 
          if (solverIndex == 0)
          {
-            currentEvaluationPose.getPosition().setMatchingFrame(voxel.getPosition());
-            currentEvaluationPose.getOrientation().setToZero();
+            evaluatedPose.getPosition().setMatchingFrame(voxel.getPosition());
+            evaluatedPose.getOrientation().setToZero();
          }
 
          FramePose3D solverInput = solverInputs[solverIndex];
@@ -292,11 +285,6 @@ public class ReachabilitySphereMapCalculator implements Controller
 
          if (success)
          {
-            current.setIncludingFrame(solvers[solverIndex].getControlFramePoseInEndEffector().getPosition());
-            current.changeFrame(ReferenceFrame.getWorldFrame());
-            error.sub(solverInput.getPosition(), current);
-            System.out.println(error.length());
-            
             voxel.registerReachablePosition(solverInput.getPosition(), solvers[solverIndex].getRobotArmJoints());
             if (solverIndex == 0)
                writeSolverSolution(solvers[solverIndex], controllerOutput);
@@ -367,7 +355,7 @@ public class ReachabilitySphereMapCalculator implements Controller
                solverInput.changeFrame(ReferenceFrame.getWorldFrame());
 
                if (solverIndex == 0)
-                  currentEvaluationPose.set(solverInput);
+                  evaluatedPose.set(solverInput);
 
                if (solver.solveForPose(solverInput))
                {
