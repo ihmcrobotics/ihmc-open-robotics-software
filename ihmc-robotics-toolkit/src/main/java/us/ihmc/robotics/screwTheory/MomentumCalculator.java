@@ -4,14 +4,8 @@ import java.util.stream.Stream;
 
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.Momentum;
-<<<<<<< HEAD
 import us.ihmc.mecano.spatial.interfaces.FixedFrameMomentumBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaReadOnly;
-=======
-import us.ihmc.mecano.spatial.Twist;
-import us.ihmc.mecano.spatial.interfaces.MomentumBasics;
-import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
->>>>>>> set up a whole-body inertia calculator
 
 public class MomentumCalculator
 {
