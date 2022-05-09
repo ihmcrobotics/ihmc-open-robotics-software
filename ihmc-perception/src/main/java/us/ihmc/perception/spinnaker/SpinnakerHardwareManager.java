@@ -2,31 +2,16 @@ package us.ihmc.perception.spinnaker;
 
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.spinnaker.Spinnaker_C.*;
-import us.ihmc.log.LogTools;
-import us.ihmc.tools.string.StringTools;
-
-import java.util.function.Supplier;
 
 import static org.bytedeco.spinnaker.global.Spinnaker_C.*;
+import static us.ihmc.perception.spinnaker.SpinnakerTools.assertNoError;
 
 public class SpinnakerHardwareManager
 {
-   private static SpinnakerHardwareManager instance = null;
-
-   public static SpinnakerHardwareManager getInstance()
-   {
-      if (instance == null)
-         instance = new SpinnakerHardwareManager();
-
-      return instance;
-   }
-
    private final spinSystem system;
    private final spinCameraList cameras;
 
-   private boolean isDestroyed = false;
-
-   private SpinnakerHardwareManager()
+   public SpinnakerHardwareManager()
    {
       system = new spinSystem();
       assertNoError(spinSystemGetInstance(system), "Unable to retrieve Spinnaker system instance!");
@@ -49,29 +34,13 @@ public class SpinnakerHardwareManager
       return new BytedecoBlackfly(blackflyCamera, acqMode, serial);
    }
 
-   private static void assertNoError(spinError error, String errorMessage)
-   {
-      if (error.value != spinError.SPINNAKER_ERR_SUCCESS.value)
-      {
-         Supplier<String> message = StringTools.format("Error code: {}: {}", error.value, errorMessage);
-         LogTools.fatal(message);
-         throw new RuntimeException(message.get());
-      }
-   }
-
    /**
-    * The Spinnaker hardware manager SHOULD NOT be destroyed prior to the destruction of ALL cameras
-    * Calling destroy after the instance is already destroyed will do nothing.
+    * The Spinnaker hardware manager should not be destroyed prior to the destruction of all cameras.
     */
    public void destroy()
    {
-      if (!isDestroyed)
-      {
-         spinCameraListClear(cameras);
-         spinCameraListDestroy(cameras);
-         spinSystemReleaseInstance(system);
-
-         isDestroyed = true;
-      }
+      spinCameraListClear(cameras);
+      spinCameraListDestroy(cameras);
+      spinSystemReleaseInstance(system);
    }
 }

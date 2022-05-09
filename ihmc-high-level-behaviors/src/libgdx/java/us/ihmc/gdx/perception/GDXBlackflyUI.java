@@ -49,7 +49,7 @@ public class GDXBlackflyUI
             {
                if (nativesLoadedActivator.isNewlyActivated())
                {
-                  spinnakerHardwareManager = SpinnakerHardwareManager.getInstance();
+                  spinnakerHardwareManager = new SpinnakerHardwareManager();
                   blackfly = spinnakerHardwareManager.buildBlackfly("17403057");
                   blackfly.initialize();
                }
