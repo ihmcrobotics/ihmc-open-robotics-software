@@ -64,7 +64,6 @@ public class StepConstraintMessageConverter
       vertexBuffer.clear();
       for (StepConstraintRegion constraintRegion : constraintRegions)
       {
-         RigidBodyTransform transform = new RigidBodyTransform();
          constraintRegion.getTransformToWorld().get(message.getRegionOrientation().add(), message.getRegionOrigin().add());
          constraintRegion.getNormal(message.getRegionNormal().add());
 
@@ -85,6 +84,29 @@ public class StepConstraintMessageConverter
             {
                vertexBuffer.add().set(convexPolygon.getVertex(vertexIndex), 0.0);
             }
+         }
+      }
+
+      return message;
+   }
+
+   public static StepConstraintsListMessage convertToStepConstraintsListMessageFromPlanarRegions(List<PlanarRegion> constraintRegions)
+   {
+      StepConstraintsListMessage message = new StepConstraintsListMessage();
+
+      Object<Point3D> vertexBuffer = message.getVertexBuffer();
+      vertexBuffer.clear();
+      for (PlanarRegion constraintRegion : constraintRegions)
+      {
+         constraintRegion.getTransformToWorld().get(message.getRegionOrientation().add(), message.getRegionOrigin().add());
+         constraintRegion.getNormal(message.getRegionNormal().add());
+
+         message.getConcaveHullsSize().add(constraintRegion.getConcaveHullSize());
+         message.getNumberOfHolesInRegion().add(0);
+
+         for (int vertexIndex = 0; vertexIndex < constraintRegion.getConcaveHullSize(); vertexIndex++)
+         {
+            vertexBuffer.add().set(constraintRegion.getConcaveHullVertex(vertexIndex), 0.0);
          }
       }
 
