@@ -73,7 +73,7 @@ public class EnvironmentConstraintHandler
    {
       this.contactableFeet = contactableFeet;
 
-      planarRegionDecider = new CapturabilityBasedPlanarRegionDecider(icpControlPlane, useICPControlPlaneInStepAdjustment, registry, yoGraphicsListRegistry);
+      planarRegionDecider = new CapturabilityBasedPlanarRegionDecider(icpControlPlane, useICPControlPlaneInStepAdjustment, registry, null);
       stepConstraintOptimizer = new ConvexStepConstraintOptimizer(registry);
       parameters = new YoConstraintOptimizerParameters(registry);
 
@@ -88,7 +88,7 @@ public class EnvironmentConstraintHandler
 
       if (yoGraphicsListRegistry != null)
       {
-         YoArtifactPolygon activePlanarRegionViz = new YoArtifactPolygon("ConvexHullConstraint", yoConvexHullConstraint, Color.RED, false);
+         YoArtifactPolygon activePlanarRegionViz = new YoArtifactPolygon("Environmental Convex Hull Constraint", yoConvexHullConstraint, Color.RED, false);
 
          yoGraphicsListRegistry.registerArtifact(getClass().getSimpleName(), activePlanarRegionViz);
       }
