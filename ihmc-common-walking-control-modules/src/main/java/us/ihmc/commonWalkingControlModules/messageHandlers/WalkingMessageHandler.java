@@ -295,7 +295,7 @@ public class WalkingMessageHandler
 
    public void handleStepConstraintsListCommand(StepConstraintsListCommand stepConstraintsListCommand)
    {
-      stepConstraintRegionHandler.handleStepConstraintRegionCommand(stepConstraintsListCommand);
+      stepConstraintRegionHandler.handleStepConstraintsListCommand(stepConstraintsListCommand);
    }
 
    public PlanarRegionsListHandler getPlanarRegionsListHandler()
