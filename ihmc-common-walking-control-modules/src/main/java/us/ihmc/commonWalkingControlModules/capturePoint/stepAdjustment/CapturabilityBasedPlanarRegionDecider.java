@@ -192,11 +192,6 @@ public class CapturabilityBasedPlanarRegionDecider
    private final StepConstraintRegion highestRegionUnderFoot = new StepConstraintRegion();
    private final FramePoint3D projectedFoothold = new FramePoint3D();
 
-   /**
-    * Fixme generates garbage
-    * @param foothold
-    * @return
-    */
    private StepConstraintRegion findPlanarRegionUnderFoothold(FramePoint3DReadOnly foothold)
    {
       if (!PlanarRegionTools.projectPointToPlanesVertically(foothold, stepConstraintRegions, projectedFoothold, highestRegionUnderFoot))

@@ -15,6 +15,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.*;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.RegionInWorldInterface;
 
 import java.util.ArrayList;
@@ -1122,11 +1123,44 @@ public class PlanarRegionTools
                                                                                        Vector3DReadOnly lineDirectionInWorld,
                                                                                        Point3DBasics intersectionToPack)
    {
-      boolean intersectsPlane = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(region.getPoint(),
-                                                                                        region.getNormal(),
-                                                                                        lineOriginInWorld,
-                                                                                        lineDirectionInWorld,
-                                                                                        intersectionToPack);
+      return intersectRegionWithLine(region,
+                                     lineOriginInWorld.getX(),
+                                     lineOriginInWorld.getY(),
+                                     lineOriginInWorld.getZ(),
+                                     lineDirectionInWorld.getX(),
+                                     lineDirectionInWorld.getY(),
+                                     lineDirectionInWorld.getZ(),
+                                     intersectionToPack);
+   }
+
+   /**
+    * Will pack the intersection point between a line and a single planar region. If the line does
+    * not intersect the region this method will return false, and the point will be NaN.
+    */
+   public static <T extends RegionInWorldInterface<T>> boolean intersectRegionWithLine(RegionInWorldInterface<T> region,
+                                                                                       double lineOriginInWorldX,
+                                                                                       double lineOriginInWorldY,
+                                                                                       double lineOriginInWorldZ,
+                                                                                       double lineDirectionInWorldX,
+                                                                                       double lineDirectionInWorldY,
+                                                                                       double lineDirectionInWorldZ,
+                                                                                       Point3DBasics intersectionToPack)
+   {
+      Point3DReadOnly pointOnPlane = region.getPoint();
+      Vector3DReadOnly planeNormal = region.getNormal();
+      boolean intersectsPlane = EuclidCoreMissingTools.intersectionBetweenLine3DAndPlane3D(pointOnPlane.getX(),
+                                                                                           pointOnPlane.getY(),
+                                                                                           pointOnPlane.getZ(),
+                                                                                           planeNormal.getX(),
+                                                                                           planeNormal.getY(),
+                                                                                           planeNormal.getZ(),
+                                                                                           lineOriginInWorldX,
+                                                                                           lineOriginInWorldY,
+                                                                                           lineOriginInWorldZ,
+                                                                                           lineDirectionInWorldX,
+                                                                                           lineDirectionInWorldY,
+                                                                                           lineDirectionInWorldZ,
+                                                                                           intersectionToPack);
 
       if (!intersectsPlane)
       {
@@ -1296,7 +1330,14 @@ public class PlanarRegionTools
       for (int i = 0; i < regions.size(); i++)
       {
          T region = regions.get(i);
-         if (!intersectRegionWithLine(region, pointInWorldToProject, new Vector3D(0.0, 0.0, 1.0), projectedPointToPack))
+         if (!intersectRegionWithLine(region,
+                                      pointInWorldToProject.getX(),
+                                      pointInWorldToProject.getY(),
+                                      pointInWorldToProject.getZ(),
+                                      0.0,
+                                      0.0,
+                                      1.0,
+                                      projectedPointToPack))
             continue;
 
          double height = projectedPointToPack.getZ();
