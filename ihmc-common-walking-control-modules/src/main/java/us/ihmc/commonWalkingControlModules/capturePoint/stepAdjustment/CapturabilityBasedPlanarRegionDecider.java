@@ -1,4 +1,4 @@
-package us.ihmc.avatar.stepAdjustment;
+package us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment;
 
 import java.awt.Color;
 import java.util.ArrayList;
