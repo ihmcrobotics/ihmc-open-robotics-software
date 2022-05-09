@@ -3,6 +3,7 @@ package us.ihmc.perception;
 import org.apache.commons.lang3.StringUtils;
 import org.bytedeco.javacpp.*;
 import org.bytedeco.opencl.*;
+import org.bytedeco.opencl.global.OpenCL;
 import us.ihmc.log.LogTools;
 
 import java.nio.file.Paths;
@@ -341,7 +342,9 @@ public class OpenCLManager
       this.returnCode.put(returnCode);
       if (returnCode != CL_SUCCESS) // duplicated to reduce stack trace height
       {
-         LogTools.error(1, "OpenCL error code: " + returnCode);
+         String message = "OpenCL error code: " + returnCode + ": " + getReturnCodeString(returnCode);
+         LogTools.error(1, message);
+         throw new RuntimeException(message);
       }
    }
 
@@ -349,7 +352,9 @@ public class OpenCLManager
    {
       if (returnCode.get() != CL_SUCCESS)
       {
-         LogTools.error(1, "OpenCL error code: " + returnCode.get());
+         String message = "OpenCL error code: " + returnCode.get() + ": " + getReturnCodeString(returnCode.get());
+         LogTools.error(1, message);
+         throw new RuntimeException(message);
       }
    }
 
@@ -381,5 +386,140 @@ public class OpenCLManager
    public int getReturnCode()
    {
       return returnCode.get();
+   }
+
+   private String getReturnCodeString(int returnCode)
+   {
+      switch (returnCode)
+      {
+         case OpenCL.CL_SUCCESS:
+            return "CL_SUCCESS";
+         case OpenCL.CL_DEVICE_NOT_FOUND:
+            return "CL_DEVICE_NOT_FOUND";
+         case OpenCL.CL_DEVICE_NOT_AVAILABLE:
+            return "CL_DEVICE_NOT_AVAILABLE";
+         case OpenCL.CL_COMPILER_NOT_AVAILABLE:
+            return "CL_COMPILER_NOT_AVAILABLE";
+         case OpenCL.CL_MEM_OBJECT_ALLOCATION_FAILURE:
+            return "CL_MEM_OBJECT_ALLOCATION_FAILURE";
+         case OpenCL.CL_OUT_OF_RESOURCES:
+            return "CL_OUT_OF_RESOURCES";
+         case OpenCL.CL_OUT_OF_HOST_MEMORY:
+            return "CL_OUT_OF_HOST_MEMORY";
+         case OpenCL.CL_PROFILING_INFO_NOT_AVAILABLE:
+            return "CL_PROFILING_INFO_NOT_AVAILABLE";
+         case OpenCL.CL_MEM_COPY_OVERLAP:
+            return "CL_MEM_COPY_OVERLAP";
+         case OpenCL.CL_IMAGE_FORMAT_MISMATCH:
+            return "CL_IMAGE_FORMAT_MISMATCH";
+         case OpenCL.CL_IMAGE_FORMAT_NOT_SUPPORTED:
+            return "CL_IMAGE_FORMAT_NOT_SUPPORTED";
+         case OpenCL.CL_BUILD_PROGRAM_FAILURE:
+            return "CL_BUILD_PROGRAM_FAILURE";
+         case OpenCL.CL_MAP_FAILURE:
+            return "CL_MAP_FAILURE";
+         case OpenCL.CL_MISALIGNED_SUB_BUFFER_OFFSET:
+            return "CL_MISALIGNED_SUB_BUFFER_OFFSET";
+         case OpenCL.CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST:
+            return "CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST";
+         case OpenCL.CL_COMPILE_PROGRAM_FAILURE:
+            return "CL_COMPILE_PROGRAM_FAILURE";
+         case OpenCL.CL_LINKER_NOT_AVAILABLE:
+            return "CL_LINKER_NOT_AVAILABLE";
+         case OpenCL.CL_LINK_PROGRAM_FAILURE:
+            return "CL_LINK_PROGRAM_FAILURE";
+         case OpenCL.CL_DEVICE_PARTITION_FAILED:
+            return "CL_DEVICE_PARTITION_FAILED";
+         case OpenCL.CL_KERNEL_ARG_INFO_NOT_AVAILABLE:
+            return "CL_KERNEL_ARG_INFO_NOT_AVAILABLE";
+         case OpenCL.CL_INVALID_VALUE:
+            return "CL_INVALID_VALUE";
+         case OpenCL.CL_INVALID_DEVICE_TYPE:
+            return "CL_INVALID_DEVICE_TYPE";
+         case OpenCL.CL_INVALID_PLATFORM:
+            return "CL_INVALID_PLATFORM";
+         case OpenCL.CL_INVALID_DEVICE:
+            return "CL_INVALID_DEVICE";
+         case OpenCL.CL_INVALID_CONTEXT:
+            return "CL_INVALID_CONTEXT";
+         case OpenCL.CL_INVALID_QUEUE_PROPERTIES:
+            return "CL_INVALID_QUEUE_PROPERTIES";
+         case OpenCL.CL_INVALID_COMMAND_QUEUE:
+            return "CL_INVALID_COMMAND_QUEUE";
+         case OpenCL.CL_INVALID_HOST_PTR:
+            return "CL_INVALID_HOST_PTR";
+         case OpenCL.CL_INVALID_MEM_OBJECT:
+            return "CL_INVALID_MEM_OBJECT";
+         case OpenCL.CL_INVALID_IMAGE_FORMAT_DESCRIPTOR:
+            return "CL_INVALID_IMAGE_FORMAT_DESCRIPTOR";
+         case OpenCL.CL_INVALID_IMAGE_SIZE:
+            return "CL_INVALID_IMAGE_SIZE";
+         case OpenCL.CL_INVALID_SAMPLER:
+            return "CL_INVALID_SAMPLER";
+         case OpenCL.CL_INVALID_BINARY:
+            return "CL_INVALID_BINARY";
+         case OpenCL.CL_INVALID_BUILD_OPTIONS:
+            return "CL_INVALID_BUILD_OPTIONS";
+         case OpenCL.CL_INVALID_PROGRAM:
+            return "CL_INVALID_PROGRAM";
+         case OpenCL.CL_INVALID_PROGRAM_EXECUTABLE:
+            return "CL_INVALID_PROGRAM_EXECUTABLE";
+         case OpenCL.CL_INVALID_KERNEL_NAME:
+            return "CL_INVALID_KERNEL_NAME";
+         case OpenCL.CL_INVALID_KERNEL_DEFINITION:
+            return "CL_INVALID_KERNEL_DEFINITION";
+         case OpenCL.CL_INVALID_KERNEL:
+            return "CL_INVALID_KERNEL";
+         case OpenCL.CL_INVALID_ARG_INDEX:
+            return "CL_INVALID_ARG_INDEX";
+         case OpenCL.CL_INVALID_ARG_VALUE:
+            return "CL_INVALID_ARG_VALUE";
+         case OpenCL.CL_INVALID_ARG_SIZE:
+            return "CL_INVALID_ARG_SIZE";
+         case OpenCL.CL_INVALID_KERNEL_ARGS:
+            return "CL_INVALID_KERNEL_ARGS";
+         case OpenCL.CL_INVALID_WORK_DIMENSION:
+            return "CL_INVALID_WORK_DIMENSION";
+         case OpenCL.CL_INVALID_WORK_GROUP_SIZE:
+            return "CL_INVALID_WORK_GROUP_SIZE";
+         case OpenCL.CL_INVALID_WORK_ITEM_SIZE:
+            return "CL_INVALID_WORK_ITEM_SIZE";
+         case OpenCL.CL_INVALID_GLOBAL_OFFSET:
+            return "CL_INVALID_GLOBAL_OFFSET";
+         case OpenCL.CL_INVALID_EVENT_WAIT_LIST:
+            return "CL_INVALID_EVENT_WAIT_LIST";
+         case OpenCL.CL_INVALID_EVENT:
+            return "CL_INVALID_EVENT";
+         case OpenCL.CL_INVALID_OPERATION:
+            return "CL_INVALID_OPERATION";
+         case OpenCL.CL_INVALID_GL_OBJECT:
+            return "CL_INVALID_GL_OBJECT";
+         case OpenCL.CL_INVALID_BUFFER_SIZE:
+            return "CL_INVALID_BUFFER_SIZE";
+         case OpenCL.CL_INVALID_MIP_LEVEL:
+            return "CL_INVALID_MIP_LEVEL";
+         case OpenCL.CL_INVALID_GLOBAL_WORK_SIZE:
+            return "CL_INVALID_GLOBAL_WORK_SIZE";
+         case OpenCL.CL_INVALID_PROPERTY:
+            return "CL_INVALID_PROPERTY";
+         case OpenCL.CL_INVALID_IMAGE_DESCRIPTOR:
+            return "CL_INVALID_IMAGE_DESCRIPTOR";
+         case OpenCL.CL_INVALID_COMPILER_OPTIONS:
+            return "CL_INVALID_COMPILER_OPTIONS";
+         case OpenCL.CL_INVALID_LINKER_OPTIONS:
+            return "CL_INVALID_LINKER_OPTIONS";
+         case OpenCL.CL_INVALID_DEVICE_PARTITION_COUNT:
+            return "CL_INVALID_DEVICE_PARTITION_COUNT";
+         case OpenCL.CL_INVALID_PIPE_SIZE:
+            return "CL_INVALID_PIPE_SIZE";
+         case OpenCL.CL_INVALID_DEVICE_QUEUE:
+            return "CL_INVALID_DEVICE_QUEUE";
+         case OpenCL.CL_INVALID_SPEC_ID:
+            return "CL_INVALID_SPEC_ID";
+         case OpenCL.CL_MAX_SIZE_RESTRICTION_EXCEEDED:
+            return "CL_MAX_SIZE_RESTRICTION_EXCEEDED";
+         default:
+            return "Code not found";
+      }
    }
 }

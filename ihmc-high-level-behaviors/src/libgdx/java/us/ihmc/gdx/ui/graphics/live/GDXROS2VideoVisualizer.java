@@ -26,7 +26,7 @@ public class GDXROS2VideoVisualizer extends GDXOpenCVVideoVisualizer
 
    public GDXROS2VideoVisualizer(String title, ROS2Node ros2Node, ROS2Topic<VideoPacket> topic, ROS2VideoFormat format)
    {
-      super(title, topic.getName(), false);
+      super(title + " (ROS 2)", topic.getName(), false);
       this.ros2Node = ros2Node;
       this.topic = topic;
       this.format = format;
