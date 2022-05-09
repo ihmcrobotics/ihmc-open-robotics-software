@@ -61,11 +61,8 @@ public class EnvironmentConstraintHandler
    private final RigidBodyTransform footOrientationTransform = new RigidBodyTransform();
    private final FramePoint2D stepXY = new FramePoint2D();
 
-   private final ICPControlPlane icpControlPlane;
-
    private final CapturabilityBasedPlanarRegionDecider planarRegionDecider;
    private final ConvexStepConstraintOptimizer stepConstraintOptimizer;
-   private final BooleanProvider useICPControlPlaneInStepAdjustment;
 
    public EnvironmentConstraintHandler(ICPControlPlane icpControlPlane,
                                        SideDependentList<? extends ContactablePlaneBody> contactableFeet,
@@ -74,11 +71,9 @@ public class EnvironmentConstraintHandler
                                        YoRegistry registry,
                                        YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this.icpControlPlane = icpControlPlane;
       this.contactableFeet = contactableFeet;
-      this.useICPControlPlaneInStepAdjustment = useICPControlPlaneInStepAdjustment;
 
-      planarRegionDecider = new CapturabilityBasedPlanarRegionDecider(icpControlPlane, registry, yoGraphicsListRegistry);
+      planarRegionDecider = new CapturabilityBasedPlanarRegionDecider(icpControlPlane, useICPControlPlaneInStepAdjustment, registry, yoGraphicsListRegistry);
       stepConstraintOptimizer = new ConvexStepConstraintOptimizer(registry);
       parameters = new YoConstraintOptimizerParameters(registry);
 
