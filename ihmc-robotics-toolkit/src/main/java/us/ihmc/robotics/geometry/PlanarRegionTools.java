@@ -1092,33 +1092,46 @@ public class PlanarRegionTools
     * Will return the intersection point between a line and a single planar region. If the line does
     * not intersect the region this method will return null.
     */
-   public static Point3D intersectRegionWithLine(RegionInWorldInterface region, Line3DReadOnly projectionLineInWorld)
+   public static <T extends RegionInWorldInterface<T>> Point3D intersectRegionWithLine(RegionInWorldInterface<T> region, Line3DReadOnly projectionLineInWorld)
    {
-      Vector3D planeNormal = new Vector3D();
-      Point3D pointOnPlane = new Point3D();
-      region.getNormal(planeNormal);
-      region.getOrigin(pointOnPlane);
+      Point3D pointToReturn = new Point3D();
 
-      Point3D intersectionWithPlane = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pointOnPlane,
-                                                                                              planeNormal,
-                                                                                              projectionLineInWorld.getPoint(),
-                                                                                              projectionLineInWorld.getDirection());
-
-      if (intersectionWithPlane == null)
-      {
+      if (intersectRegionWithLine(region, projectionLineInWorld, pointToReturn))
+         return pointToReturn;
+      else
          return null;
-      }
+   }
 
-      RigidBodyTransformReadOnly regionToLocal = region.getTransformToLocal();
-      Point3DBasics intersectionInLocal = new Point3D(intersectionWithPlane);
-      regionToLocal.transform(intersectionInLocal);
+   /**
+    * Will pack the intersection point between a line and a single planar region. If the line does
+    * not intersect the region this method will return false, and the point will be NaN.
+    */
+   public static <T extends RegionInWorldInterface<T>> boolean intersectRegionWithLine(RegionInWorldInterface<T> region,
+                                                                                       Line3DReadOnly projectionLineInWorld,
+                                                                                       Point3DBasics intersectionToPack)
+   {
+      boolean intersectsPlane = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(region.getPoint(),
+                                                                                        region.getNormal(),
+                                                                                        projectionLineInWorld.getPoint(),
+                                                                                        projectionLineInWorld.getDirection(),
+                                                                                        intersectionToPack);
 
-      if (region.isPointInside(intersectionInLocal.getX(), intersectionInLocal.getY()))
+      if (!intersectsPlane)
       {
-         return intersectionWithPlane;
+         intersectionToPack.setToNaN();
+         return false;
       }
 
-      return null;
+      region.getTransformToLocal().transform(intersectionToPack);
+
+      if (region.isPointInside(intersectionToPack.getX(), intersectionToPack.getY()))
+      {
+         region.getTransformToWorld().transform(intersectionToPack);
+         return true;
+      }
+
+      intersectionToPack.setToNaN();
+      return false;
    }
 
    public static ImmutablePair<Point3D, PlanarRegion> intersectRegionsWithRay(PlanarRegionsList regions, Point3DReadOnly rayStart, Vector3D rayDirection)
@@ -1212,7 +1225,7 @@ public class PlanarRegionTools
       return projectPointToPlanesVertically(pointInWorld, regions, null);
    }
 
-   public static <T extends RegionInWorldInterface> Point3D projectPointToPlanesVertically(Point3DReadOnly pointInWorld, List<T> regions, T highestRegionToPack)
+   public static <T extends RegionInWorldInterface<T>> Point3D projectPointToPlanesVertically(Point3DReadOnly pointInWorld, List<T> regions, T highestRegionToPack)
    {
       Point3D highestIntersection = null;
 
