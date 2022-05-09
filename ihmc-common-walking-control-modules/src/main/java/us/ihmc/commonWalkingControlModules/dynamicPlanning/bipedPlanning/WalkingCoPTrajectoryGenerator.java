@@ -215,11 +215,17 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
 
    private final FrameConvexPolygon2DBasics nextPolygon = new FrameConvexPolygon2D();
 
+   private final FrameConvexPolygon2D supportPolygon = new FrameConvexPolygon2D();
+   private final FramePoint2D initialCoP = new FramePoint2D();
+   private final FramePoint3D restrictedInitialCoP = new FramePoint3D();
+
    public void compute(CoPTrajectoryGeneratorState state)
    {
       int numberOfUpcomingFootsteps = Math.min(parameters.getNumberOfStepsToConsider(), state.getNumberOfFootstep());
 
       reset(state);
+      supportPolygon.clear(worldFrame);
+
       // Add initial support states of the feet and set the moving polygons
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -231,15 +237,21 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
 
          movingPolygonsInSole.get(robotSide).setIncludingFrame(state.getFootPolygonInSole(robotSide));
          movingPolygonsInSole.get(robotSide).changeFrameAndProjectToXYPlane(stepFrame);
+         supportPolygon.addVerticesMatchingFrame(movingPolygonsInSole.get(robotSide), false);
       }
+      supportPolygon.update();
 
       positionSplitFractionCalculator.computeSplitFractionsFromPosition();
       areaSplitFractionCalculator.computeSplitFractionsFromArea();
 
+      initialCoP.set(state.getInitialCoP());
+      supportPolygon.orthogonalProjection(initialCoP);
+      restrictedInitialCoP.set(initialCoP, state.getInitialCoP().getZ());
+
       // compute cop waypoint location
       SettableContactStateProvider contactStateProvider = contactStateProviders.add();
       contactStateProvider.setStartTime(0.0);
-      contactStateProvider.setStartECMPPosition(state.getInitialCoP());
+      contactStateProvider.setStartECMPPosition(restrictedInitialCoP);
 
       // Put first CoP as per chicken support computations in case starting from rest
       if (numberOfUpcomingFootsteps == 0)
