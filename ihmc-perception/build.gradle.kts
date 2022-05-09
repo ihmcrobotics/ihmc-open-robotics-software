@@ -63,7 +63,6 @@ bytedecoDependencies {
    apiBytedecoNatives("opencl", "3.0-")
    apiBytedecoNatives("librealsense2", "2.50.0-")
    apiBytedecoNatives("spinnaker", "2.4.0.143-")
-   api("org.bytedeco:spinnaker:2.4.0.143-$javaCPPVersion");
 }
 
 javacvDependencies {
@@ -74,16 +73,17 @@ javacvDependencies {
    apiBytedecoNatives("opencl", "3.0-")
    apiBytedecoNatives("librealsense2", "2.50.0-")
    apiBytedecoNatives("spinnaker", "2.4.0.143-")
-   api("org.bytedeco:spinnaker:2.4.0.143-$javaCPPVersion");
 }
 
 fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, versionPrefix: String = "")
 {
    apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion")
    apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:linux-x86_64")
-   //apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:linux-arm64")
+   if (name != "spinnaker")
+      apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:linux-arm64")
    apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:windows-x86_64")
-   //apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:macosx-x86_64")
+   if (name != "spinnaker")
+      apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:macosx-x86_64")
 }
 
 fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoSelective(dependencyNotation: String)
