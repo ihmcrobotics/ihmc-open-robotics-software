@@ -516,6 +516,13 @@ public class WalkingCommandConsumer
       abortWalkingRequested.set(commandConsumerWithDelayBuffers.pollNewestCommand(AbortWalkingCommand.class).isAbortWalkingRequested());
    }
 
+   public void consumeEnvironmentalModelingCommands()
+   {
+      consumePlanarRegionsListCommand();
+      consumePlanarRegionStepConstraintCommand();
+      consumePlanarRegionStepConstraintsListCommand();
+
+   }
    public void consumePlanarRegionsListCommand()
    {
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(PlanarRegionsListCommand.class))
@@ -532,12 +539,11 @@ public class WalkingCommandConsumer
       }
    }
 
-
    public void consumePlanarRegionStepConstraintsListCommand()
    {
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(StepConstraintsListCommand.class))
       {
-         walkingMessageHandler.handleStepConstraintRegionCommand(commandConsumerWithDelayBuffers.pollNewestCommand(StepConstraintsListCommand.class));
+         walkingMessageHandler.handleStepConstraintsListCommand(commandConsumerWithDelayBuffers.pollNewestCommand(StepConstraintsListCommand.class));
       }
    }
    

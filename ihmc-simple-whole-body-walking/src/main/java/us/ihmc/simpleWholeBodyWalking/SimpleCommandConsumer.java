@@ -409,15 +409,6 @@ public class SimpleCommandConsumer
       }
    }
 
-
-   public void consumePlanarRegionStepConstraintCommand()
-   {
-      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(StepConstraintRegionCommand.class))
-      {
-         walkingMessageHandler.handleStepConstraintRegionCommand(commandConsumerWithDelayBuffers.pollNewestCommand(StepConstraintRegionCommand.class));
-      }
-   }
-
    public void consumePrepareForLocomotionCommands()
    {
       if (!commandConsumerWithDelayBuffers.isNewCommandAvailable(PrepareForLocomotionCommand.class))
