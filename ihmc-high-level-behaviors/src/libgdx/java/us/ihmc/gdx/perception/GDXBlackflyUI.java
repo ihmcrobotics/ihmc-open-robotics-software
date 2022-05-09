@@ -61,7 +61,7 @@ public class GDXBlackflyUI
                      imagePanel = new GDXCVImagePanel("Blackfly Image", blackfly.getWidth(), blackfly.getHeight());
                      baseUI.getImGuiPanelManager().addPanel(imagePanel.getVideoPanel());
 
-                     imageData = new BytePointer((long) blackfly.getWidth() * blackfly.getHeight() * 4); //Each pixel has 4 bytes of data, hence *4
+                     imageData = new BytePointer((long) blackfly.getWidth() * blackfly.getHeight() * 4); // Each pixel has 4 bytes of data, hence * 4
 
                      baseUI.getPerspectiveManager().reloadPerspective();
                   }

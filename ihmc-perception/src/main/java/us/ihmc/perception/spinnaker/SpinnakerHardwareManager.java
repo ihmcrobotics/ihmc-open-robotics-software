@@ -3,6 +3,9 @@ package us.ihmc.perception.spinnaker;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.spinnaker.Spinnaker_C.*;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.string.StringTools;
+
+import java.util.function.Supplier;
 
 import static org.bytedeco.spinnaker.global.Spinnaker_C.*;
 
@@ -18,8 +21,8 @@ public class SpinnakerHardwareManager
       return instance;
    }
 
-   private spinSystem system;
-   private spinCameraList cameras;
+   private final spinSystem system;
+   private final spinCameraList cameras;
 
    private boolean isDestroyed = false;
 
@@ -50,8 +53,9 @@ public class SpinnakerHardwareManager
    {
       if (error.value != spinError.SPINNAKER_ERR_SUCCESS.value)
       {
-         LogTools.fatal(errorMessage);
-         throw new RuntimeException(String.valueOf(error.value));
+         Supplier<String> message = StringTools.format("Error code: {}: {}", error.value, errorMessage);
+         LogTools.fatal(message);
+         throw new RuntimeException(message.get());
       }
    }
 
