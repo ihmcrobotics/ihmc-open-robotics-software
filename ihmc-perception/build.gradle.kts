@@ -62,6 +62,8 @@ bytedecoDependencies {
    apiBytedecoNatives("opencv", "4.5.5-")
    apiBytedecoNatives("opencl", "3.0-")
    apiBytedecoNatives("librealsense2", "2.50.0-")
+   apiBytedecoNatives("ffmpeg", "5.0-")
+   api("org.bytedeco:ffmpeg-platform:5.0-$javaCPPVersion");
 }
 
 javacvDependencies {
@@ -71,6 +73,8 @@ javacvDependencies {
    apiBytedecoNatives("opencv", "4.5.5-")
    apiBytedecoNatives("opencl", "3.0-")
    apiBytedecoNatives("librealsense2", "2.50.0-")
+   apiBytedecoNatives("ffmpeg", "5.0-")
+   api("org.bytedeco:ffmpeg-platform:5.0-$javaCPPVersion");
 }
 
 fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, versionPrefix: String = "")
