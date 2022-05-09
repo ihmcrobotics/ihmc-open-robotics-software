@@ -20,7 +20,7 @@ public class WholeBodyAngularVelocityCalculator
 
    public WholeBodyAngularVelocityCalculator(ReferenceFrame centerOfMassFrame, YoGraphicsListRegistry graphicsListRegistry, RigidBodyBasics... rigidBodies)
    {
-      this.wholeBodyInertiaCalculator = new WholeBodyInertiaCalculator(centerOfMassFrame, graphicsListRegistry, rigidBodies);
+      this.wholeBodyInertiaCalculator = new WholeBodyInertiaCalculator(centerOfMassFrame, null, rigidBodies);
       this.momentumCalculator = new MomentumCalculator(rigidBodies);
       robotMomentum.setReferenceFrame(centerOfMassFrame);
    }

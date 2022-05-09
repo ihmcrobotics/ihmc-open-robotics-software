@@ -34,9 +34,14 @@ public class WholeBodyInertiaCalculator
       AppearanceDefinition appearance = YoAppearance.Green();
       appearance.setTransparency(0.5);
       comPose = new YoFramePoseUsingYawPitchRoll("comPose", ReferenceFrame.getWorldFrame(), null);
-      inertiaEllipsoid = new YoGraphicEllipsoid("inertiaEllipse", comPose, appearance, radii);
 
-      graphicsListRegistry.registerYoGraphic("WholeBodyInertia", inertiaEllipsoid);
+      if (graphicsListRegistry != null)
+      {
+         inertiaEllipsoid = new YoGraphicEllipsoid("inertiaEllipse", comPose, appearance, radii);
+         graphicsListRegistry.registerYoGraphic("WholeBodyInertia", inertiaEllipsoid);
+      }
+      else
+         inertiaEllipsoid = null;
    }
 
    public WholeBodyInertiaCalculator(ReferenceFrame centerOfMassFrame, YoGraphicsListRegistry graphicsListRegistry, RigidBodyBasics rootBody)
@@ -62,7 +67,8 @@ public class WholeBodyInertiaCalculator
          wholeBodyInertia.add(tempInertia);
       }
 
-      updateVisualizer();
+      if (inertiaEllipsoid != null)
+         updateVisualizer();
    }
 
    public SpatialInertiaReadOnly getWholeBodyInertia()
