@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
@@ -10,6 +11,7 @@ import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -51,7 +53,7 @@ public class EnvironmentConstraintHandler
    private final YoFrameConvexPolygon2D yoConvexHullConstraint;
    private final FrameConvexPolygon2D reachabilityRegionInConstraintPlane = new FrameConvexPolygon2D();
 
-   private StepConstraintRegion stepConstraintRegion = null;
+   private final List<StepConstraintRegion> stepConstraintRegions = new ArrayList<>();
 
    private final FramePoint3D projectedReachablePoint = new FramePoint3D();
 
@@ -61,6 +63,7 @@ public class EnvironmentConstraintHandler
 
    private final ICPControlPlane icpControlPlane;
 
+   private final CapturabilityBasedPlanarRegionDecider planarRegionDecider;
    private final ConvexStepConstraintOptimizer stepConstraintOptimizer;
    private final BooleanProvider useICPControlPlaneInStepAdjustment;
 
@@ -75,6 +78,7 @@ public class EnvironmentConstraintHandler
       this.contactableFeet = contactableFeet;
       this.useICPControlPlaneInStepAdjustment = useICPControlPlaneInStepAdjustment;
 
+      planarRegionDecider = new CapturabilityBasedPlanarRegionDecider(icpControlPlane, registry, yoGraphicsListRegistry);
       stepConstraintOptimizer = new ConvexStepConstraintOptimizer(registry);
       parameters = new YoConstraintOptimizerParameters(registry);
 
@@ -97,58 +101,48 @@ public class EnvironmentConstraintHandler
 
    public void setStepConstraintRegion(StepConstraintRegion stepConstraintRegion)
    {
-      this.stepConstraintRegion = stepConstraintRegion;
-      stepConstraintOptimizer.reset();
+      reset();
+      this.stepConstraintRegions.add(stepConstraintRegion);
    }
 
    public boolean hasStepConstraintRegion()
    {
-      return stepConstraintRegion != null;
+      return planarRegionDecider.getConstraintRegion() != null;
    }
 
    public void reset()
    {
       foundSolution.set(false);
-      stepConstraintRegion = null;
+      stepConstraintRegions.clear();
       yoConvexHullConstraint.clear();
       isEnvironmentConstraintValid.set(false);
       stepConstraintOptimizer.reset();
+      planarRegionDecider.reset();
    }
 
    public void setReachabilityRegion(FrameConvexPolygon2DReadOnly reachabilityRegion)
    {
-      if (stepConstraintRegion == null)
-         return;
+      this.reachabilityRegionInConstraintPlane.setIncludingFrame(reachabilityRegion);
+   }
 
-      if (useICPControlPlaneInStepAdjustment.getValue() && icpControlPlane != null)
-      {
-         reachabilityRegionInConstraintPlane.clear();
-         for (int i = 0; i < reachabilityRegion.getNumberOfVertices(); i++)
-         {
-            icpControlPlane.projectPointFromControlPlaneOntoConstraintRegion(worldFrame,
-                                                                             reachabilityRegion.getVertex(i),
-                                                                             projectedReachablePoint,
-                                                                             stepConstraintRegion);
-            reachabilityRegionInConstraintPlane.addVertex(projectedReachablePoint);
-         }
-         reachabilityRegionInConstraintPlane.update();
-      }
-      else
-      {
-         reachabilityRegionInConstraintPlane.setIncludingFrame(reachabilityRegion);
-      }
+   public void updateConstraintRegion(FramePose3DReadOnly footstepPose, FrameConvexPolygon2DReadOnly captureRegion)
+   {
+      planarRegionDecider.setConstraintRegions(stepConstraintRegions);
+      planarRegionDecider.setCaptureRegion(captureRegion);
+      planarRegionDecider.updatePlanarRegionConstraintForStep(footstepPose, reachabilityRegionInConstraintPlane);
    }
 
    private final Point2DBasics centroidToThrowAway = new Point2D();
 
    public boolean validateConvexityOfPlanarRegion()
    {
-      if (stepConstraintRegion == null)
+      if (stepConstraintRegions.isEmpty())
       {
          isEnvironmentConstraintValid.set(true);
          return isEnvironmentConstraintValid.getBooleanValue();
       }
 
+      StepConstraintRegion stepConstraintRegion = planarRegionDecider.getConstraintRegion();
       double concaveHullArea = EuclidGeometryPolygonTools.computeConvexPolygon2DArea(stepConstraintRegion.getConcaveHullVertices(),
                                                                                      stepConstraintRegion.getConcaveHullSize(),
                                                                                      true,
@@ -166,6 +160,8 @@ public class EnvironmentConstraintHandler
                                                        FixedFramePose3DBasics footstepPoseToPack,
                                                        List<Point2D> predictedContactPoints)
    {
+      StepConstraintRegion stepConstraintRegion = planarRegionDecider.getConstraintRegion();
+
       if (stepConstraintRegion == null)
       {
          foundSolution.set(true);
