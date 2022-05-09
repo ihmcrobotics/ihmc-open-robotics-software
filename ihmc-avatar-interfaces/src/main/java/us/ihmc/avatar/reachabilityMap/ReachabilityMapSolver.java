@@ -147,7 +147,7 @@ public class ReachabilityMapSolver
 
    public void setRayAxis(Axis3D rayAxis)
    {
-      rayAngularSelection.setAxisSelection(rayAxis == Axis3D.X, rayAxis == Axis3D.Y, rayAxis == Axis3D.Z);
+      setRaySolveAngularSelection(rayAxis != Axis3D.X, rayAxis != Axis3D.Y, rayAxis != Axis3D.Z);
    }
 
    public void setRaySolveAngularSelection(boolean selectX, boolean selectY, boolean selectZ)
@@ -207,7 +207,7 @@ public class ReachabilityMapSolver
       message.getControlFramePositionInEndEffector().set(controlFramePoseInEndEffector.getPosition());
       message.getControlFrameOrientationInEndEffector().set(controlFramePoseInEndEffector.getOrientation());
       if (solverForRay)
-         message.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(rayAngularSelection));
+         MessageTools.packSelectionMatrix3DMessage(rayAngularSelection, message.getAngularSelectionMatrix());
       else
          MessageTools.packSelectionMatrix3DMessage(true, message.getAngularSelectionMatrix());
       commandInputManager.submitMessage(message);
