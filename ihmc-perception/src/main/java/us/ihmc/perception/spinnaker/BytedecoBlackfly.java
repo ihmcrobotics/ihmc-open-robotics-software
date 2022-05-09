@@ -6,13 +6,12 @@ import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacpp.SizeTPointer;
 import org.bytedeco.spinnaker.Spinnaker_C.*;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.string.StringTools;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
 
 import static org.bytedeco.spinnaker.global.Spinnaker_C.*;
+import static us.ihmc.perception.spinnaker.SpinnakerTools.assertNoError;
 
 public class BytedecoBlackfly
 {
@@ -156,15 +155,5 @@ public class BytedecoBlackfly
       spinImageRelease(currentUnprocessedImage.get());
 
       spinCameraRelease(camera);
-   }
-
-   private static void assertNoError(spinError error, String errorMessage)
-   {
-      if (error.value != spinError.SPINNAKER_ERR_SUCCESS.value)
-      {
-         Supplier<String> message = StringTools.format("Error code: {}: {}", error.value, errorMessage);
-         LogTools.fatal(message);
-         throw new RuntimeException(message.get());
-      }
    }
 }
