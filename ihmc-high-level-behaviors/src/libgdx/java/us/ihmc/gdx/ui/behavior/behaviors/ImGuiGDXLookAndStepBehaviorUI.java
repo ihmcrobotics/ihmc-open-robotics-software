@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import controller_msgs.msg.dds.StoredPropertySetMessage;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.internal.ImGui;
 import com.badlogic.gdx.graphics.*;
@@ -12,6 +11,7 @@ import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
+import us.ihmc.communication.property.StoredPropertySetMessageTools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
@@ -137,12 +137,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
       LookAndStepBehaviorParameters lookAndStepParameters = new LookAndStepBehaviorParameters();
       lookAndStepParameterTuner.create(lookAndStepParameters,
                                        LookAndStepBehaviorParameters.keys,
-                                       () ->
-                                       {
-                                          StoredPropertySetMessage storedPropertySetMessage = new StoredPropertySetMessage();
-                                          lookAndStepParameters.getAllAsStrings().forEach(value -> storedPropertySetMessage.getStrings().add(value));
-                                          helper.publish(LOOK_AND_STEP_PARAMETERS, storedPropertySetMessage);
-                                       });
+                                       () -> helper.publish(LOOK_AND_STEP_PARAMETERS, StoredPropertySetMessageTools.newMessage(lookAndStepParameters)));
       stopForImpassibilities.set(lookAndStepParameters.getStopForImpassibilities());
 
       FootstepPlannerParametersBasics footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters("ForLookAndStep");

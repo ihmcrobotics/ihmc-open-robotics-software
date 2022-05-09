@@ -368,6 +368,7 @@ public class GDXGPUPlanarRegionExtractionUI
       mergeDistanceThreshold.set((float) parameters.getMergeDistanceThreshold());
       mergeAngularThreshold.set((float) parameters.getMergeAngularThreshold());
       filterDisparityThreshold.set((float) parameters.getFilterDisparityThreshold());
+      desiredPatchSize.set(parameters.getPatchSize());
       patchSize.set(parameters.getPatchSize());
       deadPixelFilterPatchSize.set(parameters.getDeadPixelFilterPatchSize());
       focalLengthXPixels.set((float) parameters.getFocalLengthXPixels());
