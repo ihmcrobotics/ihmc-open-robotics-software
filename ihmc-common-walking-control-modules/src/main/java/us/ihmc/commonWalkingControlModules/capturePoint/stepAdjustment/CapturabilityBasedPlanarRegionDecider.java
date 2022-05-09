@@ -13,7 +13,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
@@ -47,7 +46,7 @@ public class CapturabilityBasedPlanarRegionDecider
    private final YoDouble intersectionAreaWithCurrentRegion;
 
    private final ConvexPolygon2D convexHullConstraint = new ConvexPolygon2D();
-   private final ConvexPolygon2D possibleArea = new ConvexPolygon2D();
+   private final ConvexPolygon2D reachableEnvironmentalArea = new ConvexPolygon2D();
 
    private final FrameConvexPolygon2D captureRegion = new FrameConvexPolygon2D();
    private final YoFrameConvexPolygon2D yoConvexHullConstraint;
@@ -142,17 +141,18 @@ public class CapturabilityBasedPlanarRegionDecider
       }
    }
 
-   public StepConstraintRegion updatePlanarRegionConstraintForStep(FramePose3DReadOnly footstepPose, ConvexPolygon2DReadOnly reachabilityInControlPlane)
+   public StepConstraintRegion updatePlanarRegionConstraintForStep(FramePose3DReadOnly footstepPose, ConvexPolygon2DReadOnly reachableRegion)
    {
       constraintRegionChanged.set(false);
 
       captureRegion.changeFrameAndProjectToXYPlane(worldFrame);
 
-      // if we don't have any guess, just snap the foot vertically down.
+      // if we don't have any guess, just snap the foot vertically down onto the highest planar region under it.
       if (planarRegionToConstrainTo == null)
       {
          planarRegionToConstrainTo = findPlanarRegionUnderFoothold(footstepPose.getPosition());
 
+         // update the convex hull of the constraint
          if (planarRegionToConstrainTo != null)
          {
             computeProjectedConvexHull(planarRegionToConstrainTo);
@@ -160,9 +160,10 @@ public class CapturabilityBasedPlanarRegionDecider
          }
       }
 
-      if (switchPlanarRegionConstraintsAutomatically.getBooleanValue() && !checkIfCurrentPlanarRegionIsValid(captureRegion, reachabilityInControlPlane))
+      // if we can switch, and there's a better region to be using, switch
+      if (switchPlanarRegionConstraintsAutomatically.getBooleanValue() && !checkIfCurrentConstraintRegionIsValid(captureRegion, reachableRegion))
       {
-         StepConstraintRegion betterRegion = findBestPlanarRegionToStepTo(captureRegion, reachabilityInControlPlane);
+         StepConstraintRegion betterRegion = findBestPlanarRegionToStepTo(captureRegion, reachableRegion);
          if (betterRegion != null && betterRegion != planarRegionToConstrainTo)
          {
             planarRegionToConstrainTo = betterRegion;
@@ -200,41 +201,49 @@ public class CapturabilityBasedPlanarRegionDecider
       return highestRegionUnderFoot;
    }
 
-   private boolean checkIfCurrentPlanarRegionIsValid(FrameConvexPolygon2DReadOnly captureRegion, ConvexPolygon2DReadOnly reachabilityRegion)
+   /**
+    * Checks to see if the current constraint region is still valid for using. This is determined by making sure that the intersection of the environmental
+    * constraint, the reachable area, and the capture region is above some minimum threshold.
+    */
+   private boolean checkIfCurrentConstraintRegionIsValid(FrameConvexPolygon2DReadOnly captureRegion, ConvexPolygon2DReadOnly reachabilityRegion)
    {
       if (planarRegionToConstrainTo == null)
          return false;
 
       computeProjectedConvexHull(planarRegionToConstrainTo);
       if (reachabilityRegion != null)
-         convexPolygonTools.computeIntersectionOfPolygons(convexHullConstraint, reachabilityRegion, possibleArea);
+         convexPolygonTools.computeIntersectionOfPolygons(convexHullConstraint, reachabilityRegion, reachableEnvironmentalArea);
       else
-         possibleArea.set(convexHullConstraint);
+         reachableEnvironmentalArea.set(convexHullConstraint);
 
-      intersectionAreaWithCurrentRegion.set(convexPolygonTools.computeIntersectionAreaOfPolygons(captureRegion, possibleArea));
+      // if the current reachable portion of the environmental constraint has a large enough intersecting area with the capture region, it is still valid.
+      intersectionAreaWithCurrentRegion.set(convexPolygonTools.computeIntersectionAreaOfPolygons(captureRegion, reachableEnvironmentalArea));
 
       return intersectionAreaWithCurrentRegion.getDoubleValue() > minimumIntersectionForSearch.getDoubleValue();
    }
 
    private StepConstraintRegion findBestPlanarRegionToStepTo(FrameConvexPolygon2DReadOnly captureRegion, ConvexPolygon2DReadOnly reachabilityRegion)
    {
-      double maxArea = intersectionAreaWithCurrentRegion.getDoubleValue();
-      if (maxArea > 0.0)
-         maxArea = (1.0 + inflationToCurrentArea.getDoubleValue()) * maxArea + areaImprovementToSwitch.getDoubleValue();
+      double currentAreaOfBestIntersection = intersectionAreaWithCurrentRegion.getDoubleValue();
+      if (currentAreaOfBestIntersection > 0.0) // if we do have some intersection, we want to weight more heavily continued use of that. We increase the current area weight, as well as require a larger area to switch
+         currentAreaOfBestIntersection = (1.0 + inflationToCurrentArea.getDoubleValue()) * currentAreaOfBestIntersection + areaImprovementToSwitch.getDoubleValue();
 
       StepConstraintRegion activePlanarRegion = planarRegionToConstrainTo;
 
       for (int regionIndex = 0; regionIndex < stepConstraintRegions.size(); regionIndex++)
       {
          StepConstraintRegion constraintRegion = stepConstraintRegions.get(regionIndex);
+         // this is the current constrained planar region, so move on
          if (constraintRegion == activePlanarRegion)
             continue;
 
+         // get the area of intersection with this new candidate
          double intersectionArea = findIntersectionAreaWithCaptureRegion(captureRegion, reachabilityRegion, constraintRegion);
 
-         if (intersectionArea > maxArea)
+         // if this new candidate has more intersecting area, switch the regions
+         if (intersectionArea > currentAreaOfBestIntersection)
          {
-            maxArea = intersectionArea;
+            currentAreaOfBestIntersection = intersectionArea;
             activePlanarRegion = constraintRegion;
          }
       }
@@ -257,11 +266,11 @@ public class CapturabilityBasedPlanarRegionDecider
       }
 
       if (reachabilityRegion != null)
-         convexPolygonTools.computeIntersectionOfPolygons(convexHullConstraint, reachabilityRegion, possibleArea);
+         convexPolygonTools.computeIntersectionOfPolygons(convexHullConstraint, reachabilityRegion, reachableEnvironmentalArea);
       else
-         possibleArea.set(convexHullConstraint);
+         reachableEnvironmentalArea.set(convexHullConstraint);
 
-      double intersectionArea = convexPolygonTools.computeIntersectionAreaOfPolygons(captureRegionInControlPlane, possibleArea);
+      double intersectionArea = convexPolygonTools.computeIntersectionAreaOfPolygons(captureRegionInControlPlane, reachableEnvironmentalArea);
 
       for (ConcavePolygon2DReadOnly convexPolygon : constraintRegion.getHolesInConstraintRegion())
       {
@@ -276,11 +285,11 @@ public class CapturabilityBasedPlanarRegionDecider
          }
 
          if (reachabilityRegion != null)
-            convexPolygonTools.computeIntersectionOfPolygons(convexHullConstraint, reachabilityRegion, possibleArea);
+            convexPolygonTools.computeIntersectionOfPolygons(convexHullConstraint, reachabilityRegion, reachableEnvironmentalArea);
          else
-            possibleArea.set(convexHullConstraint);
+            reachableEnvironmentalArea.set(convexHullConstraint);
 
-         intersectionArea -= convexPolygonTools.computeIntersectionAreaOfPolygons(captureRegionInControlPlane, possibleArea);
+         intersectionArea -= convexPolygonTools.computeIntersectionAreaOfPolygons(captureRegionInControlPlane, reachableEnvironmentalArea);
       }
 
       return intersectionArea;
