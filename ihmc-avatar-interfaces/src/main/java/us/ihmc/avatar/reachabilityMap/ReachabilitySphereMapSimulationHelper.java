@@ -45,7 +45,8 @@ public class ReachabilitySphereMapSimulationHelper
    {
       robotDefinition.ignoreAllJoints();
 
-      RigidBodyBasics rootBody = robotDefinition.newInstance(Robot.createRobotRootFrame(robotDefinition, ReferenceFrame.getWorldFrame())); // This allows to visualize YoGraphics in frames other than world
+      ReferenceFrame robotRootFrame = Robot.createRobotRootFrame(robotDefinition, ReferenceFrame.getWorldFrame()); // This allows to visualize YoGraphics in frames other than world
+      RigidBodyBasics rootBody = robotDefinition.newInstance(robotRootFrame);
       RigidBodyBasics base = MultiBodySystemTools.findRigidBody(rootBody, baseName);
       RigidBodyBasics endEffector = MultiBodySystemTools.findRigidBody(rootBody, endEffectorName);
       OneDoFJointBasics[] armJoints = MultiBodySystemTools.createOneDoFJointPath(base, endEffector);

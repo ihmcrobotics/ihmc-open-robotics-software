@@ -11,9 +11,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.ejml.data.DMatrixRMaj;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
 import us.ihmc.avatar.reachabilityMap.ReachabilitySphereMapSimulationHelper.VisualizationType;
 import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DData;
 import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.VoxelExtraData;
@@ -36,15 +33,18 @@ import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
-import us.ihmc.scs2.session.SessionMode;
 import us.ihmc.scs2.sessionVisualizer.TriangleMesh3DFactories;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizer;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizerControls;
-import us.ihmc.scs2.simulation.VisualizationSession;
+import us.ihmc.scs2.sharedMemory.interfaces.YoBufferPropertiesReadOnly;
+import us.ihmc.scs2.simulation.SimulationSession;
+import us.ihmc.scs2.simulation.SimulationSessionControls;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ReachabilityMapTools
 {
@@ -125,7 +125,10 @@ public class ReachabilityMapTools
 
    public static void loadVisualizeReachabilityMap(String robotName, RobotDefinition robotDefinition)
    {
-      loadVisualizeReachabilityMap(robotName, robotDefinition, robotDefinition.newInstance(Robot.createRobotRootFrame(robotDefinition, ReferenceFrame.getWorldFrame())), null);
+      loadVisualizeReachabilityMap(robotName,
+                                   robotDefinition,
+                                   robotDefinition.newInstance(Robot.createRobotRootFrame(robotDefinition, ReferenceFrame.getWorldFrame())),
+                                   null);
    }
 
    public static void loadVisualizeReachabilityMap(String robotName,
@@ -149,48 +152,45 @@ public class ReachabilityMapTools
       Voxel3DGrid grid = reachabilityMapFileLoader.getLoadedGrid();
       SphereVoxelShape sphereVoxelShape = grid.getSphereVoxelShape();
 
-      Map<VisualizationType, ObservableList<VisualDefinition>> voxelVisualization = new EnumMap<>(VisualizationType.class);
+      Map<VisualizationType, List<VisualDefinition>> voxelVisualization = new EnumMap<>(VisualizationType.class);
 
       YoRegistry registry = new YoRegistry(ReachabilityMapTools.class.getSimpleName());
-      AtomicReference<VisualizationType> previousVisualizationType = new AtomicReference<>(VisualizationType.RayReach);
-      YoEnum<VisualizationType> currentVisualizationType = new YoEnum<>("currentVisualizationType", registry, VisualizationType.class);
-      currentVisualizationType.set(VisualizationType.RayReach);
 
       YoEnum<VisualizationType> currentEvaluation = new YoEnum<>("currentEvaluation", registry, VisualizationType.class);
+      AtomicReference<VisualizationType> previousEvaluation = new AtomicReference<>(currentEvaluation.getValue());
       YoFramePose3D currentEvaluationPose = new YoFramePose3D("currentEvaluationPose", ReferenceFrame.getWorldFrame(), registry);
+      YoDouble D = new YoDouble("D", registry);
+      YoDouble D0 = new YoDouble("D0", registry);
+      YoInteger numberOfReachableRays = new YoInteger("numberOfReachableRays", registry);
+      YoInteger numberOfReachableRotationsAroundRay = new YoInteger("numberOfReachableRotationsAroundRay", registry);
+      YoInteger numberOfReachablePoses = new YoInteger("numberOfReachablePoses", registry);
 
-      VisualizationSession visualizationSession = new VisualizationSession(robotName + " Reachability Map Visualizer");
-      visualizationSession.getRootRegistry().addChild(registry);
-      Robot robot = visualizationSession.addRobot(robotDefinition);
-      SessionVisualizerControls guiControls = SessionVisualizer.startSessionVisualizer(visualizationSession);
+      robotDefinition.ignoreAllJoints();
+
+      SimulationSession session = new SimulationSession(robotName + " Reachability Map Visualizer");
+      SimulationSessionControls sessionControls = session.getSimulationSessionControls();
+      session.getRootRegistry().addChild(registry);
+      Robot robot = session.addRobot(robotDefinition);
+      SessionVisualizerControls guiControls = SessionVisualizer.startSessionVisualizer(session);
       guiControls.waitUntilFullyUp();
+      session.stopSessionThread();
 
+      guiControls.addStaticVisuals(createReachibilityColorScaleVisuals());
+      guiControls.addStaticVisuals(ReachabilityMapTools.createBoundingBoxVisuals(grid));
       guiControls.addYoGraphic(newYoGraphicCoordinateSystem3DDefinition("currentEvaluationPose", currentEvaluationPose, 0.15, ColorDefinitions.HotPink()));
       guiControls.addYoGraphic(newYoGraphicCoordinateSystem3DDefinition("controlFrame", controlFramePose, 0.05, ColorDefinitions.parse("#A1887F")));
 
       for (VisualizationType visualizationType : VisualizationType.values())
       {
-         ObservableList<VisualDefinition> visualList = FXCollections.observableArrayList();
-
-         visualList.addListener(new ListChangeListener<VisualDefinition>()
-         {
-            @Override
-            public void onChanged(Change<? extends VisualDefinition> change)
-            {
-               if (currentVisualizationType.getValue() != visualizationType)
-                  return;
-
-               while (change.next())
-               {
-                  if (change.wasAdded())
-                     guiControls.addStaticVisuals(change.getAddedSubList());
-                  if (change.wasRemoved())
-                     guiControls.removeStaticVisuals(change.getAddedSubList());
-               }
-            }
-         });
-         voxelVisualization.put(visualizationType, visualList);
+         voxelVisualization.put(visualizationType, new ArrayList<>());
       }
+
+      currentEvaluation.addListener(v ->
+      {
+         guiControls.removeStaticVisuals(voxelVisualization.get(previousEvaluation.get()));
+         guiControls.addStaticVisuals(voxelVisualization.get(currentEvaluation.getValue()));
+         previousEvaluation.set(currentEvaluation.getValue());
+      });
 
       for (int voxelIndex = 0; voxelIndex < grid.getNumberOfVoxels(); voxelIndex++)
       {
@@ -217,6 +217,8 @@ public class ReachabilityMapTools
       }
 
       currentEvaluation.set(VisualizationType.PositionReach);
+      double bufferGrowthFactor = 1.1;
+      YoBufferPropertiesReadOnly bufferProperties = session.getBufferProperties();
 
       for (int voxelIndex = 0; voxelIndex < grid.getNumberOfVoxels(); voxelIndex++)
       {
@@ -233,7 +235,10 @@ public class ReachabilityMapTools
          writeVoxelJointData(positionExtraData, robot);
          currentEvaluationPose.getPosition().set(positionExtraData.getDesiredPosition());
          currentEvaluationPose.getOrientation().setFromReferenceFrame(controlFrame);
-         visualizationSession.runTick();
+         sessionControls.simulateNow(1);
+
+         if (bufferProperties.getActiveBufferLength() >= bufferProperties.getSize() - 1)
+            session.submitBufferSizeRequestAndWait((int) (bufferGrowthFactor * bufferProperties.getSize()));
       }
 
       currentEvaluation.set(VisualizationType.RayReach);
@@ -250,6 +255,9 @@ public class ReachabilityMapTools
          if (positionExtraData == null)
             continue;
 
+         D.set(voxel.getD());
+         numberOfReachableRays.set(voxel.getNumberOfReachableRays());
+
          for (int rayIndex = 0; rayIndex < sphereVoxelShape.getNumberOfRays(); rayIndex++)
          {
             VoxelExtraData rayExtraData = voxel.getRayExtraData(rayIndex);
@@ -259,7 +267,10 @@ public class ReachabilityMapTools
                writeVoxelJointData(rayExtraData, robot);
                currentEvaluationPose.getPosition().set(rayExtraData.getDesiredPosition());
                currentEvaluationPose.getOrientation().set(rayExtraData.getDesiredOrientation());
-               visualizationSession.runTick();
+               sessionControls.simulateNow(1);
+
+               if (bufferProperties.getActiveBufferLength() >= bufferProperties.getSize() - 1)
+                  session.submitBufferSizeRequestAndWait((int) (bufferGrowthFactor * bufferProperties.getSize()));
             }
          }
       }
@@ -278,8 +289,14 @@ public class ReachabilityMapTools
          if (positionExtraData == null)
             continue;
 
+         D0.set(voxel.getD0());
+         numberOfReachableRays.set(voxel.getNumberOfReachableRays());
+         numberOfReachablePoses.set(voxel.getNumberOfReachablePoses());
+
          for (int rayIndex = 0; rayIndex < sphereVoxelShape.getNumberOfRays(); rayIndex++)
          {
+            numberOfReachableRotationsAroundRay.set(voxel.getNumberOfReachableRotationsAroundRay(rayIndex));
+
             for (int rotationIndex = 0; rotationIndex < sphereVoxelShape.getNumberOfRotationsAroundRay(); rotationIndex++)
             {
                VoxelExtraData poseExtraData = voxel.getPoseExtraData(rayIndex, rotationIndex);
@@ -289,23 +306,17 @@ public class ReachabilityMapTools
                   writeVoxelJointData(poseExtraData, robot);
                   currentEvaluationPose.getPosition().set(poseExtraData.getDesiredPosition());
                   currentEvaluationPose.getOrientation().set(poseExtraData.getDesiredOrientation());
-                  visualizationSession.runTick();
+                  sessionControls.simulateNow(1);
+
+                  if (bufferProperties.getActiveBufferLength() >= bufferProperties.getSize() - 1)
+                     session.submitBufferSizeRequestAndWait((int) (bufferGrowthFactor * bufferProperties.getSize()));
                }
             }
          }
       }
 
-      visualizationSession.setSessionMode(SessionMode.PAUSE);
-      guiControls.addStaticVisuals(createReachibilityColorScaleVisuals());
-      guiControls.addStaticVisuals(ReachabilityMapTools.createBoundingBoxVisuals(grid));
-
-      currentVisualizationType.addListener(v ->
-      {
-         guiControls.removeStaticVisuals(voxelVisualization.get(previousVisualizationType.get()));
-         guiControls.addStaticVisuals(voxelVisualization.get(currentVisualizationType.getValue()));
-         previousVisualizationType.set(currentVisualizationType.getValue());
-      });
-
+      sessionControls.cropBuffer();
+      session.startSessionThread();
       guiControls.waitUntilDown();
    }
 
