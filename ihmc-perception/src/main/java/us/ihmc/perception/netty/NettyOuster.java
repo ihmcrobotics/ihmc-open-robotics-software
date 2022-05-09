@@ -8,6 +8,9 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.nio.NioDatagramChannel;
+import us.ihmc.euclid.tuple3D.Point3D32;
+
+import java.util.HashSet;
 
 public class NettyOuster
 {
@@ -15,8 +18,10 @@ public class NettyOuster
 
    private EventLoopGroup group;
    private Bootstrap bootstrap;
+
+   private HashSet<Point3D32> points;
    public NettyOuster() {
-      //this constructor does nothing right now
+      points = new HashSet<>();
    }
 
    public void initialize() {
@@ -41,5 +46,12 @@ public class NettyOuster
 
    public void stop() {
       group.shutdownGracefully();
+   }
+
+   public boolean hasPoints() {
+      return false; //TODO
+   }
+   public HashSet<Point3D32> getPoints() {
+      return points; //TODO points should be updated somewhere before this method for points to actually render
    }
 }
