@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -17,6 +18,7 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.idl.IDLSequence;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pubsub.DomainFactory;
@@ -27,6 +29,7 @@ import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -36,7 +39,29 @@ public class FootstepPlanningModuleLauncher
    private static final String LOG_DIRECTORY;
 
    // TODO publish version of ihmc-commons with access to capacity of RecyclingArrayList so that ros message field capacities can be accessed from the field's java object
-   private static final int footstepPlanCapacity = 50;
+   private static final int defaultFootstepPlanCapacity = 50;
+   private static final int footstepPlanCapacity;
+
+   static
+   {
+      int footstepListCapacity = defaultFootstepPlanCapacity;
+
+      try
+      {
+         FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
+         IDLSequence.Object<FootstepDataMessage> footstepDataList = footstepDataListMessage.getFootstepDataList();
+         Field valuesField = RecyclingArrayList.class.getDeclaredField("values");
+         valuesField.setAccessible(true);
+         Object[] values = (Object[]) valuesField.get(footstepDataList);
+         footstepListCapacity = values.length;
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
+
+      footstepPlanCapacity = footstepListCapacity;
+   }
 
    static
    {
