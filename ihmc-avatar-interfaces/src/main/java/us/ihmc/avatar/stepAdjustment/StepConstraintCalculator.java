@@ -97,7 +97,7 @@ public class StepConstraintCalculator
       this.soleZUpFrames = soleZUpFrames;
       this.steppableRegionsCalculator = new SteppableRegionsCalculator(kinematicStepRange, registry);
       this.captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth, kinematicStepRange, soleZUpFrames, registry, graphicsListRegistry);
-      this.planarRegionDecider = new CapturabilityBasedPlanarRegionDecider(centerOfMassFrame, gravityZ, registry, graphicsListRegistry);
+      this.planarRegionDecider = new CapturabilityBasedPlanarRegionDecider(centerOfMassFrame, gravityZ, () -> true, registry, graphicsListRegistry);
       this.reachabilityConstraintCalculator = new ReachabilityConstraintCalculator(soleZUpFrames,
                                                                                    footLength,
                                                                                    footWidth,

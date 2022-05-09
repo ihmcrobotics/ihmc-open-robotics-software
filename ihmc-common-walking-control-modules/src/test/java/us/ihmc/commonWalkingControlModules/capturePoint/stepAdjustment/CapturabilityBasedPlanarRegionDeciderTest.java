@@ -1,4 +1,4 @@
-package us.ihmc.avatar.stepAdjustment;
+package us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +18,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class CapturabilityBasedPlanarRegionDeciderTest
 {
@@ -49,6 +49,7 @@ public class CapturabilityBasedPlanarRegionDeciderTest
       centerOfMassFrame.translateAndUpdate(0.0, 0.0, 1.0);
       CapturabilityBasedPlanarRegionDecider constraintCalculator = new CapturabilityBasedPlanarRegionDecider(centerOfMassFrame,
                                                                                                              9.81,
+                                                                                                             () -> true,
                                                                                                              new YoRegistry("Dummy"),
                                                                                                              null);
       constraintCalculator.setSwitchPlanarRegionConstraintsAutomatically(true);
@@ -70,7 +71,13 @@ public class CapturabilityBasedPlanarRegionDeciderTest
       constraintCalculator.updatePlanarRegionConstraintForStep(stepPose, null);
 
       assertTrue(groundPlane.epsilonEquals(constraintCalculator.getConstraintRegion(), 1e-8));
+
+      constraintCalculator.reset();
+      constraintCalculator.setCaptureRegion(captureRegion);
+
+      assertNull(constraintCalculator.updatePlanarRegionConstraintForStep(stepPose, null));
    }
+
 
    @Test
    public void testFlatGroundWithOtherRegion()
@@ -119,6 +126,7 @@ public class CapturabilityBasedPlanarRegionDeciderTest
       PoseReferenceFrame centerOfMassFrame = new PoseReferenceFrame("centerOfMassFrame", ReferenceFrame.getWorldFrame());
       CapturabilityBasedPlanarRegionDecider constraintCalculator = new CapturabilityBasedPlanarRegionDecider(centerOfMassFrame,
                                                                                                              9.81,
+                                                                                                             () -> true,
                                                                                                              new YoRegistry("Dummy"),
                                                                                                              null);
       constraintCalculator.setSwitchPlanarRegionConstraintsAutomatically(true);
