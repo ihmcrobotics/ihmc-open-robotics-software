@@ -11,6 +11,9 @@ import us.ihmc.tools.thread.Activator;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.utilities.ros.ROS1Helper;
 
+/** To run this you have to download the Spinnaker SDK, move it to the robot computer, then run
+ *  the install script inside of it.
+ */
 public class DualBlackflyAndAruCoMarkerOnRobotProcess
 {
    private static final String LEFT_SERIAL_NUMBER = System.getProperty("blackfly.left.serial.number", "00000000");
