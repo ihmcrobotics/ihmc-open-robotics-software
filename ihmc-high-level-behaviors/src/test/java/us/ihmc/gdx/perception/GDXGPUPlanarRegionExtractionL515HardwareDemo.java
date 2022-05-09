@@ -62,7 +62,8 @@ public class GDXGPUPlanarRegionExtractionL515HardwareDemo
                if (nativesLoadedActivator.isNewlyActivated())
                {
                   realSenseHardwareManager = new RealSenseHardwareManager();
-                  l515 = realSenseHardwareManager.createFullFeaturedL515("F1120418");
+//                  l515 = realSenseHardwareManager.createFullFeaturedL515("F1120418");
+                  l515 = realSenseHardwareManager.createFullFeaturedL515("F1121365");
                   l515.initialize();
                }
 

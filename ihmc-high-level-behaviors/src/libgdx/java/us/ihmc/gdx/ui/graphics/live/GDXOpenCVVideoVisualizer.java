@@ -43,7 +43,7 @@ public class GDXOpenCVVideoVisualizer extends ImGuiGDXVisualizer
 
    protected void updateImageDimensions(int imageWidth, int imageHeight)
    {
-      if (rgba8Mat == null || pixmap.getWidth() < imageWidth || pixmap.getHeight() < imageHeight)
+      if (rgba8Mat == null || pixmap.getWidth() != imageWidth || pixmap.getHeight() != imageHeight)
       {
          if (pixmap != null)
          {
@@ -94,6 +94,11 @@ public class GDXOpenCVVideoVisualizer extends ImGuiGDXVisualizer
    protected Mat getRGBA8Mat()
    {
       return rgba8Mat;
+   }
+
+   public BytePointer getRgba8888BytePointer()
+   {
+      return rgba8888BytePointer;
    }
 
    protected ResettableExceptionHandlingExecutorService getThreadQueue()
