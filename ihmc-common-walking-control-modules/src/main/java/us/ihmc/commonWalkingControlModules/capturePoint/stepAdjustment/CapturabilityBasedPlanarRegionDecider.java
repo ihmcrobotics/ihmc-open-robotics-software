@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -109,7 +110,6 @@ public class CapturabilityBasedPlanarRegionDecider
    {
       if (useControlPlane.getValue() && icpControlPlane != null)
          icpControlPlane.setOmega0(omega);
-
    }
 
    public void setSwitchPlanarRegionConstraintsAutomatically(boolean switchAutomatically)
@@ -148,6 +148,7 @@ public class CapturabilityBasedPlanarRegionDecider
 
       captureRegion.changeFrameAndProjectToXYPlane(worldFrame);
 
+      // if we don't have any guess, just snap the foot vertically down.
       if (planarRegionToConstrainTo == null)
       {
          planarRegionToConstrainTo = findPlanarRegionUnderFoothold(footstepPose.getPosition());
@@ -189,6 +190,7 @@ public class CapturabilityBasedPlanarRegionDecider
    }
 
    private final StepConstraintRegion highestRegionUnderFoot = new StepConstraintRegion();
+   private final FramePoint3D projectedFoothold = new FramePoint3D();
 
    /**
     * Fixme generates garbage
@@ -197,9 +199,10 @@ public class CapturabilityBasedPlanarRegionDecider
     */
    private StepConstraintRegion findPlanarRegionUnderFoothold(FramePoint3DReadOnly foothold)
    {
-      Point3D projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(foothold, stepConstraintRegions, highestRegionUnderFoot);
+      if (!PlanarRegionTools.projectPointToPlanesVertically(foothold, stepConstraintRegions, projectedFoothold, highestRegionUnderFoot))
+         return null;
 
-      return projectedPoint == null ? null : highestRegionUnderFoot;
+      return highestRegionUnderFoot;
    }
 
    private boolean checkIfCurrentPlanarRegionIsValid(FrameConvexPolygon2DReadOnly captureRegion, ConvexPolygon2DReadOnly reachabilityRegion)
