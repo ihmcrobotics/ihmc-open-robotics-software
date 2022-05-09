@@ -62,15 +62,18 @@ public class EnvironmentConstraintHandler
    private final ICPControlPlane icpControlPlane;
 
    private final ConvexStepConstraintOptimizer stepConstraintOptimizer;
+   private final BooleanProvider useICPControlPlaneInStepAdjustment;
 
    public EnvironmentConstraintHandler(ICPControlPlane icpControlPlane,
                                        SideDependentList<? extends ContactablePlaneBody> contactableFeet,
+                                       BooleanProvider useICPControlPlaneInStepAdjustment,
                                        String yoNamePrefix,
                                        YoRegistry registry,
                                        YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.icpControlPlane = icpControlPlane;
       this.contactableFeet = contactableFeet;
+      this.useICPControlPlaneInStepAdjustment = useICPControlPlaneInStepAdjustment;
 
       stepConstraintOptimizer = new ConvexStepConstraintOptimizer(registry);
       parameters = new YoConstraintOptimizerParameters(registry);
@@ -117,16 +120,23 @@ public class EnvironmentConstraintHandler
       if (stepConstraintRegion == null)
          return;
 
-      reachabilityRegionInConstraintPlane.clear();
-      for (int i = 0; i < reachabilityRegion.getNumberOfVertices(); i++)
+      if (useICPControlPlaneInStepAdjustment.getValue() && icpControlPlane != null)
       {
-         icpControlPlane.projectPointFromControlPlaneOntoConstraintRegion(worldFrame,
-                                                                          reachabilityRegion.getVertex(i),
-                                                                          projectedReachablePoint,
-                                                                          stepConstraintRegion);
-         reachabilityRegionInConstraintPlane.addVertex(projectedReachablePoint);
+         reachabilityRegionInConstraintPlane.clear();
+         for (int i = 0; i < reachabilityRegion.getNumberOfVertices(); i++)
+         {
+            icpControlPlane.projectPointFromControlPlaneOntoConstraintRegion(worldFrame,
+                                                                             reachabilityRegion.getVertex(i),
+                                                                             projectedReachablePoint,
+                                                                             stepConstraintRegion);
+            reachabilityRegionInConstraintPlane.addVertex(projectedReachablePoint);
+         }
+         reachabilityRegionInConstraintPlane.update();
       }
-      reachabilityRegionInConstraintPlane.update();
+      else
+      {
+         reachabilityRegionInConstraintPlane.setIncludingFrame(reachabilityRegion);
+      }
    }
 
    private final Point2DBasics centroidToThrowAway = new Point2D();
