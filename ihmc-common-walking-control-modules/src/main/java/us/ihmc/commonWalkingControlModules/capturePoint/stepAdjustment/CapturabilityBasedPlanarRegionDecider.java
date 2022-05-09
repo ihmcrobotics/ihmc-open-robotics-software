@@ -59,7 +59,14 @@ public class CapturabilityBasedPlanarRegionDecider
                                                 YoRegistry registry,
                                                 YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this.icpControlPlane = new ICPControlPlane(centerOfMassFrame, gravityZ, registry);
+      this(new ICPControlPlane(centerOfMassFrame, gravityZ, registry), registry, yoGraphicsListRegistry);
+   }
+
+   public CapturabilityBasedPlanarRegionDecider(ICPControlPlane icpControlPlane,
+                                                YoRegistry registry,
+                                                YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      this.icpControlPlane = icpControlPlane;
 
       constraintRegionChanged = new YoBoolean("constraintRegionChanged", registry);
       intersectionAreaWithCurrentRegion = new YoDouble("intersectionAreaWithCurrentRegion", registry);
@@ -164,6 +171,11 @@ public class CapturabilityBasedPlanarRegionDecider
       return planarRegionToConstrainTo;
    }
 
+   /**
+    * FIXME this generates garbage
+    * @param foothold
+    * @return
+    */
    private StepConstraintRegion findPlanarRegionUnderFoothold(FramePoint3DReadOnly foothold)
    {
       StepConstraintRegion highestRegionUnderFoot = new StepConstraintRegion();

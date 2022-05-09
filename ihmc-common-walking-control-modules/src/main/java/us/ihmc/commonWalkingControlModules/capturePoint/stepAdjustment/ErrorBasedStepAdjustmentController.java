@@ -380,9 +380,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
       icpError.sub(desiredICP, currentICP);
 
-      environmentConstraintProvider.setReachabilityRegion(reachabilityConstraintHandler.getReachabilityConstraint());
-      if (!environmentConstraintProvider.validateConvexityOfPlanarRegion())
-         return;
 
       boolean errorAboveThreshold = icpError.lengthSquared() > MathTools.square(minICPErrorForStepAdjustment.getValue());
 
@@ -399,12 +396,18 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       projectAdjustedStepIntoCaptureRegion();
       boolean wasAdjusted = deadbandAndApplyStepAdjustment();
 
+      environmentConstraintProvider.setReachabilityRegion(reachabilityConstraintHandler.getReachabilityConstraint());
+      environmentConstraintProvider.updateConstraintRegion(footstepSolution, multiStepCaptureRegionCalculator.getCaptureRegion());
+
       if (environmentConstraintProvider.hasStepConstraintRegion() && (wasAdjusted || !hasPlanarRegionBeenAssigned.getBooleanValue()))
       {
-         wasAdjusted |= environmentConstraintProvider.applyEnvironmentConstraintToFootstep(upcomingFootstepSide.getEnumValue(),
-                                                                                           footstepSolution,
-                                                                                           upcomingFootstepContactPoints);
-         hasPlanarRegionBeenAssigned.set(environmentConstraintProvider.foundSolution());
+         if (environmentConstraintProvider.validateConvexityOfPlanarRegion())
+         {
+            wasAdjusted |= environmentConstraintProvider.applyEnvironmentConstraintToFootstep(upcomingFootstepSide.getEnumValue(),
+                                                                                              footstepSolution,
+                                                                                              upcomingFootstepContactPoints);
+            hasPlanarRegionBeenAssigned.set(environmentConstraintProvider.foundSolution());
+         }
       }
 
       footstepWasAdjusted.set(wasAdjusted);
