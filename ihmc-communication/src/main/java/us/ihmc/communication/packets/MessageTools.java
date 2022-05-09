@@ -315,11 +315,16 @@ public class MessageTools
    public static SelectionMatrix3DMessage createSelectionMatrix3DMessage(SelectionMatrix3D selectionMatrix3D)
    {
       SelectionMatrix3DMessage message = new SelectionMatrix3DMessage();
-      message.setSelectionFrameId(MessageTools.toFrameId(selectionMatrix3D.getSelectionFrame()));
-      message.setXSelected(selectionMatrix3D.isXSelected());
-      message.setYSelected(selectionMatrix3D.isYSelected());
-      message.setZSelected(selectionMatrix3D.isZSelected());
+      packSelectionMatrix3DMessage(selectionMatrix3D, message);
       return message;
+   }
+
+   public static void packSelectionMatrix3DMessage(SelectionMatrix3D selectionMatrix3D, SelectionMatrix3DMessage messageToPack)
+   {
+      messageToPack.setSelectionFrameId(MessageTools.toFrameId(selectionMatrix3D.getSelectionFrame()));
+      messageToPack.setXSelected(selectionMatrix3D.isXSelected());
+      messageToPack.setYSelected(selectionMatrix3D.isYSelected());
+      messageToPack.setZSelected(selectionMatrix3D.isZSelected());
    }
 
    public static void packSelectionMatrix3DMessage(boolean xSelected, boolean ySelected, boolean zSelected, ReferenceFrame selectionFrame,
