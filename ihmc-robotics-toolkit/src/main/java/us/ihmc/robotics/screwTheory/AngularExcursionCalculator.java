@@ -48,8 +48,11 @@ public class AngularExcursionCalculator
       wholeBodyAngularMomentum = new YoFrameVector3D("wholeBodyAngularMomentum", centerOfMassFrame, registry);
 
       comPose = new YoFramePose3D("comPose", ReferenceFrame.getWorldFrame(), registry);
-      YoGraphicCoordinateSystem comCoordinate = new YoGraphicCoordinateSystem("comCoordinate", comPose, 1.0);
-      graphicsListRegistry.registerYoGraphic("comFrame", comCoordinate);
+      if (graphicsListRegistry != null)
+      {
+         YoGraphicCoordinateSystem comCoordinate = new YoGraphicCoordinateSystem("comCoordinate", comPose, 1.0);
+         graphicsListRegistry.registerYoGraphic("comFrame", comCoordinate);
+      }
    }
 
    public void setToZero()
