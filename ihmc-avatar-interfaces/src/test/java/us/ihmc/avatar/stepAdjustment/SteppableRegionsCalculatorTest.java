@@ -54,10 +54,17 @@ public class SteppableRegionsCalculatorTest
       }
    }
 
+   public SteppableRegionsCalculator getSteppableRegionsCalculator()
+   {
+      SteppableRegionsCalculator calculator = new SteppableRegionsCalculator(1.0, new YoRegistry("test"));
+      calculator.setRemoveSteppableAreaCloseToObstacles(true);
+      return calculator;
+   }
+
    @Test
    public void testEasyJustGround()
    {
-      SteppableRegionsCalculator calculator = new SteppableRegionsCalculator(1.0, new YoRegistry("test"));
+      SteppableRegionsCalculator calculator = getSteppableRegionsCalculator();
 
       ConvexPolygon2D groundPolygon = new ConvexPolygon2D();
       groundPolygon.addVertex(1.0, 1.0);
@@ -87,7 +94,7 @@ public class SteppableRegionsCalculatorTest
    @Test
    public void testEasyGroundWithABlock()
    {
-      SteppableRegionsCalculator calculator = new SteppableRegionsCalculator(1.0, new YoRegistry("test"));
+      SteppableRegionsCalculator calculator = getSteppableRegionsCalculator();
 
       if (visualize)
          createUI();
@@ -171,7 +178,7 @@ public class SteppableRegionsCalculatorTest
    @Test
    public void testEasyGroundWithWallThatSplitsInHalf()
    {
-      SteppableRegionsCalculator calculator = new SteppableRegionsCalculator(1.0, new YoRegistry("test"));
+      SteppableRegionsCalculator calculator = getSteppableRegionsCalculator();
 
       ConvexPolygon2D groundPolygon = new ConvexPolygon2D();
       groundPolygon.addVertex(1.0, 1.0);
@@ -249,7 +256,7 @@ public class SteppableRegionsCalculatorTest
    @Test
    public void testEasyGroundWithABlockBelow()
    {
-      SteppableRegionsCalculator calculator = new SteppableRegionsCalculator(1.0, new YoRegistry("test"));
+      SteppableRegionsCalculator calculator = getSteppableRegionsCalculator();
 
       ConvexPolygon2D groundPolygon = new ConvexPolygon2D();
       groundPolygon.addVertex(1.0, 1.0);
@@ -301,7 +308,7 @@ public class SteppableRegionsCalculatorTest
    @Test
    public void testEasyGroundWithBlockThatCrops()
    {
-      SteppableRegionsCalculator calculator = new SteppableRegionsCalculator(1.0, new YoRegistry("test"));
+      SteppableRegionsCalculator calculator = getSteppableRegionsCalculator();
 
       ConvexPolygon2D groundPolygon = new ConvexPolygon2D();
       groundPolygon.addVertex(1.0, 1.0);
@@ -365,7 +372,7 @@ public class SteppableRegionsCalculatorTest
    @Test
    public void testEasyGroundWithBlockThatMergesWithAHole()
    {
-      SteppableRegionsCalculator calculator = new SteppableRegionsCalculator(1.0, new YoRegistry("test"));
+      SteppableRegionsCalculator calculator = getSteppableRegionsCalculator();
 
       ConvexPolygon2D groundPolygon = new ConvexPolygon2D();
       groundPolygon.addVertex(1.0, 1.0);
@@ -484,7 +491,7 @@ public class SteppableRegionsCalculatorTest
    @Test
    public void testSplitThatTurnsHoleIntoAClip()
    {
-      SteppableRegionsCalculator calculator = new SteppableRegionsCalculator(1.0, new YoRegistry("test"));
+      SteppableRegionsCalculator calculator = getSteppableRegionsCalculator();
 
       ConvexPolygon2D groundPolygon = new ConvexPolygon2D();
       groundPolygon.addVertex(1.0, 1.0);
@@ -581,7 +588,7 @@ public class SteppableRegionsCalculatorTest
       if (visualize)
          createUI();
 
-      SteppableRegionsCalculator calculator = new SteppableRegionsCalculator(1.0, new YoRegistry("test"));
+      SteppableRegionsCalculator calculator = getSteppableRegionsCalculator();
 
       ConvexPolygon2D groundPolygon = new ConvexPolygon2D();
       groundPolygon.addVertex(1.0, 1.0);
@@ -1066,7 +1073,7 @@ public class SteppableRegionsCalculatorTest
       double canEasilyStepOverHeight = 0.1;
       double orthogonalAngle = Math.toRadians(75.0);
 
-      SteppableRegionsCalculator calculator = new SteppableRegionsCalculator(1.0, new YoRegistry("test"));
+      SteppableRegionsCalculator calculator = getSteppableRegionsCalculator();
 
       calculator.setMinimumDistanceFromCliffBottoms(minimumDistanceFromCliffBottoms);
       calculator.setCanEasilyStepOverHeight(canEasilyStepOverHeight);
@@ -1138,7 +1145,7 @@ public class SteppableRegionsCalculatorTest
       if (visualize)
          createUI();
 
-      SteppableRegionsCalculator calculator = new SteppableRegionsCalculator(1.0, new YoRegistry("test"));
+      SteppableRegionsCalculator calculator = getSteppableRegionsCalculator();
 
       FramePoint3D dummyStanceFoot = new FramePoint3D();
       dummyStanceFoot.setToNaN();
