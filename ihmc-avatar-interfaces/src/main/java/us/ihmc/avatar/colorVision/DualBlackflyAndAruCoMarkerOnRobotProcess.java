@@ -29,14 +29,16 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
    private final ROS1Helper ros1Helper;
    private final ROS2Helper ros2Helper;
    private final TypedNotification<Empty> reconnectROS1Notification = new TypedNotification<>();
-   private SideDependentList<DualBlackflyCamera> blackflies = new SideDependentList<>(new DualBlackflyCamera(LEFT_SERIAL_NUMBER),
-                                                                                      new DualBlackflyCamera(RIGHT_SERIAL_NUMBER));
+   private SideDependentList<DualBlackflyCamera> blackflies = new SideDependentList<>();
 
    private SpinnakerHardwareManager spinnakerHardwareManager;
 
    public DualBlackflyAndAruCoMarkerOnRobotProcess()
    {
       nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
+
+//      blackflies.put(RobotSide.LEFT, new DualBlackflyCamera(LEFT_SERIAL_NUMBER));
+      blackflies.put(RobotSide.RIGHT, new DualBlackflyCamera(RIGHT_SERIAL_NUMBER));
 
       ros1Helper = new ROS1Helper("blackfly_node");
 
@@ -56,7 +58,7 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
          if (nativesLoadedActivator.isNewlyActivated())
          {
             spinnakerHardwareManager = new SpinnakerHardwareManager();
-            for (RobotSide side : RobotSide.values)
+            for (RobotSide side : blackflies.sides())
             {
                DualBlackflyCamera blackfly = blackflies.get(side);
                blackfly.create(spinnakerHardwareManager.buildBlackfly(blackfly.getSerialNumber()), ros1Helper, RosTools.BLACKFLY_VIDEO_TOPICS.get(side));
@@ -68,7 +70,7 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
             ros1Helper.reconnectEverything();
          }
 
-         for (RobotSide side : RobotSide.values)
+         for (RobotSide side : blackflies.sides())
          {
             blackflies.get(side).update();
          }
@@ -77,7 +79,7 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
 
    private void destroy()
    {
-      for (RobotSide side : RobotSide.values)
+      for (RobotSide side : blackflies.sides())
       {
          blackflies.get(side).destroy();
       }
