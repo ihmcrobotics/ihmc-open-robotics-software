@@ -84,7 +84,7 @@ public class EnvironmentConstraintHandler
       isEnvironmentConstraintValid = new YoBoolean("isEnvironmentConstraintValid", registry);
 
       yoConvexHullConstraint = new YoFrameConvexPolygon2D(yoNamePrefix + "ConvexHullConstraint", "", worldFrame, 12, registry);
-      foundSolution = new YoBoolean("foundSolution", registry);
+      foundSolution = new YoBoolean("foundSolutionToStepConstraint", registry);
 
       if (yoGraphicsListRegistry != null)
       {
@@ -97,8 +97,7 @@ public class EnvironmentConstraintHandler
    public void setStepConstraintRegions(List<StepConstraintRegion> stepConstraintRegions)
    {
       reset();
-      for (int i = 0; i < stepConstraintRegions.size(); i++)
-         this.stepConstraintRegions.add(stepConstraintRegions.get(i));
+      planarRegionDecider.setConstraintRegions(stepConstraintRegions);
    }
 
    public boolean hasStepConstraintRegion()
@@ -123,9 +122,10 @@ public class EnvironmentConstraintHandler
 
    public void updateConstraintRegion(FramePose3DReadOnly footstepPose, FrameConvexPolygon2DReadOnly captureRegion)
    {
-      planarRegionDecider.setConstraintRegions(stepConstraintRegions);
       planarRegionDecider.setCaptureRegion(captureRegion);
       planarRegionDecider.updatePlanarRegionConstraintForStep(footstepPose, reachabilityRegionInConstraintPlane);
+      if (planarRegionDecider.constraintRegionChanged())
+         stepConstraintOptimizer.reset();
    }
 
    private final Point2DBasics centroidToThrowAway = new Point2D();
