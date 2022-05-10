@@ -7,6 +7,7 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
@@ -16,6 +17,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
@@ -34,7 +37,7 @@ public class EnvironmentConstraintHandler
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static final double defaultDesiredDistanceInside = 0.04;
+   private static final double defaultDesiredDistanceInside = 0.06;
    private static final boolean defaultUsePredictedContactPoints = false;
    private static final double defaultMaxConcaveEstimateRatio = 1.1;
 
@@ -195,10 +198,12 @@ public class EnvironmentConstraintHandler
       }
 
       footstepPoseToPack.getPosition().setZ(stepConstraintRegion.getPlaneZGivenXY(footstepPoseToPack.getX(), footstepPoseToPack.getY()));
-      footstepPoseToPack.getOrientation().set(stepConstraintRegion.getTransformToWorld().getRotation());
+      // TODO need to rotate to match the surface normal
+//      footstepPoseToPack.getOrientation().set(stepConstraintRegion.getTransformToWorld().getRotation());
 
       return originalPose.getPositionDistance(footstepPoseToPack) > 1e-5 || originalPose.getOrientationDistance(footstepPoseToPack) > 1e-5;
    }
+
 
    public boolean foundSolution()
    {
