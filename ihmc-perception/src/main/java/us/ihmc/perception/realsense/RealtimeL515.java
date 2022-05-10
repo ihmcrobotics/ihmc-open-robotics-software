@@ -253,6 +253,11 @@ public class RealtimeL515
       }
    }
 
+   public rs2_frame getDepthFrameDataHandle()
+   {
+      return depthFrame;
+   }
+
    public double getDepthToMeterConversion()
    {
       return depthToMeterConversion;
