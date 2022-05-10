@@ -30,7 +30,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 
-public class ReachabilityMapFileWriter
+public class ReachabilityMapSpreadsheetExporterV0
 {
    private static final int MAX_NUMBER_OF_ROWS = 65535;
 
@@ -58,12 +58,12 @@ public class ReachabilityMapFileWriter
                                               Voxel3DGrid gridToWrite)
          throws IOException
    {
-      ReachabilityMapFileWriter writer = new ReachabilityMapFileWriter(robotName, classForFilePath);
+      ReachabilityMapSpreadsheetExporterV0 writer = new ReachabilityMapSpreadsheetExporterV0(robotName, classForFilePath);
       writer.write(robotArmJoints, controlFramePose, gridToWrite);
       writer.exportAndClose();
    }
 
-   public ReachabilityMapFileWriter(String robotName, Class<?> classForFilePath) throws IOException
+   public ReachabilityMapSpreadsheetExporterV0(String robotName, Class<?> classForFilePath) throws IOException
    {
       this.robotName = robotName;
       String fileName = prependDateToFileName(robotName) + ".xls";
