@@ -202,7 +202,8 @@ public class GPUPlanarRegionExtraction
          cyImage.resize(patchImageWidth, patchImageHeight, openCLManager, null);
          czImage.resize(patchImageWidth, patchImageHeight, openCLManager, null);
          graphImage.resize(patchImageWidth, patchImageHeight, openCLManager, null);
-         onPatchSizeChanged.run();
+         if (onPatchSizeChanged != null)
+            onPatchSizeChanged.run();
          regionVisitedMatrix.reshape(patchImageHeight, patchImageWidth);
          boundaryVisitedMatrix.reshape(patchImageHeight, patchImageWidth);
          boundaryMatrix.reshape(patchImageHeight, patchImageWidth);
@@ -301,7 +302,8 @@ public class GPUPlanarRegionExtraction
 
                   tempIsland.planarRegion = planarRegion;
                   tempIsland.planarRegionIslandIndex = planarRegionIslandIndex;
-                  forDrawingDebugPanel.accept(tempIsland);
+                  if (forDrawingDebugPanel != null)
+                     forDrawingDebugPanel.accept(tempIsland);
                }
                else
                {
@@ -376,7 +378,8 @@ public class GPUPlanarRegionExtraction
                                                                    1);
             if (numberOfBoundaryPatches >= parameters.getBoundaryMinPatches())
             {
-               forDrawingDebugPanel.accept(regionRing);
+               if (forDrawingDebugPanel != null)
+                  forDrawingDebugPanel.accept(regionRing);
                ++regionRingIndex;
             }
             else
