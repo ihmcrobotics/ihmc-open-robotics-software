@@ -120,7 +120,7 @@ public class EnvironmentConstraintHandler
       this.reachabilityRegionInConstraintPlane.setIncludingFrame(reachabilityRegion);
    }
 
-   public void updateConstraintRegion(FramePose3DReadOnly footstepPose, FrameConvexPolygon2DReadOnly captureRegion)
+   public void updateActiveConstraintRegionToUse(FramePose3DReadOnly footstepPose, FrameConvexPolygon2DReadOnly captureRegion)
    {
       planarRegionDecider.setCaptureRegion(captureRegion);
       planarRegionDecider.updatePlanarRegionConstraintForStep(footstepPose, reachabilityRegionInConstraintPlane);

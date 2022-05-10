@@ -324,12 +324,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    }
 
    @Override
-   public boolean hasStepConstraintRegion()
-   {
-      return environmentConstraintProvider.hasStepConstraintRegion();
-   }
-
-   @Override
    public void initialize(double initialTime, RobotSide supportSide)
    {
       isInSwing.set(true);
@@ -399,7 +393,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       boolean wasAdjusted = deadbandAndApplyStepAdjustment();
 
       environmentConstraintProvider.setReachabilityRegion(reachabilityConstraintHandler.getReachabilityConstraint());
-      environmentConstraintProvider.updateConstraintRegion(footstepSolution, multiStepCaptureRegionCalculator.getCaptureRegion());
+      environmentConstraintProvider.updateActiveConstraintRegionToUse(footstepSolution, multiStepCaptureRegionCalculator.getCaptureRegion());
 
       if (environmentConstraintProvider.hasStepConstraintRegion() && (wasAdjusted || !hasPlanarRegionBeenAssigned.getBooleanValue()))
       {
