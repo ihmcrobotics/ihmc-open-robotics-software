@@ -22,8 +22,6 @@ public interface StepAdjustmentController
 
    void setStepConstraintRegions(List<StepConstraintRegion> stepConstraintRegion);
 
-   boolean hasStepConstraintRegion();
-
    void initialize(double initialTime, RobotSide supportSide);
 
    void compute(double currentTime,

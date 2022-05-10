@@ -211,12 +211,6 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
    }
 
    @Override
-   public boolean hasStepConstraintRegion()
-   {
-      return false;
-   }
-
-   @Override
    public void initialize(double initialTime, RobotSide supportSide)
    {
       isInSwing.set(true);
