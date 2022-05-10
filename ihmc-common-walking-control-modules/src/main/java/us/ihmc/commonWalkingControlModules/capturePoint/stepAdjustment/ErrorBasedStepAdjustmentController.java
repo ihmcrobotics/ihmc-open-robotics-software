@@ -215,8 +215,8 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                                                                    false,
                                                                    yoNamePrefix,
                                                                    registry,
-                                                                   yoGraphicsListRegistry);
-      oneStepSafetyHeuristics = new CaptureRegionSafetyHeuristics(lengthLimit, registry, yoGraphicsListRegistry);
+                                                                   null);
+      oneStepSafetyHeuristics = new CaptureRegionSafetyHeuristics(lengthLimit, registry, null);
       multiStepCaptureRegionCalculator = new MultiStepCaptureRegionCalculator(reachabilityConstraintHandler, allowCrossOverSteps, registry, yoGraphicsListRegistry);
       environmentConstraintProvider = new EnvironmentConstraintHandler(icpControlPlane, contactableFeet, useICPControlPlaneInStepAdjustment,
                                                                        yoNamePrefix, registry, yoGraphicsListRegistry);
