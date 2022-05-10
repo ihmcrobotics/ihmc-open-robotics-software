@@ -167,7 +167,6 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
    @Test
    public void testSidePush()
    {
-      simulationTestingParameters.setKeepSCSUp(true);
       setupTest();
 
       double totalMass = getRobotModel().createFullRobotModel().getTotalMass();
