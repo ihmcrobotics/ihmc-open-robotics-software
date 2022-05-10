@@ -47,7 +47,6 @@ public abstract class AbstractFootControlState implements State
       FullHumanoidRobotModel fullRobotModel = footControlHelper.getHighLevelHumanoidControllerToolbox().getFullRobotModel();
       pelvis = fullRobotModel.getPelvis();
       rootBody = fullRobotModel.getElevator();
-      pelvis.getP
    }
 
    public abstract void doSpecificAction(double timeInState);
