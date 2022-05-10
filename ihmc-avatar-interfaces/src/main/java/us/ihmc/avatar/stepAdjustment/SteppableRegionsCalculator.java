@@ -12,6 +12,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintListConverter;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ClusterType;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
@@ -21,6 +22,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterTools;
 import us.ihmc.robotics.RegionInWorldInterface;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2D;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DBasics;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DReadOnly;
@@ -166,27 +168,37 @@ public class SteppableRegionsCalculator
       // first, filter out all the regions that are invalid for stepping
       List<PlanarRegion> candidateRegions = allPlanarRegions.stream().filter(this::isRegionValidForStepping).collect(Collectors.toList());
 
-      steppableRegions = new ArrayList<>();
+  
       obstacleExtrusionsMap = new HashMap<>();
       maskedRegionsExtrusions = new HashMap<>();
-      for (PlanarRegion candidateRegion : candidateRegions)
+      
+      if (removeSteppableAreaCloseToObstacles.getBooleanValue())
       {
-         List<StepConstraintRegion> regions = createSteppableRegionsFromPlanarRegion(candidateRegion, allPlanarRegions);
-         if (regions != null)
+         steppableRegions = new ArrayList<>();
+
+         for (PlanarRegion candidateRegion : candidateRegions)
          {
-            for (StepConstraintRegion region : regions)
+            List<StepConstraintRegion> regions = createSteppableRegionsFromPlanarRegion(candidateRegion, allPlanarRegions);
+            if (regions != null)
             {
-               if (candidateRegion.getRegionId() != -1)
-                  region.setRegionId(candidateRegion.getRegionId());
-               steppableRegions.add(region);
+               for (StepConstraintRegion region : regions)
+               {
+                  if (candidateRegion.getRegionId() != -1)
+                     region.setRegionId(candidateRegion.getRegionId());
+                  steppableRegions.add(region);
+               }
             }
          }
-      }
 
-      for (StepConstraintRegion stepConstraintRegion : steppableRegions)
+         for (StepConstraintRegion stepConstraintRegion : steppableRegions)
+         {
+            if (stepConstraintRegion.getRegionId() == -1)
+               stepConstraintRegion.setRegionId(random.nextInt());
+         }
+      }
+      else
       {
-         if (stepConstraintRegion.getRegionId() == -1)
-            stepConstraintRegion.setRegionId(random.nextInt());
+         steppableRegions = StepConstraintListConverter.convertPlanarRegionListToStepConstraintRegion(allPlanarRegions);
       }
 
       return steppableRegions;
@@ -261,21 +273,22 @@ public class SteppableRegionsCalculator
       return closeEnough;
    }
 
+   
    private List<StepConstraintRegion> createSteppableRegionsFromPlanarRegion(PlanarRegion candidateRegion, List<PlanarRegion> allOtherRegions)
    {
-      ConcavePolygon2D candidateConstraintRegion = new ConcavePolygon2D();
-      candidateConstraintRegion.addVertices(Vertex2DSupplier.asVertex2DSupplier(candidateRegion.getConcaveHull()));
-      candidateConstraintRegion.update();
-
-      List<PlanarRegion> obstacleRegions = allOtherRegions.stream()
-                                                          .filter(candidate -> obstacleRegionFilter.isRegionValidObstacle(candidate, candidateRegion))
-                                                          .collect(Collectors.toList());
-
       List<StepConstraintRegion> stepConstraintRegions;
 
       if (removeSteppableAreaCloseToObstacles.getBooleanValue())
       {
+
+         List<PlanarRegion> obstacleRegions = allOtherRegions.stream()
+                                                             .filter(candidate -> obstacleRegionFilter.isRegionValidObstacle(candidate, candidateRegion))
+                                                             .collect(Collectors.toList());
          List<ConcavePolygon2DBasics> obstacleExtrusions = createObstacleExtrusions(candidateRegion, obstacleRegions);
+
+         ConcavePolygon2D candidateConstraintRegion = new ConcavePolygon2D();
+         candidateConstraintRegion.addVertices(Vertex2DSupplier.asVertex2DSupplier(candidateRegion.getConcaveHull()));
+         candidateConstraintRegion.update();
 
          if (obstacleExtrusions.stream().anyMatch(region -> isRegionMasked(candidateConstraintRegion, region)))
          {
@@ -295,7 +308,7 @@ public class SteppableRegionsCalculator
       else
       {
          stepConstraintRegions = new ArrayList<>();
-         stepConstraintRegions.add(new StepConstraintRegion(candidateRegion.getTransformToWorld(), candidateConstraintRegion));
+         stepConstraintRegions.add(StepConstraintListConverter.convertPlanarRegionToStepConstraintRegion(candidateRegion));
       }
 
 
