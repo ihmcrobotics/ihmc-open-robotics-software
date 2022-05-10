@@ -38,7 +38,7 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
       nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
 
 //      blackflies.put(RobotSide.LEFT, new DualBlackflyCamera(LEFT_SERIAL_NUMBER));
-      blackflies.put(RobotSide.RIGHT, new DualBlackflyCamera(RIGHT_SERIAL_NUMBER));
+      blackflies.put(RobotSide.RIGHT, new DualBlackflyCamera(RIGHT_SERIAL_NUMBER, 1920, 1200));
 
       ros1Helper = new ROS1Helper("blackfly_node");
 

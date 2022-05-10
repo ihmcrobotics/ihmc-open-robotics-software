@@ -15,6 +15,7 @@ public class DualBlackflyCamera
    private String serialNumber;
    private BytedecoBlackfly blackfly;
    private BytePointer imageData;
+   private ROS1Helper ros1Helper;
    private String ros1Topic;
    private RosImagePublisher rosImagePublisher;
    private ChannelBuffer ros1ChannelBuffer;
@@ -22,31 +23,37 @@ public class DualBlackflyCamera
    private int imageWidth;
    private int imageHeight;
 
-   public DualBlackflyCamera(String serialNumber)
+   public DualBlackflyCamera(String serialNumber, int imageWidth, int imageHeight)
    {
       this.serialNumber = serialNumber;
+      this.imageWidth = imageWidth;
+      this.imageHeight = imageHeight;
    }
 
    public void create(BytedecoBlackfly blackfly, ROS1Helper ros1Helper, String ros1Topic)
    {
       this.blackfly = blackfly;
+      this.ros1Helper = ros1Helper;
       this.ros1Topic = ros1Topic;
       blackfly.initialize();
-
-      imageWidth = blackfly.getWidth();
-      imageHeight = blackfly.getHeight();
-      numberOfBytesInFrame = imageWidth * imageHeight * 4;
-      imageData = new BytePointer((long) numberOfBytesInFrame);
-
-      LogTools.info("Publishing ROS 1 color: {}", ros1Topic);
-      rosImagePublisher = new RosImagePublisher();
-      ros1Helper.attachPublisher(ros1Topic, rosImagePublisher);
-      ros1ChannelBuffer = rosImagePublisher.getChannelBufferFactory().getBuffer(numberOfBytesInFrame);
    }
 
    public void update()
    {
       blackfly.getImageData(imageData);
+
+      if (ros1ChannelBuffer == null)
+      {
+//         imageWidth = blackfly.getWidth();
+//         imageHeight = blackfly.getHeight();
+         numberOfBytesInFrame = imageWidth * imageHeight * 4;
+         imageData = new BytePointer((long) numberOfBytesInFrame);
+
+         LogTools.info("Publishing ROS 1 color: {}", ros1Topic);
+         rosImagePublisher = new RosImagePublisher();
+         ros1Helper.attachPublisher(ros1Topic, rosImagePublisher);
+         ros1ChannelBuffer = rosImagePublisher.getChannelBufferFactory().getBuffer(numberOfBytesInFrame);
+      }
 
       double dataAquisitionTime = Conversions.nanosecondsToSeconds(System.nanoTime());
 
