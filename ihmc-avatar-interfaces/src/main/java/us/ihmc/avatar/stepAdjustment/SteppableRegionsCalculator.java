@@ -159,6 +159,11 @@ public class SteppableRegionsCalculator
       this.orthogonalAngle.set(orthogonalAngle);
    }
 
+   public void setRemoveSteppableAreaCloseToObstacles(boolean removeSteppableAreaCloseToObstacles)
+   {
+      this.removeSteppableAreaCloseToObstacles.set(removeSteppableAreaCloseToObstacles);
+   }
+
    public List<StepConstraintRegion> computeSteppableRegions()
    {
       tooSmallRegions = new ArrayList<>();
