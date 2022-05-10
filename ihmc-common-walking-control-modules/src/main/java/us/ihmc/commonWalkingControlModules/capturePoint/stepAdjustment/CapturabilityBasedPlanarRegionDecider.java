@@ -29,21 +29,24 @@ public class CapturabilityBasedPlanarRegionDecider
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static final double defaultMinimumIntersectionForSearch = 0.015;
-   private static final double defaultAreaImprovementToSwitch = 0.015;
-   private static final double defaultInflationToCurrentArea = 1.1;
+   private static final double defaultMinimumCaptureAreaForSearch = 0.015;
+   private static final double defaultCaptureAreaImprovementToSwitch = 0.015;
+   private static final double defaultWeightToCurrentCaptureArea = 1.1;
 
    private final List<StepConstraintRegion> stepConstraintRegions = new ArrayList<>();
 
+   private final YoBoolean currentStepConstraintIsStillValid;
    private final YoBoolean switchPlanarRegionConstraintsAutomatically;
-   private final YoDouble minimumIntersectionForSearch;
-   private final YoDouble areaImprovementToSwitch;
-   private final YoDouble inflationToCurrentArea;
+   private final YoDouble minimumCaptureAreaThreshold;
+   private final YoDouble captureAreaImprovementToSwitch;
+   private final YoDouble weightToCurrentCaptureArea;
 
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
 
    private final YoBoolean constraintRegionChanged;
-   private final YoDouble intersectionAreaWithCurrentRegion;
+   private final YoDouble captureAreaWithNextBestRegion;
+   private final YoDouble captureAreaWithCurrentRegion;
+   private final YoDouble minimumCaptureAreaToSwitch;
 
    private final ConvexPolygon2D convexHullConstraint = new ConvexPolygon2D();
    private final ConvexPolygon2D reachableEnvironmentalArea = new ConvexPolygon2D();
@@ -73,15 +76,18 @@ public class CapturabilityBasedPlanarRegionDecider
       this.useControlPlane = useControlPlane;
       this.icpControlPlane = icpControlPlane;
 
+      currentStepConstraintIsStillValid = new YoBoolean("currentStepConstraintIsStillValid", registry);
       constraintRegionChanged = new YoBoolean("constraintRegionChanged", registry);
-      intersectionAreaWithCurrentRegion = new YoDouble("intersectionAreaWithCurrentRegion", registry);
+      captureAreaWithCurrentRegion = new YoDouble("captureAreaWithCurrentRegion", registry);
+      captureAreaWithNextBestRegion = new YoDouble("captureAreaWithNextBestRegion", registry);
+      minimumCaptureAreaToSwitch = new YoDouble("minimumCaptureAreaToSwitch", registry);
 
-      minimumIntersectionForSearch = new YoDouble("minimumIntersectionForSearch", registry);
-      areaImprovementToSwitch = new YoDouble("areaImprovementToSwitch", registry);
-      inflationToCurrentArea = new YoDouble("inflationToCurrentArea", registry);
-      minimumIntersectionForSearch.set(defaultMinimumIntersectionForSearch);
-      areaImprovementToSwitch.set(defaultAreaImprovementToSwitch);
-      inflationToCurrentArea.set(defaultInflationToCurrentArea);
+      minimumCaptureAreaThreshold = new YoDouble("minimumCaptureAreaThreshold", registry);
+      captureAreaImprovementToSwitch = new YoDouble("captureAreaImprovementToSwitch", registry);
+      weightToCurrentCaptureArea = new YoDouble("weightToCurrentCaptureArea", registry);
+      minimumCaptureAreaThreshold.set(defaultMinimumCaptureAreaForSearch);
+      captureAreaImprovementToSwitch.set(defaultCaptureAreaImprovementToSwitch);
+      weightToCurrentCaptureArea.set(defaultWeightToCurrentCaptureArea);
 
       switchPlanarRegionConstraintsAutomatically = new YoBoolean("switchPlanarRegionConstraintsAutomatically", registry);
       switchPlanarRegionConstraintsAutomatically.set(true);
@@ -122,7 +128,7 @@ public class CapturabilityBasedPlanarRegionDecider
    {
       planarRegionToConstrainTo = null;
       stepConstraintRegions.clear();
-      intersectionAreaWithCurrentRegion.set(0.0);
+      captureAreaWithCurrentRegion.set(0.0);
       yoConvexHullConstraint.clear();
    }
 
@@ -173,6 +179,11 @@ public class CapturabilityBasedPlanarRegionDecider
             constraintRegionChanged.set(true);
          }
       }
+      else
+      {
+         minimumCaptureAreaToSwitch.setToNaN();
+         captureAreaWithNextBestRegion.setToNaN();
+      }
 
       return planarRegionToConstrainTo;
    }
@@ -210,26 +221,34 @@ public class CapturabilityBasedPlanarRegionDecider
    private boolean checkIfCurrentConstraintRegionIsValid(FrameConvexPolygon2DReadOnly captureRegion, ConvexPolygon2DReadOnly reachabilityRegion)
    {
       if (planarRegionToConstrainTo == null)
-         return false;
-
-      computeProjectedConvexHull(planarRegionToConstrainTo);
-      if (reachabilityRegion != null)
-         convexPolygonTools.computeIntersectionOfPolygons(convexHullConstraint, reachabilityRegion, reachableEnvironmentalArea);
+      {
+         currentStepConstraintIsStillValid.set(false);
+      }
       else
-         reachableEnvironmentalArea.set(convexHullConstraint);
+      {
 
-      // if the current reachable portion of the environmental constraint has a large enough intersecting area with the capture region, it is still valid.
-      intersectionAreaWithCurrentRegion.set(convexPolygonTools.computeIntersectionAreaOfPolygons(captureRegion, reachableEnvironmentalArea));
+         computeProjectedConvexHull(planarRegionToConstrainTo);
+         if (reachabilityRegion != null)
+            convexPolygonTools.computeIntersectionOfPolygons(convexHullConstraint, reachabilityRegion, reachableEnvironmentalArea);
+         else
+            reachableEnvironmentalArea.set(convexHullConstraint);
 
-      return intersectionAreaWithCurrentRegion.getDoubleValue() > minimumIntersectionForSearch.getDoubleValue();
+         // if the current reachable portion of the environmental constraint has a large enough intersecting area with the capture region, it is still valid.
+         captureAreaWithCurrentRegion.set(convexPolygonTools.computeIntersectionAreaOfPolygons(captureRegion, reachableEnvironmentalArea));
+
+         currentStepConstraintIsStillValid.set(captureAreaWithCurrentRegion.getDoubleValue() > minimumCaptureAreaThreshold.getDoubleValue());
+      }
+      return currentStepConstraintIsStillValid.getBooleanValue();
    }
 
    private StepConstraintRegion findBestPlanarRegionToStepTo(FrameConvexPolygon2DReadOnly captureRegion, ConvexPolygon2DReadOnly reachabilityRegion)
    {
-      double currentAreaOfBestIntersection = intersectionAreaWithCurrentRegion.getDoubleValue();
+      double currentAreaOfBestIntersection = captureAreaWithCurrentRegion.getDoubleValue();
       if (currentAreaOfBestIntersection > 0.0) // if we do have some intersection, we want to weight more heavily continued use of that. We increase the current area weight, as well as require a larger area to switch
-         currentAreaOfBestIntersection = inflationToCurrentArea.getDoubleValue() * currentAreaOfBestIntersection + areaImprovementToSwitch.getDoubleValue();
+         currentAreaOfBestIntersection = weightToCurrentCaptureArea.getDoubleValue() * currentAreaOfBestIntersection + captureAreaImprovementToSwitch.getDoubleValue();
 
+      minimumCaptureAreaToSwitch.set(currentAreaOfBestIntersection);
+      captureAreaWithNextBestRegion.setToNaN();
       StepConstraintRegion activePlanarRegion = planarRegionToConstrainTo;
 
       for (int regionIndex = 0; regionIndex < stepConstraintRegions.size(); regionIndex++)
@@ -245,6 +264,7 @@ public class CapturabilityBasedPlanarRegionDecider
          // if this new candidate has more intersecting area, switch the regions
          if (intersectionArea > currentAreaOfBestIntersection)
          {
+            captureAreaWithNextBestRegion.set(intersectionArea);
             currentAreaOfBestIntersection = intersectionArea;
             activePlanarRegion = constraintRegion;
          }
