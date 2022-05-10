@@ -14,6 +14,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.matrix.LinearTransform3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -22,6 +23,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.OpenCLFloatBuffer;
@@ -192,6 +194,7 @@ public class GPUPlanarRegionExtraction
       if (patchSizeChanged)
       {
          patchSizeChanged = false;
+         LogTools.info("Resizing patch image to {}x{}", patchImageWidth, patchImageHeight);
          nxImage.resize(patchImageWidth, patchImageHeight, openCLManager, null);
          nyImage.resize(patchImageWidth, patchImageHeight, openCLManager, null);
          nzImage.resize(patchImageWidth, patchImageHeight, openCLManager, null);
@@ -452,8 +455,11 @@ public class GPUPlanarRegionExtraction
          List<PlanarRegion> planarRegions = new ArrayList<>();
          try
          {
+            // Going through LinearTransform3D first prevents NotARotationMatrix exceptions.
+            LinearTransform3D linearTransform3D = new LinearTransform3D(EuclidGeometryTools.axisAngleFromZUpToVector3D(gpuPlanarRegion.getNormal()));
+            linearTransform3D.normalize();
             FrameQuaternion orientation = new FrameQuaternion();
-            orientation.setIncludingFrame(cameraFrame, EuclidGeometryTools.axisAngleFromZUpToVector3D(gpuPlanarRegion.getNormal()));
+            orientation.setIncludingFrame(cameraFrame, linearTransform3D.getAsQuaternion());
             orientation.changeFrame(ReferenceFrame.getWorldFrame());
 
             // First compute the set of concave hulls for this region
@@ -531,12 +537,44 @@ public class GPUPlanarRegionExtraction
 
    private void calculateDerivativeParameters()
    {
+      int previousPatchHeight = patchHeight;
+      int previousPatchWidth = patchWidth;
+      int previousPatchImageHeight = patchImageHeight;
+      int previousPatchImageWidth = patchImageWidth;
+      int previousFilterPatchImageHeight = filterPatchImageHeight;
+      int previousFilterPatchImageWidth = filterPatchImageWidth;
+
       patchHeight = parameters.getPatchSize();
       patchWidth = parameters.getPatchSize();
       patchImageHeight = imageHeight / patchHeight;
       patchImageWidth = imageWidth / patchWidth;
       filterPatchImageHeight = imageHeight / parameters.getDeadPixelFilterPatchSize();
       filterPatchImageWidth = imageWidth / parameters.getDeadPixelFilterPatchSize();
+
+      int newPatchHeight = patchHeight;
+      int newPatchWidth = patchWidth;
+      int newPatchImageHeight = patchImageHeight;
+      int newPatchImageWidth = patchImageWidth;
+      int newFilterPatchImageHeight = filterPatchImageHeight;
+      int newFilterPatchImageWidth = filterPatchImageWidth;
+
+      boolean changed = previousPatchHeight != newPatchHeight;
+      changed |= previousPatchWidth != newPatchWidth;
+      changed |= previousPatchImageHeight != newPatchImageHeight;
+      changed |= previousPatchImageWidth != newPatchImageWidth;
+      changed |= previousFilterPatchImageHeight != newFilterPatchImageHeight;
+      changed |= previousFilterPatchImageWidth != newFilterPatchImageWidth;
+
+      if (changed)
+      {
+         LogTools.info("Updated patch sizes:");
+         LogTools.info("newPatchHeight: {} -> {}", previousPatchHeight, newPatchHeight);
+         LogTools.info("newPatchWidth: {} -> {}", previousPatchWidth, newPatchWidth);
+         LogTools.info("newPatchImageHeight: {} -> {}", previousPatchImageHeight, newPatchImageHeight);
+         LogTools.info("newPatchImageWidth: {} -> {}", previousPatchImageWidth, newPatchImageWidth);
+         LogTools.info("newFilterPatchImageHeight: {} -> {}", previousFilterPatchImageHeight, newFilterPatchImageHeight);
+         LogTools.info("newFilterPatchImageWidth: {} -> {}", previousFilterPatchImageWidth, newFilterPatchImageWidth);
+      }
    }
 
    public void destroy()

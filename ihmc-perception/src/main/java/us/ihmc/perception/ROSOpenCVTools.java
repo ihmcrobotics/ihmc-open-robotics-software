@@ -18,24 +18,29 @@ import java.util.Vector;
 
 public class ROSOpenCVTools
 {
-   public static void backMatWithNettyBuffer(Mat mat, ChannelBuffer channelBuffer)
+   public static ByteBuffer getAsDirectByteBuffer(ChannelBuffer channelBuffer)
    {
       ByteBuffer slicedBuffer = RosTools.sliceNettyBuffer(channelBuffer);
       ByteBuffer slicedDirectBuffer;
-      if (!slicedBuffer.isDirect())
+      if (!slicedBuffer.isDirect()) // TODO: How to get Netty to receive via direct buffers?
       {
-         //         throw new RuntimeException("Netty buffer is not direct somehow.");
          slicedDirectBuffer = ByteBuffer.allocateDirect(slicedBuffer.capacity());
          slicedDirectBuffer.order(ByteOrder.nativeOrder());
          slicedBuffer.rewind();
          slicedDirectBuffer.put(slicedBuffer);
+         slicedDirectBuffer.rewind();
       }
       else
       {
          slicedDirectBuffer = slicedBuffer;
       }
 
-      BytePointer imageDataPointer = new BytePointer(slicedDirectBuffer);
+      return slicedDirectBuffer;
+   }
+
+   public static void backMatWithNettyBuffer(Mat mat, ChannelBuffer channelBuffer)
+   {
+      BytePointer imageDataPointer = new BytePointer(getAsDirectByteBuffer(channelBuffer));
       mat.data(imageDataPointer);
    }
 

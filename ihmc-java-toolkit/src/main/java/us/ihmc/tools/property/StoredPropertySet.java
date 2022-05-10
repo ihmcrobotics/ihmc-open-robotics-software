@@ -11,7 +11,6 @@ import us.ihmc.tools.io.WorkspaceFile;
 
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
