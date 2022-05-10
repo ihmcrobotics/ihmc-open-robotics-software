@@ -229,7 +229,8 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
                        FramePoint2DReadOnly desiredICP,
                        FramePoint2DReadOnly currentICP,
                        FrameVector2DReadOnly residualICPError,
-                       double omega0)
+                       double omega0,
+                       int numberOfStepsInQueue)
    {
       if (!isInSwing.getBooleanValue())
          return;

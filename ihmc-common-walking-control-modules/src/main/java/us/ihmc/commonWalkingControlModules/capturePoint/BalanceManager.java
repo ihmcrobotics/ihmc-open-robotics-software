@@ -392,7 +392,7 @@ public class BalanceManager
       this.stepConstraintRegionHandler = planarRegionStepConstraint;
    }
 
-   public boolean checkAndUpdateStepAdjustment(Footstep footstep)
+   public boolean checkAndUpdateStepAdjustment(Footstep footstep, int numberOfStepsInQueue)
    {
       boolean usingStepAdjustment = stepAdjustmentController.useStepAdjustment();
 
@@ -413,7 +413,12 @@ public class BalanceManager
       if (stepConstraintRegionHandler != null && stepConstraintRegionHandler.hasNewStepConstraintRegion())
          stepAdjustmentController.setStepConstraintRegion(stepConstraintRegionHandler.pollHasNewStepConstraintRegion());
 
-      stepAdjustmentController.compute(yoTime.getDoubleValue(), desiredCapturePoint, capturePoint2d, residualICPErrorForStepAdjustment, omega0);
+      stepAdjustmentController.compute(yoTime.getDoubleValue(),
+                                       desiredCapturePoint,
+                                       capturePoint2d,
+                                       residualICPErrorForStepAdjustment,
+                                       omega0,
+                                       numberOfStepsInQueue);
       boolean footstepWasAdjusted = stepAdjustmentController.wasFootstepAdjusted();
       footstep.setPose(stepAdjustmentController.getFootstepSolution());
       return footstepWasAdjusted;
