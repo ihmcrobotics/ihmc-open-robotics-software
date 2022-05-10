@@ -363,7 +363,6 @@ public class ReachabilitySphereMapCalculator implements Controller
 
                   if (solverIndex == 0)
                      writeSolverSolution(solver, controllerOutput);
-                  break;
                }
             }
          }
