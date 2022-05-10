@@ -2,11 +2,12 @@ package us.ihmc.commonWalkingControlModules.messageHandlers;
 
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StepConstraintRegionCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StepConstraintsListCommand;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+
+import java.util.List;
 
 public class StepConstraintRegionHandler
 {
@@ -46,19 +47,16 @@ public class StepConstraintRegionHandler
 
    public boolean hasNewStepConstraintRegion()
    {
-      stepConstraintRegions.clear();
-      {
-         return hasNewConstraintRegion.getBooleanValue();
-      }
+      return hasNewConstraintRegion.getBooleanValue();
    }
 
-   public StepConstraintRegion pollHasNewStepConstraintRegion()
+   public List<StepConstraintRegion> pollHasNewStepConstraintRegions()
    {
       if (!hasNewConstraintRegion.getBooleanValue())
          return null;
 
       hasNewConstraintRegion.set(false);
 
-      return stepConstraintRegions.get(0);
+      return stepConstraintRegions;
    }
 }
