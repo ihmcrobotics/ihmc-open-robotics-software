@@ -12,6 +12,7 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.stepConstraintToolboxModule.StepConstraintToolboxModule;
+import us.ihmc.avatar.stepAdjustment.StepConstraintCalculator;
 import us.ihmc.avatar.stepAdjustment.SteppableRegionsCalculator;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
@@ -27,6 +28,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintMessageConverter;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -39,6 +41,8 @@ import us.ihmc.simulationToolkit.controllers.PushRobotControllerSCS2;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import java.util.List;
 
 public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInterface
 {
@@ -75,12 +79,12 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       simulationTestHelper.start();
 
+      SteppableRegionsCalculator stepConstraintCalculator = new SteppableRegionsCalculator(4.0, simulationTestHelper.getControllerRegistry());
 
       PlanarRegionsList planarRegionsList = environment.getPlanarRegionsList();
 
-      StepConstraintsListMessage constraintsListMessage = StepConstraintMessageConverter.convertToStepConstraintsListMessageFromPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
-
-      simulationTestHelper.publishToController(constraintsListMessage);
+      stepConstraintCalculator.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
+      List<StepConstraintRegion> stepConstraints = stepConstraintCalculator.computeSteppableRegions();
 
       double z = getForcePointOffsetZInChestFrame();
       pushRobotController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationSession().getTime(),
@@ -116,8 +120,9 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       assertTrue(simulationTestHelper.simulateNow(0.5));
 
       FootstepDataListMessage footsteps = createFootstepDataListMessage(swingTime, transferTime);
+      StepConstraintsListMessage constraintsListMessage = StepConstraintMessageConverter.convertToStepConstraintsListMessage(stepConstraints);
+      footsteps.getDefaultStepConstraints().set(constraintsListMessage);
       simulationTestHelper.publishToController(footsteps);
-      simulationTestHelper.publishToController(constraintsListMessage);
 
       simulationTestHelper.simulateNow(1.0);
    }
