@@ -94,10 +94,11 @@ public class EnvironmentConstraintHandler
       }
    }
 
-   public void setStepConstraintRegion(StepConstraintRegion stepConstraintRegion)
+   public void setStepConstraintRegions(List<StepConstraintRegion> stepConstraintRegions)
    {
       reset();
-      this.stepConstraintRegions.add(stepConstraintRegion);
+      for (int i = 0; i < stepConstraintRegions.size(); i++)
+         this.stepConstraintRegions.add(stepConstraintRegions.get(i));
    }
 
    public boolean hasStepConstraintRegion()
