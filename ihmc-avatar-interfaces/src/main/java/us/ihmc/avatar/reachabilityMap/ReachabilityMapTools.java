@@ -138,7 +138,7 @@ public class ReachabilityMapTools
    {
       long startTime = System.nanoTime();
       System.out.println("Loading reachability map");
-      ReachabilityMapFileLoader reachabilityMapFileLoader = new ReachabilityMapFileLoader(robotName, rootBody, referenceFrames);
+      ReachabilityMapSpreadsheetImporterV0 reachabilityMapFileLoader = new ReachabilityMapSpreadsheetImporterV0(robotName, rootBody, referenceFrames);
       FramePose3D controlFramePose = reachabilityMapFileLoader.getControlFramePose();
 
       RigidBodyBasics endEffector = MultiBodySystemTools.collectSubtreeEndEffectors(rootBody)[0];

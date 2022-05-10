@@ -32,7 +32,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizerIOTools;
 
-public class ReachabilityMapFileLoader
+public class ReachabilityMapSpreadsheetImporterV0
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private NPOIFSFileSystem fileSystem;
@@ -45,22 +45,22 @@ public class ReachabilityMapFileLoader
 
    private final FramePose3D controlFramePose;
 
-   public ReachabilityMapFileLoader(String robotName, RigidBodyBasics rootBody)
+   public ReachabilityMapSpreadsheetImporterV0(String robotName, RigidBodyBasics rootBody)
    {
       this(robotName, rootBody, null);
    }
 
-   public ReachabilityMapFileLoader(String robotName, RigidBodyBasics rootBody, Collection<ReferenceFrame> referenceFrames)
+   public ReachabilityMapSpreadsheetImporterV0(String robotName, RigidBodyBasics rootBody, Collection<ReferenceFrame> referenceFrames)
    {
       this(selectionFileDialog(), robotName, rootBody, referenceFrames);
    }
 
-   public ReachabilityMapFileLoader(File fileToLoad, String robotName, RigidBodyBasics rootBody)
+   public ReachabilityMapSpreadsheetImporterV0(File fileToLoad, String robotName, RigidBodyBasics rootBody)
    {
       this(selectionFileDialog(), robotName, rootBody, null);
    }
 
-   public ReachabilityMapFileLoader(File fileToLoad, String robotName, RigidBodyBasics rootBody, Collection<ReferenceFrame> referenceFrames)
+   public ReachabilityMapSpreadsheetImporterV0(File fileToLoad, String robotName, RigidBodyBasics rootBody, Collection<ReferenceFrame> referenceFrames)
    {
       try
       {
@@ -212,7 +212,7 @@ public class ReachabilityMapFileLoader
       HSSFSheet currentDataSheet;
 
       int currentDataSheetNameIndex = 1;
-      currentDataSheet = workBookToLoad.getSheet(ReachabilityMapFileWriter.getPositionDataSheetName(currentDataSheetNameIndex++));
+      currentDataSheet = workBookToLoad.getSheet(ReachabilityMapSpreadsheetExporterV0.getPositionDataSheetName(currentDataSheetNameIndex++));
 
       while (currentDataSheet != null)
       {
@@ -239,7 +239,7 @@ public class ReachabilityMapFileLoader
             currentRow = currentDataSheet.getRow(currentRowIndex++);
          }
 
-         currentDataSheet = workBookToLoad.getSheet(ReachabilityMapFileWriter.getPositionDataSheetName(currentDataSheetNameIndex++));
+         currentDataSheet = workBookToLoad.getSheet(ReachabilityMapSpreadsheetExporterV0.getPositionDataSheetName(currentDataSheetNameIndex++));
       }
    }
 
@@ -249,7 +249,7 @@ public class ReachabilityMapFileLoader
       HSSFSheet currentDataSheet;
 
       int currentDataSheetNameIndex = 1;
-      currentDataSheet = workBookToLoad.getSheet(ReachabilityMapFileWriter.getRayDataSheetName(currentDataSheetNameIndex++));
+      currentDataSheet = workBookToLoad.getSheet(ReachabilityMapSpreadsheetExporterV0.getRayDataSheetName(currentDataSheetNameIndex++));
 
       while (currentDataSheet != null)
       {
@@ -279,7 +279,7 @@ public class ReachabilityMapFileLoader
             currentRow = currentDataSheet.getRow(currentRowIndex++);
          }
 
-         currentDataSheet = workBookToLoad.getSheet(ReachabilityMapFileWriter.getRayDataSheetName(currentDataSheetNameIndex++));
+         currentDataSheet = workBookToLoad.getSheet(ReachabilityMapSpreadsheetExporterV0.getRayDataSheetName(currentDataSheetNameIndex++));
       }
    }
 
@@ -289,7 +289,7 @@ public class ReachabilityMapFileLoader
       HSSFSheet currentDataSheet;
 
       int currentDataSheetNameIndex = 1;
-      currentDataSheet = workBookToLoad.getSheet(ReachabilityMapFileWriter.getPoseDataSheetName(currentDataSheetNameIndex++));
+      currentDataSheet = workBookToLoad.getSheet(ReachabilityMapSpreadsheetExporterV0.getPoseDataSheetName(currentDataSheetNameIndex++));
 
       while (currentDataSheet != null)
       {
@@ -320,7 +320,7 @@ public class ReachabilityMapFileLoader
             currentRow = currentDataSheet.getRow(currentRowIndex++);
          }
 
-         currentDataSheet = workBookToLoad.getSheet(ReachabilityMapFileWriter.getPoseDataSheetName(currentDataSheetNameIndex++));
+         currentDataSheet = workBookToLoad.getSheet(ReachabilityMapSpreadsheetExporterV0.getPoseDataSheetName(currentDataSheetNameIndex++));
       }
    }
 

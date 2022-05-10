@@ -193,7 +193,7 @@ public class ReachabilitySphereMapSimulationHelper
 
    public void exportDataToFile(String robotName, Class<?> classForFilePath) throws IOException
    {
-      ReachabilityMapFileWriter.exportVoxel3DGridToFile(robotName,
+      ReachabilityMapSpreadsheetExporterV0.exportVoxel3DGridToFile(robotName,
                                                         classForFilePath,
                                                         calculator.getRobotArmJoints(),
                                                         calculator.getControlFramePose(),
