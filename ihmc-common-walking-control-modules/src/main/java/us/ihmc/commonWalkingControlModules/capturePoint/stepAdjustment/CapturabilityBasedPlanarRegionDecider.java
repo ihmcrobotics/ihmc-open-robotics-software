@@ -84,6 +84,7 @@ public class CapturabilityBasedPlanarRegionDecider
       inflationToCurrentArea.set(defaultInflationToCurrentArea);
 
       switchPlanarRegionConstraintsAutomatically = new YoBoolean("switchPlanarRegionConstraintsAutomatically", registry);
+      switchPlanarRegionConstraintsAutomatically.set(true);
 
       yoConvexHullConstraint = new YoFrameConvexPolygon2D("convexHullConstraint", "", worldFrame, 12, registry);
 
@@ -97,7 +98,8 @@ public class CapturabilityBasedPlanarRegionDecider
    public void setConstraintRegions(List<StepConstraintRegion> constraintRegions)
    {
       reset();
-      stepConstraintRegions.addAll(constraintRegions);
+      for (int i = 0; i < constraintRegions.size(); i++)
+         stepConstraintRegions.add(constraintRegions.get(i));
    }
 
    public void setCaptureRegion(FrameConvexPolygon2DReadOnly captureRegion)
@@ -262,7 +264,7 @@ public class CapturabilityBasedPlanarRegionDecider
       else
       {
          convexHullConstraint.set(constraintRegion.getConcaveHull());
-         convexHullConstraint.applyTransform(constraintRegion.getTransformToWorld());
+         convexHullConstraint.applyTransform(constraintRegion.getTransformToWorld(), false);
       }
 
       if (reachabilityRegion != null)
