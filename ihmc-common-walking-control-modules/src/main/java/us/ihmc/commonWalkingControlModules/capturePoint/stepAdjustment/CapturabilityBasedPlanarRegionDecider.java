@@ -30,8 +30,8 @@ public class CapturabilityBasedPlanarRegionDecider
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final double defaultMinimumIntersectionForSearch = 0.015;
-   private static final double defaultAreaImprovementToSwitch = 0.02;
-   private static final double defaultInflationToCurrentArea = 0.1;
+   private static final double defaultAreaImprovementToSwitch = 0.015;
+   private static final double defaultInflationToCurrentArea = 1.1;
 
    private final List<StepConstraintRegion> stepConstraintRegions = new ArrayList<>();
 
@@ -228,7 +228,7 @@ public class CapturabilityBasedPlanarRegionDecider
    {
       double currentAreaOfBestIntersection = intersectionAreaWithCurrentRegion.getDoubleValue();
       if (currentAreaOfBestIntersection > 0.0) // if we do have some intersection, we want to weight more heavily continued use of that. We increase the current area weight, as well as require a larger area to switch
-         currentAreaOfBestIntersection = (1.0 + inflationToCurrentArea.getDoubleValue()) * currentAreaOfBestIntersection + areaImprovementToSwitch.getDoubleValue();
+         currentAreaOfBestIntersection = inflationToCurrentArea.getDoubleValue() * currentAreaOfBestIntersection + areaImprovementToSwitch.getDoubleValue();
 
       StepConstraintRegion activePlanarRegion = planarRegionToConstrainTo;
 

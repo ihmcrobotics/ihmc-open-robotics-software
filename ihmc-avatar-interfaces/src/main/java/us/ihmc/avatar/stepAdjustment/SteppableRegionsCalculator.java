@@ -183,7 +183,7 @@ public class SteppableRegionsCalculator
 
          for (PlanarRegion candidateRegion : candidateRegions)
          {
-            List<StepConstraintRegion> regions = createSteppableRegionsFromPlanarRegion(candidateRegion, allPlanarRegions);
+            List<StepConstraintRegion> regions = createSteppableRegionsFromPlanarRegion(candidateRegion, candidateRegions);
             if (regions != null)
             {
                for (StepConstraintRegion region : regions)
@@ -203,7 +203,7 @@ public class SteppableRegionsCalculator
       }
       else
       {
-         steppableRegions = StepConstraintListConverter.convertPlanarRegionListToStepConstraintRegion(allPlanarRegions);
+         steppableRegions = StepConstraintListConverter.convertPlanarRegionListToStepConstraintRegion(candidateRegions);
       }
 
       return steppableRegions;
