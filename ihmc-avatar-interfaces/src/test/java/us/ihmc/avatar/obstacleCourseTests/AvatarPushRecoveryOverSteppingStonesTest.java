@@ -130,7 +130,6 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
    @Test
    public void testWalkingOverSteppingStonesForwardPush()
    {
-      simulationTestingParameters.setKeepSCSUp(true);
       setupTest();
       double transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
 
