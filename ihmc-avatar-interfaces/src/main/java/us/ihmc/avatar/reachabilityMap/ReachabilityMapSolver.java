@@ -18,6 +18,7 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -134,9 +135,10 @@ public class ReachabilityMapSolver
       }
    }
 
-   public void setControlFramePoseInBody(RigidBodyTransformReadOnly controlFramePose)
+   public void setControlFramePoseInParentJoint(Pose3DReadOnly controlFramePose)
    {
-      controlFramePoseInEndEffector.setIncludingFrame(endEffector.getBodyFixedFrame(), controlFramePose);
+      controlFramePoseInEndEffector.setIncludingFrame(endEffector.getParentJoint().getFrameAfterJoint(), controlFramePose);
+      controlFramePoseInEndEffector.changeFrame(endEffector.getBodyFixedFrame());
    }
 
    public void setControlFramePoseInParentJoint(RigidBodyTransformReadOnly controlFramePose)

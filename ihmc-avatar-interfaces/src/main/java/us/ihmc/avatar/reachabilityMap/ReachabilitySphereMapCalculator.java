@@ -10,12 +10,10 @@ import java.util.stream.IntStream;
 
 import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DData;
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
-import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -28,6 +26,7 @@ import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.scs2.session.tools.SCS1GraphicConversionTools;
+import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -60,23 +59,24 @@ public class ReachabilitySphereMapCalculator implements Controller
 
    private final List<YoGraphicGroupDefinition> solverYoGraphicGroupDefinitions = new ArrayList<>();
 
-   public ReachabilitySphereMapCalculator(OneDoFJointBasics[] robotArmJoints, ControllerOutput controllerOutput)
-   {
-      this(robotArmJoints, controllerOutput, 20);
-   }
-
-   public ReachabilitySphereMapCalculator(OneDoFJointBasics[] robotArmJoints, ControllerOutput controllerOutput, int numberOfThreads)
+   public ReachabilitySphereMapCalculator(ReachabilityMapRobotInformation robotInformation, ControllerOutput controllerOutput, int numberOfThreads)
    {
       this.controllerOutput = controllerOutput;
 
       solvers = new ReachabilityMapSolver[numberOfThreads];
       solverResults = new boolean[numberOfThreads];
       solverVoxels = new Voxel3DData[numberOfThreads];
+      solverInputs = new FramePose3D[numberOfThreads];
+      translationFromVoxelOrigin = new FrameVector3D[numberOfThreads];
 
-      solverInputs = new FramePose3D[solvers.length];
-      translationFromVoxelOrigin = new FrameVector3D[solvers.length];
+      RobotDefinition robotDefinition = robotInformation.getRobotDefinition();
+      ReferenceFrame robotRootFrame = Robot.createRobotRootFrame(robotDefinition, ReferenceFrame.getWorldFrame()); // This allows to visualize YoGraphics in frames other than world
+      RigidBodyBasics rootBody = robotDefinition.newInstance(robotRootFrame);
+      RigidBodyBasics base = MultiBodySystemTools.findRigidBody(rootBody, robotInformation.getBaseName());
+      RigidBodyBasics endEffector = MultiBodySystemTools.findRigidBody(rootBody, robotInformation.getEndEffectorName());
+      OneDoFJointBasics[] armJoints = MultiBodySystemTools.createOneDoFJointPath(base, endEffector);
 
-      OneDoFJointBasics firstJoint = robotArmJoints[0];
+      OneDoFJointBasics firstJoint = armJoints[0];
       for (int i = 0; i < numberOfThreads; i++)
       {
          YoRegistry solverRegistry = new YoRegistry("solverRegistry" + i);
@@ -87,7 +87,7 @@ public class ReachabilitySphereMapCalculator implements Controller
 
          if (i == 0)
          {
-            solverJoints = robotArmJoints;
+            solverJoints = armJoints;
             cloneSuffix = "";
          }
          else
@@ -95,8 +95,7 @@ public class ReachabilitySphereMapCalculator implements Controller
             RigidBodyBasics originalRootBody = MultiBodySystemTools.getRootBody(firstJoint.getPredecessor());
             cloneSuffix = "-solver" + i;
             RigidBodyBasics solverRootBody = MultiBodySystemFactories.cloneMultiBodySystem(originalRootBody, ReferenceFrame.getWorldFrame(), cloneSuffix);
-            solverJoints = Arrays.stream(robotArmJoints)
-                                 .map(originalJoint -> MultiBodySystemTools.findJoint(solverRootBody, originalJoint.getName() + cloneSuffix))
+            solverJoints = Arrays.stream(armJoints).map(originalJoint -> MultiBodySystemTools.findJoint(solverRootBody, originalJoint.getName() + cloneSuffix))
                                  .toArray(OneDoFJointBasics[]::new);
          }
 
@@ -111,6 +110,12 @@ public class ReachabilitySphereMapCalculator implements Controller
          }
          solverInputs[i] = new FramePose3D();
          translationFromVoxelOrigin[i] = new FrameVector3D();
+      }
+
+      for (ReachabilityMapSolver solver : solvers)
+      {
+         solver.setControlFramePoseInParentJoint(robotInformation.getControlFramePoseInParentJoint());
+         solver.setRayAxis(robotInformation.getOrthogonalToPalm());
       }
 
       gridFramePose.attachVariableChangedListener(v ->
@@ -179,55 +184,6 @@ public class ReachabilitySphereMapCalculator implements Controller
    public FramePose3DReadOnly getControlFramePose()
    {
       return solvers[0].getControlFramePoseInEndEffector();
-   }
-
-   /**
-    * Sets the transform of the end-effector's frame of interest with respect to the end-effector's
-    * body-fixed frame.
-    * <p>
-    * It is recommended to align the x-axis of the control frame with the vector that is orthogonal to
-    * the palm.
-    * </p>
-    * 
-    * @param controlFramePose the transform from the control frame with respect to the end-effector's
-    *                         body-fixed frame.
-    */
-   public void setControlFramePoseInBody(RigidBodyTransformReadOnly controlFramePose)
-   {
-      for (ReachabilityMapSolver solver : solvers)
-      {
-         solver.setControlFramePoseInBody(controlFramePose);
-      }
-   }
-
-   /**
-    * Sets the transform of the end-effector's frame of interest with respect to the end-effector's
-    * parent joint frame.
-    * <p>
-    * It is recommended to align the x-axis of the control frame with the vector that is orthogonal to
-    * the palm.
-    * </p>
-    * 
-    * @param controlFramePose the transform from the control frame with respect to the end-effector's
-    *                         parent joint frame.
-    */
-   public void setControlFramePoseInParentJoint(RigidBodyTransformReadOnly controlFramePose)
-   {
-      for (ReachabilityMapSolver solver : solvers)
-      {
-         solver.setControlFramePoseInParentJoint(controlFramePose);
-      }
-   }
-
-   /**
-    * Specifies while axis is orthogonal to the palm.
-    */
-   public void setPalmOrthogonalAxis(Axis3D axis)
-   {
-      for (ReachabilityMapSolver solver : solvers)
-      {
-         solver.setRayAxis(axis);
-      }
    }
 
    public void enableJointTorqueAnalysis(boolean considerJointTorqueLimits)

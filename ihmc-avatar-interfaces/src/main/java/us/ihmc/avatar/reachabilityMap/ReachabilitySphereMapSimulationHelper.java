@@ -9,12 +9,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
-import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizer;
@@ -41,35 +36,22 @@ public class ReachabilitySphereMapSimulationHelper
    private final AtomicReference<VisualizationType> previousVisualizationType = new AtomicReference<>(VisualizationType.RayReach);
    private final YoEnum<VisualizationType> currentVisualizationType = new YoEnum<>("currentVisualizationType", registry, VisualizationType.class);
 
-   public ReachabilitySphereMapSimulationHelper(RobotDefinition robotDefinition, String baseName, String endEffectorName)
+   public ReachabilitySphereMapSimulationHelper(ReachabilityMapRobotInformation robotInformation)
    {
+      RobotDefinition robotDefinition = robotInformation.getRobotDefinition();
       robotDefinition.ignoreAllJoints();
-
-      ReferenceFrame robotRootFrame = Robot.createRobotRootFrame(robotDefinition, ReferenceFrame.getWorldFrame()); // This allows to visualize YoGraphics in frames other than world
-      RigidBodyBasics rootBody = robotDefinition.newInstance(robotRootFrame);
-      RigidBodyBasics base = MultiBodySystemTools.findRigidBody(rootBody, baseName);
-      RigidBodyBasics endEffector = MultiBodySystemTools.findRigidBody(rootBody, endEffectorName);
-      OneDoFJointBasics[] armJoints = MultiBodySystemTools.createOneDoFJointPath(base, endEffector);
 
       session = new SimulationSession("Reachability Analysis - " + robotDefinition.getName());
       session.initializeBufferSize(16000);
       session.getRootRegistry().addChild(registry);
       Robot robot = session.addRobot(robotDefinition);
-      calculator = new ReachabilitySphereMapCalculator(armJoints, robot.getControllerOutput());
+      calculator = new ReachabilitySphereMapCalculator(robotInformation, robot.getControllerOutput(), 20);
       calculator.setVoxel3DGrid(Voxel3DGrid.newVoxel3DGrid(25, 0.05, 50, 1));
       calculator.setRobotCollisionModel(robotDefinition);
       robot.addController(calculator);
 
       previousVisualizationType.set(VisualizationType.RayReach);
       currentVisualizationType.set(VisualizationType.RayReach);
-   }
-
-   /**
-    * Specifies while axis is orthogonal to the palm.
-    */
-   public void setPalmOrthogonalAxis(Axis3D axis)
-   {
-      calculator.setPalmOrthogonalAxis(axis);
    }
 
    public void enableJointTorqueAnalysis(boolean considerJointTorqueLimits)
@@ -101,16 +83,6 @@ public class ReachabilitySphereMapSimulationHelper
    {
       Voxel3DGrid voxel3DGrid = Voxel3DGrid.newVoxel3DGrid(gridSizeInNumberOfVoxels, voxelSize, numberOfRays, numberOfRotationsAroundRay);
       calculator.setVoxel3DGrid(voxel3DGrid);
-   }
-
-   public void setControlFramePoseInBody(RigidBodyTransformReadOnly controlFramePoseInParentJointFrame)
-   {
-      calculator.setControlFramePoseInBody(controlFramePoseInParentJointFrame);
-   }
-
-   public void setControlFramePoseInParentJoint(RigidBodyTransformReadOnly controlFramePoseInParentJointFrame)
-   {
-      calculator.setControlFramePoseInParentJoint(controlFramePoseInParentJointFrame);
    }
 
    private SessionVisualizerControls guiControls;
@@ -194,10 +166,10 @@ public class ReachabilitySphereMapSimulationHelper
    public void exportDataToFile(String robotName, Class<?> classForFilePath) throws IOException
    {
       ReachabilityMapSpreadsheetExporterV0.exportVoxel3DGridToFile(robotName,
-                                                        classForFilePath,
-                                                        calculator.getRobotArmJoints(),
-                                                        calculator.getControlFramePose(),
-                                                        calculator.getVoxel3DGrid());
+                                                                   classForFilePath,
+                                                                   calculator.getRobotArmJoints(),
+                                                                   calculator.getControlFramePose(),
+                                                                   calculator.getVoxel3DGrid());
    }
 
    public ReachabilitySphereMapCalculator getCalculator()
