@@ -10,13 +10,10 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.NPOIFSFileSystem;
-import org.ejml.data.DMatrixRMaj;
-import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DData;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.scs2.definition.robot.OneDoFJointDefinition;
@@ -49,7 +46,7 @@ public class ReachabilityMapSpreadsheetImporter implements ReachabilityMapFileRe
       loadControlFramePose(robotInformation, descriptionSheet);
 
       Voxel3DGrid reachabilityMap = createGrid(descriptionSheet);
-      loadReachabilityMapData(reachabilityMap, workbook);
+      loadReachabilityMapData(robotInformation.getEvaluatedJoints().size(), reachabilityMap, workbook);
 
       try
       {
@@ -65,13 +62,15 @@ public class ReachabilityMapSpreadsheetImporter implements ReachabilityMapFileRe
 
    private static void loadControlFramePose(ReachabilityMapRobotInformation robotInformation, HSSFSheet descriptionSheet)
    {
-      HSSFCell positionCell = descriptionSheet.getRow(16).getCell(2);
-      HSSFCell orientationCell = descriptionSheet.getRow(16).getCell(4);
-
-      Pose3D controlFramePose = new Pose3D();
-      controlFramePose.getPosition().set(parseDoubleArray(positionCell.getStringCellValue()));
-      controlFramePose.getOrientation().set(new YawPitchRoll(parseDoubleArray(orientationCell.getStringCellValue())));
-      robotInformation.setControlFramePoseInParentJoint(controlFramePose);
+      HSSFRow row = descriptionSheet.getRow(14);
+      int cellIndex = 1;
+      double x = row.getCell(cellIndex++).getNumericCellValue();
+      double y = row.getCell(cellIndex++).getNumericCellValue();
+      double z = row.getCell(cellIndex++).getNumericCellValue();
+      double yaw = row.getCell(cellIndex++).getNumericCellValue();
+      double pitch = row.getCell(cellIndex++).getNumericCellValue();
+      double roll = row.getCell(cellIndex++).getNumericCellValue();
+      robotInformation.setControlFramePoseInParentJoint(new Pose3D(x, y, z, yaw, pitch, roll));
    }
 
    private static void checkRobotMatchesData(ReachabilityMapRobotInformation robotInformation, HSSFSheet descriptionSheet)
@@ -87,7 +86,7 @@ public class ReachabilityMapSpreadsheetImporter implements ReachabilityMapFileRe
       ArrayList<String> jointNames = new ArrayList<>();
 
       int currentIndexValue = 2;
-      HSSFRow currentRow = descriptionSheet.getRow(11);
+      HSSFRow currentRow = descriptionSheet.getRow(8);
       HSSFCell currentCell = currentRow.getCell(currentIndexValue);
 
       while (currentCell != null)
@@ -125,18 +124,14 @@ public class ReachabilityMapSpreadsheetImporter implements ReachabilityMapFileRe
 
    private static Voxel3DGrid createGrid(HSSFSheet descriptionSheet)
    {
-      DMatrixRMaj transformToParentFrameAsDenseMatrix = CommonOps_DDRM.identity(4);
-      int row = 0;
-      for (int rowIndex = 8; rowIndex < 11; rowIndex++)
-      {
-         int col = 0;
-         for (int cellIndex = 2; cellIndex < 6; cellIndex++)
-         {
-            transformToParentFrameAsDenseMatrix.set(row, col, descriptionSheet.getRow(rowIndex).getCell(cellIndex).getNumericCellValue());
-            col++;
-         }
-         row++;
-      }
+      HSSFRow poseRow = descriptionSheet.getRow(14);
+      int poseCellIndex = 1;
+      double x = poseRow.getCell(poseCellIndex++).getNumericCellValue();
+      double y = poseRow.getCell(poseCellIndex++).getNumericCellValue();
+      double z = poseRow.getCell(poseCellIndex++).getNumericCellValue();
+      double yaw = poseRow.getCell(poseCellIndex++).getNumericCellValue();
+      double pitch = poseRow.getCell(poseCellIndex++).getNumericCellValue();
+      double roll = poseRow.getCell(poseCellIndex++).getNumericCellValue();
 
       int numberOfVoxelsPerDimension = (int) descriptionSheet.getRow(2).getCell(1).getNumericCellValue();
       double voxelSize = descriptionSheet.getRow(3).getCell(2).getNumericCellValue();
@@ -144,18 +139,18 @@ public class ReachabilityMapSpreadsheetImporter implements ReachabilityMapFileRe
       int numberOfRotationsPerRay = (int) descriptionSheet.getRow(5).getCell(2).getNumericCellValue();
 
       Voxel3DGrid grid = Voxel3DGrid.newVoxel3DGrid(numberOfVoxelsPerDimension, voxelSize, numberOfRaysPerVoxel, numberOfRotationsPerRay);
-      grid.setGridPose(new RigidBodyTransform(transformToParentFrameAsDenseMatrix));
+      grid.setGridPose(new Pose3D(x, y, z, yaw, pitch, roll));
       return grid;
    }
 
-   private static void loadReachabilityMapData(Voxel3DGrid reachabilityMap, HSSFWorkbook workbook)
+   private static void loadReachabilityMapData(int numberOfJoints, Voxel3DGrid reachabilityMap, HSSFWorkbook workbook)
    {
-      loadPositionData(reachabilityMap, workbook);
-      loadRayData(reachabilityMap, workbook);
-      loadPoseData(reachabilityMap, workbook);
+      loadPositionData(numberOfJoints, reachabilityMap, workbook);
+      loadRayData(numberOfJoints, reachabilityMap, workbook);
+      loadPoseData(numberOfJoints, reachabilityMap, workbook);
    }
 
-   private static void loadPositionData(Voxel3DGrid reachabilityMap, HSSFWorkbook workbook)
+   private static void loadPositionData(int numberOfJoints, Voxel3DGrid reachabilityMap, HSSFWorkbook workbook)
    {
       HSSFRow currentRow;
       HSSFSheet currentDataSheet;
@@ -176,9 +171,16 @@ public class ReachabilityMapSpreadsheetImporter implements ReachabilityMapFileRe
             int xIndex = (int) currentRow.getCell(cellIndex++).getNumericCellValue();
             int yIndex = (int) currentRow.getCell(cellIndex++).getNumericCellValue();
             int zIndex = (int) currentRow.getCell(cellIndex++).getNumericCellValue();
-            Point3D desiredPosition = new Point3D(parseDoubleArray(currentRow.getCell(cellIndex++).getStringCellValue()));
-            float[] jointPositions = parseFloatArray(currentRow.getCell(cellIndex++).getStringCellValue());
-            float[] jointTorques = parseFloatArray(currentRow.getCell(cellIndex++).getStringCellValue());
+            Point3D desiredPosition = new Point3D();
+            desiredPosition.setX(currentRow.getCell(cellIndex++).getNumericCellValue());
+            desiredPosition.setY(currentRow.getCell(cellIndex++).getNumericCellValue());
+            desiredPosition.setZ(currentRow.getCell(cellIndex++).getNumericCellValue());
+            float[] jointPositions = new float[numberOfJoints];
+            for (int i = 0; i < numberOfJoints; i++)
+               jointPositions[i] = (float) currentRow.getCell(cellIndex++).getNumericCellValue();
+            float[] jointTorques = new float[numberOfJoints];
+            for (int i = 0; i < numberOfJoints; i++)
+               jointTorques[i] = (float) currentRow.getCell(cellIndex++).getNumericCellValue();
             Voxel3DData voxel = reachabilityMap.getOrCreateVoxel(xIndex, yIndex, zIndex);
             voxel.registerReachablePosition(desiredPosition, jointPositions, jointTorques);
             currentRow = currentDataSheet.getRow(currentRowIndex++);
@@ -188,7 +190,7 @@ public class ReachabilityMapSpreadsheetImporter implements ReachabilityMapFileRe
       }
    }
 
-   private static void loadRayData(Voxel3DGrid reachabilityMap, HSSFWorkbook workbook)
+   private static void loadRayData(int numberOfJoints, Voxel3DGrid reachabilityMap, HSSFWorkbook workbook)
    {
       HSSFRow currentRow;
       HSSFSheet currentDataSheet;
@@ -210,10 +212,20 @@ public class ReachabilityMapSpreadsheetImporter implements ReachabilityMapFileRe
             int yIndex = (int) currentRow.getCell(cellIndex++).getNumericCellValue();
             int zIndex = (int) currentRow.getCell(cellIndex++).getNumericCellValue();
             int rayIndex = (int) currentRow.getCell(cellIndex++).getNumericCellValue();
-            Point3D desiredPosition = new Point3D(parseDoubleArray(currentRow.getCell(cellIndex++).getStringCellValue()));
-            YawPitchRoll desiredOrientation = new YawPitchRoll(parseDoubleArray(currentRow.getCell(cellIndex++).getStringCellValue()));
-            float[] jointPositions = parseFloatArray(currentRow.getCell(cellIndex++).getStringCellValue());
-            float[] jointTorques = parseFloatArray(currentRow.getCell(cellIndex++).getStringCellValue());
+            Point3D desiredPosition = new Point3D();
+            desiredPosition.setX(currentRow.getCell(cellIndex++).getNumericCellValue());
+            desiredPosition.setY(currentRow.getCell(cellIndex++).getNumericCellValue());
+            desiredPosition.setZ(currentRow.getCell(cellIndex++).getNumericCellValue());
+            YawPitchRoll desiredOrientation = new YawPitchRoll();
+            desiredOrientation.setYaw(currentRow.getCell(cellIndex++).getNumericCellValue());
+            desiredOrientation.setPitch(currentRow.getCell(cellIndex++).getNumericCellValue());
+            desiredOrientation.setRoll(currentRow.getCell(cellIndex++).getNumericCellValue());
+            float[] jointPositions = new float[numberOfJoints];
+            for (int i = 0; i < numberOfJoints; i++)
+               jointPositions[i] = (float) currentRow.getCell(cellIndex++).getNumericCellValue();
+            float[] jointTorques = new float[numberOfJoints];
+            for (int i = 0; i < numberOfJoints; i++)
+               jointTorques[i] = (float) currentRow.getCell(cellIndex++).getNumericCellValue();
 
             Voxel3DData voxel = reachabilityMap.getOrCreateVoxel(xIndex, yIndex, zIndex);
             voxel.registerReachableRay(rayIndex, new Pose3D(desiredPosition, desiredOrientation), jointPositions, jointTorques);
@@ -224,7 +236,7 @@ public class ReachabilityMapSpreadsheetImporter implements ReachabilityMapFileRe
       }
    }
 
-   private static void loadPoseData(Voxel3DGrid reachabilityMap, HSSFWorkbook workbook)
+   private static void loadPoseData(int numberOfJoints, Voxel3DGrid reachabilityMap, HSSFWorkbook workbook)
    {
       HSSFRow currentRow;
       HSSFSheet currentDataSheet;
@@ -247,10 +259,20 @@ public class ReachabilityMapSpreadsheetImporter implements ReachabilityMapFileRe
             int zIndex = (int) currentRow.getCell(cellIndex++).getNumericCellValue();
             int rayIndex = (int) currentRow.getCell(cellIndex++).getNumericCellValue();
             int rotationIndex = (int) currentRow.getCell(cellIndex++).getNumericCellValue();
-            Point3D desiredPosition = new Point3D(parseDoubleArray(currentRow.getCell(cellIndex++).getStringCellValue()));
-            YawPitchRoll desiredOrientation = new YawPitchRoll(parseDoubleArray(currentRow.getCell(cellIndex++).getStringCellValue()));
-            float[] jointPositions = parseFloatArray(currentRow.getCell(cellIndex++).getStringCellValue());
-            float[] jointTorques = parseFloatArray(currentRow.getCell(cellIndex++).getStringCellValue());
+            Point3D desiredPosition = new Point3D();
+            desiredPosition.setX(currentRow.getCell(cellIndex++).getNumericCellValue());
+            desiredPosition.setY(currentRow.getCell(cellIndex++).getNumericCellValue());
+            desiredPosition.setZ(currentRow.getCell(cellIndex++).getNumericCellValue());
+            YawPitchRoll desiredOrientation = new YawPitchRoll();
+            desiredOrientation.setYaw(currentRow.getCell(cellIndex++).getNumericCellValue());
+            desiredOrientation.setPitch(currentRow.getCell(cellIndex++).getNumericCellValue());
+            desiredOrientation.setRoll(currentRow.getCell(cellIndex++).getNumericCellValue());
+            float[] jointPositions = new float[numberOfJoints];
+            for (int i = 0; i < numberOfJoints; i++)
+               jointPositions[i] = (float) currentRow.getCell(cellIndex++).getNumericCellValue();
+            float[] jointTorques = new float[numberOfJoints];
+            for (int i = 0; i < numberOfJoints; i++)
+               jointTorques[i] = (float) currentRow.getCell(cellIndex++).getNumericCellValue();
 
             Voxel3DData voxel = reachabilityMap.getOrCreateVoxel(xIndex, yIndex, zIndex);
             voxel.registerReachablePose(rayIndex, rotationIndex, new Pose3D(desiredPosition, desiredOrientation), jointPositions, jointTorques);
@@ -259,46 +281,6 @@ public class ReachabilityMapSpreadsheetImporter implements ReachabilityMapFileRe
 
          currentDataSheet = workbook.getSheet(ReachabilityMapSpreadsheetExporter.getPoseDataSheetName(currentDataSheetNameIndex++));
       }
-   }
-
-   private static float[] parseFloatArray(String string)
-   {
-      if (string == null)
-         return null;
-
-      string = string.replace("[", "").replace("]", "").trim();
-
-      if (string.isEmpty())
-         return null;
-
-      String[] elements = string.split(",");
-      float[] array = new float[elements.length];
-
-      for (int i = 0; i < elements.length; i++)
-      {
-         array[i] = Float.parseFloat(elements[i].trim());
-      }
-      return array;
-   }
-
-   private static double[] parseDoubleArray(String string)
-   {
-      if (string == null)
-         return null;
-
-      string = string.replace("[", "").replace("]", "").trim();
-
-      if (string.isEmpty())
-         return null;
-
-      String[] elements = string.split(",");
-      double[] array = new double[elements.length];
-
-      for (int i = 0; i < elements.length; i++)
-      {
-         array[i] = Double.parseDouble(elements[i].trim());
-      }
-      return array;
    }
 
    @Override
