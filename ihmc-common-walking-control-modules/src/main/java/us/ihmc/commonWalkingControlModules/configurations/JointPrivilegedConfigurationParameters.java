@@ -113,6 +113,6 @@ public class JointPrivilegedConfigurationParameters
     */
    public double getDefaultWeight()
    {
-      return 5.0;
+      return 1.0;
    }
 }
