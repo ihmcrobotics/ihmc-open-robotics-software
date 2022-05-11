@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
@@ -35,6 +36,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 
 public class PlanarRegionToolsTest
 {
@@ -1237,6 +1239,38 @@ public class PlanarRegionToolsTest
 
    }
 
+
+   @Test
+   public void testSimpleVerticalAndRotatedSnap()
+   {
+      ConvexPolygon2D polygonToSnap = createRectanglePolygon(0.5, 0.25);
+
+
+      RigidBodyTransform planarRegionTransform = new RigidBodyTransform();
+      planarRegionTransform.setRotationEulerAndZeroTranslation(0.1, 0.2, 0.3);
+
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.setTransform(planarRegionTransform);
+
+      generator.addCubeReferencedAtBottomMiddle(1.0, 0.5, 0.7);
+      PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
+
+      PlanarRegion planarRegion = new PlanarRegion();
+      assertEquals(3, PlanarRegionTools.findPlanarRegionsIntersectingPolygon(polygonToSnap, planarRegionsList).size());
+
+   }
+
+
+   public static ConvexPolygon2D createRectanglePolygon(double lengthX, double widthY)
+   {
+      ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
+      convexPolygon.addVertex(lengthX / 2.0, widthY / 2.0);
+      convexPolygon.addVertex(-lengthX / 2.0, widthY / 2.0);
+      convexPolygon.addVertex(-lengthX / 2.0, -widthY / 2.0);
+      convexPolygon.addVertex(lengthX / 2.0, -widthY / 2.0);
+      convexPolygon.update();
+      return convexPolygon;
+   }
 
    @Test
    public void testIsPointInsideConcaveHull()
