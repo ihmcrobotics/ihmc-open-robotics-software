@@ -690,8 +690,10 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          naturalPosture.setNaturalPostureOffset(naturalPosture.getNominalStandingPoseQoffset());
       }
       double[] q = new double[fullRobotModel.getOneDoFJoints().length];
+      
+      OneDoFJointBasics[] controlledOneDoFJoints = MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(),OneDoFJointBasics.class);
       int i = 0; // GMN: HACK!
-      for (OneDoFJointBasics joint : fullRobotModel.getOneDoFJoints())
+      for (OneDoFJointBasics joint : controlledOneDoFJoints)
       {
          q[i] = joint.getQ();
          i += 1;

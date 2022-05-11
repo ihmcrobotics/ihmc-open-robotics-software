@@ -79,8 +79,8 @@ public class ControllerNaturalPostureManager
       
       for (int i=0; i<3; i++)
       {
-         npQPweightMatrix.set(i,i,naturalPostureAngularWeight.getElement(i));
-//         npQPweightMatrix.set(i,i,0.0);
+//         npQPweightMatrix.set(i,i,naturalPostureAngularWeight.getElement(i));
+         npQPweightMatrix.set(i,i,5.0);
       }
       
       // Get current NP:   GMN - we're assuming NP compute() is getting called somewhere else?
@@ -105,14 +105,15 @@ public class ControllerNaturalPostureManager
       Dnp.set(2,0, cbe*cal); Dnp.set(2,1,-sal);  Dnp.set(2,2,0.0);
       
 //      double[] kp = gains.getProportionalGains();
-      double[] kp = new double[] {0,0,0};
+      double[] kp = new double[] {10,10,10};
       tau.set(0,0,kp[0]*(0 - npYaw));
       tau.set(1,0,kp[1]*(0 - npPitch));
       tau.set(2,0,kp[2]*(0 - npRoll));
       // GMN: derivative terms???
-      
-      CommonOps_DDRM.invert(Dnp);
-      CommonOps_DDRM.transpose(Dnp);
+
+   // GMN: WE SHOULD INTERPRET THIS AS AN OMEGA COMMAND....?      
+//      CommonOps_DDRM.invert(Dnp);       
+//      CommonOps_DDRM.transpose(Dnp);    
       CommonOps_DDRM.mult(Dnp, tau, npQPobjective);
       
       npQPjacobian.set(robotNaturalPosture.getNaturalPostureJacobian());
