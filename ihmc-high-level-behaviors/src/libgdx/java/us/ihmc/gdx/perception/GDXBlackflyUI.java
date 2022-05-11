@@ -6,6 +6,7 @@ import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.gdx.ui.tools.ImPlotStopwatchPlot;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.spinnaker.BytedecoBlackfly;
 import us.ihmc.perception.spinnaker.SpinnakerHardwareManager;
@@ -26,6 +27,7 @@ public class GDXBlackflyUI
    private BytePointer imageData;
    private FrequencyCalculator frameReadFrequency = new FrequencyCalculator();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ImPlotStopwatchPlot processDurationPlot = new ImPlotStopwatchPlot("Process duration");
 
    public GDXBlackflyUI()
    {
@@ -71,8 +73,10 @@ public class GDXBlackflyUI
                   frameReadFrequency.ping();
                   imagePanel.getBytedecoImage().rewind();
 
+                  processDurationPlot.start();
                   blackfly.getImageData(imageData);
-                  imagePanel.getBytedecoImage().getBackingDirectByteBuffer().put(imageData.asByteBuffer());
+                  imagePanel.updateDataAddress(imageData.address());
+                  processDurationPlot.stop();
                }
 
                if (imagePanel != null)
@@ -90,6 +94,8 @@ public class GDXBlackflyUI
             if (imagePanel != null)
             {
                ImGui.text("Frame read frequency: " + frameReadFrequency.getFrequency());
+
+               processDurationPlot.renderImGuiWidgets();
 
                ImGui.text("R G B A:");
 
