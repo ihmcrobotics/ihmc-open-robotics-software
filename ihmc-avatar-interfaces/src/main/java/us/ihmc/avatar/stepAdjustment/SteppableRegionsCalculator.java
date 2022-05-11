@@ -183,7 +183,7 @@ public class SteppableRegionsCalculator
 
          for (PlanarRegion candidateRegion : candidateRegions)
          {
-            List<StepConstraintRegion> regions = createSteppableRegionsFromPlanarRegion(candidateRegion, candidateRegions);
+            List<StepConstraintRegion> regions = createSteppableRegionsFromPlanarRegion(candidateRegion, allPlanarRegions);
             if (regions != null)
             {
                for (StepConstraintRegion region : regions)
