@@ -2,8 +2,8 @@ package us.ihmc.avatar.reachabilityMap;
 
 import static us.ihmc.avatar.scs2.YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3DDefinition;
 
+import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -16,18 +16,14 @@ import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DData;
 import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.VoxelExtraData;
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
 import us.ihmc.commons.Conversions;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
@@ -106,51 +102,19 @@ public class ReachabilityMapTools
       return voxelViz.getVisualDefinitions();
    }
 
-   public static void loadVisualizeReachabilityMap(String robotName, RobotDefinition robotDefinition, FullHumanoidRobotModel fullRobotModel)
-   {
-      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
-      List<ReferenceFrame> frameList = new ArrayList<>();
-      frameList.add(referenceFrames.getPelvisZUpFrame());
-      frameList.add(referenceFrames.getMidFeetZUpFrame());
-      frameList.add(referenceFrames.getCenterOfMassFrame());
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         frameList.add(referenceFrames.getSoleFrame(robotSide));
-         frameList.add(referenceFrames.getAnkleZUpFrame(robotSide));
-         frameList.add(referenceFrames.getHandFrame(robotSide));
-      }
-
-   }
-
-   public static void loadVisualizeReachabilityMap(String robotName, RobotDefinition robotDefinition)
-   {
-      loadVisualizeReachabilityMap(robotName,
-                                   robotDefinition,
-                                   robotDefinition.newInstance(Robot.createRobotRootFrame(robotDefinition, ReferenceFrame.getWorldFrame())),
-                                   null);
-   }
-
-   public static void loadVisualizeReachabilityMap(String robotName,
-                                                   RobotDefinition robotDefinition,
-                                                   RigidBodyBasics rootBody,
-                                                   Collection<ReferenceFrame> referenceFrames)
+   public static void loadVisualizeReachabilityMap(ReachabilityMapRobotInformation robotInformation)
    {
       long startTime = System.nanoTime();
       System.out.println("Loading reachability map");
-      ReachabilityMapSpreadsheetImporterV0 reachabilityMapFileLoader = new ReachabilityMapSpreadsheetImporterV0(robotName, rootBody, referenceFrames);
-      FramePose3D controlFramePose = reachabilityMapFileLoader.getControlFramePose();
-
-      RigidBodyBasics endEffector = MultiBodySystemTools.collectSubtreeEndEffectors(rootBody)[0];
-      ReferenceFrame controlFrame = ReferenceFrameTools.constructFrameWithChangingTransformFromParent("controlFrame",
-                                                                                                      endEffector.getParentJoint().getFrameAfterJoint(),
-                                                                                                      new RigidBodyTransform(controlFramePose.getOrientation(),
-                                                                                                                             controlFramePose.getPosition()));
+      ReachabilityMapSpreadsheetImporterV0 importer = new ReachabilityMapSpreadsheetImporterV0();
+      File file = importer.openSelectionFileDialog();
+      if (file == null)
+         return;
+      Voxel3DGrid reachabilityMap = importer.read(file, robotInformation);
 
       System.out.println("Done loading reachability map. Took: " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime) + " seconds.");
 
-      Voxel3DGrid grid = reachabilityMapFileLoader.getLoadedGrid();
-      SphereVoxelShape sphereVoxelShape = grid.getSphereVoxelShape();
+      SphereVoxelShape sphereVoxelShape = reachabilityMap.getSphereVoxelShape();
 
       Map<VisualizationType, List<VisualDefinition>> voxelVisualization = new EnumMap<>(VisualizationType.class);
 
@@ -165,9 +129,10 @@ public class ReachabilityMapTools
       YoInteger numberOfReachableRotationsAroundRay = new YoInteger("numberOfReachableRotationsAroundRay", registry);
       YoInteger numberOfReachablePoses = new YoInteger("numberOfReachablePoses", registry);
 
+      RobotDefinition robotDefinition = robotInformation.getRobotDefinition();
       robotDefinition.ignoreAllJoints();
 
-      SimulationSession session = new SimulationSession(robotName + " Reachability Map Visualizer");
+      SimulationSession session = new SimulationSession(robotDefinition.getName() + " Reachability Map Visualizer");
       SimulationSessionControls sessionControls = session.getSimulationSessionControls();
       session.getRootRegistry().addChild(registry);
       Robot robot = session.addRobot(robotDefinition);
@@ -175,8 +140,16 @@ public class ReachabilityMapTools
       guiControls.waitUntilFullyUp();
       session.stopSessionThread();
 
+      Pose3DReadOnly controlFramePose = robotInformation.getControlFramePoseInParentJoint();
+
+      RigidBodyBasics endEffector = robot.getRigidBody(robotInformation.getEndEffectorName());
+      ReferenceFrame controlFrame = ReferenceFrameTools.constructFrameWithChangingTransformFromParent("controlFrame",
+                                                                                                      endEffector.getParentJoint().getFrameAfterJoint(),
+                                                                                                      new RigidBodyTransform(controlFramePose.getOrientation(),
+                                                                                                                             controlFramePose.getPosition()));
+
       guiControls.addStaticVisuals(createReachibilityColorScaleVisuals());
-      guiControls.addStaticVisuals(ReachabilityMapTools.createBoundingBoxVisuals(grid));
+      guiControls.addStaticVisuals(ReachabilityMapTools.createBoundingBoxVisuals(reachabilityMap));
       guiControls.addYoGraphic(newYoGraphicCoordinateSystem3DDefinition("currentEvaluationPose", currentEvaluationPose, 0.15, ColorDefinitions.HotPink()));
       guiControls.addYoGraphic(newYoGraphicCoordinateSystem3DDefinition("controlFrame", controlFramePose, 0.05, ColorDefinitions.parse("#A1887F")));
 
@@ -192,13 +165,14 @@ public class ReachabilityMapTools
          previousEvaluation.set(currentEvaluation.getValue());
       });
 
-      for (int voxelIndex = 0; voxelIndex < grid.getNumberOfVoxels(); voxelIndex++)
+      for (int voxelIndex = 0; voxelIndex < reachabilityMap.getNumberOfVoxels(); voxelIndex++)
       {
-         Voxel3DData voxel = grid.getVoxel(voxelIndex);
+         Voxel3DData voxel = reachabilityMap.getVoxel(voxelIndex);
 
          if (voxel == null)
          {
-            voxelVisualization.get(VisualizationType.Unreachable).add(sphereVoxelShape.createDReachabilityVisual(grid.getVoxelPosition(voxelIndex), 0.1, -1));
+            voxelVisualization.get(VisualizationType.Unreachable)
+                              .add(sphereVoxelShape.createDReachabilityVisual(reachabilityMap.getVoxelPosition(voxelIndex), 0.1, -1));
          }
          else
          {
@@ -220,9 +194,9 @@ public class ReachabilityMapTools
       double bufferGrowthFactor = 1.1;
       YoBufferPropertiesReadOnly bufferProperties = session.getBufferProperties();
 
-      for (int voxelIndex = 0; voxelIndex < grid.getNumberOfVoxels(); voxelIndex++)
+      for (int voxelIndex = 0; voxelIndex < reachabilityMap.getNumberOfVoxels(); voxelIndex++)
       {
-         Voxel3DData voxel = grid.getVoxel(voxelIndex);
+         Voxel3DData voxel = reachabilityMap.getVoxel(voxelIndex);
 
          if (voxel == null)
             continue;
@@ -243,9 +217,9 @@ public class ReachabilityMapTools
 
       currentEvaluation.set(VisualizationType.RayReach);
 
-      for (int voxelIndex = 0; voxelIndex < grid.getNumberOfVoxels(); voxelIndex++)
+      for (int voxelIndex = 0; voxelIndex < reachabilityMap.getNumberOfVoxels(); voxelIndex++)
       {
-         Voxel3DData voxel = grid.getVoxel(voxelIndex);
+         Voxel3DData voxel = reachabilityMap.getVoxel(voxelIndex);
 
          if (voxel == null)
             continue;
@@ -277,9 +251,9 @@ public class ReachabilityMapTools
 
       currentEvaluation.set(VisualizationType.PoseReach);
 
-      for (int voxelIndex = 0; voxelIndex < grid.getNumberOfVoxels(); voxelIndex++)
+      for (int voxelIndex = 0; voxelIndex < reachabilityMap.getNumberOfVoxels(); voxelIndex++)
       {
-         Voxel3DData voxel = grid.getVoxel(voxelIndex);
+         Voxel3DData voxel = reachabilityMap.getVoxel(voxelIndex);
 
          if (voxel == null)
             continue;

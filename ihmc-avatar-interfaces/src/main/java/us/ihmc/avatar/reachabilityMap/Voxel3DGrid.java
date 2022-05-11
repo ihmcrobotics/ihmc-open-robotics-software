@@ -41,25 +41,11 @@ public class Voxel3DGrid implements ReferenceFrameHolder
 
    public static Voxel3DGrid newVoxel3DGrid(int gridSizeInNumberOfVoxels, double voxelSize, int numberOfRays, int numberOfRotationsAroundRay)
    {
-      return newVoxel3DGrid(ReferenceFrame.getWorldFrame(), gridSizeInNumberOfVoxels, voxelSize, numberOfRays, numberOfRotationsAroundRay);
-   }
-
-   public static Voxel3DGrid newVoxel3DGrid(ReferenceFrame parentFrame,
-                                            int gridSizeInNumberOfVoxels,
-                                            double voxelSize,
-                                            int numberOfRays,
-                                            int numberOfRotationsAroundRay)
-   {
       SphereVoxelShape sphereVoxelShape = new SphereVoxelShape(voxelSize, numberOfRays, numberOfRotationsAroundRay, SphereVoxelType.graspOrigin);
-      return new Voxel3DGrid(parentFrame, sphereVoxelShape, gridSizeInNumberOfVoxels, voxelSize);
+      return new Voxel3DGrid(sphereVoxelShape, gridSizeInNumberOfVoxels, voxelSize);
    }
 
    public Voxel3DGrid(SphereVoxelShape sphereVoxelShape, int gridSizeInNumberOfVoxels, double voxelSize)
-   {
-      this(ReferenceFrame.getWorldFrame(), sphereVoxelShape, gridSizeInNumberOfVoxels, voxelSize);
-   }
-
-   public Voxel3DGrid(ReferenceFrame parentFrame, SphereVoxelShape sphereVoxelShape, int gridSizeInNumberOfVoxels, double voxelSize)
    {
       if (gridSizeInNumberOfVoxels > MAX_GRID_SIZE_VOXELS)
          throw new IllegalArgumentException("Grid size is too big: " + gridSizeInNumberOfVoxels + " [max=" + MAX_GRID_SIZE_VOXELS + "]");
@@ -74,7 +60,7 @@ public class Voxel3DGrid implements ReferenceFrameHolder
       double halfSize = gridSizeMeters / 2.0;
       boundingBox = new BoundingBox3D(-halfSize, -halfSize, -halfSize, halfSize, halfSize, halfSize);
       voxels = new Voxel3DData[numberOfVoxels];
-      referenceFrame = new PoseReferenceFrame("voxel3DGridFrame", parentFrame);
+      referenceFrame = new PoseReferenceFrame("voxel3DGridFrame", ReferenceFrame.getWorldFrame());
       sphereVoxelShape.setReferenceFrame(referenceFrame);
    }
 
