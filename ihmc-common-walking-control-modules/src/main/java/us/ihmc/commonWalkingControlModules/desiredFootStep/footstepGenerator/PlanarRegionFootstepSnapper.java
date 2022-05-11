@@ -16,6 +16,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.footstepPlanning.polygonSnapping.GarbageFreePlanarRegionListPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStepParameters;
@@ -39,6 +40,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
    private final FramePose3D adjustedFootstepPose = new FramePose3D();
 
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
+   private final GarbageFreePlanarRegionListPolygonSnapper snapper = new GarbageFreePlanarRegionListPolygonSnapper();
 
    private final SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons;
    private final ContinuousStepGenerator continuousStepGenerator;
@@ -144,6 +146,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
          return true;
       }
 
+      // TODO garbasge
       snappedFootstepPolygonToPack.set(doSnapAndWiggle(solePose, footStepPolygonInSoleFrame, footstepPolygonInWorld));
       RigidBodyTransform soleTransform = new RigidBodyTransform();
       solePose.get(soleTransform);
@@ -152,13 +155,12 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       return true;
    }
 
+   private final PlanarRegion regionToSnapTo = new PlanarRegion();
+   private final RigidBodyTransform snapTransform = new RigidBodyTransform();
 
    private ConvexPolygon2D doSnapAndWiggle(FramePose3D solePose, ConvexPolygon2DReadOnly footStepPolygon, FrameConvexPolygon2D footPolygon)
    {
-      PlanarRegion regionToMoveTo = new PlanarRegion();
-      // TODO make this garbage free
-      RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, steppableRegionsList, Double.POSITIVE_INFINITY, regionToMoveTo);
-      if (snapTransform == null)
+      if (!snapper.snapPolygonToPlanarRegionsList(footPolygon, steppableRegionsList, Double.POSITIVE_INFINITY, regionToSnapTo, snapTransform))
       {
          throw new RuntimeException("Snapping failed");
       }
@@ -166,8 +168,9 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       solePose.setZ(0.0);
       solePose.applyTransform(snapTransform);
 
+      // TODO remove garbage
       RigidBodyTransform regionToWorld = new RigidBodyTransform();
-      regionToMoveTo.getTransformToWorld(regionToWorld);
+      regionToSnapTo.getTransformToWorld(regionToWorld);
       PoseReferenceFrame regionFrame = new PoseReferenceFrame("RegionFrame", ReferenceFrame.getWorldFrame());
       regionFrame.setPoseAndUpdate(regionToWorld);
       PoseReferenceFrame soleFrameBeforeWiggle = new PoseReferenceFrame("SoleFrameBeforeWiggle", solePose);
@@ -176,7 +179,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       ConvexPolygon2D footPolygonInRegion = new ConvexPolygon2D(footStepPolygon);
       footPolygonInRegion.applyTransform(soleToRegion, false);
 
-      RigidBodyTransform wiggleTransform = PolygonWiggler.wigglePolygonIntoConvexHullOfRegion(footPolygonInRegion, regionToMoveTo, wiggleParameters);
+      RigidBodyTransform wiggleTransform = PolygonWiggler.wigglePolygonIntoConvexHullOfRegion(footPolygonInRegion, regionToSnapTo, wiggleParameters);
 
       if (wiggleTransform == null)
          solePose.setToNaN();
@@ -195,7 +198,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
          soleToRegion = soleFrameAfterWiggle.getTransformToDesiredFrame(regionFrame);
          footPolygonInRegion.set(footStepPolygon);
          footPolygonInRegion.applyTransform(soleToRegion, false);
-         convexPolygonTools.computeIntersectionOfPolygons(regionToMoveTo.getConvexHull(), footPolygonInRegion, foothold);
+         convexPolygonTools.computeIntersectionOfPolygons(regionToSnapTo.getConvexHull(), footPolygonInRegion, foothold);
          soleToRegion.invert();
          foothold.applyTransform(soleToRegion, false);
       }
