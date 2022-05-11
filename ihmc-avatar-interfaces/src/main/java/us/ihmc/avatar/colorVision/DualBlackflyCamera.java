@@ -23,11 +23,9 @@ public class DualBlackflyCamera
    private int imageWidth;
    private int imageHeight;
 
-   public DualBlackflyCamera(String serialNumber, int imageWidth, int imageHeight)
+   public DualBlackflyCamera(String serialNumber)
    {
       this.serialNumber = serialNumber;
-      this.imageWidth = imageWidth;
-      this.imageHeight = imageHeight;
    }
 
    public void create(BytedecoBlackfly blackfly, ROS1Helper ros1Helper, String ros1Topic)
@@ -40,40 +38,44 @@ public class DualBlackflyCamera
 
    public void update()
    {
-      blackfly.getImageData(imageData);
-
-      if (ros1ChannelBuffer == null)
+      if (blackfly.readFrameData())
       {
-//         imageWidth = blackfly.getWidth();
-//         imageHeight = blackfly.getHeight();
-         numberOfBytesInFrame = imageWidth * imageHeight * 4;
-         imageData = new BytePointer((long) numberOfBytesInFrame);
+         double dataAquisitionTime = Conversions.nanosecondsToSeconds(System.nanoTime());
 
-         LogTools.info("Publishing ROS 1 color: {}", ros1Topic);
-         rosImagePublisher = new RosImagePublisher();
-         ros1Helper.attachPublisher(ros1Topic, rosImagePublisher);
-         ros1ChannelBuffer = rosImagePublisher.getChannelBufferFactory().getBuffer(numberOfBytesInFrame);
-      }
-
-      double dataAquisitionTime = Conversions.nanosecondsToSeconds(System.nanoTime());
-
-      if (rosImagePublisher.isConnected())
-      {
-         ros1ChannelBuffer.clear();
-
-         for (int i = 0; i < numberOfBytesInFrame; i++)
+         if (ros1ChannelBuffer == null)
          {
-            ros1ChannelBuffer.writeByte(imageData.get(i));
+            imageWidth = blackfly.getWidth();
+            imageHeight = blackfly.getHeight();
+            LogTools.info("Blackfly {} resolution detected: {}x{}", serialNumber, imageWidth, imageHeight);
+            numberOfBytesInFrame = imageWidth * imageHeight * 4;
+            imageData = new BytePointer((long) numberOfBytesInFrame);
+
+            LogTools.info("Publishing ROS 1 color: {}", ros1Topic);
+            rosImagePublisher = new RosImagePublisher();
+            ros1Helper.attachPublisher(ros1Topic, rosImagePublisher);
+            ros1ChannelBuffer = rosImagePublisher.getChannelBufferFactory().getBuffer(numberOfBytesInFrame);
          }
 
-         ros1ChannelBuffer.readerIndex(0);
-         ros1ChannelBuffer.writerIndex(numberOfBytesInFrame);
+         blackfly.getImageData(imageData);
 
-         int bytesPerValue = 4;
-         Image message = rosImagePublisher.createMessage(imageWidth, imageHeight, bytesPerValue, "8UC4", ros1ChannelBuffer);
-         message.getHeader().setStamp(new Time(dataAquisitionTime));
+         if (rosImagePublisher.isConnected())
+         {
+            ros1ChannelBuffer.clear();
 
-         rosImagePublisher.publish(message);
+            for (int i = 0; i < numberOfBytesInFrame; i++)
+            {
+               ros1ChannelBuffer.writeByte(imageData.get(i));
+            }
+
+            ros1ChannelBuffer.readerIndex(0);
+            ros1ChannelBuffer.writerIndex(numberOfBytesInFrame);
+
+            int bytesPerValue = 4;
+            Image message = rosImagePublisher.createMessage(imageWidth, imageHeight, bytesPerValue, "8UC4", ros1ChannelBuffer);
+            message.getHeader().setStamp(new Time(dataAquisitionTime));
+
+            rosImagePublisher.publish(message);
+         }
       }
    }
 

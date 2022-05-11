@@ -6,6 +6,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.spinnaker.SpinnakerHardwareManager;
+import us.ihmc.perception.spinnaker.SpinnakerTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -38,7 +39,7 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
       nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
 
 //      blackflies.put(RobotSide.LEFT, new DualBlackflyCamera(LEFT_SERIAL_NUMBER));
-      blackflies.put(RobotSide.RIGHT, new DualBlackflyCamera(RIGHT_SERIAL_NUMBER, 1920, 1200));
+      blackflies.put(RobotSide.RIGHT, new DualBlackflyCamera(RIGHT_SERIAL_NUMBER));
 
       ros1Helper = new ROS1Helper("blackfly_node");
 
@@ -88,6 +89,7 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
 
    public static void main(String[] args)
    {
+//      SpinnakerTools.printAllConnectedDevicesInformation();
       new DualBlackflyAndAruCoMarkerOnRobotProcess();
    }
 }

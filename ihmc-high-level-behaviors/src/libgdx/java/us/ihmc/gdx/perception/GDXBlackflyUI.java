@@ -7,6 +7,7 @@ import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.tools.ImPlotStopwatchPlot;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.spinnaker.BytedecoBlackfly;
 import us.ihmc.perception.spinnaker.SpinnakerHardwareManager;
@@ -28,6 +29,7 @@ public class GDXBlackflyUI
    private FrequencyCalculator frameReadFrequency = new FrequencyCalculator();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImPlotStopwatchPlot processDurationPlot = new ImPlotStopwatchPlot("Process duration");
+   private String serialNumber;
 
    public GDXBlackflyUI()
    {
@@ -52,7 +54,8 @@ public class GDXBlackflyUI
                if (nativesLoadedActivator.isNewlyActivated())
                {
                   spinnakerHardwareManager = new SpinnakerHardwareManager();
-                  blackfly = spinnakerHardwareManager.buildBlackfly("17403057");
+                  serialNumber = "17403057";
+                  blackfly = spinnakerHardwareManager.buildBlackfly(serialNumber);
                   blackfly.initialize();
                }
 
@@ -62,6 +65,7 @@ public class GDXBlackflyUI
                   {
                      int imageWidth = blackfly.getWidth();
                      int imageHeight = blackfly.getHeight();
+                     LogTools.info("Blackfly {} resolution detected: {}x{}", serialNumber, imageWidth, imageHeight);
                      imagePanel = new GDXCVImagePanel("Blackfly Image", imageWidth, imageHeight);
                      baseUI.getImGuiPanelManager().addPanel(imagePanel.getVideoPanel());
 
