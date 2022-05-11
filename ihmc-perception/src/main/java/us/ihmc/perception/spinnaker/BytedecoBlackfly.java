@@ -137,6 +137,10 @@ public class BytedecoBlackfly
       return true;
    }
 
+   /**
+    * It appears this call will return two alternating memory segments so it can do
+    * a zero copy double buffer internally.
+    */
    public void getImageData(Pointer pointer)
    {
       spinImageGetData(currentImage, pointer);
