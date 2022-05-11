@@ -74,3 +74,6 @@ float64 touchdown_duration -1.0
 # has its first waypoint at time 0.0, and the pitch of the first swing waypoint (in sole z-up frame) is different from the
 # foot pitch.
 float64 liftoff_duration -1.0
+
+# Step constraint regions to be used by this footstep
+StepConstraintsListMessage step_constraints
