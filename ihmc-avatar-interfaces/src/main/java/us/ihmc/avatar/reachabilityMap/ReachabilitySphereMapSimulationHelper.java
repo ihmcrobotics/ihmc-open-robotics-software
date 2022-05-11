@@ -28,7 +28,7 @@ public class ReachabilitySphereMapSimulationHelper
 
    public enum VisualizationType
    {
-      PositionReach, RayReach, PoseReach, WristManipulability, Unreachable;
+      PositionReach, RayReach, PoseReach, WristManipulability, Unreachable, Nothing;
    };
 
    private final Map<VisualizationType, ObservableList<VisualDefinition>> voxelVisualization = new EnumMap<>(VisualizationType.class);

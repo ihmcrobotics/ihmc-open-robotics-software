@@ -412,6 +412,11 @@ public class Voxel3DGrid implements ReferenceFrameHolder
          return n;
       }
 
+      public double getSize()
+      {
+         return voxelSize;
+      }
+
       public Voxel3DKey getKey()
       {
          return key;

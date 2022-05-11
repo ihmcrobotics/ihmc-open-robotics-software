@@ -8,18 +8,23 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
 
 import org.ejml.data.DMatrixRMaj;
 
+import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.avatar.reachabilityMap.ReachabilitySphereMapSimulationHelper.VisualizationType;
 import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DData;
 import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.VoxelExtraData;
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
 import us.ihmc.commons.Conversions;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
@@ -44,12 +49,22 @@ public class ReachabilityMapVisualizer
    private final ReachabilityMapRobotInformation robotInformation;
    private Voxel3DGrid reachabilityMap;
 
+   private boolean visualizePositionReach = true;
+   private boolean visualizeRayReach = true;
+   private boolean visualizePoseReach = true;
+
+   private Predicate<Voxel3DData> positionFilter = null;
+   private RayPredicate rayFilter = null;
+   private PosePredicate poseFilter = null;
+
    private final YoRegistry registry = new YoRegistry(ReachabilityMapTools.class.getSimpleName());
    private final YoEnum<VisualizationType> currentEvaluation = new YoEnum<>("currentEvaluation", registry, VisualizationType.class);
    private final AtomicReference<VisualizationType> previousEvaluation = new AtomicReference<>(currentEvaluation.getValue());
    private final YoFramePose3D currentEvaluationPose = new YoFramePose3D("currentEvaluationPose", SimulationSession.DEFAULT_INERTIAL_FRAME, registry);
    private final YoDouble D = new YoDouble("D", registry);
    private final YoDouble D0 = new YoDouble("D0", registry);
+   private final YoInteger numberOfRays = new YoInteger("numberOfRays", registry);
+   private final YoInteger numberOfPoses = new YoInteger("numberOfPoses", registry);
    private final YoInteger numberOfReachableRays = new YoInteger("numberOfReachableRays", registry);
    private final YoInteger numberOfReachableRotationsAroundRay = new YoInteger("numberOfReachableRotationsAroundRay", registry);
    private final YoInteger numberOfReachablePoses = new YoInteger("numberOfReachablePoses", registry);
@@ -59,6 +74,45 @@ public class ReachabilityMapVisualizer
       this.robotInformation = robotInformation;
    }
 
+   public void setVisualizePositionReach(boolean visualizePositionReach)
+   {
+      this.visualizePositionReach = visualizePositionReach;
+   }
+
+   public void setVisualizeRayReach(boolean visualizeRayReach)
+   {
+      this.visualizeRayReach = visualizeRayReach;
+   }
+
+   public void setVisualizePoseReach(boolean visualizePoseReach)
+   {
+      this.visualizePoseReach = visualizePoseReach;
+   }
+
+   public void setPositionReachVoxelFilter(Predicate<Voxel3DData> positionReachVoxelFilter)
+   {
+      positionFilter = positionReachVoxelFilter;
+   }
+
+   public void setRayFilter(RayPredicate rayFilter)
+   {
+      this.rayFilter = rayFilter;
+   }
+
+   public void setPoseFilter(PosePredicate poseFilter)
+   {
+      this.poseFilter = poseFilter;
+   }
+
+   public boolean loadReachabilityMapFromLatestFile(Class<?> classForFilePath)
+   {
+      ReachabilityMapSpreadsheetImporter importer = new ReachabilityMapSpreadsheetImporter();
+      File file = importer.findLatestFile(classForFilePath, robotInformation);
+      if (file == null)
+         return false;
+      return loadReachabilityMapFromFile(importer, file);
+   }
+
    public boolean loadReachabilityMapFromFile()
    {
       ReachabilityMapSpreadsheetImporter importer = new ReachabilityMapSpreadsheetImporter();
@@ -66,6 +120,11 @@ public class ReachabilityMapVisualizer
       if (file == null)
          return false;
 
+      return loadReachabilityMapFromFile(importer, file);
+   }
+
+   public boolean loadReachabilityMapFromFile(ReachabilityMapFileReader importer, File file)
+   {
       long startTime = System.nanoTime();
       System.out.println("Loading reachability map");
 
@@ -75,7 +134,6 @@ public class ReachabilityMapVisualizer
          return false;
 
       System.out.println("Done loading reachability map. Took: " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime) + " seconds.");
-
       return true;
    }
 
@@ -150,13 +208,94 @@ public class ReachabilityMapVisualizer
          }
       }
 
-      visualizePositionReach(session, robot, controlFrame);
-      visualizeRayReach(session, robot);
-      visualizePoseReach(session, robot);
+      if (visualizePositionReach)
+         visualizePositionReach(session, robot, controlFrame);
+      if (visualizeRayReach)
+         visualizeRayReach(session, robot);
+      if (visualizePoseReach)
+         visualizePoseReach(session, robot);
 
       sessionControls.cropBuffer();
       session.startSessionThread();
       guiControls.waitUntilDown();
+   }
+
+   public void visualizePositionReach(SimulationSession session, Robot robot, ReferenceFrame controlFrame)
+   {
+      currentEvaluation.set(VisualizationType.PositionReach);
+
+      for (int voxelIndex = 0; voxelIndex < reachabilityMap.getNumberOfVoxels(); voxelIndex++)
+      {
+         Voxel3DData voxel = reachabilityMap.getVoxel(voxelIndex);
+
+         if (voxel == null)
+            continue;
+         if (positionFilter != null && !positionFilter.test(voxel))
+            continue;
+
+         VoxelExtraData positionExtraData = voxel.getPositionExtraData();
+
+         if (positionExtraData == null)
+            continue;
+
+         writeVoxelJointData(positionExtraData, robot);
+         currentEvaluationPose.getPosition().set(positionExtraData.getDesiredPosition());
+         currentEvaluationPose.getOrientation().setFromReferenceFrame(controlFrame);
+         simulationStep(session);
+      }
+   }
+
+   public void visualizeRayReach(SimulationSession session, Robot robot)
+   {
+      SphereVoxelShape sphereVoxelShape = reachabilityMap.getSphereVoxelShape();
+      currentEvaluation.set(VisualizationType.RayReach);
+
+      List<VoxelExtraData> filteredRayExtraDataList = new ArrayList<>();
+
+      for (int voxelIndex = 0; voxelIndex < reachabilityMap.getNumberOfVoxels(); voxelIndex++)
+      {
+         Voxel3DData voxel = reachabilityMap.getVoxel(voxelIndex);
+
+         if (voxel == null)
+            continue;
+         if (positionFilter != null && !positionFilter.test(voxel))
+            continue;
+
+         VoxelExtraData positionExtraData = voxel.getPositionExtraData();
+
+         if (positionExtraData == null)
+            continue;
+
+         filteredRayExtraDataList.clear();
+         numberOfRays.set(0);
+         numberOfReachableRays.set(0);
+
+         for (int rayIndex = 0; rayIndex < sphereVoxelShape.getNumberOfRays(); rayIndex++)
+         {
+            if (rayFilter != null && rayFilter.test(sphereVoxelShape, rayIndex))
+               continue;
+
+            numberOfRays.increment();
+
+            VoxelExtraData rayExtraData = voxel.getRayExtraData(rayIndex);
+
+            if (rayExtraData == null)
+               continue;
+
+            filteredRayExtraDataList.add(rayExtraData);
+            numberOfReachableRays.increment();
+         }
+
+         D.set(numberOfReachableRays.getValueAsDouble() / numberOfRays.getValueAsDouble());
+
+         for (VoxelExtraData rayExtraData : filteredRayExtraDataList)
+         {
+            writeVoxelJointData(rayExtraData, robot);
+            currentEvaluationPose.getPosition().set(rayExtraData.getDesiredPosition());
+            currentEvaluationPose.getOrientation().set(rayExtraData.getDesiredOrientation());
+            simulationStep(session);
+         }
+      }
    }
 
    public void visualizePoseReach(SimulationSession session, Robot robot)
@@ -176,85 +315,74 @@ public class ReachabilityMapVisualizer
          if (positionExtraData == null)
             continue;
 
-         D0.set(voxel.getD0());
-         numberOfReachableRays.set(voxel.getNumberOfReachableRays());
-         numberOfReachablePoses.set(voxel.getNumberOfReachablePoses());
+         List<List<VoxelExtraData>> filteredPoseExtraData2DList = new ArrayList<>();
+         TIntArrayList reachableRotationsList = new TIntArrayList();
+         numberOfRays.set(0);
+         numberOfPoses.set(0);
 
          for (int rayIndex = 0; rayIndex < sphereVoxelShape.getNumberOfRays(); rayIndex++)
          {
-            numberOfReachableRotationsAroundRay.set(voxel.getNumberOfReachableRotationsAroundRay(rayIndex));
+            if (rayFilter != null && rayFilter.test(sphereVoxelShape, rayIndex))
+               continue;
+
+            List<VoxelExtraData> filteredPoseExtraDataList = null;
+            boolean hasIncrementedNumberOfRays = false;
+            boolean hasIncrementedNumberOfReachableRays = false;
+            int numberOfReachableRotations = 0;
 
             for (int rotationIndex = 0; rotationIndex < sphereVoxelShape.getNumberOfRotationsAroundRay(); rotationIndex++)
             {
+               if (poseFilter != null && !poseFilter.test(sphereVoxelShape, rayIndex, rotationIndex))
+                  continue;
+
+               if (!hasIncrementedNumberOfRays)
+               {
+                  numberOfRays.increment();
+                  hasIncrementedNumberOfRays = true;
+               }
+               numberOfPoses.increment();
+
                VoxelExtraData poseExtraData = voxel.getPoseExtraData(rayIndex, rotationIndex);
 
-               if (poseExtraData != null)
+               if (poseExtraData == null)
+                  continue;
+
+               if (filteredPoseExtraDataList == null)
+                  filteredPoseExtraDataList = new ArrayList<>();
+
+               filteredPoseExtraDataList.add(poseExtraData);
+
+               numberOfReachableRotations++;
+               if (!hasIncrementedNumberOfReachableRays)
                {
-                  writeVoxelJointData(poseExtraData, robot);
-                  currentEvaluationPose.getPosition().set(poseExtraData.getDesiredPosition());
-                  currentEvaluationPose.getOrientation().set(poseExtraData.getDesiredOrientation());
-                  simulationStep(session);
+                  numberOfReachableRays.increment();
+                  hasIncrementedNumberOfReachableRays = true;
                }
+               numberOfReachablePoses.increment();
+            }
+
+            if (filteredPoseExtraDataList != null)
+            {
+               filteredPoseExtraData2DList.add(filteredPoseExtraDataList);
+               reachableRotationsList.add(numberOfReachableRotations);
             }
          }
-      }
-   }
 
-   public void visualizeRayReach(SimulationSession session, Robot robot)
-   {
-      SphereVoxelShape sphereVoxelShape = reachabilityMap.getSphereVoxelShape();
-      currentEvaluation.set(VisualizationType.RayReach);
+         D0.set(numberOfReachablePoses.getValueAsDouble() / numberOfReachablePoses.getValueAsDouble());
 
-      for (int voxelIndex = 0; voxelIndex < reachabilityMap.getNumberOfVoxels(); voxelIndex++)
-      {
-         Voxel3DData voxel = reachabilityMap.getVoxel(voxelIndex);
-
-         if (voxel == null)
-            continue;
-
-         VoxelExtraData positionExtraData = voxel.getPositionExtraData();
-
-         if (positionExtraData == null)
-            continue;
-
-         D.set(voxel.getD());
-         numberOfReachableRays.set(voxel.getNumberOfReachableRays());
-
-         for (int rayIndex = 0; rayIndex < sphereVoxelShape.getNumberOfRays(); rayIndex++)
+         for (int rayIndex = 0; rayIndex < filteredPoseExtraData2DList.size(); rayIndex++)
          {
-            VoxelExtraData rayExtraData = voxel.getRayExtraData(rayIndex);
+            List<VoxelExtraData> filteredPoseExtraDataList = filteredPoseExtraData2DList.get(rayIndex);
+            numberOfReachableRotationsAroundRay.set(reachableRotationsList.get(rayIndex));
 
-            if (rayExtraData != null)
+            for (VoxelExtraData poseExtraData : filteredPoseExtraDataList)
             {
-               writeVoxelJointData(rayExtraData, robot);
-               currentEvaluationPose.getPosition().set(rayExtraData.getDesiredPosition());
-               currentEvaluationPose.getOrientation().set(rayExtraData.getDesiredOrientation());
+               writeVoxelJointData(poseExtraData, robot);
+               currentEvaluationPose.getPosition().set(poseExtraData.getDesiredPosition());
+               currentEvaluationPose.getOrientation().set(poseExtraData.getDesiredOrientation());
                simulationStep(session);
             }
          }
-      }
-   }
-
-   public void visualizePositionReach(SimulationSession session, Robot robot, ReferenceFrame controlFrame)
-   {
-      currentEvaluation.set(VisualizationType.PositionReach);
-
-      for (int voxelIndex = 0; voxelIndex < reachabilityMap.getNumberOfVoxels(); voxelIndex++)
-      {
-         Voxel3DData voxel = reachabilityMap.getVoxel(voxelIndex);
-
-         if (voxel == null)
-            continue;
-
-         VoxelExtraData positionExtraData = voxel.getPositionExtraData();
-
-         if (positionExtraData == null)
-            continue;
-
-         writeVoxelJointData(positionExtraData, robot);
-         currentEvaluationPose.getPosition().set(positionExtraData.getDesiredPosition());
-         currentEvaluationPose.getOrientation().setFromReferenceFrame(controlFrame);
-         simulationStep(session);
       }
    }
 
@@ -291,5 +419,37 @@ public class ReachabilityMapVisualizer
          vector.set(i, array[i]);
       }
       return vector;
+   }
+
+   public static interface RayPredicate
+   {
+      boolean test(SphereVoxelShape sphereVoxelShape, int rayIndex);
+   }
+
+   public static interface PosePredicate
+   {
+      boolean test(SphereVoxelShape sphereVoxelShape, int rayIndex, int rotationIndex);
+   }
+
+   /**
+    * Creates new ray filter that selects all ray which dot product with the given vector is positive.
+    * <p>
+    * For instance, if {@link Axis3D#Y} is given, then only the rays with {@code ray.y >= 0.0} with be
+    * considered.
+    * </p>
+    */
+   public static RayPredicate newHemisphereFilter(Vector3DReadOnly filteringRayDirection)
+   {
+      Vector3D ray = new Vector3D();
+
+      return new RayPredicate()
+      {
+         @Override
+         public boolean test(SphereVoxelShape sphereVoxelShape, int rayIndex)
+         {
+            sphereVoxelShape.getRay(ray, rayIndex);
+            return ray.dot(filteringRayDirection) < 0.0;
+         }
+      };
    }
 }

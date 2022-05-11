@@ -1,9 +1,7 @@
 package us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes;
 
-import java.awt.Color;
-
+import us.ihmc.avatar.reachabilityMap.ReachabilityMapTools;
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -11,14 +9,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
-import us.ihmc.scs2.definition.geometry.Sphere3DDefinition;
-import us.ihmc.scs2.definition.visual.ColorDefinition;
-import us.ihmc.scs2.definition.visual.ColorDefinitions;
-import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 
 /**
@@ -111,48 +102,13 @@ public class SphereVoxelShape
       return pointsOnSphere;
    }
 
-   @Deprecated
-   public Graphics3DObject createVisualization(FramePoint3D voxelLocation, double scale, double reachabilityValue)
-   {
-      ReferenceFrame originalFrame = voxelLocation.getReferenceFrame();
-      voxelLocation.changeFrame(ReferenceFrame.getWorldFrame());
-
-      Graphics3DObject voxelViz = new Graphics3DObject();
-
-      AppearanceDefinition appearance = YoAppearance.RGBColorFromHex(Color.HSBtoRGB((float) (0.7 * reachabilityValue), 1.0f, 1.0f));
-
-      voxelViz.translate(voxelLocation.getX(), voxelLocation.getY(), voxelLocation.getZ());
-      voxelViz.addSphere(scale * voxelSize / 2.0, appearance);
-
-      voxelLocation.changeFrame(originalFrame);
-
-      return voxelViz;
-   }
-
    public VisualDefinition createPositionReachabilityVisual(FramePoint3DReadOnly voxelLocation, double scale, boolean reachable)
    {
-      FramePoint3D voxelLocationLocal = new FramePoint3D(voxelLocation);
-      voxelLocationLocal.changeFrame(ReferenceFrame.getWorldFrame());
-
-      ColorDefinition color;
-      if (reachable)
-         color = ColorDefinitions.Chartreuse();
-      else
-         color = ColorDefinitions.DarkRed();
-      MaterialDefinition materialDefinition = new MaterialDefinition(color);
-      materialDefinition.setShininess(10);
-      return new VisualDefinition(voxelLocationLocal, new Sphere3DDefinition(scale * voxelSize / 2.0, 16), materialDefinition);
+      return ReachabilityMapTools.createPositionReachabilityVisual(voxelLocation, scale * voxelSize / 2.0, reachable);
    }
+
    public VisualDefinition createDReachabilityVisual(FramePoint3DReadOnly voxelLocation, double scale, double reachabilityValue)
    {
-      FramePoint3D voxelLocationLocal = new FramePoint3D(voxelLocation);
-      voxelLocationLocal.changeFrame(ReferenceFrame.getWorldFrame());
-
-      ColorDefinition color;
-      if (reachabilityValue == -1.0)
-         color = ColorDefinitions.Black();
-      else
-         color = ColorDefinitions.hsb(0.7 * reachabilityValue * 360.0, 1, 1);
-      return new VisualDefinition(voxelLocationLocal, new Sphere3DDefinition(scale * voxelSize / 2.0, 16), new MaterialDefinition(color));
+      return ReachabilityMapTools.createDReachabilityVisual(voxelLocation, scale * voxelSize / 2.0, reachabilityValue);
    }
 }
