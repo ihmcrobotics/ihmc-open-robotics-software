@@ -1,9 +1,15 @@
 package us.ihmc.avatar.reachabilityMap;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.scs2.definition.robot.JointDefinition;
+import us.ihmc.scs2.definition.robot.OneDoFJointDefinition;
+import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 
 public class ReachabilityMapRobotInformation
@@ -81,5 +87,64 @@ public class ReachabilityMapRobotInformation
    public String getEndEffectorName()
    {
       return endEffectorName;
+   }
+
+   public List<OneDoFJointDefinition> getEvaluatedJoints()
+   {
+      return createOneDoFJointPath(robotDefinition, baseName, endEffectorName);
+   }
+
+   public static List<OneDoFJointDefinition> createOneDoFJointPath(RobotDefinition robotDefinition, String startRigidBodyName, String endRigidBodyName)
+   {
+      List<OneDoFJointDefinition> joints = new ArrayList<>();
+
+      RigidBodyDefinition start = robotDefinition.getRigidBodyDefinition(startRigidBodyName);
+      RigidBodyDefinition end = robotDefinition.getRigidBodyDefinition(endRigidBodyName);
+
+      // Go from end to start
+      RigidBodyDefinition current = end;
+
+      while (current != start)
+      {
+         JointDefinition parentJoint = current.getParentJoint();
+
+         if (parentJoint == null)
+            break;
+         if (parentJoint instanceof OneDoFJointDefinition)
+            joints.add((OneDoFJointDefinition) parentJoint);
+
+         current = parentJoint.getPredecessor();
+      }
+
+      if (current != start)
+      { // The previous loop failed, we do the same but from start to end
+         joints.clear();
+         current = start;
+
+         while (current != end)
+         {
+            JointDefinition parentJoint = current.getParentJoint();
+
+            if (parentJoint == null)
+               break;
+            if (parentJoint instanceof OneDoFJointDefinition)
+               joints.add((OneDoFJointDefinition) parentJoint);
+
+            current = parentJoint.getPredecessor();
+         }
+
+         if (current != end)
+         { // We failed again, something's wrong...
+            return null;
+         }
+         else
+         { // Success!
+            return joints;
+         }
+      }
+      else
+      { // Success!
+         return joints;
+      }
    }
 }

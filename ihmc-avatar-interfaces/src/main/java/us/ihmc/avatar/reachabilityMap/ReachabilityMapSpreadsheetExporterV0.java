@@ -1,18 +1,10 @@
 package us.ihmc.avatar.reachabilityMap;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import java.io.OutputStream;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -20,21 +12,19 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DData;
 import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DKey;
 import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.VoxelExtraData;
-import us.ihmc.commons.nio.FileTools;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.scs2.definition.robot.OneDoFJointDefinition;
 
-public class ReachabilityMapSpreadsheetExporterV0
+public class ReachabilityMapSpreadsheetExporterV0 implements ReachabilityMapFileWriter
 {
    private static final int MAX_NUMBER_OF_ROWS = 65535;
 
-   private FileOutputStream fileOutputStream;
    private HSSFWorkbook workbook = new HSSFWorkbook();
 
    private HSSFSheet positionDataSheet;
@@ -49,97 +39,81 @@ public class ReachabilityMapSpreadsheetExporterV0
    private int rayDataRow = 0;
    private int poseDataRow = 0;
 
-   private final String robotName;
-
-   public static void exportVoxel3DGridToFile(String robotName,
-                                              Class<?> classForFilePath,
-                                              OneDoFJointBasics[] robotArmJoints,
-                                              FramePose3DReadOnly controlFramePose,
-                                              Voxel3DGrid gridToWrite)
-         throws IOException
+   public ReachabilityMapSpreadsheetExporterV0()
    {
-      ReachabilityMapSpreadsheetExporterV0 writer = new ReachabilityMapSpreadsheetExporterV0(robotName, classForFilePath);
-      writer.write(robotArmJoints, controlFramePose, gridToWrite);
-      writer.exportAndClose();
    }
 
-   public ReachabilityMapSpreadsheetExporterV0(String robotName, Class<?> classForFilePath) throws IOException
+   @Override
+   public void write(OutputStream os, ReachabilityMapRobotInformation robotInformation, Voxel3DGrid reachabilityMap)
    {
-      this.robotName = robotName;
-      String fileName = prependDateToFileName(robotName) + ".xls";
-      Path filePath = deriveResourcesPath(classForFilePath);
-      FileTools.ensureDirectoryExists(filePath);
-      filePath = filePath.resolve(fileName);
+      createDescriptionSheet(robotInformation, reachabilityMap);
+
+      for (int voxelIndex = 0; voxelIndex < reachabilityMap.getNumberOfVoxels(); voxelIndex++)
+      {
+         Voxel3DData voxel = reachabilityMap.getVoxel(voxelIndex);
+         if (voxel == null)
+            continue;
+
+         writePositionData(voxel);
+         writeRayData(voxel);
+         writePoseData(voxel);
+      }
+
       try
       {
-         fileOutputStream = new FileOutputStream(filePath.toFile());
+         workbook.write(os);
+         os.close();
       }
-      catch (FileNotFoundException e)
+      catch (IOException e)
       {
          e.printStackTrace();
       }
    }
 
-   public void write(OneDoFJointBasics[] robotArmJoints, FramePose3DReadOnly controlFramePose, Voxel3DGrid gridToWrite)
+   @Override
+   public String getFileExtension()
    {
-      createDescriptionSheet(robotName, robotArmJoints, controlFramePose, gridToWrite);
-
-      for (int voxelIndex = 0; voxelIndex < gridToWrite.getNumberOfVoxels(); voxelIndex++)
-      {
-         writeVoxelData(gridToWrite.getVoxel(voxelIndex));
-      }
+      return ".xls";
    }
 
-   public static Path deriveResourcesPath(Class<?> clazz)
-   {
-      List<String> pathNames = new ArrayList<String>();
-
-      String[] packageNames = clazz.getPackage().getName().split("\\.");
-
-      pathNames.addAll(Arrays.asList(packageNames));
-      pathNames.add(StringUtils.uncapitalize(clazz.getSimpleName()));
-
-      return Paths.get("resources", pathNames.toArray(new String[0]));
-   }
-
-   private void createDescriptionSheet(String robotName, OneDoFJointBasics[] robotArmJoints, FramePose3DReadOnly controlFramePose, Voxel3DGrid gridToWrite)
+   private void createDescriptionSheet(ReachabilityMapRobotInformation robotInformation, Voxel3DGrid reachabilityMap)
    {
       HSSFSheet descriptionSheet = workbook.createSheet("Description");
       int currentRowIndex = 0;
       int currentCellIndex = 0;
       HSSFRow currentRow = descriptionSheet.createRow(currentRowIndex++);
       currentRow.createCell(currentCellIndex++).setCellValue("Reachability Map for the robot:");
-      currentRow.createCell(currentCellIndex++).setCellValue(robotName);
+      currentRow.createCell(currentCellIndex++).setCellValue(robotInformation.getRobotDefinition().getName());
 
       currentCellIndex = 0;
       currentRow = descriptionSheet.createRow(currentRowIndex++);
       currentRow.createCell(currentCellIndex++).setCellValue("Grid size = ");
-      currentRow.createCell(currentCellIndex++).setCellValue(gridToWrite.getGridSizeMeters());
+      currentRow.createCell(currentCellIndex++).setCellValue(reachabilityMap.getGridSizeMeters());
 
       currentCellIndex = 0;
       currentRow = descriptionSheet.createRow(currentRowIndex++);
       currentRow.createCell(currentCellIndex++).setCellValue("Number of voxels per dimension = ");
-      currentRow.createCell(currentCellIndex++).setCellValue((double) gridToWrite.getGridSizeVoxels());
+      currentRow.createCell(currentCellIndex++).setCellValue((double) reachabilityMap.getGridSizeVoxels());
 
       currentCellIndex = 0;
       currentRow = descriptionSheet.createRow(currentRowIndex++);
       currentRow.createCell(currentCellIndex++).setCellValue("Voxel properties:");
       currentRow.createCell(currentCellIndex++).setCellValue("Size:");
-      currentRow.createCell(currentCellIndex++).setCellValue(gridToWrite.getVoxelSize());
+      currentRow.createCell(currentCellIndex++).setCellValue(reachabilityMap.getVoxelSize());
       currentCellIndex = 1;
       currentRow = descriptionSheet.createRow(currentRowIndex++);
       currentRow.createCell(currentCellIndex++).setCellValue("Number of rays:");
-      currentRow.createCell(currentCellIndex++).setCellValue((double) gridToWrite.getSphereVoxelShape().getNumberOfRays());
+      currentRow.createCell(currentCellIndex++).setCellValue((double) reachabilityMap.getSphereVoxelShape().getNumberOfRays());
       currentCellIndex = 1;
       currentRow = descriptionSheet.createRow(currentRowIndex++);
       currentRow.createCell(currentCellIndex++).setCellValue("Number of rotations per ray:");
-      currentRow.createCell(currentCellIndex++).setCellValue((double) gridToWrite.getSphereVoxelShape().getNumberOfRotationsAroundRay());
+      currentRow.createCell(currentCellIndex++).setCellValue((double) reachabilityMap.getSphereVoxelShape().getNumberOfRotationsAroundRay());
 
       currentCellIndex = 0;
       currentRow = descriptionSheet.createRow(currentRowIndex++);
       currentRow.createCell(currentCellIndex++).setCellValue("Grid reference frame information:");
       currentRow.createCell(currentCellIndex++).setCellValue("Name:");
-      ReferenceFrame gridReferenceFrame = gridToWrite.getReferenceFrame();
+      ReferenceFrame gridReferenceFrame = reachabilityMap.getReferenceFrame();
       currentRow.createCell(currentCellIndex++).setCellValue(gridReferenceFrame.getName());
 
       currentCellIndex = 1;
@@ -148,9 +122,9 @@ public class ReachabilityMapSpreadsheetExporterV0
       String parentFrameName = gridReferenceFrame.isWorldFrame() ? "null" : gridReferenceFrame.getParent().getName();
       currentRow.createCell(currentCellIndex++).setCellValue(parentFrameName);
 
-      FramePose3D poseToParent = new FramePose3D(gridToWrite.getReferenceFrame());
+      FramePose3D poseToParent = new FramePose3D(reachabilityMap.getReferenceFrame());
       if (!gridReferenceFrame.isWorldFrame())
-         poseToParent.changeFrame(gridToWrite.getReferenceFrame().getParent());
+         poseToParent.changeFrame(reachabilityMap.getReferenceFrame().getParent());
       RigidBodyTransform transformToParent = new RigidBodyTransform();
       poseToParent.get(transformToParent);
 
@@ -189,18 +163,19 @@ public class ReachabilityMapSpreadsheetExporterV0
       effortLowerLimitRow.createCell(currentCellIndex).setCellValue("effort lower limit:");
       effortUpperLimitRow.createCell(currentCellIndex++).setCellValue("effort upper limit:");
 
-      for (int i = 0; i < robotArmJoints.length; i++)
+      List<OneDoFJointDefinition> evaluatedJoints = robotInformation.getEvaluatedJoints();
+
+      for (int i = 0; i < evaluatedJoints.size(); i++)
       {
-         currentRow.createCell(currentCellIndex).setCellValue(robotArmJoints[i].getName());
-         positionLowerLimitRow.createCell(currentCellIndex).setCellValue(robotArmJoints[i].getJointLimitLower());
-         positionUpperLimitRow.createCell(currentCellIndex).setCellValue(robotArmJoints[i].getJointLimitUpper());
-         effortLowerLimitRow.createCell(currentCellIndex).setCellValue(robotArmJoints[i].getEffortLimitLower());
-         effortUpperLimitRow.createCell(currentCellIndex++).setCellValue(robotArmJoints[i].getEffortLimitUpper());
+         currentRow.createCell(currentCellIndex).setCellValue(evaluatedJoints.get(i).getName());
+         positionLowerLimitRow.createCell(currentCellIndex).setCellValue(evaluatedJoints.get(i).getPositionLowerLimit());
+         positionUpperLimitRow.createCell(currentCellIndex).setCellValue(evaluatedJoints.get(i).getPositionUpperLimit());
+         effortLowerLimitRow.createCell(currentCellIndex).setCellValue(evaluatedJoints.get(i).getEffortLowerLimit());
+         effortUpperLimitRow.createCell(currentCellIndex++).setCellValue(evaluatedJoints.get(i).getEffortUpperLimit());
       }
 
+      Pose3DReadOnly controlFramePoseInParentJoint = robotInformation.getControlFramePoseInParentJoint();
       currentRow = descriptionSheet.createRow(currentRowIndex++);
-      FramePose3D controlFramePoseInParentJoint = new FramePose3D(controlFramePose);
-      controlFramePoseInParentJoint.changeFrame(robotArmJoints[robotArmJoints.length - 1].getFrameAfterJoint());
       currentCellIndex = 0;
       currentRow.createCell(currentCellIndex++).setCellValue("Control frame pose in parent joint:");
       currentRow.createCell(currentCellIndex++).setCellValue("position (xyz)=");
@@ -208,24 +183,6 @@ public class ReachabilityMapSpreadsheetExporterV0
       currentRow.createCell(currentCellIndex++).setCellValue("orientation (ypr)=");
       currentRow.createCell(currentCellIndex++).setCellValue(printOrientation(controlFramePoseInParentJoint.getOrientation()));
 
-   }
-
-   private static String prependDateToFileName(String fileName)
-   {
-      DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss_");
-      Date date = new Date();
-      String dateAsString = dateFormat.format(date);
-
-      return dateAsString + fileName;
-   }
-
-   public void writeVoxelData(Voxel3DData voxel3DData)
-   {
-      if (voxel3DData == null)
-         return;
-      writePositionData(voxel3DData);
-      writeRayData(voxel3DData);
-      writePoseData(voxel3DData);
    }
 
    private void writePositionData(Voxel3DData voxel3DData)
@@ -384,18 +341,5 @@ public class ReachabilityMapSpreadsheetExporterV0
    public static String getPoseDataSheetName(int sheetIndex)
    {
       return "Pose Data " + sheetIndex;
-   }
-
-   public void exportAndClose()
-   {
-      try
-      {
-         workbook.write(fileOutputStream);
-         fileOutputStream.close();
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-      }
    }
 }
