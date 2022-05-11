@@ -28,11 +28,14 @@ public class josephGRobot extends Robot
    
    private static final double BASE_HEIGHT = 1.0;
    private static final double BASE_RADIUS = 3.0;
+   private static final double BASE_MASS = 5.0;
    
    private static final double LINK_RADIUS = 0.1;
    
    private static final double LINK1_LENGTH = 3.0;
+   private static final double LINK1_MASS = 1.0;
    private static final double LINK2_LENGTH = 2.0;
+   private static final double LINK2_MASS = 0.5;
    
    public josephGRobot()
    {
@@ -54,35 +57,76 @@ public class josephGRobot extends Robot
       
       /*
          Create Link1
-       */
+      
       Link link1 = new Link("link1");
       Graphics3DObject link1Graphics = new Graphics3DObject();
       link1Graphics.addCylinder(LINK1_LENGTH, LINK_RADIUS, blue);
-      link1.setLinkGraphics(link1Graphics);
+      link1.setLinkGraphics(link1Graphics); 
+      */
       
       /*
          Create Link2
-       */
+       
       Link link2 = new Link("link2");
       Graphics3DObject link2Graphics = new Graphics3DObject();
       link2Graphics.addCylinder(LINK2_LENGTH, LINK_RADIUS, red);
       link2.setLinkGraphics(link2Graphics);
+      */
       
       
       /*
          Creating yawJoint (root joint)
        */
       PinJoint yawJoint = new PinJoint("yaw", new Vector3D(0.0, 0.0, BASE_HEIGHT), this, Axis3D.Z);
-      yawJoint.setLink(link1);
+      yawJoint.setInitialState(0.0, 0.0);
+      yawJoint.setLink(makeLink1());
       this.addRootJoint(yawJoint);
       
       /*
          Create pitchJoint
        */
       PinJoint pitchJoint = new PinJoint("pitch", new Vector3D(0.0, 0.0, LINK1_LENGTH), this, Axis3D.X);
-      pitchJoint.setLink(link2);
+      pitchJoint.setLink(makeLink2());
       yawJoint.addJoint(pitchJoint);
       
+   }
+   
+   private Link makeLink1() 
+   {
+      Link link1 = new Link("link1");
+      link1.setMomentOfInertia(0.0, 0.0, 2);
+      link1.setMass(2.0);
+      link1.setComOffset(0.0, 0.0, LINK1_LENGTH/2);
+      
+      Graphics3DObject link1Graphics = new Graphics3DObject();
+      link1Graphics.rotate(Math.PI/2, Axis3D.X);
+      link1Graphics.translate(0.0, 0.0, -0.5);
+      link1Graphics.addCylinder(1, 0.25, YoAppearance.Red());
+      link1Graphics.translate(0.0, 0.0, 0.5);
+      link1Graphics.rotate(-Math.PI/2, Axis3D.X);
+      link1Graphics.addCylinder(LINK1_LENGTH, LINK_RADIUS, blue);
+      link1.setLinkGraphics(link1Graphics);
+      
+      return link1;
+   }
+   
+   private Link makeLink2()
+   {
+      Link link2 = new Link("link2");
+      link2.setMomentOfInertia(0.0, 0.0, 2);
+      link2.setMass(2.0);
+      link2.setComOffset(0.0, 0.0, LINK2_LENGTH/2);
+      
+      Graphics3DObject link2Graphics = new Graphics3DObject();
+      link2Graphics.rotate(Math.PI/2, Axis3D.Y);
+      link2Graphics.translate(0.0, 0.0, -0.25);
+      link2Graphics.addCylinder(0.5, 0.25, YoAppearance.Red());
+      link2Graphics.translate(0.0, 0.0, 0.25);
+      link2Graphics.rotate(-Math.PI/2, Axis3D.Y);
+      link2Graphics.addCylinder(LINK1_LENGTH, LINK_RADIUS, blue);
+      link2.setLinkGraphics(link2Graphics);
+      
+      return link2;
    }
    
 }
