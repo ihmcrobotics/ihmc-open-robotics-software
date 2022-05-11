@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -69,10 +70,11 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       {
          PlanarRegionCommand candidateRegion = planarRegions.getPlanarRegionCommand(i);
 
-         if (EuclidGeometryPolygonTools.computeConvexPolygon2DArea(candidateRegion.getConcaveHullsVertices(),
-                                                                   candidateRegion.getConcaveHullsVertices().size(),
-                                                                   true,
-                                                                   null) > parameters.getMinPlanarRegionArea())
+         double polygonArea = EuclidGeometryPolygonTools.computeConvexPolygon2DArea(candidateRegion.getConcaveHullsVertices(),
+                                                                                         candidateRegion.getConcaveHullsVertices().size(),
+                                                                                         true,
+                                                                                         null);
+         if (polygonArea > parameters.getMinPlanarRegionArea())
             continue;
 
          if (candidateRegion.getTransformToWorld().getM22() >= Math.cos(parameters.getMaxPlanarRegionAngle()))
@@ -120,6 +122,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
    private final PoseReferenceFrame soleFrameBeforeSnapping = new PoseReferenceFrame("SoleFrameBeforeSnapping", ReferenceFrame.getWorldFrame());
 
    private final FrameConvexPolygon2D footstepPolygonInWorld = new FrameConvexPolygon2D();
+   private final RigidBodyTransform transformToSole = new RigidBodyTransform();
 
    public boolean snapAndWiggle(FramePose3D solePose, ConvexPolygon2DReadOnly footStepPolygonInSoleFrame, ConvexPolygon2DBasics snappedFootstepPolygonToPack)
    {
@@ -147,10 +150,10 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       }
 
       // TODO garbasge
-      snappedFootstepPolygonToPack.set(doSnapAndWiggle(solePose, footStepPolygonInSoleFrame, footstepPolygonInWorld));
-      RigidBodyTransform soleTransform = new RigidBodyTransform();
-      solePose.get(soleTransform);
-      snappedFootstepPolygonToPack.applyInverseTransform(soleTransform, false);
+      doSnapAndWiggle(solePose, footStepPolygonInSoleFrame, footstepPolygonInWorld, snappedFootstepPolygonToPack);
+
+      solePose.get(transformToSole);
+      snappedFootstepPolygonToPack.applyInverseTransform(transformToSole, false);
 
       return true;
    }
@@ -158,55 +161,62 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
    private final PlanarRegion regionToSnapTo = new PlanarRegion();
    private final RigidBodyTransform snapTransform = new RigidBodyTransform();
 
-   private ConvexPolygon2D doSnapAndWiggle(FramePose3D solePose, ConvexPolygon2DReadOnly footStepPolygon, FrameConvexPolygon2D footPolygon)
+   private final PoseReferenceFrame soleFrameAfterSnapAndBeforeWiggle = new PoseReferenceFrame("SoleFrameAfterSnapAndBeforeWiggle", ReferenceFrame.getWorldFrame());
+   private final PoseReferenceFrame soleFrameAfterWiggle = new PoseReferenceFrame("SoleFrameAfterWiggle", ReferenceFrame.getWorldFrame());
+   private final PoseReferenceFrame planarRegionFrame = new PoseReferenceFrame("PlanarRegionFrame", ReferenceFrame.getWorldFrame());
+
+   private final RigidBodyTransform transformFromSoleToRegion = new RigidBodyTransform();
+   private final ConvexPolygon2D footPolygonInRegionFrame = new ConvexPolygon2D();
+
+   private void doSnapAndWiggle(FramePose3D solePoseToSnapAndWiggle,
+                                ConvexPolygon2DReadOnly footStepPolygonInSoleFrame,
+                                FrameConvexPolygon2DReadOnly footPolygonInWorld,
+                                ConvexPolygon2DBasics snappedFootholdInWorldToPack)
    {
-      if (!snapper.snapPolygonToPlanarRegionsList(footPolygon, steppableRegionsList, Double.POSITIVE_INFINITY, regionToSnapTo, snapTransform))
+      if (!snapper.snapPolygonToPlanarRegionsList(footPolygonInWorld, steppableRegionsList, Double.POSITIVE_INFINITY, regionToSnapTo, snapTransform))
       {
          throw new RuntimeException("Snapping failed");
       }
 
-      solePose.setZ(0.0);
-      solePose.applyTransform(snapTransform);
+      solePoseToSnapAndWiggle.setZ(0.0);
+      solePoseToSnapAndWiggle.applyTransform(snapTransform);
+
+      planarRegionFrame.setPoseAndUpdate(regionToSnapTo.getTransformToWorld());
+      soleFrameAfterSnapAndBeforeWiggle.setPoseAndUpdate(solePoseToSnapAndWiggle);
+
+      soleFrameAfterSnapAndBeforeWiggle.getTransformToDesiredFrame(transformFromSoleToRegion, planarRegionFrame);
+      footPolygonInRegionFrame.set(footStepPolygonInSoleFrame);
+      footPolygonInRegionFrame.applyTransform(transformFromSoleToRegion, false);
 
       // TODO remove garbage
-      RigidBodyTransform regionToWorld = new RigidBodyTransform();
-      regionToSnapTo.getTransformToWorld(regionToWorld);
-      PoseReferenceFrame regionFrame = new PoseReferenceFrame("RegionFrame", ReferenceFrame.getWorldFrame());
-      regionFrame.setPoseAndUpdate(regionToWorld);
-      PoseReferenceFrame soleFrameBeforeWiggle = new PoseReferenceFrame("SoleFrameBeforeWiggle", solePose);
-
-      RigidBodyTransform soleToRegion = soleFrameBeforeWiggle.getTransformToDesiredFrame(regionFrame);
-      ConvexPolygon2D footPolygonInRegion = new ConvexPolygon2D(footStepPolygon);
-      footPolygonInRegion.applyTransform(soleToRegion, false);
-
-      RigidBodyTransform wiggleTransform = PolygonWiggler.wigglePolygonIntoConvexHullOfRegion(footPolygonInRegion, regionToSnapTo, wiggleParameters);
+      RigidBodyTransform wiggleTransform = PolygonWiggler.wigglePolygonIntoConvexHullOfRegion(footPolygonInRegionFrame, regionToSnapTo, wiggleParameters);
 
       if (wiggleTransform == null)
-         solePose.setToNaN();
+         solePoseToSnapAndWiggle.setToNaN();
       else
       {
-         solePose.changeFrame(regionFrame);
-         solePose.applyTransform(wiggleTransform);
-         solePose.changeFrame(ReferenceFrame.getWorldFrame());
+         solePoseToSnapAndWiggle.changeFrame(planarRegionFrame);
+         solePoseToSnapAndWiggle.applyTransform(wiggleTransform);
+         solePoseToSnapAndWiggle.changeFrame(ReferenceFrame.getWorldFrame());
       }
 
       // check for partial foothold
-      ConvexPolygon2D foothold = new ConvexPolygon2D();
       if (wiggleParameters.deltaInside < 0.0)
       {
-         PoseReferenceFrame soleFrameAfterWiggle = new PoseReferenceFrame("SoleFrameAfterWiggle", solePose);
-         soleToRegion = soleFrameAfterWiggle.getTransformToDesiredFrame(regionFrame);
-         footPolygonInRegion.set(footStepPolygon);
-         footPolygonInRegion.applyTransform(soleToRegion, false);
-         convexPolygonTools.computeIntersectionOfPolygons(regionToSnapTo.getConvexHull(), footPolygonInRegion, foothold);
-         soleToRegion.invert();
-         foothold.applyTransform(soleToRegion, false);
+
+         soleFrameAfterWiggle.setPoseAndUpdate(solePoseToSnapAndWiggle);
+         soleFrameAfterWiggle.getTransformToDesiredFrame(transformFromSoleToRegion, planarRegionFrame);
+         footPolygonInRegionFrame.set(footStepPolygonInSoleFrame);
+         footPolygonInRegionFrame.applyTransform(transformFromSoleToRegion, false);
+
+         convexPolygonTools.computeIntersectionOfPolygons(regionToSnapTo.getConvexHull(), footPolygonInRegionFrame, snappedFootholdInWorldToPack);
+
+         snappedFootholdInWorldToPack.applyInverseTransform(transformFromSoleToRegion, false);
       }
       else
       {
-         foothold.set(footPolygon);
+         snappedFootholdInWorldToPack.set(footPolygonInWorld);
       }
-      return foothold;
    }
 
    private final Point2D concaveHullVertex = new Point2D();
