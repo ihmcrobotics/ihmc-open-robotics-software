@@ -40,24 +40,33 @@ public class ReachabilityMapSpreadsheetImporter implements ReachabilityMapFileRe
          return null;
       }
 
-      HSSFSheet descriptionSheet = workbook.getSheet("Description");
-
-      checkRobotMatchesData(robotInformation, descriptionSheet);
-      loadControlFramePose(robotInformation, descriptionSheet);
-
-      Voxel3DGrid reachabilityMap = createGrid(descriptionSheet);
-      loadReachabilityMapData(robotInformation.getEvaluatedJoints().size(), reachabilityMap, workbook);
-
       try
       {
-         fileSystem.close();
+         HSSFSheet descriptionSheet = workbook.getSheet("Description");
+         
+         checkRobotMatchesData(robotInformation, descriptionSheet);
+         loadControlFramePose(robotInformation, descriptionSheet);
+         
+         Voxel3DGrid reachabilityMap = createGrid(descriptionSheet);
+         loadReachabilityMapData(robotInformation.getEvaluatedJoints().size(), reachabilityMap, workbook);
+         return reachabilityMap;
       }
-      catch (IOException e)
+      catch (Exception e)
       {
          e.printStackTrace();
+         return null;
       }
-
-      return reachabilityMap;
+      finally
+      {
+         try
+         {
+            fileSystem.close();
+         }
+         catch (IOException e)
+         {
+            e.printStackTrace();
+         }
+      }
    }
 
    private static void loadControlFramePose(ReachabilityMapRobotInformation robotInformation, HSSFSheet descriptionSheet)
@@ -85,7 +94,7 @@ public class ReachabilityMapSpreadsheetImporter implements ReachabilityMapFileRe
 
       ArrayList<String> jointNames = new ArrayList<>();
 
-      int currentIndexValue = 2;
+      int currentIndexValue = 1;
       HSSFRow currentRow = descriptionSheet.getRow(8);
       HSSFCell currentCell = currentRow.getCell(currentIndexValue);
 
@@ -124,7 +133,7 @@ public class ReachabilityMapSpreadsheetImporter implements ReachabilityMapFileRe
 
    private static Voxel3DGrid createGrid(HSSFSheet descriptionSheet)
    {
-      HSSFRow poseRow = descriptionSheet.getRow(14);
+      HSSFRow poseRow = descriptionSheet.getRow(7);
       int poseCellIndex = 1;
       double x = poseRow.getCell(poseCellIndex++).getNumericCellValue();
       double y = poseRow.getCell(poseCellIndex++).getNumericCellValue();

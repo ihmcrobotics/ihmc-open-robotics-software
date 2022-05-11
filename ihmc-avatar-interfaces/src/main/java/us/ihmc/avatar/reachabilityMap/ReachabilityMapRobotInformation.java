@@ -117,7 +117,12 @@ public class ReachabilityMapRobotInformation
          current = parentJoint.getPredecessor();
       }
 
-      if (current != start)
+      if (current == start)
+      { // Success!
+         Collections.reverse(joints);
+         return joints;
+      }
+      else
       { // The previous loop failed, we do the same but from start to end
          joints.clear();
          current = start;
@@ -134,19 +139,14 @@ public class ReachabilityMapRobotInformation
             current = parentJoint.getPredecessor();
          }
 
-         if (current != end)
-         { // We failed again, something's wrong...
-            return null;
-         }
-         else
+         if (current == end)
          { // Success!
             return joints;
          }
-      }
-      else
-      { // Success!
-         Collections.reverse(joints);
-         return joints;
+         else
+         { // We failed again, something's wrong...
+            return null;
+         }
       }
    }
 }
