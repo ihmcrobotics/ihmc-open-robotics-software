@@ -1,6 +1,7 @@
 package us.ihmc.avatar.reachabilityMap;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import us.ihmc.euclid.Axis3D;
@@ -144,6 +145,7 @@ public class ReachabilityMapRobotInformation
       }
       else
       { // Success!
+         Collections.reverse(joints);
          return joints;
       }
    }
