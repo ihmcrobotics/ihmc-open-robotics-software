@@ -57,7 +57,7 @@ public class josephGRobot extends Robot
        */
       Link link1 = new Link("link1");
       Graphics3DObject link1Graphics = new Graphics3DObject();
-      link1Graphics.addCylinder(LINK1_LENGTH, LINK_RADIUS, black);
+      link1Graphics.addCylinder(LINK1_LENGTH, LINK_RADIUS, blue);
       link1.setLinkGraphics(link1Graphics);
       
       /*
@@ -65,7 +65,7 @@ public class josephGRobot extends Robot
        */
       Link link2 = new Link("link2");
       Graphics3DObject link2Graphics = new Graphics3DObject();
-      link2Graphics.addCylinder(LINK2_LENGTH, LINK_RADIUS, black);
+      link2Graphics.addCylinder(LINK2_LENGTH, LINK_RADIUS, red);
       link2.setLinkGraphics(link2Graphics);
       
       
