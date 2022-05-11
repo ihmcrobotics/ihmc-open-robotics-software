@@ -161,6 +161,46 @@ public class YoGraphicDefinitionFactory
    }
 
    public static YoGraphicCoordinateSystem3DDefinition newYoGraphicCoordinateSystem3DDefinition(String name,
+                                                                                                Pose3DReadOnly constantFramePose,
+                                                                                                double scale,
+                                                                                                ColorDefinition color)
+   {
+      double bodyLength = scale * 0.9;
+      double headLength = scale * 0.1;
+      double bodyRadius = scale * 0.02;
+      double headRadius = bodyRadius * 2.0;
+      return newYoGraphicCoordinateSystem3DDefinition(name,
+                                                      constantFramePose.getPosition(),
+                                                      constantFramePose.getOrientation(),
+                                                      null,
+                                                      bodyLength,
+                                                      headLength,
+                                                      bodyRadius,
+                                                      headRadius,
+                                                      color);
+   }
+
+   public static YoGraphicCoordinateSystem3DDefinition newYoGraphicCoordinateSystem3DDefinition(String name,
+                                                                                                Pose3DReadOnly constantPose,
+                                                                                                double bodyLength,
+                                                                                                double headLength,
+                                                                                                double bodyRadius,
+                                                                                                double headRadius,
+                                                                                                ColorDefinition color)
+   {
+      return newYoGraphicCoordinateSystem3DDefinition(name,
+                                                      constantPose.getPosition(),
+                                                      null,
+                                                      constantPose.getOrientation(),
+                                                      null,
+                                                      bodyLength,
+                                                      headLength,
+                                                      bodyRadius,
+                                                      headRadius,
+                                                      color);
+   }
+
+   public static YoGraphicCoordinateSystem3DDefinition newYoGraphicCoordinateSystem3DDefinition(String name,
                                                                                                 Pose3DReadOnly constantPose,
                                                                                                 ReferenceFrame poseFrame,
                                                                                                 double bodyLength,

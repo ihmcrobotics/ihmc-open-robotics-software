@@ -3,9 +3,7 @@ package us.ihmc.avatar.reachabilityMap;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
+import java.util.List;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -15,138 +13,75 @@ import org.apache.poi.poifs.filesystem.NPOIFSFileSystem;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
-import cern.colt.Arrays;
-import javafx.stage.FileChooser;
-import javafx.stage.FileChooser.ExtensionFilter;
 import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DData;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.javafx.JavaFXMissingTools;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizerIOTools;
+import us.ihmc.scs2.definition.robot.OneDoFJointDefinition;
 
-public class ReachabilityMapSpreadsheetImporterV0
+public class ReachabilityMapSpreadsheetImporterV0 implements ReachabilityMapFileReader
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private NPOIFSFileSystem fileSystem;
-   private HSSFWorkbook workBookToLoad;
-   private final Voxel3DGrid loadedGrid;
-
-   private Consumer<Voxel3DData> voxel3DPositionDataLoadedListener = null;
-   private Consumer<Voxel3DData> voxel3DRayDataLoadedListener = null;
-   private Consumer<Voxel3DData> voxel3DPoseDataLoadedListener = null;
-
-   private final FramePose3D controlFramePose;
-
-   public ReachabilityMapSpreadsheetImporterV0(String robotName, RigidBodyBasics rootBody)
+   public ReachabilityMapSpreadsheetImporterV0()
    {
-      this(robotName, rootBody, null);
    }
 
-   public ReachabilityMapSpreadsheetImporterV0(String robotName, RigidBodyBasics rootBody, Collection<ReferenceFrame> referenceFrames)
+   @Override
+   public Voxel3DGrid read(File fileToLoad, ReachabilityMapRobotInformation robotInformation)
    {
-      this(selectionFileDialog(), robotName, rootBody, referenceFrames);
-   }
-
-   public ReachabilityMapSpreadsheetImporterV0(File fileToLoad, String robotName, RigidBodyBasics rootBody)
-   {
-      this(selectionFileDialog(), robotName, rootBody, null);
-   }
-
-   public ReachabilityMapSpreadsheetImporterV0(File fileToLoad, String robotName, RigidBodyBasics rootBody, Collection<ReferenceFrame> referenceFrames)
-   {
+      NPOIFSFileSystem fileSystem;
+      HSSFWorkbook workbook;
       try
       {
          fileSystem = new NPOIFSFileSystem(fileToLoad);
-         workBookToLoad = new HSSFWorkbook(fileSystem.getRoot(), true);
+         workbook = new HSSFWorkbook(fileSystem.getRoot(), true);
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+         return null;
+      }
+
+      HSSFSheet descriptionSheet = workbook.getSheet("Description");
+
+      checkRobotMatchesData(robotInformation, descriptionSheet);
+      loadControlFramePose(robotInformation, descriptionSheet);
+
+      Voxel3DGrid reachabilityMap = createGrid(descriptionSheet);
+      loadReachabilityMapData(reachabilityMap, workbook);
+
+      try
+      {
+         fileSystem.close();
       }
       catch (IOException e)
       {
          e.printStackTrace();
       }
 
-      HSSFSheet descriptionSheet = workBookToLoad.getSheet("Description");
-
-      checkRobotMatchesData(robotName, rootBody, descriptionSheet);
-
-      loadedGrid = createGrid(rootBody, referenceFrames, descriptionSheet);
-
-      controlFramePose = loadControlFramePose(rootBody, descriptionSheet);
-
-      loadData();
-
-      close();
+      return reachabilityMap;
    }
 
-   public FramePose3D getControlFramePose()
+   private static void loadControlFramePose(ReachabilityMapRobotInformation robotInformation, HSSFSheet descriptionSheet)
    {
-      return controlFramePose;
-   }
-
-   private FramePose3D loadControlFramePose(RigidBodyBasics rootBody, HSSFSheet descriptionSheet)
-   {
-      RigidBodyBasics endEffector = MultiBodySystemTools.collectSubtreeEndEffectors(rootBody)[0];
-
       HSSFCell positionCell = descriptionSheet.getRow(16).getCell(2);
       HSSFCell orientationCell = descriptionSheet.getRow(16).getCell(4);
 
-      FramePose3D controlFramePose = new FramePose3D(endEffector.getParentJoint().getFrameAfterJoint());
+      Pose3D controlFramePose = new Pose3D();
       controlFramePose.getPosition().set(parseDoubleArray(positionCell.getStringCellValue()));
       controlFramePose.getOrientation().set(new YawPitchRoll(parseDoubleArray(orientationCell.getStringCellValue())));
-
-      return controlFramePose;
+      robotInformation.setControlFramePoseInParentJoint(controlFramePose);
    }
 
-   public void setVoxel3DPositionDataLoadedListener(Consumer<Voxel3DData> voxel3dPositionDataLoadedListener)
-   {
-      voxel3DPositionDataLoadedListener = voxel3dPositionDataLoadedListener;
-   }
-
-   public void setVoxel3DRayDataLoadedListener(Consumer<Voxel3DData> voxel3dRayDataLoadedListener)
-   {
-      voxel3DRayDataLoadedListener = voxel3dRayDataLoadedListener;
-   }
-
-   public void setVoxel3DPoseDataLoadedListener(Consumer<Voxel3DData> voxel3dPoseDataLoadedListener)
-   {
-      voxel3DPoseDataLoadedListener = voxel3dPoseDataLoadedListener;
-   }
-
-   public static File selectionFileDialog()
-   {
-      JavaFXMissingTools.startup();
-      return JavaFXMissingTools.runAndWait(() ->
-      {
-         FileChooser fileChooser = new FileChooser();
-         fileChooser.setTitle("Choose reachability map to load");
-         File initialDirectory = SessionVisualizerIOTools.getDefaultFilePath("humanoid-reachability-map-load");
-         if (initialDirectory == null)
-            initialDirectory = new File(".");
-         fileChooser.setInitialDirectory(initialDirectory);
-         fileChooser.getExtensionFilters().add(new ExtensionFilter("Spreadsheet", "*.xls"));
-         fileChooser.getExtensionFilters().add(new ExtensionFilter("All Files", "*.*"));
-         File result = fileChooser.showOpenDialog(null);
-         if (result != null)
-            SessionVisualizerIOTools.setDefaultFilePath("humanoid-reachability-map-load", result.getParentFile());
-         return result;
-      });
-   }
-
-   private void checkRobotMatchesData(String robotName, RigidBodyBasics rootBody, HSSFSheet descriptionSheet)
+   private static void checkRobotMatchesData(ReachabilityMapRobotInformation robotInformation, HSSFSheet descriptionSheet)
    {
       String robotNameInWorkbook = descriptionSheet.getRow(0).getCell(1).getStringCellValue();
 
-      if (!robotName.equals(robotNameInWorkbook))
+      if (!robotInformation.getRobotDefinition().getName().equals(robotNameInWorkbook))
       {
-         throw new RuntimeException("Trying to load the data for another robot: Loading data for " + robotName + ", workbook contains data for "
-               + robotNameInWorkbook);
+         throw new RuntimeException("Trying to load the data for another robot: Loading data for " + robotInformation.getRobotDefinition().getName()
+               + ", workbook contains data for " + robotNameInWorkbook);
       }
 
       ArrayList<String> jointNames = new ArrayList<>();
@@ -162,19 +97,34 @@ public class ReachabilityMapSpreadsheetImporterV0
          currentCell = currentRow.getCell(currentIndexValue);
       }
 
-      JointBasics[] joints = Stream.of(MultiBodySystemTools.collectSubtreeJoints(rootBody)).filter(joint -> jointNames.contains(joint.getName()))
-                                   .toArray(JointBasics[]::new);
-      OneDoFJointBasics[] oneDoFJoints = MultiBodySystemTools.filterJoints(joints, OneDoFJointBasics.class);
+      boolean jointsMatch = true;
+      List<OneDoFJointDefinition> evaluatedJoints = robotInformation.getEvaluatedJoints();
 
-      if (oneDoFJoints.length != jointNames.size())
+      if (jointNames.size() != evaluatedJoints.size())
       {
-         throw new RuntimeException("Could not find all the joints, expected:\n " + jointNames + "\nwas:\n" + Arrays.toString(oneDoFJoints));
+         jointsMatch = false;
+      }
+      else
+      {
+         for (int i = 0; i < evaluatedJoints.size(); i++)
+         {
+            if (!jointNames.get(i).equals(evaluatedJoints.get(i).getName()))
+            {
+               jointsMatch = false;
+               break;
+            }
+         }
+      }
+
+      if (!jointsMatch)
+      {
+         throw new RuntimeException("Could not find all the joints, expected:\n " + jointNames + "\nwas:\n["
+               + EuclidCoreIOTools.getCollectionString(", ", evaluatedJoints, j -> j.getName()) + "]");
       }
    }
 
-   private Voxel3DGrid createGrid(RigidBodyBasics rootBody, Collection<ReferenceFrame> referenceFrames, HSSFSheet descriptionSheet)
+   private static Voxel3DGrid createGrid(HSSFSheet descriptionSheet)
    {
-      String parentFrameName = descriptionSheet.getRow(7).getCell(2).getStringCellValue();
       DMatrixRMaj transformToParentFrameAsDenseMatrix = CommonOps_DDRM.identity(4);
       int row = 0;
       for (int rowIndex = 8; rowIndex < 11; rowIndex++)
@@ -187,32 +137,31 @@ public class ReachabilityMapSpreadsheetImporterV0
          }
          row++;
       }
-      ReferenceFrame parentFrame = searchParentFrameInCommonRobotFrames(parentFrameName, referenceFrames, rootBody);
 
       int numberOfVoxelsPerDimension = (int) descriptionSheet.getRow(2).getCell(1).getNumericCellValue();
       double voxelSize = descriptionSheet.getRow(3).getCell(2).getNumericCellValue();
       int numberOfRaysPerVoxel = (int) descriptionSheet.getRow(4).getCell(2).getNumericCellValue();
       int numberOfRotationsPerRay = (int) descriptionSheet.getRow(5).getCell(2).getNumericCellValue();
 
-      Voxel3DGrid grid = Voxel3DGrid.newVoxel3DGrid(parentFrame, numberOfVoxelsPerDimension, voxelSize, numberOfRaysPerVoxel, numberOfRotationsPerRay);
+      Voxel3DGrid grid = Voxel3DGrid.newVoxel3DGrid(numberOfVoxelsPerDimension, voxelSize, numberOfRaysPerVoxel, numberOfRotationsPerRay);
       grid.setGridPose(new RigidBodyTransform(transformToParentFrameAsDenseMatrix));
       return grid;
    }
 
-   private void loadData()
+   private static void loadReachabilityMapData(Voxel3DGrid reachabilityMap, HSSFWorkbook workbook)
    {
-      loadPositionData();
-      loadRayData();
-      loadPoseData();
+      loadPositionData(reachabilityMap, workbook);
+      loadRayData(reachabilityMap, workbook);
+      loadPoseData(reachabilityMap, workbook);
    }
 
-   private void loadPositionData()
+   private static void loadPositionData(Voxel3DGrid reachabilityMap, HSSFWorkbook workbook)
    {
       HSSFRow currentRow;
       HSSFSheet currentDataSheet;
 
       int currentDataSheetNameIndex = 1;
-      currentDataSheet = workBookToLoad.getSheet(ReachabilityMapSpreadsheetExporterV0.getPositionDataSheetName(currentDataSheetNameIndex++));
+      currentDataSheet = workbook.getSheet(ReachabilityMapSpreadsheetExporterV0.getPositionDataSheetName(currentDataSheetNameIndex++));
 
       while (currentDataSheet != null)
       {
@@ -230,26 +179,22 @@ public class ReachabilityMapSpreadsheetImporterV0
             Point3D desiredPosition = new Point3D(parseDoubleArray(currentRow.getCell(cellIndex++).getStringCellValue()));
             float[] jointPositions = parseFloatArray(currentRow.getCell(cellIndex++).getStringCellValue());
             float[] jointTorques = parseFloatArray(currentRow.getCell(cellIndex++).getStringCellValue());
-            Voxel3DData voxel = loadedGrid.getOrCreateVoxel(xIndex, yIndex, zIndex);
+            Voxel3DData voxel = reachabilityMap.getOrCreateVoxel(xIndex, yIndex, zIndex);
             voxel.registerReachablePosition(desiredPosition, jointPositions, jointTorques);
-
-            if (voxel3DPositionDataLoadedListener != null)
-               voxel3DPositionDataLoadedListener.accept(voxel);
-
             currentRow = currentDataSheet.getRow(currentRowIndex++);
          }
 
-         currentDataSheet = workBookToLoad.getSheet(ReachabilityMapSpreadsheetExporterV0.getPositionDataSheetName(currentDataSheetNameIndex++));
+         currentDataSheet = workbook.getSheet(ReachabilityMapSpreadsheetExporterV0.getPositionDataSheetName(currentDataSheetNameIndex++));
       }
    }
 
-   private void loadRayData()
+   private static void loadRayData(Voxel3DGrid reachabilityMap, HSSFWorkbook workbook)
    {
       HSSFRow currentRow;
       HSSFSheet currentDataSheet;
 
       int currentDataSheetNameIndex = 1;
-      currentDataSheet = workBookToLoad.getSheet(ReachabilityMapSpreadsheetExporterV0.getRayDataSheetName(currentDataSheetNameIndex++));
+      currentDataSheet = workbook.getSheet(ReachabilityMapSpreadsheetExporterV0.getRayDataSheetName(currentDataSheetNameIndex++));
 
       while (currentDataSheet != null)
       {
@@ -270,26 +215,22 @@ public class ReachabilityMapSpreadsheetImporterV0
             float[] jointPositions = parseFloatArray(currentRow.getCell(cellIndex++).getStringCellValue());
             float[] jointTorques = parseFloatArray(currentRow.getCell(cellIndex++).getStringCellValue());
 
-            Voxel3DData voxel = loadedGrid.getOrCreateVoxel(xIndex, yIndex, zIndex);
+            Voxel3DData voxel = reachabilityMap.getOrCreateVoxel(xIndex, yIndex, zIndex);
             voxel.registerReachableRay(rayIndex, new Pose3D(desiredPosition, desiredOrientation), jointPositions, jointTorques);
-
-            if (voxel3DRayDataLoadedListener != null)
-               voxel3DRayDataLoadedListener.accept(voxel);
-
             currentRow = currentDataSheet.getRow(currentRowIndex++);
          }
 
-         currentDataSheet = workBookToLoad.getSheet(ReachabilityMapSpreadsheetExporterV0.getRayDataSheetName(currentDataSheetNameIndex++));
+         currentDataSheet = workbook.getSheet(ReachabilityMapSpreadsheetExporterV0.getRayDataSheetName(currentDataSheetNameIndex++));
       }
    }
 
-   private void loadPoseData()
+   private static void loadPoseData(Voxel3DGrid reachabilityMap, HSSFWorkbook workbook)
    {
       HSSFRow currentRow;
       HSSFSheet currentDataSheet;
 
       int currentDataSheetNameIndex = 1;
-      currentDataSheet = workBookToLoad.getSheet(ReachabilityMapSpreadsheetExporterV0.getPoseDataSheetName(currentDataSheetNameIndex++));
+      currentDataSheet = workbook.getSheet(ReachabilityMapSpreadsheetExporterV0.getPoseDataSheetName(currentDataSheetNameIndex++));
 
       while (currentDataSheet != null)
       {
@@ -311,20 +252,16 @@ public class ReachabilityMapSpreadsheetImporterV0
             float[] jointPositions = parseFloatArray(currentRow.getCell(cellIndex++).getStringCellValue());
             float[] jointTorques = parseFloatArray(currentRow.getCell(cellIndex++).getStringCellValue());
 
-            Voxel3DData voxel = loadedGrid.getOrCreateVoxel(xIndex, yIndex, zIndex);
+            Voxel3DData voxel = reachabilityMap.getOrCreateVoxel(xIndex, yIndex, zIndex);
             voxel.registerReachablePose(rayIndex, rotationIndex, new Pose3D(desiredPosition, desiredOrientation), jointPositions, jointTorques);
-
-            if (voxel3DPoseDataLoadedListener != null)
-               voxel3DPoseDataLoadedListener.accept(voxel);
-
             currentRow = currentDataSheet.getRow(currentRowIndex++);
          }
 
-         currentDataSheet = workBookToLoad.getSheet(ReachabilityMapSpreadsheetExporterV0.getPoseDataSheetName(currentDataSheetNameIndex++));
+         currentDataSheet = workbook.getSheet(ReachabilityMapSpreadsheetExporterV0.getPoseDataSheetName(currentDataSheetNameIndex++));
       }
    }
 
-   private float[] parseFloatArray(String string)
+   private static float[] parseFloatArray(String string)
    {
       if (string == null)
          return null;
@@ -344,7 +281,7 @@ public class ReachabilityMapSpreadsheetImporterV0
       return array;
    }
 
-   private double[] parseDoubleArray(String string)
+   private static double[] parseDoubleArray(String string)
    {
       if (string == null)
          return null;
@@ -364,60 +301,15 @@ public class ReachabilityMapSpreadsheetImporterV0
       return array;
    }
 
-   public Voxel3DGrid getLoadedGrid()
+   @Override
+   public String getFileType()
    {
-      return loadedGrid;
+      return "Spreadsheet";
    }
 
-   private ReferenceFrame searchParentFrameInCommonRobotFrames(String parentFrameName, Collection<ReferenceFrame> referenceFrames, RigidBodyBasics rootBody)
+   @Override
+   public String getFileExtension()
    {
-      if (parentFrameName.equals(worldFrame.getName()))
-         return worldFrame;
-
-      if (parentFrameName.equals(rootBody.getBodyFixedFrame().getName()))
-         return rootBody.getBodyFixedFrame();
-
-      for (JointBasics joint : rootBody.childrenSubtreeIterable())
-      {
-         ReferenceFrame frameAfterJoint = joint.getFrameAfterJoint();
-         ReferenceFrame frameBeforeJoint = joint.getFrameBeforeJoint();
-         RigidBodyBasics successor = joint.getSuccessor();
-
-         if (parentFrameName.equals(frameAfterJoint.getName()))
-            return frameAfterJoint;
-
-         if (parentFrameName.equals(frameBeforeJoint.getName()))
-            return frameBeforeJoint;
-
-         if (successor != null)
-         {
-            ReferenceFrame bodyFixedFrame = successor.getBodyFixedFrame();
-            if (parentFrameName.equals(bodyFixedFrame.getName()))
-               return bodyFixedFrame;
-         }
-      }
-
-      if (referenceFrames == null || referenceFrames.isEmpty())
-         return null;
-
-      for (ReferenceFrame referenceFrame : referenceFrames)
-      {
-         if (parentFrameName.equals(referenceFrame.getName()))
-            return referenceFrame;
-      }
-
-      return null;
-   }
-
-   private void close()
-   {
-      try
-      {
-         fileSystem.close();
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-      }
+      return ".xls";
    }
 }
