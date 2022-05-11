@@ -219,7 +219,6 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       // Instead of projecting all the polygons of this region onto the world XY-plane,
       // the given convex polygon is projected along the z-world axis to be snapped onto plane.
       ConvexPolygon2D projectedPolygon = projectPolygonVerticallyToRegion(convexPolygon2d);
-
       // Now, just need to go through each polygon of this region and see there is at least one intersection
       for (int i = 0; i < getNumberOfConvexPolygons(); i++)
       {
@@ -396,7 +395,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
     */
    public void projectPolygonVerticallyToRegion(ConvexPolygon2DReadOnly convexPolygonInWorld, ConvexPolygon2DBasics projectedPolygonToPack)
    {
-      projectedPolygonToPack.set(convexPolygonInWorld);
+      projectedPolygonToPack.clear();
 
       for (int i = 0; i < convexPolygonInWorld.getNumberOfVertices(); i++)
       {
