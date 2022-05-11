@@ -58,7 +58,20 @@ public class ImGuiSSHJApplicationService
       ImGui.sameLine();
       ImGui.text("Service name: " + serviceName);
 
-      ImGui.sameLine();
+      String serviceStatusText = serviceStatus.get();
+      if (serviceStatusText.contains("failed"))
+      {
+         ImGui.textColored(0.8f, 0.0f, 0.0f, 1.0f, serviceStatusText);
+      }
+      else if (serviceStatusText.contains("running"))
+      {
+         ImGui.textColored(0.0f, 0.8f, 0.0f, 1.0f, serviceStatusText);
+      }
+      else
+      {
+         ImGui.text(serviceStatusText);
+      }
+
       if (ImGui.button(labels.get("Start")))
       {
          runCommand("start");
@@ -69,13 +82,20 @@ public class ImGuiSSHJApplicationService
          runCommand("stop");
       }
       ImGui.sameLine();
+      if (ImGui.button(labels.get("Kill")))
+      {
+         runCommand("kill");
+      }
+      ImGui.sameLine();
       if (ImGui.button(labels.get("Restart")))
       {
          runCommand("restart");
       }
 
+      ImGui.sameLine();
       if (!islogMonitorThreadRunning() && ImGui.button(labels.get("Start log monitor")))
       {
+
          startLogMonitor();
       }
       if (islogMonitorThreadRunning())
@@ -91,25 +111,11 @@ public class ImGuiSSHJApplicationService
          ImGui.text("Exit status: " + exitStatus);
       }
 
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Show log panel")))
-      {
-         logPanel.getIsShowing().set(true);
-      }
-
-      String serviceStatusText = serviceStatus.get();
-      if (serviceStatusText.contains("failed"))
-      {
-         ImGui.textColored(0.8f, 0.0f, 0.0f, 1.0f, serviceStatusText);
-      }
-      else if (serviceStatusText.contains("running"))
-      {
-         ImGui.textColored(0.0f, 0.8f, 0.0f, 1.0f, serviceStatusText);
-      }
-      else
-      {
-         ImGui.text(serviceStatusText);
-      }
+//      ImGui.sameLine();
+//      if (ImGui.button(labels.get("Show log panel")))
+//      {
+//         logPanel.getIsShowing().set(true);
+//      }
 
       standardOut.updateConsoleText(this::acceptNewText);
       standardError.updateConsoleText(this::acceptNewText);
@@ -125,6 +131,7 @@ public class ImGuiSSHJApplicationService
    {
       if (!islogMonitorThreadRunning())
       {
+         logPanel.getIsShowing().set(true);
          logMonitorRunThread = ThreadTools.startAsDaemon(() ->
          {
             SSHJTools.session(remoteHostname, remoteUsername, sshj ->
