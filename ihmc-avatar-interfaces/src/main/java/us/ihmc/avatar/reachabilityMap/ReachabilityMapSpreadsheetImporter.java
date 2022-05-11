@@ -21,9 +21,9 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.scs2.definition.robot.OneDoFJointDefinition;
 
-public class ReachabilityMapSpreadsheetImporterV0 implements ReachabilityMapFileReader
+public class ReachabilityMapSpreadsheetImporter implements ReachabilityMapFileReader
 {
-   public ReachabilityMapSpreadsheetImporterV0()
+   public ReachabilityMapSpreadsheetImporter()
    {
    }
 
@@ -161,7 +161,7 @@ public class ReachabilityMapSpreadsheetImporterV0 implements ReachabilityMapFile
       HSSFSheet currentDataSheet;
 
       int currentDataSheetNameIndex = 1;
-      currentDataSheet = workbook.getSheet(ReachabilityMapSpreadsheetExporterV0.getPositionDataSheetName(currentDataSheetNameIndex++));
+      currentDataSheet = workbook.getSheet(ReachabilityMapSpreadsheetExporter.getPositionDataSheetName(currentDataSheetNameIndex++));
 
       while (currentDataSheet != null)
       {
@@ -184,7 +184,7 @@ public class ReachabilityMapSpreadsheetImporterV0 implements ReachabilityMapFile
             currentRow = currentDataSheet.getRow(currentRowIndex++);
          }
 
-         currentDataSheet = workbook.getSheet(ReachabilityMapSpreadsheetExporterV0.getPositionDataSheetName(currentDataSheetNameIndex++));
+         currentDataSheet = workbook.getSheet(ReachabilityMapSpreadsheetExporter.getPositionDataSheetName(currentDataSheetNameIndex++));
       }
    }
 
@@ -194,7 +194,7 @@ public class ReachabilityMapSpreadsheetImporterV0 implements ReachabilityMapFile
       HSSFSheet currentDataSheet;
 
       int currentDataSheetNameIndex = 1;
-      currentDataSheet = workbook.getSheet(ReachabilityMapSpreadsheetExporterV0.getRayDataSheetName(currentDataSheetNameIndex++));
+      currentDataSheet = workbook.getSheet(ReachabilityMapSpreadsheetExporter.getRayDataSheetName(currentDataSheetNameIndex++));
 
       while (currentDataSheet != null)
       {
@@ -220,7 +220,7 @@ public class ReachabilityMapSpreadsheetImporterV0 implements ReachabilityMapFile
             currentRow = currentDataSheet.getRow(currentRowIndex++);
          }
 
-         currentDataSheet = workbook.getSheet(ReachabilityMapSpreadsheetExporterV0.getRayDataSheetName(currentDataSheetNameIndex++));
+         currentDataSheet = workbook.getSheet(ReachabilityMapSpreadsheetExporter.getRayDataSheetName(currentDataSheetNameIndex++));
       }
    }
 
@@ -230,7 +230,7 @@ public class ReachabilityMapSpreadsheetImporterV0 implements ReachabilityMapFile
       HSSFSheet currentDataSheet;
 
       int currentDataSheetNameIndex = 1;
-      currentDataSheet = workbook.getSheet(ReachabilityMapSpreadsheetExporterV0.getPoseDataSheetName(currentDataSheetNameIndex++));
+      currentDataSheet = workbook.getSheet(ReachabilityMapSpreadsheetExporter.getPoseDataSheetName(currentDataSheetNameIndex++));
 
       while (currentDataSheet != null)
       {
@@ -257,7 +257,7 @@ public class ReachabilityMapSpreadsheetImporterV0 implements ReachabilityMapFile
             currentRow = currentDataSheet.getRow(currentRowIndex++);
          }
 
-         currentDataSheet = workbook.getSheet(ReachabilityMapSpreadsheetExporterV0.getPoseDataSheetName(currentDataSheetNameIndex++));
+         currentDataSheet = workbook.getSheet(ReachabilityMapSpreadsheetExporter.getPoseDataSheetName(currentDataSheetNameIndex++));
       }
    }
 

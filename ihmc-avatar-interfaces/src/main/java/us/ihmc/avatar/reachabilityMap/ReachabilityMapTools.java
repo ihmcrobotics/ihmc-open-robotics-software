@@ -106,7 +106,7 @@ public class ReachabilityMapTools
    {
       long startTime = System.nanoTime();
       System.out.println("Loading reachability map");
-      ReachabilityMapSpreadsheetImporterV0 importer = new ReachabilityMapSpreadsheetImporterV0();
+      ReachabilityMapSpreadsheetImporter importer = new ReachabilityMapSpreadsheetImporter();
       File file = importer.openSelectionFileDialog();
       if (file == null)
          return;

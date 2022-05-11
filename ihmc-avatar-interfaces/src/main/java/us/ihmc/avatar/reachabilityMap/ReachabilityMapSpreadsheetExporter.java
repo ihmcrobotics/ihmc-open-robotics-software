@@ -21,7 +21,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.scs2.definition.robot.OneDoFJointDefinition;
 
-public class ReachabilityMapSpreadsheetExporterV0 implements ReachabilityMapFileWriter
+public class ReachabilityMapSpreadsheetExporter implements ReachabilityMapFileWriter
 {
    private static final int MAX_NUMBER_OF_ROWS = 65535;
 
@@ -39,7 +39,7 @@ public class ReachabilityMapSpreadsheetExporterV0 implements ReachabilityMapFile
    private int rayDataRow = 0;
    private int poseDataRow = 0;
 
-   public ReachabilityMapSpreadsheetExporterV0()
+   public ReachabilityMapSpreadsheetExporter()
    {
    }
 
