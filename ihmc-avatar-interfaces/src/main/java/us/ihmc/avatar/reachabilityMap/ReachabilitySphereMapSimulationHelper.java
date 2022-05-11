@@ -22,6 +22,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public class ReachabilitySphereMapSimulationHelper
 {
+   private final ReachabilityMapRobotInformation robotInformation;
    private final ReachabilitySphereMapCalculator calculator;
    private final SimulationSession session;
 
@@ -38,6 +39,7 @@ public class ReachabilitySphereMapSimulationHelper
 
    public ReachabilitySphereMapSimulationHelper(ReachabilityMapRobotInformation robotInformation)
    {
+      this.robotInformation = robotInformation;
       RobotDefinition robotDefinition = robotInformation.getRobotDefinition();
       robotDefinition.ignoreAllJoints();
 
@@ -163,13 +165,10 @@ public class ReachabilitySphereMapSimulationHelper
       });
    }
 
-   public void exportDataToFile(String robotName, Class<?> classForFilePath) throws IOException
+   public void exportDataToFile(Class<?> classForFilePath) throws IOException
    {
-      ReachabilityMapSpreadsheetExporterV0.exportVoxel3DGridToFile(robotName,
-                                                                   classForFilePath,
-                                                                   calculator.getRobotArmJoints(),
-                                                                   calculator.getControlFramePose(),
-                                                                   calculator.getVoxel3DGrid());
+      ReachabilityMapSpreadsheetExporterV0 exporter = new ReachabilityMapSpreadsheetExporterV0();
+      exporter.write(classForFilePath, robotInformation, calculator.getVoxel3DGrid());
    }
 
    public ReachabilitySphereMapCalculator getCalculator()
