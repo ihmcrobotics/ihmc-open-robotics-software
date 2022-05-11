@@ -85,6 +85,14 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
       return csgCommandInputManager;
    }
 
+   public CSGCommandInputManager getCSGCommandInputManager()
+   {
+      if (csgCommandInputManagerField.hasValue())
+         return csgCommandInputManagerField.get();
+      else
+         return null;
+   }
+
    @Override
    public ComponentBasedFootstepDataMessageGenerator buildPlugin(HighLevelControllerFactoryHelper controllerFactoryHelper)
    {
