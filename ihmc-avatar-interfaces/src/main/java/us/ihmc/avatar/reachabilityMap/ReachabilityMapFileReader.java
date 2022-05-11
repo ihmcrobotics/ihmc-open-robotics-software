@@ -1,6 +1,11 @@
 package us.ihmc.avatar.reachabilityMap;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
@@ -35,4 +40,25 @@ public interface ReachabilityMapFileReader
       });
    }
 
+   default File findLatestFile(Class<?> classForFilePath, ReachabilityMapRobotInformation robotInformation)
+   {
+      Path deriveResourcesPath = ReachabilityMapFileWriter.deriveResourcesPath(classForFilePath);
+
+      File folder = deriveResourcesPath.toFile();
+
+      if (!folder.exists())
+         return null;
+
+      String fileExtension = getFileExtension();
+      String robotName = robotInformation.getRobotDefinition().getName();
+
+      List<File> reachabilityMapFiles = new ArrayList<>(Arrays.asList(folder.listFiles(f -> f.getName().endsWith(robotName + fileExtension))));
+
+      if (reachabilityMapFiles.isEmpty())
+         return null;
+
+      Collections.sort(reachabilityMapFiles);
+
+      return reachabilityMapFiles.get(reachabilityMapFiles.size() - 1);
+   }
 }
