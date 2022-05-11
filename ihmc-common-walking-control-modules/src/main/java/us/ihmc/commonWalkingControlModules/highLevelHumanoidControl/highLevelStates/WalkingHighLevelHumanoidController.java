@@ -881,7 +881,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    {
       planeContactStateCommandPool.clear();
 
-//      controllerCoreCommand.addInverseDynamicsCommand(privilegedConfigurationCommand);
+      controllerCoreCommand.addInverseDynamicsCommand(privilegedConfigurationCommand);
       if (!limitCommandSent.getBooleanValue())
       {
          controllerCoreCommand.addInverseDynamicsCommand(jointLimitEnforcementMethodCommand);
