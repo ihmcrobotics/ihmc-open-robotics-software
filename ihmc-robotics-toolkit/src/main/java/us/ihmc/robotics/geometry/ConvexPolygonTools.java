@@ -229,7 +229,8 @@ public class ConvexPolygonTools
     *
     * @param polygonP ConvexPolygon2d
     * @param polygonQ ConvexPolygon2d
-    * @return ConvexPolygon2d Intersection of polygonP and polygonQ
+    * @param intersectingPolygonToPack intersecting polygon to pack. May be null.
+    * @return ConvexPolygon2d Intersection of polygonP and polygonQ.
     */
    public boolean computeIntersectionOfPolygons(ConvexPolygon2DReadOnly polygonP, ConvexPolygon2DReadOnly polygonQ,
                                                 ConvexPolygon2DBasics intersectingPolygonToPack)
@@ -424,6 +425,9 @@ public class ConvexPolygonTools
       // If no bridges, then check if the polygons are contained in each other.
       if (bridgeCount == 0)
       {
+         if (intersectingPolygonToPack == null)
+            return true;
+
          // check to see if a polygons is contained in another.
          if (polygonP.isPointInside(polygonQ.getVertex(0)))
          {
@@ -440,7 +444,8 @@ public class ConvexPolygonTools
          boolean success = buildCommonPolygonFromBridges(bridgeIndicesP, bridgeIndicesQ, bridgeWasOnLeft, polygonP, polygonQ, intersectingPolygonToPack);
          if (!success)
          {
-            intersectingPolygonToPack.clearAndUpdate();
+            if (intersectingPolygonToPack != null)
+               intersectingPolygonToPack.clearAndUpdate();
             return false;
          }
       }
@@ -453,6 +458,9 @@ public class ConvexPolygonTools
                                                                                        ConvexPolygon2DReadOnly otherPolygon,
                                                                                        ConvexPolygon2DBasics intersectingPolygon)
    {
+      if (intersectingPolygon == null)
+         return false;
+
       if (otherPolygon.pointIsOnPerimeter(polygonWithExactlyOneVertex.getVertex(0)))
       {
          intersectingPolygon.set(polygonWithExactlyOneVertex);
@@ -478,22 +486,29 @@ public class ConvexPolygonTools
 
       if (intersections == 0)
       {
-         intersectingPolygon.clearAndUpdate();
+         if (intersectingPolygon != null)
+            intersectingPolygon.clearAndUpdate();
          return false;
       }
       else if (intersections == 1)
       {
-         intersectingPolygon.clear();
-         intersectingPolygon.addVertex(intersection1);
-         intersectingPolygon.update();
+         if (intersectingPolygon != null)
+         {
+            intersectingPolygon.clear();
+            intersectingPolygon.addVertex(intersection1);
+            intersectingPolygon.update();
+         }
          return true;
       }
       else
       {
-         intersectingPolygon.clear();
-         intersectingPolygon.addVertex(intersection1);
-         intersectingPolygon.addVertex(intersection2);
-         intersectingPolygon.update();
+         if (intersectingPolygon != null)
+         {
+            intersectingPolygon.clear();
+            intersectingPolygon.addVertex(intersection1);
+            intersectingPolygon.addVertex(intersection2);
+            intersectingPolygon.update();
+         }
          return true;
       }
    }
@@ -604,7 +619,8 @@ public class ConvexPolygonTools
          throw new RuntimeException("Neither P1, nor P2 increment!!!");
       }
 
-      intersectingPolygonToPack.clear();
+      if (intersectingPolygonToPack != null)
+         intersectingPolygonToPack.clear();
 
       // Start at the first intersection. Add it. Then march to the next intersection. Then continue.
       for (int i = 0; i < crossingIndices.size(); i++)
@@ -631,12 +647,16 @@ public class ConvexPolygonTools
                PrintTools.error("Returning null polygon");
             }
 
-            intersectingPolygonToPack.clear();
-            intersectingPolygonToPack.update();
+            if (intersectingPolygonToPack != null)
+            {
+               intersectingPolygonToPack.clear();
+               intersectingPolygonToPack.update();
+            }
             return false;
          }
 
-         intersectingPolygonToPack.addVertex(intersection);
+         if (intersectingPolygonToPack != null)
+            intersectingPolygonToPack.addVertex(intersection);
 
          if (incrementPNext)
          {
@@ -647,7 +667,8 @@ public class ConvexPolygonTools
 
             while (indexP != indexPNext)
             {
-               intersectingPolygonToPack.addVertex(polygonP.getVertex(indexP));
+               if (intersectingPolygonToPack != null)
+                  intersectingPolygonToPack.addVertex(polygonP.getVertex(indexP));
                indexP = polygonP.getNextVertexIndex(indexP);
             }
          }
@@ -660,7 +681,8 @@ public class ConvexPolygonTools
 
             while (indexQ != indexQNext)
             {
-               intersectingPolygonToPack.addVertex(polygonQ.getVertex(indexQ));
+               if (intersectingPolygonToPack != null)
+                  intersectingPolygonToPack.addVertex(polygonQ.getVertex(indexQ));
                indexQ = polygonQ.getNextVertexIndex(indexQ);
             }
          }
@@ -668,10 +690,13 @@ public class ConvexPolygonTools
          incrementPNext = !incrementPNext;
       }
 
-      intersectingPolygonToPack.update();
+      if (intersectingPolygonToPack != null)
+      {
+         intersectingPolygonToPack.update();
 
-      if (intersectingPolygonToPack.isEmpty())
-         return false;
+         if (intersectingPolygonToPack.isEmpty())
+            return false;
+      }
 
       return true;
    }
@@ -695,7 +720,8 @@ public class ConvexPolygonTools
 
          if (!success)
          {
-            intersectingPolygonToPack.clearAndUpdate();
+            if (intersectingPolygonToPack != null)
+               intersectingPolygonToPack.clearAndUpdate();
             return false; // No intersection.
          }
       }

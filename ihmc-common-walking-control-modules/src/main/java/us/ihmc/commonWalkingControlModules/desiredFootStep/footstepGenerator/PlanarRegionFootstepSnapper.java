@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator;
 
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.PolygonWiggler;
+import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
@@ -19,19 +21,43 @@ import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStepParameters;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
+import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.List;
 
 public class PlanarRegionFootstepSnapper implements FootstepAdjustment
 {
    private final RecyclingArrayList<PlanarRegion> steppableRegionsList = new RecyclingArrayList<>(PlanarRegion::new);
-   private final SnapAndWiggleSingleStepParameters parameters;
+   private final SnapAndWiggleSingleStepParameters parameters = new SnapAndWiggleSingleStepParameters();
+   private final WiggleParameters wiggleParameters = new WiggleParameters();
 
    private final FramePose3D footstepAtSameHeightAsStanceFoot = new FramePose3D();
    private final FramePose3D adjustedFootstepPose = new FramePose3D();
+
+   private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
+
+   private final SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons;
+   private final ContinuousStepGenerator continuousStepGenerator;
+
+   public PlanarRegionFootstepSnapper(ContinuousStepGenerator continuousStepGenerator, SteppingParameters steppingParameters)
+   {
+      this.continuousStepGenerator = continuousStepGenerator;
+
+      double footLength = steppingParameters.getFootLength();
+      double toeWidth = steppingParameters.getToeWidth();
+      double footWidth = steppingParameters.getFootWidth();
+      ConvexPolygon2D footPolygon = new ConvexPolygon2D();
+      footPolygon.addVertex(footLength / 2.0, toeWidth / 2.0);
+      footPolygon.addVertex(footLength / 2.0, -toeWidth / 2.0);
+      footPolygon.addVertex(-footLength / 2.0, -footWidth / 2.0);
+      footPolygon.addVertex(-footLength / 2.0, footWidth / 2.0);
+      footPolygon.update();
+      footPolygons = new SideDependentList<>(footPolygon, footPolygon);
+   }
 
 
    public void setPlanarRegions(PlanarRegionsListCommand planarRegions)
@@ -47,7 +73,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
                                                                    null) > parameters.getMinPlanarRegionArea())
             continue;
 
-         if (candidateRegion.getTransformToWorld().getZ() >= Math.cos(parameters.getMaxPlanarRegionAngle()))
+         if (candidateRegion.getTransformToWorld().getM22() >= Math.cos(parameters.getMaxPlanarRegionAngle()))
             continue;
 
          PlanarRegion planarRegion = steppableRegionsList.add();
@@ -65,17 +91,19 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       if (steppableRegionsList.isEmpty())
       {
          adjustedFootstepPose.set(footstepAtSameHeightAsStanceFoot);
+         ConvexPolygon2D footPolygonToWiggle = new ConvexPolygon2D();
+         ConvexPolygon2D wiggledPolygon = new ConvexPolygon2D();
          footPolygonToWiggle.set(footPolygons.get(footSide));
          try
          {
-            snapAndWiggle(adjustedFootstepPose, footPolygonToWiggle);
+            snapAndWiggle(adjustedFootstepPose, footPolygonToWiggle, wiggledPolygon);
             if (adjustedFootstepPose.containsNaN())
                return footstepAtSameHeightAsStanceFoot;
          }
-         catch (SnapAndWiggleSingleStep.SnappingFailedException e)
+         catch (RuntimeException e)
          {
             /*
-             * It's fine if the snap & wiggle fails, can be because there no planar regions around the footstep.
+             * It's fine if the snap & wiggle fails, can be because there are no planar regions around the footstep.
              * Let's just keep the adjusted footstep based on the pose of the current stance foot.
              */
          }
@@ -128,6 +156,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
    private ConvexPolygon2D doSnapAndWiggle(FramePose3D solePose, ConvexPolygon2DReadOnly footStepPolygon, FrameConvexPolygon2D footPolygon)
    {
       PlanarRegion regionToMoveTo = new PlanarRegion();
+      // TODO make this garbage free
       RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, steppableRegionsList, Double.POSITIVE_INFINITY, regionToMoveTo);
       if (snapTransform == null)
       {

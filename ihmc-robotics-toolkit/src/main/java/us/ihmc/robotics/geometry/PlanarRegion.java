@@ -2,13 +2,11 @@ package us.ihmc.robotics.geometry;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.*;
-import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
-import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
-import us.ihmc.euclid.geometry.interfaces.LineSegment2DReadOnly;
-import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.geometry.interfaces.*;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.interfaces.Transformable;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.shape.collision.interfaces.SupportingVertexHolder;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -60,6 +58,13 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
 
    private final PlanarRegionOrigin origin = new PlanarRegionOrigin(fromLocalToWorldTransform);
    private final PlanarRegionNormal normal = new PlanarRegionNormal(fromLocalToWorldTransform);
+
+   /**
+    * Internal variables for math purposes
+    */
+   private final ConvexPolygon2D tempPolygon = new ConvexPolygon2D();
+   private final Point2D tempPoint2D = new Point2D();
+   private final Point3D tempPoint3D = new Point3D();
 
    /**
     * Create a new, empty planar region.
@@ -214,13 +219,12 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       // Instead of projecting all the polygons of this region onto the world XY-plane,
       // the given convex polygon is projected along the z-world axis to be snapped onto plane.
       ConvexPolygon2D projectedPolygon = projectPolygonVerticallyToRegion(convexPolygon2d);
-      ConvexPolygon2D dummyPolygon = new ConvexPolygon2D();
 
       // Now, just need to go through each polygon of this region and see there is at least one intersection
       for (int i = 0; i < getNumberOfConvexPolygons(); i++)
       {
          ConvexPolygon2D polygonToCheck = convexPolygons.get(i);
-         boolean hasIntersection = convexPolygonTools.computeIntersectionOfPolygons(polygonToCheck, projectedPolygon, dummyPolygon);
+         boolean hasIntersection = convexPolygonTools.computeIntersectionOfPolygons(polygonToCheck, projectedPolygon, null);
          if (hasIntersection)
             return true;
       }
@@ -229,8 +233,10 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
    }
 
    /**
-    * Returns all of the intersections when the convexPolygon is projected vertically onto this
+    * Returns all the intersections when the convexPolygon is projected vertically onto this
     * PlanarRegion.
+    *
+    * WARNING generates garbage
     *
     * @param convexPolygon2DBasics Polygon to project vertically.
     * @param intersectionsInPlaneFrameToPack ArrayList of ConvexPolygon2d to pack with the
@@ -241,22 +247,29 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
    {
       // Instead of projecting all the polygons of this region onto the world XY-plane,
       // the given convex polygon is projected along the z-world axis to be snapped onto plane.
-      ConvexPolygon2D projectedPolygon = projectPolygonVerticallyToRegion(convexPolygon2DBasics);
+      projectPolygonVerticallyToRegion(convexPolygon2DBasics, tempPolygon);
 
       // Now, just need to go through each polygon of this region and see there is at least one intersection
       for (int i = 0; i < getNumberOfConvexPolygons(); i++)
       {
          ConvexPolygon2D intersectingPolygon = new ConvexPolygon2D();
-         if (convexPolygonTools.computeIntersectionOfPolygons(convexPolygons.get(i), projectedPolygon, intersectingPolygon))
+         if (convexPolygonTools.computeIntersectionOfPolygons(convexPolygons.get(i), tempPolygon, intersectingPolygon))
          {
             intersectionsInPlaneFrameToPack.add(intersectingPolygon);
          }
       }
    }
 
+   public boolean getPolygonIntersection(int convexPolygonIndex, ConvexPolygon2DReadOnly polygonToIntersect, ConvexPolygon2DBasics intersectingPolygonToPack)
+   {
+      return convexPolygonTools.computeIntersectionOfPolygons(convexPolygons.get(convexPolygonIndex), polygonToIntersect, intersectingPolygonToPack);
+   }
+
    /**
     * Returns all of the intersections when the convexPolygon is snapped onto this PlanarRegion with
     * the snappingTransform.
+    *
+    * WARNING generates garbage
     *
     * @param convexPolygon2d Polygon to snap.
     * @param snappingTransform RigidBodyTransform that snaps the polygon onto this region. Must have
@@ -271,6 +284,8 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
    /**
     * Returns all of the intersections when the convexPolygon is snapped onto this PlanarRegion with
     * the snappingTransform.
+    *
+    * WARNING generates garbage
     *
     * @param convexPolygon2d Polygon to snap.
     * @param snappingTransform RigidBodyTransform that snaps the polygon onto this region. Must have
@@ -326,6 +341,8 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
     * this planar region. If the snappingTransform is not consistent with this PlanarRegion, then it
     * prints an error message.
     *
+    *     * WARNING generates garbage
+    *
     * @param polygonToSnap
     * @param snappingTransform
     * @return ConvexPolygon2d Snapped polygon in the frame of this PlanarRegion.
@@ -355,6 +372,8 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
     * each vertex in world z. Then puts each vertex in local frame. In doing so, the area of the
     * rotated polygon will actually increase on tilted PlanarRegions.
     *
+    * WARNING generates garbage
+    *
     * @param convexPolygonInWorld Polygon to project
     * @return new projected ConvexPolygon2d
     */
@@ -362,23 +381,38 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
    {
       ConvexPolygon2D projectedPolygon = new ConvexPolygon2D();
 
-      Point3D snappedVertex3d = new Point3D();
+      projectPolygonVerticallyToRegion(convexPolygonInWorld, projectedPolygon);
+
+      return projectedPolygon;
+   }
+
+   /**
+    * Projects the input ConvexPolygon2d to the plane defined by this PlanarRegion by translating
+    * each vertex in world z. Then puts each vertex in local frame. In doing so, the area of the
+    * rotated polygon will actually increase on tilted PlanarRegions.
+    *
+    * @param convexPolygonInWorld Polygon to project
+    * @return new projected ConvexPolygon2d
+    */
+   public void projectPolygonVerticallyToRegion(ConvexPolygon2DReadOnly convexPolygonInWorld, ConvexPolygon2DBasics projectedPolygonToPack)
+   {
+      projectedPolygonToPack.set(convexPolygonInWorld);
 
       for (int i = 0; i < convexPolygonInWorld.getNumberOfVertices(); i++)
       {
          Point2DReadOnly originalVertex = convexPolygonInWorld.getVertex(i);
          // Find the vertex 3d that is snapped to the plane following z-world.
-         snappedVertex3d.setX(originalVertex.getX());
-         snappedVertex3d.setY(originalVertex.getY());
-         snappedVertex3d.setZ(getPlaneZGivenXY(originalVertex.getX(), originalVertex.getY()));
+         tempPoint3D.setX(originalVertex.getX());
+         tempPoint3D.setY(originalVertex.getY());
+         tempPoint3D.setZ(getPlaneZGivenXY(originalVertex.getX(), originalVertex.getY()));
 
          // Transform to local coordinates
-         fromWorldToLocalTransform.transform(snappedVertex3d);
+         fromWorldToLocalTransform.transform(tempPoint3D);
          // Add the snapped vertex to the snapped polygon
-         projectedPolygon.addVertex(snappedVertex3d.getX(), snappedVertex3d.getY());
+         projectedPolygonToPack.addVertex(tempPoint3D);
       }
-      projectedPolygon.update();
-      return projectedPolygon;
+
+      projectedPolygonToPack.update();
    }
 
    /**
@@ -1532,6 +1566,11 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
    public void transformFromLocalToWorld(Transformable objectToTransform)
    {
       objectToTransform.applyTransform(fromLocalToWorldTransform);
+   }
+
+   public ConvexPolygonTools getConvexPolygonTools()
+   {
+      return convexPolygonTools;
    }
 
    @Override

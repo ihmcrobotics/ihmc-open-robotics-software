@@ -2,6 +2,7 @@ package us.ihmc.robotics.geometry;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.*;
 import us.ihmc.euclid.geometry.interfaces.*;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
@@ -27,6 +28,75 @@ import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.*;
 
 public class PlanarRegionTools
 {
+   private final ConvexPolygon2D tempPolygon = new ConvexPolygon2D();
+   private final ConvexPolygon2D tempPolygon2 = new ConvexPolygon2D();
+
+   public PlanarRegionTools()
+   {}
+
+   /**
+    * Returns all the intersections when the convexPolygon is projected vertically onto this
+    * PlanarRegion.
+    *
+    *
+    * @param convexPolygon2DBasics Polygon to project vertically.
+    * @param intersectionsInPlaneFrameToPack ArrayList of ConvexPolygon2d to pack with the
+    *           intersections.
+    */
+   public void getPolygonIntersectionsWhenProjectedVertically(PlanarRegion regionToProjectOnto,
+                                                              ConvexPolygon2DReadOnly convexPolygon2DBasics,
+                                                              RecyclingArrayList<Point2DBasics> intersectionsInPlaneFrameToPack)
+   {
+      intersectionsInPlaneFrameToPack.clear();
+
+      // Instead of projecting all the polygons of this region onto the world XY-plane,
+      // the given convex polygon is projected along the z-world axis to be snapped onto plane.
+      regionToProjectOnto.projectPolygonVerticallyToRegion(convexPolygon2DBasics, tempPolygon);
+
+      // Now, just need to go through each polygon of this region and see there is at least one intersection
+      for (int i = 0; i < regionToProjectOnto.getNumberOfConvexPolygons(); i++)
+      {
+         if (regionToProjectOnto.getPolygonIntersection(i, tempPolygon, tempPolygon2))
+         {
+            for (int j = 0; j < tempPolygon2.getNumberOfVertices(); j++)
+               intersectionsInPlaneFrameToPack.add().set(tempPolygon2.getVertex(j));
+         }
+      }
+   }
+
+   /**
+    * Returns all the intersections when the convexPolygon is projected vertically onto this
+    * PlanarRegion.
+    *
+    * WARNING generates garbage
+    *
+    * @param convexPolygon2DBasics Polygon to project vertically.
+    * @param intersectionsInPlaneFrameToPack ArrayList of ConvexPolygon2d to pack with the
+    *           intersections.
+    */
+   public static List<Point2DReadOnly> getPolygonIntersectionsWhenProjectedVertically(PlanarRegion regionToProjectOnto,
+                                                                                      ConvexPolygon2DReadOnly convexPolygon2DBasics)
+   {
+      ArrayList<Point2DReadOnly> intersectionsInPlaneFrame = new ArrayList<>();
+      ConvexPolygon2D tempPolygon = new ConvexPolygon2D();
+
+      // Instead of projecting all the polygons of this region onto the world XY-plane,
+      // the given convex polygon is projected along the z-world axis to be snapped onto plane.
+      regionToProjectOnto.projectPolygonVerticallyToRegion(convexPolygon2DBasics, tempPolygon);
+
+      // Now, just need to go through each polygon of this region and see there is at least one intersection
+      for (int i = 0; i < regionToProjectOnto.getNumberOfConvexPolygons(); i++)
+      {
+         ConvexPolygon2D intersectingPolygon = new ConvexPolygon2D();
+         if (regionToProjectOnto.getPolygonIntersection(i, tempPolygon, intersectingPolygon))
+         {
+            intersectionsInPlaneFrame.addAll(intersectingPolygon.getPolygonVerticesView());
+         }
+      }
+
+      return intersectionsInPlaneFrame;
+   }
+
    /**
     * Checks to see if regionA is above regionB in terms of not ever having to "step up" from regionA to regionB.
     * If regionA is above regionB, then regionB should not be able to be an obstacle of regionA.
@@ -781,7 +851,28 @@ public class PlanarRegionTools
     */
    public static List<PlanarRegion> findPlanarRegionsIntersectingPolygon(ConvexPolygon2DReadOnly convexPolygon, List<PlanarRegion> regions)
    {
-      List<PlanarRegion> containers = null;
+      List<PlanarRegion> containers = new ArrayList<>();
+      if (findPlanarRegionsIntersectingPolygon(convexPolygon, regions, containers))
+         return containers;
+
+      return null;
+   }
+
+   /**
+    * Find all the planar regions that intersect with the given convex polygon. The algorithm is
+    * equivalent to projecting all the regions onto the XY-plane and then finding the regions
+    * intersecting with the given convex polygon.
+    *
+    * @param convexPolygon the query.
+    * @return the list of planar regions intersecting with the given polygon. Returns null when no
+    *       region intersects.
+    */
+   public static boolean findPlanarRegionsIntersectingPolygon(ConvexPolygon2DReadOnly convexPolygon,
+                                                              List<PlanarRegion> regions,
+                                                              List<PlanarRegion> intersectingRegionsToPack)
+   {
+      intersectingRegionsToPack.clear();
+      boolean hasIntersection = false;
 
       for (int i = 0; i < regions.size(); i++)
       {
@@ -791,14 +882,14 @@ public class PlanarRegionTools
 
          if (candidateRegion.isPolygonIntersecting(convexPolygon))
          {
-            if (containers == null)
-               containers = new ArrayList<>();
-            containers.add(candidateRegion);
+            hasIntersection = true;
+            intersectingRegionsToPack.add(candidateRegion);
          }
       }
 
-      return containers;
+      return hasIntersection;
    }
+
 
    /**
     * Find all the planar regions that contain the given point.
