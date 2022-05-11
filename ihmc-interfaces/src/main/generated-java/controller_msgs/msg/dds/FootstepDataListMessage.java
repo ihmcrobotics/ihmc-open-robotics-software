@@ -73,11 +73,16 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
             * Properties for queueing footstep lists.
             */
    public controller_msgs.msg.dds.QueueableMessage queueing_properties_;
+   /**
+            * Default step constraints regions
+            */
+   public controller_msgs.msg.dds.StepConstraintsListMessage default_step_constraints_;
 
    public FootstepDataListMessage()
    {
       footstep_data_list_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage> (50, new controller_msgs.msg.dds.FootstepDataMessagePubSubType());
       queueing_properties_ = new controller_msgs.msg.dds.QueueableMessage();
+      default_step_constraints_ = new controller_msgs.msg.dds.StepConstraintsListMessage();
 
    }
 
@@ -109,6 +114,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
       offset_footsteps_height_with_execution_error_ = other.offset_footsteps_height_with_execution_error_;
 
       controller_msgs.msg.dds.QueueableMessagePubSubType.staticCopy(other.queueing_properties_, queueing_properties_);
+      controller_msgs.msg.dds.StepConstraintsListMessagePubSubType.staticCopy(other.default_step_constraints_, default_step_constraints_);
    }
 
    /**
@@ -293,6 +299,15 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
    }
 
 
+   /**
+            * Default step constraints regions
+            */
+   public controller_msgs.msg.dds.StepConstraintsListMessage getDefaultStepConstraints()
+   {
+      return default_step_constraints_;
+   }
+
+
    public static Supplier<FootstepDataListMessagePubSubType> getPubSubType()
    {
       return FootstepDataListMessagePubSubType::new;
@@ -336,6 +351,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.offset_footsteps_height_with_execution_error_, other.offset_footsteps_height_with_execution_error_, epsilon)) return false;
 
       if (!this.queueing_properties_.epsilonEquals(other.queueing_properties_, epsilon)) return false;
+      if (!this.default_step_constraints_.epsilonEquals(other.default_step_constraints_, epsilon)) return false;
 
       return true;
    }
@@ -369,6 +385,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
       if(this.offset_footsteps_height_with_execution_error_ != otherMyClass.offset_footsteps_height_with_execution_error_) return false;
 
       if (!this.queueing_properties_.equals(otherMyClass.queueing_properties_)) return false;
+      if (!this.default_step_constraints_.equals(otherMyClass.default_step_constraints_)) return false;
 
       return true;
    }
@@ -400,7 +417,9 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
       builder.append("offset_footsteps_height_with_execution_error=");
       builder.append(this.offset_footsteps_height_with_execution_error_);      builder.append(", ");
       builder.append("queueing_properties=");
-      builder.append(this.queueing_properties_);
+      builder.append(this.queueing_properties_);      builder.append(", ");
+      builder.append("default_step_constraints=");
+      builder.append(this.default_step_constraints_);
       builder.append("}");
       return builder.toString();
    }

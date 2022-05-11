@@ -21,10 +21,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.*;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
@@ -985,5 +982,58 @@ public class EuclidCoreMissingTools
          dotProduct = -1.0;
 
       return EuclidCoreTools.acos(dotProduct);
+   }
+
+   /**
+    * Computes the coordinates of the intersection between a plane and an infinitely long line.
+    * <a href="https://en.wikipedia.org/wiki/Line%E2%80%93plane_intersection"> Useful link </a>.
+    * <p>
+    * Edge cases:
+    * <ul>
+    * <li>If the line is parallel to the plane, this methods fails and returns {@code false}.
+    * </ul>
+    * </p>
+    *
+    * @param intersectionToPack point in which the coordinates of the intersection are stored.
+    * @return {@code true} if the method succeeds, {@code false} otherwise.
+    */
+   public static boolean intersectionBetweenLine3DAndPlane3D(double pointOnPlaneX,
+                                                             double pointOnPlaneY,
+                                                             double pointOnPlaneZ,
+                                                             double planeNormalX,
+                                                             double planeNormalY,
+                                                             double planeNormalZ,
+                                                             double pointOnLineX,
+                                                             double pointOnLineY,
+                                                             double pointOnLineZ,
+                                                             double lineDirectionX,
+                                                             double lineDirectionY,
+                                                             double lineDirectionZ,
+                                                             Point3DBasics intersectionToPack)
+   {
+      // Switching to the notation used in https://en.wikipedia.org/wiki/Line%E2%80%93plane_intersection
+      // Note: the algorithm is independent from the magnitudes of planeNormal and lineDirection
+
+      // Let's compute the value of the coefficient d = ( (p0 - l0).n ) / ( l.n )
+      double numerator, denominator;
+      numerator = (pointOnPlaneX - pointOnLineX) * planeNormalX;
+      numerator += (pointOnPlaneY - pointOnLineY) * planeNormalY;
+      numerator += (pointOnPlaneZ - pointOnLineZ) * planeNormalZ;
+      denominator = planeNormalX * lineDirectionX + planeNormalY * lineDirectionY + planeNormalZ * lineDirectionZ;
+
+      // Check if the line is parallel to the plane
+      if (Math.abs(denominator) < ONE_TRILLIONTH)
+      {
+         return false;
+      }
+      else
+      {
+         double d = numerator / denominator;
+
+         intersectionToPack.setX(d * lineDirectionX + pointOnLineX);
+         intersectionToPack.setY(d * lineDirectionY + pointOnLineY);
+         intersectionToPack.setZ(d * lineDirectionZ + pointOnLineZ);
+         return true;
+      }
    }
 }

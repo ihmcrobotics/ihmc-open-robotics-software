@@ -104,6 +104,7 @@ public abstract class AvatarPushRecoveryWithCrossOverWalkingTest implements Mult
    @Test
    public void testOutwardPushInSwing()
    {
+      simulationTestingParameters.setKeepSCSUp(true);
       setupTest();
 
       // setup all parameters
@@ -165,7 +166,7 @@ public abstract class AvatarPushRecoveryWithCrossOverWalkingTest implements Mult
       ((YoBoolean) simulationTestHelper.findVariable("controllerAllowCrossOverSteps")).set(true);
       ((YoBoolean) simulationTestHelper.findVariable("speedUpSwingDynamicsFromError")).set(true);
       ((YoBoolean) simulationTestHelper.findVariable("speedUpTransferDynamicsFromError")).set(true);
-      ((YoDouble) simulationTestHelper.findVariable("icpDistanceFromFootPolygonThreshold")).set(0.25);
+      ((YoDouble) simulationTestHelper.findVariable("icpDistanceFromFootPolygonThreshold")).set(0.35);
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       pushRobotController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationSession().getTime(), simulationTestHelper.getRobot(), fullRobotModel);
       simulationTestHelper.addYoGraphicDefinition(pushRobotController.getForceVizDefinition());
