@@ -308,11 +308,12 @@ public class AvatarSimulationFactory
       componentBasedFootstepDataMessageGeneratorFactory.setRegistry();
       componentBasedFootstepDataMessageGeneratorFactory.setUseHeadingAndVelocityScript(false);
 
-      stepGeneratorThread = new AvatarStepGeneratorThread(componentBasedFootstepDataMessageGeneratorFactory, contextDataFactory,
-                                                    highLevelHumanoidControllerFactory.get().getStatusOutputManager(),
-                                                    highLevelHumanoidControllerFactory.get().getCommandInputManager(),
-                                                    robotModel.get(),
-                                                    perceptionDTProvider.getValue());
+      stepGeneratorThread = new AvatarStepGeneratorThread(componentBasedFootstepDataMessageGeneratorFactory,
+                                                          contextDataFactory,
+                                                          highLevelHumanoidControllerFactory.get().getStatusOutputManager(),
+                                                          highLevelHumanoidControllerFactory.get().getCommandInputManager(),
+                                                          robotModel.get(),
+                                                          perceptionDTProvider.getValue());
    }
 
    private void createMasterContext()
