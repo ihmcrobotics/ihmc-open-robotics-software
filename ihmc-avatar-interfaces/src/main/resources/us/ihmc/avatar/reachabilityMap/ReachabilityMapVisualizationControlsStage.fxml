@@ -41,12 +41,12 @@
                      <Label text="yMax:" GridPane.columnIndex="2" GridPane.rowIndex="2" />
                      <Label text="zMin:" GridPane.columnIndex="4" GridPane.rowIndex="1" />
                      <Label text="zMax:" GridPane.columnIndex="4" GridPane.rowIndex="2" />
-                     <Spinner prefWidth="125.0" GridPane.columnIndex="1" GridPane.rowIndex="1" fx:id="xMinSpinner" />
-                     <Spinner prefWidth="125.0" GridPane.columnIndex="1" GridPane.rowIndex="2" fx:id="xMaxSpinner" />
-                     <Spinner fx:id="yMinSpinner" prefWidth="125.0" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-                     <Spinner fx:id="yMaxSpinner" prefWidth="125.0" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-                     <Spinner fx:id="zMinSpinner" prefWidth="125.0" GridPane.columnIndex="5" GridPane.rowIndex="1" />
-                     <Spinner fx:id="zMaxSpinner" prefWidth="125.0" GridPane.columnIndex="5" GridPane.rowIndex="2" />
+                     <Spinner editable="true" prefWidth="125.0" GridPane.columnIndex="1" GridPane.rowIndex="1" fx:id="xMinSpinner" />
+                     <Spinner editable="true" prefWidth="125.0" GridPane.columnIndex="1" GridPane.rowIndex="2" fx:id="xMaxSpinner" />
+                     <Spinner fx:id="yMinSpinner" editable="true" prefWidth="125.0" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                     <Spinner fx:id="yMaxSpinner" editable="true" prefWidth="125.0" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                     <Spinner fx:id="zMinSpinner" editable="true" prefWidth="125.0" GridPane.columnIndex="5" GridPane.rowIndex="1" />
+                     <Spinner fx:id="zMaxSpinner" editable="true" prefWidth="125.0" GridPane.columnIndex="5" GridPane.rowIndex="2" />
                      <Button mnemonicParsing="false" onAction="#refreshVisualization" text="Generate Visualization" GridPane.columnIndex="5" GridPane.rowIndex="3" />
                   </children>
                   <padding>
