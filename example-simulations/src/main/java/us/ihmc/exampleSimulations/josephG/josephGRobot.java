@@ -37,6 +37,9 @@ public class josephGRobot extends Robot
    private static final double LINK2_LENGTH = 2.0;
    private static final double LINK2_MASS = 0.5;
    
+   private double jointVelocity = 3.0;
+   private double jointPosition;
+   
    public josephGRobot()
    {
       super("JosephRobot");
@@ -54,33 +57,17 @@ public class josephGRobot extends Robot
       baseGraphics.addCoordinateSystem(0.3);
       base.setLinkGraphics(baseGraphics);
       this.addStaticLink(base);
-      
-      /*
-         Create Link1
-      
-      Link link1 = new Link("link1");
-      Graphics3DObject link1Graphics = new Graphics3DObject();
-      link1Graphics.addCylinder(LINK1_LENGTH, LINK_RADIUS, blue);
-      link1.setLinkGraphics(link1Graphics); 
-      */
-      
-      /*
-         Create Link2
-       
-      Link link2 = new Link("link2");
-      Graphics3DObject link2Graphics = new Graphics3DObject();
-      link2Graphics.addCylinder(LINK2_LENGTH, LINK_RADIUS, red);
-      link2.setLinkGraphics(link2Graphics);
-      */
-      
+     
       
       /*
          Creating yawJoint (root joint)
        */
-      PinJoint yawJoint = new PinJoint("yaw", new Vector3D(0.0, 0.0, BASE_HEIGHT), this, Axis3D.Z);
-      yawJoint.setInitialState(0.0, 0.0);
+      PinJoint yawJoint = new PinJoint("yaw", new Vector3D(0.0, 0.0, BASE_HEIGHT), this, Axis3D.Y);
+      yawJoint.setQd(jointVelocity);
       yawJoint.setLink(makeLink1());
       this.addRootJoint(yawJoint);
+      
+      this.jointPosition = yawJoint.getQ();
       
       /*
          Create pitchJoint
@@ -128,5 +115,25 @@ public class josephGRobot extends Robot
       
       return link2;
    }
+   
+   public void setJointVelocity(double velocity)
+   {
+      this.jointVelocity = velocity;
+   }
+   public double getJointVelocity()
+   {
+      return this.jointVelocity;
+   }
+   
+   public void setJointPosition(double angle)
+   {
+      this.jointPosition = angle;
+   }
+   public double getJointPosition()
+   {
+      return this.jointPosition;
+   }
+   
+   
    
 }
