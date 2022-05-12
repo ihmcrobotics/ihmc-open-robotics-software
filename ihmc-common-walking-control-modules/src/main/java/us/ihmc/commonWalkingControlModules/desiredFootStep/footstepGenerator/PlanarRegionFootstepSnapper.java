@@ -55,7 +55,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
 
    private final ConvexStepConstraintOptimizer stepConstraintOptimizer;
 
-   public PlanarRegionFootstepSnapper(ContinuousStepGenerator continuousStepGenerator, SteppingParameters steppingParameters)
+   public PlanarRegionFootstepSnapper(ContinuousStepGenerator continuousStepGenerator, SteppingParameters steppingParameters, YoRegistry parentRegistry)
    {
       this.continuousStepGenerator = continuousStepGenerator;
       this.wiggleParameters = new YoConstraintOptimizerParameters(registry);
@@ -71,6 +71,8 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       footPolygon.addVertex(-footLength / 2.0, footWidth / 2.0);
       footPolygon.update();
       footPolygons = new SideDependentList<>(footPolygon, footPolygon);
+
+      parentRegistry.addChild(registry);
    }
 
 
