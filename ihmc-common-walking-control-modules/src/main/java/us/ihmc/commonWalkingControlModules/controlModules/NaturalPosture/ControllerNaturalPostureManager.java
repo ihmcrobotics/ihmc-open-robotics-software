@@ -160,8 +160,14 @@ public class ControllerNaturalPostureManager
       double sal = Math.sin(npRoll.getValue());
       double cal = Math.cos(npRoll.getValue());
       
-      //TODO: A quaternion can be used to transform a matrix. Should be able to use currentNPQuat to transform tau, instead of needing to make this matrix. 
-      //TODO: This seems to be swapping yaw(z) and roll (x). Shouldn't need to do that if you do things in x-y-z order (roll-pitch-yaw).
+      // Dnp:
+      //   + is *not* a 3x3 orthogonal transformation
+      //   + is a velocity transformation: omega = Dnp * (Euler_rates)
+      //   + the order of the Euler angles is required to derive the correct transformation
+      //   + (i.e. we cannot find this transform from the quaternion only, since you also need the choice of Euler set)
+      //   + the transformations for RPY & YPR are different, as the RPY Euler set is a different orientation representation
+      //   + to avoid confusion, keep variable name & math consistent: keep the Y,P,R = 0,1,2 order when using YPR Euler sets
+      //   + BUT the result: omega will be {x,y,z}
       Dnp.set(0,0,-sbe);     Dnp.set(0,1,0.0);   Dnp.set(0,2,1.0);
       Dnp.set(1,0, cbe*sal); Dnp.set(1,1, cal);  Dnp.set(1,2,0.0);
       Dnp.set(2,0, cbe*cal); Dnp.set(2,1,-sal);  Dnp.set(2,2,0.0);
@@ -179,9 +185,6 @@ public class ControllerNaturalPostureManager
  
       // GMN: derivative terms???
 
-   // GMN: WE SHOULD INTERPRET THIS AS AN OMEGA COMMAND....?      
-//      CommonOps_DDRM.invert(Dnp);       
-//      CommonOps_DDRM.transpose(Dnp);    
       CommonOps_DDRM.mult(Dnp, tau, npQPobjective);
       
       npQPjacobian.set(robotNaturalPosture.getNaturalPostureJacobian());
