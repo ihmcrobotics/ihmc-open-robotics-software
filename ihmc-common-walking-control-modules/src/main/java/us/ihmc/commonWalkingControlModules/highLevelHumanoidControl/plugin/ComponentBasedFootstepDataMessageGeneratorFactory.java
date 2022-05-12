@@ -115,8 +115,9 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 
       ContinuousStepGenerator continuousStepGenerator = new ContinuousStepGenerator(registryField.get());
-      
-      continuousStepGenerator.setFootstepAdjustment(footstepAdjusterField.get());
+
+      if (footstepAdjusterField.hasValue())
+         continuousStepGenerator.setFootstepAdjustment(footstepAdjusterField.get());
       continuousStepGenerator.setFootstepStatusListener(statusMessageOutputManager);
       continuousStepGenerator.setFrameBasedFootPoseProvider(referenceFrames.getSoleZUpFrames());
       continuousStepGenerator.configureWith(walkingControllerParameters);
