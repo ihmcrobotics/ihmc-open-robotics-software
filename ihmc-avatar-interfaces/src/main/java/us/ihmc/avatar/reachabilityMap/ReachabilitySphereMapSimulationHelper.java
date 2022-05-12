@@ -61,14 +61,14 @@ public class ReachabilitySphereMapSimulationHelper
       calculator.enableJointTorqueAnalysis(considerJointTorqueLimits);
    }
 
-   public void setEvaluateDReachability(boolean enable)
+   public void setEvaluateRReachability(boolean enable)
    {
-      calculator.setEvaluateDReachability(enable);
+      calculator.setEvaluateRReachability(enable);
    }
 
-   public void setEvaluateD0Reachability(boolean enable)
+   public void setEvaluateR2Reachability(boolean enable)
    {
-      calculator.setEvaluateD0Reachability(enable);
+      calculator.setEvaluateR2Reachability(enable);
    }
 
    public void setGridPose(RigidBodyTransformReadOnly pose)
@@ -139,21 +139,21 @@ public class ReachabilitySphereMapSimulationHelper
 
       calculator.setVoxelUnreachableListener(voxel ->
       {
-         voxelVisualization.get(VisualizationType.Unreachable).add(sphereVoxelShape.createDReachabilityVisual(voxel.getPosition(), 0.1, -1));
+         voxelVisualization.get(VisualizationType.Unreachable).add(sphereVoxelShape.createRReachabilityVisual(voxel.getPosition(), 0.1, -1));
       });
 
       calculator.setVoxelCompletedListener(voxel ->
       {
          voxelVisualization.get(VisualizationType.PositionReach).add(sphereVoxelShape.createPositionReachabilityVisual(voxel.getPosition(), 0.2, true));
 
-         if (voxel.getD() > 1e-3)
+         if (voxel.getR() > 1e-3)
          {
-            voxelVisualization.get(VisualizationType.RayReach).add(sphereVoxelShape.createDReachabilityVisual(voxel.getPosition(), 0.25, voxel.getD()));
-            voxelVisualization.get(VisualizationType.PoseReach).add(sphereVoxelShape.createDReachabilityVisual(voxel.getPosition(), 0.25, voxel.getD0()));
+            voxelVisualization.get(VisualizationType.RayReach).add(sphereVoxelShape.createRReachabilityVisual(voxel.getPosition(), 0.25, voxel.getR()));
+            voxelVisualization.get(VisualizationType.PoseReach).add(sphereVoxelShape.createRReachabilityVisual(voxel.getPosition(), 0.25, voxel.getR2()));
          }
          else
          {
-            voxelVisualization.get(VisualizationType.Unreachable).add(sphereVoxelShape.createDReachabilityVisual(voxel.getPosition(), 0.1, -1));
+            voxelVisualization.get(VisualizationType.Unreachable).add(sphereVoxelShape.createRReachabilityVisual(voxel.getPosition(), 0.1, -1));
          }
       });
 

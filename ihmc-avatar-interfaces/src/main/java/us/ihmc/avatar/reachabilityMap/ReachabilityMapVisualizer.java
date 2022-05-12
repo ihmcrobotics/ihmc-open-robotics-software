@@ -61,8 +61,8 @@ public class ReachabilityMapVisualizer
    private final YoEnum<VisualizationType> currentEvaluation = new YoEnum<>("currentEvaluation", registry, VisualizationType.class);
    private final AtomicReference<VisualizationType> previousEvaluation = new AtomicReference<>(currentEvaluation.getValue());
    private final YoFramePose3D currentEvaluationPose = new YoFramePose3D("currentEvaluationPose", SimulationSession.DEFAULT_INERTIAL_FRAME, registry);
-   private final YoDouble D = new YoDouble("D", registry);
-   private final YoDouble D0 = new YoDouble("D0", registry);
+   private final YoDouble R = new YoDouble("R", registry);
+   private final YoDouble R2 = new YoDouble("R2", registry);
    private final YoInteger numberOfRays = new YoInteger("numberOfRays", registry);
    private final YoInteger numberOfPoses = new YoInteger("numberOfPoses", registry);
    private final YoInteger numberOfReachableRays = new YoInteger("numberOfReachableRays", registry);
@@ -190,20 +190,20 @@ public class ReachabilityMapVisualizer
          if (voxel == null)
          {
             voxelVisualization.get(VisualizationType.Unreachable)
-                              .add(sphereVoxelShape.createDReachabilityVisual(reachabilityMap.getVoxelPosition(voxelIndex), 0.1, -1));
+                              .add(sphereVoxelShape.createRReachabilityVisual(reachabilityMap.getVoxelPosition(voxelIndex), 0.1, -1));
          }
          else
          {
             voxelVisualization.get(VisualizationType.PositionReach).add(sphereVoxelShape.createPositionReachabilityVisual(voxel.getPosition(), 0.2, true));
 
-            if (voxel.getD() > 1e-3)
+            if (voxel.getR() > 1e-3)
             {
-               voxelVisualization.get(VisualizationType.RayReach).add(sphereVoxelShape.createDReachabilityVisual(voxel.getPosition(), 0.25, voxel.getD()));
-               voxelVisualization.get(VisualizationType.PoseReach).add(sphereVoxelShape.createDReachabilityVisual(voxel.getPosition(), 0.25, voxel.getD0()));
+               voxelVisualization.get(VisualizationType.RayReach).add(sphereVoxelShape.createRReachabilityVisual(voxel.getPosition(), 0.25, voxel.getR()));
+               voxelVisualization.get(VisualizationType.PoseReach).add(sphereVoxelShape.createRReachabilityVisual(voxel.getPosition(), 0.25, voxel.getR2()));
             }
             else
             {
-               voxelVisualization.get(VisualizationType.Unreachable).add(sphereVoxelShape.createDReachabilityVisual(voxel.getPosition(), 0.1, -1));
+               voxelVisualization.get(VisualizationType.Unreachable).add(sphereVoxelShape.createRReachabilityVisual(voxel.getPosition(), 0.1, -1));
             }
          }
       }
@@ -286,7 +286,7 @@ public class ReachabilityMapVisualizer
             numberOfReachableRays.increment();
          }
 
-         D.set(numberOfReachableRays.getValueAsDouble() / numberOfRays.getValueAsDouble());
+         R.set(numberOfReachableRays.getValueAsDouble() / numberOfRays.getValueAsDouble());
 
          for (VoxelExtraData rayExtraData : filteredRayExtraDataList)
          {
@@ -368,7 +368,7 @@ public class ReachabilityMapVisualizer
             }
          }
 
-         D0.set(numberOfReachablePoses.getValueAsDouble() / numberOfReachablePoses.getValueAsDouble());
+         R2.set(numberOfReachablePoses.getValueAsDouble() / numberOfReachablePoses.getValueAsDouble());
 
          for (int rayIndex = 0; rayIndex < filteredPoseExtraData2DList.size(); rayIndex++)
          {
