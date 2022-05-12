@@ -21,6 +21,7 @@ import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
+import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -69,7 +70,7 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
       contextDataFactory.setProcessedJointData(processedJointData);
       contextDataFactory.setSensorDataContext(new SensorDataContext(fullRobotModel));
       humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
-//      csgCommandInputManager = csgPluginFactory.getCSGCommandInputManager().getCommandInputManager();
+      csgCommandInputManager = csgPluginFactory.getCSGCommandInputManager().getCommandInputManager();
 
       humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       csg = csgPluginFactory.buildPlugin(humanoidReferenceFrames,
@@ -86,6 +87,8 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
                                                                          drcRobotModel.getWalkingControllerParameters().getSteppingParameters(),
                                                                          csgRegistry);
       csg.getContinuousStepGenerator().setFootstepAdjustment(planarRegionFootstepSnapper);
+
+      ParameterLoaderHelper.loadParameters(this, drcRobotModel, csgRegistry);
 
    }
 
