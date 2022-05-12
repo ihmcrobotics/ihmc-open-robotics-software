@@ -3,23 +3,33 @@ package us.ihmc.avatar.reachabilityMap;
 import static us.ihmc.avatar.scs2.YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3DDefinition;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
-import java.util.EnumMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
 import org.ejml.data.DMatrixRMaj;
 
 import gnu.trove.list.array.TIntArrayList;
+import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
+import javafx.stage.Stage;
 import us.ihmc.avatar.reachabilityMap.ReachabilitySphereMapSimulationHelper.VisualizationType;
 import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DData;
 import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.VoxelExtraData;
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -32,6 +42,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
+import us.ihmc.scs2.definition.visual.TextureDefinition;
 import us.ihmc.scs2.definition.visual.TriangleMesh3DBuilder;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizer;
@@ -63,7 +74,6 @@ public class ReachabilityMapVisualizer
 
    private final YoRegistry registry = new YoRegistry(ReachabilityMapTools.class.getSimpleName());
    private final YoEnum<VisualizationType> currentEvaluation = new YoEnum<>("currentEvaluation", registry, VisualizationType.class);
-   private final AtomicReference<VisualizationType> previousEvaluation = new AtomicReference<>(currentEvaluation.getValue());
    private final YoFramePose3D currentEvaluationPose = new YoFramePose3D("currentEvaluationPose", SimulationSession.DEFAULT_INERTIAL_FRAME, registry);
    private final YoDouble R = new YoDouble("R", registry);
    private final YoDouble R2 = new YoDouble("R2", registry);
@@ -72,6 +82,8 @@ public class ReachabilityMapVisualizer
    private final YoInteger numberOfReachableRays = new YoInteger("numberOfReachableRays", registry);
    private final YoInteger numberOfReachableRotationsAroundRay = new YoInteger("numberOfReachableRotationsAroundRay", registry);
    private final YoInteger numberOfReachablePoses = new YoInteger("numberOfReachablePoses", registry);
+
+   private SessionVisualizerControls guiControls;
 
    public ReachabilityMapVisualizer(ReachabilityMapRobotInformation robotInformation)
    {
@@ -155,7 +167,7 @@ public class ReachabilityMapVisualizer
       SimulationSessionControls sessionControls = session.getSimulationSessionControls();
       session.getRootRegistry().addChild(registry);
       Robot robot = session.addRobot(robotDefinition);
-      SessionVisualizerControls guiControls = SessionVisualizer.startSessionVisualizer(session);
+      guiControls = SessionVisualizer.startSessionVisualizer(session);
       guiControls.waitUntilFullyUp();
       session.stopSessionThread();
 
@@ -172,53 +184,7 @@ public class ReachabilityMapVisualizer
       guiControls.addYoGraphic(newYoGraphicCoordinateSystem3DDefinition("currentEvaluationPose", currentEvaluationPose, 0.15, ColorDefinitions.HotPink()));
       guiControls.addYoGraphic(newYoGraphicCoordinateSystem3DDefinition("controlFrame", controlFramePose, 0.05, ColorDefinitions.parse("#A1887F")));
 
-      Map<VisualizationType, List<VisualDefinition>> voxelVisualization = new EnumMap<>(VisualizationType.class);
-
-      for (VisualizationType visualizationType : VisualizationType.values())
-      {
-         voxelVisualization.put(visualizationType, new ArrayList<>());
-      }
-
-      currentEvaluation.addListener(v ->
-      {
-         guiControls.removeStaticVisuals(voxelVisualization.get(previousEvaluation.get()));
-         guiControls.addStaticVisuals(voxelVisualization.get(currentEvaluation.getValue()));
-         previousEvaluation.set(currentEvaluation.getValue());
-      });
-
-      TriangleMesh3DBuilder vizMeshBuilder = new TriangleMesh3DBuilder();
-
-      Point2D unreachableTexture = new Point2D(0.0, 0.5);
-      Point2D reachableTexture = new Point2D(1.0, 0.5);
-
-      for (int voxelIndex = 0; voxelIndex < reachabilityMap.getNumberOfVoxels(); voxelIndex++)
-      {
-         Voxel3DData voxel = reachabilityMap.getVoxel(voxelIndex);
-
-         if (voxel == null)
-         {
-            voxel = reachabilityMap.getOrCreateVoxel(voxelIndex);
-            voxelVisualization.get(VisualizationType.Unreachable).add(ReachabilityMapTools.createRReachabilityVisual(voxel, 0.1, (double) -1));
-            reachabilityMap.destroy(voxel);
-         }
-         else
-         {
-            voxelVisualization.get(VisualizationType.PositionReach).add(ReachabilityMapTools.createPositionReachabilityVisual(voxel, 0.2, true));
-
-            if (voxel.getR() > 1e-3)
-            {
-               ReachabilityMapTools.createVoxelRayHeatmap(voxel, 0.25, reachableTexture, unreachableTexture, vizMeshBuilder);
-               voxelVisualization.get(VisualizationType.PoseReach).add(ReachabilityMapTools.createRReachabilityVisual(voxel, 0.25, voxel.getR2()));
-            }
-            else
-            {
-               voxelVisualization.get(VisualizationType.Unreachable).add(ReachabilityMapTools.createRReachabilityVisual(voxel, 0.1, (double) -1));
-            }
-         }
-      }
-
-      voxelVisualization.get(VisualizationType.RayReach)
-                        .add(new VisualDefinition(vizMeshBuilder.generateTriangleMesh3D(), new MaterialDefinition(ReachabilityMapTools.generateReachabilityGradient(0.0, 0.7))));
+      createVisualizationControls();
 
       LogTools.info("Done generating visuals");
 
@@ -247,6 +213,29 @@ public class ReachabilityMapVisualizer
       session.startSessionThread();
       LogTools.info("Done");
       guiControls.waitUntilDown();
+   }
+
+   private void createVisualizationControls()
+   {
+      URL resource = getClass().getClassLoader()
+                               .getResource(getClass().getPackage().getName().replace('.', '/') + "/ReachabilityMapVisualizationControlsStage.fxml");
+      FXMLLoader fxmlLoader = new FXMLLoader(resource);
+      VisualizationControlsStageController controller = new VisualizationControlsStageController();
+      fxmlLoader.setController(controller);
+
+      Platform.runLater(() ->
+      {
+         try
+         {
+            Stage stage = fxmlLoader.load();
+            controller.initialize();
+            stage.show();
+         }
+         catch (IOException e)
+         {
+            e.printStackTrace();
+         }
+      });
    }
 
    public void visualizePositionReach(SimulationSession session, Robot robot, ReferenceFrame controlFrame)
@@ -480,5 +469,135 @@ public class ReachabilityMapVisualizer
             return ray.dot(filteringRayDirection) < 0.0;
          }
       };
+   }
+
+   private class VisualizationControlsStageController
+   {
+      private static final String PositionReach = "PositionReach";
+      private static final String RayReachA = "RayReachA";
+      private static final String RayReachB = "RayReachB";
+      private static final String PoseReach = "PoseReach";
+
+      @FXML
+      private Stage stage;
+      @FXML
+      private ComboBox<String> visualizationTypeComboBox;
+      @FXML
+      private Spinner<Double> xMinSpinner, xMaxSpinner;
+      @FXML
+      private Spinner<Double> yMinSpinner, yMaxSpinner;
+      @FXML
+      private Spinner<Double> zMinSpinner, zMaxSpinner;
+
+      private List<VisualDefinition> previousVisuals;
+
+      public void initialize()
+      {
+         visualizationTypeComboBox.setItems(FXCollections.observableArrayList(PositionReach, RayReachA, RayReachB, PoseReach));
+
+         FramePoint3D minPoint = reachabilityMap.getMinPoint();
+         FramePoint3D maxPoint = reachabilityMap.getMaxPoint();
+
+         xMinSpinner.setValueFactory(new DoubleSpinnerValueFactory(minPoint.getX(), maxPoint.getX(), minPoint.getX(), reachabilityMap.getVoxelSize()));
+         xMaxSpinner.setValueFactory(new DoubleSpinnerValueFactory(minPoint.getX(), maxPoint.getX(), maxPoint.getX(), reachabilityMap.getVoxelSize()));
+         yMinSpinner.setValueFactory(new DoubleSpinnerValueFactory(minPoint.getY(), maxPoint.getY(), minPoint.getY(), reachabilityMap.getVoxelSize()));
+         yMaxSpinner.setValueFactory(new DoubleSpinnerValueFactory(minPoint.getY(), maxPoint.getY(), maxPoint.getY(), reachabilityMap.getVoxelSize()));
+         zMinSpinner.setValueFactory(new DoubleSpinnerValueFactory(minPoint.getZ(), maxPoint.getZ(), minPoint.getZ(), reachabilityMap.getVoxelSize()));
+         zMaxSpinner.setValueFactory(new DoubleSpinnerValueFactory(minPoint.getZ(), maxPoint.getZ(), maxPoint.getZ(), reachabilityMap.getVoxelSize()));
+
+         guiControls.addVisualizerShutdownListener(() -> stage.close());
+      }
+
+      @FXML
+      private void refreshVisualization()
+      {
+         String selectedItem = visualizationTypeComboBox.getSelectionModel().getSelectedItem();
+         BoundingBox3D bbx = new BoundingBox3D(xMinSpinner.getValue(),
+                                               yMinSpinner.getValue(),
+                                               zMinSpinner.getValue(),
+                                               xMaxSpinner.getValue(),
+                                               yMaxSpinner.getValue(),
+                                               zMaxSpinner.getValue());
+
+         List<VisualDefinition> visuals;
+
+         if (selectedItem == null)
+            visuals = null;
+         else if (selectedItem.equals(PositionReach))
+            visuals = generatePositionReachVisuals(bbx);
+         else if (selectedItem.equals(RayReachA))
+            visuals = generateRayReachAVisuals(bbx);
+         else if (selectedItem.equals(RayReachB))
+            visuals = generateRayReachBVisuals(bbx);
+         else if (selectedItem.equals(PoseReach))
+            visuals = generatePoseReachVisuals(bbx);
+         else
+            visuals = null;
+
+         if (previousVisuals != null)
+            guiControls.removeStaticVisuals(previousVisuals);
+         guiControls.addStaticVisuals(visuals);
+         previousVisuals = visuals;
+      }
+
+      private List<VisualDefinition> generatePositionReachVisuals(BoundingBox3D bbx)
+      {
+         List<VisualDefinition> visuals = new ArrayList<>();
+
+         for (int voxelIndex = 0; voxelIndex < reachabilityMap.getNumberOfVoxels(); voxelIndex++)
+         {
+            Voxel3DData voxel = reachabilityMap.getVoxel(voxelIndex);
+            if (voxel != null && bbx.isInsideInclusive(voxel.getPosition()))
+               visuals.add(ReachabilityMapTools.createPositionReachabilityVisual(voxel, 0.2, true));
+         }
+         return visuals;
+      }
+
+      private List<VisualDefinition> generateRayReachAVisuals(BoundingBox3D bbx)
+      {
+         List<VisualDefinition> visuals = new ArrayList<>();
+
+         for (int voxelIndex = 0; voxelIndex < reachabilityMap.getNumberOfVoxels(); voxelIndex++)
+         {
+            Voxel3DData voxel = reachabilityMap.getVoxel(voxelIndex);
+            if (voxel != null && bbx.isInsideInclusive(voxel.getPosition()) && voxel.getR() > 1e-3)
+               visuals.add(ReachabilityMapTools.createRReachabilityVisual(voxel, 0.25, voxel.getR()));
+         }
+         return visuals;
+      }
+
+      private List<VisualDefinition> generateRayReachBVisuals(BoundingBox3D bbx)
+      {
+         TriangleMesh3DBuilder vizMeshBuilder = new TriangleMesh3DBuilder();
+         Point2D unreachableTexture = new Point2D(0.0, 0.5);
+         Point2D reachableTexture = new Point2D(1.0, 0.5);
+
+         for (int voxelIndex = 0; voxelIndex < reachabilityMap.getNumberOfVoxels(); voxelIndex++)
+         {
+            Voxel3DData voxel = reachabilityMap.getVoxel(voxelIndex);
+
+            if (voxel != null && bbx.isInsideInclusive(voxel.getPosition()) && voxel.getR() > 1e-3)
+            {
+               ReachabilityMapTools.createVoxelRayHeatmap(voxel, 0.25, reachableTexture, unreachableTexture, vizMeshBuilder);
+            }
+         }
+
+         TextureDefinition diffuseMap = ReachabilityMapTools.generateReachabilityGradient(0.0, 0.7);
+         return Collections.singletonList(new VisualDefinition(vizMeshBuilder.generateTriangleMesh3D(), new MaterialDefinition(diffuseMap)));
+
+      }
+
+      private List<VisualDefinition> generatePoseReachVisuals(BoundingBox3D bbx)
+      {
+         List<VisualDefinition> visuals = new ArrayList<>();
+
+         for (int voxelIndex = 0; voxelIndex < reachabilityMap.getNumberOfVoxels(); voxelIndex++)
+         {
+            Voxel3DData voxel = reachabilityMap.getVoxel(voxelIndex);
+            if (voxel != null && bbx.isInsideInclusive(voxel.getPosition()) && voxel.getR() > 1e-3)
+               visuals.add(ReachabilityMapTools.createRReachabilityVisual(voxel, 0.25, voxel.getR2()));
+         }
+         return visuals;
+      }
    }
 }
