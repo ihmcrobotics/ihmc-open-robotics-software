@@ -36,6 +36,7 @@ public class KinematicsToolboxSnapshotDescription
    private static final JSONSerializer<KinematicsToolboxOutputStatus> ktosSerializer = new JSONSerializer<>(new KinematicsToolboxOutputStatusPubSubType());
    private static final JSONSerializer<KinematicsToolboxPrivilegedConfigurationMessage> ktpcmSerializer = new JSONSerializer<>(new KinematicsToolboxPrivilegedConfigurationMessagePubSubType());
 
+   public String name;
    public RobotConfigurationData controllerConfiguration;
    public KinematicsToolboxOutputStatus ikSolution;
    public KinematicsToolboxPrivilegedConfigurationMessage ikPrivilegedConfiguration;
@@ -207,6 +208,16 @@ public class KinematicsToolboxSnapshotDescription
       if (centerOfMassAnchor != null)
          centerOfMassAnchor.applyTransform(transform);
       sixDoFAnchors.forEach(anchor -> anchor.applyTransform(transform));
+   }
+
+   public void setName(String name)
+   {
+      this.name = name;
+   }
+
+   public String getName()
+   {
+      return name;
    }
 
    @Override
