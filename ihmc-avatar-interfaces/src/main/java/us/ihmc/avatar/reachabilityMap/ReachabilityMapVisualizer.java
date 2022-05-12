@@ -168,7 +168,6 @@ public class ReachabilityMapVisualizer
       guiControls.addYoGraphic(newYoGraphicCoordinateSystem3DDefinition("currentEvaluationPose", currentEvaluationPose, 0.15, ColorDefinitions.HotPink()));
       guiControls.addYoGraphic(newYoGraphicCoordinateSystem3DDefinition("controlFrame", controlFramePose, 0.05, ColorDefinitions.parse("#A1887F")));
 
-      SphereVoxelShape sphereVoxelShape = reachabilityMap.getSphereVoxelShape();
       Map<VisualizationType, List<VisualDefinition>> voxelVisualization = new EnumMap<>(VisualizationType.class);
 
       for (VisualizationType visualizationType : VisualizationType.values())
@@ -189,21 +188,22 @@ public class ReachabilityMapVisualizer
 
          if (voxel == null)
          {
-            voxelVisualization.get(VisualizationType.Unreachable)
-                              .add(sphereVoxelShape.createRReachabilityVisual(reachabilityMap.getVoxelPosition(voxelIndex), 0.1, -1));
+            voxel = reachabilityMap.getOrCreateVoxel(voxelIndex);
+            voxelVisualization.get(VisualizationType.Unreachable).add(ReachabilityMapTools.createRReachabilityVisual(voxel, 0.1, (double) -1));
+            reachabilityMap.destroy(voxel);
          }
          else
          {
-            voxelVisualization.get(VisualizationType.PositionReach).add(sphereVoxelShape.createPositionReachabilityVisual(voxel.getPosition(), 0.2, true));
+            voxelVisualization.get(VisualizationType.PositionReach).add(ReachabilityMapTools.createPositionReachabilityVisual(voxel, 0.2, true));
 
             if (voxel.getR() > 1e-3)
             {
-               voxelVisualization.get(VisualizationType.RayReach).add(sphereVoxelShape.createRReachabilityVisual(voxel.getPosition(), 0.25, voxel.getR()));
-               voxelVisualization.get(VisualizationType.PoseReach).add(sphereVoxelShape.createRReachabilityVisual(voxel.getPosition(), 0.25, voxel.getR2()));
+               voxelVisualization.get(VisualizationType.RayReach).add(ReachabilityMapTools.createRReachabilityVisual(voxel, 0.25, voxel.getR()));
+               voxelVisualization.get(VisualizationType.PoseReach).add(ReachabilityMapTools.createRReachabilityVisual(voxel, 0.25, voxel.getR2()));
             }
             else
             {
-               voxelVisualization.get(VisualizationType.Unreachable).add(sphereVoxelShape.createRReachabilityVisual(voxel.getPosition(), 0.1, -1));
+               voxelVisualization.get(VisualizationType.Unreachable).add(ReachabilityMapTools.createRReachabilityVisual(voxel, 0.1, (double) -1));
             }
          }
       }

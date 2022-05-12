@@ -3,6 +3,7 @@ package us.ihmc.avatar.reachabilityMap;
 import java.util.List;
 
 import javafx.application.Platform;
+import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DData;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -83,9 +84,9 @@ public class ReachabilityMapTools
          Platform.exit();
    }
 
-   public static VisualDefinition createPositionReachabilityVisual(FramePoint3DReadOnly voxelLocation, double size, boolean reachable)
+   public static VisualDefinition createPositionReachabilityVisual(Voxel3DData voxel, double scale, boolean reachable)
    {
-      FramePoint3D voxelLocationLocal = new FramePoint3D(voxelLocation);
+      FramePoint3D voxelLocationLocal = new FramePoint3D(voxel.getPosition());
       voxelLocationLocal.changeFrame(ReferenceFrame.getWorldFrame());
 
       ColorDefinition color;
@@ -95,12 +96,12 @@ public class ReachabilityMapTools
          color = ColorDefinitions.DarkRed();
       MaterialDefinition materialDefinition = new MaterialDefinition(color);
       materialDefinition.setShininess(10);
-      return new VisualDefinition(voxelLocationLocal, new Sphere3DDefinition(size, 16), materialDefinition);
+      return new VisualDefinition(voxelLocationLocal, new Sphere3DDefinition(scale * voxel.getSize() / 2.0, 16), materialDefinition);
    }
 
-   public static VisualDefinition createRReachabilityVisual(FramePoint3DReadOnly voxelLocation, double size, double reachabilityValue)
+   public static VisualDefinition createRReachabilityVisual(Voxel3DData voxel, double scale, double reachabilityValue)
    {
-      FramePoint3D voxelLocationLocal = new FramePoint3D(voxelLocation);
+      FramePoint3D voxelLocationLocal = new FramePoint3D(voxel.getPosition());
       voxelLocationLocal.changeFrame(ReferenceFrame.getWorldFrame());
 
       ColorDefinition color;
@@ -108,6 +109,8 @@ public class ReachabilityMapTools
          color = ColorDefinitions.Black();
       else
          color = ColorDefinitions.hsb(0.7 * reachabilityValue * 360.0, 1, 1);
-      return new VisualDefinition(voxelLocationLocal, new Sphere3DDefinition(size, 16), new MaterialDefinition(color));
+      MaterialDefinition materialDefinition = new MaterialDefinition(color);
+      materialDefinition.setShininess(10);
+      return new VisualDefinition(voxelLocationLocal, new Sphere3DDefinition(scale * voxel.getSize() / 2.0, 16), materialDefinition);
    }
 }
