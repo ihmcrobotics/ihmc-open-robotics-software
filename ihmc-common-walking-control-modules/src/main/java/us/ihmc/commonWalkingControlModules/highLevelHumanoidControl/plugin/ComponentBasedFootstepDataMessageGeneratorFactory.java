@@ -99,23 +99,23 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
       HighLevelHumanoidControllerToolbox controllerToolbox = controllerFactoryHelper.getHighLevelHumanoidControllerToolbox();
 
       return buildPlugin(controllerToolbox.getReferenceFrames(),
+                         controllerToolbox.getControlDT(),
                          controllerFactoryHelper.getWalkingControllerParameters(),
                          controllerFactoryHelper.getStatusMessageOutputManager(),
                          controllerFactoryHelper.getCommandInputManager(),
+                         controllerToolbox.getYoGraphicsListRegistry(),
                          controllerToolbox.getContactableFeet(),
-                         controllerToolbox.getYoTime(),
-                         controllerToolbox.getControlDT(),
-                         controllerToolbox.getYoGraphicsListRegistry());
+                         controllerToolbox.getYoTime() );
    }
 
    public ComponentBasedFootstepDataMessageGenerator buildPlugin(CommonHumanoidReferenceFrames referenceFrames,
+                                                                 double controlDT,
                                                                  WalkingControllerParameters walkingControllerParameters,
-                                                                 StatusMessageOutputManager statusMessageOutputManager,
-                                                                 CommandInputManager commandInputManager,
+                                                                 StatusMessageOutputManager walkingStatusMessageOutputManager,
+                                                                 CommandInputManager walkingCommandInputManager,
+                                                                 YoGraphicsListRegistry yoGraphicsListRegistry,
                                                                  SideDependentList<? extends ContactableBody> contactableFeet,
-                                                                 DoubleProvider timeProvider,
-                                                                 double updateDT,
-                                                                 YoGraphicsListRegistry yoGraphicsListRegistry)
+                                                                 DoubleProvider timeProvider)
    {
       if (!registryField.hasValue())
          setRegistry();
@@ -123,10 +123,9 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 
       ContinuousStepGenerator continuousStepGenerator = new ContinuousStepGenerator(registryField.get());
-
-      if (footstepAdjusterField.hasValue())
-         continuousStepGenerator.setFootstepAdjustment(footstepAdjusterField.get());
-      continuousStepGenerator.setFootstepStatusListener(statusMessageOutputManager);
+      
+      continuousStepGenerator.setFootstepAdjustment(footstepAdjusterField.get());
+      continuousStepGenerator.setFootstepStatusListener(walkingStatusMessageOutputManager);
       continuousStepGenerator.setFrameBasedFootPoseProvider(referenceFrames.getSoleZUpFrames());
       continuousStepGenerator.configureWith(walkingControllerParameters);
       continuousStepGenerator.setStopWalkingMessenger(new StopWalkingMessenger()
@@ -136,14 +135,14 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
          @Override
          public void submitStopWalkingRequest()
          {
-            commandInputManager.submitMessage(message);
+            walkingCommandInputManager.submitMessage(message);
          }
       });
-      continuousStepGenerator.setFootstepMessenger(commandInputManager::submitMessage);
+      continuousStepGenerator.setFootstepMessenger(walkingCommandInputManager::submitMessage);
 
       List<Updatable> updatables = new ArrayList<>();
 
-      if (yoGraphicsListRegistry != null)
+      if (yoGraphicsListRegistry != null && contactableFeet != null)
          continuousStepGenerator.setupVisualization(contactableFeet, yoGraphicsListRegistry);
       if (heightMapField.hasValue() && heightMapField.get() != null)
          continuousStepGenerator.setHeightMapBasedFootstepAdjustment(heightMapField.get());
@@ -153,7 +152,7 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
          continuousStepGenerator.setDesiredVelocityProvider(csgCommandInputManagerField.get().createDesiredVelocityProvider());
          continuousStepGenerator.setDesiredTurningVelocityProvider(csgCommandInputManagerField.get().createDesiredTurningVelocityProvider());
          continuousStepGenerator.setWalkInputProvider(csgCommandInputManagerField.get().createWalkInputProvider());
-         statusMessageOutputManager.attachStatusMessageListener(HighLevelStateChangeStatusMessage.class, csgCommandInputManagerField.get()::setHighLevelStateChangeStatusMessage);
+         walkingStatusMessageOutputManager.attachStatusMessageListener(HighLevelStateChangeStatusMessage.class, csgCommandInputManagerField.get()::setHighLevelStateChangeStatusMessage);
          updatables.add(csgCommandInputManagerField.get());
          
          //this is probably not the way the class was intended to be modified.
