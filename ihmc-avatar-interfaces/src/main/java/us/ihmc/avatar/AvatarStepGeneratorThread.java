@@ -19,7 +19,6 @@ import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
-import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -28,7 +27,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 
 import java.util.Arrays;
-import java.util.List;
 
 public class AvatarStepGeneratorThread implements AvatarControllerThreadInterface
 {
@@ -46,7 +44,7 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
    private final YoBoolean runCSG = new YoBoolean("RunCSG", csgRegistry);
 
    private final PlanarRegionFootstepSnapper planarRegionFootstepSnapper;
-   private final CommandInputManager csgCommandInputManager;
+   private CommandInputManager csgCommandInputManager;
 
    public AvatarStepGeneratorThread(ComponentBasedFootstepDataMessageGeneratorFactory csgPluginFactory,
                                     HumanoidRobotContextDataFactory contextDataFactory,
@@ -71,7 +69,7 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
       contextDataFactory.setProcessedJointData(processedJointData);
       contextDataFactory.setSensorDataContext(new SensorDataContext(fullRobotModel));
       humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
-      csgCommandInputManager = csgPluginFactory.getCSGCommandInputManager().getCommandInputManager();
+//      csgCommandInputManager = csgPluginFactory.getCSGCommandInputManager().getCommandInputManager();
 
       humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       csg = csgPluginFactory.buildPlugin(humanoidReferenceFrames,
@@ -82,6 +80,7 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
                                          null,
                                          null,
                                          csgTime);
+      csgRegistry.addChild(csg.getRegistry());
 
       this.planarRegionFootstepSnapper = new PlanarRegionFootstepSnapper(csg.getContinuousStepGenerator(),
                                                                          drcRobotModel.getWalkingControllerParameters().getSteppingParameters(),
@@ -129,10 +128,7 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
             firstTick.set(false);
          }
 
-         // TODO should just poll the newest one
-         List<PlanarRegionsListCommand> commands = csgCommandInputManager.pollNewCommands(PlanarRegionsListCommand.class);
-
-         planarRegionFootstepSnapper.setPlanarRegions(commands.get(0));
+         consumePlanarRegions();
 
          csg.update(csgTime.getValue());
          humanoidRobotContextData.setPerceptionRan(true);
@@ -140,6 +136,20 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
       catch (Exception e)
       {
          throw new RuntimeException(e);
+      }
+   }
+
+   private void consumePlanarRegions()
+   {
+      if (csgCommandInputManager != null)
+      {
+         if (csgCommandInputManager.isNewCommandAvailable(PlanarRegionsListCommand.class))
+         {
+            PlanarRegionsListCommand commands = csgCommandInputManager.pollNewestCommand(PlanarRegionsListCommand.class);
+            planarRegionFootstepSnapper.setPlanarRegions(commands);
+         }
+
+         csgCommandInputManager.clearCommands(PlanarRegionsListCommand.class);
       }
    }
 

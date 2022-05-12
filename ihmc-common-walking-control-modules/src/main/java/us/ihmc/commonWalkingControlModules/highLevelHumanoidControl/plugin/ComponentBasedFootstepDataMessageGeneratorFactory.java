@@ -24,6 +24,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.contactable.ContactableBody;
@@ -214,6 +215,7 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
          List<Class<? extends Command<?, ?>>> commands = new ArrayList<>();
          commands.add(ContinuousStepGeneratorParametersCommand.class);
          commands.add(ContinuousStepGeneratorInputCommand.class);
+         commands.add(PlanarRegionsListCommand.class);
          return commands;
       }
 
