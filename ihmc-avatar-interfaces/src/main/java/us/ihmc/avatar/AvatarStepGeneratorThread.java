@@ -3,7 +3,9 @@ package us.ihmc.avatar;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.PlanarRegionFootstepSnapper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ComponentBasedFootstepDataMessageGenerator;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ComponentBasedFootstepDataMessageGeneratorFactory;
@@ -13,14 +15,19 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
+import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class AvatarStepGeneratorThread implements AvatarControllerThreadInterface
@@ -49,8 +56,22 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
                                     double perceptionDt)
    {
       this.fullRobotModel = drcRobotModel.createFullRobotModel();
+
+      HumanoidRobotContextJointData processedJointData = new HumanoidRobotContextJointData(fullRobotModel.getOneDoFJoints().length);
+      ForceSensorDataHolder forceSensorDataHolderForController = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
+      CenterOfMassDataHolder centerOfMassDataHolderForController = new CenterOfMassDataHolder();
+      CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator = new CenterOfPressureDataHolder(fullRobotModel);
+      LowLevelOneDoFJointDesiredDataHolder desiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(fullRobotModel.getControllableOneDoFJoints());
+      RobotMotionStatusHolder robotMotionStatusHolder = new RobotMotionStatusHolder();
+      contextDataFactory.setForceSensorDataHolder(forceSensorDataHolderForController);
+      contextDataFactory.setCenterOfMassDataHolder(centerOfMassDataHolderForController);
+      contextDataFactory.setCenterOfPressureDataHolder(centerOfPressureDataHolderForEstimator);
+      contextDataFactory.setRobotMotionStatusHolder(robotMotionStatusHolder);
+      contextDataFactory.setJointDesiredOutputList(desiredJointDataHolder);
+      contextDataFactory.setProcessedJointData(processedJointData);
       contextDataFactory.setSensorDataContext(new SensorDataContext(fullRobotModel));
       humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
+      csgCommandInputManager = csgPluginFactory.setCSGCommandInputManager().getCommandInputManager();
 
       humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       csg = csgPluginFactory.buildPlugin(humanoidReferenceFrames,
@@ -67,7 +88,6 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
                                                                          csgRegistry);
       csg.getContinuousStepGenerator().setFootstepAdjustment(planarRegionFootstepSnapper);
 
-      csgCommandInputManager = csgPluginFactory.getCSGCommandInputManager().getCommandInputManager();
    }
 
    public void initialize()
