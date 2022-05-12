@@ -1,28 +1,21 @@
 package us.ihmc.avatar.reachabilityMap;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape.SphereVoxelType;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
-import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 public class Voxel3DGrid implements ReferenceFrameHolder
@@ -135,72 +128,6 @@ public class Voxel3DGrid implements ReferenceFrameHolder
    private int toIndex(double coordinate)
    {
       return (int) (coordinate / voxelSize + gridSizeVoxels / 2 - 1);
-   }
-
-   private final PrincipalComponentAnalysis3D pca = new PrincipalComponentAnalysis3D();
-
-   // FIXME Still in development
-   private void fitCone(int xIndex, int yIndex, int zIndex)
-   {
-      Voxel3DData voxel = getVoxel(xIndex, yIndex, zIndex);
-
-      List<Point3D> reachablePointsOnly = new ArrayList<>();
-      for (int i = 0; i < sphereVoxelShape.getNumberOfRays(); i++)
-      {
-         if (voxel.isRayReachable(i))
-            reachablePointsOnly.add(sphereVoxelShape.getPointsOnSphere()[i]);
-      }
-
-      pca.setPointCloud(reachablePointsOnly);
-      pca.compute();
-      RotationMatrix coneRotation = new RotationMatrix();
-      pca.getPrincipalFrameRotationMatrix(coneRotation);
-
-      Vector3D sphereOriginToAverage = new Vector3D();
-      Vector3D thirdAxis = new Vector3D();
-      coneRotation.getColumn(2, thirdAxis);
-
-      FramePoint3D voxelLocation = new FramePoint3D(voxel.getPosition());
-      Vector3D mean = new Vector3D();
-      sphereOriginToAverage.sub(mean, voxelLocation);
-
-      if (sphereOriginToAverage.dot(thirdAxis) < 0.0)
-      {
-         // Rotate the frame of PI around the principal axis, such that the third axis is pointing towards the point cloud.
-         RotationMatrix invertThirdAxis = new RotationMatrix();
-         invertThirdAxis.setToRollOrientation(Math.PI);
-         coneRotation.multiply(invertThirdAxis);
-      }
-
-      // Build the cone
-      double smallestDotProduct = Double.POSITIVE_INFINITY;
-      coneRotation.getColumn(2, thirdAxis);
-      Vector3D testedRay = new Vector3D();
-      Vector3D mostOpenedRay = new Vector3D();
-
-      // Find the point that is the farthest from the 
-      for (Point3D point : reachablePointsOnly)
-      {
-         testedRay.sub(point, voxelLocation);
-         double absDotProduct = Math.abs(testedRay.dot(thirdAxis));
-         if (absDotProduct < smallestDotProduct)
-         {
-            smallestDotProduct = absDotProduct;
-            mostOpenedRay.set(testedRay);
-         }
-      }
-
-      Vector3D standardDeviation = new Vector3D();
-      pca.getStandardDeviation(standardDeviation);
-      standardDeviation.scale(1.3); // Because the points are uniformly distributed
-
-      double coneBaseRadius = Math.sqrt(standardDeviation.getX() * standardDeviation.getX() + standardDeviation.getY() * standardDeviation.getY());//radiusVector.length();
-      double coneHeight = mostOpenedRay.dot(thirdAxis);
-
-      RigidBodyTransform coneTransform = new RigidBodyTransform();
-
-      coneTransform.getRotation().set(coneRotation);
-      coneTransform.getTranslation().set(voxelLocation);
    }
 
    public void setGridPose(RigidBodyTransformReadOnly pose)
@@ -410,6 +337,110 @@ public class Voxel3DGrid implements ReferenceFrameHolder
          }
 
          return n;
+      }
+
+      public double computeD06()
+      {
+         int nCommOrientations = 0;
+
+         for (int rayIndex = 0; rayIndex < getNumberOfRays(); rayIndex++)
+         {
+            for (int rotationIndex = 0; rotationIndex < getNumberOfRotationsAroundRay(); rotationIndex++)
+            {
+               nCommOrientations += compute6NeighborCommonOrientation(rayIndex, rotationIndex);
+            }
+         }
+
+         return (double) nCommOrientations / (6.0 * getNumberOfReachablePoses());
+      }
+
+      public double computeD018()
+      {
+         int nCommOrientations = 0;
+
+         for (int rayIndex = 0; rayIndex < getNumberOfRays(); rayIndex++)
+         {
+            for (int rotationIndex = 0; rotationIndex < getNumberOfRotationsAroundRay(); rotationIndex++)
+            {
+               nCommOrientations += compute18NeighborCommonOrientation(rayIndex, rotationIndex);
+            }
+         }
+
+         return (double) nCommOrientations / (18.0 * getNumberOfReachablePoses());
+      }
+
+      public double computeD026()
+      {
+         int nCommOrientations = 0;
+
+         for (int rayIndex = 0; rayIndex < getNumberOfRays(); rayIndex++)
+         {
+            for (int rotationIndex = 0; rotationIndex < getNumberOfRotationsAroundRay(); rotationIndex++)
+            {
+               nCommOrientations += compute26NeighborCommonOrientation(rayIndex, rotationIndex);
+            }
+         }
+
+         return (double) nCommOrientations / (26.0 * getNumberOfReachablePoses());
+      }
+
+      public int compute6NeighborCommonOrientation(int rayIndex, int rotationIndex)
+      {
+         int n = 0;
+         n += isNeightPoseReachable(+1, 0, 0, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeightPoseReachable(-1, 0, 0, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeightPoseReachable(0, +1, 0, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeightPoseReachable(0, -1, 0, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeightPoseReachable(0, 0, +1, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeightPoseReachable(0, 0, -1, rayIndex, rotationIndex) ? 1 : 0;
+         return n;
+      }
+
+      public int compute18NeighborCommonOrientation(int rayIndex, int rotationIndex)
+      {
+         int n = compute6NeighborCommonOrientation(rayIndex, rotationIndex);
+         n += isNeightPoseReachable(+1, +1, 0, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeightPoseReachable(+1, -1, 0, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeightPoseReachable(-1, +1, 0, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeightPoseReachable(-1, -1, 0, rayIndex, rotationIndex) ? 1 : 0;
+
+         n += isNeightPoseReachable(0, +1, +1, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeightPoseReachable(0, +1, -1, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeightPoseReachable(0, -1, +1, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeightPoseReachable(0, -1, -1, rayIndex, rotationIndex) ? 1 : 0;
+
+         n += isNeightPoseReachable(+1, 0, +1, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeightPoseReachable(-1, 0, +1, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeightPoseReachable(+1, 0, -1, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeightPoseReachable(-1, 0, -1, rayIndex, rotationIndex) ? 1 : 0;
+
+         return n;
+      }
+
+      public int compute26NeighborCommonOrientation(int rayIndex, int rotationIndex)
+      {
+         int n = compute18NeighborCommonOrientation(rayIndex, rotationIndex);
+         n += isNeightPoseReachable(+1, +1, +1, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeightPoseReachable(+1, +1, -1, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeightPoseReachable(+1, -1, +1, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeightPoseReachable(+1, -1, -1, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeightPoseReachable(-1, +1, +1, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeightPoseReachable(-1, +1, -1, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeightPoseReachable(-1, -1, +1, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeightPoseReachable(-1, -1, -1, rayIndex, rotationIndex) ? 1 : 0;
+
+         return n;
+      }
+
+      public boolean isNeightPoseReachable(int xShift, int yShift, int zShift, int rayIndex, int rotationIndex)
+      {
+         Voxel3DData neighbor = getNeighbor(1, 0, 0);
+         return neighbor != null && neighbor.isPoseReachable(rayIndex, rotationIndex);
+      }
+
+      public Voxel3DData getNeighbor(int xShift, int yShift, int zShift)
+      {
+         return getVoxel(key.getX() + xShift, key.getY() + yShift, key.getZ() + zShift);
       }
 
       public double getSize()
