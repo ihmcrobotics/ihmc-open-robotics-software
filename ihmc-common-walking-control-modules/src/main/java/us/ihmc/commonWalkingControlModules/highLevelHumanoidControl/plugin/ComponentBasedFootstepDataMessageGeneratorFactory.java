@@ -110,7 +110,7 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
    }
 
    public ComponentBasedFootstepDataMessageGenerator buildPlugin(CommonHumanoidReferenceFrames referenceFrames,
-                                                                 double controlDT,
+                                                                 double updateDT,
                                                                  WalkingControllerParameters walkingControllerParameters,
                                                                  StatusMessageOutputManager walkingStatusMessageOutputManager,
                                                                  CommandInputManager walkingCommandInputManager,
