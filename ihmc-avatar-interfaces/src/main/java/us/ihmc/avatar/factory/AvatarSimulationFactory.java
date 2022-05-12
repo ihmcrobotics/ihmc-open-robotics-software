@@ -764,6 +764,13 @@ public class AvatarSimulationFactory
       this.externalPelvisCorrectorSubscriber.set(externalPelvisCorrectorSubscriber);
    }
 
+
+   public void setComponentBasedFootstepDataMessageGeneratorParameters(boolean useHeadingAndVelocityScript,
+                                                                HeadingAndVelocityEvaluationScriptParameters headingAndVelocityEvaluationScriptParameters)
+   {
+      setComponentBasedFootstepDataMessageGeneratorParameters(useHeadingAndVelocityScript, null, headingAndVelocityEvaluationScriptParameters);
+   }
+
    public void setComponentBasedFootstepDataMessageGeneratorParameters(boolean useHeadingAndVelocityScript,
                                                                        HeightMap heightMapForFootstepZ,
                                                                        HeadingAndVelocityEvaluationScriptParameters headingAndVelocityEvaluationScriptParameters)
