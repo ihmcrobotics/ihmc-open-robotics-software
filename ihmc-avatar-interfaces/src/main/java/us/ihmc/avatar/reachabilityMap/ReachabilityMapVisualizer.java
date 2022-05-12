@@ -12,7 +12,11 @@ import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
 
 import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
+import org.ejml.interfaces.decomposition.EigenDecomposition_F64;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -21,6 +25,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
+import javafx.scene.control.ToggleButton;
 import javafx.stage.Stage;
 import us.ihmc.avatar.reachabilityMap.ReachabilitySphereMapSimulationHelper.VisualizationType;
 import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DData;
@@ -38,8 +43,11 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
@@ -78,6 +86,7 @@ public class ReachabilityMapVisualizer
    private final YoFramePose3D currentEvaluationPose = new YoFramePose3D("currentEvaluationPose", SimulationSession.DEFAULT_INERTIAL_FRAME, registry);
    private final YoDouble R = new YoDouble("R", registry);
    private final YoDouble R2 = new YoDouble("R2", registry);
+   private final YoDouble singularity = new YoDouble("singularity", registry);
    private final YoInteger numberOfRays = new YoInteger("numberOfRays", registry);
    private final YoInteger numberOfPoses = new YoInteger("numberOfPoses", registry);
    private final YoInteger numberOfReachableRays = new YoInteger("numberOfReachableRays", registry);
@@ -257,6 +266,7 @@ public class ReachabilityMapVisualizer
          if (positionExtraData == null)
             continue;
 
+         singularity.set(computeFullJacobianSingularityMetric(voxel.getPositionExtraData().getJointPositions()));
          writeVoxelJointData(positionExtraData, robot);
          currentEvaluationPose.getPosition().set(positionExtraData.getDesiredPosition());
          currentEvaluationPose.getOrientation().setFromReferenceFrame(controlFrame);
@@ -309,6 +319,7 @@ public class ReachabilityMapVisualizer
 
          for (VoxelExtraData rayExtraData : filteredRayExtraDataList)
          {
+            singularity.set(computeFullJacobianSingularityMetric(rayExtraData.getJointPositions()));
             writeVoxelJointData(rayExtraData, robot);
             currentEvaluationPose.getPosition().set(rayExtraData.getDesiredPosition());
             currentEvaluationPose.getOrientation().set(rayExtraData.getDesiredOrientation());
@@ -396,6 +407,7 @@ public class ReachabilityMapVisualizer
 
             for (VoxelExtraData poseExtraData : filteredPoseExtraDataList)
             {
+               singularity.set(computeFullJacobianSingularityMetric(poseExtraData.getJointPositions()));
                writeVoxelJointData(poseExtraData, robot);
                currentEvaluationPose.getPosition().set(poseExtraData.getDesiredPosition());
                currentEvaluationPose.getOrientation().set(poseExtraData.getDesiredOrientation());
@@ -474,36 +486,52 @@ public class ReachabilityMapVisualizer
 
    private class VisualizationControlsStageController
    {
-      private static final String PositionReach = "PositionReach";
-      private static final String RayReachA = "RayReachA";
-      private static final String RayReachB = "RayReachB";
-      private static final String PoseReach = "PoseReach";
-      private static final String NeighborhoodDexterity6 = "NeighborhoodDexterity 6";
-      private static final String NeighborhoodDexterity18 = "NeighborhoodDexterity 18";
-      private static final String NeighborhoodDexterity26 = "NeighborhoodDexterity 26";
+      private static final String Reach = "Reach";
+      private static final String NeighborhoodDexterity6 = "Neighborhood Dexterity 6";
+      private static final String NeighborhoodDexterity18 = "Neighborhood Dexterity 18";
+      private static final String NeighborhoodDexterity26 = "Neighborhood Dexterity 26";
+      private static final String FullSingularity = "Full Singularity";
+      private static final String LinearSingularity = "Linear Singularity";
+      private static final String AngularSingularity = "Angular Singularity";
+      private static final String RangeOfMotion = "Range of Motion";
+      private static final String TauCapability = "Tau Capability";
+
+      private static final String PositionTarget = "Position";
+      private static final String RayTarget = "Ray";
+      private static final String PoseTarget = "Pose";
 
       @FXML
       private Stage stage;
       @FXML
       private ComboBox<String> visualizationTypeComboBox;
       @FXML
+      private ComboBox<String> visualizationTargetComboBox;
+      @FXML
+      private ToggleButton normalizeDataToggleButton, heatmapToggleButton;
+      @FXML
       private Spinner<Double> xMinSpinner, xMaxSpinner;
       @FXML
       private Spinner<Double> yMinSpinner, yMaxSpinner;
       @FXML
       private Spinner<Double> zMinSpinner, zMaxSpinner;
+      @FXML
+      private Spinner<Double> scaleSpinner;
 
       private List<VisualDefinition> previousVisuals;
 
       public void initialize()
       {
-         visualizationTypeComboBox.setItems(FXCollections.observableArrayList(PositionReach,
-                                                                              RayReachA,
-                                                                              RayReachB,
-                                                                              PoseReach,
+         visualizationTypeComboBox.setItems(FXCollections.observableArrayList(Reach,
                                                                               NeighborhoodDexterity6,
                                                                               NeighborhoodDexterity18,
-                                                                              NeighborhoodDexterity26));
+                                                                              NeighborhoodDexterity26,
+                                                                              FullSingularity,
+                                                                              LinearSingularity,
+                                                                              AngularSingularity,
+                                                                              RangeOfMotion,
+                                                                              TauCapability));
+         visualizationTargetComboBox.setItems(FXCollections.observableArrayList(PositionTarget, RayTarget, PoseTarget));
+         visualizationTargetComboBox.getSelectionModel().select(RayTarget);
 
          FramePoint3D minPoint = reachabilityMap.getMinPoint();
          FramePoint3D maxPoint = reachabilityMap.getMaxPoint();
@@ -514,6 +542,7 @@ public class ReachabilityMapVisualizer
          yMaxSpinner.setValueFactory(new DoubleSpinnerValueFactory(minPoint.getY(), maxPoint.getY(), maxPoint.getY(), reachabilityMap.getVoxelSize()));
          zMinSpinner.setValueFactory(new DoubleSpinnerValueFactory(minPoint.getZ(), maxPoint.getZ(), minPoint.getZ(), reachabilityMap.getVoxelSize()));
          zMaxSpinner.setValueFactory(new DoubleSpinnerValueFactory(minPoint.getZ(), maxPoint.getZ(), maxPoint.getZ(), reachabilityMap.getVoxelSize()));
+         scaleSpinner.setValueFactory(new DoubleSpinnerValueFactory(0.01, 1.0, 0.20, 0.05));
 
          guiControls.addVisualizerShutdownListener(() -> stage.close());
       }
@@ -521,7 +550,9 @@ public class ReachabilityMapVisualizer
       @FXML
       private void refreshVisualization()
       {
-         String selectedItem = visualizationTypeComboBox.getSelectionModel().getSelectedItem();
+         String selectedType = visualizationTypeComboBox.getSelectionModel().getSelectedItem();
+         String selectedTarget = visualizationTargetComboBox.getSelectionModel().getSelectedItem();
+         boolean normalize = normalizeDataToggleButton.isSelected();
          BoundingBox3D bbx = new BoundingBox3D(xMinSpinner.getValue(),
                                                yMinSpinner.getValue(),
                                                zMinSpinner.getValue(),
@@ -529,26 +560,50 @@ public class ReachabilityMapVisualizer
                                                yMaxSpinner.getValue(),
                                                zMaxSpinner.getValue());
 
-         List<VisualDefinition> visuals;
+         List<VisualDefinition> visuals = null;
 
-         if (selectedItem == null)
-            visuals = null;
-         else if (selectedItem.equals(PositionReach))
-            visuals = generatePositionReachVisuals(bbx);
-         else if (selectedItem.equals(RayReachA))
-            visuals = generateRayReachAVisuals(bbx);
-         else if (selectedItem.equals(RayReachB))
-            visuals = generateRayReachBVisuals(bbx);
-         else if (selectedItem.equals(PoseReach))
-            visuals = generatePoseReachVisuals(bbx);
-         else if (selectedItem.equals(NeighborhoodDexterity6))
-            visuals = generateNeighborhoodDexterity6Visuals(bbx);
-         else if (selectedItem.equals(NeighborhoodDexterity18))
-            visuals = generateNeighborhoodDexterity18Visuals(bbx);
-         else if (selectedItem.equals(NeighborhoodDexterity26))
-            visuals = generateNeighborhoodDexterity26Visuals(bbx);
-         else
-            visuals = null;
+         if (selectedType != null)
+         {
+            if (!heatmapToggleButton.isSelected())
+            {
+               if (selectedType.equals(Reach))
+                  visuals = generateReachVisuals(selectedTarget, normalize, bbx);
+               else if (selectedType.equals(NeighborhoodDexterity6))
+                  visuals = generateNeighborhoodDexterity6Visuals(selectedTarget, normalize, bbx);
+               else if (selectedType.equals(NeighborhoodDexterity18))
+                  visuals = generateNeighborhoodDexterity18Visuals(selectedTarget, normalize, bbx);
+               else if (selectedType.equals(NeighborhoodDexterity26))
+                  visuals = generateNeighborhoodDexterity26Visuals(selectedTarget, normalize, bbx);
+               else if (selectedType.equals(FullSingularity))
+                  visuals = generateFullSingularityVisuals(selectedTarget, normalize, bbx);
+               else if (selectedType.equals(LinearSingularity))
+                  visuals = generateLinearSingularityVisuals(selectedTarget, normalize, bbx);
+               else if (selectedType.equals(AngularSingularity))
+                  visuals = generateAngularSingularityVisuals(selectedTarget, normalize, bbx);
+               else if (selectedType.equals(RangeOfMotion))
+                  visuals = generateRangeOfMotionVisuals(selectedTarget, normalize, bbx);
+               else if (selectedType.equals(TauCapability))
+                  visuals = generateTauCapabilityVisuals(selectedTarget, normalize, bbx);
+            }
+            else
+            {
+               RayIndexBasedVoxelQualityMetric qualityMetric = null;
+               if (selectedType.equals(Reach))
+                  qualityMetric = getReachHeatMapMetric(selectedTarget);
+               else if (selectedType.equals(FullSingularity))
+                  qualityMetric = getVoxelExtraDataBasedMetric(selectedTarget, ReachabilityMapVisualizer.this::computeFullJacobianSingularityMetric);
+               else if (selectedType.equals(LinearSingularity))
+                  qualityMetric = getVoxelExtraDataBasedMetric(selectedTarget, ReachabilityMapVisualizer.this::computeLinearJacobianSingularityMetric);
+               else if (selectedType.equals(AngularSingularity))
+                  qualityMetric = getVoxelExtraDataBasedMetric(selectedTarget, ReachabilityMapVisualizer.this::computeAngularJacobianSingularityMetric);
+               else if (selectedType.equals(RangeOfMotion))
+                  qualityMetric = getVoxelExtraDataBasedMetric(selectedTarget, ReachabilityMapVisualizer.this::computeRoMMetric);
+               else if (selectedType.equals(TauCapability))
+                  qualityMetric = getVoxelExtraDataBasedMetric(selectedTarget, ReachabilityMapVisualizer.this::computeTauCapabilityMetric);
+
+               visuals = generateMetricRayBasedHeatMapVisuals(normalize, qualityMetric, bbx);
+            }
+         }
 
          if (previousVisuals != null)
             guiControls.removeStaticVisuals(previousVisuals);
@@ -556,68 +611,462 @@ public class ReachabilityMapVisualizer
          previousVisuals = visuals;
       }
 
-      private List<VisualDefinition> generatePositionReachVisuals(BoundingBox3D bbx)
+      public List<VisualDefinition> generateReachVisuals(String target, boolean normalizeMetric, BoundingBox3D bbx)
       {
-         return generateMetricVisual(bbx, voxel -> 1.0);
+         switch (target)
+         {
+            case PositionTarget:
+               return generateMetricVisual(normalizeMetric, bbx, voxel -> 1.0);
+            case RayTarget:
+               return generateMetricVisual(normalizeMetric, bbx, Voxel3DData::getR);
+            case PoseTarget:
+               return generateMetricVisual(normalizeMetric, bbx, Voxel3DData::getR2);
+         }
+         return null;
       }
 
-      private List<VisualDefinition> generateRayReachAVisuals(BoundingBox3D bbx)
+      private List<VisualDefinition> generateNeighborhoodDexterity6Visuals(String target, boolean normalizeMetric, BoundingBox3D bbx)
       {
-         return generateMetricVisual(bbx, Voxel3DData::getR);
+         return generateMetricVisual(normalizeMetric, bbx, Voxel3DData::computeD06);
       }
 
-      private List<VisualDefinition> generateRayReachBVisuals(BoundingBox3D bbx)
+      private List<VisualDefinition> generateNeighborhoodDexterity18Visuals(String target, boolean normalizeMetric, BoundingBox3D bbx)
       {
-         TriangleMesh3DBuilder vizMeshBuilder = new TriangleMesh3DBuilder();
-         Point2D unreachableTexture = new Point2D(0.0, 0.5);
-         Point2D reachableTexture = new Point2D(1.0, 0.5);
+         return generateMetricVisual(normalizeMetric, bbx, Voxel3DData::computeD018);
+      }
+
+      private List<VisualDefinition> generateNeighborhoodDexterity26Visuals(String target, boolean normalizeMetric, BoundingBox3D bbx)
+      {
+         return generateMetricVisual(normalizeMetric, bbx, Voxel3DData::computeD026);
+      }
+
+      public List<VisualDefinition> generateFullSingularityVisuals(String target, boolean normalize, BoundingBox3D bbx)
+      {
+         ToDoubleFunction<VoxelExtraData> singularityCalculator = extraData -> computeFullJacobianSingularityMetric(extraData);
+         switch (target)
+         {
+            case PositionTarget:
+               return generateMetricVisual(normalize, bbx, voxel -> singularityCalculator.applyAsDouble(voxel.getPositionExtraData()));
+            case RayTarget:
+               return generateMetricVisual(normalize, bbx, voxel -> evaluateRayVoxelExtraData(voxel, singularityCalculator));
+            case PoseTarget:
+               return generateMetricVisual(normalize, bbx, voxel -> evaluatePoseVoxelExtraData(voxel, singularityCalculator));
+         }
+         return null;
+      }
+
+      public List<VisualDefinition> generateLinearSingularityVisuals(String target, boolean normalize, BoundingBox3D bbx)
+      {
+         ToDoubleFunction<VoxelExtraData> singularityCalculator = extraData -> computeLinearJacobianSingularityMetric(extraData);
+         switch (target)
+         {
+            case PositionTarget:
+               return generateMetricVisual(normalize, bbx, voxel -> singularityCalculator.applyAsDouble(voxel.getPositionExtraData()));
+            case RayTarget:
+               return generateMetricVisual(normalize, bbx, voxel -> evaluateRayVoxelExtraData(voxel, singularityCalculator));
+            case PoseTarget:
+               return generateMetricVisual(normalize, bbx, voxel -> evaluatePoseVoxelExtraData(voxel, singularityCalculator));
+         }
+         return null;
+      }
+
+      public List<VisualDefinition> generateAngularSingularityVisuals(String target, boolean normalize, BoundingBox3D bbx)
+      {
+         ToDoubleFunction<VoxelExtraData> singularityCalculator = ReachabilityMapVisualizer.this::computeAngularJacobianSingularityMetric;
+         switch (target)
+         {
+            case PositionTarget:
+               return generateMetricVisual(normalize, bbx, voxel -> singularityCalculator.applyAsDouble(voxel.getPositionExtraData()));
+            case RayTarget:
+               return generateMetricVisual(normalize, bbx, voxel -> evaluateRayVoxelExtraData(voxel, singularityCalculator));
+            case PoseTarget:
+               return generateMetricVisual(normalize, bbx, voxel -> evaluatePoseVoxelExtraData(voxel, singularityCalculator));
+         }
+         return null;
+      }
+
+      public List<VisualDefinition> generateRangeOfMotionVisuals(String target, boolean normalize, BoundingBox3D bbx)
+      {
+         ToDoubleFunction<VoxelExtraData> singularityCalculator = ReachabilityMapVisualizer.this::computeRoMMetric;
+         switch (target)
+         {
+            case PositionTarget:
+               return generateMetricVisual(normalize, bbx, voxel -> singularityCalculator.applyAsDouble(voxel.getPositionExtraData()));
+            case RayTarget:
+               return generateMetricVisual(normalize, bbx, voxel -> evaluateRayVoxelExtraData(voxel, singularityCalculator));
+            case PoseTarget:
+               return generateMetricVisual(normalize, bbx, voxel -> evaluatePoseVoxelExtraData(voxel, singularityCalculator));
+         }
+         return null;
+      }
+
+      public List<VisualDefinition> generateTauCapabilityVisuals(String target, boolean normalize, BoundingBox3D bbx)
+      {
+         ToDoubleFunction<VoxelExtraData> singularityCalculator = ReachabilityMapVisualizer.this::computeTauCapabilityMetric;
+         switch (target)
+         {
+            case PositionTarget:
+               return generateMetricVisual(normalize, bbx, voxel -> singularityCalculator.applyAsDouble(voxel.getPositionExtraData()));
+            case RayTarget:
+               return generateMetricVisual(normalize, bbx, voxel -> evaluateRayVoxelExtraData(voxel, singularityCalculator));
+            case PoseTarget:
+               return generateMetricVisual(normalize, bbx, voxel -> evaluatePoseVoxelExtraData(voxel, singularityCalculator));
+         }
+         return null;
+      }
+
+      private List<VisualDefinition> generateMetricVisual(boolean normalizeMetric, BoundingBox3D bbx, ToDoubleFunction<Voxel3DData> metricFunction)
+      {
+         List<VisualDefinition> visuals = new ArrayList<>();
+         TDoubleArrayList metricValues = new TDoubleArrayList();
+         List<Voxel3DData> evaluatedVoxels = new ArrayList<>();
 
          for (int voxelIndex = 0; voxelIndex < reachabilityMap.getNumberOfVoxels(); voxelIndex++)
          {
             Voxel3DData voxel = reachabilityMap.getVoxel(voxelIndex);
-
-            if (voxel != null && bbx.isInsideInclusive(voxel.getPosition()) && voxel.getR() > 1e-3)
+            if (voxel != null && bbx.isInsideInclusive(voxel.getPosition()))
             {
-               ReachabilityMapTools.createVoxelRayHeatmap(voxel, 0.25, reachableTexture, unreachableTexture, vizMeshBuilder);
+               double metricValue = metricFunction.applyAsDouble(voxel);
+               metricValues.add(metricValue);
+               evaluatedVoxels.add(voxel);
+
+            }
+         }
+
+         double min = metricValues.min();
+         double max = metricValues.max();
+         double range = max - min;
+
+         for (int i = 0; i < evaluatedVoxels.size(); i++)
+         {
+            double value = normalizeMetric ? (metricValues.get(i) - min) / range : metricValues.get(i);
+            visuals.add(ReachabilityMapTools.createMetricVisual(evaluatedVoxels.get(i), scaleSpinner.getValue(), value));
+         }
+
+         return visuals;
+      }
+
+      public RayIndexBasedVoxelQualityMetric getReachHeatMapMetric(String target)
+      {
+         if (RayTarget.equals(target))
+         {
+            return (voxel, rayIndex) -> voxel.isRayReachable(rayIndex) ? 1.0 : 0.0;
+         }
+
+         if (PoseTarget.equals(target))
+         {
+            return (voxel, rayIndex) ->
+            {
+               double r = (double) voxel.getNumberOfReachableRotationsAroundRay(rayIndex);
+               double R = (double) voxel.getNumberOfRotationsAroundRay();
+               return r / R;
+            };
+         }
+
+         return null;
+      }
+
+      public RayIndexBasedVoxelQualityMetric getVoxelExtraDataBasedMetric(String target, ToDoubleFunction<VoxelExtraData> function)
+      {
+         switch (target)
+         {
+            case RayTarget:
+               return (voxel, rayIndex) -> function.applyAsDouble(voxel.getRayExtraData(rayIndex));
+            case PoseTarget:
+               return (voxel, rayIndex) ->
+               {
+                  double s = 0.0;
+                  for (int rotationIndex = 0; rotationIndex < voxel.getNumberOfRotationsAroundRay(); rotationIndex++)
+                  {
+                     s += function.applyAsDouble(voxel.getPoseExtraData(rayIndex, rotationIndex));
+                  }
+                  return s /= voxel.getNumberOfRotationsAroundRay();
+               };
+         }
+         return null;
+      }
+
+      public List<VisualDefinition> generateMetricRayBasedHeatMapVisuals(boolean normalizeMetric, RayIndexBasedVoxelQualityMetric metric, BoundingBox3D bbx)
+      {
+         if (metric == null)
+            return null;
+
+         TriangleMesh3DBuilder vizMeshBuilder = new TriangleMesh3DBuilder();
+         Point2D unreachableTexture = new Point2D(0.0, 0.5);
+         Point2D reachableTexture = new Point2D(1.0, 0.5);
+
+         if (normalizeMetric)
+         {
+            List<double[]> savedValues = new ArrayList<>();
+            List<Voxel3DData> savedVoxels = new ArrayList<>();
+
+            double min = Double.POSITIVE_INFINITY;
+            double max = Double.NEGATIVE_INFINITY;
+
+            for (int voxelIndex = 0; voxelIndex < reachabilityMap.getNumberOfVoxels(); voxelIndex++)
+            {
+               Voxel3DData voxel = reachabilityMap.getVoxel(voxelIndex);
+               if (voxel == null || !bbx.isInsideInclusive(voxel.getPosition()))
+                  continue;
+
+               savedVoxels.add(voxel);
+               double[] voxelValues = new double[voxel.getNumberOfRays()];
+               savedValues.add(voxelValues);
+
+               for (int rayIndex = 0; rayIndex < voxel.getNumberOfRays(); rayIndex++)
+               {
+                  double value = metric.evaluate(voxel, rayIndex);
+                  voxelValues[rayIndex] = value;
+                  min = Math.min(min, value);
+                  max = Math.max(max, value);
+               }
+            }
+
+            double offset = min;
+            double range = max - min;
+
+            for (int i = 0; i < savedVoxels.size(); i++)
+            {
+               Voxel3DData voxel = savedVoxels.get(i);
+               double[] voxelValues = savedValues.get(i);
+
+               ReachabilityMapTools.createVoxelRayHeatmap(voxel,
+                                                          scaleSpinner.getValue(),
+                                                          rayIndex -> (voxelValues[rayIndex] - offset) / range,
+                                                          reachableTexture,
+                                                          unreachableTexture,
+                                                          vizMeshBuilder);
+            }
+         }
+         else
+         {
+            for (int voxelIndex = 0; voxelIndex < reachabilityMap.getNumberOfVoxels(); voxelIndex++)
+            {
+               Voxel3DData voxel = reachabilityMap.getVoxel(voxelIndex);
+
+               if (voxel != null && bbx.isInsideInclusive(voxel.getPosition()) && voxel.getR() > 1e-3)
+               {
+                  ReachabilityMapTools.createVoxelRayHeatmap(voxel,
+                                                             scaleSpinner.getValue(),
+                                                             rayIndex -> metric.evaluate(voxel, rayIndex),
+                                                             reachableTexture,
+                                                             unreachableTexture,
+                                                             vizMeshBuilder);
+               }
             }
          }
 
          TextureDefinition diffuseMap = ReachabilityMapTools.generateReachabilityGradient(0.0, 0.7);
          return Collections.singletonList(new VisualDefinition(vizMeshBuilder.generateTriangleMesh3D(), new MaterialDefinition(diffuseMap)));
-
       }
+   }
 
-      private List<VisualDefinition> generatePoseReachVisuals(BoundingBox3D bbx)
+   public double evaluateRayVoxelExtraData(Voxel3DData voxel, ToDoubleFunction<VoxelExtraData> jointPositionFunction)
+   {
+      double s = 0.0;
+
+      for (int rayIndex = 0; rayIndex < voxel.getNumberOfRays(); rayIndex++)
       {
-         return generateMetricVisual(bbx, Voxel3DData::getR2);
-      }
-
-      private List<VisualDefinition> generateNeighborhoodDexterity6Visuals(BoundingBox3D bbx)
-      {
-         return generateMetricVisual(bbx, Voxel3DData::computeD06);
-      }
-
-      private List<VisualDefinition> generateNeighborhoodDexterity18Visuals(BoundingBox3D bbx)
-      {
-         return generateMetricVisual(bbx, Voxel3DData::computeD018);
-      }
-
-      private List<VisualDefinition> generateNeighborhoodDexterity26Visuals(BoundingBox3D bbx)
-      {
-         return generateMetricVisual(bbx, Voxel3DData::computeD026);
-      }
-
-      private List<VisualDefinition> generateMetricVisual(BoundingBox3D bbx, ToDoubleFunction<Voxel3DData> metricFunction)
-      {
-         List<VisualDefinition> visuals = new ArrayList<>();
-
-         for (int voxelIndex = 0; voxelIndex < reachabilityMap.getNumberOfVoxels(); voxelIndex++)
+         if (voxel.isRayReachable(rayIndex))
          {
-            Voxel3DData voxel = reachabilityMap.getVoxel(voxelIndex);
-            if (voxel != null && bbx.isInsideInclusive(voxel.getPosition()) && voxel.getR() > 1e-3)
-               visuals.add(ReachabilityMapTools.createMetricVisual(voxel, 0.25, metricFunction.applyAsDouble(voxel)));
+            s += jointPositionFunction.applyAsDouble(voxel.getRayExtraData(rayIndex));
          }
-         return visuals;
       }
+
+      return s / voxel.getNumberOfReachableRays();
+   }
+
+   public double evaluatePoseVoxelExtraData(Voxel3DData voxel, ToDoubleFunction<VoxelExtraData> jointPositionFunction)
+   {
+      double s = 0.0;
+
+      for (int rayIndex = 0; rayIndex < voxel.getNumberOfRays(); rayIndex++)
+      {
+         for (int rotationIndex = 0; rotationIndex < voxel.getNumberOfRotationsAroundRay(); rotationIndex++)
+         {
+            if (voxel.isPoseReachable(rayIndex, rotationIndex))
+            {
+               s += jointPositionFunction.applyAsDouble(voxel.getPoseExtraData(rayIndex, rotationIndex));
+            }
+         }
+      }
+
+      return s / voxel.getNumberOfReachablePoses();
+   }
+
+   public double computeRoMMetric(VoxelExtraData extraData)
+   {
+      if (extraData == null)
+         return 0.0;
+      return computeRoMMetric(extraData.getJointPositions());
+   }
+
+   public double computeRoMMetric(float[] jointPositions)
+   {
+      double l = 0.0;
+
+      for (int i = 0; i < jointsCopy.length; i++)
+      {
+         double min = jointsCopy[i].getJointLimitLower();
+         double max = jointsCopy[i].getJointLimitUpper();
+         double midRange = 0.5 * (min + max);
+         double rom = max - min;
+         double ratio = (jointPositions[i] - midRange) / rom;
+         l += ratio * ratio;
+      }
+
+      return 1.0 - 4.0 / jointsCopy.length * l;
+   }
+
+   public double computeTauCapabilityMetric(VoxelExtraData extraData)
+   {
+      if (extraData == null)
+         return 0.0;
+      return computeTauCapabilityMetric(extraData.getJointTorques());
+   }
+
+   public double computeTauCapabilityMetric(float[] jointTorques)
+   {
+      double l = 0.0;
+
+      for (int i = 0; i < jointsCopy.length; i++)
+      {
+         double min = jointsCopy[i].getEffortLimitLower();
+         double max = jointsCopy[i].getEffortLimitUpper();
+         double midRange = 0.5 * (min + max);
+         double rom = max - min;
+         double ratio = (jointTorques[i] - midRange) / rom;
+         l += ratio * ratio;
+      }
+
+      return 1.0 - 4.0 / jointsCopy.length * l;
+   }
+
+   public double computeFullJacobianSingularityMetric(VoxelExtraData extraData)
+   {
+      if (extraData == null)
+         return 0.0;
+      return computeFullJacobianSingularityMetric(extraData.getJointPositions());
+   }
+
+   public double computeFullJacobianSingularityMetric(float[] jointPositions)
+   {
+      DMatrixRMaj jacobian = computeJacobian(jointPositions);
+      DMatrixRMaj outer = new DMatrixRMaj(6, 6);
+      CommonOps_DDRM.multOuter(jacobian, outer);
+
+      if (!eig.decompose(outer))
+         return 0.0;
+
+      double min = eig.getEigenvalue(0).getReal();
+      double max = eig.getEigenvalue(0).getReal();
+
+      for (int i = 1; i < eig.getNumberOfEigenvalues(); i++)
+      {
+         min = Math.min(min, eig.getEigenvalue(i).getReal());
+         max = Math.max(max, eig.getEigenvalue(i).getReal());
+      }
+
+      return min / max;
+   }
+
+   public double computeLinearJacobianSingularityMetric(VoxelExtraData extraData)
+   {
+      if (extraData == null)
+         return 0.0;
+      return computeLinearJacobianSingularityMetric(extraData.getJointPositions());
+   }
+
+   public double computeLinearJacobianSingularityMetric(float[] jointPositions)
+   {
+      DMatrixRMaj jacobian = computeJacobian(jointPositions);
+      DMatrixRMaj linearPart = new DMatrixRMaj(3, jacobian.numCols);
+      CommonOps_DDRM.extract(jacobian, 3, 6, 0, jacobian.numCols, linearPart, 0, 0);
+      DMatrixRMaj outer = new DMatrixRMaj(3, 3);
+      CommonOps_DDRM.multOuter(linearPart, outer);
+
+      if (!eig.decompose(outer))
+         return 0.0;
+
+      double min = eig.getEigenvalue(0).getReal();
+      double max = eig.getEigenvalue(0).getReal();
+
+      for (int i = 1; i < eig.getNumberOfEigenvalues(); i++)
+      {
+         min = Math.min(min, eig.getEigenvalue(i).getReal());
+         max = Math.max(max, eig.getEigenvalue(i).getReal());
+      }
+
+      return min / max;
+   }
+
+   public double computeAngularJacobianSingularityMetric(VoxelExtraData extraData)
+   {
+      if (extraData == null)
+         return 0.0;
+      return computeAngularJacobianSingularityMetric(extraData.getJointPositions());
+   }
+
+   public double computeAngularJacobianSingularityMetric(float[] jointPositions)
+   {
+      DMatrixRMaj jacobian = computeJacobian(jointPositions);
+      DMatrixRMaj angularPart = new DMatrixRMaj(3, jacobian.numCols);
+      CommonOps_DDRM.extract(jacobian, 0, 3, 0, jacobian.numCols, angularPart, 0, 0);
+      DMatrixRMaj outer = new DMatrixRMaj(3, 3);
+      CommonOps_DDRM.multOuter(angularPart, outer);
+
+      if (!eig.decompose(outer))
+         return 0.0;
+
+      double min = eig.getEigenvalue(0).getReal();
+      double max = eig.getEigenvalue(0).getReal();
+
+      for (int i = 1; i < eig.getNumberOfEigenvalues(); i++)
+      {
+         min = Math.min(min, eig.getEigenvalue(i).getReal());
+         max = Math.max(max, eig.getEigenvalue(i).getReal());
+      }
+
+      return min / max;
+   }
+
+   private final EigenDecomposition_F64<DMatrixRMaj> eig = DecompositionFactory_DDRM.eig(false);
+
+   private GeometricJacobianCalculator jacobianCalculator;
+   private OneDoFJointBasics[] jointsCopy;
+   private ReferenceFrame controlFrameCopy;
+
+   private DMatrixRMaj computeJacobian(float[] jointPositions)
+   {
+      if (jointsCopy == null)
+      { // Initializing the copy of the joints that we'll use to evaluate the Jacobian.
+         RigidBodyBasics rootBodyCopy = robotInformation.getRobotDefinition().newInstance(ReferenceFrame.getWorldFrame());
+         RigidBodyBasics baseCopy = MultiBodySystemTools.findRigidBody(rootBodyCopy, robotInformation.getBaseName());
+         RigidBodyBasics endEffectorCopy = MultiBodySystemTools.findRigidBody(rootBodyCopy, robotInformation.getEndEffectorName());
+         jointsCopy = MultiBodySystemTools.createOneDoFJointPath(baseCopy, endEffectorCopy);
+         controlFrameCopy = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("controlFrameCopy",
+                                                                                              endEffectorCopy.getParentJoint().getFrameAfterJoint(),
+                                                                                              new RigidBodyTransform(robotInformation.getControlFramePoseInParentJoint()
+                                                                                                                                     .getOrientation(),
+                                                                                                                     robotInformation.getControlFramePoseInParentJoint()
+                                                                                                                                     .getPosition()));
+      }
+
+      for (int i = 0; i < jointsCopy.length; i++)
+      {
+         jointsCopy[i].setQ(jointPositions[i]);
+         jointsCopy[i].updateFrame();
+      }
+
+      if (jacobianCalculator == null)
+         jacobianCalculator = new GeometricJacobianCalculator();
+      jacobianCalculator.setKinematicChain(jointsCopy);
+      jacobianCalculator.setJacobianFrame(controlFrameCopy);
+      return jacobianCalculator.getJacobianMatrix();
+   }
+
+   private static interface RayIndexBasedVoxelQualityMetric
+   {
+      double evaluate(Voxel3DData voxel, int rayIndex);
    }
 }

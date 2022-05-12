@@ -6,6 +6,7 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -28,26 +29,33 @@
                   </columnConstraints>
                   <rowConstraints>
                      <RowConstraints vgrow="SOMETIMES" />
+                     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                      <RowConstraints vgrow="SOMETIMES" />
                      <RowConstraints vgrow="SOMETIMES" />
                      <RowConstraints vgrow="SOMETIMES" />
                   </rowConstraints>
                   <children>
                      <Label text="Visualization type:" />
-                     <ComboBox fx:id="visualizationTypeComboBox" prefWidth="150.0" GridPane.columnIndex="1" />
-                     <Label text="xMin:" GridPane.rowIndex="1" />
-                     <Label text="xMax:" GridPane.rowIndex="2" />
-                     <Label text="yMin:" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                     <Label text="yMax:" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                     <Label text="zMin:" GridPane.columnIndex="4" GridPane.rowIndex="1" />
-                     <Label text="zMax:" GridPane.columnIndex="4" GridPane.rowIndex="2" />
-                     <Spinner editable="true" prefWidth="125.0" GridPane.columnIndex="1" GridPane.rowIndex="1" fx:id="xMinSpinner" />
-                     <Spinner editable="true" prefWidth="125.0" GridPane.columnIndex="1" GridPane.rowIndex="2" fx:id="xMaxSpinner" />
-                     <Spinner fx:id="yMinSpinner" editable="true" prefWidth="125.0" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-                     <Spinner fx:id="yMaxSpinner" editable="true" prefWidth="125.0" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-                     <Spinner fx:id="zMinSpinner" editable="true" prefWidth="125.0" GridPane.columnIndex="5" GridPane.rowIndex="1" />
-                     <Spinner fx:id="zMaxSpinner" editable="true" prefWidth="125.0" GridPane.columnIndex="5" GridPane.rowIndex="2" />
-                     <Button mnemonicParsing="false" onAction="#refreshVisualization" text="Generate Visualization" GridPane.columnIndex="5" GridPane.rowIndex="3" />
+                     <ComboBox fx:id="visualizationTypeComboBox" maxWidth="1.7976931348623157E308" prefWidth="150.0" GridPane.columnIndex="1" GridPane.columnSpan="3" />
+                     <Label text="Target:" GridPane.rowIndex="1" />
+                     <ComboBox fx:id="visualizationTargetComboBox" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                     <ToggleButton fx:id="normalizeDataToggleButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Normalize Data" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                     <Label text="xMin:" GridPane.rowIndex="2" />
+                     <Label text="xMax:" GridPane.rowIndex="3" />
+                     <Label text="yMin:" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                     <Label text="yMax:" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                     <Label text="zMin:" GridPane.columnIndex="4" GridPane.rowIndex="2" />
+                     <Label text="zMax:" GridPane.columnIndex="4" GridPane.rowIndex="3" />
+                     <Spinner editable="true" prefWidth="125.0" GridPane.columnIndex="1" GridPane.rowIndex="2" fx:id="xMinSpinner" />
+                     <Spinner editable="true" prefWidth="125.0" GridPane.columnIndex="1" GridPane.rowIndex="3" fx:id="xMaxSpinner" />
+                     <Spinner fx:id="yMinSpinner" editable="true" prefWidth="125.0" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                     <Spinner fx:id="yMaxSpinner" editable="true" prefWidth="125.0" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                     <Spinner fx:id="zMinSpinner" editable="true" prefWidth="125.0" GridPane.columnIndex="5" GridPane.rowIndex="2" />
+                     <Spinner fx:id="zMaxSpinner" editable="true" prefWidth="125.0" GridPane.columnIndex="5" GridPane.rowIndex="3" />
+                     <Button mnemonicParsing="false" onAction="#refreshVisualization" text="Generate Visualization" GridPane.columnIndex="5" GridPane.rowIndex="4" />
+                     <ToggleButton fx:id="heatmapToggleButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Heatmap" GridPane.columnIndex="5" GridPane.rowIndex="1" />
+                     <Label text="Sphere scale:" GridPane.rowIndex="4" />
+                     <Spinner fx:id="scaleSpinner" editable="true" prefWidth="125.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                   </children>
                   <padding>
                      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />

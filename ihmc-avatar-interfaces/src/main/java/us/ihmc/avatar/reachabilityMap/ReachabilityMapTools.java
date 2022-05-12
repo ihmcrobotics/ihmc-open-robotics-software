@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.List;
+import java.util.function.IntToDoubleFunction;
 
 import javafx.application.Platform;
 import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DData;
@@ -134,6 +135,21 @@ public class ReachabilityMapTools
                                             Point2DReadOnly unreachableTextureCoord,
                                             TriangleMesh3DBuilder vizMeshBuilder)
    {
+      createVoxelRayHeatmap(voxel,
+                            scale,
+                            rayIndex -> voxel.isRayReachable(rayIndex) ? 1.0 : 0.0,
+                            reachableTextureCoord,
+                            unreachableTextureCoord,
+                            vizMeshBuilder);
+   }
+
+   public static void createVoxelRayHeatmap(Voxel3DData voxel,
+                                            double scale,
+                                            IntToDoubleFunction rayIndexQualityCalculator,
+                                            Point2DReadOnly highQualityTextureCoord,
+                                            Point2DReadOnly lowQualityTextureCoord,
+                                            TriangleMesh3DBuilder vizMeshBuilder)
+   {
       TriangleMesh3DDefinition mesh = TriangleMesh3DFactories.Sphere(scale * voxel.getSize() / 2.0, 8, 8);
 
       for (int i = 0; i < mesh.getNormals().length; i++)
@@ -161,14 +177,14 @@ public class ReachabilityMapTools
             }
             else
             {
-               boolean isRayReachable = voxel.isRayReachable(rayIndex);
+               double quality = rayIndexQualityCalculator.applyAsDouble(rayIndex);
                sumOfWeights += weight;
-               reachabilityValue += weight * (isRayReachable ? 1.0 : 0.0);
+               reachabilityValue += weight * quality;
             }
          }
 
          reachabilityValue /= sumOfWeights;
-         texture.interpolate(unreachableTextureCoord, reachableTextureCoord, reachabilityValue);
+         texture.interpolate(lowQualityTextureCoord, highQualityTextureCoord, reachabilityValue);
       }
 
       RigidBodyTransform pose = voxel.getPosition().getReferenceFrame().getTransformToRoot();
