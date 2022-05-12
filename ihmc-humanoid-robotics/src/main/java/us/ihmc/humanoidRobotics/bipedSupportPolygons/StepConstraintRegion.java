@@ -182,7 +182,9 @@ public class StepConstraintRegion implements RegionInWorldInterface<StepConstrai
       convexHull.set(concaveHull);
    }
 
-   public void set(RigidBodyTransformReadOnly transformToWorld, List<? extends Point2DReadOnly> concaveHullsVertices, List<ConcavePolygon2D> holesInRegion)
+   public void set(RigidBodyTransformReadOnly transformToWorld,
+                   List<? extends Point2DReadOnly> concaveHullsVertices,
+                   List<? extends ConcavePolygon2DReadOnly> holesInRegion)
    {
       fromLocalToWorldTransform.set(transformToWorld);
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);

@@ -101,6 +101,8 @@ public class PlanarRegionTools
     * Checks to see if regionA is above regionB in terms of not ever having to "step up" from regionA to regionB.
     * If regionA is above regionB, then regionB should not be able to be an obstacle of regionA.
     *
+    * WARNING generates garbage
+    *
     * @param regionA PlanarRegion to check to see if it is above the other region.
     * @param regionB PlanarRegion to check to see if it is below the other region.
     * @param epsilon Margin of error. If epsilon is positive, then will still return true even if there are points in regionB higher than regionA by at
