@@ -81,20 +81,31 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
    @Override
    public ComponentBasedFootstepDataMessageGenerator buildPlugin(HighLevelControllerFactoryHelper controllerFactoryHelper)
    {
+      HighLevelHumanoidControllerToolbox controllerToolbox = controllerFactoryHelper.getHighLevelHumanoidControllerToolbox();
+
+      return buildPlugin(controllerToolbox.getReferenceFrames(),
+                         controllerFactoryHelper.getWalkingControllerParameters(),
+                         controllerFactoryHelper.getStatusMessageOutputManager(),
+                         controllerFactoryHelper.getCommandInputManager(),
+                         controllerToolbox.getContactableFeet(),
+                         controllerToolbox.getYoTime(),
+                         controllerToolbox.getControlDT(),
+                         controllerToolbox.getYoGraphicsListRegistry());
+   }
+
+   public ComponentBasedFootstepDataMessageGenerator buildPlugin(CommonHumanoidReferenceFrames referenceFrames,
+                                                                 WalkingControllerParameters walkingControllerParameters,
+                                                                 StatusMessageOutputManager statusMessageOutputManager,
+                                                                 CommandInputManager commandInputManager,
+                                                                 SideDependentList<? extends ContactableBody> contactableFeet,
+                                                                 DoubleProvider timeProvider,
+                                                                 double updateDT,
+                                                                 YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
       if (!registryField.hasValue())
          setRegistry();
 
       FactoryTools.checkAllFactoryFieldsAreSet(this);
-
-      HighLevelHumanoidControllerToolbox controllerToolbox = controllerFactoryHelper.getHighLevelHumanoidControllerToolbox();
-      CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
-      double controlDT = controllerToolbox.getControlDT();
-      WalkingControllerParameters walkingControllerParameters = controllerFactoryHelper.getWalkingControllerParameters();
-      StatusMessageOutputManager statusMessageOutputManager = controllerFactoryHelper.getStatusMessageOutputManager();
-      CommandInputManager commandInputManager = controllerFactoryHelper.getCommandInputManager();
-      YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
-      SideDependentList<? extends ContactableBody> contactableFeet = controllerToolbox.getContactableFeet();
-      DoubleProvider timeProvider = controllerToolbox.getYoTime();
 
       ContinuousStepGenerator continuousStepGenerator = new ContinuousStepGenerator(registryField.get());
 
@@ -134,7 +145,7 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
       }
       else if (useHeadingAndVelocityScriptField.get())
       {
-         HeadingAndVelocityEvaluationScript script = new HeadingAndVelocityEvaluationScript(controlDT,
+         HeadingAndVelocityEvaluationScript script = new HeadingAndVelocityEvaluationScript(updateDT,
                                                                                             timeProvider,
                                                                                             headingAndVelocityEvaluationScriptParametersField.get(),
                                                                                             registryField.get());

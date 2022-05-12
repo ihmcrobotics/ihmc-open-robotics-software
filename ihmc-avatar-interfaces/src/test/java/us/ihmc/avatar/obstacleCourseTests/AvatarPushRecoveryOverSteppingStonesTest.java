@@ -14,6 +14,8 @@ import controller_msgs.msg.dds.PlanarRegionMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
+import us.ihmc.avatar.stepAdjustment.StepConstraintCalculator;
+import us.ihmc.avatar.stepAdjustment.SteppableRegionsCalculator;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
@@ -28,8 +30,10 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintMessageConverter;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -38,6 +42,7 @@ import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationToolkit.controllers.PushRobotControllerSCS2;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiRobotTestInterface
@@ -84,13 +89,10 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
 
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
                                                                                                                                              simulationTestingParameters);
+      simulationTestHelperFactory.setUseImpulseBasedPhysicsEngine(true);
       simulationTestHelperFactory.setStartingLocationOffset(selectedLocation.getStartingLocationOffset());
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       simulationTestHelper.start();
-
-      assertTrue(simulationTestHelper.simulateNow(0.05));
-      PlanarRegionsListMessage planarRegionsListMessage = createPlanarRegionsListMessage();
-      simulationTestHelper.publishToController(planarRegionsListMessage);
 
       FullHumanoidRobotModel fullRobotModel = getRobotModel().createFullRobotModel();
       double z = getForcePointOffsetZInChestFrame();
@@ -123,10 +125,6 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
 
       assertTrue(simulationTestHelper.simulateNow(0.25));
 
-      FootstepDataListMessage footstepDataList = createFootstepsForWalkingOverEasySteppingStones(swingTime, transferTime);
-      footstepDataList.setAreFootstepsAdjustable(true);
-      simulationTestHelper.publishToController(footstepDataList);
-      assertTrue(simulationTestHelper.simulateNow(1.0));
    }
 
    @Test
@@ -135,9 +133,14 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       setupTest();
       double transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
 
+      SteppableRegionsCalculator steppableRegionsCalculator = new SteppableRegionsCalculator(10.0, new YoRegistry("test"));
+      steppableRegionsCalculator.setPlanarRegions(createPlanarRegionsList());
+
       FootstepDataListMessage footstepDataList = createFootstepsForWalkingOverEasySteppingStones(swingTime, transferTime);
       footstepDataList.setAreFootstepsAdjustable(true);
+      footstepDataList.getDefaultStepConstraints().set(StepConstraintMessageConverter.convertToStepConstraintsListMessage(steppableRegionsCalculator.computeSteppableRegions()));
       simulationTestHelper.publishToController(footstepDataList);
+
 
       StateTransitionCondition firstPushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
       double delay = 0.5 * swingTime;
@@ -178,14 +181,21 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
 
    private FootstepDataListMessage createFootstepsForWalkingOverEasySteppingStones(double swingTime, double transferTime)
    {
-      List<Pose3D> footstepPoses = new ArrayList<>();
-      footstepPoses.add(new Pose3D(new Point3D(-7.75, -0.55, 0.3), new Quaternion(0.0, 0.0, 1.0, 0.0)));
-      footstepPoses.add(new Pose3D(new Point3D(-8.25, -0.95, 0.3), new Quaternion(0.0, 0.0, 1.0, 0.0)));
-      footstepPoses.add(new Pose3D(new Point3D(-8.75, -0.55, 0.3), new Quaternion(0.0, 0.0, 1.0, 0.0)));
-      footstepPoses.add(new Pose3D(new Point3D(-9.25, -0.95, 0.3), new Quaternion(0.0, 0.0, 1.0, 0.0)));
-      footstepPoses.add(new Pose3D(new Point3D(-9.75, -0.55, 0.3), new Quaternion(0.0, 0.0, 1.0, 0.0)));
-      footstepPoses.add(new Pose3D(new Point3D(-10.25, -1.00, 0.3), new Quaternion(0.0, 0.0, 1.0, 0.0)));
-      footstepPoses.add(new Pose3D(new Point3D(-10.25, -0.65, 0.3), new Quaternion(0.0, 0.0, 1.0, 0.0)));
+      Pose3D[] footstepPoses = {
+            new Pose3D(new Point3D(-7.72847174992541, -0.5619736174919732, 0.3839138258635628),
+                       new Quaternion(-0.002564106649548222, 9.218543591576633E-4, 0.9999871158757672, 0.004282945726398341)),
+            new Pose3D(new Point3D(-8.233931300168681, -0.952122284180518, 0.3841921077973934),
+                       new Quaternion(-2.649132161393031E-6, -0.00302400231893713, 0.999986265693845, 0.004280633905867881)),
+            new Pose3D(new Point3D(-8.711157422190857, -0.5634436272430561, 0.38340964898482055),
+                       new Quaternion(-6.333967334144636E-4, -0.002689012266100874, 0.9999870292977306, 0.004278931865605645)),
+            new Pose3D(new Point3D(-9.246614388340875, -0.9823725639340232, 0.3838760717826556),
+                       new Quaternion(4.990380502353344E-4, 0.002867206806117212, 0.9999866091454905, 0.00427920738681889)),
+            new Pose3D(new Point3D(-9.694460236661355, -0.5363354293129117, 0.3828438933446154),
+                       new Quaternion(0.0043663633816866795, 6.575433167622114E-4, 0.9999811020260976, 0.004277627645902338)),
+            new Pose3D(new Point3D(-10.204483462540168, -1.0007498263499959, 0.3841142603691748),
+                       new Quaternion(3.379337850421112E-4, 0.0013510800402890615, 0.9999898702179759, 0.004280168795429233)),
+            new Pose3D(new Point3D(-10.20677294790819, -0.6741336761434962, 0.3829201197142793),
+                       new Quaternion(0.004772284224629501, 0.005592011887113724, 0.9999639290557834, 0.004253856327364576))};
 
       for (Pose3D footstepPose : footstepPoses) // The footsteps were originally written in terms of desired ankle pose for Atlas, this transforms it to desired sole pose.
          footstepPose.appendTranslation(0.025, 0.0, -0.084);
@@ -193,7 +203,7 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       return EndToEndTestTools.generateFootstepsFromPose3Ds(RobotSide.RIGHT, footstepPoses, swingTime, transferTime);
    }
 
-   private PlanarRegionsListMessage createPlanarRegionsListMessage()
+   private List<PlanarRegion> createPlanarRegionsList()
    {
       List<Point3D> locations = new ArrayList<>();
       locations.add(new Point3D(-7.75, -0.55, 0.3));
@@ -219,17 +229,13 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       planarRegions.add(platform);
       planarRegions.add(platform);
 
-      List<PlanarRegionMessage> planarRegionsAsMessages = new ArrayList<>();
-      for (int i = 0; i < planarRegions.size(); i++)
-      {
-         PlanarRegion planarRegion = planarRegions.get(i);
-         if (planarRegion != null)
-            planarRegionsAsMessages.add(PlanarRegionMessageConverter.convertToPlanarRegionMessage(planarRegion));
-      }
+      return planarRegions;
 
-      PlanarRegionsListMessage messageList = PlanarRegionMessageConverter.createPlanarRegionsListMessage(planarRegionsAsMessages);
+   }
 
-      return messageList;
+   private PlanarRegionsListMessage createPlanarRegionsListMessage()
+   {
+      return PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(new PlanarRegionsList(createPlanarRegionsList()));
    }
 
    private PlanarRegion createSteppingStonePlanarRegion(Point3D centered)
