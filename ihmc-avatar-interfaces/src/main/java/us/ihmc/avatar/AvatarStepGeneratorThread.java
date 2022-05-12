@@ -1,6 +1,5 @@
 package us.ihmc.avatar;
 
-import us.ihmc.avatar.AvatarControllerThreadInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
@@ -11,16 +10,10 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.Compo
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.nadia.operation.joystickPlugin.NadiaRCJoystickPlugin;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -29,7 +22,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class AvatarStepGeneratorThread implements AvatarControllerThreadInterface
 {
@@ -46,8 +38,8 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
    private final YoLong timestamp = new YoLong("TimestampCSG", csgRegistry);
    private final YoBoolean runCSG = new YoBoolean("RunCSG", csgRegistry);
 
-   private final PlanarRegionFootstepSnapper planarRegionFootstepSnapper = new PlanarRegionFootstepSnapper();
-   private final CommandInputManager walkingCommandInputmanager;
+   private final PlanarRegionFootstepSnapper planarRegionFootstepSnapper;
+   private final CommandInputManager walkingCommandInputManager;
    private final CommandInputManager csgCommandInputManager;
 
    public AvatarStepGeneratorThread(ComponentBasedFootstepDataMessageGeneratorFactory csgPluginFactory,
@@ -59,7 +51,7 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
                                     double perceptionDt)
    {
       this.fullRobotModel = drcRobotModel.createFullRobotModel();
-      this.walkingCommandInputmanager = walkingCommandInputManager;
+      this.walkingCommandInputManager = walkingCommandInputManager;
       contextDataFactory.setSensorDataContext(new SensorDataContext(fullRobotModel));
       humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
 
@@ -73,6 +65,9 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
                                          null,
                                          csgTime);
 
+      this.planarRegionFootstepSnapper = new PlanarRegionFootstepSnapper(csg.getContinuousStepGenerator(),
+                                                                         drcRobotModel.getWalkingControllerParameters().getSteppingParameters(),
+                                                                         csgRegistry);
       csg.getContinuousStepGenerator().setFootstepAdjustment(planarRegionFootstepSnapper);
 
       csgCommandInputManager = csgPluginFactory.getCSGCommandInputManager().getCommandInputManager();
@@ -130,39 +125,6 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
          throw new RuntimeException(e);
       }
    }
-
-   private FramePose3DReadOnly adjustFootstep(FramePose2DReadOnly footstepPose, RobotSide footSide)
-   {
-      FramePose3D adjustedBasedOnStanceFoot = new FramePose3D();
-      adjustedBasedOnStanceFoot.getPosition().set(footstepPose.getPosition());
-      adjustedBasedOnStanceFoot.setZ(continuousStepGenerator.getCurrentSupportFootPose().getZ());
-      adjustedBasedOnStanceFoot.getOrientation().set(footstepPose.getOrientation());
-
-      if (planarRegionsList.get() != null)
-      {
-         FramePose3D wiggledPose = new FramePose3D(adjustedBasedOnStanceFoot);
-         footPolygonToWiggle.set(footPolygons.get(footSide));
-         try
-         {
-            snapAndWiggleSingleStep.snapAndWiggle(wiggledPose, footPolygonToWiggle, forwardVelocity.getValue() > 0.0);
-            if (wiggledPose.containsNaN())
-               return adjustedBasedOnStanceFoot;
-         }
-         catch (SnapAndWiggleSingleStep.SnappingFailedException e)
-         {
-            /*
-             * It's fine if the snap & wiggle fails, can be because there no planar regions around the footstep.
-             * Let's just keep the adjusted footstep based on the pose of the current stance foot.
-             */
-         }
-         return wiggledPose;
-      }
-      else
-      {
-         return adjustedBasedOnStanceFoot;
-      }
-   }
-
 
    @Override
    public YoRegistry getYoVariableRegistry()
