@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator;
 
+import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.ConvexStepConstraintOptimizer;
+import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.YoConstraintOptimizerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.PolygonWiggler;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
@@ -16,6 +18,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.polygonSnapping.GarbageFreePlanarRegionListPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
@@ -28,14 +31,16 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.List;
 
 public class PlanarRegionFootstepSnapper implements FootstepAdjustment
 {
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+
    private final RecyclingArrayList<PlanarRegion> steppableRegionsList = new RecyclingArrayList<>(PlanarRegion::new);
    private final SnapAndWiggleSingleStepParameters parameters = new SnapAndWiggleSingleStepParameters();
-   private final WiggleParameters wiggleParameters = new WiggleParameters();
 
    private final FramePose3D footstepAtSameHeightAsStanceFoot = new FramePose3D();
    private final FramePose3D adjustedFootstepPose = new FramePose3D();
@@ -46,9 +51,15 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
    private final SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons;
    private final ContinuousStepGenerator continuousStepGenerator;
 
+   private final YoConstraintOptimizerParameters wiggleParameters;
+
+   private final ConvexStepConstraintOptimizer stepConstraintOptimizer;
+
    public PlanarRegionFootstepSnapper(ContinuousStepGenerator continuousStepGenerator, SteppingParameters steppingParameters)
    {
       this.continuousStepGenerator = continuousStepGenerator;
+      this.wiggleParameters = new YoConstraintOptimizerParameters(registry);
+      this.stepConstraintOptimizer = new ConvexStepConstraintOptimizer(registry);
 
       double footLength = steppingParameters.getFootLength();
       double toeWidth = steppingParameters.getToeWidth();
@@ -188,8 +199,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       footPolygonInRegionFrame.set(footStepPolygonInSoleFrame);
       footPolygonInRegionFrame.applyTransform(transformFromSoleToRegion, false);
 
-      // TODO remove garbage
-      RigidBodyTransform wiggleTransform = PolygonWiggler.wigglePolygonIntoConvexHullOfRegion(footPolygonInRegionFrame, regionToSnapTo, wiggleParameters);
+      RigidBodyTransformReadOnly wiggleTransform = stepConstraintOptimizer.findConstraintTransform(footPolygonInRegionFrame, regionToSnapTo.getConvexHull(), wiggleParameters);
 
       if (wiggleTransform == null)
          solePoseToSnapAndWiggle.setToNaN();
@@ -201,7 +211,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       }
 
       // check for partial foothold
-      if (wiggleParameters.deltaInside < 0.0)
+      if (wiggleParameters.getDesiredDistanceInside() < 0.0)
       {
 
          soleFrameAfterWiggle.setPoseAndUpdate(solePoseToSnapAndWiggle);
