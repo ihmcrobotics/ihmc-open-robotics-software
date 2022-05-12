@@ -12,19 +12,24 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 
 import java.util.HashSet;
 
+/**
+ * Ouster Firmware User Manual: https://data.ouster.io/downloads/software-user-manual/firmware-user-manual-v2.3.0.pdf
+ */
 public class NettyOuster
 {
    public static final int PORT = 7502;
 
    private EventLoopGroup group;
    private Bootstrap bootstrap;
+   private HashSet<Point3D32> points = new HashSet<>();
 
-   private HashSet<Point3D32> points;
-   public NettyOuster() {
-      points = new HashSet<>();
+   public NettyOuster()
+   {
+
    }
 
-   public void initialize() {
+   public void initialize()
+   {
       group = new NioEventLoopGroup();
       bootstrap = new Bootstrap();
       bootstrap.group(group).channel(NioDatagramChannel.class).handler(new SimpleChannelInboundHandler<DatagramPacket>()
@@ -33,25 +38,31 @@ public class NettyOuster
          protected void channelRead0(ChannelHandlerContext ctx, DatagramPacket msg)
          {
             ByteBuf data = msg.content().readBytes(msg.content().capacity());
-            for (int i = 0; i < data.capacity(); i++) {
+            for (int i = 0; i < data.capacity(); i++)
+            {
                System.out.printf("%02x ", data.getByte(i));
             }
          }
       });
    }
 
-   public void start() {
+   public void start()
+   {
       bootstrap.bind(PORT);
    }
 
-   public void stop() {
+   public void stop()
+   {
       group.shutdownGracefully();
    }
 
-   public boolean hasPoints() {
+   public boolean hasPoints()
+   {
       return false; //TODO
    }
-   public HashSet<Point3D32> getPoints() {
+
+   public HashSet<Point3D32> getPoints()
+   {
       return points; //TODO points should be updated somewhere before this method for points to actually render
    }
 }
