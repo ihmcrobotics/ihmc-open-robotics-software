@@ -107,8 +107,8 @@ public class SphereVoxelShape
       return ReachabilityMapTools.createPositionReachabilityVisual(voxelLocation, scale * voxelSize / 2.0, reachable);
    }
 
-   public VisualDefinition createDReachabilityVisual(FramePoint3DReadOnly voxelLocation, double scale, double reachabilityValue)
+   public VisualDefinition createRReachabilityVisual(FramePoint3DReadOnly voxelLocation, double scale, double reachabilityValue)
    {
-      return ReachabilityMapTools.createDReachabilityVisual(voxelLocation, scale * voxelSize / 2.0, reachabilityValue);
+      return ReachabilityMapTools.createRReachabilityVisual(voxelLocation, scale * voxelSize / 2.0, reachabilityValue);
    }
 }

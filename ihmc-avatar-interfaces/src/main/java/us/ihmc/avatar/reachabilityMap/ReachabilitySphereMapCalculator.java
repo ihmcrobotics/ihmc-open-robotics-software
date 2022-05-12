@@ -54,8 +54,8 @@ public class ReachabilitySphereMapCalculator implements Controller
    private final YoFramePose3D evaluatedPose = new YoFramePose3D("evaluatedPose", ReferenceFrame.getWorldFrame(), registry);
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
 
-   private final YoBoolean evaluateDReachability = new YoBoolean("evaluateDReachability", registry);
-   private final YoBoolean evaluateD0Reachability = new YoBoolean("evaluateD0Reachability", registry);
+   private final YoBoolean evaluateRReachability = new YoBoolean("evaluateRReachability", registry);
+   private final YoBoolean evaluateR2Reachability = new YoBoolean("evaluateR2Reachability", registry);
 
    private final List<YoGraphicGroupDefinition> solverYoGraphicGroupDefinitions = new ArrayList<>();
 
@@ -141,14 +141,14 @@ public class ReachabilitySphereMapCalculator implements Controller
       voxel3DGrid.setGridPose(gridFramePose);
    }
 
-   public void setEvaluateDReachability(boolean enable)
+   public void setEvaluateRReachability(boolean enable)
    {
-      evaluateDReachability.set(enable);
+      evaluateRReachability.set(enable);
    }
 
-   public void setEvaluateD0Reachability(boolean enable)
+   public void setEvaluateR2Reachability(boolean enable)
    {
-      evaluateD0Reachability.set(enable);
+      evaluateR2Reachability.set(enable);
    }
 
    public void setVoxelUnreachableListener(Consumer<Voxel3DData> voxelUnreachableListener)
@@ -283,7 +283,7 @@ public class ReachabilitySphereMapCalculator implements Controller
 
       for (int rayIndex = 0; rayIndex < sphereVoxelShape.getNumberOfRays(); rayIndex++)
       {
-         if (evaluateDReachability.getValue())
+         if (evaluateRReachability.getValue())
          {
             sphereVoxelShape.getPose(solverInput, rayIndex, 0);
             solverInput.getPosition().add(voxel.getPosition());
@@ -302,7 +302,7 @@ public class ReachabilitySphereMapCalculator implements Controller
             }
          }
 
-         if (evaluateD0Reachability.getValue())
+         if (evaluateR2Reachability.getValue())
          {
             for (int rotationAroundRayIndex = 0; rotationAroundRayIndex < sphereVoxelShape.getNumberOfRotationsAroundRay(); rotationAroundRayIndex++)
             {

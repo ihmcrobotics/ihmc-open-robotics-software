@@ -343,12 +343,12 @@ public class Voxel3DGrid implements ReferenceFrameHolder
       }
 
       /**
-       * Return the D reachability value in percent for this voxel based on the number of the rays that
+       * Return the R reachability value in percent for this voxel based on the number of the rays that
        * have been reached.
        * 
-       * @return The D reachability
+       * @return The R reachability
        */
-      public double getD()
+      public double getR()
       {
          return (double) getNumberOfReachableRays() / (double) getNumberOfRays();
       }
@@ -371,12 +371,12 @@ public class Voxel3DGrid implements ReferenceFrameHolder
       }
 
       /**
-       * Return the D0 reachability value in percent for this voxel based on the number of the
+       * Return the R2 reachability value in percent for this voxel based on the number of the
        * orientations (number of rays times number of rotations around rays) that have been reached.
        * 
-       * @return The D0 reachability
+       * @return The R2 reachability
        */
-      public double getD0()
+      public double getR2()
       {
          return (double) getNumberOfReachablePoses() / (double) getNumberOfRays() / (double) getNumberOfRotationsAroundRay();
       }

@@ -10,9 +10,9 @@ import us.ihmc.scs2.definition.geometry.Sphere3DDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
+import us.ihmc.scs2.definition.visual.TriangleMesh3DFactories;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
-import us.ihmc.scs2.sessionVisualizer.TriangleMesh3DFactories;
 
 public class ReachabilityMapTools
 {
@@ -98,7 +98,7 @@ public class ReachabilityMapTools
       return new VisualDefinition(voxelLocationLocal, new Sphere3DDefinition(size, 16), materialDefinition);
    }
 
-   public static VisualDefinition createDReachabilityVisual(FramePoint3DReadOnly voxelLocation, double size, double reachabilityValue)
+   public static VisualDefinition createRReachabilityVisual(FramePoint3DReadOnly voxelLocation, double size, double reachabilityValue)
    {
       FramePoint3D voxelLocationLocal = new FramePoint3D(voxelLocation);
       voxelLocationLocal.changeFrame(ReferenceFrame.getWorldFrame());
