@@ -25,10 +25,13 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.visual.MaterialDefinition;
+import us.ihmc.scs2.definition.visual.TriangleMesh3DBuilder;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizer;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizerControls;
@@ -158,7 +161,7 @@ public class ReachabilityMapVisualizer
       Pose3DReadOnly controlFramePose = robotInformation.getControlFramePoseInParentJoint();
 
       RigidBodyBasics endEffector = robot.getRigidBody(robotInformation.getEndEffectorName());
-      ReferenceFrame controlFrame = ReferenceFrameTools.constructFrameWithChangingTransformFromParent("controlFrame",
+      ReferenceFrame controlFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("controlFrame",
                                                                                                       endEffector.getParentJoint().getFrameAfterJoint(),
                                                                                                       new RigidBodyTransform(controlFramePose.getOrientation(),
                                                                                                                              controlFramePose.getPosition()));
@@ -182,6 +185,9 @@ public class ReachabilityMapVisualizer
          previousEvaluation.set(currentEvaluation.getValue());
       });
 
+      TriangleMesh3DBuilder rayReachableVizMeshBuilder = new TriangleMesh3DBuilder();
+      TriangleMesh3DBuilder rayUnreachableVizMeshBuilder = new TriangleMesh3DBuilder();
+
       for (int voxelIndex = 0; voxelIndex < reachabilityMap.getNumberOfVoxels(); voxelIndex++)
       {
          Voxel3DData voxel = reachabilityMap.getVoxel(voxelIndex);
@@ -198,7 +204,8 @@ public class ReachabilityMapVisualizer
 
             if (voxel.getR() > 1e-3)
             {
-               voxelVisualization.get(VisualizationType.RayReach).add(ReachabilityMapTools.createRReachabilityVisual(voxel, 0.25, voxel.getR()));
+               ReachabilityMapTools.createRReachabilityVisualStyle2(voxel, 0.25, rayReachableVizMeshBuilder, rayUnreachableVizMeshBuilder);
+               //               voxelVisualization.get(VisualizationType.RayReach).add(ReachabilityMapTools.createRReachabilityVisual(voxel, 0.25, voxel.getR()));
                voxelVisualization.get(VisualizationType.PoseReach).add(ReachabilityMapTools.createRReachabilityVisual(voxel, 0.25, voxel.getR2()));
             }
             else
@@ -208,15 +215,37 @@ public class ReachabilityMapVisualizer
          }
       }
 
-      if (visualizePositionReach)
-         visualizePositionReach(session, robot, controlFrame);
-      if (visualizeRayReach)
-         visualizeRayReach(session, robot);
-      if (visualizePoseReach)
-         visualizePoseReach(session, robot);
+      voxelVisualization.get(VisualizationType.RayReach)
+                        .add(new VisualDefinition(rayReachableVizMeshBuilder.generateTriangleMesh3D(), new MaterialDefinition(ColorDefinitions.GreenYellow())));
+      voxelVisualization.get(VisualizationType.RayReach)
+                        .add(new VisualDefinition(rayUnreachableVizMeshBuilder.generateTriangleMesh3D(), new MaterialDefinition(ColorDefinitions.IndianRed())));
 
+      LogTools.info("Done generating visuals");
+
+      if (visualizePositionReach)
+      {
+         LogTools.info("Start exploring position reach");
+         visualizePositionReach(session, robot, controlFrame);
+         LogTools.info("Done exploring position reach");
+      }
+      if (visualizeRayReach)
+      {
+         LogTools.info("Start exploring ray reach");
+         visualizeRayReach(session, robot);
+         LogTools.info("Done exploring ray reach");
+      }
+      if (visualizePoseReach)
+      {
+         LogTools.info("Start exploring ray reach");
+         visualizePoseReach(session, robot);
+         LogTools.info("Done exploring ray reach");
+      }
+
+      LogTools.info("Cropping buffer");
       sessionControls.cropBuffer();
+      LogTools.info("Restarting session's thread");
       session.startSessionThread();
+      LogTools.info("Done");
       guiControls.waitUntilDown();
    }
 
