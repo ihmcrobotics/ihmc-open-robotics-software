@@ -91,6 +91,10 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
 
+   private final YoBoolean useNaturalPostureCommand = new YoBoolean("useNaturalPostureCommand", registry);
+   private final YoBoolean useBodyManagerCommands = new YoBoolean("useBodyManagerCommands", registry);
+   private final YoBoolean usePelvisOrientationCommand = new YoBoolean("usePelvisOrientationCommand", registry);
+
    private final YoDouble yoTime;
 
    private final HighLevelControlManagerFactory managerFactory;
@@ -158,6 +162,10 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
                                              WalkingControllerParameters walkingControllerParameters,
                                              HighLevelHumanoidControllerToolbox controllerToolbox)
    {
+      useNaturalPostureCommand.set(true);
+      useBodyManagerCommands.set(true);
+      usePelvisOrientationCommand.set(true);
+
       this.managerFactory = managerFactory;
 
       // Getting parameters from the HighLevelHumanoidControllerToolbox
@@ -903,19 +911,30 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          controllerCoreCommand.addInverseDynamicsCommand(planeContactStateCommand);
       }
 
-//      for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
-//      {
-//         RigidBodyControlManager bodyManager = bodyManagers.get(managerIdx);
-//         if (bodyManager != null)
-//         {
-//            controllerCoreCommand.addFeedbackControlCommand(bodyManager.getFeedbackControlCommand());
-//            controllerCoreCommand.addInverseDynamicsCommand(bodyManager.getInverseDynamicsCommand());
-//         }
-//      }
-
-//            controllerCoreCommand.addFeedbackControlCommand(pelvisOrientationManager.getFeedbackControlCommand());
-      //      controllerCoreCommand.addInverseDynamicsCommand(pelvisOrientationManager.getInverseDynamicsCommand());
-      controllerCoreCommand.addInverseDynamicsCommand(naturalPostureManager.getQPObjectiveCommand());
+      if (useBodyManagerCommands.getValue())
+      {
+         for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
+         {
+            RigidBodyControlManager bodyManager = bodyManagers.get(managerIdx);
+            if (bodyManager != null)
+            {
+               controllerCoreCommand.addFeedbackControlCommand(bodyManager.getFeedbackControlCommand());
+               controllerCoreCommand.addInverseDynamicsCommand(bodyManager.getInverseDynamicsCommand());
+            }
+         }
+      }
+      
+      if (useNaturalPostureCommand.getValue())
+      {
+         controllerCoreCommand.addInverseDynamicsCommand(naturalPostureManager.getQPObjectiveCommand());
+      }
+      
+      if (usePelvisOrientationCommand.getValue())
+      {
+         controllerCoreCommand.addFeedbackControlCommand(pelvisOrientationManager.getFeedbackControlCommand());
+         //      controllerCoreCommand.addInverseDynamicsCommand(pelvisOrientationManager.getInverseDynamicsCommand());
+      }
+      
       controllerCoreCommand.addFeedbackControlCommand(comHeightManager.getFeedbackControlCommand());
 
       controllerCoreCommand.addInverseDynamicsCommand(controllerCoreOptimizationSettings.getCommand());
