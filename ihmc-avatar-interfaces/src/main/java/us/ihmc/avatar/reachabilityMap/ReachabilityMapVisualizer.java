@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.function.ToDoubleFunction;
 
 import org.ejml.data.DMatrixRMaj;
 
@@ -477,6 +478,9 @@ public class ReachabilityMapVisualizer
       private static final String RayReachA = "RayReachA";
       private static final String RayReachB = "RayReachB";
       private static final String PoseReach = "PoseReach";
+      private static final String NeighborhoodDexterity6 = "NeighborhoodDexterity 6";
+      private static final String NeighborhoodDexterity18 = "NeighborhoodDexterity 18";
+      private static final String NeighborhoodDexterity26 = "NeighborhoodDexterity 26";
 
       @FXML
       private Stage stage;
@@ -493,7 +497,13 @@ public class ReachabilityMapVisualizer
 
       public void initialize()
       {
-         visualizationTypeComboBox.setItems(FXCollections.observableArrayList(PositionReach, RayReachA, RayReachB, PoseReach));
+         visualizationTypeComboBox.setItems(FXCollections.observableArrayList(PositionReach,
+                                                                              RayReachA,
+                                                                              RayReachB,
+                                                                              PoseReach,
+                                                                              NeighborhoodDexterity6,
+                                                                              NeighborhoodDexterity18,
+                                                                              NeighborhoodDexterity26));
 
          FramePoint3D minPoint = reachabilityMap.getMinPoint();
          FramePoint3D maxPoint = reachabilityMap.getMaxPoint();
@@ -531,6 +541,12 @@ public class ReachabilityMapVisualizer
             visuals = generateRayReachBVisuals(bbx);
          else if (selectedItem.equals(PoseReach))
             visuals = generatePoseReachVisuals(bbx);
+         else if (selectedItem.equals(NeighborhoodDexterity6))
+            visuals = generateNeighborhoodDexterity6Visuals(bbx);
+         else if (selectedItem.equals(NeighborhoodDexterity18))
+            visuals = generateNeighborhoodDexterity18Visuals(bbx);
+         else if (selectedItem.equals(NeighborhoodDexterity26))
+            visuals = generateNeighborhoodDexterity26Visuals(bbx);
          else
             visuals = null;
 
@@ -542,28 +558,12 @@ public class ReachabilityMapVisualizer
 
       private List<VisualDefinition> generatePositionReachVisuals(BoundingBox3D bbx)
       {
-         List<VisualDefinition> visuals = new ArrayList<>();
-
-         for (int voxelIndex = 0; voxelIndex < reachabilityMap.getNumberOfVoxels(); voxelIndex++)
-         {
-            Voxel3DData voxel = reachabilityMap.getVoxel(voxelIndex);
-            if (voxel != null && bbx.isInsideInclusive(voxel.getPosition()))
-               visuals.add(ReachabilityMapTools.createPositionReachabilityVisual(voxel, 0.2, true));
-         }
-         return visuals;
+         return generateMetricVisual(bbx, voxel -> 1.0);
       }
 
       private List<VisualDefinition> generateRayReachAVisuals(BoundingBox3D bbx)
       {
-         List<VisualDefinition> visuals = new ArrayList<>();
-
-         for (int voxelIndex = 0; voxelIndex < reachabilityMap.getNumberOfVoxels(); voxelIndex++)
-         {
-            Voxel3DData voxel = reachabilityMap.getVoxel(voxelIndex);
-            if (voxel != null && bbx.isInsideInclusive(voxel.getPosition()) && voxel.getR() > 1e-3)
-               visuals.add(ReachabilityMapTools.createRReachabilityVisual(voxel, 0.25, voxel.getR()));
-         }
-         return visuals;
+         return generateMetricVisual(bbx, Voxel3DData::getR);
       }
 
       private List<VisualDefinition> generateRayReachBVisuals(BoundingBox3D bbx)
@@ -589,13 +589,33 @@ public class ReachabilityMapVisualizer
 
       private List<VisualDefinition> generatePoseReachVisuals(BoundingBox3D bbx)
       {
+         return generateMetricVisual(bbx, Voxel3DData::getR2);
+      }
+
+      private List<VisualDefinition> generateNeighborhoodDexterity6Visuals(BoundingBox3D bbx)
+      {
+         return generateMetricVisual(bbx, Voxel3DData::computeD06);
+      }
+
+      private List<VisualDefinition> generateNeighborhoodDexterity18Visuals(BoundingBox3D bbx)
+      {
+         return generateMetricVisual(bbx, Voxel3DData::computeD018);
+      }
+
+      private List<VisualDefinition> generateNeighborhoodDexterity26Visuals(BoundingBox3D bbx)
+      {
+         return generateMetricVisual(bbx, Voxel3DData::computeD026);
+      }
+
+      private List<VisualDefinition> generateMetricVisual(BoundingBox3D bbx, ToDoubleFunction<Voxel3DData> metricFunction)
+      {
          List<VisualDefinition> visuals = new ArrayList<>();
 
          for (int voxelIndex = 0; voxelIndex < reachabilityMap.getNumberOfVoxels(); voxelIndex++)
          {
             Voxel3DData voxel = reachabilityMap.getVoxel(voxelIndex);
             if (voxel != null && bbx.isInsideInclusive(voxel.getPosition()) && voxel.getR() > 1e-3)
-               visuals.add(ReachabilityMapTools.createRReachabilityVisual(voxel, 0.25, voxel.getR2()));
+               visuals.add(ReachabilityMapTools.createMetricVisual(voxel, 0.25, metricFunction.applyAsDouble(voxel)));
          }
          return visuals;
       }

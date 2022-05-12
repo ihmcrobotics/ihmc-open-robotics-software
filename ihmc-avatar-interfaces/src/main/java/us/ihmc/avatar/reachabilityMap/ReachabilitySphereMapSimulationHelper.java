@@ -136,7 +136,7 @@ public class ReachabilitySphereMapSimulationHelper
 
       calculator.setVoxelUnreachableListener(voxel ->
       {
-         voxelVisualization.get(VisualizationType.Unreachable).add(ReachabilityMapTools.createRReachabilityVisual(voxel, 0.1, (double) -1));
+         voxelVisualization.get(VisualizationType.Unreachable).add(ReachabilityMapTools.createMetricVisual(voxel, 0.1, (double) -1));
       });
 
       calculator.setVoxelCompletedListener(voxel ->
@@ -145,12 +145,12 @@ public class ReachabilitySphereMapSimulationHelper
 
          if (voxel.getR() > 1e-3)
          {
-            voxelVisualization.get(VisualizationType.RayReach).add(ReachabilityMapTools.createRReachabilityVisual(voxel, 0.25, voxel.getR()));
-            voxelVisualization.get(VisualizationType.PoseReach).add(ReachabilityMapTools.createRReachabilityVisual(voxel, 0.25, voxel.getR2()));
+            voxelVisualization.get(VisualizationType.RayReach).add(ReachabilityMapTools.createMetricVisual(voxel, 0.25, voxel.getR()));
+            voxelVisualization.get(VisualizationType.PoseReach).add(ReachabilityMapTools.createMetricVisual(voxel, 0.25, voxel.getR2()));
          }
          else
          {
-            voxelVisualization.get(VisualizationType.Unreachable).add(ReachabilityMapTools.createRReachabilityVisual(voxel, 0.1, (double) -1));
+            voxelVisualization.get(VisualizationType.Unreachable).add(ReachabilityMapTools.createMetricVisual(voxel, 0.1, (double) -1));
          }
       });
 

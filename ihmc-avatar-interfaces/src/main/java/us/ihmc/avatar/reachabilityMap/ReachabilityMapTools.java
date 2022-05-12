@@ -113,16 +113,16 @@ public class ReachabilityMapTools
       return new VisualDefinition(voxelLocationLocal, new Sphere3DDefinition(scale * voxel.getSize() / 2.0, 16), materialDefinition);
    }
 
-   public static VisualDefinition createRReachabilityVisual(Voxel3DData voxel, double scale, double reachabilityValue)
+   public static VisualDefinition createMetricVisual(Voxel3DData voxel, double scale, double qualityValue)
    {
       FramePoint3D voxelLocationLocal = new FramePoint3D(voxel.getPosition());
       voxelLocationLocal.changeFrame(ReferenceFrame.getWorldFrame());
 
       ColorDefinition color;
-      if (reachabilityValue == -1.0)
+      if (qualityValue == -1.0)
          color = ColorDefinitions.Black();
       else
-         color = ColorDefinitions.hsb(0.7 * reachabilityValue * 360.0, 1, 1);
+         color = ColorDefinitions.hsb(0.7 * qualityValue * 360.0, 1, 1);
       MaterialDefinition materialDefinition = new MaterialDefinition(color);
       materialDefinition.setShininess(10);
       return new VisualDefinition(voxelLocationLocal, new Sphere3DDefinition(scale * voxel.getSize() / 2.0, 16), materialDefinition);
