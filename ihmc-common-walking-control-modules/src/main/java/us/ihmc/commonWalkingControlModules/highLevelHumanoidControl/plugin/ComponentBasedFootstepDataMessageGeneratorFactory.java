@@ -149,7 +149,17 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
       if (heightMapField.hasValue() && heightMapField.get() != null)
          continuousStepGenerator.setHeightMapBasedFootstepAdjustment(heightMapField.get());
 
-      if (csgCommandInputManagerField.hasValue())
+      if (useHeadingAndVelocityScriptField.get())
+      {
+         HeadingAndVelocityEvaluationScript script = new HeadingAndVelocityEvaluationScript(updateDT,
+                                                                                            timeProvider,
+                                                                                            headingAndVelocityEvaluationScriptParametersField.get(),
+                                                                                            registryField.get());
+         continuousStepGenerator.setDesiredTurningVelocityProvider(script.getDesiredTurningVelocityProvider());
+         continuousStepGenerator.setDesiredVelocityProvider(script.getDesiredVelocityProvider());
+         updatables.add(script);
+      }
+      else if (csgCommandInputManagerField.hasValue())
       {
          continuousStepGenerator.setDesiredVelocityProvider(csgCommandInputManagerField.get().createDesiredVelocityProvider());
          continuousStepGenerator.setDesiredTurningVelocityProvider(csgCommandInputManagerField.get().createDesiredTurningVelocityProvider());
@@ -160,16 +170,6 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
          //this is probably not the way the class was intended to be modified.
          csgCommandInputManagerField.get().setCSG(continuousStepGenerator);
          
-      }
-      else if (useHeadingAndVelocityScriptField.get())
-      {
-         HeadingAndVelocityEvaluationScript script = new HeadingAndVelocityEvaluationScript(updateDT,
-                                                                                            timeProvider,
-                                                                                            headingAndVelocityEvaluationScriptParametersField.get(),
-                                                                                            registryField.get());
-         continuousStepGenerator.setDesiredTurningVelocityProvider(script.getDesiredTurningVelocityProvider());
-         continuousStepGenerator.setDesiredVelocityProvider(script.getDesiredVelocityProvider());
-         updatables.add(script);
       }
       else
       {
