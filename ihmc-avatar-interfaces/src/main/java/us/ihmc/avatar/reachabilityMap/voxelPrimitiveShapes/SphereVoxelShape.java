@@ -1,16 +1,13 @@
 package us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes;
 
-import us.ihmc.avatar.reachabilityMap.ReachabilityMapTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
-import us.ihmc.scs2.definition.visual.VisualDefinition;
 
 /**
  * SphereVoxelShape creates N points uniformly distributed on the surface of a sphere. For each
@@ -31,7 +28,6 @@ public class SphereVoxelShape
    private final Point3D[] pointsOnSphere;
    /** Origin of the sphere in the current voxel coordinate. Should probably always be set to zero. */
    private final Point3D sphereOrigin = new Point3D();
-   private final double voxelSize;
 
    private final int numberOfRays;
    private final int numberOfRotationsAroundRay;
@@ -41,7 +37,6 @@ public class SphereVoxelShape
 
    public SphereVoxelShape(double voxelSize, int numberOfRays, int numberOfRotationsAroundRay, SphereVoxelType type)
    {
-      this.voxelSize = voxelSize;
       this.type = type;
       this.numberOfRays = numberOfRays;
       this.numberOfRotationsAroundRay = numberOfRotationsAroundRay;
@@ -100,15 +95,5 @@ public class SphereVoxelShape
    public Point3D[] getPointsOnSphere()
    {
       return pointsOnSphere;
-   }
-
-   public VisualDefinition createPositionReachabilityVisual(FramePoint3DReadOnly voxelLocation, double scale, boolean reachable)
-   {
-      return ReachabilityMapTools.createPositionReachabilityVisual(voxelLocation, scale * voxelSize / 2.0, reachable);
-   }
-
-   public VisualDefinition createRReachabilityVisual(FramePoint3DReadOnly voxelLocation, double scale, double reachabilityValue)
-   {
-      return ReachabilityMapTools.createRReachabilityVisual(voxelLocation, scale * voxelSize / 2.0, reachabilityValue);
    }
 }
