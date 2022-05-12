@@ -1,5 +1,8 @@
 package us.ihmc.avatar.reachabilityMap;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.util.List;
 
 import javafx.application.Platform;
@@ -7,12 +10,20 @@ import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DData;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D32;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.scs2.definition.geometry.Sphere3DDefinition;
+import us.ihmc.scs2.definition.geometry.TriangleMesh3DDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
+import us.ihmc.scs2.definition.visual.TextureDefinition;
 import us.ihmc.scs2.definition.visual.TriangleMesh3DBuilder;
 import us.ihmc.scs2.definition.visual.TriangleMesh3DFactories;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
@@ -117,30 +128,72 @@ public class ReachabilityMapTools
       return new VisualDefinition(voxelLocationLocal, new Sphere3DDefinition(scale * voxel.getSize() / 2.0, 16), materialDefinition);
    }
 
-   public static void createRReachabilityVisualStyle2(Voxel3DData voxel,
-                                                      double scale,
-                                                      TriangleMesh3DBuilder reachableMeshBuilder,
-                                                      TriangleMesh3DBuilder unreachableMeshBuilder)
+   public static void createVoxelRayHeatmap(Voxel3DData voxel,
+                                            double scale,
+                                            Point2DReadOnly reachableTextureCoord,
+                                            Point2DReadOnly unreachableTextureCoord,
+                                            TriangleMesh3DBuilder vizMeshBuilder)
    {
-      RigidBodyTransform transform = voxel.getPosition().getReferenceFrame().getTransformToRoot();
+      TriangleMesh3DDefinition mesh = TriangleMesh3DFactories.Sphere(scale * voxel.getSize() / 2.0, 8, 8);
 
-      Point3D rayStart = new Point3D(voxel.getPosition());
-      transform.transform(rayStart);
-      Point3D rayEnd = new Point3D();
-      Point3D[] pointsOnSphere = voxel.getSphereVoxelShape().getPointsOnSphere();
-      double lineWidth = scale * voxel.getSize() / 3.0;
-
-      for (int rayIndex = 0; rayIndex < voxel.getNumberOfRays(); rayIndex++)
+      for (int i = 0; i < mesh.getNormals().length; i++)
       {
-         rayEnd.set(pointsOnSphere[rayIndex]);
-         rayEnd.scale(scale);
-         rayEnd.add(voxel.getPosition());
-         transform.transform(rayEnd);
+         Point3D32 vertex = mesh.getVertices()[i];
+         vertex.add(voxel.getPosition());
+         Vector3D32 normal = mesh.getNormals()[i];
+         Point2D32 texture = mesh.getTextures()[i];
 
-         if (voxel.isRayReachable(rayIndex))
-            reachableMeshBuilder.addLine(rayStart, rayEnd, lineWidth);
-         else
-            unreachableMeshBuilder.addLine(rayStart, rayEnd, lineWidth);
+         double sumOfWeights = 0.0;
+         double reachabilityValue = 0.0;
+
+         for (int rayIndex = 0; rayIndex < voxel.getNumberOfRays(); rayIndex++)
+         {
+            Point3D pointOnVoxelSphere = voxel.getSphereVoxelShape().getPointsOnSphere()[rayIndex];
+            double rayDirectionX = pointOnVoxelSphere.getX() / voxel.getSize();
+            double rayDirectionY = pointOnVoxelSphere.getY() / voxel.getSize();
+            double rayDirectionZ = pointOnVoxelSphere.getZ() / voxel.getSize();
+
+            double weight = TupleTools.dot(rayDirectionX, rayDirectionY, rayDirectionZ, normal);
+
+            if (weight <= 0.0)
+            {
+               continue;
+            }
+            else
+            {
+               boolean isRayReachable = voxel.isRayReachable(rayIndex);
+               sumOfWeights += weight;
+               reachabilityValue += weight * (isRayReachable ? 1.0 : 0.0);
+            }
+         }
+
+         reachabilityValue /= sumOfWeights;
+         texture.interpolate(unreachableTextureCoord, reachableTextureCoord, reachabilityValue);
       }
+
+      RigidBodyTransform pose = voxel.getPosition().getReferenceFrame().getTransformToRoot();
+      vizMeshBuilder.addTriangleMesh3D(mesh, pose.getTranslation(), pose.getRotation());
+   }
+
+   public static TextureDefinition generateReachabilityGradient(double unreachableHue, double reachableHue)
+   {
+      return new TextureDefinition(createGradientImage(128, 4, unreachableHue, reachableHue));
+   }
+
+   private static BufferedImage createGradientImage(int width, int height, double hueStart, double hueEnd)
+   {
+
+      BufferedImage gradientImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+      Graphics2D graphics2D = gradientImage.createGraphics();
+
+      for (int x = 0; x < width; x++)
+      {
+         double hue = EuclidCoreTools.interpolate(hueStart, hueEnd, x / (width - 1.0));
+         graphics2D.setColor(Color.getHSBColor((float) hue, 1, 1));
+         graphics2D.drawRect(x, 0, 1, height);
+      }
+
+      graphics2D.dispose();
+      return gradientImage;
    }
 }

@@ -23,6 +23,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.log.LogTools;
@@ -185,8 +186,10 @@ public class ReachabilityMapVisualizer
          previousEvaluation.set(currentEvaluation.getValue());
       });
 
-      TriangleMesh3DBuilder rayReachableVizMeshBuilder = new TriangleMesh3DBuilder();
-      TriangleMesh3DBuilder rayUnreachableVizMeshBuilder = new TriangleMesh3DBuilder();
+      TriangleMesh3DBuilder vizMeshBuilder = new TriangleMesh3DBuilder();
+
+      Point2D unreachableTexture = new Point2D(0.0, 0.5);
+      Point2D reachableTexture = new Point2D(1.0, 0.5);
 
       for (int voxelIndex = 0; voxelIndex < reachabilityMap.getNumberOfVoxels(); voxelIndex++)
       {
@@ -204,8 +207,7 @@ public class ReachabilityMapVisualizer
 
             if (voxel.getR() > 1e-3)
             {
-               ReachabilityMapTools.createRReachabilityVisualStyle2(voxel, 0.25, rayReachableVizMeshBuilder, rayUnreachableVizMeshBuilder);
-               //               voxelVisualization.get(VisualizationType.RayReach).add(ReachabilityMapTools.createRReachabilityVisual(voxel, 0.25, voxel.getR()));
+               ReachabilityMapTools.createVoxelRayHeatmap(voxel, 0.25, reachableTexture, unreachableTexture, vizMeshBuilder);
                voxelVisualization.get(VisualizationType.PoseReach).add(ReachabilityMapTools.createRReachabilityVisual(voxel, 0.25, voxel.getR2()));
             }
             else
@@ -216,9 +218,7 @@ public class ReachabilityMapVisualizer
       }
 
       voxelVisualization.get(VisualizationType.RayReach)
-                        .add(new VisualDefinition(rayReachableVizMeshBuilder.generateTriangleMesh3D(), new MaterialDefinition(ColorDefinitions.GreenYellow())));
-      voxelVisualization.get(VisualizationType.RayReach)
-                        .add(new VisualDefinition(rayUnreachableVizMeshBuilder.generateTriangleMesh3D(), new MaterialDefinition(ColorDefinitions.IndianRed())));
+                        .add(new VisualDefinition(vizMeshBuilder.generateTriangleMesh3D(), new MaterialDefinition(ReachabilityMapTools.generateReachabilityGradient(0.0, 0.7))));
 
       LogTools.info("Done generating visuals");
 
