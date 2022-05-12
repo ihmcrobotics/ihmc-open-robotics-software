@@ -7,10 +7,13 @@ import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DData;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.scs2.definition.geometry.Sphere3DDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
+import us.ihmc.scs2.definition.visual.TriangleMesh3DBuilder;
 import us.ihmc.scs2.definition.visual.TriangleMesh3DFactories;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
@@ -112,5 +115,32 @@ public class ReachabilityMapTools
       MaterialDefinition materialDefinition = new MaterialDefinition(color);
       materialDefinition.setShininess(10);
       return new VisualDefinition(voxelLocationLocal, new Sphere3DDefinition(scale * voxel.getSize() / 2.0, 16), materialDefinition);
+   }
+
+   public static void createRReachabilityVisualStyle2(Voxel3DData voxel,
+                                                      double scale,
+                                                      TriangleMesh3DBuilder reachableMeshBuilder,
+                                                      TriangleMesh3DBuilder unreachableMeshBuilder)
+   {
+      RigidBodyTransform transform = voxel.getPosition().getReferenceFrame().getTransformToRoot();
+
+      Point3D rayStart = new Point3D(voxel.getPosition());
+      transform.transform(rayStart);
+      Point3D rayEnd = new Point3D();
+      Point3D[] pointsOnSphere = voxel.getSphereVoxelShape().getPointsOnSphere();
+      double lineWidth = scale * voxel.getSize() / 3.0;
+
+      for (int rayIndex = 0; rayIndex < voxel.getNumberOfRays(); rayIndex++)
+      {
+         rayEnd.set(pointsOnSphere[rayIndex]);
+         rayEnd.scale(scale);
+         rayEnd.add(voxel.getPosition());
+         transform.transform(rayEnd);
+
+         if (voxel.isRayReachable(rayIndex))
+            reachableMeshBuilder.addLine(rayStart, rayEnd, lineWidth);
+         else
+            unreachableMeshBuilder.addLine(rayStart, rayEnd, lineWidth);
+      }
    }
 }

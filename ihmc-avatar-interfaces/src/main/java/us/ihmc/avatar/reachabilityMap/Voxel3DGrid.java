@@ -427,6 +427,11 @@ public class Voxel3DGrid implements ReferenceFrameHolder
          return position;
       }
 
+      public SphereVoxelShape getSphereVoxelShape()
+      {
+         return sphereVoxelShape;
+      }
+
       public int getNumberOfRays()
       {
          return sphereVoxelShape.getNumberOfRays();
