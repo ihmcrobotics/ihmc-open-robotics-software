@@ -257,6 +257,8 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
             return false;
          if (estimatorRan ^ other.estimatorRan)
             return false;
+         if (perceptionRan ^ other.perceptionRan)
+            return false;
          if (!processedJointData.equals(other.processedJointData))
             return false;
          if (!forceSensorDataHolder.equals(other.forceSensorDataHolder))
