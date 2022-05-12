@@ -39,7 +39,6 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
    private final YoBoolean runCSG = new YoBoolean("RunCSG", csgRegistry);
 
    private final PlanarRegionFootstepSnapper planarRegionFootstepSnapper;
-   private final CommandInputManager walkingCommandInputManager;
    private final CommandInputManager csgCommandInputManager;
 
    public AvatarStepGeneratorThread(ComponentBasedFootstepDataMessageGeneratorFactory csgPluginFactory,
@@ -47,11 +46,9 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
                                     StatusMessageOutputManager walkingOutputManager,
                                     CommandInputManager walkingCommandInputManager,
                                     DRCRobotModel drcRobotModel,
-                                    RealtimeROS2Node ros2Node,
                                     double perceptionDt)
    {
       this.fullRobotModel = drcRobotModel.createFullRobotModel();
-      this.walkingCommandInputManager = walkingCommandInputManager;
       contextDataFactory.setSensorDataContext(new SensorDataContext(fullRobotModel));
       humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
 
