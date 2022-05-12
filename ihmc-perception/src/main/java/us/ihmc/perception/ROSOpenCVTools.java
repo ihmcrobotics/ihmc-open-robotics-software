@@ -18,7 +18,7 @@ import java.util.Vector;
 
 public class ROSOpenCVTools
 {
-   public static void backMatWithNettyBuffer(Mat mat, ChannelBuffer channelBuffer)
+   public static ByteBuffer getAsDirectByteBuffer(ChannelBuffer channelBuffer)
    {
       ByteBuffer slicedBuffer = RosTools.sliceNettyBuffer(channelBuffer);
       ByteBuffer slicedDirectBuffer;
@@ -35,7 +35,12 @@ public class ROSOpenCVTools
          slicedDirectBuffer = slicedBuffer;
       }
 
-      BytePointer imageDataPointer = new BytePointer(slicedDirectBuffer);
+      return slicedDirectBuffer;
+   }
+
+   public static void backMatWithNettyBuffer(Mat mat, ChannelBuffer channelBuffer)
+   {
+      BytePointer imageDataPointer = new BytePointer(getAsDirectByteBuffer(channelBuffer));
       mat.data(imageDataPointer);
    }
 

@@ -33,7 +33,7 @@ public class AtlasPushRecoveryWithCrossOverWalkingTest extends AvatarPushRecover
    @Override
    public double getOutwardPushDelta()
    {
-      return 0.9;
+      return 0.75;
    }
 
    @Override
