@@ -4,6 +4,7 @@ import gnu.trove.map.TObjectDoubleMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.AvatarEstimatorThread;
+import us.ihmc.avatar.AvatarStepGeneratorThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.avatar.factory.DisposableRobotController;
@@ -42,6 +43,7 @@ public class SCS2AvatarSimulation
    private HumanoidRobotContextData masterContext;
    private AvatarEstimatorThread estimatorThread;
    private AvatarControllerThread controllerThread;
+   private AvatarStepGeneratorThread stepGeneratorThread;
    private SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
    private FullHumanoidRobotModel controllerFullRobotModel;
    private RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup;
@@ -162,6 +164,7 @@ public class SCS2AvatarSimulation
       SubtreeStreams.fromChildren(OneDoFJointBasics.class, robot.getRootBody()).forEach(joint -> jointPositions.put(joint.getName(), joint.getQ()));
       estimatorThread.initializeStateEstimators(rootJointTransform, jointPositions);
       controllerThread.initialize();
+      stepGeneratorThread.initialize();
       masterContext.set(estimatorThread.getHumanoidRobotContextData());
 
       simulationSession.reinitializeSession();
@@ -272,6 +275,11 @@ public class SCS2AvatarSimulation
    public AvatarControllerThread getControllerThread()
    {
       return controllerThread;
+   }
+
+   public void setStepGeneratorThread(AvatarStepGeneratorThread stepGeneratorThread)
+   {
+      this.stepGeneratorThread = stepGeneratorThread;
    }
 
    public void setSimulatedRobotTimeProvider(SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider)

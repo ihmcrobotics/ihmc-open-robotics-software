@@ -98,15 +98,17 @@ public abstract class AvatarFlatGroundFastWalkingTest implements MultiRobotTestI
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
                                                                                                                                              flatGround,
                                                                                                                                              simulationTestingParameters);
-      simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+
       if (cheatWithGroundHeightAtForFootstep)
-         simulationTestHelper.getHighLevelHumanoidControllerFactory().createComponentBasedFootstepDataMessageGenerator(useVelocityAndHeadingScript,
-                                                                                                                       walkingScriptParameters);
+         simulationTestHelperFactory.setComponentBasedFootstepDataMessageGeneratorParameters(useVelocityAndHeadingScript,
+                                                                                             walkingScriptParameters);
       else
-         simulationTestHelper.getHighLevelHumanoidControllerFactory().createComponentBasedFootstepDataMessageGenerator(useVelocityAndHeadingScript,
-                                                                                                                       flatGround.getTerrainObject3D()
-                                                                                                                                 .getHeightMapIfAvailable(),
-                                                                                                                       walkingScriptParameters);
+         simulationTestHelperFactory.setComponentBasedFootstepDataMessageGeneratorParameters(useVelocityAndHeadingScript,
+                                                                                             flatGround.getTerrainObject3D().getHeightMapIfAvailable(),
+                                                                                             walkingScriptParameters);
+
+      simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+
       simulationTestHelper.start();
    }
 }

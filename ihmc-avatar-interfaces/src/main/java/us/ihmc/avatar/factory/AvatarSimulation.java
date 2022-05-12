@@ -123,6 +123,7 @@ public class AvatarSimulation
       robotInitialSetup.initializeRobot(humanoidFloatingRootJointRobot);
       AvatarSimulationFactory.initializeEstimator(humanoidFloatingRootJointRobot, stateEstimationThread);
       controllerThread.initialize();
+      stepGeneratorThread.initialize();
 
       // Otehrwise the master context gets overridden by the estimator and controller contexts.
       masterContext.setControllerRan(false);
