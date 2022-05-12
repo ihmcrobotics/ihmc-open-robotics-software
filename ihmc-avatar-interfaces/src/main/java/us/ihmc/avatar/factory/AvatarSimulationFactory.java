@@ -764,7 +764,6 @@ public class AvatarSimulationFactory
       this.externalPelvisCorrectorSubscriber.set(externalPelvisCorrectorSubscriber);
    }
 
-
    public void setComponentBasedFootstepDataMessageGeneratorParameters(boolean useHeadingAndVelocityScript,
                                                                 HeadingAndVelocityEvaluationScriptParameters headingAndVelocityEvaluationScriptParameters)
    {
