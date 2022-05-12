@@ -8,6 +8,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.nio.NioDatagramChannel;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple3D.Point3D32;
 
 import java.util.HashSet;
@@ -64,5 +65,16 @@ public class NettyOuster
    public HashSet<Point3D32> getPoints()
    {
       return points; //TODO points should be updated somewhere before this method for points to actually render
+   }
+
+   public static void main(String[] args)
+   {
+      NettyOuster nettyOuster = new NettyOuster();
+      nettyOuster.initialize();
+      nettyOuster.start();
+
+      Runtime.getRuntime().addShutdownHook(new Thread(nettyOuster::stop));
+
+      ThreadTools.sleepForever();
    }
 }
