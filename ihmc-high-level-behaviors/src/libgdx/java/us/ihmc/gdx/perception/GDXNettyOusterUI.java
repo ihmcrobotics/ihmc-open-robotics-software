@@ -1,7 +1,6 @@
 package us.ihmc.gdx.perception;
 
 import imgui.ImGui;
-import org.bytedeco.javacpp.BytePointer;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.gdx.GDXPointCloudRenderer;
