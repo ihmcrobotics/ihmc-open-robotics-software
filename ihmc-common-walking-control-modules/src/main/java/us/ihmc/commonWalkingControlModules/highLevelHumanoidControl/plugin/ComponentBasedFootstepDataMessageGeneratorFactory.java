@@ -90,7 +90,7 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
       if (csgCommandInputManagerField.hasValue())
          return csgCommandInputManagerField.get();
       else
-         return null;
+         return setCSGCommandInputManager();
    }
 
    @Override

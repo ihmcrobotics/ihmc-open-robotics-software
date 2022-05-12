@@ -10,14 +10,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import controller_msgs.msg.dds.StampedPosePacket;
 import gnu.trove.map.TObjectDoubleMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
-import us.ihmc.avatar.AvatarControllerThread;
-import us.ihmc.avatar.AvatarEstimatorThread;
-import us.ihmc.avatar.AvatarEstimatorThreadFactory;
-import us.ihmc.avatar.AvatarSimulatedHandControlThread;
-import us.ihmc.avatar.BarrierSchedulerTools;
-import us.ihmc.avatar.ControllerTask;
-import us.ihmc.avatar.EstimatorTask;
-import us.ihmc.avatar.SimulationRobotVisualizer;
+import us.ihmc.avatar.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.avatar.drcRobot.shapeContactSettings.DRCRobotModelShapeCollisionSettings;
@@ -28,6 +21,7 @@ import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ComponentBasedFootstepDataMessageGeneratorFactory;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler.TaskOverrunBehavior;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -83,10 +77,12 @@ import us.ihmc.tools.factories.RequiredFactoryField;
 import us.ihmc.tools.gui.AWTTools;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.yoVariables.euclid.referenceFrame.interfaces.FrameIndexMap;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class AvatarSimulationFactory
 {
+
    private final RequiredFactoryField<DRCRobotModel> robotModel = new RequiredFactoryField<>("robotModel");
    private final RequiredFactoryField<HighLevelHumanoidControllerFactory> highLevelHumanoidControllerFactory = new RequiredFactoryField<>("highLevelHumanoidControllerFactory");
    private final RequiredFactoryField<CommonAvatarEnvironmentInterface> commonAvatarEnvironment = new RequiredFactoryField<>("commonAvatarEnvironmentInterface");
@@ -102,6 +98,8 @@ public class AvatarSimulationFactory
    private final OptionalFactoryField<Boolean> logToFile = new OptionalFactoryField<>("logToFile");
    private final OptionalFactoryField<PelvisPoseCorrectionCommunicatorInterface> externalPelvisCorrectorSubscriber = new OptionalFactoryField<>("externalPelvisCorrectorSubscriber");
 
+   private final DoubleProvider perceptionDTProvider = () -> robotModel.get().getControllerDT() * 10.0;
+
    // TO CONSTRUCT
    private HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot;
    private YoVariableServer yoVariableServer;
@@ -112,6 +110,7 @@ public class AvatarSimulationFactory
    private DRCOutputProcessor simulationOutputProcessor;
    private AvatarEstimatorThread estimatorThread;
    private AvatarControllerThread controllerThread;
+   private AvatarStepGeneratorThread stepGeneratorThread;
    private DisposableRobotController robotController;
    private SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
    private ActualCMPComputer actualCMPComputer;
@@ -302,6 +301,20 @@ public class AvatarSimulationFactory
                                                     robotModel.get().getEstimatorDT());
    }
 
+   private void setupStepGeneratorThread()
+   {
+      HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
+      ComponentBasedFootstepDataMessageGeneratorFactory componentBasedFootstepDataMessageGeneratorFactory = new ComponentBasedFootstepDataMessageGeneratorFactory();
+      componentBasedFootstepDataMessageGeneratorFactory.setRegistry();
+      componentBasedFootstepDataMessageGeneratorFactory.setUseHeadingAndVelocityScript(false);
+
+      stepGeneratorThread = new AvatarStepGeneratorThread(componentBasedFootstepDataMessageGeneratorFactory, contextDataFactory,
+                                                    highLevelHumanoidControllerFactory.get().getStatusOutputManager(),
+                                                    highLevelHumanoidControllerFactory.get().getCommandInputManager(),
+                                                    robotModel.get(),
+                                                    perceptionDTProvider.getValue());
+   }
+
    private void createMasterContext()
    {
       // Create intermediate data buffer for threading.
@@ -317,9 +330,11 @@ public class AvatarSimulationFactory
       // Create the tasks that will be run on their own threads.
       int estimatorDivisor = (int) Math.round(robotModel.getEstimatorDT() / robotModel.getSimulateDT());
       int controllerDivisor = (int) Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT());
+      int stepGeneratorDivisor = (int) Math.round(perceptionDTProvider.getValue() / robotModel.getSimulateDT()); // TODO make this not hard coded
       int handControlDivisor = (int) Math.round(robotModel.getSimulatedHandControlDT() / robotModel.getSimulateDT());
       HumanoidRobotControlTask estimatorTask = new EstimatorTask(estimatorThread, estimatorDivisor, robotModel.getSimulateDT(), masterFullRobotModel);
       HumanoidRobotControlTask controllerTask = new ControllerTask("Controller", controllerThread, controllerDivisor, robotModel.getSimulateDT(), masterFullRobotModel);
+      HumanoidRobotControlTask stepGeneratorTask = new ControllerTask("StepGenerator", stepGeneratorThread, stepGeneratorDivisor, robotModel.getControllerDT(), masterFullRobotModel);
 
       AvatarSimulatedHandControlThread handControlThread = robotModel.createSimulatedHandController(realtimeROS2Node.get());
       SimulatedHandControlTask handControlTask = null;
@@ -360,11 +375,14 @@ public class AvatarSimulationFactory
       if (simulationOutputProcessor != null)
       {
          controllerTask.addRunnableOnSchedulerThread(BarrierSchedulerTools.createProcessorUpdater(simulationOutputProcessor, controllerThread));
+         // TODO should this be done?
+//         controllerTask.addRunnableOnSchedulerThread(BarrierSchedulerTools.createProcessorUpdater(simulationOutputProcessor, stepGeneratorThread));
       }
 
       List<HumanoidRobotControlTask> tasks = new ArrayList<HumanoidRobotControlTask>();
       tasks.add(estimatorTask);
       tasks.add(controllerTask);
+      tasks.add(stepGeneratorTask);
       if (handControlTask != null)
          tasks.add(handControlTask);
 
@@ -387,6 +405,7 @@ public class AvatarSimulationFactory
          ArrayList<RegistrySendBufferBuilder> builders = new ArrayList<>();
          builders.add(new RegistrySendBufferBuilder(estimatorThread.getYoRegistry(), estimatorThread.getFullRobotModel().getElevator(), null));
          builders.add(new RegistrySendBufferBuilder(controllerThread.getYoVariableRegistry(), controllerThread.getYoGraphicsListRegistry()));
+         builders.add(new RegistrySendBufferBuilder(stepGeneratorThread.getYoVariableRegistry(), stepGeneratorThread.getYoGraphicsListRegistry()));
          intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(getClass().getSimpleName(),
                                                                          robotModel.getLogModelProvider(),
                                                                          builders,
@@ -407,6 +426,9 @@ public class AvatarSimulationFactory
          yoVariableServer.addRegistry(controllerThread.getYoVariableRegistry(), controllerThread.getYoGraphicsListRegistry());
          controllerTask.addRunnableOnTaskThread(() -> yoVariableServer.update(controllerThread.getHumanoidRobotContextData().getTimestamp(),
                                                                               controllerThread.getYoVariableRegistry()));
+         yoVariableServer.addRegistry(stepGeneratorThread.getYoVariableRegistry(), stepGeneratorThread.getYoGraphicsListRegistry());
+         stepGeneratorTask.addRunnableOnTaskThread(() -> yoVariableServer.update(stepGeneratorThread.getHumanoidRobotContextData().getTimestamp(),
+                                                                                 stepGeneratorThread.getYoVariableRegistry()));
       }
 
       // Add registry and graphics to SCS.
@@ -414,10 +436,14 @@ public class AvatarSimulationFactory
                                                                                          estimatorThread.getYoGraphicsListRegistry());
       SimulationRobotVisualizer controllerRobotVisualizer = new SimulationRobotVisualizer(controllerThread.getYoVariableRegistry(),
                                                                                           controllerThread.getYoGraphicsListRegistry());
+      SimulationRobotVisualizer stepGeneratorRobotVisualizer = new SimulationRobotVisualizer(stepGeneratorThread.getYoVariableRegistry(),
+                                                                                             stepGeneratorThread.getYoGraphicsListRegistry());
       estimatorTask.addRunnableOnSchedulerThread(() -> estimatorRobotVisualizer.update());
       controllerTask.addRunnableOnSchedulerThread(() -> controllerRobotVisualizer.update());
+      stepGeneratorTask.addRunnableOnSchedulerThread(() -> stepGeneratorRobotVisualizer.update());
       addRegistryAndGraphics(estimatorRobotVisualizer, robotController.getYoRegistry(), simulationConstructionSet);
       addRegistryAndGraphics(controllerRobotVisualizer, robotController.getYoRegistry(), simulationConstructionSet);
+      addRegistryAndGraphics(stepGeneratorRobotVisualizer, robotController.getYoRegistry(), simulationConstructionSet);
 
       if (handControlTask != null)
       {
@@ -619,6 +645,7 @@ public class AvatarSimulationFactory
       setupSimulationOutputProcessor();
       setupStateEstimationThread();
       setupControllerThread();
+      setupStepGeneratorThread();
       setupMultiThreadedRobotController();
       initializeStateEstimatorToActual();
       setupThreadedRobotController();
@@ -641,6 +668,7 @@ public class AvatarSimulationFactory
       avatarSimulation.setIntraprocessYoVariableLogger(intraprocessYoVariableLogger);
       avatarSimulation.setControllerThread(controllerThread);
       avatarSimulation.setStateEstimationThread(estimatorThread);
+      avatarSimulation.setStepGeneratorThread(stepGeneratorThread);
       avatarSimulation.setRobotController(robotController);
       avatarSimulation.setHumanoidFloatingRootJointRobot(humanoidFloatingRootJointRobot);
       avatarSimulation.setSimulatedRobotTimeProvider(simulatedRobotTimeProvider);

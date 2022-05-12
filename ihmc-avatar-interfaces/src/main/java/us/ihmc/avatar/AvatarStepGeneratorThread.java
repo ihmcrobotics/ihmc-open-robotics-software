@@ -71,7 +71,7 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
       contextDataFactory.setProcessedJointData(processedJointData);
       contextDataFactory.setSensorDataContext(new SensorDataContext(fullRobotModel));
       humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
-      csgCommandInputManager = csgPluginFactory.setCSGCommandInputManager().getCommandInputManager();
+      csgCommandInputManager = csgPluginFactory.getCSGCommandInputManager().getCommandInputManager();
 
       humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       csg = csgPluginFactory.buildPlugin(humanoidReferenceFrames,
