@@ -31,13 +31,14 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PlanarRegionFootstepSnapper implements FootstepAdjustment
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private final RecyclingArrayList<PlanarRegion> steppableRegionsList = new RecyclingArrayList<>(PlanarRegion::new);
+   private final List<PlanarRegion> steppableRegionsList = new ArrayList<>();
    private final SnapAndWiggleSingleStepParameters parameters = new SnapAndWiggleSingleStepParameters();
 
    private final FramePose3D footstepAtSameHeightAsStanceFoot = new FramePose3D();
@@ -74,26 +75,11 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
    }
 
 
-   public void setPlanarRegions(PlanarRegionsListCommand planarRegions)
+   public void setPlanarRegions(List<PlanarRegion> planarRegions)
    {
       steppableRegionsList.clear();
-      for (int i = 0; i < planarRegions.getNumberOfPlanarRegions(); i++)
-      {
-         PlanarRegionCommand candidateRegion = planarRegions.getPlanarRegionCommand(i);
-
-         double polygonArea = EuclidGeometryPolygonTools.computeConvexPolygon2DArea(candidateRegion.getConcaveHullsVertices(),
-                                                                                         candidateRegion.getConcaveHullsVertices().size(),
-                                                                                         true,
-                                                                                         null);
-         if (polygonArea > parameters.getMinPlanarRegionArea())
-            continue;
-
-         if (candidateRegion.getTransformToWorld().getM22() >= Math.cos(parameters.getMaxPlanarRegionAngle()))
-            continue;
-
-         PlanarRegion planarRegion = steppableRegionsList.add();
-         planarRegion.set(candidateRegion.getTransformToWorld(), candidateRegion.getConvexPolygons(), candidateRegion.getRegionId());
-      }
+      for (int i = 0; i < planarRegions.size(); i++)
+         steppableRegionsList.add(planarRegions.get(i));
    }
 
    private final ConvexPolygon2D footPolygonToSnapAndWiggle = new ConvexPolygon2D();

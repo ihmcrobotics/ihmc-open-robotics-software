@@ -1,6 +1,8 @@
 package us.ihmc.avatar;
 
 import us.ihmc.avatar.stepAdjustment.PlanarRegionFootstepSnapper;
+import us.ihmc.avatar.stepAdjustment.PlanarRegionStepConstraintCalculator;
+import us.ihmc.avatar.stepAdjustment.PlanarRegionsFilterForStepping;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -17,7 +19,10 @@ public class AvatarStepGeneratorController implements RobotController
    private final ContinuousStepGenerator continuousStepGenerator;
    private final CommandInputManager commandInputManager;
    private final DoubleProvider timeProvider;
+
+   private final PlanarRegionsFilterForStepping planarRegionsFilterForStepping = new PlanarRegionsFilterForStepping();
    private final PlanarRegionFootstepSnapper planarRegionFootstepSnapper;
+   private final PlanarRegionStepConstraintCalculator stepConstraintCalculator;
 
    public AvatarStepGeneratorController(ContinuousStepGenerator continuousStepGenerator,
                                         CommandInputManager commandInputManager,
@@ -31,7 +36,10 @@ public class AvatarStepGeneratorController implements RobotController
       planarRegionFootstepSnapper = new PlanarRegionFootstepSnapper(continuousStepGenerator,
                                                                     steppingParameters,
                                                                     registry);
+      stepConstraintCalculator = new PlanarRegionStepConstraintCalculator();
+
       continuousStepGenerator.setFootstepAdjustment(planarRegionFootstepSnapper);
+      continuousStepGenerator.setStepConstraintRegionCalculator(stepConstraintCalculator);
    }
 
    @Override
@@ -61,7 +69,11 @@ public class AvatarStepGeneratorController implements RobotController
          if (commandInputManager.isNewCommandAvailable(PlanarRegionsListCommand.class))
          {
             PlanarRegionsListCommand commands = commandInputManager.pollNewestCommand(PlanarRegionsListCommand.class);
-            planarRegionFootstepSnapper.setPlanarRegions(commands);
+
+            planarRegionsFilterForStepping.setPlanarRegions(commands);
+
+            planarRegionFootstepSnapper.setPlanarRegions(planarRegionsFilterForStepping.getPlanarRegions());
+            stepConstraintCalculator.setPlanarRegions(planarRegionsFilterForStepping.getPlanarRegions());
          }
 
          commandInputManager.clearCommands(PlanarRegionsListCommand.class);

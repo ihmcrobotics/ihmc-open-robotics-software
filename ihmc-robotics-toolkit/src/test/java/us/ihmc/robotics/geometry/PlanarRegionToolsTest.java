@@ -26,6 +26,7 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -1297,6 +1298,54 @@ public class PlanarRegionToolsTest
          }
       }
    }
+
+   @Test
+   public void testClosestPointOnPlanarRegion()
+   {
+      ConvexPolygon2D convexPolygon2D = new ConvexPolygon2D();
+      convexPolygon2D.addVertex(5.0, 5.0);
+      convexPolygon2D.addVertex(5.0, -5.0);
+      convexPolygon2D.addVertex(-5.0, -5.0);
+      convexPolygon2D.addVertex(-5.0, 5.0);
+      convexPolygon2D.update();
+
+      RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
+      rigidBodyTransform.getRotation().setToPitchOrientation(Math.toRadians(45.0));
+
+      PlanarRegion planarRegion = new PlanarRegion(rigidBodyTransform, convexPolygon2D);
+
+      Point3D pointAboveOrigin = new Point3D(0.0, 0.0, 1.0);
+
+      Point3D closestPoint = PlanarRegionTools.closestPointOnPlanarRegion(pointAboveOrigin, planarRegion);
+
+      double orthogonalDistance = Math.sin(Math.toRadians(45));
+      double axialDistance = Math.cos(Math.toRadians(45)) * orthogonalDistance;
+      Point3D closestPointExpected = new Point3D(-axialDistance, 0.0, axialDistance);
+
+      assertEquals(orthogonalDistance, PlanarRegionTools.distanceToPlanarRegion(pointAboveOrigin, planarRegion), 1e-5);
+      EuclidCoreTestTools.assertTuple3DEquals(closestPointExpected, closestPoint, 1e-4);
+
+      // move the region, and check again
+      rigidBodyTransform.getTranslation().set(closestPointExpected);
+      planarRegion = new PlanarRegion(rigidBodyTransform, convexPolygon2D);
+
+      assertEquals(orthogonalDistance, PlanarRegionTools.distanceToPlanarRegion(pointAboveOrigin, planarRegion), 1e-5);
+      EuclidCoreTestTools.assertTuple3DEquals(closestPointExpected, closestPoint, 1e-4);
+
+      // move it so that a vertical projection doesn't intersect
+      convexPolygon2D.clear();
+      convexPolygon2D.addVertex(0.5 * orthogonalDistance, 0.5 * orthogonalDistance);
+      convexPolygon2D.addVertex(0.5 * orthogonalDistance, -0.5 * orthogonalDistance);
+      convexPolygon2D.addVertex(-0.5 * orthogonalDistance, -0.5 * orthogonalDistance);
+      convexPolygon2D.addVertex(-0.5 * orthogonalDistance, 0.5 * orthogonalDistance);
+      convexPolygon2D.update();
+
+      planarRegion = new PlanarRegion(rigidBodyTransform, convexPolygon2D);
+
+      assertEquals(orthogonalDistance, PlanarRegionTools.distanceToPlanarRegion(pointAboveOrigin, planarRegion), 1e-5);
+      EuclidCoreTestTools.assertTuple3DEquals(closestPointExpected, closestPoint, 1e-4);
+   }
+
 
    private static Point2DReadOnly getRandomInteriorPoint(Random random, ConvexPolygon2DReadOnly polygon)
    {

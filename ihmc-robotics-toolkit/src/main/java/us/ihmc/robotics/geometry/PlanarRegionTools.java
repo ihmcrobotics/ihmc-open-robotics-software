@@ -1113,7 +1113,7 @@ public class PlanarRegionTools
    }
 
    /**
-    * Finds and returns the closest point the the provided point on the planar regions.
+    * Finds and returns the closest point the provided point on the planar regions.
     */
    public static Point3D projectPointToPlanes(Point3DReadOnly point, PlanarRegionsList regions)
    {
@@ -1135,6 +1135,9 @@ public class PlanarRegionTools
       return closestPoint;
    }
 
+   /**
+    * Warning generates garbage
+    */
    public static double distanceToPlanarRegion(Point3DReadOnly pointInWorld, PlanarRegion planarRegion)
    {
       return pointInWorld.distance(closestPointOnPlanarRegion(pointInWorld, planarRegion));
@@ -1143,43 +1146,70 @@ public class PlanarRegionTools
    /**
     * Projects the given point in the world onto the planar region, returning the closest point in the world on the region to
     * the provided point.
+    *
+    *     * Warning generates garbage
     */
    public static Point3D closestPointOnPlanarRegion(Point3DReadOnly pointInWorld, PlanarRegion region)
    {
-      return closestPointOnPlanarRegion(pointInWorld, region.getConvexHull(), region.getTransformToWorld(), region.getTransformToLocal());
+      return closestPointOnPlanarRegion(pointInWorld, region.getConvexHull(), region.getTransformToWorld());
+   }
+
+   public static boolean closestPointOnPlanarRegion(Point3DReadOnly pointInWorld, PlanarRegion region, Point3DBasics closestPointsToPack)
+   {
+      return closestPointOnPlanarRegion(pointInWorld, region.getConvexHull(), region.getTransformToWorld(), closestPointsToPack);
    }
 
    public static Point3D closestPointOnPlanarRegion(Point3DReadOnly pointInWorld,
                                                     ConvexPolygon2DReadOnly regionConvexHull,
-                                                    RigidBodyTransformReadOnly regionToWorld,
-                                                    RigidBodyTransformReadOnly regionToLocal)
+                                                    RigidBodyTransformReadOnly transformFromRegionToWorld)
    {
-      Vector3D planeNormal = new Vector3D(0.0, 0.0, 1.0);
-      planeNormal.applyTransform(regionToWorld);
+      Point3D closestPoint = new Point3D();
+      if (closestPointOnPlanarRegion(pointInWorld, regionConvexHull, transformFromRegionToWorld, closestPoint))
+         return closestPoint;
 
-      Point3D pointOnPlane = new Point3D();
-      pointOnPlane.set(regionConvexHull.getVertex(0));
-      pointOnPlane.applyTransform(regionToWorld);
+      return null;
+   }
 
-      Point3D intersectionWithPlane = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pointOnPlane, planeNormal, pointInWorld, planeNormal);
-      if (intersectionWithPlane == null)
+   public static boolean closestPointOnPlanarRegion(Point3DReadOnly pointInWorld,
+                                                    ConvexPolygon2DReadOnly regionConvexHull,
+                                                    RigidBodyTransformReadOnly transformFromRegionToWorld,
+                                                    Point3DBasics closestPointToPack)
+   {
+      transformFromRegionToWorld.inverseTransform(pointInWorld, closestPointToPack);
+
+      // find the intersection in the plane frmae
+      if (!EuclidCoreMissingTools.intersectionBetweenLine3DAndPlane3D(0.0,
+                                                                      0.0,
+                                                                      0.0,
+                                                                      0.0,
+                                                                      0.0,
+                                                                      1.0,
+                                                                      closestPointToPack.getX(),
+                                                                      closestPointToPack.getY(),
+                                                                      closestPointToPack.getZ(),
+                                                                      0.0,
+                                                                      0.0,
+                                                                      1.0,
+                                                                      closestPointToPack))
       {
-         return null;
+         return false;
       }
 
-      Point3D intersectionInPlaneFrame = new Point3D(intersectionWithPlane);
-      intersectionInPlaneFrame.applyTransform(regionToLocal);
-      Point2D intersectionInPlaneFrame2D = new Point2D(intersectionInPlaneFrame);
 
       // checking convex hull here - might be better to check all polygons to avoid false positive
-      if (!regionConvexHull.isPointInside(intersectionInPlaneFrame2D))
+      if (!regionConvexHull.isPointInside(closestPointToPack.getX(), closestPointToPack.getY()))
       {
-         regionConvexHull.orthogonalProjection(intersectionInPlaneFrame2D);
-         intersectionWithPlane.setToZero();
-         intersectionWithPlane.set(intersectionInPlaneFrame2D);
-         intersectionWithPlane.applyTransform(regionToWorld);
+         regionConvexHull.checkIfUpToDate();
+         EuclidCoreMissingTools.orthogonalProjectionOnConvexPolygon2D(closestPointToPack.getX(),
+                                                                      closestPointToPack.getY(),
+                                                                      regionConvexHull.getVertexBufferView(),
+                                                                      regionConvexHull.getNumberOfVertices(),
+                                                                      regionConvexHull.isClockwiseOrdered(),
+                                                                      closestPointToPack);
       }
-      return intersectionWithPlane;
+      closestPointToPack.applyTransform(transformFromRegionToWorld);
+
+      return true;
    }
 
    /**

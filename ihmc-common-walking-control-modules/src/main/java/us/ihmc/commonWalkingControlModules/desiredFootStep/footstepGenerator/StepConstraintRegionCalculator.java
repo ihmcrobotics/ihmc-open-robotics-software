@@ -19,5 +19,5 @@ public interface StepConstraintRegionCalculator
     * @param footstepPose step pose
     * @param stepConstraintsToPack step constraint regions to return. Modified.
     */
-   void computeConstraintRegions(FramePose2DReadOnly stanceFootPose, FramePose3DReadOnly footstepPose, StepConstraintsListMessage stepConstraintsToPack);
+   void computeConstraintRegions(FramePose3DReadOnly stanceFootPose, FramePose3DReadOnly footstepPose, StepConstraintsListMessage stepConstraintsToPack);
 }

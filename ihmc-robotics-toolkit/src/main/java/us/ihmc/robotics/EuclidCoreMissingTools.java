@@ -1,11 +1,12 @@
 package us.ihmc.robotics;
 
-import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.ONE_MILLIONTH;
-import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.ONE_TRILLIONTH;
+import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.*;
+import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.orthogonalProjectionOnLineSegment2D;
 import static us.ihmc.euclid.tools.EuclidCoreTools.normSquared;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.CommonMatrix3DBasics;
@@ -26,6 +27,8 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.*;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+
+import java.util.List;
 
 public class EuclidCoreMissingTools
 {
@@ -1044,5 +1047,93 @@ public class EuclidCoreMissingTools
          intersectionToPack.setZ(d * lineDirectionZ + pointOnLineZ);
          return true;
       }
+   }
+
+   public static boolean orthogonalProjectionOnConvexPolygon2D(double pointToProjectX,
+                                                               double pointToProjectY,
+                                                               List<? extends Point2DReadOnly> convexPolygon2D,
+                                                               int numberOfVertices,
+                                                               boolean clockwiseOrdered,
+                                                               Point3DBasics projectionToPack)
+   {
+      checkNumberOfVertices(convexPolygon2D, numberOfVertices);
+
+      if (numberOfVertices == 0)
+         return false;
+
+      if (numberOfVertices == 1)
+      {
+         projectionToPack.set(convexPolygon2D.get(0));
+         return true;
+      }
+
+      if (numberOfVertices == 2)
+      {
+         return orthogonalProjectionOnLineSegment2D(pointToProjectX, pointToProjectY, convexPolygon2D.get(0), convexPolygon2D.get(1), projectionToPack);
+      }
+
+      int closestEdgeIndex = EuclidGeometryPolygonTools.closestEdgeIndexToPoint2D(pointToProjectX, pointToProjectY, convexPolygon2D, numberOfVertices, clockwiseOrdered);
+
+      if (closestEdgeIndex == -1)
+         return false;
+
+      if (!EuclidGeometryPolygonTools.canObserverSeeEdge(closestEdgeIndex, pointToProjectX, pointToProjectY, convexPolygon2D, numberOfVertices, clockwiseOrdered))
+         return false;
+
+      Point2DReadOnly edgeStart = convexPolygon2D.get(closestEdgeIndex);
+      Point2DReadOnly edgeEnd = convexPolygon2D.get(EuclidGeometryPolygonTools.next(closestEdgeIndex, numberOfVertices));
+
+      return orthogonalProjectionOnLineSegment2D(pointToProjectX, pointToProjectY, edgeStart, edgeEnd, projectionToPack);
+   }
+
+   public static boolean orthogonalProjectionOnLineSegment2D(double pointToProjectX,
+                                                             double pointToProjectY,
+                                                             Point2DReadOnly lineSegmentStart,
+                                                             Point2DReadOnly lineSegmentEnd,
+                                                             Point3DBasics projectionToPack)
+   {
+      return orthogonalProjectionOnLineSegment2D(pointToProjectX,
+                                                 pointToProjectY,
+                                                 lineSegmentStart.getX(),
+                                                 lineSegmentStart.getY(),
+                                                 lineSegmentEnd.getX(),
+                                                 lineSegmentEnd.getY(),
+                                                 projectionToPack);
+   }
+
+   public static boolean orthogonalProjectionOnLineSegment2D(double pointToProjectX,
+                                                             double pointToProjectY,
+                                                             double lineSegmentStartX,
+                                                             double lineSegmentStartY,
+                                                             double lineSegmentEndX,
+                                                             double lineSegmentEndY,
+                                                             Point3DBasics projectionToPack)
+   {
+      double percentage = percentageAlongLineSegment2D(pointToProjectX,
+                                                       pointToProjectY,
+                                                       lineSegmentStartX,
+                                                       lineSegmentStartY,
+                                                       lineSegmentEndX,
+                                                       lineSegmentEndY);
+      if (percentage > 1.0)
+         percentage = 1.0;
+      else if (percentage < 0.0)
+         percentage = 0.0;
+
+      projectionToPack.set((1.0 - percentage) * lineSegmentStartX + percentage * lineSegmentEndX,
+                           (1.0 - percentage) * lineSegmentStartY + percentage * lineSegmentEndY,
+                           0.0);
+
+      /*
+       * This method never fails with the current implementation but the method still returns a boolean in
+       * case a failure case is implemented.
+       */
+      return true;
+   }
+
+   private static void checkNumberOfVertices(List<? extends Point2DReadOnly> convexPolygon2D, int numberOfVertices)
+   {
+      if (numberOfVertices < 0 || numberOfVertices > convexPolygon2D.size())
+         throw new IllegalArgumentException("Illegal numberOfVertices: " + numberOfVertices + ", expected a value in ] 0, " + convexPolygon2D.size() + "].");
    }
 }
