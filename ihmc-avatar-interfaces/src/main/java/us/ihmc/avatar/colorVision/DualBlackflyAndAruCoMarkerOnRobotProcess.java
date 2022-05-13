@@ -38,8 +38,8 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
    {
       nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
 
-//      blackflies.put(RobotSide.LEFT, new DualBlackflyCamera(LEFT_SERIAL_NUMBER));
-      blackflies.put(RobotSide.RIGHT, new DualBlackflyCamera(RIGHT_SERIAL_NUMBER));
+      blackflies.put(RobotSide.LEFT, new DualBlackflyCamera(LEFT_SERIAL_NUMBER));
+//      blackflies.put(RobotSide.RIGHT, new DualBlackflyCamera(RIGHT_SERIAL_NUMBER));
 
       ros1Helper = new ROS1Helper("blackfly_node");
 
@@ -47,14 +47,14 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
       ros2Helper = new ROS2Helper(ros2Node);
       ros2Helper.subscribeViaCallback(DualBlackflyComms.RECONNECT_ROS1_NODE, reconnectROS1Notification::set);
 
-      thread = new PausablePeriodicThread("DualBlackflyNode", UnitConversions.hertzToSeconds(2.0), false, this::update);
+      thread = new PausablePeriodicThread("DualBlackflyNode", UnitConversions.hertzToSeconds(31.0), false, this::update);
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "DualBlackflyShutdown"));
       thread.start();
    }
 
    private void update()
    {
-      LogTools.info("Updating");
+//      LogTools.info("Updating");
       if (nativesLoadedActivator.poll())
       {
          if (nativesLoadedActivator.isNewlyActivated())
@@ -77,7 +77,7 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
             blackflies.get(side).update();
          }
       }
-      LogTools.info("Finished update");
+//      LogTools.info("Finished update");
    }
 
    private void destroy()

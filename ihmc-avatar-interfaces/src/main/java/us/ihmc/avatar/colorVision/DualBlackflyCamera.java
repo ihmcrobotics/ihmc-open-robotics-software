@@ -40,7 +40,7 @@ public class DualBlackflyCamera
    {
       if (blackfly.readFrameData())
       {
-         LogTools.info("Read data");
+//         LogTools.info("Read data");
          double dataAquisitionTime = Conversions.nanosecondsToSeconds(System.nanoTime());
 
          if (ros1ChannelBuffer == null)
@@ -61,7 +61,7 @@ public class DualBlackflyCamera
 
          if (rosImagePublisher.isConnected())
          {
-            LogTools.info("ROS connected");
+//            LogTools.info("ROS connected");
             ros1ChannelBuffer.clear();
 
             for (int i = 0; i < numberOfBytesInFrame; i++)
