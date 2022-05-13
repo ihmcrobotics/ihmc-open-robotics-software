@@ -4,9 +4,9 @@ import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.spinnaker.SpinnakerHardwareManager;
-import us.ihmc.perception.spinnaker.SpinnakerTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -47,13 +47,14 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
       ros2Helper = new ROS2Helper(ros2Node);
       ros2Helper.subscribeViaCallback(DualBlackflyComms.RECONNECT_ROS1_NODE, reconnectROS1Notification::set);
 
-      thread = new PausablePeriodicThread("DualBlackflyNode", UnitConversions.hertzToSeconds(31.0), false, this::update);
+      thread = new PausablePeriodicThread("DualBlackflyNode", UnitConversions.hertzToSeconds(2.0), false, this::update);
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "DualBlackflyShutdown"));
       thread.start();
    }
 
    private void update()
    {
+      LogTools.info("Updating");
       if (nativesLoadedActivator.poll())
       {
          if (nativesLoadedActivator.isNewlyActivated())
@@ -76,6 +77,7 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
             blackflies.get(side).update();
          }
       }
+      LogTools.info("Finished update");
    }
 
    private void destroy()
