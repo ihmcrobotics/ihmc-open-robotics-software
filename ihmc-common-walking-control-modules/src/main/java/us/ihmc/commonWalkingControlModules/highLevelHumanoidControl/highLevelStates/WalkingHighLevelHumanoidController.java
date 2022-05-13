@@ -737,18 +737,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
             naturalPosture.setNaturalPostureOffset(naturalPosture.getNominalStandingPoseQoffset());
          }
 
-         // FIXME is this in the correct order?
-         double[] q = new double[fullRobotModel.getOneDoFJoints().length];
-
-         OneDoFJointBasics[] controlledOneDoFJoints = MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(),OneDoFJointBasics.class);
-         int i = 0; // GMN: HACK!
-         for (OneDoFJointBasics joint : controlledOneDoFJoints)
-         {
-            q[i] = joint.getQ();
-            i += 1;
-         }
-         Quaternion Qbase = new Quaternion(fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToWorldFrame().getRotation());
-         naturalPosture.compute(q, Qbase);
+         naturalPosture.compute(fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToWorldFrame().getRotation());
 
          firstTick = false;
       }
