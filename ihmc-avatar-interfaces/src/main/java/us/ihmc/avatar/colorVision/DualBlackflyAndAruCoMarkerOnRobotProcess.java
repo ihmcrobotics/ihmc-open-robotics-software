@@ -4,7 +4,6 @@ import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.spinnaker.SpinnakerHardwareManager;
 import us.ihmc.pubsub.DomainFactory;
@@ -54,7 +53,6 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
 
    private void update()
    {
-//      LogTools.info("Updating");
       if (nativesLoadedActivator.poll())
       {
          if (nativesLoadedActivator.isNewlyActivated())
@@ -63,7 +61,11 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
             for (RobotSide side : blackflies.sides())
             {
                DualBlackflyCamera blackfly = blackflies.get(side);
-               blackfly.create(spinnakerHardwareManager.buildBlackfly(blackfly.getSerialNumber()), ros1Helper, RosTools.BLACKFLY_VIDEO_TOPICS.get(side));
+               blackfly.create(spinnakerHardwareManager.buildBlackfly(blackfly.getSerialNumber()),
+                               side,
+                               ros1Helper,
+                               RosTools.BLACKFLY_VIDEO_TOPICS.get(side),
+                               ros2Helper);
             }
          }
 
@@ -77,7 +79,6 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
             blackflies.get(side).update();
          }
       }
-//      LogTools.info("Finished update");
    }
 
    private void destroy()
