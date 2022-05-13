@@ -32,6 +32,8 @@ public class ActualCMPComputer extends SimpleRobotController
    private final Vector3D linearMomentumRate = new Vector3D();
    private final Vector3D angularMomentum = new Vector3D();
    private final Point3D comPosition = new Point3D();
+   private final Vector3D comVector = new Vector3D();
+   private final Vector3D angularMomentumAboutCenterOfMass = new Vector3D();
    private final Point2D comPosition2d = new Point2D();
    private final Vector3D comAcceleration = new Vector3D();
    private final Point2D cmp = new Point2D();
@@ -92,10 +94,16 @@ public class ActualCMPComputer extends SimpleRobotController
       cmp.add(comPosition2d);
 
       yoCmp.set(cmp);
-      
+
       // update the angular momentum rate by numerical differentiation of the robot angular momentum
       simulatedRobot.getRootJoint().physics.recursiveComputeAngularMomentum(angularMomentum);
-      yoAngularMomentum.set(angularMomentum);
+
+      // Transform angular momentum to be about the Center of Mass:
+      comVector.set(comPosition);
+      angularMomentumAboutCenterOfMass.cross(linearMomentum, comVector);
+      angularMomentumAboutCenterOfMass.add(angularMomentum);
+
+      yoAngularMomentum.set(angularMomentumAboutCenterOfMass);
       angularMomentumRateOfChange.update();
    }
 
