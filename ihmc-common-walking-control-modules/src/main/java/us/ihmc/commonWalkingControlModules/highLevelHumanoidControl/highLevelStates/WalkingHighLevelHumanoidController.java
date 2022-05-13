@@ -736,6 +736,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
             // use the built-in pose:
             naturalPosture.setNaturalPostureOffset(naturalPosture.getNominalStandingPoseQoffset());
          }
+
+         // FIXME is this in the correct order?
          double[] q = new double[fullRobotModel.getOneDoFJoints().length];
 
          OneDoFJointBasics[] controlledOneDoFJoints = MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(),OneDoFJointBasics.class);
