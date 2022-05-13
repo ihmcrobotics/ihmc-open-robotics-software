@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--AgileJ Ltd. (http://www.agilej.com)--><ajsv>
+    <diagram creationDate="2022-May-12 17:14" licenseGrade="single" licenseeName="AgileJ community member" licenseeOrganization="agilej-community" populationMethod="manual" version="1.9.2.v20190518-1152">
+        <filterScript>
+
+hide all methods&#13;
+hide all fields
+
+</filterScript>
+        <class className="us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController" modelMemberId="us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController" project="ihmc-common-walking-control-modules" xLocation="-692" yLocation="-301"/>
+        <class className="us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand" modelMemberId="us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand" project="ihmc-common-walking-control-modules" xLocation="-519" yLocation="484"/>
+        <class className="us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters" modelMemberId="us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters" project="ihmc-common-walking-control-modules" xLocation="-9" yLocation="515"/>
+        <class className="us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters" modelMemberId="us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters" project="ihmc-common-walking-control-modules" xLocation="453" yLocation="430"/>
+        <class className="com.optimus.parameters.OptimusWalkingControllerParameters" modelMemberId="com.optimus.parameters.OptimusWalkingControllerParameters" project="optimus-simulation" xLocation="-321" yLocation="129"/>
+        <class className="us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConfigurationHandler" modelMemberId="us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConfigurationHandler" project="ihmc-common-walking-control-modules" xLocation="165" yLocation="108"/>
+        <class className="us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WholeBodyControllerCoreFactory" modelMemberId="us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WholeBodyControllerCoreFactory" project="ihmc-common-walking-control-modules" xLocation="-261" yLocation="-209"/>
+        <class className="us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox" modelMemberId="us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox" project="ihmc-common-walking-control-modules" xLocation="308" yLocation="-169"/>
+        <class className="us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand" modelMemberId="us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand" project="ihmc-common-walking-control-modules" xLocation="816" yLocation="187"/>
+        <class className="us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters" modelMemberId="us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters" project="ihmc-common-walking-control-modules" xLocation="-430" yLocation="263"/>
+        <class className="us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator" modelMemberId="us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator" project="ihmc-common-walking-control-modules" xLocation="-32" yLocation="-49"/>
+    </diagram>
+</ajsv>
