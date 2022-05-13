@@ -14,6 +14,13 @@ public interface HumanoidRobotNaturalPosture
    
    public abstract void setNaturalPostureOffset(QuaternionReadOnly Qoffset);
 
+   public abstract double[] getJointPositionArray();
+
+   default void compute(Orientation3DReadOnly Qbase)
+   {
+      compute(getJointPositionArray(), Qbase);
+   }
+
    public abstract void compute(double[] q, Orientation3DReadOnly Qbase);
 
    public abstract Quaternion getNaturalPostureQuaternion();
