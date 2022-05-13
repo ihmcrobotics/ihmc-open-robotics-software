@@ -158,7 +158,7 @@ public class InverseKinematicsOptimizationControlModule
       MomentumReadOnly centroidalMomentumSoltuion = motionQPInputCalculator.computeCentroidalMomentumFromSolution(jointVelocities);
       inverseKinematicsSolution.setJointVelocities(jointVelocities);
       if (computeJointTorques.getValue())
-         inverseKinematicsSolution.setJointTorques(toolbox.getGravityGradientCalculator().getGravityMatrix());
+         inverseKinematicsSolution.setJointTorques(toolbox.getGravityGradientCalculator().getTauMatrix());
       inverseKinematicsSolution.setCentroidalMomentumSolution(centroidalMomentumSoltuion);
 
       if (noConvergenceException != null)

@@ -286,8 +286,8 @@ public class MotionQPInputCalculator
          return false;
 
       qpInputToPack.reshape(numberOfDoFs);
-      qpInputToPack.taskJacobian.set(gravityGradientCalculator.getGravityGradientMatrix());
-      qpInputToPack.taskObjective.set(gravityGradientCalculator.getGravityMatrix());
+      qpInputToPack.taskJacobian.set(gravityGradientCalculator.getTauGradientMatrix());
+      qpInputToPack.taskObjective.set(gravityGradientCalculator.getTauMatrix());
       CommonOps_DDRM.changeSign(qpInputToPack.taskObjective);
       qpInputToPack.setUseWeightScalar(true);
       qpInputToPack.setWeight(weight);
@@ -317,11 +317,11 @@ public class MotionQPInputCalculator
          return false;
 
       qpInputToPack.reshape(numberOfDoFs);
-      qpInputToPack.taskJacobian.set(gravityGradientCalculator.getGravityGradientMatrix());
-      qpInputToPack.taskObjective.set(gravityGradientCalculator.getGravityMatrix());
+      qpInputToPack.taskJacobian.set(gravityGradientCalculator.getTauGradientMatrix());
+      qpInputToPack.taskObjective.set(gravityGradientCalculator.getTauMatrix());
       CommonOps_DDRM.changeSign(qpInputToPack.taskObjective);
       qpInputToPack.taskWeightMatrix.zero();
-      weightCalculator.computeWeightMatrix(gravityGradientCalculator.getGravityMatrix(), qpInputToPack.taskWeightMatrix);
+      weightCalculator.computeWeightMatrix(gravityGradientCalculator.getTauMatrix(), qpInputToPack.taskWeightMatrix);
 
       if (projectIntoNullspace)
       {
