@@ -188,6 +188,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
    {
       if (!snapper.snapPolygonToPlanarRegionsList(footPolygonInWorld, steppableRegionsList, Double.POSITIVE_INFINITY, regionToSnapTo, snapTransform))
       {
+         // TODO need to do something smarter
          throw new RuntimeException("Snapping failed");
       }
 

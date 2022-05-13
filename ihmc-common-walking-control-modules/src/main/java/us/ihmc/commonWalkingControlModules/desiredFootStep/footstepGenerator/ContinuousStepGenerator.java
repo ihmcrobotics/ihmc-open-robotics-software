@@ -139,6 +139,7 @@ public class ContinuousStepGenerator implements Updatable
    private FootstepAdjustment footstepAdjustment;
    private List<FootstepValidityIndicator> footstepValidityIndicators = new ArrayList<>();
    private AlternateStepChooser alternateStepChooser = this::calculateSquareUpStep;
+   private StepConstraintRegionCalculator stepConstraintRegionCalculator;
 
    private final FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
    private final RecyclingArrayList<FootstepDataMessage> footsteps = footstepDataListMessage.getFootstepDataList();
@@ -335,6 +336,8 @@ public class ContinuousStepGenerator implements Updatable
          footstep.getLocation().set(nextFootstepPose3D.getPosition());
          footstep.getOrientation().set(nextFootstepPose3D.getOrientation());
          footstep.setSwingHeight(parameters.getSwingHeight());
+         if (stepConstraintRegionCalculator != null)
+            stepConstraintRegionCalculator.computeConstraintRegions(footstepPose2D, nextFootstepPose3D, footstep.getStepConstraints());
 
          footstepPose2D.set(nextFootstepPose2D);
          swingSide = swingSide.getOppositeSide();
@@ -614,6 +617,16 @@ public class ContinuousStepGenerator implements Updatable
    public void setFootstepAdjustment(FootstepAdjustment footstepAdjustment)
    {
       this.footstepAdjustment = footstepAdjustment;
+   }
+
+   /**
+    * Sets the method for calculating the constraint regions for the generated footsteps.
+    *
+    * @param stepConstraintRegionCalculator the calculator method.
+    */
+   public void setStepConstraintRegionCalculator(StepConstraintRegionCalculator stepConstraintRegionCalculator)
+   {
+      this.stepConstraintRegionCalculator = stepConstraintRegionCalculator;
    }
 
    /**
