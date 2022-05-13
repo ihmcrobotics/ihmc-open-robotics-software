@@ -36,11 +36,12 @@ public class SimulatedRobotiqHandsControlThread implements AvatarSimulatedHandCo
    public SimulatedRobotiqHandsControlThread(FullHumanoidRobotModel fullRobotModel,
                                              RealtimeROS2Node realtimeROS2Node,
                                              ROS2Topic<?> outputTopic,
-                                             ROS2Topic<?> inputTopic)
+                                             ROS2Topic<?> inputTopic,
+                                             RobotSide[] sides)
    {
       this.fullRobotModel = fullRobotModel;
 
-      for (RobotSide robotSide : RobotSide.values)
+      for (RobotSide robotSide : sides)
       {
          SubtreeStreams.fromChildren(OneDoFJointBasics.class, fullRobotModel.getHand(robotSide)).forEach(controlledFingerJoints::add);
       }
@@ -51,7 +52,8 @@ public class SimulatedRobotiqHandsControlThread implements AvatarSimulatedHandCo
                                                        controllerTime,
                                                        realtimeROS2Node,
                                                        outputTopic,
-                                                       inputTopic);
+                                                       inputTopic,
+                                                       sides);
       registry.addChild(controller.getYoRegistry());
 
       firstTick.set(true);

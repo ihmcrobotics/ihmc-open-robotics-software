@@ -42,6 +42,8 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
+import java.util.List;
+
 public class ErrorBasedStepAdjustmentController implements StepAdjustmentController
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -213,10 +215,11 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                                                                    false,
                                                                    yoNamePrefix,
                                                                    registry,
-                                                                   yoGraphicsListRegistry);
-      oneStepSafetyHeuristics = new CaptureRegionSafetyHeuristics(lengthLimit, registry, yoGraphicsListRegistry);
+                                                                   null);
+      oneStepSafetyHeuristics = new CaptureRegionSafetyHeuristics(lengthLimit, registry, null);
       multiStepCaptureRegionCalculator = new MultiStepCaptureRegionCalculator(reachabilityConstraintHandler, allowCrossOverSteps, registry, yoGraphicsListRegistry);
-      environmentConstraintProvider = new EnvironmentConstraintHandler(icpControlPlane, contactableFeet, yoNamePrefix, registry, yoGraphicsListRegistry);
+      environmentConstraintProvider = new EnvironmentConstraintHandler(icpControlPlane, contactableFeet, useICPControlPlaneInStepAdjustment,
+                                                                       yoNamePrefix, registry, yoGraphicsListRegistry);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -315,15 +318,9 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    }
 
    @Override
-   public void setStepConstraintRegion(StepConstraintRegion stepConstraintRegion)
+   public void setStepConstraintRegions(List<StepConstraintRegion> stepConstraintRegion)
    {
-      environmentConstraintProvider.setStepConstraintRegion(stepConstraintRegion);
-   }
-
-   @Override
-   public boolean hasStepConstraintRegion()
-   {
-      return environmentConstraintProvider.hasStepConstraintRegion();
+      environmentConstraintProvider.setStepConstraintRegions(stepConstraintRegion);
    }
 
    @Override
@@ -359,7 +356,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       RobotSide swingSide = upcomingFootstepSide.getEnumValue();
       RobotSide stanceSide = swingSide.getOppositeSide();
       captureRegionCalculator.calculateCaptureRegion(swingSide,
-                                                     timeRemainingInState.getDoubleValue(),
+                                                     Math.max(timeRemainingInState.getDoubleValue(), 0.0),
                                                      currentICP,
                                                      omega0,
                                                      allowableAreaForCoP);
@@ -379,9 +376,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
       icpError.sub(desiredICP, currentICP);
 
-      environmentConstraintProvider.setReachabilityRegion(reachabilityConstraintHandler.getReachabilityConstraint());
-      if (!environmentConstraintProvider.validateConvexityOfPlanarRegion())
-         return;
 
       boolean errorAboveThreshold = icpError.lengthSquared() > MathTools.square(minICPErrorForStepAdjustment.getValue());
 
@@ -398,12 +392,18 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       projectAdjustedStepIntoCaptureRegion();
       boolean wasAdjusted = deadbandAndApplyStepAdjustment();
 
+      environmentConstraintProvider.setReachabilityRegion(reachabilityConstraintHandler.getReachabilityConstraint());
+      environmentConstraintProvider.updateActiveConstraintRegionToUse(footstepSolution, multiStepCaptureRegionCalculator.getCaptureRegion());
+
       if (environmentConstraintProvider.hasStepConstraintRegion() && (wasAdjusted || !hasPlanarRegionBeenAssigned.getBooleanValue()))
       {
-         wasAdjusted |= environmentConstraintProvider.applyEnvironmentConstraintToFootstep(upcomingFootstepSide.getEnumValue(),
-                                                                                           footstepSolution,
-                                                                                           upcomingFootstepContactPoints);
-         hasPlanarRegionBeenAssigned.set(environmentConstraintProvider.foundSolution());
+         if (environmentConstraintProvider.validateConvexityOfPlanarRegion())
+         {
+            wasAdjusted |= environmentConstraintProvider.applyEnvironmentConstraintToFootstep(upcomingFootstepSide.getEnumValue(),
+                                                                                              footstepSolution,
+                                                                                              upcomingFootstepContactPoints);
+            hasPlanarRegionBeenAssigned.set(environmentConstraintProvider.foundSolution());
+         }
       }
 
       footstepWasAdjusted.set(wasAdjusted);

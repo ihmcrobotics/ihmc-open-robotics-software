@@ -36,7 +36,6 @@ public class ImGuiSSHJApplicationService
    private Thread logMonitorRunThread;
    private AtomicReference<String> serviceStatus = new AtomicReference<>("Status not subscribed to.");
 
-
    public ImGuiSSHJApplicationService(String applicationName, String serviceName, String remoteHostname, String remoteUsername)
    {
       this.logPanel = new ImGuiPanel(applicationName + " Log", consoleArea::renderImGuiWidgets);
@@ -75,7 +74,7 @@ public class ImGuiSSHJApplicationService
          runCommand("restart");
       }
 
-      if (!islogMonitorThreadRunning() && ImGui.button("Start log monitor"))
+      if (!islogMonitorThreadRunning() && ImGui.button(labels.get("Start log monitor")))
       {
          startLogMonitor();
       }
@@ -83,11 +82,7 @@ public class ImGuiSSHJApplicationService
       {
          if (ImGui.button("SIGINT"))
          {
-            ExceptionTools.handle(() ->
-            {
-               logMonitorSSHJCommand.signal(Signal.INT);
-               logMonitorSSHJCommand.close();
-            }, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+            stopLogMonitor();
          }
       }
       if (exitStatus > -1)
@@ -102,10 +97,28 @@ public class ImGuiSSHJApplicationService
          logPanel.getIsShowing().set(true);
       }
 
-      ImGui.text(serviceStatus.get());
+      String serviceStatusText = serviceStatus.get();
+      if (serviceStatusText.contains("failed"))
+      {
+         ImGui.textColored(0.8f, 0.0f, 0.0f, 1.0f, serviceStatusText);
+      }
+      else if (serviceStatusText.contains("running"))
+      {
+         ImGui.textColored(0.0f, 0.8f, 0.0f, 1.0f, serviceStatusText);
+      }
+      else
+      {
+         ImGui.text(serviceStatusText);
+      }
 
       standardOut.updateConsoleText(this::acceptNewText);
       standardError.updateConsoleText(this::acceptNewText);
+   }
+
+   public void restartLogMonitor()
+   {
+      stopLogMonitor();
+      startLogMonitor();
    }
 
    public void startLogMonitor()
@@ -124,6 +137,18 @@ public class ImGuiSSHJApplicationService
                });
             });
          }, "SSHJCommand");
+      }
+   }
+
+   private void stopLogMonitor()
+   {
+      if (islogMonitorThreadRunning())
+      {
+         ExceptionTools.handle(() ->
+         {
+            logMonitorSSHJCommand.signal(Signal.INT);
+            logMonitorSSHJCommand.close();
+         }, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
       }
    }
 

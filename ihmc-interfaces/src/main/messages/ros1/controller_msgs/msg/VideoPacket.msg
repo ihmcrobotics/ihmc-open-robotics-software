@@ -23,6 +23,10 @@ int64 timestamp
 
 int8[] data
 
+uint16 image_width
+
+uint16 image_height
+
 geometry_msgs/Point position
 
 geometry_msgs/Quaternion orientation

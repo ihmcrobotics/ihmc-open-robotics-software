@@ -61,6 +61,7 @@ public class GDXPerceptionVisualizerUI
         globalVisualizersUI = new ImGuiGDXGlobalVisualizersPanel();
 
         globalVisualizersUI.addVisualizer(new GDXROS2PlanarRegionsVisualizer("Lidar REA planar regions", ros2Node, ROS2Tools.LIDAR_REA_REGIONS));
+        globalVisualizersUI.addVisualizer(new GDXROS2PlanarRegionsVisualizer("Mapsense planar regions", ros2Node, ROS2Tools.MAPSENSE_REGIONS));
         GDXROS1PlanarRegionsVisualizer mapsenseRegionsVisualizer = new GDXROS1PlanarRegionsVisualizer("MapSense Planar Regions",
                                                                                                       ros2Node,
                                                                                                       RosTools.MAPSENSE_REGIONS);
@@ -69,6 +70,7 @@ public class GDXPerceptionVisualizerUI
         globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("L515 Color Video", RosTools.L515_VIDEO));
         globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("L515 Depth Video", RosTools.L515_DEPTH));
         globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("L515 Compressed Video", RosTools.L515_COMPRESSED_VIDEO));
+        globalVisualizersUI.addVisualizer(new GDXROS2VideoVisualizer("L515 Depth Video", ros2Node, ROS2Tools.L515_DEPTH, ROS2VideoFormat.CV16UC1));
 
         globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("D435 Compressed Color", RosTools.D435_VIDEO_COMPRESSED));
         globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("D435 Color", RosTools.D435_VIDEO));
