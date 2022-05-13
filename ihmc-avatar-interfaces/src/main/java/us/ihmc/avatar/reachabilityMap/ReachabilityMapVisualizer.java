@@ -67,6 +67,7 @@ import us.ihmc.scs2.sharedMemory.interfaces.YoBufferPropertiesReadOnly;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.SimulationSessionControls;
 import us.ihmc.scs2.simulation.robot.Robot;
+import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimRigidBodyBasics;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -99,6 +100,10 @@ public class ReachabilityMapVisualizer
    private final YoInteger numberOfReachableRays = new YoInteger("numberOfReachableRays", registry);
    private final YoInteger numberOfReachableRotationsAroundRay = new YoInteger("numberOfReachableRotationsAroundRay", registry);
    private final YoInteger numberOfReachablePoses = new YoInteger("numberOfReachablePoses", registry);
+
+   private SimRigidBodyBasics robotBase;
+   private SimRigidBodyBasics robotEndEffector;
+   private OneDoFJointBasics[] robotArmJoints;
 
    private SessionVisualizerControls guiControls;
 
@@ -184,6 +189,10 @@ public class ReachabilityMapVisualizer
       SimulationSessionControls sessionControls = session.getSimulationSessionControls();
       session.getRootRegistry().addChild(registry);
       Robot robot = session.addRobot(robotDefinition);
+      robotBase = robot.getRigidBody(robotInformation.getBaseName());
+      robotEndEffector = robot.getRigidBody(robotInformation.getEndEffectorName());
+      robotArmJoints = MultiBodySystemTools.createOneDoFJointPath(robotBase, robotEndEffector);
+
       guiControls = SessionVisualizer.startSessionVisualizer(session);
       guiControls.waitUntilFullyUp();
       session.stopSessionThread();
@@ -207,19 +216,19 @@ public class ReachabilityMapVisualizer
       if (visualizePositionReach)
       {
          LogTools.info("Start exploring position reach");
-         visualizePositionReach(session, robot, controlFrame);
+         visualizePositionReach(session, controlFrame);
          LogTools.info("Done exploring position reach");
       }
       if (visualizeRayReach)
       {
          LogTools.info("Start exploring ray reach");
-         visualizeRayReach(session, robot);
+         visualizeRayReach(session);
          LogTools.info("Done exploring ray reach");
       }
       if (visualizePoseReach)
       {
          LogTools.info("Start exploring ray reach");
-         visualizePoseReach(session, robot);
+         visualizePoseReach(session);
          LogTools.info("Done exploring ray reach");
       }
 
@@ -254,7 +263,7 @@ public class ReachabilityMapVisualizer
       });
    }
 
-   public void visualizePositionReach(SimulationSession session, Robot robot, ReferenceFrame controlFrame)
+   public void visualizePositionReach(SimulationSession session, ReferenceFrame controlFrame)
    {
       currentEvaluation.set(VisualizationType.PositionReach);
 
@@ -273,14 +282,14 @@ public class ReachabilityMapVisualizer
             continue;
 
          singularity.set(computeFullJacobianSingularityMetric(voxel.getPositionExtraData()));
-         writeVoxelJointData(positionExtraData, robot);
+         writeVoxelJointData(positionExtraData, robotArmJoints);
          currentEvaluationPose.getPosition().set(positionExtraData.getDesiredPosition());
          currentEvaluationPose.getOrientation().setFromReferenceFrame(controlFrame);
          simulationStep(session);
       }
    }
 
-   public void visualizeRayReach(SimulationSession session, Robot robot)
+   public void visualizeRayReach(SimulationSession session)
    {
       SphereVoxelShape sphereVoxelShape = reachabilityMap.getSphereVoxelShape();
       currentEvaluation.set(VisualizationType.RayReach);
@@ -326,7 +335,7 @@ public class ReachabilityMapVisualizer
          for (VoxelExtraData rayExtraData : filteredRayExtraDataList)
          {
             singularity.set(computeFullJacobianSingularityMetric(rayExtraData));
-            writeVoxelJointData(rayExtraData, robot);
+            writeVoxelJointData(rayExtraData, robotArmJoints);
             currentEvaluationPose.getPosition().set(rayExtraData.getDesiredPosition());
             currentEvaluationPose.getOrientation().set(rayExtraData.getDesiredOrientation());
             simulationStep(session);
@@ -334,7 +343,7 @@ public class ReachabilityMapVisualizer
       }
    }
 
-   public void visualizePoseReach(SimulationSession session, Robot robot)
+   public void visualizePoseReach(SimulationSession session)
    {
       SphereVoxelShape sphereVoxelShape = reachabilityMap.getSphereVoxelShape();
       currentEvaluation.set(VisualizationType.PoseReach);
@@ -414,7 +423,7 @@ public class ReachabilityMapVisualizer
             for (VoxelExtraData poseExtraData : filteredPoseExtraDataList)
             {
                singularity.set(computeFullJacobianSingularityMetric(poseExtraData));
-               writeVoxelJointData(poseExtraData, robot);
+               writeVoxelJointData(poseExtraData, robotArmJoints);
                currentEvaluationPose.getPosition().set(poseExtraData.getDesiredPosition());
                currentEvaluationPose.getOrientation().set(poseExtraData.getDesiredOrientation());
                simulationStep(session);
@@ -432,7 +441,7 @@ public class ReachabilityMapVisualizer
          session.submitBufferSizeRequestAndWait((int) (bufferGrowthFactor * bufferProperties.getSize()));
    }
 
-   public static void writeVoxelJointData(VoxelExtraData voxelExtraData, Robot robot)
+   public static void writeVoxelJointData(VoxelExtraData voxelExtraData, OneDoFJointBasics[] robotArmJoints)
    {
       DMatrixRMaj jointPositions = toVectorMatrix(voxelExtraData.getJointPositions());
       DMatrixRMaj jointTorques = toVectorMatrix(voxelExtraData.getJointTorques());
@@ -440,12 +449,12 @@ public class ReachabilityMapVisualizer
       int positionIndex = 0;
       int torqueIndex = 0;
 
-      for (JointBasics joint : robot.getAllJoints())
+      for (JointBasics joint : robotArmJoints)
       {
          positionIndex = joint.setJointConfiguration(positionIndex, jointPositions);
          torqueIndex = joint.setJointTau(torqueIndex, jointTorques);
+         joint.updateFrame();
       }
-      robot.updateFrames();
    }
 
    public static DMatrixRMaj toVectorMatrix(float[] array)
@@ -877,9 +886,12 @@ public class ReachabilityMapVisualizer
 
       for (int rayIndex = 0; rayIndex < voxel.getNumberOfRays(); rayIndex++)
       {
-         if (voxel.isRayReachable(rayIndex) && isWithinLimits(voxel.getRayExtraData(rayIndex)))
+         if (voxel.isRayReachable(rayIndex))
          {
-            s += jointPositionFunction.applyAsDouble(voxel.getRayExtraData(rayIndex));
+            if (isWithinLimits(voxel.getRayExtraData(rayIndex)))
+            {
+               s += jointPositionFunction.applyAsDouble(voxel.getRayExtraData(rayIndex));
+            }
          }
       }
 
@@ -959,9 +971,10 @@ public class ReachabilityMapVisualizer
       float[] jointTorques = new float[jointsCopy.length];
       for (int i = 0; i < jointsCopy.length; i++)
       {
-         double tau = jointTorquesCalculator.getJointTauMatrix().get(i);
+         OneDoFJointBasics joint = jointsCopy[i];
+         double tau = jointTorquesCalculator.getComputedJointTau(joint).get(0);
 
-         if (!MathTools.intervalContains(tau, jointsCopy[i].getEffortLimitLower(), jointsCopy[i].getEffortLimitUpper()))
+         if (!MathTools.intervalContains(tau, joint.getEffortLimitLower(), joint.getEffortLimitUpper()))
             return 0.0;
 
          jointTorques[i] = (float) tau;
