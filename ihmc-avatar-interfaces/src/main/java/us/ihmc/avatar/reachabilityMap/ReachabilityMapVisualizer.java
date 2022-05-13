@@ -25,13 +25,17 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.control.ToggleButton;
 import javafx.stage.Stage;
+import javafx.util.converter.DoubleStringConverter;
 import us.ihmc.avatar.reachabilityMap.ReachabilitySphereMapSimulationHelper.VisualizationType;
 import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DData;
 import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.VoxelExtraData;
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -47,7 +51,9 @@ import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculator;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
@@ -190,7 +196,6 @@ public class ReachabilityMapVisualizer
                                                                                                                              controlFramePose.getPosition()));
 
       guiControls.addStaticVisuals(ReachabilityMapTools.createReachibilityColorScaleVisuals());
-      guiControls.addStaticVisuals(ReachabilityMapTools.createBoundingBoxVisuals(reachabilityMap));
       guiControls.addYoGraphic(newYoGraphicCoordinateSystem3DDefinition("currentEvaluationPose", currentEvaluationPose, 0.15, ColorDefinitions.HotPink()));
       guiControls.addYoGraphic(newYoGraphicCoordinateSystem3DDefinition("controlFrame", controlFramePose, 0.05, ColorDefinitions.parse("#A1887F")));
 
@@ -266,7 +271,7 @@ public class ReachabilityMapVisualizer
          if (positionExtraData == null)
             continue;
 
-         singularity.set(computeFullJacobianSingularityMetric(voxel.getPositionExtraData().getJointPositions()));
+         singularity.set(computeFullJacobianSingularityMetric(voxel.getPositionExtraData()));
          writeVoxelJointData(positionExtraData, robot);
          currentEvaluationPose.getPosition().set(positionExtraData.getDesiredPosition());
          currentEvaluationPose.getOrientation().setFromReferenceFrame(controlFrame);
@@ -319,7 +324,7 @@ public class ReachabilityMapVisualizer
 
          for (VoxelExtraData rayExtraData : filteredRayExtraDataList)
          {
-            singularity.set(computeFullJacobianSingularityMetric(rayExtraData.getJointPositions()));
+            singularity.set(computeFullJacobianSingularityMetric(rayExtraData));
             writeVoxelJointData(rayExtraData, robot);
             currentEvaluationPose.getPosition().set(rayExtraData.getDesiredPosition());
             currentEvaluationPose.getOrientation().set(rayExtraData.getDesiredOrientation());
@@ -407,7 +412,7 @@ public class ReachabilityMapVisualizer
 
             for (VoxelExtraData poseExtraData : filteredPoseExtraDataList)
             {
-               singularity.set(computeFullJacobianSingularityMetric(poseExtraData.getJointPositions()));
+               singularity.set(computeFullJacobianSingularityMetric(poseExtraData));
                writeVoxelJointData(poseExtraData, robot);
                currentEvaluationPose.getPosition().set(poseExtraData.getDesiredPosition());
                currentEvaluationPose.getOrientation().set(poseExtraData.getDesiredOrientation());
@@ -516,8 +521,19 @@ public class ReachabilityMapVisualizer
       private Spinner<Double> zMinSpinner, zMaxSpinner;
       @FXML
       private Spinner<Double> scaleSpinner;
+      @FXML
+      private Spinner<Double> payloadSpinner;
+      @FXML
+      private TextField jointNameText0, jointNameText1, jointNameText2, jointNameText3, jointNameText4, jointNameText5, jointNameText6;
+      @FXML
+      private TextField jointQMinText0, jointQMinText1, jointQMinText2, jointQMinText3, jointQMinText4, jointQMinText5, jointQMinText6;
+      @FXML
+      private TextField jointQMaxText0, jointQMaxText1, jointQMaxText2, jointQMaxText3, jointQMaxText4, jointQMaxText5, jointQMaxText6;
+      @FXML
+      private TextField jointTauMaxText0, jointTauMaxText1, jointTauMaxText2, jointTauMaxText3, jointTauMaxText4, jointTauMaxText5, jointTauMaxText6;
 
       private List<VisualDefinition> previousVisuals;
+      private List<VisualDefinition> previousReachabilityMapBBXVisuals;
 
       public void initialize()
       {
@@ -530,6 +546,11 @@ public class ReachabilityMapVisualizer
                                                                               AngularSingularity,
                                                                               RangeOfMotion,
                                                                               TauCapability));
+         visualizationTypeComboBox.getSelectionModel().selectedItemProperty().addListener((o, oldValue, newValue) ->
+         {
+            // Make it obvious that the payload feature is only available with TauCapability
+            payloadSpinner.setDisable(!TauCapability.equals(newValue));
+         });
          visualizationTargetComboBox.setItems(FXCollections.observableArrayList(PositionTarget, RayTarget, PoseTarget));
          visualizationTargetComboBox.getSelectionModel().select(RayTarget);
 
@@ -542,7 +563,42 @@ public class ReachabilityMapVisualizer
          yMaxSpinner.setValueFactory(new DoubleSpinnerValueFactory(minPoint.getY(), maxPoint.getY(), maxPoint.getY(), reachabilityMap.getVoxelSize()));
          zMinSpinner.setValueFactory(new DoubleSpinnerValueFactory(minPoint.getZ(), maxPoint.getZ(), minPoint.getZ(), reachabilityMap.getVoxelSize()));
          zMaxSpinner.setValueFactory(new DoubleSpinnerValueFactory(minPoint.getZ(), maxPoint.getZ(), maxPoint.getZ(), reachabilityMap.getVoxelSize()));
-         scaleSpinner.setValueFactory(new DoubleSpinnerValueFactory(0.01, 1.0, 0.20, 0.05));
+         scaleSpinner.setValueFactory(new DoubleSpinnerValueFactory(0.05, 1.0, 0.20, 0.05));
+         payloadSpinner.setValueFactory(new DoubleSpinnerValueFactory(0.0, 50.0, 0.0, 0.25));
+
+         TextField[] jointNameTexts = {jointNameText0, jointNameText1, jointNameText2, jointNameText3, jointNameText4, jointNameText5, jointNameText6};
+         TextField[] jointQMinTexts = {jointQMinText0, jointQMinText1, jointQMinText2, jointQMinText3, jointQMinText4, jointQMinText5, jointQMinText6};
+         TextField[] jointQMaxTexts = {jointQMaxText0, jointQMaxText1, jointQMaxText2, jointQMaxText3, jointQMaxText4, jointQMaxText5, jointQMaxText6};
+         TextField[] jointTauMaxTexts = {jointTauMaxText0,
+                                         jointTauMaxText1,
+                                         jointTauMaxText2,
+                                         jointTauMaxText3,
+                                         jointTauMaxText4,
+                                         jointTauMaxText5,
+                                         jointTauMaxText6};
+
+         ensureJointsCopyExist();
+
+         for (int i = 0; i < Math.min(7, jointsCopy.length); i++)
+         {
+            OneDoFJointBasics joint = jointsCopy[i];
+            jointNameTexts[i].setText(joint.getName());
+
+            TextFormatter<Double> qminFormatter = new TextFormatter<>(new DoubleStringConverter());
+            TextFormatter<Double> qmaxFormatter = new TextFormatter<>(new DoubleStringConverter());
+            TextFormatter<Double> taumaxFormatter = new TextFormatter<>(new DoubleStringConverter());
+            jointQMinTexts[i].setTextFormatter(qminFormatter);
+            jointQMaxTexts[i].setTextFormatter(qmaxFormatter);
+            jointTauMaxTexts[i].setTextFormatter(taumaxFormatter);
+
+            qminFormatter.setValue(joint.getJointLimitLower());
+            qmaxFormatter.setValue(joint.getJointLimitUpper());
+            taumaxFormatter.setValue(joint.getEffortLimitUpper());
+
+            qminFormatter.valueProperty().addListener((o, oldValue, newValue) -> joint.setJointLimitLower(newValue));
+            qmaxFormatter.valueProperty().addListener((o, oldValue, newValue) -> joint.setJointLimitUpper(newValue));
+            taumaxFormatter.valueProperty().addListener((o, oldValue, newValue) -> joint.setEffortLimit(newValue));
+         }
 
          guiControls.addVisualizerShutdownListener(() -> stage.close());
       }
@@ -599,7 +655,7 @@ public class ReachabilityMapVisualizer
                else if (selectedType.equals(RangeOfMotion))
                   qualityMetric = getVoxelExtraDataBasedMetric(selectedTarget, ReachabilityMapVisualizer.this::computeRoMMetric);
                else if (selectedType.equals(TauCapability))
-                  qualityMetric = getVoxelExtraDataBasedMetric(selectedTarget, ReachabilityMapVisualizer.this::computeTauCapabilityMetric);
+                  qualityMetric = getVoxelExtraDataBasedMetric(selectedTarget, extraData -> computeTauCapabilityMetric(extraData, payloadSpinner.getValue()));
 
                visuals = generateMetricRayBasedHeatMapVisuals(normalize, qualityMetric, bbx);
             }
@@ -608,7 +664,21 @@ public class ReachabilityMapVisualizer
          if (previousVisuals != null)
             guiControls.removeStaticVisuals(previousVisuals);
          guiControls.addStaticVisuals(visuals);
+
+         if (previousReachabilityMapBBXVisuals != null)
+            guiControls.removeStaticVisuals(previousReachabilityMapBBXVisuals);
+         List<VisualDefinition> reachabilityMapBBXVisuals = generateMapBBX(bbx);
+         guiControls.addStaticVisuals(reachabilityMapBBXVisuals);
+         previousReachabilityMapBBXVisuals = reachabilityMapBBXVisuals;
+
          previousVisuals = visuals;
+      }
+
+      private List<VisualDefinition> generateMapBBX(BoundingBox3D bbx)
+      {
+         ReferenceFrame referenceFrame = reachabilityMap.getReferenceFrame();
+         return ReachabilityMapTools.createBoundingBoxVisuals(new FramePoint3D(referenceFrame, bbx.getMinPoint()),
+                                                              new FramePoint3D(referenceFrame, bbx.getMaxPoint()));
       }
 
       public List<VisualDefinition> generateReachVisuals(String target, boolean normalizeMetric, BoundingBox3D bbx)
@@ -618,9 +688,30 @@ public class ReachabilityMapVisualizer
             case PositionTarget:
                return generateMetricVisual(normalizeMetric, bbx, voxel -> 1.0);
             case RayTarget:
-               return generateMetricVisual(normalizeMetric, bbx, Voxel3DData::getR);
+               return generateMetricVisual(normalizeMetric, bbx, voxel ->
+               {
+                  int n = 0;
+                  for (int rayIndex = 0; rayIndex < voxel.getNumberOfRays(); rayIndex++)
+                  {
+                     if (voxel.isRayReachable(rayIndex) && isWithinLimits(voxel.getRayExtraData(rayIndex)))
+                        n++;
+                  }
+                  return (double) n / (double) voxel.getNumberOfRays();
+               });
             case PoseTarget:
-               return generateMetricVisual(normalizeMetric, bbx, Voxel3DData::getR2);
+               return generateMetricVisual(normalizeMetric, bbx, voxel ->
+               {
+                  int n = 0;
+                  for (int rayIndex = 0; rayIndex < voxel.getNumberOfRays(); rayIndex++)
+                  {
+                     for (int rotationIndex = 0; rotationIndex < voxel.getNumberOfRotationsAroundRay(); rotationIndex++)
+                     {
+                        if (voxel.isPoseReachable(rayIndex, rotationIndex) && isWithinLimits(voxel.getPoseExtraData(rayIndex, rotationIndex)))
+                           n++;
+                     }
+                  }
+                  return (double) n / (double) voxel.getNumberOfRays() / (double) voxel.getNumberOfRotationsAroundRay();
+               });
          }
          return null;
       }
@@ -702,7 +793,7 @@ public class ReachabilityMapVisualizer
 
       public List<VisualDefinition> generateTauCapabilityVisuals(String target, boolean normalize, BoundingBox3D bbx)
       {
-         ToDoubleFunction<VoxelExtraData> singularityCalculator = ReachabilityMapVisualizer.this::computeTauCapabilityMetric;
+         ToDoubleFunction<VoxelExtraData> singularityCalculator = extraData -> computeTauCapabilityMetric(extraData, payloadSpinner.getValue());
          switch (target)
          {
             case PositionTarget:
@@ -867,7 +958,7 @@ public class ReachabilityMapVisualizer
 
       for (int rayIndex = 0; rayIndex < voxel.getNumberOfRays(); rayIndex++)
       {
-         if (voxel.isRayReachable(rayIndex))
+         if (voxel.isRayReachable(rayIndex) && isWithinLimits(voxel.getRayExtraData(rayIndex)))
          {
             s += jointPositionFunction.applyAsDouble(voxel.getRayExtraData(rayIndex));
          }
@@ -884,7 +975,7 @@ public class ReachabilityMapVisualizer
       {
          for (int rotationIndex = 0; rotationIndex < voxel.getNumberOfRotationsAroundRay(); rotationIndex++)
          {
-            if (voxel.isPoseReachable(rayIndex, rotationIndex))
+            if (voxel.isPoseReachable(rayIndex, rotationIndex) && isWithinLimits(voxel.getPoseExtraData(rayIndex, rotationIndex)))
             {
                s += jointPositionFunction.applyAsDouble(voxel.getPoseExtraData(rayIndex, rotationIndex));
             }
@@ -896,13 +987,10 @@ public class ReachabilityMapVisualizer
 
    public double computeRoMMetric(VoxelExtraData extraData)
    {
-      if (extraData == null)
+      if (extraData == null || !isWithinLimits(extraData))
          return 0.0;
-      return computeRoMMetric(extraData.getJointPositions());
-   }
+      ensureJointsCopyExist();
 
-   public double computeRoMMetric(float[] jointPositions)
-   {
       double l = 0.0;
 
       for (int i = 0; i < jointsCopy.length; i++)
@@ -911,22 +999,58 @@ public class ReachabilityMapVisualizer
          double max = jointsCopy[i].getJointLimitUpper();
          double midRange = 0.5 * (min + max);
          double rom = max - min;
-         double ratio = (jointPositions[i] - midRange) / rom;
+         double q = MathTools.clamp(extraData.getJointPositions()[i], min, max);
+         double ratio = (q - midRange) / rom;
          l += ratio * ratio;
       }
 
       return 1.0 - 4.0 / jointsCopy.length * l;
    }
 
-   public double computeTauCapabilityMetric(VoxelExtraData extraData)
+   private GravityCoriolisExternalWrenchMatrixCalculator jointTorquesCalculator;
+
+   public double computeTauCapabilityMetric(VoxelExtraData extraData, double payloadInKg)
    {
-      if (extraData == null)
+      if (extraData == null || !isWithinLimits(extraData))
          return 0.0;
-      return computeTauCapabilityMetric(extraData.getJointTorques());
+
+      if (payloadInKg == 0.0)
+         return computeTauCapabilityMetric(extraData);
+
+      ensureJointsCopyExist();
+
+      double gravity = -9.81;
+      if (jointTorquesCalculator == null)
+      {
+         jointTorquesCalculator = new GravityCoriolisExternalWrenchMatrixCalculator(MultiBodySystemTools.getRootBody(jointsCopy[0].getPredecessor()));
+         jointTorquesCalculator.setGravitionalAcceleration(gravity);
+      }
+
+      for (int i = 0; i < jointsCopy.length; i++)
+      {
+         jointsCopy[i].setQ(extraData.getJointPositions()[i]);
+         jointsCopy[i].updateFrame();
+      }
+
+      Wrench payloadWrench = new Wrench(endEffectorCopy.getBodyFixedFrame(), controlFrameCopy);
+      payloadWrench.getLinearPart().setMatchingFrame(ReferenceFrame.getWorldFrame(), new Vector3D(0.0, 0.0, gravity * payloadInKg));
+      jointTorquesCalculator.getExternalWrench(endEffectorCopy).setMatchingFrame(payloadWrench);
+      jointTorquesCalculator.compute();
+
+      float[] jointToruqes = new float[jointsCopy.length];
+      for (int i = 0; i < jointsCopy.length; i++)
+      {
+         jointToruqes[i] = (float) jointTorquesCalculator.getJointTauMatrix().get(i);
+      }
+      return computeTauCapabilityMetric(jointToruqes);
    }
 
-   public double computeTauCapabilityMetric(float[] jointTorques)
+   public double computeTauCapabilityMetric(VoxelExtraData extraData)
    {
+      if (extraData == null || !isWithinLimits(extraData))
+         return 0.0;
+      ensureJointsCopyExist();
+
       double l = 0.0;
 
       for (int i = 0; i < jointsCopy.length; i++)
@@ -935,7 +1059,28 @@ public class ReachabilityMapVisualizer
          double max = jointsCopy[i].getEffortLimitUpper();
          double midRange = 0.5 * (min + max);
          double rom = max - min;
-         double ratio = (jointTorques[i] - midRange) / rom;
+         double tau = MathTools.clamp(extraData.getJointTorques()[i], min, max);
+         double ratio = (tau - midRange) / rom;
+         l += ratio * ratio;
+      }
+
+      return 1.0 - 4.0 / jointsCopy.length * l;
+   }
+
+   public double computeTauCapabilityMetric(float[] jointTorques)
+   {
+      ensureJointsCopyExist();
+
+      double l = 0.0;
+
+      for (int i = 0; i < jointsCopy.length; i++)
+      {
+         double min = jointsCopy[i].getEffortLimitLower();
+         double max = jointsCopy[i].getEffortLimitUpper();
+         double midRange = 0.5 * (min + max);
+         double rom = max - min;
+         double tau = MathTools.clamp(jointTorques[i], min, max);
+         double ratio = (tau - midRange) / rom;
          l += ratio * ratio;
       }
 
@@ -944,14 +1089,10 @@ public class ReachabilityMapVisualizer
 
    public double computeFullJacobianSingularityMetric(VoxelExtraData extraData)
    {
-      if (extraData == null)
+      if (extraData == null || !isWithinLimits(extraData))
          return 0.0;
-      return computeFullJacobianSingularityMetric(extraData.getJointPositions());
-   }
 
-   public double computeFullJacobianSingularityMetric(float[] jointPositions)
-   {
-      DMatrixRMaj jacobian = computeJacobian(jointPositions);
+      DMatrixRMaj jacobian = computeJacobian(extraData.getJointPositions());
       DMatrixRMaj outer = new DMatrixRMaj(6, 6);
       CommonOps_DDRM.multOuter(jacobian, outer);
 
@@ -972,14 +1113,9 @@ public class ReachabilityMapVisualizer
 
    public double computeLinearJacobianSingularityMetric(VoxelExtraData extraData)
    {
-      if (extraData == null)
+      if (extraData == null || !isWithinLimits(extraData))
          return 0.0;
-      return computeLinearJacobianSingularityMetric(extraData.getJointPositions());
-   }
-
-   public double computeLinearJacobianSingularityMetric(float[] jointPositions)
-   {
-      DMatrixRMaj jacobian = computeJacobian(jointPositions);
+      DMatrixRMaj jacobian = computeJacobian(extraData.getJointPositions());
       DMatrixRMaj linearPart = new DMatrixRMaj(3, jacobian.numCols);
       CommonOps_DDRM.extract(jacobian, 3, 6, 0, jacobian.numCols, linearPart, 0, 0);
       DMatrixRMaj outer = new DMatrixRMaj(3, 3);
@@ -1002,14 +1138,10 @@ public class ReachabilityMapVisualizer
 
    public double computeAngularJacobianSingularityMetric(VoxelExtraData extraData)
    {
-      if (extraData == null)
+      if (extraData == null || !isWithinLimits(extraData))
          return 0.0;
-      return computeAngularJacobianSingularityMetric(extraData.getJointPositions());
-   }
 
-   public double computeAngularJacobianSingularityMetric(float[] jointPositions)
-   {
-      DMatrixRMaj jacobian = computeJacobian(jointPositions);
+      DMatrixRMaj jacobian = computeJacobian(extraData.getJointPositions());
       DMatrixRMaj angularPart = new DMatrixRMaj(3, jacobian.numCols);
       CommonOps_DDRM.extract(jacobian, 0, 3, 0, jacobian.numCols, angularPart, 0, 0);
       DMatrixRMaj outer = new DMatrixRMaj(3, 3);
@@ -1035,22 +1167,11 @@ public class ReachabilityMapVisualizer
    private GeometricJacobianCalculator jacobianCalculator;
    private OneDoFJointBasics[] jointsCopy;
    private ReferenceFrame controlFrameCopy;
+   private RigidBodyBasics endEffectorCopy;
 
    private DMatrixRMaj computeJacobian(float[] jointPositions)
    {
-      if (jointsCopy == null)
-      { // Initializing the copy of the joints that we'll use to evaluate the Jacobian.
-         RigidBodyBasics rootBodyCopy = robotInformation.getRobotDefinition().newInstance(ReferenceFrame.getWorldFrame());
-         RigidBodyBasics baseCopy = MultiBodySystemTools.findRigidBody(rootBodyCopy, robotInformation.getBaseName());
-         RigidBodyBasics endEffectorCopy = MultiBodySystemTools.findRigidBody(rootBodyCopy, robotInformation.getEndEffectorName());
-         jointsCopy = MultiBodySystemTools.createOneDoFJointPath(baseCopy, endEffectorCopy);
-         controlFrameCopy = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("controlFrameCopy",
-                                                                                              endEffectorCopy.getParentJoint().getFrameAfterJoint(),
-                                                                                              new RigidBodyTransform(robotInformation.getControlFramePoseInParentJoint()
-                                                                                                                                     .getOrientation(),
-                                                                                                                     robotInformation.getControlFramePoseInParentJoint()
-                                                                                                                                     .getPosition()));
-      }
+      ensureJointsCopyExist();
 
       for (int i = 0; i < jointsCopy.length; i++)
       {
@@ -1063,6 +1184,42 @@ public class ReachabilityMapVisualizer
       jacobianCalculator.setKinematicChain(jointsCopy);
       jacobianCalculator.setJacobianFrame(controlFrameCopy);
       return jacobianCalculator.getJacobianMatrix();
+   }
+
+   public boolean isWithinLimits(VoxelExtraData extraData)
+   {
+      ensureJointsCopyExist();
+
+      for (int i = 0; i < jointsCopy.length; i++)
+      {
+         double q = extraData.getJointPositions()[i];
+         double tau = extraData.getJointTorques()[i];
+
+         OneDoFJointBasics joint = jointsCopy[i];
+         if (!MathTools.intervalContains(q, joint.getJointLimitLower() - 1.0e-7, joint.getJointLimitUpper() + 1.0e-7))
+            return false;
+         if (!MathTools.intervalContains(tau, joint.getEffortLimitLower() - 1.0e-7, joint.getEffortLimitUpper() + 1.0e-7))
+            return false;
+      }
+
+      return true;
+   }
+
+   public void ensureJointsCopyExist()
+   {
+      if (jointsCopy == null)
+      { // Initializing the copy of the joints that we'll use to evaluate the Jacobian.
+         RigidBodyBasics rootBodyCopy = robotInformation.getRobotDefinition().newInstance(ReferenceFrame.getWorldFrame());
+         RigidBodyBasics baseCopy = MultiBodySystemTools.findRigidBody(rootBodyCopy, robotInformation.getBaseName());
+         endEffectorCopy = MultiBodySystemTools.findRigidBody(rootBodyCopy, robotInformation.getEndEffectorName());
+         jointsCopy = MultiBodySystemTools.createOneDoFJointPath(baseCopy, endEffectorCopy);
+         controlFrameCopy = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("controlFrameCopy",
+                                                                                              endEffectorCopy.getParentJoint().getFrameAfterJoint(),
+                                                                                              new RigidBodyTransform(robotInformation.getControlFramePoseInParentJoint()
+                                                                                                                                     .getOrientation(),
+                                                                                                                     robotInformation.getControlFramePoseInParentJoint()
+                                                                                                                                     .getPosition()));
+      }
    }
 
    private static interface RayIndexBasedVoxelQualityMetric
