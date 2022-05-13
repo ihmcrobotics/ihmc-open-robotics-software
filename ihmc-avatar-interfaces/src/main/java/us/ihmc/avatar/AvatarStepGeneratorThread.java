@@ -33,7 +33,6 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
 {
    private final YoRegistry csgRegistry = new YoRegistry("csgRegistry");
 
-   private final ComponentBasedFootstepDataMessageGenerator csg;
    private final FullHumanoidRobotModel fullRobotModel;
 
    private final HumanoidRobotContextData humanoidRobotContextData;
@@ -44,8 +43,7 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
    private final YoLong timestamp = new YoLong("TimestampCSG", csgRegistry);
    private final YoBoolean runCSG = new YoBoolean("RunCSG", csgRegistry);
 
-   private final PlanarRegionFootstepSnapper planarRegionFootstepSnapper;
-   private CommandInputManager csgCommandInputManager;
+   private final AvatarStepGeneratorController stepGeneratorController;
 
    public AvatarStepGeneratorThread(ComponentBasedFootstepDataMessageGeneratorFactory csgPluginFactory,
                                     HumanoidRobotContextDataFactory contextDataFactory,
@@ -70,10 +68,11 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
       contextDataFactory.setProcessedJointData(processedJointData);
       contextDataFactory.setSensorDataContext(new SensorDataContext(fullRobotModel));
       humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
-      csgCommandInputManager = csgPluginFactory.getCSGCommandInputManager().getCommandInputManager();
+      CommandInputManager csgCommandInputManager = csgPluginFactory.getCSGCommandInputManager().getCommandInputManager();
 
       humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
-      csg = csgPluginFactory.buildPlugin(humanoidReferenceFrames,
+
+      ComponentBasedFootstepDataMessageGenerator csg = csgPluginFactory.buildPlugin(humanoidReferenceFrames,
                                          perceptionDt,
                                          drcRobotModel.getWalkingControllerParameters(),
                                          walkingOutputManager,
@@ -81,12 +80,14 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
                                          null,
                                          null,
                                          csgTime);
-      csgRegistry.addChild(csg.getRegistry());
 
-      this.planarRegionFootstepSnapper = new PlanarRegionFootstepSnapper(csg.getContinuousStepGenerator(),
-                                                                         drcRobotModel.getWalkingControllerParameters().getSteppingParameters(),
-                                                                         csgRegistry);
-      csg.getContinuousStepGenerator().setFootstepAdjustment(planarRegionFootstepSnapper);
+      stepGeneratorController = new AvatarStepGeneratorController(csg.getContinuousStepGenerator(),
+                                                                  csgCommandInputManager,
+                                                                  drcRobotModel.getWalkingControllerParameters().getSteppingParameters(),
+                                                                  csgTime);
+
+      csgRegistry.addChild(csg.getRegistry());
+      csgRegistry.addChild(stepGeneratorController.getYoRegistry());
 
       ParameterLoaderHelper.loadParameters(this, drcRobotModel, csgRegistry);
 
@@ -131,9 +132,8 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
             firstTick.set(false);
          }
 
-         consumePlanarRegions();
+         stepGeneratorController.doControl();
 
-         csg.update(csgTime.getValue());
          humanoidRobotContextData.setPerceptionRan(true);
       }
       catch (Exception e)
@@ -142,19 +142,7 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
       }
    }
 
-   private void consumePlanarRegions()
-   {
-      if (csgCommandInputManager != null)
-      {
-         if (csgCommandInputManager.isNewCommandAvailable(PlanarRegionsListCommand.class))
-         {
-            PlanarRegionsListCommand commands = csgCommandInputManager.pollNewestCommand(PlanarRegionsListCommand.class);
-            planarRegionFootstepSnapper.setPlanarRegions(commands);
-         }
 
-         csgCommandInputManager.clearCommands(PlanarRegionsListCommand.class);
-      }
-   }
 
    @Override
    public YoRegistry getYoVariableRegistry()

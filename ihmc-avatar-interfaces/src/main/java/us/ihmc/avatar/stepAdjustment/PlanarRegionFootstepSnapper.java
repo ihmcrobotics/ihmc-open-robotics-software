@@ -96,6 +96,9 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       }
    }
 
+   private final ConvexPolygon2D footPolygonToSnapAndWiggle = new ConvexPolygon2D();
+   private final ConvexPolygon2D wiggledPolygon = new ConvexPolygon2D();
+
    @Override
    public FramePose3DReadOnly adjustFootstep(FramePose2DReadOnly footstepPose, RobotSide footSide)
    {
@@ -103,15 +106,14 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       footstepAtSameHeightAsStanceFoot.setZ(continuousStepGenerator.getCurrentSupportFootPose().getZ());
       footstepAtSameHeightAsStanceFoot.getOrientation().set(footstepPose.getOrientation());
 
-      if (steppableRegionsList.isEmpty())
+      if (!steppableRegionsList.isEmpty())
       {
          adjustedFootstepPose.set(footstepAtSameHeightAsStanceFoot);
-         ConvexPolygon2D footPolygonToWiggle = new ConvexPolygon2D();
-         ConvexPolygon2D wiggledPolygon = new ConvexPolygon2D();
-         footPolygonToWiggle.set(footPolygons.get(footSide));
+         footPolygonToSnapAndWiggle.set(footPolygons.get(footSide));
+
          try
          {
-            snapAndWiggle(adjustedFootstepPose, footPolygonToWiggle, wiggledPolygon);
+            snapAndWiggle(adjustedFootstepPose, footPolygonToSnapAndWiggle, wiggledPolygon);
             if (adjustedFootstepPose.containsNaN())
                return footstepAtSameHeightAsStanceFoot;
          }
