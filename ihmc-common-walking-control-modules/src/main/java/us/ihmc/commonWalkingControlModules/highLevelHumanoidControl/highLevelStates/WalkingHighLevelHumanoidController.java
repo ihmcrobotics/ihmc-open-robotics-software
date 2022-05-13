@@ -55,6 +55,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -291,7 +292,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       controllerCoreOptimizationSettings = new ParameterizedControllerCoreOptimizationSettings(defaultControllerCoreOptimizationSettings, registry);
 
       this.naturalPosture = walkingControllerParameters.getNaturalPosture(fullRobotModel, registry, controllerToolbox.getYoGraphicsListRegistry());
-      this.naturalPosture.initialize();
+      if (naturalPosture != null)
+         naturalPosture.initialize();
    }
 
    private StateMachine<WalkingStateEnum, WalkingState> setupStateMachine()
@@ -530,11 +532,29 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       privilegedConfigurationCommand.clear();
       privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_ZERO);
 
+      //TODO: This is hardcoded here. It should be moved to a parameter setting instead. This is not the long term place for it.
+      createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, ArmJointName.SHOULDER_PITCH, 0.0);
+      createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, ArmJointName.SHOULDER_PITCH, 0.0);
+      createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, ArmJointName.SHOULDER_ROLL, -1.2);
+      createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, ArmJointName.SHOULDER_ROLL, 1.2);
+      createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, ArmJointName.SHOULDER_YAW, -0.37);
+      createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, ArmJointName.SHOULDER_YAW, 0.37);
+      createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, ArmJointName.ELBOW_PITCH, -1.2);
+      createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, ArmJointName.ELBOW_PITCH, 1.2);
+      createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, ArmJointName.WRIST_YAW, 0.0);
+      createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, ArmJointName.WRIST_YAW, 0.0);
+      createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, ArmJointName.WRIST_ROLL, 0.0);
+      createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, ArmJointName.WRIST_ROLL, 0.0);
+      createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, ArmJointName.FIRST_WRIST_PITCH, 0.0);
+      createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, ArmJointName.FIRST_WRIST_PITCH, 0.0);
+      
       for (RobotSide robotSide : RobotSide.values)
       {
-         ArmJointName[] armJointNames = fullRobotModel.getRobotSpecificJointNames().getArmJointNames();
-         for (int i = 0; i < armJointNames.length; i++)
-            privilegedConfigurationCommand.addJoint(fullRobotModel.getArmJoint(robotSide, armJointNames[i]), PrivilegedConfigurationOption.AT_MID_RANGE);
+//         ArmJointName[] armJointNames = fullRobotModel.getRobotSpecificJointNames().getArmJointNames();
+//         for (int i = 0; i < armJointNames.length; i++)
+//         {
+//            privilegedConfigurationCommand.addJoint(fullRobotModel.getArmJoint(robotSide, armJointNames[i]), PrivilegedConfigurationOption.AT_MID_RANGE);
+//         }
 
          OneDoFJointBasics kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH);
 
@@ -559,6 +579,24 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       commandConsumer.avoidManipulationAbortForDuration(RigidBodyControlManager.INITIAL_GO_HOME_TIME);
 
       firstTick = true;
+   }
+
+   
+   private OneDoFJointPrivilegedConfigurationParameters createAndAddJointPrivilegedConfigurationParameters(RobotSide robotSide, ArmJointName armJointName, double privilegedAngle)
+   {
+      OneDoFJointBasics armJoint = fullRobotModel.getArmJoint(robotSide, armJointName);            
+
+      OneDoFJointPrivilegedConfigurationParameters jointParameters = new OneDoFJointPrivilegedConfigurationParameters();
+      jointParameters.setConfigurationGain(40.0);//40.0);
+      jointParameters.setVelocityGain(6.0);//6.0);
+      jointParameters.setWeight(0.5);//5.0);
+      jointParameters.setMaxAcceleration(Double.POSITIVE_INFINITY);
+      jointParameters.setPrivilegedConfigurationOption(null);
+      jointParameters.setPrivilegedConfiguration(privilegedAngle);
+
+      privilegedConfigurationCommand.addJoint(armJoint, jointParameters);
+
+      return jointParameters;
    }
 
    private void initializeManagers()
@@ -692,24 +730,27 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       if (ENABLE_LEG_ELASTICITY_DEBUGGATOR)
          legElasticityDebuggator.update();
 
-      if (firstTick)
+      if (naturalPosture != null)
       {
-         // use the built-in pose:
-         naturalPosture.setNaturalPostureOffset(naturalPosture.getNominalStandingPoseQoffset());
-      }
-      double[] q = new double[fullRobotModel.getOneDoFJoints().length];
-      
-      OneDoFJointBasics[] controlledOneDoFJoints = MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(),OneDoFJointBasics.class);
-      int i = 0; // GMN: HACK!
-      for (OneDoFJointBasics joint : controlledOneDoFJoints)
-      {
-         q[i] = joint.getQ();
-         i += 1;
-      }
-      Quaternion Qbase = new Quaternion(fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToWorldFrame().getRotation());
-      naturalPosture.compute(q, Qbase);
+         if (firstTick)
+         {
+            // use the built-in pose:
+            naturalPosture.setNaturalPostureOffset(naturalPosture.getNominalStandingPoseQoffset());
+         }
+         double[] q = new double[fullRobotModel.getOneDoFJoints().length];
 
-      firstTick = false;
+         OneDoFJointBasics[] controlledOneDoFJoints = MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(),OneDoFJointBasics.class);
+         int i = 0; // GMN: HACK!
+         for (OneDoFJointBasics joint : controlledOneDoFJoints)
+         {
+            q[i] = joint.getQ();
+            i += 1;
+         }
+         Quaternion Qbase = new Quaternion(fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToWorldFrame().getRotation());
+         naturalPosture.compute(q, Qbase);
+
+         firstTick = false;
+      }
    }
 
    private void handleChangeInContactState()
@@ -778,7 +819,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       }
 
       pelvisOrientationManager.compute();
-      naturalPostureManager.compute();
+      if (naturalPostureManager != null)
+         naturalPostureManager.compute();
 
       comHeightManager.compute(balanceManager.getDesiredICPVelocity(), desiredCoMVelocityAsFrameVector, isInDoubleSupport, omega0, feetManager);
       FeedbackControlCommand<?> heightControlCommand = comHeightManager.getHeightControlCommand();
@@ -924,7 +966,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          }
       }
       
-      if (useNaturalPostureCommand.getValue())
+      if ((naturalPostureManager != null) && (useNaturalPostureCommand.getValue()))
       {
          controllerCoreCommand.addInverseDynamicsCommand(naturalPostureManager.getQPObjectiveCommand());
       }
