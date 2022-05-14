@@ -5,6 +5,7 @@ import org.bytedeco.javacpp.LongPointer;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacpp.SizeTPointer;
 import org.bytedeco.spinnaker.Spinnaker_C.*;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -23,7 +24,7 @@ public class BytedecoBlackfly
    private String acquisitionMode;
 
    AtomicBoolean doImageAcquisition;
-   Thread imageAcquisitionThread;
+   Thread imageAcquisitionService;
 
    AtomicReference<spinImage> currentUnprocessedImage;
    spinImage previousImage = null;
@@ -69,7 +70,7 @@ public class BytedecoBlackfly
       //Image acquisition needs to run on a different thread so that the whole program doesn't need to wait for new images
       doImageAcquisition = new AtomicBoolean(true);
       currentUnprocessedImage = new AtomicReference<>(null);
-      imageAcquisitionThread = new Thread(new Runnable()
+      imageAcquisitionService = ThreadTools.startAThread(new Runnable()
       {
          @Override
          public void run()
@@ -93,8 +94,8 @@ public class BytedecoBlackfly
                spinImageRelease(oldImage);
             }
          }
-      });
-      imageAcquisitionThread.start();
+      }, "Blackfly " + this.serial + " Image Acquisition");
+      imageAcquisitionService.start();
    }
 
    public int getHeight()
@@ -151,7 +152,7 @@ public class BytedecoBlackfly
       doImageAcquisition.set(false);
       try
       {
-         imageAcquisitionThread.wait();
+         imageAcquisitionService.wait();
       }
       catch (InterruptedException ex)
       {
