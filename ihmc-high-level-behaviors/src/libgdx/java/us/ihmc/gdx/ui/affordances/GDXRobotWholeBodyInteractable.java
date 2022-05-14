@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import controller_msgs.msg.dds.SpatialVectorMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
@@ -17,9 +18,9 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
-import us.ihmc.gdx.input.ImGui3DViewPickResult;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.gdx.ui.graphics.GDXSpatialVectorArrows;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -29,7 +30,9 @@ import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,6 +57,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
 
    private final SideDependentList<GDXLiveRobotPartInteractable> footInteractables = new SideDependentList<>();
    private final SideDependentList<GDXLiveRobotPartInteractable> handInteractables = new SideDependentList<>();
+   private final SideDependentList<GDXSpatialVectorArrows> wristWrenchArrows = new SideDependentList<>();
    private GDXLiveRobotPartInteractable pelvisInteractable;
    private final GDXWalkPathControlRing walkPathControlRing = new GDXWalkPathControlRing();
 
@@ -150,6 +154,16 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
                                                                                                   ReferenceFrame.getWorldFrame()));
                });
                handInteractables.put(side, interactableHand);
+               HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
+               SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
+               ForceSensorDefinition[] forceSensorDefinitions = syncedRobot.getFullRobotModel().getForceSensorDefinitions();
+               for (int i = 0; i < forceSensorDefinitions.length; i++)
+               {
+                  if (wristForceSensorNames.get(side).equals(forceSensorDefinitions[i].getSensorName()))
+                  {
+                     wristWrenchArrows.put(side, new GDXSpatialVectorArrows(forceSensorDefinitions[i].getSensorFrame(), i));
+                  }
+               }
             }
          }
       }
@@ -171,6 +185,17 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
          }
 
          walkPathControlRing.update();
+
+         for (RobotSide side : RobotSide.values)
+         {
+            GDXSpatialVectorArrows wristArrows = wristWrenchArrows.get(side);
+            if (syncedRobot.getForceSensorData().size() > wristArrows.getIndexOfSensor())
+            {
+               SpatialVectorMessage forceSensorData = syncedRobot.getForceSensorData().get(wristArrows.getIndexOfSensor());
+               wristArrows.update(forceSensorData.getLinearPart(), forceSensorData.getAngularPart());
+            }
+
+         }
       }
    }
 
@@ -297,6 +322,15 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
          }
 
          walkPathControlRing.getVirtualRenderables(renderables, pool);
+
+         for (RobotSide side : RobotSide.values)
+         {
+            GDXSpatialVectorArrows wristArrows = wristWrenchArrows.get(side);
+            if (syncedRobot.getForceSensorData().size() > wristArrows.getIndexOfSensor())
+            {
+               wristArrows.getRenderables(renderables, pool);
+            }
+         }
       }
    }
 
