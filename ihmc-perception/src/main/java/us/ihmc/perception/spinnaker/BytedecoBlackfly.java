@@ -95,7 +95,6 @@ public class BytedecoBlackfly
             }
          }
       }, "Blackfly " + this.serial + " Image Acquisition");
-      imageAcquisitionService.start();
    }
 
    public int getHeight()
