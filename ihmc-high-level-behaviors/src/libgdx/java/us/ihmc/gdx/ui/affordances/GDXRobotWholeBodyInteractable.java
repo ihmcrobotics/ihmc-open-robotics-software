@@ -11,6 +11,7 @@ import imgui.type.ImFloat;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
@@ -44,6 +45,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ROS2ControllerHelper ros2Helper;
+   private final YoVariableClientHelper yoVariableClientHelper;
 
    private final ArrayList<GDXRobotCollisionLink> selfCollisionLinks = new ArrayList<>();
    private final ArrayList<GDXRobotCollisionLink> environmentCollisionLinks = new ArrayList<>();
@@ -65,13 +67,15 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
                                         RobotCollisionModel robotEnvironmentCollisionModel,
                                         DRCRobotModel robotModel,
                                         ROS2SyncedRobotModel syncedRobot,
-                                        ROS2ControllerHelper ros2Helper)
+                                        ROS2ControllerHelper ros2Helper,
+                                        YoVariableClientHelper yoVariableClientHelper)
    {
       this.robotSelfCollisionModel = robotSelfCollisionModel;
       this.robotEnvironmentCollisionModel = robotEnvironmentCollisionModel;
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
       this.ros2Helper = ros2Helper;
+      this.yoVariableClientHelper = yoVariableClientHelper;
    }
 
    public void create(GDXImGuiBasedUI baseUI)
@@ -161,7 +165,10 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
                {
                   if (wristForceSensorNames.get(side).equals(forceSensorDefinitions[i].getSensorName()))
                   {
-                     wristWrenchArrows.put(side, new GDXSpatialVectorArrows(forceSensorDefinitions[i].getSensorFrame(), i));
+//                     wristWrenchArrows.put(side, new GDXSpatialVectorArrows(forceSensorDefinitions[i].getSensorFrame(), i));
+                     wristWrenchArrows.put(side, new GDXSpatialVectorArrows(forceSensorDefinitions[i].getSensorFrame(),
+                                                                            yoVariableClientHelper,
+                                                                            side.getLowerCaseName() + "WristSensor"));
                   }
                }
             }
@@ -186,15 +193,18 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
 
          walkPathControlRing.update();
 
-         for (RobotSide side : RobotSide.values)
+//         for (RobotSide side : RobotSide.values)
+//         {
+//            GDXSpatialVectorArrows wristArrows = wristWrenchArrows.get(side);
+//            if (syncedRobot.getForceSensorData().size() > wristArrows.getIndexOfSensor())
+//            {
+//               SpatialVectorMessage forceSensorData = syncedRobot.getForceSensorData().get(wristArrows.getIndexOfSensor());
+//               wristArrows.update(forceSensorData.getLinearPart(), forceSensorData.getAngularPart());
+//            }
+//         }
+         for (RobotSide side : wristWrenchArrows.sides())
          {
-            GDXSpatialVectorArrows wristArrows = wristWrenchArrows.get(side);
-            if (syncedRobot.getForceSensorData().size() > wristArrows.getIndexOfSensor())
-            {
-               SpatialVectorMessage forceSensorData = syncedRobot.getForceSensorData().get(wristArrows.getIndexOfSensor());
-               wristArrows.update(forceSensorData.getLinearPart(), forceSensorData.getAngularPart());
-            }
-
+            wristWrenchArrows.get(side).updateFromYoVariables();
          }
       }
    }
