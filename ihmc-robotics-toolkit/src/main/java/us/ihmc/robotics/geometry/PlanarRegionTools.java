@@ -31,6 +31,9 @@ public class PlanarRegionTools
    private final ConvexPolygon2D tempPolygon = new ConvexPolygon2D();
    private final ConvexPolygon2D tempPolygon2 = new ConvexPolygon2D();
 
+   private final Point3D tempPoint3D = new Point3D();
+   private final Point2D tempPoint2D = new Point2D();
+
    public PlanarRegionTools()
    {}
 
@@ -1135,6 +1138,8 @@ public class PlanarRegionTools
       return closestPoint;
    }
 
+
+
    /**
     * Warning generates garbage
     */
@@ -1152,6 +1157,11 @@ public class PlanarRegionTools
    public static Point3D closestPointOnPlanarRegion(Point3DReadOnly pointInWorld, PlanarRegion region)
    {
       return closestPointOnPlanarRegion(pointInWorld, region.getConvexHull(), region.getTransformToWorld());
+   }
+
+   public static boolean closestPointOnPlanarRegion(Point2DReadOnly pointInWorld, PlanarRegion region, Point3DBasics closestPointsToPack)
+   {
+      return closestPointOnPlanarRegion(pointInWorld, region.getConvexHull(), region.getTransformToWorld(), closestPointsToPack);
    }
 
    public static boolean closestPointOnPlanarRegion(Point3DReadOnly pointInWorld, PlanarRegion region, Point3DBasics closestPointsToPack)
@@ -1176,6 +1186,49 @@ public class PlanarRegionTools
                                                     Point3DBasics closestPointToPack)
    {
       transformFromRegionToWorld.inverseTransform(pointInWorld, closestPointToPack);
+
+      // find the intersection in the plane frmae
+      if (!EuclidCoreMissingTools.intersectionBetweenLine3DAndPlane3D(0.0,
+                                                                      0.0,
+                                                                      0.0,
+                                                                      0.0,
+                                                                      0.0,
+                                                                      1.0,
+                                                                      closestPointToPack.getX(),
+                                                                      closestPointToPack.getY(),
+                                                                      closestPointToPack.getZ(),
+                                                                      0.0,
+                                                                      0.0,
+                                                                      1.0,
+                                                                      closestPointToPack))
+      {
+         return false;
+      }
+
+
+      // checking convex hull here - might be better to check all polygons to avoid false positive
+      if (!regionConvexHull.isPointInside(closestPointToPack.getX(), closestPointToPack.getY()))
+      {
+         regionConvexHull.checkIfUpToDate();
+         EuclidCoreMissingTools.orthogonalProjectionOnConvexPolygon2D(closestPointToPack.getX(),
+                                                                      closestPointToPack.getY(),
+                                                                      regionConvexHull.getVertexBufferView(),
+                                                                      regionConvexHull.getNumberOfVertices(),
+                                                                      regionConvexHull.isClockwiseOrdered(),
+                                                                      closestPointToPack);
+      }
+      closestPointToPack.applyTransform(transformFromRegionToWorld);
+
+      return true;
+   }
+
+   public static boolean closestPointOnPlanarRegion(Point2DReadOnly pointInWorld,
+                                                    ConvexPolygon2DReadOnly regionConvexHull,
+                                                    RigidBodyTransformReadOnly transformFromRegionToWorld,
+                                                    Point3DBasics closestPointToPack)
+   {
+      closestPointToPack.set(pointInWorld);
+      transformFromRegionToWorld.inverseTransform(closestPointToPack);
 
       // find the intersection in the plane frmae
       if (!EuclidCoreMissingTools.intersectionBetweenLine3DAndPlane3D(0.0,

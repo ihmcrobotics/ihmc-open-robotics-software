@@ -13,19 +13,19 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.polygonSnapping.GarbageFreePlanarRegionListPolygonSnapper;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStepParameters;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -39,7 +39,6 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final List<PlanarRegion> steppableRegionsList = new ArrayList<>();
-   private final SnapAndWiggleSingleStepParameters parameters = new SnapAndWiggleSingleStepParameters();
 
    private final FramePose3D footstepAtSameHeightAsStanceFoot = new FramePose3D();
    private final FramePose3D adjustedFootstepPose = new FramePose3D();
@@ -148,8 +147,9 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
          return true;
       }
 
-      // TODO garbasge
-      doSnapAndWiggle(solePose, footStepPolygonInSoleFrame, footstepPolygonInWorld, snappedFootstepPolygonToPack);
+      computeFootSnapToPlanarRegion(solePose, footstepPolygonInWorld, regionToSnapTo, snapTransform);
+
+      doSnapAndWiggle(solePose, footStepPolygonInSoleFrame, footstepPolygonInWorld, snappedFootstepPolygonToPack, regionToSnapTo, snapTransform);
 
       solePose.get(transformToSole);
       snappedFootstepPolygonToPack.applyInverseTransform(transformToSole, false);
@@ -157,8 +157,33 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       return true;
    }
 
+
    private final PlanarRegion regionToSnapTo = new PlanarRegion();
    private final RigidBodyTransform snapTransform = new RigidBodyTransform();
+
+   private final Point3D tempPointOnOtherRegion = new Point3D();
+   private final Point2D displacement = new Point2D();
+
+   private void computeFootSnapToPlanarRegion(FixedFramePose3DBasics solePoseToSnap,
+                                              FrameConvexPolygon2DBasics footPolygonInWorld,
+                                              PlanarRegion planarRegionToPack,
+                                              RigidBodyTransform snapTransformToPack)
+   {
+      if (snapper.snapPolygonToPlanarRegionsList(footPolygonInWorld, steppableRegionsList, Double.POSITIVE_INFINITY, planarRegionToPack, snapTransformToPack))
+         return;
+
+      Point2DReadOnly centroid = footPolygonInWorld.getCentroid();
+      PlanarRegion closestRegion = findClosestPlanarRegionToPointByProjectionOntoXYPlane(centroid.getX(), centroid.getY());
+      PlanarRegionTools.closestPointOnPlanarRegion(centroid, closestRegion, tempPointOnOtherRegion);
+
+      displacement.set(tempPointOnOtherRegion);
+      displacement.sub(centroid);
+
+      solePoseToSnap.appendTranslation(displacement.getX(), displacement.getY(), 0.0);
+      footPolygonInWorld.translate(displacement);
+
+      snapper.snapPolygonToPlanarRegionsList(footPolygonInWorld, steppableRegionsList, Double.POSITIVE_INFINITY, planarRegionToPack, snapTransformToPack);
+   }
 
    private final PoseReferenceFrame soleFrameAfterSnapAndBeforeWiggle = new PoseReferenceFrame("SoleFrameAfterSnapAndBeforeWiggle", ReferenceFrame.getWorldFrame());
    private final PoseReferenceFrame soleFrameAfterWiggle = new PoseReferenceFrame("SoleFrameAfterWiggle", ReferenceFrame.getWorldFrame());
@@ -168,16 +193,12 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
    private final ConvexPolygon2D footPolygonInRegionFrame = new ConvexPolygon2D();
 
    private void doSnapAndWiggle(FramePose3D solePoseToSnapAndWiggle,
-                                ConvexPolygon2DReadOnly footStepPolygonInSoleFrame,
-                                FrameConvexPolygon2DReadOnly footPolygonInWorld,
-                                ConvexPolygon2DBasics snappedFootholdInWorldToPack)
+                                   ConvexPolygon2DReadOnly footStepPolygonInSoleFrame,
+                                   FrameConvexPolygon2DReadOnly footPolygonInWorld,
+                                   ConvexPolygon2DBasics snappedFootholdInWorldToPack,
+                                   PlanarRegion regionToSnapTo,
+                                   RigidBodyTransformReadOnly snapTransform)
    {
-      if (!snapper.snapPolygonToPlanarRegionsList(footPolygonInWorld, steppableRegionsList, Double.POSITIVE_INFINITY, regionToSnapTo, snapTransform))
-      {
-         // TODO need to do something smarter
-         throw new RuntimeException("Snapping failed");
-      }
-
       solePoseToSnapAndWiggle.setZ(0.0);
       solePoseToSnapAndWiggle.applyTransform(snapTransform);
 
@@ -214,6 +235,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       }
       else
       {
+         // FIXME I don't think this is quite right
          snappedFootholdInWorldToPack.set(footPolygonInWorld);
       }
    }
