@@ -16,6 +16,7 @@ public class YoContinuousStepGeneratorParameters implements ContinuousStepGenera
    private final YoDouble turnMaxAngleInward, turnMaxAngleOutward;
    private final YoBoolean stepsAreAdjustable;
    private final YoBoolean shiftUpcomingStepsWithTouchdown;
+   private final YoBoolean includeStepConstraintsWhenAvailable;
 
    public YoContinuousStepGeneratorParameters(String nameSuffix, YoRegistry registry)
    {
@@ -32,6 +33,7 @@ public class YoContinuousStepGeneratorParameters implements ContinuousStepGenera
       turnMaxAngleInward = new YoDouble("maxAngleTurnInwards" + nameSuffix, registry);
       stepsAreAdjustable = new YoBoolean("stepsAreAdjustable" + nameSuffix, registry);
       shiftUpcomingStepsWithTouchdown = new YoBoolean("shiftUpcomingStepsWithTouchdown" + nameSuffix, registry);
+      includeStepConstraintsWhenAvailable = new YoBoolean("includeStepConstraintsWhenAvailable" + nameSuffix, registry);
    }
 
    @Override
@@ -44,6 +46,12 @@ public class YoContinuousStepGeneratorParameters implements ContinuousStepGenera
    public void setShiftUpcomingStepsWithTouchdown(boolean shiftUpcomingStepsWithTouchdown)
    {
       this.shiftUpcomingStepsWithTouchdown.set(shiftUpcomingStepsWithTouchdown);
+   }
+
+   @Override
+   public void setIncludeStepConstraintsWhenAvailable(boolean includeStepConstraintsWhenAvailable)
+   {
+      this.includeStepConstraintsWhenAvailable.set(includeStepConstraintsWhenAvailable);
    }
 
    @Override
@@ -188,6 +196,12 @@ public class YoContinuousStepGeneratorParameters implements ContinuousStepGenera
    public boolean getShiftUpcomingStepsWithTouchdown()
    {
       return shiftUpcomingStepsWithTouchdown.getBooleanValue();
+   }
+
+   @Override
+   public boolean getIncludeStepConstraintsWhenAvailable()
+   {
+      return includeStepConstraintsWhenAvailable.getBooleanValue();
    }
 
    @Override

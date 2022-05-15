@@ -73,13 +73,13 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
       humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
 
       ComponentBasedFootstepDataMessageGenerator csg = csgPluginFactory.buildPlugin(humanoidReferenceFrames,
-                                         perceptionDt,
-                                         drcRobotModel.getWalkingControllerParameters(),
-                                         walkingOutputManager,
-                                         walkingCommandInputManager,
-                                         null,
-                                         null,
-                                         csgTime);
+                                                                                    perceptionDt,
+                                                                                    drcRobotModel.getWalkingControllerParameters(),
+                                                                                    walkingOutputManager,
+                                                                                    walkingCommandInputManager,
+                                                                                    null,
+                                                                                    null,
+                                                                                    csgTime);
 
       stepGeneratorController = new AvatarStepGeneratorController(csg.getContinuousStepGenerator(),
                                                                   csgCommandInputManager,

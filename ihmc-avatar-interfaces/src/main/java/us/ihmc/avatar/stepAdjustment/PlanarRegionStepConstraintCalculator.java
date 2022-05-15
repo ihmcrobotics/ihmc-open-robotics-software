@@ -1,6 +1,7 @@
 package us.ihmc.avatar.stepAdjustment;
 
 import controller_msgs.msg.dds.StepConstraintsListMessage;
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.StepConstraintRegionCalculator;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -53,15 +54,15 @@ public class PlanarRegionStepConstraintCalculator implements StepConstraintRegio
             regionsToInclude.add(planarRegionsList.get(i));
       }
 
-      int i = 0;
-      while (i < regionsToInclude.size())
-      {
-         PlanarRegionTools.closestPointOnPlanarRegion(footstepPose.getPosition(), regionsToInclude.get(i), pointToPack);
-         if (pointToPack.distance(footstepPose.getPosition()) < distanceToInclude)
-            regionsToInclude.remove(i);
-         else
-            i++;
-      }
+//      int i = 0;
+//      while (i < regionsToInclude.size())
+//      {
+//         PlanarRegionTools.closestPointOnPlanarRegion(footstepPose.getPosition(), regionsToInclude.get(i), pointToPack);
+//         if (pointToPack.distance(footstepPose.getPosition()) < distanceToInclude)
+//            regionsToInclude.remove(i);
+//         else
+//            i++;
+//      }
 
       StepConstraintListConverter.convertPlanarRegionListToStepConstraintRegion(regionsToInclude, steppableRegions);
       StepConstraintMessageConverter.convertToStepConstraintsListMessage(steppableRegions, stepConstraintsToPack);

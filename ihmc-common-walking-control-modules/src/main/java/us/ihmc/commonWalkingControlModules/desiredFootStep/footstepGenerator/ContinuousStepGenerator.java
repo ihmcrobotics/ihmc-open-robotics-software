@@ -336,7 +336,7 @@ public class ContinuousStepGenerator implements Updatable
          footstep.getLocation().set(nextFootstepPose3D.getPosition());
          footstep.getOrientation().set(nextFootstepPose3D.getOrientation());
          footstep.setSwingHeight(parameters.getSwingHeight());
-         if (stepConstraintRegionCalculator != null)
+         if (parameters.getIncludeStepConstraintsWhenAvailable() && stepConstraintRegionCalculator != null)
             stepConstraintRegionCalculator.computeConstraintRegions(previousFootstepPose, nextFootstepPose3D, footstep.getStepConstraints());
 
          footstepPose2D.set(nextFootstepPose2D);
