@@ -20,6 +20,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.graphicsDescription.HeightMap;
@@ -32,9 +33,13 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLevelHumanoidControllerPluginFactory
 {
@@ -188,12 +193,14 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
       private final CommandInputManager commandInputManager = new CommandInputManager(supportedCommands());
 
       private boolean isOpen = false;
-      private boolean walk = false;
       private boolean isUnitVelocities = false;
-      private final Vector2D desiredVelocity = new Vector2D();
-      private double turningVelocity = 0.0;
       private HighLevelControllerName currentController;
       private ContinuousStepGenerator continuousStepGenerator;
+      private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+      private final YoBoolean walk = new YoBoolean("desiredWalkCSG", registry);
+      private final YoDouble desiredTurningVelocity = new YoDouble("desiredTurningVelocityCSG", registry);
+      private final YoFrameVector2D desiredVelocity = new YoFrameVector2D("desiredVelocityCSG", ReferenceFrame.getWorldFrame(), registry);
+
 
       public CSGCommandInputManager()
       {
@@ -202,7 +209,11 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
       public void setCSG(ContinuousStepGenerator continuousStepGenerator)
       {
          this.continuousStepGenerator = continuousStepGenerator;
-         
+      }
+
+      public YoRegistry getRegistry()
+      {
+         return registry;
       }
 
       public CommandInputManager getCommandInputManager()
@@ -234,9 +245,9 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
             ContinuousStepGeneratorInputCommand command = commandInputManager.pollNewestCommand(ContinuousStepGeneratorInputCommand.class);
             desiredVelocity.setX(command.getForwardVelocity());
             desiredVelocity.setY(command.getLateralVelocity());
-            turningVelocity = command.getTurnVelocity();
+            desiredTurningVelocity.set(command.getTurnVelocity());
             isUnitVelocities = command.isUnitVelocities();
-            walk = command.isWalk();
+            walk.set(command.isWalk());
          }
 
          if (commandInputManager.isNewCommandAvailable(ContinuousStepGeneratorParametersCommand.class))
@@ -255,7 +266,7 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
          }
 
          if (!isOpen)
-            walk = false;
+            walk.set(false);
       }
 
       public boolean isOpen()
@@ -288,7 +299,7 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
             @Override
             public double getTurningVelocity()
             {
-               return turningVelocity;
+               return desiredTurningVelocity.getValue();
             }
 
             @Override
@@ -301,7 +312,7 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
 
       public BooleanProvider createWalkInputProvider()
       {
-         return () -> walk;
+         return walk;
       }
    }
 }
