@@ -72,6 +72,9 @@ public class TableDefinition  extends RobotDefinition
                                                                            radiusOfGyrationPercent * sizeX,
                                                                            radiusOfGyrationPercent * sizeY,
                                                                            radiusOfGyrationPercent * sizeZ));
+      Point3D centerOfMassOffset = new Point3D(sizeX / 2.0, sizeY / 2.0, sizeZ / 2.0);
+      tableSurface.getInertiaPose().getTranslation().set(centerOfMassOffset);
+      tableSurface.getInertiaPose().getRotation().setToZero();
       rootJointDefinition.setSuccessor(tableSurface);
 
       setRootBodyDefinition(rootBodyDefinition);
