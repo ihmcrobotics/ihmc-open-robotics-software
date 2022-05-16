@@ -55,7 +55,7 @@ public class AvatarStepGeneratorController implements RobotController
       planarRegionFootstepSnapper = new PlanarRegionFootstepSnapper(continuousStepGenerator.getContinuousStepGenerator(),
                                                                     steppingParameters,
                                                                     registry);
-      stepConstraintCalculator = new PlanarRegionStepConstraintCalculator(steppingParameters);
+      stepConstraintCalculator = new PlanarRegionStepConstraintCalculator(steppingParameters, registry);
 
       planarRegionsFilterForStepping = new PlanarRegionsFilterForStepping(registry, graphicsListRegistry);
 

@@ -12,8 +12,12 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintMessageConver
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
+import us.ihmc.robotics.lists.QuickSort;
+import us.ihmc.yoVariables.parameters.IntegerParameter;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class PlanarRegionStepConstraintCalculator implements StepConstraintRegionCalculator
@@ -23,13 +27,15 @@ public class PlanarRegionStepConstraintCalculator implements StepConstraintRegio
    private final RecyclingArrayList<StepConstraintRegion> steppableRegions = new RecyclingArrayList<>(StepConstraintRegion::new);
 
    private static final double extraReachRatioToInclude = 1.5;
-   private static final int numberOfRegionsToInclude = 5;
+   private final IntegerParameter numberOfRegionsToInclude;
 
    private final SteppingParameters steppingParameters;
+   private final Comparator<PlanarRegion> areaComparator = Comparator.comparingDouble(region -> region.getConvexHull().getArea());
 
-   public PlanarRegionStepConstraintCalculator(SteppingParameters steppingParameters)
+   public PlanarRegionStepConstraintCalculator(SteppingParameters steppingParameters, YoRegistry registry)
    {
       this.steppingParameters = steppingParameters;
+      numberOfRegionsToInclude = new IntegerParameter("numberOfRegionsToIncludeAsConstraints", registry, 5);
    }
 
    public void setPlanarRegions(List<PlanarRegion> planarRegions)
@@ -54,15 +60,10 @@ public class PlanarRegionStepConstraintCalculator implements StepConstraintRegio
             regionsToInclude.add(planarRegionsList.get(i));
       }
 
-//      int i = 0;
-//      while (i < regionsToInclude.size())
-//      {
-//         PlanarRegionTools.closestPointOnPlanarRegion(footstepPose.getPosition(), regionsToInclude.get(i), pointToPack);
-//         if (pointToPack.distance(footstepPose.getPosition()) < distanceToInclude)
-//            regionsToInclude.remove(i);
-//         else
-//            i++;
-//      }
+      QuickSort.sort(regionsToInclude, areaComparator);
+
+      while (regionsToInclude.size() > numberOfRegionsToInclude.getValue())
+         regionsToInclude.remove(0);
 
       StepConstraintListConverter.convertPlanarRegionListToStepConstraintRegion(regionsToInclude, steppableRegions);
       StepConstraintMessageConverter.convertToStepConstraintsListMessage(steppableRegions, stepConstraintsToPack);
