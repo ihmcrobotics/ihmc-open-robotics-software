@@ -100,7 +100,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
          RobotDefinition robotDefinition = robotModel.getRobotDefinition();
          String modelFileName = GDXInteractableTools.getModelFileName(robotDefinition.getRigidBodyDefinition(collidable.getRigidBody().getName()));
 
-         if (collidable.getRigidBody().getName().equals("pelvis"))
+         if (collidable.getRigidBody().getName().equals("pelvis") || collidable.getRigidBody().getName().equals("pelvisLink"))
          {
             pelvisInteractable = new GDXLiveRobotPartInteractable();
             pelvisInteractable.create(collisionLink,
@@ -115,7 +115,9 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
          for (RobotSide side : RobotSide.values)
          {
             String robotSidePrefix = (side == RobotSide.LEFT) ? "l_" : "r_";
-            if (collidable.getRigidBody().getName().equals(robotSidePrefix + "foot"))
+            String robotSideName = (side == RobotSide.LEFT) ? "left" : "right";
+            if (collidable.getRigidBody().getName().equals(robotSidePrefix + "foot")
+                || collidable.getRigidBody().getName().equals(robotSideName + "FootLink"))
             {
                GDXLiveRobotPartInteractable interactableFoot = new GDXLiveRobotPartInteractable();
 //               String modelFileName = robotSidePrefix + "foot.g3dj";
@@ -129,7 +131,8 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
                });
                footInteractables.put(side, interactableFoot);
             }
-            if (collidable.getRigidBody().getName().equals(robotSidePrefix + "hand"))
+            if (collidable.getRigidBody().getName().equals(robotSidePrefix + "hand")
+                || collidable.getRigidBody().getName().equals(robotSideName + "WristPitchLink"))
             {
                ReferenceFrame handFrame = syncedRobot.getFullRobotModel().getEndEffectorFrame(side, LimbName.ARM);
                ReferenceFrame collisionFrame = handFrame;
@@ -163,7 +166,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
                ForceSensorDefinition[] forceSensorDefinitions = syncedRobot.getFullRobotModel().getForceSensorDefinitions();
                for (int i = 0; i < forceSensorDefinitions.length; i++)
                {
-                  if (wristForceSensorNames.get(side).equals(forceSensorDefinitions[i].getSensorName()))
+                  if (wristForceSensorNames.containsValue(side) && wristForceSensorNames.get(side).equals(forceSensorDefinitions[i].getSensorName()))
                   {
 //                     wristWrenchArrows.put(side, new GDXSpatialVectorArrows(forceSensorDefinitions[i].getSensorFrame(), i));
                      wristWrenchArrows.put(side, new GDXSpatialVectorArrows(forceSensorDefinitions[i].getSensorFrame(),
@@ -333,7 +336,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
 
          walkPathControlRing.getVirtualRenderables(renderables, pool);
 
-         for (RobotSide side : RobotSide.values)
+         for (RobotSide side : wristWrenchArrows.sides())
          {
             GDXSpatialVectorArrows wristArrows = wristWrenchArrows.get(side);
             if (syncedRobot.getForceSensorData().size() > wristArrows.getIndexOfSensor())
