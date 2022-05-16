@@ -88,7 +88,7 @@ public class GPUPlanarRegionExtraction
    private int filterPatchImageHeight;
    private int filterPatchImageWidth;
    private final ConcaveHullFactoryParameters concaveHullFactoryParameters = new ConcaveHullFactoryParameters();
-   private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
+   private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters("ForGPURegions");
    private final PlanarRegionsList planarRegionsList = new PlanarRegionsList();
    private final GPUPlanarRegionIsland tempIsland = new GPUPlanarRegionIsland();
    private boolean firstRun = true;
