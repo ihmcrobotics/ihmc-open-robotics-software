@@ -35,7 +35,7 @@ public class BoxWithFiducial3RobotDefinition extends RobotDefinition
       collisionShapeDefinition.getOriginPose().getTranslation().set(size / 2.0, size / 2.0, size / 2.0);
       box.addCollisionShapeDefinition(collisionShapeDefinition);
 
-      box.setMass(5.0);
+      box.setMass(0.5);
       double radiusOfGyrationPercent = 0.8;
       box.setMomentOfInertia(MomentOfInertiaFactory.fromMassAndRadiiOfGyration(box.getMass(),
                                                                                radiusOfGyrationPercent * size,
