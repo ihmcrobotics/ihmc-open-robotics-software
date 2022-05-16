@@ -27,6 +27,8 @@ public class BoundingBoxCollisionDetector
    private final Box3D bodyBox = new Box3D();
    // this is the bounding box of "bodyBox", used as an optimization before doing a full collision check
    private final BoundingBox3D boundingBox = new BoundingBox3D();
+   // Collision result for each query between the bounding box and planar region
+   private final EuclidShape3DCollisionResult collisionResult = new EuclidShape3DCollisionResult();
 
    public void setPlanarRegionsList(PlanarRegionsList planarRegions)
    {
@@ -50,11 +52,17 @@ public class BoundingBoxCollisionDetector
 
    public BodyCollisionData checkForCollision()
    {
+      BodyCollisionData collisionData = new BodyCollisionData();
+      checkForCollision(collisionData);
+
+      return collisionData;
+   }
+
+   public boolean checkForCollision(BodyCollisionData collisionDataToPack)
+   {
       checkInputs();
       setBoundingBoxPosition();
       setDimensions();
-
-      BodyCollisionData collisionData = new BodyCollisionData();
 
       for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
       {
@@ -62,20 +70,19 @@ public class BoundingBoxCollisionDetector
 
          if (planarRegion.getBoundingBox3dInWorld().intersectsExclusive(bodyBox.getBoundingBox()))
          {
-            PlanarRegion region = planarRegionsList.getPlanarRegion(i);
-            EuclidShape3DCollisionResult collisionResult = collisionDetector.evaluateCollision(region, bodyBox);
+            collisionDetector.evaluateCollision(planarRegion, bodyBox, collisionResult);
             if (collisionResult.areShapesColliding())
             {
-               collisionData.setCollisionDetected(true);
-               collisionData.setCollisionResult(collisionResult);
-               collisionData.getPlanarRegion().set(region);
-               collisionData.getBodyBox().set(bodyBox);
+               collisionDataToPack.setCollisionDetected(true);
+               collisionDataToPack.setCollisionResult(collisionResult);
+               collisionDataToPack.getPlanarRegion().set(planarRegion);
+               collisionDataToPack.getBodyBox().set(bodyBox);
                break;
             }
          }
       }
 
-      return collisionData;
+      return collisionDataToPack.isCollisionDetected();
    }
 
    private static double getMinimumPositiveValue(double... values)
@@ -94,7 +101,7 @@ public class BoundingBoxCollisionDetector
       else
          return min;
    }
-   
+
    private void setBoundingBoxPosition()
    {
       bodyBox.getPose().getTranslation().set(bodyPoseX, bodyPoseY, bodyPoseZ + 0.5 * boxHeight);
