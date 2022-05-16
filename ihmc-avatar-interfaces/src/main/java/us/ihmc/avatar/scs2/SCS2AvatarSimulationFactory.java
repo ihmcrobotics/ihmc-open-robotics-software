@@ -369,12 +369,14 @@ public class SCS2AvatarSimulationFactory
       if (heightMapForFootstepZ.hasValue())
          componentBasedFootstepDataMessageGeneratorFactory.setHeightMap(heightMapForFootstepZ.get());
 
+
       stepGeneratorThread = new AvatarStepGeneratorThread(componentBasedFootstepDataMessageGeneratorFactory,
                                                           contextDataFactory,
                                                           highLevelHumanoidControllerFactory.get().getStatusOutputManager(),
                                                           highLevelHumanoidControllerFactory.get().getCommandInputManager(),
                                                           robotModel.get(),
                                                           perceptionDTProvider.getValue());
+      stepGeneratorThread.createControllerNetworkSubscriber(robotModel.get().getSimpleRobotName(), realtimeROS2Node.get());
    }
 
    private void setupMultiThreadedRobotController()

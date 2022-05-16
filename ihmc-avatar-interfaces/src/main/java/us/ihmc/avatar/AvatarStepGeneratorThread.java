@@ -1,16 +1,22 @@
 package us.ihmc.avatar;
 
+import controller_msgs.msg.dds.WholeBodyStreamingMessage;
+import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.avatar.stepAdjustment.PlanarRegionFootstepSnapper;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ComponentBasedFootstepDataMessageGenerator;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ComponentBasedFootstepDataMessageGeneratorFactory;
 import us.ihmc.commons.Conversions;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
@@ -19,6 +25,9 @@ import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
+import us.ihmc.ros2.ROS2QosProfile;
+import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
@@ -44,6 +53,8 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
    private final YoBoolean runCSG = new YoBoolean("RunCSG", csgRegistry);
 
    private final AvatarStepGeneratorController stepGeneratorController;
+   private final CommandInputManager csgCommandInputManager;
+   private final StatusMessageOutputManager walkingOutputManager;
 
    public AvatarStepGeneratorThread(ComponentBasedFootstepDataMessageGeneratorFactory csgPluginFactory,
                                     HumanoidRobotContextDataFactory contextDataFactory,
@@ -53,6 +64,7 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
                                     double perceptionDt)
    {
       this.fullRobotModel = drcRobotModel.createFullRobotModel();
+      this.walkingOutputManager = walkingOutputManager;
 
       HumanoidRobotContextJointData processedJointData = new HumanoidRobotContextJointData(fullRobotModel.getOneDoFJoints().length);
       ForceSensorDataHolder forceSensorDataHolderForController = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
@@ -68,7 +80,7 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
       contextDataFactory.setProcessedJointData(processedJointData);
       contextDataFactory.setSensorDataContext(new SensorDataContext(fullRobotModel));
       humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
-      CommandInputManager csgCommandInputManager = csgPluginFactory.getCSGCommandInputManager().getCommandInputManager();
+      csgCommandInputManager = csgPluginFactory.getCSGCommandInputManager().getCommandInputManager();
 
       humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
 
@@ -81,7 +93,7 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
                                                                                     null,
                                                                                     csgTime);
 
-      stepGeneratorController = new AvatarStepGeneratorController(csg.getContinuousStepGenerator(),
+      stepGeneratorController = new AvatarStepGeneratorController(csg,
                                                                   csgCommandInputManager,
                                                                   drcRobotModel.getWalkingControllerParameters().getSteppingParameters(),
                                                                   csgTime);
@@ -91,6 +103,21 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
 
       ParameterLoaderHelper.loadParameters(this, drcRobotModel, csgRegistry);
 
+   }
+
+   public void createControllerNetworkSubscriber(String robotName, RealtimeROS2Node realtimeROS2Node)
+   {
+      ROS2Topic<?> inputTopic = ROS2Tools.getControllerInputTopic(robotName);
+      ROS2Topic<?> outputTopic = ROS2Tools.getControllerOutputTopic(robotName);
+
+      ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(inputTopic,
+                                                                                                csgCommandInputManager,
+                                                                                                outputTopic,
+                                                                                                walkingOutputManager,
+                                                                                                realtimeROS2Node);
+
+      controllerNetworkSubscriber.addMessageCollectors(ControllerAPIDefinition.createDefaultMessageIDExtractor(), 3);
+      controllerNetworkSubscriber.addMessageValidator(ControllerAPIDefinition.createDefaultMessageValidation());
    }
 
    public void initialize()

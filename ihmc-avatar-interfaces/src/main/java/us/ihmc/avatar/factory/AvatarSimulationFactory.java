@@ -327,6 +327,7 @@ public class AvatarSimulationFactory
                                                           highLevelHumanoidControllerFactory.get().getCommandInputManager(),
                                                           robotModel.get(),
                                                           perceptionDTProvider.getValue());
+      stepGeneratorThread.createControllerNetworkSubscriber(robotModel.get().getSimpleRobotName(), realtimeROS2Node.get());
    }
 
    private void createMasterContext()
