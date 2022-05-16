@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import controller_msgs.msg.dds.SpatialVectorMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
@@ -25,6 +24,7 @@ import us.ihmc.gdx.ui.graphics.GDXSpatialVectorArrows;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.physics.Collidable;
@@ -100,7 +100,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
          RobotDefinition robotDefinition = robotModel.getRobotDefinition();
          String modelFileName = GDXInteractableTools.getModelFileName(robotDefinition.getRigidBodyDefinition(collidable.getRigidBody().getName()));
 
-         if (collidable.getRigidBody().getName().equals("pelvis") || collidable.getRigidBody().getName().equals("pelvisLink"))
+         if (collidable.getRigidBody().getName().equals(syncedRobot.getFullRobotModel().getPelvis().getName()))
          {
             pelvisInteractable = new GDXLiveRobotPartInteractable();
             pelvisInteractable.create(collisionLink,
@@ -115,9 +115,8 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
          for (RobotSide side : RobotSide.values)
          {
             String robotSidePrefix = (side == RobotSide.LEFT) ? "l_" : "r_";
-            String robotSideName = (side == RobotSide.LEFT) ? "left" : "right";
-            if (collidable.getRigidBody().getName().equals(robotSidePrefix + "foot")
-                || collidable.getRigidBody().getName().equals(robotSideName + "FootLink"))
+            String footName = syncedRobot.getFullRobotModel().getFoot(side).getName();
+            if (collidable.getRigidBody().getName().equals(footName))
             {
                GDXLiveRobotPartInteractable interactableFoot = new GDXLiveRobotPartInteractable();
 //               String modelFileName = robotSidePrefix + "foot.g3dj";
@@ -131,8 +130,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
                });
                footInteractables.put(side, interactableFoot);
             }
-            if (collidable.getRigidBody().getName().equals(robotSidePrefix + "hand")
-                || collidable.getRigidBody().getName().equals(robotSideName + "WristPitchLink"))
+            if (collidable.getRigidBody().getName().equals(syncedRobot.getFullRobotModel().getHand(side).getName()))
             {
                ReferenceFrame handFrame = syncedRobot.getFullRobotModel().getEndEffectorFrame(side, LimbName.ARM);
                ReferenceFrame collisionFrame = handFrame;
