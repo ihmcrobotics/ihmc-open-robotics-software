@@ -25,7 +25,7 @@ public class GDXFFMPEGLogger
    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
    private static final String logDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
    private String fileName = null;
-   private OutputStream file = null;
+   private boolean isInitialized = false;
    private boolean isClosed = false;
    private AVDictionary dict;
    private AVFormatContext fmtContext;
@@ -101,90 +101,76 @@ public class GDXFFMPEGLogger
       if (isClosed)
          return false;
 
-      if (file == null) {
+      if (!isInitialized) {
+         AVCodecContext codecContext = videoStream.getEncoder();
+         AVDictionary opt = new AVDictionary();
+         av_dict_copy(opt, dict, 0);
+
          try
          {
-            //TODO    open_video(oc, video_codec, &video_st, opt);
-            AVCodecContext codecContext = videoStream.getEncoder();
-            AVDictionary opt = new AVDictionary();
-            av_dict_copy(opt, dict, 0);
-
-            try
+            if (avcodec_open2(codecContext, codecContext.codec(), opt) > 0) //TODO codec may be wrong here
             {
-               if (avcodec_open2(codecContext, codecContext.codec(), opt) > 0) //TODO codec may be wrong here
-               {
-                  LogTools.error("Could not open video codec. Logging will not begin.");
-                  close();
-                  return false;
-               }
-            }
-            finally
-            {
-               av_dict_free(opt); //Free dictionary even if we return false up there
-            }
-
-            AVFrame pic = av_frame_alloc();
-            pic.format(codecContext.pix_fmt());
-            pic.width(codecContext.width());
-            pic.height(codecContext.height());
-
-            videoStream.setFrame(pic);
-            if (av_frame_get_buffer(pic, 0) > 0) {
-               LogTools.error("Could not get framebuffer. Logging will not begin.");
+               LogTools.error("Could not open video codec. Logging will not begin.");
                close();
                return false;
             }
-
-            //TODO review comment from muxing.c
-            //It is possible that an additional conversion to YUV420P is happening. I don't know if this is just for MPEG, or a limitation of FFMPEG as a whole:
-            /*
-             * If the output format is not YUV420P, then a temporary YUV420P
-             * picture is needed too. It is then converted to the required
-             * output format.
-             */
-            //For now I'm just not gonna do it (which may cause errors)
-            //This is what videoStream.tempFrame is
-
-            if (avcodec_parameters_from_context(videoStream.getStream().codecpar(), codecContext) > 0) {
-               LogTools.error("Could not copy parameters to muxer. Logging will not begin.");
-               close();
-               return false;
-            }
-
-            av_dump_format(fmtContext, 0, fileName, 1); //this is not freeing the memory - that's avformat_free_context (called during close())
-
-            file = new FileOutputStream(fileName);
          }
-         catch(FileNotFoundException ex) {
-            LogTools.error("Unable to create logfile " + fileName + "! Logging will not begin.");
+         finally
+         {
+            av_dict_free(opt); //Free dictionary even if we return false up there
+         }
+
+         AVFrame pic = av_frame_alloc();
+         pic.format(codecContext.pix_fmt());
+         pic.width(codecContext.width());
+         pic.height(codecContext.height());
+
+         videoStream.setFrame(pic);
+         if (av_frame_get_buffer(pic, 0) > 0) {
+            LogTools.error("Could not get framebuffer. Logging will not begin.");
             close();
+            return false;
          }
+
+         //TODO review comment from muxing.c
+         //It is possible that an additional conversion to YUV420P is happening. I don't know if this is just for MPEG, or a limitation of FFMPEG as a whole:
+         /*
+          * If the output format is not YUV420P, then a temporary YUV420P
+          * picture is needed too. It is then converted to the required
+          * output format.
+          */
+         //For now I'm just not gonna do it (which may cause errors)
+         //This is what videoStream.tempFrame is
+
+         if (avcodec_parameters_from_context(videoStream.getStream().codecpar(), codecContext) > 0) {
+            LogTools.error("Could not copy parameters to muxer. Logging will not begin.");
+            close();
+            return false;
+         }
+
+         av_dump_format(fmtContext, 0, fileName, 1); //this is not freeing the memory - that's avformat_free_context (called during close())
+
+         if (avio_open(fmtContext.pb(), fileName, AVIO_FLAG_WRITE) < 0) {
+            LogTools.error("Could not open file for writing. Logging will not begin.");
+            close();
+            return false;
+         }
+
+         avformat_write_header(fmtContext, opt);
+
+         isInitialized = true; //Initialization is now finished. Note that !isInitialized && isClosed is an error state
       }
 
       //TODO write AVFrame to video file. This method may need to be private, and the AVFrame might need to be created within the context established in this file.
-      //avcodec_encode_video() will be helpful
+      //avcodec_encode_video() will be helpful maybe
 
-      //Flush at some point
-      try
-      {
-         file.flush();
-      }
-      catch(IOException ex) {
-         LogTools.warn("Unable to flush logfile stream (non-critical)");
-      }
+
+
       return false;
    }
 
    public void close() {
       LogTools.info("Closing logger (if you did not expect this to happen, something has gone wrong, and logging will stop.)");
-
-      try {
-         file.flush();
-         file.close();
-      }
-      catch(IOException ex) {
-         LogTools.warn("Something went wrong while closing logger - log may not have been saved properly.");
-      }
 
       //TODO free contexts and stuff
 
