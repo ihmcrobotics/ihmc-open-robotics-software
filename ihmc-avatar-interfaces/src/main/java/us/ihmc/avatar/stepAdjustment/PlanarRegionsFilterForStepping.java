@@ -31,6 +31,7 @@ public class PlanarRegionsFilterForStepping
    private final YoInteger totalPlanarRegions = new YoInteger("totalPlanarRegions", registry);
    private final YoInteger bigEnoughPlanarRegionsCounter = new YoInteger("bigEnoughPlanarRegionsCounter", registry);
    private final YoInteger filteredPlanarRegionsCounter = new YoInteger("filteredPlanarRegionsCounter", registry);
+   private final YoInteger countsSinceReceivedPlanarRegions = new YoInteger("countsSinceReceivedPlanarRegions", registry);
 
 
    private final RecyclingArrayList<PlanarRegion> allPlanarRegionsList = new RecyclingArrayList<>(PlanarRegion::new);
@@ -63,9 +64,14 @@ public class PlanarRegionsFilterForStepping
       return maxPlanarRegionAngle.getValue();
    }
 
+   public void update()
+   {
+      countsSinceReceivedPlanarRegions.increment();
+   }
 
    public void setPlanarRegions(PlanarRegionsListCommand planarRegions)
    {
+      countsSinceReceivedPlanarRegions.set(-1);
       allPlanarRegionsList.clear();
       bigEnoughPlanarRegionsList.clear();
       filteredPlanarRegionsList.clear();
@@ -74,20 +80,15 @@ public class PlanarRegionsFilterForStepping
       {
          PlanarRegionCommand candidateRegion = planarRegions.getPlanarRegionCommand(i);
 
-         double polygonArea = EuclidGeometryPolygonTools.computeConvexPolygon2DArea(candidateRegion.getConcaveHullsVertices(),
-                                                                                    candidateRegion.getConcaveHullsVertices().size(),
-                                                                                    true,
-                                                                                    null);
-
          PlanarRegion planarRegion = allPlanarRegionsList.add();
          planarRegion.set(candidateRegion.getTransformToWorld(), candidateRegion.getConvexPolygons(), candidateRegion.getRegionId());
 
-         if (polygonArea > getMinPlanarRegionArea())
+         if (planarRegion.getConvexHull().getArea() < getMinPlanarRegionArea())
             continue;
 
          bigEnoughPlanarRegionsList.add(planarRegion);
 
-         if (candidateRegion.getTransformToWorld().getM22() >= Math.cos(getMaxPlanarRegionAngle()))
+         if (Math.abs(planarRegion.getNormal().getZ()) < Math.cos(getMaxPlanarRegionAngle()))
             continue;
 
          filteredPlanarRegionsList.add(planarRegion);

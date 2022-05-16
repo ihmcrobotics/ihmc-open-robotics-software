@@ -74,6 +74,7 @@ public class AvatarStepGeneratorController implements RobotController
    {
       consumePlanarRegions();
 
+      planarRegionsFilterForStepping.update();
       continuousStepGenerator.update(timeProvider.getValue());
    }
 
