@@ -9,9 +9,11 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
+import java.util.List;
+
 public class BoundingBoxCollisionDetector
 {
-   private PlanarRegionsList planarRegionsList;
+   private List<PlanarRegion> planarRegionsList;
    private final GilbertJohnsonKeerthiCollisionDetector collisionDetector = new GilbertJohnsonKeerthiCollisionDetector();
 
    private double boxDepth = Double.NaN;
@@ -31,6 +33,11 @@ public class BoundingBoxCollisionDetector
    private final EuclidShape3DCollisionResult collisionResult = new EuclidShape3DCollisionResult();
 
    public void setPlanarRegionsList(PlanarRegionsList planarRegions)
+   {
+      setPlanarRegionsList(planarRegions.getPlanarRegionsAsList());
+   }
+
+   public void setPlanarRegionsList(List<PlanarRegion> planarRegions)
    {
       this.planarRegionsList = planarRegions;
    }
