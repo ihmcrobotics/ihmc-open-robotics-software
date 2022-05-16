@@ -26,8 +26,8 @@ public class StepConstraintCalculatorViewerAPI
    public static final Topic<PlanarRegionsList> TooSmallRegionData = topic("TooSmallRegionData");
    public static final Topic<PlanarRegionsList> MaskedRegionsData = topic("MaskedRegionsData");
    public static final Topic<List<StepConstraintRegion>> StepConstraintRegionData = topic("StepConstraintRegionData");
-   public static final Topic<HashMap<RegionInWorldInterface, List<ConcavePolygon2DBasics>>> ObstacleExtrusionsData = topic("ObstacleExtrusionsData");
-   public static final Topic<HashMap<RegionInWorldInterface, List<ConcavePolygon2DBasics>>> MaskedRegionsObstacleExtrusionsData = topic("MaskedRegionsObstacleExtrusionsData");
+   public static final Topic<HashMap<RegionInWorldInterface<?>, List<ConcavePolygon2DBasics>>> ObstacleExtrusionsData = topic("ObstacleExtrusionsData");
+   public static final Topic<HashMap<RegionInWorldInterface<?>, List<ConcavePolygon2DBasics>>> MaskedRegionsObstacleExtrusionsData = topic("MaskedRegionsObstacleExtrusionsData");
 
    public static final Topic<Boolean> ShowPlanarRegions = topic("ShowPlanarRegions");
    public static final Topic<Boolean> ShowTooSteepRegions = topic("ShowTooSteepRegions");

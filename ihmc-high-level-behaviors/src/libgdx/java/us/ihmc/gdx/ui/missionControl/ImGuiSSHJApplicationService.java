@@ -82,11 +82,7 @@ public class ImGuiSSHJApplicationService
       {
          if (ImGui.button("SIGINT"))
          {
-            ExceptionTools.handle(() ->
-            {
-               logMonitorSSHJCommand.signal(Signal.INT);
-               logMonitorSSHJCommand.close();
-            }, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+            stopLogMonitor();
          }
       }
       if (exitStatus > -1)
@@ -119,6 +115,12 @@ public class ImGuiSSHJApplicationService
       standardError.updateConsoleText(this::acceptNewText);
    }
 
+   public void restartLogMonitor()
+   {
+      stopLogMonitor();
+      startLogMonitor();
+   }
+
    public void startLogMonitor()
    {
       if (!islogMonitorThreadRunning())
@@ -135,6 +137,18 @@ public class ImGuiSSHJApplicationService
                });
             });
          }, "SSHJCommand");
+      }
+   }
+
+   private void stopLogMonitor()
+   {
+      if (islogMonitorThreadRunning())
+      {
+         ExceptionTools.handle(() ->
+         {
+            logMonitorSSHJCommand.signal(Signal.INT);
+            logMonitorSSHJCommand.close();
+         }, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
       }
    }
 
