@@ -28,7 +28,6 @@ public class GDXSCS2EnvironmentManager
    private SCS2AvatarSimulation avatarSimulation;
    private RealtimeROS2Node realtimeROS2Node;
    private RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup;
-   private HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters;
    private boolean useVelocityAndHeadingScript;
    private GDXImGuiBasedUI baseUI;
    private int recordFrequency;
@@ -54,9 +53,6 @@ public class GDXSCS2EnvironmentManager
 
       //      recordFrequency = (int) Math.max(1.0, Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT()));
       recordFrequency = 1;
-
-      useVelocityAndHeadingScript = true;
-      walkingScriptParameters = new HeadingAndVelocityEvaluationScriptParameters();
 
       baseUI.getImGuiPanelManager().addPanel(managerPanel);
    }
@@ -113,7 +109,7 @@ public class GDXSCS2EnvironmentManager
          SCS2AvatarSimulationFactory avatarSimulationFactory = new SCS2AvatarSimulationFactory();
          avatarSimulationFactory.setRobotModel(robotModel);
          avatarSimulationFactory.setRealtimeROS2Node(realtimeROS2Node);
-         avatarSimulationFactory.setDefaultHighLevelHumanoidControllerFactory(useVelocityAndHeadingScript, walkingScriptParameters);
+         avatarSimulationFactory.setDefaultHighLevelHumanoidControllerFactory(false, null);
          for (TerrainObjectDefinition terrainObjectDefinition : terrainObjectDefinitions)
          {
             avatarSimulationFactory.addTerrainObjectDefinition(terrainObjectDefinition);
