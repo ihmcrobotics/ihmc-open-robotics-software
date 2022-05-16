@@ -41,6 +41,7 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -49,6 +50,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -192,22 +194,22 @@ public class ReachabilityMapVisualizer
       robotBase = robot.getRigidBody(robotInformation.getBaseName());
       robotEndEffector = robot.getRigidBody(robotInformation.getEndEffectorName());
       robotArmJoints = MultiBodySystemTools.createOneDoFJointPath(robotBase, robotEndEffector);
+      RigidBodyBasics endEffector = robot.getRigidBody(robotInformation.getEndEffectorName());
+      Pose3DReadOnly controlFramePose = robotInformation.getControlFramePoseInParentJoint();
+      RigidBodyTransform frameTransform = new RigidBodyTransform(controlFramePose.getOrientation(), controlFramePose.getPosition());
+      MovingReferenceFrame parentFrame = endEffector.getParentJoint().getFrameAfterJoint();
+      ReferenceFrame controlFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("controlFrame", parentFrame, frameTransform);
 
       guiControls = SessionVisualizer.startSessionVisualizer(session);
       guiControls.waitUntilFullyUp();
       session.stopSessionThread();
 
-      Pose3DReadOnly controlFramePose = robotInformation.getControlFramePoseInParentJoint();
-
-      RigidBodyBasics endEffector = robot.getRigidBody(robotInformation.getEndEffectorName());
-      ReferenceFrame controlFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("controlFrame",
-                                                                                                      endEffector.getParentJoint().getFrameAfterJoint(),
-                                                                                                      new RigidBodyTransform(controlFramePose.getOrientation(),
-                                                                                                                             controlFramePose.getPosition()));
-
       guiControls.addStaticVisuals(ReachabilityMapTools.createReachibilityColorScaleVisuals());
       guiControls.addYoGraphic(newYoGraphicCoordinateSystem3DDefinition("currentEvaluationPose", currentEvaluationPose, 0.15, ColorDefinitions.HotPink()));
-      guiControls.addYoGraphic(newYoGraphicCoordinateSystem3DDefinition("controlFrame", controlFramePose, 0.05, ColorDefinitions.parse("#A1887F")));
+      guiControls.addYoGraphic(newYoGraphicCoordinateSystem3DDefinition("controlFrame",
+                                                                        new FramePose3D(controlFrame),
+                                                                        0.05,
+                                                                        ColorDefinitions.parse("#A1887F")));
 
       createVisualizationControls();
 
