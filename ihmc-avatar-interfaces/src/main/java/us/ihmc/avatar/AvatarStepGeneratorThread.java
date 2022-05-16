@@ -56,6 +56,8 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
    private final CommandInputManager csgCommandInputManager;
    private final StatusMessageOutputManager walkingOutputManager;
 
+   private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
+
    public AvatarStepGeneratorThread(ComponentBasedFootstepDataMessageGeneratorFactory csgPluginFactory,
                                     HumanoidRobotContextDataFactory contextDataFactory,
                                     StatusMessageOutputManager walkingOutputManager,
@@ -97,7 +99,8 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
       stepGeneratorController = new AvatarStepGeneratorController(csg,
                                                                   csgCommandInputManager,
                                                                   drcRobotModel.getWalkingControllerParameters().getSteppingParameters(),
-                                                                  csgTime);
+                                                                  csgTime,
+                                                                  graphicsListRegistry);
 
       csgRegistry.addChild(csg.getRegistry());
       csgRegistry.addChild(stepGeneratorController.getYoRegistry());
@@ -180,7 +183,7 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
 
    public YoGraphicsListRegistry getYoGraphicsListRegistry()
    {
-      return null;
+      return graphicsListRegistry;
    }
 
    @Override

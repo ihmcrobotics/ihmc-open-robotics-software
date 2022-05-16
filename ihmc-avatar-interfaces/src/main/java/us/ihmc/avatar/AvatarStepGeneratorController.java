@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.collision.BoundingBoxCollisionDetector;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -35,7 +36,7 @@ public class AvatarStepGeneratorController implements RobotController
 
    private final SteppingParameters steppingParameters;
 
-   private final PlanarRegionsFilterForStepping planarRegionsFilterForStepping = new PlanarRegionsFilterForStepping(registry);
+   private final PlanarRegionsFilterForStepping planarRegionsFilterForStepping;
    private final PlanarRegionFootstepSnapper planarRegionFootstepSnapper;
    private final PlanarRegionStepConstraintCalculator stepConstraintCalculator;
    private final BoundingBoxCollisionDetector collisionDetector;
@@ -43,7 +44,8 @@ public class AvatarStepGeneratorController implements RobotController
    public AvatarStepGeneratorController(ComponentBasedFootstepDataMessageGenerator continuousStepGenerator,
                                         CommandInputManager commandInputManager,
                                         SteppingParameters steppingParameters,
-                                        DoubleProvider timeProvider)
+                                        DoubleProvider timeProvider,
+                                        YoGraphicsListRegistry graphicsListRegistry)
    {
       this.continuousStepGenerator = continuousStepGenerator;
       this.commandInputManager = commandInputManager;
@@ -55,6 +57,7 @@ public class AvatarStepGeneratorController implements RobotController
                                                                     registry);
       stepConstraintCalculator = new PlanarRegionStepConstraintCalculator(steppingParameters);
 
+      planarRegionsFilterForStepping = new PlanarRegionsFilterForStepping(registry, graphicsListRegistry);
 
       double collisionBoxDepth = 0.65;
       double collisionBoxWidth = 1.15;
