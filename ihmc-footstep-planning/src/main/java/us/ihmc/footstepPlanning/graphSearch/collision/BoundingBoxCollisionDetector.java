@@ -71,9 +71,9 @@ public class BoundingBoxCollisionDetector
       setBoundingBoxPosition();
       setDimensions();
 
-      for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
+      for (int i = 0; i < planarRegionsList.size(); i++)
       {
-         PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(i);
+         PlanarRegion planarRegion = planarRegionsList.get(i);
 
          if (planarRegion.getBoundingBox3dInWorld().intersectsExclusive(bodyBox.getBoundingBox()))
          {
