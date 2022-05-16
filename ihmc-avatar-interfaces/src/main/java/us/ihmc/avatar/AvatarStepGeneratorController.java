@@ -5,6 +5,7 @@ import us.ihmc.avatar.stepAdjustment.PlanarRegionStepConstraintCalculator;
 import us.ihmc.avatar.stepAdjustment.PlanarRegionsFilterForStepping;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ComponentBasedFootstepDataMessageGenerator;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -28,18 +29,18 @@ public class AvatarStepGeneratorController implements RobotController
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private final ContinuousStepGenerator continuousStepGenerator;
+   private final ComponentBasedFootstepDataMessageGenerator continuousStepGenerator;
    private final CommandInputManager commandInputManager;
    private final DoubleProvider timeProvider;
 
    private final SteppingParameters steppingParameters;
 
-   private final PlanarRegionsFilterForStepping planarRegionsFilterForStepping = new PlanarRegionsFilterForStepping();
+   private final PlanarRegionsFilterForStepping planarRegionsFilterForStepping = new PlanarRegionsFilterForStepping(registry);
    private final PlanarRegionFootstepSnapper planarRegionFootstepSnapper;
    private final PlanarRegionStepConstraintCalculator stepConstraintCalculator;
    private final BoundingBoxCollisionDetector collisionDetector;
 
-   public AvatarStepGeneratorController(ContinuousStepGenerator continuousStepGenerator,
+   public AvatarStepGeneratorController(ComponentBasedFootstepDataMessageGenerator continuousStepGenerator,
                                         CommandInputManager commandInputManager,
                                         SteppingParameters steppingParameters,
                                         DoubleProvider timeProvider)
@@ -49,7 +50,7 @@ public class AvatarStepGeneratorController implements RobotController
       this.steppingParameters = steppingParameters;
       this.timeProvider = timeProvider;
 
-      planarRegionFootstepSnapper = new PlanarRegionFootstepSnapper(continuousStepGenerator,
+      planarRegionFootstepSnapper = new PlanarRegionFootstepSnapper(continuousStepGenerator.getContinuousStepGenerator(),
                                                                     steppingParameters,
                                                                     registry);
       stepConstraintCalculator = new PlanarRegionStepConstraintCalculator(steppingParameters);
@@ -61,11 +62,11 @@ public class AvatarStepGeneratorController implements RobotController
       collisionDetector = new BoundingBoxCollisionDetector();
       collisionDetector.setBoxDimensions(collisionBoxDepth, collisionBoxWidth, collisionBoxHeight);
 
-      continuousStepGenerator.setFootstepAdjustment(planarRegionFootstepSnapper);
-      continuousStepGenerator.setStepConstraintRegionCalculator(stepConstraintCalculator);
-      continuousStepGenerator.addFootstepValidityIndicator(this::isSafeStepHeight);
-      continuousStepGenerator.addFootstepValidityIndicator(this::isSafeDistanceFromObstacle);
-      continuousStepGenerator.addFootstepValidityIndicator(this::isStepSnappable);
+      continuousStepGenerator.getContinuousStepGenerator().setFootstepAdjustment(planarRegionFootstepSnapper);
+      continuousStepGenerator.getContinuousStepGenerator().setStepConstraintRegionCalculator(stepConstraintCalculator);
+      continuousStepGenerator.getContinuousStepGenerator().addFootstepValidityIndicator(this::isSafeStepHeight);
+      continuousStepGenerator.getContinuousStepGenerator().addFootstepValidityIndicator(this::isSafeDistanceFromObstacle);
+      continuousStepGenerator.getContinuousStepGenerator().addFootstepValidityIndicator(this::isStepSnappable);
    }
 
    @Override

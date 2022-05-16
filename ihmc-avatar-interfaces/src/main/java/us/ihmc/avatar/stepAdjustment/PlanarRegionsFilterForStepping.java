@@ -5,6 +5,10 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,30 +16,51 @@ import java.util.List;
 public class PlanarRegionsFilterForStepping
 {
 
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+
    /**
     * Minimum planar region area for a foothold
     */
-   private double minPlanarRegionArea = 0.05;
+   private final DoubleProvider minPlanarRegionArea = new DoubleParameter("minPlanarRegionAreaForStepping", registry, 0.05);
 
    /**
     * Maximum angle of planar region considered for a foothold.
     * Zero degrees corresponds to a vertical normal
     */
-   private double maxPlanarRegionAngle = Math.toRadians(25.0);
+   private final DoubleProvider maxPlanarRegionAngle = new DoubleParameter("maxPlanarRegionAngleForStepping", registry, Math.toRadians(25.0));
+   private final YoInteger totalPlanarRegions = new YoInteger("totalPlanarRegions", registry);
+   private final YoInteger bigEnoughPlanarRegionsCounter = new YoInteger("bigEnoughPlanarRegionsCounter", registry);
+   private final YoInteger filteredPlanarRegionsCounter = new YoInteger("filteredPlanarRegionsCounter", registry);
+
 
    private final RecyclingArrayList<PlanarRegion> allPlanarRegionsList = new RecyclingArrayList<>(PlanarRegion::new);
    private final List<PlanarRegion> bigEnoughPlanarRegionsList = new ArrayList<>();
    private final List<PlanarRegion> filteredPlanarRegionsList = new ArrayList<>();
 
+   public PlanarRegionsFilterForStepping(YoRegistry parentRegistry)
+   {
+      parentRegistry.addChild(registry);
+   }
+
+   public void clear()
+   {
+      totalPlanarRegions.set(-1);
+      bigEnoughPlanarRegionsCounter.set(-1);
+      filteredPlanarRegionsCounter.set(-1);
+
+      allPlanarRegionsList.clear();
+      bigEnoughPlanarRegionsList.clear();
+      filteredPlanarRegionsList.clear();
+   }
 
    public double getMinPlanarRegionArea()
    {
-      return minPlanarRegionArea;
+      return minPlanarRegionArea.getValue();
    }
 
    public double getMaxPlanarRegionAngle()
    {
-      return maxPlanarRegionAngle;
+      return maxPlanarRegionAngle.getValue();
    }
 
 
@@ -67,6 +92,10 @@ public class PlanarRegionsFilterForStepping
 
          filteredPlanarRegionsList.add(planarRegion);
       }
+
+      totalPlanarRegions.set(allPlanarRegionsList.size());
+      bigEnoughPlanarRegionsCounter.set(bigEnoughPlanarRegionsList.size());
+      filteredPlanarRegionsCounter.set(filteredPlanarRegionsList.size());
    }
 
    public List<PlanarRegion> getPlanarRegions()
