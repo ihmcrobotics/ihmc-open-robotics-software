@@ -9,6 +9,8 @@ import org.bytedeco.ffmpeg.avutil.AVFrame;
 import static org.bytedeco.ffmpeg.global.avcodec.*;
 import static org.bytedeco.ffmpeg.global.avformat.*;
 import static org.bytedeco.ffmpeg.global.avutil.*;
+import static org.bytedeco.ffmpeg.global.swscale.*;
+import static org.bytedeco.ffmpeg.global.swresample.*;
 
 import org.bytedeco.ffmpeg.avutil.AVRational;
 import us.ihmc.log.LogTools;
@@ -97,7 +99,7 @@ public class GDXFFMPEGLogger
     * The first time a frame is put will take longer than the others because of initialization
     * This method DOES NOT handle disposal of frames!
     */
-   public boolean put(AVFrame frame) {
+   public boolean put() {
       if (isClosed)
          return false;
 
@@ -132,6 +134,8 @@ public class GDXFFMPEGLogger
             return false;
          }
 
+         //TODO may be missing frame allocation or something to do with dummy image. \/\/\/
+
          //TODO review comment from muxing.c
          //It is possible that an additional conversion to YUV420P is happening. I don't know if this is just for MPEG, or a limitation of FFMPEG as a whole:
          /*
@@ -161,18 +165,90 @@ public class GDXFFMPEGLogger
          isInitialized = true; //Initialization is now finished. Note that !isInitialized && isClosed is an error state
       }
 
-      //TODO write AVFrame to video file. This method may need to be private, and the AVFrame might need to be created within the context established in this file.
-      //avcodec_encode_video() will be helpful maybe
+      //Encode video
+      AVFrame frame = getVideoFrame(videoStream);
+      avcodec_send_frame(videoStream.getEncoder(), frame);
 
+      //This while loop is weird, but copied from muxing.c
+      int ret = 0;
+      while (ret >= 0) {
+         ret = avcodec_receive_packet(videoStream.getEncoder(), videoStream.getTempPacket());
+         if ( ret < 0) {
+            LogTools.error("Error encoding frame. Logging will stop.");
+            close();
+            return false;
+         }
 
+         av_packet_rescale_ts(videoStream.getTempPacket(), videoStream.getEncoder().time_base(), videoStream.getStream().time_base());
+         videoStream.getTempPacket().stream_index(videoStream.getStream().index());
 
-      return false;
+         ret = av_interleaved_write_frame(fmtContext, videoStream.getTempPacket());
+         if (ret < 0) {
+            LogTools.error("Error writing output packet. Logging will stop.");
+            close();
+            return false;
+         }
+      }
+
+      return ret == AVERROR_EOF();
+   }
+
+   private AVFrame getVideoFrame(FFMPEGOutputStream ost) {
+      AVCodecContext c = ost.getEncoder();
+
+      AVRational one = new AVRational().num(1).den(1);
+      if (av_compare_ts(videoStream.getNextPts(), c.time_base(), 10, one) > 0) //Value 10 comes from STREAM_DURATION in file, probably should be higher but call may be doing other things
+         return null;
+
+      if (av_frame_make_writable(ost.getFrame()) < 0) {
+         LogTools.error("Could not make frame writable. Logging will stop.");
+         close();
+         return null;
+      }
+
+      //TODO more YUV420P stuff. This may or may not be necessary. It looks like they're converging from the stored YUV image into the codec pixel format, so conversion from whatever we use (RGBA8?) to the codec format is probably necessary here.
+      //Note the following C code:
+//      if (c->pix_fmt != AV_PIX_FMT_YUV420P) {
+//         /* as we only generate a YUV420P picture, we must convert it
+//          * to the codec pixel format if needed */
+//         if (!ost->sws_ctx) {
+//            ost->sws_ctx = sws_getContext(c->width, c->height,
+//                                          AV_PIX_FMT_YUV420P,
+//                                          c->width, c->height,
+//                                          c->pix_fmt,
+//                                          SCALE_FLAGS, NULL, NULL, NULL);
+//            if (!ost->sws_ctx) {
+//               fprintf(stderr,
+//                       "Could not initialize the conversion context\n");
+//               exit(1);
+//            }
+//         }
+//         fill_yuv_image(ost->tmp_frame, ost->next_pts, c->width, c->height);
+//         sws_scale(ost->sws_ctx, (const uint8_t * const *) ost->tmp_frame->data,
+//               ost->tmp_frame->linesize, 0, c->height, ost->frame->data,
+//               ost->frame->linesize);
+//      } else {
+//         fill_yuv_image(ost->frame, ost->next_pts, c->width, c->height);
+//      }
+
+      videoStream.getFrame().pts(videoStream.getNextPts());
+
+      return videoStream.getFrame();
    }
 
    public void close() {
       LogTools.info("Closing logger (if you did not expect this to happen, something has gone wrong, and logging will stop.)");
 
-      //TODO free contexts and stuff
+      avcodec_free_context(videoStream.getEncoder());
+
+      av_frame_free(videoStream.getFrame());
+      if (videoStream.getTempFrame() != null && !videoStream.getTempFrame().isNull())
+         av_frame_free(videoStream.getTempFrame());
+
+      av_packet_free(videoStream.getTempPacket());
+
+      sws_freeContext(videoStream.getSwsContext());
+      swr_free(videoStream.getSwrContext());
 
       isClosed = true;
    }
