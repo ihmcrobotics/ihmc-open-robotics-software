@@ -6,6 +6,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegion
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PlanarRegionsFilterForStepping
@@ -22,6 +23,11 @@ public class PlanarRegionsFilterForStepping
     */
    private double maxPlanarRegionAngle = Math.toRadians(25.0);
 
+   private final RecyclingArrayList<PlanarRegion> allPlanarRegionsList = new RecyclingArrayList<>(PlanarRegion::new);
+   private final List<PlanarRegion> bigEnoughPlanarRegionsList = new ArrayList<>();
+   private final List<PlanarRegion> filteredPlanarRegionsList = new ArrayList<>();
+
+
    public double getMinPlanarRegionArea()
    {
       return minPlanarRegionArea;
@@ -32,11 +38,13 @@ public class PlanarRegionsFilterForStepping
       return maxPlanarRegionAngle;
    }
 
-   private final RecyclingArrayList<PlanarRegion> planarRegionsList = new RecyclingArrayList<>(PlanarRegion::new);
 
    public void setPlanarRegions(PlanarRegionsListCommand planarRegions)
    {
-      planarRegionsList.clear();
+      allPlanarRegionsList.clear();
+      bigEnoughPlanarRegionsList.clear();
+      filteredPlanarRegionsList.clear();
+
       for (int i = 0; i < planarRegions.getNumberOfPlanarRegions(); i++)
       {
          PlanarRegionCommand candidateRegion = planarRegions.getPlanarRegionCommand(i);
@@ -45,19 +53,34 @@ public class PlanarRegionsFilterForStepping
                                                                                     candidateRegion.getConcaveHullsVertices().size(),
                                                                                     true,
                                                                                     null);
+
+         PlanarRegion planarRegion = allPlanarRegionsList.add();
+         planarRegion.set(candidateRegion.getTransformToWorld(), candidateRegion.getConvexPolygons(), candidateRegion.getRegionId());
+
          if (polygonArea > getMinPlanarRegionArea())
             continue;
+
+         bigEnoughPlanarRegionsList.add(planarRegion);
 
          if (candidateRegion.getTransformToWorld().getM22() >= Math.cos(getMaxPlanarRegionAngle()))
             continue;
 
-         PlanarRegion planarRegion = planarRegionsList.add();
-         planarRegion.set(candidateRegion.getTransformToWorld(), candidateRegion.getConvexPolygons(), candidateRegion.getRegionId());
+         filteredPlanarRegionsList.add(planarRegion);
       }
    }
 
    public List<PlanarRegion> getPlanarRegions()
    {
-      return planarRegionsList;
+      return allPlanarRegionsList;
+   }
+
+   public List<PlanarRegion> getBigEnoughPlanarRegions()
+   {
+      return bigEnoughPlanarRegionsList;
+   }
+
+   public List<PlanarRegion> getFilteredPlanarRegions()
+   {
+      return filteredPlanarRegionsList;
    }
 }
