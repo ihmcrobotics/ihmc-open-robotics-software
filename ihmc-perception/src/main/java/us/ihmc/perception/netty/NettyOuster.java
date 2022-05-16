@@ -15,6 +15,9 @@ import java.util.HashSet;
 
 /**
  * Ouster Firmware User Manual: https://data.ouster.io/downloads/software-user-manual/firmware-user-manual-v2.3.0.pdf
+ *
+ * To test, use the GNU netcat command:
+ * netcat -ul 7502
  */
 public class NettyOuster
 {
