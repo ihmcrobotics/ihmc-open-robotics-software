@@ -618,9 +618,19 @@ public class GDXTools
    {
       String combinedString = Gdx.files.classpath(pathForLoadingFromClasspath).readString();
 
-      String vertexMacro = "#type vertex\n";
+      String vertexMacro;
+      String fragmentMacro;
+      if (combinedString.endsWith("\r\n"))
+      {
+         vertexMacro = "#type vertex\r\n";
+         fragmentMacro = "#type fragment\r\n";
+      }
+      else
+      {
+         vertexMacro = "#type vertex\n";
+         fragmentMacro = "#type fragment\n";
+      }
       int vertexBegin = combinedString.indexOf(vertexMacro);
-      String fragmentMacro = "#type fragment\n";
       int fragmentBegin = combinedString.indexOf(fragmentMacro);
 
       String vertexShader = combinedString.substring(vertexBegin + vertexMacro.length() - 1, fragmentBegin).trim();

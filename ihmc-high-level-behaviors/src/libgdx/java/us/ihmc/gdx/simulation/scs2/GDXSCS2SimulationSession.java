@@ -35,6 +35,7 @@ import java.util.HashMap;
 
 public class GDXSCS2SimulationSession
 {
+   private static final int MAX_SCS2_BUFFER_SIZE = 10000;
    private final SimulationSession simulationSession;
    private final ImBoolean runAtRealtimeRate = new ImBoolean(true);
    private final ImDouble playbackRealtimeRate = new ImDouble(1.0);
@@ -317,6 +318,12 @@ public class GDXSCS2SimulationSession
    {
       this.bufferDuration.set((float) bufferDuration);
       int bufferSizeRequest = (int) (bufferDuration / UnitConversions.hertzToSeconds(dtHz.get()) / bufferRecordTickPeriod.get());
+      if (bufferSizeRequest > MAX_SCS2_BUFFER_SIZE)
+      {
+         LogTools.warn("Trying to set buffer size to {}, clamping it to: {}", bufferSizeRequest, MAX_SCS2_BUFFER_SIZE);
+         bufferSizeRequest = MAX_SCS2_BUFFER_SIZE;
+      }
+      
       simulationSession.submitBufferSizeRequest(bufferSizeRequest);
    }
 
