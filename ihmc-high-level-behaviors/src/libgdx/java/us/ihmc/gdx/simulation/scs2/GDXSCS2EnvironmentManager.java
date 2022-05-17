@@ -41,6 +41,7 @@ public class GDXSCS2EnvironmentManager
    private ArrayList<Runnable> onSessionStartedRunnables = new ArrayList<>();
    private final StatelessNotification destroyedNotification = new StatelessNotification();
    private Consumer<SCS2AvatarSimulationFactory> externalFactorySetup = null;
+   private boolean createYoVariableServer = true;
 
    public void create(GDXImGuiBasedUI baseUI, DRCRobotModel robotModel, CommunicationMode ros2CommunicationMode)
    {
@@ -120,7 +121,7 @@ public class GDXSCS2EnvironmentManager
          }
          avatarSimulationFactory.setRobotInitialSetup(robotInitialSetup);
          avatarSimulationFactory.setSimulationDataRecordTickPeriod(recordFrequency);
-         avatarSimulationFactory.setCreateYoVariableServer(true);
+         avatarSimulationFactory.setCreateYoVariableServer(isCreateYoVariableServer());
          avatarSimulationFactory.setUseBulletPhysicsEngine(true);
          avatarSimulationFactory.setUseRobotDefinitionCollisions(true);
          avatarSimulationFactory.setShowGUI(false);
@@ -203,5 +204,15 @@ public class GDXSCS2EnvironmentManager
    public void setExternalFactorySetup(Consumer<SCS2AvatarSimulationFactory> externalFactorySetup)
    {
       this.externalFactorySetup = externalFactorySetup;
+   }
+
+   public boolean isCreateYoVariableServer()
+   {
+      return createYoVariableServer;
+   }
+
+   public void setCreateYoVariableServer(boolean createYoVariableServer)
+   {
+      this.createYoVariableServer = createYoVariableServer;
    }
 }
