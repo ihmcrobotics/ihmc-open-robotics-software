@@ -28,7 +28,7 @@ import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.input.editor.GDXUIActionMap;
 import us.ihmc.gdx.input.editor.GDXUITrigger;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.vr.GDXVRManager;
@@ -61,8 +61,8 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
    {
       this.placedPoseConsumer = placedPoseConsumer;
       float sphereRadius = 0.03f;
-      sphere = GDXModelPrimitives.createSphere(sphereRadius, color);
-      arrow = GDXModelPrimitives.createArrow(sphereRadius * 6.0, color);
+      sphere = GDXModelBuilder.createSphere(sphereRadius, color);
+      arrow = GDXModelBuilder.createArrow(sphereRadius * 6.0, color);
 
       placeGoalActionMap = new GDXUIActionMap(startAction ->
                                               {

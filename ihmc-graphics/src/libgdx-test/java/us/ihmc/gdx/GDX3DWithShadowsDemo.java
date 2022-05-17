@@ -10,7 +10,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.gdx.lighting.*;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 
 import java.util.ArrayList;
 
@@ -51,11 +51,11 @@ public class GDX3DWithShadowsDemo
             manager.getDirectionalLights().add(directionalLight);
 
             //Add model instances
-            instances.add(box = GDXModelPrimitives.buildModelInstance(meshBuilder ->
+            instances.add(box = GDXModelBuilder.buildModelInstance(meshBuilder ->
             {
                meshBuilder.addBox(2, 2, 2, new Point3D(0, 1.5, 0), Color.RED);
             }, "box"));
-            instances.add(GDXModelPrimitives.buildModelInstance(meshBuilder ->
+            instances.add(GDXModelBuilder.buildModelInstance(meshBuilder ->
             {
                meshBuilder.addBox(10, 1, 10, new Point3D(), Color.YELLOW);
             }, "box"));

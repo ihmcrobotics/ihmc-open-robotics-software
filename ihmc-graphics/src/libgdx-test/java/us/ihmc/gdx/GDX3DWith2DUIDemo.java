@@ -11,7 +11,7 @@ import org.lwjgl.opengl.GL41;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.tools.BoxesDemoModel;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 
 public class GDX3DWith2DUIDemo
 {
@@ -33,7 +33,7 @@ public class GDX3DWith2DUIDemo
                               (int) (sceneManager.getCurrentWindowWidth() * 1.0),
                               (int) (sceneManager.getCurrentWindowHeight() * 3.0 / 4.0));
 
-            sceneManager.addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
+            sceneManager.addModelInstance(new ModelInstance(GDXModelBuilder.createCoordinateFrame(0.3)));
             sceneManager.addModelInstance(new BoxesDemoModel().newInstance());
 
             stage = new Stage(new ScreenViewport());
