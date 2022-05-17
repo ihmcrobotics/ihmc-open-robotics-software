@@ -80,18 +80,18 @@ public class GDXBuildingConstructor extends ImGuiPanel
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-         for (GDXSimpleObject model : virtualObjects)
-         {
-            model.getRealRenderables(renderables, pool);
-         }
-         if (selectedObject != null)
-         {
-            pose3DGizmo.getRenderables(renderables, pool);
-         }
-         if (intersectedObject != null && intersectedObject != selectedObject)
-         {
-            intersectedObject.getCollisionMeshRenderables(renderables, pool);
-         }
+      for (GDXSimpleObject model : virtualObjects)
+      {
+         model.getRealRenderables(renderables, pool);
+      }
+      if (selectedObject != null)
+      {
+         pose3DGizmo.getRenderables(renderables, pool);
+      }
+      if (intersectedObject != null && intersectedObject != selectedObject)
+      {
+         intersectedObject.getCollisionMeshRenderables(renderables, pool);
+      }
    }
 
    public void getRealRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
@@ -163,8 +163,6 @@ public class GDXBuildingConstructor extends ImGuiPanel
                pose3DGizmo.getTransformToParent().set(selectedObject.getObjectTransform());
             }
 
-
-
 //            if(viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Right))
 //            {
 //               float value = 0.0f;
@@ -178,8 +176,8 @@ public class GDXBuildingConstructor extends ImGuiPanel
 //                  }
 //                  ImGui.endChild();
 //               }
-//               LogTools.info("Click Registered: {}", value);
 //
+//               LogTools.info("Click Registered: {}", value);
 //            }
          }
       }
@@ -235,7 +233,6 @@ public class GDXBuildingConstructor extends ImGuiPanel
             }
             case PLACING:
             {
-
                cornerPoint = building.getClosestRectangularCorner(lastPickPoint);
 
                selectedObject.setPositionInWorld(cornerPoint);
@@ -285,7 +282,6 @@ public class GDXBuildingConstructor extends ImGuiPanel
                   objectToPlace.getBoundingSphere().setRadius(building.getHeight() / 2.0f);
 
                   building.insertComponent(GDXBuildingObject.ComponentType.WALLS, objectToPlace);
-
                }
 
                selectedObject = null;
