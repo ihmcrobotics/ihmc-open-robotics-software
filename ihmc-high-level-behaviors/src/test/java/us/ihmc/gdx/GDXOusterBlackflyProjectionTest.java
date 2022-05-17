@@ -13,9 +13,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
@@ -53,7 +52,7 @@ public class GDXOusterBlackflyProjectionTest
          {
             baseUI.create();
 
-            worldFrameGraphic = new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3));
+            worldFrameGraphic = new ModelInstance(GDXModelBuilder.createCoordinateFrame(0.3));
             GDXTools.setTransparency(worldFrameGraphic, 0.6f);
 
             userTransformToParent = new RigidBodyTransform();
@@ -72,7 +71,7 @@ public class GDXOusterBlackflyProjectionTest
             baseUI.addImGui3DViewInputProcessor(ousterPointInWorldGizmo::process3DViewInput);
             ousterPointInWorldGizmo.setResizeAutomatically(false);
 
-            pointOnCMOSGraphic = GDXModelPrimitives.createSphere(0.01f, Color.RED);
+            pointOnCMOSGraphic = GDXModelBuilder.createSphere(0.01f, Color.RED);
 
             baseUI.get3DSceneManager().addRenderableProvider(this::getRenderables);
             baseUI.getImGuiPanelManager().addPanel("Reference Frames", this::renderImGuiWidgets);

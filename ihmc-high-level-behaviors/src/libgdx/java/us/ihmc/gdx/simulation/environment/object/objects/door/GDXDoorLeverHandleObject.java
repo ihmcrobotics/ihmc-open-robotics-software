@@ -15,7 +15,7 @@ public class GDXDoorLeverHandleObject extends GDXEnvironmentObject
    public GDXDoorLeverHandleObject()
    {
       super(NAME, FACTORY);
-      Model realisticModel = GDXModelLoader.loadG3DModel("environmentObjects/door/doorLeverHandle/DoorLeverHandle.g3dj");
+      Model realisticModel = GDXModelLoader.load("environmentObjects/door/doorLeverHandle/DoorLeverHandle.g3dj");
       setRealisticModel(realisticModel);
 
       double sizeX = 0.065;

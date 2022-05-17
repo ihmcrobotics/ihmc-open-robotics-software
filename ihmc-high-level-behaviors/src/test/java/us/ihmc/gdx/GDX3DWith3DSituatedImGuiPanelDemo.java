@@ -28,7 +28,7 @@ import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.*;
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.TextureCoordinates;
@@ -54,7 +54,7 @@ public class GDX3DWith3DSituatedImGuiPanelDemo
          {
             sceneManager.create();
 
-            sceneManager.addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
+            sceneManager.addModelInstance(new ModelInstance(GDXModelBuilder.createCoordinateFrame(0.3)));
 
             ImGui.createContext();
 
