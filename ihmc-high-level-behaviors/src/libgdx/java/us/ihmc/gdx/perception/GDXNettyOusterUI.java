@@ -23,8 +23,7 @@ public class GDXNettyOusterUI
                                                               "ihmc-high-level-behaviors/src/main/resources");
    private final Activator nativesLoadedActivator;
    private NettyOuster ouster;
-   private GDXPointCloudRenderer pointsRenderer;
-   private RecyclingArrayList<Point3D32> points;
+   private GDXCVImagePanel imagePanel;
    private FrequencyCalculator frameReadFrequency = new FrequencyCalculator();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
@@ -39,41 +38,34 @@ public class GDXNettyOusterUI
          {
             baseUI.create();
 
-            ImGuiPanel panel = new ImGuiPanel("Blackfly", this::renderImGuiWidgets);
+            ImGuiPanel panel = new ImGuiPanel("Ouster", this::renderImGuiWidgets);
             baseUI.getImGuiPanelManager().addPanel(panel);
          }
 
          @Override
-         public void render()
-         {
+         public void render() {
             if (nativesLoadedActivator.poll())
             {
                if (nativesLoadedActivator.isNewlyActivated())
                {
                   ouster = new NettyOuster();
                   ouster.initialize();
+                  ouster.start();
                }
 
-               if (ouster.hasPoints())
+               if (imagePanel == null)
                {
-                  if (pointsRenderer == null)
-                  {
-                     pointsRenderer = new GDXPointCloudRenderer();
-                     baseUI.get3DSceneManager().addRenderableProvider(pointsRenderer);
+                  imagePanel = new GDXCVImagePanel("Ouster Depth Image", ouster.getBytedecoImage());
 
-                     baseUI.getPerspectiveManager().reloadPerspective();
-                  }
-
-                  frameReadFrequency.ping();
-
-                  points.clear();
-                  points.addAll(ouster.getPoints());
-
-                  GDX3DSceneTools.glClearGray(); //maybe necessary?
-                  pointsRenderer.setPointsToRender(points);
-                  baseUI.get3DSceneManager().setViewportBoundsToWindow(); //also maybe necessary? Both of these were taken from GDXPointCloudRendererDemo
-                  pointsRenderer.updateMesh();
+                  baseUI.getImGuiPanelManager().addPanel(imagePanel.getVideoPanel());
+                  baseUI.getPerspectiveManager().reloadPerspective();
                }
+
+               frameReadFrequency.ping();
+               imagePanel.getBytedecoImage().rewind();
+
+               if (imagePanel != null)
+                  imagePanel.draw();
             }
 
             baseUI.renderBeforeOnScreenUI();
@@ -84,7 +76,7 @@ public class GDXNettyOusterUI
          {
             ImGui.text("System native byte order: " + ByteOrder.nativeOrder().toString());
 
-            if (pointsRenderer != null)
+            if (imagePanel != null)
             {
                ImGui.text("Frame read frequency: " + frameReadFrequency.getFrequency());
             }
