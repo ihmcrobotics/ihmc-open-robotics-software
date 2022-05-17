@@ -1,7 +1,6 @@
 package us.ihmc.avatar.reachabilityMap;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,29 +21,33 @@ public interface ReachabilityMapFileReader
 
    default File openSelectionFileDialog()
    {
+      File initialDirectory = SessionVisualizerIOTools.getDefaultFilePath("humanoid-reachability-map-load");
+      if (initialDirectory == null)
+         initialDirectory = new File(".");
+      File result = openSelectionFileDialog(initialDirectory);
+      if (result != null)
+         SessionVisualizerIOTools.setDefaultFilePath("humanoid-reachability-map-load", result.getParentFile());
+      return result;
+   }
+
+   default File openSelectionFileDialog(File initialDirectory)
+   {
       JavaFXMissingTools.startup();
       return JavaFXMissingTools.runAndWait(() ->
       {
          FileChooser fileChooser = new FileChooser();
          fileChooser.setTitle("Choose reachability map to load");
-         File initialDirectory = SessionVisualizerIOTools.getDefaultFilePath("humanoid-reachability-map-load");
-         if (initialDirectory == null)
-            initialDirectory = new File(".");
-         fileChooser.setInitialDirectory(initialDirectory);
+         if (initialDirectory != null)
+            fileChooser.setInitialDirectory(initialDirectory);
          fileChooser.getExtensionFilters().add(new ExtensionFilter(getFileType(), "*" + getFileExtension()));
          fileChooser.getExtensionFilters().add(new ExtensionFilter("All Files", "*.*"));
-         File result = fileChooser.showOpenDialog(null);
-         if (result != null)
-            SessionVisualizerIOTools.setDefaultFilePath("humanoid-reachability-map-load", result.getParentFile());
-         return result;
+         return fileChooser.showOpenDialog(null);
       });
    }
 
    default File findLatestFile(Class<?> classForFilePath, ReachabilityMapRobotInformation robotInformation)
    {
-      Path deriveResourcesPath = ReachabilityMapFileWriter.deriveResourcesPath(classForFilePath);
-
-      File folder = deriveResourcesPath.toFile();
+      File folder = deriveResourcesFolder(classForFilePath);
 
       if (!folder.exists())
          return null;
@@ -60,5 +63,10 @@ public interface ReachabilityMapFileReader
       Collections.sort(reachabilityMapFiles);
 
       return reachabilityMapFiles.get(reachabilityMapFiles.size() - 1);
+   }
+
+   static File deriveResourcesFolder(Class<?> classForFilePath)
+   {
+      return ReachabilityMapFileWriter.deriveResourcesPath(classForFilePath).toFile();
    }
 }

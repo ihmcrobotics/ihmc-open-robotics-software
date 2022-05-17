@@ -43,10 +43,10 @@ public class ReachabilityMapSpreadsheetImporter implements ReachabilityMapFileRe
       try
       {
          HSSFSheet descriptionSheet = workbook.getSheet("Description");
-         
+
          checkRobotMatchesData(robotInformation, descriptionSheet);
          loadControlFramePose(robotInformation, descriptionSheet);
-         
+
          Voxel3DGrid reachabilityMap = createGrid(descriptionSheet);
          loadReachabilityMapData(robotInformation.getEvaluatedJoints().size(), reachabilityMap, workbook);
          return reachabilityMap;

@@ -162,7 +162,13 @@ public class ReachabilitySphereMapSimulationHelper
       });
    }
 
-   public void exportDataToFile(Class<?> classForFilePath) throws IOException
+   public void exportDataToMatlabFile(Class<?> classForFilePath) throws IOException
+   {
+      ReachabilityMapMatlabExporter exporter = new ReachabilityMapMatlabExporter();
+      exporter.write(classForFilePath, robotInformation, calculator.getVoxel3DGrid());
+   }
+
+   public void exportDataToSpreadsheetFile(Class<?> classForFilePath) throws IOException
    {
       ReachabilityMapSpreadsheetExporter exporter = new ReachabilityMapSpreadsheetExporter();
       exporter.write(classForFilePath, robotInformation, calculator.getVoxel3DGrid());

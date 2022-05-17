@@ -1,7 +1,8 @@
 package us.ihmc.avatar.reachabilityMap;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.List;
 
 import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -39,7 +40,7 @@ public class ReachabilityMapSpreadsheetExporter implements ReachabilityMapFileWr
    }
 
    @Override
-   public void write(OutputStream os, ReachabilityMapRobotInformation robotInformation, Voxel3DGrid reachabilityMap)
+   public void write(File file, ReachabilityMapRobotInformation robotInformation, Voxel3DGrid reachabilityMap)
    {
       createDescriptionSheet(robotInformation, reachabilityMap);
 
@@ -56,14 +57,28 @@ public class ReachabilityMapSpreadsheetExporter implements ReachabilityMapFileWr
          writePoseData(jointNames, voxel);
       }
 
+      FileOutputStream os = null;
       try
       {
+         os = new FileOutputStream(file);
          workbook.write(os);
-         os.close();
       }
       catch (IOException e)
       {
          e.printStackTrace();
+      }
+      finally
+      {
+         try
+         {
+            workbook.close();
+            if (os != null)
+               os.close();
+         }
+         catch (IOException e)
+         {
+            e.printStackTrace();
+         }
       }
    }
 

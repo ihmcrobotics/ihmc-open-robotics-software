@@ -1,9 +1,7 @@
 package us.ihmc.avatar.reachabilityMap;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DateFormat;
@@ -21,17 +19,17 @@ public interface ReachabilityMapFileWriter
 {
    default void write(Class<?> classForFilePath, ReachabilityMapRobotInformation robotInformation, Voxel3DGrid reachabilityMap)
    {
-      FileOutputStream outputStream = newFileOutputStream(robotInformation.getRobotDefinition().getName(), classForFilePath, getFileExtension());
+      File outputStream = newFile(robotInformation.getRobotDefinition().getName(), classForFilePath, getFileExtension());
       if (outputStream == null)
          return;
       write(outputStream, robotInformation, reachabilityMap);
    }
 
-   void write(OutputStream os, ReachabilityMapRobotInformation robotInformation, Voxel3DGrid reachabilityMap);
+   void write(File file, ReachabilityMapRobotInformation robotInformation, Voxel3DGrid reachabilityMap);
 
    String getFileExtension();
 
-   static FileOutputStream newFileOutputStream(String robotName, Class<?> classForFilePath, String fileExtension)
+   static File newFile(String robotName, Class<?> classForFilePath, String fileExtension)
    {
       String fileName = ReachabilityMapFileWriter.prependDateToFileName(robotName) + fileExtension;
       Path filePath = deriveResourcesPath(classForFilePath);
@@ -46,15 +44,7 @@ public interface ReachabilityMapFileWriter
       }
       filePath = filePath.resolve(fileName);
 
-      try
-      {
-         return new FileOutputStream(filePath.toFile());
-      }
-      catch (FileNotFoundException e)
-      {
-         e.printStackTrace();
-         return null;
-      }
+      return filePath.toFile();
    }
 
    static Path deriveResourcesPath(Class<?> clazz)
