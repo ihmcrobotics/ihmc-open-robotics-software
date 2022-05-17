@@ -1,4 +1,4 @@
-!!us.ihmc.robotics.functionApproximation.NeuralNetwork.importing.NeuralNetworkTestPoints
+!!us.ihmc.robotics.functionApproximation.NeuralNetwork.importing.NeuralNetworkImportVerifier
 actuals:
 - - 4.3953399658203125
   - -2.629202365875244
