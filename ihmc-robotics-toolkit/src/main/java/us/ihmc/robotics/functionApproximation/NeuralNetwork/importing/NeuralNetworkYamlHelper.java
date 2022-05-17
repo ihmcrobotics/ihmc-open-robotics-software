@@ -48,10 +48,20 @@ public class NeuralNetworkYamlHelper
    public static void main(String[] args) throws IOException
    {
       //The neural network doesn't care about this, but the input data should match this ordering
-      String[] inputVariableNames = new String[] {"LEFT_ANKLE_PITCH_joint_q", "LEFT_ANKLE_PITCH_joint_q_previous", "LEFT_ANKLE_PITCH_joint_qd",
-            "LEFT_ANKLE_PITCH_joint_qd_previous", "LEFT_ANKLE_PITCH_joint_qdd", "LEFT_ANKLE_PITCH_joint_qdd_previous", "LEFT_ANKLE_PITCH_tauMeasured_previous",
-            "LEFT_KNEE_PITCH_joint_q", "LEFT_KNEE_PITCH_joint_q_previous", "LEFT_KNEE_PITCH_joint_qd", "LEFT_KNEE_PITCH_joint_qd_previous",
-            "LEFT_KNEE_PITCH_joint_qdd", "LEFT_KNEE_PITCH_joint_qdd_previous", "LEFT_KNEE_PITCH_tauMeasured_previous"};
+      String[] inputVariableNames = new String[] {"LEFT_ANKLE_PITCH_joint_q",
+                                                  "LEFT_ANKLE_PITCH_joint_q_previous",
+                                                  "LEFT_ANKLE_PITCH_joint_qd",
+                                                  "LEFT_ANKLE_PITCH_joint_qd_previous",
+                                                  "LEFT_ANKLE_PITCH_joint_qdd",
+                                                  "LEFT_ANKLE_PITCH_joint_qdd_previous",
+                                                  "LEFT_ANKLE_PITCH_tauMeasured_previous",
+                                                  "LEFT_KNEE_PITCH_joint_q",
+                                                  "LEFT_KNEE_PITCH_joint_q_previous",
+                                                  "LEFT_KNEE_PITCH_joint_qd",
+                                                  "LEFT_KNEE_PITCH_joint_qd_previous",
+                                                  "LEFT_KNEE_PITCH_joint_qdd",
+                                                  "LEFT_KNEE_PITCH_joint_qdd_previous",
+                                                  "LEFT_KNEE_PITCH_tauMeasured_previous"};
 
       //This is hacky, but leaving something blank gets a passthrough activation function.
       String[] activationFunctionsPerLayer = new String[] {"", "RELU", ""};
@@ -73,14 +83,70 @@ public class NeuralNetworkYamlHelper
 
       //the weights between the input layer and the hidden layer
       double[][] hiddenLayerWeights = new double[4][];
-      hiddenLayerWeights[0] = new double[] {-0.46510178, -0.05915822, 0.3717158, -0.45220408, 0.1210492, -0.12430278, -0.29257497, 0.3202149, 0.10641811,
-            0.45007122, 0.24379735, -0.13266943, -0.1242077, 0.12984337, 0.62552196, 0.3651869};
-      hiddenLayerWeights[1] = new double[] {-0.03552369, 0.7017831, -0.16389109, 0.2945423, -0.10112676, 0.10519658, 0.7274673, -0.2770513, -0.5848242,
-            -0.08602782, 0.1309489, -0.2813644, 0.09275991, -0.099305, 1.612328, -0.42894414};
-      hiddenLayerWeights[2] = new double[] {0.15122245, 0.5346764, 0.01194376, 0.33071777, -0.05709987, 0.05674522, -0.5670206, 0.0768759, -0.31645796,
-            -0.13648617, 0.38817182, -0.31028637, 0.02570818, -0.03258159, 0.1956599, -0.17547709};
-      hiddenLayerWeights[3] = new double[] {-0.50018334, -0.5318647, -0.24139157, 0.05813099, 0.15277725, -0.15938585, -0.71538013, 0.7469889, 0.17892408,
-            0.76543343, 0.12041978, 0.10104298, -0.15151536, 0.160927, -2.4808238, 0.554581};
+      hiddenLayerWeights[0] = new double[] {-0.46510178,
+                                            -0.05915822,
+                                            0.3717158,
+                                            -0.45220408,
+                                            0.1210492,
+                                            -0.12430278,
+                                            -0.29257497,
+                                            0.3202149,
+                                            0.10641811,
+                                            0.45007122,
+                                            0.24379735,
+                                            -0.13266943,
+                                            -0.1242077,
+                                            0.12984337,
+                                            0.62552196,
+                                            0.3651869};
+      hiddenLayerWeights[1] = new double[] {-0.03552369,
+                                            0.7017831,
+                                            -0.16389109,
+                                            0.2945423,
+                                            -0.10112676,
+                                            0.10519658,
+                                            0.7274673,
+                                            -0.2770513,
+                                            -0.5848242,
+                                            -0.08602782,
+                                            0.1309489,
+                                            -0.2813644,
+                                            0.09275991,
+                                            -0.099305,
+                                            1.612328,
+                                            -0.42894414};
+      hiddenLayerWeights[2] = new double[] {0.15122245,
+                                            0.5346764,
+                                            0.01194376,
+                                            0.33071777,
+                                            -0.05709987,
+                                            0.05674522,
+                                            -0.5670206,
+                                            0.0768759,
+                                            -0.31645796,
+                                            -0.13648617,
+                                            0.38817182,
+                                            -0.31028637,
+                                            0.02570818,
+                                            -0.03258159,
+                                            0.1956599,
+                                            -0.17547709};
+      hiddenLayerWeights[3] = new double[] {-0.50018334,
+                                            -0.5318647,
+                                            -0.24139157,
+                                            0.05813099,
+                                            0.15277725,
+                                            -0.15938585,
+                                            -0.71538013,
+                                            0.7469889,
+                                            0.17892408,
+                                            0.76543343,
+                                            0.12041978,
+                                            0.10104298,
+                                            -0.15151536,
+                                            0.160927,
+                                            -2.4808238,
+                                            0.554581};
 
       //the weights between the hidden layer and the output layer
       double[][] ouputLayerWeights = new double[1][];
@@ -97,18 +163,35 @@ public class NeuralNetworkYamlHelper
       neuralNetworkConfiguration.setNumberOfNeuronsPerLayer(numberOfNeuronsPerLayer);
       neuralNetworkConfiguration.setWeights(weights);
 
-      NeuralNetworkYamlHelper.saveNeuralNetworkConfigurationToYamlFile(neuralNetworkConfiguration, "testNNParam.yaml");
+      NeuralNetworkYamlHelper.saveNeuralNetworkConfigurationToYamlFile(neuralNetworkConfiguration,
+                                                                       "ihmc-open-robotics-software/ihmc-robotics-toolkit/resources/"
+                                                                       + "functionApproximation/NeuralNetwork/testNNParam.yaml");
 
       // if you want to make the NN by hand you can simple call
       //      neuralNetwork.createInputLayer(16);
       //      neuralNetwork.createLayer(4, hiddenLayerBias, hiddenLayerWeights, new Relu());
       //      neuralNetwork.createLayer(1, outputBias, ouputLayerWeights, new PassThrough());
 
-      FileInputStream fileInputStream = new FileInputStream("testNNParam.yaml");
+      FileInputStream fileInputStream = new FileInputStream(
+            "ihmc-open-robotics-software/ihmc-robotics-toolkit/resources/functionApproximation/NeuralNetwork/testNNParam.yaml");
       NeuralNetwork neuralNetwork = NeuralNetworkYamlHelper.createNeuralNetworkFromYamlFile(fileInputStream);
 
-      neuralNetwork.setInput(new double[] {0.7041736, 0.7041736, -0.82175085, -0.7660606, -55.92842308, -55.55744086, -0.19960167, 0.20344828, 0.48069055,
-            0.48069055, 0.07482435, 0.0718136, 3.15835607, 2.86869009, 1.14953754, -1.47241379});
+      neuralNetwork.setInput(new double[] {0.7041736,
+                                           0.7041736,
+                                           -0.82175085,
+                                           -0.7660606,
+                                           -55.92842308,
+                                           -55.55744086,
+                                           -0.19960167,
+                                           0.20344828,
+                                           0.48069055,
+                                           0.48069055,
+                                           0.07482435,
+                                           0.0718136,
+                                           3.15835607,
+                                           2.86869009,
+                                           1.14953754,
+                                           -1.47241379});
       //ground truth 1.0482758620689654
 
       double[] output = new double[1];
