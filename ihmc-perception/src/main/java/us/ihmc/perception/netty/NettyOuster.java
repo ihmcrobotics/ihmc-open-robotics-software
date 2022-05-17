@@ -7,7 +7,6 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.perception.BytedecoImage;
 
 import java.nio.ByteOrder;
@@ -29,13 +28,12 @@ public class NettyOuster
 
    private EventLoopGroup group;
    private Bootstrap bootstrap;
-   private final Mat data;
    private final BytedecoImage image;
 
    public NettyOuster()
    {
-      data = new Mat(HEIGHT, WIDTH, opencv_core.CV_32FC1); //TODO rows/cols should be determined by querying REST API of ouster instead
-      image = new BytedecoImage(data);
+      //TODO rows/cols should be determined by querying REST API of ouster instead
+      image = new BytedecoImage(WIDTH, HEIGHT, opencv_core.CV_32FC1);
    }
 
    public void initialize()
@@ -45,14 +43,14 @@ public class NettyOuster
       bootstrap.group(group).channel(NioDatagramChannel.class).handler(new SimpleChannelInboundHandler<DatagramPacket>()
       {
          @Override
-         protected void channelRead0(ChannelHandlerContext ctx, DatagramPacket msg)
+         protected void channelRead0(ChannelHandlerContext context, DatagramPacket packet)
          {
             //TODO buffer can only contain 2048 bytes right now, which needs to be at least 12608 to actually store lidar packet (we are missing lots of data)
-            ByteBuf bufferedData = msg.content().readBytes(msg.content().capacity());
+            ByteBuf bufferedData = packet.content().readBytes(packet.content().capacity());
             bufferedData = bufferedData.order(ByteOrder.LITTLE_ENDIAN); //Ouster is little endian
 
             int i = 0;
-            while (i + MEASUREMENT_BLOCK_SIZE <= msg.content().capacity()) //TODO you guessed it, REST API
+            while (i + MEASUREMENT_BLOCK_SIZE <= packet.content().capacity()) //TODO you guessed it, REST API
             {
                i += 8; //Timestamp
                int measurementID = (int) extractValue(bufferedData, i, 2);
@@ -68,9 +66,10 @@ public class NettyOuster
                boolean dataOkay = extractValue(bufferedData, i, 4) == 0xFFFFFFFFL;
                i += 4;
 
-               if (dataOkay) {
+               if (dataOkay)
+               {
                   for (int k = 0; k < 64; k++)
-                     data.ptr(k, measurementID).putFloat(range[k] / 1000.0F);
+                     image.getBytedecoOpenCVMat().ptr(k, measurementID).putFloat(range[k] / 1000.0F);
                }
             }
 
@@ -78,18 +77,21 @@ public class NettyOuster
          }
       });
 
-      bootstrap.option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(LIDAR_DATA_PACKET_SIZE)); //TODO this needs to also be done with the REST API
+      bootstrap.option(ChannelOption.RCVBUF_ALLOCATOR,
+                       new FixedRecvByteBufAllocator(LIDAR_DATA_PACKET_SIZE)); //TODO this needs to also be done with the REST API
    }
 
    /**
     * Java doesn't have support for unsigned 32-bit integers* so we have to use a long instead
     */
-   private long extractValue(ByteBuf data, int index, int num) {
+   private long extractValue(ByteBuf data, int index, int num)
+   {
       int shift = index % 4;
       int modIndex = index - (index % 4);
       long val = data.getUnsignedInt(modIndex);
       val >>= shift;
-      switch(num) {
+      switch (num)
+      {
          case 1:
             val = val & 0xFF;
             break;
@@ -118,7 +120,8 @@ public class NettyOuster
       group.shutdownGracefully();
    }
 
-   public BytedecoImage getBytedecoImage() {
+   public BytedecoImage getBytedecoImage()
+   {
       return image;
    }
 }
