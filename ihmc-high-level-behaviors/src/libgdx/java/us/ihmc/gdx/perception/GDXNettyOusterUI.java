@@ -48,7 +48,7 @@ public class GDXNettyOusterUI
                   ouster.start();
                }
 
-               if (imagePanel == null)
+               if (imagePanel == null && ouster.isInitialized())
                {
                   imagePanel = new GDXCVImagePanel("Ouster Depth Image", ouster.getImageWidth(), ouster.getImageHeight());
 
