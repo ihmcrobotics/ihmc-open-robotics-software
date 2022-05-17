@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 import java.util.List;
 import java.util.function.Supplier;
 
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
@@ -30,6 +31,7 @@ public class AngularMomentumHandler<T extends ContactStateBasics<T>>
 
    public AngularMomentumHandler(double totalMass,
                                  double gravity,
+                                 WalkingControllerParameters walkingControllerParameters,
                                  CenterOfMassStateProvider centerOfMassStateProvider,
                                  SideDependentList<MovingReferenceFrame> soleFrames,
                                  Supplier<T> contactSupplier,
@@ -44,6 +46,7 @@ public class AngularMomentumHandler<T extends ContactStateBasics<T>>
       ecmpTrajectoryCalculator = new ECMPTrajectoryCalculator<>(totalMass, gravity, contactSupplier, registry);
       angularMomentumCalculator = new ThreePotatoAngularMomentumCalculator(totalMass,
                                                                            potatoMassFraction,
+                                                                           walkingControllerParameters,
                                                                            gravity,
                                                                            centerOfMassStateProvider,
                                                                            soleFrames,

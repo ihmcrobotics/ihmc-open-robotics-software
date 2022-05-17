@@ -24,6 +24,7 @@ import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PID3DConfiguration;
 import us.ihmc.robotics.controllers.pidGains.implementations.PIDSE3Configuration;
+import us.ihmc.robotics.functionApproximation.NeuralNetwork.NeuralNetwork;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 
 public abstract class WalkingControllerParameters
@@ -793,5 +794,10 @@ public abstract class WalkingControllerParameters
    public double getSwingTimeOverrunToInitializeFreeFall()
    {
       return Double.POSITIVE_INFINITY;
+   }
+
+   public NeuralNetwork getThreePotatoResidualModel()
+   {
+      return null;
    }
 }

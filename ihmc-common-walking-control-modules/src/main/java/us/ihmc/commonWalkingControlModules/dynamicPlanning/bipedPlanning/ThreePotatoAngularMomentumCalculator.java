@@ -2,8 +2,11 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
 import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools.sufficientlyLongTime;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.List;
 
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -19,6 +22,8 @@ import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.robotics.functionApproximation.NeuralNetwork.NeuralNetwork;
+import us.ihmc.robotics.functionApproximation.NeuralNetwork.importing.NeuralNetworkYamlHelper;
 import us.ihmc.robotics.math.trajectories.FixedFramePolynomialEstimator3D;
 import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
@@ -46,14 +51,14 @@ public class ThreePotatoAngularMomentumCalculator
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final boolean debug = false;
-   private static final boolean visualize = false;
+   private static final boolean visualize = true;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoDouble potatoMass = new YoDouble("PotatoMass", registry);
    private final DoubleProvider potatoMassFraction;
    private final double totalMass;
 
-   private final BooleanProvider useHeightScaledAngularMomentum = new BooleanParameter("useHeightScaledAngularMomentum", registry, true);
+   private final BooleanProvider useHeightScaledAngularMomentum = new BooleanParameter("useHeightScaledAngularMomentum", registry, false);
    private final DoubleProvider idealAngularMomentumSampleDt = new DoubleParameter("idealAngularMomentumSampleDt", registry, 0.05);
    private final IntegerProvider maxAngularMomentumSamplesPerSegment = new IntegerParameter("maxAngularMomentumSamplesPerSegment", registry, 8);
    private final IntegerProvider minAngularMomentumSamplesPerSegment = new IntegerParameter("minAngularMomentumSamplesPerSegment", registry, 5);
@@ -76,6 +81,27 @@ public class ThreePotatoAngularMomentumCalculator
    private final YoFramePoint3D predictedRightFootPosition = new YoFramePoint3D("predictedRightFootPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D predictedRightFootVelocity = new YoFrameVector3D("predictedRightFootVelocity", ReferenceFrame.getWorldFrame(), registry);
 
+   private final YoFramePoint3D centerOfMassPosition = new YoFramePoint3D("centerOfMassPosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D centerOfMassVelocity = new YoFrameVector3D("centerOfMassVelocity", ReferenceFrame.getWorldFrame(), registry);
+   private final FramePoint3D potatoPosition = new FramePoint3D();
+   private final FrameVector3D potatoVelocity = new FrameVector3D();
+   private final FrameVector3D relativePotatoPosition = new FrameVector3D();
+   private final FrameVector3D relativePotatoVelocity = new FrameVector3D();
+   private final FrameVector3D relativePotatoAcceleration = new FrameVector3D();
+   private final YoFramePoint3D leftPotatoPosition = new YoFramePoint3D("leftPotatoPosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D leftPotatoVelocity = new YoFrameVector3D("leftPotatoVelocity", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D rightPotatoPosition = new YoFramePoint3D("rightPotatoPosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D rightPotatoVelocity = new YoFrameVector3D("rightPotatoVelocity", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D leftPotatoRelativePosition = new YoFramePoint3D("leftPotatoRelativePosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D leftPotatoRelativeVelocity = new YoFrameVector3D("leftPotatoRelativeVelocity", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D rightPotatoRelativePosition = new YoFramePoint3D("rightPotatoRelativePosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D rightPotatoRelativeVelocity = new YoFrameVector3D("rightPotatoRelativeVelocity", ReferenceFrame.getWorldFrame(), registry);
+
+   private final double potatoMassFractionTrainedOn = 0.07;
+   private final NeuralNetwork threePotatoResidualModel;
+   private final BooleanParameter useThreePotatoResidualModel = new BooleanParameter("useThreePotatoResidualModel", registry, false);
+   private final YoFrameVector3D threePotatoResidualPredicted =  new YoFrameVector3D("threePotatoResidualPredicted", ReferenceFrame.getWorldFrame(), registry);
+
    private final YoDouble comTrajectoryCurrentTime = new YoDouble("firstPotatoCurrentTrajectoryTime", registry);
    private final YoInteger comTrajectoryCurrentSegment = new YoInteger("firstPotatoCurrentSegmentIndex", registry);
 
@@ -85,10 +111,6 @@ public class ThreePotatoAngularMomentumCalculator
    private final FrameVector3D totalTorque = new FrameVector3D();
    private final FrameVector3D angularMomentum = new FrameVector3D();
    private final FrameVector3D torque = new FrameVector3D();
-
-   private final FrameVector3D relativePotatoPosition = new FrameVector3D();
-   private final FrameVector3D relativePotatoVelocity = new FrameVector3D();
-   private final FrameVector3D relativePotatoAcceleration = new FrameVector3D();
 
    private final FixedFramePolynomialEstimator3D angularMomentumEstimator = new FixedFramePolynomialEstimator3D(worldFrame);
    private final FixedFramePolynomialEstimator3D scaledAngularMomentumEstimator = new FixedFramePolynomialEstimator3D(worldFrame);
@@ -111,6 +133,7 @@ public class ThreePotatoAngularMomentumCalculator
 
    public ThreePotatoAngularMomentumCalculator(double totalMass,
                                                DoubleProvider potatoMassFraction,
+                                               WalkingControllerParameters walkingControllerParameters,
                                                double gravityZ,
                                                CenterOfMassStateProvider centerOfMassStateProvider,
                                                SideDependentList<MovingReferenceFrame> soleFrames,
@@ -122,6 +145,8 @@ public class ThreePotatoAngularMomentumCalculator
       this.soleFrames = soleFrames;
       this.totalMass = totalMass;
       this.potatoMassFraction = potatoMassFraction;
+
+      threePotatoResidualModel = walkingControllerParameters.getThreePotatoResidualModel();
 
       angularMomentumTrajectory = new MultipleSegmentPositionTrajectoryGenerator<>("angularMomentum",
                                                                                    50,
@@ -201,11 +226,12 @@ public class ThreePotatoAngularMomentumCalculator
       totalAngularMomentum.setToZero();
       if (centerOfMassStateProvider != null && soleFrames != null)
       {
+         FramePoint3DReadOnly comPosition = centerOfMassStateProvider.getCenterOfMassPosition();
+         centerOfMassPosition.set(comPosition);
+         FrameVector3DReadOnly comVelocity = centerOfMassStateProvider.getCenterOfMassVelocity();
+         centerOfMassVelocity.set(comVelocity);
          for (RobotSide robotSide : RobotSide.values)
          {
-            FramePoint3DReadOnly comPosition = centerOfMassStateProvider.getCenterOfMassPosition();
-            FrameVector3DReadOnly comVelocity = centerOfMassStateProvider.getCenterOfMassVelocity();
-
             potatoPosition.setToZero(soleFrames.get(robotSide));
             potatoPosition.changeFrame(ReferenceFrame.getWorldFrame());
             potatoVelocity.setIncludingFrame(soleFrames.get(robotSide).getTwistOfFrame().getLinearPart());
@@ -213,7 +239,34 @@ public class ThreePotatoAngularMomentumCalculator
 
             computeAngularMomentumAtInstant(comPosition, comVelocity, potatoPosition, potatoVelocity, potatoMass.getDoubleValue(), angularMomentum);
             totalAngularMomentum.add(angularMomentum);
+
+            if (robotSide == RobotSide.LEFT)
+            {
+               leftPotatoPosition.set(potatoPosition);
+               leftPotatoVelocity.set(potatoVelocity);
+               leftPotatoRelativePosition.sub(centerOfMassPosition, leftPotatoPosition);
+               leftPotatoRelativeVelocity.sub(centerOfMassVelocity, leftPotatoVelocity);
+            }
+            else
+            {
+               rightPotatoPosition.set(potatoPosition);
+               rightPotatoVelocity.set(potatoVelocity);
+               rightPotatoRelativePosition.sub(centerOfMassPosition, rightPotatoPosition);
+               rightPotatoRelativeVelocity.sub(centerOfMassVelocity, rightPotatoVelocity);
+            }
          }
+
+         if (!useThreePotatoResidualModel.getValue() || threePotatoResidualModel == null)
+         {
+            observeAngularMomentumResidual(centerOfMassPosition, centerOfMassVelocity,
+                                           leftPotatoRelativePosition, leftPotatoRelativeVelocity,
+                                           rightPotatoRelativePosition, rightPotatoRelativeVelocity, threePotatoResidualPredicted);
+            // TODO: magic number on bottom  of fraction is the potatoMassFraction in the training set
+            threePotatoResidualPredicted.scale(1 / 0.07);
+            threePotatoResidualPredicted.scale(potatoMassFraction.getValue());
+            totalAngularMomentum.add(threePotatoResidualPredicted);
+         }
+
          actualModelAngularMomentum.set(totalAngularMomentum);
       }
 
@@ -263,10 +316,6 @@ public class ThreePotatoAngularMomentumCalculator
 
       angularMomentumPredictionTimer.stopMeasurement();
    }
-
-   private final FramePoint3D potatoPosition = new FramePoint3D();
-   private final FrameVector3D potatoVelocity = new FrameVector3D();
-
 
    public void computeAngularMomentumTrajectories(List<? extends TimeIntervalProvider> timeIntervals,
                                                   MultipleSegmentPositionTrajectoryGenerator<?> comTrajectories)
@@ -464,5 +513,40 @@ public class ThreePotatoAngularMomentumCalculator
 
       angularMomentumToPack.cross(relativePotatoPosition, relativePotatoVelocity);
       angularMomentumToPack.scale(potatoMass);
+   }
+
+   private final double[] neuralNetworkInput = new double[18];
+   private final double[] neuralNetworkOutput = new double[3];
+
+   private void observeAngularMomentumResidual(Point3DReadOnly centerOfMassPosition,
+                                               Vector3DReadOnly centerOfMassVelocity,
+                                               Point3DReadOnly leftPotatoRelativePosition,
+                                               Vector3DReadOnly leftPotatoRelativeVelocity,
+                                               Point3DReadOnly rightPotatoRelativePosition,
+                                               Vector3DReadOnly rightPotatoRelativeVelocity,
+                                               Vector3DBasics threePotatoResidualPredictionToPack)
+   {
+      neuralNetworkInput[0] = centerOfMassPosition.getX();
+      neuralNetworkInput[1] = centerOfMassPosition.getY();
+      neuralNetworkInput[2] = centerOfMassPosition.getZ();
+      neuralNetworkInput[3] = centerOfMassVelocity.getX();
+      neuralNetworkInput[4] = centerOfMassVelocity.getY();
+      neuralNetworkInput[5] = centerOfMassVelocity.getZ();
+      neuralNetworkInput[6] = leftPotatoRelativePosition.getX();
+      neuralNetworkInput[7] = leftPotatoRelativePosition.getY();
+      neuralNetworkInput[8] = leftPotatoRelativePosition.getZ();
+      neuralNetworkInput[9] = leftPotatoRelativeVelocity.getX();
+      neuralNetworkInput[10] = leftPotatoRelativeVelocity.getY();
+      neuralNetworkInput[11] = leftPotatoRelativeVelocity.getZ();
+      neuralNetworkInput[12] = rightPotatoRelativePosition.getX();
+      neuralNetworkInput[13] = rightPotatoRelativePosition.getY();
+      neuralNetworkInput[14] = rightPotatoRelativePosition.getZ();
+      neuralNetworkInput[15] = rightPotatoRelativeVelocity.getX();
+      neuralNetworkInput[16] = rightPotatoRelativeVelocity.getY();
+      neuralNetworkInput[17] = rightPotatoRelativeVelocity.getZ();
+
+      threePotatoResidualModel.setInput(neuralNetworkInput);
+      threePotatoResidualModel.compute(neuralNetworkOutput);
+      threePotatoResidualPredictionToPack.set(neuralNetworkOutput);
    }
 }

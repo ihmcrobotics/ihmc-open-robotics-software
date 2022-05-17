@@ -247,6 +247,7 @@ public class BalanceManager
 
       angularMomentumHandler = new AngularMomentumHandler<>(totalMass,
                                                             gravityZ,
+                                                            walkingControllerParameters,
                                                             controllerToolbox,
                                                             controllerToolbox.getReferenceFrames().getSoleFrames(),
                                                             SettableContactStateProvider::new,
