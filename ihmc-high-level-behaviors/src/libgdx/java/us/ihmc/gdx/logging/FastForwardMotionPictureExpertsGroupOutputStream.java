@@ -11,7 +11,7 @@ import org.bytedeco.ffmpeg.swscale.SwsContext;
  * This class basically copies the class found in the muxing.c example in the FFMPEG docs.
  * It serves to provide a consolidated interface for interaction with audio/video streams
  */
-public class FFMPEGOutputStream //TODO modify to match Java conventions
+public class FastForwardMotionPictureExpertsGroupOutputStream //TODO modify to match Java conventions
 {
    //Variables
    private AVStream stream;
