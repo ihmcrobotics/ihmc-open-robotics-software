@@ -63,7 +63,7 @@ public class NettyOuster
                   i += 12; //Range, and other values we don't care about
                }
 
-               boolean dataOkay = extractValue(bufferedData, i, 4) == 0xFFFF;
+               boolean dataOkay = extractValue(bufferedData, i, 4) == 0xFFFFFFFFL;
                i += 4;
 
                if (dataOkay) {
