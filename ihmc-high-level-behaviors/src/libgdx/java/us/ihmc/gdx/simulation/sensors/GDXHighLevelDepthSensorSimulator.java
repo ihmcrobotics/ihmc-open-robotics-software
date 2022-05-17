@@ -174,7 +174,6 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
          ros1PointCloudPublisher = new RosPointCloudPublisher(PointType.XYZ, false);
          ros1Node.attachPublisher(ros1DepthCameraInfoTopic, ros1DepthCameraInfoPublisher);
          ros1Node.attachPublisher(ros1DepthImageTopic, ros1DepthPublisher);
-
          ros1DepthChannelBuffer = ros1DepthPublisher.getChannelBufferFactory().getBuffer(2 * imageWidth * imageHeight);
          LogTools.info("Publishing ROS 1 color: {} {}", ros1ColorImageTopic, ros1ColorCameraInfoTopic);
          ros1ColorPublisher = new RosImagePublisher();
@@ -350,7 +349,6 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
 
    private void publishDepthImageROS1()
    {
-      LogTools.info("Publishing Depth");
       if (ros1DepthPublisher.isConnected() && ros1DepthCameraInfoPublisher.isConnected() && !depthExecutor.isExecuting())
       {
          PerspectiveCamera camera = depthSensorSimulator.getCamera();
@@ -625,6 +623,7 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
       this.ros1PointCloudTopic = ros1PointCloudTopic;
       ros1Node.attachPublisher(ros1PointCloudTopic, ros1PointCloudPublisher);
    }
+
    public ReferenceFrame getSensorFrame()
    {
       return sensorFrame;
