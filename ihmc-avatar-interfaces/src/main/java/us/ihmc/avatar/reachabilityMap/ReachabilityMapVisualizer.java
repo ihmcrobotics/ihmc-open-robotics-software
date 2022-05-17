@@ -146,11 +146,19 @@ public class ReachabilityMapVisualizer
 
    public boolean loadReachabilityMapFromLatestFile(Class<?> classForFilePath)
    {
-      ReachabilityMapSpreadsheetImporter importer = new ReachabilityMapSpreadsheetImporter();
-      File file = importer.findLatestFile(classForFilePath, robotInformation);
+      ReachabilityMapMatlabImporter matlabImporter = new ReachabilityMapMatlabImporter();
+      File file = matlabImporter.findLatestFile(classForFilePath, robotInformation);
+      if (file != null)
+         return loadReachabilityMapFromFile(matlabImporter, file);
+
+      ReachabilityMapSpreadsheetImporter spreadSheetImporter = new ReachabilityMapSpreadsheetImporter();
+      file = spreadSheetImporter.findLatestFile(classForFilePath, robotInformation);
       if (file == null)
+      {
+         LogTools.error("Failed to load latest file.");
          return false;
-      return loadReachabilityMapFromFile(importer, file);
+      }
+      return loadReachabilityMapFromFile(spreadSheetImporter, file);
    }
 
    public boolean loadReachabilityMapFromFile()
@@ -239,7 +247,6 @@ public class ReachabilityMapVisualizer
       LogTools.info("Restarting session's thread");
       session.startSessionThread();
       LogTools.info("Done");
-      guiControls.waitUntilDown();
    }
 
    private void createVisualizationControls()
@@ -947,8 +954,8 @@ public class ReachabilityMapVisualizer
       if (extraData == null || !isWithinLimits(extraData))
          return 0.0;
 
-      if (payloadInKg == 0.0)
-         return computeTauCapabilityMetric(extraData);
+      if (payloadInKg == 0.0 && extraData.getJointTorques() != null)
+         return computeTauCapabilityMetric(extraData.getJointTorques());
 
       ensureJointsCopyExist();
 
@@ -982,28 +989,6 @@ public class ReachabilityMapVisualizer
          jointTorques[i] = (float) tau;
       }
       return computeTauCapabilityMetric(jointTorques);
-   }
-
-   public double computeTauCapabilityMetric(VoxelExtraData extraData)
-   {
-      if (extraData == null || !isWithinLimits(extraData))
-         return 0.0;
-      ensureJointsCopyExist();
-
-      double l = 0.0;
-
-      for (int i = 0; i < jointsCopy.length; i++)
-      {
-         double min = jointsCopy[i].getEffortLimitLower();
-         double max = jointsCopy[i].getEffortLimitUpper();
-         double midRange = 0.5 * (min + max);
-         double rom = max - min;
-         double tau = MathTools.clamp(extraData.getJointTorques()[i], min, max);
-         double ratio = (tau - midRange) / rom;
-         l += ratio * ratio;
-      }
-
-      return 1.0 - 4.0 / jointsCopy.length * l;
    }
 
    public double computeTauCapabilityMetric(float[] jointTorques)
@@ -1132,12 +1117,9 @@ public class ReachabilityMapVisualizer
       for (int i = 0; i < jointsCopy.length; i++)
       {
          double q = extraData.getJointPositions()[i];
-         double tau = extraData.getJointTorques()[i];
 
          OneDoFJointBasics joint = jointsCopy[i];
          if (!MathTools.intervalContains(q, joint.getJointLimitLower() - 1.0e-7, joint.getJointLimitUpper() + 1.0e-7))
-            return false;
-         if (!MathTools.intervalContains(tau, joint.getEffortLimitLower() - 1.0e-7, joint.getEffortLimitUpper() + 1.0e-7))
             return false;
       }
 
