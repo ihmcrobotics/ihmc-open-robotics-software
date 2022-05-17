@@ -9,7 +9,6 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.BytedecoOpenCVTools;
 
 import java.nio.ByteOrder;
 
@@ -21,26 +20,31 @@ import java.nio.ByteOrder;
  */
 public class NettyOuster
 {
-   public static final int PORT = 7502;
+   public static final int TCP_PORT = 7501;
+   public static final int UDP_PORT = 7502;
 
-   private static final int HEIGHT = 64;
-   private static final int WIDTH = 1024;
-   private static final int LIDAR_DATA_PACKET_SIZE = 12608;
-   private static final int MEASUREMENT_BLOCK_SIZE = 788;
+   // -- LIDAR Information --
+   private int pixelsPerColumn = 64;
+   private int columnsPerFrame = 1024;
+   private int columnsPerPacket = 16;
+   private int[] pixelShift = new int[pixelsPerColumn];
+   // -- End LIDAR Information --
 
    private EventLoopGroup group;
    private Bootstrap bootstrap;
-   private final BytedecoImage image;
+   private BytedecoImage image;
 
    public NettyOuster()
    {
-      //TODO rows/cols should be determined by querying REST API of ouster instead
-      image = new BytedecoImage(WIDTH, HEIGHT, opencv_core.CV_32FC1);
-      image.getBytedecoOpenCVMat().setTo(new Mat(0.0f)); // should initialize it to 0
+      //TODO Get LIDAR information from TCP
+      build();
    }
 
-   public void initialize()
+   private void build()
    {
+      image = new BytedecoImage(columnsPerFrame, pixelsPerColumn, opencv_core.CV_32FC1);
+      image.getBytedecoOpenCVMat().setTo(new Mat(0.0f)); //Initialize matrix to 0
+
       group = new NioEventLoopGroup();
       bootstrap = new Bootstrap();
       bootstrap.group(group).channel(NioDatagramChannel.class).handler(new SimpleChannelInboundHandler<DatagramPacket>()
@@ -48,19 +52,18 @@ public class NettyOuster
          @Override
          protected void channelRead0(ChannelHandlerContext context, DatagramPacket packet)
          {
-            //TODO buffer can only contain 2048 bytes right now, which needs to be at least 12608 to actually store lidar packet (we are missing lots of data)
             ByteBuf bufferedData = packet.content().readBytes(packet.content().capacity());
             bufferedData = bufferedData.order(ByteOrder.LITTLE_ENDIAN); //Ouster is little endian
 
             int i = 0;
-            while (i + MEASUREMENT_BLOCK_SIZE <= packet.content().capacity()) //TODO you guessed it, REST API
+            for (int colNumber = 0; colNumber < columnsPerPacket; colNumber++)
             {
                i += 8; //Timestamp
                int measurementID = (int) extractValue(bufferedData, i, 2);
                i += 8; //Measurement ID (above), Frame ID, Encoder Count
 
-               long[] range = new long[64];
-               for (int blockID = 0; blockID < 64; blockID++)
+               long[] range = new long[pixelsPerColumn];
+               for (int blockID = 0; blockID < pixelsPerColumn; blockID++)
                { //Note that blockID is useful data here
                   range[blockID] = extractValue(bufferedData, i, 4);
                   i += 12; //Range, and other values we don't care about
@@ -78,7 +81,10 @@ public class NettyOuster
                      {
                         rangeScaled = 0.0f;
                      }
-                     image.getBytedecoOpenCVMat().ptr(k, measurementID).putFloat(rangeScaled);
+
+                     //Calculate column by adding the reported row pixel shift to the measurement ID, and then adjusting for over/underflow
+                     int column = (measurementID + pixelShift[k]) % columnsPerFrame;
+                     image.getBytedecoOpenCVMat().ptr(k, column).putFloat(rangeScaled);
                   }
                }
             }
@@ -87,8 +93,8 @@ public class NettyOuster
          }
       });
 
-      bootstrap.option(ChannelOption.RCVBUF_ALLOCATOR,
-                       new FixedRecvByteBufAllocator(LIDAR_DATA_PACKET_SIZE)); //TODO this needs to also be done with the REST API
+      int lidarPacketSize = columnsPerPacket * (16 + (pixelsPerColumn * 12) + 4);
+      bootstrap.option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(lidarPacketSize));
    }
 
    /**
@@ -122,7 +128,7 @@ public class NettyOuster
 
    public void start()
    {
-      bootstrap.bind(PORT);
+      bootstrap.bind(UDP_PORT);
    }
 
    public void stop()
@@ -132,12 +138,12 @@ public class NettyOuster
 
    public int getImageWidth()
    {
-      return WIDTH;
+      return columnsPerFrame;
    }
 
    public int getImageHeight()
    {
-      return HEIGHT;
+      return pixelsPerColumn;
    }
 
    public BytedecoImage getBytedecoImage()
