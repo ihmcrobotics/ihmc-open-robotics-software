@@ -72,7 +72,14 @@ public class NettyOuster
                if (dataOkay)
                {
                   for (int k = 0; k < 64; k++)
-                     image.getBytedecoOpenCVMat().ptr(k, measurementID).putFloat(range[k] / 1000.0F);
+                  {
+                     float rangeScaled = range[k] / 1000.0F;
+                     if (rangeScaled > 30.0)
+                     {
+                        rangeScaled = 0.0f;
+                     }
+                     image.getBytedecoOpenCVMat().ptr(k, measurementID).putFloat(rangeScaled);
+                  }
                }
             }
 
