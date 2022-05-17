@@ -1,0 +1,43 @@
+!!us.ihmc.robotics.functionApproximation.NeuralNetwork.importing.NeuralNetworkConfiguration
+activationFunctionsPerLayer: ['', RELU, '']
+bias:
+- [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+- [0.8374003, 0.03701664, -0.28729317, 0.01319704]
+- [-0.3590592]
+inputVariableNames: [LEFT_ANKLE_PITCH_joint_q, LEFT_ANKLE_PITCH_joint_q_previous,
+  LEFT_ANKLE_PITCH_joint_qd, LEFT_ANKLE_PITCH_joint_qd_previous, LEFT_ANKLE_PITCH_joint_qdd,
+  LEFT_ANKLE_PITCH_joint_qdd_previous, LEFT_ANKLE_PITCH_tauMeasured_previous, LEFT_KNEE_PITCH_joint_q,
+  LEFT_KNEE_PITCH_joint_q_previous, LEFT_KNEE_PITCH_joint_qd, LEFT_KNEE_PITCH_joint_qd_previous,
+  LEFT_KNEE_PITCH_joint_qdd, LEFT_KNEE_PITCH_joint_qdd_previous, LEFT_KNEE_PITCH_tauMeasured_previous]
+numberOfNeuronsPerLayer: [16, 4, 1]
+outputVariableNames: null
+weights:
+- - [0.0]
+  - [0.0]
+  - [0.0]
+  - [0.0]
+  - [0.0]
+  - [0.0]
+  - [0.0]
+  - [0.0]
+  - [0.0]
+  - [0.0]
+  - [0.0]
+  - [0.0]
+  - [0.0]
+  - [0.0]
+  - [0.0]
+  - [0.0]
+- - [-0.46510178, -0.05915822, 0.3717158, -0.45220408, 0.1210492, -0.12430278, -0.29257497,
+    0.3202149, 0.10641811, 0.45007122, 0.24379735, -0.13266943, -0.1242077, 0.12984337,
+    0.62552196, 0.3651869]
+  - [-0.03552369, 0.7017831, -0.16389109, 0.2945423, -0.10112676, 0.10519658, 0.7274673,
+    -0.2770513, -0.5848242, -0.08602782, 0.1309489, -0.2813644, 0.09275991, -0.099305,
+    1.612328, -0.42894414]
+  - [0.15122245, 0.5346764, 0.01194376, 0.33071777, -0.05709987, 0.05674522, -0.5670206,
+    0.0768759, -0.31645796, -0.13648617, 0.38817182, -0.31028637, 0.02570818, -0.03258159,
+    0.1956599, -0.17547709]
+  - [-0.50018334, -0.5318647, -0.24139157, 0.05813099, 0.15277725, -0.15938585, -0.71538013,
+    0.7469889, 0.17892408, 0.76543343, 0.12041978, 0.10104298, -0.15151536, 0.160927,
+    -2.4808238, 0.554581]
+- - [0.46576336, 0.41093794, -0.01115055, -0.27883196]
