@@ -63,7 +63,9 @@ public class ImGuiGDXBehaviorUIManager
    {
       this.behaviorRegistry = behaviorRegistry;
       helper = new BehaviorHelper("Behaviors panel", robotModelSupplier.get(), ros2Node, enableROS1);
-      messagerManagerWidget = new ImGuiMessagerManagerWidget(helper.getMessagerHelper(), behaviorModuleHost::get);
+      messagerManagerWidget = new ImGuiMessagerManagerWidget(helper.getMessagerHelper(),
+                                                             behaviorModuleHost::get,
+                                                             NetworkPorts.BEHAVIOR_MODULE_MESSAGER_PORT.getPort());
       yoVariableClientManagerWidget = new ImGuiYoVariableClientManagerWidget(helper.getYoVariableClientHelper(),
                                                                              behaviorModuleHost::get,
                                                                              NetworkPorts.BEHAVIOR_MODULE_YOVARIABLESERVER_PORT.getPort());
@@ -116,6 +118,8 @@ public class ImGuiGDXBehaviorUIManager
 
    public void create(GDXImGuiBasedUI baseUI)
    {
+      ImNodesTools.initialize();
+
       imNodeBehaviorTreeUI.create();
 
       highestLevelUI.create(baseUI);

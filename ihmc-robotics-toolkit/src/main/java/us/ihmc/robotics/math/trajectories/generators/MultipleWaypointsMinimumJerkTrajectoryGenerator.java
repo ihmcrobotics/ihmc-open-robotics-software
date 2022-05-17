@@ -197,7 +197,12 @@ public class MultipleWaypointsMinimumJerkTrajectoryGenerator implements DoubleTr
          initializeSubTrajectory(currentWaypointIndex.getIntegerValue());
       }
 
-      double subTrajectoryTime = time - waypoints.get(currentWaypointIndex.getIntegerValue()).getTime();
+      double subTrajectoryTime;
+      if (time < waypoints.get(numberOfWaypoints.getIntegerValue() - 1).getTime())
+         subTrajectoryTime = time - waypoints.get(currentWaypointIndex.getIntegerValue()).getTime();
+      else
+         subTrajectoryTime = waypoints.get(numberOfWaypoints.getIntegerValue() - 1).getTime()
+               - waypoints.get(numberOfWaypoints.getIntegerValue() - 2).getTime();
       subTrajectory.compute(subTrajectoryTime);
    }
 

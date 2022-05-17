@@ -6,6 +6,7 @@ import org.reflections.scanners.Scanners;
 import org.reflections.util.ConfigurationBuilder;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.commons.nio.BasicPathVisitor;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -14,6 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.BiConsumer;
 
 /**
  * The system class loader, 99% of the time, is the same as your class's loader.
@@ -134,5 +136,30 @@ public class ResourceTools
    public static boolean exists(String name)
    {
       return ClassLoader.getSystemResource(name) != null;
+   }
+
+   public static void walkResourcesFlat(String pathNecessaryForResourceExploring, BiConsumer<String, BasicPathVisitor.PathType> pathVisitor)
+   {
+      TreeSet<String> fileNames = new TreeSet<>();
+      TreeSet<String> directoryNames = new TreeSet<>();
+      for (String resourceEntry : ResourceTools.listResources(pathNecessaryForResourceExploring, ".*"))
+      {
+         if (resourceEntry.contains("/"))
+         {
+            directoryNames.add(resourceEntry.substring(0, resourceEntry.indexOf("/")));
+         }
+         else
+         {
+            fileNames.add(resourceEntry);
+         }
+      }
+      for (String fileName : fileNames)
+      {
+         pathVisitor.accept(fileName, BasicPathVisitor.PathType.FILE);
+      }
+      for (String directoryName : directoryNames)
+      {
+         pathVisitor.accept(directoryName, BasicPathVisitor.PathType.DIRECTORY);
+      }
    }
 }

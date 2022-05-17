@@ -1,8 +1,5 @@
 package us.ihmc.gdx.ui.graphics.live;
 
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import imgui.internal.ImGui;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
@@ -11,43 +8,39 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.jboss.netty.buffer.ChannelBuffer;
 import sensor_msgs.CompressedImage;
 import sensor_msgs.Image;
-import us.ihmc.gdx.imgui.ImGuiTools;
-import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.gdx.imgui.ImGuiVideoPanel;
-import us.ihmc.gdx.ui.visualizers.ImGuiFrequencyPlot;
-import us.ihmc.gdx.ui.visualizers.ImGuiGDXROS1Visualizer;
-import us.ihmc.perception.ROSOpenCVImage;
-import us.ihmc.perception.ROSOpenCVTools;
-import us.ihmc.perception.ImageEncodingTools;
+import us.ihmc.gdx.ui.visualizers.ImGuiGDXROS1VisualizerInterface;
+import us.ihmc.perception.*;
 import us.ihmc.utilities.ros.RosNodeInterface;
+import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
-public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
+public class GDXROS1VideoVisualizer extends GDXOpenCVVideoVisualizer implements ImGuiGDXROS1VisualizerInterface
 {
    private final boolean isCompressed;
    private AbstractRosTopicSubscriber<Image> subscriber;
    private AbstractRosTopicSubscriber<CompressedImage> compressedSubscriber;
    private final String topic;
-   private Pixmap pixmap;
-   private Texture texture;
-   private final ImGuiVideoPanel videoPanel;
-   private volatile Image image;
-   private volatile CompressedImage compressedImage;
-   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
-   private Mat inputImageMat;
+   private Mat input8UC1Mat;
+   private Mat input16UC1Mat;
    private Mat decodedImageMat;
    private Mat resizedImageMat;
+   private boolean currentlySubscribed = false;
+   private final String name;
 
    public GDXROS1VideoVisualizer(String title, String topic)
    {
-      super(title);
+      this(title, topic, false);
+   }
+
+   public GDXROS1VideoVisualizer(String title, String topic, boolean flipY)
+   {
+      super(title + " (ROS 1)", topic, flipY);
+      name = title;
       this.topic = topic;
       isCompressed = topic.endsWith("compressed");
-      videoPanel = new ImGuiVideoPanel(ImGuiTools.uniqueLabel(this, topic), false);
    }
 
    @Override
@@ -60,8 +53,7 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
             @Override
             public void onNewMessage(CompressedImage image)
             {
-               GDXROS1VideoVisualizer.this.compressedImage = image;
-               frequencyPlot.recordEvent();
+               doReceiveMessageOnThread(() -> processIncomingMessageOnThread(image));
             }
          };
          ros1Node.attachSubscriber(topic, compressedSubscriber);
@@ -73,11 +65,70 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
             @Override
             public void onNewMessage(Image image)
             {
-               GDXROS1VideoVisualizer.this.image = image;
-               frequencyPlot.recordEvent();
+               doReceiveMessageOnThread(() -> processIncomingMessageOnThread(image));
             }
          };
          ros1Node.attachSubscriber(topic, subscriber);
+      }
+   }
+
+   private void processIncomingMessageOnThread(CompressedImage compressedImage)
+   {
+//      ChannelBuffer nettyChannelBuffer = compressedImage.getData();
+      //         decodedImageMat = new Mat(image.getHeight(), image.getWidth(), opencv_core.CV_8UC4);
+      //         resizedImageMat = new Mat(image.getHeight(), image.getWidth(), opencv_core.CV_8UC4);
+
+      try
+      {
+         ROSOpenCVImage ROSOpenCVImage = ROSOpenCVTools.toCvCopy(compressedImage, ImageEncodingTools.RGBA8);
+         Buffer buffer = ROSOpenCVImage.image.createBuffer();
+         //         ensureTextureReady(ROSOpenCVImage.image.cols(), ROSOpenCVImage.image.rows());
+         //         pixmap.setPixels((ByteBuffer) buffer);
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
+   }
+
+   private void processIncomingMessageOnThread(Image image)
+   {
+      ChannelBuffer nettyChannelBuffer = image.getData();
+
+      int imageWidth = image.getWidth();
+      int imageHeight = image.getHeight();
+      String encoding = image.getEncoding();
+      int cvType = ImageEncodingTools.getCvType(encoding);
+
+      if (cvType == opencv_core.CV_16UC1)
+      {
+         if (input16UC1Mat == null || input16UC1Mat.rows() != imageHeight || input16UC1Mat.cols() != imageWidth)
+         {
+            input16UC1Mat = new Mat(imageHeight, imageWidth, cvType);
+            input8UC1Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC1);
+         }
+
+         ROSOpenCVTools.backMatWithNettyBuffer(input16UC1Mat, nettyChannelBuffer);
+         BytedecoOpenCVTools.clampTo8BitUnsignedChar(input16UC1Mat, input8UC1Mat, 0.0, 255.0);
+      }
+
+      synchronized (this)
+      {
+         updateImageDimensions(imageWidth, imageHeight);
+
+         if (cvType == opencv_core.CV_16UC1)
+         {
+            opencv_imgproc.cvtColor(input8UC1Mat, getRGBA8Mat(), opencv_imgproc.COLOR_GRAY2RGBA);
+         }
+         else if (cvType == opencv_core.CV_8UC4)
+         {
+            ByteBuffer inputByteBuffer = RosTools.sliceNettyBuffer(nettyChannelBuffer);
+            BytePointer rgba8888BytePointer = getRgba8888BytePointer();
+            for (int i = 0; i < inputByteBuffer.limit(); i++)
+            {
+               rgba8888BytePointer.put(i, inputByteBuffer.get());
+            }
+         }
       }
    }
 
@@ -99,58 +150,37 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
    {
       super.renderImGuiWidgets();
       ImGui.text(topic);
-      frequencyPlot.renderImGuiWidgets();
-      ImGui.sameLine();
-   }
-
-   @Override
-   public void update()
-   {
-      super.update();
-      if (isActive())
-      {
-         // store the latest ones here
-         Image image = this.image;
-         CompressedImage compressedImage = this.compressedImage;
-
-         if (isCompressed && compressedImage != null)
-         {
-            decompressAndDecodeUsingOpenCV(compressedImage);
-            texture.draw(pixmap, 0, 0);
-         }
-         else if (image != null)
-         {
-            ensureTextureReady(image.getWidth(), image.getHeight());
-            decodeUsingOpenCV(image);
-            texture.draw(pixmap, 0, 0);
-         }
-      }
+      getFrequencyPlot().renderImGuiWidgets();
    }
 
    private void decodeUsingOpenCV(Image image)
    {
-      if (inputImageMat == null)
+      String encoding = image.getEncoding();
+      if (input16UC1Mat == null)
       {
-         String encoding = image.getEncoding();
          int cvType = ImageEncodingTools.getCvType(encoding);
-         inputImageMat = new Mat(image.getHeight(), image.getWidth(), cvType);
+         input16UC1Mat = new Mat(image.getHeight(), image.getWidth(), cvType);
          decodedImageMat = new Mat(image.getHeight(), image.getWidth(), opencv_core.CV_8UC4);
          resizedImageMat = new Mat(image.getHeight(), image.getWidth(), opencv_core.CV_8UC4);
       }
 
-      ROSOpenCVTools.backMatWithNettyBuffer(inputImageMat, image.getData());
+      ChannelBuffer nettyChannelBuffer = image.getData();
+      ROSOpenCVTools.backMatWithNettyBuffer(input16UC1Mat, nettyChannelBuffer);
 
-      if (ImageEncodingTools.isMono(image.getEncoding()))
+//      BytedecoOpenCVTools.clampTo8BitUnsignedChar(inputImageMat, input8UC1Mat, 0.0, 255.0);
+
+      if (ImageEncodingTools.isMono(encoding))
       {
          double min = 0.0;
-         double max = ImageEncodingTools.getMaxBitValue(image.getEncoding());
-         opencv_core.normalize(inputImageMat, inputImageMat, min, max, opencv_core.NORM_MINMAX, -1, opencv_core.noArray());
+         double max = ImageEncodingTools.getMaxBitValue(encoding);
+         int depthType = -1; // output same type as input
+         opencv_core.normalize(input16UC1Mat, input16UC1Mat, min, max, opencv_core.NORM_MINMAX, depthType, opencv_core.noArray());
       }
 
-      int conversionCode = ImageEncodingTools.getColorConversionCode(image.getEncoding(), ImageEncodingTools.RGBA8).get(0);
-      opencv_imgproc.cvtColor(inputImageMat, decodedImageMat, conversionCode);
+      int conversionCode = ImageEncodingTools.getColorConversionCode(encoding, ImageEncodingTools.RGBA8).get(0);
+      opencv_imgproc.cvtColor(input16UC1Mat, decodedImageMat, conversionCode);
 
-      int sourceDepth = ImageEncodingTools.bitDepth(image.getEncoding());
+      int sourceDepth = ImageEncodingTools.bitDepth(encoding);
       if (sourceDepth == 16)
       {
          double alpha = 255.0 / 65535.0;
@@ -160,44 +190,23 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
       else
          decodedImageMat.convertTo(resizedImageMat, opencv_core.CV_8UC4); // TODO: Necessary?
 
-      pixmap.setPixels((ByteBuffer) resizedImageMat.createBuffer());
+//      pixmap.setPixels((ByteBuffer) resizedImageMat.createBuffer());
    }
 
-   private void decompressAndDecodeUsingOpenCV(CompressedImage compressedImage)
+   public void updateSubscribers(RosNodeInterface ros1Node)
    {
-      try
+      boolean active = isActive();
+      if (active != currentlySubscribed)
       {
-         ROSOpenCVImage ROSOpenCVImage = ROSOpenCVTools.toCvCopy(compressedImage, ImageEncodingTools.RGBA8);
-         Buffer buffer = ROSOpenCVImage.image.createBuffer();
-         ensureTextureReady(ROSOpenCVImage.image.cols(), ROSOpenCVImage.image.rows());
-         pixmap.setPixels((ByteBuffer) buffer);
-      }
-      catch (Exception e)
-      {
-         e.printStackTrace();
-      }
-   }
-
-   private void ensureTextureReady(int width, int height)
-   {
-      if (texture == null || texture.getWidth() < width || texture.getHeight() < height)
-      {
-         if (texture != null)
+         if (active)
          {
-            texture.dispose();
-            pixmap.dispose();
+            subscribe(ros1Node);
          }
-
-         pixmap = new Pixmap(width, height, Pixmap.Format.RGBA8888);
-         texture = new Texture(new PixmapTextureData(pixmap, null, false, false));
-
-         videoPanel.setTexture(texture);
+         else
+         {
+            unsubscribe(ros1Node);
+         }
       }
-   }
-
-   @Override
-   public ImGuiVideoPanel getPanel()
-   {
-      return videoPanel;
+      currentlySubscribed = active;
    }
 }

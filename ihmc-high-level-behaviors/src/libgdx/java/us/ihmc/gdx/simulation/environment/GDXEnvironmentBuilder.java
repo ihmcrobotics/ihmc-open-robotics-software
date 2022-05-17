@@ -82,7 +82,16 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
       sceneManager.addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
 
       pose3DGizmo.create(sceneManager.getCamera3D());
+      baseUI.addImGui3DViewPickCalculator(this::calculate3DViewPick);
       baseUI.addImGui3DViewInputProcessor(this::process3DViewInput);
+   }
+
+   public void calculate3DViewPick(ImGui3DViewInput input)
+   {
+      if (selectedObject != null && !isPlacing)
+      {
+         pose3DGizmo.calculate3DViewPick(input);
+      }
    }
 
    public void process3DViewInput(ImGui3DViewInput viewInput)
@@ -244,9 +253,7 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
             }
          }
       }
-      int flags = ImGuiInputTextFlags.None;
-      flags += ImGuiInputTextFlags.CallbackResize;
-      ImGui.inputText("###saveText", saveString, flags);
+      ImGuiTools.inputText("###saveText", saveString);
       ImGui.sameLine();
       if (ImGui.button("Save as"))
       {

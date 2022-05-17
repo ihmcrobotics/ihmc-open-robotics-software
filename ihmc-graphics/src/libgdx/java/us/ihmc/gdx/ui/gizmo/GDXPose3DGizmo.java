@@ -16,18 +16,19 @@ import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.gdx.FocusBasedGDXCamera;
+import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.input.ImGui3DViewPickResult;
 import us.ihmc.gdx.mesh.GDXMeshBuilder;
 import us.ihmc.gdx.mesh.GDXMeshDataInterpreter;
 import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
@@ -64,23 +65,30 @@ public class GDXPose3DGizmo implements RenderableProvider
    private final DynamicGDXModel[] torusModels = new DynamicGDXModel[3];
    private final Point3D closestCollision = new Point3D();
    private SixDoFSelection closestCollisionSelection;
+   private double closestCollisionDistance;
+   private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
+   private boolean isMousePickSelected = false;
    private final SphereRayIntersection boundingSphereIntersection = new SphereRayIntersection();
    private final DiscreteTorusRayIntersection torusIntersection = new DiscreteTorusRayIntersection();
    private final DiscreteArrowRayIntersection arrowIntersection = new DiscreteArrowRayIntersection();
    private final FramePose3D framePose3D = new FramePose3D();
    private final FramePose3D tempFramePose3D = new FramePose3D();
    /** The main, source, true, base transform that this thing represents. */
-   private final RigidBodyTransform transformToParent;
-   private final ReferenceFrame parentReferenceFrame;
-   private final ReferenceFrame gizmoFrame;
+   private RigidBodyTransform transformToParent;
+   private ReferenceFrame parentReferenceFrame;
+   private ReferenceFrame gizmoFrame;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
    private static final YawPitchRoll FLIP_180 = new YawPitchRoll(0.0, Math.PI, 0.0);
    private final Line3DMouseDragAlgorithm lineDragAlgorithm = new Line3DMouseDragAlgorithm();
    private final ClockFaceRotation3DMouseDragAlgorithm clockFaceDragAlgorithm = new ClockFaceRotation3DMouseDragAlgorithm();
-   private FocusBasedGDXCamera camera3D;
+   private GDXFocusBasedCamera camera3D;
+   private final RigidBodyTransform transformFromKeyboardTransformationToWorld = new RigidBodyTransform();
+   private ReferenceFrame keyboardTransformationFrame;
    private final Point3D cameraPosition = new Point3D();
+   private double distanceToCamera;
    private double lastDistanceToCamera = -1.0;
+   private final double translateSpeedFactor = 0.5;
 
    public GDXPose3DGizmo()
    {
@@ -89,19 +97,32 @@ public class GDXPose3DGizmo implements RenderableProvider
 
    public GDXPose3DGizmo(ReferenceFrame parentReferenceFrame)
    {
-      this.parentReferenceFrame = parentReferenceFrame;
-      transformToParent = new RigidBodyTransform();
-      gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentReferenceFrame, transformToParent);
+      RigidBodyTransform transformToParent = new RigidBodyTransform();
+      ReferenceFrame gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentReferenceFrame, transformToParent);
+      initialize(gizmoFrame, transformToParent);
    }
 
    public GDXPose3DGizmo(ReferenceFrame gizmoFrame, RigidBodyTransform gizmoTransformToParentFrameToModify)
    {
+      initialize(gizmoFrame, gizmoTransformToParentFrameToModify);
+   }
+
+   private void initialize(ReferenceFrame gizmoFrame, RigidBodyTransform gizmoTransformToParentFrameToModify)
+   {
       this.parentReferenceFrame = gizmoFrame.getParent();
       this.transformToParent = gizmoTransformToParentFrameToModify;
       this.gizmoFrame = gizmoFrame;
+      keyboardTransformationFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
+                                                                                                           transformFromKeyboardTransformationToWorld);
    }
 
-   public void create(FocusBasedGDXCamera camera3D)
+   public void setParentFrame(ReferenceFrame parentReferenceFrame)
+   {
+      this.parentReferenceFrame = parentReferenceFrame;
+      gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentReferenceFrame, transformToParent);
+   }
+
+   public void create(GDXFocusBasedCamera camera3D)
    {
       this.camera3D = camera3D;
 
@@ -131,15 +152,16 @@ public class GDXPose3DGizmo implements RenderableProvider
       recreateGraphics();
    }
 
-   public void process3DViewInput(ImGui3DViewInput input)
+   public void calculate3DViewPick(ImGui3DViewInput input)
    {
       updateTransforms();
 
       boolean rightMouseDragging = input.isDragging(ImGuiMouseButton.Right);
+      boolean middleMouseDragging = input.isDragging(ImGuiMouseButton.Middle);
       boolean rightMouseDown = ImGui.getIO().getMouseDown(ImGuiMouseButton.Right);
       boolean isWindowHovered = ImGui.isWindowHovered();
 
-      if (isWindowHovered && !rightMouseDragging)
+      if (isWindowHovered && !rightMouseDragging && !middleMouseDragging)
       {
          Line3DReadOnly pickRay = input.getPickRayInWorld();
          determineCurrentSelectionFromPickRay(pickRay);
@@ -149,7 +171,20 @@ public class GDXPose3DGizmo implements RenderableProvider
             clockFaceDragAlgorithm.reset();
          }
       }
-      if (rightMouseDragging && closestCollisionSelection != null)
+
+      pickResult.setPickIntersects(closestCollisionSelection != null);
+      pickResult.setDistanceToCamera(closestCollisionDistance);
+      input.addPickResult(pickResult);
+   }
+
+   public void process3DViewInput(ImGui3DViewInput input)
+   {
+      boolean rightMouseDragging = input.isDragging(ImGuiMouseButton.Right);
+      isMousePickSelected = pickResult == input.getClosestPick();
+
+      updateMaterialHighlighting();
+
+      if (isMousePickSelected && rightMouseDragging)
       {
          Line3DReadOnly pickRay = input.getPickRayInWorld();
 
@@ -157,7 +192,8 @@ public class GDXPose3DGizmo implements RenderableProvider
          {
             Vector3DReadOnly linearMotion = lineDragAlgorithm.calculate(pickRay,
                                                                         closestCollision,
-                                                                        axisRotations.get(closestCollisionSelection.toAxis3D()), transformToWorld);
+                                                                        axisRotations.get(closestCollisionSelection.toAxis3D()),
+                                                                        transformToWorld);
 
             tempFramePose3D.setToZero(gizmoFrame);
             tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
@@ -170,7 +206,8 @@ public class GDXPose3DGizmo implements RenderableProvider
          {
             if (clockFaceDragAlgorithm.calculate(pickRay,
                                                  closestCollision,
-                                                 axisRotations.get(closestCollisionSelection.toAxis3D()), transformToWorld))
+                                                 axisRotations.get(closestCollisionSelection.toAxis3D()),
+                                                 transformToWorld))
             {
                tempFramePose3D.setToZero(gizmoFrame);
                tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
@@ -223,31 +260,41 @@ public class GDXPose3DGizmo implements RenderableProvider
          }
          else // translation
          {
+            transformFromKeyboardTransformationToWorld.setToZero();
+            transformFromKeyboardTransformationToWorld.getRotation().setToYawOrientation(camera3D.getFocusPointPose().getYaw());
+            keyboardTransformationFrame.update();
+            tempFramePose3D.setToZero(keyboardTransformationFrame);
+
             double amount = deltaTime * (shiftHeld ? 0.05 : 0.4);
+            distanceToCamera = cameraPosition.distance(framePose3D.getPosition());
             if (upArrowHeld && !ctrlHeld) // x +
             {
-               transformToParent.getTranslation().addX(amount);
+               tempFramePose3D.getPosition().addX(getTranslateSpeedFactor() * amount);
             }
             if (downArrowHeld && !ctrlHeld) // x -
             {
-               transformToParent.getTranslation().subX(amount);
+               tempFramePose3D.getPosition().subX(getTranslateSpeedFactor() * amount);
             }
             if (leftArrowHeld) // y +
             {
-               transformToParent.getTranslation().addY(amount);
+               tempFramePose3D.getPosition().addY(getTranslateSpeedFactor() * amount);
             }
             if (rightArrowHeld) // y -
             {
-               transformToParent.getTranslation().subY(amount);
+               tempFramePose3D.getPosition().subY(getTranslateSpeedFactor() * amount);
             }
             if (upArrowHeld && ctrlHeld) // z +
             {
-               transformToParent.getTranslation().addZ(amount);
+               tempFramePose3D.getPosition().addZ(getTranslateSpeedFactor() * amount);
             }
             if (downArrowHeld && ctrlHeld) // z -
             {
-               transformToParent.getTranslation().subZ(amount);
+               tempFramePose3D.getPosition().subZ(getTranslateSpeedFactor() * amount);
             }
+
+            tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
+            tempFramePose3D.get(tempTransform);
+            transformToParent.getTranslation().add(tempTransform.getTranslation());
          }
       }
 
@@ -257,7 +304,7 @@ public class GDXPose3DGizmo implements RenderableProvider
       if (resizeAutomatically.get())
       {
          GDXTools.toEuclid(camera3D.position, cameraPosition);
-         double distanceToCamera = cameraPosition.distance(framePose3D.getPosition());
+         distanceToCamera = cameraPosition.distance(framePose3D.getPosition());
          if (lastDistanceToCamera != distanceToCamera)
          {
             lastDistanceToCamera = distanceToCamera;
@@ -288,7 +335,7 @@ public class GDXPose3DGizmo implements RenderableProvider
    private void determineCurrentSelectionFromPickRay(Line3DReadOnly pickRay)
    {
       closestCollisionSelection = null;
-      double closestCollisionDistance = Double.POSITIVE_INFINITY;
+      closestCollisionDistance = Double.POSITIVE_INFINITY;
 
       // Optimization: Do one large sphere collision to avoid completely far off picks
       boundingSphereIntersection.setup(1.5 * torusRadius.get(), transformToWorld);
@@ -330,16 +377,15 @@ public class GDXPose3DGizmo implements RenderableProvider
             }
          }
       }
-
-      updateMaterialHighlighting();
    }
 
    private void updateMaterialHighlighting()
    {
+      boolean prior = isMousePickSelected && closestCollisionSelection != null;
       // could only do this when selection changed
       for (Axis3D axis : Axis3D.values)
       {
-         if (closestCollisionSelection != null && closestCollisionSelection.isAngular() && closestCollisionSelection.toAxis3D() == axis)
+         if (prior && closestCollisionSelection.isAngular() && closestCollisionSelection.toAxis3D() == axis)
          {
             torusModels[axis.ordinal()].setMaterial(highlightedMaterials[axis.ordinal()]);
          }
@@ -348,7 +394,7 @@ public class GDXPose3DGizmo implements RenderableProvider
             torusModels[axis.ordinal()].setMaterial(normalMaterials[axis.ordinal()]);
          }
 
-         if (closestCollisionSelection != null && closestCollisionSelection.isLinear() && closestCollisionSelection.toAxis3D() == axis)
+         if (prior && closestCollisionSelection.isLinear() && closestCollisionSelection.toAxis3D() == axis)
          {
             arrowModels[axis.ordinal()].setMaterial(highlightedMaterials[axis.ordinal()]);
          }
@@ -423,7 +469,7 @@ public class GDXPose3DGizmo implements RenderableProvider
       }
    }
 
-   public Pose3DReadOnly getPose()
+   public FramePose3DReadOnly getPose()
    {
       return framePose3D;
    }
@@ -487,8 +533,23 @@ public class GDXPose3DGizmo implements RenderableProvider
       return meshBuilder.generateMeshDataHolder();
    }
 
+   private double getTranslateSpeedFactor()
+   {
+      return translateSpeedFactor * distanceToCamera;
+   }
+
    public void setResizeAutomatically(boolean resizeAutomatically)
    {
       this.resizeAutomatically.set(resizeAutomatically);
+   }
+
+   ClockFaceRotation3DMouseDragAlgorithm getClockFaceDragAlgorithm()
+   {
+      return clockFaceDragAlgorithm;
+   }
+
+   public boolean getMousePickSelected()
+   {
+      return isMousePickSelected;
    }
 }

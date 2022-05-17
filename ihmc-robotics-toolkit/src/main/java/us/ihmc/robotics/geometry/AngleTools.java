@@ -59,10 +59,27 @@ public class AngleTools
       return interpolateAngle(angleA, angleB, 0.5);
    }
 
+   /**
+    * Performs a linear interpolation from {@code angleA} to {@code angleB} given the percentage
+    * {@code alpha} and trim the result to be in [-<i>pi</i>, <i>pi</i>].
+    * <ul>
+    * <li>If {@code alpha == 0}, the result is {@code angleA}.
+    * <li>If {@code alpha == 1}, the result is {@code angleB}.
+    * <li>If {@code alpha == 0.5}, the result is the average of the two angles.
+    * <li>The percentage {@code alpha} is not clamped to be in [0, 1] such that this method can be used
+    * for extrapolation.
+    * </ul>
+    * 
+    * @param angleA the first angle in the interpolation.
+    * @param angleB the second angle in the interpolation.
+    * @param alpha  the percentage to use for the interpolation. A value of 0 will return
+    *               {@code angleA}, while a value of 1 will return {@code angleB}.
+    * @return the interpolated angle in [-<i>pi</i>, <i>pi</i>].
+    */
    public static double interpolateAngle(double angleA, double angleB, double alpha)
    {
       // A + alpha * (B-A)/2
-      double average = angleA + alpha * AngleTools.computeAngleDifferenceMinusPiToPi(angleB, angleA);
+      double average = angleA + alpha * computeAngleDifferenceMinusPiToPi(angleB, angleA);
       return trimAngleMinusPiToPi(average);
    }
 
@@ -167,7 +184,7 @@ public class AngleTools
     * This will shift an angle to be in the range [<i>startOfAngleRange</i>,
     *  (<i>startOfAngleRange + 2*pi</i>)
     *
-    * @param angleToShift the angle to shift
+    * @param angleToShift      the angle to shift
     * @param startOfAngleRange start of the range.
     * @return the shifted angle
     */
@@ -180,9 +197,9 @@ public class AngleTools
     * This will shift an angle to be in the range [<i>startOfAngleRange</i>,
     *  (<i>startOfAngleRange + endOfAngleRange</i>)
     *
-    * @param angleToShift the angle to shift
+    * @param angleToShift      the angle to shift
     * @param startOfAngleRange start of the range.
-    * @param endOfAngleRange end of the range.
+    * @param endOfAngleRange   end of the range.
     * @return the shifted angle
     */
    public static double shiftAngleToStartOfRange(double angleToShift, double startOfAngleRange, double endOfAngleRange)
@@ -282,9 +299,9 @@ public class AngleTools
     * If the x or y components are both under the noTranslationTolerance, 
     * then the initial orientation as given in startPose will be returned. 
     *
-    * @param startPose initial position and orientation
-    * @param endPoint end position
-    * @param headingOffset offset from path angle
+    * @param startPose              initial position and orientation
+    * @param endPoint               end position
+    * @param headingOffset          offset from path angle
     * @param noTranslationTolerance tolerance for determining if path angle should be determined
     * @return number between -PI and PI
     */
@@ -306,10 +323,10 @@ public class AngleTools
    }
 
    /**
-    * Returns an angle between two points + heading Offset from -PI to PI. 
+    * Returns an angle between two points + heading Offset from -PI to PI.
     *
     * @param startPose initial position
-    * @param endPoint end position
+    * @param endPoint  end position
     * @return number between -PI and PI
     */
    public static double calculateHeading(Point2D32 startPose, Point2D32 endPoint)

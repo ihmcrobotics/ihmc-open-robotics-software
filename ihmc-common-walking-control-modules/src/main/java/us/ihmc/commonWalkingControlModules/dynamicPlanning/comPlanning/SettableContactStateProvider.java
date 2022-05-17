@@ -36,6 +36,13 @@ public class SettableContactStateProvider implements ContactStateBasics<Settable
       endECMPVelocity.setToNaN();
    }
 
+   public SettableContactStateProvider(SettableContactStateProvider other)
+   {
+      this();
+      set(other);
+   }
+
+
    public void reset()
    {
       startECMPPosition.setToNaN();

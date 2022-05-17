@@ -14,10 +14,7 @@ import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -32,6 +29,7 @@ import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
@@ -43,6 +41,8 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import java.util.List;
 
 public class ErrorBasedStepAdjustmentController implements StepAdjustmentController
 {
@@ -111,7 +111,12 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
    private final BooleanProvider useICPControlPlaneInStepAdjustment = new BooleanParameter(yoNamePrefix + "useICPControlPlaneInStepAdjustment", registry, false);
    private final DoubleProvider minimumTimeForStepAdjustment = new DoubleParameter(yoNamePrefix + "minimumTimeForStepAdjustment", registry, 0.02);
-   private final DoubleProvider distanceInsideToScaleSupportPolygon = new DoubleParameter(yoNamePrefix + "distanceInsideToScaleSupportPolygon", registry, 0.035);
+   private final DoubleParameter supportDistanceFromFront = new DoubleParameter(yoNamePrefix + "supportDistanceFromFront", registry, 0.02);
+   private final DoubleParameter supportDistanceFromBack = new DoubleParameter(yoNamePrefix + "supportDistanceFromBack", registry, 0.05);
+   private final DoubleParameter supportDistanceFromInside = new DoubleParameter(yoNamePrefix + "supportDistanceFromInside", registry, 0.02);
+   private final DoubleParameter supportDistanceFromOutside = new DoubleParameter(yoNamePrefix + "supportDistanceFromOutside", registry, 0.035);
+
+   private final SideDependentList<FixedFrameConvexPolygon2DBasics> allowableAreasForCoP = new SideDependentList<>();
 
    private final StepAdjustmentReachabilityConstraint reachabilityConstraintHandler;
    private final OneStepCaptureRegionCalculator captureRegionCalculator;
@@ -210,10 +215,18 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                                                                    false,
                                                                    yoNamePrefix,
                                                                    registry,
-                                                                   yoGraphicsListRegistry);
-      oneStepSafetyHeuristics = new CaptureRegionSafetyHeuristics(lengthLimit, registry, yoGraphicsListRegistry);
+                                                                   null);
+      oneStepSafetyHeuristics = new CaptureRegionSafetyHeuristics(lengthLimit, registry, null);
       multiStepCaptureRegionCalculator = new MultiStepCaptureRegionCalculator(reachabilityConstraintHandler, allowCrossOverSteps, registry, yoGraphicsListRegistry);
-      environmentConstraintProvider = new EnvironmentConstraintHandler(icpControlPlane, contactableFeet, yoNamePrefix, registry, yoGraphicsListRegistry);
+      environmentConstraintProvider = new EnvironmentConstraintHandler(icpControlPlane, contactableFeet, useICPControlPlaneInStepAdjustment,
+                                                                       yoNamePrefix, registry, yoGraphicsListRegistry);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         FixedFrameConvexPolygon2DBasics allowableAreaForCoP = new YoFrameConvexPolygon2D(robotSide.getCamelCaseName() + "AllowableAreaForCoP", soleZUpFrames.get(robotSide), 4, registry);
+         allowableAreaForCoP.set(bipedSupportPolygons.getFootPolygonInSoleFrame(robotSide));
+         allowableAreasForCoP.put(robotSide, allowableAreaForCoP);
+      }
 
       if (walkingControllerParameters != null)
          swingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
@@ -305,15 +318,9 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    }
 
    @Override
-   public void setStepConstraintRegion(StepConstraintRegion stepConstraintRegion)
+   public void setStepConstraintRegions(List<StepConstraintRegion> stepConstraintRegion)
    {
-      environmentConstraintProvider.setStepConstraintRegion(stepConstraintRegion);
-   }
-
-   @Override
-   public boolean hasStepConstraintRegion()
-   {
-      return environmentConstraintProvider.hasStepConstraintRegion();
+      environmentConstraintProvider.setStepConstraintRegions(stepConstraintRegion);
    }
 
    @Override
@@ -349,7 +356,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       RobotSide swingSide = upcomingFootstepSide.getEnumValue();
       RobotSide stanceSide = swingSide.getOppositeSide();
       captureRegionCalculator.calculateCaptureRegion(swingSide,
-                                                     timeRemainingInState.getDoubleValue(),
+                                                     Math.max(timeRemainingInState.getDoubleValue(), 0.0),
                                                      currentICP,
                                                      omega0,
                                                      allowableAreaForCoP);
@@ -369,9 +376,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
       icpError.sub(desiredICP, currentICP);
 
-      environmentConstraintProvider.setReachabilityRegion(reachabilityConstraintHandler.getReachabilityConstraint());
-      if (!environmentConstraintProvider.validateConvexityOfPlanarRegion())
-         return;
 
       boolean errorAboveThreshold = icpError.lengthSquared() > MathTools.square(minICPErrorForStepAdjustment.getValue());
 
@@ -388,12 +392,18 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       projectAdjustedStepIntoCaptureRegion();
       boolean wasAdjusted = deadbandAndApplyStepAdjustment();
 
+      environmentConstraintProvider.setReachabilityRegion(reachabilityConstraintHandler.getReachabilityConstraint());
+      environmentConstraintProvider.updateActiveConstraintRegionToUse(footstepSolution, multiStepCaptureRegionCalculator.getCaptureRegion());
+
       if (environmentConstraintProvider.hasStepConstraintRegion() && (wasAdjusted || !hasPlanarRegionBeenAssigned.getBooleanValue()))
       {
-         wasAdjusted |= environmentConstraintProvider.applyEnvironmentConstraintToFootstep(upcomingFootstepSide.getEnumValue(),
-                                                                                           footstepSolution,
-                                                                                           upcomingFootstepContactPoints);
-         hasPlanarRegionBeenAssigned.set(environmentConstraintProvider.foundSolution());
+         if (environmentConstraintProvider.validateConvexityOfPlanarRegion())
+         {
+            wasAdjusted |= environmentConstraintProvider.applyEnvironmentConstraintToFootstep(upcomingFootstepSide.getEnumValue(),
+                                                                                              footstepSolution,
+                                                                                              upcomingFootstepContactPoints);
+            hasPlanarRegionBeenAssigned.set(environmentConstraintProvider.foundSolution());
+         }
       }
 
       footstepWasAdjusted.set(wasAdjusted);
@@ -404,8 +414,35 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
    private void computeLimitedAreaForCoP()
    {
-      FrameConvexPolygon2DReadOnly supportPolygon = bipedSupportPolygons.getFootPolygonInSoleFrame(upcomingFootstepSide.getEnumValue().getOppositeSide());
-      polygonScaler.scaleConvexPolygon(supportPolygon, distanceInsideToScaleSupportPolygon.getValue(), allowableAreaForCoPInFoot);
+      RobotSide supportSide = upcomingFootstepSide.getEnumValue().getOppositeSide();
+      FixedFrameConvexPolygon2DBasics shrunkSupport = allowableAreasForCoP.get(supportSide);
+      shrunkSupport.setMatchingFrame(bipedSupportPolygons.getFootPolygonInSoleFrame(supportSide), false);
+
+      for (int i = 0; i < shrunkSupport.getNumberOfVertices(); i++)
+      {
+         FixedFramePoint2DBasics point = shrunkSupport.getVertexUnsafe(i);
+         if (point.getX() > 0.0)
+            point.setX(Math.max(point.getX() - supportDistanceFromFront.getValue(), 0.0));
+         else
+            point.setX(Math.min(point.getX() + supportDistanceFromBack.getValue(), 0.0));
+
+         if (supportSide == RobotSide.LEFT)
+         {
+            if (point.getY() > 0)
+               point.setY(Math.max(point.getY() - supportDistanceFromOutside.getValue(), 0.0));
+            else
+               point.setY(Math.min(point.getY() + supportDistanceFromInside.getValue(), 0.0));
+         }
+         else
+         {
+            if (point.getY() > 0)
+               point.setY(Math.max(point.getY() - supportDistanceFromInside.getValue(), 0.0));
+            else
+               point.setY(Math.min(point.getY() + supportDistanceFromOutside.getValue(), 0.0));
+         }
+      }
+
+      allowableAreaForCoPInFoot.setIncludingFrame(shrunkSupport);
 
       if (useICPControlPlaneInStepAdjustment.getValue())
       {

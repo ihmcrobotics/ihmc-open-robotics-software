@@ -93,6 +93,11 @@ public class JSONFileTools
       }
    }
 
+   public static void load(WorkspaceFile file, Consumer<JsonNode> jsonNodeConsumer)
+   {
+      load(file.getClasspathResourceAsStream(), jsonNodeConsumer);
+   }
+
    public static void loadFromWorkspace(String directoryNameToAssumePresent,
                                         String subsequentPathToResourceFolder,
                                         String resourcePathString,
@@ -158,6 +163,11 @@ public class JSONFileTools
                                          Consumer<ObjectNode> rootConsumer)
    {
       return save(WorkspacePathTools.findPathToResource(directoryNameToAssumePresent, subsequentPathToResourceFolder, resourcePathString), rootConsumer);
+   }
+
+   public static boolean save(WorkspaceFile workspaceFile, Consumer<ObjectNode> rootConsumer)
+   {
+      return save(workspaceFile.getFilePath(), rootConsumer);
    }
 
    public static boolean save(Path settingsPath, Consumer<ObjectNode> rootConsumer)

@@ -334,7 +334,7 @@ public class GDXBulletPhysicsInteractionForcesDemo
 
          private ModelInstance createArrow()
          {
-//            ModelInstance modelInstance = GDXModelPrimitives.createSphere(0.01f, Color.PINK);
+//            ModelInstance modelInstance = GDXModelBuilder.createSphere(0.01f, Color.PINK);
             float length = 0.2f;
             Color color = Color.PINK;
             ModelInstance modelInstance = GDXModelBuilder.buildModelInstance(meshBuilder ->

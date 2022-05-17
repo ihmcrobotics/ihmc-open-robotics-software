@@ -20,8 +20,8 @@ public class KryoObjectClient extends KryoObjectCommunicator
    private final InetAddress host;
    private final int tcpPort;
 
-   private final int writeBufferSize; 
-   
+   private final int writeBufferSize;
+
    private boolean reconnectAutomatically = false;
    private boolean isClosed = true;
 

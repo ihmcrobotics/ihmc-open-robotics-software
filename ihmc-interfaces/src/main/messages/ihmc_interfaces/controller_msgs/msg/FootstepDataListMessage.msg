@@ -42,3 +42,6 @@ bool offset_footsteps_with_execution_error false
 bool offset_footsteps_height_with_execution_error false
 # Properties for queueing footstep lists.
 QueueableMessage queueing_properties
+
+# Default step constraints regions
+StepConstraintsListMessage default_step_constraints

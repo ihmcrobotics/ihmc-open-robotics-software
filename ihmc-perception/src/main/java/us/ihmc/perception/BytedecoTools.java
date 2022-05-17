@@ -20,11 +20,32 @@ public class BytedecoTools
       return nativesActivated;
    }
 
+   public static Activator loadOpenCVNativesOnAThread()
+   {
+      Activator nativesActivated = new Activator();
+      ThreadTools.startAThread(() ->
+      {
+         loadOpenCV();
+         nativesActivated.activate();
+      }, "Bytedeco loader");
+      return nativesActivated;
+   }
+
    public static void loadNatives()
+   {
+      loadOpenCL();
+      loadOpenCV();
+   }
+
+   public static void loadOpenCL()
    {
       LogTools.info("Loading Bytedeco OpenCL...");
       Loader.load(OpenCL.class);
       LogTools.info("Bytedeco OpenCL loaded.");
+   }
+
+   public static void loadOpenCV()
+   {
       LogTools.info("Loading Bytedeco OpenCV...");
       Loader.load(opencv_core.class);
       LogTools.info("Bytedeco OpenCV loaded.");

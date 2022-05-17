@@ -12,10 +12,12 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.log.LogTools;
 
 public class PlanarRegionsList
 {
    private final List<PlanarRegion> regions;
+   private transient ArrayList<PlanarRegion> placeholderForRemovingRegions;
 
    public PlanarRegionsList()
    {
@@ -457,6 +459,27 @@ public class PlanarRegionsList
          {
             ids.add(id);
          }
+      }
+   }
+
+   public void removePlanarRegionsWithNaN()
+   {
+      if (placeholderForRemovingRegions == null)
+         placeholderForRemovingRegions = new ArrayList<>();
+
+      placeholderForRemovingRegions.clear();
+
+      for (PlanarRegion region : regions)
+      {
+         if (region.containsNaN())
+         {
+            placeholderForRemovingRegions.add(region);
+         }
+      }
+
+      for (PlanarRegion planarRegionToRemove : placeholderForRemovingRegions)
+      {
+         regions.remove(planarRegionToRemove);
       }
    }
 

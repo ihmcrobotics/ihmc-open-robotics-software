@@ -26,6 +26,14 @@ public class GDXPoseModifiableObject
       object.setTransformToWorld(pose3DGizmo.getTransformToParent());
    }
 
+   public void calculate3DViewPick(ImGui3DViewInput input)
+   {
+      if (isSelected)
+      {
+         pose3DGizmo.calculate3DViewPick(input);
+      }
+   }
+
    private void process3DViewInput(ImGui3DViewInput viewInput)
    {
       showCollisionMesh = false;

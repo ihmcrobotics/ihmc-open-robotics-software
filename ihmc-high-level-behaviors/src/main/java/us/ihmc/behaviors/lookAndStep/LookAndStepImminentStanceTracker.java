@@ -75,7 +75,11 @@ public class LookAndStepImminentStanceTracker
          }
          else
          {
-            lastCompletedFootstep.set(new PlannedFootstepCopier(commandedImminentStancePoses.get(robotSide)));
+            PlannedFootstepReadOnly commandedImminentStanceFootstep = commandedImminentStancePoses.get(robotSide);
+            if (commandedImminentStanceFootstep != null)
+            {
+               lastCompletedFootstep.set(new PlannedFootstepCopier(commandedImminentStanceFootstep));
+            }
             if (!commandedFootstepQueue.isEmpty())
             {
                commandedImminentStancePoses.put(commandedFootstepQueue.getFirst().getRobotSide(), commandedFootstepQueue.getFirst());
