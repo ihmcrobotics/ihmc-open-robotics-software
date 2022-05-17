@@ -8,8 +8,9 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.nio.NioDatagramChannel;
-import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.tuple3D.Point3D32;
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.perception.BytedecoImage;
 
 import java.nio.ByteOrder;
 import java.util.HashSet;
@@ -26,12 +27,13 @@ public class NettyOuster
 
    private EventLoopGroup group;
    private Bootstrap bootstrap;
-   private HashSet<Point3D32> points = new HashSet<>();
-   private long time = System.nanoTime();
+   private final Mat data;
+   private final BytedecoImage image;
 
    public NettyOuster()
    {
-
+      data = new Mat(64, 1024, opencv_core.CV_32FC1); //TODO rows/cols should be determined by querying REST API of ouster instead
+      image = new BytedecoImage(data);
    }
 
    public void initialize()
@@ -43,73 +45,42 @@ public class NettyOuster
          @Override
          protected void channelRead0(ChannelHandlerContext ctx, DatagramPacket msg)
          {
-            ByteBuf data = msg.content().readBytes(msg.content().capacity());
-            data = data.order(ByteOrder.LITTLE_ENDIAN);
+            //TODO buffer can only contain 2048 bytes right now, which needs to be at least 12608 to actually store lidar packet (we are missing lots of data)
+            ByteBuf bufferedData = msg.content().readBytes(msg.content().capacity());
+            bufferedData = bufferedData.order(ByteOrder.LITTLE_ENDIAN); //Ouster is little endian
+
             int i = 0;
-            System.out.print("Timestamp: ");
-            i = printBytes(data, i, 8);
-            System.out.print("Frame ID: ");
-            i = printBytes(data, i, 2);
-            System.out.print("Measurement ID: ");
-            i = printBytes(data, i, 2);
-            System.out.print("Encoder Count: ");
-            i = printBytes(data, i, 4);
-            System.out.println();
+            while (i + 788 < msg.content().capacity()) //SHOULD be 16 reads (but is actually 2 right now)
+            {
+               i += 8; //Timestamp
+               int measurementID = (int) extractValue(bufferedData, i, 2);
+               i += 8; //Measurement ID (above), Frame ID, Encoder Count
 
-            for (int j = 0; j < 64; j++) {
-               System.out.println("Block " + j + ":");
-               System.out.print("Range (mm): ");
-               i = printBytes(data, i, 4);
-               System.out.print("Signal Photons: ");
-               i = printBytes(data, i, 2);
-               i++;
-               System.out.print("Reflectivity: ");
-               i = printBytes(data, i, 1);
-               i+=2;
-               System.out.print("NIR Photons: ");
-               i = printBytes(data, i, 2);
-               System.out.println();
+               long[] range = new long[64];
+               for (int blockID = 0; blockID < 64; blockID++)
+               { //Note that blockID is useful data here
+                  range[blockID] = extractValue(bufferedData, i, 4);
+                  i += 12; //Range, and other values we don't care about
+               }
+
+               boolean dataOkay = extractValue(bufferedData, i, 4) == 0xFFFF;
+               i += 4;
+
+               if (dataOkay) {
+                  for (int k = 0; k < 64; k++)
+                     data.ptr(k, measurementID).putFloat(range[k] / 1000.0F);
+               }
             }
 
-            System.out.println();
-            i = printBytes(data, i, 4);
-
-            System.out.println("\n\n");
-
-            System.out.print("Timestamp: ");
-            i = printBytes(data, i, 8);
-            System.out.print("Frame ID: ");
-            i = printBytes(data, i, 2);
-            System.out.print("Measurement ID: ");
-            i = printBytes(data, i, 2);
-            System.out.print("Encoder Count: ");
-            i = printBytes(data, i, 4);
-            System.out.println();
-
-            for (int j = 0; j < 64; j++) {
-               System.out.println("Block " + j + ":");
-               System.out.print("Range (mm): ");
-               i = printBytes(data, i, 4);
-               System.out.print("Signal Photons: ");
-               i = printBytes(data, i, 2);
-               i++;
-               System.out.print("Reflectivity: ");
-               i = printBytes(data, i, 1);
-               i+=2;
-               System.out.print("NIR Photons: ");
-               i = printBytes(data, i, 2);
-               System.out.println();
-            }
-
-            System.out.println();
-            printBytes(data, i, 4);
-
-            System.out.println("\n\n");
+            bufferedData.release();
          }
       });
    }
 
-   private int printBytes(ByteBuf data, int index, int num) {
+   /**
+    * Java doesn't have support for unsigned 32-bit integers* so we have to use a long instead
+    */
+   private long extractValue(ByteBuf data, int index, int num) {
       int shift = index % 4;
       int modIndex = index - (index % 4);
       long val = data.getUnsignedInt(modIndex);
@@ -126,11 +97,11 @@ public class NettyOuster
          case 8:
             val += data.getUnsignedInt(modIndex + 4) << 32;
             break;
+         default:
+            return -1;
       }
 
-      System.out.println(val == 4294967295L ? "FFFF" : val);
-
-      return index + num;
+      return val;
    }
 
    public void start()
@@ -143,24 +114,7 @@ public class NettyOuster
       group.shutdownGracefully();
    }
 
-   public boolean hasPoints()
-   {
-      return false; //TODO
-   }
-
-   public HashSet<Point3D32> getPoints()
-   {
-      return points; //TODO points should be updated somewhere before this method for points to actually render
-   }
-
-   public static void main(String[] args)
-   {
-      NettyOuster nettyOuster = new NettyOuster();
-      nettyOuster.initialize();
-      nettyOuster.start();
-
-      Runtime.getRuntime().addShutdownHook(new Thread(nettyOuster::stop));
-
-      ThreadTools.sleepForever();
+   public BytedecoImage getBytedecoImage() {
+      return image;
    }
 }
