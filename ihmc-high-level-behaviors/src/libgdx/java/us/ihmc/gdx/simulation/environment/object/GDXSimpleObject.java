@@ -26,7 +26,6 @@ import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.gizmo.StepCheckIsPointInsideAlgorithm;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.log.LogTools;
 
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -137,20 +136,20 @@ public class GDXSimpleObject
       if (collisionMesh == null)
       {
          setCollisionModel(meshBuilder ->
-                           {
-                              Color color = GDXTools.toGDX(YoAppearance.LightSkyBlue());
-                              if (collisionGeometryObject instanceof Box3D)
-                              {
-                                 Box3D box3D = (Box3D) collisionGeometryObject;
-                                 meshBuilder.addBox((float) box3D.getSizeX(), (float) box3D.getSizeY(), (float) box3D.getSizeZ(), color);
-                                 meshBuilder.addMultiLineBox(box3D.getVertices(), 0.01, color); // so we can see it better
-                              }
-                              else if (collisionGeometryObject instanceof Sphere3D)
-                              {
-                                 Sphere3D sphere3D = (Sphere3D) collisionGeometryObject;
-                                 meshBuilder.addSphere((float) sphere3D.getRadius(), color);
-                              }
-                           });
+         {
+            Color color = GDXTools.toGDX(YoAppearance.LightSkyBlue());
+            if (collisionGeometryObject instanceof Box3D)
+            {
+               Box3D box3D = (Box3D) collisionGeometryObject;
+               meshBuilder.addBox((float) box3D.getSizeX(), (float) box3D.getSizeY(), (float) box3D.getSizeZ(), color);
+               meshBuilder.addMultiLineBox(box3D.getVertices(), 0.01, color); // so we can see it better
+            }
+            else if (collisionGeometryObject instanceof Sphere3D)
+            {
+               Sphere3D sphere3D = (Sphere3D) collisionGeometryObject;
+               meshBuilder.addSphere((float) sphere3D.getRadius(), color);
+            }
+         });
       }
    }
 
