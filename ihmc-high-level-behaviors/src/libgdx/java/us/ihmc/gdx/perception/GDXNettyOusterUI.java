@@ -1,13 +1,9 @@
 package us.ihmc.gdx.perception;
 
 import imgui.ImGui;
-import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.gdx.GDXPointCloudRenderer;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.netty.NettyOuster;
@@ -24,7 +20,7 @@ public class GDXNettyOusterUI
    private final Activator nativesLoadedActivator;
    private NettyOuster ouster;
    private GDXCVImagePanel imagePanel;
-   private FrequencyCalculator frameReadFrequency = new FrequencyCalculator();
+   private final FrequencyCalculator frameReadFrequency = new FrequencyCalculator();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
    public GDXNettyOusterUI()
@@ -55,17 +51,18 @@ public class GDXNettyOusterUI
 
                if (imagePanel == null)
                {
-                  imagePanel = new GDXCVImagePanel("Ouster Depth Image", ouster.getBytedecoImage());
+                  imagePanel = new GDXCVImagePanel("Ouster Depth Image", ouster.getImageWidth(), ouster.getImageHeight());
 
                   baseUI.getImGuiPanelManager().addPanel(imagePanel.getVideoPanel());
                   baseUI.getPerspectiveManager().reloadPerspective();
                }
 
                frameReadFrequency.ping();
-               imagePanel.getBytedecoImage().rewind();
 
                if (imagePanel != null)
-                  imagePanel.draw();
+               {
+                  imagePanel.drawFloatImage(ouster.getBytedecoImage().getBytedecoOpenCVMat());
+               }
             }
 
             baseUI.renderBeforeOnScreenUI();

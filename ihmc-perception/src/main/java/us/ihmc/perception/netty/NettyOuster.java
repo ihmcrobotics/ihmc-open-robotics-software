@@ -7,7 +7,9 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.BytedecoOpenCVTools;
 
 import java.nio.ByteOrder;
 
@@ -34,6 +36,7 @@ public class NettyOuster
    {
       //TODO rows/cols should be determined by querying REST API of ouster instead
       image = new BytedecoImage(WIDTH, HEIGHT, opencv_core.CV_32FC1);
+      image.getBytedecoOpenCVMat().setTo(new Mat(0.0f)); // should initialize it to 0
    }
 
    public void initialize()
@@ -118,6 +121,16 @@ public class NettyOuster
    public void stop()
    {
       group.shutdownGracefully();
+   }
+
+   public int getImageWidth()
+   {
+      return WIDTH;
+   }
+
+   public int getImageHeight()
+   {
+      return HEIGHT;
    }
 
    public BytedecoImage getBytedecoImage()
