@@ -45,7 +45,6 @@ public class GDXNettyOusterUI
                if (nativesLoadedActivator.isNewlyActivated())
                {
                   ouster = new NettyOuster();
-                  ouster.initialize();
                   ouster.start();
                }
 
