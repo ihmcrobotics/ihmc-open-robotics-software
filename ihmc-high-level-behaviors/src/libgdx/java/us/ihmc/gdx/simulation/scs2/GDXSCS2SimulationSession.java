@@ -381,4 +381,14 @@ public class GDXSCS2SimulationSession
    {
       return onSessionStartedRunnables;
    }
+
+   public double getSimDT()
+   {
+      return UnitConversions.hertzToSeconds(dtHz.get());
+   }
+
+   public int getBufferRecordTickPeriod()
+   {
+      return bufferRecordTickPeriod.get();
+   }
 }
