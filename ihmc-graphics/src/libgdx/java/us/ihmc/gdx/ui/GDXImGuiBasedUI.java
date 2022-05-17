@@ -9,6 +9,7 @@ import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
+import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.time.Stopwatch;
@@ -63,6 +64,7 @@ public class GDXImGuiBasedUI
    private final ImBoolean vsync = new ImBoolean(false);
    private final ImBoolean shadows = new ImBoolean(false);
    private final ImInt libGDXLogLevel = new ImInt(GDXTools.toGDX(LogTools.getLevel()));
+   private final ImFloat imguiFontScale = new ImFloat(1.0f);
    private final GDXImGuiPerspectiveManager perspectiveManager;
    private long renderIndex = 0;
 
@@ -202,6 +204,10 @@ public class GDXImGuiBasedUI
          if (ImGui.inputInt("libGDX log level", libGDXLogLevel, 1))
          {
             Gdx.app.setLogLevel(libGDXLogLevel.get());
+         }
+         if (ImGui.inputFloat("Font Size", imguiFontScale, 0.1f))
+         {
+            ImGui.getIO().setFontGlobalScale(imguiFontScale.get());
          }
          ImGui.popItemWidth();
          ImGui.endMenu();

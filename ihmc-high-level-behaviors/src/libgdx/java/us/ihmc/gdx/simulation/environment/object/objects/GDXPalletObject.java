@@ -17,7 +17,7 @@ public class GDXPalletObject extends GDXEnvironmentObject
    public GDXPalletObject()
    {
       super(NAME, FACTORY);
-      Model realisticModel = GDXModelLoader.loadG3DModel("environmentObjects/pallet/Pallet.g3dj");
+      Model realisticModel = GDXModelLoader.load("environmentObjects/pallet/Pallet.g3dj");
       setRealisticModel(realisticModel);
 
       double sizeX = 1.21;

@@ -5,7 +5,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -46,7 +46,7 @@ public class GDXFootstepGraphicDemo
             footsteps.add(new MinimalFootstep(RobotSide.RIGHT, rightPose, foothold, "Right"));
             footstepPlanGraphic.generateMeshes(footsteps);
 
-            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
+            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelBuilder.createCoordinateFrame(0.3)));
             baseUI.get3DSceneManager().addRenderableProvider(footstepPlanGraphic);
          }
 

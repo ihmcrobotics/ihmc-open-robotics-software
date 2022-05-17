@@ -8,7 +8,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.gdx.lighting.GDXDirectionalLight;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObjectFactory;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 
@@ -24,7 +24,7 @@ public class GDXDirectionalLightObject extends GDXEnvironmentObject
       super(NAME, FACTORY);
       this.light = new GDXDirectionalLight();
 
-      Model model = GDXModelPrimitives.buildModel(meshBuilder -> meshBuilder.addBox(0.2f, 0.2f, 0.05f, Color.YELLOW), "directionalModel");
+      Model model = GDXModelBuilder.buildModel(meshBuilder -> meshBuilder.addBox(0.2f, 0.2f, 0.05f, Color.YELLOW), "directionalModel");
       setRealisticModel(model);
       Box3D collisionBox = new Box3D(0.2f, 0.2f, 0.05f);
 

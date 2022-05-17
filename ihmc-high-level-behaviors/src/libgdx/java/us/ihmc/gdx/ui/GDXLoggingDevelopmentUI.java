@@ -9,7 +9,7 @@ import us.ihmc.avatar.logging.PlanarRegionsListLogger;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.gdx.tools.BoxesDemoModel;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -87,7 +87,7 @@ public class GDXLoggingDevelopmentUI
          {
             baseUI.create();
 
-            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
+            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelBuilder.createCoordinateFrame(0.3)));
             baseUI.get3DSceneManager().addModelInstance(new BoxesDemoModel().newInstance());
 
             planarRegionsGraphic = new GDXPlanarRegionsGraphic();
