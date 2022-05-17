@@ -255,17 +255,13 @@ public class ThreePotatoAngularMomentumCalculator
                rightPotatoRelativeVelocity.sub(centerOfMassVelocity, rightPotatoVelocity);
             }
          }
-
-         if (!useThreePotatoResidualModel.getValue() || threePotatoResidualModel == null)
-         {
-            observeAngularMomentumResidual(centerOfMassPosition, centerOfMassVelocity,
-                                           leftPotatoRelativePosition, leftPotatoRelativeVelocity,
-                                           rightPotatoRelativePosition, rightPotatoRelativeVelocity, threePotatoResidualPredicted);
-            // TODO: magic number on bottom  of fraction is the potatoMassFraction in the training set
-            threePotatoResidualPredicted.scale(1 / 0.07);
-            threePotatoResidualPredicted.scale(potatoMassFraction.getValue());
-            totalAngularMomentum.add(threePotatoResidualPredicted);
-         }
+         observeAngularMomentumResidual(centerOfMassPosition, centerOfMassVelocity,
+                                        leftPotatoRelativePosition, leftPotatoRelativeVelocity,
+                                        rightPotatoRelativePosition, rightPotatoRelativeVelocity, threePotatoResidualPredicted);
+         // TODO: magic number on bottom  of fraction is the potatoMassFraction in the training set
+         threePotatoResidualPredicted.scale(1 / 0.07);
+         threePotatoResidualPredicted.scale(potatoMassFraction.getValue());
+         totalAngularMomentum.add(threePotatoResidualPredicted);
 
          actualModelAngularMomentum.set(totalAngularMomentum);
       }
@@ -526,6 +522,12 @@ public class ThreePotatoAngularMomentumCalculator
                                                Vector3DReadOnly rightPotatoRelativeVelocity,
                                                Vector3DBasics threePotatoResidualPredictionToPack)
    {
+      if (!useThreePotatoResidualModel.getValue() || threePotatoResidualModel == null)
+      {
+         threePotatoResidualPredictionToPack.setToZero();
+         return;
+      }
+
       neuralNetworkInput[0] = centerOfMassPosition.getX();
       neuralNetworkInput[1] = centerOfMassPosition.getY();
       neuralNetworkInput[2] = centerOfMassPosition.getZ();
