@@ -2,9 +2,7 @@ package us.ihmc.perception.netty;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.nio.NioDatagramChannel;
@@ -13,7 +11,6 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.perception.BytedecoImage;
 
 import java.nio.ByteOrder;
-import java.util.HashSet;
 
 /**
  * Ouster Firmware User Manual: https://data.ouster.io/downloads/software-user-manual/firmware-user-manual-v2.3.0.pdf
@@ -25,6 +22,11 @@ public class NettyOuster
 {
    public static final int PORT = 7502;
 
+   private static final int HEIGHT = 64;
+   private static final int WIDTH = 1024;
+   private static final int LIDAR_DATA_PACKET_SIZE = 12608;
+   private static final int MEASUREMENT_BLOCK_SIZE = 788;
+
    private EventLoopGroup group;
    private Bootstrap bootstrap;
    private final Mat data;
@@ -32,7 +34,7 @@ public class NettyOuster
 
    public NettyOuster()
    {
-      data = new Mat(64, 1024, opencv_core.CV_32FC1); //TODO rows/cols should be determined by querying REST API of ouster instead
+      data = new Mat(HEIGHT, WIDTH, opencv_core.CV_32FC1); //TODO rows/cols should be determined by querying REST API of ouster instead
       image = new BytedecoImage(data);
    }
 
@@ -50,7 +52,7 @@ public class NettyOuster
             bufferedData = bufferedData.order(ByteOrder.LITTLE_ENDIAN); //Ouster is little endian
 
             int i = 0;
-            while (i + 788 < msg.content().capacity()) //SHOULD be 16 reads (but is actually 2 right now)
+            while (i + MEASUREMENT_BLOCK_SIZE <= msg.content().capacity()) //TODO you guessed it, REST API
             {
                i += 8; //Timestamp
                int measurementID = (int) extractValue(bufferedData, i, 2);
@@ -75,6 +77,8 @@ public class NettyOuster
             bufferedData.release();
          }
       });
+
+      bootstrap.option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(LIDAR_DATA_PACKET_SIZE)); //TODO this needs to also be done with the REST API
    }
 
    /**
