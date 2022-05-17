@@ -1,5 +1,8 @@
 package us.ihmc.perception.netty;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
@@ -8,8 +11,12 @@ import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 
+import java.io.*;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.nio.ByteOrder;
 
 /**
@@ -24,10 +31,10 @@ public class NettyOuster
    public static final int UDP_PORT = 7502;
 
    // -- LIDAR Information --
-   private int pixelsPerColumn = 64;
-   private int columnsPerFrame = 1024;
-   private int columnsPerPacket = 16;
-   private int[] pixelShift = new int[pixelsPerColumn];
+   private int pixelsPerColumn;
+   private int columnsPerFrame;
+   private int columnsPerPacket;
+   private int[] pixelShift;
    // -- End LIDAR Information --
 
    private EventLoopGroup group;
@@ -36,7 +43,46 @@ public class NettyOuster
 
    public NettyOuster()
    {
-      //TODO Get LIDAR information from TCP
+      String jsonResponse = "";
+      try (Socket socket = new Socket("192.168.244.2", TCP_PORT)) { //TODO IP should not be hardcoded (wait for UDP to get?)
+
+         OutputStream output = socket.getOutputStream();
+         PrintWriter writer = new PrintWriter(output, true);
+         writer.println("get_lidar_data_format");
+
+         InputStream input = socket.getInputStream();
+         BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+
+         jsonResponse = reader.readLine();
+      } catch (UnknownHostException ex) {
+         LogTools.error("Ouster host could not be found.");
+         return;
+      } catch (IOException ex) {
+         LogTools.error(ex.getMessage());
+         LogTools.error(ex.getStackTrace());
+      }
+
+      try
+      {
+         ObjectMapper mapper = new ObjectMapper();
+         JsonNode root = mapper.readTree(jsonResponse);
+
+         pixelsPerColumn = root.get("pixels_per_column").asInt();
+         columnsPerFrame = root.get("columns_per_frame").asInt();
+         columnsPerPacket = root.get("columns_per_packet").asInt();
+         pixelShift = new int[pixelsPerColumn];
+
+         JsonNode pShift = root.get("pixel_shift_by_row");
+         for(int i = 0; i < pixelsPerColumn; i++) {
+            pixelShift[i] = pShift.get(i).asInt();
+         }
+      }
+      catch (JsonProcessingException ex)
+      {
+         LogTools.error(ex.getMessage());
+         return;
+      }
+
       build();
    }
 
