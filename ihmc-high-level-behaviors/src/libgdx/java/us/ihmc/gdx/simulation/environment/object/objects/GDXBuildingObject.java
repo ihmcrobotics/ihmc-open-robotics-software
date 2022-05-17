@@ -1,13 +1,9 @@
 package us.ihmc.gdx.simulation.environment.object.objects;
 
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g3d.Model;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.gdx.simulation.environment.object.GDXSimpleObject;
-import us.ihmc.gdx.tools.GDXModelBuilder;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,42 +33,43 @@ public class GDXBuildingObject
    public Point3D getClosestRectangularCorner(Point3D lastPickPoint)
    {
       Point3D cornerPoint;
-      if(corners.size() > 0)
+      if (corners.size() > 0)
       {
          Point3D corner = corners.get(corners.size() - 1);
+         int secondVectorX = 1;
+         int secondVectorY = 0;
          double angle = EuclidGeometryTools.angleFromFirstToSecondVector2D(corner.getX() - lastPickPoint.getX(),
                                                                            corner.getY() - lastPickPoint.getY(),
-                                                                           1,
-                                                                           0);
+                                                                           secondVectorX,
+                                                                           secondVectorY);
 
-         if( StrictMath.abs(angle - StrictMath.PI / 2.0f) < 0.1f || StrictMath.abs(angle + StrictMath.PI / 2.0f) < 0.1f)
+         if (StrictMath.abs(angle - StrictMath.PI / 2.0f) < 0.1f || StrictMath.abs(angle + StrictMath.PI / 2.0f) < 0.1f)
          {
             Vector3D direction = new Vector3D(0.0f, 1.0f, 0.0f);
             cornerPoint = EuclidGeometryTools.orthogonalProjectionOnLine3D(lastPickPoint, corner, direction);
          }
-         else if( StrictMath.abs(angle) < 0.1f || StrictMath.abs(angle - StrictMath.PI) < 0.1f)
+         else if (StrictMath.abs(angle) < 0.1f || StrictMath.abs(angle - StrictMath.PI) < 0.1f)
          {
             Vector3D direction = new Vector3D(1.0f, 0.0f, 0.0f);
             cornerPoint = EuclidGeometryTools.orthogonalProjectionOnLine3D(lastPickPoint, corner, direction);
          }
-         else {
+         else
+         {
             cornerPoint = lastPickPoint;
          }
-
       }
-      else cornerPoint = lastPickPoint;
+      else
+         cornerPoint = lastPickPoint;
       return cornerPoint;
    }
 
    public Point3D getLastCorner()
    {
-      if(corners.size() >= 1)
+      if (corners.size() >= 1)
          return corners.get(corners.size() - 1);
       else
          return null;
    }
-
-
 
    public ArrayList<Point3D> getCorners()
    {
