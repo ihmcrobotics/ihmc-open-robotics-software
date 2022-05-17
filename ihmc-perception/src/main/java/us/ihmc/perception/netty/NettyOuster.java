@@ -29,6 +29,8 @@ public class NettyOuster
 {
    public static final int TCP_PORT = 7501;
    public static final int UDP_PORT = 7502;
+   public static final int MAX_PACKET_SIZE = 24896; //Defined by software user manual
+   private static int actualLidarPacketSize;
 
    // -- LIDAR Information --
    private int pixelsPerColumn;
@@ -37,60 +39,14 @@ public class NettyOuster
    private int[] pixelShift;
    // -- End LIDAR Information --
 
-   private EventLoopGroup group;
-   private Bootstrap bootstrap;
+   private boolean tcpInitialized = false;
+
+   private final EventLoopGroup group;
+   private final Bootstrap bootstrap;
    private BytedecoImage image;
 
    public NettyOuster()
    {
-      String jsonResponse = "";
-      try (Socket socket = new Socket("192.168.244.2", TCP_PORT)) { //TODO IP should not be hardcoded (wait for UDP to get?)
-
-         OutputStream output = socket.getOutputStream();
-         PrintWriter writer = new PrintWriter(output, true);
-         writer.println("get_lidar_data_format");
-
-         InputStream input = socket.getInputStream();
-         BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-
-         jsonResponse = reader.readLine();
-      } catch (UnknownHostException ex) {
-         LogTools.error("Ouster host could not be found.");
-         return;
-      } catch (IOException ex) {
-         LogTools.error(ex.getMessage());
-         LogTools.error(ex.getStackTrace());
-      }
-
-      try
-      {
-         ObjectMapper mapper = new ObjectMapper();
-         JsonNode root = mapper.readTree(jsonResponse);
-
-         pixelsPerColumn = root.get("pixels_per_column").asInt();
-         columnsPerFrame = root.get("columns_per_frame").asInt();
-         columnsPerPacket = root.get("columns_per_packet").asInt();
-         pixelShift = new int[pixelsPerColumn];
-
-         JsonNode pShift = root.get("pixel_shift_by_row");
-         for(int i = 0; i < pixelsPerColumn; i++) {
-            pixelShift[i] = pShift.get(i).asInt();
-         }
-      }
-      catch (JsonProcessingException ex)
-      {
-         LogTools.error(ex.getMessage());
-         return;
-      }
-
-      build();
-   }
-
-   private void build()
-   {
-      image = new BytedecoImage(columnsPerFrame, pixelsPerColumn, opencv_core.CV_32FC1);
-      image.getBytedecoOpenCVMat().setTo(new Mat(0.0f)); //Initialize matrix to 0
-
       group = new NioEventLoopGroup();
       bootstrap = new Bootstrap();
       bootstrap.group(group).channel(NioDatagramChannel.class).handler(new SimpleChannelInboundHandler<DatagramPacket>()
@@ -98,7 +54,14 @@ public class NettyOuster
          @Override
          protected void channelRead0(ChannelHandlerContext context, DatagramPacket packet)
          {
-            ByteBuf bufferedData = packet.content().readBytes(packet.content().capacity());
+            if (!tcpInitialized) {
+               configureTCP(packet.sender().getAddress().toString().substring(1)); //Address looks like "/192.168.x.x" so we just discard the '/'
+               buildImage();
+
+               actualLidarPacketSize = columnsPerPacket * (16 + (pixelsPerColumn * 12) + 4);
+            }
+
+            ByteBuf bufferedData = packet.content().readBytes(actualLidarPacketSize);
             bufferedData = bufferedData.order(ByteOrder.LITTLE_ENDIAN); //Ouster is little endian
 
             int i = 0;
@@ -139,8 +102,56 @@ public class NettyOuster
          }
       });
 
-      int lidarPacketSize = columnsPerPacket * (16 + (pixelsPerColumn * 12) + 4);
-      bootstrap.option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(lidarPacketSize));
+      bootstrap.option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(MAX_PACKET_SIZE));
+   }
+
+   private void buildImage() {
+      image = new BytedecoImage(columnsPerFrame, pixelsPerColumn, opencv_core.CV_32FC1);
+      image.getBytedecoOpenCVMat().setTo(new Mat(0.0f)); //Initialize matrix to 0
+   }
+
+   private void configureTCP(String host) {
+      String jsonResponse = "";
+      try (Socket socket = new Socket(host, TCP_PORT)) {
+
+         OutputStream output = socket.getOutputStream();
+         PrintWriter writer = new PrintWriter(output, true);
+         writer.println("get_lidar_data_format");
+
+         InputStream input = socket.getInputStream();
+         BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+
+         jsonResponse = reader.readLine();
+      } catch (UnknownHostException ex) {
+         LogTools.error("Ouster host could not be found.");
+         return;
+      } catch (IOException ex) {
+         LogTools.error(ex.getMessage());
+         LogTools.error(ex.getStackTrace());
+      }
+
+      try
+      {
+         ObjectMapper mapper = new ObjectMapper();
+         JsonNode root = mapper.readTree(jsonResponse);
+
+         pixelsPerColumn = root.get("pixels_per_column").asInt();
+         columnsPerFrame = root.get("columns_per_frame").asInt();
+         columnsPerPacket = root.get("columns_per_packet").asInt();
+         pixelShift = new int[pixelsPerColumn];
+
+         JsonNode pShift = root.get("pixel_shift_by_row");
+         for(int i = 0; i < pixelsPerColumn; i++) {
+            pixelShift[i] = pShift.get(i).asInt();
+         }
+      }
+      catch (JsonProcessingException ex)
+      {
+         LogTools.error(ex.getMessage());
+         return;
+      }
+
+      tcpInitialized = true;
    }
 
    /**
@@ -182,14 +193,19 @@ public class NettyOuster
       group.shutdownGracefully();
    }
 
+   public boolean isInitialized()
+   {
+      return tcpInitialized;
+   }
+
    public int getImageWidth()
    {
-      return columnsPerFrame;
+      return tcpInitialized ? columnsPerFrame : -1;
    }
 
    public int getImageHeight()
    {
-      return pixelsPerColumn;
+      return tcpInitialized ? pixelsPerColumn : -1;
    }
 
    public BytedecoImage getBytedecoImage()
