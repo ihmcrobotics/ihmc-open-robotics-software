@@ -11,15 +11,14 @@ import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.gdx.simulation.environment.object.objects.FlatGroundDefinition;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.scs2.definition.robot.RobotDefinition;
-import us.ihmc.scs2.simulation.SimulationSession;
-import us.ihmc.scs2.simulation.robot.Robot;
+import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
+import us.ihmc.tools.thread.StatelessNotification;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 public class GDXSCS2EnvironmentManager
 {
@@ -35,11 +34,14 @@ public class GDXSCS2EnvironmentManager
    private int recordFrequency;
    private DRCRobotModel robotModel;
    private CommunicationMode ros2CommunicationMode;
-   private final ArrayList<Robot> secondaryRobots = new ArrayList<>();
+   private final ArrayList<GDXSCS2SecondaryRobot> secondaryRobots = new ArrayList<>();
+   private final ArrayList<TerrainObjectDefinition> terrainObjectDefinitions = new ArrayList<>();
    private final ArrayList<String> robotsToHide = new ArrayList<>();
    private volatile boolean starting = false;
    private volatile boolean started = false;
    private ArrayList<Runnable> onSessionStartedRunnables = new ArrayList<>();
+   private final StatelessNotification destroyedNotification = new StatelessNotification();
+   private Consumer<SCS2AvatarSimulationFactory> externalFactorySetup = null;
 
    public void create(GDXImGuiBasedUI baseUI, DRCRobotModel robotModel, CommunicationMode ros2CommunicationMode)
    {
@@ -47,14 +49,14 @@ public class GDXSCS2EnvironmentManager
       this.robotModel = robotModel;
       this.ros2CommunicationMode = ros2CommunicationMode;
 
+      double initialYaw = 0.3;
+      robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, initialYaw);
+
       //      recordFrequency = (int) Math.max(1.0, Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT()));
       recordFrequency = 1;
 
       useVelocityAndHeadingScript = true;
       walkingScriptParameters = new HeadingAndVelocityEvaluationScriptParameters();
-
-      double initialYaw = 0.3;
-      robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, initialYaw);
 
       baseUI.getImGuiPanelManager().addPanel(managerPanel);
    }
@@ -73,7 +75,7 @@ public class GDXSCS2EnvironmentManager
          if (ImGui.button(labels.get("Rebuild simulation")))
          {
             destroy();
-            buildSimulation();
+            buildSimulation(true);
          }
          ImGui.sameLine();
          if (ImGui.button(labels.get("Destroy")))
@@ -94,9 +96,17 @@ public class GDXSCS2EnvironmentManager
 
    public void buildSimulation()
    {
+      buildSimulation(false);
+   }
+
+   public void buildSimulation(boolean waitForDestroy)
+   {
       starting = true;
       ThreadTools.startAsDaemon(() ->
       {
+         if (waitForDestroy)
+            destroyedNotification.blockingWait();
+
          realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(ros2CommunicationMode.getPubSubImplementation(),
                                                              "flat_ground_walking_track_simulation");
 
@@ -104,10 +114,13 @@ public class GDXSCS2EnvironmentManager
          avatarSimulationFactory.setRobotModel(robotModel);
          avatarSimulationFactory.setRealtimeROS2Node(realtimeROS2Node);
          avatarSimulationFactory.setDefaultHighLevelHumanoidControllerFactory(useVelocityAndHeadingScript, walkingScriptParameters);
-         avatarSimulationFactory.setTerrainObjectDefinition(new FlatGroundDefinition());
-         for (Robot secondaryRobot : secondaryRobots)
+         for (TerrainObjectDefinition terrainObjectDefinition : terrainObjectDefinitions)
          {
-            avatarSimulationFactory.addSecondaryRobot(secondaryRobot);
+            avatarSimulationFactory.addTerrainObjectDefinition(terrainObjectDefinition);
+         }
+         for (GDXSCS2SecondaryRobot secondaryRobot : secondaryRobots)
+         {
+            avatarSimulationFactory.addSecondaryRobot(secondaryRobot.create());
          }
          avatarSimulationFactory.setRobotInitialSetup(robotInitialSetup);
          avatarSimulationFactory.setSimulationDataRecordTickPeriod(recordFrequency);
@@ -115,6 +128,8 @@ public class GDXSCS2EnvironmentManager
          avatarSimulationFactory.setUseBulletPhysicsEngine(true);
          avatarSimulationFactory.setUseRobotDefinitionCollisions(true);
          avatarSimulationFactory.setShowGUI(false);
+         if (externalFactorySetup != null)
+            externalFactorySetup.accept(avatarSimulationFactory);
 
          avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
          avatarSimulation.setSystemExitOnDestroy(false);
@@ -159,15 +174,19 @@ public class GDXSCS2EnvironmentManager
             avatarSimulation = null;
             scs2SimulationSession = null;
             realtimeROS2Node = null;
+            destroyedNotification.notifyOtherThread();
          }, getClass().getSimpleName() + "Destroy");
       }
    }
 
-   public Robot addSecondaryRobot(RobotDefinition robotDefinition)
+   public ArrayList<GDXSCS2SecondaryRobot> getSecondaryRobots()
    {
-      Robot robot = new Robot(robotDefinition, SimulationSession.DEFAULT_INERTIAL_FRAME);
-      secondaryRobots.add(robot);
-      return robot;
+      return secondaryRobots;
+   }
+
+   public ArrayList<TerrainObjectDefinition> getTerrainObjectDefinitions()
+   {
+      return terrainObjectDefinitions;
    }
 
    public GDXSCS2SimulationSession getSCS2SimulationSession()
@@ -183,5 +202,10 @@ public class GDXSCS2EnvironmentManager
    public ArrayList<Runnable> getOnSessionStartedRunnables()
    {
       return onSessionStartedRunnables;
+   }
+
+   public void setExternalFactorySetup(Consumer<SCS2AvatarSimulationFactory> externalFactorySetup)
+   {
+      this.externalFactorySetup = externalFactorySetup;
    }
 }

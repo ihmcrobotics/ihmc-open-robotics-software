@@ -79,4 +79,17 @@ public class ScriptedFootstepGenerator
 
       return footstep;
    }
+
+   public static RobotSide[] createRobotSidesStartingFrom(RobotSide robotSide, int length)
+   {
+      RobotSide[] ret = new RobotSide[length];
+   
+      for (int i = 0; i < length; i++)
+      {
+         ret[i] = robotSide;
+         robotSide = robotSide.getOppositeSide();
+      }
+   
+      return ret;
+   }
 }

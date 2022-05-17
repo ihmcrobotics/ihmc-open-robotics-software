@@ -5,7 +5,7 @@ import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.gdx.FocusBasedGDXCamera;
+import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.ui.graphics.GDXMultiBodyGraphic;
 import us.ihmc.gdx.ui.visualizers.ImGuiFrequencyPlot;
@@ -20,8 +20,8 @@ import java.util.function.Supplier;
 public class GDXROS2RobotVisualizer extends GDXMultiBodyGraphic
 {
    private final ImBoolean trackRobot = new ImBoolean(false);
-   private final Supplier<FocusBasedGDXCamera> cameraForTrackingSupplier;
-   private FocusBasedGDXCamera cameraForTracking;
+   private final Supplier<GDXFocusBasedCamera> cameraForTrackingSupplier;
+   private GDXFocusBasedCamera cameraForTracking;
    private final Point3D previousRobotMidFeetUnderPelvis = new Point3D();
    private final Point3D latestRobotMidFeetUnderPelvis = new Point3D();
    private final Point3D robotTranslationDifference = new Point3D();
@@ -35,7 +35,7 @@ public class GDXROS2RobotVisualizer extends GDXMultiBodyGraphic
       this(robotModel, syncedRobot, () -> null);
    }
 
-   public GDXROS2RobotVisualizer(DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot, Supplier<FocusBasedGDXCamera> cameraForTrackingSupplier)
+   public GDXROS2RobotVisualizer(DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot, Supplier<GDXFocusBasedCamera> cameraForTrackingSupplier)
    {
       super(robotModel.getSimpleRobotName() + " Robot Visualizer (ROS 2)");
       this.robotModel = robotModel;

@@ -72,16 +72,16 @@ public class MultiContactSupportRegionSolverVisualizer
 
    public static void main(String[] args)
    {
-//      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createTriangleFlatGround();
-//      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createTriangleTiltedOutSlightly();
-//      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createTriangleTiltedOutALot();
-//      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createTriangleOneTiltedFullyOut();
-//      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createTriangleOneTiltedFullyIn();
-//      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createFlatSquare();
-//      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createBipedFeet();
-//      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createBipedFeet(1.0, -1.0, 0.6);
-//      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createBipedFeetWithSingleHandhold();
-      MultiContactSupportRegionSolverInput input = MultiContactSupportRegionSolverInputExamples.createBipedFeetWithTwoHandholds();
+//      MultiContactSupportRegionSolverInput input = MultiContactSupportRegionSolverInputExamples.createTriangleFlatGround();
+//      MultiContactSupportRegionSolverInput input = MultiContactSupportRegionSolverInputExamples.createTriangleTiltedOutSlightly();
+//      MultiContactSupportRegionSolverInput input = MultiContactSupportRegionSolverInputExamples.createTriangleTiltedOutALot();
+      MultiContactSupportRegionSolverInput input = MultiContactSupportRegionSolverInputExamples.createTriangleOneTiltedFullyOut();
+//      MultiContactSupportRegionSolverInput input = MultiContactSupportRegionSolverInputExamples.createTriangleOneTiltedFullyIn();
+//      MultiContactSupportRegionSolverInput input = MultiContactSupportRegionSolverInputExamples.createFlatSquare();
+//      MultiContactSupportRegionSolverInput input = MultiContactSupportRegionSolverInputExamples.createBipedFeet();
+//      MultiContactSupportRegionSolverInput input = MultiContactSupportRegionSolverInputExamples.createBipedFeet(1.0, -1.0, 0.6);
+//      MultiContactSupportRegionSolverInput input = MultiContactSupportRegionSolverInputExamples.createBipedFeetWithSingleHandhold();
+//      MultiContactSupportRegionSolverInput input = MultiContactSupportRegionSolverInputExamples.createBipedFeetWithTwoHandholds();
 
       new MultiContactSupportRegionSolverVisualizer(input);
    }

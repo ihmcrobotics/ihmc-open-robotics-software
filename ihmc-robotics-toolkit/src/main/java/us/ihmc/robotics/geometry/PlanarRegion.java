@@ -763,6 +763,17 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       return convexPolygons.isEmpty();
    }
 
+   public boolean containsNaN()
+   {
+      boolean containsNaN = getBoundingBox3dInWorld().containsNaN();
+      // TODO: containsNaN |= more stuff possibly
+      if (containsNaN)
+      {
+         LogTools.error("Region bounding box contained NaN");
+      }
+      return containsNaN;
+   }
+
    public List<Point2D> getConcaveHull()
    {
       return concaveHullsVertices;

@@ -8,6 +8,7 @@ import controller_msgs.msg.dds.PauseWalkingMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGeneratorParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.DesiredTurningVelocityProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.DesiredVelocityProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScript;
@@ -80,20 +81,31 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
    @Override
    public ComponentBasedFootstepDataMessageGenerator buildPlugin(HighLevelControllerFactoryHelper controllerFactoryHelper)
    {
+      HighLevelHumanoidControllerToolbox controllerToolbox = controllerFactoryHelper.getHighLevelHumanoidControllerToolbox();
+
+      return buildPlugin(controllerToolbox.getReferenceFrames(),
+                         controllerFactoryHelper.getWalkingControllerParameters(),
+                         controllerFactoryHelper.getStatusMessageOutputManager(),
+                         controllerFactoryHelper.getCommandInputManager(),
+                         controllerToolbox.getContactableFeet(),
+                         controllerToolbox.getYoTime(),
+                         controllerToolbox.getControlDT(),
+                         controllerToolbox.getYoGraphicsListRegistry());
+   }
+
+   public ComponentBasedFootstepDataMessageGenerator buildPlugin(CommonHumanoidReferenceFrames referenceFrames,
+                                                                 WalkingControllerParameters walkingControllerParameters,
+                                                                 StatusMessageOutputManager statusMessageOutputManager,
+                                                                 CommandInputManager commandInputManager,
+                                                                 SideDependentList<? extends ContactableBody> contactableFeet,
+                                                                 DoubleProvider timeProvider,
+                                                                 double updateDT,
+                                                                 YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
       if (!registryField.hasValue())
          setRegistry();
 
       FactoryTools.checkAllFactoryFieldsAreSet(this);
-
-      HighLevelHumanoidControllerToolbox controllerToolbox = controllerFactoryHelper.getHighLevelHumanoidControllerToolbox();
-      CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
-      double controlDT = controllerToolbox.getControlDT();
-      WalkingControllerParameters walkingControllerParameters = controllerFactoryHelper.getWalkingControllerParameters();
-      StatusMessageOutputManager statusMessageOutputManager = controllerFactoryHelper.getStatusMessageOutputManager();
-      CommandInputManager commandInputManager = controllerFactoryHelper.getCommandInputManager();
-      YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
-      SideDependentList<? extends ContactableBody> contactableFeet = controllerToolbox.getContactableFeet();
-      DoubleProvider timeProvider = controllerToolbox.getYoTime();
 
       ContinuousStepGenerator continuousStepGenerator = new ContinuousStepGenerator(registryField.get());
 
@@ -126,10 +138,14 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
          continuousStepGenerator.setWalkInputProvider(csgCommandInputManagerField.get().createWalkInputProvider());
          statusMessageOutputManager.attachStatusMessageListener(HighLevelStateChangeStatusMessage.class, csgCommandInputManagerField.get()::setHighLevelStateChangeStatusMessage);
          updatables.add(csgCommandInputManagerField.get());
+         
+         //this is probably not the way the class was intended to be modified.
+         csgCommandInputManagerField.get().setCSG(continuousStepGenerator);
+         
       }
       else if (useHeadingAndVelocityScriptField.get())
       {
-         HeadingAndVelocityEvaluationScript script = new HeadingAndVelocityEvaluationScript(controlDT,
+         HeadingAndVelocityEvaluationScript script = new HeadingAndVelocityEvaluationScript(updateDT,
                                                                                             timeProvider,
                                                                                             headingAndVelocityEvaluationScriptParametersField.get(),
                                                                                             registryField.get());
@@ -159,9 +175,16 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
       private final Vector2D desiredVelocity = new Vector2D();
       private double turningVelocity = 0.0;
       private HighLevelControllerName currentController;
+      private ContinuousStepGenerator continuousStepGenerator;
 
       public CSGCommandInputManager()
       {
+      }
+
+      public void setCSG(ContinuousStepGenerator continuousStepGenerator)
+      {
+         this.continuousStepGenerator = continuousStepGenerator;
+         
       }
 
       public CommandInputManager getCommandInputManager()
@@ -195,6 +218,21 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
             turningVelocity = command.getTurnVelocity();
             isUnitVelocities = command.isUnitVelocities();
             walk = command.isWalk();
+         }
+
+         if (commandInputManager.isNewCommandAvailable(ContinuousStepGeneratorParametersCommand.class))
+         {
+            ContinuousStepGeneratorParametersCommand command = commandInputManager.pollNewestCommand(ContinuousStepGeneratorParametersCommand.class);
+            ContinuousStepGeneratorParameters parameters = command.getParameters();
+            
+            if(continuousStepGenerator != null)
+            {
+               continuousStepGenerator.setFootstepTiming(parameters.getSwingDuration(), parameters.getTransferDuration());  
+               continuousStepGenerator.setSwingHeight(parameters.getSwingHeight());
+               continuousStepGenerator.setFootstepsAreAdjustable(parameters.getStepsAreAdjustable());
+               continuousStepGenerator.setStepWidths(parameters.getDefaultStepWidth(), parameters.getMinStepWidth(), parameters.getMaxStepWidth());
+            }
+            
          }
 
          if (!isOpen)

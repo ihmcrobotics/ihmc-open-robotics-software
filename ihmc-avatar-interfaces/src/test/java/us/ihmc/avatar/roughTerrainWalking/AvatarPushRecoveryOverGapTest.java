@@ -2,6 +2,7 @@ package us.ihmc.avatar.roughTerrainWalking;
 
 import static us.ihmc.robotics.Assert.assertTrue;
 
+import controller_msgs.msg.dds.StepConstraintsListMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,10 +12,14 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.stepConstraintToolboxModule.StepConstraintToolboxModule;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.avatar.stepAdjustment.StepConstraintCalculator;
+import us.ihmc.avatar.stepAdjustment.SteppableRegionsCalculator;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.BoundingBox3D;
@@ -22,6 +27,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintMessageConverter;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -30,22 +37,23 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.PlanarRegionEnvironmentInterface;
-import us.ihmc.simulationToolkit.controllers.PushRobotController;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationToolkit.controllers.PushRobotControllerSCS2;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import java.util.List;
 
 public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   private DRCSimulationTestHelper drcSimulationTestHelper;
-   private StepConstraintToolboxModule stepConstraintModule;
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
+   private SCS2AvatarTestingSimulation simulationTestHelper;
+//   private StepConstraintToolboxModule stepConstraintModule;
 
    private SideDependentList<StateTransitionCondition> singleSupportStartConditions = new SideDependentList<>();
    private SideDependentList<StateTransitionCondition> doubleSupportStartConditions = new SideDependentList<>();
 
-   private PushRobotController pushRobotController;
+   private PushRobotControllerSCS2 pushRobotController;
 
    private double swingTime, transferTime;
 
@@ -54,10 +62,8 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       return 0.3;
    }
 
-   public void setupTest() throws SimulationExceededMaximumTimeException
+   public void setupTest()
    {
-      String className = getClass().getSimpleName();
-
       double platform1Length = 0.7;
       double platform2Length = 1.0;
       double gapWidth = 0.10;
@@ -66,42 +72,44 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       GapPlanarRegionEnvironment environment = new GapPlanarRegionEnvironment(platform1Length, platform2Length, 0.55, gapWidth, sideGapWidth);
 
       DRCRobotModel robotModel = getRobotModel();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
-      drcSimulationTestHelper.setTestEnvironment(environment);
-      drcSimulationTestHelper.createSimulation(className);
+      SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
+                                                                                                                                             environment,
+                                                                                                                                             simulationTestingParameters);
+      simulationTestHelperFactory.setUseImpulseBasedPhysicsEngine(true);
+      simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+      simulationTestHelper.start();
 
-      stepConstraintModule = new StepConstraintToolboxModule(robotModel, true, PubSubImplementation.INTRAPROCESS, 9.81);
-      stepConstraintModule.setSwitchPlanarRegionConstraintsAutomatically(true);
-      stepConstraintModule.wakeUp();
+      SteppableRegionsCalculator stepConstraintCalculator = new SteppableRegionsCalculator(4.0, simulationTestHelper.getControllerRegistry());
 
       PlanarRegionsList planarRegionsList = environment.getPlanarRegionsList();
-      PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
 
-      drcSimulationTestHelper.publishToController(planarRegionsListMessage);
-      stepConstraintModule.updatePlanarRegion(planarRegionsListMessage);
+      stepConstraintCalculator.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
+      List<StepConstraintRegion> stepConstraints = stepConstraintCalculator.computeSteppableRegions();
 
       double z = getForcePointOffsetZInChestFrame();
-      pushRobotController = new PushRobotController(drcSimulationTestHelper.getRobot(), robotModel.createFullRobotModel().getChest().getParentJoint().getName(),
-            new Vector3D(0, 0, z));
-
-      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+      pushRobotController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationSession().getTime(),
+                                                        simulationTestHelper.getRobot(),
+                                                        robotModel.createFullRobotModel().getChest().getParentJoint().getName(),
+                                                        new Vector3D(0, 0, z));
 
       for (RobotSide robotSide : RobotSide.values)
       {
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          String footPrefix = sidePrefix + "Foot";
          @SuppressWarnings("unchecked")
-         final YoEnum<FootControlModule.ConstraintType> footConstraintType = (YoEnum<FootControlModule.ConstraintType>) scs.findVariable(sidePrefix + "FootControlModule", footPrefix + "CurrentState");
+         final YoEnum<FootControlModule.ConstraintType> footConstraintType = (YoEnum<FootControlModule.ConstraintType>) simulationTestHelper.findVariable(sidePrefix
+               + "FootControlModule", footPrefix + "CurrentState");
          @SuppressWarnings("unchecked")
-         final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.findVariable("WalkingHighLevelHumanoidController", "walkingCurrentState");
+         final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) simulationTestHelper.findVariable("WalkingHighLevelHumanoidController",
+                                                                                                                    "walkingCurrentState");
          singleSupportStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType));
          doubleSupportStartConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
       }
 
-      scs.addYoGraphic(pushRobotController.getForceVisualizer());
+      simulationTestHelper.addYoGraphicDefinition(pushRobotController.getForceVizDefinition());
 
-      drcSimulationTestHelper.getSimulationConstructionSet().setCameraPosition(8.0, -8.0, 5.0);
-      drcSimulationTestHelper.getSimulationConstructionSet().setCameraFix(1.5, 0.0, 0.8);
+      simulationTestHelper.setCameraPosition(8.0, -8.0, 5.0);
+      simulationTestHelper.setCameraFocusPosition(1.5, 0.0, 0.8);
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
 
@@ -109,36 +117,36 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       transferTime = walkingControllerParameters.getDefaultTransferTime();
 
       ThreadTools.sleep(1000);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
+      assertTrue(simulationTestHelper.simulateNow(0.5));
 
       FootstepDataListMessage footsteps = createFootstepDataListMessage(swingTime, transferTime);
-      drcSimulationTestHelper.publishToController(footsteps);
-      drcSimulationTestHelper.publishToController(planarRegionsListMessage);
+      StepConstraintsListMessage constraintsListMessage = StepConstraintMessageConverter.convertToStepConstraintsListMessage(stepConstraints);
+      footsteps.getDefaultStepConstraints().set(constraintsListMessage);
+      simulationTestHelper.publishToController(footsteps);
 
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      simulationTestHelper.simulateNow(1.0);
    }
 
-
    @Test
-   public void testNoPush() throws SimulationExceededMaximumTimeException
+   public void testNoPush()
    {
       setupTest();
 
       double simulationTime = (swingTime + transferTime) * 4 + 1.0;
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+      assertTrue(simulationTestHelper.simulateNow(simulationTime));
 
       Point3D center = new Point3D(1.05, 0.0, 1.0893768421917251);
       Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
-      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+      simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
 
    @Test
-   public void testForwardPush() throws SimulationExceededMaximumTimeException
+   public void testForwardPush()
    {
       setupTest();
 
-      double totalMass  = getRobotModel().createFullRobotModel().getTotalMass();
+      double totalMass = getRobotModel().createFullRobotModel().getTotalMass();
       StateTransitionCondition firstPushCondition = singleSupportStartConditions.get(RobotSide.LEFT);
       double delay = 0.5 * swingTime;
       Vector3D firstForceDirection = new Vector3D(1.0, 0.0, 0.0);
@@ -148,20 +156,20 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       pushRobotController.applyForceDelayed(firstPushCondition, delay, firstForceDirection, magnitude, duration);
 
       double simulationTime = (swingTime + transferTime) * 4 + 1.0;
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+      simulationTestHelper.simulateNow(simulationTime);
 
       Point3D center = new Point3D(1.05, 0.0, 1.0893768421917251);
       Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
-      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+      simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
 
    @Test
-   public void testSidePush() throws SimulationExceededMaximumTimeException
+   public void testSidePush()
    {
       setupTest();
 
-      double totalMass  = getRobotModel().createFullRobotModel().getTotalMass();
+      double totalMass = getRobotModel().createFullRobotModel().getTotalMass();
       StateTransitionCondition firstPushCondition = singleSupportStartConditions.get(RobotSide.LEFT);
       double delay = 0.5 * swingTime;
       Vector3D firstForceDirection = new Vector3D(0.0, 1.0, 0.0);
@@ -171,12 +179,12 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       pushRobotController.applyForceDelayed(firstPushCondition, delay, firstForceDirection, magnitude, duration);
 
       double simulationTime = (swingTime + transferTime) * 4 + 1.0;
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+      assertTrue(simulationTestHelper.simulateNow(simulationTime));
 
       Point3D center = new Point3D(1.05, 0.0, 1.0893768421917251);
       Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
-      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+      simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
 
    private FootstepDataListMessage createFootstepDataListMessage(double swingTime, double transferTime)
@@ -198,9 +206,6 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       return message;
    }
 
-
-
-
    @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
@@ -210,22 +215,11 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
    @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
-      {
-         ThreadTools.sleepForever();
-      }
-
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcSimulationTestHelper != null)
+      if (simulationTestHelper != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
-      }
-
-      if (stepConstraintModule != null)
-      {
-         stepConstraintModule.closeAndDispose();
-         stepConstraintModule = null;
+         simulationTestHelper.finishTest();
+         simulationTestHelper = null;
       }
 
       if (pushRobotController != null)
@@ -250,7 +244,7 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
          double sideWidth = 0.18;
          double sideLength = platform1Length + platform2Length + forwardGapSize;
          double distanceToCenter = 0.5 * sideLength - 0.5 * platform1Length;
-         generator.translate(-platform2Center + distanceToCenter, 0.5 * platformWidth  + sideGapSize + 0.5 * sideWidth, 0.0);
+         generator.translate(-platform2Center + distanceToCenter, 0.5 * platformWidth + sideGapSize + 0.5 * sideWidth, 0.0);
          generator.addCubeReferencedAtBottomMiddle(sideLength, sideWidth, 0.01); // ground
          addPlanarRegionsToTerrain(YoAppearance.Grey());
       }

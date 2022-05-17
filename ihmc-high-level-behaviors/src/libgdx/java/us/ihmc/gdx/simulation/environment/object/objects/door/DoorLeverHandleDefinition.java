@@ -4,6 +4,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.mecano.tools.MomentOfInertiaFactory;
 import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
+import us.ihmc.scs2.definition.geometry.Cylinder3DDefinition;
 import us.ihmc.scs2.definition.geometry.ModelFileGeometryDefinition;
 import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
@@ -35,13 +36,20 @@ public class DoorLeverHandleDefinition extends RigidBodyDefinition
       modelVisualDefinition.setGeometryDefinition(geometryDefinition);
       addVisualDefinition(modelVisualDefinition);
 
-//      Point3D collisionShapeOffset = new Point3D(0.0, sizeY / 2.0 + 0.025, sizeZ / 2.0);
-      CollisionShapeDefinition collisionShapeDefinition = new CollisionShapeDefinition();
-      ModelFileGeometryDefinition collisionShapeGeometryDefinition
-            = new ModelFileGeometryDefinition("environmentObjects/door/doorLeverHandle/DoorLeverHandle.stl");
-      collisionShapeDefinition.setGeometryDefinition(collisionShapeGeometryDefinition);
-      collisionShapeDefinition.setConcave(true);
-      collisionShapeDefinition.getOriginPose().set(new YawPitchRoll(0.0, 0.0, -Math.toRadians(90.0)), new Point3D());
-      addCollisionShapeDefinition(collisionShapeDefinition);
+////      Point3D collisionShapeOffset = new Point3D(0.0, sizeY / 2.0 + 0.025, sizeZ / 2.0);
+//      CollisionShapeDefinition collisionShapeDefinition = new CollisionShapeDefinition();
+//      ModelFileGeometryDefinition collisionShapeGeometryDefinition
+//            = new ModelFileGeometryDefinition("environmentObjects/door/doorLeverHandle/DoorLeverHandle.stl");
+//      collisionShapeDefinition.setGeometryDefinition(collisionShapeGeometryDefinition);
+//      collisionShapeDefinition.setConcave(true);
+//      collisionShapeDefinition.getOriginPose().set(new YawPitchRoll(0.0, 0.0, -Math.toRadians(90.0)), new Point3D());
+//      addCollisionShapeDefinition(collisionShapeDefinition);
+
+      CollisionShapeDefinition cylinderCollisionShapeDefinition = new CollisionShapeDefinition();
+      double length = 0.12528;
+      Cylinder3DDefinition cylinderDefinition = new Cylinder3DDefinition(length, 0.012);
+      cylinderCollisionShapeDefinition.setGeometryDefinition(cylinderDefinition);
+      cylinderCollisionShapeDefinition.getOriginPose().set(new YawPitchRoll(0.0, 0.0, -Math.toRadians(90.0)), new Point3D(-0.045, -length / 2.0, 0.0));
+      addCollisionShapeDefinition(cylinderCollisionShapeDefinition);
    }
 }

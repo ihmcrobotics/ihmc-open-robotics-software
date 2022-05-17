@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFoot
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commonWalkingControlModules.referenceFrames.WalkingTrajectoryPath;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
@@ -26,6 +27,7 @@ public abstract class TransferState extends WalkingState
    protected final RobotSide transferToSide;
 
    protected final WalkingMessageHandler walkingMessageHandler;
+   protected final WalkingTrajectoryPath walkingTrajectoryPath;
    protected final HighLevelHumanoidControllerToolbox controllerToolbox;
    protected final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
@@ -47,9 +49,14 @@ public abstract class TransferState extends WalkingState
    private final DoubleProvider unloadFraction;
    private final DoubleProvider rhoMin;
 
-   public TransferState(WalkingStateEnum transferStateEnum, WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
-                        HighLevelControlManagerFactory managerFactory, WalkingFailureDetectionControlModule failureDetectionControlModule,
-                        DoubleProvider unloadFraction, DoubleProvider rhoMin, YoRegistry parentRegistry)
+   public TransferState(WalkingStateEnum transferStateEnum,
+                        WalkingMessageHandler walkingMessageHandler,
+                        HighLevelHumanoidControllerToolbox controllerToolbox,
+                        HighLevelControlManagerFactory managerFactory,
+                        WalkingFailureDetectionControlModule failureDetectionControlModule,
+                        DoubleProvider unloadFraction,
+                        DoubleProvider rhoMin,
+                        YoRegistry parentRegistry)
    {
       super(transferStateEnum, parentRegistry);
       this.transferToSide = transferStateEnum.getTransferToSide();
@@ -59,6 +66,7 @@ public abstract class TransferState extends WalkingState
       this.unloadFraction = unloadFraction;
       this.rhoMin = rhoMin;
 
+      walkingTrajectoryPath = controllerToolbox.getWalkingTrajectoryPath();
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
       balanceManager = managerFactory.getOrCreateBalanceManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
@@ -86,7 +94,7 @@ public abstract class TransferState extends WalkingState
       feetManager.updateContactStatesInDoubleSupport(transferToSide);
 
       // Always do this so that when a foot slips or is loaded in the air, the height gets adjusted.
-//      comHeightManager.setSupportLeg(transferToSide.getOppositeSide());
+      //      comHeightManager.setSupportLeg(transferToSide.getOppositeSide());
 
       balanceManager.computeNormalizedEllipticICPError(transferToSide);
 
@@ -122,24 +130,29 @@ public abstract class TransferState extends WalkingState
          transferTimeElapsedUnderPrecomputedICPPlan = timeInState > walkingMessageHandler.getNextTransferTime();
       }
 
+      capturePoint2d.setIncludingFrame(balanceManager.getCapturePoint());
+      FrameConvexPolygon2DReadOnly supportPolygonInWorld = controllerToolbox.getBipedSupportPolygons().getSupportPolygonInWorld();
+
+      double distanceToSupport = supportPolygonInWorld.distance(capturePoint2d);
+
       if (balanceManager.isICPPlanDone() || transferTimeElapsedUnderPrecomputedICPPlan)
       {
-         capturePoint2d.setIncludingFrame(balanceManager.getCapturePoint());
-         FrameConvexPolygon2DReadOnly supportPolygonInWorld = controllerToolbox.getBipedSupportPolygons().getSupportPolygonInWorld();
          FrameConvexPolygon2DReadOnly nextPolygonInWorld = failureDetectionControlModule.getCombinedFootPolygonWithNextFootstep();
-
-         double distanceToSupport = supportPolygonInWorld.distance(capturePoint2d);
          boolean isICPInsideNextSupportPolygon = nextPolygonInWorld.isPointInside(capturePoint2d);
 
-         if (distanceToSupport > balanceManager.getICPDistanceOutsideSupportForStep() || (distanceToSupport > 0.0 && isICPInsideNextSupportPolygon))
+         // if you're outside at all, but taking the next step will recover, go ahead and do it.
+         if ((distanceToSupport > 0.0 && isICPInsideNextSupportPolygon))
             return true;
+         // if you're done, and your error is low, trigger the next step
          else if (balanceManager.getNormalizedEllipticICPError() < 1.0)
             return true;
+         // if you're done, and your error is too high, start using a higher momentum recovery
          else
             balanceManager.setUseMomentumRecoveryModeForBalance(true);
       }
 
-      return false;
+      // if you're too far outside, go ahead and trigger the next step
+      return distanceToSupport > balanceManager.getICPDistanceOutsideSupportForStep();
    }
 
    /**
@@ -193,6 +206,7 @@ public abstract class TransferState extends WalkingState
    @Override
    public void onEntry()
    {
+      initializeWalkingTrajectoryPath();
       updateICPPlan();
 
       if (walkingMessageHandler.hasUpcomingFootsteps())
@@ -212,6 +226,13 @@ public abstract class TransferState extends WalkingState
       transferToAndNextFootstepsData.setComAtEndOfState(balanceManager.getFinalDesiredCoMPosition());
       comHeightManager.setSupportLeg(transferToSide);
       comHeightManager.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
+   }
+
+   protected void initializeWalkingTrajectoryPath()
+   {
+      walkingTrajectoryPath.clearFootsteps();
+      walkingTrajectoryPath.addFootsteps(walkingMessageHandler);
+      walkingTrajectoryPath.initializeDoubleSupport();
    }
 
    protected void updateICPPlan()
