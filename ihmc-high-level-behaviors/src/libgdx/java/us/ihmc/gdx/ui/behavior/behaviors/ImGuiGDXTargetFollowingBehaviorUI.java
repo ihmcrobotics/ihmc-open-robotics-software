@@ -18,7 +18,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
@@ -95,7 +95,7 @@ public class ImGuiGDXTargetFollowingBehaviorUI extends ImGuiGDXBehaviorUIInterfa
       targetFollowingParameterTuner.create(targetFollowingParameters,
                                            TargetFollowingBehaviorParameters.keys,
                                            () -> helper.publish(TargetFollowingParameters, targetFollowingParameters.getAllAsStrings()));
-      targetApproachPoseGraphic = GDXModelPrimitives.createCoordinateFrameInstance(0.1);
+      targetApproachPoseGraphic = GDXModelBuilder.createCoordinateFrameInstance(0.1);
       targetApproachPoseReference = helper.subscribeViaReference(TargetApproachPose, BehaviorTools.createNaNPose());
       manualTargetAffordance.create(baseUI, placedTargetPose ->
       {
