@@ -62,7 +62,6 @@ public class NettyOuster
             }
 
             ByteBuf bufferedData = packet.content().readBytes(actualLidarPacketSize);
-            bufferedData = bufferedData.order(ByteOrder.LITTLE_ENDIAN); //Ouster is little endian
 
             int i = 0;
             for (int colNumber = 0; colNumber < columnsPerPacket; colNumber++)
@@ -161,7 +160,9 @@ public class NettyOuster
    {
       int shift = index % 4;
       int modIndex = index - (index % 4);
-      long val = data.getUnsignedInt(modIndex);
+
+      //Use little endian accessors (getUnsignedIntLE, not getUnsignedInt)
+      long val = data.getUnsignedIntLE(modIndex);
       val >>= shift;
       switch (num)
       {
@@ -174,7 +175,7 @@ public class NettyOuster
          case 4:
             break;
          case 8:
-            val += data.getUnsignedInt(modIndex + 4) << 32;
+            val += data.getUnsignedIntLE(modIndex + 4) << 32;
             break;
          default:
             return -1;
