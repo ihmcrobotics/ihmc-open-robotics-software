@@ -19,6 +19,21 @@ public class NeuralNetworkConfiguration
 
    }
 
+   public NeuralNetworkConfiguration(String[] inputVariableNames,
+                                     String[] outputVariableNames,
+                                     String[] activationFunctionsPerLayer,
+                                     int[] numberOfNeuronsPerLayer,
+                                     double[][] bias,
+                                     double[][][] weights)
+   {
+      this.inputVariableNames = inputVariableNames;
+      this.outputVariableNames = outputVariableNames;
+      this.activationFunctionsPerLayer = activationFunctionsPerLayer;
+      this.numberOfNeuronsPerLayer = numberOfNeuronsPerLayer;
+      this.bias = bias;
+      this.weights = weights;
+   }
+
    public String[] getActivationFunctionsPerLayer()
    {
       return activationFunctionsPerLayer;
