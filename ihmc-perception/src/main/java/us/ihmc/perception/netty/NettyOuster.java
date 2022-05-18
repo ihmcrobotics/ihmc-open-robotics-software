@@ -55,7 +55,10 @@ public class NettyOuster
          protected void channelRead0(ChannelHandlerContext context, DatagramPacket packet)
          {
             if (!tcpInitialized) {
-               configureTCP(packet.sender().getAddress().toString().substring(1)); //Address looks like "/192.168.x.x" so we just discard the '/'
+               if (!configureTCP(packet.sender().getAddress().toString().substring(1))) { //Address looks like "/192.168.x.x" so we just discard the '/'
+                  LogTools.error("Failed to initialize Ouster using TCP API.");
+                  return;
+               }
                buildImage();
 
                actualLidarPacketSize = columnsPerPacket * (16 + (pixelsPerColumn * 12) + 4);
@@ -109,10 +112,12 @@ public class NettyOuster
       image.getBytedecoOpenCVMat().setTo(new Mat(0.0f)); //Initialize matrix to 0
    }
 
-   private void configureTCP(String host) {
-      String jsonResponse = "";
-      try (Socket socket = new Socket(host, TCP_PORT)) {
+   private boolean configureTCP(String host) {
+      LogTools.info("Attempting to query host " + host);
 
+      String jsonResponse = "";
+      LogTools.info("Binding to TCP port " + TCP_PORT);
+      try (Socket socket = new Socket(host, TCP_PORT)) {
          OutputStream output = socket.getOutputStream();
          PrintWriter writer = new PrintWriter(output, true);
          writer.println("get_lidar_data_format");
@@ -123,10 +128,13 @@ public class NettyOuster
          jsonResponse = reader.readLine();
       } catch (UnknownHostException ex) {
          LogTools.error("Ouster host could not be found.");
-         return;
+         return false;
       } catch (IOException ex) {
          LogTools.error(ex.getMessage());
          LogTools.error(ex.getStackTrace());
+         return false;
+      } finally {
+         LogTools.info("Unbound from TCP port " + TCP_PORT);
       }
 
       try
@@ -147,10 +155,11 @@ public class NettyOuster
       catch (JsonProcessingException ex)
       {
          LogTools.error(ex.getMessage());
-         return;
+         return false;
       }
 
       tcpInitialized = true;
+      return true;
    }
 
    /**
@@ -184,13 +193,19 @@ public class NettyOuster
       return val;
    }
 
+   /**
+    * Bind to UDP, and begin receiving data.
+    * Note that data will not be processed until Ouster's TCP API is queried for image data, which will not happen until after this call.
+    */
    public void start()
    {
+      LogTools.info("Binding to UDP port " + UDP_PORT);
       bootstrap.bind(UDP_PORT);
    }
 
    public void stop()
    {
+      LogTools.info("Unbinding from UDP port " + UDP_PORT);
       group.shutdownGracefully();
    }
 
