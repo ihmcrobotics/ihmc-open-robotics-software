@@ -800,4 +800,9 @@ public abstract class WalkingControllerParameters
    {
       return null;
    }
+
+   public double getThreePotatoResidualModelMassFraction()
+   {
+      return Double.NEGATIVE_INFINITY;
+   }
 }

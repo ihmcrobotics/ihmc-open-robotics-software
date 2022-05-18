@@ -97,8 +97,8 @@ public class ThreePotatoAngularMomentumCalculator
    private final YoFramePoint3D rightPotatoRelativePosition = new YoFramePoint3D("rightPotatoRelativePosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D rightPotatoRelativeVelocity = new YoFrameVector3D("rightPotatoRelativeVelocity", ReferenceFrame.getWorldFrame(), registry);
 
-   private final double potatoMassFractionTrainedOn = 0.07;
    private final NeuralNetwork threePotatoResidualModel;
+   private final double threePotatoResidualModelMassFraction;
    private final BooleanParameter useThreePotatoResidualModel = new BooleanParameter("useThreePotatoResidualModel", registry, false);
    private final YoFrameVector3D threePotatoResidualPredicted =  new YoFrameVector3D("threePotatoResidualPredicted", ReferenceFrame.getWorldFrame(), registry);
 
@@ -147,6 +147,7 @@ public class ThreePotatoAngularMomentumCalculator
       this.potatoMassFraction = potatoMassFraction;
 
       threePotatoResidualModel = walkingControllerParameters.getThreePotatoResidualModel();
+      threePotatoResidualModelMassFraction = walkingControllerParameters.getThreePotatoResidualModelMassFraction();
 
       angularMomentumTrajectory = new MultipleSegmentPositionTrajectoryGenerator<>("angularMomentum",
                                                                                    50,
@@ -258,9 +259,8 @@ public class ThreePotatoAngularMomentumCalculator
          observeAngularMomentumResidual(centerOfMassPosition, centerOfMassVelocity,
                                         leftPotatoRelativePosition, leftPotatoRelativeVelocity,
                                         rightPotatoRelativePosition, rightPotatoRelativeVelocity, threePotatoResidualPredicted);
-         // TODO: magic number on bottom  of fraction is the potatoMassFraction in the training set
-         threePotatoResidualPredicted.scale(1 / 0.07);
-         threePotatoResidualPredicted.scale(potatoMassFraction.getValue());
+         threePotatoResidualPredicted.scale(threePotatoResidualModelMassFraction);
+         threePotatoResidualPredicted.scale(1 / potatoMassFraction.getValue());
          totalAngularMomentum.add(threePotatoResidualPredicted);
 
          actualModelAngularMomentum.set(totalAngularMomentum);
