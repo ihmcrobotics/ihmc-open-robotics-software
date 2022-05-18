@@ -8,6 +8,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
 
@@ -22,6 +23,7 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
@@ -29,6 +31,7 @@ import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.converter.DoubleStringConverter;
 import us.ihmc.avatar.reachabilityMap.ReachabilitySphereMapSimulationHelper.VisualizationType;
@@ -65,6 +68,7 @@ import us.ihmc.scs2.definition.visual.TriangleMesh3DBuilder;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizer;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizerControls;
+import us.ihmc.scs2.sessionVisualizer.jfx.tools.JavaFXMissingTools;
 import us.ihmc.scs2.sharedMemory.interfaces.YoBufferPropertiesReadOnly;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.SimulationSessionControls;
@@ -108,6 +112,7 @@ public class ReachabilityMapVisualizer
    private OneDoFJointBasics[] robotArmJoints;
 
    private SessionVisualizerControls guiControls;
+   private VisualizationControlsStageController controller;
 
    public ReachabilityMapVisualizer(ReachabilityMapRobotInformation robotInformation)
    {
@@ -249,13 +254,25 @@ public class ReachabilityMapVisualizer
       LogTools.info("Done");
    }
 
+   public SessionVisualizerControls getGuiControls()
+   {
+      return guiControls;
+   }
+
+   public void addCustomGUIControl(Node customControl)
+   {
+      controller.addCustomControl(customControl);
+   }
+
    private void createVisualizationControls()
    {
       URL resource = getClass().getClassLoader()
                                .getResource(getClass().getPackage().getName().replace('.', '/') + "/ReachabilityMapVisualizationControlsStage.fxml");
       FXMLLoader fxmlLoader = new FXMLLoader(resource);
-      VisualizationControlsStageController controller = new VisualizationControlsStageController();
+      controller = new VisualizationControlsStageController();
       fxmlLoader.setController(controller);
+
+      CountDownLatch latch = new CountDownLatch(1);
 
       Platform.runLater(() ->
       {
@@ -264,12 +281,22 @@ public class ReachabilityMapVisualizer
             Stage stage = fxmlLoader.load();
             controller.initialize();
             stage.show();
+            latch.countDown();
          }
          catch (IOException e)
          {
             e.printStackTrace();
          }
       });
+
+      try
+      {
+         latch.await();
+      }
+      catch (InterruptedException e)
+      {
+         e.printStackTrace();
+      }
    }
 
    public void visualizePositionReach(SimulationSession session, ReferenceFrame controlFrame)
@@ -527,6 +554,8 @@ public class ReachabilityMapVisualizer
       @FXML
       private Stage stage;
       @FXML
+      private VBox extraControlsContainer;
+      @FXML
       private ComboBox<String> visualizationTypeComboBox;
       @FXML
       private ComboBox<String> visualizationTargetComboBox;
@@ -620,6 +649,15 @@ public class ReachabilityMapVisualizer
          }
 
          guiControls.addVisualizerShutdownListener(() -> stage.close());
+      }
+
+      private void addCustomControl(Node customControl)
+      {
+         JavaFXMissingTools.runAndWait(getClass(), () ->
+         {
+            extraControlsContainer.getChildren().add(customControl);
+            stage.sizeToScene();
+         });
       }
 
       @FXML
