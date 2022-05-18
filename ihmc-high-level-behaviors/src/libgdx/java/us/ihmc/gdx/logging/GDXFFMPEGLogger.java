@@ -19,7 +19,7 @@ import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class GameDevelopmentExtensionsFastForwardMotionPictureExpertsGroupLogger
+public class GDXFFMPEGLogger
 {
    //Constants
    private static final int FRAMERATE = 30;
@@ -31,27 +31,27 @@ public class GameDevelopmentExtensionsFastForwardMotionPictureExpertsGroupLogger
    private boolean isClosed = false;
    private AVDictionary dict;
    private AVFormatContext fmtContext;
-   private FastForwardMotionPictureExpertsGroupOutputStream videoStream;
+   private FFMPEGOutputStream videoStream;
 
    /***
     * Note - lossless is true by default
     */
-   GameDevelopmentExtensionsFastForwardMotionPictureExpertsGroupLogger(int width, int height) {
+   GDXFFMPEGLogger(int width, int height) {
       this(width, height, true);
    }
 
    /***
     * Note - lossless is true by default
     */
-   GameDevelopmentExtensionsFastForwardMotionPictureExpertsGroupLogger(int width, int height, String logName) {
+   GDXFFMPEGLogger(int width, int height, String logName) {
       this(width, height, true, "Video");
    }
 
-   GameDevelopmentExtensionsFastForwardMotionPictureExpertsGroupLogger(int width, int height, boolean lossless) {
+   GDXFFMPEGLogger(int width, int height, boolean lossless) {
       this(width, height, lossless, "Video");
    }
 
-   GameDevelopmentExtensionsFastForwardMotionPictureExpertsGroupLogger(int width, int height, boolean lossless, String logName) {
+   GDXFFMPEGLogger(int width, int height, boolean lossless, String logName) {
       fileName = logDirectory + dateFormat.format(new Date()) + "_" + logName + "_Log.webm";
 
       av_dict_set(dict, "lossless", lossless ? "1" : "0", 0); //TODO this is maybe wrong
@@ -66,7 +66,7 @@ public class GameDevelopmentExtensionsFastForwardMotionPictureExpertsGroupLogger
       }
 
       //Add video stream
-      videoStream = new FastForwardMotionPictureExpertsGroupOutputStream();
+      videoStream = new FFMPEGOutputStream();
       AVCodecContext codecContext;
 
       AVCodec codec = avcodec_find_encoder(fmtContext.video_codec_id());
@@ -193,7 +193,7 @@ public class GameDevelopmentExtensionsFastForwardMotionPictureExpertsGroupLogger
       return ret == AVERROR_EOF();
    }
 
-   private AVFrame getVideoFrame(FastForwardMotionPictureExpertsGroupOutputStream ost) {
+   private AVFrame getVideoFrame(FFMPEGOutputStream ost) {
       AVCodecContext c = ost.getEncoder();
 
       AVRational one = new AVRational().num(1).den(1);
