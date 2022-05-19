@@ -13,6 +13,17 @@ public class QPObjectiveCommand implements InverseDynamicsCommand<QPObjectiveCom
    private final DMatrixRMaj jacobian = new DMatrixRMaj(1, 1);
    private final DMatrixRMaj weightMatrix = new DMatrixRMaj(1, 1);
    private final DMatrixRMaj selectionMatrix = new DMatrixRMaj(1, 1);
+   
+   private boolean doNullspaceProjection = false;
+   
+   public void setDoNullSpaceProjection(boolean flag)
+   {
+      doNullspaceProjection = flag;
+   }
+   public boolean isNullspaceProjected()
+   {
+      return doNullspaceProjection;
+   }
 
    public QPObjectiveCommand()
    {

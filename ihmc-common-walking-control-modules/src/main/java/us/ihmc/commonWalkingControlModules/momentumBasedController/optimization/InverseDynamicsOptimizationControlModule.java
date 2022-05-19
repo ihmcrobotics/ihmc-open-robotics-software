@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -91,12 +92,15 @@ public class InverseDynamicsOptimizationControlModule
 
    private final DMatrixRMaj zeroObjective = new DMatrixRMaj(0, 0);
 
+   private ArrayList<QPObjectiveCommand> qpObjectiveCommands = new ArrayList<>();
+
    public InverseDynamicsOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, YoRegistry parentRegistry)
    {
       this(toolbox, null, parentRegistry);
    }
 
-   public InverseDynamicsOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, DynamicsMatrixCalculator dynamicsMatrixCalculator,
+   public InverseDynamicsOptimizationControlModule(WholeBodyControlCoreToolbox toolbox,
+                                                   DynamicsMatrixCalculator dynamicsMatrixCalculator,
                                                    YoRegistry parentRegistry)
    {
       jointIndexHandler = toolbox.getJointIndexHandler();
@@ -205,6 +209,12 @@ public class InverseDynamicsOptimizationControlModule
 
       setupWrenchesEquilibriumConstraint();
       computePrivilegedJointAccelerations();
+
+      for (QPObjectiveCommand command : qpObjectiveCommands)
+      {
+         submitQPObjectiveCommandNow(command, true);
+      }
+      qpObjectiveCommands.clear();
 
       if (SETUP_JOINT_LIMIT_CONSTRAINTS)
       {
@@ -359,11 +369,23 @@ public class InverseDynamicsOptimizationControlModule
 
    public void submitQPObjectiveCommand(QPObjectiveCommand command)
    {
-      boolean success = motionQPInputCalculator.convertQPObjectiveCommand(command, motionQPInput);
+      if (command.isNullspaceProjected())
+      {
+         qpObjectiveCommands.add(command);
+      }
+      else
+      {
+         submitQPObjectiveCommandNow(command, false);
+      }
+   }
+
+   private void submitQPObjectiveCommandNow(QPObjectiveCommand command, boolean projectIntoNullspace)
+   {
+      boolean success = motionQPInputCalculator.convertQPObjectiveCommand(command, motionQPInput, projectIntoNullspace);
       if (success)
          qpSolver.addMotionInput(motionQPInput);
    }
-   
+
    public void submitSpatialAccelerationCommand(SpatialAccelerationCommand command)
    {
       boolean success = motionQPInputCalculator.convertSpatialAccelerationCommand(command, motionQPInput);

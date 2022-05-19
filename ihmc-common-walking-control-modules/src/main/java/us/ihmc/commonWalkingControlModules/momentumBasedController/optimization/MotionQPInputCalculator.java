@@ -313,14 +313,14 @@ public class MotionQPInputCalculator
       }
    }
 
-   public boolean convertQPObjectiveCommand(QPObjectiveCommand commandToConvert, QPInputTypeA qpInputToPack)
+   public boolean convertQPObjectiveCommand(QPObjectiveCommand commandToConvert, QPInputTypeA qpInputToPack, boolean projectIntoNullspace)
    {
-//      LogTools.info("-------------------------WBCC------------------------------------");
-//      LogTools.info("-------------------------WBCC------------------------------------");
-//      LogTools.info(EuclidCoreIOTools.getArrayString(", ", jointIndexHandler.getIndexedJoints(), j -> j.getName()));
-//      LogTools.info("-------------------------WBCC------------------------------------");
-//      LogTools.info("-------------------------WBCC------------------------------------");
-//      LogTools.info("-------------------------WBCC------------------------------------");
+//    LogTools.info("-------------------------WBCC------------------------------------");
+//    LogTools.info("-------------------------WBCC------------------------------------");
+//    LogTools.info(EuclidCoreIOTools.getArrayString(", ", jointIndexHandler.getIndexedJoints(), j -> j.getName()));
+//    LogTools.info("-------------------------WBCC------------------------------------");
+//    LogTools.info("-------------------------WBCC------------------------------------");
+//    LogTools.info("-------------------------WBCC------------------------------------");
       DMatrixRMaj jacobian = commandToConvert.getJacobian();
       DMatrixRMaj objective = commandToConvert.getObjective();
       DMatrixRMaj selectionMatrix = commandToConvert.getSelectionMatrix();
@@ -346,10 +346,24 @@ public class MotionQPInputCalculator
 
       CommonOps_DDRM.mult(selectionMatrix, objective, qpInputToPack.taskObjective);
 
-//      tempTaskJacobian.reshape(taskSize, jacobianCalculator.getNumberOfDegreesOfFreedom());
       CommonOps_DDRM.mult(selectionMatrix, jacobian, qpInputToPack.taskJacobian);
 
-      recordTaskJacobian(qpInputToPack.taskJacobian);
+      if (projectIntoNullspace)
+      {
+         tempTaskVelocityJacobianNative.set(qpInputToPack.taskJacobian);
+         allTaskJacobianNative.set(allTaskJacobian);
+         velocityNativeNullspaceProjector.project(tempTaskVelocityJacobianNative,
+                                                  allTaskJacobianNative,
+                                                  projectedTaskJacobian,
+                                                  nullspaceProjectionAlpha.getValue());
+         
+         projectedTaskJacobian.get(qpInputToPack.taskJacobian);
+      }
+      else
+      {
+         recordTaskJacobian(qpInputToPack.taskJacobian);
+      }
+      
       return true;
    }
 
