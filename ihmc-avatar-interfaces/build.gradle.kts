@@ -27,6 +27,7 @@ mainDependencies {
    api("us.ihmc:jinput:2.0.6-ihmc2")
    api("us.ihmc:euclid:0.17.2")
    api("us.ihmc:euclid-geometry:0.17.2")
+   api("us.ihmc:mecano-graphviz:0.10.0")
    api("us.ihmc:ihmc-yovariables:0.9.12")
    api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.8")
    api("us.ihmc:simulation-construction-set:0.21.16")
