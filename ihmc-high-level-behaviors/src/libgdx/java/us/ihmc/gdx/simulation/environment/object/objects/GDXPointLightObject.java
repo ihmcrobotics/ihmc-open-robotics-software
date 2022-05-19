@@ -6,7 +6,7 @@ import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.gdx.lighting.GDXPointLight;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObjectFactory;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 
@@ -21,7 +21,7 @@ public class GDXPointLightObject extends GDXEnvironmentObject
       super(NAME, FACTORY);
       light = new GDXPointLight();
 
-      Model model = GDXModelPrimitives.buildModel(meshBuilder -> meshBuilder.addSphere(0.1f, Color.YELLOW), "pointModel");
+      Model model = GDXModelBuilder.buildModel(meshBuilder -> meshBuilder.addSphere(0.1f, Color.YELLOW), "pointModel");
       setRealisticModel(model);
 
       Box3D collisionBox = new Box3D(0.1f, 0.1f, 0.1f);

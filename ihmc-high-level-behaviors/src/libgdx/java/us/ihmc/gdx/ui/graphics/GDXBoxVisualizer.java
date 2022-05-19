@@ -9,7 +9,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
@@ -65,7 +65,7 @@ public class GDXBoxVisualizer implements RenderableProvider
          if (lastModel != null)
             lastModel.dispose();
 
-         lastModel = GDXModelPrimitives.buildModel(meshBuilder ->
+         lastModel = GDXModelBuilder.buildModel(meshBuilder ->
          {
             double lineWidth = 0.03;
             meshBuilder.addMultiLineBox(vertices, lineWidth, color);

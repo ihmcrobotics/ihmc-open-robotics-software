@@ -28,7 +28,7 @@ public class ImGuiYoVariableClientManagerWidget
       {
          if (ImGui.button("Connect YoVariable client"))
          {
-            yoVariableClientHelper.start(hostSupplier.get(), port);
+            startYoVariableClient();
          }
       }
       else
@@ -40,5 +40,15 @@ public class ImGuiYoVariableClientManagerWidget
             yoVariableClientHelper.disconnect();
          }
       }
+   }
+
+   public void startYoVariableClient()
+   {
+      yoVariableClientHelper.start(hostSupplier.get(), port);
+   }
+
+   public void destroy()
+   {
+      yoVariableClientHelper.disconnect();
    }
 }
