@@ -92,7 +92,7 @@ public class InverseDynamicsOptimizationControlModule
 
    private final DMatrixRMaj zeroObjective = new DMatrixRMaj(0, 0);
 
-   private ArrayList<QPObjectiveCommand> qpObjectiveCommands = new ArrayList<>();
+   private final ArrayList<QPObjectiveCommand> nullspaceQPObjectiveCommands = new ArrayList<>();
 
    public InverseDynamicsOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, YoRegistry parentRegistry)
    {
@@ -210,11 +210,12 @@ public class InverseDynamicsOptimizationControlModule
       setupWrenchesEquilibriumConstraint();
       computePrivilegedJointAccelerations();
 
-      for (QPObjectiveCommand command : qpObjectiveCommands)
+      for (int i = 0; i < nullspaceQPObjectiveCommands.size(); i++)
       {
-         submitQPObjectiveCommandNow(command, true);
+         QPObjectiveCommand command = nullspaceQPObjectiveCommands.get(i);
+         submitQPObjectiveCommandNow(command);
       }
-      qpObjectiveCommands.clear();
+      nullspaceQPObjectiveCommands.clear();
 
       if (SETUP_JOINT_LIMIT_CONSTRAINTS)
       {
@@ -371,17 +372,17 @@ public class InverseDynamicsOptimizationControlModule
    {
       if (command.isNullspaceProjected())
       {
-         qpObjectiveCommands.add(command);
+         nullspaceQPObjectiveCommands.add(command);
       }
       else
       {
-         submitQPObjectiveCommandNow(command, false);
+         submitQPObjectiveCommandNow(command);
       }
    }
 
-   private void submitQPObjectiveCommandNow(QPObjectiveCommand command, boolean projectIntoNullspace)
+   private void submitQPObjectiveCommandNow(QPObjectiveCommand command)
    {
-      boolean success = motionQPInputCalculator.convertQPObjectiveCommand(command, motionQPInput, projectIntoNullspace);
+      boolean success = motionQPInputCalculator.convertQPObjectiveCommand(command, motionQPInput);
       if (success)
          qpSolver.addMotionInput(motionQPInput);
    }

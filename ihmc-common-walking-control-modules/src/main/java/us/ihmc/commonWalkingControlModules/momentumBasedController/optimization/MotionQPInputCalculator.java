@@ -313,7 +313,7 @@ public class MotionQPInputCalculator
       }
    }
 
-   public boolean convertQPObjectiveCommand(QPObjectiveCommand commandToConvert, QPInputTypeA qpInputToPack, boolean projectIntoNullspace)
+   public boolean convertQPObjectiveCommand(QPObjectiveCommand commandToConvert, QPInputTypeA qpInputToPack)
    {
 //    LogTools.info("-------------------------WBCC------------------------------------");
 //    LogTools.info("-------------------------WBCC------------------------------------");
@@ -348,7 +348,7 @@ public class MotionQPInputCalculator
 
       CommonOps_DDRM.mult(selectionMatrix, jacobian, qpInputToPack.taskJacobian);
 
-      if (projectIntoNullspace)
+      if (commandToConvert.isNullspaceProjected())
       {
          tempTaskVelocityJacobianNative.set(qpInputToPack.taskJacobian);
          allTaskJacobianNative.set(allTaskJacobian);
