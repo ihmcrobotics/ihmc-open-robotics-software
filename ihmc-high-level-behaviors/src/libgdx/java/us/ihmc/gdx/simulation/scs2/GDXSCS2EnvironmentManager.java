@@ -208,4 +208,9 @@ public class GDXSCS2EnvironmentManager
    {
       this.externalFactorySetup = externalFactorySetup;
    }
+
+   public SCS2AvatarSimulation getAvatarSimulation()
+   {
+      return avatarSimulation;
+   }
 }
