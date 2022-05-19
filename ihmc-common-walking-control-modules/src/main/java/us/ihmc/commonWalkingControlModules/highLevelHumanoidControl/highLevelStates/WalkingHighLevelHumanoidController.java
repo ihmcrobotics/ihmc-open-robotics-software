@@ -533,14 +533,16 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_ZERO);
 
       //TODO: This is hardcoded here. It should be moved to a parameter setting instead. This is not the long term place for it.
-      createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, ArmJointName.SHOULDER_PITCH, 0.0);
-      createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, ArmJointName.SHOULDER_PITCH, 0.0);
-      createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, ArmJointName.SHOULDER_ROLL, -1.2);
-      createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, ArmJointName.SHOULDER_ROLL, 1.2);
-      createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, ArmJointName.SHOULDER_YAW, -0.37);
-      createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, ArmJointName.SHOULDER_YAW, 0.37);
-      createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, ArmJointName.ELBOW_PITCH, -1.2);
-      createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, ArmJointName.ELBOW_PITCH, 1.2);
+      spineRollPrivilegedConfigurationParameters();
+      spineYawPrivilegedConfigurationParameters();
+      createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, ArmJointName.SHOULDER_PITCH, 0.1, 5, 2, 1);
+      createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, ArmJointName.SHOULDER_PITCH, -0.1, 5, 2, 1);
+      createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, ArmJointName.SHOULDER_ROLL, -1.3, 10, 4, 1);
+      createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, ArmJointName.SHOULDER_ROLL, 1.3, 10, 4, 1);
+      createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, ArmJointName.SHOULDER_YAW, -0.3, 10, 4, 1);
+      createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, ArmJointName.SHOULDER_YAW, 0.3, 10, 4, 1);
+      createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, ArmJointName.ELBOW_PITCH, -1.0, 5, 2, 1);
+      createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, ArmJointName.ELBOW_PITCH, 1.0, 5, 2, 1);
       createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, ArmJointName.WRIST_YAW, 0.0);
       createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, ArmJointName.WRIST_YAW, 0.0);
       createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, ArmJointName.WRIST_ROLL, 0.0);
@@ -582,6 +584,39 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    }
 
    
+   private OneDoFJointPrivilegedConfigurationParameters spineRollPrivilegedConfigurationParameters()
+   {
+      OneDoFJointBasics spineRoll = fullRobotModel.getOneDoFJointByName("spineRoll");            
+
+      OneDoFJointPrivilegedConfigurationParameters jointParameters = new OneDoFJointPrivilegedConfigurationParameters();
+      jointParameters.setConfigurationGain(400.0);//40.0);
+      jointParameters.setVelocityGain(60.0);//6.0);
+      jointParameters.setWeight(1);//5.0);
+      jointParameters.setMaxAcceleration(Double.POSITIVE_INFINITY);
+      jointParameters.setPrivilegedConfigurationOption(null);
+      jointParameters.setPrivilegedConfiguration(0.0);
+
+      privilegedConfigurationCommand.addJoint(spineRoll, jointParameters);
+
+      return jointParameters;
+   }
+   private OneDoFJointPrivilegedConfigurationParameters spineYawPrivilegedConfigurationParameters()
+   {
+      OneDoFJointBasics spineYaw = fullRobotModel.getOneDoFJointByName("spineYaw");            
+
+      OneDoFJointPrivilegedConfigurationParameters jointParameters = new OneDoFJointPrivilegedConfigurationParameters();
+      jointParameters.setConfigurationGain(400.0);//40.0);
+      jointParameters.setVelocityGain(60.0);//6.0);
+      jointParameters.setWeight(1);//5.0);
+      jointParameters.setMaxAcceleration(Double.POSITIVE_INFINITY);
+      jointParameters.setPrivilegedConfigurationOption(null);
+      jointParameters.setPrivilegedConfiguration(0.0);
+
+      privilegedConfigurationCommand.addJoint(spineYaw, jointParameters);
+
+      return jointParameters;
+   }
+
    private OneDoFJointPrivilegedConfigurationParameters createAndAddJointPrivilegedConfigurationParameters(RobotSide robotSide, ArmJointName armJointName, double privilegedAngle)
    {
       OneDoFJointBasics armJoint = fullRobotModel.getArmJoint(robotSide, armJointName);            
@@ -589,7 +624,28 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       OneDoFJointPrivilegedConfigurationParameters jointParameters = new OneDoFJointPrivilegedConfigurationParameters();
       jointParameters.setConfigurationGain(40.0);//40.0);
       jointParameters.setVelocityGain(6.0);//6.0);
-      jointParameters.setWeight(0.5);//5.0);
+      jointParameters.setWeight(1);//5.0);
+      jointParameters.setMaxAcceleration(Double.POSITIVE_INFINITY);
+      jointParameters.setPrivilegedConfigurationOption(null);
+      jointParameters.setPrivilegedConfiguration(privilegedAngle);
+
+      privilegedConfigurationCommand.addJoint(armJoint, jointParameters);
+
+      return jointParameters;
+   }
+
+   private OneDoFJointPrivilegedConfigurationParameters createAndAddJointPrivilegedConfigurationParameters(RobotSide robotSide, ArmJointName armJointName, 
+                                                                                                           double privilegedAngle, 
+                                                                                                           double pgain,
+                                                                                                           double dgain,
+                                                                                                           double weight)
+   {
+      OneDoFJointBasics armJoint = fullRobotModel.getArmJoint(robotSide, armJointName);            
+
+      OneDoFJointPrivilegedConfigurationParameters jointParameters = new OneDoFJointPrivilegedConfigurationParameters();
+      jointParameters.setConfigurationGain(pgain);//40.0);
+      jointParameters.setVelocityGain(dgain);//6.0);
+      jointParameters.setWeight(weight);//5.0);
       jointParameters.setMaxAcceleration(Double.POSITIVE_INFINITY);
       jointParameters.setPrivilegedConfigurationOption(null);
       jointParameters.setPrivilegedConfiguration(privilegedAngle);
