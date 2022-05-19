@@ -1,6 +1,7 @@
 package us.ihmc.gdx.logging;
 
 import imgui.ImGui;
+import org.bytedeco.ffmpeg.avutil.AVRational;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.thread.ThreadTools;
@@ -18,10 +19,13 @@ import us.ihmc.tools.time.FrequencyCalculator;
 import java.nio.ByteOrder;
 import java.util.Random;
 
+import static org.bytedeco.ffmpeg.global.avutil.av_q2d;
+
 public class GDXFFMPEGLoggingDemo
 {
    public static final int WIDTH = 64;
    public static final int HEIGHT = 64;
+   public static final int FRAMERATE = 30;
    public static final int NICE_COLOR = 0xFFAA6600;
    private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/main/resources");
    private final Activator nativesLoadedActivator;
@@ -54,8 +58,13 @@ public class GDXFFMPEGLoggingDemo
                @Override
                public void run()
                {
+                  AVRational msBetweenFrames = new AVRational();
+                  msBetweenFrames.num(1);
+                  msBetweenFrames.den(FRAMERATE);
+
                   while (true) {
-                     rand.nextBytes(data);
+                     if (index % 10 == 0)
+                        rand.nextBytes(data);
 
                      if (imagePanel != null)
                      {
@@ -69,7 +78,8 @@ public class GDXFFMPEGLoggingDemo
                         index++;
                      }
 
-                     ThreadTools.sleep(500);
+                     //Using an AVRational helps ensure that we calculate fps the same way the logger does
+                     ThreadTools.sleep((int) (av_q2d(msBetweenFrames) * 1000));
                   }
                }
             }, "ByteDeco Image Updater");
