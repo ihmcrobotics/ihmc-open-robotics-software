@@ -5,35 +5,29 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import controller_msgs.msg.dds.ChestTrajectoryMessage;
+import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.referenceFrame.FrameYawPitchRoll;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 
-public class GDXChestOrientationAction implements GDXBehaviorAction
+public class GDXPelvisHeightAction implements GDXBehaviorAction
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private ROS2ControllerHelper ros2ControllerHelper;
-   private ROS2SyncedRobotModel syncedRobot;
    private final ImBoolean selected = new ImBoolean();
-   private final ImDouble yaw = new ImDouble();
-   private final ImDouble pitch = new ImDouble();
-   private final ImDouble roll = new ImDouble();
+   private final ImDouble heightInWorld = new ImDouble();
    private final ImDouble trajectoryTime = new ImDouble(4.0);
 
-   public void create(ROS2ControllerHelper ros2ControllerHelper, ROS2SyncedRobotModel syncedRobot)
+   public void create(ROS2ControllerHelper ros2ControllerHelper)
    {
       this.ros2ControllerHelper = ros2ControllerHelper;
-      this.syncedRobot = syncedRobot;
    }
 
    @Override
@@ -58,11 +52,7 @@ public class GDXChestOrientationAction implements GDXBehaviorAction
    public void renderImGuiWidgets()
    {
       ImGui.pushItemWidth(80.0f);
-      ImGui.inputDouble(labels.get("Yaw"), yaw);
-      ImGui.sameLine();
-      ImGui.inputDouble(labels.get("Pitch"), pitch);
-      ImGui.sameLine();
-      ImGui.inputDouble(labels.get("Roll"), roll);
+      ImGui.inputDouble(labels.get("Height in world"), heightInWorld);
       ImGui.inputDouble(labels.get("Trajectory time"), trajectoryTime);
       ImGui.popItemWidth();
    }
@@ -76,36 +66,29 @@ public class GDXChestOrientationAction implements GDXBehaviorAction
    public void saveToFile(ObjectNode jsonNode)
    {
       jsonNode.put("trajectoryTime", trajectoryTime.get());
-      jsonNode.put("yaw", yaw.get());
-      jsonNode.put("pitch", pitch.get());
-      jsonNode.put("roll", roll.get());
+      jsonNode.put("heightInWorld", heightInWorld.get());
    }
 
    @Override
    public void loadFromFile(JsonNode jsonNode)
    {
       trajectoryTime.set(jsonNode.get("trajectoryTime").asDouble());
-      yaw.set(jsonNode.get("yaw").asDouble());
-      pitch.set(jsonNode.get("pitch").asDouble());
-      roll.set(jsonNode.get("roll").asDouble());
+      heightInWorld.set(jsonNode.get("heightInWorld").asDouble());
    }
 
    @Override
    public void performAction()
    {
-      FrameYawPitchRoll frameChestYawPitchRoll = new FrameYawPitchRoll(syncedRobot.getReferenceFrames().getChestFrame());
-      frameChestYawPitchRoll.changeFrame(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
-      frameChestYawPitchRoll.setYawPitchRoll(yaw.get(), pitch.get(), roll.get());
-      frameChestYawPitchRoll.changeFrame(ReferenceFrame.getWorldFrame());
-
-      ChestTrajectoryMessage message = new ChestTrajectoryMessage();
-      message.getSo3Trajectory()
-             .set(HumanoidMessageTools.createSO3TrajectoryMessage(trajectoryTime.get(),
-                                                                  frameChestYawPitchRoll,
-                                                                  EuclidCoreTools.zeroVector3D,
-                                                                  syncedRobot.getReferenceFrames().getPelvisZUpFrame()));
+      PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage();
+      message.getEuclideanTrajectory()
+             .set(HumanoidMessageTools.createEuclideanTrajectoryMessage(trajectoryTime.get(),
+                                                                        new Point3D(0.0, 0.0, heightInWorld.get()),
+                                                                        ReferenceFrame.getWorldFrame()));
       long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
-      message.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
+      message.getEuclideanTrajectory().getFrameInformation().setDataReferenceFrameId(frameId);
+      message.getEuclideanTrajectory().getSelectionMatrix().setXSelected(false);
+      message.getEuclideanTrajectory().getSelectionMatrix().setYSelected(false);
+      message.getEuclideanTrajectory().getSelectionMatrix().setZSelected(true);
 
       ros2ControllerHelper.publishToController(message);
    }
@@ -125,6 +108,6 @@ public class GDXChestOrientationAction implements GDXBehaviorAction
    @Override
    public String getNameForDisplay()
    {
-      return "Chest Orientation";
+      return "Pelvis Height";
    }
 }
