@@ -17,7 +17,6 @@ import us.ihmc.perception.BytedecoImage;
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.nio.ByteOrder;
 
 /**
  * Ouster Firmware User Manual: https://data.ouster.io/downloads/software-user-manual/firmware-user-manual-v2.3.0.pdf

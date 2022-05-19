@@ -14,9 +14,7 @@ import java.nio.ByteOrder;
 
 public class GDXNettyOusterUI
 {
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
-                                                              "ihmc-open-robotics-software",
-                                                              "ihmc-high-level-behaviors/src/main/resources");
+   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/main/resources");
    private final Activator nativesLoadedActivator;
    private NettyOuster ouster;
    private GDXCVImagePanel imagePanel;
@@ -39,7 +37,8 @@ public class GDXNettyOusterUI
          }
 
          @Override
-         public void render() {
+         public void render()
+         {
             if (nativesLoadedActivator.poll())
             {
                if (nativesLoadedActivator.isNewlyActivated())
