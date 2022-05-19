@@ -16,7 +16,7 @@ public class GDXMediumCinderBlockRoughed extends GDXEnvironmentObject
    public GDXMediumCinderBlockRoughed()
    {
       super(NAME, FACTORY);
-      Model realisticModel = GDXModelLoader.loadG3DModel("environmentObjects/mediumCinderBlockRoughed/MediumCinderBlockRoughed.g3dj");
+      Model realisticModel = GDXModelLoader.load("environmentObjects/mediumCinderBlockRoughed/MediumCinderBlockRoughed.g3dj");
       setRealisticModel(realisticModel);
 
       double height = 0.141535; // these were measured in blender

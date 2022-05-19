@@ -18,6 +18,7 @@ import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobo
 import us.ihmc.tools.thread.StatelessNotification;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 public class GDXSCS2EnvironmentManager
 {
@@ -40,6 +41,7 @@ public class GDXSCS2EnvironmentManager
    private volatile boolean started = false;
    private ArrayList<Runnable> onSessionStartedRunnables = new ArrayList<>();
    private final StatelessNotification destroyedNotification = new StatelessNotification();
+   private Consumer<SCS2AvatarSimulationFactory> externalFactorySetup = null;
 
    public void create(GDXImGuiBasedUI baseUI, DRCRobotModel robotModel, CommunicationMode ros2CommunicationMode)
    {
@@ -126,6 +128,8 @@ public class GDXSCS2EnvironmentManager
          avatarSimulationFactory.setUseBulletPhysicsEngine(true);
          avatarSimulationFactory.setUseRobotDefinitionCollisions(true);
          avatarSimulationFactory.setShowGUI(false);
+         if (externalFactorySetup != null)
+            externalFactorySetup.accept(avatarSimulationFactory);
 
          avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
          avatarSimulation.setSystemExitOnDestroy(false);
@@ -198,5 +202,15 @@ public class GDXSCS2EnvironmentManager
    public ArrayList<Runnable> getOnSessionStartedRunnables()
    {
       return onSessionStartedRunnables;
+   }
+
+   public void setExternalFactorySetup(Consumer<SCS2AvatarSimulationFactory> externalFactorySetup)
+   {
+      this.externalFactorySetup = externalFactorySetup;
+   }
+
+   public SCS2AvatarSimulation getAvatarSimulation()
+   {
+      return avatarSimulation;
    }
 }
