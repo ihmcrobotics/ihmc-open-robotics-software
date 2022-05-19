@@ -882,8 +882,10 @@ public class ReachabilityMapVisualizer
          for (int voxelIndex = 0; voxelIndex < reachabilityMap.getNumberOfVoxels(); voxelIndex++)
          {
             Voxel3DData voxel = reachabilityMap.getVoxel(voxelIndex);
-            if (voxel == null || !bbx.isInsideInclusive(voxel.getPosition()))
+            if (voxel == null)
                continue;
+
+            boolean insideBBX = bbx.isInsideInclusive(voxel.getPosition());
 
             double[] voxelValues = new double[voxel.getNumberOfRays()];
             double voxelMin = Double.POSITIVE_INFINITY;
@@ -901,8 +903,11 @@ public class ReachabilityMapVisualizer
             { // Otherwise the voxel is pretty much not reachable
                min = Math.min(min, voxelMin);
                max = Math.max(max, voxelMax);
-               savedVoxels.add(voxel);
-               savedValues.add(voxelValues);
+               if (insideBBX)
+               {
+                  savedVoxels.add(voxel);
+                  savedValues.add(voxelValues);
+               }
             }
          }
 
