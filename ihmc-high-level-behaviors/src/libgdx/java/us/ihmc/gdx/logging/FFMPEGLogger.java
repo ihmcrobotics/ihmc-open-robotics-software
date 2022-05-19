@@ -14,12 +14,13 @@ import static org.bytedeco.ffmpeg.global.swresample.*;
 
 import org.bytedeco.ffmpeg.avutil.AVRational;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.BytedecoImage;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class GDXFFMPEGLogger
+public class FFMPEGLogger
 {
    //Constants
    private static final int FRAMERATE = 30;
@@ -36,22 +37,22 @@ public class GDXFFMPEGLogger
    /***
     * Note - lossless is true by default
     */
-   GDXFFMPEGLogger(int width, int height) {
+   FFMPEGLogger(int width, int height) {
       this(width, height, true);
    }
 
    /***
     * Note - lossless is true by default
     */
-   GDXFFMPEGLogger(int width, int height, String logName) {
+   FFMPEGLogger(int width, int height, String logName) {
       this(width, height, true, "Video");
    }
 
-   GDXFFMPEGLogger(int width, int height, boolean lossless) {
+   FFMPEGLogger(int width, int height, boolean lossless) {
       this(width, height, lossless, "Video");
    }
 
-   GDXFFMPEGLogger(int width, int height, boolean lossless, String logName) {
+   FFMPEGLogger(int width, int height, boolean lossless, String logName) {
       fileName = logDirectory + dateFormat.format(new Date()) + "_" + logName + "_Log.webm";
 
       av_dict_set(dict, "lossless", lossless ? "1" : "0", 0); //TODO this is maybe wrong
@@ -99,7 +100,7 @@ public class GDXFFMPEGLogger
     * The first time a frame is put will take longer than the others because of initialization
     * This method DOES NOT handle disposal of frames!
     */
-   public boolean put() {
+   public boolean put(BytedecoImage image) {
       if (isClosed)
          return false;
 

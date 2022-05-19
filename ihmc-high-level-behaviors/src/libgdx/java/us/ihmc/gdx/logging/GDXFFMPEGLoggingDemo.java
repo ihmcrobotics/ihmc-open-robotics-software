@@ -10,7 +10,6 @@ import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.perception.GDXCVImagePanel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.tools.thread.Activator;
@@ -34,6 +33,7 @@ public class GDXFFMPEGLoggingDemo
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
    private BytedecoImage image;
+   private FFMPEGLogger logger;
 
    public GDXFFMPEGLoggingDemo()
    {
@@ -96,6 +96,8 @@ public class GDXFFMPEGLoggingDemo
 
                   baseUI.getImGuiPanelManager().addPanel(imagePanel.getVideoPanel());
                   baseUI.getPerspectiveManager().reloadPerspective();
+
+                  logger = new FFMPEGLogger(WIDTH, HEIGHT);
                }
 
                frameReadFrequency.ping();
