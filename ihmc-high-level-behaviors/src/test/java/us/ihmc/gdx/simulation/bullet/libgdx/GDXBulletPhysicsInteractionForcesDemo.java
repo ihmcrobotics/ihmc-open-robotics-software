@@ -23,7 +23,7 @@ import us.ihmc.gdx.simulation.bullet.GDXBulletTools;
 import us.ihmc.gdx.simulation.environment.GDXEnvironmentBuilder;
 import us.ihmc.gdx.simulation.environment.object.objects.GDXLabFloorObject;
 import us.ihmc.gdx.simulation.environment.object.objects.GDXMediumCinderBlockRoughed;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.yo.ImPlotYoPlot;
@@ -327,17 +327,17 @@ public class GDXBulletPhysicsInteractionForcesDemo
 
          private ModelInstance createSphere()
          {
-            ModelInstance modelInstance = GDXModelPrimitives.createSphere(0.01f, Color.RED);
+            ModelInstance modelInstance = GDXModelBuilder.createSphere(0.01f, Color.RED);
 //            GDXTools.setTransparency(modelInstance, 0.8f);
             return modelInstance;
          }
 
          private ModelInstance createArrow()
          {
-//            ModelInstance modelInstance = GDXModelPrimitives.createSphere(0.01f, Color.PINK);
+//            ModelInstance modelInstance = GDXModelBuilder.createSphere(0.01f, Color.PINK);
             float length = 0.2f;
             Color color = Color.PINK;
-            ModelInstance modelInstance = GDXModelPrimitives.buildModelInstance(meshBuilder ->
+            ModelInstance modelInstance = GDXModelBuilder.buildModelInstance(meshBuilder ->
             {
                double coneHeight = 0.10 * length;
                double cylinderLength = length - coneHeight;

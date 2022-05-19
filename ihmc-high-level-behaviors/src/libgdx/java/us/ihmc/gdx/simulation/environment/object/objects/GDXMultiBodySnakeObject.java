@@ -17,7 +17,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.simulation.bullet.GDXBulletPhysicsManager;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObjectFactory;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 
 import java.util.ArrayList;
@@ -39,7 +39,7 @@ public class GDXMultiBodySnakeObject extends GDXEnvironmentObject
    {
       super(NAME, FACTORY);
 
-      Model realisticModel = GDXModelPrimitives.createBox(linkHalfExtents.x * 2.0f, linkHalfExtents.y * 2.0f, linkHalfExtents.z * 2.0f, Color.BLUE).model;
+      Model realisticModel = GDXModelBuilder.createBox(linkHalfExtents.x * 2.0f, linkHalfExtents.y * 2.0f, linkHalfExtents.z * 2.0f, Color.BLUE).model;
       setRealisticModel(realisticModel);
 
       setMass(1.0f);
@@ -104,7 +104,7 @@ public class GDXMultiBodySnakeObject extends GDXEnvironmentObject
          multiBody.getLink(linkIndex).setCollider(linkCollider);
          linkColliders.add(linkCollider);
 
-         linkModelInstances.add(GDXModelPrimitives.createBox(linkHalfExtents.x * 2.0f, linkHalfExtents.y * 2.0f, linkHalfExtents.z * 2.0f, Color.RED));
+         linkModelInstances.add(GDXModelBuilder.createBox(linkHalfExtents.x * 2.0f, linkHalfExtents.y * 2.0f, linkHalfExtents.z * 2.0f, Color.RED));
       }
 
       multiBody.finalizeMultiDof();
