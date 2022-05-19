@@ -37,6 +37,11 @@ public interface UIParameters
 
    public abstract Transform getJmeTransformWristToHand(RobotSide side);
 
+   public default RigidBodyTransform getHandGraphicToHandFrameTransform(RobotSide side)
+   {
+      return new RigidBodyTransform();
+   }
+
    public default RobotCollisionModel getSelectionModel()
    {
       return null;

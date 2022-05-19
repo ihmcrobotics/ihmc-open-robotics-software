@@ -13,7 +13,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.simulation.bullet.GDXBulletPhysicsManager;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 
@@ -42,7 +42,7 @@ public class GDXLibGDXBulletPhysicsDemo3
             float groundSizeX = 1000.0f;
             float groundSizeY = 1000.0f;
             float groundSizeZ = 0.5f;
-            ModelInstance groundModelInstance = GDXModelPrimitives.createBox(groundSizeX, groundSizeY, groundSizeZ, Color.DARK_GRAY);
+            ModelInstance groundModelInstance = GDXModelBuilder.createBox(groundSizeX, groundSizeY, groundSizeZ, Color.DARK_GRAY);
             RigidBodyTransform groundTransform = new RigidBodyTransform(new YawPitchRoll(0.0,
                                                                                          Math.toRadians(15.0),
                                                                                          0.0),
@@ -66,7 +66,7 @@ public class GDXLibGDXBulletPhysicsDemo3
                x += 0.02;
                y = 0.0;
                double z = boxSizeZ * 1.05 * (i + 1.0);
-               ModelInstance boxModelInstance = GDXModelPrimitives.createBox(boxSizeX, boxSizeY, boxSizeZ, Color.RED);
+               ModelInstance boxModelInstance = GDXModelBuilder.createBox(boxSizeX, boxSizeY, boxSizeZ, Color.RED);
                double yaw = 0.0;
                double pitch = RandomNumbers.nextDouble(random, -Math.PI / 90.0, Math.PI / 90.0);
                double roll = RandomNumbers.nextDouble(random, -Math.PI / 90.0, Math.PI / 90.0);

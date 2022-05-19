@@ -79,6 +79,7 @@ public class ControllerAPIDefinition
       commands.add(CenterOfMassTrajectoryCommand.class);
       commands.add(PlanarRegionsListCommand.class);
       commands.add(StepConstraintRegionCommand.class);
+      commands.add(StepConstraintsListCommand.class);
       commands.add(HandWrenchTrajectoryCommand.class);
 
       /** Commands supported by multi-contact controller, not in this repo */
