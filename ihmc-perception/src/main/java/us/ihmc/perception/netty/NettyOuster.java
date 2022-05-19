@@ -21,7 +21,7 @@ import java.nio.ByteOrder;
 
 /**
  * Ouster Firmware User Manual: https://data.ouster.io/downloads/software-user-manual/firmware-user-manual-v2.3.0.pdf
- *
+ * 
  * To test, use the GNU netcat command:
  * netcat -ul 7502
  */
@@ -54,8 +54,10 @@ public class NettyOuster
          @Override
          protected void channelRead0(ChannelHandlerContext context, DatagramPacket packet)
          {
-            if (!tcpInitialized) {
-               if (!configureTCP(packet.sender().getAddress().toString().substring(1))) { //Address looks like "/192.168.x.x" so we just discard the '/'
+            if (!tcpInitialized)
+            {
+               if (!configureTCP(packet.sender().getAddress().toString().substring(1)))
+               { //Address looks like "/192.168.x.x" so we just discard the '/'
                   LogTools.error("Failed to initialize Ouster using TCP API.");
                   return;
                }
@@ -67,7 +69,7 @@ public class NettyOuster
             ByteBuf bufferedData = packet.content().readBytes(actualLidarPacketSize);
 
             int i = 0;
-            for (int colNumber = 0; colNumber < columnsPerPacket; colNumber++)
+            for (int columnNumber = 0; columnNumber < columnsPerPacket; columnNumber++)
             {
                i += 8; //Timestamp
                int measurementID = (int) extractValue(bufferedData, i, 2);
@@ -107,17 +109,20 @@ public class NettyOuster
       bootstrap.option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(MAX_PACKET_SIZE));
    }
 
-   private void buildImage() {
+   private void buildImage()
+   {
       image = new BytedecoImage(columnsPerFrame, pixelsPerColumn, opencv_core.CV_32FC1);
       image.getBytedecoOpenCVMat().setTo(new Mat(0.0f)); //Initialize matrix to 0
    }
 
-   private boolean configureTCP(String host) {
+   private boolean configureTCP(String host)
+   {
       LogTools.info("Attempting to query host " + host);
 
       String jsonResponse = "";
       LogTools.info("Binding to TCP port " + TCP_PORT);
-      try (Socket socket = new Socket(host, TCP_PORT)) {
+      try (Socket socket = new Socket(host, TCP_PORT))
+      {
          OutputStream output = socket.getOutputStream();
          PrintWriter writer = new PrintWriter(output, true);
          writer.println("get_lidar_data_format");
@@ -126,14 +131,20 @@ public class NettyOuster
          BufferedReader reader = new BufferedReader(new InputStreamReader(input));
 
          jsonResponse = reader.readLine();
-      } catch (UnknownHostException ex) {
+      }
+      catch (UnknownHostException unknownHostException)
+      {
          LogTools.error("Ouster host could not be found.");
          return false;
-      } catch (IOException ex) {
-         LogTools.error(ex.getMessage());
-         LogTools.error(ex.getStackTrace());
+      }
+      catch (IOException ioException)
+      {
+         LogTools.error(ioException.getMessage());
+         LogTools.error(ioException.getStackTrace());
          return false;
-      } finally {
+      }
+      finally
+      {
          LogTools.info("Unbound from TCP port " + TCP_PORT);
       }
 
@@ -147,14 +158,15 @@ public class NettyOuster
          columnsPerPacket = root.get("columns_per_packet").asInt();
          pixelShift = new int[pixelsPerColumn];
 
-         JsonNode pShift = root.get("pixel_shift_by_row");
-         for(int i = 0; i < pixelsPerColumn; i++) {
-            pixelShift[i] = pShift.get(i).asInt();
+         JsonNode pixelShiftNode = root.get("pixel_shift_by_row");
+         for (int i = 0; i < pixelsPerColumn; i++)
+         {
+            pixelShift[i] = pixelShiftNode.get(i).asInt();
          }
       }
-      catch (JsonProcessingException ex)
+      catch (JsonProcessingException jsonProcessingException)
       {
-         LogTools.error(ex.getMessage());
+         LogTools.error(jsonProcessingException.getMessage());
          return false;
       }
 
@@ -165,15 +177,15 @@ public class NettyOuster
    /**
     * Java doesn't have support for unsigned 32-bit integers* so we have to use a long instead
     */
-   private long extractValue(ByteBuf data, int index, int num)
+   private long extractValue(ByteBuf nettyByteBuf, int index, int numberOfBytes)
    {
       int shift = index % 4;
       int modIndex = index - (index % 4);
 
       //Use little endian accessors (getUnsignedIntLE, not getUnsignedInt)
-      long val = data.getUnsignedIntLE(modIndex);
+      long val = nettyByteBuf.getUnsignedIntLE(modIndex);
       val >>= shift;
-      switch (num)
+      switch (numberOfBytes)
       {
          case 1:
             val = val & 0xFF;
@@ -184,7 +196,7 @@ public class NettyOuster
          case 4:
             break;
          case 8:
-            val += data.getUnsignedIntLE(modIndex + 4) << 32;
+            val += nettyByteBuf.getUnsignedIntLE(modIndex + 4) << 32;
             break;
          default:
             return -1;
