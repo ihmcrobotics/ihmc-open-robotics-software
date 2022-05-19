@@ -46,6 +46,11 @@ public class MultiContactScriptPostProcessor
 
    public WholeBodyJointspaceTrajectoryMessage process1(List<KinematicsToolboxSnapshotDescription> rawScript, boolean solveForTimes)
    {
+      return process1(rawScript, solveForTimes, null);
+   }
+
+   public WholeBodyJointspaceTrajectoryMessage process1(List<KinematicsToolboxSnapshotDescription> rawScript, boolean solveForTimes, TDoubleArrayList waypointTimes)
+   {
       checkJointNameHash(rawScript);
       List<KinematicsToolboxOutputStatus> desiredRobotConfigurations = rawScript.stream().map(item -> item.getIkSolution()).collect(Collectors.toList());
       KinematicsToolboxOutputStatus startDesiredConfiguration = desiredRobotConfigurations.get(0);
@@ -82,13 +87,13 @@ public class MultiContactScriptPostProcessor
       }
       else
       {
-         trajectoryPointOptimizer.computeForFixedTime(new TDoubleArrayList(IntStream.range(1, numberOfConfigurations - 1)
-                                                                                    .mapToDouble(i -> (double) i / (numberOfConfigurations - 1))
-                                                                                    .toArray()));
+         if (waypointTimes == null)
+            waypointTimes = new TDoubleArrayList(IntStream.range(1, numberOfConfigurations - 1).mapToDouble(i -> (double) i / (numberOfConfigurations - 1)).toArray());
+         trajectoryPointOptimizer.computeForFixedTime(waypointTimes);
       }
 
       WholeBodyJointspaceTrajectoryMessage message = new WholeBodyJointspaceTrajectoryMessage();
-      double trajectoryTimeOffset = 0.5;
+      double trajectoryTimeOffset = 0.75;
       double totalTrajectoryTime = durationPerKeyframe * numberOfConfigurations;
 
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
