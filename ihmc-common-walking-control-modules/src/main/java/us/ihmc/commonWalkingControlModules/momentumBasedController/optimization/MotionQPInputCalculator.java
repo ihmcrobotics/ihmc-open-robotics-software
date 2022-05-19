@@ -393,7 +393,7 @@ public class MotionQPInputCalculator
       }
    }
 
-   public boolean convertQPObjectiveCommand(QPObjectiveCommand commandToConvert, QPInputTypeA qpInputToPack, boolean projectIntoNullspace)
+   public boolean convertQPObjectiveCommand(QPObjectiveCommand commandToConvert, QPInputTypeA qpInputToPack)
    {
       DMatrixRMaj jacobian = commandToConvert.getJacobian();
       DMatrixRMaj objective = commandToConvert.getObjective();
@@ -423,7 +423,7 @@ public class MotionQPInputCalculator
       tempTaskJacobian.reshape(taskSize, jacobianCalculator.getNumberOfDegreesOfFreedom());
       CommonOps_DDRM.mult(selectionMatrix, jacobian, tempTaskJacobian);
 
-      if (projectIntoNullspace)
+      if (commandToConvert.isNullspaceProjected())
       {
          tempTaskVelocityJacobianNative.set(qpInputToPack.taskJacobian);
          allTaskJacobianNative.set(allTaskJacobian);
