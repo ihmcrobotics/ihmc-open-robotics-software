@@ -14,7 +14,6 @@ import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
@@ -24,7 +23,6 @@ import us.ihmc.gdx.ui.graphics.GDXSpatialVectorArrows;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.physics.Collidable;
@@ -159,7 +157,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
                ForceSensorDefinition[] forceSensorDefinitions = syncedRobot.getFullRobotModel().getForceSensorDefinitions();
                for (int i = 0; i < forceSensorDefinitions.length; i++)
                {
-                  if (wristForceSensorNames.containsValue(side) && wristForceSensorNames.get(side).equals(forceSensorDefinitions[i].getSensorName()))
+                  if (wristForceSensorNames.containsKey(side) && wristForceSensorNames.get(side).equals(forceSensorDefinitions[i].getSensorName()))
                   {
 //                     wristWrenchArrows.put(side, new GDXSpatialVectorArrows(forceSensorDefinitions[i].getSensorFrame(), i));
                      wristWrenchArrows.put(side, new GDXSpatialVectorArrows(forceSensorDefinitions[i].getSensorFrame(),
@@ -189,17 +187,14 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
 
          walkPathControlRing.update();
 
-//         for (RobotSide side : RobotSide.values)
-//         {
+         for (RobotSide side : wristWrenchArrows.sides())
+         {
 //            GDXSpatialVectorArrows wristArrows = wristWrenchArrows.get(side);
 //            if (syncedRobot.getForceSensorData().size() > wristArrows.getIndexOfSensor())
 //            {
 //               SpatialVectorMessage forceSensorData = syncedRobot.getForceSensorData().get(wristArrows.getIndexOfSensor());
 //               wristArrows.update(forceSensorData.getLinearPart(), forceSensorData.getAngularPart());
 //            }
-//         }
-         for (RobotSide side : wristWrenchArrows.sides())
-         {
             wristWrenchArrows.get(side).updateFromYoVariables();
          }
       }
