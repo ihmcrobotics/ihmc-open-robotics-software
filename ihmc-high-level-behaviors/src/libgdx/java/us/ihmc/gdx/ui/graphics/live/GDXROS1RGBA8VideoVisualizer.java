@@ -1,13 +1,6 @@
 package us.ihmc.gdx.ui.graphics.live;
 
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import imgui.internal.ImGui;
-import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.opencv_core.Mat;
-import org.jboss.netty.buffer.ChannelBuffer;
 import sensor_msgs.Image;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiVideoPanel;
@@ -16,25 +9,20 @@ import us.ihmc.gdx.ui.visualizers.ImGuiGDXROS1VisualizerInterface;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
+import us.ihmc.tools.thread.ZeroCopySwapReference;
 import us.ihmc.utilities.ros.RosNodeInterface;
-import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
-
-import java.nio.ByteBuffer;
 
 public class GDXROS1RGBA8VideoVisualizer extends ImGuiGDXVisualizer implements ImGuiGDXROS1VisualizerInterface
 {
    private AbstractRosTopicSubscriber<Image> subscriber;
    private final String topic;
    private boolean currentlySubscribed = false;
-   private Mat rgba8Mat;
-   private boolean needNewTexture = false;
-   private BytePointer rgba8888BytePointer;
    private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
    private final ResettableExceptionHandlingExecutorService threadQueue;
-   private Pixmap pixmap;
-   private Texture texture;
    private final ImGuiVideoPanel videoPanel;
+   private final ZeroCopySwapReference<GDXROS1RGBA8VideoVisualizerData> dataSwapReferenceManager
+         = new ZeroCopySwapReference<>(GDXROS1RGBA8VideoVisualizerData::new);
 
    public GDXROS1RGBA8VideoVisualizer(String title, String topic)
    {
@@ -70,33 +58,10 @@ public class GDXROS1RGBA8VideoVisualizer extends ImGuiGDXVisualizer implements I
 
    private void processIncomingMessageOnThread(Image image)
    {
-      ChannelBuffer nettyChannelBuffer = image.getData();
-
-      int imageWidth = image.getWidth();
-      int imageHeight = image.getHeight();
-
-      updateImageDimensions(imageWidth, imageHeight);
-      ByteBuffer inputByteBuffer = RosTools.sliceNettyBuffer(nettyChannelBuffer);
-      for (int i = 0; i < inputByteBuffer.limit(); i++)
+      dataSwapReferenceManager.accessOnLowPriorityThread(data ->
       {
-         rgba8888BytePointer.put(i, inputByteBuffer.get());
-      }
-   }
-
-   protected void updateImageDimensions(int imageWidth, int imageHeight)
-   {
-      if (rgba8Mat == null || pixmap.getWidth() != imageWidth || pixmap.getHeight() != imageHeight)
-      {
-         if (pixmap != null)
-         {
-            pixmap.dispose();
-         }
-
-         pixmap = new Pixmap(imageWidth, imageHeight, Pixmap.Format.RGBA8888);
-         rgba8888BytePointer = new BytePointer(pixmap.getPixels());
-         rgba8Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, rgba8888BytePointer);
-         needNewTexture = true;
-      }
+         data.updateOnMessageProcessingThread(image);
+      });
    }
 
    @Override
@@ -105,25 +70,10 @@ public class GDXROS1RGBA8VideoVisualizer extends ImGuiGDXVisualizer implements I
       super.update();
       if (isActive())
       {
-         synchronized (this)
+         dataSwapReferenceManager.accessOnLowPriorityThread(data ->
          {
-            if (rgba8Mat != null)
-            {
-               if (texture == null || needNewTexture)
-               {
-                  needNewTexture = false;
-                  if (texture != null)
-                  {
-                     texture.dispose();
-                  }
-
-                  texture = new Texture(new PixmapTextureData(pixmap, null, false, false));
-                  videoPanel.setTexture(texture);
-               }
-
-               texture.draw(pixmap, 0, 0);
-            }
-         }
+            data.updateOnUIThread(videoPanel);
+         });
       }
    }
 
