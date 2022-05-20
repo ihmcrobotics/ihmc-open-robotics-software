@@ -78,6 +78,9 @@ public class GDXFFMPEGLoggingDemo
                            image.getBackingDirectByteBuffer().putInt((WIDTH + i) * 4, d ? NICE_COLOR : 0xFF000000);
                         }
 
+                        if (logger != null)
+                           logger.put(image);
+
                         index++;
                      }
 

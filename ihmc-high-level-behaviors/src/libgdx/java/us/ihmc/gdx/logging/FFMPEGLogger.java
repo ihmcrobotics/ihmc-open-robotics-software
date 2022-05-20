@@ -3,6 +3,7 @@ package us.ihmc.gdx.logging;
 import org.bytedeco.ffmpeg.avcodec.AVCodec;
 import org.bytedeco.ffmpeg.avcodec.AVCodecContext;
 import org.bytedeco.ffmpeg.avformat.AVFormatContext;
+import org.bytedeco.ffmpeg.avformat.AVOutputFormat;
 import org.bytedeco.ffmpeg.avutil.AVDictionary;
 import org.bytedeco.ffmpeg.avutil.AVFrame;
 
@@ -72,8 +73,8 @@ public class FFMPEGLogger
 
       // Output context
       avFormatContext = new AVFormatContext();
-      int returnCode = avformat.avformat_alloc_output_context2(avFormatContext, null, null, fileName);
-      if (returnCode != 0)
+      int returnCode = avformat.avformat_alloc_output_context2(avFormatContext, null, "webm", fileName);
+      if (returnCode != 0 || avFormatContext.isNull())
       {
          LogTools.error("{}: Failed to find output format webm (does this computer support webm?). The logger will not begin.",
                         FFMPEGTools.getErrorCodeString(returnCode));
@@ -81,11 +82,21 @@ public class FFMPEGLogger
          return;
       }
 
+      AVOutputFormat outputFormat = avFormatContext.oformat();
+
+      LogTools.debug("Codec ID: " + outputFormat.video_codec());
+
       // Add video stream
       videoOutputStream = new FFMPEGOutputStream();
       AVCodecContext avCodecContext;
 
-      AVCodec codec = avcodec.avcodec_find_encoder(avFormatContext.video_codec_id());
+      AVCodec codec = avcodec.avcodec_find_encoder(outputFormat.video_codec());
+      if (codec == null)
+      {
+         LogTools.error("Webm codec is null (does this computer support webm?). The logger will not begin.");
+         isClosed = true;
+         return;
+      }
 
       videoOutputStream.setTempPacket(avcodec.av_packet_alloc());
       videoOutputStream.setStream(avformat.avformat_new_stream(avFormatContext, null));
@@ -107,13 +118,12 @@ public class FFMPEGLogger
       avCodecContext.gop_size(12); // Some or all of these settings may be unnecessary with lossless
       avCodecContext.pix_fmt(avutil.AV_PIX_FMT_RGBA);
 
-      if ((avFormatContext.oformat().flags() & avformat.AVFMT_GLOBALHEADER) != 0)
+      if ((outputFormat.flags() & avformat.AVFMT_GLOBALHEADER) != 0)
          avCodecContext.flags(avCodecContext.flags() | avcodec.AV_CODEC_FLAG_GLOBAL_HEADER);
    }
 
    /***
     * The first time a frame is put will take longer than the others because of initialization
-    * This method DOES NOT handle disposal of frames!
     */
    public boolean put(BytedecoImage image)
    {
@@ -268,18 +278,22 @@ public class FFMPEGLogger
       LogTools.info("Closing logger (if you did not expect this to happen, something has gone wrong, and logging will stop.)");
       isClosed = true;
 
-      avcodec.avcodec_free_context(videoOutputStream.getEncoder());
+      if (videoOutputStream.getEncoder() != null && !videoOutputStream.getEncoder().isNull())
+         avcodec.avcodec_free_context(videoOutputStream.getEncoder());
 
-      avutil.av_frame_free(videoOutputStream.getFrame());
+      if (videoOutputStream.getFrame() != null && !videoOutputStream.getFrame().isNull())
+         avutil.av_frame_free(videoOutputStream.getFrame());
+
       if (videoOutputStream.getTempFrame() != null && !videoOutputStream.getTempFrame().isNull())
          avutil.av_frame_free(videoOutputStream.getTempFrame());
 
-      avcodec.av_packet_free(videoOutputStream.getTempPacket());
+      if (videoOutputStream.getTempPacket() != null && !videoOutputStream.getTempPacket().isNull())
+         avcodec.av_packet_free(videoOutputStream.getTempPacket());
 
-      if (videoOutputStream.getSwsContext() != null)
+      if (videoOutputStream.getSwsContext() != null && !videoOutputStream.getSwsContext().isNull())
          swscale.sws_freeContext(videoOutputStream.getSwsContext());
 
-      if (videoOutputStream.getSwrContext() != null)
+      if (videoOutputStream.getSwrContext() != null && !videoOutputStream.getSwrContext().isNull())
          swresample.swr_free(videoOutputStream.getSwrContext());
    }
 
