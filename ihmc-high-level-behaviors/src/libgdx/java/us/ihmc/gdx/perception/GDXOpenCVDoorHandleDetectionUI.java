@@ -7,18 +7,26 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import georegression.struct.point.Vector2D_F32;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
 import imgui.type.ImInt;
+import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
-import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.Point;
-import org.bytedeco.opencv.opencv_core.Scalar;
+import org.bytedeco.opencv.global.opencv_video;
+import org.bytedeco.opencv.opencv_core.*;
+//import org.opencv.core.MatOfPoint;
+//import org.opencv.core.MatOfPoint2f;
+import org.opencv.video.Video;
+
+
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.imgui.ImGuiVideoPanel;
@@ -31,6 +39,7 @@ import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.OpenCVDoorHandleDetection;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 
@@ -51,8 +60,8 @@ public class GDXOpenCVDoorHandleDetectionUI
       public void renderImGuiWidgets()
       {
          super.renderImGuiWidgets();
-         if(ImGui.isMouseDown(0))
-         {
+         //if(ImGui.isMouseDown(0))
+         if(true){
             mouseX = ImGui.getMousePosX() - ImGui.getWindowPosX();
             mouseY = ImGui.getMousePosY() - ImGui.getWindowPosY() - ImGui.getWindowSizeY() / 2;
             float ratio = imageHeight / imageWidth;
@@ -60,25 +69,29 @@ public class GDXOpenCVDoorHandleDetectionUI
             if (realRatio > ratio)
             {
                float adjustedHeight = imageHeight * ImGui.getWindowSizeX() / imageWidth;
-               mouseY -= adjustedHeight / 2 + ImGui.getTextLineHeight();
+               mouseY -= adjustedHeight / 2 + ImGui.getTextLineHeight() -adjustedHeight;
+               mouseY *= imageWidth/ImGui.getWindowSizeX();
                mouseX -= 3; //I don't know how much padding there is on the sides on photo, just guessing 3
+               mouseX *= imageWidth/ImGui.getWindowSizeX();
             }
             else
             {
-               mouseY -= ImGui.getWindowSizeY() / 2;
-               float adjustedWidth = ImGui.getWindowSizeX()- imageWidth * (ImGui.getWindowSizeY()) / imageHeight;
-               mouseX -= (adjustedWidth/2 + ImGui.getTextLineHeight()) ;
+               mouseY += (ImGui.getWindowSizeY() )/ 2;
+               mouseY-=  2*ImGui.getTextLineHeight();
+               float adjustedWidth = ImGui.getWindowSizeX()- imageWidth * (ImGui.getWindowSizeY() - ImGui.getTextLineHeight()) / imageHeight;
+               mouseX -= (adjustedWidth/2) ;
+               mouseX *= imageHeight/ (ImGui.getWindowSizeY()- ImGui.getTextLineHeight()) ;
+               mouseY *= imageHeight/(ImGui.getWindowSizeY()- 2*ImGui.getTextLineHeight());
             }
-            mouseY = -mouseY;
-
+            //mouseY = -mouseY;
+            //mouseY+= (ImGui.getWindowSizeY());
 
 
          }
          Point pointxy = new Point((int) mouseX, (int) mouseY);
-         Scalar color = new Scalar(255, 1, 2, 100);
-         //opencv_imgproc.circle(imageForDrawing.getBytedecoOpenCVMat(), pointxy, 100, color);
+         Scalar color = new Scalar(255, 1, 2, 255);
 
-      }
+         }
 
       public float getMouseX()
       {
@@ -234,6 +247,32 @@ public class GDXOpenCVDoorHandleDetectionUI
    private final Stopwatch stopwatch = new Stopwatch().start();
    private final ImPlotDoublePlotLine restOfStuffPlotLine = new ImPlotDoublePlotLine("Other stuff");
 
+  //private Scalar4f coords0 = new Scalar4f(0.0f,0.0f);
+   //private Pointer point1 = new Pointer();
+   //private Pointer point2 = new Pointer();
+   /*MatOfPoint p0MatofPoint = new MatOfPoint();
+   MatOfPoint2f p0 = new MatOfPoint2f(p0MatofPoint.toArray()) ;
+   MatOfPoint2f p1 = new MatOfPoint2f(); */
+   private Point2f point2f1 = new Point2f(0,0);
+   private Point2f point2f2 = new Point2f(0,0);
+   private Point pointnew = new Point(0,0);
+   private Point pointxy = new Point(0,0);
+   private Mat p0 = new Mat(point2f1);
+   private Mat p1 = new Mat(point2f2);
+   private Mat old_gray = new Mat();
+   private Mat img_gray = new Mat();
+   private Mat status = new Mat();
+   private Mat error = new Mat();
+   private Vector2D_F32 oldPoints = new Vector2D_F32();
+   private Vector2D_F32 xy = new Vector2D_F32();
+   private int max_distance = 90;
+   private Scalar color = new Scalar(255, 1, 2, 255);
+   private TermCriteria criteria = new TermCriteria(opencv_core.CV_TERMCRIT_EPS | opencv_core.CV_TERMCRIT_NUMBER, 10, .01);
+   private Size size = new Size(12,12);
+   private float mousex;
+   private float mousey;
+
+
    public GDXOpenCVDoorHandleDetectionUI(String namePostfix)
    {
       this.namePostfix = namePostfix;
@@ -292,7 +331,6 @@ public class GDXOpenCVDoorHandleDetectionUI
    {
 
 
-
       if (detectionEnabled.get())
       {
          stopwatch.lap();
@@ -308,39 +346,64 @@ public class GDXOpenCVDoorHandleDetectionUI
 
             opencv_imgproc.cvtColor(imageForDrawing.getBytedecoOpenCVMat(), markerImagePanel.getBytedecoImage().getBytedecoOpenCVMat(), opencv_imgproc.COLOR_RGB2RGBA);
 
-            float mouseX = markerImagePanel.getVideoPanel().mouseX;
-            float mouseY = markerImagePanel.getVideoPanel().mouseY;
-
-            Point pointxy = new Point((int) mouseX, (int) mouseY);
-            Scalar color = new Scalar(255, 1, 2, 0);
-            opencv_imgproc.circle(imageForDrawing.getBytedecoOpenCVMat(), pointxy, 100, color);
-            System.out.printf("X: %f, Y: %f\n", mouseX, mouseY);
-
-            markerImagePanel.draw();
-
-
-
-         }
-
-         if (showGraphics.get())
-         {
-            /*for (int i = 0; i < markersToTrack.size(); i++)
+            if(ImGui.isMouseDown(0))
             {
-               OpenCVArUcoMarker markerToTrack = markersToTrack.get(i);
-               if (DoorHandleDetection.isDetected(markerToTrack))
-               {
-                  markerPose.setToZero(cameraFrame);
-                  DoorHandleDetection.getPose(markerToTrack, markerPose);
-                  markerPose.changeFrame(ReferenceFrame.getWorldFrame());
-                  markerPoseCoordinateFrames.get(i).setPoseInWorldFrame(markerPose);
-               }
-            }*/
+               mousex = markerImagePanel.getVideoPanel().mouseX;
+               mousey = markerImagePanel.getVideoPanel().mouseY;
+            }
+
+             pointxy.x((int) mousex);
+             pointxy.y((int) mousey);
+           // opencv_imgproc.circle(markerImagePanel.getBytedecoImage().getBytedecoOpenCVMat(), pointxy, 6, new Scalar(0,0,255,255), -1, opencv_imgproc.LINE_8, 0);
+            if(img_gray != null)
+               old_gray = img_gray.clone();
+            else
+               opencv_imgproc.cvtColor(markerImagePanel.getBytedecoImage().getBytedecoOpenCVMat(),  old_gray, opencv_imgproc.COLOR_RGB2GRAY);
+
+            opencv_imgproc.cvtColor(markerImagePanel.getBytedecoImage().getBytedecoOpenCVMat(),  img_gray, opencv_imgproc.COLOR_RGB2GRAY);
+            if(img_gray == null)
+            {
+               return;
+            }
+
+
+
+            if(mousex!=0.0f || mousey!=0.0f)
+            {
+               //More pyramids lead to lower quality
+               opencv_video.calcOpticalFlowPyrLK(old_gray, img_gray, p0, p1, status, error, size, 1, criteria, 0, 0.1);
+
+
+               xy.set(p1.ptr(0).getFloat(), p1.ptr(0).getFloat(Float.BYTES));
+
+               //Check if the marker moved too far over the past frame
+              /* double dist = Math.sqrt(((int)xy.getX() - (int)oldPoints.getX())^2 + ((int)xy.getX() - (int)oldPoints.getX())^2);
+               if((int)dist>max_distance){
+                  p1=p0;
+                  xy.set(p1.ptr(0).getFloat(), p1.ptr(0).getFloat(Float.BYTES));
+               }*/
+
+               pointnew.x((int) xy.getX());
+               pointnew.y((int) xy.getY());
+              // System.out.print("X:" + xy.getX() + ", Y:" + xy.getY() + "\n");
+               opencv_imgproc.circle(markerImagePanel.getBytedecoImage().getBytedecoOpenCVMat(), pointnew, 8, color, -1, opencv_imgproc.LINE_8, 0);
+               opencv_imgproc.circle(markerImagePanel.getBytedecoImage().getBytedecoOpenCVMat(), new Point((int)markerImagePanel.getVideoPanel().mouseX, (int)markerImagePanel.getVideoPanel().mouseY), 4, new Scalar(0,0,255,255), -1, opencv_imgproc.LINE_8, 0);
+               System.out.print(pointnew.x()+ " " +pointnew.y() + "\n");
+
+
+               p0 = p1;
+               oldPoints.set(xy.getX(), xy.getY());
+            }
+
          }
+
 
 
          restOfStuffPlotLine.addValue(stopwatch.lapElapsed());
 
       }
+      //opencv_imgproc.circle(markerImagePanel.getBytedecoImage().getBytedecoOpenCVMat(), new Point(mouseX,mouseY), 16, color, -1, opencv_imgproc.LINE_8, 0);
+      markerImagePanel.draw();
    }
 
    public void renderImGuiWidgets()
@@ -470,3 +533,4 @@ public class GDXOpenCVDoorHandleDetectionUI
    }
 
 }
+

@@ -124,7 +124,7 @@ public class OpenCVDoorHandleDetection
                                                  synchronized (inputImageSync)
                                                  {
                                                     stopwatch.getForThreadOne().lap();
-                                                    rgb888ColorImage.accessOnLowPriorityThread(rgb888ColorImage ->
+                                                    /*rgb888ColorImage.accessOnLowPriorityThread(rgb888ColorImage ->
                                                                                                {
                                                                                                   opencv_aruco.detectMarkers(rgb888ColorImage.getBytedecoOpenCVMat(),
                                                                                                                              dictionary,
@@ -134,7 +134,7 @@ public class OpenCVDoorHandleDetection
                                                                                                                              rejectedImagePoints.getForThreadOne(),
                                                                                                                              cameraMatrix,
                                                                                                                              distortionCoefficients);
-                                                                                               });
+                                                                                               });*/
                                                     stopwatch.getForThreadOne().suspend();
                                                  }
 
@@ -190,7 +190,7 @@ public class OpenCVDoorHandleDetection
     * Multiple markers of the same ID is not supported.
     */
    private void updateMarkerPose(OpenCVArUcoMarker marker)
-   {
+   {/*
       if (enabled)
       {
          cornerForPose.clear();
@@ -232,7 +232,7 @@ public class OpenCVDoorHandleDetection
          double y = translationVectors.ptr(0).getDouble(Double.BYTES);
          double z = translationVectors.ptr(0).getDouble(2 * Double.BYTES);
          euclidPosition.set(z, -x, -y);
-      }
+      }*/
    }
 
    public void drawDetectedMarkers(Mat imageForDrawing, Scalar idColor)

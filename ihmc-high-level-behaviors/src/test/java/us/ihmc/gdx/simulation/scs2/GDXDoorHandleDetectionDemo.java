@@ -59,7 +59,7 @@ public class GDXDoorHandleDetectionDemo
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
             baseUI.get3DSceneManager().addRenderableProvider(environmentBuilder::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
             baseUI.get3DSceneManager().addRenderableProvider(environmentBuilder::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
-            environmentBuilder.loadEnvironment("DoorsForArUcoTesting.json");
+            environmentBuilder.loadEnvironment("DoorHandleDetectionDemo.json");
 
             sensorPoseGizmo.create(baseUI.get3DSceneManager().getCamera3D());
             sensorPoseGizmo.setResizeAutomatically(true);
@@ -91,9 +91,6 @@ public class GDXDoorHandleDetectionDemo
                                               cameraSensor.getDepthCameraIntrinsics(),
                                               cameraSensor.getSensorFrame());
                   DoorHandleDetectionUI = new GDXOpenCVDoorHandleDetectionUI("from Sensor");
-                  ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
-                  markersToTrack.add(new OpenCVArUcoMarker(0, 0.2032));
-                  markersToTrack.add(new OpenCVArUcoMarker(1, 0.2032));
                   DoorHandleDetectionUI.create(DoorHandleDetection/*, markersToTrack*/, sensorPoseGizmo.getGizmoFrame());
                   baseUI.getImGuiPanelManager().addPanel(DoorHandleDetectionUI.getMainPanel());
                   baseUI.get3DSceneManager().addRenderableProvider(DoorHandleDetectionUI::getRenderables, GDXSceneLevel.VIRTUAL);
