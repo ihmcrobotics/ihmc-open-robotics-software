@@ -14,18 +14,23 @@ ihmc {
 }
 
 mainDependencies {
-   api("io.netty:netty:3.5.8.Final")
-   api("com.google.guava:guava:18.0")
-   api("org.apache.commons:com.springsource.org.apache.commons.io:1.4.0")
-   api("org.boofcv:boofcv-geo:0.36")
-   api("org.reflections:reflections:0.9.10")
+   api("us.ihmc:ihmc-communication:source")
+   api("us.ihmc:ihmc-robotics-toolkit:source")
+   api("us.ihmc:ihmc-java-toolkit:source")
 
-   api("org.apache.logging.log4j:log4j-1.2-api:2.17.0") // required for rosjava to log stuff
-   api("org.ros.rosjava_core:rosjava:0.2.1") {
-      exclude(group = "junit", module = "junit")
-      exclude(group = "org.ros.rosjava_messages", module = "rosjava_test_msgs")
-      exclude(group = "org.ros.rosjava_messages", module = "test_rosmaster")
-   }
+   api("io.netty:netty-common:4.1.77.Final")
+//   api("org.apache.commons:com.springsource.org.apache.commons.io:1.4.0")
+//   api("org.boofcv:boofcv-geo:0.36")
+   api("org.apache.xmlrpc:xmlrpc-client:3.1.3")
+   api("org.apache.xmlrpc:xmlrpc-server:3.1.3")
+   api("dnsjava:dnsjava:3.5.1")
+
+//   api("org.apache.logging.log4j:log4j-1.2-api:2.17.0") // required for rosjava to log stuff
+//   api("org.ros.rosjava_core:rosjava:0.2.1") {
+//      exclude(group = "junit", module = "junit")
+//      exclude(group = "org.ros.rosjava_messages", module = "rosjava_test_msgs")
+//      exclude(group = "org.ros.rosjava_messages", module = "test_rosmaster")
+//   }
    api("org.ros.rosjava_bootstrap:message_generation:0.3.3")
    api("org.ros.rosjava_messages:std_msgs:0.5.10")
    api("org.ros.rosjava_messages:std_srvs:1.11.1")
@@ -39,11 +44,6 @@ mainDependencies {
    api("org.ros.rosjava_messages:nav_msgs:1.11.7")
    api("org.ros.rosjava_messages:tf2_msgs:0.5.9")
    api("org.ros.rosjava_messages:tf:1.10.8")
-
-   api("us.ihmc:euclid:0.17.2")
-   api("us.ihmc:ihmc-communication:source")
-   api("us.ihmc:ihmc-robotics-toolkit:source")
-   api("us.ihmc:ihmc-java-toolkit:source")
 }
 
 testDependencies {

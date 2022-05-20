@@ -18,7 +18,6 @@ mainDependencies {
    api("us.ihmc:ihmc-video-codecs:2.1.6")
    api("org.boofcv:boofcv-geo:0.36")
    api("com.google.guava:guava:18.0")
-   api("org.reflections:reflections:0.9.10")
    api("commons-net:commons-net:3.6")
    api("org.lz4:lz4-java:1.8.0")
 
