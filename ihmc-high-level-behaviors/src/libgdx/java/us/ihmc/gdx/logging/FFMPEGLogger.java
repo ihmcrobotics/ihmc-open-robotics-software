@@ -8,11 +8,12 @@ import org.bytedeco.ffmpeg.avutil.AVFrame;
 
 import static org.bytedeco.ffmpeg.global.avcodec.*;
 import static org.bytedeco.ffmpeg.global.avformat.*;
-import static org.bytedeco.ffmpeg.global.avutil.*;
 import static org.bytedeco.ffmpeg.global.swscale.*;
 import static org.bytedeco.ffmpeg.global.swresample.*;
 
 import org.bytedeco.ffmpeg.avutil.AVRational;
+import org.bytedeco.ffmpeg.global.avformat;
+import org.bytedeco.ffmpeg.global.avutil;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 
@@ -23,6 +24,8 @@ import java.util.Date;
 /**
  * Doxygen:
  * https://ffmpeg.org/doxygen/trunk/index.html
+ * Wiki:
+ * https://trac.ffmpeg.org/
  */
 public class FFMPEGLogger
 {
@@ -63,13 +66,18 @@ public class FFMPEGLogger
    {
       fileName = logDirectory + dateFormat.format(new Date()) + "_" + logName + "_Log.webm";
 
-      av_dict_set(avDictionary, "lossless", lossless ? "1" : "0", 0); //TODO this is maybe wrong
+      int avDictFlags = 0;
+      avDictionary = new AVDictionary();
+      avutil.av_dict_set(avDictionary, "lossless", lossless ? "1" : "0", avDictFlags); // TODO this is maybe wrong
 
       LogTools.info("Building FFMPEG contexts");
       //Output context
-      avformat_alloc_output_context2(avFormatContext, null, null, fileName);
-      if (avFormatContext == null || avFormatContext.isNull())
+
+      avFormatContext = new AVFormatContext();
+      int returnCode = avformat.avformat_alloc_output_context2(avFormatContext, null, null, fileName);
+      if (returnCode != 0)
       {
+//         avformat.AV
          LogTools.error("Failed to find output format webm (does this computer support webm?). The logger will not begin.");
          isClosed = true;
          return;
@@ -99,7 +107,7 @@ public class FFMPEGLogger
       avCodecContext.time_base(framePeriod);
 
       avCodecContext.gop_size(12); //Some or all of these settings may be unnecessary with lossless
-      avCodecContext.pix_fmt(AV_PIX_FMT_RGBA);
+      avCodecContext.pix_fmt(avutil.AV_PIX_FMT_RGBA);
 
       if ((avFormatContext.oformat().flags() & AVFMT_GLOBALHEADER) != 0)
          avCodecContext.flags(avCodecContext.flags() | AV_CODEC_FLAG_GLOBAL_HEADER);
@@ -118,7 +126,7 @@ public class FFMPEGLogger
       {
          AVCodecContext avCodecContext = videoOutputStream.getEncoder();
          AVDictionary optAVDictionary = new AVDictionary();
-         av_dict_copy(optAVDictionary, avDictionary, 0);
+         avutil.av_dict_copy(optAVDictionary, avDictionary, 0);
 
          try
          {
@@ -131,16 +139,16 @@ public class FFMPEGLogger
          }
          finally
          {
-            av_dict_free(optAVDictionary); //Free dictionary even if we return false up there
+            avutil.av_dict_free(optAVDictionary); //Free dictionary even if we return false up there
          }
 
-         AVFrame pic = av_frame_alloc();
+         AVFrame pic = avutil.av_frame_alloc();
          pic.format(avCodecContext.pix_fmt());
          pic.width(avCodecContext.width());
          pic.height(avCodecContext.height());
 
          videoOutputStream.setFrame(pic);
-         if (av_frame_get_buffer(pic, 0) > 0)
+         if (avutil.av_frame_get_buffer(pic, 0) > 0)
          {
             LogTools.error("Could not get framebuffer. Logging will not begin.");
             close();
@@ -208,7 +216,7 @@ public class FFMPEGLogger
          }
       }
 
-      return ret == AVERROR_EOF();
+      return ret == avutil.AVERROR_EOF();
    }
 
    private AVFrame getVideoFrame(FFMPEGOutputStream ost)
@@ -216,11 +224,11 @@ public class FFMPEGLogger
       AVCodecContext c = ost.getEncoder();
 
       AVRational one = new AVRational().num(1).den(1);
-      if (av_compare_ts(videoOutputStream.getNextPts(), c.time_base(), 10, one)
+      if (avutil.av_compare_ts(videoOutputStream.getNextPts(), c.time_base(), 10, one)
           > 0) //Value 10 comes from STREAM_DURATION in file, probably should be higher but call may be doing other things
          return null;
 
-      if (av_frame_make_writable(ost.getFrame()) < 0)
+      if (avutil.av_frame_make_writable(ost.getFrame()) < 0)
       {
          LogTools.error("Could not make frame writable. Logging will stop.");
          close();
@@ -263,9 +271,9 @@ public class FFMPEGLogger
 
       avcodec_free_context(videoOutputStream.getEncoder());
 
-      av_frame_free(videoOutputStream.getFrame());
+      avutil.av_frame_free(videoOutputStream.getFrame());
       if (videoOutputStream.getTempFrame() != null && !videoOutputStream.getTempFrame().isNull())
-         av_frame_free(videoOutputStream.getTempFrame());
+         avutil.av_frame_free(videoOutputStream.getTempFrame());
 
       av_packet_free(videoOutputStream.getTempPacket());
 
