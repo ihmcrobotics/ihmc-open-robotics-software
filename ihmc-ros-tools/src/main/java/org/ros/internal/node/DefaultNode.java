@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -17,7 +17,6 @@
 package org.ros.internal.node;
 
 import com.google.common.annotations.VisibleForTesting;
-
 import org.ros.Parameters;
 import org.ros.concurrent.CancellableLoop;
 import org.ros.concurrent.ListenerGroup;
@@ -43,19 +42,11 @@ import org.ros.internal.node.topic.SubscriberFactory;
 import org.ros.internal.node.topic.TopicDeclaration;
 import org.ros.internal.node.topic.TopicParticipantManager;
 import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
-import org.ros.message.MessageDeserializer;
-import org.ros.message.MessageFactory;
-import org.ros.message.MessageSerializationFactory;
-import org.ros.message.MessageSerializer;
-import org.ros.message.Time;
+import org.ros.message.*;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 import org.ros.namespace.NodeNameResolver;
-import org.ros.node.ConnectedNode;
-import org.ros.node.DefaultNodeFactory;
-import org.ros.node.Node;
-import org.ros.node.NodeConfiguration;
-import org.ros.node.NodeListener;
+import org.ros.node.*;
 import org.ros.node.parameter.ParameterTree;
 import org.ros.node.service.ServiceClient;
 import org.ros.node.service.ServiceResponseBuilder;
@@ -77,519 +68,590 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * The default implementation of a {@link Node}.
- * 
+ *
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class DefaultNode implements ConnectedNode {
+public class DefaultNode implements ConnectedNode
+{
 
-  private static final boolean DEBUG = false;
+   private static final boolean DEBUG = false;
 
-  // TODO(damonkohler): Move to NodeConfiguration.
-  /**
-   * The maximum delay before shutdown will begin even if all
-   * {@link NodeListener}s have not yet returned from their
-   * {@link NodeListener#onShutdown(Node)} callback.
-   */
-  private static final int MAX_SHUTDOWN_DELAY_DURATION = 5;
-  private static final TimeUnit MAX_SHUTDOWN_DELAY_UNITS = TimeUnit.SECONDS;
+   // TODO(damonkohler): Move to NodeConfiguration.
+   /**
+    * The maximum delay before shutdown will begin even if all
+    * {@link NodeListener}s have not yet returned from their
+    * {@link NodeListener#onShutdown(Node)} callback.
+    */
+   private static final int MAX_SHUTDOWN_DELAY_DURATION = 5;
+   private static final TimeUnit MAX_SHUTDOWN_DELAY_UNITS = TimeUnit.SECONDS;
 
-  private final NodeConfiguration nodeConfiguration;
-  private final ListenerGroup<NodeListener> nodeListeners;
-  private final ScheduledExecutorService scheduledExecutorService;
-  private final URI masterUri;
-  private final MasterClient masterClient;
-  private final TopicParticipantManager topicParticipantManager;
-  private final ServiceManager serviceManager;
-  private final ParameterManager parameterManager;
-  private final GraphName nodeName;
-  private final NodeNameResolver resolver;
-  private final SlaveServer slaveServer;
-  private final ParameterTree parameterTree;
-  private final PublisherFactory publisherFactory;
-  private final SubscriberFactory subscriberFactory;
-  private final ServiceFactory serviceFactory;
-  private final Registrar registrar;
+   private final NodeConfiguration nodeConfiguration;
+   private final ListenerGroup<NodeListener> nodeListeners;
+   private final ScheduledExecutorService scheduledExecutorService;
+   private final URI masterUri;
+   private final MasterClient masterClient;
+   private final TopicParticipantManager topicParticipantManager;
+   private final ServiceManager serviceManager;
+   private final ParameterManager parameterManager;
+   private final GraphName nodeName;
+   private final NodeNameResolver resolver;
+   private final SlaveServer slaveServer;
+   private final ParameterTree parameterTree;
+   private final PublisherFactory publisherFactory;
+   private final SubscriberFactory subscriberFactory;
+   private final ServiceFactory serviceFactory;
+   private final Registrar registrar;
 
-  private TimeProvider timeProvider;
+   private TimeProvider timeProvider;
 
-  /**
-   * {@link DefaultNode}s should only be constructed using the
-   * {@link DefaultNodeFactory}.
-   * 
-   * @param nodeConfiguration
-   *          the {@link NodeConfiguration} for this {@link Node}
-   * @param nodeListeners
-   *          a {@link Collection} of {@link NodeListener}s that will be added
-   *          to this {@link Node} before it starts
-   */
-  public DefaultNode(NodeConfiguration nodeConfiguration, Collection<NodeListener> nodeListeners,
-      ScheduledExecutorService scheduledExecutorService) {
-    this.nodeConfiguration = NodeConfiguration.copyOf(nodeConfiguration);
-    this.nodeListeners = new ListenerGroup<NodeListener>(scheduledExecutorService);
-    this.nodeListeners.addAll(nodeListeners);
-    this.scheduledExecutorService = scheduledExecutorService;
-    masterUri = nodeConfiguration.getMasterUri();
-    masterClient = new MasterClient(masterUri);
-    topicParticipantManager = new TopicParticipantManager();
-    serviceManager = new ServiceManager();
-    parameterManager = new ParameterManager(scheduledExecutorService);
+   /**
+    * {@link DefaultNode}s should only be constructed using the
+    * {@link DefaultNodeFactory}.
+    *
+    * @param nodeConfiguration
+    *          the {@link NodeConfiguration} for this {@link Node}
+    * @param nodeListeners
+    *          a {@link Collection} of {@link NodeListener}s that will be added
+    *          to this {@link Node} before it starts
+    */
+   public DefaultNode(NodeConfiguration nodeConfiguration, Collection<NodeListener> nodeListeners, ScheduledExecutorService scheduledExecutorService)
+   {
+      this.nodeConfiguration = NodeConfiguration.copyOf(nodeConfiguration);
+      this.nodeListeners = new ListenerGroup<NodeListener>(scheduledExecutorService);
+      this.nodeListeners.addAll(nodeListeners);
+      this.scheduledExecutorService = scheduledExecutorService;
+      masterUri = nodeConfiguration.getMasterUri();
+      masterClient = new MasterClient(masterUri);
+      topicParticipantManager = new TopicParticipantManager();
+      serviceManager = new ServiceManager();
+      parameterManager = new ParameterManager(scheduledExecutorService);
 
-    GraphName basename = nodeConfiguration.getNodeName();
-    NameResolver parentResolver = nodeConfiguration.getParentResolver();
-    nodeName = parentResolver.getNamespace().join(basename);
-    resolver = new NodeNameResolver(nodeName, parentResolver);
-    slaveServer =
-        new SlaveServer(nodeName, nodeConfiguration.getTcpRosBindAddress(),
-            nodeConfiguration.getTcpRosAdvertiseAddress(),
-            nodeConfiguration.getXmlRpcBindAddress(),
-            nodeConfiguration.getXmlRpcAdvertiseAddress(), masterClient, topicParticipantManager,
-            serviceManager, parameterManager, scheduledExecutorService);
-    slaveServer.start();
+      GraphName basename = nodeConfiguration.getNodeName();
+      NameResolver parentResolver = nodeConfiguration.getParentResolver();
+      nodeName = parentResolver.getNamespace().join(basename);
+      resolver = new NodeNameResolver(nodeName, parentResolver);
+      slaveServer = new SlaveServer(nodeName,
+                                    nodeConfiguration.getTcpRosBindAddress(),
+                                    nodeConfiguration.getTcpRosAdvertiseAddress(),
+                                    nodeConfiguration.getXmlRpcBindAddress(),
+                                    nodeConfiguration.getXmlRpcAdvertiseAddress(),
+                                    masterClient,
+                                    topicParticipantManager,
+                                    serviceManager,
+                                    parameterManager,
+                                    scheduledExecutorService);
+      slaveServer.start();
 
-    NodeIdentifier nodeIdentifier = slaveServer.toNodeIdentifier();
+      NodeIdentifier nodeIdentifier = slaveServer.toNodeIdentifier();
 
-    parameterTree =
-        DefaultParameterTree.newFromNodeIdentifier(nodeIdentifier, masterClient.getRemoteUri(),
-            resolver, parameterManager);
+      parameterTree = DefaultParameterTree.newFromNodeIdentifier(nodeIdentifier, masterClient.getRemoteUri(), resolver, parameterManager);
 
-    publisherFactory =
-        new PublisherFactory(nodeIdentifier, topicParticipantManager,
-            nodeConfiguration.getTopicMessageFactory(), scheduledExecutorService);
-    subscriberFactory =
-        new SubscriberFactory(nodeIdentifier, topicParticipantManager, scheduledExecutorService);
-    serviceFactory =
-        new ServiceFactory(nodeName, slaveServer, serviceManager, scheduledExecutorService);
+      publisherFactory = new PublisherFactory(nodeIdentifier, topicParticipantManager, nodeConfiguration.getTopicMessageFactory(), scheduledExecutorService);
+      subscriberFactory = new SubscriberFactory(nodeIdentifier, topicParticipantManager, scheduledExecutorService);
+      serviceFactory = new ServiceFactory(nodeName, slaveServer, serviceManager, scheduledExecutorService);
 
-    registrar = new Registrar(masterClient, scheduledExecutorService);
-    topicParticipantManager.setListener(registrar);
-    serviceManager.setListener(registrar);
+      registrar = new Registrar(masterClient, scheduledExecutorService);
+      topicParticipantManager.setListener(registrar);
+      serviceManager.setListener(registrar);
 
-    scheduledExecutorService.execute(new Runnable() {
-      @Override
-      public void run() {
-        start();
+      scheduledExecutorService.execute(new Runnable()
+      {
+         @Override
+         public void run()
+         {
+            start();
+         }
+      });
+   }
+
+   private void start()
+   {
+      // The Registrar must be started first so that master registration is
+      // possible during startup.
+      registrar.start(slaveServer.toNodeIdentifier());
+
+      // Wait for the logger to register with the master. This ensures the master is running before
+      // requesting the use_sim_time parameter.
+      final CountDownLatch rosoutLatch = new CountDownLatch(1);
+
+      try
+      {
+         rosoutLatch.await();
       }
-    });
-  }
+      catch (InterruptedException e)
+      {
+         signalOnError(e);
+         shutdown();
+         return;
+      }
 
-  private void start() {
-    // The Registrar must be started first so that master registration is
-    // possible during startup.
-    registrar.start(slaveServer.toNodeIdentifier());
+      boolean useSimTime = false;
+      try
+      {
+         useSimTime = parameterTree.has(Parameters.USE_SIM_TIME) && parameterTree.getBoolean(Parameters.USE_SIM_TIME);
+      }
+      catch (Exception e)
+      {
+         signalOnError(e);
+         shutdown();
+         return;
+      }
 
-    // Wait for the logger to register with the master. This ensures the master is running before
-    // requesting the use_sim_time parameter.
-    final CountDownLatch rosoutLatch = new CountDownLatch(1);
-
-    try {
-      rosoutLatch.await();
-    } catch (InterruptedException e) {
-      signalOnError(e);
-      shutdown();
-      return;
-    }
-
-    boolean useSimTime = false;
-    try {
-      useSimTime =
-          parameterTree.has(Parameters.USE_SIM_TIME)
-              && parameterTree.getBoolean(Parameters.USE_SIM_TIME);
-    } catch (Exception e) {
-      signalOnError(e);
-      shutdown();
-      return;
-    }
-
-    final CountDownLatch timeLatch = new CountDownLatch(1);
-    if (useSimTime) {
-      ClockTopicTimeProvider clockTopicTimeProvider = new ClockTopicTimeProvider(this);
-      clockTopicTimeProvider.getSubscriber().addSubscriberListener(
-          new DefaultSubscriberListener<rosgraph_msgs.Clock>() {
+      final CountDownLatch timeLatch = new CountDownLatch(1);
+      if (useSimTime)
+      {
+         ClockTopicTimeProvider clockTopicTimeProvider = new ClockTopicTimeProvider(this);
+         clockTopicTimeProvider.getSubscriber().addSubscriberListener(new DefaultSubscriberListener<rosgraph_msgs.Clock>()
+         {
             @Override
-            public void onMasterRegistrationSuccess(Subscriber<rosgraph_msgs.Clock> subscriber) {
-              timeLatch.countDown();
+            public void onMasterRegistrationSuccess(Subscriber<rosgraph_msgs.Clock> subscriber)
+            {
+               timeLatch.countDown();
             }
-          });
-      timeProvider = clockTopicTimeProvider;
-    } else {
-      timeProvider = nodeConfiguration.getTimeProvider();
-      timeLatch.countDown();
-    }
-
-    try {
-      timeLatch.await();
-    } catch (InterruptedException e) {
-      signalOnError(e);
-      shutdown();
-      return;
-    }
-
-    signalOnStart();
-  }
-
-  @VisibleForTesting
-  Registrar getRegistrar() {
-    return registrar;
-  }
-
-  private <T> MessageSerializer<T> newMessageSerializer(String messageType) {
-    return nodeConfiguration.getMessageSerializationFactory().newMessageSerializer(messageType);
-  }
-
-  @SuppressWarnings("unchecked")
-  private <T> MessageDeserializer<T> newMessageDeserializer(String messageType) {
-    return (MessageDeserializer<T>) nodeConfiguration.getMessageSerializationFactory()
-        .newMessageDeserializer(messageType);
-  }
-
-  @SuppressWarnings("unchecked")
-  private <T> MessageSerializer<T> newServiceResponseSerializer(String serviceType) {
-    return (MessageSerializer<T>) nodeConfiguration.getMessageSerializationFactory()
-        .newServiceResponseSerializer(serviceType);
-  }
-
-  @SuppressWarnings("unchecked")
-  private <T> MessageDeserializer<T> newServiceResponseDeserializer(String serviceType) {
-    return (MessageDeserializer<T>) nodeConfiguration.getMessageSerializationFactory()
-        .newServiceResponseDeserializer(serviceType);
-  }
-
-  @SuppressWarnings("unchecked")
-  private <T> MessageSerializer<T> newServiceRequestSerializer(String serviceType) {
-    return (MessageSerializer<T>) nodeConfiguration.getMessageSerializationFactory()
-        .newServiceRequestSerializer(serviceType);
-  }
-
-  @SuppressWarnings("unchecked")
-  private <T> MessageDeserializer<T> newServiceRequestDeserializer(String serviceType) {
-    return (MessageDeserializer<T>) nodeConfiguration.getMessageSerializationFactory()
-        .newServiceRequestDeserializer(serviceType);
-  }
-
-  @Override
-  public <T> Publisher<T> newPublisher(GraphName topicName, String messageType) {
-    GraphName resolvedTopicName = resolveName(topicName);
-    TopicDescription topicDescription =
-        nodeConfiguration.getTopicDescriptionFactory().newFromType(messageType);
-    TopicDeclaration topicDeclaration =
-        TopicDeclaration.newFromTopicName(resolvedTopicName, topicDescription, null);
-    MessageSerializer<T> serializer = newMessageSerializer(messageType);
-    return publisherFactory.newOrExisting(topicDeclaration, serializer);
-  }
-
-  @Override
-  public <T> Publisher<T> newPublisher(String topicName, String messageType) {
-    return newPublisher(GraphName.of(topicName), messageType);
-  }
-
-  @Override
-  public <T> Subscriber<T> newSubscriber(GraphName topicName, String messageType) {
-    return newSubscriber(topicName, messageType, null);
-  }
-
-  @Override
-  public <T> Subscriber<T> newSubscriber(GraphName topicName, String messageType, TransportHints transportHints) {
-    GraphName resolvedTopicName = resolveName(topicName);
-    TopicDescription topicDescription =
-        nodeConfiguration.getTopicDescriptionFactory().newFromType(messageType);
-    TopicDeclaration topicDeclaration =
-        TopicDeclaration.newFromTopicName(resolvedTopicName, topicDescription, transportHints);
-    MessageDeserializer<T> deserializer = newMessageDeserializer(messageType);
-    Subscriber<T> subscriber = subscriberFactory.newOrExisting(topicDeclaration, deserializer);
-    return subscriber;
-  }
-
-  @Override
-  public <T> Subscriber<T> newSubscriber(String topicName, String messageType) {
-    return newSubscriber(GraphName.of(topicName), messageType, null);
-  }
-
-  @Override
-  public <T> Subscriber<T> newSubscriber(String topicName, String messageType, TransportHints transportHints) {
-    return newSubscriber(GraphName.of(topicName), messageType, transportHints);
-  }
-
-  @Override
-  public <T, S> ServiceServer<T, S> newServiceServer(GraphName serviceName, String serviceType,
-      ServiceResponseBuilder<T, S> responseBuilder) {
-    GraphName resolvedServiceName = resolveName(serviceName);
-    // TODO(damonkohler): It's rather non-obvious that the URI will be
-    // created later on the fly.
-    ServiceIdentifier identifier = new ServiceIdentifier(resolvedServiceName, null);
-    ServiceDescription serviceDescription =
-        nodeConfiguration.getServiceDescriptionFactory().newFromType(serviceType);
-    ServiceDeclaration definition = new ServiceDeclaration(identifier, serviceDescription);
-    MessageDeserializer<T> requestDeserializer = newServiceRequestDeserializer(serviceType);
-    MessageSerializer<S> responseSerializer = newServiceResponseSerializer(serviceType);
-    return serviceFactory.newServer(definition, responseBuilder, requestDeserializer,
-        responseSerializer, nodeConfiguration.getServiceResponseMessageFactory());
-  }
-
-  @Override
-  public <T, S> ServiceServer<T, S> newServiceServer(String serviceName, String serviceType,
-      ServiceResponseBuilder<T, S> responseBuilder) {
-    return newServiceServer(GraphName.of(serviceName), serviceType, responseBuilder);
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public <T, S> ServiceServer<T, S> getServiceServer(GraphName serviceName) {
-    return (ServiceServer<T, S>) serviceManager.getServer(serviceName);
-  }
-
-  @Override
-  public <T, S> ServiceServer<T, S> getServiceServer(String serviceName) {
-    return getServiceServer(GraphName.of(serviceName));
-  }
-
-  @Override
-  public URI lookupServiceUri(GraphName serviceName) {
-    Response<URI> response =
-        masterClient.lookupService(slaveServer.toNodeIdentifier().getName(),
-            resolveName(serviceName).toString());
-    if (response.getStatusCode() == StatusCode.SUCCESS) {
-      return response.getResult();
-    } else {
-      return null;
-    }
-  }
-
-  @Override
-  public URI lookupServiceUri(String serviceName) {
-    return lookupServiceUri(GraphName.of(serviceName));
-  }
-
-  @Override
-  public <T, S> ServiceClient<T, S> newServiceClient(GraphName serviceName, String serviceType)
-      throws ServiceNotFoundException {
-    GraphName resolvedServiceName = resolveName(serviceName);
-    URI uri = lookupServiceUri(resolvedServiceName);
-    if (uri == null) {
-      throw new ServiceNotFoundException("No such service " + resolvedServiceName + " of type "
-          + serviceType);
-    }
-    ServiceDescription serviceDescription =
-        nodeConfiguration.getServiceDescriptionFactory().newFromType(serviceType);
-    ServiceIdentifier serviceIdentifier = new ServiceIdentifier(resolvedServiceName, uri);
-    ServiceDeclaration definition = new ServiceDeclaration(serviceIdentifier, serviceDescription);
-    MessageSerializer<T> requestSerializer = newServiceRequestSerializer(serviceType);
-    MessageDeserializer<S> responseDeserializer = newServiceResponseDeserializer(serviceType);
-    return serviceFactory.newClient(definition, requestSerializer, responseDeserializer,
-        nodeConfiguration.getServiceRequestMessageFactory());
-  }
-
-  @Override
-  public <T, S> ServiceClient<T, S> newServiceClient(String serviceName, String serviceType)
-      throws ServiceNotFoundException {
-    return newServiceClient(GraphName.of(serviceName), serviceType);
-  }
-
-  @Override
-  public Time getCurrentTime() {
-    return timeProvider.getCurrentTime();
-  }
-
-  @Override
-  public GraphName getName() {
-    return nodeName;
-  }
-
-  @Override
-  public GraphName resolveName(GraphName name) {
-    return resolver.resolve(name);
-  }
-
-  @Override
-  public GraphName resolveName(String name) {
-    return resolver.resolve(GraphName.of(name));
-  }
-
-  @Override
-  public void shutdown() {
-    signalOnShutdown();
-    // NOTE(damonkohler): We don't want to raise potentially spurious
-    // exceptions during shutdown that would interrupt the process. This is
-    // simply best effort cleanup.
-    for (ServiceServer<?, ?> serviceServer : serviceManager.getServers()) {
-      try {
-        Response<Integer> response =
-            masterClient.unregisterService(slaveServer.toNodeIdentifier(), serviceServer);
-        if (DEBUG) {
-          if (response.getResult() == 0) {
-            System.err.println("Failed to unregister service: " + serviceServer.getName());
-          }
-        }
-      } catch (XmlRpcTimeoutException e) {
-        LogTools.error(e);
-      } catch (RemoteException e) {
-        LogTools.error(e);
+         });
+         timeProvider = clockTopicTimeProvider;
       }
-    }
-    for (ServiceClient<?, ?> serviceClient : serviceManager.getClients()) {
-      serviceClient.shutdown();
-    }
-    slaveServer.shutdown();
-    topicParticipantManager.shutdown();
-    registrar.shutdown();
-    signalOnShutdownComplete();
-  }
-
-  @Override
-  public URI getMasterUri() {
-    return masterUri;
-  }
-
-  @Override
-  public NodeNameResolver getResolver() {
-    return resolver;
-  }
-
-  @Override
-  public ParameterTree getParameterTree() {
-    return parameterTree;
-  }
-
-  @Override
-  public URI getUri() {
-    return slaveServer.getUri();
-  }
-
-  @Override
-  public MessageSerializationFactory getMessageSerializationFactory() {
-    return nodeConfiguration.getMessageSerializationFactory();
-  }
-
-  @Override
-  public MessageFactory getTopicMessageFactory() {
-    return nodeConfiguration.getTopicMessageFactory();
-  }
-
-  @Override
-  public MessageFactory getServiceRequestMessageFactory() {
-    return nodeConfiguration.getServiceRequestMessageFactory();
-  }
-
-  @Override
-  public MessageFactory getServiceResponseMessageFactory() {
-    return nodeConfiguration.getServiceResponseMessageFactory();
-  }
-
-  @Override
-  public void addListener(NodeListener listener) {
-    nodeListeners.add(listener);
-  }
-
-  /**
-   * SignalRunnable all {@link NodeListener}s that the {@link Node} has
-   * experienced an error.
-   * <p>
-   * Each listener is called in a separate thread.
-   */
-  private void signalOnError(final Throwable throwable) {
-    final Node node = this;
-    nodeListeners.signal(new SignalRunnable<NodeListener>() {
-      @Override
-      public void run(NodeListener listener) {
-        listener.onError(node, throwable);
-      }
-    });
-  }
-
-  @Override
-  public void removeListeners() {
-    nodeListeners.shutdown();
-  }
-
-  /**
-   * SignalRunnable all {@link NodeListener}s that the {@link Node} has started.
-   * <p>
-   * Each listener is called in a separate thread.
-   */
-  private void signalOnStart() {
-    final ConnectedNode connectedNode = this;
-    nodeListeners.signal(new SignalRunnable<NodeListener>() {
-      @Override
-      public void run(NodeListener listener) {
-        listener.onStart(connectedNode);
-      }
-    });
-  }
-
-  /**
-   * SignalRunnable all {@link NodeListener}s that the {@link Node} has started
-   * shutting down.
-   * <p>
-   * Each listener is called in a separate thread.
-   */
-  private void signalOnShutdown() {
-    final Node node = this;
-    try {
-      nodeListeners.signal(new SignalRunnable<NodeListener>() {
-        @Override
-        public void run(NodeListener listener) {
-          listener.onShutdown(node);
-        }
-      }, MAX_SHUTDOWN_DELAY_DURATION, MAX_SHUTDOWN_DELAY_UNITS);
-    } catch (InterruptedException e) {
-      // Ignored since we do not guarantee that all listeners will finish
-      // before
-      // shutdown begins.
-    }
-  }
-
-  /**
-   * SignalRunnable all {@link NodeListener}s that the {@link Node} has shut
-   * down.
-   * <p>
-   * Each listener is called in a separate thread.
-   */
-  private void signalOnShutdownComplete() {
-    final Node node = this;
-    nodeListeners.signal(new SignalRunnable<NodeListener>() {
-      @Override
-      public void run(NodeListener listener) {
-        try {
-          listener.onShutdownComplete(node);
-        } catch (Throwable e) {
-          System.out.println(listener);
-        }
-      }
-    });
-  }
-
-  @VisibleForTesting
-  InetSocketAddress getAddress() {
-    return slaveServer.getAddress();
-  }
-
-  @Override
-  public ScheduledExecutorService getScheduledExecutorService() {
-    return scheduledExecutorService;
-  }
-
-  @Override
-  public void executeCancellableLoop(final CancellableLoop cancellableLoop) {
-    scheduledExecutorService.execute(cancellableLoop);
-    addListener(new NodeListener() {
-      @Override
-      public void onStart(ConnectedNode connectedNode) {
+      else
+      {
+         timeProvider = nodeConfiguration.getTimeProvider();
+         timeLatch.countDown();
       }
 
-      @Override
-      public void onShutdown(Node node) {
-        cancellableLoop.cancel();
+      try
+      {
+         timeLatch.await();
+      }
+      catch (InterruptedException e)
+      {
+         signalOnError(e);
+         shutdown();
+         return;
       }
 
-      @Override
-      public void onShutdownComplete(Node node) {
-      }
+      signalOnStart();
+   }
 
-      @Override
-      public void onError(Node node, Throwable throwable) {
-        cancellableLoop.cancel();
+   @VisibleForTesting
+   Registrar getRegistrar()
+   {
+      return registrar;
+   }
+
+   private <T> MessageSerializer<T> newMessageSerializer(String messageType)
+   {
+      return nodeConfiguration.getMessageSerializationFactory().newMessageSerializer(messageType);
+   }
+
+   @SuppressWarnings("unchecked")
+   private <T> MessageDeserializer<T> newMessageDeserializer(String messageType)
+   {
+      return (MessageDeserializer<T>) nodeConfiguration.getMessageSerializationFactory().newMessageDeserializer(messageType);
+   }
+
+   @SuppressWarnings("unchecked")
+   private <T> MessageSerializer<T> newServiceResponseSerializer(String serviceType)
+   {
+      return (MessageSerializer<T>) nodeConfiguration.getMessageSerializationFactory().newServiceResponseSerializer(serviceType);
+   }
+
+   @SuppressWarnings("unchecked")
+   private <T> MessageDeserializer<T> newServiceResponseDeserializer(String serviceType)
+   {
+      return (MessageDeserializer<T>) nodeConfiguration.getMessageSerializationFactory().newServiceResponseDeserializer(serviceType);
+   }
+
+   @SuppressWarnings("unchecked")
+   private <T> MessageSerializer<T> newServiceRequestSerializer(String serviceType)
+   {
+      return (MessageSerializer<T>) nodeConfiguration.getMessageSerializationFactory().newServiceRequestSerializer(serviceType);
+   }
+
+   @SuppressWarnings("unchecked")
+   private <T> MessageDeserializer<T> newServiceRequestDeserializer(String serviceType)
+   {
+      return (MessageDeserializer<T>) nodeConfiguration.getMessageSerializationFactory().newServiceRequestDeserializer(serviceType);
+   }
+
+   @Override
+   public <T> Publisher<T> newPublisher(GraphName topicName, String messageType)
+   {
+      GraphName resolvedTopicName = resolveName(topicName);
+      TopicDescription topicDescription = nodeConfiguration.getTopicDescriptionFactory().newFromType(messageType);
+      TopicDeclaration topicDeclaration = TopicDeclaration.newFromTopicName(resolvedTopicName, topicDescription, null);
+      MessageSerializer<T> serializer = newMessageSerializer(messageType);
+      return publisherFactory.newOrExisting(topicDeclaration, serializer);
+   }
+
+   @Override
+   public <T> Publisher<T> newPublisher(String topicName, String messageType)
+   {
+      return newPublisher(GraphName.of(topicName), messageType);
+   }
+
+   @Override
+   public <T> Subscriber<T> newSubscriber(GraphName topicName, String messageType)
+   {
+      return newSubscriber(topicName, messageType, null);
+   }
+
+   @Override
+   public <T> Subscriber<T> newSubscriber(GraphName topicName, String messageType, TransportHints transportHints)
+   {
+      GraphName resolvedTopicName = resolveName(topicName);
+      TopicDescription topicDescription = nodeConfiguration.getTopicDescriptionFactory().newFromType(messageType);
+      TopicDeclaration topicDeclaration = TopicDeclaration.newFromTopicName(resolvedTopicName, topicDescription, transportHints);
+      MessageDeserializer<T> deserializer = newMessageDeserializer(messageType);
+      Subscriber<T> subscriber = subscriberFactory.newOrExisting(topicDeclaration, deserializer);
+      return subscriber;
+   }
+
+   @Override
+   public <T> Subscriber<T> newSubscriber(String topicName, String messageType)
+   {
+      return newSubscriber(GraphName.of(topicName), messageType, null);
+   }
+
+   @Override
+   public <T> Subscriber<T> newSubscriber(String topicName, String messageType, TransportHints transportHints)
+   {
+      return newSubscriber(GraphName.of(topicName), messageType, transportHints);
+   }
+
+   @Override
+   public <T, S> ServiceServer<T, S> newServiceServer(GraphName serviceName, String serviceType, ServiceResponseBuilder<T, S> responseBuilder)
+   {
+      GraphName resolvedServiceName = resolveName(serviceName);
+      // TODO(damonkohler): It's rather non-obvious that the URI will be
+      // created later on the fly.
+      ServiceIdentifier identifier = new ServiceIdentifier(resolvedServiceName, null);
+      ServiceDescription serviceDescription = nodeConfiguration.getServiceDescriptionFactory().newFromType(serviceType);
+      ServiceDeclaration definition = new ServiceDeclaration(identifier, serviceDescription);
+      MessageDeserializer<T> requestDeserializer = newServiceRequestDeserializer(serviceType);
+      MessageSerializer<S> responseSerializer = newServiceResponseSerializer(serviceType);
+      return serviceFactory.newServer(definition,
+                                      responseBuilder,
+                                      requestDeserializer,
+                                      responseSerializer,
+                                      nodeConfiguration.getServiceResponseMessageFactory());
+   }
+
+   @Override
+   public <T, S> ServiceServer<T, S> newServiceServer(String serviceName, String serviceType, ServiceResponseBuilder<T, S> responseBuilder)
+   {
+      return newServiceServer(GraphName.of(serviceName), serviceType, responseBuilder);
+   }
+
+   @SuppressWarnings("unchecked")
+   @Override
+   public <T, S> ServiceServer<T, S> getServiceServer(GraphName serviceName)
+   {
+      return (ServiceServer<T, S>) serviceManager.getServer(serviceName);
+   }
+
+   @Override
+   public <T, S> ServiceServer<T, S> getServiceServer(String serviceName)
+   {
+      return getServiceServer(GraphName.of(serviceName));
+   }
+
+   @Override
+   public URI lookupServiceUri(GraphName serviceName)
+   {
+      Response<URI> response = masterClient.lookupService(slaveServer.toNodeIdentifier().getName(), resolveName(serviceName).toString());
+      if (response.getStatusCode() == StatusCode.SUCCESS)
+      {
+         return response.getResult();
       }
-    });
-  }
+      else
+      {
+         return null;
+      }
+   }
+
+   @Override
+   public URI lookupServiceUri(String serviceName)
+   {
+      return lookupServiceUri(GraphName.of(serviceName));
+   }
+
+   @Override
+   public <T, S> ServiceClient<T, S> newServiceClient(GraphName serviceName, String serviceType) throws ServiceNotFoundException
+   {
+      GraphName resolvedServiceName = resolveName(serviceName);
+      URI uri = lookupServiceUri(resolvedServiceName);
+      if (uri == null)
+      {
+         throw new ServiceNotFoundException("No such service " + resolvedServiceName + " of type " + serviceType);
+      }
+      ServiceDescription serviceDescription = nodeConfiguration.getServiceDescriptionFactory().newFromType(serviceType);
+      ServiceIdentifier serviceIdentifier = new ServiceIdentifier(resolvedServiceName, uri);
+      ServiceDeclaration definition = new ServiceDeclaration(serviceIdentifier, serviceDescription);
+      MessageSerializer<T> requestSerializer = newServiceRequestSerializer(serviceType);
+      MessageDeserializer<S> responseDeserializer = newServiceResponseDeserializer(serviceType);
+      return serviceFactory.newClient(definition, requestSerializer, responseDeserializer, nodeConfiguration.getServiceRequestMessageFactory());
+   }
+
+   @Override
+   public <T, S> ServiceClient<T, S> newServiceClient(String serviceName, String serviceType) throws ServiceNotFoundException
+   {
+      return newServiceClient(GraphName.of(serviceName), serviceType);
+   }
+
+   @Override
+   public Time getCurrentTime()
+   {
+      return timeProvider.getCurrentTime();
+   }
+
+   @Override
+   public GraphName getName()
+   {
+      return nodeName;
+   }
+
+   @Override
+   public GraphName resolveName(GraphName name)
+   {
+      return resolver.resolve(name);
+   }
+
+   @Override
+   public GraphName resolveName(String name)
+   {
+      return resolver.resolve(GraphName.of(name));
+   }
+
+   @Override
+   public void shutdown()
+   {
+      signalOnShutdown();
+      // NOTE(damonkohler): We don't want to raise potentially spurious
+      // exceptions during shutdown that would interrupt the process. This is
+      // simply best effort cleanup.
+      for (ServiceServer<?, ?> serviceServer : serviceManager.getServers())
+      {
+         try
+         {
+            Response<Integer> response = masterClient.unregisterService(slaveServer.toNodeIdentifier(), serviceServer);
+            if (DEBUG)
+            {
+               if (response.getResult() == 0)
+               {
+                  System.err.println("Failed to unregister service: " + serviceServer.getName());
+               }
+            }
+         }
+         catch (XmlRpcTimeoutException e)
+         {
+            LogTools.error(e);
+         }
+         catch (RemoteException e)
+         {
+            LogTools.error(e);
+         }
+      }
+      for (ServiceClient<?, ?> serviceClient : serviceManager.getClients())
+      {
+         serviceClient.shutdown();
+      }
+      slaveServer.shutdown();
+      topicParticipantManager.shutdown();
+      registrar.shutdown();
+      signalOnShutdownComplete();
+   }
+
+   @Override
+   public URI getMasterUri()
+   {
+      return masterUri;
+   }
+
+   @Override
+   public NodeNameResolver getResolver()
+   {
+      return resolver;
+   }
+
+   @Override
+   public ParameterTree getParameterTree()
+   {
+      return parameterTree;
+   }
+
+   @Override
+   public URI getUri()
+   {
+      return slaveServer.getUri();
+   }
+
+   @Override
+   public MessageSerializationFactory getMessageSerializationFactory()
+   {
+      return nodeConfiguration.getMessageSerializationFactory();
+   }
+
+   @Override
+   public MessageFactory getTopicMessageFactory()
+   {
+      return nodeConfiguration.getTopicMessageFactory();
+   }
+
+   @Override
+   public MessageFactory getServiceRequestMessageFactory()
+   {
+      return nodeConfiguration.getServiceRequestMessageFactory();
+   }
+
+   @Override
+   public MessageFactory getServiceResponseMessageFactory()
+   {
+      return nodeConfiguration.getServiceResponseMessageFactory();
+   }
+
+   @Override
+   public void addListener(NodeListener listener)
+   {
+      nodeListeners.add(listener);
+   }
+
+   /**
+    * SignalRunnable all {@link NodeListener}s that the {@link Node} has
+    * experienced an error.
+    * <p>
+    * Each listener is called in a separate thread.
+    */
+   private void signalOnError(final Throwable throwable)
+   {
+      final Node node = this;
+      nodeListeners.signal(new SignalRunnable<NodeListener>()
+      {
+         @Override
+         public void run(NodeListener listener)
+         {
+            listener.onError(node, throwable);
+         }
+      });
+   }
+
+   @Override
+   public void removeListeners()
+   {
+      nodeListeners.shutdown();
+   }
+
+   /**
+    * SignalRunnable all {@link NodeListener}s that the {@link Node} has started.
+    * <p>
+    * Each listener is called in a separate thread.
+    */
+   private void signalOnStart()
+   {
+      final ConnectedNode connectedNode = this;
+      nodeListeners.signal(new SignalRunnable<NodeListener>()
+      {
+         @Override
+         public void run(NodeListener listener)
+         {
+            listener.onStart(connectedNode);
+         }
+      });
+   }
+
+   /**
+    * SignalRunnable all {@link NodeListener}s that the {@link Node} has started
+    * shutting down.
+    * <p>
+    * Each listener is called in a separate thread.
+    */
+   private void signalOnShutdown()
+   {
+      final Node node = this;
+      try
+      {
+         nodeListeners.signal(new SignalRunnable<NodeListener>()
+         {
+            @Override
+            public void run(NodeListener listener)
+            {
+               listener.onShutdown(node);
+            }
+         }, MAX_SHUTDOWN_DELAY_DURATION, MAX_SHUTDOWN_DELAY_UNITS);
+      }
+      catch (InterruptedException e)
+      {
+         // Ignored since we do not guarantee that all listeners will finish
+         // before
+         // shutdown begins.
+      }
+   }
+
+   /**
+    * SignalRunnable all {@link NodeListener}s that the {@link Node} has shut
+    * down.
+    * <p>
+    * Each listener is called in a separate thread.
+    */
+   private void signalOnShutdownComplete()
+   {
+      final Node node = this;
+      nodeListeners.signal(new SignalRunnable<NodeListener>()
+      {
+         @Override
+         public void run(NodeListener listener)
+         {
+            try
+            {
+               listener.onShutdownComplete(node);
+            }
+            catch (Throwable e)
+            {
+               System.out.println(listener);
+            }
+         }
+      });
+   }
+
+   @VisibleForTesting
+   InetSocketAddress getAddress()
+   {
+      return slaveServer.getAddress();
+   }
+
+   @Override
+   public ScheduledExecutorService getScheduledExecutorService()
+   {
+      return scheduledExecutorService;
+   }
+
+   @Override
+   public void executeCancellableLoop(final CancellableLoop cancellableLoop)
+   {
+      scheduledExecutorService.execute(cancellableLoop);
+      addListener(new NodeListener()
+      {
+         @Override
+         public void onStart(ConnectedNode connectedNode)
+         {
+         }
+
+         @Override
+         public void onShutdown(Node node)
+         {
+            cancellableLoop.cancel();
+         }
+
+         @Override
+         public void onShutdownComplete(Node node)
+         {
+         }
+
+         @Override
+         public void onError(Node node, Throwable throwable)
+         {
+            cancellableLoop.cancel();
+         }
+      });
+   }
 }

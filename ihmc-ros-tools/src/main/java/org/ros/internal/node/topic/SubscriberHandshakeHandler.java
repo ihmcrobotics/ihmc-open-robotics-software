@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -33,43 +33,49 @@ import java.util.concurrent.ExecutorService;
 /**
  * Performs a handshake with the connected {@link Publisher} and connects the
  * {@link Publisher} to the {@link IncomingMessageQueue} on success.
- * 
+ *
  * @author damonkohler@google.com (Damon Kohler)
- * 
+ *
  * @param <T>
  *          the {@link Subscriber} may only subscribe to messages of this type
  */
-class SubscriberHandshakeHandler<T> extends BaseClientHandshakeHandler {
+class SubscriberHandshakeHandler<T> extends BaseClientHandshakeHandler
+{
 
-  private final IncomingMessageQueue<T> incomingMessageQueue;
+   private final IncomingMessageQueue<T> incomingMessageQueue;
 
-  public SubscriberHandshakeHandler(ConnectionHeader outgoingConnectionHeader,
-      final IncomingMessageQueue<T> incomingMessageQueue, ExecutorService executorService) {
-    super(new SubscriberHandshake(outgoingConnectionHeader), executorService);
-    this.incomingMessageQueue = incomingMessageQueue;
-  }
+   public SubscriberHandshakeHandler(ConnectionHeader outgoingConnectionHeader,
+                                     final IncomingMessageQueue<T> incomingMessageQueue,
+                                     ExecutorService executorService)
+   {
+      super(new SubscriberHandshake(outgoingConnectionHeader), executorService);
+      this.incomingMessageQueue = incomingMessageQueue;
+   }
 
-  @Override
-  protected void onSuccess(ConnectionHeader incomingConnectionHeader, ChannelHandlerContext ctx,
-      MessageEvent e) {
-    ChannelPipeline pipeline = e.getChannel().getPipeline();
-    pipeline.remove(SubscriberHandshakeHandler.this);
-    NamedChannelHandler namedChannelHandler = incomingMessageQueue.getMessageReceiver();
-    pipeline.addLast(namedChannelHandler.getName(), namedChannelHandler);
-    String latching = incomingConnectionHeader.getField(ConnectionHeaderFields.LATCHING);
-    if (latching != null && latching.equals("1")) {
-      incomingMessageQueue.setLatchMode(true);
-    }
-  }
+   @Override
+   protected void onSuccess(ConnectionHeader incomingConnectionHeader, ChannelHandlerContext ctx, MessageEvent e)
+   {
+      ChannelPipeline pipeline = e.getChannel().getPipeline();
+      pipeline.remove(SubscriberHandshakeHandler.this);
+      NamedChannelHandler namedChannelHandler = incomingMessageQueue.getMessageReceiver();
+      pipeline.addLast(namedChannelHandler.getName(), namedChannelHandler);
+      String latching = incomingConnectionHeader.getField(ConnectionHeaderFields.LATCHING);
+      if (latching != null && latching.equals("1"))
+      {
+         incomingMessageQueue.setLatchMode(true);
+      }
+   }
 
-  @Override
-  protected void onFailure(String errorMessage, ChannelHandlerContext ctx, MessageEvent e) {
-    LogTools.error("Subscriber handshake failed: " + errorMessage);
-    e.getChannel().close();
-  }
+   @Override
+   protected void onFailure(String errorMessage, ChannelHandlerContext ctx, MessageEvent e)
+   {
+      LogTools.error("Subscriber handshake failed: " + errorMessage);
+      e.getChannel().close();
+   }
 
-  @Override
-  public String getName() {
-    return "SubscriberHandshakeHandler";
-  }
+   @Override
+   public String getName()
+   {
+      return "SubscriberHandshakeHandler";
+   }
 }

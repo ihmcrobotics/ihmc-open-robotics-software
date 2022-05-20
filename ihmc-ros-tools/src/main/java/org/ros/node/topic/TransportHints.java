@@ -2,7 +2,6 @@ package org.ros.node.topic;
 
 import org.ros.node.ConnectedNode;
 
-
 /**
  * Provides a way of specifying network transport hints to
  * {@link ConnectedNode#newSubscriber(org.ros.namespace.GraphName, String, TransportHints)} and
@@ -10,24 +9,29 @@ import org.ros.node.ConnectedNode;
  *
  * @author stefan.glaser@hs-offenburg.de (Stefan Glaser)
  */
-public class TransportHints {
+public class TransportHints
+{
 
-  private boolean tcpNoDelay;
+   private boolean tcpNoDelay;
 
-  public TransportHints() {
-    this(false);
-  }
+   public TransportHints()
+   {
+      this(false);
+   }
 
-  public TransportHints(boolean tcpNoDelay) {
-    this.tcpNoDelay = tcpNoDelay;
-  }
+   public TransportHints(boolean tcpNoDelay)
+   {
+      this.tcpNoDelay = tcpNoDelay;
+   }
 
-  public TransportHints tcpNoDelay(boolean tcpNoDelay) {
-    this.tcpNoDelay = tcpNoDelay;
-    return this;
-  }
+   public TransportHints tcpNoDelay(boolean tcpNoDelay)
+   {
+      this.tcpNoDelay = tcpNoDelay;
+      return this;
+   }
 
-  public boolean getTcpNoDelay() {
-    return tcpNoDelay;
-  }
+   public boolean getTcpNoDelay()
+   {
+      return tcpNoDelay;
+   }
 }

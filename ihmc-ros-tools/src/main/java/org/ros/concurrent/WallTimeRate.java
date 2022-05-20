@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2012 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -16,32 +16,38 @@
 
 package org.ros.concurrent;
 
-
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class WallTimeRate implements Rate {
+public class WallTimeRate implements Rate
+{
 
-  private final long delay;
+   private final long delay;
 
-  private long time;
+   private long time;
 
-  public WallTimeRate(int hz) {
-    delay = 1000 / hz;
-    time = 0;
-  }
+   public WallTimeRate(int hz)
+   {
+      delay = 1000 / hz;
+      time = 0;
+   }
 
-  @Override
-  public void sleep() {
-    long delta = System.currentTimeMillis() - time;
-    while (delta < delay) {
-      try {
-        Thread.sleep(delay - delta);
-      } catch (InterruptedException e) {
-        break;
+   @Override
+   public void sleep()
+   {
+      long delta = System.currentTimeMillis() - time;
+      while (delta < delay)
+      {
+         try
+         {
+            Thread.sleep(delay - delta);
+         }
+         catch (InterruptedException e)
+         {
+            break;
+         }
+         delta = System.currentTimeMillis() - time;
       }
-      delta = System.currentTimeMillis() - time;
-    }
-    time = System.currentTimeMillis();
-  }
+      time = System.currentTimeMillis();
+   }
 }

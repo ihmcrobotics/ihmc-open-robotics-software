@@ -16,41 +16,48 @@
 
 package org.ros.internal.node.response;
 
-public enum StatusCode {
-  ERROR(-1), FAILURE(0), SUCCESS(1);
+public enum StatusCode
+{
+   ERROR(-1), FAILURE(0), SUCCESS(1);
 
-  private final int intValue;
+   private final int intValue;
 
-  private StatusCode(int value) {
-    this.intValue = value;
-  }
+   private StatusCode(int value)
+   {
+      this.intValue = value;
+   }
 
-  public int toInt() {
-    return intValue;
-  }
+   public int toInt()
+   {
+      return intValue;
+   }
 
-  public static StatusCode fromInt(int intValue) {
-    switch (intValue) {
-    case -1:
-      return ERROR;
-    case 1:
-      return SUCCESS;
-    case 0:
-    default:
-      return FAILURE;
-    }
-  }
-  
-  @Override
-  public String toString() {
-    switch (this) {
-      case ERROR:
-        return "Error";
-      case SUCCESS:
-        return "Success";
-      case FAILURE:
-      default:
-        return "Failure";
-    }
-  }
+   public static StatusCode fromInt(int intValue)
+   {
+      switch (intValue)
+      {
+         case -1:
+            return ERROR;
+         case 1:
+            return SUCCESS;
+         case 0:
+         default:
+            return FAILURE;
+      }
+   }
+
+   @Override
+   public String toString()
+   {
+      switch (this)
+      {
+         case ERROR:
+            return "Error";
+         case SUCCESS:
+            return "Success";
+         case FAILURE:
+         default:
+            return "Failure";
+      }
+   }
 }

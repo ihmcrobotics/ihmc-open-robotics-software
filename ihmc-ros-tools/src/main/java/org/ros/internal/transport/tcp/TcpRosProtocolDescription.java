@@ -23,10 +23,11 @@ import org.ros.internal.transport.ProtocolNames;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class TcpRosProtocolDescription extends ProtocolDescription {
+public class TcpRosProtocolDescription extends ProtocolDescription
+{
 
-  public TcpRosProtocolDescription(AdvertiseAddress address) {
-    super(ProtocolNames.TCPROS, address);
-  }
-
+   public TcpRosProtocolDescription(AdvertiseAddress address)
+   {
+      super(ProtocolNames.TCPROS, address);
+   }
 }
