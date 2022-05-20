@@ -10,6 +10,9 @@ public class ImGuiVideoPanel extends ImGuiPanel
 
    private Texture texture;
    private final boolean flipY;
+   private float mouseXRightFromLeft;
+   private float mouseYDownFromTop;
+   private Runnable userImGuiImageInteraction;
 
    public ImGuiVideoPanel(String name, boolean flipY)
    {
@@ -27,6 +30,14 @@ public class ImGuiVideoPanel extends ImGuiPanel
 
    public void renderImGuiWidgets()
    {
+      mouseXRightFromLeft = ImGui.getMousePosX() - ImGui.getWindowPosX();
+      mouseYDownFromTop = ImGui.getMousePosY() - ImGui.getWindowPosY();
+
+      if (userImGuiImageInteraction != null)
+      {
+         userImGuiImageInteraction.run();
+      }
+
       if (texture != null)
       {
          //      float posX = ImGui.getWindowPosX() + ImGui.getWindowContentRegionMinX();
@@ -62,5 +73,20 @@ public class ImGuiVideoPanel extends ImGuiPanel
 
          ImGui.getWindowDrawList().addImage(texture.getTextureObjectHandle(), startX, startY, endX, endY);
       }
+   }
+
+   public void setUserImGuiImageInteraction(Runnable userImGuiImageInteraction)
+   {
+      this.userImGuiImageInteraction = userImGuiImageInteraction;
+   }
+
+   public float getMouseXRightFromLeft()
+   {
+      return mouseXRightFromLeft;
+   }
+
+   public float getMouseYDownFromTop()
+   {
+      return mouseYDownFromTop;
    }
 }
