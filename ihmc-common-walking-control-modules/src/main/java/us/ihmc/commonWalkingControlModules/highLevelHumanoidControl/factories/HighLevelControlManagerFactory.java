@@ -342,7 +342,7 @@ public class HighLevelControlManagerFactory
                                                                                                             controllerToolbox.getYoGraphicsListRegistry());
 
       naturalPostureManager = new NaturalPostureManager(naturalPostureMeasurement, naturalPostureGains, controllerToolbox, registry);
-      naturalPostureManager.setWeights(naturalPostureAngularWeight);
+//      naturalPostureManager.setWeights(naturalPostureAngularWeight);
       return naturalPostureManager;
    }
 
