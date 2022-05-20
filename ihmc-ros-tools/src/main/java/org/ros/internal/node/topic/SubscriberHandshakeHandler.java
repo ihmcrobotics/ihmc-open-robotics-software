@@ -16,8 +16,6 @@
 
 package org.ros.internal.node.topic;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.MessageEvent;
@@ -28,6 +26,7 @@ import org.ros.internal.transport.queue.IncomingMessageQueue;
 import org.ros.internal.transport.tcp.NamedChannelHandler;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
+import us.ihmc.log.LogTools;
 
 import java.util.concurrent.ExecutorService;
 
@@ -41,8 +40,6 @@ import java.util.concurrent.ExecutorService;
  *          the {@link Subscriber} may only subscribe to messages of this type
  */
 class SubscriberHandshakeHandler<T> extends BaseClientHandshakeHandler {
-
-  private static final Log log = LogFactory.getLog(SubscriberHandshakeHandler.class);
 
   private final IncomingMessageQueue<T> incomingMessageQueue;
 
@@ -67,7 +64,7 @@ class SubscriberHandshakeHandler<T> extends BaseClientHandshakeHandler {
 
   @Override
   protected void onFailure(String errorMessage, ChannelHandlerContext ctx, MessageEvent e) {
-    log.error("Subscriber handshake failed: " + errorMessage);
+    LogTools.error("Subscriber handshake failed: " + errorMessage);
     e.getChannel().close();
   }
 

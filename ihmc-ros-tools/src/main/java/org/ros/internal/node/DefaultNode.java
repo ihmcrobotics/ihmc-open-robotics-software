@@ -18,7 +18,6 @@ package org.ros.internal.node;
 
 import com.google.common.annotations.VisibleForTesting;
 
-import org.apache.commons.logging.Log;
 import org.ros.Parameters;
 import org.ros.concurrent.CancellableLoop;
 import org.ros.concurrent.ListenerGroup;
@@ -61,13 +60,13 @@ import org.ros.node.parameter.ParameterTree;
 import org.ros.node.service.ServiceClient;
 import org.ros.node.service.ServiceResponseBuilder;
 import org.ros.node.service.ServiceServer;
-import org.ros.node.topic.DefaultPublisherListener;
 import org.ros.node.topic.DefaultSubscriberListener;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 import org.ros.node.topic.TransportHints;
 import org.ros.time.ClockTopicTimeProvider;
 import org.ros.time.TimeProvider;
+import us.ihmc.log.LogTools;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -113,7 +112,6 @@ public class DefaultNode implements ConnectedNode {
   private final ServiceFactory serviceFactory;
   private final Registrar registrar;
 
-  private RosoutLogger log;
   private TimeProvider timeProvider;
 
   /**
@@ -184,14 +182,6 @@ public class DefaultNode implements ConnectedNode {
     // Wait for the logger to register with the master. This ensures the master is running before
     // requesting the use_sim_time parameter.
     final CountDownLatch rosoutLatch = new CountDownLatch(1);
-
-    log = new RosoutLogger(this);
-    log.getPublisher().addListener(new DefaultPublisherListener<rosgraph_msgs.Log>() {
-      @Override
-      public void onMasterRegistrationSuccess(Publisher<rosgraph_msgs.Log> registrant) {
-        rosoutLatch.countDown();
-      }
-    });
 
     try {
       rosoutLatch.await();
@@ -407,11 +397,6 @@ public class DefaultNode implements ConnectedNode {
   }
 
   @Override
-  public Log getLog() {
-    return log;
-  }
-
-  @Override
   public GraphName resolveName(GraphName name) {
     return resolver.resolve(name);
   }
@@ -437,9 +422,9 @@ public class DefaultNode implements ConnectedNode {
           }
         }
       } catch (XmlRpcTimeoutException e) {
-        log.error(e);
+        LogTools.error(e);
       } catch (RemoteException e) {
-        log.error(e);
+        LogTools.error(e);
       }
     }
     for (ServiceClient<?, ?> serviceClient : serviceManager.getClients()) {

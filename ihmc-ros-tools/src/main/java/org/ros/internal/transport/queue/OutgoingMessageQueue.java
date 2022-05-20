@@ -18,8 +18,6 @@ package org.ros.internal.transport.queue;
 
 import com.google.common.annotations.VisibleForTesting;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.group.ChannelGroup;
@@ -31,6 +29,7 @@ import org.ros.concurrent.CircularBlockingDeque;
 import org.ros.internal.message.MessageBufferPool;
 import org.ros.internal.message.MessageBuffers;
 import org.ros.message.MessageSerializer;
+import us.ihmc.log.LogTools;
 
 import java.util.concurrent.ExecutorService;
 
@@ -40,7 +39,6 @@ import java.util.concurrent.ExecutorService;
 public class OutgoingMessageQueue<T> {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(OutgoingMessageQueue.class);
 
   private static final int DEQUE_CAPACITY = 16;
 
@@ -62,8 +60,8 @@ public class OutgoingMessageQueue<T> {
       final ChannelBuffer buffer = messageBufferPool.acquire();
       serializer.serialize(message, buffer);
       if (DEBUG) {
-        log.info(String.format("Writing %d bytes to %d channels.", buffer.readableBytes(),
-            channelGroup.size()));
+        LogTools.info(String.format("Writing %d bytes to %d channels.", buffer.readableBytes(),
+                                    channelGroup.size()));
       }
       // Note that the buffer is automatically "duplicated" by Netty to avoid
       // race conditions. However, the duplicated buffer and the original buffer
@@ -127,7 +125,7 @@ public class OutgoingMessageQueue<T> {
    */
   public void addChannel(Channel channel) {
     if (!writer.isRunning()) {
-      log.warn("Failed to add channel. Cannot add channels after shutdown.");
+      LogTools.warn("Failed to add channel. Cannot add channels after shutdown.");
       return;
     }
     if (latchMode && latchedMessage != null) {

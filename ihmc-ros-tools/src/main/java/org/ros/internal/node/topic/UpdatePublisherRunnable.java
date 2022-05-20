@@ -16,8 +16,6 @@
 
 package org.ros.internal.node.topic;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.ros.exception.RemoteException;
 import org.ros.internal.node.client.SlaveClient;
 import org.ros.internal.node.response.Response;
@@ -28,6 +26,7 @@ import org.ros.internal.transport.ProtocolDescription;
 import org.ros.internal.transport.ProtocolNames;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
+import us.ihmc.log.LogTools;
 
 /**
  * A {@link Runnable} which is used whenever new publishers are being added to a
@@ -37,8 +36,6 @@ import org.ros.node.topic.Subscriber;
  * @author damonkohler@google.com (Damon Kohler)
  */
 class UpdatePublisherRunnable<MessageType> implements Runnable {
-
-  private static final Log log = LogFactory.getLog(UpdatePublisherRunnable.class);
 
   private final DefaultSubscriber<MessageType> subscriber;
   private final PublisherIdentifier publisherIdentifier;
@@ -72,21 +69,21 @@ class UpdatePublisherRunnable<MessageType> implements Runnable {
       if (ProtocolNames.SUPPORTED.contains(selected.getName())) {
         subscriber.addPublisher(publisherIdentifier, selected.getAddress());
       } else {
-        log.error("Publisher returned unsupported protocol selection: " + response);
+        LogTools.error("Publisher returned unsupported protocol selection: " + response);
       }
     } catch (RemoteException e) {
       // TODO(damonkohler): Retry logic is needed at the XML-RPC layer.
-      log.error(e);
+      LogTools.error(e);
     } catch (XmlRpcTimeoutException e) {
       // TODO(damonkohler): see above note re: retry
-      log.error(e);
+      LogTools.error(e);
     } catch (RuntimeException e) {
       // TODO(kwc):
       // org.apache.xmlrpc.XmlRpcException/java.net.ConnectException's are
       // leaking through as java.lang.reflect.UndeclaredThrowableExceptions.
       // This is happening whenever the node attempts to connect to a stale
       // publisher (i.e. a publisher that is no longer online).
-      log.error(e);
+      LogTools.error(e);
     }
   }
 }

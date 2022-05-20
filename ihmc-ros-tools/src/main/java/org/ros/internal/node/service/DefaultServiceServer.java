@@ -18,8 +18,6 @@ package org.ros.internal.node.service;
 
 import com.google.common.base.Preconditions;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.ChannelHandler;
 import org.ros.address.AdvertiseAddress;
@@ -37,6 +35,7 @@ import org.ros.node.service.DefaultServiceServerListener;
 import org.ros.node.service.ServiceResponseBuilder;
 import org.ros.node.service.ServiceServer;
 import org.ros.node.service.ServiceServerListener;
+import us.ihmc.log.LogTools;
 
 import java.net.URI;
 import java.util.concurrent.ScheduledExecutorService;
@@ -49,7 +48,6 @@ import java.util.concurrent.ScheduledExecutorService;
 public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(DefaultPublisher.class);
 
   private final ServiceDeclaration serviceDeclaration;
   private final ServiceResponseBuilder<T, S> serviceResponseBuilder;
@@ -75,29 +73,29 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
     listenerGroup.add(new DefaultServiceServerListener<T, S>() {
       @Override
       public void onMasterRegistrationSuccess(ServiceServer<T, S> registrant) {
-        log.info("Service registered: " + DefaultServiceServer.this);
+        LogTools.info("Service registered: " + DefaultServiceServer.this);
       }
 
       @Override
       public void onMasterRegistrationFailure(ServiceServer<T, S> registrant) {
-        log.info("Service registration failed: " + DefaultServiceServer.this);
+        LogTools.info("Service registration failed: " + DefaultServiceServer.this);
       }
 
       @Override
       public void onMasterUnregistrationSuccess(ServiceServer<T, S> registrant) {
-        log.info("Service unregistered: " + DefaultServiceServer.this);
+        LogTools.info("Service unregistered: " + DefaultServiceServer.this);
       }
 
       @Override
       public void onMasterUnregistrationFailure(ServiceServer<T, S> registrant) {
-        log.info("Service unregistration failed: " + DefaultServiceServer.this);
+        LogTools.info("Service unregistration failed: " + DefaultServiceServer.this);
       }
     });
   }
 
   public ChannelBuffer finishHandshake(ConnectionHeader incomingConnectionHeader) {
     if (DEBUG) {
-      log.info("Client handshake header: " + incomingConnectionHeader);
+      LogTools.info("Client handshake header: " + incomingConnectionHeader);
     }
     ConnectionHeader connectionHeader = toDeclaration().toConnectionHeader();
     String expectedChecksum = connectionHeader.getField(ConnectionHeaderFields.MD5_CHECKSUM);
@@ -107,7 +105,7 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
     Preconditions.checkState(incomingChecksum.equals(expectedChecksum)
         || incomingChecksum.equals("*"));
     if (DEBUG) {
-      log.info("Server handshake header: " + connectionHeader);
+      LogTools.info("Server handshake header: " + connectionHeader);
     }
     return connectionHeader.encode();
   }

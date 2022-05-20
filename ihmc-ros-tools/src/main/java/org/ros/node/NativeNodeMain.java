@@ -16,8 +16,7 @@
 
 package org.ros.node;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import us.ihmc.log.LogTools;
 
 /**
  * A java wrapper to load and run a native-code ROS node.
@@ -30,7 +29,6 @@ import org.apache.commons.logging.LogFactory;
 public abstract class NativeNodeMain extends AbstractNodeMain {
 
   public static final int SUCCESS = 0;
-  private Log log = LogFactory.getLog(NativeNodeMain.class);
   private String libName;
   private String masterUri = null;
   private String hostName = null;
@@ -57,18 +55,18 @@ public abstract class NativeNodeMain extends AbstractNodeMain {
       remappingArguments = remappings;
     }
     
-    log.info("Trying to load native library '" + libName + "'...");
+    LogTools.info("Trying to load native library '" + libName + "'...");
     try {
       System.loadLibrary(libName);
     }
     catch (SecurityException e) {
-      log.info("Error loading library! SecurityException");
+      LogTools.info("Error loading library! SecurityException");
     }
     catch (UnsatisfiedLinkError e) {
-      log.info("Error loading library! UnsatisfiedLinkError");
+      LogTools.info("Error loading library! UnsatisfiedLinkError");
     }
     catch (NullPointerException e) {
-      log.info("Error loading library! NullPointerException");
+      LogTools.info("Error loading library! NullPointerException");
     }
   }
 

@@ -16,14 +16,13 @@
 
 package org.ros.internal.transport;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.ros.exception.RosRuntimeException;
+import us.ihmc.log.LogTools;
 
 import java.io.IOException;
 import java.nio.channels.Channels;
@@ -36,7 +35,6 @@ import java.nio.channels.Channels;
 public class ConnectionTrackingHandler extends SimpleChannelHandler {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(ConnectionTrackingHandler.class);
 
   /**
    * The channel group the connection is to be part of.
@@ -50,7 +48,7 @@ public class ConnectionTrackingHandler extends SimpleChannelHandler {
   @Override
   public void channelOpen(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
     if (DEBUG) {
-      log.info("Channel opened: " + e.getChannel());
+      LogTools.info("Channel opened: " + e.getChannel());
     }
     channelGroup.add(e.getChannel());
     super.channelOpen(ctx, e);
@@ -59,7 +57,7 @@ public class ConnectionTrackingHandler extends SimpleChannelHandler {
   @Override
   public void channelClosed(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
     if (DEBUG) {
-      log.info("Channel closed: " + e.getChannel());
+      LogTools.info("Channel closed: " + e.getChannel());
     }
     super.channelClosed(ctx, e);
   }
@@ -73,9 +71,9 @@ public class ConnectionTrackingHandler extends SimpleChannelHandler {
       // and should not be fatal. However, in all cases the channel should be
       // closed.
       if (DEBUG) {
-        log.error("Channel exception: " + ctx.getChannel(), e.getCause());
+        LogTools.error("Channel exception: " + ctx.getChannel(), e.getCause());
       } else {
-        log.error("Channel exception: " + e.getCause());
+        LogTools.error("Channel exception: " + e.getCause());
       }
     } else {
       throw new RosRuntimeException(e.getCause());

@@ -19,11 +19,10 @@ package org.ros.internal.transport;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.message.MessageBuffers;
+import us.ihmc.log.LogTools;
 
 import java.nio.charset.Charset;
 import java.util.Collections;
@@ -36,7 +35,6 @@ import java.util.Map.Entry;
 public class ConnectionHeader {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(ConnectionHeader.class);
 
   private final Map<String, String> fields;
 
@@ -73,7 +71,7 @@ public class ConnectionHeader {
       }
     }
     if (DEBUG) {
-      log.info("Decoded header: " + fields);
+      LogTools.info("Decoded header: " + fields);
     }
     ConnectionHeader connectionHeader = new ConnectionHeader();
     connectionHeader.mergeFields(fields);

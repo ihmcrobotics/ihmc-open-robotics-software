@@ -19,8 +19,6 @@ package org.ros.internal.node.server.master;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
 import org.ros.internal.node.client.SlaveClient;
@@ -35,6 +33,7 @@ import org.ros.node.Node;
 import org.ros.node.service.ServiceServer;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
+import us.ihmc.log.LogTools;
 
 import java.net.URI;
 import java.util.Collection;
@@ -56,7 +55,6 @@ import java.util.List;
 public class MasterServer extends XmlRpcServer implements MasterRegistrationListener {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(MasterServer.class);
 
   /**
    * Position in the {@link #getSystemState()} for publisher information.
@@ -94,7 +92,7 @@ public class MasterServer extends XmlRpcServer implements MasterRegistrationList
    */
   public void start() {
     if (DEBUG) {
-      log.info("Starting master server.");
+      LogTools.info("Starting master server.");
     }
     super.start(MasterXmlRpcEndpointImpl.class, new MasterXmlRpcEndpointImpl(this));
   }
@@ -154,7 +152,7 @@ public class MasterServer extends XmlRpcServer implements MasterRegistrationList
   public List<URI> registerSubscriber(GraphName nodeName, URI nodeSlaveUri, GraphName topicName,
       String topicMessageType) {
     if (DEBUG) {
-      log.info(String.format(
+      LogTools.info(String.format(
           "Registering subscriber %s with message type %s on node %s with URI %s", topicName,
           topicMessageType, nodeName, nodeSlaveUri));
     }
@@ -182,7 +180,7 @@ public class MasterServer extends XmlRpcServer implements MasterRegistrationList
    */
   public boolean unregisterSubscriber(GraphName nodeName, GraphName topicName) {
     if (DEBUG) {
-      log.info(String.format("Unregistering subscriber for %s on node %s.", topicName, nodeName));
+      LogTools.info(String.format("Unregistering subscriber for %s on node %s.", topicName, nodeName));
     }
     synchronized (masterRegistrationManager) {
       return masterRegistrationManager.unregisterSubscriber(nodeName, topicName);
@@ -207,7 +205,7 @@ public class MasterServer extends XmlRpcServer implements MasterRegistrationList
   public List<URI> registerPublisher(GraphName nodeName, URI nodeSlaveUri, GraphName topicName,
       String topicMessageType) {
     if (DEBUG) {
-      log.info(String.format(
+      LogTools.info(String.format(
           "Registering publisher %s with message type %s on node %s with URI %s.", topicName,
           topicMessageType, nodeName, nodeSlaveUri));
     }
@@ -239,7 +237,7 @@ public class MasterServer extends XmlRpcServer implements MasterRegistrationList
    */
   private void publisherUpdate(TopicRegistrationInfo topicInfo, List<URI> subscriberSlaveUris) {
     if (DEBUG) {
-      log.info("Publisher update: " + topicInfo.getTopicName());
+      LogTools.info("Publisher update: " + topicInfo.getTopicName());
     }
     List<URI> publisherUris = Lists.newArrayList();
     for (NodeRegistrationInfo publisherNodeInfo : topicInfo.getPublishers()) {
@@ -280,7 +278,7 @@ public class MasterServer extends XmlRpcServer implements MasterRegistrationList
    */
   public boolean unregisterPublisher(GraphName nodeName, GraphName topicName) {
     if (DEBUG) {
-      log.info(String.format("Unregistering publisher for %s on %s.", topicName, nodeName));
+      LogTools.info(String.format("Unregistering publisher for %s on %s.", topicName, nodeName));
     }
     synchronized (masterRegistrationManager) {
       return masterRegistrationManager.unregisterPublisher(nodeName, topicName);
@@ -476,8 +474,8 @@ public class MasterServer extends XmlRpcServer implements MasterRegistrationList
   public void onNodeReplacement(NodeRegistrationInfo nodeInfo) {
     // A node in the registration manager is being replaced. Contact the node
     // and tell it to shut down.
-    if (log.isWarnEnabled()) {
-      log.warn(String.format("Existing node %s with slave URI %s will be shutdown.",
+    if (LogTools.isWarnEnabled()) {
+      LogTools.warn(String.format("Existing node %s with slave URI %s will be shutdown.",
           nodeInfo.getNodeName(), nodeInfo.getNodeSlaveUri()));
     }
 

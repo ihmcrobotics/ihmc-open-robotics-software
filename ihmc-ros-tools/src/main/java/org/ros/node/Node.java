@@ -16,7 +16,6 @@
 
 package org.ros.node;
 
-import org.apache.commons.logging.Log;
 import org.ros.concurrent.CancellableLoop;
 import org.ros.internal.node.xmlrpc.MasterXmlRpcEndpoint;
 import org.ros.message.MessageFactory;
@@ -69,11 +68,6 @@ public interface Node {
    *         attached to.
    */
   URI getMasterUri();
-
-  /**
-   * @return Logger for this node, which will also perform logging to /rosout.
-   */
-  Log getLog();
 
   /**
    * @return the {@link MessageSerializationFactory} used by this node

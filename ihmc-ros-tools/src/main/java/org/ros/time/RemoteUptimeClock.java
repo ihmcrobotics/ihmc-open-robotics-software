@@ -20,9 +20,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.ros.exception.RosRuntimeException;
+import us.ihmc.log.LogTools;
 
 import java.util.Collections;
 import java.util.List;
@@ -35,7 +34,6 @@ import java.util.concurrent.Callable;
 public class RemoteUptimeClock {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(RemoteUptimeClock.class);
 
   private final LocalUptimeProvider localUptimeProvider;
   private final Callable<Double> callable;
@@ -217,7 +215,7 @@ public class RemoteUptimeClock {
    *          the delay in milliseconds between collecting each sample
    */
   public void calibrate(int sampleSize, double samplingDelayMillis) {
-    log.info("Starting calibration...");
+    LogTools.info("Starting calibration...");
     double remoteUptimeSum = 0;
     double localUptimeSum = 0;
     double driftSum = 0;
@@ -247,7 +245,7 @@ public class RemoteUptimeClock {
     // -5s since the localUptime started 5s earlier than measuredRemoteUptime).
     double offset = (drift * remoteUptimeSum - localUptimeSum) / sampleSize;
     predictedRemoteUptime = (localUptime + offset) / drift;
-    log.info(String.format("Calibration complete. Drift: %.4g, Offset: %.4f s", drift, offset));
+    LogTools.info(String.format("Calibration complete. Drift: %.4g, Offset: %.4f s", drift, offset));
   }
 
   /**
@@ -282,7 +280,7 @@ public class RemoteUptimeClock {
     double latency = result.latency;
 
     if (latencyOutlierFilter.add(latency)) {
-      log.warn(String.format(
+      LogTools.warn(String.format(
           "Measurement latency marked as outlier. Latency: %.4f s, Median: %.4f s", latency,
           latencyOutlierFilter.getMedian()));
       return;
@@ -293,7 +291,7 @@ public class RemoteUptimeClock {
     Preconditions.checkState(localUptimeDelta > 1e-9);
     Preconditions.checkState(remoteUptimeDelta > 1e-9);
     if (DEBUG) {
-      log.info(String.format("localUptimeDelta: %.4g, remoteUptimeDelta: %.4g", localUptimeDelta,
+      LogTools.info(String.format("localUptimeDelta: %.4g, remoteUptimeDelta: %.4g", localUptimeDelta,
           remoteUptimeDelta));
     }
 
@@ -311,7 +309,7 @@ public class RemoteUptimeClock {
         errorReductionCoefficientSensitivity * (newCombinedDriftAndError - newDrift);
     double deltaRatio = remoteUptimeDelta / localUptimeDelta;
     double error = newLocalUptime - toLocalUptime(newRemoteUptime);
-    log.info(String.format("Latency: %.4f s, Delta ratio: %.4f, Drift: %.4g, "
+    LogTools.info(String.format("Latency: %.4f s, Delta ratio: %.4f, Drift: %.4g, "
         + "Error reduction coefficient: %.4g, Error: %.4f s", latency, deltaRatio, newDrift,
         newErrorReductionCoefficient, error));
 
@@ -336,7 +334,7 @@ public class RemoteUptimeClock {
     try {
       newRemoteUptime = callable.call();
     } catch (Exception e) {
-      log.error(e);
+      LogTools.error(e);
       throw new RosRuntimeException(e);
     }
     double latency = localUptimeProvider.getSeconds() - newLocalUptime;

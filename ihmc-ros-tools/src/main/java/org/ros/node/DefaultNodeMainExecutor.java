@@ -25,10 +25,9 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.ros.concurrent.DefaultScheduledExecutorService;
 import org.ros.namespace.GraphName;
+import us.ihmc.log.LogTools;
 
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
@@ -42,7 +41,6 @@ import java.util.concurrent.ScheduledExecutorService;
 public class DefaultNodeMainExecutor implements NodeMainExecutor {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(DefaultNodeMainExecutor.class);
 
   private final NodeFactory nodeFactory;
   private final ScheduledExecutorService scheduledExecutorService;
@@ -66,7 +64,7 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
 
     @Override
     public void onError(Node node, Throwable throwable) {
-      log.error("Node error.", throwable);
+      LogTools.error("Node error.", throwable);
       unregisterNode(node);
     }
   }
@@ -124,7 +122,7 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
     nodeConfigurationCopy.setDefaultNodeName(nodeMain.getDefaultNodeName());
     Preconditions.checkNotNull(nodeConfigurationCopy.getNodeName(), "Node name not specified.");
     if (DEBUG) {
-      log.info("Starting node: " + nodeConfigurationCopy.getNodeName());
+      LogTools.info("Starting node: " + nodeConfigurationCopy.getNodeName());
     }
     scheduledExecutorService.execute(new Runnable() {
       @Override
@@ -176,14 +174,14 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
       node.shutdown();
     } catch (Exception e) {
       // Ignore spurious errors during shutdown.
-      log.error("Exception thrown while shutting down node.", e);
+      LogTools.error("Exception thrown while shutting down node.", e);
       // We don't expect any more callbacks from a node that throws an exception
       // while shutting down. So, we unregister it immediately.
       unregisterNode(node);
       success = false;
     }
     if (success) {
-      log.info("Shutdown successful.");
+      LogTools.info("Shutdown successful.");
     }
   }
 

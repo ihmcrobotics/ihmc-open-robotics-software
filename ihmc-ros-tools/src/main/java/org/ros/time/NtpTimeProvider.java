@@ -19,13 +19,12 @@ package org.ros.time;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.net.ntp.NTPUDPClient;
 import org.apache.commons.net.ntp.TimeInfo;
 import org.ros.math.CollectionMath;
 import org.ros.message.Duration;
 import org.ros.message.Time;
+import us.ihmc.log.LogTools;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -42,7 +41,6 @@ import java.util.concurrent.TimeUnit;
 public class NtpTimeProvider implements TimeProvider {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(NtpTimeProvider.class);
 
   private int sampleSize = 11;
   
@@ -86,19 +84,19 @@ public class NtpTimeProvider implements TimeProvider {
       }
     }
     offset = CollectionMath.median(offsets);
-    log.info(String.format("NTP time offset: %d ms", offset));
+    LogTools.info(String.format("NTP time offset: %d ms", offset));
   }
 
   private long computeOffset() throws IOException {
     if (DEBUG) {
-      log.info("Updating time offset from NTP server: " + host.getHostName());
+      LogTools.info("Updating time offset from NTP server: " + host.getHostName());
     }
     TimeInfo time;
     try {
       time = ntpClient.getTime(host);
     } catch (IOException e) {
       if (DEBUG) {
-        log.error("Failed to read time from NTP server: " + host.getHostName(), e);
+        LogTools.error("Failed to read time from NTP server: " + host.getHostName(), e);
       }
       throw e;
     }
@@ -129,7 +127,7 @@ public class NtpTimeProvider implements TimeProvider {
             try {
               updateTime();
             } catch (IOException e) {
-              log.error("Periodic NTP update failed.", e);
+              LogTools.error("Periodic NTP update failed.", e);
             }
           }
         }, 0, period, unit);

@@ -18,11 +18,10 @@ package org.ros.internal.node.topic;
 
 import com.google.common.base.Preconditions;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.ros.internal.node.BaseClientHandshake;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
+import us.ihmc.log.LogTools;
 
 /**
  * Handshake logic from the subscriber side of a topic connection.
@@ -32,7 +31,6 @@ import org.ros.internal.transport.ConnectionHeaderFields;
 public class SubscriberHandshake extends BaseClientHandshake {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(SubscriberHandshake.class);
 
   public SubscriberHandshake(ConnectionHeader outgoingConnectionHeader) {
     super(outgoingConnectionHeader);
@@ -44,8 +42,8 @@ public class SubscriberHandshake extends BaseClientHandshake {
   @Override
   public boolean handshake(ConnectionHeader incommingConnectionHeader) {
     if (DEBUG) {
-      log.info("Outgoing subscriber connection header: " + outgoingConnectionHeader);
-      log.info("Incoming publisher connection header: " + incommingConnectionHeader);
+      LogTools.info("Outgoing subscriber connection header: " + outgoingConnectionHeader);
+      LogTools.info("Incoming publisher connection header: " + incommingConnectionHeader);
     }
     setErrorMessage(incommingConnectionHeader.getField(ConnectionHeaderFields.ERROR));
     String incomingType = incommingConnectionHeader.getField(ConnectionHeaderFields.TYPE);

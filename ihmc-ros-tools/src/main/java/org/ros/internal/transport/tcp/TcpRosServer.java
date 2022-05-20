@@ -18,8 +18,6 @@ package org.ros.internal.transport.tcp;
 
 import com.google.common.base.Preconditions;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.buffer.HeapChannelBufferFactory;
 import org.jboss.netty.channel.Channel;
@@ -31,6 +29,7 @@ import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.topic.TopicParticipantManager;
+import us.ihmc.log.LogTools;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
@@ -50,7 +49,6 @@ import java.util.concurrent.ScheduledExecutorService;
 public class TcpRosServer {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(TcpRosServer.class);
 
   private final BindAddress bindAddress;
   private final AdvertiseAddress advertiseAddress;
@@ -92,8 +90,8 @@ public class TcpRosServer {
       }
     });
     if (DEBUG) {
-      log.info("Bound to: " + bindAddress);
-      log.info("Advertising: " + advertiseAddress);
+      LogTools.info("Bound to: " + bindAddress);
+      LogTools.info("Advertising: " + advertiseAddress);
     }
   }
 
@@ -105,7 +103,7 @@ public class TcpRosServer {
    */
   public void shutdown() {
     if (DEBUG) {
-      log.info("Shutting down: " + getAddress());
+      LogTools.info("Shutting down: " + getAddress());
     }
     if (outgoingChannel != null) {
       outgoingChannel.close().awaitUninterruptibly();

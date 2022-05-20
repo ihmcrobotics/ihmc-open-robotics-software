@@ -18,13 +18,12 @@ package org.ros.internal.transport.queue;
 
 import org.ros.concurrent.CircularBlockingDeque;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
 import org.ros.internal.transport.tcp.AbstractNamedChannelHandler;
 import org.ros.message.MessageDeserializer;
+import us.ihmc.log.LogTools;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -35,7 +34,6 @@ import org.ros.message.MessageDeserializer;
 public class MessageReceiver<T> extends AbstractNamedChannelHandler {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(MessageReceiver.class);
 
   private final CircularBlockingDeque<LazyMessage<T>> lazyMessages;
   private final MessageDeserializer<T> deserializer;
@@ -55,7 +53,7 @@ public class MessageReceiver<T> extends AbstractNamedChannelHandler {
   public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
     ChannelBuffer buffer = (ChannelBuffer) e.getMessage();
     if (DEBUG) {
-      log.info(String.format("Received %d byte message.", buffer.readableBytes()));
+      LogTools.info(String.format("Received %d byte message.", buffer.readableBytes()));
     }
     // We have to make a defensive copy of the buffer here because Netty does
     // not guarantee that the returned ChannelBuffer will not be reused.

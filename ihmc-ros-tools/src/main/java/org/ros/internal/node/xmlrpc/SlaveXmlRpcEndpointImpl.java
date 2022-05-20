@@ -19,8 +19,6 @@ package org.ros.internal.node.xmlrpc;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.response.StatusCode;
 import org.ros.internal.node.server.ServerException;
@@ -29,6 +27,7 @@ import org.ros.internal.node.topic.DefaultPublisher;
 import org.ros.internal.node.topic.DefaultSubscriber;
 import org.ros.internal.transport.ProtocolDescription;
 import org.ros.namespace.GraphName;
+import us.ihmc.log.LogTools;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -45,7 +44,6 @@ import java.util.Vector;
 public class SlaveXmlRpcEndpointImpl implements SlaveXmlRpcEndpoint {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(SlaveXmlRpcEndpointImpl.class);
 
   private final SlaveServer slave;
 
@@ -72,7 +70,7 @@ public class SlaveXmlRpcEndpointImpl implements SlaveXmlRpcEndpoint {
 
   @Override
   public List<Object> shutdown(String callerId, String message) {
-    log.info("Shutdown requested by " + callerId + " with message \"" + message + "\"");
+    LogTools.info("Shutdown requested by " + callerId + " with message \"" + message + "\"");
     slave.shutdown();
     return Response.newSuccess("Shutdown successful.", null).toList();
   }
@@ -197,7 +195,7 @@ public class SlaveXmlRpcEndpointImpl implements SlaveXmlRpcEndpoint {
     }
     List<Object> response = Response.newSuccess(protocol.toString(), protocol.toList()).toList();
     if (DEBUG) {
-      log.info("requestTopic(" + topic + ", " + requestedProtocols + ") response: "
+      LogTools.info("requestTopic(" + topic + ", " + requestedProtocols + ") response: "
           + response.toString());
     }
     return response;
