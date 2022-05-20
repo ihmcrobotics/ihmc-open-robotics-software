@@ -432,10 +432,14 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
       for (int vertexIndex = 0; vertexIndex < numberOfVertices; vertexIndex++)
          texturePoints[vertexIndex] = new TexCoord2f();
 
-      int[] triangleIndices = new int[3 * numberOfTriangles];
+      int[] triangleIndices = new int[3 * numberOfTriangles * 2];
       int index = 0;
       for (int j = 2; j < numberOfVertices; j++)
       {
+         triangleIndices[index++] = 0;
+         triangleIndices[index++] = j;
+         triangleIndices[index++] = j - 1;
+         
          triangleIndices[index++] = 0;
          triangleIndices[index++] = j - 1;
          triangleIndices[index++] = j;
