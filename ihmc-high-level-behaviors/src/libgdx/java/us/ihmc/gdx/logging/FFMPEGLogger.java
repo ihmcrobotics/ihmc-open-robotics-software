@@ -69,19 +69,19 @@ public class FFMPEGLogger
       avutil.av_dict_set(avDictionary, "lossless", lossless ? "1" : "0", avDictFlags); // TODO this is maybe wrong
 
       LogTools.info("Building FFMPEG contexts");
-      //Output context
 
+      // Output context
       avFormatContext = new AVFormatContext();
       int returnCode = avformat.avformat_alloc_output_context2(avFormatContext, null, null, fileName);
       if (returnCode != 0)
       {
-//         avformat.AV
-         LogTools.error("Failed to find output format webm (does this computer support webm?). The logger will not begin.");
+         LogTools.error("{}: Failed to find output format webm (does this computer support webm?). The logger will not begin.",
+                        FFMPEGTools.getErrorCodeString(returnCode));
          isClosed = true;
          return;
       }
 
-      //Add video stream
+      // Add video stream
       videoOutputStream = new FFMPEGOutputStream();
       AVCodecContext avCodecContext;
 
@@ -89,12 +89,12 @@ public class FFMPEGLogger
 
       videoOutputStream.setTempPacket(avcodec.av_packet_alloc());
       videoOutputStream.setStream(avformat.avformat_new_stream(avFormatContext, null));
-      videoOutputStream.getStream().id(avFormatContext.nb_streams() - 1); //I don't know what this does at all but it's in the example
+      videoOutputStream.getStream().id(avFormatContext.nb_streams() - 1); // I don't know what this does at all but it's in the example
       avCodecContext = avcodec.avcodec_alloc_context3(codec);
       videoOutputStream.setEncoder(avCodecContext);
 
       avCodecContext.codec_id(avFormatContext.video_codec_id());
-      avCodecContext.bit_rate(400000); //This is what they've used in all the examples but is arbitrary other than that
+      avCodecContext.bit_rate(400000); // This is what they've used in all the examples but is arbitrary other than that
       avCodecContext.width(width);
       avCodecContext.height(height);
 
@@ -104,7 +104,7 @@ public class FFMPEGLogger
       videoOutputStream.getStream().time_base(framePeriod);
       avCodecContext.time_base(framePeriod);
 
-      avCodecContext.gop_size(12); //Some or all of these settings may be unnecessary with lossless
+      avCodecContext.gop_size(12); // Some or all of these settings may be unnecessary with lossless
       avCodecContext.pix_fmt(avutil.AV_PIX_FMT_RGBA);
 
       if ((avFormatContext.oformat().flags() & avformat.AVFMT_GLOBALHEADER) != 0)
