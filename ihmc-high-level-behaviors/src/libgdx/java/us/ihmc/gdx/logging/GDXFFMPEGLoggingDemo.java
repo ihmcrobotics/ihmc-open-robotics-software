@@ -52,7 +52,7 @@ public class GDXFFMPEGLoggingDemo
             image = new BytedecoImage(WIDTH, HEIGHT, opencv_core.CV_8UC4);
             ThreadTools.startAThread(new Runnable()
             {
-               final Random rand = new Random();
+               final Random random = new Random();
                final byte[] data = new byte[4];
                int index = 0;
 
@@ -66,7 +66,7 @@ public class GDXFFMPEGLoggingDemo
                   while (true)
                   {
                      if (index % 10 == 0)
-                        rand.nextBytes(data);
+                        random.nextBytes(data);
 
                      if (imagePanel != null)
                      {

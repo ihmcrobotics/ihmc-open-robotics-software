@@ -25,7 +25,10 @@ public class FFMPEGOutputStream //TODO modify to match Java conventions
 
    private AVPacket tempPacket;
 
-   private float t, tincr, tincr2;
+   // We don't know what these are yet
+   private float t;
+   private float tincr;
+   private float tincr2;
 
    private SwsContext swsContext;
 
