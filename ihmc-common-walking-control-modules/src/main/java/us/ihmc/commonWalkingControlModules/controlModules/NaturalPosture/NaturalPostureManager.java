@@ -65,10 +65,15 @@ public class NaturalPostureManager
       return walkingManager.getInverseDynamicsCommand();
    }
    
-   public void setWeights(Vector3DReadOnly weight)
+   public InverseDynamicsCommand<?> getPelvisPrivilegedPoseCommand()
    {
-      walkingManager.setWeights(weight);
+      return walkingManager.getPelvisPrivilegedPoseCommand();
    }
+   
+//   public void setWeights(Vector3DReadOnly weight)
+//   {
+//      walkingManager.setWeights(weight);
+//   }
    
    public void compute()
    {
