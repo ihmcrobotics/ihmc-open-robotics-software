@@ -55,6 +55,7 @@ public class GDXFFMPEGLoggingDemo
                final Random rand = new Random();
                final byte[] data = new byte[4];
                int index = 0;
+
                @Override
                public void run()
                {
@@ -62,14 +63,16 @@ public class GDXFFMPEGLoggingDemo
                   msBetweenFrames.num(1);
                   msBetweenFrames.den(FRAMERATE);
 
-                  while (true) {
+                  while (true)
+                  {
                      if (index % 10 == 0)
                         rand.nextBytes(data);
 
                      if (imagePanel != null)
                      {
                         image.getBytedecoOpenCVMat().setTo(new Mat(data));
-                        for (int i = 0; i < 32; i++) {
+                        for (int i = 0; i < 32; i++)
+                        {
                            boolean d = ((index >> (31 - i)) & 1) == 1;
                            image.getBackingDirectByteBuffer().putInt(i * 4, d ? NICE_COLOR : 0xFF000000);
                            image.getBackingDirectByteBuffer().putInt((WIDTH + i) * 4, d ? NICE_COLOR : 0xFF000000);
