@@ -128,6 +128,7 @@ public class GDXFFMPEGLoggingDemo
          @Override
          public void dispose()
          {
+            logger.close();
             baseUI.dispose();
          }
       });

@@ -266,6 +266,7 @@ public class FFMPEGLogger
    public void close()
    {
       LogTools.info("Closing logger (if you did not expect this to happen, something has gone wrong, and logging will stop.)");
+      isClosed = true;
 
       avcodec.avcodec_free_context(videoOutputStream.getEncoder());
 
@@ -275,10 +276,18 @@ public class FFMPEGLogger
 
       avcodec.av_packet_free(videoOutputStream.getTempPacket());
 
-      swscale.sws_freeContext(videoOutputStream.getSwsContext());
-      swresample.swr_free(videoOutputStream.getSwrContext());
+      if (videoOutputStream.getSwsContext() != null)
+         swscale.sws_freeContext(videoOutputStream.getSwsContext());
 
-      isClosed = true;
+      if (videoOutputStream.getSwrContext() != null)
+         swresample.swr_free(videoOutputStream.getSwrContext());
+   }
+
+   @Override
+   protected void finalize() throws Throwable
+   {
+      super.finalize();
+      close(); //Ensure that file gets written properly
    }
 
    public boolean isClosed()
