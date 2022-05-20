@@ -93,6 +93,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final YoRegistry registry = new YoRegistry(name);
 
    private final YoBoolean useNaturalPostureCommand = new YoBoolean("useNaturalPostureCommand", registry);
+   private final YoBoolean usePelvisPrivilegedPoseCommand = new YoBoolean("usePelvisPrivilegedPoseCommand", registry);
    private final YoBoolean useBodyManagerCommands = new YoBoolean("useBodyManagerCommands", registry);
    private final YoBoolean usePelvisOrientationCommand = new YoBoolean("usePelvisOrientationCommand", registry);
 
@@ -164,6 +165,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
                                              HighLevelHumanoidControllerToolbox controllerToolbox)
    {
       useNaturalPostureCommand.set(true);
+      usePelvisPrivilegedPoseCommand.set(false);
       useBodyManagerCommands.set(true);
       usePelvisOrientationCommand.set(true);
 
@@ -1015,6 +1017,11 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       if ((naturalPostureManager != null) && (useNaturalPostureCommand.getValue()))
       {
          controllerCoreCommand.addInverseDynamicsCommand(naturalPostureManager.getQPObjectiveCommand());
+      }
+      
+      if ((naturalPostureManager != null) && (usePelvisPrivilegedPoseCommand.getValue()))
+      {
+         controllerCoreCommand.addInverseDynamicsCommand(naturalPostureManager.getPelvisPrivilegedPoseCommand());
       }
       
       if (usePelvisOrientationCommand.getValue())
