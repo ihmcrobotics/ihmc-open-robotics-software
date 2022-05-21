@@ -10,13 +10,13 @@ public class GPUHeightMap
 
    private final OpenCLManager openCLManager = new OpenCLManager();
 
-   private final BytedecoImage elevationMap;
-   private final BytedecoImage varianceMap;
-   private final BytedecoImage validityMap;
-   private final BytedecoImage traversabilityMap;
-   private final BytedecoImage timeMap;
-   private final BytedecoImage upperBoundMap;
-   private final BytedecoImage lowerBoundMap;
+//   private final BytedecoImage elevationMap;
+//   private final BytedecoImage varianceMap;
+//   private final BytedecoImage validityMap;
+//   private final BytedecoImage traversabilityMap;
+//   private final BytedecoImage timeMap;
+//   private final BytedecoImage upperBoundMap;
+//   private final BytedecoImage lowerBoundMap;
 
    public GPUHeightMap(GPUHeightMapParameters parameters)
    {
