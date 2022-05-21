@@ -3,6 +3,7 @@ package us.ihmc.gdx.logging;
 import org.bytedeco.ffmpeg.avcodec.AVCodec;
 import org.bytedeco.ffmpeg.avcodec.AVCodecContext;
 import org.bytedeco.ffmpeg.avformat.AVFormatContext;
+import org.bytedeco.ffmpeg.avformat.AVIOContext;
 import org.bytedeco.ffmpeg.avformat.AVOutputFormat;
 import org.bytedeco.ffmpeg.avutil.AVDictionary;
 import org.bytedeco.ffmpeg.avutil.AVFrame;
@@ -13,6 +14,7 @@ import org.bytedeco.ffmpeg.global.avformat;
 import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.ffmpeg.global.swresample;
 import org.bytedeco.ffmpeg.global.swscale;
+import org.bytedeco.javacpp.DoublePointer;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 
@@ -116,7 +118,7 @@ public class FFMPEGLogger
       avCodecContext.time_base(framePeriod);
 
       avCodecContext.gop_size(12); // Some or all of these settings may be unnecessary with lossless
-      avCodecContext.pix_fmt(avutil.AV_PIX_FMT_RGBA);
+      avCodecContext.pix_fmt(avutil.AV_PIX_FMT_YUV420P);
 
       if ((outputFormat.flags() & avformat.AVFMT_GLOBALHEADER) != 0)
          avCodecContext.flags(avCodecContext.flags() | avcodec.AV_CODEC_FLAG_GLOBAL_HEADER);
@@ -156,24 +158,20 @@ public class FFMPEGLogger
          pic.height(avCodecContext.height());
 
          videoOutputStream.setFrame(pic);
-         if (avutil.av_frame_get_buffer(pic, 0) > 0)
+
+         AVFrame tempPic = avutil.av_frame_alloc();
+         tempPic.format(avutil.AV_PIX_FMT_YUV420P);
+         tempPic.width(avCodecContext.width());
+         tempPic.height(avCodecContext.height());
+
+         videoOutputStream.setTempFrame(tempPic);
+
+         if (avutil.av_frame_get_buffer(pic, 0) > 0 || avutil.av_frame_get_buffer(tempPic, 0) > 0)
          {
             LogTools.error("Could not get framebuffer. Logging will not begin.");
             close();
             return false;
          }
-
-         //TODO may be missing frame allocation or something to do with dummy image. \/\/\/
-
-         //TODO review comment from muxing.c
-         //It is possible that an additional conversion to YUV420P is happening. I don't know if this is just for MPEG, or a limitation of FFMPEG as a whole:
-         /*
-          * If the output format is not YUV420P, then a temporary YUV420P
-          * picture is needed too. It is then converted to the required
-          * output format.
-          */
-         //For now I'm just not gonna do it (which may cause errors)
-         //This is what videoStream.tempFrame is
 
          if (avcodec.avcodec_parameters_from_context(videoOutputStream.getStream().codecpar(), avCodecContext) > 0)
          {
@@ -184,20 +182,33 @@ public class FFMPEGLogger
 
          avformat.av_dump_format(avFormatContext, 0, fileName, 1); //this is not freeing the memory - that's avformat_free_context (called during close())
 
-         if (avformat.avio_open(avFormatContext.pb(), fileName, avformat.AVIO_FLAG_WRITE) < 0)
+         try
          {
-            LogTools.error("Could not open file for writing. Logging will not begin.");
+            new File(fileName).getParentFile().mkdirs();
+         }
+         catch (Exception ignored) {}
+
+         AVIOContext pb = new AVIOContext();
+         int ret = 0;
+         if ((ret = avformat.avio_open(pb, fileName, avformat.AVIO_FLAG_WRITE)) < 0)
+         {
+            LogTools.error("{}: Could not open file for writing. Logging will not begin.", FFMPEGTools.getErrorCodeString(ret));
             close();
             return false;
          }
+         avFormatContext.pb(pb);
 
-         avformat.avformat_write_header(avFormatContext, optAVDictionary);
+         if ((ret = avformat.avformat_write_header(avFormatContext, optAVDictionary)) < 0) {
+            LogTools.error("{}: Could not write to file. Logging will not begin.", FFMPEGTools.getErrorCodeString(ret));
+            close();
+            return false;
+         }
 
          isInitialized = true; //Initialization is now finished. Note that !isInitialized && isClosed is an error state
       }
 
       //Encode video
-      AVFrame frame = getVideoFrame(videoOutputStream);
+      AVFrame frame = getVideoFrame(videoOutputStream, image);
       avcodec.avcodec_send_frame(videoOutputStream.getEncoder(), frame);
 
       //This while loop is weird, but copied from muxing.c
@@ -207,9 +218,15 @@ public class FFMPEGLogger
          ret = avcodec.avcodec_receive_packet(videoOutputStream.getEncoder(), videoOutputStream.getTempPacket());
          if (ret < 0)
          {
-            LogTools.error("Error encoding frame. Logging will stop.");
-            close();
-            return false;
+            if (ret == -11) {
+               LogTools.warn("{}: This frame will not be logged", FFMPEGTools.getErrorCodeString(ret));
+               return false;
+            }
+            else {
+               LogTools.error("{}: Error encoding frame. Logging will stop.", FFMPEGTools.getErrorCodeString(ret));
+               close();
+               return false;
+            }
          }
 
          avcodec.av_packet_rescale_ts(videoOutputStream.getTempPacket(), videoOutputStream.getEncoder().time_base(), videoOutputStream.getStream().time_base());
@@ -224,10 +241,30 @@ public class FFMPEGLogger
          }
       }
 
+      avformat.avio_flush(avFormatContext.pb());
+
       return ret == avutil.AVERROR_EOF();
    }
 
-   private AVFrame getVideoFrame(FFMPEGOutputStream ost)
+   //This method currently only contains random values to see if it's actually printing. TODO convert image into YUVwhatever and print
+   private void fillImage(AVFrame pict, BytedecoImage image, int width, int height) {
+      int x, y, i;
+
+      for (y = 0; y < height; y++) {
+         for (x = 0; x < width; x++) {
+            pict.data().get(0).getPointer(y * pict.linesize().get(0) + x).fill(48);
+         }
+      }
+
+      for (y = 0; y < height / 2; y++) {
+         for (x = 0; x < width / 2; x++) {
+            pict.data().get(1).getPointer(y * pict.linesize().get(1) + x).fill(52);
+            pict.data().get(2).getPointer(y * pict.linesize().get(2) + x).fill(-12);
+         }
+      }
+   }
+
+   private AVFrame getVideoFrame(FFMPEGOutputStream ost, BytedecoImage image)
    {
       AVCodecContext c = ost.getEncoder();
 
@@ -243,32 +280,28 @@ public class FFMPEGLogger
          return null;
       }
 
-      //TODO more YUV420P stuff. This may or may not be necessary. It looks like they're converging from the stored YUV image into the codec pixel format, so conversion from whatever we use (RGBA8?) to the codec format is probably necessary here.
-      //Note the following C code:
-      //      if (c->pix_fmt != AV_PIX_FMT_YUV420P) {
-      //         /* as we only generate a YUV420P picture, we must convert it
-      //          * to the codec pixel format if needed */
-      //         if (!ost->sws_ctx) {
-      //            ost->sws_ctx = sws_getContext(c->width, c->height,
-      //                                          AV_PIX_FMT_YUV420P,
-      //                                          c->width, c->height,
-      //                                          c->pix_fmt,
-      //                                          SCALE_FLAGS, NULL, NULL, NULL);
-      //            if (!ost->sws_ctx) {
-      //               fprintf(stderr,
-      //                       "Could not initialize the conversion context\n");
-      //               exit(1);
-      //            }
-      //         }
-      //         fill_yuv_image(ost->tmp_frame, ost->next_pts, c->width, c->height);
-      //         sws_scale(ost->sws_ctx, (const uint8_t * const *) ost->tmp_frame->data,
-      //               ost->tmp_frame->linesize, 0, c->height, ost->frame->data,
-      //               ost->frame->linesize);
-      //      } else {
-      //         fill_yuv_image(ost->frame, ost->next_pts, c->width, c->height);
-      //      }
+      if (c.pix_fmt() != avutil.AV_PIX_FMT_YUV420P)
+      {
+         if (ost.getSwsContext() == null || ost.getSwsContext().isNull()) {
+            ost.setSwsContext(swscale.sws_getContext(c.width(), c.height(), avutil.AV_PIX_FMT_YUV420P, c.width(), c.height(), c.pix_fmt(), swscale.SWS_BICUBIC, null, null, (DoublePointer)null));
+
+            if (ost.getSwsContext() == null || ost.getSwsContext().isNull()) {
+               LogTools.error("Error creating SWS Context.");
+               return null;
+            }
+         }
+
+         fillImage(ost.getTempFrame(), image, c.width(), c.height());
+
+         swscale.sws_scale(ost.getSwsContext(), ost.getTempFrame().data(), ost.getTempFrame().linesize(), 0, c.height(), ost.getFrame().data(), ost.getFrame().linesize());
+      }
+      else
+      {
+         fillImage(ost.getFrame(), image, c.width(), c.height());
+      }
 
       videoOutputStream.getFrame().pts(videoOutputStream.getNextPts());
+      videoOutputStream.setNextPts(videoOutputStream.getNextPts() + 1);
 
       return videoOutputStream.getFrame();
    }
@@ -277,6 +310,8 @@ public class FFMPEGLogger
    {
       LogTools.info("Closing logger (if you did not expect this to happen, something has gone wrong, and logging will stop.)");
       isClosed = true;
+
+      avformat.avio_close(avFormatContext.pb());
 
       if (videoOutputStream.getEncoder() != null && !videoOutputStream.getEncoder().isNull())
          avcodec.avcodec_free_context(videoOutputStream.getEncoder());
