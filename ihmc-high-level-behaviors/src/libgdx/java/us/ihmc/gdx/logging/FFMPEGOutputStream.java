@@ -17,7 +17,7 @@ public class FFMPEGOutputStream //TODO modify to match Java conventions
    private AVStream stream;
    private AVCodecContext encoder;
 
-   private long nextPts;
+   private int nextPts;
    private int samplesCount;
 
    private AVFrame frame;
@@ -53,12 +53,12 @@ public class FFMPEGOutputStream //TODO modify to match Java conventions
       this.encoder = encoder;
    }
 
-   public long getNextPts()
+   public int getNextPts()
    {
       return nextPts;
    }
 
-   public void setNextPts(long nextPts)
+   public void setNextPts(int nextPts)
    {
       this.nextPts = nextPts;
    }
