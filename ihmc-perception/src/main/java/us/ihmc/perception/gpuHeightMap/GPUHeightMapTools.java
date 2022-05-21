@@ -24,8 +24,8 @@ public class GPUHeightMapTools
    private final int maxNumberOfPoints;
    private final OpenCLManager openCLManager = new OpenCLManager();
 
-   private final OpenCLFloatBuffer inputPointCloudBuffer;
-   private final OpenCLFloatBuffer transformedPointCloudBuffer;
+   private OpenCLFloatBuffer inputPointCloudBuffer;
+   private OpenCLFloatBuffer transformedPointCloudBuffer;
    private final OpenCLFloatBuffer transformBuffer = new OpenCLFloatBuffer(12);
    private final _cl_program heightMapToolsProgram;
    private final _cl_kernel transformPointsKernel;
@@ -40,11 +40,11 @@ public class GPUHeightMapTools
       this.maxNumberOfPoints = maxNumberOfPoints;
       openCLManager.create();
 
-      inputPointCloudBuffer = new OpenCLFloatBuffer(maxNumberOfPoints * 3 * Float.BYTES);
-      transformedPointCloudBuffer = new OpenCLFloatBuffer(maxNumberOfPoints * 3 * Float.BYTES);
-
-      inputPointCloudBuffer.createOpenCLBufferObject(openCLManager);
-      transformedPointCloudBuffer.createOpenCLBufferObject(openCLManager);
+//      inputPointCloudBuffer = new OpenCLFloatBuffer(maxNumberOfPoints * 3 * Float.BYTES);
+//      transformedPointCloudBuffer = new OpenCLFloatBuffer(maxNumberOfPoints * 3 * Float.BYTES);
+//
+//      inputPointCloudBuffer.createOpenCLBufferObject(openCLManager);
+//      transformedPointCloudBuffer.createOpenCLBufferObject(openCLManager);
 
       transformBuffer.createOpenCLBufferObject(openCLManager);
       heightMapToolsProgram = openCLManager.loadProgram("GPUHeightMapTools");
@@ -64,6 +64,12 @@ public class GPUHeightMapTools
 
    public List<Point3D> transformPoints(List<Point3D32> points, RigidBodyTransformReadOnly transformToDesiredFrame)
    {
+      inputPointCloudBuffer = new OpenCLFloatBuffer(points.size() * 3 * Float.BYTES);
+      transformedPointCloudBuffer = new OpenCLFloatBuffer(points.size() * 3 * Float.BYTES);
+
+      inputPointCloudBuffer.createOpenCLBufferObject(openCLManager);
+      transformedPointCloudBuffer.createOpenCLBufferObject(openCLManager);
+
       packPointCloudIntoFloatBUffer(points, inputPointCloudBuffer.getBackingDirectFloatBuffer());
       inputPointCloudBuffer.writeOpenCLBufferObject(openCLManager);
 

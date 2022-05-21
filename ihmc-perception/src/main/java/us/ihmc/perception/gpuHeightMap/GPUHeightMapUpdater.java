@@ -8,6 +8,7 @@ import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
 
 import java.nio.FloatBuffer;
+import java.util.List;
 
 public class GPUHeightMapUpdater
 {
@@ -33,9 +34,16 @@ public class GPUHeightMapUpdater
       populateParametersBuffer((float) 0.0, (float) 0.0, pointCloudFrame);
    }
 
-   private void packPointCloudIntoFloatBUffer(IDLSequence.Object<Point3D32> points, FloatBuffer floatBufferToPack)
+
+   private void packPointCloudIntoFloatBUffer(List<Point3D32> points, FloatBuffer floatBufferToPack)
    {
-      // TODO
+      int index = 0;
+      for (int i = 0; i < points.size(); i++)
+      {
+         floatBufferToPack.put(index++, points.get(i).getX32());
+         floatBufferToPack.put(index++, points.get(i).getY32());
+         floatBufferToPack.put(index++, points.get(i).getZ32());
+      }
    }
 
    private void populateParametersBuffer(float centerX, float centerY, ReferenceFrame pointCloudFrame)
