@@ -23,7 +23,7 @@ public class GPUHeightMap
    private final OpenCLManager openCLManager = new OpenCLManager();
 
    private final OpenCLFloatBuffer localizationBuffer = new OpenCLFloatBuffer(14);
-   private final OpenCLFloatBuffer parametersBuffer = new OpenCLFloatBuffer(12);
+   private final OpenCLFloatBuffer parametersBuffer = new OpenCLFloatBuffer(14);
 
    private final OpenCLFloatBuffer elevationMapData;
    private final OpenCLFloatBuffer updatedMapData;
@@ -31,8 +31,9 @@ public class GPUHeightMap
    private final OpenCLFloatBuffer errorBuffer = new OpenCLFloatBuffer(2);
 
    private final _cl_program heightMapProgram;
-//   private final _cl_kernel addPointsKernel;
+   private final _cl_kernel addPointsKernel;
    private final _cl_kernel errorCountingKernel;
+   private final _cl_kernel averageMapKernel;
 
    public GPUHeightMap()
    {
@@ -60,9 +61,10 @@ public class GPUHeightMap
       updatedMapData.createOpenCLBufferObject(openCLManager);
       normalMapData.createOpenCLBufferObject(openCLManager);
 
-      heightMapProgram = openCLManager.loadProgram("GPUHeightMap2");
-//      addPointsKernel = openCLManager.createKernel(heightMapProgram, "addPointsKernel");
+      heightMapProgram = openCLManager.loadProgram("GPUHeightMap");
+      addPointsKernel = openCLManager.createKernel(heightMapProgram, "addPointsKernel");
       errorCountingKernel = openCLManager.createKernel(heightMapProgram, "errorCountingKernel");
+      averageMapKernel = openCLManager.createKernel(heightMapProgram, "averageMapKernel");
    }
 
    public void input(List<Point3D> rawPoints, RigidBodyTransformReadOnly transformToWorld)
@@ -130,6 +132,8 @@ public class GPUHeightMap
       parametersBuffer.getBytedecoFloatBufferPointer().put(index++, (float) parameters.traversabilityInlier);
       parametersBuffer.getBytedecoFloatBufferPointer().put(index++, (float) parameters.sensorNoiseFactor);
       parametersBuffer.getBytedecoFloatBufferPointer().put(index++, (float) parameters.resolution);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(index++, (float) parameters.initialVariance);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(index++, (float) parameters.maxVariance);
 
       parametersBuffer.writeOpenCLBufferObject(openCLManager);
    }
@@ -147,7 +151,19 @@ public class GPUHeightMap
       openCLManager.setKernelArgument(errorCountingKernel, 4, updatedMapData.getOpenCLBufferObject());
       openCLManager.setKernelArgument(errorCountingKernel, 5, errorBuffer.getOpenCLBufferObject());
 
+      openCLManager.setKernelArgument(addPointsKernel, 0, rawPointsBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(addPointsKernel, 1, localizationBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(addPointsKernel, 2, parametersBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(addPointsKernel, 3, elevationMapData.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(addPointsKernel, 4, updatedMapData.getOpenCLBufferObject());
+
+      openCLManager.setKernelArgument(averageMapKernel, 0, updatedMapData.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(averageMapKernel, 1, elevationMapData.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(averageMapKernel, 2, parametersBuffer.getOpenCLBufferObject());
+
       openCLManager.execute1D(errorCountingKernel, pointsSize);
+      openCLManager.execute1D(addPointsKernel, pointsSize);
+      openCLManager.execute1D(averageMapKernel, pointsSize);
 
       // TODO MODIFY the translation to be relative to the center
    }
