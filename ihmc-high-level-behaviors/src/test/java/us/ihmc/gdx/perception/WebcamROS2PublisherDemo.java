@@ -5,6 +5,7 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.global.opencv_videoio;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_videoio.VideoCapture;
+import org.bytedeco.opencv.opencv_videoio.VideoWriter;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.imgui.ImGuiPanel;
@@ -27,11 +28,9 @@ public class WebcamROS2PublisherDemo
    private VideoCapture videoCapture;
    private int imageHeight = -1;
    private int imageWidth = -1;
+   private double reportedFPS = -1;
    private String backendName = "";
-//   private BytedecoImage rgbImage;
    private Mat rgbImage;
-//   private Mat rgbaImage;
-//   private GDXCVImagePanel cvImagePanel;
    private ImGuiOpenCVSwapVideoPanel swapCVPanel;
    private ImPlotStopwatchPlot readPerformancePlot = new ImPlotStopwatchPlot("VideoCapture read(Mat)");
    private ImPlotFrequencyPlot readFrequencyPlot = new ImPlotFrequencyPlot("read Frequency");
@@ -58,23 +57,26 @@ public class WebcamROS2PublisherDemo
 
                   imageWidth = (int) videoCapture.get(opencv_videoio.CAP_PROP_FRAME_WIDTH);
                   imageHeight = (int) videoCapture.get(opencv_videoio.CAP_PROP_FRAME_HEIGHT);
+                  reportedFPS = videoCapture.get(opencv_videoio.CAP_PROP_FPS);
 
                   LogTools.info("Default resolution: {} x {}", imageWidth, imageHeight);
+                  LogTools.info("Default fps: {}", reportedFPS);
 
                   backendName = BytedecoTools.stringFromByteBuffer(videoCapture.getBackendName());
 
-//                  videoCapture.set(opencv_videoio.CAP_PROP_FRAME_WIDTH, 1920.0);
-//                  videoCapture.set(opencv_videoio.CAP_PROP_FRAME_HEIGHT, 1080.0);
-//
-//                  imageWidth = (int) videoCapture.get(opencv_videoio.CAP_PROP_FRAME_WIDTH);
-//                  imageHeight = (int) videoCapture.get(opencv_videoio.CAP_PROP_FRAME_HEIGHT);
+                  videoCapture.set(opencv_videoio.CAP_PROP_FRAME_WIDTH, 1920.0);
+                  videoCapture.set(opencv_videoio.CAP_PROP_FRAME_HEIGHT, 1080.0);
+                  videoCapture.set(opencv_videoio.CAP_PROP_FOURCC, VideoWriter.fourcc((byte) 'M', (byte) 'J', (byte) 'P', (byte) 'G'));
+                  videoCapture.set(opencv_videoio.CAP_PROP_FPS, 30.0);
+//                  videoCapture.set(opencv_videoio.CAP_PROP_FRAME_WIDTH, 1280.0);
+//                  videoCapture.set(opencv_videoio.CAP_PROP_FRAME_HEIGHT, 720.0);
 
-//                  rgbImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC3);
+                  imageWidth = (int) videoCapture.get(opencv_videoio.CAP_PROP_FRAME_WIDTH);
+                  imageHeight = (int) videoCapture.get(opencv_videoio.CAP_PROP_FRAME_HEIGHT);
+                  reportedFPS = videoCapture.get(opencv_videoio.CAP_PROP_FPS);
+                  LogTools.info("Format: {}", videoCapture.get(opencv_videoio.CAP_PROP_FORMAT));
+
                   rgbImage = new Mat();
-//                  rgbaImage = new Mat();
-
-//                  cvImagePanel = new GDXCVImagePanel("Video", rgbImage);
-//                  baseUI.getImGuiPanelManager().addPanel(cvImagePanel.getVideoPanel());
 
                   swapCVPanel = new ImGuiOpenCVSwapVideoPanel("Video", false);
                   baseUI.getImGuiPanelManager().addPanel(swapCVPanel.getVideoPanel());
@@ -105,32 +107,10 @@ public class WebcamROS2PublisherDemo
 
                }
 
-//               readPerformancePlot.start();
-//               boolean imageWasRead = videoCapture.read(rgbImage);
-//               readPerformancePlot.stop();
-//
-//               if (imageWasRead)
-//               {
-//                  if (cvImagePanel == null)
-//                  {
-//                     rgbaImage = new Mat();
-//
-//                     opencv_imgproc.cvtColor(rgbImage, rgbaImage, opencv_imgproc.COLOR_RGB2RGBA, 0);
-//
-//                     cvImagePanel = new GDXCVImagePanel("Video", new BytedecoImage(rgbaImage));
-//                     baseUI.getImGuiPanelManager().addPanel(cvImagePanel.getVideoPanel());
-//                  }
-//
-//                  opencv_imgproc.cvtColor(rgbImage, rgbaImage, opencv_imgproc.COLOR_BGR2RGBA, 0);
-//
-//                  cvImagePanel.draw();
-//               }
-
                swapCVPanel.getDataSwapReferenceManager().accessOnHighPriorityThread(data ->
                {
                   data.updateOnUIThread(swapCVPanel.getVideoPanel());
                });
-
 
                baseUI.renderBeforeOnScreenUI();
                baseUI.renderEnd();
@@ -152,6 +132,7 @@ public class WebcamROS2PublisherDemo
       {
          ImGui.text("Is open: " + videoCapture.isOpened());
          ImGui.text("Image dimensions: " + imageWidth + " x " + imageHeight);
+         ImGui.text("Reported fps: " + reportedFPS);
          ImGui.text("Backend name: " + backendName);
          readPerformancePlot.renderImGuiWidgets();
          readFrequencyPlot.renderImGuiWidgets();
