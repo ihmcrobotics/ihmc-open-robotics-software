@@ -15,9 +15,11 @@ import org.lwjgl.system.MemoryUtil;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.io.resources.ResourceTools;
 import us.ihmc.tools.processManagement.UnsignedByteTools;
 import us.ihmc.tools.string.StringTools;
+import us.ihmc.tools.thread.Throttler;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -37,6 +39,8 @@ public class GlfwWindowForImGui
    private final int[] windowWidthArray = new int[] {800};
    private final int[] windowHeightArray = new int[] {600};
    private long windowHandle = MemoryUtil.NULL;
+   private final Throttler frameRateLimiter = new Throttler();
+   private double minFramePeriod = UnitConversions.hertzToSeconds(240);
 
    public GlfwWindowForImGui(String windowTitle)
    {
@@ -62,7 +66,8 @@ public class GlfwWindowForImGui
       }
 
       // Get the thread stack and push a new frame
-      try (MemoryStack stack = MemoryStack.stackPush()) {
+      try (MemoryStack stack = MemoryStack.stackPush())
+      {
          final IntBuffer pWidth = stack.mallocInt(1); // int*
          final IntBuffer pHeight = stack.mallocInt(1); // int*
 
@@ -77,7 +82,7 @@ public class GlfwWindowForImGui
       } // the stack frame is popped automatically
 
       GLFW.glfwMakeContextCurrent(windowHandle); // Make the OpenGL context current
-      GLFW.glfwSwapInterval(GLFW.GLFW_TRUE); // Enable v-sync
+      setVSyncEnabled(true);
       GLFW.glfwShowWindow(windowHandle); // Make the window visible
 
       // IMPORTANT!!
@@ -87,6 +92,19 @@ public class GlfwWindowForImGui
       // creates the GLCapabilities instance and makes the OpenGL
       // bindings available for use.
       GL.createCapabilities();
+   }
+
+   public void launch(Runnable render)
+   {
+      while (!GLFW.glfwWindowShouldClose(windowHandle))
+      {
+         render.run();
+
+         frameRateLimiter.waitAndRun(minFramePeriod);
+
+         GLFW.glfwSwapBuffers(windowHandle);
+         GLFW.glfwPollEvents();
+      }
    }
 
    public void setIcon(String... imagePaths)
@@ -281,6 +299,17 @@ public class GlfwWindowForImGui
       GLFW.glfwDestroyWindow(windowHandle);
       GLFW.glfwTerminate();
       Objects.requireNonNull(GLFW.glfwSetErrorCallback(null)).free();
+   }
+
+   public void setVSyncEnabled(boolean vSyncEnabled)
+   {
+      // Technically takes more values that 0 or 1, but 0 and 1 correspond to basically vsync
+      GLFW.glfwSwapInterval(vSyncEnabled ? GLFW.GLFW_TRUE : GLFW.GLFW_FALSE);
+   }
+
+   public void setMaxFrameRate(double maxFrameRate)
+   {
+      minFramePeriod = UnitConversions.hertzToSeconds(maxFrameRate);
    }
 
    public long getWindowHandle()
