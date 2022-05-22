@@ -4,17 +4,15 @@ import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
 
 import java.nio.FloatBuffer;
 import java.util.List;
 
-public class GPUHeightMap
+public class SimpleGPUHeightMap
 {
    private final GPUHeightMapParameters parameters;
    private final int numberOfCells;
@@ -35,12 +33,12 @@ public class GPUHeightMap
    private final _cl_kernel errorCountingKernel;
    private final _cl_kernel averageMapKernel;
 
-   public GPUHeightMap()
+   public SimpleGPUHeightMap()
    {
       this(new GPUHeightMapParameters());
    }
 
-   public GPUHeightMap(GPUHeightMapParameters parameters)
+   public SimpleGPUHeightMap(GPUHeightMapParameters parameters)
    {
       this.parameters = parameters;
       openCLManager.create();
@@ -61,7 +59,7 @@ public class GPUHeightMap
       updatedMapData.createOpenCLBufferObject(openCLManager);
       normalMapData.createOpenCLBufferObject(openCLManager);
 
-      heightMapProgram = openCLManager.loadProgram("GPUHeightMap");
+      heightMapProgram = openCLManager.loadProgram("SimpleGPUHeightMap");
       errorCountingKernel = openCLManager.createKernel(heightMapProgram, "errorCountingKernel");
       addPointsKernel = openCLManager.createKernel(heightMapProgram, "addPointsKernel");
       averageMapKernel = openCLManager.createKernel(heightMapProgram, "averageMapKernel");
