@@ -14,7 +14,7 @@ import java.util.List;
 
 public class SimpleGPUHeightMap
 {
-   private final GPUHeightMapParameters parameters;
+   private final SimpleGPUHeightMapParameters parameters;
    private final int numberOfCells;
    private final int bytesPerLayer;
 
@@ -25,20 +25,18 @@ public class SimpleGPUHeightMap
 
    private final OpenCLFloatBuffer elevationMapData;
    private final OpenCLFloatBuffer updatedMapData;
-   private final OpenCLFloatBuffer normalMapData;
    private final OpenCLFloatBuffer errorBuffer = new OpenCLFloatBuffer(2);
 
    private final _cl_program heightMapProgram;
    private final _cl_kernel addPointsKernel;
-   private final _cl_kernel errorCountingKernel;
    private final _cl_kernel averageMapKernel;
 
    public SimpleGPUHeightMap()
    {
-      this(new GPUHeightMapParameters());
+      this(new SimpleGPUHeightMapParameters());
    }
 
-   public SimpleGPUHeightMap(GPUHeightMapParameters parameters)
+   public SimpleGPUHeightMap(SimpleGPUHeightMapParameters parameters)
    {
       this.parameters = parameters;
       openCLManager.create();
@@ -47,9 +45,8 @@ public class SimpleGPUHeightMap
       numberOfCells = ((int) Math.round(parameters.mapLength / parameters.resolution)) + 2;
 
       bytesPerLayer = numberOfCells * numberOfCells * Float.BYTES;
-      elevationMapData = new OpenCLFloatBuffer(7 * bytesPerLayer);
-      updatedMapData = new OpenCLFloatBuffer(7 * bytesPerLayer);
-      normalMapData = new OpenCLFloatBuffer(3 * bytesPerLayer);
+      elevationMapData = new OpenCLFloatBuffer(2 * bytesPerLayer);
+      updatedMapData = new OpenCLFloatBuffer(3 * bytesPerLayer);
 
       localizationBuffer.createOpenCLBufferObject(openCLManager);
       errorBuffer.createOpenCLBufferObject(openCLManager);
@@ -57,10 +54,8 @@ public class SimpleGPUHeightMap
 
       elevationMapData.createOpenCLBufferObject(openCLManager);
       updatedMapData.createOpenCLBufferObject(openCLManager);
-      normalMapData.createOpenCLBufferObject(openCLManager);
 
       heightMapProgram = openCLManager.loadProgram("SimpleGPUHeightMap");
-      errorCountingKernel = openCLManager.createKernel(heightMapProgram, "errorCountingKernel");
       addPointsKernel = openCLManager.createKernel(heightMapProgram, "addPointsKernel");
       averageMapKernel = openCLManager.createKernel(heightMapProgram, "averageMapKernel");
    }
@@ -120,16 +115,13 @@ public class SimpleGPUHeightMap
       int index = 0;
       parametersBuffer.getBytedecoFloatBufferPointer().put(index++, numberOfCells);
       parametersBuffer.getBytedecoFloatBufferPointer().put(index++, numberOfCells);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(index++, (float) parameters.resolution);
       parametersBuffer.getBytedecoFloatBufferPointer().put(index++, (float) parameters.minValidDistance);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(index++, (float) parameters.maxHeightRange);
       parametersBuffer.getBytedecoFloatBufferPointer().put(index++, (float) parameters.rampedHeightRangeA);
       parametersBuffer.getBytedecoFloatBufferPointer().put(index++, (float) parameters.rampedHeightRangeB);
       parametersBuffer.getBytedecoFloatBufferPointer().put(index++, (float) parameters.rampedHeightRangeC);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(index++, (float) parameters.maxHeightRange);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(index++, (float) parameters.mahalanobisThreshold);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(index++, (float) parameters.outlierVariance);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(index++, (float) parameters.traversabilityInlier);
       parametersBuffer.getBytedecoFloatBufferPointer().put(index++, (float) parameters.sensorNoiseFactor);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(index++, (float) parameters.resolution);
       parametersBuffer.getBytedecoFloatBufferPointer().put(index++, (float) parameters.initialVariance);
       parametersBuffer.getBytedecoFloatBufferPointer().put(index++, (float) parameters.maxVariance);
 
@@ -142,12 +134,6 @@ public class SimpleGPUHeightMap
    {
 //      updatedMapData.getBackingDirectFloatBuffer(); // need to fill this withzero
 
-      openCLManager.setKernelArgument(errorCountingKernel, 0, elevationMapData.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(errorCountingKernel, 1, rawPointsBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(errorCountingKernel, 2, localizationBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(errorCountingKernel, 3, parametersBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(errorCountingKernel, 4, updatedMapData.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(errorCountingKernel, 5, errorBuffer.getOpenCLBufferObject());
 
       openCLManager.setKernelArgument(addPointsKernel, 0, rawPointsBuffer.getOpenCLBufferObject());
       openCLManager.setKernelArgument(addPointsKernel, 1, localizationBuffer.getOpenCLBufferObject());
@@ -159,7 +145,6 @@ public class SimpleGPUHeightMap
       openCLManager.setKernelArgument(averageMapKernel, 1, elevationMapData.getOpenCLBufferObject());
       openCLManager.setKernelArgument(averageMapKernel, 2, parametersBuffer.getOpenCLBufferObject());
 
-      openCLManager.execute1D(errorCountingKernel, pointsSize);
       openCLManager.execute1D(addPointsKernel, pointsSize);
       openCLManager.execute1D(averageMapKernel, pointsSize);
 
