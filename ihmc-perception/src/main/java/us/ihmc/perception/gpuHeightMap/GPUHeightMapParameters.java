@@ -25,4 +25,8 @@ public class GPUHeightMapParameters
    double sensorNoiseFactor = 0.05;
    // if point is an outlier, and this value to the cell's variance
    double outlierVariance = 0.01;
+   // initial variance for each cell.
+   double initialVariance = 1000.0;
+   // max variance for each cell
+   double maxVariance = 100.0;
 }
