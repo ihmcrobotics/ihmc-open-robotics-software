@@ -31,11 +31,7 @@
 
 #define HEIGHT_LAYER 0
 #define VARIANCE_LAYER 1
-#define VALIDITY_LAYER 2
-#define TRAVERSABILITY_LAYER 3
-#define TIME_LAYER 4
-#define UPPER_BOUND_LAYER 5
-#define IS_UPPER_BOUND_LAYER 6
+#define POINT_COUNTER_LAYER 2
 
 int clamp_val(int x, int min_x, int max_x)
 {
@@ -148,52 +144,6 @@ void AtomicAdd_g_f(volatile __global float *source, const float operand)
     while (atomic_cmpxchg((volatile __global unsigned int *)source, prevVal.intVal, newVal.intVal) != prevVal.intVal);
 }
 
-void kernel errorCountingKernel(global float* map, global float* points_in, global float* localization, global float* params, global float* newMap, global float* error)
-{
-    int i = get_global_id(0);
-
-    float rx = points_in[i * 3];
-    float ry = points_in[i * 3 + 1];
-    float rz = points_in[i * 3 + 2];
-
-    float x = transform_p(rx, ry, rz, localization[r00], localization[r01], localization[r02], localization[tx]);
-    float y = transform_p(rx, ry, rz, localization[r10], localization[r11], localization[r12], localization[ty]);
-    float z = transform_p(rx, ry, rz, localization[r20], localization[r21], localization[r22], localization[tz]);
-
-    float v = z_noise(rz, params);
-
-    // don't do anything if this point is either too far away from the sensor according to a ramped height, or too close to the sensor
-    if (!is_valid(x, y, z, localization[tx], localization[ty], localization[tz], params))
-    {
-        return;
-    }
-
-    int idx = get_idx(x, y, localization[centerX], localization[centerY], params);
-    // check to make sure the point would fall in this bounded height map
-    if (!is_inside(idx, params))
-    {
-        return;
-    }
-
-    float map_h = map[get_map_idx(idx, HEIGHT_LAYER, params)];
-    float map_v = map[get_map_idx(idx, VARIANCE_LAYER, params)];
-    float map_valid = map[get_map_idx(idx, VALIDITY_LAYER, params)];
-    float map_t = map[get_map_idx(idx, TRAVERSABILITY_LAYER, params)];
-
-    float error_h = z - map_h;
-    // if this cell is already marked as valid enough, and the error is below some threshold
-    if (map_valid > 0.5 && (fabs(error_h) < (map_v * params[MAHALANOBIS_THRESH]))
-        && map_v < params[OUTLIER_VARIANCE] / 2.0
-        && map_t > params[TRAVERSABILITY_INLIER])
-    {
-        // log this height error
-        AtomicAdd_g_f(&error[0], error_h);
-        // add to the points in error
-        AtomicAdd_g_f(&error[1], 1);
-        // add to the traversability score
-        AtomicAdd_g_f(&newMap[get_map_idx(idx, TRAVERSABILITY_LAYER, params)], 1.0);
-    }
-}
 
 void kernel addPointsKernel(global float* points_in, read_only float* localization, global float* params, global float* map, global float* newMap)
 {
@@ -217,30 +167,15 @@ void kernel addPointsKernel(global float* points_in, read_only float* localizati
         {
             float map_h = map[get_map_idx(idx, HEIGHT_LAYER, params)];
             float map_v = map[get_map_idx(idx, VARIANCE_LAYER, params)];
-            float num_points = newMap[get_map_idx(idx, TIME_LAYER, params)]; // what?
 
-            if (fabs(map_h - z) > (map_v * params[MAHALANOBIS_THRESH]))
-            {
-                AtomicAdd_g_f(&map[get_map_idx(idx, VARIANCE_LAYER, params)], params[OUTLIER_VARIANCE]);
-            }
-            else
-            {
                 float new_height = (map_h * v + z * map_v) / (map_v + v);
                 float new_variance = (map_v * v) / (map_v + v);
 
                 AtomicAdd_g_f(&newMap[get_map_idx(idx, HEIGHT_LAYER, params)], new_height);
                 AtomicAdd_g_f(&newMap[get_map_idx(idx, VARIANCE_LAYER, params)], new_variance);
-                AtomicAdd_g_f(&newMap[get_map_idx(idx, VALIDITY_LAYER, params)], 1.0);
+                AtomicAdd_g_f(&newMap[get_map_idx(idx, POINT_COUNTER_LAYER, params)], 1.0);
 
-                // is Valid
-                map[get_map_idx(idx, VALIDITY_LAYER, params)] = 1;
 
-                // Time layer
-                map[get_map_idx(idx, TIME_LAYER, params)] = 0.0;
-                // Upper bound
-                map[get_map_idx(idx, UPPER_BOUND_LAYER, params)] = new_height;
-                map[get_map_idx(idx, IS_UPPER_BOUND_LAYER, params)] = 0.0;
-            }
             // visibility cleanup
         }
     }
@@ -251,26 +186,24 @@ void kernel averageMapKernel(global float* newMap, global float* map, global flo
 {
     int idx = get_global_id(0);
 
-    float map_h = map[get_map_idx(idx, HEIGHT_LAYER, params)];
-    float map_v = map[get_map_idx(idx, VARIANCE_LAYER, params)];
     float valid = map[get_map_idx(idx, VALIDITY_LAYER, params)];
+
     float new_h = newMap[get_map_idx(idx, HEIGHT_LAYER, params)];
     float new_v = newMap[get_map_idx(idx, VARIANCE_LAYER, params)];
     float new_cnt = newMap[get_map_idx(idx, VALIDITY_LAYER, params)];
 
     if (new_cnt > 0)
     {
+        // too much variance, say it's not valid
         if (new_v / new_cnt > params[MAX_VARIANCE])
         {
             map[get_map_idx(idx, HEIGHT_LAYER, params)] = 0;
             map[get_map_idx(idx, VARIANCE_LAYER, params)] = params[INITIAL_VARIANCE];
-            map[get_map_idx(idx, VALIDITY_LAYER, params)] = 0;
         }
         else
         {
             map[get_map_idx(idx, HEIGHT_LAYER, params)] = new_h / new_cnt;
             map[get_map_idx(idx, VARIANCE_LAYER, params)] = new_v / new_cnt;
-            map[get_map_idx(idx, VALIDITY_LAYER, params)] = 1;
         }
     }
 
@@ -278,7 +211,6 @@ void kernel averageMapKernel(global float* newMap, global float* map, global flo
     {
         map[get_map_idx(idx, HEIGHT_LAYER, params)] = 0.0;
         map[get_map_idx(idx, VARIANCE_LAYER, params)] = params[INITIAL_VARIANCE];
-        map[get_map_idx(idx, VALIDITY_LAYER, params)] = 0.0;
     }
 }
 
