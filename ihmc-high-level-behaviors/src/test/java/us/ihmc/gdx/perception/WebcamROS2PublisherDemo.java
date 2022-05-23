@@ -102,6 +102,7 @@ public class WebcamROS2PublisherDemo
 
                   swapCVPanel = new ImGuiOpenCVSwapVideoPanel("Video", false);
                   baseUI.getImGuiPanelManager().addPanel(swapCVPanel.getVideoPanel());
+                  baseUI.getPerspectiveManager().reloadPerspective();
 
                   readPerformancePlot = new ImPlotStopwatchPlot("VideoCapture read(Mat)");
 
@@ -129,17 +130,16 @@ public class WebcamROS2PublisherDemo
                         });
                      }
                   }, "CameraRead");
-
                }
 
                swapCVPanel.getDataSwapReferenceManager().accessOnHighPriorityThread(data ->
                {
                   data.updateOnUIThread(swapCVPanel.getVideoPanel());
                });
-
-               baseUI.renderBeforeOnScreenUI();
-               baseUI.renderEnd();
             }
+
+            baseUI.renderBeforeOnScreenUI();
+            baseUI.renderEnd();
          }
 
          @Override
