@@ -81,6 +81,7 @@ public class WebcamROS2SubscriberDemo
                {
                   swapCVPanel = new ImGuiOpenCVSwapVideoPanel("Video", false);
                   baseUI.getImGuiPanelManager().addPanel(swapCVPanel.getVideoPanel());
+                  baseUI.getPerspectiveManager().reloadPerspective();
 
                   ThreadTools.startAsDaemon(() ->
                   {
@@ -117,10 +118,10 @@ public class WebcamROS2SubscriberDemo
                   uiUpdateFrequencyPlot.ping();
                   data.updateOnUIThread(swapCVPanel.getVideoPanel());
                });
-
-               baseUI.renderBeforeOnScreenUI();
-               baseUI.renderEnd();
             }
+
+            baseUI.renderBeforeOnScreenUI();
+            baseUI.renderEnd();
          }
 
          @Override
