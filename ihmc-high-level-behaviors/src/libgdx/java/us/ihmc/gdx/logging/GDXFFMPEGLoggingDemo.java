@@ -32,18 +32,14 @@ public class GDXFFMPEGLoggingDemo
    private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/main/resources");
    private GDXCVImagePanel imagePanel;
    private ImPlotFrequencyPlot loggerPutFrequencyPlot;
-   private ImInt framerate = new ImInt(30);
+   private final ImInt framerate = new ImInt(30);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
    private static final String logDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
    private String fileName;
-
    private BytedecoImage image;
-   private FFMPEGLogger logger;
-   private final Random random = new Random();
-   private final byte[] data = new byte[4];
-   private int index = 0;
    private volatile boolean logging = false;
+   private volatile boolean finalizing = false;
 
    public GDXFFMPEGLoggingDemo()
    {
@@ -74,11 +70,7 @@ public class GDXFFMPEGLoggingDemo
 
                   baseUI.getImGuiPanelManager().addPanel(imagePanel.getVideoPanel());
                   baseUI.getPerspectiveManager().reloadPerspective();
-
-                  boolean lossless = true;
-                  logger = new FFMPEGLogger(WIDTH, HEIGHT, lossless, fileName);
                }
-
 
                imagePanel.draw();
             }
@@ -99,11 +91,18 @@ public class GDXFFMPEGLoggingDemo
             {
                if (!logging)
                {
-                  if (ImGui.button(labels.get("Start logging")))
+                  if (!finalizing)
                   {
-                     updateFileName();
-                     logging = true;
-                     ThreadTools.startAThread(this::loggingThread, "FFMPEGLogging");
+                     if (ImGui.button(labels.get("Start logging")))
+                     {
+                        updateFileName();
+                        logging = true;
+                        ThreadTools.startAThread(this::loggingThread, "FFMPEGLogging");
+                     }
+                  }
+                  else
+                  {
+                     ImGui.text("Finalizing...");
                   }
                }
                else
@@ -125,9 +124,17 @@ public class GDXFFMPEGLoggingDemo
 
          private void loggingThread()
          {
+            boolean lossless = true;
+            FFMPEGLogger logger = new FFMPEGLogger(WIDTH, HEIGHT, lossless, fileName);
+
             AVRational msBetweenFrames = new AVRational();
             msBetweenFrames.num(1);
             msBetweenFrames.den(framerate.get());
+
+            final Random random = new Random();
+            final byte[] data = new byte[4];
+            int index = 0;
+            finalizing = true;
 
             while (logging)
             {
@@ -151,12 +158,16 @@ public class GDXFFMPEGLoggingDemo
                // Using an AVRational helps ensure that we calculate fps the same way the logger does
                ThreadTools.sleep((int) (avutil.av_q2d(msBetweenFrames) * 1000));
             }
+
+            ThreadTools.sleepSeconds(2.0);
+
+            logger.close();
+            finalizing = false;
          }
 
          @Override
          public void dispose()
          {
-            logger.close();
             baseUI.dispose();
          }
       });
