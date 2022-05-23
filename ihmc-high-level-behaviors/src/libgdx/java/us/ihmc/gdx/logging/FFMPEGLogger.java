@@ -20,8 +20,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 
 import java.io.*;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 /**
  * Doxygen:
@@ -34,9 +32,7 @@ public class FFMPEGLogger
    //Constants
    private static final int FRAMERATE = 30;
    //End constants
-   private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
-   private static final String logDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
-   private String fileName = null;
+   private final String fileName;
    private boolean isInitialized = false;
    private boolean isClosed = false;
    private AVDictionary avDictionary;
@@ -46,30 +42,9 @@ public class FFMPEGLogger
    private AVFrame rgbTempFrame;
    private SwsContext rgbSwsContext;
 
-   /***
-    * Note - lossless is true by default
-    */
-   FFMPEGLogger(int width, int height)
+   public FFMPEGLogger(int width, int height, boolean lossless, String fileName)
    {
-      this(width, height, true);
-   }
-
-   /***
-    * Note - lossless is true by default
-    */
-   FFMPEGLogger(int width, int height, String logName)
-   {
-      this(width, height, true, "Video");
-   }
-
-   FFMPEGLogger(int width, int height, boolean lossless)
-   {
-      this(width, height, lossless, "Video");
-   }
-
-   FFMPEGLogger(int width, int height, boolean lossless, String logName)
-   {
-      fileName = logDirectory + dateFormat.format(new Date()) + "_" + logName + "_Log.webm";
+      this.fileName = fileName;
 
       int avDictFlags = 0;
       avDictionary = new AVDictionary();
