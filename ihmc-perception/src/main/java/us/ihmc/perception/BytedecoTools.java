@@ -56,15 +56,6 @@ public class BytedecoTools
 
    public static String stringFromByteBuffer(BytePointer bytePointerWithString)
    {
-      ByteBuffer byteBuffer = bytePointerWithString.asBuffer();
-      StringBuilder stringBuilder = new StringBuilder();
-      for (int i = 0; i < byteBuffer.capacity(); i++)
-      {
-         if (byteBuffer.get(i) == 0)
-            break;
-
-         stringBuilder.append((char) byteBuffer.get(i));
-      }
-      return stringBuilder.toString();
+      return bytePointerWithString.getString().trim();
    }
 }
