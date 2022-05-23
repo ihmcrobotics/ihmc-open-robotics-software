@@ -14,8 +14,10 @@ import us.ihmc.gdx.ui.tools.ImPlotStopwatchPlot;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2QosProfile;
+import us.ihmc.ros2.ROS2Subscription;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.Activator;
+import us.ihmc.tools.thread.Throttler;
 import us.ihmc.tools.thread.ZeroCopySwapReference;
 
 import java.io.IOException;
@@ -29,9 +31,13 @@ public class WebcamROS2SubscriberDemo
                                                               "ROS 2 Webcam Subscriber");
    private final ImGuiPanel diagnosticPanel = new ImGuiPanel("Diagnostics", this::renderImGuiWidgets);
    private ImGuiOpenCVSwapVideoPanel swapCVPanel;
-   private ImPlotStopwatchPlot acceptMessagePerformancePlot = new ImPlotStopwatchPlot("Process");
-   private ImPlotFrequencyPlot readFrequencyPlot = new ImPlotFrequencyPlot("Receive frequency");
+   private ImPlotFrequencyPlot receiveFrequencyPlot = new ImPlotFrequencyPlot("Receive frequency");
+   private ImPlotFrequencyPlot transferFrequencyPlot = new ImPlotFrequencyPlot("Transfer frequency");
+   private ImPlotFrequencyPlot uiUpdateFrequencyPlot = new ImPlotFrequencyPlot("UI update frequency");
+   private ImPlotStopwatchPlot copyBytesDurationPlot = new ImPlotStopwatchPlot("Copy bytes duration");
+   private Throttler transferThrottler = new Throttler();
    private RealtimeROS2Node realtimeROS2Node;
+   private ROS2Subscription<BigVideoPacket> subscription;
    private ZeroCopySwapReference<BigVideoSwapData> videoSwapData = new ZeroCopySwapReference<>(BigVideoSwapData::new);
    private boolean readyToReceive = false;
    private int imageWidth = -1;
@@ -47,11 +53,12 @@ public class WebcamROS2SubscriberDemo
          {
             baseUI.create();
 
-            realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "videopub");
+            realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "videosub");
             try
             {
-               realtimeROS2Node.createSubscription(BigVideoPacket.getPubSubType().get(), subscriber ->
+               subscription = realtimeROS2Node.createSubscription(BigVideoPacket.getPubSubType().get(), subscriber ->
                {
+                  receiveFrequencyPlot.ping();
                   videoSwapData.accessOnHighPriorityThread(data ->
                   {
                      data.incomingDataMessage(subscriber);
@@ -75,26 +82,28 @@ public class WebcamROS2SubscriberDemo
                   swapCVPanel = new ImGuiOpenCVSwapVideoPanel("Video", false);
                   baseUI.getImGuiPanelManager().addPanel(swapCVPanel.getVideoPanel());
 
-                  acceptMessagePerformancePlot = new ImPlotStopwatchPlot("acceptMessage");
-
                   ThreadTools.startAsDaemon(() ->
                   {
                      while (true)
                      {
+                        transferThrottler.waitAndRun(0.005);
                         videoSwapData.accessOnLowPriorityThread(data ->
                         {
                            swapCVPanel.getDataSwapReferenceManager().accessOnLowPriorityThread(panelData ->
                            {
+                              transferFrequencyPlot.ping();
                               imageWidth = data.getVideoPacket().getImageWidth();
                               imageHeight = data.getVideoPacket().getImageHeight();
 
                               panelData.updateOnImageUpdateThread(imageWidth, imageHeight);
 
+                              copyBytesDurationPlot.start();
                               BytePointer bytePointer = panelData.getRGBA8Mat().ptr(0);
                               for (int i = 0; i < data.getVideoPacket().getData().size(); i++)
                               {
                                  bytePointer.put(i, data.getVideoPacket().getData().get(i));
                               }
+                              copyBytesDurationPlot.stop();
                            });
                         });
                      }
@@ -105,6 +114,7 @@ public class WebcamROS2SubscriberDemo
 
                swapCVPanel.getDataSwapReferenceManager().accessOnHighPriorityThread(data ->
                {
+                  uiUpdateFrequencyPlot.ping();
                   data.updateOnUIThread(swapCVPanel.getVideoPanel());
                });
 
@@ -126,8 +136,10 @@ public class WebcamROS2SubscriberDemo
       if (nativesLoadedActivator.peek())
       {
          ImGui.text("Image dimensions: " + imageWidth + " x " + imageHeight);
-         acceptMessagePerformancePlot.renderImGuiWidgets();
-         readFrequencyPlot.renderImGuiWidgets();
+         receiveFrequencyPlot.renderImGuiWidgets();
+         transferFrequencyPlot.renderImGuiWidgets();
+         copyBytesDurationPlot.renderImGuiWidgets();
+         uiUpdateFrequencyPlot.renderImGuiWidgets();
       }
    }
 
