@@ -3,7 +3,7 @@ package us.ihmc.gdx.simulation.scs2;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.gdx.perception.GDXOpenCVDoorHandleDetectionUI;
+import us.ihmc.gdx.perception.GDXOpenCVOpticalFlowTrackingUI;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.environment.GDXEnvironmentBuilder;
 import us.ihmc.gdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
@@ -22,7 +22,7 @@ public class GDXDoorHandleDetectionDemo
    private GDXEnvironmentBuilder environmentBuilder;
    private final GDXPose3DGizmo sensorPoseGizmo = new GDXPose3DGizmo();
    private GDXHighLevelDepthSensorSimulator cameraSensor;
-   private GDXOpenCVDoorHandleDetectionUI doorHandleDetectionUI;
+   private GDXOpenCVOpticalFlowTrackingUI doorHandleDetectionUI;
    private final ImBoolean cameraGizmoSelected = new ImBoolean(true);
 
    public GDXDoorHandleDetectionDemo()
@@ -79,7 +79,7 @@ public class GDXDoorHandleDetectionDemo
                   baseUI.getImGuiPanelManager().addPanel(cameraSensor);
                   baseUI.get3DSceneManager().addRenderableProvider(cameraSensor, GDXSceneLevel.VIRTUAL);
 
-                  doorHandleDetectionUI = new GDXOpenCVDoorHandleDetectionUI();
+                  doorHandleDetectionUI = new GDXOpenCVOpticalFlowTrackingUI();
                   doorHandleDetectionUI.create(cameraSensor.getLowLevelSimulator().getRGBA8888ColorImage());
                   baseUI.getImGuiPanelManager().addPanel(doorHandleDetectionUI.getMainPanel());
 
