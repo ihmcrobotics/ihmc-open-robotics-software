@@ -157,6 +157,32 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private boolean firstTick = true;
 
    private HumanoidRobotNaturalPosture naturalPosture;
+   
+   private final YoDouble pPoseSpineRollKp = new YoDouble("pPoseSpineRollKp", registry);
+   private final YoDouble pPoseSpineRollKd = new YoDouble("pPoseSpineRollKd", registry);
+   private final YoDouble pPoseSpineYawKp = new YoDouble("pPoseSpineYawKp", registry);
+   private final YoDouble pPoseSpineYawKd = new YoDouble("pPoseSpineYawKd", registry);
+   private final YoDouble pPoseShoulderPitch = new YoDouble("pPoseShoulderPitch",registry);
+//   private final YoDouble pPoseShoulderPitchRight = new YoDouble("pPoseShoulderPitchRight",registry);
+//   private final SideDependentList<YoDouble> pPoseShoulderPitch = new SideDependentList<YoDouble>(pPoseShoulderPitchLeft,pPoseShoulderPitchRight);
+   private final YoDouble pPoseShoulderRoll = new YoDouble("pPoseShoulderRoll",registry);
+//   private final YoDouble pPoseShoulderRollRight = new YoDouble("pPoseShoulderRollRight",registry);
+//   private final SideDependentList<YoDouble> pPoseShoulderRoll = new SideDependentList<YoDouble>();
+   private final YoDouble pPoseShoulderYaw = new YoDouble("pPoseShoulderYaw",registry);
+//   private final YoDouble pPoseShoulderYawRight = new YoDouble("pPoseShoulderYawRight",registry);
+//   private final SideDependentList<YoDouble> pPoseShoulderYaw = new SideDependentList<YoDouble>();
+   private final YoDouble pPoseElbow = new YoDouble("pPoseElbow",registry);
+//   private final YoDouble pPoseElbowRight = new YoDouble("pPoseShoulderPitchRight",registry);
+//   private final SideDependentList<YoDouble> pPoseElbow = new SideDependentList<YoDouble>();
+   private final YoDouble pPoseShoulderPitchKp = new YoDouble("pPoseShoulderPitchKp",registry);
+   private final YoDouble pPoseShoulderRollKp = new YoDouble("pPoseShoulderRollKp",registry);
+   private final YoDouble pPoseShoulderYawKp = new YoDouble("pPoseShoulderYawKp",registry);
+   private final YoDouble pPoseElbowKp = new YoDouble("pPoseElbowKp",registry);
+   private final YoDouble pPoseShoulderPitchKd = new YoDouble("pPoseShoulderPitchKd",registry);
+   private final YoDouble pPoseShoulderRollKd = new YoDouble("pPoseShoulderRollKd",registry);
+   private final YoDouble pPoseShoulderYawKd = new YoDouble("pPoseShoulderYawKd",registry);
+   private final YoDouble pPoseElbowKd = new YoDouble("pPoseElbowKd",registry);
+   
 
    public WalkingHighLevelHumanoidController(CommandInputManager commandInputManager,
                                              StatusMessageOutputManager statusOutputManager,
@@ -296,6 +322,26 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       this.naturalPosture = walkingControllerParameters.getNaturalPosture(fullRobotModel, registry, controllerToolbox.getYoGraphicsListRegistry());
       if (naturalPosture != null)
          naturalPosture.initialize();
+
+      pPoseShoulderPitch.set(0.1);
+      pPoseShoulderRoll.set(-1.3);
+      pPoseShoulderYaw.set(-0.3);
+      pPoseElbow.set(-1.0);
+
+      pPoseSpineRollKp.set(400.0);
+      pPoseSpineYawKp.set(400.0);
+      pPoseShoulderPitchKp.set(5);
+      pPoseShoulderRollKp.set(10);
+      pPoseShoulderYawKp.set(10);
+      pPoseElbowKp.set(5);
+      
+      pPoseSpineRollKd.set(60.0);
+      pPoseSpineYawKd.set(60.0);
+      pPoseElbowKd.set(5);
+      pPoseShoulderPitchKd.set(2);
+      pPoseShoulderRollKd.set(4);
+      pPoseShoulderYawKd.set(4);
+      pPoseElbowKd.set(2);
    }
 
    private StateMachine<WalkingStateEnum, WalkingState> setupStateMachine()
@@ -530,40 +576,47 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       commandInputManager.clearAllCommands();
       walkingMessageHandler.clearFootsteps();
       walkingMessageHandler.clearFootTrajectory();
-
-      privilegedConfigurationCommand.clear();
-      privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_ZERO);
-
-      //TODO: This is hardcoded here. It should be moved to a parameter setting instead. This is not the long term place for it.
-      spineRollPrivilegedConfigurationParameters();
-      spineYawPrivilegedConfigurationParameters();
-      createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, ArmJointName.SHOULDER_PITCH, 0.1, 5, 2, 1);
-      createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, ArmJointName.SHOULDER_PITCH, -0.1, 5, 2, 1);
-      createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, ArmJointName.SHOULDER_ROLL, -1.3, 10, 4, 1);
-      createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, ArmJointName.SHOULDER_ROLL, 1.3, 10, 4, 1);
-      createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, ArmJointName.SHOULDER_YAW, -0.3, 10, 4, 1);
-      createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, ArmJointName.SHOULDER_YAW, 0.3, 10, 4, 1);
-      createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, ArmJointName.ELBOW_PITCH, -1.0, 5, 2, 1);
-      createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, ArmJointName.ELBOW_PITCH, 1.0, 5, 2, 1);
-      createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, ArmJointName.WRIST_YAW, 0.0);
-      createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, ArmJointName.WRIST_YAW, 0.0);
-      createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, ArmJointName.WRIST_ROLL, 0.0);
-      createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, ArmJointName.WRIST_ROLL, 0.0);
-      createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, ArmJointName.FIRST_WRIST_PITCH, 0.0);
-      createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, ArmJointName.FIRST_WRIST_PITCH, 0.0);
       
-      for (RobotSide robotSide : RobotSide.values)
-      {
-//         ArmJointName[] armJointNames = fullRobotModel.getRobotSpecificJointNames().getArmJointNames();
-//         for (int i = 0; i < armJointNames.length; i++)
-//         {
-//            privilegedConfigurationCommand.addJoint(fullRobotModel.getArmJoint(robotSide, armJointNames[i]), PrivilegedConfigurationOption.AT_MID_RANGE);
-//         }
+      updatePrivilegedConfigurationCommand();
 
-         OneDoFJointBasics kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH);
-
-         privilegedConfigurationCommand.addJoint(kneeJoint, walkingControllerParameters.getKneePrivilegedConfigurationParameters());
-      }
+//      privilegedConfigurationCommand.clear();
+//      privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_ZERO);
+//
+//      //TODO: This is hardcoded here. It should be moved to a parameter setting instead. This is not the long term place for it.
+//      spineRollPrivilegedConfigurationParameters();
+//      spineYawPrivilegedConfigurationParameters();
+//      
+//      RobotSide side = RobotSide.LEFT;
+//      createAndAddJointPrivilegedConfigurationParameters(side, ArmJointName.SHOULDER_PITCH, pPoseShoulderPitch.getDoubleValue(), pPoseShoulderPitchKp.getDoubleValue(), pPoseShoulderPitchKd.getDoubleValue());
+//      createAndAddJointPrivilegedConfigurationParameters(side, ArmJointName.SHOULDER_ROLL, pPoseShoulderRoll.getDoubleValue(), pPoseShoulderRollKp.getDoubleValue(), pPoseShoulderRollKd.getDoubleValue());
+//      createAndAddJointPrivilegedConfigurationParameters(side, ArmJointName.SHOULDER_YAW, pPoseShoulderYaw.getDoubleValue(), pPoseShoulderYawKp.getDoubleValue(), pPoseShoulderYawKd.getDoubleValue());
+//      createAndAddJointPrivilegedConfigurationParameters(side, ArmJointName.ELBOW_PITCH, pPoseElbow.getDoubleValue(), pPoseElbowKp.getDoubleValue(), pPoseElbowKd.getDoubleValue());
+//
+//      side = RobotSide.RIGHT;
+//      createAndAddJointPrivilegedConfigurationParameters(side, ArmJointName.SHOULDER_PITCH, -pPoseShoulderPitch.getDoubleValue(), pPoseShoulderPitchKp.getDoubleValue(), pPoseShoulderPitchKd.getDoubleValue());
+//      createAndAddJointPrivilegedConfigurationParameters(side, ArmJointName.SHOULDER_ROLL, -pPoseShoulderRoll.getDoubleValue(), pPoseShoulderRollKp.getDoubleValue(), pPoseShoulderRollKd.getDoubleValue());
+//      createAndAddJointPrivilegedConfigurationParameters(side, ArmJointName.SHOULDER_YAW, -pPoseShoulderYaw.getDoubleValue(), pPoseShoulderYawKp.getDoubleValue(), pPoseShoulderYawKd.getDoubleValue());
+//      createAndAddJointPrivilegedConfigurationParameters(side, ArmJointName.ELBOW_PITCH, -pPoseElbow.getDoubleValue(), pPoseElbowKp.getDoubleValue(), pPoseElbowKd.getDoubleValue());
+//
+//      createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, ArmJointName.WRIST_YAW, 0.0);
+//      createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, ArmJointName.WRIST_YAW, 0.0);
+//      createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, ArmJointName.WRIST_ROLL, 0.0);
+//      createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, ArmJointName.WRIST_ROLL, 0.0);
+//      createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, ArmJointName.FIRST_WRIST_PITCH, 0.0);
+//      createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, ArmJointName.FIRST_WRIST_PITCH, 0.0);
+//      
+//      for (RobotSide robotSide : RobotSide.values)
+//      {
+////         ArmJointName[] armJointNames = fullRobotModel.getRobotSpecificJointNames().getArmJointNames();
+////         for (int i = 0; i < armJointNames.length; i++)
+////         {
+////            privilegedConfigurationCommand.addJoint(fullRobotModel.getArmJoint(robotSide, armJointNames[i]), PrivilegedConfigurationOption.AT_MID_RANGE);
+////         }
+//
+//         OneDoFJointBasics kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH);
+//
+//         privilegedConfigurationCommand.addJoint(kneeJoint, walkingControllerParameters.getKneePrivilegedConfigurationParameters());
+//      }
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -591,8 +644,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       OneDoFJointBasics spineRoll = fullRobotModel.getOneDoFJointByName("spineRoll");            
 
       OneDoFJointPrivilegedConfigurationParameters jointParameters = new OneDoFJointPrivilegedConfigurationParameters();
-      jointParameters.setConfigurationGain(400.0);//40.0);
-      jointParameters.setVelocityGain(60.0);//6.0);
+      jointParameters.setConfigurationGain(pPoseSpineRollKp.getValue());
+      jointParameters.setVelocityGain(pPoseSpineRollKd.getValue());
       jointParameters.setWeight(1);//5.0);
       jointParameters.setMaxAcceleration(Double.POSITIVE_INFINITY);
       jointParameters.setPrivilegedConfigurationOption(null);
@@ -607,8 +660,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       OneDoFJointBasics spineYaw = fullRobotModel.getOneDoFJointByName("spineYaw");            
 
       OneDoFJointPrivilegedConfigurationParameters jointParameters = new OneDoFJointPrivilegedConfigurationParameters();
-      jointParameters.setConfigurationGain(400.0);//40.0);
-      jointParameters.setVelocityGain(60.0);//6.0);
+      jointParameters.setConfigurationGain(pPoseSpineYawKp.getValue());
+      jointParameters.setVelocityGain(pPoseSpineYawKd.getValue());
       jointParameters.setWeight(1);//5.0);
       jointParameters.setMaxAcceleration(Double.POSITIVE_INFINITY);
       jointParameters.setPrivilegedConfigurationOption(null);
@@ -639,15 +692,14 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private OneDoFJointPrivilegedConfigurationParameters createAndAddJointPrivilegedConfigurationParameters(RobotSide robotSide, ArmJointName armJointName, 
                                                                                                            double privilegedAngle, 
                                                                                                            double pgain,
-                                                                                                           double dgain,
-                                                                                                           double weight)
+                                                                                                           double dgain)
    {
       OneDoFJointBasics armJoint = fullRobotModel.getArmJoint(robotSide, armJointName);            
 
       OneDoFJointPrivilegedConfigurationParameters jointParameters = new OneDoFJointPrivilegedConfigurationParameters();
       jointParameters.setConfigurationGain(pgain);//40.0);
       jointParameters.setVelocityGain(dgain);//6.0);
-      jointParameters.setWeight(weight);//5.0);
+      jointParameters.setWeight(1.0);
       jointParameters.setMaxAcceleration(Double.POSITIVE_INFINITY);
       jointParameters.setPrivilegedConfigurationOption(null);
       jointParameters.setPrivilegedConfiguration(privilegedAngle);
@@ -978,6 +1030,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private void submitControllerCoreCommands()
    {
       planeContactStateCommandPool.clear();
+      
+      updatePrivilegedConfigurationCommand();
 
       controllerCoreCommand.addInverseDynamicsCommand(privilegedConfigurationCommand);
       if (!limitCommandSent.getBooleanValue())
@@ -1036,6 +1090,43 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       if (ENABLE_LEG_ELASTICITY_DEBUGGATOR)
          controllerCoreCommand.addInverseDynamicsCommand(legElasticityDebuggator.getInverseDynamicsCommand());
+   }
+
+   private void updatePrivilegedConfigurationCommand()
+   {
+      privilegedConfigurationCommand.clear();
+      privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_ZERO);
+
+      //TODO: This is hardcoded here. It should be moved to a parameter setting instead. This is not the long term place for it.
+      spineRollPrivilegedConfigurationParameters();
+      spineYawPrivilegedConfigurationParameters();
+      
+      RobotSide side = RobotSide.LEFT;
+      createAndAddJointPrivilegedConfigurationParameters(side, ArmJointName.SHOULDER_PITCH, pPoseShoulderPitch.getDoubleValue(), pPoseShoulderPitchKp.getDoubleValue(), pPoseShoulderPitchKd.getDoubleValue());
+      createAndAddJointPrivilegedConfigurationParameters(side, ArmJointName.SHOULDER_ROLL, pPoseShoulderRoll.getDoubleValue(), pPoseShoulderRollKp.getDoubleValue(), pPoseShoulderRollKd.getDoubleValue());
+      createAndAddJointPrivilegedConfigurationParameters(side, ArmJointName.SHOULDER_YAW, pPoseShoulderYaw.getDoubleValue(), pPoseShoulderYawKp.getDoubleValue(), pPoseShoulderYawKd.getDoubleValue());
+      createAndAddJointPrivilegedConfigurationParameters(side, ArmJointName.ELBOW_PITCH, pPoseElbow.getDoubleValue(), pPoseElbowKp.getDoubleValue(), pPoseElbowKd.getDoubleValue());
+
+      side = RobotSide.RIGHT;
+      createAndAddJointPrivilegedConfigurationParameters(side, ArmJointName.SHOULDER_PITCH, -pPoseShoulderPitch.getDoubleValue(), pPoseShoulderPitchKp.getDoubleValue(), pPoseShoulderPitchKd.getDoubleValue());
+      createAndAddJointPrivilegedConfigurationParameters(side, ArmJointName.SHOULDER_ROLL, -pPoseShoulderRoll.getDoubleValue(), pPoseShoulderRollKp.getDoubleValue(), pPoseShoulderRollKd.getDoubleValue());
+      createAndAddJointPrivilegedConfigurationParameters(side, ArmJointName.SHOULDER_YAW, -pPoseShoulderYaw.getDoubleValue(), pPoseShoulderYawKp.getDoubleValue(), pPoseShoulderYawKd.getDoubleValue());
+      createAndAddJointPrivilegedConfigurationParameters(side, ArmJointName.ELBOW_PITCH, -pPoseElbow.getDoubleValue(), pPoseElbowKp.getDoubleValue(), pPoseElbowKd.getDoubleValue());
+
+      createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, ArmJointName.WRIST_YAW, 0.0);
+      createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, ArmJointName.WRIST_YAW, 0.0);
+      createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, ArmJointName.WRIST_ROLL, 0.0);
+      createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, ArmJointName.WRIST_ROLL, 0.0);
+      createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, ArmJointName.FIRST_WRIST_PITCH, 0.0);
+      createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, ArmJointName.FIRST_WRIST_PITCH, 0.0);
+
+      // GMN: Probably should have privileged configuration set for entire robot
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         OneDoFJointBasics kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH);
+
+         privilegedConfigurationCommand.addJoint(kneeJoint, walkingControllerParameters.getKneePrivilegedConfigurationParameters());
+      }
    }
 
    public ControllerCoreCommand getControllerCoreCommand()
