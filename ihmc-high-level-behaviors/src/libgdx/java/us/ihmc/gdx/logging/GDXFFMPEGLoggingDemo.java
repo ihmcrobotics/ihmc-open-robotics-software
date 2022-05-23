@@ -22,8 +22,8 @@ import static org.bytedeco.ffmpeg.global.avutil.av_q2d;
 
 public class GDXFFMPEGLoggingDemo
 {
-   public static final int WIDTH = 64;
-   public static final int HEIGHT = 64;
+   public static final int WIDTH = 256;
+   public static final int HEIGHT = 256;
    public static final int FRAMERATE = 30;
    public static final int NICE_COLOR = 0xFFAA6600;
    private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/main/resources");
@@ -71,11 +71,12 @@ public class GDXFFMPEGLoggingDemo
                      if (imagePanel != null)
                      {
                         image.getBytedecoOpenCVMat().setTo(new Mat(data));
-                        for (int i = 0; i < 32; i++)
+                        for (int i = 0; i < 256; i++)
                         {
-                           boolean d = ((index >> (31 - i)) & 1) == 1;
-                           image.getBackingDirectByteBuffer().putInt(i * 4, d ? NICE_COLOR : 0xFF000000);
-                           image.getBackingDirectByteBuffer().putInt((WIDTH + i) * 4, d ? NICE_COLOR : 0xFF000000);
+                           boolean d = ((index >> (31 - i / 8)) & 1) == 1;
+
+                           for (int j = 0; j < 8; j++)
+                              image.getBackingDirectByteBuffer().putInt((WIDTH * j + i) * 4, d ? NICE_COLOR : 0xFF000000);
                         }
 
                         if (logger != null)
