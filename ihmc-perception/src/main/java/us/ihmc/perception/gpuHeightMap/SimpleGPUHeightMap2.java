@@ -30,7 +30,7 @@ public class SimpleGPUHeightMap2
 
    private final _cl_program heightMapProgram;
    private final _cl_kernel addPointsKernel;
-//   private final _cl_kernel averageMapKernel;
+   private final _cl_kernel averageMapKernel;
 
    public SimpleGPUHeightMap2()
    {
@@ -51,6 +51,7 @@ public class SimpleGPUHeightMap2
 
       heightMapProgram = openCLManager.loadProgram("SimpleGPUHeightMap2");
       addPointsKernel = openCLManager.createKernel(heightMapProgram, "addPointsKernel");
+      averageMapKernel = openCLManager.createKernel(heightMapProgram, "averageMapKernel");
    }
 
 
@@ -146,12 +147,12 @@ public class SimpleGPUHeightMap2
          openCLManager.setKernelArgument(addPointsKernel, 3, elevationMapData.getOpenCLBufferObject());
          openCLManager.setKernelArgument(addPointsKernel, 4, updatedMapData.getOpenCLBufferObject());
 
-//         openCLManager.setKernelArgument(averageMapKernel, 0, updatedMapData.getOpenCLBufferObject());
-//         openCLManager.setKernelArgument(averageMapKernel, 1, elevationMapData.getOpenCLBufferObject());
-//         openCLManager.setKernelArgument(averageMapKernel, 2, parametersBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(averageMapKernel, 0, updatedMapData.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(averageMapKernel, 1, elevationMapData.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(averageMapKernel, 2, parametersBuffer.getOpenCLBufferObject());
 
          openCLManager.execute1D(addPointsKernel, pointsSize);
-//         openCLManager.execute1D(averageMapKernel, pointsSize);
+         openCLManager.execute2D(averageMapKernel, numberOfCells, numberOfCells);
 
          updatedMapData.readOpenCLBufferObject(openCLManager);
 
