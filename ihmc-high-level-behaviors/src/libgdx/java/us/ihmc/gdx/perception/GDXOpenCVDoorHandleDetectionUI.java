@@ -61,7 +61,6 @@ public class GDXOpenCVDoorHandleDetectionUI
       if (ImGui.isMouseReleased(ImGuiMouseButton.Left))
       {
          userClicked = true;
-         LogTools.info("User left clicked. x: {} y: {}", mousePositionInImagePixelCoordinatesX, mousePositionInImagePixelCoordinatesY);
          previousPoint2f.x(mousePositionInImagePixelCoordinatesX);
          previousPoint2f.y(mousePositionInImagePixelCoordinatesY);
       }
