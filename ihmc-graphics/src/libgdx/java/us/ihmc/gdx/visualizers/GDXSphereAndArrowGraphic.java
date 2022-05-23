@@ -8,7 +8,7 @@ import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 
 public class GDXSphereAndArrowGraphic
@@ -20,8 +20,8 @@ public class GDXSphereAndArrowGraphic
 
    public void create(double sphereRadius, double arrowLength, Color color)
    {
-      sphere = GDXModelPrimitives.createSphere((float) sphereRadius, color);
-      arrow = GDXModelPrimitives.createArrow(arrowLength, color);
+      sphere = GDXModelBuilder.createSphere((float) sphereRadius, color);
+      arrow = GDXModelBuilder.createArrow(arrowLength, color);
    }
 
    public void clear()

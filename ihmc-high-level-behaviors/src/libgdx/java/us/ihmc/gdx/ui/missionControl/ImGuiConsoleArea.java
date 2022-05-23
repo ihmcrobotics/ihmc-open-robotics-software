@@ -3,7 +3,9 @@ package us.ihmc.gdx.ui.missionControl;
 import imgui.ImGui;
 import imgui.extension.texteditor.TextEditor;
 import imgui.extension.texteditor.TextEditorLanguageDefinition;
+import imgui.type.ImBoolean;
 import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 
 import java.util.HashMap;
 
@@ -11,6 +13,8 @@ public class ImGuiConsoleArea
 {
    private final TextEditor textEditor = new TextEditor();
    private TextEditorLanguageDefinition textEditorLanguageDefinition = new TextEditorLanguageDefinition();
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ImBoolean autoScroll = new ImBoolean(true);
 
    public ImGuiConsoleArea()
    {
@@ -40,7 +44,6 @@ public class ImGuiConsoleArea
             };
       textEditor.setPalette(palette);
 
-
       HashMap<String, String> identifiers = new HashMap<>();
       textEditorLanguageDefinition = new TextEditorLanguageDefinition();
       textEditorLanguageDefinition.setIdentifiers(identifiers);
@@ -54,7 +57,9 @@ public class ImGuiConsoleArea
 
    public void renderImGuiWidgets()
    {
-      if (ImGui.button("Auto scroll"))
+      ImGui.checkbox(labels.get("Auto scroll"), autoScroll);
+
+      if (autoScroll.get())
       {
          int lastLineIndex = textEditor.getTotalLines() - 1;
          int endOfLastLineColumn = textEditor.getTextLines()[lastLineIndex].length();

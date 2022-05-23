@@ -29,7 +29,7 @@ public class GDXModelLoader
    {
    }
 
-   public static Model loadG3DModel(String modelFileName)
+   public static Model load(String modelFileName)
    {
       return modelLoader.loadOrGetModel(modelFileName);
    }
