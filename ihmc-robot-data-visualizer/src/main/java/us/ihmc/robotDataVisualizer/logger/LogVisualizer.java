@@ -75,8 +75,7 @@ public class LogVisualizer
    {
       if (logFile == null)
       {
-         logFile = FileSelectionDialog.loadDirectoryWithFileNamed(YoVariableLoggerListener.propertyFile);
-         System.out.println("FilePath:" + logFile.getPath().toString());
+         logFile = FileSelectionDialog.loadDirectoryWithFileNamed(YoVariableLoggerListener.propertyFile);z
       }
 
       if (logFile != null)
