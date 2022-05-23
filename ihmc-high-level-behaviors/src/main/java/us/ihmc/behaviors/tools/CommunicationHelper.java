@@ -17,6 +17,7 @@ import us.ihmc.behaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
@@ -36,7 +37,6 @@ import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidancePro
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
@@ -168,7 +168,7 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    }
 
    @Override
-   public <T> ROS2Input<T> subscribeToController(Class<T> messageClass)
+   public <T> IHMCROS2Input<T> subscribeToController(Class<T> messageClass)
    {
       return subscribe(ControllerAPIDefinition.getTopic(messageClass, robotModel.getSimpleRobotName()));
    }
@@ -189,7 +189,7 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
 
    public Supplier<PlanarRegionsList> subscribeToPlanarRegionsViaReference(ROS2Topic<PlanarRegionsListMessage> topic)
    {
-      ROS2Input<PlanarRegionsListMessage> input = new ROS2Input<>(ros2Helper.getROS2NodeInterface(), topic.getType(), topic);
+      IHMCROS2Input<PlanarRegionsListMessage> input = new IHMCROS2Input<>(ros2Helper.getROS2NodeInterface(), topic.getType(), topic);
       return () -> PlanarRegionMessageConverter.convertToPlanarRegionsList(input.getLatest());
    }
 
@@ -216,7 +216,7 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    }
 
    @Override
-   public <T> ROS2Input<T> subscribe(ROS2Topic<T> topic)
+   public <T> IHMCROS2Input<T> subscribe(ROS2Topic<T> topic)
    {
       return ros2Helper.subscribe(topic);
    }

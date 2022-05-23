@@ -11,6 +11,7 @@ import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.gdx.imgui.ImGuiPanel;
+import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.bullet.GDXBulletPhysicsAsyncDebugger;
@@ -219,7 +220,7 @@ public class GDXSCS2SimulationSession
    public void renderImGuiWidgets()
    {
       ImGui.pushItemWidth(110);
-      if (ImGui.inputInt("Bullet simulation dt (Hz)", dtHz))
+      if (ImGuiTools.volatileInputInt("Bullet simulation dt (Hz)", dtHz))
       {
          changeDT();
       }
@@ -259,7 +260,7 @@ public class GDXSCS2SimulationSession
          CropBufferRequest cropBufferRequest = new CropBufferRequest(yoManager.getInPoint(), yoManager.getOutPoint());
          simulationSession.submitCropBufferRequest(cropBufferRequest);
       }
-      if (ImGui.inputInt(labels.get("Buffer record tick period"), bufferRecordTickPeriod))
+      if (ImGuiTools.volatileInputInt(labels.get("Buffer record tick period"), bufferRecordTickPeriod))
       {
          setBufferRecordTickPeriod(bufferRecordTickPeriod.get());
       }
@@ -267,7 +268,8 @@ public class GDXSCS2SimulationSession
       {
          bufferRecordTickPeriod.set(simulationSession.getBufferRecordTickPeriod());
       }
-      if (ImGui.inputFloat(labels.get("Buffer duration (s)"), bufferDuration))
+
+      if (ImGuiTools.volatileInputFloat(labels.get("Buffer duration (s)"), bufferDuration))
       {
          changeBufferDuration(bufferDuration.get());
       }
@@ -285,7 +287,7 @@ public class GDXSCS2SimulationSession
          simulationSession.submitRunAtRealTimeRate(runAtRealtimeRate.get());
       }
       ImGui.pushItemWidth(100.0f);
-      if (ImGui.inputDouble("Playback real-time rate", playbackRealtimeRate))
+      if (ImGuiTools.volatileInputDouble("Playback real-time rate", playbackRealtimeRate))
       {
          simulationSession.submitPlaybackRealTimeRate(playbackRealtimeRate.get());
       }
@@ -387,5 +389,15 @@ public class GDXSCS2SimulationSession
    public ArrayList<Runnable> getOnSessionStartedRunnables()
    {
       return onSessionStartedRunnables;
+   }
+
+   public double getSimDT()
+   {
+      return UnitConversions.hertzToSeconds(dtHz.get());
+   }
+
+   public int getBufferRecordTickPeriod()
+   {
+      return bufferRecordTickPeriod.get();
    }
 }

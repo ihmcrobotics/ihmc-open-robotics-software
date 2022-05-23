@@ -28,6 +28,7 @@ public class GDXSCS2EnvironmentManager
    private SCS2AvatarSimulation avatarSimulation;
    private RealtimeROS2Node realtimeROS2Node;
    private RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup;
+   private HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters;
    private boolean useVelocityAndHeadingScript;
    private GDXImGuiBasedUI baseUI;
    private int recordFrequency;
@@ -41,7 +42,6 @@ public class GDXSCS2EnvironmentManager
    private ArrayList<Runnable> onSessionStartedRunnables = new ArrayList<>();
    private final StatelessNotification destroyedNotification = new StatelessNotification();
    private Consumer<SCS2AvatarSimulationFactory> externalFactorySetup = null;
-   private boolean createYoVariableServer = true;
 
    public void create(GDXImGuiBasedUI baseUI, DRCRobotModel robotModel, CommunicationMode ros2CommunicationMode)
    {
@@ -54,6 +54,9 @@ public class GDXSCS2EnvironmentManager
 
       //      recordFrequency = (int) Math.max(1.0, Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT()));
       recordFrequency = 1;
+
+      useVelocityAndHeadingScript = true;
+      walkingScriptParameters = new HeadingAndVelocityEvaluationScriptParameters();
 
       baseUI.getImGuiPanelManager().addPanel(managerPanel);
    }
@@ -110,7 +113,7 @@ public class GDXSCS2EnvironmentManager
          SCS2AvatarSimulationFactory avatarSimulationFactory = new SCS2AvatarSimulationFactory();
          avatarSimulationFactory.setRobotModel(robotModel);
          avatarSimulationFactory.setRealtimeROS2Node(realtimeROS2Node);
-         avatarSimulationFactory.setDefaultHighLevelHumanoidControllerFactory(false, null);
+         avatarSimulationFactory.setDefaultHighLevelHumanoidControllerFactory(useVelocityAndHeadingScript, walkingScriptParameters);
          for (TerrainObjectDefinition terrainObjectDefinition : terrainObjectDefinitions)
          {
             avatarSimulationFactory.addTerrainObjectDefinition(terrainObjectDefinition);
@@ -121,7 +124,7 @@ public class GDXSCS2EnvironmentManager
          }
          avatarSimulationFactory.setRobotInitialSetup(robotInitialSetup);
          avatarSimulationFactory.setSimulationDataRecordTickPeriod(recordFrequency);
-         avatarSimulationFactory.setCreateYoVariableServer(isCreateYoVariableServer());
+         avatarSimulationFactory.setCreateYoVariableServer(true);
          avatarSimulationFactory.setUseBulletPhysicsEngine(true);
          avatarSimulationFactory.setUseRobotDefinitionCollisions(true);
          avatarSimulationFactory.setShowGUI(false);
@@ -206,13 +209,8 @@ public class GDXSCS2EnvironmentManager
       this.externalFactorySetup = externalFactorySetup;
    }
 
-   public boolean isCreateYoVariableServer()
+   public SCS2AvatarSimulation getAvatarSimulation()
    {
-      return createYoVariableServer;
-   }
-
-   public void setCreateYoVariableServer(boolean createYoVariableServer)
-   {
-      this.createYoVariableServer = createYoVariableServer;
+      return avatarSimulation;
    }
 }

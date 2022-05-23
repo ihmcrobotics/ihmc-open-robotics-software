@@ -45,10 +45,7 @@ import static us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegionExtractionParameter
 
 public class GPUPlanarRegionExtraction
 {
-   private final GPUPlanarRegionExtractionParameters parameters;
-   private final ConcaveHullFactoryParameters concaveHullFactoryParameters;
-   private final PolygonizerParameters polygonizerParameters;
-
+   private GPUPlanarRegionExtractionParameters parameters;
    private BytedecoImage inputFloatDepthImage;
    private BytedecoImage inputScaledFloatDepthImage;
    private BytedecoImage inputU16DepthImage;
@@ -90,29 +87,17 @@ public class GPUPlanarRegionExtraction
    private int patchWidth;
    private int filterPatchImageHeight;
    private int filterPatchImageWidth;
-
+   private final ConcaveHullFactoryParameters concaveHullFactoryParameters = new ConcaveHullFactoryParameters("ForGPURegions");
+   private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters("ForGPURegions");
    private final PlanarRegionsList planarRegionsList = new PlanarRegionsList();
    private final GPUPlanarRegionIsland tempIsland = new GPUPlanarRegionIsland();
    private boolean firstRun = true;
-
-   public GPUPlanarRegionExtraction()
-   {
-      this(new GPUPlanarRegionExtractionParameters(), new PolygonizerParameters(), new ConcaveHullFactoryParameters());
-   }
-
-   public GPUPlanarRegionExtraction(GPUPlanarRegionExtractionParameters parameters,
-                                    PolygonizerParameters polygonizerParameters,
-                                    ConcaveHullFactoryParameters concaveHullFactoryParameters)
-   {
-      this.parameters = parameters;
-      this.polygonizerParameters = polygonizerParameters;
-      this.concaveHullFactoryParameters = concaveHullFactoryParameters;
-   }
 
    public void create(int imageWidth, int imageHeight, ByteBuffer sourceDepthByteBufferOfFloats, double fx, double fy, double cx, double cy)
    {
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
+      parameters = new GPUPlanarRegionExtractionParameters();
       parameters.set(focalLengthXPixels, fx);
       parameters.set(focalLengthYPixels, fy);
       parameters.set(principalOffsetXPixels, cx);
@@ -217,8 +202,7 @@ public class GPUPlanarRegionExtraction
          cyImage.resize(patchImageWidth, patchImageHeight, openCLManager, null);
          czImage.resize(patchImageWidth, patchImageHeight, openCLManager, null);
          graphImage.resize(patchImageWidth, patchImageHeight, openCLManager, null);
-         if (onPatchSizeChanged != null)
-            onPatchSizeChanged.run();
+         onPatchSizeChanged.run();
          regionVisitedMatrix.reshape(patchImageHeight, patchImageWidth);
          boundaryVisitedMatrix.reshape(patchImageHeight, patchImageWidth);
          boundaryMatrix.reshape(patchImageHeight, patchImageWidth);
@@ -317,8 +301,7 @@ public class GPUPlanarRegionExtraction
 
                   tempIsland.planarRegion = planarRegion;
                   tempIsland.planarRegionIslandIndex = planarRegionIslandIndex;
-                  if (forDrawingDebugPanel != null)
-                     forDrawingDebugPanel.accept(tempIsland);
+                  forDrawingDebugPanel.accept(tempIsland);
                }
                else
                {
@@ -393,8 +376,7 @@ public class GPUPlanarRegionExtraction
                                                                    1);
             if (numberOfBoundaryPatches >= parameters.getBoundaryMinPatches())
             {
-               if (forDrawingDebugPanel != null)
-                  forDrawingDebugPanel.accept(regionRing);
+               forDrawingDebugPanel.accept(regionRing);
                ++regionRingIndex;
             }
             else

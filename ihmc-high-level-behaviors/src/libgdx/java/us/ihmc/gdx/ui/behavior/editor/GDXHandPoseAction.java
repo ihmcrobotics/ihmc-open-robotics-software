@@ -72,7 +72,7 @@ public class GDXHandPoseAction implements GDXBehaviorAction
       handGraphicToControlTransform.getRotation().appendPitchRotation(-Math.PI / 2.0);
       handGraphicToControlTransform.getRotation().appendRollRotation(0.0);
       handGraphicToControlTransform.getTranslation().add(0.126, -0.00179, 0.0); // TODO: Fix and check
-      String handBodyName = (side == RobotSide.LEFT) ? "l_hand" : "r_hand";
+      String handBodyName = fullRobotModel.getHand(side).getName();
       String modelFileName = GDXInteractableTools.getModelFileName(robotModel.getRobotDefinition().getRigidBodyDefinition(handBodyName));
       highlightModel = new GDXInteractableHighlightModel(modelFileName);
 
