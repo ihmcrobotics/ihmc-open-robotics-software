@@ -12,7 +12,6 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -58,45 +57,6 @@ public class ImGuiSSHJApplicationService
       ImGui.sameLine();
       ImGui.text("Service name: " + serviceName);
 
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Start")))
-      {
-         runCommand("start");
-      }
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Stop")))
-      {
-         runCommand("stop");
-      }
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Restart")))
-      {
-         runCommand("restart");
-      }
-
-      if (!islogMonitorThreadRunning() && ImGui.button(labels.get("Start log monitor")))
-      {
-         startLogMonitor();
-      }
-      if (islogMonitorThreadRunning())
-      {
-         if (ImGui.button("SIGINT"))
-         {
-            stopLogMonitor();
-         }
-      }
-      if (exitStatus > -1)
-      {
-         ImGui.sameLine();
-         ImGui.text("Exit status: " + exitStatus);
-      }
-
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Show log panel")))
-      {
-         logPanel.getIsShowing().set(true);
-      }
-
       String serviceStatusText = serviceStatus.get();
       if (serviceStatusText.contains("failed"))
       {
@@ -111,6 +71,68 @@ public class ImGuiSSHJApplicationService
          ImGui.text(serviceStatusText);
       }
 
+      if (ImGui.button(labels.get("Start")))
+      {
+         runCommand("start");
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Stop")))
+      {
+         runCommand("stop");
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Kill")))
+      {
+         runCommand("kill");
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Restart")))
+      {
+         runCommand("restart");
+      }
+
+      if (!islogMonitorThreadRunning())
+      {
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Start log monitor")))
+         {
+            startLogMonitor();
+         }
+      }
+      else
+      {
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Stop log monitor")))
+         {
+            signalLogMonitorUnsafe(Signal.INT);
+         }
+//         ImGui.sameLine();
+//         if (ImGui.button(labels.get("Kill log monitor")))
+//         {
+//            signalLogMonitorUnsafe(Signal.KILL);
+//         }
+      }
+//      ImGui.text("logMonitorRunThread: " + logMonitorRunThread);
+//      if (logMonitorRunThread != null)
+//      {
+//         ImGui.sameLine();
+//         ImGui.text("isAlive: " + logMonitorRunThread.isAlive());
+//         ImGui.sameLine();
+//         ImGui.text("state: " + logMonitorRunThread.getState());
+////         logMonitorSSHJCommand.
+//      }
+//      if (exitStatus > -1)
+//      {
+////         ImGui.sameLine();
+//         ImGui.text("Exit status: " + exitStatus);
+//      }
+
+//      ImGui.sameLine();
+//      if (ImGui.button(labels.get("Show log panel")))
+//      {
+//         logPanel.getIsShowing().set(true);
+//      }
+
       standardOut.updateConsoleText(this::acceptNewText);
       standardError.updateConsoleText(this::acceptNewText);
    }
@@ -118,38 +140,50 @@ public class ImGuiSSHJApplicationService
    public void restartLogMonitor()
    {
       stopLogMonitor();
-      startLogMonitor();
+      startLogMonitorWithoutCheck();
    }
 
    public void startLogMonitor()
    {
       if (!islogMonitorThreadRunning())
       {
-         logMonitorRunThread = ThreadTools.startAsDaemon(() ->
-         {
-            SSHJTools.session(remoteHostname, remoteUsername, sshj ->
-            {
-               exitStatus = sshj.exec("sudo journalctl -ef -o cat -u " + serviceName, timeout, sshjCommand ->
-               {
-                  this.logMonitorSSHJCommand = sshjCommand;
-                  standardOut.setInputStream(sshjCommand.getInputStream(), sshjCommand.getRemoteCharset());
-                  standardError.setInputStream(sshjCommand.getErrorStream(), sshjCommand.getRemoteCharset());
-               });
-            });
-         }, "SSHJCommand");
+         startLogMonitorWithoutCheck();
       }
+   }
+
+   private void startLogMonitorWithoutCheck()
+   {
+      logPanel.getIsShowing().set(true);
+      logMonitorRunThread = ThreadTools.startAsDaemon(() ->
+      {
+         SSHJTools.session(remoteHostname, remoteUsername, sshj ->
+         {
+            exitStatus = sshj.exec("sudo journalctl -ef -o cat -u " + serviceName, timeout, sshjCommand ->
+            {
+               this.logMonitorSSHJCommand = sshjCommand;
+               standardOut.setInputStream(sshjCommand.getInputStream(), sshjCommand.getRemoteCharset());
+               standardError.setInputStream(sshjCommand.getErrorStream(), sshjCommand.getRemoteCharset());
+            });
+         });
+      }, "SSHJCommand");
    }
 
    private void stopLogMonitor()
    {
       if (islogMonitorThreadRunning())
       {
-         ExceptionTools.handle(() ->
-         {
-            logMonitorSSHJCommand.signal(Signal.INT);
-            logMonitorSSHJCommand.close();
-         }, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+         signalLogMonitorUnsafe(Signal.INT);
       }
+   }
+
+   private void signalLogMonitorUnsafe(Signal signal)
+   {
+      ExceptionTools.handle(() ->
+      {
+         logMonitorSSHJCommand.signal(signal);
+         logMonitorSSHJCommand.close();
+      }, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+//      logMonitorSSHJCommand = null;
    }
 
    private void runCommand(String verb)
