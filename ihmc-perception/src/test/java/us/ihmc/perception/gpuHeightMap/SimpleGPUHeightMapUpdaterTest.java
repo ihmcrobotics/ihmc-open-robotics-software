@@ -94,6 +94,8 @@ public class SimpleGPUHeightMapUpdaterTest
       stopwatch.suspend();
       LogTools.info("GPU time = " + stopwatch.averageLap());
 
+      gpuHeightMap.printStopWatches();
+
       for (int i = 0; i < pointsToAdd.size(); i++)
       {
          Point3D point = pointsToAdd.get(i);
