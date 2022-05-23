@@ -1,18 +1,10 @@
 package us.ihmc.avatar;
 
-import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
 import us.ihmc.ros2.ROS2Input;
@@ -27,7 +19,7 @@ public class YoGraphicPlanarRegionsController implements RobotController
    private final YoRegistry registry = new YoRegistry(name);
 
    private final AtomicReference<PlanarRegionsList> planarRegionsListReference = new AtomicReference<>();
-   private final YoGraphicPlanarRegionsList yoGraphicPlanarRegionsList = new YoGraphicPlanarRegionsList("region", 100, 150, registry);
+   private final YoGraphicPlanarRegionsList yoGraphicPlanarRegionsList = new YoGraphicPlanarRegionsList("region", 100, 2000, registry);
    private final ROS2Input<PlanarRegionsListMessage> planarRegionsListInput;
 
    public YoGraphicPlanarRegionsController(ROS2NodeInterface ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry, ROS2Topic<PlanarRegionsListMessage> topicName)
@@ -41,7 +33,6 @@ public class YoGraphicPlanarRegionsController implements RobotController
          public void accept(PlanarRegionsListMessage planarRegionsListMessage)
          {
             planarRegionsListReference.set(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
-
          }
       });
    }
@@ -73,6 +64,7 @@ public class YoGraphicPlanarRegionsController implements RobotController
       }
       yoGraphicPlanarRegionsList.processPlanarRegionsListQueue();
       yoGraphicPlanarRegionsList.update();
+
    }
 
 }

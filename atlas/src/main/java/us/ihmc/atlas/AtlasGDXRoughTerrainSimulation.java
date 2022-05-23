@@ -11,6 +11,7 @@ import us.ihmc.avatar.simulationStarter.DRCSimulationTools;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ClearDelayQueueCommand;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
@@ -49,6 +50,7 @@ public class AtlasGDXRoughTerrainSimulation
       ROS2Node planarRegionsROS2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "planar_regions_visualizer_node");
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       ROS2Topic<PlanarRegionsListMessage> topicName = ControllerAPIDefinition.getInputTopic(robotModel.getSimpleRobotName()).withTypeName(PlanarRegionsListMessage.class);
+//      ROS2Topic<PlanarRegionsListMessage> topicName = ROS2Tools.MAPSENSE_REGIONS;
       YoGraphicPlanarRegionsController yoGraphicPlanarRegionsController = new YoGraphicPlanarRegionsController(planarRegionsROS2Node, yoGraphicsListRegistry, topicName);
 
       DRCSCSInitialSetup scsInitialSetup = simulationStarter.getSCSInitialSetup();
@@ -62,7 +64,7 @@ public class AtlasGDXRoughTerrainSimulation
       SimulationConstructionSet scs = simulationStarter.getAvatarSimulation().getSimulationConstructionSet();
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       simulationStarter.getAvatarSimulation().getHumanoidFloatingRootJointRobot().setController(yoGraphicPlanarRegionsController);
-      
+
       boolean printOutAllYoVariables = false;
       if (printOutAllYoVariables)
          printOutAllYoVariables(simulationStarter);
