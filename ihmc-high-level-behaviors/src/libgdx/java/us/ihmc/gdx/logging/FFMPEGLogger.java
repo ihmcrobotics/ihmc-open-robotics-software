@@ -14,6 +14,7 @@ import org.bytedeco.ffmpeg.global.avformat;
 import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.ffmpeg.global.swresample;
 import org.bytedeco.ffmpeg.global.swscale;
+import org.bytedeco.ffmpeg.swscale.SwsContext;
 import org.bytedeco.javacpp.DoublePointer;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
@@ -41,6 +42,9 @@ public class FFMPEGLogger
    private AVDictionary avDictionary;
    private AVFormatContext avFormatContext;
    private FFMPEGOutputStream videoOutputStream;
+
+   private AVFrame rgbTempFrame;
+   private SwsContext rgbSwsContext;
 
    /***
     * Note - lossless is true by default
@@ -246,22 +250,43 @@ public class FFMPEGLogger
       return ret == avutil.AVERROR_EOF();
    }
 
-   //This method currently only contains random values to see if it's actually printing. TODO convert image into YUVwhatever and print
    private void fillImage(AVFrame pict, BytedecoImage image, int width, int height) {
-      int x, y, i;
+      if (rgbTempFrame == null) {
+         rgbTempFrame = avutil.av_frame_alloc();
+         rgbTempFrame.format(avutil.AV_PIX_FMT_RGBA);
+         rgbTempFrame.width(width);
+         rgbTempFrame.height(height);
 
-      for (y = 0; y < height; y++) {
-         for (x = 0; x < width; x++) {
-            pict.data().get(0).getPointer(y * pict.linesize().get(0) + x).fill(48);
+         avutil.av_frame_get_buffer(rgbTempFrame, 0);
+      }
+
+      if (avutil.av_frame_make_writable(rgbTempFrame) < 0)
+      {
+         LogTools.error("Could not make frame writable. Logging will stop.");
+         close();
+      }
+
+      rgbSwsContext = swscale.sws_getContext(width, height, avutil.AV_PIX_FMT_RGBA, width, height, avutil.AV_PIX_FMT_YUV420P, swscale.SWS_BICUBIC, null, null, (DoublePointer)null);
+
+      if (rgbSwsContext == null || rgbSwsContext.isNull())
+      {
+         LogTools.error("Error creating SWS Context.");
+         return;
+      }
+
+      for (int y = 0; y < height; y++) {
+         for (int x = 0; x < width * 4; x += 4)
+         {
+            int pix = image.getBackingDirectByteBuffer().getInt(y * width + x);
+            //Note: x * 4 because 4 bytes per pixel
+            rgbTempFrame.data().get().getPointer(y * rgbTempFrame.linesize().get() + x).fill(pix & 0xFF);
+            rgbTempFrame.data().get().getPointer(y * rgbTempFrame.linesize().get() + x + 1).fill((pix >> 8) & 0xFF);
+            rgbTempFrame.data().get().getPointer(y * rgbTempFrame.linesize().get() + x + 2).fill((pix >> 16) & 0xFF);
+            rgbTempFrame.data().get().getPointer(y * rgbTempFrame.linesize().get() + x + 3).fill((pix >> 24) & 0xFF);
          }
       }
 
-      for (y = 0; y < height / 2; y++) {
-         for (x = 0; x < width / 2; x++) {
-            pict.data().get(1).getPointer(y * pict.linesize().get(1) + x).fill(52);
-            pict.data().get(2).getPointer(y * pict.linesize().get(2) + x).fill(-12);
-         }
-      }
+      swscale.sws_scale(rgbSwsContext, rgbTempFrame.data(), rgbTempFrame.linesize(), 0, height, pict.data(), pict.linesize());
    }
 
    private AVFrame getVideoFrame(FFMPEGOutputStream ost, BytedecoImage image)
@@ -315,6 +340,12 @@ public class FFMPEGLogger
 
       if (videoOutputStream.getEncoder() != null && !videoOutputStream.getEncoder().isNull())
          avcodec.avcodec_free_context(videoOutputStream.getEncoder());
+
+      if (rgbTempFrame != null && !rgbTempFrame.isNull())
+         avutil.av_frame_free(rgbTempFrame);
+
+      if (rgbSwsContext != null && !rgbSwsContext.isNull())
+         swscale.sws_freeContext(rgbSwsContext);
 
       if (videoOutputStream.getFrame() != null && !videoOutputStream.getFrame().isNull())
          avutil.av_frame_free(videoOutputStream.getFrame());
