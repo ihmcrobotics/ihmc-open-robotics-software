@@ -76,7 +76,7 @@ int get_idx(float x, float y, float center_x, float center_y, read_only float* p
     int idx_x = get_x_idx(x, center_x, params);
     int idx_y = get_y_idx(y, center_y, params);
 
-    if (idx_x == 0) printf("got a point");
+ //   if (idx_x == 0) printf("got a point");
     return get_idx_in_layer(idx_x, idx_y, params);
 }
 
@@ -100,7 +100,7 @@ bool is_inside(int idx_x, int idx_y, read_only float* params)
     int max_width = params[WIDTH];
     if (idx_x == -1 || idx_x == max_width)
     {
-        printf("Not inside from width, (%i,%i), max %i\n", idx_x,idx_y, max_width);
+       // printf("Not inside from width, (%i,%i), max %i\n", idx_x,idx_y, max_width);
         return false;
     }
     int max_height = params[HEIGHT];
@@ -121,7 +121,7 @@ bool is_valid(float x, float y, float z, float sx, float sy, float sz, read_only
 
     if (d < params[MIN_VALID_DISTANCE] * params[MIN_VALID_DISTANCE])
     {
-        printf("Not valid from distance");
+        //printf("Not valid from distance");
         return false;
     }
 
@@ -129,7 +129,7 @@ bool is_valid(float x, float y, float z, float sx, float sy, float sz, read_only
 
     if (z - sz > dxy * params[RAMPED_HEIGHT_RANGE_A] + params[RAMPED_HEIGHT_RANGE_C] || z - sz > params[MAX_HEIGHT_RANGE])
     {
-        printf("Not valid from ramp");
+        //printf("Not valid from ramp");
         return false;
     }
 
