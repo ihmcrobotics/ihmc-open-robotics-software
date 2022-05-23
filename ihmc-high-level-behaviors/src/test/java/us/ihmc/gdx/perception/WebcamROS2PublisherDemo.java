@@ -1,5 +1,6 @@
 package us.ihmc.gdx.perception;
 
+import controller_msgs.msg.dds.BigVideoPacket;
 import imgui.ImGui;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.global.opencv_videoio;
@@ -7,6 +8,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_videoio.VideoCapture;
 import org.bytedeco.opencv.opencv_videoio.VideoWriter;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
@@ -15,7 +17,13 @@ import us.ihmc.gdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.gdx.ui.tools.ImPlotStopwatchPlot;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
+import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.ros2.ROS2QosProfile;
+import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.ros2.RealtimeROS2Publisher;
 import us.ihmc.tools.thread.Activator;
+
+import java.io.IOException;
 
 public class WebcamROS2PublisherDemo
 {
@@ -34,6 +42,9 @@ public class WebcamROS2PublisherDemo
    private ImGuiOpenCVSwapVideoPanel swapCVPanel;
    private ImPlotStopwatchPlot readPerformancePlot = new ImPlotStopwatchPlot("VideoCapture read(Mat)");
    private ImPlotFrequencyPlot readFrequencyPlot = new ImPlotFrequencyPlot("read Frequency");
+   private RealtimeROS2Node realtimeROS2Node;
+   private RealtimeROS2Publisher<BigVideoPacket> publisher;
+   private BigVideoPacket videoPacket = new BigVideoPacket();
 
    public WebcamROS2PublisherDemo()
    {
@@ -44,6 +55,17 @@ public class WebcamROS2PublisherDemo
          public void create()
          {
             baseUI.create();
+
+            realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "videopub");
+            try
+            {
+               publisher = realtimeROS2Node.createPublisher(BigVideoPacket.getPubSubType().get(), "/video_test", ROS2QosProfile.BEST_EFFORT(), 1);
+            }
+            catch (IOException e)
+            {
+               throw new RuntimeException(e);
+            }
+            realtimeROS2Node.spin();
          }
 
          @Override
@@ -101,6 +123,9 @@ public class WebcamROS2PublisherDemo
                         {
                            data.updateOnImageUpdateThread(imageWidth, imageHeight);
                            opencv_imgproc.cvtColor(rgbImage, data.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA, 0);
+
+//                           videoPacket.getData()
+                           publisher.publish(videoPacket);
                         });
                      }
                   }, "CameraRead");
