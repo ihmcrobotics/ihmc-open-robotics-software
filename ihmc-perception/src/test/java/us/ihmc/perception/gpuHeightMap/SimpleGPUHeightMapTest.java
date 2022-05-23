@@ -3,9 +3,11 @@ package us.ihmc.perception.gpuHeightMap;
 import org.junit.jupiter.api.Test;
 import org.ojalgo.random.RandomNumber;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.heightMap.HeightMapData;
 
 import java.util.ArrayList;
@@ -28,7 +30,7 @@ public class SimpleGPUHeightMapTest
 
       Random random = new Random(1738L);
       List<Point3D> pointsToAdd = new ArrayList<>();
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < 3000; i++)
       {
          Point3D point = EuclidCoreRandomTools.nextPoint3D(random, 0.5 * parameters.mapLength);
          point.setZ(RandomNumbers.nextDouble(random, 0.1));
@@ -36,7 +38,11 @@ public class SimpleGPUHeightMapTest
          cpuHeightMap.setHeightAt(point.getX(), point.getY(), point.getZ());
       }
 
+      Stopwatch stopwatch = new Stopwatch();
+      stopwatch.start();
       gpuHeightMap.input(pointsToAdd, new RigidBodyTransform());
+      stopwatch.suspend();
+      LogTools.info("Total time = " + stopwatch.totalElapsed());
 
       for (int i = 0; i < pointsToAdd.size(); i++)
       {
