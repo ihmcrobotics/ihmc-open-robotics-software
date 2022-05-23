@@ -342,7 +342,9 @@ public class FFMPEGLogger
    protected void finalize() throws Throwable
    {
       super.finalize();
-      close(); //Ensure that file gets written properly
+
+      if (!isClosed)
+         close(); //Ensure that file gets written properly
    }
 
    public boolean isClosed()
