@@ -64,8 +64,8 @@ public class GPUHeightMapTools
 
    public List<Point3D> transformPoints(List<Point3D32> points, RigidBodyTransformReadOnly transformToDesiredFrame)
    {
-      inputPointCloudBuffer = new OpenCLFloatBuffer(points.size() * 3 * Float.BYTES);
-      transformedPointCloudBuffer = new OpenCLFloatBuffer(points.size() * 3 * Float.BYTES);
+      inputPointCloudBuffer = new OpenCLFloatBuffer(points.size() * 3);
+      transformedPointCloudBuffer = new OpenCLFloatBuffer(points.size() * 3);
 
       inputPointCloudBuffer.createOpenCLBufferObject(openCLManager);
       transformedPointCloudBuffer.createOpenCLBufferObject(openCLManager);
