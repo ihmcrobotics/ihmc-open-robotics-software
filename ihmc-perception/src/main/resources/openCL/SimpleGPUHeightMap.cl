@@ -73,6 +73,7 @@ int get_idx(float x, float y, float center_x, float center_y, read_only float* p
 
 int get_map_idx(int idx, int layer_n, read_only float* params)
 {
+  //   if (idx == 0) printf("layer_n %d \n", layer_n);
     const int layer = params[WIDTH] * params[HEIGHT];
     return layer * layer_n + idx;
 }
@@ -138,7 +139,7 @@ void AtomicAdd_g_f(volatile __global float *source, const float operand)
 }
 
 
-void kernel addPointsKernel(read_only float* points_in, read_only float* localization, read_only float* params, read_only float* map, global float* newMap)
+void kernel addPointsKernel(read_only float* points_in, read_only float* localization, read_only float* params)//, read_only float* map, global float* newMap)
 {
     int i = get_global_id(0);
 
@@ -146,27 +147,28 @@ void kernel addPointsKernel(read_only float* points_in, read_only float* localiz
     float ry = points_in[i * 3 + 1];
     float rz = points_in[i * 3 + 2];
 
+
     float x = transform_p(rx, ry, rz, localization[r00], localization[r01], localization[r02], localization[tx]);
     float y = transform_p(rx, ry, rz, localization[r10], localization[r11], localization[r12], localization[ty]);
     float z = transform_p(rx, ry, rz, localization[r20], localization[r21], localization[r22], localization[tz]);
 
     float v = z_noise(rz, params);
 
-    if (is_valid(x, y, z, localization[tx], localization[ty], localization[tz], params))
+//    if (is_valid(x, y, z, localization[tx], localization[ty], localization[tz], params))
     {
-        int idx = get_idx(x, y, localization[centerX], localization[centerY], params);
+//        int idx = get_idx(x, y, localization[centerX], localization[centerY], params);
 
-        if (is_inside(idx, params))
+     //   if (is_inside(idx, params))
         {
-            float map_h = map[get_map_idx(idx, HEIGHT_LAYER, params)];
-            float map_v = map[get_map_idx(idx, VARIANCE_LAYER, params)];
+     //       float map_h = map[get_map_idx(idx, HEIGHT_LAYER, params)];
+     //       float map_v = map[get_map_idx(idx, VARIANCE_LAYER, params)];
 
-                float new_height = (map_h * v + z * map_v) / (map_v + v);
-                float new_variance = (map_v * v) / (map_v + v);
+     //       float new_height = (map_h * v + z * map_v) / (map_v + v);
+      //      float new_variance = (map_v * v) / (map_v + v);
 
-                AtomicAdd_g_f(&newMap[get_map_idx(idx, HEIGHT_LAYER, params)], new_height);
-                AtomicAdd_g_f(&newMap[get_map_idx(idx, VARIANCE_LAYER, params)], new_variance);
-                AtomicAdd_g_f(&newMap[get_map_idx(idx, POINT_COUNTER_LAYER, params)], 1.0);
+//                AtomicAdd_g_f(&newMap[get_map_idx(idx, HEIGHT_LAYER, params)], new_height);
+//                AtomicAdd_g_f(&newMap[get_map_idx(idx, VARIANCE_LAYER, params)], new_variance);
+//                AtomicAdd_g_f(&newMap[get_map_idx(idx, POINT_COUNTER_LAYER, params)], 1.0);
 
 
             // visibility cleanup
@@ -174,27 +176,33 @@ void kernel addPointsKernel(read_only float* points_in, read_only float* localiz
     }
 }
 
-// TODO restructure this to run i x j on image 2d
-void kernel averageMapKernel(read_only float* newMap, write_only float* map, read_only float* params)
+void kernel averageMapKernel(read_only float* newMap, write_only float* map, global float* params)
 {
     int idx = get_global_id(0);
 
-    float new_h = newMap[get_map_idx(idx, HEIGHT_LAYER, params)];
-    float new_v = newMap[get_map_idx(idx, VARIANCE_LAYER, params)];
-    float new_cnt = newMap[get_map_idx(idx, POINT_COUNTER_LAYER, params)];
+ //   float new_h = newMap[get_map_idx(idx, HEIGHT_LAYER, params)];
+ //   float new_v = newMap[get_map_idx(idx, VARIANCE_LAYER, params)];
+ //   float new_cnt = newMap[get_map_idx(idx, POINT_COUNTER_LAYER, params)];
 
-    if (new_cnt > 0)
+ //   if (new_cnt > 0)
     {
+        int height_idx = get_map_idx(idx, HEIGHT_LAYER, params);
+        int variance_idx = get_map_idx(idx, VARIANCE_LAYER, params);
+
+if (idx == 0) printf("width %d, height %d\n", params[WIDTH], params[HEIGHT]);
+        // printf("height index = %d", height_idx);
+        //printf(" variance index = %d \n", variance_idx);
+
         // too much variance, say it's not valid
-        if (new_v / new_cnt > params[MAX_VARIANCE])
+  //      if (new_v / new_cnt > params[MAX_VARIANCE])
         {
-            map[get_map_idx(idx, HEIGHT_LAYER, params)] = 0;
-            map[get_map_idx(idx, VARIANCE_LAYER, params)] = params[INITIAL_VARIANCE];
+//            map[height_idx] = 1.0;
+//            map[variance_idx] = params[INITIAL_VARIANCE];
         }
-        else
+ //       else
         {
-            map[get_map_idx(idx, HEIGHT_LAYER, params)] = new_h / new_cnt;
-            map[get_map_idx(idx, VARIANCE_LAYER, params)] = new_v / new_cnt;
+//            map[height_idx] = new_h / new_cnt;
+//            map[variance_idx] = new_v / new_cnt;
         }
     }
 }
