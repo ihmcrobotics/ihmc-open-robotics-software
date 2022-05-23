@@ -1,7 +1,6 @@
 package us.ihmc.perception.gpuHeightMap;
 
 import org.junit.jupiter.api.Test;
-import org.ojalgo.random.RandomNumber;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -23,8 +22,8 @@ public class SimpleGPUHeightMapTest
    {
       SimpleGPUHeightMapParameters parameters = new SimpleGPUHeightMapParameters();
       parameters.mapLength = 2.0;
-      parameters.resolution = 0.1;
-      SimpleGPUHeightMap2 gpuHeightMap = new SimpleGPUHeightMap2(parameters);
+      parameters.resolution = 0.04;
+      SimpleGPUHeightMap gpuHeightMap = new SimpleGPUHeightMap(parameters);
 
       HeightMapData cpuHeightMap = new HeightMapData(parameters.resolution, parameters.mapLength, 0.0, 0.0);
 
