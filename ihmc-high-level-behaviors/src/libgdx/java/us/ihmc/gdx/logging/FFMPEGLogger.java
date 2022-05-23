@@ -198,8 +198,7 @@ public class FFMPEGLogger
          if (ret < 0)
          {
             if (ret == -11) {
-               LogTools.warn("{}: This frame will not be logged", FFMPEGTools.getErrorCodeString(ret));
-               return false;
+               continue; //Resource temporarily unavailable - we just try this again
             }
             else {
                LogTools.error("{}: Error encoding frame. Logging will stop.", FFMPEGTools.getErrorCodeString(ret));
