@@ -249,14 +249,17 @@ public class FFMPEGLogger
       }
 
       for (int y = 0; y < height; y++) {
-         for (int x = 0; x < width * 4; x += 4)
+         for (int x = 0; x < width; x++)
          {
-            int pix = image.getBackingDirectByteBuffer().getInt(y * width + x);
+            int r = image.getBackingDirectByteBuffer().get(4 * (y * width + x));
+            int g = image.getBackingDirectByteBuffer().get(4 * (y * width + x) + 1);
+            int b = image.getBackingDirectByteBuffer().get(4 * (y * width + x) + 2);
+            int a = image.getBackingDirectByteBuffer().get(4 * (y * width + x) + 3);
             //Note: x * 4 because 4 bytes per pixel
-            rgbTempFrame.data().get().getPointer(y * rgbTempFrame.linesize().get() + x).fill(pix & 0xFF);
-            rgbTempFrame.data().get().getPointer(y * rgbTempFrame.linesize().get() + x + 1).fill((pix >> 8) & 0xFF);
-            rgbTempFrame.data().get().getPointer(y * rgbTempFrame.linesize().get() + x + 2).fill((pix >> 16) & 0xFF);
-            rgbTempFrame.data().get().getPointer(y * rgbTempFrame.linesize().get() + x + 3).fill((pix >> 24) & 0xFF);
+            rgbTempFrame.data().get().getPointer(y * rgbTempFrame.linesize().get() + x * 4).fill(r);
+            rgbTempFrame.data().get().getPointer(y * rgbTempFrame.linesize().get() + x * 4 + 1).fill(g);
+            rgbTempFrame.data().get().getPointer(y * rgbTempFrame.linesize().get() + x * 4 + 2).fill(b);
+            rgbTempFrame.data().get().getPointer(y * rgbTempFrame.linesize().get() + x * 4 + 3).fill(a);
          }
       }
 
