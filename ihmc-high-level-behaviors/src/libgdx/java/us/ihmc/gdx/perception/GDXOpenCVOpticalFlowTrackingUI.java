@@ -9,10 +9,9 @@ import org.bytedeco.opencv.global.opencv_video;
 import org.bytedeco.opencv.opencv_core.*;
 
 import us.ihmc.gdx.imgui.ImGuiPanel;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 
-public class GDXOpenCVDoorHandleDetectionUI
+public class GDXOpenCVOpticalFlowTrackingUI
 {
    private int imageWidth;
    private int imageHeight;
@@ -39,7 +38,7 @@ public class GDXOpenCVDoorHandleDetectionUI
    private int maxDistance = 90;
    private boolean userClicked = true;
 
-   public GDXOpenCVDoorHandleDetectionUI()
+   public GDXOpenCVOpticalFlowTrackingUI()
    {
       mainPanel = new ImGuiPanel("Door Handle Detection", this::renderImGuiWidgets);
    }
