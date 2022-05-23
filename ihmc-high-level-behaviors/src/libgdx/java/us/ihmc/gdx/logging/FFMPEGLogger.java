@@ -268,11 +268,6 @@ public class FFMPEGLogger
    {
       AVCodecContext c = ost.getEncoder();
 
-      AVRational one = new AVRational().num(1).den(1);
-      if (avutil.av_compare_ts(videoOutputStream.getNextPts(), c.time_base(), 10, one)
-          > 0) //Value 10 comes from STREAM_DURATION in file, probably should be higher but call may be doing other things
-         return null;
-
       if (avutil.av_frame_make_writable(ost.getFrame()) < 0)
       {
          LogTools.error("Could not make frame writable. Logging will stop.");
