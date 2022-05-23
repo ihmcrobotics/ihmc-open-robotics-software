@@ -19,7 +19,7 @@ import static us.ihmc.robotics.Assert.assertEquals;
 
 public class SimpleGPUHeightMapUpdaterTest
 {
-   private static final int timingLaps = 1;
+   private static final int timingLaps = 100;
    private static final int pointsToInclude = 10000;
 
    @Test
