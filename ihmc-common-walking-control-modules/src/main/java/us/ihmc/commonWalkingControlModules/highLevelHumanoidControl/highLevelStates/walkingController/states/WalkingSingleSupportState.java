@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import org.apache.commons.math3.util.Precision;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
+import us.ihmc.commonWalkingControlModules.capturePoint.HeightManager;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
@@ -52,7 +52,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
-   private final CenterOfMassHeightManager comHeightManager;
+   private final HeightManager comHeightManager;
    private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;
 

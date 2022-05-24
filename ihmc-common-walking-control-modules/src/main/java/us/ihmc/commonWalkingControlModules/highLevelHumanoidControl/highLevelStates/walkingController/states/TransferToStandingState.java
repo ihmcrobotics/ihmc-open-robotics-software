@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
-import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
+import us.ihmc.commonWalkingControlModules.capturePoint.HeightManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
@@ -32,7 +32,7 @@ public class TransferToStandingState extends WalkingState
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
-   private final CenterOfMassHeightManager comHeightManager;
+   private final HeightManager comHeightManager;
    private final BalanceManager balanceManager;
    private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;

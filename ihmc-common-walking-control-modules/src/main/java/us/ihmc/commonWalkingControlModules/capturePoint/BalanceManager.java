@@ -22,6 +22,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.AngularMomentumHandler;
@@ -505,6 +506,23 @@ public class BalanceManager
 
 
 
+      if (heightControlCommand.getCommandType() == ControllerCoreCommandType.COMMAND_LIST)
+      {
+         FeedbackControlCommandList heightControlCommandList = (FeedbackControlCommandList) heightControlCommand;
+         
+         for (int i=0; i<heightControlCommandList.getNumberOfCommands(); i++)
+         {
+            FeedbackControlCommand<?> command = heightControlCommandList.getCommand(i);
+            if ((command.getCommandType() == ControllerCoreCommandType.POINT) || (command.getCommandType() == ControllerCoreCommandType.MOMENTUM))
+            {
+               heightControlCommand = command;
+               break;
+            }
+            
+            throw new IllegalArgumentException("Need a Valid Height Control Command!");
+         }
+      }
+      
       if (heightControlCommand.getCommandType() == ControllerCoreCommandType.POINT)
       {
          linearMomentumRateControlModuleInput.setUsePelvisHeightCommand(true);

@@ -1,8 +1,15 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
+import us.ihmc.commonWalkingControlModules.capturePoint.HeightManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleInput;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleOutput;
 import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryControlModule;
@@ -22,7 +29,11 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.stateTransitionConditions.ContinuePushRecoveryWithNextStepCondition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.stateTransitionConditions.RecoveryTransferToStandingCondition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.stateTransitionConditions.StandingToSwingCondition;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.states.*;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.states.PushRecoveryState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.states.PushRecoveryStateEnum;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.states.RecoveringSwingState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.states.RecoveryTransferState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.states.TransferToStandingPushRecoveryState;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
@@ -45,16 +56,12 @@ import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
-import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-
-import java.util.*;
-import java.util.function.Function;
 
 public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusProvider
 {
@@ -68,7 +75,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
    private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;
    private final PushRecoveryBalanceManager balanceManager;
-   private final CenterOfMassHeightManager comHeightManager;
+   private final HeightManager comHeightManager;
 
    private final ArrayList<RigidBodyControlManager> bodyManagers = new ArrayList<>();
    private final Map<String, RigidBodyControlManager> bodyManagerByJointName = new HashMap<>();
@@ -439,6 +446,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
       comHeightManager.compute(balanceManager.getDesiredICPVelocity(),
                                desiredCoMVelocityAsFrameVector,
                                isInDoubleSupport,
+                               currentState.getSupportSide(),
                                omega0,
                                feetManager);
       FeedbackControlCommand<?> heightControlCommand = comHeightManager.getHeightControlCommand();
