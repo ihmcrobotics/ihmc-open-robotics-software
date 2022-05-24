@@ -253,13 +253,18 @@ public class FFMPEGLogger
    public void destroy()
    {
       LogTools.info("Destroying...");
+
       avformat.avio_close(avFormatContext.pb());
       avformat.avformat_free_context(avFormatContext);
+
+      avcodec.avcodec_close(avEncoderContext);
       avcodec.avcodec_free_context(avEncoderContext);
+
       avutil.av_frame_free(avFrameToBeEncoded);
       avutil.av_frame_free(avFrameToBeScaled);
       avutil.av_frame_free(avFrameToBeScaled);
       avcodec.av_packet_free(avPacket);
+
       swscale.sws_freeContext(swsContext);
    }
 
