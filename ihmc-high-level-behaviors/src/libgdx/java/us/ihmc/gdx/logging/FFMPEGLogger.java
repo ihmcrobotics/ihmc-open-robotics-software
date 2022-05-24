@@ -44,7 +44,7 @@ public class FFMPEGLogger
    private final AVRational framePeriod;
    private final int pictureGroupSize = 12;
    private final int sourceAVPixelFormat = avutil.AV_PIX_FMT_RGBA;
-   private final int encoderAVPixelFormat = avutil.AV_PIX_FMT_YUV420P;
+   private final int encoderAVPixelFormat;
    private final boolean formatWantsGlobalHeader;
    private boolean isInitialized = false;
    private final AVDictionary avDictionary;
@@ -63,7 +63,8 @@ public class FFMPEGLogger
       this.sourceVideoWidth = sourceVideoWidth;
       this.sourceVideoHeight = sourceVideoHeight;
       this.fileName = fileName;
-      formatName = "webm";
+      this.formatName = "webm";
+      this.encoderAVPixelFormat = lossless ? avutil.AV_PIX_FMT_GBRP : avutil.AV_PIX_FMT_YUV420P;
 
       LogTools.info("Initializing ffmpeg contexts for {} output to {}", formatName, fileName);
 
