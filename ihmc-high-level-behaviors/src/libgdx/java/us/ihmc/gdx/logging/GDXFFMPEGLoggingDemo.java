@@ -40,6 +40,7 @@ public class GDXFFMPEGLoggingDemo
    private BytedecoImage image;
    private volatile boolean logging = false;
    private volatile boolean finalizing = false;
+   private FFMPEGLogger logger;
 
    public GDXFFMPEGLoggingDemo()
    {
@@ -114,6 +115,16 @@ public class GDXFFMPEGLoggingDemo
                }
 
                loggerPutFrequencyPlot.renderImGuiWidgets();
+
+               if (logger != null)
+               {
+                  ImGui.text("Format name: " + logger.getFormatName());
+                  ImGui.text("Codec: " + logger.getCodecLongName());
+                  ImGui.text("Bit rate: " + logger.getBitRate());
+                  ImGui.text("Picture group size (GOP): " + logger.getPictureGroupSize());
+                  ImGui.text("Pixel format: planar YUV 4:2:0, 12bpp, (1 Cr & Cb sample per 2x2 Y samples)");
+                  ImGui.text("Global header: " + logger.getFormatWantsGlobalHeader());
+               }
             }
          }
 
@@ -125,7 +136,7 @@ public class GDXFFMPEGLoggingDemo
          private void loggingThread()
          {
             boolean lossless = true;
-            FFMPEGLogger logger = new FFMPEGLogger(WIDTH, HEIGHT, lossless, framerate.get(), fileName);
+            logger = new FFMPEGLogger(WIDTH, HEIGHT, lossless, framerate.get(), fileName);
 
             AVRational msBetweenFrames = new AVRational();
             msBetweenFrames.num(1);
@@ -161,7 +172,7 @@ public class GDXFFMPEGLoggingDemo
 
             ThreadTools.sleepSeconds(2.0);
 
-            logger.close();
+            logger.destroy();
             finalizing = false;
          }
 
