@@ -43,7 +43,7 @@ public class FFMPEGLogger
    private final int bitRate = 400000;
    private final AVRational framePeriod;
    private final int pictureGroupSize = 12;
-   private final int sourceAVPixelFormat = avutil.AV_PIX_FMT_RGBA;
+   private final int sourceAVPixelFormat;
    private final int encoderAVPixelFormat;
    private final boolean formatWantsGlobalHeader;
    private boolean isInitialized = false;
@@ -58,13 +58,20 @@ public class FFMPEGLogger
    private SwsContext swsContext;
    private int presentationTimestamp = 0;
 
-   public FFMPEGLogger(int sourceVideoWidth, int sourceVideoHeight, boolean lossless, int framerate, String fileName)
+   public FFMPEGLogger(int sourceVideoWidth,
+                       int sourceVideoHeight,
+                       boolean lossless,
+                       int framerate,
+                       int sourcePixelFormat,
+                       int encoderPixelFormat,
+                       String fileName)
    {
       this.sourceVideoWidth = sourceVideoWidth;
       this.sourceVideoHeight = sourceVideoHeight;
+      this.sourceAVPixelFormat = sourcePixelFormat;
       this.fileName = fileName;
-      this.formatName = "webm";
-      this.encoderAVPixelFormat = lossless ? avutil.AV_PIX_FMT_GBRP : avutil.AV_PIX_FMT_YUV420P;
+      this.formatName = fileName.substring(fileName.lastIndexOf('.') + 1);
+      this.encoderAVPixelFormat = encoderPixelFormat;
 
       LogTools.info("Initializing ffmpeg contexts for {} output to {}", formatName, fileName);
 

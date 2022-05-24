@@ -2,25 +2,27 @@ package us.ihmc.gdx.logging;
 
 import imgui.ImGui;
 import imgui.type.ImInt;
-import org.bytedeco.ffmpeg.avutil.AVRational;
 import org.bytedeco.ffmpeg.global.avutil;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.ui.tools.ImPlotFrequencyPlot;
-import us.ihmc.perception.BytedecoImage;
+import us.ihmc.tools.UnitConversions;
+import us.ihmc.tools.thread.Throttler;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.function.Supplier;
 
 public class FFMPEGLoggerDemoHelper
 {
    private int imageWidth;
    private int imageHeight;
-   private String fileCoreName;
+   private String fileSuffix;
+   private int sourcePixelFormat;
+   private int encoderPixelFormat;
+   private boolean lossless;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImInt framerate = new ImInt(30);
    private ImPlotFrequencyPlot loggerPutFrequencyPlot;
@@ -33,10 +35,14 @@ public class FFMPEGLoggerDemoHelper
    private volatile boolean finalizing = false;
    private FFMPEGLogger logger;
    private Runnable sourceImageInputRunnable;
+   private final Throttler throttler = new Throttler();
 
-   public FFMPEGLoggerDemoHelper(String fileCoreName)
+   public FFMPEGLoggerDemoHelper(String fileSuffix, int sourcePixelFormat, int encoderPixelFormat, boolean lossless)
    {
-      this.fileCoreName = fileCoreName;
+      this.fileSuffix = fileSuffix;
+      this.sourcePixelFormat = sourcePixelFormat;
+      this.encoderPixelFormat = encoderPixelFormat;
+      this.lossless = lossless;
       updateFileName();
    }
 
@@ -97,24 +103,21 @@ public class FFMPEGLoggerDemoHelper
 
    private void updateFileName()
    {
-      fileName = logDirectory + dateFormat.format(new Date()) + "_" + fileCoreName + ".webm";
+      fileName = logDirectory + dateFormat.format(new Date()) + "_" + fileSuffix;
    }
 
    private void loggingThread()
    {
-      boolean lossless = true;
-      logger = new FFMPEGLogger(imageWidth, imageHeight, lossless, framerate.get(), fileName);
+      logger = new FFMPEGLogger(imageWidth, imageHeight, lossless, framerate.get(), sourcePixelFormat, encoderPixelFormat, fileName);
 
       finalizing = true;
 
       expectedVideoLengthStopwatch.start();
       while (logging)
       {
+         throttler.waitAndRun(UnitConversions.hertzToSeconds(framerate.get()));
          loggerPutFrequencyPlot.ping();
          sourceImageInputRunnable.run();
-
-         // Using an AVRational helps ensure that we calculate fps the same way the logger does
-         ThreadTools.sleep((int) (avutil.av_q2d(logger.getFramePeriod()) * 1000));
       }
       expectedVideoLength = expectedVideoLengthStopwatch.totalElapsed();
 

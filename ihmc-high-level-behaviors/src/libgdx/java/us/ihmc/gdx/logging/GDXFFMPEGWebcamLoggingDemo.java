@@ -2,13 +2,12 @@ package us.ihmc.gdx.logging;
 
 import imgui.ImGui;
 import org.bytedeco.ffmpeg.ffmpeg;
+import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.global.opencv_videoio;
-import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_videoio.VideoCapture;
 import org.bytedeco.opencv.opencv_videoio.VideoWriter;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
@@ -17,6 +16,7 @@ import us.ihmc.gdx.ui.graphics.ImGuiOpenCVSwapVideoPanel;
 import us.ihmc.gdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.gdx.ui.tools.ImPlotStopwatchPlot;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.tools.thread.Activator;
 
@@ -28,9 +28,13 @@ public class GDXFFMPEGWebcamLoggingDemo
    private final Activator nativesLoadedActivator = BytedecoTools.loadNativesOnAThread(opencv_core.class, ffmpeg.class);
    private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/main/resources");
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final FFMPEGLoggerDemoHelper ffmpegLoggerDemoHelper = new FFMPEGLoggerDemoHelper("FFMPEGWebcamLoggingDemo");
+   private final boolean lossless = true;
+   private final FFMPEGLoggerDemoHelper ffmpegLoggerDemoHelper = new FFMPEGLoggerDemoHelper("FFMPEGWebcamLoggingDemo.webm",
+                                                                                            avutil.AV_PIX_FMT_BGR8,
+                                                                                            avutil.AV_PIX_FMT_YUV420P,
+                                                                                            lossless);
    private VideoCapture videoCapture;
-   private Mat bgrImage;
+   private BytedecoImage bgrImage;
    private int imageHeight = -1;
    private int imageWidth = -1;
    private double reportedFPS = -1;
@@ -82,7 +86,7 @@ public class GDXFFMPEGWebcamLoggingDemo
                   reportedFPS = videoCapture.get(opencv_videoio.CAP_PROP_FPS);
                   LogTools.info("Format: {}", videoCapture.get(opencv_videoio.CAP_PROP_FORMAT));
 
-                  bgrImage = new Mat();
+                  bgrImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC3);
 
                   swapCVPanel = new ImGuiOpenCVSwapVideoPanel("Video", false);
                   baseUI.getImGuiPanelManager().addPanel(swapCVPanel.getVideoPanel());
@@ -93,18 +97,10 @@ public class GDXFFMPEGWebcamLoggingDemo
 
                   ffmpegLoggerDemoHelper.create(imageWidth, imageHeight, () ->
                   {
-                     swapCVPanel.getDataSwapReferenceManager().accessOnHighPriorityThread(data ->
-                     {
-                        ffmpegLoggerDemoHelper.getLogger().put(data.getBytedecoImage());
-                     });
-                  });
-
-                  ThreadTools.startAsDaemon(() ->
-                  {
-                     while (true)
+                     swapCVPanel.getDataSwapReferenceManager().accessOnLowPriorityThread(data ->
                      {
                         readPerformancePlot.start();
-                        boolean imageWasRead = videoCapture.read(bgrImage);
+                        boolean imageWasRead = videoCapture.read(bgrImage.getBytedecoOpenCVMat());
                         readPerformancePlot.stop();
                         readFrequencyPlot.ping();
 
@@ -113,13 +109,34 @@ public class GDXFFMPEGWebcamLoggingDemo
                            LogTools.error("Image was not read!");
                         }
 
-                        swapCVPanel.getDataSwapReferenceManager().accessOnLowPriorityThread(data ->
-                        {
-                           data.updateOnImageUpdateThread(imageWidth, imageHeight);
-                           opencv_imgproc.cvtColor(bgrImage, data.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA, 0);
-                        });
-                     }
-                  }, "CameraRead");
+                        ffmpegLoggerDemoHelper.getLogger().put(bgrImage);
+
+                        data.updateOnImageUpdateThread(imageWidth, imageHeight);
+                        opencv_imgproc.cvtColor(bgrImage.getBytedecoOpenCVMat(), data.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA, 0);
+                     });
+                  });
+
+//                  ThreadTools.startAsDaemon(() ->
+//                  {
+//                     while (true)
+//                     {
+//                        readPerformancePlot.start();
+//                        boolean imageWasRead = videoCapture.read(bgrImage);
+//                        readPerformancePlot.stop();
+//                        readFrequencyPlot.ping();
+//
+//                        if (!imageWasRead)
+//                        {
+//                           LogTools.error("Image was not read!");
+//                        }
+//
+//                        swapCVPanel.getDataSwapReferenceManager().accessOnLowPriorityThread(data ->
+//                        {
+//                           data.updateOnImageUpdateThread(imageWidth, imageHeight);
+//                           opencv_imgproc.cvtColor(bgrImage, data.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA, 0);
+//                        });
+//                     }
+//                  }, "CameraRead");
 
                   baseUI.getPerspectiveManager().reloadPerspective();
                }
