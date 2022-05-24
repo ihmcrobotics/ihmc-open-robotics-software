@@ -81,8 +81,8 @@ public class GDXFFMPEGWebcamLoggingDemo
 
                   backendName = BytedecoTools.stringFromByteBuffer(videoCapture.getBackendName());
 
-                  videoCapture.set(opencv_videoio.CAP_PROP_FRAME_WIDTH, 1920.0);
-                  videoCapture.set(opencv_videoio.CAP_PROP_FRAME_HEIGHT, 1080.0);
+//                  videoCapture.set(opencv_videoio.CAP_PROP_FRAME_WIDTH, 1920.0);
+//                  videoCapture.set(opencv_videoio.CAP_PROP_FRAME_HEIGHT, 1080.0);
                   videoCapture.set(opencv_videoio.CAP_PROP_FOURCC, VideoWriter.fourcc((byte) 'M', (byte) 'J', (byte) 'P', (byte) 'G'));
                   videoCapture.set(opencv_videoio.CAP_PROP_FPS, 30.0);
                   //                  videoCapture.set(opencv_videoio.CAP_PROP_FRAME_WIDTH, 1280.0);
@@ -190,7 +190,7 @@ public class GDXFFMPEGWebcamLoggingDemo
          private void loggingThread()
          {
             boolean lossless = true;
-            FFMPEGLogger logger = new FFMPEGLogger(imageWidth, imageHeight, lossless, fileName);
+            FFMPEGLogger logger = new FFMPEGLogger(imageWidth, imageHeight, lossless, framerate.get(), fileName);
 
             AVRational msBetweenFrames = new AVRational();
             msBetweenFrames.num(1);

@@ -125,7 +125,7 @@ public class GDXFFMPEGLoggingDemo
          private void loggingThread()
          {
             boolean lossless = true;
-            FFMPEGLogger logger = new FFMPEGLogger(WIDTH, HEIGHT, lossless, fileName);
+            FFMPEGLogger logger = new FFMPEGLogger(WIDTH, HEIGHT, lossless, framerate.get(), fileName);
 
             AVRational msBetweenFrames = new AVRational();
             msBetweenFrames.num(1);
