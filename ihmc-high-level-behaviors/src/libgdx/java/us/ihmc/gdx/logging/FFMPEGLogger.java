@@ -17,8 +17,11 @@ import org.bytedeco.ffmpeg.global.avformat;
 import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.ffmpeg.global.swscale;
 import org.bytedeco.ffmpeg.swscale.SwsContext;
+import org.bytedeco.ffmpeg.swscale.SwsFilter;
 import org.bytedeco.javacpp.DoublePointer;
+import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.Pointer;
+import org.bytedeco.javacpp.PointerPointer;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.log.LogTools;
@@ -41,19 +44,20 @@ public class FFMPEGLogger
    private final int bitRate = 400000;
    private final AVRational framePeriod;
    private final int pictureGroupSize = 12;
-   private final int avPixelFormat = avutil.AV_PIX_FMT_YUV420P;
+   private final int sourceAVPixelFormat = avutil.AV_PIX_FMT_RGBA;
+   private final int encoderAVPixelFormat = avutil.AV_PIX_FMT_YUV420P;
    private final boolean formatWantsGlobalHeader;
    private boolean isInitialized = false;
    private final AVDictionary avDictionary;
    private final AVFormatContext avFormatContext;
    private String codecLongName;
-   private AVPacket tempAVPacket;
+   private AVPacket avPacket;
    private AVStream avStream;
    private AVCodecContext avEncoderContext;
-   private AVFrame avFrame;
-   private AVFrame tempAVFrame;
+   private AVFrame avFrameToBeEncoded;
+   private AVFrame avFrameToBeScaled;
    private SwsContext swsContext;
-   private int nextPts;
+   private int presentationTimestamp = 0;
    private AVFrame rgbTempFrame;
    private SwsContext rgbSwsContext;
 
@@ -84,8 +88,8 @@ public class FFMPEGLogger
       avEncoderContext = avcodec.avcodec_alloc_context3(avEncoder);
 
       // Allocate a packet for later use
-      tempAVPacket = avcodec.av_packet_alloc();
-      FFMPEGTools.checkPointer(tempAVPacket, "Allocating a packet");
+      avPacket = avcodec.av_packet_alloc();
+      FFMPEGTools.checkPointer(avPacket, "Allocating a packet");
 
       // Create a new stream
       avStream = avformat.avformat_new_stream(avFormatContext, null);
@@ -108,7 +112,7 @@ public class FFMPEGLogger
       avEncoderContext.time_base(framePeriod);
 
       avEncoderContext.gop_size(pictureGroupSize); // Some or all of these settings may be unnecessary with lossless
-      avEncoderContext.pix_fmt(avPixelFormat);
+      avEncoderContext.pix_fmt(encoderAVPixelFormat);
 
       formatWantsGlobalHeader = (outputFormat.flags() & avformat.AVFMT_GLOBALHEADER) != 0;
       if (formatWantsGlobalHeader)
@@ -129,21 +133,21 @@ public class FFMPEGLogger
          int returnCode = avcodec.avcodec_open2(avEncoderContext, avEncoderContext.codec(), avDictionary);
          FFMPEGTools.checkNonZeroError(returnCode, "Initializing codec context to use the codec");
 
-         avFrame = avutil.av_frame_alloc();
-         avFrame.format(avPixelFormat);
-         avFrame.width(videoWidth);
-         avFrame.height(videoHeight);
+         avFrameToBeEncoded = avutil.av_frame_alloc();
+         avFrameToBeEncoded.format(encoderAVPixelFormat);
+         avFrameToBeEncoded.width(videoWidth);
+         avFrameToBeEncoded.height(videoHeight);
 
-         tempAVFrame = avutil.av_frame_alloc();
-         tempAVFrame.format(avPixelFormat);
-         tempAVFrame.width(videoWidth);
-         tempAVFrame.height(videoHeight);
+         avFrameToBeScaled = avutil.av_frame_alloc();
+         avFrameToBeScaled.format(sourceAVPixelFormat);
+         avFrameToBeScaled.width(videoWidth);
+         avFrameToBeScaled.height(videoHeight);
 
          int bufferSizeAlignment = 0;
-         returnCode = avutil.av_frame_get_buffer(avFrame, bufferSizeAlignment);
+         returnCode = avutil.av_frame_get_buffer(avFrameToBeEncoded, bufferSizeAlignment);
          FFMPEGTools.checkNonZeroError(returnCode, "Allocating new buffer for avFrame");
 
-         returnCode = avutil.av_frame_get_buffer(tempAVFrame, bufferSizeAlignment);
+         returnCode = avutil.av_frame_get_buffer(avFrameToBeScaled, bufferSizeAlignment);
          FFMPEGTools.checkNonZeroError(returnCode, "Allocating new buffer for tempAVFrame");
 
          AVCodecParameters avCodecParameters = avStream.codecpar();
@@ -164,74 +168,92 @@ public class FFMPEGLogger
 
          returnCode = avformat.avformat_write_header(avFormatContext, avDictionary);
          FFMPEGTools.checkNonZeroError(returnCode, "Allocating the stream private data and writing the stream header to the output media file");
+
+         if (sourceAVPixelFormat != encoderAVPixelFormat)
+         {
+            int sourceFormat = sourceAVPixelFormat;
+            int sourceVideoWidth = avEncoderContext.width();
+            int sourceVideoHeight = avEncoderContext.height();
+            int destinationVideoWidth = avEncoderContext.width();
+            int destinationVideoHeight = avEncoderContext.height();
+            int destinationFormat = encoderAVPixelFormat;
+            int algorithmAndOptionForScaling = swscale.SWS_BICUBIC;
+            SwsFilter sourceFilter = null;
+            SwsFilter destinationFilter = null;
+            DoublePointer extraParameters = null;
+            swsContext = swscale.sws_getContext(sourceVideoWidth,
+                                                sourceVideoHeight,
+                                                sourceFormat,
+                                                destinationVideoWidth,
+                                                destinationVideoHeight,
+                                                destinationFormat,
+                                                algorithmAndOptionForScaling,
+                                                sourceFilter,
+                                                destinationFilter,
+                                                extraParameters);
+            FFMPEGTools.checkPointer(swsContext, "Allocating SWS context");
+         }
       }
 
-      //Encode video
-      AVFrame frame = getVideoFrame(image);
-      avcodec.avcodec_send_frame(avEncoderContext, frame);
+      int returnCode;
+      returnCode = avutil.av_frame_make_writable(avFrameToBeEncoded);
+      FFMPEGTools.checkNonZeroError(returnCode, "Ensuring frame data is writable");
 
-      //This while loop is weird, but copied from muxing.c
-      int ret = 0;
-      while (ret >= 0)
+      if (swsContext == null)
       {
-         ret = avcodec.avcodec_receive_packet(avEncoderContext, tempAVPacket);
-         if (ret < 0)
-         {
-            if (ret == -11)
-            {
-               continue; //Resource temporarily unavailable - we just try this again
-            }
-            else
-            {
-               LogTools.error("{}: Error encoding frame. Logging will stop.", FFMPEGTools.getErrorCodeString(ret));
-               destroy();
-               return false;
-            }
-         }
+         fillImage(avFrameToBeEncoded, image, videoWidth, videoHeight);
+      }
+      else
+      {
+         returnCode = avutil.av_frame_make_writable(avFrameToBeScaled);
+         FFMPEGTools.checkNonZeroError(returnCode, "Ensuring frame data is writable");
 
-         avcodec.av_packet_rescale_ts(tempAVPacket, avEncoderContext.time_base(), avStream.time_base());
-         tempAVPacket.stream_index(avStream.index());
+         fillImage(avFrameToBeScaled, image, videoWidth, videoHeight);
 
-         ret = avformat.av_interleaved_write_frame(avFormatContext, tempAVPacket);
-         if (ret < 0)
-         {
-            LogTools.error("Error writing output packet. Logging will stop.");
-            destroy();
-            return false;
-         }
+         PointerPointer sourceSlice = avFrameToBeScaled.data();
+         IntPointer sourceStride = avFrameToBeScaled.linesize();
+         int sourceSliceY = 0;
+         int sourceSliceHeight = avEncoderContext.height();
+         PointerPointer destination = avFrameToBeEncoded.data();
+         IntPointer destinationStride = avFrameToBeEncoded.linesize();
+         int heightOfOutputSlice = swscale.sws_scale(swsContext, sourceSlice, sourceStride, sourceSliceY, sourceSliceHeight, destination, destinationStride);
       }
 
+      // Presentation timestamp in time_base units (time when frame should be shown to user).
+      avFrameToBeEncoded.pts(presentationTimestamp++);
+
+      // Try again is returned quite often, citing "Resource temporarily unavailable"
+      // Documentation says that the user must try to send input, so we put the send frame in here
+      int tryAgainError = avutil.AVERROR_EAGAIN();
+      do
+      {
+         returnCode = avcodec.avcodec_send_frame(avEncoderContext, avFrameToBeEncoded);
+         FFMPEGTools.checkNonZeroError(returnCode, "Supplying frame to encoder");
+
+         returnCode = avcodec.avcodec_receive_packet(avEncoderContext, avPacket);
+      }
+      while (returnCode == tryAgainError);
+      FFMPEGTools.checkNonZeroError(returnCode, "Reading encoded data from the encoder");
+
+      // Convert valid timing fields (timestamps / durations) in a packet from one timebase to another
+      AVRational sourceTimebase = avEncoderContext.time_base();
+      AVRational destinationTimebase = avStream.time_base();
+      avcodec.av_packet_rescale_ts(avPacket, sourceTimebase, destinationTimebase);
+
+      // Decompression timestamp in AVStream->time_base units; the time at which the packet is decompressed
+      avPacket.stream_index(avStream.index());
+
+      returnCode = avformat.av_interleaved_write_frame(avFormatContext, avPacket);
+      FFMPEGTools.checkNonZeroError(returnCode, "Writing packet to output media file ensuring correct interleaving");
+
+      // Force flush buffered data
       avformat.avio_flush(avFormatContext.pb());
 
-      return ret == avutil.AVERROR_EOF();
+      return returnCode == 0;
    }
 
-   private void fillImage(AVFrame pict, BytedecoImage image, int width, int height)
+   private void fillImage(AVFrame avFrame, BytedecoImage image, int width, int height)
    {
-      if (rgbTempFrame == null)
-      {
-         rgbTempFrame = avutil.av_frame_alloc();
-         rgbTempFrame.format(avutil.AV_PIX_FMT_RGBA);
-         rgbTempFrame.width(width);
-         rgbTempFrame.height(height);
-
-         avutil.av_frame_get_buffer(rgbTempFrame, 0);
-      }
-
-      if (avutil.av_frame_make_writable(rgbTempFrame) < 0)
-      {
-         LogTools.error("Could not make frame writable. Logging will stop.");
-         destroy();
-      }
-
-      rgbSwsContext = swscale.sws_getContext(width, height, avutil.AV_PIX_FMT_RGBA, width, height, avutil.AV_PIX_FMT_YUV420P, swscale.SWS_BICUBIC, null, null, (DoublePointer)null);
-
-      if (rgbSwsContext == null || rgbSwsContext.isNull())
-      {
-         LogTools.error("Error creating SWS Context.");
-         return;
-      }
-
       for (int y = 0; y < height; y++)
       {
          for (int x = 0; x < width; x++)
@@ -241,61 +263,13 @@ public class FFMPEGLogger
             int b = image.getBackingDirectByteBuffer().get(4 * (y * width + x) + 2);
             int a = image.getBackingDirectByteBuffer().get(4 * (y * width + x) + 3);
             //Note: x * 4 because 4 bytes per pixel
-            Pointer data = rgbTempFrame.data().get();
-            data.getPointer(y * rgbTempFrame.linesize().get() + x * 4).fill(r);
-            data.getPointer(y * rgbTempFrame.linesize().get() + x * 4 + 1).fill(g);
-            data.getPointer(y * rgbTempFrame.linesize().get() + x * 4 + 2).fill(b);
-            data.getPointer(y * rgbTempFrame.linesize().get() + x * 4 + 3).fill(a);
+            Pointer data = avFrame.data().get();
+            data.getPointer(y * avFrame.linesize().get() + x * 4).fill(r);
+            data.getPointer(y * avFrame.linesize().get() + x * 4 + 1).fill(g);
+            data.getPointer(y * avFrame.linesize().get() + x * 4 + 2).fill(b);
+            data.getPointer(y * avFrame.linesize().get() + x * 4 + 3).fill(a);
          }
       }
-
-      swscale.sws_scale(rgbSwsContext, rgbTempFrame.data(), rgbTempFrame.linesize(), 0, height, pict.data(), pict.linesize());
-   }
-
-   private AVFrame getVideoFrame(BytedecoImage image)
-   {
-      if (avutil.av_frame_make_writable(avFrame) < 0)
-      {
-         LogTools.error("Could not make frame writable. Logging will stop.");
-         destroy();
-         return null;
-      }
-
-      if (avEncoderContext.pix_fmt() != avutil.AV_PIX_FMT_YUV420P)
-      {
-         if (swsContext == null || swsContext.isNull())
-         {
-            swsContext = swscale.sws_getContext(avEncoderContext.width(),
-                                                avEncoderContext.height(),
-                                                avutil.AV_PIX_FMT_YUV420P,
-                                                avEncoderContext.width(),
-                                                avEncoderContext.height(),
-                                                avEncoderContext.pix_fmt(),
-                                                swscale.SWS_BICUBIC,
-                                                null,
-                                                null,
-                                                (DoublePointer) null);
-
-            if (swsContext == null || swsContext.isNull())
-            {
-               LogTools.error("Error creating SWS Context.");
-               return null;
-            }
-         }
-
-         fillImage(tempAVFrame, image, avEncoderContext.width(), avEncoderContext.height());
-
-         swscale.sws_scale(swsContext, tempAVFrame.data(), tempAVFrame.linesize(), 0, avEncoderContext.height(), avFrame.data(), avFrame.linesize());
-      }
-      else
-      {
-         fillImage(avFrame, image, avEncoderContext.width(), avEncoderContext.height());
-      }
-
-      avFrame.pts(nextPts);
-      nextPts = nextPts + 1;
-
-      return avFrame;
    }
 
    public void destroy()
@@ -306,10 +280,10 @@ public class FFMPEGLogger
       avcodec.avcodec_free_context(avEncoderContext);
       avutil.av_frame_free(rgbTempFrame);
       swscale.sws_freeContext(rgbSwsContext);
-      avutil.av_frame_free(avFrame);
-      avutil.av_frame_free(tempAVFrame);
-      avutil.av_frame_free(tempAVFrame);
-      avcodec.av_packet_free(tempAVPacket);
+      avutil.av_frame_free(avFrameToBeEncoded);
+      avutil.av_frame_free(avFrameToBeScaled);
+      avutil.av_frame_free(avFrameToBeScaled);
+      avcodec.av_packet_free(avPacket);
       swscale.sws_freeContext(swsContext);
    }
 
