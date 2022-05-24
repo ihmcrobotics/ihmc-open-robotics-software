@@ -142,19 +142,18 @@ public class GDXFFMPEGWebcamLoggingDemo
          private void renderImGuiWidgets()
          {
             ImGui.text("System native byte order: " + ByteOrder.nativeOrder().toString());
-
-            ImGui.text("Is open: " + videoCapture.isOpened());
-            ImGui.text("Image dimensions: " + imageWidth + " x " + imageHeight);
-            ImGui.text("Reported fps: " + reportedFPS);
-            ImGui.text("Backend name: " + backendName);
-            readPerformancePlot.renderImGuiWidgets();
-            readFrequencyPlot.renderImGuiWidgets();
-
             ImGui.text("File name: " + fileName);
             ImGui.inputInt(labels.get("framerate"), framerate, 1);
 
             if (nativesLoadedActivator.peek())
             {
+               ImGui.text("Is open: " + videoCapture.isOpened());
+               ImGui.text("Image dimensions: " + imageWidth + " x " + imageHeight);
+               ImGui.text("Reported fps: " + reportedFPS);
+               ImGui.text("Backend name: " + backendName);
+               readPerformancePlot.renderImGuiWidgets();
+               readFrequencyPlot.renderImGuiWidgets();
+
                if (!logging)
                {
                   if (!finalizing)
