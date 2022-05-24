@@ -65,6 +65,7 @@ public class ControllerNaturalPostureManager
    
    private final QPObjectiveCommand pelvisQPObjectiveCommand = new QPObjectiveCommand();
 
+   private final YoDouble pPosePelvisPitch = new YoDouble("pPosePelvisPitch", registry);
    private final YoDouble pPosePelvisYawKp = new YoDouble("pPosePelvisYawKp", registry);
    private final YoDouble pPosePelvisPitchKp = new YoDouble("pPosePelvisPitchKp", registry);
    private final YoDouble pPosePelvisRollKp = new YoDouble("pPosePelvisRollKp", registry);
@@ -135,6 +136,7 @@ public class ControllerNaturalPostureManager
       pelvisQPweightMatrix.reshape(3, 3);
       pelvisQPselectionMatrix.reshape(3, 3);
       CommonOps_DDRM.setIdentity(pelvisQPselectionMatrix);
+      pPosePelvisPitch.set(0.0);
       pPosePelvisYawKp.set(400.0);
       pPosePelvisPitchKp.set(400);
       pPosePelvisRollKp.set(400.0);
@@ -271,7 +273,7 @@ public class ControllerNaturalPostureManager
       // The pelvis equilibrium pose servo:
       // GMN: Hard-coded all zeros for pelvis priv pose for now...
       pelvisYawAcceleration.set(  pPosePelvisYawKp.getValue()  *(0.0 - pelvisYPR.getYaw())   - pPosePelvisYawKd.getValue()  * pelvisYPRdot.get(0,0));
-      pelvisPitchAcceleration.set(pPosePelvisPitchKp.getValue()*(0.0 - pelvisYPR.getPitch()) - pPosePelvisPitchKd.getValue()* pelvisYPRdot.get(1,0));
+      pelvisPitchAcceleration.set(pPosePelvisPitchKp.getValue()*(pPosePelvisPitch.getValue() - pelvisYPR.getPitch()) - pPosePelvisPitchKd.getValue()* pelvisYPRdot.get(1,0));
       pelvisRollAcceleration.set( pPosePelvisRollKp.getValue() *(0.0 - pelvisYPR.getRoll())  - pPosePelvisRollKd.getValue() * pelvisYPRdot.get(2,0));
       
       omegaDot.set(0, 0, pelvisYawAcceleration.getValue());
