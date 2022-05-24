@@ -48,6 +48,11 @@ public class SwapReference<T>
       return forThreadTwo;
    }
 
+   public boolean isThreadOneA()
+   {
+      return forThreadOne == a;
+   }
+
    public void swap()
    {
       T temp = forThreadOne;

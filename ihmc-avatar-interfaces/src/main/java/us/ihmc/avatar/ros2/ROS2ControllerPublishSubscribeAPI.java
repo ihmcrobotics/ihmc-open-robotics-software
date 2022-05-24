@@ -1,8 +1,8 @@
 package us.ihmc.avatar.ros2;
 
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.util.function.Consumer;
@@ -16,7 +16,7 @@ public interface ROS2ControllerPublishSubscribeAPI extends ROS2PublishSubscribeA
 
    public <T> void subscribeViaCallback(Function<String, ROS2Topic<T>> topicFunction, Consumer<T> callback);
 
-   public <T> ROS2Input<T> subscribeToController(Class<T> messageClass);
+   public <T> IHMCROS2Input<T> subscribeToController(Class<T> messageClass);
 
    public <T> void subscribeToControllerViaCallback(Class<T> messageClass, Consumer<T> callback);
 

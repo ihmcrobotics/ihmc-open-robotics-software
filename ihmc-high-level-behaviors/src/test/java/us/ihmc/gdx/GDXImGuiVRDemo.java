@@ -7,7 +7,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.gdx.tools.BoxesDemoModel;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.graphics.GDXReferenceFrameGraphic;
 import us.ihmc.gdx.vr.GDXVRContext;
@@ -57,7 +57,7 @@ public class GDXImGuiVRDemo
             rightEyeZUpFrameGraphic = new GDXReferenceFrameGraphic(0.2);
             rightEyeZBackFrameGraphic = new GDXReferenceFrameGraphic(0.2);
 
-            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
+            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelBuilder.createCoordinateFrame(0.3)));
             baseUI.get3DSceneManager().addModelInstance(new BoxesDemoModel().newInstance());
 
             baseUI.get3DSceneManager().addRenderableProvider(this::getRenderables);
