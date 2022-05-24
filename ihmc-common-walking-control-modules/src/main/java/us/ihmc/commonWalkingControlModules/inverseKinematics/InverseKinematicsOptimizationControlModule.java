@@ -172,7 +172,10 @@ public class InverseKinematicsOptimizationControlModule
       if (!computeJointTorques.getValue())
          return;
 
-      boolean success = motionQPInputCalculator.computeGravityCompensationMinimization(qpInput, toolbox.getJointTorqueMinimizationWeightCalculator(), true);
+      boolean success = motionQPInputCalculator.computeGravityCompensationMinimization(qpInput,
+                                                                                       toolbox.getJointTorqueMinimizationWeightCalculator(),
+                                                                                       true,
+                                                                                       toolbox.getControlDT());
       if (success)
          qpSolver.addMotionInput(qpInput);
    }
