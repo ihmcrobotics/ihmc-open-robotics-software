@@ -16,6 +16,7 @@ import org.bytedeco.ffmpeg.global.swresample;
 import org.bytedeco.ffmpeg.global.swscale;
 import org.bytedeco.ffmpeg.swscale.SwsContext;
 import org.bytedeco.javacpp.DoublePointer;
+import org.bytedeco.javacpp.Pointer;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 
@@ -256,10 +257,11 @@ public class FFMPEGLogger
             int b = image.getBackingDirectByteBuffer().get(4 * (y * width + x) + 2);
             int a = image.getBackingDirectByteBuffer().get(4 * (y * width + x) + 3);
             //Note: x * 4 because 4 bytes per pixel
-            rgbTempFrame.data().get().getPointer(y * rgbTempFrame.linesize().get() + x * 4).fill(r);
-            rgbTempFrame.data().get().getPointer(y * rgbTempFrame.linesize().get() + x * 4 + 1).fill(g);
-            rgbTempFrame.data().get().getPointer(y * rgbTempFrame.linesize().get() + x * 4 + 2).fill(b);
-            rgbTempFrame.data().get().getPointer(y * rgbTempFrame.linesize().get() + x * 4 + 3).fill(a);
+            Pointer data = rgbTempFrame.data().get();
+            data.getPointer(y * rgbTempFrame.linesize().get() + x * 4).fill(r);
+            data.getPointer(y * rgbTempFrame.linesize().get() + x * 4 + 1).fill(g);
+            data.getPointer(y * rgbTempFrame.linesize().get() + x * 4 + 2).fill(b);
+            data.getPointer(y * rgbTempFrame.linesize().get() + x * 4 + 3).fill(a);
          }
       }
 
