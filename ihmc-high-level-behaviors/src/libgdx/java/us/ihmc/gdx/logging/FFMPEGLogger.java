@@ -255,15 +255,36 @@ public class FFMPEGLogger
       returnCode = avformat.av_interleaved_write_frame(avFormatContext, avPacket);
       FFMPEGTools.checkNonZeroError(returnCode, "Writing packet to output media file ensuring correct interleaving");
 
-      // Force flush buffered data
-      avformat.avio_flush(avFormatContext.pb());
-
       return returnCode == 0;
    }
 
-   public void destroy()
+   public void stop()
    {
-      LogTools.info("Destroying...");
+      LogTools.info("Stopping...");
+
+      int endOfFileError = avutil.AVERROR_EOF();
+      int tryAgainError = avutil.AVERROR_EAGAIN();
+      int returnCode;
+      do
+      {
+         returnCode = avcodec.avcodec_send_frame(avEncoderContext, null);
+         if (returnCode != 0 && returnCode != endOfFileError) // end of file is okay
+         {
+            LogTools.warn("Got code: {}: {}", returnCode, FFMPEGTools.getErrorCodeString(returnCode));
+            FFMPEGTools.checkNonZeroError(returnCode, "Supplying null frame to encoder to signal end of stream");
+         }
+
+         // Reading encoded data packet from the encoder
+         returnCode = avcodec.avcodec_receive_packet(avEncoderContext, avPacket);
+         if (returnCode != 0 && returnCode != tryAgainError && returnCode != endOfFileError) // try again, end of file, are okay
+         {
+            FFMPEGTools.checkNonZeroError(returnCode, "Reading encoded data packet from the encoder");
+         }
+      }
+      while (returnCode != endOfFileError);
+
+      returnCode = avformat.av_write_trailer(avFormatContext);
+      FFMPEGTools.checkNonZeroError(returnCode, "Writing stream trailer to output media file");
 
       avformat.avio_close(avFormatContext.pb());
       avformat.avformat_free_context(avFormatContext);

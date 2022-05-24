@@ -2,7 +2,6 @@ package us.ihmc.gdx.logging;
 
 import imgui.ImGui;
 import imgui.type.ImInt;
-import org.bytedeco.ffmpeg.global.avutil;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
@@ -24,7 +23,7 @@ public class FFMPEGLoggerDemoHelper
    private int encoderPixelFormat;
    private boolean lossless;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImInt framerate = new ImInt(30);
+   private final ImInt framerate = new ImInt();
    private ImPlotFrequencyPlot loggerPutFrequencyPlot;
    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
    private final String logDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
@@ -37,12 +36,13 @@ public class FFMPEGLoggerDemoHelper
    private Runnable sourceImageInputRunnable;
    private final Throttler throttler = new Throttler();
 
-   public FFMPEGLoggerDemoHelper(String fileSuffix, int sourcePixelFormat, int encoderPixelFormat, boolean lossless)
+   public FFMPEGLoggerDemoHelper(String fileSuffix, int sourcePixelFormat, int encoderPixelFormat, boolean lossless, int framerate)
    {
       this.fileSuffix = fileSuffix;
       this.sourcePixelFormat = sourcePixelFormat;
       this.encoderPixelFormat = encoderPixelFormat;
       this.lossless = lossless;
+      this.framerate.set(framerate);
       updateFileName();
    }
 
@@ -121,7 +121,7 @@ public class FFMPEGLoggerDemoHelper
       }
       expectedVideoLength = expectedVideoLengthStopwatch.totalElapsed();
 
-      logger.destroy();
+      logger.stop();
       finalizing = false;
    }
 
