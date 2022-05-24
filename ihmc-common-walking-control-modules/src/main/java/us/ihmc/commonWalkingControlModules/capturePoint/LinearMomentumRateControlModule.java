@@ -428,7 +428,10 @@ public class LinearMomentumRateControlModule
    private void updateHeightController()
    {
       if (heightControlCommand == null)
+      {
+         desiredCoMHeightAcceleration = 0.0;
          return;
+      }
 
       switch (heightControlCommand.getCommandType())
       {

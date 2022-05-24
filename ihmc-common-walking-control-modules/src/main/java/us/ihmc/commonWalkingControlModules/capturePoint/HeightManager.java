@@ -43,6 +43,7 @@ public interface HeightManager
    public abstract void compute(FrameVector2DReadOnly desiredICPVelocity,
                        FrameVector2DReadOnly desiredCoMVelocity,
                        boolean isInDoubleSupport,
+                       RobotSide supportSide,
                        double omega0,
                        FeetManager feetManager);
 

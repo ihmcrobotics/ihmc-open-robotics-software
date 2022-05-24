@@ -3,7 +3,10 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
-import us.ihmc.commonWalkingControlModules.controlModules.pelvis.*;
+import us.ihmc.commonWalkingControlModules.controlModules.pelvis.HeightThroughKneeControlState;
+import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisAndCenterOfMassHeightControlState;
+import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisHeightControlMode;
+import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisHeightControlState;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
@@ -110,9 +113,11 @@ public class CenterOfMassHeightManager implements HeightManager
       doPrepareForLocomotion.set(value);
    }
 
+   @Override
    public void compute(FrameVector2DReadOnly desiredICPVelocity,
                        FrameVector2DReadOnly desiredCoMVelocity,
                        boolean isInDoubleSupport,
+                       RobotSide supportSide,
                        double omega0,
                        FeetManager feetManager)
    {
@@ -121,6 +126,7 @@ public class CenterOfMassHeightManager implements HeightManager
                   .computeCoMHeightCommand(desiredICPVelocity,
                                            desiredCoMVelocity,
                                            isInDoubleSupport,
+                                           supportSide,
                                            omega0,
                                            feetManager);
    }
