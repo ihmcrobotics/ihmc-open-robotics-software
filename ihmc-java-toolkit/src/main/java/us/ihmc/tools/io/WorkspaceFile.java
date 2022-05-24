@@ -29,7 +29,11 @@ public class WorkspaceFile
          getResource = () -> directory.getClassForLoading().getResource(pathForResourceLoadingPathFiltered);
       }
 
-      workspaceFile = directory.getDirectoryPath().resolve(subsequentPathToFile);
+      Path directoryPath = directory.getDirectoryPath();
+      if (directoryPath != null)
+         workspaceFile = directoryPath.resolve(subsequentPathToFile);
+      else
+         workspaceFile = null;
    }
 
    /** If the directory is available for reading/writing using files.

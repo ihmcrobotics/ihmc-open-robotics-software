@@ -34,6 +34,7 @@ import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
@@ -73,7 +74,21 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       return robotInitialSetup;
    }
 
-   public abstract HandModel getHandModel();
+   public abstract HandModel getHandModel(RobotSide side);
+
+   public default SideDependentList<HandModel> getHandModels()
+   {
+      SideDependentList<HandModel> handModels = new SideDependentList<>();
+      for (RobotSide side : RobotSide.values)
+      {
+         HandModel handModel = getHandModel(side);
+         if (handModel != null)
+         {
+            handModels.put(side, handModel);
+         }
+      }
+      return handModels;
+   }
 
    public abstract double getSimulateDT();
 

@@ -2,6 +2,7 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import java.util.List;
 
+import controller_msgs.msg.dds.StepConstraintsListMessage;
 import org.apache.commons.lang3.mutable.MutableDouble;
 
 import controller_msgs.msg.dds.FootstepDataMessage;
@@ -52,6 +53,8 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    /** the execution time. This number is set if the execution delay is non zero **/
    public double adjustedExecutionTime;
 
+   private final StepConstraintsListCommand stepConstraints = new StepConstraintsListCommand();
+
    public FootstepDataCommand()
    {
       clear();
@@ -76,6 +79,8 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
 
       touchdownDuration = Double.NaN;
       liftoffDuration = Double.NaN;
+
+      stepConstraints.clear();
    }
 
    @Override
@@ -135,6 +140,11 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       touchdownDuration = message.getTouchdownDuration();
       liftoffDuration = message.getLiftoffDuration();
 
+      StepConstraintsListMessage stepConstraints = message.getStepConstraints();
+      this.stepConstraints.clear();
+      if (stepConstraints != null)
+         this.stepConstraints.setFromMessage(stepConstraints);
+
       this.executionDelayTime = message.getExecutionDelayTime();
    }
 
@@ -175,6 +185,8 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       touchdownDuration = other.touchdownDuration;
       liftoffDuration = other.liftoffDuration;
       this.executionDelayTime = other.executionDelayTime;
+      this.stepConstraints.clear();
+      this.stepConstraints.set(other.getStepConstraints());
    }
 
    public void set(ReferenceFrame trajectoryFrame, FootstepDataMessage message)
@@ -289,6 +301,11 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    public double getLiftoffDuration()
    {
       return liftoffDuration;
+   }
+
+   public StepConstraintsListCommand getStepConstraints()
+   {
+      return stepConstraints;
    }
 
    @Override

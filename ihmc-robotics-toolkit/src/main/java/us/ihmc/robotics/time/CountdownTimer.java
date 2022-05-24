@@ -1,12 +1,9 @@
 package us.ihmc.robotics.time;
 
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoVariable;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoLong;
 
 // All information needed to set a timer in a single class.
 // Set a time, and the timer will "timeOut" when that much time has elapsed
@@ -15,7 +12,7 @@ public class CountdownTimer
 {
    private final YoDouble maxTime;
    private final YoDouble timeLeft;
-   private final YoBoolean isStopped;
+   private final YoBoolean isTurnedOff;
 
    private double startTime;
 
@@ -32,8 +29,8 @@ public class CountdownTimer
       this.timeLeft = new YoDouble(name + "TimeLeft", registry);
       this.timeLeft.set(0.0);
 
-      isStopped = new YoBoolean(name + "IsStopped", registry);
-      isStopped.set(true);
+      isTurnedOff = new YoBoolean(name + "IsTurnedOff", registry);
+      isTurnedOff.set(true);
 
       startTime = 0.0;
    }
@@ -47,13 +44,14 @@ public class CountdownTimer
    {
       startTime = getCurrentAbsoluteTime();
       maxTime.set(time);
-      isStopped.set(false);
+      isTurnedOff.set(false);
    }
 
    // This is equivalent to an update loop
    public boolean isRinging()
    {
-      if (!isStopped.getBooleanValue() || checkTimeLeft() <= 0.0)
+      this.updateTimeLeft();
+      if (!isTurnedOff.getBooleanValue() && checkTimeLeft() <= 0.0)
       {
          return true;
       }
@@ -63,18 +61,23 @@ public class CountdownTimer
    // Prevents the timer from going off again. Useful for showing that the timer has been "checked"
    public void stopRinging()
    {
-      isStopped.set(true);
+      isTurnedOff.set(true);
    }
 
-   public boolean isStopped()
+   public boolean isTurnedOff()
    {
-      return isStopped.getBooleanValue();
+      return isTurnedOff.getBooleanValue();
    }
 
    public double checkTimeLeft()
    {
-      timeLeft.set((startTime + maxTime.getDoubleValue()) - getCurrentAbsoluteTime());
+
       return timeLeft.getDoubleValue();
+   }
+
+   private void updateTimeLeft()
+   {
+      timeLeft.set((startTime + maxTime.getDoubleValue()) - getCurrentAbsoluteTime());
    }
 
    private double getCurrentAbsoluteTime()

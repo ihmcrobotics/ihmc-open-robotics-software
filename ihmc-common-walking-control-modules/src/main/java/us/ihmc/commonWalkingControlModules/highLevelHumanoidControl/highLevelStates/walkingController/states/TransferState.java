@@ -130,24 +130,29 @@ public abstract class TransferState extends WalkingState
          transferTimeElapsedUnderPrecomputedICPPlan = timeInState > walkingMessageHandler.getNextTransferTime();
       }
 
+      capturePoint2d.setIncludingFrame(balanceManager.getCapturePoint());
+      FrameConvexPolygon2DReadOnly supportPolygonInWorld = controllerToolbox.getBipedSupportPolygons().getSupportPolygonInWorld();
+
+      double distanceToSupport = supportPolygonInWorld.distance(capturePoint2d);
+
       if (balanceManager.isICPPlanDone() || transferTimeElapsedUnderPrecomputedICPPlan)
       {
-         capturePoint2d.setIncludingFrame(balanceManager.getCapturePoint());
-         FrameConvexPolygon2DReadOnly supportPolygonInWorld = controllerToolbox.getBipedSupportPolygons().getSupportPolygonInWorld();
          FrameConvexPolygon2DReadOnly nextPolygonInWorld = failureDetectionControlModule.getCombinedFootPolygonWithNextFootstep();
-
-         double distanceToSupport = supportPolygonInWorld.distance(capturePoint2d);
          boolean isICPInsideNextSupportPolygon = nextPolygonInWorld.isPointInside(capturePoint2d);
 
-         if (distanceToSupport > balanceManager.getICPDistanceOutsideSupportForStep() || (distanceToSupport > 0.0 && isICPInsideNextSupportPolygon))
+         // if you're outside at all, but taking the next step will recover, go ahead and do it.
+         if ((distanceToSupport > 0.0 && isICPInsideNextSupportPolygon))
             return true;
+         // if you're done, and your error is low, trigger the next step
          else if (balanceManager.getNormalizedEllipticICPError() < 1.0)
             return true;
+         // if you're done, and your error is too high, start using a higher momentum recovery
          else
             balanceManager.setUseMomentumRecoveryModeForBalance(true);
       }
 
-      return false;
+      // if you're too far outside, go ahead and trigger the next step
+      return distanceToSupport > balanceManager.getICPDistanceOutsideSupportForStep();
    }
 
    /**

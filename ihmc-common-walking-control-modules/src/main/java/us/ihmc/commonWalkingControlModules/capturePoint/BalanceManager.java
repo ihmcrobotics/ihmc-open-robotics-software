@@ -411,7 +411,7 @@ public class BalanceManager
       if (!swingSpeedUpForStepAdjustment.isNaN() && swingSpeedUpForStepAdjustment.getValue() > 0.0)
          stepAdjustmentController.submitSwingSpeedUpUnderDisturbance(swingSpeedUpForStepAdjustment.getValue());
       if (stepConstraintRegionHandler != null && stepConstraintRegionHandler.hasNewStepConstraintRegion())
-         stepAdjustmentController.setStepConstraintRegion(stepConstraintRegionHandler.pollHasNewStepConstraintRegion());
+         stepAdjustmentController.setStepConstraintRegions(stepConstraintRegionHandler.pollHasNewStepConstraintRegions());
 
       stepAdjustmentController.compute(yoTime.getDoubleValue(), desiredCapturePoint, capturePoint2d, residualICPErrorForStepAdjustment, omega0);
       boolean footstepWasAdjusted = stepAdjustmentController.wasFootstepAdjusted();

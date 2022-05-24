@@ -8,7 +8,6 @@ import java.util.function.Consumer;
 
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
-import org.bytedeco.javacpp.MutableBytePointer;
 import org.bytedeco.librealsense2.rs2_config;
 import org.bytedeco.librealsense2.rs2_context;
 import org.bytedeco.librealsense2.rs2_device;
@@ -33,6 +32,7 @@ import us.ihmc.communication.packets.StereoPointCloudCompression.ColorAccessor;
 import us.ihmc.communication.packets.StereoPointCloudCompression.CompressionIntermediateVariablesPackage;
 import us.ihmc.communication.packets.StereoPointCloudCompression.PointAccessor;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.perception.MutableBytePointer;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 

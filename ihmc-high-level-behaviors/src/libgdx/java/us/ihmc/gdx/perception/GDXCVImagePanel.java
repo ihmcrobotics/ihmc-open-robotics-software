@@ -11,6 +11,9 @@ import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLManager;
 
+/**
+ * Possible to render grayscale images directly? Pixmap format Alpha texture?
+ */
 public class GDXCVImagePanel
 {
    private Pixmap pixmap;
@@ -25,14 +28,8 @@ public class GDXCVImagePanel
       int imageWidth = bytedecoImage.getImageWidth();
       int imageHeight = bytedecoImage.getImageHeight();
 
-      long[] nativeData = new long[4];
-      nativeData[0] = bytedecoImage.getBytedecoByteBufferPointer().address();
-      nativeData[1] = imageWidth;
-      nativeData[2] = imageHeight;
-      nativeData[3] = Gdx2DPixmap.GDX2D_FORMAT_RGBA8888;
-      pixmap = new Pixmap(new Gdx2DPixmap(bytedecoImage.getBackingDirectByteBuffer(), nativeData));
-
-      this.bytedecoImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4, pixmap.getPixels());
+      this.bytedecoImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4, bytedecoImage.getBackingDirectByteBuffer());
+      createPixmapFromBytedecoImage(imageWidth, imageHeight);
 
       boolean flipY = false;
       setup(name, imageWidth, imageHeight, flipY);
@@ -67,7 +64,7 @@ public class GDXCVImagePanel
    {
       if (videoPanel.getIsShowing().get())
       {
-         BytedecoOpenCVTools.clamp32BitFloatTo8BitUnsignedChar(floatImage, normalizedScaledImage.getBytedecoOpenCVMat(), 0.0, 255.0);
+         BytedecoOpenCVTools.clampTo8BitUnsignedChar(floatImage, normalizedScaledImage.getBytedecoOpenCVMat(), 0.0, 255.0);
          BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(normalizedScaledImage.getBytedecoOpenCVMat(), bytedecoImage.getBytedecoOpenCVMat());
          draw();
       }
@@ -85,6 +82,16 @@ public class GDXCVImagePanel
          panelTexture.draw(pixmap, 0, 0);
    }
 
+   private void createPixmapFromBytedecoImage(int imageWidth, int imageHeight)
+   {
+      long[] nativeData = new long[4];
+      nativeData[0] = bytedecoImage.getBytedecoByteBufferPointer().address();
+      nativeData[1] = imageWidth;
+      nativeData[2] = imageHeight;
+      nativeData[3] = Gdx2DPixmap.GDX2D_FORMAT_RGBA8888;
+      pixmap = new Pixmap(new Gdx2DPixmap(bytedecoImage.getBackingDirectByteBuffer(), nativeData));
+   }
+
    public void resize(int imageWidth, int imageHeight, OpenCLManager openCLManager)
    {
       panelTexture.dispose();
@@ -98,6 +105,13 @@ public class GDXCVImagePanel
       normalizedScaledImage.resize(imageWidth, imageHeight, openCLManager, null);
 
       BytedecoOpenCVTools.setRGBA8888ImageAlpha(bytedecoImage.getBytedecoOpenCVMat(), 255);
+   }
+
+   public void updateDataAddress(long address)
+   {
+      bytedecoImage.rewind();
+      bytedecoImage.changeAddress(address);
+      createPixmapFromBytedecoImage(bytedecoImage.getImageWidth(), bytedecoImage.getImageHeight());
    }
 
    public ImGuiVideoPanel getVideoPanel()
