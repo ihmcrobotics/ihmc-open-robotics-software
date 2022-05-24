@@ -1,9 +1,8 @@
 package us.ihmc.gdx.logging;
 
 import imgui.ImGui;
-import imgui.type.ImInt;
-import org.bytedeco.ffmpeg.avutil.AVRational;
-import org.bytedeco.ffmpeg.global.avutil;
+import org.bytedeco.ffmpeg.ffmpeg;
+import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.global.opencv_videoio;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -21,33 +20,24 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.tools.thread.Activator;
 
-import java.io.File;
 import java.nio.ByteOrder;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class GDXFFMPEGWebcamLoggingDemo
 {
-   private final Activator nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
+   private static final String WEBCAM_FILE = System.getProperty("webcam.file");
+   private final Activator nativesLoadedActivator = BytedecoTools.loadNativesOnAThread(opencv_core.class, ffmpeg.class);
    private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/main/resources");
-   private ImPlotFrequencyPlot loggerPutFrequencyPlot;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
-   private static final String logDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
-   private String fileName;
-   private volatile boolean logging = false;
-   private volatile boolean finalizing = false;
+   private final FFMPEGLoggerDemoHelper ffmpegLoggerDemoHelper = new FFMPEGLoggerDemoHelper("FFMPEGWebcamLoggingDemo");
    private VideoCapture videoCapture;
    private Mat bgrImage;
    private int imageHeight = -1;
    private int imageWidth = -1;
    private double reportedFPS = -1;
    private String backendName = "";
-   private final ImInt framerate = new ImInt(30);
    private ImGuiOpenCVSwapVideoPanel swapCVPanel;
    private ImPlotStopwatchPlot readPerformancePlot;
    private ImPlotFrequencyPlot readFrequencyPlot;
-   private FFMPEGLogger logger;
 
    public GDXFFMPEGWebcamLoggingDemo()
    {
@@ -60,8 +50,6 @@ public class GDXFFMPEGWebcamLoggingDemo
 
             ImGuiPanel panel = new ImGuiPanel("Diagnostics", this::renderImGuiWidgets);
             baseUI.getImGuiPanelManager().addPanel(panel);
-
-            updateFileName();
          }
 
          @Override
@@ -71,7 +59,7 @@ public class GDXFFMPEGWebcamLoggingDemo
             {
                if (nativesLoadedActivator.isNewlyActivated())
                {
-                  videoCapture = new VideoCapture("/dev/video2");
+                  videoCapture = new VideoCapture(WEBCAM_FILE);
 
                   imageWidth = (int) videoCapture.get(opencv_videoio.CAP_PROP_FRAME_WIDTH);
                   imageHeight = (int) videoCapture.get(opencv_videoio.CAP_PROP_FRAME_HEIGHT);
@@ -103,6 +91,14 @@ public class GDXFFMPEGWebcamLoggingDemo
                   readPerformancePlot = new ImPlotStopwatchPlot("VideoCapture read(Mat)");
                   readFrequencyPlot = new ImPlotFrequencyPlot("read Frequency");
 
+                  ffmpegLoggerDemoHelper.create(imageWidth, imageHeight, () ->
+                  {
+                     swapCVPanel.getDataSwapReferenceManager().accessOnHighPriorityThread(data ->
+                     {
+                        ffmpegLoggerDemoHelper.getLogger().put(data.getBytedecoImage());
+                     });
+                  });
+
                   ThreadTools.startAsDaemon(() ->
                   {
                      while (true)
@@ -125,8 +121,6 @@ public class GDXFFMPEGWebcamLoggingDemo
                      }
                   }, "CameraRead");
 
-                  loggerPutFrequencyPlot = new ImPlotFrequencyPlot("FFMPEGLogger put (Hz)");
-
                   baseUI.getPerspectiveManager().reloadPerspective();
                }
 
@@ -143,8 +137,7 @@ public class GDXFFMPEGWebcamLoggingDemo
          private void renderImGuiWidgets()
          {
             ImGui.text("System native byte order: " + ByteOrder.nativeOrder().toString());
-            ImGui.text("File name: " + fileName);
-            ImGui.inputInt(labels.get("framerate"), framerate, 1);
+            ffmpegLoggerDemoHelper.renderImGuiBasicInfo();
 
             if (nativesLoadedActivator.peek())
             {
@@ -155,71 +148,8 @@ public class GDXFFMPEGWebcamLoggingDemo
                readPerformancePlot.renderImGuiWidgets();
                readFrequencyPlot.renderImGuiWidgets();
 
-               if (!logging)
-               {
-                  if (!finalizing)
-                  {
-                     if (ImGui.button(labels.get("Start logging")))
-                     {
-                        updateFileName();
-                        logging = true;
-                        ThreadTools.startAThread(this::loggingThread, "FFMPEGLogging");
-                     }
-                  }
-                  else
-                  {
-                     ImGui.text("Finalizing...");
-                  }
-               }
-               else
-               {
-                  if (ImGui.button(labels.get("Stop logging")))
-                  {
-                     logging = false;
-                  }
-               }
-
-               loggerPutFrequencyPlot.renderImGuiWidgets();
-
-               if (logger != null)
-               {
-                  ImGui.text("Format name: " + logger.getFormatName());
-                  ImGui.text("Codec: " + logger.getCodecLongName());
-                  ImGui.text("Bit rate: " + logger.getBitRate());
-                  ImGui.text("Picture group size (GOP): " + logger.getPictureGroupSize());
-                  ImGui.text("Pixel format: planar YUV 4:2:0, 12bpp, (1 Cr & Cb sample per 2x2 Y samples)");
-                  ImGui.text("Global header: " + logger.getFormatWantsGlobalHeader());
-               }
+               ffmpegLoggerDemoHelper.renderImGuiNativesLoaded();
             }
-         }
-
-         private void updateFileName()
-         {
-            fileName = logDirectory + dateFormat.format(new Date()) + "_FFMPEGLoggingDemo.webm";
-         }
-
-         private void loggingThread()
-         {
-            boolean lossless = true;
-            logger = new FFMPEGLogger(imageWidth, imageHeight, lossless, framerate.get(), fileName);
-
-            finalizing = true;
-
-            while (logging)
-            {
-               loggerPutFrequencyPlot.ping();
-
-               swapCVPanel.getDataSwapReferenceManager().accessOnHighPriorityThread(data ->
-               {
-                  logger.put(data.getBytedecoImage());
-               });
-
-               // Using an AVRational helps ensure that we calculate fps the same way the logger does
-               ThreadTools.sleep((int) (avutil.av_q2d(logger.getFramePeriod()) * 1000));
-            }
-
-            logger.destroy();
-            finalizing = false;
          }
 
          @Override
