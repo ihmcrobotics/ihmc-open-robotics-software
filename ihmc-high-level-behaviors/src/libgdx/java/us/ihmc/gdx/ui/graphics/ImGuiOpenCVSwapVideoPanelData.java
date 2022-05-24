@@ -7,6 +7,7 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.gdx.imgui.ImGuiVideoPanel;
+import us.ihmc.perception.BytedecoImage;
 
 public class ImGuiOpenCVSwapVideoPanelData
 {
@@ -15,6 +16,7 @@ public class ImGuiOpenCVSwapVideoPanelData
    private Mat rgba8Mat;
    private boolean needNewTexture = false;
    private Texture texture;
+   private BytedecoImage bytedecoImage;
 
    public void updateOnImageUpdateThread(int imageWidth, int imageHeight)
    {
@@ -28,6 +30,7 @@ public class ImGuiOpenCVSwapVideoPanelData
          pixmap = new Pixmap(imageWidth, imageHeight, Pixmap.Format.RGBA8888);
          rgba8888BytePointer = new BytePointer(pixmap.getPixels());
          rgba8Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, rgba8888BytePointer);
+         bytedecoImage = new BytedecoImage(rgba8Mat);
          needNewTexture = true;
       }
    }
@@ -55,5 +58,10 @@ public class ImGuiOpenCVSwapVideoPanelData
    public Mat getRGBA8Mat()
    {
       return rgba8Mat;
+   }
+
+   public BytedecoImage getBytedecoImage()
+   {
+      return bytedecoImage;
    }
 }
