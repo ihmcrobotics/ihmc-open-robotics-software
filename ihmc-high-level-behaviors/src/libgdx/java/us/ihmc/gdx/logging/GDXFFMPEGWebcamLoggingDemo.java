@@ -218,8 +218,6 @@ public class GDXFFMPEGWebcamLoggingDemo
                ThreadTools.sleep((int) (avutil.av_q2d(logger.getFramePeriod()) * 1000));
             }
 
-            ThreadTools.sleepSeconds(2.0);
-
             logger.destroy();
             finalizing = false;
          }
