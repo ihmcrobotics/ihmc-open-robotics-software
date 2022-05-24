@@ -28,11 +28,14 @@ public class GDXFFMPEGWebcamLoggingDemo
    private final Activator nativesLoadedActivator = BytedecoTools.loadNativesOnAThread(opencv_core.class, ffmpeg.class);
    private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/main/resources");
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final boolean lossless = true;
+   private final boolean lossless = false;
+   private final int framerate = 15;
    private final FFMPEGLoggerDemoHelper ffmpegLoggerDemoHelper = new FFMPEGLoggerDemoHelper("FFMPEGWebcamLoggingDemo.webm",
-                                                                                            avutil.AV_PIX_FMT_BGR8,
+                                                                                            avutil.AV_PIX_FMT_BGR24,
+//                                                                                            avutil.AV_PIX_FMT_RGBA,
                                                                                             avutil.AV_PIX_FMT_YUV420P,
-                                                                                            lossless);
+                                                                                            lossless,
+                                                                                            framerate);
    private VideoCapture videoCapture;
    private BytedecoImage bgrImage;
    private int imageHeight = -1;
@@ -77,7 +80,7 @@ public class GDXFFMPEGWebcamLoggingDemo
 //                  videoCapture.set(opencv_videoio.CAP_PROP_FRAME_WIDTH, 1920.0);
 //                  videoCapture.set(opencv_videoio.CAP_PROP_FRAME_HEIGHT, 1080.0);
                   videoCapture.set(opencv_videoio.CAP_PROP_FOURCC, VideoWriter.fourcc((byte) 'M', (byte) 'J', (byte) 'P', (byte) 'G'));
-                  videoCapture.set(opencv_videoio.CAP_PROP_FPS, 30.0);
+                  videoCapture.set(opencv_videoio.CAP_PROP_FPS, framerate);
                   //                  videoCapture.set(opencv_videoio.CAP_PROP_FRAME_WIDTH, 1280.0);
                   //                  videoCapture.set(opencv_videoio.CAP_PROP_FRAME_HEIGHT, 720.0);
 
@@ -113,6 +116,8 @@ public class GDXFFMPEGWebcamLoggingDemo
 
                         data.updateOnImageUpdateThread(imageWidth, imageHeight);
                         opencv_imgproc.cvtColor(bgrImage.getBytedecoOpenCVMat(), data.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA, 0);
+
+//                        ffmpegLoggerDemoHelper.getLogger().put(data.getBytedecoImage());
                      });
                   });
 

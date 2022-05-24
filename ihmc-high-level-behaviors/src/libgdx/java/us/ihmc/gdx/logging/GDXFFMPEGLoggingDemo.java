@@ -28,10 +28,12 @@ public class GDXFFMPEGLoggingDemo
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private BytedecoImage image;
    private final boolean lossless = true;
+   private final int framerate = 30;
    private final FFMPEGLoggerDemoHelper ffmpegLoggerDemoHelper = new FFMPEGLoggerDemoHelper("FFMPEGLoggingDemo.webm",
                                                                                             avutil.AV_PIX_FMT_RGBA,
                                                                                             lossless ? avutil.AV_PIX_FMT_GBRP : avutil.AV_PIX_FMT_YUV420P,
-                                                                                            lossless);
+                                                                                            lossless,
+                                                                                            framerate);
    final Random random = new Random();
    final byte[] data = new byte[4];
    int index = 0;
