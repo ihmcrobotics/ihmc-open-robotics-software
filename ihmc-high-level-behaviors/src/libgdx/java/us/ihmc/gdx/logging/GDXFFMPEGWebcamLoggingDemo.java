@@ -47,6 +47,7 @@ public class GDXFFMPEGWebcamLoggingDemo
    private ImGuiOpenCVSwapVideoPanel swapCVPanel;
    private ImPlotStopwatchPlot readPerformancePlot;
    private ImPlotFrequencyPlot readFrequencyPlot;
+   private FFMPEGLogger logger;
 
    public GDXFFMPEGWebcamLoggingDemo()
    {
@@ -179,6 +180,16 @@ public class GDXFFMPEGWebcamLoggingDemo
                }
 
                loggerPutFrequencyPlot.renderImGuiWidgets();
+
+               if (logger != null)
+               {
+                  ImGui.text("Format name: " + logger.getFormatName());
+                  ImGui.text("Codec: " + logger.getCodecLongName());
+                  ImGui.text("Bit rate: " + logger.getBitRate());
+                  ImGui.text("Picture group size (GOP): " + logger.getPictureGroupSize());
+                  ImGui.text("Pixel format: planar YUV 4:2:0, 12bpp, (1 Cr & Cb sample per 2x2 Y samples)");
+                  ImGui.text("Global header: " + logger.getFormatWantsGlobalHeader());
+               }
             }
          }
 
@@ -190,11 +201,7 @@ public class GDXFFMPEGWebcamLoggingDemo
          private void loggingThread()
          {
             boolean lossless = true;
-            FFMPEGLogger logger = new FFMPEGLogger(imageWidth, imageHeight, lossless, framerate.get(), fileName);
-
-            AVRational msBetweenFrames = new AVRational();
-            msBetweenFrames.num(1);
-            msBetweenFrames.den(framerate.get());
+            logger = new FFMPEGLogger(imageWidth, imageHeight, lossless, framerate.get(), fileName);
 
             finalizing = true;
 
@@ -208,12 +215,12 @@ public class GDXFFMPEGWebcamLoggingDemo
                });
 
                // Using an AVRational helps ensure that we calculate fps the same way the logger does
-               ThreadTools.sleep((int) (avutil.av_q2d(msBetweenFrames) * 1000));
+               ThreadTools.sleep((int) (avutil.av_q2d(logger.getFramePeriod()) * 1000));
             }
 
             ThreadTools.sleepSeconds(2.0);
 
-            logger.close();
+            logger.destroy();
             finalizing = false;
          }
 
