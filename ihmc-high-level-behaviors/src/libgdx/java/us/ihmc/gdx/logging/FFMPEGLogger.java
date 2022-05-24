@@ -103,6 +103,10 @@ public class FFMPEGLogger
       avEncoderContext.width(sourceVideoWidth);
       avEncoderContext.height(sourceVideoHeight);
 
+      //Enable FFMPEG-decided multithreading (in testing, doubles performance)
+      avEncoderContext.thread_type(AVCodecContext.FF_THREAD_SLICE);
+      avEncoderContext.thread_count(0);
+
       framePeriod = new AVRational();
       framePeriod.num(1);
       framePeriod.den(framerate);
