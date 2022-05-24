@@ -6,7 +6,9 @@ import org.bytedeco.ffmpeg.avutil.AVRational;
 import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
@@ -34,8 +36,10 @@ public class GDXFFMPEGLoggingDemo
    private ImPlotFrequencyPlot loggerPutFrequencyPlot;
    private final ImInt framerate = new ImInt(30);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
-   private static final String logDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
+   private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+   private final String logDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
+   private final Stopwatch expectedVideoLengthStopwatch = new Stopwatch();
+   private double expectedVideoLength = 0.0;
    private String fileName;
    private BytedecoImage image;
    private volatile boolean logging = false;
@@ -124,6 +128,7 @@ public class GDXFFMPEGLoggingDemo
                   ImGui.text("Picture group size (GOP): " + logger.getPictureGroupSize());
                   ImGui.text("Pixel format: planar YUV 4:2:0, 12bpp, (1 Cr & Cb sample per 2x2 Y samples)");
                   ImGui.text("Global header: " + logger.getFormatWantsGlobalHeader());
+                  ImGui.text("Expected video length: " + FormattingTools.getFormattedDecimal2D(expectedVideoLength) + " s");
                }
             }
          }
@@ -147,6 +152,7 @@ public class GDXFFMPEGLoggingDemo
             int index = 0;
             finalizing = true;
 
+            expectedVideoLengthStopwatch.start();
             while (logging)
             {
                if (index % 10 == 0)
@@ -169,6 +175,7 @@ public class GDXFFMPEGLoggingDemo
                // Using an AVRational helps ensure that we calculate fps the same way the logger does
                ThreadTools.sleep((int) (avutil.av_q2d(msBetweenFrames) * 1000));
             }
+            expectedVideoLength = expectedVideoLengthStopwatch.totalElapsed();
 
             logger.destroy();
             finalizing = false;
