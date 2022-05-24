@@ -70,7 +70,7 @@ public class FFMPEGLogger
 
       int avDictFlags = 0;
       avDictionary = new AVDictionary();
-      avutil.av_dict_set(avDictionary, "lossless", lossless ? "1" : "0", avDictFlags); // TODO this is maybe wrong
+      avutil.av_dict_set(avDictionary, "lossless", lossless ? "1" : "0", avDictFlags);
 
       // Allocate format context for an output format
       avFormatContext = new AVFormatContext();
