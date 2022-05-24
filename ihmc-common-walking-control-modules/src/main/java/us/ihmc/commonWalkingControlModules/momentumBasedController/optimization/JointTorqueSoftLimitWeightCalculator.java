@@ -27,9 +27,9 @@ public class JointTorqueSoftLimitWeightCalculator implements JointTorqueMinimiza
 
       oneDoFJointTorqueWeights = new YoDouble[indexedOneDoFJoints.length];
 
-      for (int i = 0; i < indexedJoints.length; i++)
+      for (int i = 0; i < indexedOneDoFJoints.length; i++)
       {
-         JointBasics joint = indexedJoints[i];
+         JointBasics joint = indexedOneDoFJoints[i];
          oneDoFJointTorqueWeights[i] = new YoDouble(joint.getName() + "TorqueWeight", registry);
       }
    }
