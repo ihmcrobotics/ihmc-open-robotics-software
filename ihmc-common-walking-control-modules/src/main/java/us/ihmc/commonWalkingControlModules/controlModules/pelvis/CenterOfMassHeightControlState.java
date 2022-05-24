@@ -107,7 +107,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
 
       // TODO: Fix low level stuff so that we are truly controlling pelvis height and not CoM height.
       controlPelvisHeightInsteadOfCoMHeight.set(walkingControllerParameters.controlPelvisHeightInsteadOfCoMHeight());
-      controlHeightWithMomentum.set(walkingControllerParameters.controlHeightWithMomentum());
+      controlHeightWithMomentum.set(false); //walkingControllerParameters.controlHeightWithMomentum());
 
       double controlDT = controllerToolbox.getControlDT();
       comHeightTimeDerivativesSmoother = new CoMHeightTimeDerivativesSmoother(controlDT, registry);
