@@ -20,7 +20,6 @@ import org.bytedeco.ffmpeg.swscale.SwsContext;
 import org.bytedeco.ffmpeg.swscale.SwsFilter;
 import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.javacpp.IntPointer;
-import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacpp.PointerPointer;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
@@ -37,8 +36,8 @@ import java.nio.file.Paths;
  */
 public class FFMPEGLogger
 {
-   private int videoWidth;
-   private int videoHeight;
+   private final int sourceVideoWidth;
+   private final int sourceVideoHeight;
    private final String fileName;
    private final String formatName;
    private final int bitRate = 400000;
@@ -50,21 +49,19 @@ public class FFMPEGLogger
    private boolean isInitialized = false;
    private final AVDictionary avDictionary;
    private final AVFormatContext avFormatContext;
-   private String codecLongName;
-   private AVPacket avPacket;
-   private AVStream avStream;
-   private AVCodecContext avEncoderContext;
+   private final String codecLongName;
+   private final AVPacket avPacket;
+   private final AVStream avStream;
+   private final AVCodecContext avEncoderContext;
    private AVFrame avFrameToBeEncoded;
    private AVFrame avFrameToBeScaled;
    private SwsContext swsContext;
    private int presentationTimestamp = 0;
-   private AVFrame rgbTempFrame;
-   private SwsContext rgbSwsContext;
 
-   public FFMPEGLogger(int videoWidth, int videoHeight, boolean lossless, int framerate, String fileName)
+   public FFMPEGLogger(int sourceVideoWidth, int sourceVideoHeight, boolean lossless, int framerate, String fileName)
    {
-      this.videoWidth = videoWidth;
-      this.videoHeight = videoHeight;
+      this.sourceVideoWidth = sourceVideoWidth;
+      this.sourceVideoHeight = sourceVideoHeight;
       this.fileName = fileName;
       formatName = "webm";
 
@@ -102,8 +99,8 @@ public class FFMPEGLogger
 
       avEncoderContext.codec_id(avFormatContext.video_codec_id());
       avEncoderContext.bit_rate(bitRate); // This is what they've used in all the examples but is arbitrary other than that
-      avEncoderContext.width(videoWidth);
-      avEncoderContext.height(videoHeight);
+      avEncoderContext.width(sourceVideoWidth);
+      avEncoderContext.height(sourceVideoHeight);
 
       framePeriod = new AVRational();
       framePeriod.num(1);
@@ -124,7 +121,7 @@ public class FFMPEGLogger
    /**
     * The first time a frame is put will take longer than the others because of initialization
     */
-   public boolean put(BytedecoImage image)
+   public boolean put(BytedecoImage sourceImage)
    {
       if (!isInitialized)
       {
@@ -135,8 +132,8 @@ public class FFMPEGLogger
 
          avFrameToBeEncoded = avutil.av_frame_alloc();
          avFrameToBeEncoded.format(encoderAVPixelFormat);
-         avFrameToBeEncoded.width(videoWidth);
-         avFrameToBeEncoded.height(videoHeight);
+         avFrameToBeEncoded.width(sourceVideoWidth);
+         avFrameToBeEncoded.height(sourceVideoHeight);
 
          int bufferSizeAlignment = 0;
          returnCode = avutil.av_frame_get_buffer(avFrameToBeEncoded, bufferSizeAlignment);
@@ -165,8 +162,8 @@ public class FFMPEGLogger
          {
             avFrameToBeScaled = avutil.av_frame_alloc();
             avFrameToBeScaled.format(sourceAVPixelFormat);
-            avFrameToBeScaled.width(videoWidth);
-            avFrameToBeScaled.height(videoHeight);
+            avFrameToBeScaled.width(sourceVideoWidth);
+            avFrameToBeScaled.height(sourceVideoHeight);
 
             returnCode = avutil.av_frame_get_buffer(avFrameToBeScaled, bufferSizeAlignment);
             FFMPEGTools.checkNonZeroError(returnCode, "Allocating new buffer for tempAVFrame");
@@ -201,14 +198,14 @@ public class FFMPEGLogger
 
       if (swsContext == null)
       {
-         fillImage(avFrameToBeEncoded, image, videoWidth, videoHeight);
+         avFrameToBeEncoded.data(0, sourceImage.getBytedecoByteBufferPointer());
       }
       else
       {
          returnCode = avutil.av_frame_make_writable(avFrameToBeScaled);
          FFMPEGTools.checkNonZeroError(returnCode, "Ensuring frame data is writable");
 
-         fillImage(avFrameToBeScaled, image, videoWidth, videoHeight);
+         avFrameToBeScaled.data(0, sourceImage.getBytedecoByteBufferPointer());
 
          PointerPointer sourceSlice = avFrameToBeScaled.data();
          IntPointer sourceStride = avFrameToBeScaled.linesize();
@@ -252,35 +249,12 @@ public class FFMPEGLogger
       return returnCode == 0;
    }
 
-   private void fillImage(AVFrame avFrame, BytedecoImage image, int width, int height)
-   {
-      avFrame.data(0, image.getBytedecoByteBufferPointer());
-//      Pointer data = avFrame.data().get();
-//      for (int y = 0; y < height; y++)
-//      {
-//         for (int x = 0; x < width; x++)
-//         {
-//            int r = image.getBackingDirectByteBuffer().get(4 * (y * width + x));
-//            int g = image.getBackingDirectByteBuffer().get(4 * (y * width + x) + 1);
-//            int b = image.getBackingDirectByteBuffer().get(4 * (y * width + x) + 2);
-//            int a = image.getBackingDirectByteBuffer().get(4 * (y * width + x) + 3);
-//            //Note: x * 4 because 4 bytes per pixel
-//            data.getPointer(y * avFrame.linesize().get() + x * 4).fill(r);
-//            data.getPointer(y * avFrame.linesize().get() + x * 4 + 1).fill(g);
-//            data.getPointer(y * avFrame.linesize().get() + x * 4 + 2).fill(b);
-//            data.getPointer(y * avFrame.linesize().get() + x * 4 + 3).fill(a);
-//         }
-//      }
-   }
-
    public void destroy()
    {
       LogTools.info("Destroying...");
       avformat.avio_close(avFormatContext.pb());
       avformat.avformat_free_context(avFormatContext);
       avcodec.avcodec_free_context(avEncoderContext);
-      avutil.av_frame_free(rgbTempFrame);
-      swscale.sws_freeContext(rgbSwsContext);
       avutil.av_frame_free(avFrameToBeEncoded);
       avutil.av_frame_free(avFrameToBeScaled);
       avutil.av_frame_free(avFrameToBeScaled);
