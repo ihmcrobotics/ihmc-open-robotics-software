@@ -57,7 +57,7 @@ public class SpringFlamingoSimulation
 //   private static TerrainIfLeapOfFaithController terrainIfLeapOfFaith = TerrainIfLeapOfFaithController.SLOPE_AND_STEPS;
 //   private static TerrainIfLeapOfFaithController terrainIfLeapOfFaith = TerrainIfLeapOfFaithController.SLOPE;
 //   private static TerrainIfLeapOfFaithController terrainIfLeapOfFaith = TerrainIfLeapOfFaithController.FLAT;
-   
+
    public static double DT = 0.0001;
    public static int TICKS_PER_RECORD = 10;
    public static int TICKS_PER_CONTROL = 10;
