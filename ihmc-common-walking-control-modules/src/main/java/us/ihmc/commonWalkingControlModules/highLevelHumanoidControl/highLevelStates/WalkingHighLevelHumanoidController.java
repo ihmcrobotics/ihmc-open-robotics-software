@@ -328,15 +328,15 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       pPoseShoulderYaw.set(-0.3);
       pPoseElbow.set(-1.0);
 
-      pPoseSpineRollKp.set(200.0);
-      pPoseSpineYawKp.set(200.0);
+      pPoseSpineRollKp.set(50.0);
+      pPoseSpineYawKp.set(300.0);
       pPoseShoulderPitchKp.set(5);
       pPoseShoulderRollKp.set(10);
       pPoseShoulderYawKp.set(10);
       pPoseElbowKp.set(5);
       
-      pPoseSpineRollKd.set(30.0);
-      pPoseSpineYawKd.set(30.0);
+      pPoseSpineRollKd.set(7.5);
+      pPoseSpineYawKd.set(45.0);
       pPoseElbowKd.set(5);
       pPoseShoulderPitchKd.set(2);
       pPoseShoulderRollKd.set(4);
