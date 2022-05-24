@@ -112,7 +112,8 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
 
    private List<EventTask> createCompleteEventList()
    {
-      return Arrays.asList(createStepInPlace(), createGoToCruiseVelocity(), createTurn180Cruise(), createSpeedUpToMaxStraight(), createSlowDownToZero(),
+      return Arrays.asList(//createStepInPlace(), 
+                           createGoToCruiseVelocity(), createTurn180Cruise(), createSpeedUpToMaxStraight(), createSlowDownToZero(),
                            createSidestepLeft(), createSlowDownToZero(), createSidestepRight(), createSlowDownToZero(), createTurnInPlace180(),
                            createDiagonallyRight45(), createSlowDownToZero(), createDiagonallyLeft45(), createSlowDownToZero(), createWaveCruise(),
                            createSlowDownToZero(), createTurnInPlace180(), createChangeHeadingWalkingStraight(), createSlowDownToZero());
