@@ -280,13 +280,13 @@ public class MotionQPInputCalculator
       return true;
    }
 
-   public boolean computeGravityCompensationMinimization(QPInputTypeA qpInputToPack, double weight, boolean projectIntoNullspace)
+   public boolean computeGravityCompensationMinimization(QPInputTypeA qpInputToPack, double weight, boolean projectIntoNullspace, double dt)
    {
       if (weight <= 0.0)
          return false;
 
       qpInputToPack.reshape(numberOfDoFs);
-      qpInputToPack.taskJacobian.set(gravityGradientCalculator.getTauGradientMatrix());
+      CommonOps_DDRM.scale(dt, gravityGradientCalculator.getTauGradientMatrix(), qpInputToPack.taskJacobian);
       qpInputToPack.taskObjective.set(gravityGradientCalculator.getTauMatrix());
       CommonOps_DDRM.changeSign(qpInputToPack.taskObjective);
       qpInputToPack.setUseWeightScalar(true);
@@ -311,13 +311,14 @@ public class MotionQPInputCalculator
 
    public boolean computeGravityCompensationMinimization(QPInputTypeA qpInputToPack,
                                                          JointTorqueMinimizationWeightCalculator weightCalculator,
-                                                         boolean projectIntoNullspace)
+                                                         boolean projectIntoNullspace,
+                                                         double dt)
    {
       if (weightCalculator.isWeightZero())
          return false;
 
       qpInputToPack.reshape(numberOfDoFs);
-      qpInputToPack.taskJacobian.set(gravityGradientCalculator.getTauGradientMatrix());
+      CommonOps_DDRM.scale(dt, gravityGradientCalculator.getTauGradientMatrix(), qpInputToPack.taskJacobian);
       qpInputToPack.taskObjective.set(gravityGradientCalculator.getTauMatrix());
       CommonOps_DDRM.changeSign(qpInputToPack.taskObjective);
       qpInputToPack.taskWeightMatrix.zero();
