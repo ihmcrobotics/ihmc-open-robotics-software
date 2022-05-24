@@ -12,16 +12,8 @@ public class FFMPEGTools
 {
    public static void checkError(int returnCode, Pointer pointerToCheck, String message)
    {
-      if (returnCode != 0)
-      {
-         Supplier<String> messageSupplier = StringTools.format("{}: {}", FFMPEGTools.getErrorCodeString(returnCode), message);
-         LogTools.error(messageSupplier);
-         throw new RuntimeException(messageSupplier.get());
-      }
-      else
-      {
-         checkPointer(pointerToCheck, message);
-      }
+      checkNonZeroError(returnCode, message);
+      checkPointer(pointerToCheck, message);
    }
 
    public static void checkPointer(Pointer pointerToCheck, String message)
@@ -35,6 +27,16 @@ public class FFMPEGTools
       else if (pointerToCheck.isNull())
       {
          Supplier<String> messageSupplier = StringTools.format("Pointer isNull() returned true: {}: {}", pointerToCheck.getClass().getSimpleName(), message);
+         LogTools.error(messageSupplier);
+         throw new RuntimeException(messageSupplier.get());
+      }
+   }
+
+   public static void checkNonZeroError(int returnCode, String message)
+   {
+      if (returnCode != 0)
+      {
+         Supplier<String> messageSupplier = StringTools.format("Code {} {}: {}", returnCode, FFMPEGTools.getErrorCodeString(returnCode), message);
          LogTools.error(messageSupplier);
          throw new RuntimeException(messageSupplier.get());
       }

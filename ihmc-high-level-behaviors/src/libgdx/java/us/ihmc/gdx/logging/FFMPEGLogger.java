@@ -2,6 +2,7 @@ package us.ihmc.gdx.logging;
 
 import org.bytedeco.ffmpeg.avcodec.AVCodec;
 import org.bytedeco.ffmpeg.avcodec.AVCodecContext;
+import org.bytedeco.ffmpeg.avcodec.AVCodecParameters;
 import org.bytedeco.ffmpeg.avcodec.AVPacket;
 import org.bytedeco.ffmpeg.avformat.AVFormatContext;
 import org.bytedeco.ffmpeg.avformat.AVIOContext;
@@ -18,10 +19,12 @@ import org.bytedeco.ffmpeg.global.swscale;
 import org.bytedeco.ffmpeg.swscale.SwsContext;
 import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.javacpp.Pointer;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.nio.FileTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 
-import java.io.*;
+import java.nio.file.Paths;
 
 /**
  * Doxygen:
@@ -31,6 +34,8 @@ import java.io.*;
  */
 public class FFMPEGLogger
 {
+   private int videoWidth;
+   private int videoHeight;
    private final String fileName;
    private final String formatName;
    private final int bitRate = 400000;
@@ -45,15 +50,17 @@ public class FFMPEGLogger
    private AVPacket tempAVPacket;
    private AVStream avStream;
    private AVCodecContext avEncoderContext;
-   private AVFrame frame;
-   private AVFrame tempFrame;
+   private AVFrame avFrame;
+   private AVFrame tempAVFrame;
    private SwsContext swsContext;
    private int nextPts;
    private AVFrame rgbTempFrame;
    private SwsContext rgbSwsContext;
 
-   public FFMPEGLogger(int width, int height, boolean lossless, int framerate, String fileName)
+   public FFMPEGLogger(int videoWidth, int videoHeight, boolean lossless, int framerate, String fileName)
    {
+      this.videoWidth = videoWidth;
+      this.videoHeight = videoHeight;
       this.fileName = fileName;
       formatName = "webm";
 
@@ -84,13 +91,15 @@ public class FFMPEGLogger
       avStream = avformat.avformat_new_stream(avFormatContext, null);
       FFMPEGTools.checkPointer(avStream, "Adding a new stream");
 
-      int numberOfStreams = avFormatContext.nb_streams();
-      avStream.id(numberOfStreams - 1); // I don't know what this does at all, but it's in the example
+      // FIXME Remove this? We were just setting the id to 0 anyway
+      // Documentation says replaced by libavformat if left unset
+      // int numberOfStreams = avFormatContext.nb_streams();
+      // avStream.id(numberOfStreams - 1); // I don't know what this does at all, but it's in the example
 
       avEncoderContext.codec_id(avFormatContext.video_codec_id());
       avEncoderContext.bit_rate(bitRate); // This is what they've used in all the examples but is arbitrary other than that
-      avEncoderContext.width(width);
-      avEncoderContext.height(height);
+      avEncoderContext.width(videoWidth);
+      avEncoderContext.height(videoHeight);
 
       framePeriod = new AVRational();
       framePeriod.num(1);
@@ -108,83 +117,53 @@ public class FFMPEGLogger
       }
    }
 
-   /***
+   /**
     * The first time a frame is put will take longer than the others because of initialization
     */
    public boolean put(BytedecoImage image)
    {
       if (!isInitialized)
       {
-         AVDictionary optAVDictionary = new AVDictionary();
-         avutil.av_dict_copy(optAVDictionary, avDictionary, 0);
+         isInitialized = true;
 
-         try
-         {
-            if (avcodec.avcodec_open2(avEncoderContext, avEncoderContext.codec(), optAVDictionary) > 0) // TODO codec may be wrong here
-            {
-               LogTools.error("Could not open video codec. Logging will not begin.");
-               destroy();
-               return false;
-            }
-         }
-         finally
-         {
-            avutil.av_dict_free(optAVDictionary); //Free dictionary even if we return false up there
-         }
+         int returnCode = avcodec.avcodec_open2(avEncoderContext, avEncoderContext.codec(), avDictionary);
+         FFMPEGTools.checkNonZeroError(returnCode, "Initializing codec context to use the codec");
 
-         AVFrame pic = avutil.av_frame_alloc();
-         pic.format(avEncoderContext.pix_fmt());
-         pic.width(avEncoderContext.width());
-         pic.height(avEncoderContext.height());
+         avFrame = avutil.av_frame_alloc();
+         avFrame.format(avPixelFormat);
+         avFrame.width(videoWidth);
+         avFrame.height(videoHeight);
 
-         frame = pic;
+         tempAVFrame = avutil.av_frame_alloc();
+         tempAVFrame.format(avPixelFormat);
+         tempAVFrame.width(videoWidth);
+         tempAVFrame.height(videoHeight);
 
-         AVFrame tempPic = avutil.av_frame_alloc();
-         tempPic.format(avutil.AV_PIX_FMT_YUV420P);
-         tempPic.width(avEncoderContext.width());
-         tempPic.height(avEncoderContext.height());
+         int bufferSizeAlignment = 0;
+         returnCode = avutil.av_frame_get_buffer(avFrame, bufferSizeAlignment);
+         FFMPEGTools.checkNonZeroError(returnCode, "Allocating new buffer for avFrame");
 
-         tempFrame = tempPic;
+         returnCode = avutil.av_frame_get_buffer(tempAVFrame, bufferSizeAlignment);
+         FFMPEGTools.checkNonZeroError(returnCode, "Allocating new buffer for tempAVFrame");
 
-         if (avutil.av_frame_get_buffer(pic, 0) > 0 || avutil.av_frame_get_buffer(tempPic, 0) > 0)
-         {
-            LogTools.error("Could not get framebuffer. Logging will not begin.");
-            destroy();
-            return false;
-         }
+         AVCodecParameters avCodecParameters = avStream.codecpar();
+         returnCode = avcodec.avcodec_parameters_from_context(avCodecParameters, avEncoderContext);
+         FFMPEGTools.checkNonZeroError(returnCode, "Setting stream parameters to codec context values");
 
-         if (avcodec.avcodec_parameters_from_context(avStream.codecpar(), avEncoderContext) > 0)
-         {
-            LogTools.error("Could not copy parameters to muxer. Logging will not begin.");
-            destroy();
-            return false;
-         }
+         // Dump information about the stream to a file
+         int streamIndex = 0;
+         int isContextOutput = 1; // Our context is output; we are streaming to file after all
+         avformat.av_dump_format(avFormatContext, streamIndex, fileName, isContextOutput);
 
-         avformat.av_dump_format(avFormatContext, 0, fileName, 1); //this is not freeing the memory - that's avformat_free_context (called during close())
+         FileTools.ensureDirectoryExists(Paths.get(fileName).getParent(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
 
-         try
-         {
-            new File(fileName).getParentFile().mkdirs();
-         }
-         catch (Exception ignored) {}
+         AVIOContext avBytestreamIOContext = new AVIOContext();
+         returnCode = avformat.avio_open(avBytestreamIOContext, fileName, avformat.AVIO_FLAG_WRITE);
+         FFMPEGTools.checkError(returnCode, avBytestreamIOContext, "Creating and initializing the I/O context");
+         avFormatContext.pb(avBytestreamIOContext);
 
-         AVIOContext pb = new AVIOContext();
-         int ret = 0;
-         if ((ret = avformat.avio_open(pb, fileName, avformat.AVIO_FLAG_WRITE)) < 0)
-         {
-            LogTools.error("{}: Could not open file for writing. Logging will not begin.", FFMPEGTools.getErrorCodeString(ret));
-            destroy();
-            return false;
-         }
-         avFormatContext.pb(pb);
-
-         if ((ret = avformat.avformat_write_header(avFormatContext, optAVDictionary)) < 0) {
-            LogTools.error("{}: Could not write to file. Logging will not begin.", FFMPEGTools.getErrorCodeString(ret));
-            destroy();
-            return false;
-         }
-
-         isInitialized = true; //Initialization is now finished. Note that !isInitialized && isClosed is an error state
+         returnCode = avformat.avformat_write_header(avFormatContext, avDictionary);
+         FFMPEGTools.checkNonZeroError(returnCode, "Allocating the stream private data and writing the stream header to the output media file");
       }
 
       //Encode video
@@ -275,7 +254,7 @@ public class FFMPEGLogger
 
    private AVFrame getVideoFrame(BytedecoImage image)
    {
-      if (avutil.av_frame_make_writable(frame) < 0)
+      if (avutil.av_frame_make_writable(avFrame) < 0)
       {
          LogTools.error("Could not make frame writable. Logging will stop.");
          destroy();
@@ -304,33 +283,32 @@ public class FFMPEGLogger
             }
          }
 
-         fillImage(tempFrame, image, avEncoderContext.width(), avEncoderContext.height());
+         fillImage(tempAVFrame, image, avEncoderContext.width(), avEncoderContext.height());
 
-         swscale.sws_scale(swsContext, tempFrame.data(), tempFrame.linesize(), 0, avEncoderContext.height(), frame.data(), frame.linesize());
+         swscale.sws_scale(swsContext, tempAVFrame.data(), tempAVFrame.linesize(), 0, avEncoderContext.height(), avFrame.data(), avFrame.linesize());
       }
       else
       {
-         fillImage(frame, image, avEncoderContext.width(), avEncoderContext.height());
+         fillImage(avFrame, image, avEncoderContext.width(), avEncoderContext.height());
       }
 
-      frame.pts(nextPts);
+      avFrame.pts(nextPts);
       nextPts = nextPts + 1;
 
-      return frame;
+      return avFrame;
    }
 
    public void destroy()
    {
-      LogTools.info("Closing logger (if you did not expect this to happen, something has gone wrong, and logging will stop.)");
-
+      LogTools.info("Destroying...");
       avformat.avio_close(avFormatContext.pb());
       avformat.avformat_free_context(avFormatContext);
       avcodec.avcodec_free_context(avEncoderContext);
       avutil.av_frame_free(rgbTempFrame);
       swscale.sws_freeContext(rgbSwsContext);
-      avutil.av_frame_free(frame);
-      avutil.av_frame_free(tempFrame);
-      avutil.av_frame_free(tempFrame);
+      avutil.av_frame_free(avFrame);
+      avutil.av_frame_free(tempAVFrame);
+      avutil.av_frame_free(tempAVFrame);
       avcodec.av_packet_free(tempAVPacket);
       swscale.sws_freeContext(swsContext);
    }
