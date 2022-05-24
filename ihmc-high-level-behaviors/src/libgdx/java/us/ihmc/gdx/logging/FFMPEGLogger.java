@@ -138,17 +138,9 @@ public class FFMPEGLogger
          avFrameToBeEncoded.width(videoWidth);
          avFrameToBeEncoded.height(videoHeight);
 
-         avFrameToBeScaled = avutil.av_frame_alloc();
-         avFrameToBeScaled.format(sourceAVPixelFormat);
-         avFrameToBeScaled.width(videoWidth);
-         avFrameToBeScaled.height(videoHeight);
-
          int bufferSizeAlignment = 0;
          returnCode = avutil.av_frame_get_buffer(avFrameToBeEncoded, bufferSizeAlignment);
          FFMPEGTools.checkNonZeroError(returnCode, "Allocating new buffer for avFrame");
-
-         returnCode = avutil.av_frame_get_buffer(avFrameToBeScaled, bufferSizeAlignment);
-         FFMPEGTools.checkNonZeroError(returnCode, "Allocating new buffer for tempAVFrame");
 
          AVCodecParameters avCodecParameters = avStream.codecpar();
          returnCode = avcodec.avcodec_parameters_from_context(avCodecParameters, avEncoderContext);
@@ -171,6 +163,14 @@ public class FFMPEGLogger
 
          if (sourceAVPixelFormat != encoderAVPixelFormat)
          {
+            avFrameToBeScaled = avutil.av_frame_alloc();
+            avFrameToBeScaled.format(sourceAVPixelFormat);
+            avFrameToBeScaled.width(videoWidth);
+            avFrameToBeScaled.height(videoHeight);
+
+            returnCode = avutil.av_frame_get_buffer(avFrameToBeScaled, bufferSizeAlignment);
+            FFMPEGTools.checkNonZeroError(returnCode, "Allocating new buffer for tempAVFrame");
+
             int sourceFormat = sourceAVPixelFormat;
             int sourceVideoWidth = avEncoderContext.width();
             int sourceVideoHeight = avEncoderContext.height();
@@ -254,22 +254,23 @@ public class FFMPEGLogger
 
    private void fillImage(AVFrame avFrame, BytedecoImage image, int width, int height)
    {
-      for (int y = 0; y < height; y++)
-      {
-         for (int x = 0; x < width; x++)
-         {
-            int r = image.getBackingDirectByteBuffer().get(4 * (y * width + x));
-            int g = image.getBackingDirectByteBuffer().get(4 * (y * width + x) + 1);
-            int b = image.getBackingDirectByteBuffer().get(4 * (y * width + x) + 2);
-            int a = image.getBackingDirectByteBuffer().get(4 * (y * width + x) + 3);
-            //Note: x * 4 because 4 bytes per pixel
-            Pointer data = avFrame.data().get();
-            data.getPointer(y * avFrame.linesize().get() + x * 4).fill(r);
-            data.getPointer(y * avFrame.linesize().get() + x * 4 + 1).fill(g);
-            data.getPointer(y * avFrame.linesize().get() + x * 4 + 2).fill(b);
-            data.getPointer(y * avFrame.linesize().get() + x * 4 + 3).fill(a);
-         }
-      }
+      avFrame.data(0, image.getBytedecoByteBufferPointer());
+//      Pointer data = avFrame.data().get();
+//      for (int y = 0; y < height; y++)
+//      {
+//         for (int x = 0; x < width; x++)
+//         {
+//            int r = image.getBackingDirectByteBuffer().get(4 * (y * width + x));
+//            int g = image.getBackingDirectByteBuffer().get(4 * (y * width + x) + 1);
+//            int b = image.getBackingDirectByteBuffer().get(4 * (y * width + x) + 2);
+//            int a = image.getBackingDirectByteBuffer().get(4 * (y * width + x) + 3);
+//            //Note: x * 4 because 4 bytes per pixel
+//            data.getPointer(y * avFrame.linesize().get() + x * 4).fill(r);
+//            data.getPointer(y * avFrame.linesize().get() + x * 4 + 1).fill(g);
+//            data.getPointer(y * avFrame.linesize().get() + x * 4 + 2).fill(b);
+//            data.getPointer(y * avFrame.linesize().get() + x * 4 + 3).fill(a);
+//         }
+//      }
    }
 
    public void destroy()
