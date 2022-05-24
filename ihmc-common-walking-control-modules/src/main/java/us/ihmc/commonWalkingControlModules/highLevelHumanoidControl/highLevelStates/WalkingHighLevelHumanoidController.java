@@ -194,7 +194,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
                                              WalkingControllerParameters walkingControllerParameters,
                                              HighLevelHumanoidControllerToolbox controllerToolbox)
    {
-      useNaturalPostureCommand.set(true);
+      useNaturalPostureCommand.set(false);
       usePelvisPrivilegedPoseCommand.set(false);
       useBodyManagerCommands.set(true);
       usePelvisOrientationCommand.set(true);
