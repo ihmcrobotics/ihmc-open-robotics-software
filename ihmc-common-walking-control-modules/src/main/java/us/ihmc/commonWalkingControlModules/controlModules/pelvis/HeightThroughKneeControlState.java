@@ -109,15 +109,18 @@ public class HeightThroughKneeControlState implements PelvisAndCenterOfMassHeigh
    
    private Vector3DReadOnly pelvisTaskpaceFeedbackWeight;
    private final FullHumanoidRobotModel fullRobotModel;
-   
+
    private final SideDependentList<OneDoFJointBasics> kneeJoints;
-   private final YoDouble desiredSupportKneeAngle = new YoDouble("desiredSupportKneeAngle", registry);
+   private final YoDouble leftDesiredSupportKneeAngle = new YoDouble("leftDesiredSupportKneeAngle", registry);
+   private final YoDouble rightDesiredSupportKneeAngle = new YoDouble("rightDesiredSupportKneeAngle", registry);
+   private final SideDependentList<YoDouble> desiredSupportKneeAngles = new SideDependentList<YoDouble>(leftDesiredSupportKneeAngle, rightDesiredSupportKneeAngle);
 
    public HeightThroughKneeControlState(HighLevelHumanoidControllerToolbox controllerToolbox,
                                          WalkingControllerParameters walkingControllerParameters,
                                          YoRegistry parentRegistry)
    {
-      desiredSupportKneeAngle.set(0.2);
+      leftDesiredSupportKneeAngle.set(0.5);
+      rightDesiredSupportKneeAngle.set(0.5);
 
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       fullRobotModel = controllerToolbox.getFullRobotModel();
@@ -479,7 +482,7 @@ public class HeightThroughKneeControlState implements PelvisAndCenterOfMassHeigh
       supportKneeControlCommand.setWeightForSolver(10.0);
 //      supportKneeControlCommand.setInverseDynamics(kneeJoints.get(kneeSideToControl.getValue()).getQ()+0.01, kneeJoints.get(kneeSideToControl.getValue()).getQ(), 0.0);
 //      supportKneeControlCommand.setInverseDynamics(0.4, kneeJoints.get(kneeSideToControl.getValue()).getQd(), 0.0);
-      supportKneeControlCommand.setInverseDynamics(desiredSupportKneeAngle.getValue(), 0.0, 0.0);
+      supportKneeControlCommand.setInverseDynamics(desiredSupportKneeAngles.get(kneeSideToControl.getValue()).getValue(), 0.0, 0.0);
       
       OneDoFJointFeedbackControlCommand nonSupportKneeControlCommand = kneeControlCommands.get(kneeSideToControl.getValue().getOppositeSide());
 //      nonSupportKneeControlCommand.setInverseDynamics(kneeJoints.get(kneeSideToControl.getValue().getOppositeSide()).getQ()+0.01, kneeJoints.get(kneeSideToControl.getValue().getOppositeSide()).getQd(), 0.0);
@@ -488,7 +491,7 @@ public class HeightThroughKneeControlState implements PelvisAndCenterOfMassHeigh
       if (isInDoubleSupport)
       {
          nonSupportKneeControlCommand.setWeightForSolver(1.0);
-         nonSupportKneeControlCommand.setInverseDynamics(desiredSupportKneeAngle.getValue(), 0.0, 0.0); 
+         nonSupportKneeControlCommand.setInverseDynamics(desiredSupportKneeAngles.get(kneeSideToControl.getValue().getOppositeSide()).getValue(), 0.0, 0.0); 
       }
       else
       {
