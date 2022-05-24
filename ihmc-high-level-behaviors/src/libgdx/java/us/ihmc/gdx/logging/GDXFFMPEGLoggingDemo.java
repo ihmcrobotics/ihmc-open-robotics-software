@@ -2,6 +2,7 @@ package us.ihmc.gdx.logging;
 
 import imgui.ImGui;
 import org.bytedeco.ffmpeg.ffmpeg;
+import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
@@ -26,7 +27,11 @@ public class GDXFFMPEGLoggingDemo
    private GDXCVImagePanel imagePanel;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private BytedecoImage image;
-   private final FFMPEGLoggerDemoHelper ffmpegLoggerDemoHelper = new FFMPEGLoggerDemoHelper("FFMPEGLoggingDemo");
+   private final boolean lossless = true;
+   private final FFMPEGLoggerDemoHelper ffmpegLoggerDemoHelper = new FFMPEGLoggerDemoHelper("FFMPEGLoggingDemo.webm",
+                                                                                            avutil.AV_PIX_FMT_RGBA,
+                                                                                            lossless ? avutil.AV_PIX_FMT_GBRP : avutil.AV_PIX_FMT_YUV420P,
+                                                                                            lossless);
    final Random random = new Random();
    final byte[] data = new byte[4];
    int index = 0;
