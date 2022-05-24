@@ -4,6 +4,8 @@ import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.ONE_MILLIONTH;
 import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.ONE_TRILLIONTH;
 import static us.ihmc.euclid.tools.EuclidCoreTools.normSquared;
 
+import org.ejml.data.DMatrixRMaj;
+
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -982,6 +984,28 @@ public class EuclidCoreMissingTools
          dotProduct = -1.0;
 
       return EuclidCoreTools.acos(dotProduct);
+   }
+
+   // *** NOTE ***: The 4x4 output matrix produced by this method assumes a Quaternion component ordering of:
+   //   Quat = [ Qs
+   //            Qx
+   //            Qy
+   //            Qz ]
+   public static DMatrixRMaj quaternionDotToOmegaTransform(QuaternionReadOnly rotatingFrameQuaternion)
+   {
+      double qs = rotatingFrameQuaternion.getS();
+      double qx = rotatingFrameQuaternion.getX();
+      double qy = rotatingFrameQuaternion.getY();
+      double qz = rotatingFrameQuaternion.getZ();
+
+      DMatrixRMaj E = new DMatrixRMaj(4,4);
+
+      E.set(0,0, qs); E.set(0,1, qx); E.set(0,2, qy); E.set(0,3, qz);
+      E.set(1,0,-qx); E.set(1,1, qs); E.set(1,2, qz); E.set(1,3,-qy);
+      E.set(2,0,-qy); E.set(2,1,-qz); E.set(2,2, qs); E.set(2,3, qx);
+      E.set(3,0,-qz); E.set(3,1, qy); E.set(3,2,-qx); E.set(3,3, qs);
+      
+      return E;
    }
 
    /**

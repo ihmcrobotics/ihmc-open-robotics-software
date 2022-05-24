@@ -242,6 +242,9 @@ public class WholeBodyVirtualModelControlSolver
          VirtualModelControlCommand<?> command = virtualModelControlCommandList.pollCommand();
          switch (command.getCommandType())
          {
+            case QP_INPUT:
+               optimizationControlModule.submitQPObjectiveCommand((QPObjectiveCommand) command);
+               break;
             case MOMENTUM:
                optimizationControlModule.submitMomentumRateCommand((MomentumRateCommand) command);
                recordMomentumRate((MomentumRateCommand) command);
