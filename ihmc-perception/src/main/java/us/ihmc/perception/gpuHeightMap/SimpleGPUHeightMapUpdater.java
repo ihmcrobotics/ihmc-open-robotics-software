@@ -20,7 +20,7 @@ public class SimpleGPUHeightMapUpdater
    private final SimpleGPUHeightMapParameters parameters;
    private final int numberOfCells;
 
-   private final OpenCLManager openCLManager = new OpenCLManager();
+   private final OpenCLManager openCLManager;
 
    private final OpenCLFloatBuffer inputPointCloudBuffer = new OpenCLFloatBuffer(0);
    private final OpenCLFloatBuffer localizationBuffer = new OpenCLFloatBuffer(14);
@@ -45,11 +45,17 @@ public class SimpleGPUHeightMapUpdater
 
    public SimpleGPUHeightMapUpdater()
    {
-      this(new SimpleGPUHeightMapParameters());
+      this(new OpenCLManager(), new SimpleGPUHeightMapParameters());
    }
 
-   public SimpleGPUHeightMapUpdater(SimpleGPUHeightMapParameters parameters)
+   public SimpleGPUHeightMapUpdater(OpenCLManager openCLManager)
    {
+      this(openCLManager, new SimpleGPUHeightMapParameters());
+   }
+
+   public SimpleGPUHeightMapUpdater(OpenCLManager openCLManager, SimpleGPUHeightMapParameters parameters)
+   {
+      this.openCLManager = openCLManager;
       this.parameters = parameters;
       openCLManager.create();
 
@@ -95,6 +101,7 @@ public class SimpleGPUHeightMapUpdater
    {
       populateLocalizaitonBuffer(transformToWorld.getTranslation().getX32(), transformToWorld.getTranslation().getY32(), transformToWorld);
       populateParametersBuffer();
+      populateIntrinsicsBuffer();
 
       updateMapWithKernel(image, imageWidth, imageHeight);
 
@@ -209,7 +216,6 @@ public class SimpleGPUHeightMapUpdater
          firstRun = false;
          localizationBuffer.createOpenCLBufferObject(openCLManager);
          parametersBuffer.createOpenCLBufferObject(openCLManager);
-         inputPointCloudBuffer.createOpenCLBufferObject(openCLManager);
          elevationMapData.createOpenCLBufferObject(openCLManager);
          intrinsicsBuffer.createOpenCLBufferObject(openCLManager);
 
@@ -227,7 +233,6 @@ public class SimpleGPUHeightMapUpdater
       }
       else
       {
-         inputPointCloudBuffer.writeOpenCLBufferObject(openCLManager);
          localizationBuffer.writeOpenCLBufferObject(openCLManager);
          parametersBuffer.writeOpenCLBufferObject(openCLManager);
          intrinsicsBuffer.writeOpenCLBufferObject(openCLManager);

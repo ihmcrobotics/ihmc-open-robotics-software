@@ -112,7 +112,7 @@ public class GDXGPUPlanarRegionExtractionUI
    public void create(int imageWidth, int imageHeight, ByteBuffer sourceDepthByteBufferOfFloats, double fx, double fy, double cx, double cy)
    {
       gpuPlanarRegionExtraction.create(imageWidth, imageHeight, sourceDepthByteBufferOfFloats, fx, fy, cx, cy);
-      simpleGPUHeightMapUpdater = new SimpleGPUHeightMapUpdater(new SimpleGPUHeightMapParameters());
+      simpleGPUHeightMapUpdater = new SimpleGPUHeightMapUpdater(gpuPlanarRegionExtraction.getOpenCLManager(), new SimpleGPUHeightMapParameters());
       simpleGPUHeightMapUpdater.setCameraIntrinsics(fx, fy, cx, cy);
       gpuPlanarRegionExtraction.addImageCallBackFunction((image, width, height, cameraFrame) -> simpleGPUHeightMapUpdater.inputFromImage(image, width, height, cameraFrame.getTransformToWorldFrame()));
 
