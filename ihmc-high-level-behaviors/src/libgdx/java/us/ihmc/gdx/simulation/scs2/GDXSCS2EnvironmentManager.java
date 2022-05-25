@@ -22,7 +22,7 @@ import java.util.function.Consumer;
 
 public class GDXSCS2EnvironmentManager
 {
-   private GDXSCS2SimulationSession scs2SimulationSession;
+   private GDXSCS2BulletSimulationSession scs2SimulationSession;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiPanel managerPanel = new ImGuiPanel("SCS 2 Simulation Session", this::renderImGuiWidgets);
    private SCS2AvatarSimulation avatarSimulation;
@@ -134,7 +134,7 @@ public class GDXSCS2EnvironmentManager
          avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
          avatarSimulation.setSystemExitOnDestroy(false);
 
-         scs2SimulationSession = new GDXSCS2SimulationSession(avatarSimulation.getSimulationSession());
+         scs2SimulationSession = new GDXSCS2BulletSimulationSession(avatarSimulation.getSimulationSession());
          scs2SimulationSession.getOnSessionStartedRunnables().addAll(onSessionStartedRunnables);
 
          avatarSimulation.beforeSessionThreadStart();
@@ -189,7 +189,7 @@ public class GDXSCS2EnvironmentManager
       return terrainObjectDefinitions;
    }
 
-   public GDXSCS2SimulationSession getSCS2SimulationSession()
+   public GDXSCS2Session getSCS2SimulationSession()
    {
       return scs2SimulationSession;
    }
