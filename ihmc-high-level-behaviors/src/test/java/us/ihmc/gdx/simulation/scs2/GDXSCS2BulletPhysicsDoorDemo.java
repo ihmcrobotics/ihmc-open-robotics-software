@@ -14,7 +14,7 @@ public class GDXSCS2BulletPhysicsDoorDemo
    private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
                                                               "ihmc-open-robotics-software",
                                                               "ihmc-high-level-behaviors/src/test/resources");
-   private final GDXSCS2SimulationSession scs2SimulationSession = new GDXSCS2SimulationSession();
+   private final GDXSCS2BulletSimulationSession scs2SimulationSession = new GDXSCS2BulletSimulationSession();
 
    public GDXSCS2BulletPhysicsDoorDemo()
    {

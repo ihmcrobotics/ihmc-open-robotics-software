@@ -10,43 +10,47 @@ import imgui.type.ImDouble;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.gdx.imgui.ImGuiPanel;
+import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.log.LogTools;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
+import us.ihmc.scs2.session.Session;
 import us.ihmc.scs2.session.SessionMode;
-import us.ihmc.scs2.session.log.LogSession;
 import us.ihmc.scs2.sharedMemory.CropBufferRequest;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.time.DurationCalculator;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class GDXSCS2LogSession
+public class GDXSCS2Session
 {
-   private final LogSession logSession;
+   protected final Session session;
    private final ImBoolean runAtRealtimeRate = new ImBoolean(true);
    private final ImDouble playbackRealtimeRate = new ImDouble(1.0);
-   private final ImGuiPanel controlPanel = new ImGuiPanel("SCS 2 Log Session", this::renderImGuiWidgets);
+   private final ImGuiPanel controlPanel = new ImGuiPanel("SCS 2 Session", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImInt bufferIndex = new ImInt();
-   private final ImInt dtHz = new ImInt(-1);
+   protected final ImInt dtHz = new ImInt(-1);
    private final ImInt bufferRecordTickPeriod = new ImInt(1);
    private final ImFloat bufferDuration = new ImFloat(5.0f);
-   private final ImBoolean pauseAtEndOfBuffer = new ImBoolean(true);
+   protected final ImBoolean pauseAtEndOfBuffer = new ImBoolean(true);
    private final ArrayList<Pair<ImBoolean, String>> showRobotPairs = new ArrayList<>();
    private final HashMap<String, ImBoolean> showRobotMap = new HashMap<>();
    private final ImBoolean showTerrain = new ImBoolean(true);
    private final ImBoolean showVirtualRenderables = new ImBoolean(true);
    private final ImBoolean showCollisionMeshes = new ImBoolean(false);
    private final YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
-   private final GDXYoManager yoManager = new GDXYoManager();
+   protected final DurationCalculator simulationDurationCalculator = new DurationCalculator();
+   protected final YoDouble simulationRealtimeRate = new YoDouble("simulationRealtimeRate", yoRegistry);
+   protected final GDXYoManager yoManager = new GDXYoManager();
    private final ArrayList<GDXSimulatedRobot> robots = new ArrayList<>();
    private final ArrayList<GDXSimulatedTerrainObject> terrainObjects = new ArrayList<>();
    private final SCS2YoImPlotManager plotManager = new SCS2YoImPlotManager();
@@ -55,13 +59,10 @@ public class GDXSCS2LogSession
    private final RenderableProvider getVirtualRenderables = this::getVirtualRenderables;
    private ArrayList<Runnable> onSessionStartedRunnables = new ArrayList<>();
 
-   private final DurationCalculator simulationDurationCalculator = new DurationCalculator();
-
-   public GDXSCS2LogSession(LogSession logSession)
+   public GDXSCS2Session(Session session)
    {
-      this.logSession = logSession;
-      dtHz.set((int) UnitConversions.secondsToHertz(logSession.getSessionDTSeconds()));
-
+      this.session = session;
+      dtHz.set((int) UnitConversions.secondsToHertz(session.getSessionDTSeconds()));
    }
 
    public void create(GDXImGuiBasedUI baseUI)
@@ -71,39 +72,38 @@ public class GDXSCS2LogSession
 
    public void create(GDXImGuiBasedUI baseUI, ImGuiPanel panel)
    {
-      yoManager.startSession(logSession); // TODO: Add to controls?
+      yoManager.startSession(session); // TODO: Add to controls?
 
-
-      for (RobotDefinition robotDefinition : logSession.getRobotDefinitions())
+      for (RobotDefinition robotDefinition : session.getRobotDefinitions())
       {
          GDXSimulatedRobot robot = new GDXSimulatedRobot(robotDefinition);
          robots.add(robot);
          robot.create(yoManager);
       }
 
-      for (TerrainObjectDefinition terrainObjectDefinition : logSession.getTerrainObjectDefinitions())
+      for (TerrainObjectDefinition terrainObjectDefinition : session.getTerrainObjectDefinitions())
       {
          GDXSimulatedTerrainObject simulatedTerrainObject = new GDXSimulatedTerrainObject(terrainObjectDefinition);
          terrainObjects.add(simulatedTerrainObject);
          simulatedTerrainObject.create();
       }
 
-      logSession.getRootRegistry().addChild(yoRegistry);
+      session.getRootRegistry().addChild(yoRegistry);
 
-      bufferRecordTickPeriod.set(logSession.getBufferRecordTickPeriod());
+      bufferRecordTickPeriod.set(session.getBufferRecordTickPeriod());
       changeBufferDuration(bufferDuration.get());
       updateDTFromSession();
-      logSession.submitPlaybackRealTimeRate(playbackRealtimeRate.get());
-      logSession.submitRunAtRealTimeRate(runAtRealtimeRate.get());
+      session.submitPlaybackRealTimeRate(playbackRealtimeRate.get());
+      session.submitRunAtRealTimeRate(runAtRealtimeRate.get());
 
-      for (RobotDefinition robotDefinition : logSession.getRobotDefinitions())
+      for (RobotDefinition robotDefinition : session.getRobotDefinitions())
       {
          ImBoolean imBoolean = new ImBoolean(true);
          showRobotPairs.add(ImmutablePair.of(imBoolean, robotDefinition.getName()));
          showRobotMap.put(robotDefinition.getName(), imBoolean);
       }
 
-      logSession.startSessionThread(); // TODO: Need start/stop controls?
+      session.startSessionThread(); // TODO: Need start/stop controls?
 
       baseUI.get3DSceneManager().addRenderableProvider(getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
       baseUI.get3DSceneManager().addRenderableProvider(getVirtualRenderables, GDXSceneLevel.VIRTUAL);
@@ -115,7 +115,7 @@ public class GDXSCS2LogSession
    {
       yoManager.update();
 
-      if (!sessionStartedHandled && logSession.hasSessionStarted())
+      if (!sessionStartedHandled && session.hasSessionStarted())
       {
          sessionStartedHandled = true;
          LogTools.info("Session started.");
@@ -126,7 +126,7 @@ public class GDXSCS2LogSession
          }
       }
 
-      if (logSession.getActiveMode() != SessionMode.RUNNING)
+      if (session.getActiveMode() != SessionMode.RUNNING)
       {
          simulationDurationCalculator.pause();
       }
@@ -172,8 +172,14 @@ public class GDXSCS2LogSession
 
    public void renderImGuiWidgets()
    {
+      renderImGuiWidgetsPartOne();
+      renderImGuiWidgetsPartTwo();
+   }
+
+   protected void renderImGuiWidgetsPartOne()
+   {
       ImGui.pushItemWidth(110);
-      if (ImGui.inputInt("Bullet simulation dt (Hz)", dtHz))
+      if (ImGuiTools.volatileInputInt("Bullet simulation dt (Hz)", dtHz))
       {
          changeDT();
       }
@@ -182,52 +188,55 @@ public class GDXSCS2LogSession
          updateDTFromSession();
       }
       ImGui.popItemWidth();
-      if (ImGui.radioButton("Run", logSession.getActiveMode() == SessionMode.RUNNING))
+      if (ImGui.radioButton("Run", session.getActiveMode() == SessionMode.RUNNING))
       {
-         logSession.submitBufferIndexRequest(yoManager.getOutPoint());
-         logSession.setSessionMode(SessionMode.RUNNING);
+         session.submitBufferIndexRequest(yoManager.getOutPoint());
+         session.setSessionMode(SessionMode.RUNNING);
       }
       ImGui.sameLine();
-      if (ImGui.radioButton("Pause", logSession.getActiveMode() == SessionMode.PAUSE))
+      if (ImGui.radioButton("Pause", session.getActiveMode() == SessionMode.PAUSE))
       {
-         logSession.setSessionMode(SessionMode.PAUSE);
+         session.setSessionMode(SessionMode.PAUSE);
       }
       ImGui.sameLine();
-      if (ImGui.radioButton("Playback", logSession.getActiveMode() == SessionMode.PLAYBACK))
+      if (ImGui.radioButton("Playback", session.getActiveMode() == SessionMode.PLAYBACK))
       {
-         logSession.setSessionMode(SessionMode.PLAYBACK);
+         session.setSessionMode(SessionMode.PLAYBACK);
       }
       if (ImGui.button(labels.get("Run 1 tick")))
       {
-         logSession.runTick();
+         session.runTick();
       }
       ImGui.sameLine();
       if (ImGui.button(labels.get("Go to Out Point")))
       {
-         logSession.submitBufferIndexRequest(yoManager.getOutPoint());
+         session.submitBufferIndexRequest(yoManager.getOutPoint());
       }
       ImGui.sameLine();
       ImGui.text("Out point: " + yoManager.getOutPoint());
       if (ImGui.button(labels.get("Crop to In Out")))
       {
          CropBufferRequest cropBufferRequest = new CropBufferRequest(yoManager.getInPoint(), yoManager.getOutPoint());
-         logSession.submitCropBufferRequest(cropBufferRequest);
+         session.submitCropBufferRequest(cropBufferRequest);
       }
-      if (ImGui.inputInt(labels.get("Buffer record tick period"), bufferRecordTickPeriod))
+      ImGui.pushItemWidth(80.0f);
+      if (ImGuiTools.volatileInputInt(labels.get("Buffer record tick period"), bufferRecordTickPeriod))
       {
          setBufferRecordTickPeriod(bufferRecordTickPeriod.get());
       }
       else
       {
-         bufferRecordTickPeriod.set(logSession.getBufferRecordTickPeriod());
+         bufferRecordTickPeriod.set(session.getBufferRecordTickPeriod());
       }
-      if (ImGui.inputFloat(labels.get("Buffer duration (s)"), bufferDuration))
+
+      if (ImGuiTools.volatileInputFloat(labels.get("Buffer duration (s)"), bufferDuration))
       {
          changeBufferDuration(bufferDuration.get());
       }
+      ImGui.popItemWidth();
       if (ImGui.sliderInt(labels.get("Buffer"), bufferIndex.getData(), 0, yoManager.getBufferSize()))
       {
-         logSession.submitBufferIndexRequest(bufferIndex.get());
+         session.submitBufferIndexRequest(bufferIndex.get());
       }
       else
       {
@@ -236,12 +245,12 @@ public class GDXSCS2LogSession
       ImGui.checkbox(labels.get("Pause and end of buffer"), pauseAtEndOfBuffer);
       if (ImGui.checkbox("Run at real-time rate", runAtRealtimeRate))
       {
-         logSession.submitRunAtRealTimeRate(runAtRealtimeRate.get());
+         session.submitRunAtRealTimeRate(runAtRealtimeRate.get());
       }
       ImGui.pushItemWidth(100.0f);
-      if (ImGui.inputDouble("Playback real-time rate", playbackRealtimeRate))
+      if (ImGuiTools.volatileInputDouble("Playback real-time rate", playbackRealtimeRate))
       {
-         logSession.submitPlaybackRealTimeRate(playbackRealtimeRate.get());
+         session.submitPlaybackRealTimeRate(playbackRealtimeRate.get());
       }
       ImGui.popItemWidth();
       for (Pair<ImBoolean, String> showRobotPair : showRobotPairs)
@@ -251,26 +260,30 @@ public class GDXSCS2LogSession
       ImGui.checkbox(labels.get("Show terrain"), showTerrain);
       ImGui.checkbox(labels.get("Show virtual renderables"), showVirtualRenderables);
       ImGui.checkbox(labels.get("Show collision meshes"), showCollisionMeshes);
+   }
+
+   protected void renderImGuiWidgetsPartTwo()
+   {
       plotManager.renderImGuiWidgets();
    }
 
    public void setBufferRecordTickPeriod(int bufferRecordTickPeriod)
    {
       this.bufferRecordTickPeriod.set(bufferRecordTickPeriod);
-      logSession.setBufferRecordTickPeriod(bufferRecordTickPeriod);
+      session.setBufferRecordTickPeriod(bufferRecordTickPeriod);
       changeBufferDuration(bufferDuration.get());
    }
 
    private void updateDTFromSession()
    {
-      dtHz.set((int) UnitConversions.secondsToHertz(logSession.getSessionDTSeconds()));
+      dtHz.set((int) UnitConversions.secondsToHertz(session.getSessionDTSeconds()));
    }
 
    public void changeBufferDuration(double bufferDuration)
    {
       this.bufferDuration.set((float) bufferDuration);
       int bufferSizeRequest = (int) (bufferDuration / UnitConversions.hertzToSeconds(dtHz.get()) / bufferRecordTickPeriod.get());
-      logSession.submitBufferSizeRequest(bufferSizeRequest);
+      session.submitBufferSizeRequest(bufferSizeRequest);
    }
 
    public void setPauseAtEndOfBuffer(boolean pauseAtEndOfBuffer)
@@ -280,7 +293,7 @@ public class GDXSCS2LogSession
 
    private void changeDT()
    {
-      logSession.setSessionDTSeconds(UnitConversions.hertzToSeconds(dtHz.get()));
+      session.setSessionDTSeconds(UnitConversions.hertzToSeconds(dtHz.get()));
    }
 
    public void setDT(double dt)
@@ -300,9 +313,9 @@ public class GDXSCS2LogSession
       showRobotPairs.clear();
    }
 
-   public LogSession getSession()
+   public Session getSession()
    {
-      return logSession;
+      return session;
    }
 
    public ImGuiPanel getControlPanel()
@@ -333,5 +346,15 @@ public class GDXSCS2LogSession
    public ArrayList<Runnable> getOnSessionStartedRunnables()
    {
       return onSessionStartedRunnables;
+   }
+
+   public double getSimDT()
+   {
+      return UnitConversions.hertzToSeconds(dtHz.get());
+   }
+
+   public int getBufferRecordTickPeriod()
+   {
+      return bufferRecordTickPeriod.get();
    }
 }
