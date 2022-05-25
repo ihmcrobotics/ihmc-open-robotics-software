@@ -20,6 +20,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -117,7 +118,7 @@ public class ContinuousStepController
          }
       });
       continuousStepGenerator.configureWith(walkingControllerParameters);
-      continuousStepGenerator.setFootstepAdjustment(this::adjustFootstep);
+      continuousStepGenerator.addFootstepAdjustment(this::adjustFootstep);
       continuousStepGenerator.setFootPoseProvider(robotSide -> lastSupportFootPoses.get(robotSide));
       continuousStepGenerator.addFootstepValidityIndicator(this::isStepSnappable);
       continuousStepGenerator.addFootstepValidityIndicator(this::isSafeDistanceFromObstacle);
@@ -355,7 +356,7 @@ public class ContinuousStepController
                                                  yoGraphicsListRegistry);
    }
 
-   private FramePose3DReadOnly adjustFootstep(FramePose2DReadOnly footstepPose, RobotSide footSide)
+   private boolean adjustFootstep(FramePose2DReadOnly footstepPose, RobotSide footSide, FixedFramePose3DBasics adjustedFootstep)
    {
       FramePose3D adjustedBasedOnStanceFoot = new FramePose3D();
       adjustedBasedOnStanceFoot.getPosition().set(footstepPose.getPosition());
@@ -370,7 +371,10 @@ public class ContinuousStepController
          {
             snapAndWiggleSingleStep.snapAndWiggle(wiggledPose, footPolygonToWiggle, forwardVelocity.getValue() > 0.0);
             if (wiggledPose.containsNaN())
-               return adjustedBasedOnStanceFoot;
+            {
+               adjustedFootstep.set(adjustedBasedOnStanceFoot);
+               return true;
+            }
          }
          catch (SnappingFailedException e)
          {
@@ -379,11 +383,13 @@ public class ContinuousStepController
              * Let's just keep the adjusted footstep based on the pose of the current stance foot.
              */
          }
-         return wiggledPose;
+         adjustedFootstep.set(wiggledPose);
+         return true;
       }
       else
       {
-         return adjustedBasedOnStanceFoot;
+         adjustedFootstep.set(adjustedBasedOnStanceFoot);
+         return true;
       }
    }
 
