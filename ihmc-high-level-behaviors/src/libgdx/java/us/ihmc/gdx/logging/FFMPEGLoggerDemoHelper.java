@@ -21,6 +21,7 @@ public class FFMPEGLoggerDemoHelper
    private String fileSuffix;
    private int sourcePixelFormat;
    private int encoderPixelFormat;
+   private int bitRate;
    private boolean lossless;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImInt framerate = new ImInt();
@@ -36,13 +37,14 @@ public class FFMPEGLoggerDemoHelper
    private Runnable sourceImageInputRunnable;
    private final Throttler throttler = new Throttler();
 
-   public FFMPEGLoggerDemoHelper(String fileSuffix, int sourcePixelFormat, int encoderPixelFormat, boolean lossless, int framerate)
+   public FFMPEGLoggerDemoHelper(String fileSuffix, int sourcePixelFormat, int encoderPixelFormat, boolean lossless, int framerate, int bitRate)
    {
       this.fileSuffix = fileSuffix;
       this.sourcePixelFormat = sourcePixelFormat;
       this.encoderPixelFormat = encoderPixelFormat;
       this.lossless = lossless;
       this.framerate.set(framerate);
+      this.bitRate = bitRate;
       updateFileName();
    }
 
@@ -108,7 +110,7 @@ public class FFMPEGLoggerDemoHelper
 
    private void loggingThread()
    {
-      logger = new FFMPEGLogger(imageWidth, imageHeight, lossless, framerate.get(), sourcePixelFormat, encoderPixelFormat, fileName);
+      logger = new FFMPEGLogger(imageWidth, imageHeight, lossless, framerate.get(), bitRate, sourcePixelFormat, encoderPixelFormat, fileName);
 
       finalizing = true;
 

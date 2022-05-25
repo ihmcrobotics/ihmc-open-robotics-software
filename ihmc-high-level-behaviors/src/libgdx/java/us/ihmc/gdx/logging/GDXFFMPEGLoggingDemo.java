@@ -33,7 +33,8 @@ public class GDXFFMPEGLoggingDemo
                                                                                             avutil.AV_PIX_FMT_RGBA,
                                                                                             lossless ? avutil.AV_PIX_FMT_GBRP : avutil.AV_PIX_FMT_YUV420P,
                                                                                             lossless,
-                                                                                            framerate);
+                                                                                            framerate,
+                                                                                            400000);
    final Random random = new Random();
    final byte[] data = new byte[4];
    int index = 0;

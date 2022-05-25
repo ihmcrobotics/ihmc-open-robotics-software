@@ -40,7 +40,7 @@ public class FFMPEGLogger
    private final int sourceVideoHeight;
    private final String fileName;
    private final String formatName;
-   private final int bitRate = 400000;
+   private final int bitRate;
    private final AVRational framePeriod;
    private final int pictureGroupSize = 12;
    private final int sourceAVPixelFormat;
@@ -62,6 +62,7 @@ public class FFMPEGLogger
                        int sourceVideoHeight,
                        boolean lossless,
                        int framerate,
+                       int bitRate,
                        int sourcePixelFormat,
                        int encoderPixelFormat,
                        String fileName)
@@ -69,6 +70,7 @@ public class FFMPEGLogger
       this.sourceVideoWidth = sourceVideoWidth;
       this.sourceVideoHeight = sourceVideoHeight;
       this.sourceAVPixelFormat = sourcePixelFormat;
+      this.bitRate = bitRate;
       this.fileName = fileName;
       this.formatName = fileName.substring(fileName.lastIndexOf('.') + 1);
       this.encoderAVPixelFormat = encoderPixelFormat;
