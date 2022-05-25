@@ -42,10 +42,15 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
    private final OptionalFactoryField<HeadingAndVelocityEvaluationScriptParameters> headingAndVelocityEvaluationScriptParametersField = new OptionalFactoryField<>("headingAndVelocityEvaluationScriptParameters");
    private final OptionalFactoryField<HeightMap> heightMapField = new OptionalFactoryField<>("heightMap");
    private final OptionalFactoryField<CSGCommandInputManager> csgCommandInputManagerField = new OptionalFactoryField<>("csgCommandInputManagerField");
-   private final OptionalFactoryField<FootstepAdjustment> footstepAdjusterField= new OptionalFactoryField<>("csgFootstepAdjusterField");
+   private final OptionalFactoryField<Boolean> createSupportFootBasedFootstepAdjustment = new OptionalFactoryField<>("csgCreateSupportFootBasedFootstepAdjustment");
+   /** This is used only when the support foot based footstep adjustment is created. */
+   private final OptionalFactoryField<Boolean> adjustPitchAndRoll = new OptionalFactoryField<>("csgSupportFootBasedFootstepAdjustmentAdjustPitchAndRoll");
+   private final OptionalFactoryField<FootstepAdjustment> secondaryFootstepAdjusterField = new OptionalFactoryField<>("csgFootstepAdjusterField");
 
    public ComponentBasedFootstepDataMessageGeneratorFactory()
    {
+      createSupportFootBasedFootstepAdjustment.setDefaultValue(true);
+      adjustPitchAndRoll.setDefaultValue(false);
    }
 
    public void setRegistry()
@@ -65,7 +70,7 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
 
    public void setFootStepAdjustment(FootstepAdjustment footStepAdjustment)
    {
-      footstepAdjusterField.set(footStepAdjustment);
+      secondaryFootstepAdjusterField.set(footStepAdjustment);
    }
 
    public void setUseHeadingAndVelocityScript(boolean useHeadingAndVelocityScript)
@@ -116,8 +121,10 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
 
       ContinuousStepGenerator continuousStepGenerator = new ContinuousStepGenerator(registryField.get());
 
-      if (footstepAdjusterField.hasValue())
-         continuousStepGenerator.setFootstepAdjustment(footstepAdjusterField.get());
+      if (createSupportFootBasedFootstepAdjustment.hasValue() && createSupportFootBasedFootstepAdjustment.get())
+         continuousStepGenerator.setSupportFootBasedFootstepAdjustment(adjustPitchAndRoll.hasValue() && adjustPitchAndRoll.get());
+      if (secondaryFootstepAdjusterField.hasValue())
+         continuousStepGenerator.addFootstepAdjustment(secondaryFootstepAdjusterField.get());
       continuousStepGenerator.setFootstepStatusListener(statusMessageOutputManager);
       continuousStepGenerator.setFrameBasedFootPoseProvider(referenceFrames.getSoleZUpFrames());
       continuousStepGenerator.configureWith(walkingControllerParameters);
@@ -145,12 +152,13 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
          continuousStepGenerator.setDesiredVelocityProvider(csgCommandInputManagerField.get().createDesiredVelocityProvider());
          continuousStepGenerator.setDesiredTurningVelocityProvider(csgCommandInputManagerField.get().createDesiredTurningVelocityProvider());
          continuousStepGenerator.setWalkInputProvider(csgCommandInputManagerField.get().createWalkInputProvider());
-         statusMessageOutputManager.attachStatusMessageListener(HighLevelStateChangeStatusMessage.class, csgCommandInputManagerField.get()::setHighLevelStateChangeStatusMessage);
+         statusMessageOutputManager.attachStatusMessageListener(HighLevelStateChangeStatusMessage.class,
+                                                                csgCommandInputManagerField.get()::setHighLevelStateChangeStatusMessage);
          updatables.add(csgCommandInputManagerField.get());
-         
+
          //this is probably not the way the class was intended to be modified.
          csgCommandInputManagerField.get().setCSG(continuousStepGenerator);
-         
+
       }
       else if (useHeadingAndVelocityScriptField.get())
       {
@@ -193,7 +201,7 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
       public void setCSG(ContinuousStepGenerator continuousStepGenerator)
       {
          this.continuousStepGenerator = continuousStepGenerator;
-         
+
       }
 
       public CommandInputManager getCommandInputManager()
@@ -233,15 +241,15 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
          {
             ContinuousStepGeneratorParametersCommand command = commandInputManager.pollNewestCommand(ContinuousStepGeneratorParametersCommand.class);
             ContinuousStepGeneratorParameters parameters = command.getParameters();
-            
-            if(continuousStepGenerator != null)
+
+            if (continuousStepGenerator != null)
             {
-               continuousStepGenerator.setFootstepTiming(parameters.getSwingDuration(), parameters.getTransferDuration());  
+               continuousStepGenerator.setFootstepTiming(parameters.getSwingDuration(), parameters.getTransferDuration());
                continuousStepGenerator.setSwingHeight(parameters.getSwingHeight());
                continuousStepGenerator.setFootstepsAreAdjustable(parameters.getStepsAreAdjustable());
                continuousStepGenerator.setStepWidths(parameters.getDefaultStepWidth(), parameters.getMinStepWidth(), parameters.getMaxStepWidth());
             }
-            
+
          }
 
          if (!isOpen)
