@@ -355,6 +355,11 @@ public class GDXLowLevelDepthSensorSimulator
       return metersDepthImage.getBackingDirectByteBuffer();
    }
 
+   public Mat getMetersDepthOpenCVMat()
+   {
+      return metersDepthImage.getBytedecoOpenCVMat();
+   }
+
    public BytedecoImage getRGBA8888ColorImage()
    {
       return rgba8888ColorImage;

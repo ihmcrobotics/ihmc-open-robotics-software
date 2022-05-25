@@ -8,6 +8,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.imgui.ImGuiPanel;
+import us.ihmc.gdx.perception.GDXCVImagePanel;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.environment.GDXEnvironmentBuilder;
 import us.ihmc.gdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
@@ -15,6 +16,9 @@ import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.affordances.GDXInteractableReferenceFrame;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.gdx.ui.graphics.ImGuiOpenCVSwapVideoPanel;
+import us.ihmc.log.LogTools;
+import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.tools.thread.Activator;
 
@@ -28,7 +32,7 @@ public class GDXFFMPEGL515DepthLoggingDemo
    private final int framerate = 15;
    private final int bitrate = 1450000;
    private final FFMPEGLoggerDemoHelper ffmpegLoggerDemoHelper = new FFMPEGLoggerDemoHelper("FFMPEGL515DepthLoggingDemo.webm",
-                                                                                            avutil.AV_PIX_FMT_BGR24,
+                                                                                            avutil.AV_PIX_FMT_RGBA,
                                                                                             avutil.AV_PIX_FMT_YUV420P,
                                                                                             lossless,
                                                                                             framerate,
@@ -40,6 +44,8 @@ public class GDXFFMPEGL515DepthLoggingDemo
    private ImGuiOpenCVSwapVideoPanel swapCVPanel;
    private int imageWidth;
    private int imageHeight;
+   private BytedecoImage normalizedDepthImage;
+   private BytedecoImage rgbaDepthImage;
 
    public GDXFFMPEGL515DepthLoggingDemo()
    {
@@ -72,6 +78,9 @@ public class GDXFFMPEGL515DepthLoggingDemo
             baseUI.addImGui3DViewInputProcessor(l515PoseGizmo::process3DViewInput);
             baseUI.get3DSceneManager().addRenderableProvider(l515PoseGizmo, GDXSceneLevel.VIRTUAL);
             l515PoseGizmo.getTransformToParent().appendPitchRotation(Math.toRadians(60.0));
+
+            normalizedDepthImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1);
+            rgbaDepthImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4);
          }
 
          @Override
@@ -124,8 +133,11 @@ public class GDXFFMPEGL515DepthLoggingDemo
 
                   ffmpegLoggerDemoHelper.create(imageWidth, imageHeight, () ->
                   {
-//                     l515.getLowLevelSimulator().getMetersDepthFloatBuffer()
-//                     ffmpegLoggerDemoHelper.getLogger().put(
+                     BytedecoOpenCVTools.clampTo8BitUnsignedChar(l515.getLowLevelSimulator().getMetersDepthOpenCVMat(), normalizedDepthImage.getBytedecoOpenCVMat(), 0.0, 255.0);
+                     BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(normalizedDepthImage.getBytedecoOpenCVMat(), rgbaDepthImage.getBytedecoOpenCVMat());
+
+                     rgbaDepthImage.rewind();
+                     ffmpegLoggerDemoHelper.getLogger().put(rgbaDepthImage);
                   });
 
                   baseUI.getPerspectiveManager().reloadPerspective();
