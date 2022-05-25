@@ -102,11 +102,6 @@ public class FFMPEGLogger
       avStream = avformat.avformat_new_stream(avFormatContext, null);
       FFMPEGTools.checkPointer(avStream, "Adding a new stream");
 
-      // FIXME Remove this? We were just setting the id to 0 anyway
-      // Documentation says replaced by libavformat if left unset
-      // int numberOfStreams = avFormatContext.nb_streams();
-      // avStream.id(numberOfStreams - 1); // I don't know what this does at all, but it's in the example
-
       avEncoderContext.codec_id(avFormatContext.video_codec_id());
       avEncoderContext.bit_rate(bitRate); // This is what they've used in all the examples but is arbitrary other than that
       avEncoderContext.width(sourceVideoWidth);

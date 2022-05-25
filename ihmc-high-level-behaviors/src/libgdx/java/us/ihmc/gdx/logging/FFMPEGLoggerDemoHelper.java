@@ -18,11 +18,11 @@ public class FFMPEGLoggerDemoHelper
 {
    private int imageWidth;
    private int imageHeight;
-   private String fileSuffix;
-   private int sourcePixelFormat;
-   private int encoderPixelFormat;
-   private int bitRate;
-   private boolean lossless;
+   private final String fileSuffix;
+   private final int sourcePixelFormat;
+   private final int encoderPixelFormat;
+   private final int bitRate;
+   private final boolean lossless;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImInt framerate = new ImInt();
    private ImPlotFrequencyPlot loggerPutFrequencyPlot;
