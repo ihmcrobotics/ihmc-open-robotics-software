@@ -262,8 +262,6 @@ public class GPUPlanarRegionExtraction
       openCLManager.execute2D(packKernel, patchImageHeight, patchImageWidth);
       openCLManager.execute2D(mergeKernel, patchImageHeight, patchImageWidth);
 
-      for (ImageCallBackFunction imageCallBackFunction : imageCallBackFunctions)
-         imageCallBackFunction.process(blurredDepthImage.getOpenCLImageObject(), imageWidth, imageHeight, cameraFrame);
 
       openCLManager.enqueueReadImage(filteredDepthImage.getOpenCLImageObject(), imageWidth, imageHeight, filteredDepthImage.getBytedecoByteBufferPointer());
       openCLManager.enqueueReadImage(nxImage.getOpenCLImageObject(), patchImageWidth, patchImageHeight, nxImage.getBytedecoByteBufferPointer());
@@ -273,6 +271,10 @@ public class GPUPlanarRegionExtraction
       openCLManager.enqueueReadImage(cyImage.getOpenCLImageObject(), patchImageWidth, patchImageHeight, cyImage.getBytedecoByteBufferPointer());
       openCLManager.enqueueReadImage(czImage.getOpenCLImageObject(), patchImageWidth, patchImageHeight, czImage.getBytedecoByteBufferPointer());
       openCLManager.enqueueReadImage(graphImage.getOpenCLImageObject(), patchImageWidth, patchImageHeight, graphImage.getBytedecoByteBufferPointer());
+
+
+      for (ImageCallBackFunction imageCallBackFunction : imageCallBackFunctions)
+         imageCallBackFunction.process(blurredDepthImage.getOpenCLImageObject(), imageWidth, imageHeight, cameraFrame);
 
       openCLManager.finish();
    }
