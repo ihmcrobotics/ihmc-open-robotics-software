@@ -93,7 +93,7 @@ public class GPUHeightMapVisualizer
          pointsToAdd.add(point);
       }
 
-      gpuHeightMap.input(pointsToAdd, new RigidBodyTransform());
+      gpuHeightMap.inputFromPointCloud(pointsToAdd, new RigidBodyTransform());
 
       new GPUHeightMapVisualizer(gpuHeightMap.getHeightMap());
    }

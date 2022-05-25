@@ -9,7 +9,6 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.heightMap.HeightMapData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -88,13 +87,11 @@ public class SimpleGPUHeightMapUpdaterTest
       stopwatch.start();
       for (int lap = 0; lap < timingLaps; lap++)
       {
-         gpuHeightMap.input(pointsToAdd, new RigidBodyTransform());
+         gpuHeightMap.inputFromPointCloud(pointsToAdd, new RigidBodyTransform());
          stopwatch.lap();
       }
       stopwatch.suspend();
       LogTools.info("GPU time = " + stopwatch.averageLap());
-
-      gpuHeightMap.printStopWatches();
 
       for (int i = 0; i < pointsToAdd.size(); i++)
       {
