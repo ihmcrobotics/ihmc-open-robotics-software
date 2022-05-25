@@ -187,14 +187,12 @@ float3 back_project(int2 pos, float Z, global float* params)
 
 float3 get_point_from_image(read_only image2d_t depth_image, int x, int y, global float* params)
 {
-    int gx = x*(int)params[PATCH_HEIGHT] + i;
-    int gy = y*(int)params[PATCH_WIDTH] + j;
-    int2 key = (int2)(gx,gy);
+    int2 key = (int2)(x,y);
     float Z = ((float)read_imageui(depth_image, key).x)/(float) 1000;
 
     if (Z > 0.1f)
     {
-        return back_project(pos, Z, params);
+        return back_project(key, Z, params);
     }
     else
     {
@@ -278,7 +276,7 @@ void kernel addPointsFromImageKernel(read_only image2d_t depth_image, global flo
             int variance_idx = get_map_idx(idx, VARIANCE_LAYER, params);
             int counter_idx = get_map_idx(idx, POINT_COUNTER_LAYER, params);
 
-            float new_height = ; //(map_h * v + z * map_v) / (map_v + v);
+            float new_height = z; //(map_h * v + z * map_v) / (map_v + v);
             float new_variance = z * z; //(map_v * v) / (map_v + v);
 
             AtomicAdd_g_f(&newMap[height_idx], new_height);
