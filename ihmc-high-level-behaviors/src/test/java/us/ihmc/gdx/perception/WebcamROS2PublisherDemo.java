@@ -38,7 +38,7 @@ public class WebcamROS2PublisherDemo
    private int imageWidth = -1;
    private double reportedFPS = -1;
    private String backendName = "";
-   private Mat rgbImage;
+   private Mat bgrImage;
    private ImGuiOpenCVSwapVideoPanel swapCVPanel;
    private ImPlotStopwatchPlot readPerformancePlot = new ImPlotStopwatchPlot("VideoCapture read(Mat)");
    private ImPlotFrequencyPlot readFrequencyPlot = new ImPlotFrequencyPlot("read Frequency");
@@ -98,7 +98,7 @@ public class WebcamROS2PublisherDemo
                   reportedFPS = videoCapture.get(opencv_videoio.CAP_PROP_FPS);
                   LogTools.info("Format: {}", videoCapture.get(opencv_videoio.CAP_PROP_FORMAT));
 
-                  rgbImage = new Mat();
+                  bgrImage = new Mat();
 
                   swapCVPanel = new ImGuiOpenCVSwapVideoPanel("Video", false);
                   baseUI.getImGuiPanelManager().addPanel(swapCVPanel.getVideoPanel());
@@ -111,7 +111,7 @@ public class WebcamROS2PublisherDemo
                      while (true)
                      {
                         readPerformancePlot.start();
-                        boolean imageWasRead = videoCapture.read(rgbImage);
+                        boolean imageWasRead = videoCapture.read(bgrImage);
                         readPerformancePlot.stop();
                         readFrequencyPlot.ping();
 
@@ -123,7 +123,7 @@ public class WebcamROS2PublisherDemo
                         swapCVPanel.getDataSwapReferenceManager().accessOnLowPriorityThread(data ->
                         {
                            data.updateOnImageUpdateThread(imageWidth, imageHeight);
-                           opencv_imgproc.cvtColor(rgbImage, data.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA, 0);
+                           opencv_imgproc.cvtColor(bgrImage, data.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA, 0);
 
 //                           videoPacket.getData()
                            publisher.publish(videoPacket);
