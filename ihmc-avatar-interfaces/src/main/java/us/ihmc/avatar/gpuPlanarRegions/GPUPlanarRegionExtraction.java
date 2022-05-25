@@ -93,6 +93,8 @@ public class GPUPlanarRegionExtraction
    private final GPUPlanarRegionIsland tempIsland = new GPUPlanarRegionIsland();
    private boolean firstRun = true;
 
+   private final List<ImageCallBackFunction> imageCallBackFunctions = new ArrayList<>();
+
    public void create(int imageWidth, int imageHeight, ByteBuffer sourceDepthByteBufferOfFloats, double fx, double fy, double cx, double cy)
    {
       this.imageWidth = imageWidth;
@@ -259,6 +261,9 @@ public class GPUPlanarRegionExtraction
       openCLManager.execute2D(filterKernel, filterPatchImageHeight, filterPatchImageWidth); // X & Y vs height and width are flipped in this kernel code
       openCLManager.execute2D(packKernel, patchImageHeight, patchImageWidth);
       openCLManager.execute2D(mergeKernel, patchImageHeight, patchImageWidth);
+
+      for (ImageCallBackFunction imageCallBackFunction : imageCallBackFunctions)
+         imageCallBackFunction.process(packKernelInputObject, imageWidth, imageHeight);
 
       openCLManager.enqueueReadImage(filteredDepthImage.getOpenCLImageObject(), imageWidth, imageHeight, filteredDepthImage.getBytedecoByteBufferPointer());
       openCLManager.enqueueReadImage(nxImage.getOpenCLImageObject(), patchImageWidth, patchImageHeight, nxImage.getBytedecoByteBufferPointer());
@@ -712,4 +717,15 @@ public class GPUPlanarRegionExtraction
    {
       return maxSVDSolveTime;
    }
+
+   public void addImageCallBackFunction(ImageCallBackFunction function)
+   {
+      this.imageCallBackFunctions.add(function);
+   }
+
+   public interface ImageCallBackFunction
+   {
+      void process(_cl_mem image, int imageWidth, int imageHeight);
+   }
+
 }
