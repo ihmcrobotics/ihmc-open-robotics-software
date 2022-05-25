@@ -5,6 +5,7 @@ import imgui.ImGui;
 import org.bytedeco.ffmpeg.ffmpeg;
 import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.imgui.ImGuiPanel;
@@ -78,9 +79,6 @@ public class GDXFFMPEGL515DepthLoggingDemo
             baseUI.addImGui3DViewInputProcessor(l515PoseGizmo::process3DViewInput);
             baseUI.get3DSceneManager().addRenderableProvider(l515PoseGizmo, GDXSceneLevel.VIRTUAL);
             l515PoseGizmo.getTransformToParent().appendPitchRotation(Math.toRadians(60.0));
-
-            normalizedDepthImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1);
-            rgbaDepthImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4);
          }
 
          @Override
@@ -131,12 +129,14 @@ public class GDXFFMPEGL515DepthLoggingDemo
                   swapCVPanel = new ImGuiOpenCVSwapVideoPanel("Video", false);
                   baseUI.getImGuiPanelManager().addPanel(swapCVPanel.getVideoPanel());
 
+                  normalizedDepthImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1);
+                  rgbaDepthImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4);
+
                   ffmpegLoggerDemoHelper.create(imageWidth, imageHeight, () ->
                   {
                      BytedecoOpenCVTools.clampTo8BitUnsignedChar(l515.getLowLevelSimulator().getMetersDepthOpenCVMat(), normalizedDepthImage.getBytedecoOpenCVMat(), 0.0, 255.0);
                      BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(normalizedDepthImage.getBytedecoOpenCVMat(), rgbaDepthImage.getBytedecoOpenCVMat());
 
-                     rgbaDepthImage.rewind();
                      ffmpegLoggerDemoHelper.getLogger().put(rgbaDepthImage);
                   });
 
