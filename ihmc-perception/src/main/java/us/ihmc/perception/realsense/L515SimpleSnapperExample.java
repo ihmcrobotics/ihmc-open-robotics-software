@@ -17,22 +17,26 @@ import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class L515SimpleSnapperExample implements FootstepAdjustment, L515DepthImageReceiver
 {
-   private final boolean VISUALIZE_POINT_CLOUD = false;
+   private final boolean VISUALIZE_POINT_CLOUD = true;
 
    protected final String name = getClass().getSimpleName();
    protected final YoRegistry registry;
@@ -46,6 +50,7 @@ public class L515SimpleSnapperExample implements FootstepAdjustment, L515DepthIm
    private final float[] pointInPixelSpace = new float[2];
    
    private ConcurrentCopier<short[]> concurrentCopier;
+   private final int depthSize;
 
    private final ReferenceFrame sensorFrame;
 
@@ -62,12 +67,14 @@ public class L515SimpleSnapperExample implements FootstepAdjustment, L515DepthIm
    private final YoGraphicReferenceFrame sensorFrameGraphic;
    private L515Visualizer viz;
 
-   public L515SimpleSnapperExample(String prefix, RealtimeL515 l515, YoGraphicsListRegistry graphicsListRegistry)
+   private SideDependentList<MovingReferenceFrame> soleFrames;
+
+   public L515SimpleSnapperExample(String prefix, FullHumanoidRobotModel fullHumanoidRobotModel, RealtimeL515 l515, YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this.l515 = l515;
-
+      soleFrames = fullHumanoidRobotModel.getSoleFrames();
       registry = new YoRegistry(prefix + name);
-      final int depthSize = l515.getDepthWidth() * l515.getDepthHeight();
+      depthSize = l515.getDepthWidth() * l515.getDepthHeight();
       
       concurrentCopier = new ConcurrentCopier<short[]>(new Builder<short[]>()
       {
@@ -124,11 +131,14 @@ public class L515SimpleSnapperExample implements FootstepAdjustment, L515DepthIm
       {
          viz = new L515Visualizer(prefix, l515.getDepthWidth(), l515.getDepthHeight(), 48, 40, sensorFrame, registry, graphicsListRegistry);
       }
+      
+      parentRegistry.addChild(registry);
    }
 
    public void receivedDepthData(rs2_frame depthFrame, ShortBuffer depthDataBuffer)
    {
-      depthDataBuffer.get(concurrentCopier.getCopyForWriting());
+      depthDataBuffer.position(0);
+      depthDataBuffer.get(concurrentCopier.getCopyForWriting(), 0, depthSize);
       concurrentCopier.commit();
 
       if (VISUALIZE_POINT_CLOUD)
@@ -166,7 +176,7 @@ public class L515SimpleSnapperExample implements FootstepAdjustment, L515DepthIm
     * different Z heights at the specified sample locations 
     */
    @Override
-   public FramePose3DReadOnly adjustFootstep(FramePose2DReadOnly footstepPose, RobotSide footSide)
+   public boolean adjustFootstep(FramePose2DReadOnly footstepPose, RobotSide footSide, FixedFramePose3DBasics adjustedFootstep)
    {
       desiredFootstepPose.set(footstepPose);
       desiredFootstepFrame.setPoseAndUpdate(desiredFootstepPose);
@@ -231,11 +241,21 @@ public class L515SimpleSnapperExample implements FootstepAdjustment, L515DepthIm
          }
       }
       
-      //just update the Z height
-      updatedFootStepPose.setIncludingFrame(footstepPose);
-      updatedFootStepPose.getPosition().setZ(highestPoint.getZ());
-      
-      return updatedFootStepPose;
+      if (highestPoint == null)
+      {
+         return false;
+      }
+        
+      if(highestPoint.getZ() < adjustedFootstep.getZ() + 0.3)
+      {
+         //just update the Z height
+         updatedFootStepPose.setIncludingFrame(footstepPose);
+         updatedFootStepPose.getPosition().setZ(highestPoint.getZ());
+         
+         adjustedFootstep.set(updatedFootStepPose);
+         return true;
+      }
+      return false;
 
       //TODO: Throw out invalid data, update the foot orientation, and do a simple foot wiggle
    }
