@@ -14,17 +14,13 @@ import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
-import us.ihmc.gdx.simulation.bullet.GDXBulletPhysicsAsyncDebugger;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.log.LogTools;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
+import us.ihmc.scs2.session.Session;
 import us.ihmc.scs2.session.SessionMode;
 import us.ihmc.scs2.sharedMemory.CropBufferRequest;
-import us.ihmc.scs2.simulation.SimulationSession;
-import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
-import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngine;
-import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.time.DurationCalculator;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -34,77 +30,39 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class GDXSCS2SimulationSession
+public class GDXSCS2Session
 {
-   private final SimulationSession simulationSession;
+   protected final Session session;
    private final ImBoolean runAtRealtimeRate = new ImBoolean(true);
    private final ImDouble playbackRealtimeRate = new ImDouble(1.0);
-   private final ImGuiPanel controlPanel = new ImGuiPanel("SCS 2 Simulation Session", this::renderImGuiWidgets);
+   private final ImGuiPanel controlPanel = new ImGuiPanel("SCS 2 Session", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImInt bufferIndex = new ImInt();
-   private final ImInt dtHz = new ImInt(-1);
+   protected final ImInt dtHz = new ImInt(-1);
    private final ImInt bufferRecordTickPeriod = new ImInt(1);
    private final ImFloat bufferDuration = new ImFloat(5.0f);
-   private final ImBoolean pauseAtEndOfBuffer = new ImBoolean(true);
+   protected final ImBoolean pauseAtEndOfBuffer = new ImBoolean(true);
    private final ArrayList<Pair<ImBoolean, String>> showRobotPairs = new ArrayList<>();
    private final HashMap<String, ImBoolean> showRobotMap = new HashMap<>();
    private final ImBoolean showTerrain = new ImBoolean(true);
    private final ImBoolean showVirtualRenderables = new ImBoolean(true);
    private final ImBoolean showCollisionMeshes = new ImBoolean(false);
    private final YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
-   private final DurationCalculator simulationDurationCalculator = new DurationCalculator();
-   private final YoDouble simulationRealtimeRate = new YoDouble("simulationRealtimeRate", yoRegistry);
-   private final GDXYoManager yoManager = new GDXYoManager();
+   protected final DurationCalculator simulationDurationCalculator = new DurationCalculator();
+   protected final YoDouble simulationRealtimeRate = new YoDouble("simulationRealtimeRate", yoRegistry);
+   protected final GDXYoManager yoManager = new GDXYoManager();
    private final ArrayList<GDXSimulatedRobot> robots = new ArrayList<>();
    private final ArrayList<GDXSimulatedTerrainObject> terrainObjects = new ArrayList<>();
-   private GDXBulletPhysicsAsyncDebugger bulletPhysicsDebugger;
    private final SCS2YoImPlotManager plotManager = new SCS2YoImPlotManager();
    private boolean sessionStartedHandled = false;
    private final RenderableProvider getRealRenderables = this::getRealRenderables;
    private final RenderableProvider getVirtualRenderables = this::getVirtualRenderables;
-   private PhysicsEngine physicsEngine;
    private ArrayList<Runnable> onSessionStartedRunnables = new ArrayList<>();
 
-   public GDXSCS2SimulationSession()
+   public GDXSCS2Session(Session session)
    {
-      this(new SimulationSession(BulletPhysicsEngine::new));
-   }
-
-   public GDXSCS2SimulationSession(SimulationSession simulationSession)
-   {
-      this.simulationSession = simulationSession;
-      dtHz.set((int) UnitConversions.secondsToHertz(simulationSession.getSessionDTSeconds()));
-
-      physicsEngine = simulationSession.getPhysicsEngine();
-      if (physicsEngine instanceof BulletPhysicsEngine)
-      {
-         BulletPhysicsEngine bulletPhysicsEngine = (BulletPhysicsEngine) physicsEngine;
-         bulletPhysicsDebugger = new GDXBulletPhysicsAsyncDebugger(bulletPhysicsEngine.getBulletMultiBodyDynamicsWorld());
-      }
-
-      simulationSession.addAfterPhysicsCallback(time ->
-      {
-         if (physicsEngine instanceof BulletPhysicsEngine)
-            bulletPhysicsDebugger.drawBulletDebugDrawings();
-
-         if (pauseAtEndOfBuffer.get() && yoManager.getCurrentIndex() == yoManager.getBufferSize() - 2)
-         {
-            simulationSession.setSessionMode(SessionMode.PAUSE);
-         }
-
-         simulationDurationCalculator.ping();
-         simulationRealtimeRate.set(UnitConversions.hertzToSeconds(dtHz.get()) / simulationDurationCalculator.getDuration());
-      });
-   }
-
-   public Robot addRobot(RobotDefinition robotDefinition)
-   {
-      return simulationSession.addRobot(robotDefinition);
-   }
-
-   public void addTerrainObject(TerrainObjectDefinition terrainObjectDefinition)
-   {
-      simulationSession.addTerrainObject(terrainObjectDefinition);
+      this.session = session;
+      dtHz.set((int) UnitConversions.secondsToHertz(session.getSessionDTSeconds()));
    }
 
    public void create(GDXImGuiBasedUI baseUI)
@@ -114,38 +72,38 @@ public class GDXSCS2SimulationSession
 
    public void create(GDXImGuiBasedUI baseUI, ImGuiPanel panel)
    {
-      yoManager.startSession(simulationSession); // TODO: Add to controls?
+      yoManager.startSession(session); // TODO: Add to controls?
 
-      for (RobotDefinition robotDefinition : simulationSession.getRobotDefinitions())
+      for (RobotDefinition robotDefinition : session.getRobotDefinitions())
       {
          GDXSimulatedRobot robot = new GDXSimulatedRobot(robotDefinition);
          robots.add(robot);
          robot.create(yoManager);
       }
 
-      for (TerrainObjectDefinition terrainObjectDefinition : simulationSession.getTerrainObjectDefinitions())
+      for (TerrainObjectDefinition terrainObjectDefinition : session.getTerrainObjectDefinitions())
       {
          GDXSimulatedTerrainObject simulatedTerrainObject = new GDXSimulatedTerrainObject(terrainObjectDefinition);
          terrainObjects.add(simulatedTerrainObject);
          simulatedTerrainObject.create();
       }
 
-      simulationSession.getRootRegistry().addChild(yoRegistry);
+      session.getRootRegistry().addChild(yoRegistry);
 
-      bufferRecordTickPeriod.set(simulationSession.getBufferRecordTickPeriod());
+      bufferRecordTickPeriod.set(session.getBufferRecordTickPeriod());
       changeBufferDuration(bufferDuration.get());
       updateDTFromSession();
-      simulationSession.submitPlaybackRealTimeRate(playbackRealtimeRate.get());
-      simulationSession.submitRunAtRealTimeRate(runAtRealtimeRate.get());
+      session.submitPlaybackRealTimeRate(playbackRealtimeRate.get());
+      session.submitRunAtRealTimeRate(runAtRealtimeRate.get());
 
-      for (RobotDefinition robotDefinition : simulationSession.getRobotDefinitions())
+      for (RobotDefinition robotDefinition : session.getRobotDefinitions())
       {
          ImBoolean imBoolean = new ImBoolean(true);
          showRobotPairs.add(ImmutablePair.of(imBoolean, robotDefinition.getName()));
          showRobotMap.put(robotDefinition.getName(), imBoolean);
       }
 
-      simulationSession.startSessionThread(); // TODO: Need start/stop controls?
+      session.startSessionThread(); // TODO: Need start/stop controls?
 
       baseUI.get3DSceneManager().addRenderableProvider(getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
       baseUI.get3DSceneManager().addRenderableProvider(getVirtualRenderables, GDXSceneLevel.VIRTUAL);
@@ -157,7 +115,7 @@ public class GDXSCS2SimulationSession
    {
       yoManager.update();
 
-      if (!sessionStartedHandled && simulationSession.hasSessionStarted())
+      if (!sessionStartedHandled && session.hasSessionStarted())
       {
          sessionStartedHandled = true;
          LogTools.info("Session started.");
@@ -168,7 +126,7 @@ public class GDXSCS2SimulationSession
          }
       }
 
-      if (simulationSession.getActiveMode() != SessionMode.RUNNING)
+      if (session.getActiveMode() != SessionMode.RUNNING)
       {
          simulationDurationCalculator.pause();
       }
@@ -177,8 +135,6 @@ public class GDXSCS2SimulationSession
       {
          robot.update();
       }
-      if (physicsEngine instanceof BulletPhysicsEngine)
-         bulletPhysicsDebugger.update();
    }
 
    public void getRealRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
@@ -212,11 +168,15 @@ public class GDXSCS2SimulationSession
             terrainObject.getCollisionRenderables(renderables, pool);
          }
       }
-      if (physicsEngine instanceof BulletPhysicsEngine)
-         bulletPhysicsDebugger.getVirtualRenderables(renderables, pool);
    }
 
    public void renderImGuiWidgets()
+   {
+      renderImGuiWidgetsPartOne();
+      renderImGuiWidgetsPartTwo();
+   }
+
+   protected void renderImGuiWidgetsPartOne()
    {
       ImGui.pushItemWidth(110);
       if (ImGuiTools.volatileInputInt("Bullet simulation dt (Hz)", dtHz))
@@ -228,53 +188,55 @@ public class GDXSCS2SimulationSession
          updateDTFromSession();
       }
       ImGui.popItemWidth();
-      if (ImGui.radioButton("Run", simulationSession.getActiveMode() == SessionMode.RUNNING))
+      if (ImGui.radioButton("Run", session.getActiveMode() == SessionMode.RUNNING))
       {
-         simulationSession.submitBufferIndexRequest(yoManager.getOutPoint());
-         simulationSession.setSessionMode(SessionMode.RUNNING);
+         session.submitBufferIndexRequest(yoManager.getOutPoint());
+         session.setSessionMode(SessionMode.RUNNING);
       }
       ImGui.sameLine();
-      if (ImGui.radioButton("Pause", simulationSession.getActiveMode() == SessionMode.PAUSE))
+      if (ImGui.radioButton("Pause", session.getActiveMode() == SessionMode.PAUSE))
       {
-         simulationSession.setSessionMode(SessionMode.PAUSE);
+         session.setSessionMode(SessionMode.PAUSE);
       }
       ImGui.sameLine();
-      if (ImGui.radioButton("Playback", simulationSession.getActiveMode() == SessionMode.PLAYBACK))
+      if (ImGui.radioButton("Playback", session.getActiveMode() == SessionMode.PLAYBACK))
       {
-         simulationSession.setSessionMode(SessionMode.PLAYBACK);
+         session.setSessionMode(SessionMode.PLAYBACK);
       }
       if (ImGui.button(labels.get("Run 1 tick")))
       {
-         simulationSession.runTick();
+         session.runTick();
       }
       ImGui.sameLine();
       if (ImGui.button(labels.get("Go to Out Point")))
       {
-         simulationSession.submitBufferIndexRequest(yoManager.getOutPoint());
+         session.submitBufferIndexRequest(yoManager.getOutPoint());
       }
       ImGui.sameLine();
       ImGui.text("Out point: " + yoManager.getOutPoint());
       if (ImGui.button(labels.get("Crop to In Out")))
       {
          CropBufferRequest cropBufferRequest = new CropBufferRequest(yoManager.getInPoint(), yoManager.getOutPoint());
-         simulationSession.submitCropBufferRequest(cropBufferRequest);
+         session.submitCropBufferRequest(cropBufferRequest);
       }
+      ImGui.pushItemWidth(80.0f);
       if (ImGuiTools.volatileInputInt(labels.get("Buffer record tick period"), bufferRecordTickPeriod))
       {
          setBufferRecordTickPeriod(bufferRecordTickPeriod.get());
       }
       else
       {
-         bufferRecordTickPeriod.set(simulationSession.getBufferRecordTickPeriod());
+         bufferRecordTickPeriod.set(session.getBufferRecordTickPeriod());
       }
 
       if (ImGuiTools.volatileInputFloat(labels.get("Buffer duration (s)"), bufferDuration))
       {
          changeBufferDuration(bufferDuration.get());
       }
+      ImGui.popItemWidth();
       if (ImGui.sliderInt(labels.get("Buffer"), bufferIndex.getData(), 0, yoManager.getBufferSize()))
       {
-         simulationSession.submitBufferIndexRequest(bufferIndex.get());
+         session.submitBufferIndexRequest(bufferIndex.get());
       }
       else
       {
@@ -283,12 +245,12 @@ public class GDXSCS2SimulationSession
       ImGui.checkbox(labels.get("Pause and end of buffer"), pauseAtEndOfBuffer);
       if (ImGui.checkbox("Run at real-time rate", runAtRealtimeRate))
       {
-         simulationSession.submitRunAtRealTimeRate(runAtRealtimeRate.get());
+         session.submitRunAtRealTimeRate(runAtRealtimeRate.get());
       }
       ImGui.pushItemWidth(100.0f);
       if (ImGuiTools.volatileInputDouble("Playback real-time rate", playbackRealtimeRate))
       {
-         simulationSession.submitPlaybackRealTimeRate(playbackRealtimeRate.get());
+         session.submitPlaybackRealTimeRate(playbackRealtimeRate.get());
       }
       ImGui.popItemWidth();
       for (Pair<ImBoolean, String> showRobotPair : showRobotPairs)
@@ -298,28 +260,30 @@ public class GDXSCS2SimulationSession
       ImGui.checkbox(labels.get("Show terrain"), showTerrain);
       ImGui.checkbox(labels.get("Show virtual renderables"), showVirtualRenderables);
       ImGui.checkbox(labels.get("Show collision meshes"), showCollisionMeshes);
-      if (physicsEngine instanceof BulletPhysicsEngine)
-         bulletPhysicsDebugger.renderImGuiWidgets();
+   }
+
+   protected void renderImGuiWidgetsPartTwo()
+   {
       plotManager.renderImGuiWidgets();
    }
 
    public void setBufferRecordTickPeriod(int bufferRecordTickPeriod)
    {
       this.bufferRecordTickPeriod.set(bufferRecordTickPeriod);
-      simulationSession.setBufferRecordTickPeriod(bufferRecordTickPeriod);
+      session.setBufferRecordTickPeriod(bufferRecordTickPeriod);
       changeBufferDuration(bufferDuration.get());
    }
 
    private void updateDTFromSession()
    {
-      dtHz.set((int) UnitConversions.secondsToHertz(simulationSession.getSessionDTSeconds()));
+      dtHz.set((int) UnitConversions.secondsToHertz(session.getSessionDTSeconds()));
    }
 
    public void changeBufferDuration(double bufferDuration)
    {
       this.bufferDuration.set((float) bufferDuration);
       int bufferSizeRequest = (int) (bufferDuration / UnitConversions.hertzToSeconds(dtHz.get()) / bufferRecordTickPeriod.get());
-      simulationSession.submitBufferSizeRequest(bufferSizeRequest);
+      session.submitBufferSizeRequest(bufferSizeRequest);
    }
 
    public void setPauseAtEndOfBuffer(boolean pauseAtEndOfBuffer)
@@ -329,7 +293,7 @@ public class GDXSCS2SimulationSession
 
    private void changeDT()
    {
-      simulationSession.setSessionDTSeconds(UnitConversions.hertzToSeconds(dtHz.get()));
+      session.setSessionDTSeconds(UnitConversions.hertzToSeconds(dtHz.get()));
    }
 
    public void setDT(double dt)
@@ -349,9 +313,9 @@ public class GDXSCS2SimulationSession
       showRobotPairs.clear();
    }
 
-   public SimulationSession getSession()
+   public Session getSession()
    {
-      return simulationSession;
+      return session;
    }
 
    public ImGuiPanel getControlPanel()
