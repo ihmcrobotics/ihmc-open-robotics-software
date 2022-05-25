@@ -29,6 +29,11 @@
 #define VARIANCE_LAYER 1
 #define POINT_COUNTER_LAYER 2
 
+#define DEPTH_CX 0
+#define DEPTH_CY 1
+#define DEPTH_FX 2
+#define DEPTH_FY 3
+
 int clamp_val(int x, int min_x, int max_x)
 {
     return max(min(x, max_x), min_x);
@@ -173,6 +178,30 @@ void kernel zeroValuesKernel(global float* params,  global float* newMap)
     newMap[counter_idx] = 0.0;
 }
 
+float3 back_project(int2 pos, float Z, global float* params)
+{
+   float px = (pos.x - params[DEPTH_CX]) / params[DEPTH_FX] * Z;
+   float py = (pos.y - params[DEPTH_CY]) / params[DEPTH_FY] * Z;
+   return (float3) (px, py, Z);
+}
+
+float3 get_point_from_image(read_only image2d_t depth_image, int x, int y, global float* params)
+{
+    int gx = x*(int)params[PATCH_HEIGHT] + i;
+    int gy = y*(int)params[PATCH_WIDTH] + j;
+    int2 key = (int2)(gx,gy);
+    float Z = ((float)read_imageui(depth_image, key).x)/(float) 1000;
+
+    if (Z > 0.1f)
+    {
+        return back_project(pos, Z, params);
+    }
+    else
+    {
+        return (float3) (0.0, 0.0, 0.0);
+    }
+}
+
 void kernel addPointsKernel(global float* points_in, global float* localization, global float* params,  global float* newMap)
 {
     int i = get_global_id(0);
@@ -215,6 +244,43 @@ void kernel addPointsKernel(global float* points_in, global float* localization,
             float new_variance = z * z; //(map_v * v) / (map_v + v);
 
  //           printf("Adding height %f\n", new_height);
+            AtomicAdd_g_f(&newMap[height_idx], new_height);
+            AtomicAdd_g_f(&newMap[variance_idx], new_variance);
+            AtomicAdd_g_f(&newMap[counter_idx], 1.0);
+
+
+            // visibility cleanup
+        }
+    }
+}
+
+void kernel addPointsFromImageKernel(read_only image2d_t depth_image, global float* localization, global float* params,  global float* intrinsics, global float* newMap)
+{
+    int image_y = get_global_id(0);
+    int image_x = get_global_id(1);
+
+    float3 point_in_camera_frame = get_point_from_image(depth_image, image_x, image_y, intrinsics);
+
+    float x = transform_p(point_in_camera_frame.x, point_in_camera_frame.y, point_in_camera_frame.z, localization[r00], localization[r01], localization[r02], localization[tx]);
+    float y = transform_p(point_in_camera_frame.x, point_in_camera_frame.y, point_in_camera_frame.z, localization[r10], localization[r11], localization[r12], localization[ty]);
+    float z = transform_p(point_in_camera_frame.x, point_in_camera_frame.y, point_in_camera_frame.z, localization[r20], localization[r21], localization[r22], localization[tz]);
+
+    if (is_valid(x, y, z, localization[tx], localization[ty], localization[tz], params))
+    {
+        int idx_x = get_x_idx(x, localization[centerX], params);
+        int idx_y = get_y_idx(y, localization[centerY], params);
+        int idx = get_idx_in_layer(idx_x, idx_y, params);
+
+        // TODO pretty sure this is always true by construction
+        if (is_inside(idx_x, idx_y, params))
+        {
+            int height_idx = get_map_idx(idx, HEIGHT_LAYER, params);
+            int variance_idx = get_map_idx(idx, VARIANCE_LAYER, params);
+            int counter_idx = get_map_idx(idx, POINT_COUNTER_LAYER, params);
+
+            float new_height = ; //(map_h * v + z * map_v) / (map_v + v);
+            float new_variance = z * z; //(map_v * v) / (map_v + v);
+
             AtomicAdd_g_f(&newMap[height_idx], new_height);
             AtomicAdd_g_f(&newMap[variance_idx], new_variance);
             AtomicAdd_g_f(&newMap[counter_idx], 1.0);
