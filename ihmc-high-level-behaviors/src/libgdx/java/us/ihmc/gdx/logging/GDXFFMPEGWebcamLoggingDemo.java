@@ -118,32 +118,8 @@ public class GDXFFMPEGWebcamLoggingDemo
 
                         data.updateOnImageUpdateThread(imageWidth, imageHeight);
                         opencv_imgproc.cvtColor(bgrImage.getBytedecoOpenCVMat(), data.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA, 0);
-
-//                        ffmpegLoggerDemoHelper.getLogger().put(data.getBytedecoImage());
                      });
                   });
-
-//                  ThreadTools.startAsDaemon(() ->
-//                  {
-//                     while (true)
-//                     {
-//                        readPerformancePlot.start();
-//                        boolean imageWasRead = videoCapture.read(bgrImage);
-//                        readPerformancePlot.stop();
-//                        readFrequencyPlot.ping();
-//
-//                        if (!imageWasRead)
-//                        {
-//                           LogTools.error("Image was not read!");
-//                        }
-//
-//                        swapCVPanel.getDataSwapReferenceManager().accessOnLowPriorityThread(data ->
-//                        {
-//                           data.updateOnImageUpdateThread(imageWidth, imageHeight);
-//                           opencv_imgproc.cvtColor(bgrImage, data.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA, 0);
-//                        });
-//                     }
-//                  }, "CameraRead");
 
                   baseUI.getPerspectiveManager().reloadPerspective();
                }
