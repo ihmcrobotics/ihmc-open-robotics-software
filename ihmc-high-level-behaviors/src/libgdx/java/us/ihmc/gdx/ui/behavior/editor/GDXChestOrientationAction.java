@@ -100,7 +100,7 @@ public class GDXChestOrientationAction implements GDXBehaviorAction
 
       ChestTrajectoryMessage message = new ChestTrajectoryMessage();
       message.getSo3Trajectory()
-             .set(HumanoidMessageTools.createSO3TrajectoryMessage(2.0,
+             .set(HumanoidMessageTools.createSO3TrajectoryMessage(trajectoryTime.get(),
                                                                   frameChestYawPitchRoll,
                                                                   EuclidCoreTools.zeroVector3D,
                                                                   syncedRobot.getReferenceFrames().getPelvisZUpFrame()));
