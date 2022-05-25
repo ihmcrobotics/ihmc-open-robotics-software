@@ -26,6 +26,8 @@ import us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegionExtractionParameters;
 import us.ihmc.avatar.gpuPlanarRegions.GPURegionRing;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.gpuHeightMap.SimpleGPUHeightMapParameters;
+import us.ihmc.perception.gpuHeightMap.SimpleGPUHeightMapUpdater;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -103,9 +105,14 @@ public class GDXGPUPlanarRegionExtractionUI
    private GDXPlanarRegionsGraphic planarRegionsGraphic;
    private GDXPointCloudRenderer boundaryPointCloud;
 
+   private SimpleGPUHeightMapUpdater simpleGPUHeightMapUpdater;
+
    public void create(int imageWidth, int imageHeight, ByteBuffer sourceDepthByteBufferOfFloats, double fx, double fy, double cx, double cy)
    {
       gpuPlanarRegionExtraction.create(imageWidth, imageHeight, sourceDepthByteBufferOfFloats, fx, fy, cx, cy);
+      simpleGPUHeightMapUpdater = new SimpleGPUHeightMapUpdater(new SimpleGPUHeightMapParameters());
+      simpleGPUHeightMapUpdater.setCameraIntrinsics(fx, fy, cx, cy);
+      gpuPlanarRegionExtraction.addImageCallBackFunction((image, width, height, cameraFrame) -> simpleGPUHeightMapUpdater.inputFromImage(image, width, height, cameraFrame.getTransformToWorldFrame()));
 
       setImGuiWidgetsFromParameters();
 
