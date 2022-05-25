@@ -1,5 +1,6 @@
 package us.ihmc.perception.gpuHeightMap;
 
+import controller_msgs.msg.dds.HeightMapMessage;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -152,5 +153,21 @@ public class SimpleGPUHeightMap
       }
    }
 
+   public HeightMapMessage buildMessage()
+   {
+      // Copy and report over messager
+      HeightMapMessage message = new HeightMapMessage();
+      message.setGridSizeXy(cellsPerSide);
+      message.setXyResolution(resolution);
+      message.setGridCenterX(center.getX());
+      message.setGridCenterY(center.getY());
 
+      for (int i = 0; i < heightDataMap.getNumElements(); i++)
+      {
+         message.getKeys().add(i);
+         message.getHeights().add((float) heightDataMap.get(i));
+      }
+
+      return message;
+   }
 }

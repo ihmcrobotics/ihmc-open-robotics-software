@@ -117,6 +117,8 @@ public class GDXHeightMapGraphic implements RenderableProvider
       isGeneratingMeshes.set(false);
    }
 
+
+
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {

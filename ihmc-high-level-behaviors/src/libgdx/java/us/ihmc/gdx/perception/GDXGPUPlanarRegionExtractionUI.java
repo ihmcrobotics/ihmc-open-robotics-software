@@ -24,6 +24,7 @@ import us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegion;
 import us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegionExtraction;
 import us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegionExtractionParameters;
 import us.ihmc.avatar.gpuPlanarRegions.GPURegionRing;
+import us.ihmc.gdx.visualizers.GDXHeightMapGraphic;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.gpuHeightMap.SimpleGPUHeightMapParameters;
@@ -103,6 +104,7 @@ public class GDXGPUPlanarRegionExtractionUI
    private final Mat BLACK_OPAQUE_RGBA8888 = new Mat((byte) 0, (byte) 0, (byte) 0, (byte) 255);
    private final FramePoint3D tempFramePoint = new FramePoint3D();
    private GDXPlanarRegionsGraphic planarRegionsGraphic;
+   private GDXHeightMapGraphic heightMapGraphic;
    private GDXPointCloudRenderer boundaryPointCloud;
 
    private SimpleGPUHeightMapUpdater simpleGPUHeightMapUpdater;
@@ -149,6 +151,7 @@ public class GDXGPUPlanarRegionExtractionUI
       planarRegionsSegmentationDurationPlot = new ImGuiPlot(labels.get("Planar region segmentation duration"), 1000, 300, 50);
 
       planarRegionsGraphic = new GDXPlanarRegionsGraphic();
+      heightMapGraphic = new GDXHeightMapGraphic();
       boundaryPointCloud = new GDXPointCloudRenderer();
       boundaryPointCloud.create(2000000);
    }
@@ -229,6 +232,7 @@ public class GDXGPUPlanarRegionExtractionUI
 
       render2DPanels();
       renderPlanarRegions();
+      renderHeightMap();
       renderBoundaryPoints(cameraFrame);
    }
 
@@ -254,6 +258,13 @@ public class GDXGPUPlanarRegionExtractionUI
       planarRegionsGraphic.generateMeshes(gpuPlanarRegionExtraction.getPlanarRegionsList());
       planarRegionsGraphic.update();
    }
+
+   private void renderHeightMap()
+   {
+      heightMapGraphic.generateMeshes(simpleGPUHeightMapUpdater.getHeightMap().buildMessage());
+      heightMapGraphic.update();
+   }
+
 
    private void renderBoundaryPoints(ReferenceFrame cameraFrame)
    {
