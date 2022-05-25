@@ -102,3 +102,14 @@ testDependencies {
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")
 }
+
+visualizersDependencies {
+   api(ihmc.sourceSetProject("main"))
+
+   api("us.ihmc:simulation-construction-set:0.21.16")
+
+   api("us.ihmc:simulation-construction-set-tools:source")
+   api("us.ihmc:simulation-construction-set-tools-test:source")
+}
+
+

@@ -22,9 +22,56 @@ public class SimpleGPUHeightMap
    {
       this.resolution = resolution;
    }
+
    public void setCenter(double x, double y)
    {
       center.set(x, y);
+   }
+
+   public double getCellX(int element)
+   {
+      int x = element / cellsPerSide;
+
+      return x * resolution + center.getX() - resolution * cellsPerSide * 0.5;
+   }
+
+   public double getCellY(int element)
+   {
+      int y = element % cellsPerSide;
+      return y * resolution + center.getY() - resolution * cellsPerSide * 0.5;
+   }
+
+   public double getCellZ(int element)
+   {
+      return heightDataMap.get(element);
+   }
+
+   public double getVariance(int element)
+   {
+      return varianceDataMap.get(element);
+   }
+
+   public Point2DReadOnly getCenter()
+   {
+      return center;
+   }
+
+   public Point2DReadOnly getCellLocation(int x, int y)
+   {
+      Point2D cellLocation = new Point2D((x - 0.5 * cellsPerSide) * resolution, (y - 0.5 * cellsPerSide) * resolution);
+      cellLocation.add(center);
+
+      return cellLocation;
+   }
+
+   public double getResolution()
+   {
+      return resolution;
+   }
+
+   public int getCellsPerSide()
+   {
+      return cellsPerSide;
    }
 
    public int getXIndex(double value)
