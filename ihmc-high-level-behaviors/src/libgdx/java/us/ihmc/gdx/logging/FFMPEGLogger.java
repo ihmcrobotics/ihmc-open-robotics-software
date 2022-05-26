@@ -128,7 +128,6 @@ public class FFMPEGLogger
       }
    }
 
-   //it's morbin' time
    protected void setupEncoder(AVOutputFormat outputFormat, String preferredVideoEncoder)
    {
       AVCodec avEncoder = null;
@@ -151,8 +150,77 @@ public class FFMPEGLogger
          avEncoder = avcodec.avcodec_find_encoder(codecId);
          FFMPEGTools.checkPointer(avEncoder, "Finding encoder for id: " + codecId + " name: " + formatName);
       }
+
       codecLongName = avEncoder.long_name().getString().trim();
       avEncoderContext = avcodec.avcodec_alloc_context3(avEncoder);
+   }
+
+   protected void initialize() {
+      isInitialized = true;
+
+      int returnCode = avcodec.avcodec_open2(avEncoderContext, avEncoderContext.codec(), avDictionary);
+      FFMPEGTools.checkNonZeroError(returnCode, "Initializing codec context to use the codec");
+
+      avFrameToBeEncoded = avutil.av_frame_alloc();
+      avFrameToBeEncoded.format(encoderAVPixelFormat);
+      avFrameToBeEncoded.width(sourceVideoWidth);
+      avFrameToBeEncoded.height(sourceVideoHeight);
+
+      int bufferSizeAlignment = 0;
+      returnCode = avutil.av_frame_get_buffer(avFrameToBeEncoded, bufferSizeAlignment);
+      FFMPEGTools.checkNonZeroError(returnCode, "Allocating new buffer for avFrame");
+
+      AVCodecParameters avCodecParameters = avStream.codecpar();
+      returnCode = avcodec.avcodec_parameters_from_context(avCodecParameters, avEncoderContext);
+      FFMPEGTools.checkNonZeroError(returnCode, "Setting stream parameters to codec context values");
+
+      // Dump information about the stream to a file
+      int streamIndex = 0;
+      int isContextOutput = 1; // Our context is output; we are streaming to file after all
+      avformat.av_dump_format(avFormatContext, streamIndex, fileName, isContextOutput);
+
+      FileTools.ensureDirectoryExists(Paths.get(fileName).getParent(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
+
+      AVIOContext avBytestreamIOContext = new AVIOContext();
+      returnCode = avformat.avio_open(avBytestreamIOContext, fileName, avformat.AVIO_FLAG_WRITE);
+      FFMPEGTools.checkError(returnCode, avBytestreamIOContext, "Creating and initializing the I/O context");
+      avFormatContext.pb(avBytestreamIOContext);
+
+      returnCode = avformat.avformat_write_header(avFormatContext, avDictionary);
+      FFMPEGTools.checkNonZeroError(returnCode, "Allocating the stream private data and writing the stream header to the output media file");
+
+      if (encoderFormatConversionNecessary)
+      {
+         avFrameToBeScaled = avutil.av_frame_alloc();
+         avFrameToBeScaled.format(sourceAVPixelFormat);
+         avFrameToBeScaled.width(sourceVideoWidth);
+         avFrameToBeScaled.height(sourceVideoHeight);
+
+         returnCode = avutil.av_frame_get_buffer(avFrameToBeScaled, bufferSizeAlignment);
+         FFMPEGTools.checkNonZeroError(returnCode, "Allocating new buffer for tempAVFrame");
+
+         int sourceFormat = sourceAVPixelFormat;
+         int sourceVideoWidth = avEncoderContext.width();
+         int sourceVideoHeight = avEncoderContext.height();
+         int destinationVideoWidth = avEncoderContext.width();
+         int destinationVideoHeight = avEncoderContext.height();
+         int destinationFormat = encoderAVPixelFormat;
+         int algorithmAndOptionForScaling = swscale.SWS_BICUBIC;
+         SwsFilter sourceFilter = null;
+         SwsFilter destinationFilter = null;
+         DoublePointer extraParameters = null;
+         swsContext = swscale.sws_getContext(sourceVideoWidth,
+                                             sourceVideoHeight,
+                                             sourceFormat,
+                                             destinationVideoWidth,
+                                             destinationVideoHeight,
+                                             destinationFormat,
+                                             algorithmAndOptionForScaling,
+                                             sourceFilter,
+                                             destinationFilter,
+                                             extraParameters);
+         FFMPEGTools.checkPointer(swsContext, "Allocating SWS context");
+      }
    }
 
    /**
@@ -161,73 +229,7 @@ public class FFMPEGLogger
    public boolean put(BytedecoImage sourceImage)
    {
       if (!isInitialized)
-      {
-         isInitialized = true;
-
-         int returnCode = avcodec.avcodec_open2(avEncoderContext, avEncoderContext.codec(), avDictionary);
-         FFMPEGTools.checkNonZeroError(returnCode, "Initializing codec context to use the codec");
-
-         avFrameToBeEncoded = avutil.av_frame_alloc();
-         avFrameToBeEncoded.format(encoderAVPixelFormat);
-         avFrameToBeEncoded.width(sourceVideoWidth);
-         avFrameToBeEncoded.height(sourceVideoHeight);
-
-         int bufferSizeAlignment = 0;
-         returnCode = avutil.av_frame_get_buffer(avFrameToBeEncoded, bufferSizeAlignment);
-         FFMPEGTools.checkNonZeroError(returnCode, "Allocating new buffer for avFrame");
-
-         AVCodecParameters avCodecParameters = avStream.codecpar();
-         returnCode = avcodec.avcodec_parameters_from_context(avCodecParameters, avEncoderContext);
-         FFMPEGTools.checkNonZeroError(returnCode, "Setting stream parameters to codec context values");
-
-         // Dump information about the stream to a file
-         int streamIndex = 0;
-         int isContextOutput = 1; // Our context is output; we are streaming to file after all
-         avformat.av_dump_format(avFormatContext, streamIndex, fileName, isContextOutput);
-
-         FileTools.ensureDirectoryExists(Paths.get(fileName).getParent(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
-
-         AVIOContext avBytestreamIOContext = new AVIOContext();
-         returnCode = avformat.avio_open(avBytestreamIOContext, fileName, avformat.AVIO_FLAG_WRITE);
-         FFMPEGTools.checkError(returnCode, avBytestreamIOContext, "Creating and initializing the I/O context");
-         avFormatContext.pb(avBytestreamIOContext);
-
-         returnCode = avformat.avformat_write_header(avFormatContext, avDictionary);
-         FFMPEGTools.checkNonZeroError(returnCode, "Allocating the stream private data and writing the stream header to the output media file");
-
-         if (encoderFormatConversionNecessary)
-         {
-            avFrameToBeScaled = avutil.av_frame_alloc();
-            avFrameToBeScaled.format(sourceAVPixelFormat);
-            avFrameToBeScaled.width(sourceVideoWidth);
-            avFrameToBeScaled.height(sourceVideoHeight);
-
-            returnCode = avutil.av_frame_get_buffer(avFrameToBeScaled, bufferSizeAlignment);
-            FFMPEGTools.checkNonZeroError(returnCode, "Allocating new buffer for tempAVFrame");
-
-            int sourceFormat = sourceAVPixelFormat;
-            int sourceVideoWidth = avEncoderContext.width();
-            int sourceVideoHeight = avEncoderContext.height();
-            int destinationVideoWidth = avEncoderContext.width();
-            int destinationVideoHeight = avEncoderContext.height();
-            int destinationFormat = encoderAVPixelFormat;
-            int algorithmAndOptionForScaling = swscale.SWS_BICUBIC;
-            SwsFilter sourceFilter = null;
-            SwsFilter destinationFilter = null;
-            DoublePointer extraParameters = null;
-            swsContext = swscale.sws_getContext(sourceVideoWidth,
-                                                sourceVideoHeight,
-                                                sourceFormat,
-                                                destinationVideoWidth,
-                                                destinationVideoHeight,
-                                                destinationFormat,
-                                                algorithmAndOptionForScaling,
-                                                sourceFilter,
-                                                destinationFilter,
-                                                extraParameters);
-            FFMPEGTools.checkPointer(swsContext, "Allocating SWS context");
-         }
-      }
+         initialize();
 
       int returnCode;
       returnCode = avutil.av_frame_make_writable(avFrameToBeEncoded);
