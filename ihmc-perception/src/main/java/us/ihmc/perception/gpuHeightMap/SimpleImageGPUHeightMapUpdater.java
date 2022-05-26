@@ -24,7 +24,6 @@ public class SimpleImageGPUHeightMapUpdater
 
    private final OpenCLManager openCLManager;
 
-   private final OpenCLFloatBuffer inputPointCloudBuffer = new OpenCLFloatBuffer(0);
    private final OpenCLFloatBuffer localizationBuffer = new OpenCLFloatBuffer(14);
    private final OpenCLFloatBuffer parametersBuffer = new OpenCLFloatBuffer(11);
    private final OpenCLFloatBuffer intrinsicsBuffer = new OpenCLFloatBuffer(4);
@@ -96,19 +95,6 @@ public class SimpleImageGPUHeightMapUpdater
    public SimpleGPUHeightMap getHeightMap()
    {
       return simpleGPUHeightMap;
-   }
-
-   private void packPointCloudIntoFloatBUffer(List<Point3D> points)
-   {
-      FloatPointer floatBuffer = inputPointCloudBuffer.getBytedecoFloatBufferPointer();
-
-      int index = 0;
-      for (int i = 0; i < points.size(); i++)
-      {
-         floatBuffer.put(index++, points.get(i).getX32());
-         floatBuffer.put(index++, points.get(i).getY32());
-         floatBuffer.put(index++, points.get(i).getZ32());
-      }
    }
 
    private final RotationMatrixBasics rotation = new RotationMatrix();

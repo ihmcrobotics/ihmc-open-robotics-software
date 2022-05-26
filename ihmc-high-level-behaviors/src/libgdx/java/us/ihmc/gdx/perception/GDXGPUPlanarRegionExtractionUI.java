@@ -64,6 +64,7 @@ public class GDXGPUPlanarRegionExtractionUI
    private final ImBoolean drawPatches = new ImBoolean(true);
    private final ImBoolean drawBoundaries = new ImBoolean(true);
    private final ImBoolean render3DPlanarRegions = new ImBoolean(true);
+   private final ImBoolean render3DHeightMap = new ImBoolean(false);
    private final ImBoolean render3DBoundaries = new ImBoolean(true);
    private final ImBoolean render3DGrownBoundaries = new ImBoolean(true);
    private final ImFloat regionGrowthFactor = new ImFloat();
@@ -265,6 +266,9 @@ public class GDXGPUPlanarRegionExtractionUI
 
    private void renderHeightMap()
    {
+      if (!render3DHeightMap.get())
+         return;
+
       heightMapGraphic.generateMeshes(simpleGPUHeightMapUpdater.getHeightMap().buildMessage());
       heightMapGraphic.update();
    }
@@ -360,6 +364,7 @@ public class GDXGPUPlanarRegionExtractionUI
       ImGui.checkbox(labels.get("Draw patches"), drawPatches);
       ImGui.checkbox(labels.get("Draw boundaries"), drawBoundaries);
       ImGui.checkbox(labels.get("Render 3D planar regions"), render3DPlanarRegions);
+      ImGui.checkbox(labels.get("Render 3D height map"), render3DHeightMap);
       ImGui.checkbox(labels.get("Render 3D boundaries"), render3DBoundaries);
       ImGui.checkbox(labels.get("Render 3D grown boundaries"), render3DGrownBoundaries);
       ImGui.sliderFloat(labels.get("Focal length X (px)"), focalLengthXPixels.getData(), -1000.0f, 1000.0f);
@@ -471,6 +476,8 @@ public class GDXGPUPlanarRegionExtractionUI
          planarRegionsGraphic.getRenderables(renderables, pool);
       if (render3DGrownBoundaries.get() || render3DBoundaries.get())
          boundaryPointCloud.getRenderables(renderables, pool);
+      if (render3DHeightMap.get())
+         heightMapGraphic.getRenderables(renderables, pool);
    }
 
    public void destroy()
@@ -507,6 +514,11 @@ public class GDXGPUPlanarRegionExtractionUI
    public ImBoolean getRender3DPlanarRegions()
    {
       return render3DPlanarRegions;
+   }
+
+   public ImBoolean getRender3DHeightMap()
+   {
+      return render3DHeightMap;
    }
 
    public ImBoolean getRender3DBoundaries()
