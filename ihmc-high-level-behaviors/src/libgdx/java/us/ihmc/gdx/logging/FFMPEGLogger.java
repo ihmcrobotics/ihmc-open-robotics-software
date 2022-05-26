@@ -50,10 +50,10 @@ public class FFMPEGLogger
    private boolean isInitialized = false;
    private final AVDictionary avDictionary;
    private final AVFormatContext avFormatContext;
-   private final String codecLongName;
+   protected String codecLongName;
    private final AVPacket avPacket;
    private final AVStream avStream;
-   private final AVCodecContext avEncoderContext;
+   protected AVCodecContext avEncoderContext;
    private AVFrame avFrameToBeEncoded;
    private AVFrame avFrameToBeScaled;
    private SwsContext swsContext;
@@ -91,30 +91,9 @@ public class FFMPEGLogger
       int returnCode = avformat.avformat_alloc_output_context2(avFormatContext, null, formatName, fileName);
       FFMPEGTools.checkError(returnCode, avFormatContext, formatName + " format request");
 
-      // Find encoder and allocate encoder context
+      //Get encoder, either from ID or from the preferred string
       AVOutputFormat outputFormat = avFormatContext.oformat();
-      AVCodec avEncoder = null;
-      if (preferredVideoEncoder != null)
-      {
-         avEncoder = avcodec.avcodec_find_encoder_by_name(preferredVideoEncoder);
-
-         if (avEncoder != null)
-         {
-            outputFormat.video_codec(avEncoder.id());
-            LogTools.info("Found encoder " + preferredVideoEncoder + " - id:" + avEncoder.id());
-         }
-         else
-            LogTools.error("Failed to find valid encoder " + preferredVideoEncoder + " - attempting to default to another");
-      }
-
-      if (preferredVideoEncoder == null || avEncoder == null)
-      {
-         int codecId = outputFormat.video_codec();
-         avEncoder = avcodec.avcodec_find_encoder(codecId);
-         FFMPEGTools.checkPointer(avEncoder, "Finding encoder for id: " + codecId + " name: " + formatName);
-      }
-      codecLongName = avEncoder.long_name().getString().trim();
-      avEncoderContext = avcodec.avcodec_alloc_context3(avEncoder);
+      setupEncoder(outputFormat, preferredVideoEncoder);
 
       // Allocate a packet for later use
       avPacket = avcodec.av_packet_alloc();
@@ -147,6 +126,33 @@ public class FFMPEGLogger
       {
          avEncoderContext.flags(avEncoderContext.flags() | avcodec.AV_CODEC_FLAG_GLOBAL_HEADER);
       }
+   }
+
+   //it's morbin' time
+   protected void setupEncoder(AVOutputFormat outputFormat, String preferredVideoEncoder)
+   {
+      AVCodec avEncoder = null;
+      if (preferredVideoEncoder != null)
+      {
+         avEncoder = avcodec.avcodec_find_encoder_by_name(preferredVideoEncoder);
+
+         if (avEncoder != null)
+         {
+            outputFormat.video_codec(avEncoder.id());
+            LogTools.info("Found encoder " + preferredVideoEncoder + " - id:" + avEncoder.id());
+         }
+         else
+            LogTools.error("Failed to find valid encoder " + preferredVideoEncoder + " - attempting to default to another");
+      }
+
+      if (preferredVideoEncoder == null || avEncoder == null)
+      {
+         int codecId = outputFormat.video_codec();
+         avEncoder = avcodec.avcodec_find_encoder(codecId);
+         FFMPEGTools.checkPointer(avEncoder, "Finding encoder for id: " + codecId + " name: " + formatName);
+      }
+      codecLongName = avEncoder.long_name().getString().trim();
+      avEncoderContext = avcodec.avcodec_alloc_context3(avEncoder);
    }
 
    /**
