@@ -1,21 +1,19 @@
 package us.ihmc.perception.gpuHeightMap;
 
-import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencl._cl_kernel;
-import org.bytedeco.opencl._cl_mem;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
 
 import java.nio.ByteBuffer;
-import java.util.List;
 
 public class SimpleImageGPUHeightMapUpdater
 {
@@ -41,6 +39,13 @@ public class SimpleImageGPUHeightMapUpdater
    private final _cl_kernel averageMapKernel;
 
    private final SimpleGPUHeightMap simpleGPUHeightMap;
+
+   private final Stopwatch readingStopwatch = new Stopwatch();
+   private final Stopwatch writingStopwatch = new Stopwatch();
+   private final Stopwatch zeroStopwatch = new Stopwatch();
+   private final Stopwatch packingStopwatch = new Stopwatch();
+   private final Stopwatch averageStopwatch = new Stopwatch();
+   private final Stopwatch updateStopwatch = new Stopwatch();
 
    private float fx;
    private float fy;
@@ -69,6 +74,19 @@ public class SimpleImageGPUHeightMapUpdater
       zeroValuesKernel = openCLManager.createKernel(heightMapProgram, "zeroValuesKernel");
       addPointsFromImageKernel = openCLManager.createKernel(heightMapProgram, "addPointsFromImageKernel");
       averageMapKernel = openCLManager.createKernel(heightMapProgram, "averageMapKernel");
+
+      zeroStopwatch.start();
+      readingStopwatch.start();
+      writingStopwatch.start();
+      packingStopwatch.start();
+      averageStopwatch.start();
+      updateStopwatch.start();
+      zeroStopwatch.suspend();
+      packingStopwatch.suspend();
+      averageStopwatch.suspend();
+      updateStopwatch.suspend();
+      readingStopwatch.suspend();
+      writingStopwatch.suspend();
    }
 
    public void setCameraIntrinsics(double fx, double fy, double cx, double cy)
@@ -80,7 +98,7 @@ public class SimpleImageGPUHeightMapUpdater
    }
 
    // Fixme the transform is wrong
-   public void inputFromImage(_cl_mem image, int imageWidth, int imageHeight, RigidBodyTransformReadOnly transformToWorld)
+   public void computeFromDepthMap(RigidBodyTransformReadOnly transformToWorld)
    {
       populateLocalizaitonBuffer(transformToWorld.getTranslation().getX32(), transformToWorld.getTranslation().getY32(), transformToWorld);
       populateParametersBuffer();
@@ -89,7 +107,7 @@ public class SimpleImageGPUHeightMapUpdater
       updateMapWithKernel();
 
       // TODO set a real cneter
-      updateMapObject(0.0, 0.0);
+      updateMapObject(transformToWorld.getTranslation().getX32(), transformToWorld.getTranslation().getY32());
    }
 
    public SimpleGPUHeightMap getHeightMap()
@@ -142,6 +160,7 @@ public class SimpleImageGPUHeightMapUpdater
 
    private void updateMapWithKernel()
    {
+      writingStopwatch.resume();
       // TODO reshape height map
       if (firstRun)
       {
@@ -173,21 +192,50 @@ public class SimpleImageGPUHeightMapUpdater
          parametersBuffer.writeOpenCLBufferObject(openCLManager);
          intrinsicsBuffer.writeOpenCLBufferObject(openCLManager);
       }
+      writingStopwatch.lap();
+      writingStopwatch.suspend();
 
+      zeroStopwatch.resume();
       openCLManager.execute2D(zeroValuesKernel, numberOfCells, numberOfCells);
-      openCLManager.execute2D(addPointsFromImageKernel, imageWidth, imageHeight);
-      openCLManager.execute2D(averageMapKernel, numberOfCells, numberOfCells);
+      zeroStopwatch.lap();
+      zeroStopwatch.suspend();
 
+      packingStopwatch.resume();
+      openCLManager.execute2D(addPointsFromImageKernel, imageWidth, imageHeight);
+      packingStopwatch.lap();
+      packingStopwatch.suspend();
+
+      averageStopwatch.resume();
+      openCLManager.execute2D(averageMapKernel, numberOfCells, numberOfCells);
+      averageStopwatch.lap();
+      averageStopwatch.suspend();
+
+      readingStopwatch.resume();
       elevationMapData.readOpenCLBufferObject(openCLManager);
 
       openCLManager.finish();
+      readingStopwatch.lap();
+      readingStopwatch.suspend();
+   }
+
+   public void printStopwatches()
+   {
+      LogTools.info("Reading time " + readingStopwatch.averageLap());
+      LogTools.info("Zeroing time " + zeroStopwatch.averageLap());
+      LogTools.info("Packing time " + packingStopwatch.averageLap());
+      LogTools.info("Averaging time " + averageStopwatch.averageLap());
+      LogTools.info("Update time " + updateStopwatch.averageLap());
+      LogTools.info("Writing time " + writingStopwatch.averageLap());
    }
 
    private void updateMapObject(double centerX, double centerY)
    {
+      updateStopwatch.resume();
       simpleGPUHeightMap.setCenter(centerX, centerY);
       simpleGPUHeightMap.setResolution(parameters.resolution);
 
       simpleGPUHeightMap.updateFromFloatBuffer(elevationMapData.getBackingDirectFloatBuffer(), numberOfCells);
+      updateStopwatch.lap();
+      updateStopwatch.suspend();
    }
 }

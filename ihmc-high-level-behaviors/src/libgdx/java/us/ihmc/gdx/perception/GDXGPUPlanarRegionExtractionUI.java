@@ -28,7 +28,6 @@ import us.ihmc.gdx.visualizers.GDXHeightMapGraphic;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.gpuHeightMap.SimpleGPUHeightMapParameters;
-import us.ihmc.perception.gpuHeightMap.SimpleGPUHeightMapUpdater;
 import us.ihmc.perception.gpuHeightMap.SimpleImageGPUHeightMapUpdater;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
@@ -89,10 +88,12 @@ public class GDXGPUPlanarRegionExtractionUI
    private ImGuiPlot gpuDurationPlot;
    private ImGuiPlot depthFirstSearchDurationPlot;
    private ImGuiPlot planarRegionsSegmentationDurationPlot;
+   private ImGuiPlot gpuHeightMapDurationPlot;
    private final Stopwatch wholeAlgorithmDurationStopwatch = new Stopwatch();
    private final Stopwatch gpuDurationStopwatch = new Stopwatch();
    private final Stopwatch depthFirstSearchDurationStopwatch = new Stopwatch();
    private final Stopwatch planarRegionsSegmentationDurationStopwatch = new Stopwatch();
+   private final Stopwatch gpuHeightMapStopwatch = new Stopwatch();
    private ImGuiPanel imguiPanel;
    private GDXCVImagePanel blurredDepthPanel;
    private GDXCVImagePanel filteredDepthPanel;
@@ -119,7 +120,6 @@ public class GDXGPUPlanarRegionExtractionUI
                                                                      gpuPlanarRegionExtraction.getFilteredDepthImage().getBackingDirectByteBuffer(),
                                                                      new SimpleGPUHeightMapParameters());
       simpleGPUHeightMapUpdater.setCameraIntrinsics(fx, fy, cx, cy);
-      gpuPlanarRegionExtraction.addImageCallBackFunction((image, width, height, cameraFrame) -> simpleGPUHeightMapUpdater.inputFromImage(image, width, height, cameraFrame.getTransformToWorldFrame()));
 
       setImGuiWidgetsFromParameters();
 
@@ -154,6 +154,7 @@ public class GDXGPUPlanarRegionExtractionUI
       gpuDurationPlot = new ImGuiPlot(labels.get("GPU processing duration"), 1000, 300, 50);
       depthFirstSearchDurationPlot = new ImGuiPlot(labels.get("Depth first searching duration"), 1000, 300, 50);
       planarRegionsSegmentationDurationPlot = new ImGuiPlot(labels.get("Planar region segmentation duration"), 1000, 300, 50);
+      gpuHeightMapDurationPlot = new ImGuiPlot(labels.get("Gpu height map duration"), 1000, 300, 50);
 
       planarRegionsGraphic = new GDXPlanarRegionsGraphic();
       heightMapGraphic = new GDXHeightMapGraphic();
@@ -233,7 +234,14 @@ public class GDXGPUPlanarRegionExtractionUI
       planarRegionsSegmentationDurationStopwatch.start();
       gpuPlanarRegionExtraction.computePlanarRegions(cameraFrame);
       planarRegionsSegmentationDurationStopwatch.suspend();
+
+      gpuHeightMapStopwatch.start();
+      simpleGPUHeightMapUpdater.computeFromDepthMap(cameraFrame.getTransformToWorldFrame());
+      gpuHeightMapStopwatch.suspend();
+
       wholeAlgorithmDurationStopwatch.suspend();
+
+      simpleGPUHeightMapUpdater.printStopwatches();
 
       render2DPanels();
       renderPlanarRegions();
@@ -331,6 +339,7 @@ public class GDXGPUPlanarRegionExtractionUI
       gpuDurationPlot.render(gpuDurationStopwatch.totalElapsed());
       depthFirstSearchDurationPlot.render(depthFirstSearchDurationStopwatch.totalElapsed());
       planarRegionsSegmentationDurationPlot.render(planarRegionsSegmentationDurationStopwatch.totalElapsed());
+      gpuHeightMapDurationPlot.render(gpuHeightMapStopwatch.totalElapsed());
       numberOfPlanarRegionsPlot.render((float) gpuPlanarRegionExtraction.getGPUPlanarRegions().size());
       regionMaxSearchDepthPlot.render((float) gpuPlanarRegionExtraction.getRegionMaxSearchDepth());
       numberOfBoundaryVerticesPlot.render((float) gpuPlanarRegionExtraction.getNumberOfBoundaryPatchesInWholeImage());
