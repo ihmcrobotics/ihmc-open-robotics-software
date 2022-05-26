@@ -44,9 +44,14 @@ float z_noise(float z, read_only float* params)
     return params[SENSOR_NOISE_FACTOR] * z * z;
 }
 
-float transform_p(float x, float y, float z, float r0, float r1, float r2, float t)
+float rotate_point(float3 point, float r0, float r1, float r2)
 {
-    return r0 * x + r1 * y + r2 * z + t;
+    return dot(point, (float3)(r0, r1, r2));
+}
+
+float transform_point(float3 point, float r0, float r1, float r2, float t)
+{
+    return rotate_point(point, r0, r1, r2) + t;
 }
 
 // TODO switch this to use float3
@@ -178,11 +183,16 @@ void kernel zeroValuesKernel(global float* params,  global float* newMap)
     newMap[counter_idx] = 0.0;
 }
 
-float3 back_project(int2 pos, float Z, global float* params)
+float3 back_project_to_image_frame(int2 pos, float Z, global float* params)
 {
    float px = (pos.x - params[DEPTH_CX]) / params[DEPTH_FX] * Z;
    float py = (pos.y - params[DEPTH_CY]) / params[DEPTH_FY] * Z;
    return (float3) (px, py, Z);
+}
+
+float3 project_from_image_frame_to_camera_frame(float3 point_in_image_frame)
+{
+    return (float3) (point_in_image_frame.z, -point_in_image_frame.x, point_in_image_frame.y);
 }
 
 float3 get_point_from_image(read_only image2d_t depth_image, int x, int y, global float* params)
@@ -192,7 +202,7 @@ float3 get_point_from_image(read_only image2d_t depth_image, int x, int y, globa
 
     if (Z > 0.1f)
     {
-        return back_project(key, Z, params);
+        return project_from_image_frame_to_camera_frame(back_project_to_image_frame(key, Z, params));
     }
     else
     {
@@ -208,9 +218,11 @@ void kernel addPointsKernel(global float* points_in, global float* localization,
     float ry = points_in[i * 3 + 1];
     float rz = points_in[i * 3 + 2];
 
-    float x = transform_p(rx, ry, rz, localization[r00], localization[r01], localization[r02], localization[tx]);
-    float y = transform_p(rx, ry, rz, localization[r10], localization[r11], localization[r12], localization[ty]);
-    float z = transform_p(rx, ry, rz, localization[r20], localization[r21], localization[r22], localization[tz]);
+    float3 point = (float3) (rx, ry, rz);
+
+    float x = transform_point(point, localization[r00], localization[r01], localization[r02], localization[tx]);
+    float y = transform_point(point, localization[r10], localization[r11], localization[r12], localization[ty]);
+    float z = transform_point(point, localization[r20], localization[r21], localization[r22], localization[tz]);
 
 //    if (i == 0) printf("point %f, %f, %f\n", rx, ry, rz);
 
@@ -259,9 +271,12 @@ void kernel addPointsFromImageKernel(read_only image2d_t depth_image, global flo
 
     float3 point_in_camera_frame = get_point_from_image(depth_image, image_x, image_y, intrinsics);
 
-    float x = transform_p(point_in_camera_frame.x, point_in_camera_frame.y, point_in_camera_frame.z, localization[r00], localization[r01], localization[r02], localization[tx]);
-    float y = transform_p(point_in_camera_frame.x, point_in_camera_frame.y, point_in_camera_frame.z, localization[r10], localization[r11], localization[r12], localization[ty]);
-    float z = transform_p(point_in_camera_frame.x, point_in_camera_frame.y, point_in_camera_frame.z, localization[r20], localization[r21], localization[r22], localization[tz]);
+    // if (image_y == 4 && image_x == 4) printf("Point in camera frame %f, %f, %f\n", point_in_camera_frame.x, point_in_camera_frame.y, point_in_camera_frame.z);
+    float x = transform_point(point_in_camera_frame, localization[r00], localization[r01], localization[r02], localization[tx]);
+    float y = transform_point(point_in_camera_frame, localization[r10], localization[r11], localization[r12], localization[ty]);
+    float z = transform_point(point_in_camera_frame, localization[r20], localization[r21], localization[r22], localization[tz]);
+
+    // if (image_y == 4 && image_x == 4) printf("Point in world frame %f, %f, %f\n", x, y, z);
 
     if (is_valid(x, y, z, localization[tx], localization[ty], localization[tz], params))
     {
@@ -282,7 +297,6 @@ void kernel addPointsFromImageKernel(read_only image2d_t depth_image, global flo
             AtomicAdd_g_f(&newMap[height_idx], new_height);
             AtomicAdd_g_f(&newMap[variance_idx], new_variance);
             AtomicAdd_g_f(&newMap[counter_idx], 1.0);
-
 
             // visibility cleanup
         }
@@ -305,7 +319,8 @@ void kernel averageMapKernel(global float* newMap, global float* params)
     float new_cnt = newMap[get_map_idx_in_layer(idx_x, idx_y, POINT_COUNTER_LAYER, params)];
    // float new_cnt = newMap[get_map_idx(idx_x, POINT_COUNTER_LAYER, params)];
 
- //   if (idx == 0) printf("width %i, height %i\n", params[WIDTH], params[HEIGHT]);
+   // if (idx_x == 0 && idx_y == 0) printf("width %i, height %i\n", params[WIDTH], params[HEIGHT]);
+   // if (idx_x == 0 && idx_y == 0) printf("height %f, variance %f\n", new_h, new_v);
 
     if (new_cnt > 0)
     {
@@ -320,8 +335,14 @@ void kernel averageMapKernel(global float* newMap, global float* params)
         }
 //        else
         {
+      //       printf("width %i, height %i\n", params[WIDTH], params[HEIGHT]);
+      //       printf("height %f, variance %f, count %f\n", new_h, new_v, new_cnt);
+
             newMap[height_idx] = new_h / new_cnt;
             newMap[variance_idx] = (new_v - new_h * new_h / new_cnt) / (new_cnt - 1);
+
+        //    printf("height %f, variance %f\n", newMap[height_idx], newMap[variance_idx]);
+
         }
     }
 }

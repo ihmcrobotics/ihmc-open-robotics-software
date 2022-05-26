@@ -5,6 +5,8 @@ import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.log.LogTools;
+import us.ihmc.robotics.heightMap.HeightMapTools;
 
 import java.awt.*;
 import java.nio.FloatBuffer;
@@ -149,7 +151,9 @@ public class SimpleGPUHeightMap
       for (int x = 0; x < cellsPerSide; x++)
       {
          for (int y = 0; y < cellsPerSide; y++)
+         {
             countDataMap.set(x, y, floatBuffer.get());
+         }
       }
    }
 
@@ -157,15 +161,24 @@ public class SimpleGPUHeightMap
    {
       // Copy and report over messager
       HeightMapMessage message = new HeightMapMessage();
-      message.setGridSizeXy(cellsPerSide);
+      message.setGridSizeXy(cellsPerSide * resolution);
       message.setXyResolution(resolution);
       message.setGridCenterX(center.getX());
       message.setGridCenterY(center.getY());
 
-      for (int i = 0; i < heightDataMap.getNumElements(); i++)
+      int centerIndex = HeightMapTools.computeCenterIndex(cellsPerSide * resolution, resolution);
+
+      for (int xIndex = 0; xIndex < heightDataMap.getNumRows(); xIndex++)
       {
-         message.getKeys().add(i);
-         message.getHeights().add((float) heightDataMap.get(i));
+         for (int yIndex = 0; yIndex < heightDataMap.getNumCols(); yIndex++)
+         {
+            if (countDataMap.get(xIndex, yIndex) > 0)
+            {
+               int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
+               message.getKeys().add(key);
+               message.getHeights().add((float) heightDataMap.get(xIndex));
+            }
+         }
       }
 
       return message;

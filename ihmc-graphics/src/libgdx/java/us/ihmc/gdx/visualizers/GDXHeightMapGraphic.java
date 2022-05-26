@@ -21,6 +21,7 @@ import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -33,6 +34,13 @@ public class GDXHeightMapGraphic implements RenderableProvider
    private Model lastModel;
 
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
+
+   private boolean renderGroundPlane = true;
+
+   public void setRenderGroundPlane(boolean renderGroundPlane)
+   {
+      this.renderGroundPlane = renderGroundPlane;
+   }
 
    public void clear()
    {
@@ -77,20 +85,23 @@ public class GDXHeightMapGraphic implements RenderableProvider
          double x = HeightMapTools.indexToCoordinate(xIndex, heightMapMessage.getGridCenterX(), gridResolutionXY, centerIndex);
          double y = HeightMapTools.indexToCoordinate(yIndex, heightMapMessage.getGridCenterY(), gridResolutionXY, centerIndex);
          double height = heights.get(i);
-         double renderedHeight = height - heightMapMessage.getEstimatedGroundHeight();
+         double renderedHeight = height - heightMapMessage.getEstimatedGroundHeight() + 0.02;
 
          meshBuilder.addBox(gridResolutionXY, gridResolutionXY, renderedHeight, new Point3D(x, y, heightMapMessage.getEstimatedGroundHeight() + 0.5 * renderedHeight), olive);
          meshBuilders.add(meshBuilder);
       }
 
-      GDXMultiColorMeshBuilder groundMeshBuilder = new GDXMultiColorMeshBuilder();
-      double renderedGroundPlaneHeight = 0.005;
-      groundMeshBuilder.addBox(heightMapMessage.getGridSizeXy(),
-                               heightMapMessage.getGridSizeXy(),
-                               renderedGroundPlaneHeight,
-                               new Point3D(heightMapMessage.getGridCenterX(), heightMapMessage.getGridCenterY(), heightMapMessage.getEstimatedGroundHeight()),
-                               blue);
-      meshBuilders.add(groundMeshBuilder);
+      if (renderGroundPlane)
+      {
+         GDXMultiColorMeshBuilder groundMeshBuilder = new GDXMultiColorMeshBuilder();
+         double renderedGroundPlaneHeight = 0.005;
+         groundMeshBuilder.addBox(heightMapMessage.getGridSizeXy(),
+                                  heightMapMessage.getGridSizeXy(),
+                                  renderedGroundPlaneHeight,
+                                  new Point3D(heightMapMessage.getGridCenterX(), heightMapMessage.getGridCenterY(), heightMapMessage.getEstimatedGroundHeight()),
+                                  blue);
+         meshBuilders.add(groundMeshBuilder);
+      }
 
       buildMeshAndCreateModelInstance = () ->
       {
