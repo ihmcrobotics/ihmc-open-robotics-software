@@ -63,6 +63,7 @@ bytedecoDependencies {
    apiBytedecoNatives("opencl", "3.0-")
    apiBytedecoNatives("librealsense2", "2.50.0-")
    apiBytedecoNatives("spinnaker", "2.4.0.143-")
+   apiBytedecoNatives("ffmpeg", "5.0-")
 }
 
 javacvDependencies {
@@ -73,6 +74,7 @@ javacvDependencies {
    apiBytedecoNatives("opencl", "3.0-")
    apiBytedecoNatives("librealsense2", "2.50.0-")
    apiBytedecoNatives("spinnaker", "2.4.0.143-")
+   apiBytedecoNatives("ffmpeg", "5.0-")
 }
 
 fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, versionPrefix: String = "")
