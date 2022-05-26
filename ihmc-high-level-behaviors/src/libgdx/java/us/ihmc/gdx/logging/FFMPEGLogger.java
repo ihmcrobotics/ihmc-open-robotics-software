@@ -45,6 +45,7 @@ public class FFMPEGLogger
    private final int pictureGroupSize = 12;
    private final int sourceAVPixelFormat;
    private final int encoderAVPixelFormat;
+   private boolean encoderFormatConversionNecessary;
    private final boolean formatWantsGlobalHeader;
    private boolean isInitialized = false;
    private final AVDictionary avDictionary;
@@ -74,6 +75,9 @@ public class FFMPEGLogger
       this.fileName = fileName;
       this.formatName = fileName.substring(fileName.lastIndexOf('.') + 1);
       this.encoderAVPixelFormat = encoderPixelFormat;
+
+      encoderFormatConversionNecessary = sourceAVPixelFormat != encoderAVPixelFormat &&
+                                         !(sourceAVPixelFormat == avutil.AV_PIX_FMT_RGBA && encoderPixelFormat == avutil.AV_PIX_FMT_RGB0); //No conversion for RGBA>RGB0
 
       LogTools.info("Initializing ffmpeg contexts for {} output to {}", formatName, fileName);
 
@@ -167,7 +171,7 @@ public class FFMPEGLogger
          returnCode = avformat.avformat_write_header(avFormatContext, avDictionary);
          FFMPEGTools.checkNonZeroError(returnCode, "Allocating the stream private data and writing the stream header to the output media file");
 
-         if (sourceAVPixelFormat != encoderAVPixelFormat)
+         if (encoderFormatConversionNecessary)
          {
             avFrameToBeScaled = avutil.av_frame_alloc();
             avFrameToBeScaled.format(sourceAVPixelFormat);
