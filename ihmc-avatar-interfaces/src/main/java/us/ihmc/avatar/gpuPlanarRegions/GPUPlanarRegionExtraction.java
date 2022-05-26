@@ -93,8 +93,6 @@ public class GPUPlanarRegionExtraction
    private final GPUPlanarRegionIsland tempIsland = new GPUPlanarRegionIsland();
    private boolean firstRun = true;
 
-   private final List<ImageCallBackFunction> imageCallBackFunctions = new ArrayList<>();
-
    public void create(int imageWidth, int imageHeight, ByteBuffer sourceDepthByteBufferOfFloats, double fx, double fy, double cx, double cy)
    {
       this.imageWidth = imageWidth;
@@ -271,10 +269,6 @@ public class GPUPlanarRegionExtraction
       openCLManager.enqueueReadImage(cyImage.getOpenCLImageObject(), patchImageWidth, patchImageHeight, cyImage.getBytedecoByteBufferPointer());
       openCLManager.enqueueReadImage(czImage.getOpenCLImageObject(), patchImageWidth, patchImageHeight, czImage.getBytedecoByteBufferPointer());
       openCLManager.enqueueReadImage(graphImage.getOpenCLImageObject(), patchImageWidth, patchImageHeight, graphImage.getBytedecoByteBufferPointer());
-
-
-      for (ImageCallBackFunction imageCallBackFunction : imageCallBackFunctions)
-         imageCallBackFunction.process(blurredDepthImage.getOpenCLImageObject(), imageWidth, imageHeight, cameraFrame);
 
       openCLManager.finish();
    }
@@ -719,15 +713,4 @@ public class GPUPlanarRegionExtraction
    {
       return maxSVDSolveTime;
    }
-
-   public void addImageCallBackFunction(ImageCallBackFunction function)
-   {
-      this.imageCallBackFunctions.add(function);
-   }
-
-   public interface ImageCallBackFunction
-   {
-      void process(_cl_mem image, int imageWidth, int imageHeight, ReferenceFrame cameraFrame);
-   }
-
 }
