@@ -129,6 +129,27 @@ public class SimpleGPUHeightMap
       return MathTools.clamp(idx, 0, cellsPerSide);
    }
 
+   public void updateFromFloatBuffer(FloatBuffer heightBuffer, FloatBuffer varianceBuffer, FloatBuffer countBuffer, int cellsPerSide)
+   {
+      this.cellsPerSide = cellsPerSide;
+
+      heightBuffer.position(0);
+      varianceBuffer.position(0);
+      countBuffer.position(0);
+      heightDataMap.reshape(cellsPerSide, cellsPerSide);
+      varianceDataMap.reshape(cellsPerSide, cellsPerSide);
+      countDataMap.reshape(cellsPerSide, cellsPerSide);
+
+      for (int x = 0; x < cellsPerSide; x++)
+      {
+         for (int y = 0; y < cellsPerSide; y++)
+         {
+            heightDataMap.set(x, y, heightBuffer.get());
+            varianceDataMap.set(x, y, varianceBuffer.get());
+            countDataMap.set(x, y, countBuffer.get());
+         }
+      }
+   }
    public void updateFromFloatBuffer(FloatBuffer floatBuffer, int cellsPerSide)
    {
       this.cellsPerSide = cellsPerSide;

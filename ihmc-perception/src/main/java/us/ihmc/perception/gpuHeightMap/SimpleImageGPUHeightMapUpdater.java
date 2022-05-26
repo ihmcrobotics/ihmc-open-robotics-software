@@ -30,6 +30,9 @@ public class SimpleImageGPUHeightMapUpdater
    //   private final OpenCLFloatBuffer updatedMapData;
 
    private final BytedecoImage depthImage;
+   private final BytedecoImage heightImage;
+   private final BytedecoImage varianceImage;
+   private final BytedecoImage countImage;
    private final int imageWidth;
    private final int imageHeight;
 
@@ -58,12 +61,19 @@ public class SimpleImageGPUHeightMapUpdater
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
 
+
+
       this.openCLManager = new OpenCLManager();
       this.parameters = parameters;
       openCLManager.create();
 
       // the added two are for the borders
       numberOfCells = ((int) Math.round(parameters.mapLength / parameters.resolution)) + 2;
+
+      this.heightImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_32FC1, sourceData);
+      this.varianceImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_32FC1, sourceData);
+      this.countImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_8UC1, sourceData);
+
       simpleGPUHeightMap = new SimpleGPUHeightMap();
 
       int floatsPerLayer = numberOfCells * numberOfCells;
@@ -73,7 +83,7 @@ public class SimpleImageGPUHeightMapUpdater
       heightMapProgram = openCLManager.loadProgram("SimpleGPUHeightMap");
       zeroValuesKernel = openCLManager.createKernel(heightMapProgram, "zeroValuesKernel");
       addPointsFromImageKernel = openCLManager.createKernel(heightMapProgram, "addPointsFromImageKernel");
-      averageMapKernel = openCLManager.createKernel(heightMapProgram, "averageMapKernel");
+      averageMapKernel = openCLManager.createKernel(heightMapProgram, "averageMapImagesKernel");
 
       zeroStopwatch.start();
       readingStopwatch.start();
@@ -170,7 +180,9 @@ public class SimpleImageGPUHeightMapUpdater
          elevationMapData.createOpenCLBufferObject(openCLManager);
          intrinsicsBuffer.createOpenCLBufferObject(openCLManager);
          depthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
-
+         heightImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
+         varianceImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
+         countImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
 
          openCLManager.setKernelArgument(zeroValuesKernel, 0, parametersBuffer.getOpenCLBufferObject());
          openCLManager.setKernelArgument(zeroValuesKernel, 1, elevationMapData.getOpenCLBufferObject());
@@ -183,6 +195,9 @@ public class SimpleImageGPUHeightMapUpdater
 
          openCLManager.setKernelArgument(averageMapKernel, 0, elevationMapData.getOpenCLBufferObject());
          openCLManager.setKernelArgument(averageMapKernel, 1, parametersBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(averageMapKernel, 2, heightImage.getOpenCLImageObject());
+         openCLManager.setKernelArgument(averageMapKernel, 3, varianceImage.getOpenCLImageObject());
+         openCLManager.setKernelArgument(averageMapKernel, 4, countImage.getOpenCLImageObject());
       }
       else
       {
@@ -211,7 +226,9 @@ public class SimpleImageGPUHeightMapUpdater
       averageStopwatch.suspend();
 
       readingStopwatch.resume();
-      elevationMapData.readOpenCLBufferObject(openCLManager);
+      heightImage.readOpenCLImage(openCLManager);
+      varianceImage.readOpenCLImage(openCLManager);
+      countImage.readOpenCLImage(openCLManager);
 
       openCLManager.finish();
       readingStopwatch.lap();
@@ -234,7 +251,10 @@ public class SimpleImageGPUHeightMapUpdater
       simpleGPUHeightMap.setCenter(centerX, centerY);
       simpleGPUHeightMap.setResolution(parameters.resolution);
 
-      simpleGPUHeightMap.updateFromFloatBuffer(elevationMapData.getBackingDirectFloatBuffer(), numberOfCells);
+      simpleGPUHeightMap.updateFromFloatBuffer(heightImage.getBackingDirectByteBuffer().asFloatBuffer(),
+                                               varianceImage.getBackingDirectByteBuffer().asFloatBuffer(),
+                                               countImage.getBackingDirectByteBuffer().asFloatBuffer(),
+                                               numberOfCells);
       updateStopwatch.lap();
       updateStopwatch.suspend();
    }
