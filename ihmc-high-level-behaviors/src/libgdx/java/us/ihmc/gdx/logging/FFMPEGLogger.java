@@ -66,7 +66,8 @@ public class FFMPEGLogger
                        int bitRate,
                        int sourcePixelFormat,
                        int encoderPixelFormat,
-                       String fileName)
+                       String fileName,
+                       String preferredVideoEncoder)
    {
       this.sourceVideoWidth = sourceVideoWidth;
       this.sourceVideoHeight = sourceVideoHeight;
@@ -92,9 +93,26 @@ public class FFMPEGLogger
 
       // Find encoder and allocate encoder context
       AVOutputFormat outputFormat = avFormatContext.oformat();
-      int codecId = outputFormat.video_codec();
-      AVCodec avEncoder = avcodec.avcodec_find_encoder(codecId);
-      FFMPEGTools.checkPointer(avEncoder, "Finding encoder for id: " + codecId + " name: " + formatName);
+      AVCodec avEncoder = null;
+      if (preferredVideoEncoder != null)
+      {
+         avEncoder = avcodec.avcodec_find_encoder_by_name(preferredVideoEncoder);
+
+         if (avEncoder != null)
+         {
+            outputFormat.video_codec(avEncoder.id());
+            LogTools.info("Found encoder " + preferredVideoEncoder + " - id:" + avEncoder.id());
+         }
+         else
+            LogTools.error("Failed to find valid encoder " + preferredVideoEncoder + " - attempting to default to another");
+      }
+
+      if (preferredVideoEncoder == null || avEncoder == null)
+      {
+         int codecId = outputFormat.video_codec();
+         avEncoder = avcodec.avcodec_find_encoder(codecId);
+         FFMPEGTools.checkPointer(avEncoder, "Finding encoder for id: " + codecId + " name: " + formatName);
+      }
       codecLongName = avEncoder.long_name().getString().trim();
       avEncoderContext = avcodec.avcodec_alloc_context3(avEncoder);
 
