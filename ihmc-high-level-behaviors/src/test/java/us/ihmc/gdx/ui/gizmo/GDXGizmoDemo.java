@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.graphics.GDXReferenceFrameGraphic;
@@ -32,11 +32,11 @@ public class GDXGizmoDemo
             baseUI.create();
             focusBasedCamera = baseUI.get3DSceneManager().getCamera3D();
 
-            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
+            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelBuilder.createCoordinateFrame(0.3)));
 
-            clockHandTip = new ModelInstance(GDXModelPrimitives.createSphere(0.1f, Color.RED));
+            clockHandTip = new ModelInstance(GDXModelBuilder.createSphere(0.1f, Color.RED));
             baseUI.get3DSceneManager().addModelInstance(clockHandTip);
-            clockCenter = new ModelInstance(GDXModelPrimitives.createSphere(0.1f, Color.BLUE));
+            clockCenter = new ModelInstance(GDXModelBuilder.createSphere(0.1f, Color.BLUE));
             baseUI.get3DSceneManager().addModelInstance(clockCenter);
 
             poseGizmo.create(focusBasedCamera);

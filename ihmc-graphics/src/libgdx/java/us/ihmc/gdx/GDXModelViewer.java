@@ -19,7 +19,7 @@ public class GDXModelViewer
             sceneManager.create();
             sceneManager.addCoordinateFrame(1.0);
 
-            Model model = GDXModelLoader.loadG3DModel(modelFileName);
+            Model model = GDXModelLoader.load(modelFileName);
             sceneManager.addModelInstance(new ModelInstance(model));
          }
 

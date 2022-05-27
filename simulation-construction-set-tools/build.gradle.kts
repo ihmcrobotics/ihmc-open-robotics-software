@@ -19,8 +19,8 @@ mainDependencies {
    api("us.ihmc:euclid-shape:0.17.2")
    api("us.ihmc:ihmc-yovariables:0.9.12")
    api("us.ihmc:simulation-construction-set:0.21.16")
-   api("us.ihmc:scs2-definition:0.6.0-bullet-alpha-2")
-   api("us.ihmc:scs2-simulation:0.6.0-bullet-alpha-2")
+   api("us.ihmc:scs2-definition:0.7.0-bullet-alpha-3")
+   api("us.ihmc:scs2-simulation:0.7.0-bullet-alpha-3")
    api("us.ihmc:ihmc-parameter-optimization:source")
    api("us.ihmc:ihmc-java-toolkit:source")
 }

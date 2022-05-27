@@ -5,7 +5,7 @@ import imgui.ImGui;
 import imgui.type.ImInt;
 import us.ihmc.avatar.logging.PlanarRegionsListBuffer;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -45,7 +45,7 @@ public class GDXPlaybackDevelopmentUI
 
             baseUI.create();
 
-            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
+            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelBuilder.createCoordinateFrame(0.3)));
 
             planarRegionsGraphic = new GDXPlanarRegionsGraphic();
             baseUI.get3DSceneManager().addRenderableProvider(planarRegionsGraphic);

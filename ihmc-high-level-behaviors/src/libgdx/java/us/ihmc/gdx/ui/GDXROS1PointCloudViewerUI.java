@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import imgui.internal.ImGui;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.ui.graphics.live.GDXROS1PointCloudVisualizer;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosTools;
@@ -28,7 +28,7 @@ public class GDXROS1PointCloudViewerUI
          public void create()
          {
             baseUI.create();
-            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
+            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelBuilder.createCoordinateFrame(0.3)));
             ros1PointCloudVisualizer.create();
             ros1PointCloudVisualizer.setActive(true);
             baseUI.get3DSceneManager().addRenderableProvider(ros1PointCloudVisualizer);

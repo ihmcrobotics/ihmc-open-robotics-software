@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.ImGui;
-import imgui.flag.ImGuiStyleVar;
 import imgui.type.ImBoolean;
 import org.apache.commons.lang3.tuple.MutablePair;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -110,6 +109,11 @@ public class GDXBehaviorActionSequenceEditor
                GDXHandPoseAction handPoseAction = addHandPoseAction();
                handPoseAction.loadFromFile(actionNode);
             }
+            else if (actionType.equals(GDXHandWrenchAction.class.getSimpleName()))
+            {
+               GDXHandWrenchAction handWrenchAction = addHandWrenchAction();
+               handWrenchAction.loadFromFile(actionNode);
+            }
             else if (actionType.equals(GDXHandConfigurationAction.class.getSimpleName()))
             {
                GDXHandConfigurationAction action = addHandConfigurationAction();
@@ -118,6 +122,11 @@ public class GDXBehaviorActionSequenceEditor
             else if (actionType.equals(GDXChestOrientationAction.class.getSimpleName()))
             {
                GDXChestOrientationAction action = addChestOrientationAction();
+               action.loadFromFile(actionNode);
+            }
+            else if (actionType.equals(GDXPelvisHeightAction.class.getSimpleName()))
+            {
+               GDXPelvisHeightAction action = addPelvisHeightAction();
                action.loadFromFile(actionNode);
             }
             else if (actionType.equals(GDXArmJointAnglesAction.class.getSimpleName()))
@@ -266,6 +275,7 @@ public class GDXBehaviorActionSequenceEditor
          if (ImGui.button(labels.get("X", i)))
          {
             GDXBehaviorAction removedAction = actionSequence.remove(i);
+            playbackNextIndex = actionSequence.size();
 //            removedAction.destroy();
          }
          action.renderImGuiWidgets();
@@ -288,7 +298,7 @@ public class GDXBehaviorActionSequenceEditor
       ImGui.sameLine();
       for (RobotSide side : RobotSide.values)
       {
-         if (ImGui.button(labels.get(side.getPascalCaseName())))
+         if (ImGui.button(labels.get(side.getPascalCaseName(), "HandPose")))
          {
             GDXHandPoseAction handPoseAction = addHandPoseAction();
             // Set the new action to where the last one was for faster authoring
@@ -306,6 +316,18 @@ public class GDXBehaviorActionSequenceEditor
          if (side.ordinal() < 1)
             ImGui.sameLine();
       }
+      ImGui.text("Add Hand Wrench:");
+      ImGui.sameLine();
+      for (RobotSide side : RobotSide.values)
+      {
+         if (ImGui.button(labels.get(side.getPascalCaseName(), "HandWrench")))
+         {
+            GDXHandWrenchAction handWrenchAction = addHandWrenchAction();
+            handWrenchAction.setSide(side);
+         }
+         if (side.ordinal() < 1)
+            ImGui.sameLine();
+      }
       if (ImGui.button(labels.get("Add Hand Configuration")))
       {
          addHandConfigurationAction();
@@ -313,6 +335,10 @@ public class GDXBehaviorActionSequenceEditor
       if (ImGui.button(labels.get("Add Chest Orientation")))
       {
          addChestOrientationAction();
+      }
+      if (ImGui.button(labels.get("Add Pelvis Height")))
+      {
+         addPelvisHeightAction();
       }
       if (ImGui.button(labels.get("Add Arm Joint Angles")))
       {
@@ -342,6 +368,14 @@ public class GDXBehaviorActionSequenceEditor
       return handPoseAction;
    }
 
+   private GDXHandWrenchAction addHandWrenchAction()
+   {
+      GDXHandWrenchAction handWrenchAction = new GDXHandWrenchAction();
+      handWrenchAction.create(ros2ControllerHelper);
+      insertNewAction(handWrenchAction);
+      return handWrenchAction;
+   }
+
    private GDXHandConfigurationAction addHandConfigurationAction()
    {
       GDXHandConfigurationAction handConfigurationAction = new GDXHandConfigurationAction();
@@ -356,6 +390,14 @@ public class GDXBehaviorActionSequenceEditor
       chestOrientationAction.create(ros2ControllerHelper, syncedRobot);
       insertNewAction(chestOrientationAction);
       return chestOrientationAction;
+   }
+
+   private GDXPelvisHeightAction addPelvisHeightAction()
+   {
+      GDXPelvisHeightAction pelvisHeightAction = new GDXPelvisHeightAction();
+      pelvisHeightAction.create(ros2ControllerHelper);
+      insertNewAction(pelvisHeightAction);
+      return pelvisHeightAction;
    }
 
    private GDXArmJointAnglesAction addArmJointAnglesAction()

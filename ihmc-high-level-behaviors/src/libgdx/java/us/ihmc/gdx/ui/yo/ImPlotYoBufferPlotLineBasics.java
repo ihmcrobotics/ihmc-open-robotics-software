@@ -36,7 +36,7 @@ public abstract class ImPlotYoBufferPlotLineBasics implements ImPlotPlotLine
    public boolean render()
    {
       update();
-      labelID = variableNameBase + yoVariable.getValueAsString() + variableNamePostfix;
+      labelID = variableNameBase + yoVariable.getValueAsString("%.5f") + variableNamePostfix;
       plot(labelID);
 
       boolean showingLegendPopup = false;

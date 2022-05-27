@@ -2,7 +2,8 @@ package us.ihmc.gdx.imgui;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.internal.ImGui;
-import org.lwjgl.glfw.GLFW;
+import imgui.type.ImBoolean;
+import imgui.type.ImInt;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
@@ -18,8 +19,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Consumer;
 
-import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
-
 public class ImGuiGlfwWindow
 {
    private final Path dotIHMCDirectory = Paths.get(System.getProperty("user.home"), ".ihmc");
@@ -32,6 +31,8 @@ public class ImGuiGlfwWindow
    private final GlfwWindowForImGui glfwWindowForImGui;
    private final GDXImGuiWindowAndDockSystem imGuiWindowAndDockSystem;
    private final GDXImGuiPerspectiveManager perspectiveManager;
+   private final ImBoolean vsync = new ImBoolean(true);
+   private final ImInt maxFrameRate = new ImInt(240);
 
    public ImGuiGlfwWindow(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
    {
@@ -74,12 +75,12 @@ public class ImGuiGlfwWindow
       perspectiveManager.applyPerspectiveDirectory();
    }
 
-   public void run(Runnable render, Runnable dispose)
+   public void run(Runnable create, Runnable render, Runnable dispose)
    {
-      run(null, render, dispose);
+      run(create, null, render, dispose);
    }
 
-   public void run(Runnable configure, Runnable render, Runnable dispose)
+   public void run(Runnable create, Runnable configure, Runnable render, Runnable dispose)
    {
       JSONFileTools.loadUserWithClasspathDefaultFallback(windowSettingsFile, jsonNode ->
       {
@@ -94,7 +95,10 @@ public class ImGuiGlfwWindow
 
       imGuiWindowAndDockSystem.create(windowHandle);
 
-      while (!glfwWindowShouldClose(windowHandle))
+      if (create != null)
+         create.run();
+
+      glfwWindowForImGui.launch(() ->
       {
          if (configure != null)
          {
@@ -107,9 +111,7 @@ public class ImGuiGlfwWindow
          render.run();
 
          imGuiWindowAndDockSystem.afterWindowManagement();
-         GLFW.glfwSwapBuffers(windowHandle);
-         GLFW.glfwPollEvents();
-      }
+      });
 
       dispose.run();
 
@@ -125,6 +127,20 @@ public class ImGuiGlfwWindow
       if (ImGui.beginMenu("Panels"))
       {
          imGuiWindowAndDockSystem.renderMenuDockPanelItems();
+         ImGui.endMenu();
+      }
+      if (ImGui.beginMenu("Settings"))
+      {
+         ImGui.pushItemWidth(80.0f);
+         if (ImGui.checkbox("Vsync", vsync))
+         {
+            glfwWindowForImGui.setVSyncEnabled(vsync.get());
+         }
+         if (ImGui.inputInt("Max Frame Rate", maxFrameRate, 1))
+         {
+            glfwWindowForImGui.setMaxFrameRate(maxFrameRate.get());
+         }
+         ImGui.popItemWidth();
          ImGui.endMenu();
       }
       ImGui.sameLine(ImGui.getWindowSizeX() - 110.0f);
@@ -164,12 +180,18 @@ public class ImGuiGlfwWindow
       ImGuiPanel mainPanel = new ImGuiPanel("Main Panel", renderImGuiWidgets);
       mainPanel.getIsShowing().set(true);
       imGuiWindowAndDockSystem.getPanelManager().addPanel(mainPanel);
-      ThreadTools.startAThread(() -> run(() -> { }, () -> System.exit(0)), glfwWindowForImGui.getWindowTitle());
+      ThreadTools.startAThread(() -> run(null, () -> { }, () -> System.exit(0)), glfwWindowForImGui.getWindowTitle());
    }
 
    public void setIcons(String... iconPaths)
    {
       this.iconPaths = iconPaths;
+   }
+
+   public void setEnableVsync(boolean enableVsync)
+   {
+      vsync.set(enableVsync);
+      glfwWindowForImGui.setVSyncEnabled(enableVsync);
    }
 
    public ImGuiPanelManager getPanelManager()

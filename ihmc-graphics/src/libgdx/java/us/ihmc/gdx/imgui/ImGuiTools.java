@@ -5,6 +5,9 @@ import imgui.*;
 import imgui.flag.ImGuiFreeTypeBuilderFlags;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiKey;
+import imgui.type.ImDouble;
+import imgui.type.ImFloat;
+import imgui.type.ImInt;
 import imgui.type.ImString;
 import org.apache.commons.lang3.SystemUtils;
 import org.lwjgl.glfw.GLFW;
@@ -55,6 +58,27 @@ public class ImGuiTools
    {
       glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
       glClear(GL41.GL_COLOR_BUFFER_BIT);
+   }
+
+   public static boolean volatileInputInt(String label, ImInt imInt)
+   {
+      int inputTextFlags = ImGuiInputTextFlags.None;
+      inputTextFlags += ImGuiInputTextFlags.EnterReturnsTrue;
+      return ImGui.inputInt(label, imInt, 1, 100, inputTextFlags);
+   }
+
+   public static boolean volatileInputFloat(String label, ImFloat imFloat)
+   {
+      int inputTextFlags = ImGuiInputTextFlags.None;
+      inputTextFlags += ImGuiInputTextFlags.EnterReturnsTrue;
+      return ImGui.inputFloat(label, imFloat, 0, 0, "%.3f", inputTextFlags);
+   }
+
+   public static boolean volatileInputDouble(String label, ImDouble imDouble)
+   {
+      int inputTextFlags = ImGuiInputTextFlags.None;
+      inputTextFlags += ImGuiInputTextFlags.EnterReturnsTrue;
+      return ImGui.inputDouble(label, imDouble, 0, 0, "%.6f", inputTextFlags);
    }
 
    public static boolean inputText(String label, ImString text)

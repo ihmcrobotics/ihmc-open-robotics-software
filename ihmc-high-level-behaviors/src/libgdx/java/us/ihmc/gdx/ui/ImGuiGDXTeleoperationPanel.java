@@ -18,6 +18,7 @@ import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -96,7 +97,7 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
    private final ImGuiMovingPlot statusReceivedPlot = new ImGuiMovingPlot("Hand", 1000, 230, 15);
    private final SideDependentList<ImInt> handConfigurationIndices = new SideDependentList<>(new ImInt(6), new ImInt(6));
    private final String[] handConfigurationNames = new String[HandConfiguration.values.length];
-   private final ROS2Input<PlanarRegionsListMessage> lidarREARegions;
+   private final IHMCROS2Input<PlanarRegionsListMessage> lidarREARegions;
    private final ImBoolean showGraphics = new ImBoolean(true);
 
    public ImGuiGDXTeleoperationPanel(CommunicationHelper communicationHelper)

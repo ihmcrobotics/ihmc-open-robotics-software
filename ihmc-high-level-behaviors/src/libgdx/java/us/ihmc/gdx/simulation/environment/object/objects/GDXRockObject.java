@@ -16,7 +16,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObjectFactory;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.physics.CollidableVisualizer;
@@ -73,7 +73,7 @@ public class GDXRockObject extends GDXEnvironmentObject
       convexPolytopeTransform.getTranslation().set(rock.getCentroid());
       rock.applyInverseTransform(convexPolytopeTransform);
 
-      Model model = GDXModelPrimitives.buildModel(meshBuilder -> meshBuilder.addMesh(CollidableVisualizer.newConvexPolytope3DMesh(rock), Color.GRAY));
+      Model model = GDXModelBuilder.buildModel(meshBuilder -> meshBuilder.addMesh(CollidableVisualizer.newConvexPolytope3DMesh(rock), Color.GRAY));
       setRealisticModel(model);
 
       BoundingBox box = new BoundingBox();

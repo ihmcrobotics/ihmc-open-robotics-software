@@ -12,13 +12,13 @@ import com.badlogic.gdx.graphics.g3d.model.NodePart;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
 
 import java.util.function.Consumer;
 
-// TODO: Rename to GDXModelBuilder?
-public class GDXModelPrimitives
+public class GDXModelBuilder
 {
    public static ModelInstance createCoordinateFrameInstance(double length)
    {
@@ -93,7 +93,11 @@ public class GDXModelPrimitives
          meshBuilder.addCylinder(length, radius, new Point3D(), new AxisAngle(0.0, 1.0, 0.0, Math.PI / 2.0), Color.RED);
          meshBuilder.addCone(coneHeight, coneRadius, new Point3D(length, 0.0, 0.0), new AxisAngle(0.0, 1.0, 0.0, Math.PI / 2.0), Color.RED);
          meshBuilder.addCylinder(length, radius, new Point3D(), new AxisAngle(1.0, 0.0, 0.0, -Math.PI / 2.0), Color.GREEN);
-         meshBuilder.addCone(coneHeight, coneRadius, new Point3D(0.0, length, 0.0), new AxisAngle(1.0, 0.0, 0.0, -Math.PI / 2.0), Color.GREEN);
+         meshBuilder.addCone(coneHeight,
+                             coneRadius,
+                             new Point3D(0.0, length, 0.0),
+                             new AxisAngle(1.0, 0.0, 0.0, -Math.PI / 2.0),
+                             Color.GREEN);
          meshBuilder.addCylinder(length, radius, new Point3D(), new AxisAngle(), Color.BLUE);
          meshBuilder.addCone(coneHeight, coneRadius, new Point3D(0.0, 0.0, length), new AxisAngle(), Color.BLUE);
       }, "coordinateFrame");
@@ -109,7 +113,11 @@ public class GDXModelPrimitives
          meshBuilder.addCylinder(length, radius, new Point3D(), new AxisAngle(0.0, 1.0, 0.0, Math.PI / 2.0), color);
          meshBuilder.addCone(coneHeight, coneRadius, new Point3D(length, 0.0, 0.0), new AxisAngle(0.0, 1.0, 0.0, Math.PI / 2.0), Color.RED);
          meshBuilder.addCylinder(length, radius, new Point3D(), new AxisAngle(1.0, 0.0, 0.0, -Math.PI / 2.0), color);
-         meshBuilder.addCone(coneHeight, coneRadius, new Point3D(0.0, length, 0.0), new AxisAngle(1.0, 0.0, 0.0, -Math.PI / 2.0), Color.GREEN);
+         meshBuilder.addCone(coneHeight,
+                             coneRadius,
+                             new Point3D(0.0, length, 0.0),
+                             new AxisAngle(1.0, 0.0, 0.0, -Math.PI / 2.0),
+                             Color.GREEN);
          meshBuilder.addCylinder(length, radius, new Point3D(), new AxisAngle(), color);
          meshBuilder.addCone(coneHeight, coneRadius, new Point3D(0.0, 0.0, length), new AxisAngle(), Color.BLUE);
       }, "coordinateFrame");
@@ -147,7 +155,11 @@ public class GDXModelPrimitives
          double cylinderRadius = cylinderLength / 20.0;
          double coneRadius = 1.5 * cylinderRadius;
          meshBuilder.addCylinder(cylinderLength, cylinderRadius, new Point3D(), new AxisAngle(0.0, 1.0, 0.0, Math.PI / 2.0), color);
-         meshBuilder.addCone(coneHeight, coneRadius, new Point3D(cylinderLength, 0.0, 0.0), new AxisAngle(0.0, 1.0, 0.0, Math.PI / 2.0), color);
+         meshBuilder.addCone(coneHeight,
+                             coneRadius,
+                             new Point3D(cylinderLength, 0.0, 0.0),
+                             new AxisAngle(0.0, 1.0, 0.0, Math.PI / 2.0),
+                             color);
       }, "arrow");
    }
 
@@ -160,8 +172,33 @@ public class GDXModelPrimitives
          double coneHeight = 0.10 * cylinderLength;
          double coneRadius = 1.5 * cylinderRadius;
          meshBuilder.addCylinder(cylinderLength, cylinderRadius, new Point3D(), new AxisAngle(0.0, 1.0, 0.0, Math.PI / 2.0), color);
-         meshBuilder.addCone(coneHeight, coneRadius, new Point3D(cylinderLength, 0.0, 0.0), new AxisAngle(0.0, 1.0, 0.0, Math.PI / 2.0), color);
+         meshBuilder.addCone(coneHeight,
+                             coneRadius,
+                             new Point3D(cylinderLength, 0.0, 0.0),
+                             new AxisAngle(0.0, 1.0, 0.0, Math.PI / 2.0),
+                             color);
          meshBuilder.addSphere((float) radius, color);
       }, "arrow");
+   }
+
+   public static ModelInstance createStairs(double width, double stepHeight, double stepWidth, int numberOfSteps, Color color)
+   {
+      return buildModelInstance(meshBuilder ->
+      {
+         for(int i = 1; i<numberOfSteps + 1; i++)
+         {
+            meshBuilder.addBox(stepWidth, width, stepHeight * (float) i, new Point3D(stepWidth * (float) i, 0.0f, (stepHeight * (float) i) / 2.0f), color);
+         }
+
+         for(int i = 1; i<numberOfSteps + 1; i++)
+         {
+            meshBuilder.addCylinder(1.0f, 0.02f, new Point3D(stepWidth * (float) i, -width * 0.45f, (stepHeight * (float) i)), Color.BROWN);
+            meshBuilder.addCylinder(1.0f, 0.02f, new Point3D(stepWidth * (float) i, width * 0.45f, (stepHeight * (float) i)), Color.BROWN);
+         }
+
+         meshBuilder.addCylinder(EuclidCoreTools.norm(numberOfSteps * stepWidth, numberOfSteps * stepHeight), 0.03f, new Point3D(0.0f, -width * 0.45f, 1.0f), new AxisAngle(0.0, 1.0, 0.0, Math.PI / 4.0), Color.DARK_GRAY);
+         meshBuilder.addCylinder(EuclidCoreTools.norm(numberOfSteps * stepWidth, numberOfSteps * stepHeight), 0.03f, new Point3D(0.0f, width * 0.45f, 1.0f), new AxisAngle(0.0, 1.0, 0.0, Math.PI / 4.0), Color.DARK_GRAY);
+
+      }, "stairs");
    }
 }

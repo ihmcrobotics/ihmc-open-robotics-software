@@ -14,7 +14,7 @@ public class GDXL515SensorObject extends GDXEnvironmentObject
    public GDXL515SensorObject()
    {
       super(NAME, FACTORY);
-      Model realisticModel = GDXModelLoader.loadG3DModel("environmentObjects/l515Sensor/L515Sensor.g3dj");
+      Model realisticModel = GDXModelLoader.load("environmentObjects/l515Sensor/L515Sensor.g3dj");
       setRealisticModel(realisticModel);
 
       getBoundingSphere().setRadius(0.2);

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
@@ -43,7 +44,7 @@ public class MultiContactScriptPostProcessor
       jointNameHash = Arrays.hashCode(oneDoFJoints);
    }
 
-   public WholeBodyJointspaceTrajectoryMessage process1(List<KinematicsToolboxSnapshotDescription> rawScript)
+   public WholeBodyJointspaceTrajectoryMessage process1(List<KinematicsToolboxSnapshotDescription> rawScript, boolean solveForTimes)
    {
       checkJointNameHash(rawScript);
       List<KinematicsToolboxOutputStatus> desiredRobotConfigurations = rawScript.stream().map(item -> item.getIkSolution()).collect(Collectors.toList());
@@ -67,15 +68,23 @@ public class MultiContactScriptPostProcessor
       TrajectoryPointOptimizer trajectoryPointOptimizer = new TrajectoryPointOptimizer(numberOfJoints);
       trajectoryPointOptimizer.setEndPoints(startPosition, startVelocity, targetPosition, targetVelocity);
       trajectoryPointOptimizer.setWaypoints(waypoints);
-//      trajectoryPointOptimizer.computeForFixedTime(new TDoubleArrayList(IntStream.range(1, numberOfConfigurations - 1)
-//                                                                                 .mapToDouble(i -> (double) i / (numberOfConfigurations - 1)).toArray()));
-      trajectoryPointOptimizer.compute(0);
 
-      for (int i = 0; i < 40; i++)
+      if (solveForTimes)
       {
-         if (trajectoryPointOptimizer.doFullTimeUpdate())
-            break;
-         LogTools.info("Iteration: " + i);
+         trajectoryPointOptimizer.compute(0);
+
+         for (int i = 0; i < 40; i++)
+         {
+            if (trajectoryPointOptimizer.doFullTimeUpdate())
+               break;
+            LogTools.info("Iteration: " + i);
+         }
+      }
+      else
+      {
+         trajectoryPointOptimizer.computeForFixedTime(new TDoubleArrayList(IntStream.range(1, numberOfConfigurations - 1)
+                                                                                    .mapToDouble(i -> (double) i / (numberOfConfigurations - 1))
+                                                                                    .toArray()));
       }
 
       WholeBodyJointspaceTrajectoryMessage message = new WholeBodyJointspaceTrajectoryMessage();

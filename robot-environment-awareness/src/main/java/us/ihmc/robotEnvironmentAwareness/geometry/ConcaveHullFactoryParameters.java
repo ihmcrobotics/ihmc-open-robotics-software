@@ -20,7 +20,12 @@ public class ConcaveHullFactoryParameters extends StoredPropertySet implements C
 
    public ConcaveHullFactoryParameters()
    {
-      super(keys, ConcaveHullFactoryParameters.class, PROJECT_NAME, TO_RESOURCE_FOLDER);
+      this("");
+   }
+
+   public ConcaveHullFactoryParameters(String fileNameSuffix)
+   {
+      super(keys, ConcaveHullFactoryParameters.class, PROJECT_NAME, TO_RESOURCE_FOLDER, fileNameSuffix);
       load();
    }
 

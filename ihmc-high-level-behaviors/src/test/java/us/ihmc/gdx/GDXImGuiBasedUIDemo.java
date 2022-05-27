@@ -6,7 +6,7 @@ import org.apache.logging.log4j.Level;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.gdx.imgui.ImGuiMovingPlot;
 import us.ihmc.gdx.tools.BoxesDemoModel;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.tools.ImGuiLogWidget;
 import us.ihmc.tools.string.StringTools;
@@ -34,7 +34,7 @@ public class GDXImGuiBasedUIDemo
          {
             baseUI.create();
 
-            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
+            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelBuilder.createCoordinateFrame(0.3)));
             baseUI.get3DSceneManager().addModelInstance(new BoxesDemoModel().newInstance());
 
             baseUI.getImGuiPanelManager().addPanel("Window 1", GDXImGuiBasedUIDemo.this::renderWindow1);

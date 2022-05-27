@@ -12,7 +12,7 @@ import java.nio.ByteOrder;
 public class BytedecoImage
 {
    private ByteBuffer backingDirectByteBuffer;
-   private BytePointer bytedecoByteBufferPointer;
+   private MutableBytePointer bytedecoByteBufferPointer;
    private Mat bytedecoOpenCVMat;
    private final int openCLChannelOrder;
    private final int openCLChannelDataType;
@@ -108,7 +108,7 @@ public class BytedecoImage
          this.backingDirectByteBuffer.order(ByteOrder.nativeOrder());
       }
 
-      bytedecoByteBufferPointer = new BytePointer(this.backingDirectByteBuffer);
+      bytedecoByteBufferPointer = new MutableBytePointer(this.backingDirectByteBuffer);
       if (suppliedMat != null)
       {
          bytedecoOpenCVMat = suppliedMat;
@@ -117,6 +117,13 @@ public class BytedecoImage
       {
          bytedecoOpenCVMat = new Mat(imageHeight, imageWidth, cvMatType, bytedecoByteBufferPointer);
       }
+   }
+
+   public void changeAddress(long address)
+   {
+      bytedecoByteBufferPointer.setAddress(address);
+      backingDirectByteBuffer = bytedecoByteBufferPointer.asByteBuffer(); // Allocates, but on the native side?
+      bytedecoOpenCVMat.data(bytedecoByteBufferPointer);
    }
 
    public void createOpenCLImage(OpenCLManager openCLManager, int flags)
@@ -156,7 +163,7 @@ public class BytedecoImage
          backingDirectByteBuffer = ByteBuffer.allocateDirect(imageWidth * imageHeight * bytesPerPixel);
          backingDirectByteBuffer.order(ByteOrder.nativeOrder());
       }
-      bytedecoByteBufferPointer = new BytePointer(backingDirectByteBuffer);
+      bytedecoByteBufferPointer = new MutableBytePointer(backingDirectByteBuffer);
       bytedecoOpenCVMat = new Mat(imageHeight, imageWidth, cvMatType, bytedecoByteBufferPointer);
 
       if (openCLObjectCreated)

@@ -9,42 +9,36 @@ import org.bytedeco.opencv.global.opencv_video;
 import org.bytedeco.opencv.opencv_core.*;
 
 import us.ihmc.gdx.imgui.ImGuiPanel;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 
-public class GDXOpenCVDoorHandleDetectionUI
+public class GDXOpenCVOpticalFlowTrackingUI
 {
    private int imageWidth;
    private int imageHeight;
    private BytedecoImage sourceImage;
-   private BytedecoImage imageForDrawing;
    private GDXCVImagePanel trackingImagePanel;
    private final ImGuiPanel mainPanel;
 
-
-   private Point2f point2f1 = new Point2f(0, 0);
-   private Point2f point2f2 = new Point2f(0, 0);
-   private Point firstNextPointAsInt = new Point(0, 0);
-   private Mat previousPoints = new Mat(point2f1);
-   private Mat nextPoints = new Mat(point2f2);
-   private Mat previousImage=null;
-   private Mat nextImage= null;
-   private Mat status = new Mat();
-   private Mat error = new Mat();
-   private Vector2D_F32 oldPoints = new Vector2D_F32(0,0);
-   private Vector2D_F32 firstNextPoint = new Vector2D_F32(0,0);
-   private int max_distance = 90;
-   private Scalar RED = new Scalar(255, 1, 2, 255);
-   private Scalar BLUE = new Scalar(1, 1, 255, 255);
-   private TermCriteria terminationCriteria = new TermCriteria(opencv_core.CV_TERMCRIT_EPS | opencv_core.CV_TERMCRIT_NUMBER, 30, 1);
-   private Size searchWindowSize = new Size(12, 12);
+   private final Point2f previousPoint2f = new Point2f(0, 0);
+   private final Point2f nextPoint2f = new Point2f(0, 0);
+   private final Point firstNextPointAsInt = new Point(0, 0);
+   private final Mat previousPoints = new Mat(previousPoint2f);
+   private final Mat nextPoints = new Mat(nextPoint2f);
+   private Mat previousImage = null;
+   private Mat nextImage = null;
+   private final Mat status = new Mat();
+   private final Mat error = new Mat();
+   private final Vector2D_F32 firstNextPoint = new Vector2D_F32(0, 0);
+   private final Scalar RED = new Scalar(255, 1, 2, 255);
+   private final Scalar BLUE = new Scalar(1, 1, 255, 255);
+   private final TermCriteria terminationCriteria = new TermCriteria(opencv_core.CV_TERMCRIT_EPS | opencv_core.CV_TERMCRIT_NUMBER, 30, 1);
+   private final Size searchWindowSize = new Size(12, 12);
    private float mousePositionInImagePixelCoordinatesX;
    private float mousePositionInImagePixelCoordinatesY;
+   private int maxDistance = 90;
    private boolean userClicked = true;
 
-   private GDXCVImagePanel debugImagePanel;
-
-   public GDXOpenCVDoorHandleDetectionUI()
+   public GDXOpenCVOpticalFlowTrackingUI()
    {
       mainPanel = new ImGuiPanel("Door Handle Detection", this::renderImGuiWidgets);
    }
@@ -54,19 +48,10 @@ public class GDXOpenCVDoorHandleDetectionUI
       this.sourceImage = sourceImage;
       imageWidth = sourceImage.getImageWidth();
       imageHeight = sourceImage.getImageHeight();
-      imageForDrawing = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC3);
       boolean flipY = false;
       trackingImagePanel = new GDXCVImagePanel("Door Handle Detection Image", imageWidth, imageHeight, flipY);
       trackingImagePanel.getVideoPanel().setUserImGuiImageInteraction(this::videoPanelImGuiImageInteraction);
       mainPanel.addChild(trackingImagePanel.getVideoPanel());
-
-
-
-
-      //Debugging
-      debugImagePanel = new GDXCVImagePanel("Door Handle Detection debug Image", imageWidth, imageHeight, flipY);
-      debugImagePanel.getVideoPanel().setUserImGuiImageInteraction(this::videoPanelImGuiImageInteraction);
-      mainPanel.addChild(debugImagePanel.getVideoPanel());
    }
 
    private void videoPanelImGuiImageInteraction()
@@ -75,14 +60,13 @@ public class GDXOpenCVDoorHandleDetectionUI
       if (ImGui.isMouseReleased(ImGuiMouseButton.Left))
       {
          userClicked = true;
-         LogTools.info("User left clicked. x: {} y: {}", mousePositionInImagePixelCoordinatesX, mousePositionInImagePixelCoordinatesY);
-         point2f1.x(mousePositionInImagePixelCoordinatesX);
-         point2f1.y(mousePositionInImagePixelCoordinatesY);
+         previousPoint2f.x(mousePositionInImagePixelCoordinatesX);
+         previousPoint2f.y(mousePositionInImagePixelCoordinatesY);
       }
       else if (ImGui.isMouseReleased(ImGuiMouseButton.Right))
       {
-//         userClicked = false;
-//         LogTools.info("User right clicked.");
+         //         userClicked = false;
+         //         LogTools.info("User right clicked.");
       }
    }
 
@@ -95,7 +79,6 @@ public class GDXOpenCVDoorHandleDetectionUI
 
    public void update()
    {
-
       if (previousImage == null)
       {
          previousImage = new Mat(imageHeight, imageWidth, sourceImage.getBytedecoOpenCVMat().type());
@@ -110,13 +93,11 @@ public class GDXOpenCVDoorHandleDetectionUI
 
       opencv_imgproc.cvtColor(sourceImage.getBytedecoOpenCVMat(), nextImage, opencv_imgproc.COLOR_RGBA2GRAY);
 
+      sourceImage.getBytedecoOpenCVMat().copyTo(trackingImagePanel.getBytedecoImage().getBytedecoOpenCVMat());
 
-      sourceImage.getBytedecoOpenCVMat().copyTo(trackingImagePanel.getBytedecoImage().getBytedecoOpenCVMat() );
-
-      if (true) //userClicked
+      if (true) // userClicked
       {
-
-         //More pyramids lead to lower quality
+         // More pyramids lead to lower quality
          int maximalPyramidLevelNumber = 5; // 1 means two levels
          int operationFlags = 0;
          double minEigenValueThreshold = 0.01;
@@ -134,7 +115,7 @@ public class GDXOpenCVDoorHandleDetectionUI
 
          firstNextPoint.set(nextPoints.ptr(0).getFloat(), nextPoints.ptr().getFloat(Float.BYTES));
 
-         //Check if the marker moved too far over the past frame
+         // Check if the marker moved too far over the past frame
            /* double dist = Math.sqrt(((int)xy.getX() - (int)oldPoints.getX())^2 + ((int)xy.getX() - (int)oldPoints.getX())^2);
             if((int)dist>max_distance){
                p1=p0;
@@ -146,12 +127,8 @@ public class GDXOpenCVDoorHandleDetectionUI
 
          opencv_imgproc.circle(trackingImagePanel.getBytedecoImage().getBytedecoOpenCVMat(), firstNextPointAsInt, 8, RED, -1, opencv_imgproc.LINE_8, 0);
 
-
          nextPoints.copyTo(previousPoints);
-
          nextImage.copyTo(previousImage);
-
-
       }
       else
       {
@@ -168,6 +145,7 @@ public class GDXOpenCVDoorHandleDetectionUI
    {
       mousePositionInImagePixelCoordinatesX = trackingImagePanel.getVideoPanel().getMouseXRightFromLeft();
       mousePositionInImagePixelCoordinatesY = trackingImagePanel.getVideoPanel().getMouseYDownFromTop() - ImGui.getWindowSizeY() / 2;
+
       float ratio = imageHeight / imageWidth;
       float realRatio = ImGui.getWindowSizeY() / ImGui.getWindowSizeX();
       if (realRatio > ratio)
@@ -175,7 +153,7 @@ public class GDXOpenCVDoorHandleDetectionUI
          float adjustedHeight = imageHeight * ImGui.getWindowSizeX() / imageWidth;
          mousePositionInImagePixelCoordinatesY -= adjustedHeight / 2 + ImGui.getTextLineHeight() - adjustedHeight;
          mousePositionInImagePixelCoordinatesY *= imageWidth / ImGui.getWindowSizeX();
-         mousePositionInImagePixelCoordinatesX -= 3; //I don't know how much padding there is on the sides on photo, just guessing 3
+         mousePositionInImagePixelCoordinatesX -= 3; // I don't know how much padding there is on the sides on photo, just guessing 3
          mousePositionInImagePixelCoordinatesX *= imageWidth / ImGui.getWindowSizeX();
       }
       else
@@ -187,20 +165,11 @@ public class GDXOpenCVDoorHandleDetectionUI
          mousePositionInImagePixelCoordinatesX *= imageHeight / (ImGui.getWindowSizeY() - ImGui.getTextLineHeight());
          mousePositionInImagePixelCoordinatesY *= imageHeight / (ImGui.getWindowSizeY() - 2 * ImGui.getTextLineHeight());
       }
-
-
-      Point pointxy = new Point((int) mousePositionInImagePixelCoordinatesX, (int) mousePositionInImagePixelCoordinatesY);
-      Scalar color = new Scalar(255, 1, 2, 255);
    }
 
    public ImGuiPanel getMainPanel()
    {
       return mainPanel;
-   }
-
-   public GDXCVImagePanel getTrackingImagePanel()
-   {
-      return trackingImagePanel;
    }
 }
 

@@ -9,7 +9,7 @@ import com.badlogic.gdx.math.Frustum;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
@@ -75,7 +75,7 @@ public class GDXFrustumVisualizer implements RenderableProvider
          if (lastModel != null)
             lastModel.dispose();
 
-         lastModel = GDXModelPrimitives.buildModel(meshBuilder ->
+         lastModel = GDXModelBuilder.buildModel(meshBuilder ->
          {
             double lineWidth = 0.01;
             meshBuilder.addMultiLine(vertices, lineWidth, color, false);
