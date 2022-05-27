@@ -437,7 +437,7 @@ public class MotionQPInputCalculator
       // Step 2: The small Jacobian matrix into the full Jacobian matrix. Proper indexing has to be ensured, so it is handled by the jointIndexHandler.
       jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(jointsUsedInTask, tempTaskJacobian, qpInputToPack.taskJacobian);
 
-      if (primaryBase == null)
+      if (true) //(primaryBase == null)
       { // No primary base provided for this task.
         // Record the resulting Jacobian matrix for the privileged configuration.
          recordTaskJacobian(qpInputToPack.taskJacobian);
