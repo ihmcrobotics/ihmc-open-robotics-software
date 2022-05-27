@@ -492,6 +492,7 @@ public class GDXGPUPlanarRegionExtractionUI
    public void destroy()
    {
       gpuPlanarRegionExtraction.destroy();
+      simpleGPUHeightMapUpdater.destroy();
       // TODO: Destroy the rest
    }
 

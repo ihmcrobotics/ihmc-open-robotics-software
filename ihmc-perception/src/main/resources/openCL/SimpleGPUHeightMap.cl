@@ -211,13 +211,13 @@ void kernel addPointsKernel(global float* points_in, global float* localization,
 {
     int i = get_global_id(0);
 
-    float3 point = (float3) (points_in[i * 3], points_in[i * 3 + 1], points_in[i * 3 + 2]);
+    float3 point_in_camera_frame = (float3) (points_in[i * 3], points_in[i * 3 + 1], points_in[i * 3 + 2]);
     float3 sensor = (float3) (localization[tx], localization[ty], localization[tz]);
     float3 rotation_x = (float3) (localization[r00], localization[r01], localization[r02]);
     float3 rotation_y = (float3) (localization[r10], localization[r11], localization[r12]);
     float3 rotation_z = (float3) (localization[r20], localization[r21], localization[r22]);
 
-    float3 pointInWorld = transform_point(point, rotation_x, rotation_y, rotation_z, sensor);
+    float3 pointInWorld = transform_point(point_in_camera_frame, rotation_x, rotation_y, rotation_z, sensor);
 
     if (is_valid(pointInWorld, sensor, params))
     {
@@ -304,8 +304,8 @@ void kernel averageMapKernel(global float* map_data, global float* params)
 
 void kernel averageMapImagesKernel(global float* map_data, global float* params, write_only image2d_t height_data, write_only image2d_t variance_data, write_only image2d_t counter)
 {
-    int idx_x = get_global_id(0);
-    int idx_y = get_global_id(1);
+    int idx_y = get_global_id(0);
+    int idx_x = get_global_id(1);
 
     int2 key = (int2) (idx_x, idx_y);
 

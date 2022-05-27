@@ -129,24 +129,27 @@ public class SimpleGPUHeightMap
       return MathTools.clamp(idx, 0, cellsPerSide);
    }
 
-   public void updateFromFloatBuffer(FloatBuffer heightBuffer, FloatBuffer varianceBuffer, FloatBuffer countBuffer, int cellsPerSide)
+   public void updateFromFloatBufferImage(FloatBuffer heightBuffer,
+//                                          FloatBuffer varianceBuffer,
+//                                          FloatBuffer countBuffer,
+                                          int cellsPerSide)
    {
       this.cellsPerSide = cellsPerSide;
 
       heightBuffer.position(0);
-      varianceBuffer.position(0);
-      countBuffer.position(0);
+//      varianceBuffer.position(0);
+//      countBuffer.position(0);
       heightDataMap.reshape(cellsPerSide, cellsPerSide);
-      varianceDataMap.reshape(cellsPerSide, cellsPerSide);
-      countDataMap.reshape(cellsPerSide, cellsPerSide);
+//      varianceDataMap.reshape(cellsPerSide, cellsPerSide);
+//      countDataMap.reshape(cellsPerSide, cellsPerSide);
 
-      for (int x = 0; x < cellsPerSide; x++)
+      for (int y = 0; y < cellsPerSide; y++)
       {
-         for (int y = 0; y < cellsPerSide; y++)
+         for (int x = 0; x < cellsPerSide; x++)
          {
             heightDataMap.set(x, y, heightBuffer.get());
-            varianceDataMap.set(x, y, varianceBuffer.get());
-            countDataMap.set(x, y, countBuffer.get());
+//            varianceDataMap.set(x, y, varianceBuffer.get());
+//            countDataMap.set(x, y, countBuffer.get());
          }
       }
    }
@@ -193,7 +196,8 @@ public class SimpleGPUHeightMap
       {
          for (int yIndex = 0; yIndex < heightDataMap.getNumCols(); yIndex++)
          {
-            if (countDataMap.get(xIndex, yIndex) > 0)
+            if (!MathTools.epsilonEquals(heightDataMap.get(xIndex, yIndex), 0.0, 1e-5))
+//            if (countDataMap.get(xIndex, yIndex) > 0)
             {
                int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
                message.getKeys().add(key);
