@@ -31,7 +31,7 @@ public class ControllerNaturalPostureManager
    private final DMatrixRMaj npQPselectionMatrix = new DMatrixRMaj(1, 1);
    private final Quaternion currentNPQuat = new Quaternion(0,0,0,1);
    private final YawPitchRoll npYPR = new YawPitchRoll();
-   private final DMatrixRMaj omegaDot = new DMatrixRMaj(3,1);
+   private final DMatrixRMaj yprDDot = new DMatrixRMaj(3,1);
    private final DMatrixRMaj Dnp = new DMatrixRMaj(3,3);
 
    private final YoDouble npYaw = new YoDouble("npYaw", registry);
@@ -66,12 +66,13 @@ public class ControllerNaturalPostureManager
    private final QPObjectiveCommand pelvisQPObjectiveCommand = new QPObjectiveCommand();
 
    private final YoDouble pPosePelvisPitch = new YoDouble("pPosePelvisPitch", registry);
+   private final YoDouble pPosePelvisYaw = new YoDouble("pPosePelvisYaw", registry);
    private final YoDouble pPosePelvisYawKp = new YoDouble("pPosePelvisYawKp", registry);
    private final YoDouble pPosePelvisPitchKp = new YoDouble("pPosePelvisPitchKp", registry);
    private final YoDouble pPosePelvisRollKp = new YoDouble("pPosePelvisRollKp", registry);
-   private final YoDouble pPosePelvisYawKd = new YoDouble("pPosePelvisYawKd", registry);
-   private final YoDouble pPosePelvisPitchKd = new YoDouble("pPosePelvisPitchKd", registry);
-   private final YoDouble pPosePelvisRollKd = new YoDouble("pPosePelvisRollKd", registry);
+   private final YoDouble pPosePelvisYawKdFactor = new YoDouble("pPosePelvisYawKdFactor", registry);
+   private final YoDouble pPosePelvisPitchKdFactor = new YoDouble("pPosePelvisPitchKdFactor", registry);
+   private final YoDouble pPosePelvisRollKdFactor = new YoDouble("pPosePelvisRollKdFactor", registry);
    private final DMatrixRMaj pelvisQPobjective = new DMatrixRMaj(1,1);
    private final DMatrixRMaj pelvisQPjacobian = new DMatrixRMaj(1, 1);
    private final DMatrixRMaj pelvisQPweightMatrix = new DMatrixRMaj(1, 1);
@@ -116,7 +117,7 @@ public class ControllerNaturalPostureManager
       npQPselectionMatrix.reshape(3, 3);
       CommonOps_DDRM.setIdentity(npQPselectionMatrix);
       
-      npPitchDesired.set(-0.03);
+      npPitchDesired.set(0.0);
 
       npQPWeightX.set(500.0);
       npQPWeightY.set(500.0);
@@ -138,13 +139,14 @@ public class ControllerNaturalPostureManager
       pelvisQPweightMatrix.reshape(3, 3);
       pelvisQPselectionMatrix.reshape(3, 3);
       CommonOps_DDRM.setIdentity(pelvisQPselectionMatrix);
-      pPosePelvisPitch.set(0.16);
-      pPosePelvisYawKp.set(100.0);
-      pPosePelvisPitchKp.set(400);
-      pPosePelvisRollKp.set(400.0);
-      pPosePelvisYawKd.set(15.0);
-      pPosePelvisPitchKd.set(60);
-      pPosePelvisRollKd.set(60);      
+      pPosePelvisPitch.set(0.0);
+      pPosePelvisYaw.set(0.0);
+      pPosePelvisYawKp.set(1000.0);
+      pPosePelvisPitchKp.set(3000);
+      pPosePelvisRollKp.set(1000.0);
+      pPosePelvisYawKdFactor.set(0.25);
+      pPosePelvisPitchKdFactor.set(0.15);
+      pPosePelvisRollKdFactor.set(0.25);      
       
       parentRegistry.addChild(registry);
    }
@@ -213,13 +215,13 @@ public class ControllerNaturalPostureManager
       npPitchAcceleration.set(npKpPitch.getValue()*(npPitchDesired.getValue() - npPitch.getValue()) - npKdPitch.getValue() * npPitchVelocity.getValue());
       npRollAcceleration.set(npKpRoll.getValue()*(npRollDesired.getValue() - npRoll.getValue()) - npKdRoll.getValue() * npRollVelocity.getValue());
 
-      omegaDot.set(0, 0, npYawAcceleration.getValue());
-      omegaDot.set(1, 0, npPitchAcceleration.getValue());
-      omegaDot.set(2, 0, npRollAcceleration.getValue());
+      yprDDot.set(0, 0, npYawAcceleration.getValue());
+      yprDDot.set(1, 0, npPitchAcceleration.getValue());
+      yprDDot.set(2, 0, npRollAcceleration.getValue());
  
       // GMN: derivative terms???
 
-      CommonOps_DDRM.mult(Dnp, omegaDot, npQPobjective);  // GMN: missing D-dot term (since InvDyn takes accels)
+      CommonOps_DDRM.mult(Dnp, yprDDot, npQPobjective);  // GMN: missing D-dot term (since InvDyn takes accels)
       
       npQPjacobian.set(robotNaturalPosture.getNaturalPostureJacobian());
       
@@ -274,15 +276,18 @@ public class ControllerNaturalPostureManager
 
       // The pelvis equilibrium pose servo:
       // GMN: Hard-coded all zeros for pelvis priv pose for now...
-      pelvisYawAcceleration.set(  pPosePelvisYawKp.getValue()  *(0.0 - pelvisYPR.getYaw())   - pPosePelvisYawKd.getValue()  * pelvisYPRdot.get(0,0));
-      pelvisPitchAcceleration.set(pPosePelvisPitchKp.getValue()*(pPosePelvisPitch.getValue() - pelvisYPR.getPitch()) - pPosePelvisPitchKd.getValue()* pelvisYPRdot.get(1,0));
-      pelvisRollAcceleration.set( pPosePelvisRollKp.getValue() *(0.0 - pelvisYPR.getRoll())  - pPosePelvisRollKd.getValue() * pelvisYPRdot.get(2,0));
+      pelvisYawAcceleration.set(  pPosePelvisYawKp.getValue()  *(pPosePelvisYaw.getValue() - pelvisYPR.getYaw())   - 
+                                  pPosePelvisYawKdFactor.getValue()*pPosePelvisYawKp.getValue()  * pelvisYPRdot.get(0,0));
+      pelvisPitchAcceleration.set(pPosePelvisPitchKp.getValue()*(pPosePelvisPitch.getValue() - pelvisYPR.getPitch()) - 
+                                  pPosePelvisPitchKdFactor.getValue()*pPosePelvisPitchKp.getValue()* pelvisYPRdot.get(1,0));
+      pelvisRollAcceleration.set( pPosePelvisRollKp.getValue() *(0.0 - pelvisYPR.getRoll())  - 
+                                  pPosePelvisRollKdFactor.getValue()*pPosePelvisRollKp.getValue() * pelvisYPRdot.get(2,0));
       
-      omegaDot.set(0, 0, pelvisYawAcceleration.getValue());
-      omegaDot.set(1, 0, pelvisPitchAcceleration.getValue());
-      omegaDot.set(2, 0, pelvisRollAcceleration.getValue());
+      yprDDot.set(0, 0, pelvisYawAcceleration.getValue());
+      yprDDot.set(1, 0, pelvisPitchAcceleration.getValue());
+      yprDDot.set(2, 0, pelvisRollAcceleration.getValue());
  
-      CommonOps_DDRM.mult(Dpelvis, omegaDot, pelvisQPobjective);  // GMN: missing D-dot*omega term
+      CommonOps_DDRM.mult(Dpelvis, yprDDot, pelvisQPobjective);  // GMN: missing D-dot*yprDot term
       
       pelvisQPjacobian.zero(); // GMN: necessary??
       pelvisQPjacobian.set(0,0,1.0);
