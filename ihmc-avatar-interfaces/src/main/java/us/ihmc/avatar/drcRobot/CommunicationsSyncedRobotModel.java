@@ -2,11 +2,14 @@ package us.ihmc.avatar.drcRobot;
 
 import controller_msgs.msg.dds.HandJointAnglePacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.SpatialVectorMessage;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
@@ -20,6 +23,7 @@ import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshot;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.function.Function;
 
@@ -35,6 +39,7 @@ public abstract class CommunicationsSyncedRobotModel
    protected final int jointNameHash;
    private final HumanoidReferenceFrames referenceFrames;
    private final FramePose3D temporaryPoseForQuickReading = new FramePose3D();
+   private final ArrayList<SpatialVectorMessage> forceSensorData = new ArrayList<>();
 
    public CommunicationsSyncedRobotModel(FullHumanoidRobotModel fullRobotModel, SideDependentList<HandModel> handModels, HumanoidRobotSensorInformation sensorInformation)
    {
@@ -50,6 +55,7 @@ public abstract class CommunicationsSyncedRobotModel
       jointNameHash = RobotConfigurationDataFactory.calculateJointNameHash(allJoints,
                                                                            fullRobotModel.getForceSensorDefinitions(),
                                                                            fullRobotModel.getIMUDefinitions());
+
       dataReceptionTimer = new Timer();
    }
 
@@ -86,6 +92,13 @@ public abstract class CommunicationsSyncedRobotModel
          allJoints[i].setQ(robotConfigurationData.getJointAngles().get(i));
       }
 
+      forceSensorData.clear();
+      for (int i = 0; i < robotConfigurationData.getForceSensorData().size(); i++)
+      {
+         SpatialVectorMessage spatialVectorMessage = robotConfigurationData.getForceSensorData().get(i);
+         forceSensorData.add(spatialVectorMessage);
+      }
+
       if (handModels != null)
       {
          HandModelUtils.copyHandJointAnglesFromMessagesToOneDoFJoints(handModels, handJoints, handJointAnglePackets);
@@ -116,6 +129,11 @@ public abstract class CommunicationsSyncedRobotModel
    public RobotConfigurationData getRobotConfigurationData()
    {
       return robotConfigurationData;
+   }
+
+   public ArrayList<SpatialVectorMessage> getForceSensorData()
+   {
+      return forceSensorData;
    }
 
    public long getTimestamp()

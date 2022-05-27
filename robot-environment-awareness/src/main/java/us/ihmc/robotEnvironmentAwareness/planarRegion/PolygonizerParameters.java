@@ -47,7 +47,12 @@ public class PolygonizerParameters extends StoredPropertySet implements Polygoni
 
    public PolygonizerParameters()
    {
-      super(keys, PolygonizerParameters.class, PROJECT_NAME, TO_RESOURCE_FOLDER);
+      this("");
+   }
+
+   public PolygonizerParameters(String fileNameSuffix)
+   {
+      super(keys, PolygonizerParameters.class, PROJECT_NAME, TO_RESOURCE_FOLDER, fileNameSuffix);
       load();
    }
 

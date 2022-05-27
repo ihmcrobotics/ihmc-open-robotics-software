@@ -34,7 +34,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.imgui.ImGuiTools;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.vr.GDXVRContext;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -105,8 +105,8 @@ public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
       imGuiGl3 = new ImGuiImplGl3();
       imGuiGl3.init();
 
-      centerFrameCoordinateFrame = GDXModelPrimitives.createCoordinateFrameInstance(0.3);
-      graphicsFrameCoordinateFrame = GDXModelPrimitives.createCoordinateFrameInstance(0.3);
+      centerFrameCoordinateFrame = GDXModelBuilder.createCoordinateFrameInstance(0.3);
+      graphicsFrameCoordinateFrame = GDXModelBuilder.createCoordinateFrameInstance(0.3);
 
       ModelBuilder modelBuilder = new ModelBuilder();
       modelBuilder.begin();

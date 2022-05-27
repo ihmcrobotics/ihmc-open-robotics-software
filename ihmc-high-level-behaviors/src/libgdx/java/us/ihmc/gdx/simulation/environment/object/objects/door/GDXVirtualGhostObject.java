@@ -22,7 +22,7 @@ public class GDXVirtualGhostObject extends GDXModelInstance
                                                                                                                         transformToParent);
    public GDXVirtualGhostObject(String modelName)
    {
-      super(GDXModelLoader.loadG3DModel(modelName));
+      super(GDXModelLoader.load(modelName));
       setColor(GHOST_COLOR);
 
       referenceFrameGraphic = new GDXReferenceFrameGraphic(0.05, Color.BLUE);

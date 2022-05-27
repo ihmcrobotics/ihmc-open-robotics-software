@@ -16,7 +16,7 @@ public class GDXDoorPanelObject extends GDXEnvironmentObject
    public GDXDoorPanelObject()
    {
       super(NAME, FACTORY);
-      Model realisticModel = GDXModelLoader.loadG3DModel("environmentObjects/door/doorPanel/DoorPanelWithFiducials.g3dj");
+      Model realisticModel = GDXModelLoader.load("environmentObjects/door/doorPanel/DoorPanelWithFiducials.g3dj");
       setRealisticModel(realisticModel);
 
       double sizeX = 0.0508; // centered on X

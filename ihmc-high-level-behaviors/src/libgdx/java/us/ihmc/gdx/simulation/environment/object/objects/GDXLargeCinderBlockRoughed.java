@@ -16,7 +16,7 @@ public class GDXLargeCinderBlockRoughed extends GDXEnvironmentObject
    public GDXLargeCinderBlockRoughed()
    {
       super(NAME, FACTORY);
-      Model realisticModel = GDXModelLoader.loadG3DModel("environmentObjects/largeCinderBlockRoughed/LargeCinderBlockRoughed.g3dj");
+      Model realisticModel = GDXModelLoader.load("environmentObjects/largeCinderBlockRoughed/LargeCinderBlockRoughed.g3dj");
       setRealisticModel(realisticModel);
 
       getBoundingSphere().setRadius(0.7);

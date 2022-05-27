@@ -16,10 +16,9 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.physics.CollidableVisualizer;
 
@@ -47,10 +46,10 @@ public class GDXLibGDXBulletPhysicsDemo4
             Vector3 gravity = new Vector3(0.0f, 0.0f, -9.81f);
             world = new BulletWorld(gravity);
 
-            ModelInstance ground = GDXModelPrimitives.createBox(1000.0f, 1000.0f, 0.5f, Color.DARK_GRAY);
+            ModelInstance ground = GDXModelBuilder.createBox(1000.0f, 1000.0f, 0.5f, Color.DARK_GRAY);
             double polytopeSizeZ = 0.5;
             ConvexPolytope3D convexPolytope = EuclidPolytopeFactories.newIcosahedron(0.5);
-            Model model = GDXModelPrimitives.buildModel(meshBuilder -> meshBuilder.addMesh(CollidableVisualizer.newConvexPolytope3DMesh(convexPolytope), Color.GRAY));
+            Model model = GDXModelBuilder.buildModel(meshBuilder -> meshBuilder.addMesh(CollidableVisualizer.newConvexPolytope3DMesh(convexPolytope), Color.GRAY));
             ModelInstance poloytope = new ModelInstance(model);
 
             world.addConstructor("ground", new BulletConstructor(ground.model, 0.0f));

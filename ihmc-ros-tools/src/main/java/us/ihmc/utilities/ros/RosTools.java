@@ -42,6 +42,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.string.StringTools;
 
 public class RosTools
@@ -63,6 +64,7 @@ public class RosTools
    public static final String MAPSENSE_POINT_CLOUD = "/mapsense/color/points";
    public static final String BLACKFLY_LEFT_VIDEO = "/blackfly/left/image_color";
    public static final String BLACKFLY_RIGHT_VIDEO = "/blackfly/right/image_color";
+   public static final SideDependentList<String> BLACKFLY_VIDEO_TOPICS = new SideDependentList<>(BLACKFLY_LEFT_VIDEO, BLACKFLY_RIGHT_VIDEO);
    public static final String SLAM_POSE = "/mapsense/slam/pose";
    public static final String SEMANTIC_TARGET_POSE = "/semantic/target/pose";
    public static final String SEMANTIC_TARGET_CLOUD = "/semantic/object/points";

@@ -2,7 +2,7 @@ package us.ihmc.gdx;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import imgui.internal.ImGui;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 
 public class GDXImGuiBasedUIWith3DSituatedImGuiPanelsDemo
@@ -22,7 +22,7 @@ public class GDXImGuiBasedUIWith3DSituatedImGuiPanelsDemo
          {
             baseUI.create();
 
-            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
+            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelBuilder.createCoordinateFrame(0.3)));
 
             baseUI.getImGuiPanelManager().addPanel("Window 1", this::renderWindow1);
 

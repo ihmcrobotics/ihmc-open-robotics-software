@@ -24,7 +24,7 @@ public class GDXDoorPushHandleRightFiducialStaticHandleObject extends GDXEnviron
    {
       super(NAME, FACTORY);
       Model realisticModel
-            = GDXModelLoader.loadG3DModel("environmentObjects/door/doorPushHandleRightFiducialStaticHandle/DoorPushHandleRightFiducialStaticHandle.g3dj");
+            = GDXModelLoader.load("environmentObjects/door/doorPushHandleRightFiducialStaticHandle/DoorPushHandleRightFiducialStaticHandle.g3dj");
       setRealisticModel(realisticModel);
 
       double heightZ = 2.0447; // these were measured in blender

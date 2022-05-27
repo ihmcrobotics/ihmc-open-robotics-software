@@ -16,7 +16,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.simulation.environment.GDXModelInstance;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.ui.yo.ImPlotDoublePlotLine;
 import us.ihmc.gdx.ui.yo.ImPlotPlot;
 import us.ihmc.perception.BytedecoImage;
@@ -105,7 +105,7 @@ public class GDXOpenCVArUcoMarkerDetectionUI
 
       for (OpenCVArUcoMarker markerToTrack : markersToTrack)
       {
-         GDXModelInstance coordinateFrame = new GDXModelInstance(GDXModelPrimitives.createCoordinateFrame(0.4));
+         GDXModelInstance coordinateFrame = new GDXModelInstance(GDXModelBuilder.createCoordinateFrame(0.4));
          markerPoseCoordinateFrames.add(coordinateFrame);
       }
 

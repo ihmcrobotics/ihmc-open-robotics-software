@@ -86,7 +86,7 @@ public class GDXVisualTools
          if (modelFileName == null)
             return null;
 
-         gdxModel.setModel(GDXModelLoader.loadG3DModel(modelFileName));
+         gdxModel.setModel(GDXModelLoader.load(modelFileName));
 
          if (materialDefinition != null && materialDefinition.getDiffuseColor() != null)
          {

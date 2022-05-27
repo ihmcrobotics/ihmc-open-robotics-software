@@ -5,7 +5,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.simulation.environment.GDXModelInstance;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 
 public class GDXReferenceFrameGraphic extends GDXModelInstance
@@ -16,12 +16,12 @@ public class GDXReferenceFrameGraphic extends GDXModelInstance
 
    public GDXReferenceFrameGraphic(double length)
    {
-      super(GDXModelPrimitives.createCoordinateFrameInstance(length));
+      super(GDXModelBuilder.createCoordinateFrameInstance(length));
    }
 
    public GDXReferenceFrameGraphic(double length, Color color)
    {
-      super(GDXModelPrimitives.createCoordinateFrameInstance(length, color));
+      super(GDXModelBuilder.createCoordinateFrameInstance(length, color));
    }
 
    public void setToReferenceFrame(ReferenceFrame referenceFrame)

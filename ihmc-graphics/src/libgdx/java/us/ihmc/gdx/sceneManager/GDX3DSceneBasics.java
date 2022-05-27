@@ -15,7 +15,7 @@ import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.gdx.lighting.GDXDirectionalLight;
 import us.ihmc.gdx.lighting.GDXPointLight;
 import us.ihmc.gdx.lighting.GDXShadowManager;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 
 import java.util.ArrayList;
@@ -172,7 +172,7 @@ public class GDX3DSceneBasics
 
    public void addCoordinateFrame(double size)
    {
-      addModelInstance(GDXModelPrimitives.createCoordinateFrameInstance(size), GDXSceneLevel.VIRTUAL);
+      addModelInstance(GDXModelBuilder.createCoordinateFrameInstance(size), GDXSceneLevel.VIRTUAL);
    }
 
    public void addRenderableProvider(RenderableProvider renderableProvider)

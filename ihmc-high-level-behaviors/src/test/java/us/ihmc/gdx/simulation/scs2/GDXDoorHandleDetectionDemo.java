@@ -2,19 +2,15 @@ package us.ihmc.gdx.simulation.scs2;
 
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
-import org.bytedeco.opencv.global.opencv_imgcodecs;
-import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.gdx.perception.GDXOpenCVDoorHandleDetectionUI;
+import us.ihmc.gdx.perception.GDXOpenCVOpticalFlowTrackingUI;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.environment.GDXEnvironmentBuilder;
 import us.ihmc.gdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
 import us.ihmc.gdx.simulation.sensors.GDXSimulatedSensorFactory;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
-import us.ihmc.perception.*;
-import us.ihmc.tools.io.WorkspaceDirectory;
-import us.ihmc.tools.io.WorkspaceFile;
+import us.ihmc.perception.BytedecoTools;
 import us.ihmc.tools.thread.Activator;
 
 public class GDXDoorHandleDetectionDemo
@@ -22,19 +18,15 @@ public class GDXDoorHandleDetectionDemo
    private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
                                                               "ihmc-open-robotics-software",
                                                               "ihmc-high-level-behaviors/src/test/resources");
-   private final Activator nativesLoadedActivator;
+   private final Activator nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
    private GDXEnvironmentBuilder environmentBuilder;
    private final GDXPose3DGizmo sensorPoseGizmo = new GDXPose3DGizmo();
    private GDXHighLevelDepthSensorSimulator cameraSensor;
-   private GDXOpenCVDoorHandleDetectionUI doorHandleDetectionUI;
+   private GDXOpenCVOpticalFlowTrackingUI doorHandleDetectionUI;
    private final ImBoolean cameraGizmoSelected = new ImBoolean(true);
 
    public GDXDoorHandleDetectionDemo()
    {
-      nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
-
-
-
       baseUI.launchGDXApplication(new Lwjgl3ApplicationAdapter()
       {
          @Override
@@ -87,7 +79,7 @@ public class GDXDoorHandleDetectionDemo
                   baseUI.getImGuiPanelManager().addPanel(cameraSensor);
                   baseUI.get3DSceneManager().addRenderableProvider(cameraSensor, GDXSceneLevel.VIRTUAL);
 
-                  doorHandleDetectionUI = new GDXOpenCVDoorHandleDetectionUI();
+                  doorHandleDetectionUI = new GDXOpenCVOpticalFlowTrackingUI();
                   doorHandleDetectionUI.create(cameraSensor.getLowLevelSimulator().getRGBA8888ColorImage());
                   baseUI.getImGuiPanelManager().addPanel(doorHandleDetectionUI.getMainPanel());
 

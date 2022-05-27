@@ -270,7 +270,7 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
 
          MultiContactScriptPostProcessor scriptPostProcessor = new MultiContactScriptPostProcessor(getRobotModel());
          scriptPostProcessor.setDurationPerKeyframe(durationPerKeyframe);
-         WholeBodyJointspaceTrajectoryMessage message = scriptPostProcessor.process1(scriptReader.getAllItems());
+         WholeBodyJointspaceTrajectoryMessage message = scriptPostProcessor.process1(scriptReader.getAllItems(), true);
 
          simulationTestHelper.publishToController(message);
          assertTrue(simulationTestHelper.simulateNow(message.getJointTrajectoryMessages().get(0).getTrajectoryPoints().getLast().getTime() + 2.0));

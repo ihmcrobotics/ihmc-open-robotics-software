@@ -7,6 +7,7 @@ import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLev
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import controller_msgs.msg.dds.StampedPosePacket;
@@ -123,6 +124,7 @@ public class SCS2AvatarSimulationFactory
 
    protected final OptionalFactoryField<Boolean> useImpulseBasedPhysicsEngine = new OptionalFactoryField<>("useImpulseBasePhysicsEngine", false);
    protected final OptionalFactoryField<Boolean> useBulletPhysicsEngine = new OptionalFactoryField<>("useBulletPhysicsEngine", false);
+   protected final OptionalFactoryField<Consumer<RobotDefinition>> bulletCollisionMutator = new OptionalFactoryField<>("bulletCollisionMutator");
    protected final OptionalFactoryField<ContactParametersReadOnly> impulseBasedPhysicsEngineContactParameters = new OptionalFactoryField<>("impulseBasedPhysicsEngineParameters");
    protected final OptionalFactoryField<Boolean> enableSimulatedRobotDamping = new OptionalFactoryField<>("enableSimulatedRobotDamping", true);
    protected final OptionalFactoryField<Boolean> useRobotDefinitionCollisions = new OptionalFactoryField<>("useRobotDefinitionCollisions", false);
@@ -191,9 +193,9 @@ public class SCS2AvatarSimulationFactory
 
       robotDefinition = robotModel.getRobotDefinition();
 
-      if (useBulletPhysicsEngine.get())
+      if (useBulletPhysicsEngine.get() && bulletCollisionMutator.hasValue())
       {
-         SCS2BulletSimulationTools.fixHumanoidCollisionGroupsMasksToPreventSelfCollision(robotDefinition);
+         bulletCollisionMutator.get().accept(robotDefinition);
       }
 
       if (!enableSimulatedRobotDamping.get())
@@ -719,6 +721,11 @@ public class SCS2AvatarSimulationFactory
    public void setUseBulletPhysicsEngine(boolean useBulletPhysicsEngine)
    {
       this.useBulletPhysicsEngine.set(useBulletPhysicsEngine);
+   }
+
+   public void setBulletCollisionMutator(Consumer<RobotDefinition> bulletCollisionMutator)
+   {
+      this.bulletCollisionMutator.set(bulletCollisionMutator);
    }
 
    public void setEnableSimulatedRobotDamping(boolean enableSimulatedRobotDamping)
