@@ -20,6 +20,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
+import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
@@ -49,6 +50,16 @@ public class GDXROS1PlanarRegionsVisualizer extends ImGuiGDXROS1Visualizer imple
       executorService = MissingThreadTools.newSingleThreadExecutor("ROS1PlanarRegionsSubscriber", daemon, queueSize);
 
       gpuPlanarRegionUpdater.attachROS2Tuner(ros2Node);
+   }
+
+   public GDXROS1PlanarRegionsVisualizer(String title, String topic)
+   {
+      super(title);
+      this.topic = topic;
+
+      boolean daemon = true;
+      int queueSize = 1;
+      executorService = MissingThreadTools.newSingleThreadExecutor("ROS1PlanarRegionsSubscriber", daemon, queueSize);
    }
 
    public GDXROS1PlanarRegionsVisualizer(String title, ROS2NodeInterface ros2Node, DRCRobotModel robotModel, String topic)
