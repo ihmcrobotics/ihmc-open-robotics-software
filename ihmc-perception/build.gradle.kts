@@ -48,6 +48,9 @@ mainDependencies {
    api("us.ihmc:ihmc-robot-models:source")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
+
+   api("org.freedesktop.gstreamer:gst1-java-core:1.4.0")
+   api("org.asynchttpclient:async-http-client:2.12.3")
 }
 
 openpnpDependencies {
