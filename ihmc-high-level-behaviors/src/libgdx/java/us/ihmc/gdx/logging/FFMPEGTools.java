@@ -6,6 +6,7 @@ import org.bytedeco.javacpp.Pointer;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.string.StringTools;
 
+import java.util.HashMap;
 import java.util.function.Supplier;
 
 public class FFMPEGTools
@@ -47,15 +48,31 @@ public class FFMPEGTools
       return avutil.av_make_error_string(new BytePointer(1000), 1000, code).getString();
    }
 
-   public static void listLicenses() {
-      LogTools.debug("FFMPEG Library Licenses:");
-      LogTools.debug("avcodec:    " + avcodec.avcodec_license().getString());
-      LogTools.debug("avdevice:   " + avdevice.avdevice_license().getString());
-      LogTools.debug("avfilter:   " + avfilter.avfilter_license().getString());
-      LogTools.debug("avformat:   " + avformat.avformat_license().getString());
-      LogTools.debug("avutil:     " + avutil.avutil_license().getString());
-      //LogTools.debug("postproc: " + postproc.postproc_license().getString()); //Unsatisfied link error
-      LogTools.debug("swresample: " + swresample.swresample_license().getString());
-      LogTools.debug("swscale:    " + swscale.swscale_license().getString());
+   private static void mapAddNewValueOrAppend(HashMap<String, String> map, String key, String value)
+   {
+      if (map.containsKey(key))
+         map.put(key, map.get(key) + ", " + value);
+      else
+         map.put(key, value);
+   }
+
+   public static void listLicenses()
+   {
+      HashMap<String, String> licenses = new HashMap<>();
+      mapAddNewValueOrAppend(licenses, avcodec.avcodec_license().getString(), "avcodec");
+      mapAddNewValueOrAppend(licenses, avdevice.avdevice_license().getString(), "avdevice");
+      mapAddNewValueOrAppend(licenses, avfilter.avfilter_license().getString(), "avfilter");
+      mapAddNewValueOrAppend(licenses, avformat.avformat_license().getString(), "avformat");
+      mapAddNewValueOrAppend(licenses, avutil.avutil_license().getString(), "avutil");
+      mapAddNewValueOrAppend(licenses, swresample.swresample_license().getString(), "swresample");
+      mapAddNewValueOrAppend(licenses, swscale.swscale_license().getString(), "swscale");
+
+      StringBuilder sb = new StringBuilder();
+      sb.append("FFMPEG License(s):");
+      licenses.forEach((String key, String value) -> {
+         sb.append(' ').append(key).append(": ").append(value).append(".");
+      });
+
+      LogTools.debug(sb.toString());
    }
 }
