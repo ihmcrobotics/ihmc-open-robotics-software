@@ -62,6 +62,12 @@ public class BytedecoImage
          openCLChannelOrder = OpenCL.CL_R;
          openCLChannelDataType = OpenCL.CL_FLOAT;
       }
+      else if (cvMatType == opencv_core.CV_32FC3)
+      {
+         bytesPerPixel = 4 * 3;
+         openCLChannelOrder = OpenCL.CL_RGB;
+         openCLChannelDataType = OpenCL.CL_FLOAT;
+      }
       else if (cvMatType == opencv_core.CV_32FC(6))
       {
          bytesPerPixel = 4 * 6;
