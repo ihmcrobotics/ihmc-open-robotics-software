@@ -119,6 +119,7 @@ public class ROS2Tools
    public static final SideDependentList<ROS2Topic<VideoPacket>> BLACKFLY_VIDEO
          = new SideDependentList<>(IHMC_ROOT.withModule(BLACKFLY_NAME + "left").withType(VideoPacket.class).withSuffix("video"),
                                    IHMC_ROOT.withModule(BLACKFLY_NAME + "right").withType(VideoPacket.class).withSuffix("video"));
+   public static final ROS2Topic<BigVideoPacket> BIG_VIDEO_TEST = IHMC_ROOT.withModule(BLACKFLY_NAME).withType(BigVideoPacket.class).withSuffix("test");
 
    public static final ROS2Topic<LidarScanMessage> MULTISENSE_LIDAR_SCAN = IHMC_ROOT.withTypeName(LidarScanMessage.class);
    public static final ROS2Topic<FusedSensorHeadPointCloudMessage> FUSED_SENSOR_HEAD_POINT_CLOUD = IHMC_ROOT.withTypeName(FusedSensorHeadPointCloudMessage.class);
