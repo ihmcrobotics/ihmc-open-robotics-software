@@ -46,6 +46,8 @@ public class GDXFFMPEGLoggingDemo
          @Override
          public void create()
          {
+            FFMPEGTools.listLicenses();
+
             baseUI.create();
 
             ImGuiPanel panel = new ImGuiPanel("Image", this::renderImGuiWidgets);
