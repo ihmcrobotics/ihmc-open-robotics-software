@@ -1,6 +1,7 @@
 package us.ihmc.perception.gpuHeightMap;
 
 import controller_msgs.msg.dds.HeightMapMessage;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -132,7 +133,7 @@ public class SimpleGPUHeightMap
 
    public void updateFromFloatBufferImage(FloatBuffer heightBuffer,
                                           FloatBuffer varianceBuffer,
-//                                          IntBuffer countBuffer,
+                                          Mat countMat,
                                           int cellsPerSide)
    {
       this.cellsPerSide = cellsPerSide;
@@ -150,7 +151,8 @@ public class SimpleGPUHeightMap
          {
             heightDataMap.set(x, y, heightBuffer.get());
             varianceDataMap.set(x, y, varianceBuffer.get());
-//            countDataMap.set(x, y, countBuffer.get());
+            int count = Byte.toUnsignedInt(countMat.ptr(y, x).get());
+            countDataMap.set(x, y, count);
          }
       }
    }
@@ -197,8 +199,8 @@ public class SimpleGPUHeightMap
       {
          for (int yIndex = 0; yIndex < heightDataMap.getNumCols(); yIndex++)
          {
-            if (!MathTools.epsilonEquals(heightDataMap.get(xIndex, yIndex), 0.0, 1e-5))
-//            if (countDataMap.get(xIndex, yIndex) > 0)
+//            if (!MathTools.epsilonEquals(heightDataMap.get(xIndex, yIndex), 0.0, 1e-5))
+            if (countDataMap.get(xIndex, yIndex) > 0)
             {
                int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
                message.getKeys().add(key);

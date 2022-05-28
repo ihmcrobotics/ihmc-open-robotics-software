@@ -283,7 +283,7 @@ public class SimpleImageGPUHeightMapUpdater
 
       simpleGPUHeightMap.updateFromFloatBufferImage(heightImage.getBackingDirectByteBuffer().asFloatBuffer(),
                                                     varianceImage.getBackingDirectByteBuffer().asFloatBuffer(),
-//                                                    countImage.getBackingDirectByteBuffer().asIntBuffer(),
+                                                    countImage.getBytedecoOpenCVMat(),
                                                     numberOfCells);
       updateStopwatch.lap();
       updateStopwatch.suspend();
