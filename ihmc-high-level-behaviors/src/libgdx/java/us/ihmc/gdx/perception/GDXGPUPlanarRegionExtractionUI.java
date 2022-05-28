@@ -157,6 +157,8 @@ public class GDXGPUPlanarRegionExtractionUI
       heightMapGraphic = new GDXHeightMapGraphic();
       boundaryPointCloud = new GDXPointCloudRenderer();
       boundaryPointCloud.create(2000000);
+
+      heightMapGraphic.setRenderGroundPlane(false);
    }
 
    public void extractPlanarRegions(ReferenceFrame cameraFrame)

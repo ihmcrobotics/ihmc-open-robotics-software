@@ -3,9 +3,9 @@ package us.ihmc.perception.gpuHeightMap;
 public class SimpleGPUHeightMapParameters
 {
    // resolution in m
-   public double resolution = 0.05;
+   public double resolution = 0.04;
    // map's size in m
-   public double mapLength = 3.0;
+   public double mapLength = 3.5;
 
    // points outside this distance are outliers
    double mahalanobisThreshold = 2.0;

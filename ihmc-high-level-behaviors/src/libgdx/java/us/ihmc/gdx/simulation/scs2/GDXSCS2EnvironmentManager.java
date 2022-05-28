@@ -45,12 +45,15 @@ public class GDXSCS2EnvironmentManager
 
    public void create(GDXImGuiBasedUI baseUI, DRCRobotModel robotModel, CommunicationMode ros2CommunicationMode)
    {
+      create(baseUI, robotModel, ros2CommunicationMode, 0.3, 0.0, 0.0);
+   }
+   public void create(GDXImGuiBasedUI baseUI, DRCRobotModel robotModel, CommunicationMode ros2CommunicationMode, double initialYaw, double initialX, double initialY)
+   {
       this.baseUI = baseUI;
       this.robotModel = robotModel;
       this.ros2CommunicationMode = ros2CommunicationMode;
 
-      double initialYaw = 0.3;
-      robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, initialYaw);
+      robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, initialYaw, initialX, initialY);
 
       //      recordFrequency = (int) Math.max(1.0, Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT()));
       recordFrequency = 1;
