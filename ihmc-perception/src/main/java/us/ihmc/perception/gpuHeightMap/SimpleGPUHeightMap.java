@@ -204,7 +204,7 @@ public class SimpleGPUHeightMap
             {
                int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
                message.getKeys().add(key);
-               message.getHeights().add((float) heightDataMap.get(xIndex));
+               message.getHeights().add((float) heightDataMap.get(xIndex, yIndex));
             }
          }
       }
