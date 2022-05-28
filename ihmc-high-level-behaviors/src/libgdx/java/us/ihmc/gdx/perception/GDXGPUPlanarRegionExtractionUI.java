@@ -115,7 +115,7 @@ public class GDXGPUPlanarRegionExtractionUI
    public void create(int imageWidth, int imageHeight, ByteBuffer sourceDepthByteBufferOfFloats, double fx, double fy, double cx, double cy)
    {
       gpuPlanarRegionExtraction.create(imageWidth, imageHeight, sourceDepthByteBufferOfFloats, fx, fy, cx, cy);
-      simpleGPUHeightMapUpdater.create(imageWidth, imageHeight, sourceDepthByteBufferOfFloats);
+      simpleGPUHeightMapUpdater.create(imageWidth, imageHeight, gpuPlanarRegionExtraction.getFilteredDepthImage().getBackingDirectByteBuffer());
       simpleGPUHeightMapUpdater.setCameraIntrinsics(fx, fy, cx, cy);
 
       setImGuiWidgetsFromParameters();
@@ -168,9 +168,6 @@ public class GDXGPUPlanarRegionExtractionUI
 
       wholeAlgorithmDurationStopwatch.start();
 
-      gpuHeightMapStopwatch.start();
-      simpleGPUHeightMapUpdater.computeFromDepthMap(cameraFrame.getTransformToWorldFrame());
-      gpuHeightMapStopwatch.suspend();
 
       gpuDurationStopwatch.start();
 
@@ -238,6 +235,9 @@ public class GDXGPUPlanarRegionExtractionUI
       planarRegionsSegmentationDurationStopwatch.suspend();
 
 
+      gpuHeightMapStopwatch.start();
+      simpleGPUHeightMapUpdater.computeFromDepthMap(cameraFrame.getTransformToWorldFrame(), null);
+      gpuHeightMapStopwatch.suspend();
 
       wholeAlgorithmDurationStopwatch.suspend();
 

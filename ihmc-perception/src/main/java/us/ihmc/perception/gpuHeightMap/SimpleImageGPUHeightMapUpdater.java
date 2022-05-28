@@ -1,6 +1,7 @@
 package us.ihmc.perception.gpuHeightMap;
 
 import org.bytedeco.opencl._cl_kernel;
+import org.bytedeco.opencl._cl_mem;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
@@ -26,13 +27,13 @@ public class SimpleImageGPUHeightMapUpdater
    private final OpenCLFloatBuffer parametersBuffer = new OpenCLFloatBuffer(11);
    private final OpenCLFloatBuffer intrinsicsBuffer = new OpenCLFloatBuffer(4);
 
-   private final OpenCLFloatBuffer elevationMapData;
+   private _cl_mem elevationMapData;
    //   private final OpenCLFloatBuffer updatedMapData;
 
    private BytedecoImage depthImage;
    private BytedecoImage heightImage;
-   private BytedecoImage varianceImage;
-   private BytedecoImage countImage;
+//   private BytedecoImage varianceImage;
+//   private BytedecoImage countImage;
    private int imageWidth;
    private int imageHeight;
 
@@ -66,8 +67,6 @@ public class SimpleImageGPUHeightMapUpdater
       simpleGPUHeightMap = new SimpleGPUHeightMap();
 
       int floatsPerLayer = numberOfCells * numberOfCells;
-      elevationMapData = new OpenCLFloatBuffer(3 * floatsPerLayer);
-      //      updatedMapData = new OpenCLFloatBuffer(3 * floatsPerLayer);
 
       zeroStopwatch.start();
       readingStopwatch.start();
@@ -90,8 +89,8 @@ public class SimpleImageGPUHeightMapUpdater
 
       this.depthImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_16UC1, sourceData);
       this.heightImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_32FC1, sourceData);
-      this.varianceImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_32FC1, sourceData);
-      this.countImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_8UC1, sourceData);
+//      this.varianceImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_32FC1, sourceData);
+//      this.countImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_8UC1, sourceData);
 
       openCLManager.create();
       heightMapProgram = openCLManager.loadProgram("SimpleGPUHeightMap");
@@ -117,13 +116,13 @@ public class SimpleImageGPUHeightMapUpdater
       this.cy = (float) cy;
    }
 
-   public void computeFromDepthMap(RigidBodyTransformReadOnly transformToWorld)
+   public void computeFromDepthMap(RigidBodyTransformReadOnly transformToWorld, _cl_mem depthBuffer)
    {
       populateLocalizaitonBuffer(transformToWorld.getTranslation().getX32(), transformToWorld.getTranslation().getY32(), transformToWorld);
       populateParametersBuffer();
       populateIntrinsicsBuffer();
 
-      updateMapWithKernel();
+      updateMapWithKernel(depthBuffer);
 
       updateMapObject(transformToWorld.getTranslation().getX32(), transformToWorld.getTranslation().getY32());
    }
@@ -138,7 +137,6 @@ public class SimpleImageGPUHeightMapUpdater
    private void populateLocalizaitonBuffer(float centerX, float centerY, RigidBodyTransformReadOnly transformToDesiredFrame)
    {
       rotation.set(transformToDesiredFrame.getRotation());
-      LogTools.info("rotation " + rotation);
 
       localizationBuffer.getBytedecoFloatBufferPointer().put(0, centerX);
       localizationBuffer.getBytedecoFloatBufferPointer().put(1, centerY);
@@ -181,7 +179,7 @@ public class SimpleImageGPUHeightMapUpdater
 
    boolean firstRun = true;
 
-   private void updateMapWithKernel()
+   private void updateMapWithKernel(_cl_mem depthBuffer)
    {
       writingStopwatch.resume();
       // TODO reshape height map
@@ -190,36 +188,42 @@ public class SimpleImageGPUHeightMapUpdater
          firstRun = false;
          localizationBuffer.createOpenCLBufferObject(openCLManager);
          parametersBuffer.createOpenCLBufferObject(openCLManager);
-         elevationMapData.createOpenCLBufferObject(openCLManager);
+         elevationMapData = openCLManager.createBufferObject(3 * numberOfCells * numberOfCells * Float.BYTES, null);
+
          intrinsicsBuffer.createOpenCLBufferObject(openCLManager);
          depthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
-         heightImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-         varianceImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-         countImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+         heightImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
+//         varianceImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+//         countImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
 
-         openCLManager.setKernelArgument(zeroValuesKernel, 0, parametersBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(zeroValuesKernel, 1, elevationMapData.getOpenCLBufferObject());
-
-         openCLManager.setKernelArgument(addPointsFromImageKernel, 0, depthImage.getOpenCLImageObject());
-         openCLManager.setKernelArgument(addPointsFromImageKernel, 1, localizationBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(addPointsFromImageKernel, 2, parametersBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(addPointsFromImageKernel, 3, intrinsicsBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(addPointsFromImageKernel, 4, elevationMapData.getOpenCLBufferObject());
-
-         openCLManager.setKernelArgument(averageMapKernel, 0, elevationMapData.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(averageMapKernel, 1, parametersBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(averageMapKernel, 2, heightImage.getOpenCLImageObject());
-         openCLManager.setKernelArgument(averageMapKernel, 3, varianceImage.getOpenCLImageObject());
-         openCLManager.setKernelArgument(averageMapKernel, 4, countImage.getOpenCLImageObject());
       }
       else
       {
-         depthImage.writeOpenCLImage(openCLManager);
+         if (depthBuffer != null)
+            depthImage.writeOpenCLImage(openCLManager);
 
          localizationBuffer.writeOpenCLBufferObject(openCLManager);
          parametersBuffer.writeOpenCLBufferObject(openCLManager);
          intrinsicsBuffer.writeOpenCLBufferObject(openCLManager);
       }
+
+      _cl_mem depthSource = depthBuffer == null ? depthImage.getOpenCLImageObject() : depthBuffer;
+
+      openCLManager.setKernelArgument(zeroValuesKernel, 0, parametersBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(zeroValuesKernel, 1, elevationMapData);
+
+      openCLManager.setKernelArgument(addPointsFromImageKernel, 0, depthSource);
+      openCLManager.setKernelArgument(addPointsFromImageKernel, 1, localizationBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(addPointsFromImageKernel, 2, parametersBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(addPointsFromImageKernel, 3, intrinsicsBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(addPointsFromImageKernel, 4, elevationMapData);
+
+      openCLManager.setKernelArgument(averageMapKernel, 0, elevationMapData);
+      openCLManager.setKernelArgument(averageMapKernel, 1, parametersBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(averageMapKernel, 2, heightImage.getOpenCLImageObject());
+//      openCLManager.setKernelArgument(averageMapKernel, 3, varianceImage.getOpenCLImageObject());
+//      openCLManager.setKernelArgument(averageMapKernel, 4, countImage.getOpenCLImageObject());
+
       writingStopwatch.lap();
       writingStopwatch.suspend();
 

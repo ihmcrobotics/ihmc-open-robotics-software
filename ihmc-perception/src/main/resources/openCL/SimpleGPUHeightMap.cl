@@ -302,7 +302,7 @@ void kernel averageMapKernel(global float* map_data, global float* params)
     }
 }
 
-void kernel averageMapImagesKernel(global float* map_data, global float* params, write_only image2d_t height_data, write_only image2d_t variance_data, write_only image2d_t counter)
+void kernel averageMapImagesKernel(global float* map_data, global float* params, write_only image2d_t height_data)//, write_only image2d_t variance_data, write_only image2d_t counter)
 {
     int idx_y = get_global_id(0);
     int idx_x = get_global_id(1);
@@ -316,7 +316,7 @@ void kernel averageMapImagesKernel(global float* map_data, global float* params,
     float new_v = map_data[variance_idx];
     float new_cnt = map_data[get_map_idx_in_layer(idx_x, idx_y, POINT_COUNTER_LAYER, params)];
 
-    write_imageui(counter, key, (uint4)(new_cnt,0,0,0));
+    //write_imageui(counter, key, (uint4)(new_cnt,0,0,0));
 
     if (new_cnt > 0)
     {
@@ -324,7 +324,7 @@ void kernel averageMapImagesKernel(global float* map_data, global float* params,
         float variance = (new_v - new_h * new_h / new_cnt) / (new_cnt - 1);
 
         write_imagef(height_data, key, (float4)(height,0,0,0));
-        write_imagef(variance_data, key, (float4)(variance,0,0,0));
+        //write_imagef(variance_data, key, (float4)(variance,0,0,0));
     }
 }
 
