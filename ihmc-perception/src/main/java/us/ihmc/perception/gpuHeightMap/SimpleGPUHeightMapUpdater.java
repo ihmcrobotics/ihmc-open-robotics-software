@@ -1,20 +1,18 @@
 package us.ihmc.perception.gpuHeightMap;
 
-import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_mem;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
-import us.ihmc.commons.time.Stopwatch;
+import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.log.LogTools;
+import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
 
-import java.util.List;
+import java.nio.ByteBuffer;
 
 public class SimpleGPUHeightMapUpdater
 {
@@ -23,81 +21,101 @@ public class SimpleGPUHeightMapUpdater
 
    private final OpenCLManager openCLManager;
 
-   private final OpenCLFloatBuffer inputPointCloudBuffer = new OpenCLFloatBuffer(0);
    private final OpenCLFloatBuffer localizationBuffer = new OpenCLFloatBuffer(14);
    private final OpenCLFloatBuffer parametersBuffer = new OpenCLFloatBuffer(11);
+   private final OpenCLFloatBuffer intrinsicsBuffer = new OpenCLFloatBuffer(4);
+   private _cl_mem elevationMapData;
 
-   private final OpenCLFloatBuffer elevationMapData;
-//   private final OpenCLFloatBuffer updatedMapData;
+   private BytedecoImage depthImage;
+   private BytedecoImage heightImage;
+   private BytedecoImage varianceImage;
+   private BytedecoImage countImage;
+   private int imageWidth;
+   private int imageHeight;
 
-   private final _cl_program heightMapProgram;
-   private final _cl_kernel zeroValuesKernel;
-   private final _cl_kernel addPointsKernel;
-   private final _cl_kernel averageMapKernel;
+   private _cl_program heightMapProgram;
+   private _cl_kernel zeroValuesKernel;
+   private _cl_kernel addPointsFromImageKernel;
+   private _cl_kernel averageMapKernel;
 
    private final SimpleGPUHeightMap simpleGPUHeightMap;
 
+   private float fx;
+   private float fy;
+   private float cx;
+   private float cy;
 
-   public SimpleGPUHeightMapUpdater()
+   public SimpleGPUHeightMapUpdater(SimpleGPUHeightMapParameters parameters)
    {
-      this(new OpenCLManager(), new SimpleGPUHeightMapParameters());
-   }
-
-   public SimpleGPUHeightMapUpdater(OpenCLManager openCLManager)
-   {
-      this(openCLManager, new SimpleGPUHeightMapParameters());
-   }
-
-   public SimpleGPUHeightMapUpdater(OpenCLManager openCLManager, SimpleGPUHeightMapParameters parameters)
-   {
-      this.openCLManager = openCLManager;
+      this.openCLManager = new OpenCLManager();
       this.parameters = parameters;
-      openCLManager.create();
 
       // the added two are for the borders
       numberOfCells = ((int) Math.round(parameters.mapLength / parameters.resolution)) + 2;
+
       simpleGPUHeightMap = new SimpleGPUHeightMap();
-
-      int floatsPerLayer = numberOfCells * numberOfCells;
-      elevationMapData = new OpenCLFloatBuffer(3 * floatsPerLayer);
-//      updatedMapData = new OpenCLFloatBuffer(3 * floatsPerLayer);
-
-      heightMapProgram = openCLManager.loadProgram("SimpleGPUHeightMap");
-      zeroValuesKernel = openCLManager.createKernel(heightMapProgram, "zeroValuesKernel");
-      addPointsKernel = openCLManager.createKernel(heightMapProgram, "addPointsKernel");
-      averageMapKernel = openCLManager.createKernel(heightMapProgram, "averageMapKernel");
    }
 
-   public void inputFromPointCloud(List<Point3D> rawPoints, RigidBodyTransformReadOnly transformToWorld)
+   public void create(int imageWidth, int imageHeight, ByteBuffer sourceData, double fx, double fy, double cx, double cy)
    {
-      inputPointCloudBuffer.resize(3 * rawPoints.size(), openCLManager);
-      packPointCloudIntoFloatBUffer(rawPoints);
+      this.imageWidth = imageWidth;
+      this.imageHeight = imageHeight;
 
+      this.fx = (float) fx;
+      this.fy = (float) fy;
+      this.cx = (float) cx;
+      this.cy = (float) cy;
+
+      // todo this depth image probably doesn't need to be created.
+      this.depthImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_16UC1, sourceData);
+
+      // these are the outputs structure of the map
+      this.heightImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_32FC1);
+      this.varianceImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_32FC1);
+      this.countImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_8UC1);
+
+      openCLManager.create();
+      heightMapProgram = openCLManager.loadProgram("SimpleGPUHeightMap");
+      zeroValuesKernel = openCLManager.createKernel(heightMapProgram, "zeroValuesKernel");
+      addPointsFromImageKernel = openCLManager.createKernel(heightMapProgram, "addPointsFromImageKernel");
+      averageMapKernel = openCLManager.createKernel(heightMapProgram, "averageMapImagesKernel");
+   }
+
+   public void destroy()
+   {
+      heightMapProgram.close();
+      zeroValuesKernel.close();
+      addPointsFromImageKernel.close();
+      averageMapKernel.close();
+
+      localizationBuffer.destroy(openCLManager);
+      parametersBuffer.destroy(openCLManager);
+      intrinsicsBuffer.destroy(openCLManager);
+      openCLManager.releaseBufferObject(elevationMapData);
+      elevationMapData.releaseReference();
+
+      depthImage.destroy(openCLManager);
+      heightImage.destroy(openCLManager);
+      varianceImage.destroy(openCLManager);
+      countImage.destroy(openCLManager);
+
+      openCLManager.destroy();
+   }
+
+   public void computeFromDepthMap(RigidBodyTransformReadOnly transformToWorld)
+   {
       populateLocalizaitonBuffer(transformToWorld.getTranslation().getX32(), transformToWorld.getTranslation().getY32(), transformToWorld);
       populateParametersBuffer();
+      populateIntrinsicsBuffer();
 
-      updateMapWithKernel(rawPoints.size());
+      updateMapWithKernel();
 
-      // TODO set a real cneter
-      updateMapObject(0.0, 0.0);
+      updateMapObject(transformToWorld.getTranslation().getX32(), transformToWorld.getTranslation().getY32());
    }
 
    public SimpleGPUHeightMap getHeightMap()
    {
       return simpleGPUHeightMap;
-   }
-
-   private void packPointCloudIntoFloatBUffer(List<Point3D> points)
-   {
-      FloatPointer floatBuffer = inputPointCloudBuffer.getBytedecoFloatBufferPointer();
-
-      int index = 0;
-      for (int i = 0; i < points.size(); i++)
-      {
-         floatBuffer.put(index++, points.get(i).getX32());
-         floatBuffer.put(index++, points.get(i).getY32());
-         floatBuffer.put(index++, points.get(i).getZ32());
-      }
    }
 
    private final RotationMatrixBasics rotation = new RotationMatrix();
@@ -106,18 +124,29 @@ public class SimpleGPUHeightMapUpdater
    {
       rotation.set(transformToDesiredFrame.getRotation());
 
-      int index = 0;
-      localizationBuffer.getBytedecoFloatBufferPointer().put(index++, centerX);
-      localizationBuffer.getBytedecoFloatBufferPointer().put(index++, centerY);
-      for (int i = 0; i < 3; i++)
-      {
-         for (int j = 0; j < 3; j++)
-            localizationBuffer.getBytedecoFloatBufferPointer().put(index++, (float) rotation.getElement(i, j));
-      }
-      for (int i = 0; i < 3; i++)
-         localizationBuffer.getBytedecoFloatBufferPointer().put(index++, (float) transformToDesiredFrame.getTranslation().getElement(i));
+      localizationBuffer.getBytedecoFloatBufferPointer().put(0, centerX);
+      localizationBuffer.getBytedecoFloatBufferPointer().put(1, centerY);
+      localizationBuffer.getBytedecoFloatBufferPointer().put(2, (float) rotation.getM00());
+      localizationBuffer.getBytedecoFloatBufferPointer().put(3, (float) rotation.getM01());
+      localizationBuffer.getBytedecoFloatBufferPointer().put(4, (float) rotation.getM02());
+      localizationBuffer.getBytedecoFloatBufferPointer().put(5, (float) rotation.getM10());
+      localizationBuffer.getBytedecoFloatBufferPointer().put(6, (float) rotation.getM11());
+      localizationBuffer.getBytedecoFloatBufferPointer().put(7, (float) rotation.getM12());
+      localizationBuffer.getBytedecoFloatBufferPointer().put(8, (float) rotation.getM20());
+      localizationBuffer.getBytedecoFloatBufferPointer().put(9, (float) rotation.getM21());
+      localizationBuffer.getBytedecoFloatBufferPointer().put(10, (float) rotation.getM22());
+      localizationBuffer.getBytedecoFloatBufferPointer().put(11, transformToDesiredFrame.getTranslation().getX32());
+      localizationBuffer.getBytedecoFloatBufferPointer().put(12, transformToDesiredFrame.getTranslation().getY32());
+      localizationBuffer.getBytedecoFloatBufferPointer().put(13, transformToDesiredFrame.getTranslation().getZ32());
    }
 
+   private void populateIntrinsicsBuffer()
+   {
+      intrinsicsBuffer.getBytedecoFloatBufferPointer().put(0, cx);
+      intrinsicsBuffer.getBytedecoFloatBufferPointer().put(1, cy);
+      intrinsicsBuffer.getBytedecoFloatBufferPointer().put(2, fx);
+      intrinsicsBuffer.getBytedecoFloatBufferPointer().put(3, fy);
+   }
 
    private void populateParametersBuffer()
    {
@@ -136,7 +165,7 @@ public class SimpleGPUHeightMapUpdater
 
    boolean firstRun = true;
 
-   private void updateMapWithKernel(int pointsSize)
+   private void updateMapWithKernel()
    {
       // TODO reshape height map
       if (firstRun)
@@ -144,32 +173,45 @@ public class SimpleGPUHeightMapUpdater
          firstRun = false;
          localizationBuffer.createOpenCLBufferObject(openCLManager);
          parametersBuffer.createOpenCLBufferObject(openCLManager);
-         inputPointCloudBuffer.createOpenCLBufferObject(openCLManager);
-         elevationMapData.createOpenCLBufferObject(openCLManager);
+         elevationMapData = openCLManager.createBufferObject(3 * numberOfCells * numberOfCells * Integer.BYTES, null);
 
-         openCLManager.setKernelArgument(zeroValuesKernel, 0, parametersBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(zeroValuesKernel, 1, elevationMapData.getOpenCLBufferObject());
-
-         openCLManager.setKernelArgument(addPointsKernel, 0, inputPointCloudBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(addPointsKernel, 1, localizationBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(addPointsKernel, 2, parametersBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(addPointsKernel, 3, elevationMapData.getOpenCLBufferObject());
-
-         openCLManager.setKernelArgument(averageMapKernel, 0, elevationMapData.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(averageMapKernel, 1, parametersBuffer.getOpenCLBufferObject());
+         intrinsicsBuffer.createOpenCLBufferObject(openCLManager);
+         depthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
+         heightImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
+         varianceImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
+         countImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
       }
       else
       {
-         inputPointCloudBuffer.writeOpenCLBufferObject(openCLManager);
+         depthImage.writeOpenCLImage(openCLManager);
+
          localizationBuffer.writeOpenCLBufferObject(openCLManager);
          parametersBuffer.writeOpenCLBufferObject(openCLManager);
+         intrinsicsBuffer.writeOpenCLBufferObject(openCLManager);
       }
 
+      openCLManager.setKernelArgument(zeroValuesKernel, 0, parametersBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(zeroValuesKernel, 1, elevationMapData);
+
+      openCLManager.setKernelArgument(addPointsFromImageKernel, 0, depthImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(addPointsFromImageKernel, 1, localizationBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(addPointsFromImageKernel, 2, parametersBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(addPointsFromImageKernel, 3, intrinsicsBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(addPointsFromImageKernel, 4, elevationMapData);
+
+      openCLManager.setKernelArgument(averageMapKernel, 0, elevationMapData);
+      openCLManager.setKernelArgument(averageMapKernel, 1, parametersBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(averageMapKernel, 2, heightImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(averageMapKernel, 3, varianceImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(averageMapKernel, 4, countImage.getOpenCLImageObject());
+
       openCLManager.execute2D(zeroValuesKernel, numberOfCells, numberOfCells);
-      openCLManager.execute1D(addPointsKernel, pointsSize);
+      openCLManager.execute2D(addPointsFromImageKernel, imageWidth, imageHeight);
       openCLManager.execute2D(averageMapKernel, numberOfCells, numberOfCells);
 
-      elevationMapData.readOpenCLBufferObject(openCLManager);
+      openCLManager.enqueueReadImage(heightImage.getOpenCLImageObject(), numberOfCells, numberOfCells, heightImage.getBytedecoByteBufferPointer());
+      openCLManager.enqueueReadImage(varianceImage.getOpenCLImageObject(), numberOfCells, numberOfCells, varianceImage.getBytedecoByteBufferPointer());
+      openCLManager.enqueueReadImage(countImage.getOpenCLImageObject(), numberOfCells, numberOfCells, countImage.getBytedecoByteBufferPointer());
 
       openCLManager.finish();
    }
@@ -179,6 +221,9 @@ public class SimpleGPUHeightMapUpdater
       simpleGPUHeightMap.setCenter(centerX, centerY);
       simpleGPUHeightMap.setResolution(parameters.resolution);
 
-      simpleGPUHeightMap.updateFromFloatBuffer(elevationMapData.getBackingDirectFloatBuffer(), numberOfCells);
+      simpleGPUHeightMap.updateFromFloatBufferImage(heightImage.getBytedecoOpenCVMat(),
+                                                    varianceImage.getBytedecoOpenCVMat(),
+                                                    countImage.getBytedecoOpenCVMat(),
+                                                    numberOfCells);
    }
 }
