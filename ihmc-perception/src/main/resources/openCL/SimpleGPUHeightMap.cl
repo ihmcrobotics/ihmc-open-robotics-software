@@ -1,3 +1,5 @@
+#define FLOAT_TO_INT_SCALE 10000
+
  #define centerX 0
  #define centerY 1
  #define r00 2
@@ -99,7 +101,6 @@ int get_map_idx_in_layer(int idx_x, int idx_y, int layer_n, read_only float* par
 
 int get_map_idx(int idx, int layer_n, read_only float* params)
 {
-  //  if (idx == 0) printf("layer_n %d \n", layer_n);
     const int layer = params[WIDTH] * params[HEIGHT];
     return layer * layer_n + idx;
 }
@@ -118,7 +119,6 @@ bool is_inside(int idx_x, int idx_y, read_only float* params)
         return false;
     }
 
-   // printf("Actually inside! %i, (%i, %i)\n", idx, idx_x, idx_y);
     return true;
 }
 
@@ -129,7 +129,6 @@ bool is_valid(float3 point, float3 sensor, read_only float* params)
 
     if (d < params[MIN_VALID_DISTANCE] * params[MIN_VALID_DISTANCE])
     {
-        //printf("Not valid from distance");
         return false;
     }
 
@@ -165,8 +164,7 @@ void AtomicAdd_g_f(volatile __global float *source, const float operand)
     while (atomic_cmpxchg((volatile __global unsigned int *)source, prevVal.intVal, newVal.intVal) != prevVal.intVal);
 }
 
-
-void kernel zeroValuesKernel(global float* params, global float* newMap)
+void kernel zeroValuesKernel(global float* params, global int* newMap)
 {
     int idx_x = get_global_id(0);
     int idx_y = get_global_id(1);
@@ -175,9 +173,9 @@ void kernel zeroValuesKernel(global float* params, global float* newMap)
     int variance_idx = get_map_idx_in_layer(idx_x, idx_y, VARIANCE_LAYER, params);
     int counter_idx = get_map_idx_in_layer(idx_x, idx_y, POINT_COUNTER_LAYER, params);
 
-    newMap[height_idx] = 0.0;
-    newMap[variance_idx] = 0.0;
-    newMap[counter_idx] = 0.0;
+    newMap[height_idx] = 0;
+    newMap[variance_idx] = 0;
+    newMap[counter_idx] = 0;
 }
 
 float3 back_project_to_image_frame(int2 pos, float Z, global float* params)
@@ -245,7 +243,7 @@ void kernel addPointsKernel(global float* points_in, global float* localization,
     }
 }
 
-void kernel addPointsFromImageKernel(read_only image2d_t depth_image, global float* localization, global float* params, global float* intrinsics, global float* newMap)
+void kernel addPointsFromImageKernel(read_only image2d_t depth_image, global float* localization, global float* params, global float* intrinsics, global int* newMap)
 {
     int image_y = get_global_id(0);
     int image_x = get_global_id(1);
@@ -274,9 +272,19 @@ void kernel addPointsFromImageKernel(read_only image2d_t depth_image, global flo
             float new_height = pointInWorld.z;
             float new_variance = new_height * new_height;
 
-            AtomicAdd_g_f(&newMap[height_idx], new_height);
-            AtomicAdd_g_f(&newMap[variance_idx], new_variance);
-            AtomicAdd_g_f(&newMap[counter_idx], 1.0);
+            int height = (int) (new_height * FLOAT_TO_INT_SCALE);
+            int variance = (int) (new_variance * FLOAT_TO_INT_SCALE);
+            int current_height = newMap[height_idx];
+            int current_variance = newMap[variance_idx];
+            int current_count = newMap[counter_idx];
+
+            int changed_height = current_height + height;
+            int changed_variance = current_variance + variance;
+            int changed_count = current_count + 1;
+
+            atomic_add(&newMap[height_idx], height);
+            atomic_add(&newMap[variance_idx], variance);
+            atomic_inc(&newMap[counter_idx]);
 
             // visibility cleanup
  //       }
@@ -302,7 +310,7 @@ void kernel averageMapKernel(global float* map_data, global float* params)
     }
 }
 
-void kernel averageMapImagesKernel(global float* map_data, global float* params, write_only image2d_t height_data)//, write_only image2d_t variance_data, write_only image2d_t counter)
+void kernel averageMapImagesKernel(global int* map_data, global float* params, write_only image2d_t height_data, write_only image2d_t variance_data, write_only image2d_t counter)
 {
     int idx_y = get_global_id(0);
     int idx_x = get_global_id(1);
@@ -312,19 +320,20 @@ void kernel averageMapImagesKernel(global float* map_data, global float* params,
     int height_idx = get_map_idx_in_layer(idx_x, idx_y, HEIGHT_LAYER, params);
     int variance_idx = get_map_idx_in_layer(idx_x, idx_y, VARIANCE_LAYER, params);
 
-    float new_h = map_data[height_idx];
-    float new_v = map_data[variance_idx];
-    float new_cnt = map_data[get_map_idx_in_layer(idx_x, idx_y, POINT_COUNTER_LAYER, params)];
+    float scalar = (float) FLOAT_TO_INT_SCALE;
+    float new_h = ((float) map_data[height_idx]) / scalar;
+    float new_v = ((float) map_data[variance_idx]) / scalar;
+    int new_cnt = map_data[get_map_idx_in_layer(idx_x, idx_y, POINT_COUNTER_LAYER, params)];
 
-    //write_imageui(counter, key, (uint4)(new_cnt,0,0,0));
+    write_imageui(counter, key, (uint4)(new_cnt,0,0,0));
 
     if (new_cnt > 0)
     {
         float height = new_h / new_cnt;
-        float variance = (new_v - new_h * new_h / new_cnt) / (new_cnt - 1);
+        float variance = (new_v - new_h * new_h / new_cnt) / ((float) (new_cnt - 1));
 
         write_imagef(height_data, key, (float4)(height,0,0,0));
-        //write_imagef(variance_data, key, (float4)(variance,0,0,0));
+        write_imagef(variance_data, key, (float4)(variance,0,0,0));
     }
 }
 

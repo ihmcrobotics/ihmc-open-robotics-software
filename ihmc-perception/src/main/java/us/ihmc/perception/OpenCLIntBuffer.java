@@ -1,0 +1,107 @@
+package us.ihmc.perception;
+
+import org.bytedeco.javacpp.FloatPointer;
+import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.opencl._cl_mem;
+
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+
+public class OpenCLIntBuffer
+{
+   private long numberOfIntegers;
+   private ByteBuffer backingDirectByteBuffer;
+   private IntBuffer backingDirectIntBuffer;
+   private IntPointer bytedecoIntBufferPointer;
+   private _cl_mem openCLBufferObject;
+
+   public OpenCLIntBuffer(int numberOfIntegers)
+   {
+      this(numberOfIntegers, null);
+   }
+
+   public OpenCLIntBuffer(int numberOfIntegers, IntBuffer backingDirectIntBuffer)
+   {
+      resize(numberOfIntegers, null, backingDirectIntBuffer);
+   }
+
+   public void resize(int numberOfIntegers, OpenCLManager openCLManager)
+   {
+      resize(numberOfIntegers, openCLManager, null);
+   }
+
+   public void destroy(OpenCLManager openCLManager)
+   {
+      if (openCLBufferObject != null)
+      {
+         openCLManager.releaseBufferObject(openCLBufferObject);
+         openCLBufferObject.releaseReference();
+      }
+   }
+
+   public void resize(int numberOfIntegers,  OpenCLManager openCLManager, IntBuffer backingDirectIntBuffer)
+   {
+      this.numberOfIntegers = numberOfIntegers;
+
+      boolean openCLObjectCreated = openCLBufferObject != null;
+      if (openCLObjectCreated)
+      {
+         openCLManager.releaseBufferObject(openCLBufferObject);
+      }
+
+      if (backingDirectIntBuffer == null)
+      {
+         backingDirectByteBuffer = ByteBuffer.allocateDirect(numberOfIntegers * Integer.BYTES);
+         backingDirectByteBuffer.order(ByteOrder.nativeOrder());
+         this.backingDirectIntBuffer = backingDirectByteBuffer.asIntBuffer();
+      }
+      else
+      {
+         this.backingDirectIntBuffer = backingDirectIntBuffer;
+      }
+
+      bytedecoIntBufferPointer = new IntPointer(this.backingDirectIntBuffer);
+
+      if (openCLObjectCreated)
+      {
+         createOpenCLBufferObject(openCLManager);
+      }
+   }
+
+   public void createOpenCLBufferObject(OpenCLManager openCLManager)
+   {
+      openCLBufferObject = openCLManager.createBufferObject(numberOfIntegers * Integer.BYTES, bytedecoIntBufferPointer);
+   }
+
+   public void writeOpenCLBufferObject(OpenCLManager openCLManager)
+   {
+      openCLManager.enqueueWriteBuffer(openCLBufferObject, numberOfIntegers * Integer.BYTES, bytedecoIntBufferPointer);
+   }
+
+   public void readOpenCLBufferObject(OpenCLManager openCLManager)
+   {
+      openCLManager.enqueueReadBuffer(openCLBufferObject, numberOfIntegers * Integer.BYTES, bytedecoIntBufferPointer);
+   }
+
+   public IntBuffer getBackingDirectIntBuffer()
+   {
+      return backingDirectIntBuffer;
+   }
+
+   public IntPointer getBytedecoIntBufferPointer()
+   {
+      return bytedecoIntBufferPointer;
+   }
+
+   public long getNumberOfIntegers()
+   {
+      return numberOfIntegers;
+   }
+
+   public _cl_mem getOpenCLBufferObject()
+   {
+      return openCLBufferObject;
+   }
+}
