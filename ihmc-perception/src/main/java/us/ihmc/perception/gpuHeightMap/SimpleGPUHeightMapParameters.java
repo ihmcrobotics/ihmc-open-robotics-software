@@ -3,7 +3,7 @@ package us.ihmc.perception.gpuHeightMap;
 public class SimpleGPUHeightMapParameters
 {
    // resolution in m
-   public double resolution = 0.02;
+   public double resolution = 0.05;
    // map's size in m
    public double mapLength = 3.0;
 

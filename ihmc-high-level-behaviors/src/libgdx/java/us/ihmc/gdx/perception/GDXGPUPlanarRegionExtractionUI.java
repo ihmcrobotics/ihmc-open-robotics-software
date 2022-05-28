@@ -241,7 +241,7 @@ public class GDXGPUPlanarRegionExtractionUI
 
       wholeAlgorithmDurationStopwatch.suspend();
 
-      simpleGPUHeightMapUpdater.printStopwatches();
+//      simpleGPUHeightMapUpdater.printStopwatches();
 
       render2DPanels();
       renderPlanarRegions();

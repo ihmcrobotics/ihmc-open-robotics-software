@@ -30,6 +30,15 @@ public class OpenCLFloatBuffer
       resize(numberOfFloats, openCLManager, null);
    }
 
+   public void destroy(OpenCLManager openCLManager)
+   {
+      if (openCLBufferObject != null)
+      {
+         openCLManager.releaseBufferObject(openCLBufferObject);
+         openCLBufferObject.releaseReference();
+      }
+   }
+
    public void resize(int numberOfFloats,  OpenCLManager openCLManager, FloatBuffer backingDirectFloatBuffer)
    {
       this.numberOfFloats = numberOfFloats;

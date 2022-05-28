@@ -10,6 +10,7 @@ import us.ihmc.robotics.heightMap.HeightMapTools;
 
 import java.awt.*;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 public class SimpleGPUHeightMap
 {
@@ -130,25 +131,25 @@ public class SimpleGPUHeightMap
    }
 
    public void updateFromFloatBufferImage(FloatBuffer heightBuffer,
-//                                          FloatBuffer varianceBuffer,
-//                                          FloatBuffer countBuffer,
+                                          FloatBuffer varianceBuffer,
+//                                          IntBuffer countBuffer,
                                           int cellsPerSide)
    {
       this.cellsPerSide = cellsPerSide;
 
       heightBuffer.position(0);
-//      varianceBuffer.position(0);
+      varianceBuffer.position(0);
 //      countBuffer.position(0);
       heightDataMap.reshape(cellsPerSide, cellsPerSide);
-//      varianceDataMap.reshape(cellsPerSide, cellsPerSide);
-//      countDataMap.reshape(cellsPerSide, cellsPerSide);
+      varianceDataMap.reshape(cellsPerSide, cellsPerSide);
+      countDataMap.reshape(cellsPerSide, cellsPerSide);
 
       for (int y = 0; y < cellsPerSide; y++)
       {
          for (int x = 0; x < cellsPerSide; x++)
          {
             heightDataMap.set(x, y, heightBuffer.get());
-//            varianceDataMap.set(x, y, varianceBuffer.get());
+            varianceDataMap.set(x, y, varianceBuffer.get());
 //            countDataMap.set(x, y, countBuffer.get());
          }
       }
