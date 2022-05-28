@@ -12,7 +12,6 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.perception.gpuHeightMap.SimpleGPUHeightMap;
 import us.ihmc.perception.gpuHeightMap.SimpleGPUHeightMapParameters;
-import us.ihmc.perception.gpuHeightMap.SimpleGPUHeightMapUpdater;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 

@@ -76,12 +76,12 @@ int get_x_idx(float x, float center, read_only float* params)
 int get_y_idx(float y, float center, read_only float* params)
 {
     int i = (y - center) / params[RESOLUTION] + 0.5 * params[HEIGHT];
-
     return clamp_val(i, 0, params[HEIGHT] - 1);
 }
 
 int get_idx_in_layer(int idx_x, int idx_y, read_only float* params)
 {
+    // assumes row major
     return params[WIDTH] * idx_x + idx_y;
 }
 
@@ -142,42 +142,6 @@ bool is_valid(float3 point, float3 sensor, read_only float* params)
     //}
 }
 
-// taken from http://suhorukov.blogspot.com/2011/12/opencl-11-atomic-operations-on-floating.html
-void AtomicAdd_g_f(volatile __global float *source, const float operand)
-{
-    union
-    {
-        unsigned int intVal;
-        float floatVal;
-    } newVal;
-    union
-    {
-        unsigned int intVal;
-        float floatVal;
-    } prevVal;
-
-    do
-    {
-        prevVal.floatVal = *source;
-        newVal.floatVal = prevVal.floatVal + operand;
-    }
-    while (atomic_cmpxchg((volatile __global unsigned int *)source, prevVal.intVal, newVal.intVal) != prevVal.intVal);
-}
-
-void kernel zeroValuesKernel(global float* params, global int* newMap)
-{
-    int idx_x = get_global_id(0);
-    int idx_y = get_global_id(1);
-
-    int height_idx = get_map_idx_in_layer(idx_x, idx_y, HEIGHT_LAYER, params);
-    int variance_idx = get_map_idx_in_layer(idx_x, idx_y, VARIANCE_LAYER, params);
-    int counter_idx = get_map_idx_in_layer(idx_x, idx_y, POINT_COUNTER_LAYER, params);
-
-    newMap[height_idx] = 0;
-    newMap[variance_idx] = 0;
-    newMap[counter_idx] = 0;
-}
-
 float3 back_project_to_image_frame(int2 pos, float Z, global float* params)
 {
    float px = (pos.x - params[DEPTH_CX]) / params[DEPTH_FX] * Z;
@@ -205,46 +169,23 @@ float3 get_point_from_image(read_only image2d_t depth_image, int x, int y, globa
     }
 }
 
-void kernel addPointsKernel(global float* points_in, global float* localization, global float* params,  global float* newMap)
+void kernel zeroValuesKernel(global float* params, global int* newMap)
 {
-    int i = get_global_id(0);
+    int idx_x = get_global_id(0);
+    int idx_y = get_global_id(1);
 
-    float3 point_in_camera_frame = (float3) (points_in[i * 3], points_in[i * 3 + 1], points_in[i * 3 + 2]);
-    float3 sensor = (float3) (localization[tx], localization[ty], localization[tz]);
-    float3 rotation_x = (float3) (localization[r00], localization[r01], localization[r02]);
-    float3 rotation_y = (float3) (localization[r10], localization[r11], localization[r12]);
-    float3 rotation_z = (float3) (localization[r20], localization[r21], localization[r22]);
+    int height_idx = get_map_idx_in_layer(idx_x, idx_y, HEIGHT_LAYER, params);
+    int variance_idx = get_map_idx_in_layer(idx_x, idx_y, VARIANCE_LAYER, params);
+    int counter_idx = get_map_idx_in_layer(idx_x, idx_y, POINT_COUNTER_LAYER, params);
 
-    float3 pointInWorld = transform_point(point_in_camera_frame, rotation_x, rotation_y, rotation_z, sensor);
-
-    if (is_valid(pointInWorld, sensor, params))
-    {
-        int idx_x = get_x_idx(pointInWorld.x, localization[centerX], params);
-        int idx_y = get_y_idx(pointInWorld.y, localization[centerY], params);
-        int idx = get_idx_in_layer(idx_x, idx_y, params);
-
-        // TODO pretty sure this is always true by construction
-        if (is_inside(idx_x, idx_y, params))
-        {
-            int height_idx = get_map_idx(idx, HEIGHT_LAYER, params);
-            int variance_idx = get_map_idx(idx, VARIANCE_LAYER, params);
-            int counter_idx = get_map_idx(idx, POINT_COUNTER_LAYER, params);
-
-            float new_height = pointInWorld.z;
-            float new_variance = new_height * new_height;
-
-            AtomicAdd_g_f(&newMap[height_idx], new_height);
-            AtomicAdd_g_f(&newMap[variance_idx], new_variance);
-            AtomicAdd_g_f(&newMap[counter_idx], 1.0);
-
-
-            // visibility cleanup
-        }
-    }
+    newMap[height_idx] = 0;
+    newMap[variance_idx] = 0;
+    newMap[counter_idx] = 0;
 }
 
 void kernel addPointsFromImageKernel(read_only image2d_t depth_image, global float* localization, global float* params, global float* intrinsics, global int* newMap)
 {
+    // recall that the pixels are bottom left, and go width to height
     int image_y = get_global_id(0);
     int image_x = get_global_id(1);
 
@@ -256,10 +197,11 @@ void kernel addPointsFromImageKernel(read_only image2d_t depth_image, global flo
 
     float3 pointInWorld = transform_point(point_in_camera_frame, rx, ry, rz, sensor);
 
-    if (is_valid(pointInWorld, sensor, params))
+  //  if (is_valid(pointInWorld, sensor, params))
     {
         int idx_x = get_x_idx(pointInWorld.x, localization[centerX], params);
         int idx_y = get_y_idx(pointInWorld.y, localization[centerY], params);
+        // row major index
         int idx = get_idx_in_layer(idx_x, idx_y, params);
 
         // TODO pretty sure this is always true by construction
@@ -291,29 +233,10 @@ void kernel addPointsFromImageKernel(read_only image2d_t depth_image, global flo
     }
 }
 
-void kernel averageMapKernel(global float* map_data, global float* params)
+void kernel averageMapImagesKernel(global int* map_data, global float* params, write_only image2d_t height_data, write_only image2d_t variance_data, write_only image2d_t counter)
 {
     int idx_x = get_global_id(0);
     int idx_y = get_global_id(1);
-
-    int height_idx = get_map_idx_in_layer(idx_x, idx_y, HEIGHT_LAYER, params);
-    int variance_idx = get_map_idx_in_layer(idx_x, idx_y, VARIANCE_LAYER, params);
-
-    float new_h = map_data[height_idx];
-    float new_v = map_data[variance_idx];
-    float new_cnt = map_data[get_map_idx_in_layer(idx_x, idx_y, POINT_COUNTER_LAYER, params)];
-
-    if (new_cnt > 0)
-    {
-        map_data[height_idx] = new_h / new_cnt;
-        map_data[variance_idx] = (new_v - new_h * new_h / new_cnt) / (new_cnt - 1);
-    }
-}
-
-void kernel averageMapImagesKernel(global int* map_data, global float* params, write_only image2d_t height_data, write_only image2d_t variance_data, write_only image2d_t counter)
-{
-    int idx_y = get_global_id(0);
-    int idx_x = get_global_id(1);
 
     int2 key = (int2) (idx_x, idx_y);
 

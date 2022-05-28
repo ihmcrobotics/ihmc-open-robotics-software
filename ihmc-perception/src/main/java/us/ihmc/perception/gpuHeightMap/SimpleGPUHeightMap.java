@@ -4,14 +4,10 @@ import controller_msgs.msg.dds.HeightMapMessage;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.heightMap.HeightMapTools;
-
-import java.awt.*;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 
 public class SimpleGPUHeightMap
 {
@@ -22,6 +18,8 @@ public class SimpleGPUHeightMap
    private final DMatrixRMaj heightDataMap = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj varianceDataMap = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj countDataMap = new DMatrixRMaj(0, 0);
+
+   private final BoundingBox2D boundingBox = new BoundingBox2D();
 
    public void setResolution(double resolution)
    {
@@ -119,6 +117,11 @@ public class SimpleGPUHeightMap
       return countDataMap.get(getXIndex(x), getYIndex(y));
    }
 
+   public BoundingBox2D getBoundingBox()
+   {
+      return boundingBox;
+   }
+
    private int getIndex(double value, double center)
    {
       return getIndex(value, center, resolution, cellsPerSide);
@@ -131,55 +134,35 @@ public class SimpleGPUHeightMap
       return MathTools.clamp(idx, 0, cellsPerSide);
    }
 
-   public void updateFromFloatBufferImage(FloatBuffer heightBuffer,
-                                          FloatBuffer varianceBuffer,
+   public void updateFromFloatBufferImage(Mat heightBuffer,
+                                          Mat varianceBuffer,
                                           Mat countMat,
                                           int cellsPerSide)
    {
       this.cellsPerSide = cellsPerSide;
 
-      heightBuffer.position(0);
-      varianceBuffer.position(0);
-//      countBuffer.position(0);
       heightDataMap.reshape(cellsPerSide, cellsPerSide);
       varianceDataMap.reshape(cellsPerSide, cellsPerSide);
       countDataMap.reshape(cellsPerSide, cellsPerSide);
+      boundingBox.setToNaN();
+
+      int centerIndex = HeightMapTools.computeCenterIndex(cellsPerSide * resolution, resolution);
 
       for (int y = 0; y < cellsPerSide; y++)
       {
          for (int x = 0; x < cellsPerSide; x++)
          {
-            heightDataMap.set(x, y, heightBuffer.get());
-            varianceDataMap.set(x, y, varianceBuffer.get());
+            heightDataMap.set(x, y, heightBuffer.ptr(y, x).getFloat());
+            varianceDataMap.set(x, y, varianceBuffer.ptr(y, x).getFloat());
             int count = Byte.toUnsignedInt(countMat.ptr(y, x).get());
             countDataMap.set(x, y, count);
-         }
-      }
-   }
-   public void updateFromFloatBuffer(FloatBuffer floatBuffer, int cellsPerSide)
-   {
-      this.cellsPerSide = cellsPerSide;
 
-      floatBuffer.position(0);
-      heightDataMap.reshape(cellsPerSide, cellsPerSide);
-      varianceDataMap.reshape(cellsPerSide, cellsPerSide);
-      countDataMap.reshape(cellsPerSide, cellsPerSide);
-
-      for (int x = 0; x < cellsPerSide; x++)
-      {
-         for (int y = 0; y < cellsPerSide; y++)
-            heightDataMap.set(x, y, floatBuffer.get());
-      }
-      for (int x = 0; x < cellsPerSide; x++)
-      {
-         for (int y = 0; y < cellsPerSide; y++)
-            varianceDataMap.set(x, y, floatBuffer.get());
-      }
-      for (int x = 0; x < cellsPerSide; x++)
-      {
-         for (int y = 0; y < cellsPerSide; y++)
-         {
-            countDataMap.set(x, y, floatBuffer.get());
+            if (count > 0)
+            {
+               double xPoint = HeightMapTools.indexToCoordinate(x, center.getX(), resolution, centerIndex);
+               double yPoint = HeightMapTools.indexToCoordinate(y, center.getY(), resolution, centerIndex);
+               boundingBox.updateToIncludePoint(xPoint, yPoint);
+            }
          }
       }
    }

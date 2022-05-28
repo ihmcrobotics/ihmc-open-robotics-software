@@ -12,6 +12,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.HeightMapMessage;
 import org.lwjgl.opengl.GL41;
+import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
 import us.ihmc.idl.IDLSequence;
@@ -127,6 +128,8 @@ public class GDXHeightMapGraphic implements RenderableProvider
 
       isGeneratingMeshes.set(false);
    }
+
+
 
 
 
