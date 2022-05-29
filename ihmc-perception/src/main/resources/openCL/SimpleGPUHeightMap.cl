@@ -187,11 +187,13 @@ void kernel zeroValuesKernel(global float* params,
 
     int idx = get_idx_in_layer(idx_x, idx_y, params);
 
-    variance_data[idx] = 0;
-    counter_data[idx] = 0;
     centroid_data[3 * idx] = 0;
     centroid_data[3 * idx + 1] = 0;
     centroid_data[3 * idx + 2] = 0;
+    variance_data[3 * idx] = 0;
+    variance_data[3 * idx + 1] = 0;
+    variance_data[3 * idx + 2] = 0;
+    counter_data[idx] = 0;
 }
 
 void kernel addPointsFromImageKernel(read_only image2d_t depth_image,
@@ -224,19 +226,24 @@ void kernel addPointsFromImageKernel(read_only image2d_t depth_image,
         // TODO pretty sure this is always true by construction
  //       if (is_inside(idx_x, idx_y, params))
  //       {
-            float new_height = pointInWorld.z;
-            float new_variance = new_height * new_height;
+            float new_variance_x = pointInWorld.x * pointInWorld.x;
+            float new_variance_y = pointInWorld.y * pointInWorld.y;
+            float new_variance_z = pointInWorld.z * pointInWorld.z;
 
-            int variance = (int) (new_variance * FLOAT_TO_INT_SCALE);
+            int variance_x = (int) (new_variance_x * FLOAT_TO_INT_SCALE);
+            int variance_y = (int) (new_variance_y * FLOAT_TO_INT_SCALE);
+            int variance_z = (int) (new_variance_z * FLOAT_TO_INT_SCALE);
             int x = (int) (pointInWorld.x * FLOAT_TO_INT_SCALE);
             int y = (int) (pointInWorld.y * FLOAT_TO_INT_SCALE);
-            int z = (int) (new_height * FLOAT_TO_INT_SCALE);
+            int z = (int) (pointInWorld.z * FLOAT_TO_INT_SCALE);
 
-            atomic_add(&variance_data[idx], variance);
-            atomic_inc(&counter_data[idx]);
+            atomic_add(&variance_data[3 * idx], variance_x);
+            atomic_add(&variance_data[3 * idx + 1], variance_y);
+            atomic_add(&variance_data[3 * idx + 2], variance_z);
             atomic_add(&centroid_data[3 * idx], x);
             atomic_add(&centroid_data[3 * idx + 1], y);
             atomic_add(&centroid_data[3 * idx + 2], z);
+            atomic_inc(&counter_data[idx]);
 
             // visibility cleanup
  //       }
@@ -250,7 +257,9 @@ void kernel averageMapImagesKernel(global int* centroid_buffer,
                                    write_only image2d_t centroid_x,
                                    write_only image2d_t centroid_y,
                                    write_only image2d_t centroid_z,
-                                   write_only image2d_t variance_data,
+                                   write_only image2d_t variance_x,
+                                   write_only image2d_t variance_y,
+                                   write_only image2d_t variance_z,
                                    write_only image2d_t counter)
 {
     int idx_x = get_global_id(0);
@@ -271,9 +280,13 @@ void kernel averageMapImagesKernel(global int* centroid_buffer,
         float new_x = ((float) centroid_buffer[3 * idx]) / scalar;
         float new_y = ((float) centroid_buffer[3 * idx + 1]) / scalar;
         float new_z = ((float) centroid_buffer[3 * idx + 2]) / scalar;
-        float new_v = ((float) variance_buffer[idx]) / scalar;
+        float new_vx = ((float) variance_buffer[3 * idx]) / scalar;
+        float new_vy = ((float) variance_buffer[3 * idx + 1]) / scalar;
+        float new_vz = ((float) variance_buffer[3 * idx + 2]) / scalar;
 
-        float variance = (new_v - new_z * new_z / new_cnt) / ((float) (new_cnt - 1));
+        float var_x = (new_vx - new_x * new_x / new_cnt) / ((float) (new_cnt - 1));
+        float var_y = (new_vy - new_y * new_y / new_cnt) / ((float) (new_cnt - 1));
+        float var_z = (new_vz - new_z * new_z / new_cnt) / ((float) (new_cnt - 1));
         float x = new_x / new_cnt;
         float y = new_y / new_cnt;
         float z = new_z / new_cnt;
@@ -281,7 +294,9 @@ void kernel averageMapImagesKernel(global int* centroid_buffer,
         write_imagef(centroid_x, key, (float4)(x,0,0,0));
         write_imagef(centroid_y, key, (float4)(y,0,0,0));
         write_imagef(centroid_z, key, (float4)(z,0,0,0));
-        write_imagef(variance_data, key, (float4)(variance,0,0,0));
+        write_imagef(variance_x, key, (float4)(var_x,0,0,0));
+        write_imagef(variance_y, key, (float4)(var_y,0,0,0));
+        write_imagef(variance_z, key, (float4)(var_z,0,0,0));
     }
 }
 
