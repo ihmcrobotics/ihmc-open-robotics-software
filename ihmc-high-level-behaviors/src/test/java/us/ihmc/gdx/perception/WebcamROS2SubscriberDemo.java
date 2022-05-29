@@ -56,7 +56,8 @@ public class WebcamROS2SubscriberDemo
    private int imageHeight = -1;
    private byte[] messageDataHeapArray = new byte[25000000];
    private BytePointer messageEncodedBytePointer;
-   private Mat inputJPEGYUVI420Mat;
+   private Mat inputJPEGMat;
+   private Mat inputYUVI420Mat;
    private Mat bgr8Mat;
 
    public WebcamROS2SubscriberDemo()
@@ -115,7 +116,8 @@ public class WebcamROS2SubscriberDemo
 
                   messageEncodedBytePointer = new BytePointer(25000000);
 //                  inputJPEGYUVI420Mat = new Mat(25000000);
-                  inputJPEGYUVI420Mat = new Mat(1, 1, opencv_core.CV_8UC1);
+                  inputJPEGMat = new Mat(1, 1, opencv_core.CV_8UC1);
+                  inputYUVI420Mat = new Mat(1, 1, opencv_core.CV_8UC1);
                   bgr8Mat = new Mat(1080, 1920, opencv_core.CV_8UC3);
 
 //                  ThreadTools.startAsDaemon(() ->
@@ -163,14 +165,14 @@ public class WebcamROS2SubscriberDemo
                      messageEncodedBytePointer.put(messageDataHeapArray, 0, imageEncodedTByteArrayList.size());
                      messageEncodedBytePointer.limit(imageEncodedTByteArrayList.size());
 
-                     inputJPEGYUVI420Mat.cols(imageEncodedTByteArrayList.size());
-                     inputJPEGYUVI420Mat.data(messageEncodedBytePointer);
+                     inputJPEGMat.cols(imageEncodedTByteArrayList.size());
+                     inputJPEGMat.data(messageEncodedBytePointer);
 
                      // Converts image to 3 channel BGR color image.
                      // This should handle JPEG encoded YUV I420 and output BGR
-                     opencv_imgcodecs.imdecode(inputJPEGYUVI420Mat, opencv_imgcodecs.IMREAD_COLOR, bgr8Mat);
+                     opencv_imgcodecs.imdecode(inputJPEGMat, opencv_imgcodecs.IMREAD_UNCHANGED, inputYUVI420Mat);
 
-                     opencv_imgproc.cvtColor(bgr8Mat, cvImagePanel.getBytedecoImage().getBytedecoOpenCVMat(), opencv_imgproc.COLOR_BGR2BGRA);
+                     opencv_imgproc.cvtColor(inputYUVI420Mat, cvImagePanel.getBytedecoImage().getBytedecoOpenCVMat(), opencv_imgproc.COLOR_YUV2RGBA_I420);
                   }
                }
 
