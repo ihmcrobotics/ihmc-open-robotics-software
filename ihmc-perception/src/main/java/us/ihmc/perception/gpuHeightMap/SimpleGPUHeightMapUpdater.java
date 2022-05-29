@@ -24,10 +24,15 @@ public class SimpleGPUHeightMapUpdater
    private final OpenCLFloatBuffer localizationBuffer = new OpenCLFloatBuffer(14);
    private final OpenCLFloatBuffer parametersBuffer = new OpenCLFloatBuffer(11);
    private final OpenCLFloatBuffer intrinsicsBuffer = new OpenCLFloatBuffer(4);
-   private _cl_mem elevationMapData;
 
+   private _cl_mem varianceData;
+   private _cl_mem counterData;
+   private _cl_mem centroidData;
+
+   private BytedecoImage centroidXImage;
+   private BytedecoImage centroidYImage;
    private BytedecoImage depthImage;
-   private BytedecoImage heightImage;
+   private BytedecoImage centroidZImage;
    private BytedecoImage varianceImage;
    private BytedecoImage countImage;
    private int imageWidth;
@@ -70,7 +75,9 @@ public class SimpleGPUHeightMapUpdater
       this.depthImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_16UC1, sourceData);
 
       // these are the outputs structure of the map
-      this.heightImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_32FC1);
+      this.centroidXImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_32FC1);
+      this.centroidYImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_32FC1);
+      this.centroidZImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_32FC1);
       this.varianceImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_32FC1);
       this.countImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_8UC1);
 
@@ -91,11 +98,17 @@ public class SimpleGPUHeightMapUpdater
       localizationBuffer.destroy(openCLManager);
       parametersBuffer.destroy(openCLManager);
       intrinsicsBuffer.destroy(openCLManager);
-      openCLManager.releaseBufferObject(elevationMapData);
-      elevationMapData.releaseReference();
+      openCLManager.releaseBufferObject(centroidData);
+      openCLManager.releaseBufferObject(varianceData);
+      openCLManager.releaseBufferObject(counterData);
+      centroidData.releaseReference();
+      varianceData.releaseReference();
+      counterData.releaseReference();
 
       depthImage.destroy(openCLManager);
-      heightImage.destroy(openCLManager);
+      centroidXImage.destroy(openCLManager);
+      centroidYImage.destroy(openCLManager);
+      centroidZImage.destroy(openCLManager);
       varianceImage.destroy(openCLManager);
       countImage.destroy(openCLManager);
 
@@ -173,11 +186,16 @@ public class SimpleGPUHeightMapUpdater
          firstRun = false;
          localizationBuffer.createOpenCLBufferObject(openCLManager);
          parametersBuffer.createOpenCLBufferObject(openCLManager);
-         elevationMapData = openCLManager.createBufferObject(3 * numberOfCells * numberOfCells * Integer.BYTES, null);
+         long cellsSize = (long) numberOfCells * numberOfCells * Integer.BYTES;
+         centroidData = openCLManager.createBufferObject(3 * cellsSize, null);
+         varianceData = openCLManager.createBufferObject(cellsSize, null);
+         counterData = openCLManager.createBufferObject(cellsSize, null);
 
          intrinsicsBuffer.createOpenCLBufferObject(openCLManager);
          depthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
-         heightImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
+         centroidXImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
+         centroidYImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
+         centroidZImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
          varianceImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
          countImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
       }
@@ -191,27 +209,37 @@ public class SimpleGPUHeightMapUpdater
       }
 
       openCLManager.setKernelArgument(zeroValuesKernel, 0, parametersBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(zeroValuesKernel, 1, elevationMapData);
+      openCLManager.setKernelArgument(zeroValuesKernel, 1, centroidData);
+      openCLManager.setKernelArgument(zeroValuesKernel, 2, varianceData);
+      openCLManager.setKernelArgument(zeroValuesKernel, 3, counterData);
 
       openCLManager.setKernelArgument(addPointsFromImageKernel, 0, depthImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(addPointsFromImageKernel, 1, localizationBuffer.getOpenCLBufferObject());
       openCLManager.setKernelArgument(addPointsFromImageKernel, 2, parametersBuffer.getOpenCLBufferObject());
       openCLManager.setKernelArgument(addPointsFromImageKernel, 3, intrinsicsBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(addPointsFromImageKernel, 4, elevationMapData);
+      openCLManager.setKernelArgument(addPointsFromImageKernel, 4, centroidData);
+      openCLManager.setKernelArgument(addPointsFromImageKernel, 5, varianceData);
+      openCLManager.setKernelArgument(addPointsFromImageKernel, 6, counterData);
 
-      openCLManager.setKernelArgument(averageMapKernel, 0, elevationMapData);
-      openCLManager.setKernelArgument(averageMapKernel, 1, parametersBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(averageMapKernel, 2, heightImage.getOpenCLImageObject());
-      openCLManager.setKernelArgument(averageMapKernel, 3, varianceImage.getOpenCLImageObject());
-      openCLManager.setKernelArgument(averageMapKernel, 4, countImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(averageMapKernel, 0, centroidData);
+      openCLManager.setKernelArgument(averageMapKernel, 1, varianceData);
+      openCLManager.setKernelArgument(averageMapKernel, 2, counterData);
+      openCLManager.setKernelArgument(averageMapKernel, 3, parametersBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(averageMapKernel, 4, centroidXImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(averageMapKernel, 5, centroidYImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(averageMapKernel, 6, centroidZImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(averageMapKernel, 7, varianceImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(averageMapKernel, 8, countImage.getOpenCLImageObject());
 
       openCLManager.execute2D(zeroValuesKernel, numberOfCells, numberOfCells);
       openCLManager.execute2D(addPointsFromImageKernel, imageWidth, imageHeight);
       openCLManager.execute2D(averageMapKernel, numberOfCells, numberOfCells);
 
-      openCLManager.enqueueReadImage(heightImage.getOpenCLImageObject(), numberOfCells, numberOfCells, heightImage.getBytedecoByteBufferPointer());
+      openCLManager.enqueueReadImage(centroidZImage.getOpenCLImageObject(), numberOfCells, numberOfCells, centroidZImage.getBytedecoByteBufferPointer());
       openCLManager.enqueueReadImage(varianceImage.getOpenCLImageObject(), numberOfCells, numberOfCells, varianceImage.getBytedecoByteBufferPointer());
       openCLManager.enqueueReadImage(countImage.getOpenCLImageObject(), numberOfCells, numberOfCells, countImage.getBytedecoByteBufferPointer());
+      openCLManager.enqueueReadImage(centroidXImage.getOpenCLImageObject(), numberOfCells, numberOfCells, centroidXImage.getBytedecoByteBufferPointer());
+      openCLManager.enqueueReadImage(centroidYImage.getOpenCLImageObject(), numberOfCells, numberOfCells, centroidYImage.getBytedecoByteBufferPointer());
 
       openCLManager.finish();
    }
@@ -221,7 +249,7 @@ public class SimpleGPUHeightMapUpdater
       simpleGPUHeightMap.setCenter(centerX, centerY);
       simpleGPUHeightMap.setResolution(parameters.resolution);
 
-      simpleGPUHeightMap.updateFromFloatBufferImage(heightImage.getBytedecoOpenCVMat(),
+      simpleGPUHeightMap.updateFromFloatBufferImage(centroidZImage.getBytedecoOpenCVMat(),
                                                     varianceImage.getBytedecoOpenCVMat(),
                                                     countImage.getBytedecoOpenCVMat(),
                                                     numberOfCells);
