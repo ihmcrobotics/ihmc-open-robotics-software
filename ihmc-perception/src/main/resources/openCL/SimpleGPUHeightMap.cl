@@ -27,10 +27,6 @@
 #define INITIAL_VARIANCE 9
 #define MAX_VARIANCE 10
 
-#define HEIGHT_LAYER 0
-#define VARIANCE_LAYER 1
-#define POINT_COUNTER_LAYER 2
-
 #define DEPTH_CX 0
 #define DEPTH_CY 1
 #define DEPTH_FX 2
@@ -70,13 +66,37 @@ float point_sensor_distance(float3 point, float3 sensor)
 int get_x_idx(float x, float center, read_only float* params)
 {
     int i = (x - center)  / params[RESOLUTION] + 0.5 * params[WIDTH];
-    return clamp_val(i, 0, params[WIDTH] - 1);
+    int ret = clamp_val(i, 0, params[WIDTH] - 1);
+
+    if (ret >= params[WIDTH] - 5)
+    {
+        printf("On the far right side %i.\n", ret);
+    }
+    if (ret <= 5)
+    {
+        printf("On the far left side %i.\n", ret);
+    }
+    return ret;
 }
 
 int get_y_idx(float y, float center, read_only float* params)
 {
     int i = (y - center) / params[RESOLUTION] + 0.5 * params[HEIGHT];
-    return clamp_val(i, 0, params[HEIGHT] - 1);
+    int ret = clamp_val(i, 0, params[HEIGHT] - 1);;
+    if (ret != i)
+    {
+        printf("Values not equal. %i, %i\n", i, ret);
+    }
+
+        if (ret >= params[HEIGHT] - 5)
+        {
+            printf("Far away side %i.\n", ret);
+        }
+        if (ret <= 5)
+        {
+            printf("Super close side %i.\n", ret);
+        }
+    return ret;
 }
 
 int get_idx_in_layer(int idx_x, int idx_y, read_only float* params)
@@ -92,19 +112,6 @@ int get_idx(float x, float y, float center_x, float center_y, read_only float* p
 
     return get_idx_in_layer(idx_x, idx_y, params);
 }
-
-int get_map_idx_in_layer(int idx_x, int idx_y, int layer_n, read_only float* params)
-{
-    const int layer = params[WIDTH] * params[HEIGHT];
-    return layer * layer_n + get_idx_in_layer(idx_x, idx_y, params);
-}
-
-int get_map_idx(int idx, int layer_n, read_only float* params)
-{
-    const int layer = params[WIDTH] * params[HEIGHT];
-    return layer * layer_n + idx;
-}
-
 
 bool is_inside(int idx_x, int idx_y, read_only float* params)
 {
@@ -129,6 +136,7 @@ bool is_valid(float3 point, float3 sensor, read_only float* params)
 
     if (d < params[MIN_VALID_DISTANCE] * params[MIN_VALID_DISTANCE])
     {
+        printf("Returning that a point is not valid\n");
         return false;
     }
 
@@ -169,21 +177,30 @@ float3 get_point_from_image(read_only image2d_t depth_image, int x, int y, globa
     }
 }
 
-void kernel zeroValuesKernel(global float* params, global int* newMap)
+void kernel zeroValuesKernel(global float* params,
+                             global int* centroid_data,
+                             global int* variance_data,
+                             global int* counter_data)
 {
     int idx_x = get_global_id(0);
     int idx_y = get_global_id(1);
 
-    int height_idx = get_map_idx_in_layer(idx_x, idx_y, HEIGHT_LAYER, params);
-    int variance_idx = get_map_idx_in_layer(idx_x, idx_y, VARIANCE_LAYER, params);
-    int counter_idx = get_map_idx_in_layer(idx_x, idx_y, POINT_COUNTER_LAYER, params);
+    int idx = get_idx_in_layer(idx_x, idx_y, params);
 
-    newMap[height_idx] = 0;
-    newMap[variance_idx] = 0;
-    newMap[counter_idx] = 0;
+    variance_data[idx] = 0;
+    counter_data[idx] = 0;
+    centroid_data[3 * idx] = 0;
+    centroid_data[3 * idx + 1] = 0;
+    centroid_data[3 * idx + 2] = 0;
 }
 
-void kernel addPointsFromImageKernel(read_only image2d_t depth_image, global float* localization, global float* params, global float* intrinsics, global int* newMap)
+void kernel addPointsFromImageKernel(read_only image2d_t depth_image,
+                                     global float* localization,
+                                     global float* params,
+                                     global float* intrinsics,
+                                     global int* centroid_data,
+                                     global int* variance_data,
+                                     global int* counter_data)
 {
     // recall that the pixels are bottom left, and go width to height
     int image_y = get_global_id(0);
@@ -207,55 +224,63 @@ void kernel addPointsFromImageKernel(read_only image2d_t depth_image, global flo
         // TODO pretty sure this is always true by construction
  //       if (is_inside(idx_x, idx_y, params))
  //       {
-            int height_idx = get_map_idx(idx, HEIGHT_LAYER, params);
-            int variance_idx = get_map_idx(idx, VARIANCE_LAYER, params);
-            int counter_idx = get_map_idx(idx, POINT_COUNTER_LAYER, params);
-
             float new_height = pointInWorld.z;
             float new_variance = new_height * new_height;
 
-            int height = (int) (new_height * FLOAT_TO_INT_SCALE);
             int variance = (int) (new_variance * FLOAT_TO_INT_SCALE);
-            int current_height = newMap[height_idx];
-            int current_variance = newMap[variance_idx];
-            int current_count = newMap[counter_idx];
+            int x = (int) (pointInWorld.x * FLOAT_TO_INT_SCALE);
+            int y = (int) (pointInWorld.y * FLOAT_TO_INT_SCALE);
+            int z = (int) (new_height * FLOAT_TO_INT_SCALE);
 
-            int changed_height = current_height + height;
-            int changed_variance = current_variance + variance;
-            int changed_count = current_count + 1;
-
-            atomic_add(&newMap[height_idx], height);
-            atomic_add(&newMap[variance_idx], variance);
-            atomic_inc(&newMap[counter_idx]);
+            atomic_add(&variance_data[idx], variance);
+            atomic_inc(&counter_data[idx]);
+            atomic_add(&centroid_data[3 * idx], x);
+            atomic_add(&centroid_data[3 * idx + 1], y);
+            atomic_add(&centroid_data[3 * idx + 2], z);
 
             // visibility cleanup
  //       }
     }
 }
 
-void kernel averageMapImagesKernel(global int* map_data, global float* params, write_only image2d_t height_data, write_only image2d_t variance_data, write_only image2d_t counter)
+void kernel averageMapImagesKernel(global int* centroid_buffer,
+                                   global int* variance_buffer,
+                                   global int* counter_buffer,
+                                   global float* params,
+                                   write_only image2d_t centroid_x,
+                                   write_only image2d_t centroid_y,
+                                   write_only image2d_t centroid_z,
+                                   write_only image2d_t variance_data,
+                                   write_only image2d_t counter)
 {
     int idx_x = get_global_id(0);
     int idx_y = get_global_id(1);
 
     int2 key = (int2) (idx_x, idx_y);
 
-    int height_idx = get_map_idx_in_layer(idx_x, idx_y, HEIGHT_LAYER, params);
-    int variance_idx = get_map_idx_in_layer(idx_x, idx_y, VARIANCE_LAYER, params);
+    int idx = get_idx_in_layer(idx_x, idx_y, params);
 
-    float scalar = (float) FLOAT_TO_INT_SCALE;
-    float new_h = ((float) map_data[height_idx]) / scalar;
-    float new_v = ((float) map_data[variance_idx]) / scalar;
-    int new_cnt = map_data[get_map_idx_in_layer(idx_x, idx_y, POINT_COUNTER_LAYER, params)];
+
+    int new_cnt = counter_buffer[idx];
 
     write_imageui(counter, key, (uint4)(new_cnt,0,0,0));
 
     if (new_cnt > 0)
     {
-        float height = new_h / new_cnt;
-        float variance = (new_v - new_h * new_h / new_cnt) / ((float) (new_cnt - 1));
+        float scalar = (float) FLOAT_TO_INT_SCALE;
+        float new_x = ((float) centroid_buffer[3 * idx]) / scalar;
+        float new_y = ((float) centroid_buffer[3 * idx + 1]) / scalar;
+        float new_z = ((float) centroid_buffer[3 * idx + 2]) / scalar;
+        float new_v = ((float) variance_buffer[idx]) / scalar;
 
-        write_imagef(height_data, key, (float4)(height,0,0,0));
+        float variance = (new_v - new_z * new_z / new_cnt) / ((float) (new_cnt - 1));
+        float x = new_x / new_cnt;
+        float y = new_y / new_cnt;
+        float z = new_z / new_cnt;
+
+        write_imagef(centroid_x, key, (float4)(x,0,0,0));
+        write_imagef(centroid_y, key, (float4)(y,0,0,0));
+        write_imagef(centroid_z, key, (float4)(z,0,0,0));
         write_imagef(variance_data, key, (float4)(variance,0,0,0));
     }
 }
