@@ -115,7 +115,6 @@ public class GDXGPUPlanarRegionExtractionUI
    private GDXPointCloudRenderer boundaryPointCloud;
    private GDXPointCloudRenderer boundingBoxPointCloud;
 
-
    public void create(int imageWidth, int imageHeight, ByteBuffer sourceDepthByteBufferOfFloats, double fx, double fy, double cx, double cy)
    {
       gpuPlanarRegionExtraction.create(imageWidth, imageHeight, sourceDepthByteBufferOfFloats, fx, fy, cx, cy);
@@ -164,7 +163,7 @@ public class GDXGPUPlanarRegionExtractionUI
       boundingBoxPointCloud = new GDXPointCloudRenderer();
       boundingBoxPointCloud.create(2000000);
 
-      heightMapGraphic.setRenderGroundPlane(true);
+      heightMapGraphic.setRenderGroundPlane(false);
    }
 
    public void extractPlanarRegions(ReferenceFrame cameraFrame)

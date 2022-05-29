@@ -68,14 +68,6 @@ int get_x_idx(float x, float center, read_only float* params)
     int i = (x - center)  / params[RESOLUTION] + 0.5 * params[WIDTH];
     int ret = clamp_val(i, 0, params[WIDTH] - 1);
 
-    if (ret >= params[WIDTH] - 5)
-    {
-        printf("On the far right side %i.\n", ret);
-    }
-    if (ret <= 5)
-    {
-        printf("On the far left side %i.\n", ret);
-    }
     return ret;
 }
 
@@ -83,19 +75,7 @@ int get_y_idx(float y, float center, read_only float* params)
 {
     int i = (y - center) / params[RESOLUTION] + 0.5 * params[HEIGHT];
     int ret = clamp_val(i, 0, params[HEIGHT] - 1);;
-    if (ret != i)
-    {
-        printf("Values not equal. %i, %i\n", i, ret);
-    }
 
-        if (ret >= params[HEIGHT] - 5)
-        {
-            printf("Far away side %i.\n", ret);
-        }
-        if (ret <= 5)
-        {
-            printf("Super close side %i.\n", ret);
-        }
     return ret;
 }
 
@@ -190,9 +170,7 @@ void kernel zeroValuesKernel(global float* params,
     centroid_data[3 * idx] = 0;
     centroid_data[3 * idx + 1] = 0;
     centroid_data[3 * idx + 2] = 0;
-    variance_data[3 * idx] = 0;
-    variance_data[3 * idx + 1] = 0;
-    variance_data[3 * idx + 2] = 0;
+    variance_data[idx] = 0;
     counter_data[idx] = 0;
 }
 
@@ -216,7 +194,7 @@ void kernel addPointsFromImageKernel(read_only image2d_t depth_image,
 
     float3 pointInWorld = transform_point(point_in_camera_frame, rx, ry, rz, sensor);
 
-  //  if (is_valid(pointInWorld, sensor, params))
+    if (is_valid(pointInWorld, sensor, params))
     {
         int idx_x = get_x_idx(pointInWorld.x, localization[centerX], params);
         int idx_y = get_y_idx(pointInWorld.y, localization[centerY], params);
@@ -226,23 +204,17 @@ void kernel addPointsFromImageKernel(read_only image2d_t depth_image,
         // TODO pretty sure this is always true by construction
  //       if (is_inside(idx_x, idx_y, params))
  //       {
-            float new_variance_x = pointInWorld.x * pointInWorld.x;
-            float new_variance_y = pointInWorld.y * pointInWorld.y;
             float new_variance_z = pointInWorld.z * pointInWorld.z;
 
-            int variance_x = (int) (new_variance_x * FLOAT_TO_INT_SCALE);
-            int variance_y = (int) (new_variance_y * FLOAT_TO_INT_SCALE);
             int variance_z = (int) (new_variance_z * FLOAT_TO_INT_SCALE);
             int x = (int) (pointInWorld.x * FLOAT_TO_INT_SCALE);
             int y = (int) (pointInWorld.y * FLOAT_TO_INT_SCALE);
             int z = (int) (pointInWorld.z * FLOAT_TO_INT_SCALE);
 
-            atomic_add(&variance_data[3 * idx], variance_x);
-            atomic_add(&variance_data[3 * idx + 1], variance_y);
-            atomic_add(&variance_data[3 * idx + 2], variance_z);
             atomic_add(&centroid_data[3 * idx], x);
             atomic_add(&centroid_data[3 * idx + 1], y);
             atomic_add(&centroid_data[3 * idx + 2], z);
+            atomic_add(&variance_data[idx], variance_z);
             atomic_inc(&counter_data[idx]);
 
             // visibility cleanup
@@ -257,8 +229,6 @@ void kernel averageMapImagesKernel(global int* centroid_buffer,
                                    write_only image2d_t centroid_x,
                                    write_only image2d_t centroid_y,
                                    write_only image2d_t centroid_z,
-                                   write_only image2d_t variance_x,
-                                   write_only image2d_t variance_y,
                                    write_only image2d_t variance_z,
                                    write_only image2d_t counter)
 {
@@ -280,12 +250,8 @@ void kernel averageMapImagesKernel(global int* centroid_buffer,
         float new_x = ((float) centroid_buffer[3 * idx]) / scalar;
         float new_y = ((float) centroid_buffer[3 * idx + 1]) / scalar;
         float new_z = ((float) centroid_buffer[3 * idx + 2]) / scalar;
-        float new_vx = ((float) variance_buffer[3 * idx]) / scalar;
-        float new_vy = ((float) variance_buffer[3 * idx + 1]) / scalar;
-        float new_vz = ((float) variance_buffer[3 * idx + 2]) / scalar;
+        float new_vz = ((float) variance_buffer[idx]) / scalar;
 
-        float var_x = (new_vx - new_x * new_x / new_cnt) / ((float) (new_cnt - 1));
-        float var_y = (new_vy - new_y * new_y / new_cnt) / ((float) (new_cnt - 1));
         float var_z = (new_vz - new_z * new_z / new_cnt) / ((float) (new_cnt - 1));
         float x = new_x / new_cnt;
         float y = new_y / new_cnt;
@@ -294,8 +260,6 @@ void kernel averageMapImagesKernel(global int* centroid_buffer,
         write_imagef(centroid_x, key, (float4)(x,0,0,0));
         write_imagef(centroid_y, key, (float4)(y,0,0,0));
         write_imagef(centroid_z, key, (float4)(z,0,0,0));
-        write_imagef(variance_x, key, (float4)(var_x,0,0,0));
-        write_imagef(variance_y, key, (float4)(var_y,0,0,0));
         write_imagef(variance_z, key, (float4)(var_z,0,0,0));
     }
 }

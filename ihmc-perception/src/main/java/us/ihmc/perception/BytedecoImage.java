@@ -217,4 +217,9 @@ public class BytedecoImage
    {
       return imageHeight;
    }
+
+   public int getBytesPerPixel()
+   {
+      return bytesPerPixel;
+   }
 }

@@ -8,9 +8,11 @@ import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
+import us.ihmc.robotics.heightMap.HeightMapTools;
 
 import java.nio.ByteBuffer;
 
@@ -33,8 +35,6 @@ public class SimpleGPUHeightMapUpdater
    private BytedecoImage centroidXImage;
    private BytedecoImage centroidYImage;
    private BytedecoImage centroidZImage;
-   private BytedecoImage varianceXImage;
-   private BytedecoImage varianceYImage;
    private BytedecoImage varianceZImage;
    private BytedecoImage countImage;
    private int imageWidth;
@@ -45,12 +45,14 @@ public class SimpleGPUHeightMapUpdater
    private _cl_kernel addPointsFromImageKernel;
    private _cl_kernel averageMapKernel;
 
-   private final SimpleGPUHeightMap simpleGPUHeightMap;
+   private final SimpleGPUHeightMap simpleGPUHeightMap = new SimpleGPUHeightMap();
 
    private float fx;
    private float fy;
    private float cx;
    private float cy;
+
+   private ByteBuffer backingByteBuffer;
 
    public SimpleGPUHeightMapUpdater(SimpleGPUHeightMapParameters parameters)
    {
@@ -60,11 +62,11 @@ public class SimpleGPUHeightMapUpdater
       // the added two are for the borders
       numberOfCells = ((int) Math.round(parameters.mapLength / parameters.resolution)) + 2;
 
-      simpleGPUHeightMap = new SimpleGPUHeightMap();
    }
 
    public void create(int imageWidth, int imageHeight, ByteBuffer sourceData, double fx, double fy, double cx, double cy)
    {
+      this.backingByteBuffer = sourceData;
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
 
@@ -80,8 +82,6 @@ public class SimpleGPUHeightMapUpdater
       this.centroidXImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_32FC1);
       this.centroidYImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_32FC1);
       this.centroidZImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_32FC1);
-      this.varianceXImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_32FC1);
-      this.varianceYImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_32FC1);
       this.varianceZImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_32FC1);
       this.countImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_8UC1);
 
@@ -113,8 +113,6 @@ public class SimpleGPUHeightMapUpdater
       centroidXImage.destroy(openCLManager);
       centroidYImage.destroy(openCLManager);
       centroidZImage.destroy(openCLManager);
-      varianceXImage.destroy(openCLManager);
-      varianceYImage.destroy(openCLManager);
       varianceZImage.destroy(openCLManager);
       countImage.destroy(openCLManager);
 
@@ -194,7 +192,7 @@ public class SimpleGPUHeightMapUpdater
          parametersBuffer.createOpenCLBufferObject(openCLManager);
          long cellsSize = (long) numberOfCells * numberOfCells * Integer.BYTES;
          centroidData = openCLManager.createBufferObject(3 * cellsSize, null);
-         varianceData = openCLManager.createBufferObject(3 * cellsSize, null);
+         varianceData = openCLManager.createBufferObject(cellsSize, null);
          counterData = openCLManager.createBufferObject(cellsSize, null);
 
          intrinsicsBuffer.createOpenCLBufferObject(openCLManager);
@@ -202,8 +200,6 @@ public class SimpleGPUHeightMapUpdater
          centroidXImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
          centroidYImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
          centroidZImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
-         varianceXImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
-         varianceYImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
          varianceZImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
          countImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
       }
@@ -215,6 +211,9 @@ public class SimpleGPUHeightMapUpdater
          parametersBuffer.writeOpenCLBufferObject(openCLManager);
          intrinsicsBuffer.writeOpenCLBufferObject(openCLManager);
       }
+
+      LogTools.info("expected input bytes " + backingByteBuffer.capacity());
+      LogTools.info("processed bytes " + imageHeight * imageWidth * depthImage.getBytesPerPixel());
 
       openCLManager.setKernelArgument(zeroValuesKernel, 0, parametersBuffer.getOpenCLBufferObject());
       openCLManager.setKernelArgument(zeroValuesKernel, 1, centroidData);
@@ -236,20 +235,16 @@ public class SimpleGPUHeightMapUpdater
       openCLManager.setKernelArgument(averageMapKernel, 4, centroidXImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(averageMapKernel, 5, centroidYImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(averageMapKernel, 6, centroidZImage.getOpenCLImageObject());
-      openCLManager.setKernelArgument(averageMapKernel, 7, varianceXImage.getOpenCLImageObject());
-      openCLManager.setKernelArgument(averageMapKernel, 8, varianceYImage.getOpenCLImageObject());
-      openCLManager.setKernelArgument(averageMapKernel, 9, varianceZImage.getOpenCLImageObject());
-      openCLManager.setKernelArgument(averageMapKernel, 10, countImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(averageMapKernel, 7, varianceZImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(averageMapKernel, 8, countImage.getOpenCLImageObject());
 
       openCLManager.execute2D(zeroValuesKernel, numberOfCells, numberOfCells);
-      openCLManager.execute2D(addPointsFromImageKernel, imageWidth, imageHeight);
+      openCLManager.execute2D(addPointsFromImageKernel, imageHeight, imageWidth);
       openCLManager.execute2D(averageMapKernel, numberOfCells, numberOfCells);
 
       openCLManager.enqueueReadImage(centroidXImage.getOpenCLImageObject(), numberOfCells, numberOfCells, centroidXImage.getBytedecoByteBufferPointer());
       openCLManager.enqueueReadImage(centroidYImage.getOpenCLImageObject(), numberOfCells, numberOfCells, centroidYImage.getBytedecoByteBufferPointer());
       openCLManager.enqueueReadImage(centroidZImage.getOpenCLImageObject(), numberOfCells, numberOfCells, centroidZImage.getBytedecoByteBufferPointer());
-      openCLManager.enqueueReadImage(varianceXImage.getOpenCLImageObject(), numberOfCells, numberOfCells, varianceXImage.getBytedecoByteBufferPointer());
-      openCLManager.enqueueReadImage(varianceYImage.getOpenCLImageObject(), numberOfCells, numberOfCells, varianceYImage.getBytedecoByteBufferPointer());
       openCLManager.enqueueReadImage(varianceZImage.getOpenCLImageObject(), numberOfCells, numberOfCells, varianceZImage.getBytedecoByteBufferPointer());
       openCLManager.enqueueReadImage(countImage.getOpenCLImageObject(), numberOfCells, numberOfCells, countImage.getBytedecoByteBufferPointer());
 
@@ -258,11 +253,12 @@ public class SimpleGPUHeightMapUpdater
 
    private void updateMapObject(double centerX, double centerY)
    {
-      simpleGPUHeightMap.setCenter(centerX, centerY);
       simpleGPUHeightMap.setResolution(parameters.resolution);
-
-      simpleGPUHeightMap.updateFromFloatBufferImage(centroidZImage.getBytedecoOpenCVMat(),
-                                                    varianceXImage.getBytedecoOpenCVMat(),
+      simpleGPUHeightMap.setCenter(centerX, centerY);
+      simpleGPUHeightMap.updateFromFloatBufferImage(centroidXImage.getBytedecoOpenCVMat(),
+                                                    centroidYImage.getBytedecoOpenCVMat(),
+                                                    centroidZImage.getBytedecoOpenCVMat(),
+                                                    varianceZImage.getBytedecoOpenCVMat(),
                                                     countImage.getBytedecoOpenCVMat(),
                                                     numberOfCells);
    }
