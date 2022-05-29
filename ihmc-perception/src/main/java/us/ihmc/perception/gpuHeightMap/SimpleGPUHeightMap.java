@@ -156,6 +156,8 @@ public class SimpleGPUHeightMap
    {
       this.cellsPerSide = cellsPerSide;
 
+      xDataMap.reshape(cellsPerSide, cellsPerSide);
+      yDataMap.reshape(cellsPerSide, cellsPerSide);
       zDataMap.reshape(cellsPerSide, cellsPerSide);
       varianceDataMap.reshape(cellsPerSide, cellsPerSide);
       countDataMap.reshape(cellsPerSide, cellsPerSide);
@@ -172,6 +174,8 @@ public class SimpleGPUHeightMap
             int xIndex = getXIndex(xPosition);
             int yIndex = getYIndex(yPosition);
 
+            xDataMap.set(xIndex, yIndex, xPosition);
+            yDataMap.set(xIndex, yIndex, yPosition);
             zDataMap.set(xIndex, yIndex, centroidZBuffer.ptr(y, x).getFloat());
             varianceDataMap.set(xIndex, yIndex, varianceZBuffer.ptr(y, x).getFloat());
             int count = Byte.toUnsignedInt(countMat.ptr(y, x).get());
