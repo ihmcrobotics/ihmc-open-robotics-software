@@ -15,7 +15,9 @@ public class SimpleGPUHeightMap
    private double resolution;
    private int cellsPerSide;
 
-   private final DMatrixRMaj heightDataMap = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj xDataMap = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj yDataMap = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj zDataMap = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj varianceDataMap = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj countDataMap = new DMatrixRMaj(0, 0);
 
@@ -44,9 +46,20 @@ public class SimpleGPUHeightMap
       return y * resolution + center.getY() - resolution * cellsPerSide * 0.5;
    }
 
+   public double getCellCentroidX(int element)
+   {
+      return xDataMap.get(element);
+   }
+
+   public double getCellCentroidY(int element)
+   {
+      return yDataMap.get(element);
+   }
+
+
    public double getCellZ(int element)
    {
-      return heightDataMap.get(element);
+      return zDataMap.get(element);
    }
 
    public double getVariance(int element)
@@ -94,7 +107,7 @@ public class SimpleGPUHeightMap
 
    public double getHeightAtPoint(double x, double y)
    {
-      return heightDataMap.get(getXIndex(x), getYIndex(y));
+      return zDataMap.get(getXIndex(x), getYIndex(y));
    }
 
    public double getVarianceAtPoint(Point2DReadOnly point)
@@ -134,14 +147,16 @@ public class SimpleGPUHeightMap
       return MathTools.clamp(idx, 0, cellsPerSide);
    }
 
-   public void updateFromFloatBufferImage(Mat heightBuffer,
-                                          Mat varianceBuffer,
+   public void updateFromFloatBufferImage(Mat centroidXBuffer,
+                                          Mat centroidYBuffer,
+                                          Mat centroidZBuffer,
+                                          Mat varianceZBuffer,
                                           Mat countMat,
                                           int cellsPerSide)
    {
       this.cellsPerSide = cellsPerSide;
 
-      heightDataMap.reshape(cellsPerSide, cellsPerSide);
+      zDataMap.reshape(cellsPerSide, cellsPerSide);
       varianceDataMap.reshape(cellsPerSide, cellsPerSide);
       countDataMap.reshape(cellsPerSide, cellsPerSide);
       boundingBox.setToNaN();
@@ -152,10 +167,15 @@ public class SimpleGPUHeightMap
       {
          for (int x = 0; x < cellsPerSide; x++)
          {
-            heightDataMap.set(x, y, heightBuffer.ptr(y, x).getFloat());
-            varianceDataMap.set(x, y, varianceBuffer.ptr(y, x).getFloat());
+            double xPosition = centroidXBuffer.ptr(y, x).getFloat();
+            double yPosition = centroidYBuffer.ptr(y, x).getFloat();
+            int xIndex = getXIndex(xPosition);
+            int yIndex = getYIndex(yPosition);
+
+            zDataMap.set(xIndex, yIndex, centroidZBuffer.ptr(y, x).getFloat());
+            varianceDataMap.set(xIndex, yIndex, varianceZBuffer.ptr(y, x).getFloat());
             int count = Byte.toUnsignedInt(countMat.ptr(y, x).get());
-            countDataMap.set(x, y, count);
+            countDataMap.set(xIndex, yIndex, count);
 
             if (count > 0)
             {
@@ -178,16 +198,16 @@ public class SimpleGPUHeightMap
 
       int centerIndex = HeightMapTools.computeCenterIndex(cellsPerSide * resolution, resolution);
 
-      for (int xIndex = 0; xIndex < heightDataMap.getNumRows(); xIndex++)
+      for (int xIndex = 0; xIndex < zDataMap.getNumRows(); xIndex++)
       {
-         for (int yIndex = 0; yIndex < heightDataMap.getNumCols(); yIndex++)
+         for (int yIndex = 0; yIndex < zDataMap.getNumCols(); yIndex++)
          {
 //            if (!MathTools.epsilonEquals(heightDataMap.get(xIndex, yIndex), 0.0, 1e-5))
             if (countDataMap.get(xIndex, yIndex) > 0)
             {
                int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
                message.getKeys().add(key);
-               message.getHeights().add((float) heightDataMap.get(xIndex, yIndex));
+               message.getHeights().add((float) zDataMap.get(xIndex, yIndex));
             }
          }
       }

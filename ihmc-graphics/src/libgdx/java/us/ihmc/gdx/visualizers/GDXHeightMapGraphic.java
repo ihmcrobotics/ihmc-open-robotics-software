@@ -25,6 +25,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.IntFunction;
+import java.util.function.IntToDoubleFunction;
+import java.util.function.Supplier;
 
 public class GDXHeightMapGraphic implements RenderableProvider
 {
@@ -70,25 +73,50 @@ public class GDXHeightMapGraphic implements RenderableProvider
 
    public synchronized void generateMeshes(HeightMapMessage heightMapMessage)
    {
+      IntToDoubleFunction heightProvider = (d) -> (double) heightMapMessage.getHeights().get(d);
+      IntFunction<Integer> keyProvider = (d) -> heightMapMessage.getKeys().get(d);
+
+      generateMeshes(heightProvider,
+                     keyProvider,
+                     heightMapMessage.getHeights().size(),
+                     heightMapMessage.getXyResolution(),
+                     heightMapMessage.getGridSizeXy(),
+                     heightMapMessage.getGridCenterX(),
+                     heightMapMessage.getGridCenterY(),
+                     heightMapMessage.getEstimatedGroundHeight());
+   }
+
+
+   public synchronized void generateMeshes(IntToDoubleFunction heightsProvider,
+                                           IntFunction<Integer> keysProvider,
+                                           int numberOfOccupiedCells,
+                                           double gridResolutionXY,
+                                           double gridSizeXy,
+                                           double gridCenterX,
+                                           double gridCenterY,
+                                           double groundHeight)
+   {
       List<GDXMultiColorMeshBuilder> meshBuilders = new ArrayList<>();
       Color olive = Color.OLIVE;
       Color blue = Color.BLUE;
 
-      IDLSequence.Float heights = heightMapMessage.getHeights();
-      double gridResolutionXY = heightMapMessage.getXyResolution();
-      int centerIndex = HeightMapTools.computeCenterIndex(heightMapMessage.getGridSizeXy(), gridResolutionXY);
+      if (Double.isNaN(groundHeight))
+         groundHeight = 0.0;
 
-      for (int i = 0; i < heights.size(); i++)
+      int centerIndex = HeightMapTools.computeCenterIndex(gridSizeXy, gridResolutionXY);
+
+      for (int i = 0; i < numberOfOccupiedCells; i++)
       {
          GDXMultiColorMeshBuilder meshBuilder = new GDXMultiColorMeshBuilder();
-         int xIndex = HeightMapTools.keyToXIndex(heightMapMessage.getKeys().get(i), centerIndex);
-         int yIndex = HeightMapTools.keyToYIndex(heightMapMessage.getKeys().get(i), centerIndex);
-         double x = HeightMapTools.indexToCoordinate(xIndex, heightMapMessage.getGridCenterX(), gridResolutionXY, centerIndex);
-         double y = HeightMapTools.indexToCoordinate(yIndex, heightMapMessage.getGridCenterY(), gridResolutionXY, centerIndex);
-         double height = heights.get(i);
-         double renderedHeight = height - heightMapMessage.getEstimatedGroundHeight() + 0.02;
+         int key = keysProvider.apply(i);
+         int xIndex = HeightMapTools.keyToXIndex(key, centerIndex);
+         int yIndex = HeightMapTools.keyToYIndex(key, centerIndex);
+         double x = HeightMapTools.indexToCoordinate(xIndex, gridCenterX, gridResolutionXY, centerIndex);
+         double y = HeightMapTools.indexToCoordinate(yIndex, gridCenterY, gridResolutionXY, centerIndex);
+         double height = heightsProvider.applyAsDouble(i);
+         double renderedHeight = height - groundHeight + 0.02;
 
-         meshBuilder.addBox(gridResolutionXY, gridResolutionXY, renderedHeight, new Point3D(x, y, heightMapMessage.getEstimatedGroundHeight() + 0.5 * renderedHeight), olive);
+         meshBuilder.addBox(gridResolutionXY, gridResolutionXY, renderedHeight, new Point3D(x, y, groundHeight + 0.5 * renderedHeight), olive);
          meshBuilders.add(meshBuilder);
       }
 
@@ -96,10 +124,10 @@ public class GDXHeightMapGraphic implements RenderableProvider
       {
          GDXMultiColorMeshBuilder groundMeshBuilder = new GDXMultiColorMeshBuilder();
          double renderedGroundPlaneHeight = 0.005;
-         groundMeshBuilder.addBox(heightMapMessage.getGridSizeXy(),
-                                  heightMapMessage.getGridSizeXy(),
+         groundMeshBuilder.addBox(gridSizeXy,
+                                  gridSizeXy,
                                   renderedGroundPlaneHeight,
-                                  new Point3D(heightMapMessage.getGridCenterX(), heightMapMessage.getGridCenterY(), heightMapMessage.getEstimatedGroundHeight()),
+                                  new Point3D(gridCenterX, gridCenterY, groundHeight),
                                   blue);
          meshBuilders.add(groundMeshBuilder);
       }
@@ -128,7 +156,6 @@ public class GDXHeightMapGraphic implements RenderableProvider
 
       isGeneratingMeshes.set(false);
    }
-
 
 
 
