@@ -56,7 +56,6 @@ public interface PelvisAndCenterOfMassHeightControlState extends State
    void computeCoMHeightCommand(FrameVector2DReadOnly desiredICPVelocity,
                                 FrameVector2DReadOnly desiredCoMVelocity,
                                 boolean isInDoubleSupport,
-                                RobotSide supportSide,
                                 double omega0,
                                 FeetManager feetManager);
 

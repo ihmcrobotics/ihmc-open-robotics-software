@@ -704,7 +704,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       comHeightManager.compute(balanceManager.getDesiredICPVelocity(),
                                desiredCoMVelocityAsFrameVector,
                                isInDoubleSupport,
-                               currentState.getSupportSide(),
                                omega0,
                                feetManager);
       FeedbackControlCommand<?> heightControlCommand = comHeightManager.getHeightControlCommand();

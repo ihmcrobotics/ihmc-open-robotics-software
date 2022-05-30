@@ -115,7 +115,6 @@ public class CenterOfMassHeightManager
    public void compute(FrameVector2DReadOnly desiredICPVelocity,
                        FrameVector2DReadOnly desiredCoMVelocity,
                        boolean isInDoubleSupport,
-                       RobotSide supportSide,
                        double omega0,
                        FeetManager feetManager)
    {
@@ -124,7 +123,6 @@ public class CenterOfMassHeightManager
                   .computeCoMHeightCommand(desiredICPVelocity,
                                            desiredCoMVelocity,
                                            isInDoubleSupport,
-                                           supportSide,
                                            omega0,
                                            feetManager);
    }
