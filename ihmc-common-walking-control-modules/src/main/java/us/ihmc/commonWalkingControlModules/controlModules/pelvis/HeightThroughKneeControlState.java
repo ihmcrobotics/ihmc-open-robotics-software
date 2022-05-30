@@ -493,9 +493,7 @@ public class HeightThroughKneeControlState implements PelvisAndCenterOfMassHeigh
    @Override
    public FeedbackControlCommand<?> getHeightControlCommand()
    {
-      FeedbackControlCommandList commandList = new FeedbackControlCommandList();
-      commandList.addCommand(pelvisHeightControlCommand);
-      return commandList;
+      return pelvisHeightControlCommand;
    }
 
    @Override
