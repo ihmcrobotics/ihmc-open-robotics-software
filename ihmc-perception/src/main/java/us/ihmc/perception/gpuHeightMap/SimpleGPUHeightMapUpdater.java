@@ -284,6 +284,9 @@ public class SimpleGPUHeightMapUpdater
                                                     centroidYImage.getBytedecoOpenCVMat(),
                                                     centroidZImage.getBytedecoOpenCVMat(),
                                                     varianceZImage.getBytedecoOpenCVMat(),
+                                                    normalXImage.getBytedecoOpenCVMat(),
+                                                    normalYImage.getBytedecoOpenCVMat(),
+                                                    normalZImage.getBytedecoOpenCVMat(),
                                                     countImage.getBytedecoOpenCVMat());
    }
 }

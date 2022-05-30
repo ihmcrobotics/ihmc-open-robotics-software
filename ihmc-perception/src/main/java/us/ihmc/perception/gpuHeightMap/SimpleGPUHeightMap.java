@@ -230,6 +230,9 @@ public class SimpleGPUHeightMap
       {
          message.getKeys().add(occupiedCells.get(i));
          message.getHeights().add((float) centroids.get(occupiedCells.get(i)).getZ());
+         message.getVariances().add((float) varianceDataMap.get(occupiedCells.get(i)));
+         message.getCentroids().add().set(centroids.get(occupiedCells.get(i)));
+         message.getNormals().add().set(normals.get(occupiedCells.get(i)));
       }
 
       return message;
