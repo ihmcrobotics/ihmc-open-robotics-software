@@ -9,7 +9,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.idl.IDLSequence;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
 
@@ -17,7 +16,7 @@ import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GPUHeightMapTools
+public class GPUPointCloudTools
 {
    private final static int defaultMaxNumberOfPoints = 10000;
 
@@ -30,12 +29,12 @@ public class GPUHeightMapTools
    private final _cl_program heightMapToolsProgram;
    private final _cl_kernel transformPointsKernel;
 
-   public GPUHeightMapTools()
+   public GPUPointCloudTools()
    {
       this(defaultMaxNumberOfPoints);
    }
 
-   public GPUHeightMapTools(int maxNumberOfPoints)
+   public GPUPointCloudTools(int maxNumberOfPoints)
    {
       this.maxNumberOfPoints = maxNumberOfPoints;
       openCLManager.create();
@@ -47,7 +46,7 @@ public class GPUHeightMapTools
 //      transformedPointCloudBuffer.createOpenCLBufferObject(openCLManager);
 
       transformBuffer.createOpenCLBufferObject(openCLManager);
-      heightMapToolsProgram = openCLManager.loadProgram("GPUHeightMapTools");
+      heightMapToolsProgram = openCLManager.loadProgram("GPUPointCloudTools");
       transformPointsKernel = openCLManager.createKernel(heightMapToolsProgram, "transformPointsKernel");
    }
 

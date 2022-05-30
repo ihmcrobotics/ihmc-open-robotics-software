@@ -72,7 +72,8 @@ public class GDXHeightMapGraphic implements RenderableProvider
 
    public void generateMeshesAsync(HeightMapMessage heightMapMessage)
    {
-      LogTools.info("Receiving height map with " + heightMapMessage.getKeys().size() + " cells, ground plane at " + heightMapMessage.getEstimatedGroundHeight());
+      LogTools.info(
+            "Receiving height map with " + heightMapMessage.getKeys().size() + " cells, ground plane at " + heightMapMessage.getEstimatedGroundHeight());
 
       if (!isGeneratingMeshes.getAndSet(true))
       {
@@ -108,7 +109,6 @@ public class GDXHeightMapGraphic implements RenderableProvider
                      heightMapMessage.getGridCenterY(),
                      heightMapMessage.getEstimatedGroundHeight());
    }
-
 
    public synchronized void generateMeshes(IntToDoubleFunction heightsProvider,
                                            IntToDoubleFunction variancesProvider,
@@ -159,11 +159,7 @@ public class GDXHeightMapGraphic implements RenderableProvider
       {
          GDXMultiColorMeshBuilder groundMeshBuilder = new GDXMultiColorMeshBuilder();
          double renderedGroundPlaneHeight = 0.005;
-         groundMeshBuilder.addBox(gridSizeXy,
-                                  gridSizeXy,
-                                  renderedGroundPlaneHeight,
-                                  new Point3D(gridCenterX, gridCenterY, groundHeight),
-                                  blue);
+         groundMeshBuilder.addBox(gridSizeXy, gridSizeXy, renderedGroundPlaneHeight, new Point3D(gridCenterX, gridCenterY, groundHeight), blue);
          meshBuilders.add(groundMeshBuilder);
       }
 
@@ -201,6 +197,7 @@ public class GDXHeightMapGraphic implements RenderableProvider
 
       return new Color(r, g, b, a);
    }
+
    public ConvexPolygon2DBasics generatePointsForHeightPatch(double resolution)
    {
       ConvexPolygon2DBasics polygon = new ConvexPolygon2D();
@@ -218,16 +215,10 @@ public class GDXHeightMapGraphic implements RenderableProvider
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.getTranslation().set(x, y, z);
       if (normal != null)
-      {
-//         LogTools.info("Showing normal " + normal);
          transform.getRotation().set(EuclidGeometryTools.axisAngleFromZUpToVector3D(normal));
-      }
 
       return transform;
    }
-
-
-
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
