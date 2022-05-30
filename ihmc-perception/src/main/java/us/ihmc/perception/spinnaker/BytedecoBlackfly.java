@@ -4,97 +4,99 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.LongPointer;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacpp.SizeTPointer;
-import org.bytedeco.spinnaker.Spinnaker_C.*;
+import org.bytedeco.spinnaker.Spinnaker_C.spinCamera;
+import org.bytedeco.spinnaker.Spinnaker_C.spinImage;
+import org.bytedeco.spinnaker.Spinnaker_C.spinNodeHandle;
+import org.bytedeco.spinnaker.Spinnaker_C.spinNodeMapHandle;
+import org.bytedeco.spinnaker.global.Spinnaker_C;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.bytedeco.spinnaker.global.Spinnaker_C.*;
 import static us.ihmc.perception.spinnaker.SpinnakerTools.assertNoError;
 
 public class BytedecoBlackfly
 {
-   String serial;
-   private spinNodeMapHandle nmTLDevice = null;
-   private spinCamera camera;
-   private spinNodeMapHandle camNodeMap = null;
+   private final spinCamera spinCamera;
+   private final String acquisitionMode;
+   private final String serialNumber;
+   private spinNodeMapHandle transportLayerDeviceNodeMap = null;
+   private spinNodeMapHandle cameraNodeMap = null;
 
-   private String acquisitionMode;
+   private AtomicBoolean doImageAcquisition;
+   private Thread imageAcquisitionService;
 
-   AtomicBoolean doImageAcquisition;
-   Thread imageAcquisitionService;
+   private AtomicReference<spinImage> currentUnprocessedImage;
+   private spinImage previousImage = null;
+   private spinImage currentImage = null;
 
-   AtomicReference<spinImage> currentUnprocessedImage;
-   spinImage previousImage = null;
-   spinImage currentImage = null;
-
-   protected BytedecoBlackfly(spinCamera camera, String acqMode, String serial)
+   protected BytedecoBlackfly(spinCamera spinCamera, String acquisitionMode, String serialNumber)
    {
-      this.camera = camera;
-      this.acquisitionMode = acqMode;
-      this.serial = serial;
+      this.spinCamera = spinCamera;
+      this.acquisitionMode = acquisitionMode;
+      this.serialNumber = serialNumber;
    }
 
    public void initialize()
    {
-      nmTLDevice = new spinNodeMapHandle();
-      camNodeMap = new spinNodeMapHandle();
-      assertNoError(spinCameraGetTLDeviceNodeMap(camera, nmTLDevice), "Unable to get TL device nodemap");
-      assertNoError(spinCameraInit(camera), "Unable to initialize camera");
-      assertNoError(spinCameraGetNodeMap(camera, camNodeMap), "Unable to retrieve GenICam nodemap");
+      transportLayerDeviceNodeMap = new spinNodeMapHandle();
+      cameraNodeMap = new spinNodeMapHandle();
+      assertNoError(Spinnaker_C.spinCameraGetTLDeviceNodeMap(spinCamera, transportLayerDeviceNodeMap), "Unable to get transport layer device node map");
+      assertNoError(Spinnaker_C.spinCameraInit(spinCamera), "Unable to initialize camera");
+      assertNoError(Spinnaker_C.spinCameraGetNodeMap(spinCamera, cameraNodeMap), "Unable to retrieve GenICam nodemap");
 
-      //Acquisition mode
-      spinNodeHandle camAcquisitionMode = new spinNodeHandle();
-      assertNoError(spinNodeMapGetNode(camNodeMap, new BytePointer("AcquisitionMode"), camAcquisitionMode), "Unable to set acquisition mode");
+      // Acquisition mode
+      spinNodeHandle acquisitionModeNode = new spinNodeHandle();
+      assertNoError(Spinnaker_C.spinNodeMapGetNode(cameraNodeMap, new BytePointer("AcquisitionMode"), acquisitionModeNode), "Unable to set acquisition mode");
 
+      // TODO: What the heck is going on here? Doesn't seem like these are doing anything
       spinNodeHandle setAcquisitionMode = new spinNodeHandle();
-      assertNoError(spinEnumerationGetEntryByName(camAcquisitionMode, new BytePointer(acquisitionMode), setAcquisitionMode), "Unable to set acquisition mode");
-      LongPointer ptrAcquisitionMode = new LongPointer(1);
-      assertNoError(spinEnumerationEntryGetIntValue(setAcquisitionMode, ptrAcquisitionMode), "Unable to set acquisition mode (int value retrieval)");
-      assertNoError(spinEnumerationSetIntValue(camAcquisitionMode, ptrAcquisitionMode.get()), "Unable to set acquisition mode (int value set)");
+      assertNoError(Spinnaker_C.spinEnumerationGetEntryByName(acquisitionModeNode, new BytePointer(acquisitionMode), setAcquisitionMode),
+                    "Unable to set acquisition mode");
+      LongPointer acquisitionModePointer = new LongPointer(1);
+      assertNoError(Spinnaker_C.spinEnumerationEntryGetIntValue(setAcquisitionMode, acquisitionModePointer),
+                    "Unable to set acquisition mode (int value retrieval)");
+      assertNoError(Spinnaker_C.spinEnumerationSetIntValue(acquisitionModeNode, acquisitionModePointer.get()),
+                    "Unable to set acquisition mode (int value set)");
 
-      //Pixel format
-      spinNodeHandle camPixelFormat = new spinNodeHandle();
-      assertNoError(spinNodeMapGetNode(camNodeMap, new BytePointer("PixelFormat"), camPixelFormat), "Unable to set pixel format");
+      // Pixel format
+      spinNodeHandle pixelFormatNode = new spinNodeHandle();
+      assertNoError(Spinnaker_C.spinNodeMapGetNode(cameraNodeMap, new BytePointer("PixelFormat"), pixelFormatNode), "Unable to set pixel format");
 
       spinNodeHandle setPixelFormat = new spinNodeHandle();
-      assertNoError(spinEnumerationGetEntryByName(camPixelFormat, new BytePointer("RGB8"), setPixelFormat), "Unable to set pixel format");
+      assertNoError(Spinnaker_C.spinEnumerationGetEntryByName(pixelFormatNode, new BytePointer("RGB8"), setPixelFormat), "Unable to set pixel format");
       LongPointer ptrPixelFormat = new LongPointer(1);
-      assertNoError(spinEnumerationEntryGetIntValue(setPixelFormat, ptrPixelFormat), "Unable to set pixel format (int value retrieval)");
-      assertNoError(spinEnumerationSetIntValue(camPixelFormat, ptrPixelFormat.get()), "Unable to set pixel format (int value set)");
+      assertNoError(Spinnaker_C.spinEnumerationEntryGetIntValue(setPixelFormat, ptrPixelFormat), "Unable to set pixel format (int value retrieval)");
+      assertNoError(Spinnaker_C.spinEnumerationSetIntValue(pixelFormatNode, ptrPixelFormat.get()), "Unable to set pixel format (int value set)");
 
-      assertNoError(spinCameraBeginAcquisition(camera), "Failed to begin acquiring images");
+      assertNoError(Spinnaker_C.spinCameraBeginAcquisition(spinCamera), "Failed to begin acquiring images");
 
-      //Image acquisition needs to run on a different thread so that the whole program doesn't need to wait for new images
+      // Image acquisition needs to run on a different thread so that the whole program doesn't need to wait for new images
       doImageAcquisition = new AtomicBoolean(true);
       currentUnprocessedImage = new AtomicReference<>(null);
-      imageAcquisitionService = ThreadTools.startAThread(new Runnable()
+      imageAcquisitionService = ThreadTools.startAThread(() ->
       {
-         @Override
-         public void run()
+         while (doImageAcquisition.get())
          {
-            while (doImageAcquisition.get())
+            spinImage spinImage = new spinImage();
+            Spinnaker_C.spinCameraGetNextImage(spinCamera, spinImage);
+
+            BytePointer isIncomplete = new BytePointer(1);
+            Spinnaker_C.spinImageIsIncomplete(spinImage, isIncomplete);
+            if (isIncomplete.getBool())
             {
-               spinImage image = new spinImage();
-               spinCameraGetNextImage(camera, image);
-
-               BytePointer isIncomplete = new BytePointer(1);
-               spinImageIsIncomplete(image, isIncomplete);
-               if (isIncomplete.getBool())
-               {
-                  LogTools.warn("Camera " + serial + " returned incomplete image");
-                  spinImageRelease(image);
-                  continue;
-               }
-
-               spinImage oldImage = currentUnprocessedImage.get();
-               currentUnprocessedImage.set(image);
-               spinImageRelease(oldImage);
+               LogTools.warn("Camera " + serialNumber + " returned incomplete image");
+               Spinnaker_C.spinImageRelease(spinImage);
+               continue;
             }
+
+            spinImage oldImage = currentUnprocessedImage.get();
+            currentUnprocessedImage.set(spinImage);
+            Spinnaker_C.spinImageRelease(oldImage);
          }
-      }, "Blackfly " + this.serial + " Image Acquisition");
+      }, "Blackfly " + this.serialNumber + " Image Acquisition");
    }
 
    public int getHeight()
@@ -102,9 +104,9 @@ public class BytedecoBlackfly
       if (currentImage == null)
          return 0;
 
-      SizeTPointer val = new SizeTPointer(1);
-      assertNoError(spinImageGetHeight(currentImage, val), "Height could not be determined");
-      return (int) val.get();
+      SizeTPointer heightPointer = new SizeTPointer(1);
+      assertNoError(Spinnaker_C.spinImageGetHeight(currentImage, heightPointer), "Height could not be determined");
+      return (int) heightPointer.get();
    }
 
    public int getWidth()
@@ -112,9 +114,9 @@ public class BytedecoBlackfly
       if (currentImage == null)
          return 0;
 
-      SizeTPointer val = new SizeTPointer(1);
-      assertNoError(spinImageGetWidth(currentImage, val), "Width could not be determined");
-      return (int) val.get();
+      SizeTPointer widthPointer = new SizeTPointer(1);
+      assertNoError(Spinnaker_C.spinImageGetWidth(currentImage, widthPointer), "Width could not be determined");
+      return (int) widthPointer.get();
    }
 
    public boolean readFrameData()
@@ -122,17 +124,17 @@ public class BytedecoBlackfly
       if (currentUnprocessedImage.get() == previousImage || currentUnprocessedImage.get() == null)
          return false;
 
-      spinImage image = new spinImage();
-      spinImageCreateEmpty(image);
-      spinImageConvert(currentUnprocessedImage.get(), spinPixelFormatEnums.PixelFormat_RGBa8, image);
+      spinImage spinImage = new spinImage();
+      Spinnaker_C.spinImageCreateEmpty(spinImage);
+      Spinnaker_C.spinImageConvert(currentUnprocessedImage.get(), Spinnaker_C.spinPixelFormatEnums.PixelFormat_RGBa8, spinImage);
 
       spinImage oldImage = currentImage;
 
       previousImage = currentUnprocessedImage.get();
-      currentImage = image;
+      currentImage = spinImage;
 
       if (oldImage != null)
-         spinImageDestroy(oldImage);
+         Spinnaker_C.spinImageDestroy(oldImage);
 
       return true;
    }
@@ -143,7 +145,7 @@ public class BytedecoBlackfly
     */
    public void getImageData(Pointer pointer)
    {
-      spinImageGetData(currentImage, pointer);
+      Spinnaker_C.spinImageGetData(currentImage, pointer);
    }
 
    public void destroy()
@@ -155,9 +157,9 @@ public class BytedecoBlackfly
       }
       catch (InterruptedException ex)
       {
-      } //this is probably fine
-      spinImageRelease(currentUnprocessedImage.get());
+      } // this is probably fine
+      Spinnaker_C.spinImageRelease(currentUnprocessedImage.get());
 
-      spinCameraRelease(camera);
+      Spinnaker_C.spinCameraRelease(spinCamera);
    }
 }
