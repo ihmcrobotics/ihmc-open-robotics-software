@@ -1,9 +1,9 @@
 package us.ihmc.perception.gpuHeightMap;
 
 import controller_msgs.msg.dds.HeightMapMessage;
+import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.ejml.data.DMatrixRMaj;
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -11,39 +11,78 @@ import us.ihmc.robotics.heightMap.HeightMapTools;
 
 public class SimpleGPUHeightMap
 {
-   private final Point2D center = new Point2D();
-   private double resolution;
+   private final Point2D gridCenter = new Point2D();
+   private double gridResolution;
+   private double gridSizeXY;
    private int cellsPerSide;
+   private int centerIndex;
 
-   private final DMatrixRMaj xDataMap = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj yDataMap = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj zDataMap = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj varianceDataMap = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj countDataMap = new DMatrixRMaj(0, 0);
+   private final TIntArrayList occupiedCells = new TIntArrayList();
+
+   private final TDoubleArrayList xDataMap = new TDoubleArrayList();
+   private final TDoubleArrayList yDataMap = new TDoubleArrayList();
+   private final TDoubleArrayList zDataMap = new TDoubleArrayList();
+   private final TDoubleArrayList varianceDataMap = new TDoubleArrayList();
+   private final TIntArrayList countDataMap = new TIntArrayList();
 
    private final BoundingBox2D boundingBox = new BoundingBox2D();
+   private final BoundingBox2D occupiedBoundingBox = new BoundingBox2D();
 
-   public void setResolution(double resolution)
+   public SimpleGPUHeightMap()
    {
-      this.resolution = resolution;
    }
 
-   public void setCenter(double x, double y)
+   public SimpleGPUHeightMap(double gridResolution, double gridSizeXY, double gridCenterX, double gridCenterY)
    {
-      center.set(x, y);
+      reshape(gridResolution, gridSizeXY, gridCenterX, gridCenterY);
+   }
+
+   public void reshape(double gridResolution, double gridSizeXY, double gridCenterX, double gridCenterY)
+   {
+      this.gridResolution = gridResolution;
+      this.gridSizeXY = gridSizeXY;
+      this.centerIndex = HeightMapTools.computeCenterIndex(gridSizeXY, gridResolution);
+      this.cellsPerSide = 2 * centerIndex + 1;
+      gridCenter.set(gridCenterX, gridCenterY);
+
+      double epsilon = 1e-8;
+      double halfWidth = 0.5 * (gridSizeXY + gridResolution) - epsilon;
+      double minX = gridCenterX - halfWidth;
+      double maxX = gridCenterX + halfWidth;
+      double minY = gridCenterY - halfWidth;
+      double maxY = gridCenterY + halfWidth;
+      boundingBox.getMinPoint().set(minX, minY);
+      boundingBox.getMaxPoint().set(maxX, maxY);
+
+      reset();
+   }
+
+   public void reset()
+   {
+      occupiedCells.reset();
+      xDataMap.reset();
+      yDataMap.reset();
+      zDataMap.reset();
+      varianceDataMap.reset();
+      countDataMap.reset();
+
+      xDataMap.fill(0, cellsPerSide * cellsPerSide, Double.NaN);
+      yDataMap.fill(0, cellsPerSide * cellsPerSide, Double.NaN);
+      zDataMap.fill(0, cellsPerSide * cellsPerSide, Double.NaN);
+      varianceDataMap.fill(0, cellsPerSide * cellsPerSide, Double.NaN);
+      countDataMap.fill(0, cellsPerSide * cellsPerSide, -1);
+
+      occupiedBoundingBox.setToNaN();
    }
 
    public double getCellX(int element)
    {
-      int x = element / cellsPerSide;
-
-      return x * resolution + center.getX() - resolution * cellsPerSide * 0.5;
+      return HeightMapTools.keyToXCoordinate(element, gridCenter.getX(), gridResolution, centerIndex);
    }
 
    public double getCellY(int element)
    {
-      int y = element % cellsPerSide;
-      return y * resolution + center.getY() - resolution * cellsPerSide * 0.5;
+      return HeightMapTools.keyToXCoordinate(element, gridCenter.getY(), gridResolution, centerIndex);
    }
 
    public double getCellCentroidX(int element)
@@ -56,7 +95,6 @@ public class SimpleGPUHeightMap
       return yDataMap.get(element);
    }
 
-
    public double getCellZ(int element)
    {
       return zDataMap.get(element);
@@ -67,22 +105,14 @@ public class SimpleGPUHeightMap
       return varianceDataMap.get(element);
    }
 
-   public Point2DReadOnly getCenter()
+   public Point2DReadOnly getGridCenter()
    {
-      return center;
+      return gridCenter;
    }
 
-   public Point2DReadOnly getCellLocation(int x, int y)
+   public double getGridResolution()
    {
-      Point2D cellLocation = new Point2D((x - 0.5 * cellsPerSide) * resolution, (y - 0.5 * cellsPerSide) * resolution);
-      cellLocation.add(center);
-
-      return cellLocation;
-   }
-
-   public double getResolution()
-   {
-      return resolution;
+      return gridResolution;
    }
 
    public int getCellsPerSide()
@@ -90,14 +120,14 @@ public class SimpleGPUHeightMap
       return cellsPerSide;
    }
 
-   public int getXIndex(double value)
+   public int getXIndex(double xPosition)
    {
-      return getIndex(value, center.getX());
+      return HeightMapTools.coordinateToIndex(xPosition, gridCenter.getX(), gridResolution, centerIndex);
    }
 
-   public int getYIndex(double value)
+   public int getYIndex(double yPosition)
    {
-      return getIndex(value, center.getY());
+      return HeightMapTools.coordinateToIndex(yPosition, gridCenter.getY(), gridResolution, centerIndex);
    }
 
    public double getHeightAtPoint(Point2DReadOnly point)
@@ -107,7 +137,8 @@ public class SimpleGPUHeightMap
 
    public double getHeightAtPoint(double x, double y)
    {
-      return zDataMap.get(getXIndex(x), getYIndex(y));
+      int key = HeightMapTools.coordinateToKey(x, y, gridCenter.getX(), gridCenter.getY(), gridResolution, centerIndex);
+      return zDataMap.get(key);
    }
 
    public double getVarianceAtPoint(Point2DReadOnly point)
@@ -117,75 +148,53 @@ public class SimpleGPUHeightMap
 
    public double getVarianceAtPoint(double x, double y)
    {
-      return varianceDataMap.get(getXIndex(x), getYIndex(y));
+      int key = HeightMapTools.coordinateToKey(x, y, gridCenter.getX(), gridCenter.getY(), gridResolution, centerIndex);
+      return varianceDataMap.get(key);
    }
 
-   public double getPointsAtPoint(Point2DReadOnly point)
+   public double getNumberOfPointsAtPoint(Point2DReadOnly point)
    {
-      return getPointsAtPoint(point.getX(), point.getY());
+      return getNumberOfPointsAtPoint(point.getX(), point.getY());
    }
 
-   public double getPointsAtPoint(double x, double y)
+   public double getNumberOfPointsAtPoint(double x, double y)
    {
-      return countDataMap.get(getXIndex(x), getYIndex(y));
+      int key = HeightMapTools.coordinateToKey(x, y, gridCenter.getX(), gridCenter.getY(), gridResolution, centerIndex);
+      return countDataMap.get(key);
    }
 
-   public BoundingBox2D getBoundingBox()
+   public BoundingBox2D getOccupiedBoundingBox()
    {
-      return boundingBox;
-   }
-
-   private int getIndex(double value, double center)
-   {
-      return getIndex(value, center, resolution, cellsPerSide);
-   }
-
-   public static int getIndex(double value, double center, double resolution, int cellsPerSide)
-   {
-      int idx = (int) ((value - center) / resolution + 0.5 * cellsPerSide);
-
-      return MathTools.clamp(idx, 0, cellsPerSide);
+      return occupiedBoundingBox;
    }
 
    public void updateFromFloatBufferImage(Mat centroidXBuffer,
                                           Mat centroidYBuffer,
                                           Mat centroidZBuffer,
                                           Mat varianceZBuffer,
-                                          Mat countMat,
-                                          int cellsPerSide)
+                                          Mat countMat)
    {
-      this.cellsPerSide = cellsPerSide;
-
-      xDataMap.reshape(cellsPerSide, cellsPerSide);
-      yDataMap.reshape(cellsPerSide, cellsPerSide);
-      zDataMap.reshape(cellsPerSide, cellsPerSide);
-      varianceDataMap.reshape(cellsPerSide, cellsPerSide);
-      countDataMap.reshape(cellsPerSide, cellsPerSide);
-      boundingBox.setToNaN();
-
-      int centerIndex = HeightMapTools.computeCenterIndex(cellsPerSide * resolution, resolution);
-
       for (int y = 0; y < cellsPerSide; y++)
       {
          for (int x = 0; x < cellsPerSide; x++)
          {
             double xPosition = centroidXBuffer.ptr(y, x).getFloat();
             double yPosition = centroidYBuffer.ptr(y, x).getFloat();
-            int xIndex = getXIndex(xPosition);
-            int yIndex = getYIndex(yPosition);
 
-            xDataMap.set(xIndex, yIndex, xPosition);
-            yDataMap.set(xIndex, yIndex, yPosition);
-            zDataMap.set(xIndex, yIndex, centroidZBuffer.ptr(y, x).getFloat());
-            varianceDataMap.set(xIndex, yIndex, varianceZBuffer.ptr(y, x).getFloat());
             int count = Byte.toUnsignedInt(countMat.ptr(y, x).get());
-            countDataMap.set(xIndex, yIndex, count);
 
             if (count > 0)
             {
-               double xPoint = HeightMapTools.indexToCoordinate(x, center.getX(), resolution, centerIndex);
-               double yPoint = HeightMapTools.indexToCoordinate(y, center.getY(), resolution, centerIndex);
-               boundingBox.updateToIncludePoint(xPoint, yPoint);
+               int key = HeightMapTools.coordinateToKey(xPosition, yPosition, gridCenter.getX(), gridCenter.getY(), gridResolution, centerIndex);
+
+               occupiedCells.add(key);
+               xDataMap.set(key, xPosition);
+               yDataMap.set(key, yPosition);
+               zDataMap.set(key, centroidZBuffer.ptr(y, x).getFloat());
+               varianceDataMap.set(key, varianceZBuffer.ptr(y, x).getFloat());
+
+               boundingBox.updateToIncludePoint(xPosition, yPosition);
+               countDataMap.set(key, count);
             }
          }
       }
@@ -195,26 +204,17 @@ public class SimpleGPUHeightMap
    {
       // Copy and report over messager
       HeightMapMessage message = new HeightMapMessage();
-      message.setGridSizeXy(cellsPerSide * resolution);
-      message.setXyResolution(resolution);
-      message.setGridCenterX(center.getX());
-      message.setGridCenterY(center.getY());
+      message.setGridSizeXy(gridSizeXY);
+      message.setXyResolution(gridResolution);
+      message.setGridCenterX(gridCenter.getX());
+      message.setGridCenterY(gridCenter.getY());
 
-      int centerIndex = HeightMapTools.computeCenterIndex(cellsPerSide * resolution, resolution);
-
-      for (int xIndex = 0; xIndex < zDataMap.getNumRows(); xIndex++)
+      for (int i = 0; i < occupiedCells.size(); i++)
       {
-         for (int yIndex = 0; yIndex < zDataMap.getNumCols(); yIndex++)
-         {
-//            if (!MathTools.epsilonEquals(heightDataMap.get(xIndex, yIndex), 0.0, 1e-5))
-            if (countDataMap.get(xIndex, yIndex) > 0)
-            {
-               int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
-               message.getKeys().add(key);
-               message.getHeights().add((float) zDataMap.get(xIndex, yIndex));
-            }
-         }
+         message.getKeys().add(occupiedCells.get(i));
+         message.getHeights().add((float) zDataMap.get(occupiedCells.get(i)));
       }
+
 
       return message;
    }

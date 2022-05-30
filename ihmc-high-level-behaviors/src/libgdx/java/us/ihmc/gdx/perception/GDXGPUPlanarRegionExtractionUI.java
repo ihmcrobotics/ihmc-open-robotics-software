@@ -336,7 +336,7 @@ public class GDXGPUPlanarRegionExtractionUI
 
    private void renderBoundingBox()
    {
-      BoundingBox2D boundingBox = simpleGPUHeightMapUpdater.getHeightMap().getBoundingBox();
+      BoundingBox2D boundingBox = simpleGPUHeightMapUpdater.getHeightMap().getOccupiedBoundingBox();
       if (render3DHeightMapBoundaries.get())
       {
          boundingBoxPointCloud.prepareVertexBufferForAddingPoints();

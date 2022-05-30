@@ -100,7 +100,7 @@ public class SimpleGPUHeightMapUpdaterTest
          int yIndex = SimpleGPUHeightMap.getIndex(point.getY(), 0.0, parameters.resolution, numberOfCells);
 
          assertEquals(averageHeightAtPoint.get(xIndex, yIndex), gpuHeightMap.getHeightMap().getHeightAtPoint(point.getX(), point.getY()), 1e-5);
-         assertEquals(numberOfCellsAtPoint.get(xIndex, yIndex), gpuHeightMap.getHeightMap().getPointsAtPoint(point.getX(), point.getY()), 1e-5);
+         assertEquals(numberOfCellsAtPoint.get(xIndex, yIndex), gpuHeightMap.getHeightMap().getNumberOfPointsAtPoint(point.getX(), point.getY()), 1e-5);
          assertEquals(varianceAtPoint.get(xIndex, yIndex), gpuHeightMap.getHeightMap().getVarianceAtPoint(point.getX(), point.getY()), 1e-5);
       }
 
