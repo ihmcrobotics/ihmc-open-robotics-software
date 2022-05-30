@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.perception.spinnaker.SpinnakerTools.assertNoError;
 
-public class BytedecoBlackfly
+public class SpinnakerBlackfly
 {
    private final spinCamera spinCamera;
    private final String acquisitionMode;
@@ -32,7 +32,7 @@ public class BytedecoBlackfly
    private spinImage previousImage = null;
    private spinImage currentImage = null;
 
-   protected BytedecoBlackfly(spinCamera spinCamera, String acquisitionMode, String serialNumber)
+   protected SpinnakerBlackfly(spinCamera spinCamera, String acquisitionMode, String serialNumber)
    {
       this.spinCamera = spinCamera;
       this.acquisitionMode = acquisitionMode;
