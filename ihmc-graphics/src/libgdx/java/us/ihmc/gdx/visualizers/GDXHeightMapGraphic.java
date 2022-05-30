@@ -16,10 +16,13 @@ import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.tools.AxisAngleTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.log.LogTools;
@@ -81,9 +84,15 @@ public class GDXHeightMapGraphic implements RenderableProvider
    {
       IntToDoubleFunction heightProvider = (d) -> (double) heightMapMessage.getHeights().get(d);
       IntFunction<Integer> keyProvider = (d) -> heightMapMessage.getKeys().get(d);
+      IntFunction<Vector3DReadOnly> normalsProvider;
+      if (heightMapMessage.getNormals().size() != heightMapMessage.getHeights().size())
+         normalsProvider = null;
+      else
+         normalsProvider = (d) -> heightMapMessage.getNormals().get(d);
 
       generateMeshes(heightProvider,
                      keyProvider,
+                     normalsProvider,
                      heightMapMessage.getHeights().size(),
                      heightMapMessage.getXyResolution(),
                      heightMapMessage.getGridSizeXy(),
@@ -95,6 +104,7 @@ public class GDXHeightMapGraphic implements RenderableProvider
 
    public synchronized void generateMeshes(IntToDoubleFunction heightsProvider,
                                            IntFunction<Integer> keysProvider,
+                                           IntFunction<Vector3DReadOnly> normalsProvider,
                                            int numberOfOccupiedCells,
                                            double gridResolutionXY,
                                            double gridSizeXy,
@@ -124,7 +134,10 @@ public class GDXHeightMapGraphic implements RenderableProvider
          double height = heightsProvider.applyAsDouble(i);
          double renderedHeight = height - groundHeight + 0.02;
 
-         RigidBodyTransformReadOnly transform = generateTransformForHeightPatch(x, y, renderedHeight);
+         Vector3DReadOnly normal = null;
+         if (normalsProvider != null)
+            normal = normalsProvider.apply(i);
+         RigidBodyTransformReadOnly transform = generateTransformForHeightPatch(x, y, renderedHeight, normal);
          meshBuilder.addPolygon(transform, localPoints, olive);
          meshBuilders.add(meshBuilder);
       }
@@ -178,10 +191,16 @@ public class GDXHeightMapGraphic implements RenderableProvider
       return polygon;
    }
 
-   public RigidBodyTransformReadOnly generateTransformForHeightPatch(double x, double y, double z)
+   public RigidBodyTransformReadOnly generateTransformForHeightPatch(double x, double y, double z, Vector3DReadOnly normal)
    {
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.getTranslation().set(x, y, z);
+      if (normal != null)
+      {
+//         LogTools.info("Showing normal " + normal);
+         transform.getRotation().set(EuclidGeometryTools.axisAngleFromZUpToVector3D(normal));
+      }
+
       return transform;
    }
 
