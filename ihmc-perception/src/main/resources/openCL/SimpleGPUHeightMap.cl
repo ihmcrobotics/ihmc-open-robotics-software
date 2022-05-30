@@ -15,17 +15,13 @@
  #define ty 12
  #define tz 13
 
-#define WIDTH 0
-#define HEIGHT 1
-#define RESOLUTION 2
-#define MIN_VALID_DISTANCE 3
-#define MAX_HEIGHT_RANGE 4
-#define RAMPED_HEIGHT_RANGE_A 5
-#define RAMPED_HEIGHT_RANGE_B 6
-#define RAMPED_HEIGHT_RANGE_C 7
-#define SENSOR_NOISE_FACTOR 8
-#define INITIAL_VARIANCE 9
-#define MAX_VARIANCE 10
+#define RESOLUTION 0
+#define MIN_VALID_DISTANCE 1
+#define MAX_HEIGHT_RANGE 2
+#define RAMPED_HEIGHT_RANGE_A 3
+#define RAMPED_HEIGHT_RANGE_B 4
+#define RAMPED_HEIGHT_RANGE_C 5
+#define CENTER_INDEX 6
 
 #define DEPTH_CX 0
 #define DEPTH_CY 1
@@ -35,11 +31,6 @@
 int clamp_val(int x, int min_x, int max_x)
 {
     return max(min(x, max_x), min_x);
-}
-
-float z_noise(float z, read_only float* params)
-{
-    return params[SENSOR_NOISE_FACTOR] * z * z;
 }
 
 float rotate_point(float3 point, float3 r)
@@ -63,50 +54,31 @@ float point_sensor_distance(float3 point, float3 sensor)
     return dot(delta, delta);
 }
 
+int coordinate_to_index(float coordinate, float center, float resolution, int centerIndex)
+{
+    int index = ((int) round((coordinate - center) / resolution)) + centerIndex;
+    return clamp_val(index, 0, 2 * centerIndex + 1);
+}
+
 int get_x_idx(float x, float center, read_only float* params)
 {
-    int i = (x - center)  / params[RESOLUTION] + 0.5 * params[WIDTH];
-    int ret = clamp_val(i, 0, params[WIDTH] - 1);
-
-    return ret;
+    return coordinate_to_index(x, center, params[RESOLUTION], params[CENTER_INDEX]);
 }
 
 int get_y_idx(float y, float center, read_only float* params)
 {
-    int i = (y - center) / params[RESOLUTION] + 0.5 * params[HEIGHT];
-    int ret = clamp_val(i, 0, params[HEIGHT] - 1);;
-
-    return ret;
+    return coordinate_to_index(y, center, params[RESOLUTION], params[CENTER_INDEX]);
 }
+
+int indices_to_key(int x_index, int y_index, int centerIndex)
+{
+    return x_index + y_index * (2 * centerIndex + 1);
+}
+
 
 int get_idx_in_layer(int idx_x, int idx_y, read_only float* params)
 {
-    // assumes row major
-    return params[WIDTH] * idx_x + idx_y;
-}
-
-int get_idx(float x, float y, float center_x, float center_y, read_only float* params)
-{
-    int idx_x = get_x_idx(x, center_x, params);
-    int idx_y = get_y_idx(y, center_y, params);
-
-    return get_idx_in_layer(idx_x, idx_y, params);
-}
-
-bool is_inside(int idx_x, int idx_y, read_only float* params)
-{
-    int max_width = params[WIDTH];
-    if (idx_x == -1 || idx_x == max_width)
-    {
-        return false;
-    }
-    int max_height = params[HEIGHT];
-    if (idx_y == -1 || idx_y == max_height)
-    {
-        return false;
-    }
-
-    return true;
+    return indices_to_key(idx_x, idx_y, params[CENTER_INDEX]);
 }
 
 bool is_valid(float3 point, float3 sensor, read_only float* params)
@@ -202,8 +174,6 @@ void kernel addPointsFromImageKernel(read_only image2d_t depth_image,
         int idx = get_idx_in_layer(idx_x, idx_y, params);
 
         // TODO pretty sure this is always true by construction
- //       if (is_inside(idx_x, idx_y, params))
- //       {
             float new_variance_z = pointInWorld.z * pointInWorld.z;
 
             int variance_z = (int) (new_variance_z * FLOAT_TO_INT_SCALE);
@@ -218,7 +188,6 @@ void kernel addPointsFromImageKernel(read_only image2d_t depth_image,
             atomic_inc(&counter_data[idx]);
 
             // visibility cleanup
- //       }
     }
 }
 

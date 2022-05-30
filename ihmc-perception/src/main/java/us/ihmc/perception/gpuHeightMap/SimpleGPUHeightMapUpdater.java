@@ -24,7 +24,7 @@ public class SimpleGPUHeightMapUpdater
    private final OpenCLManager openCLManager;
 
    private final OpenCLFloatBuffer localizationBuffer = new OpenCLFloatBuffer(14);
-   private final OpenCLFloatBuffer parametersBuffer = new OpenCLFloatBuffer(11);
+   private final OpenCLFloatBuffer parametersBuffer = new OpenCLFloatBuffer(7);
    private final OpenCLFloatBuffer intrinsicsBuffer = new OpenCLFloatBuffer(4);
 
    private _cl_mem varianceData;
@@ -53,6 +53,7 @@ public class SimpleGPUHeightMapUpdater
    private float cy;
 
    private ByteBuffer backingByteBuffer;
+   private int centerIndex;
 
    public SimpleGPUHeightMapUpdater(SimpleGPUHeightMapParameters parameters)
    {
@@ -60,8 +61,8 @@ public class SimpleGPUHeightMapUpdater
       this.parameters = parameters;
 
       // the added two are for the borders
-      numberOfCells = ((int) Math.round(parameters.mapLength / parameters.resolution)) + 2;
-
+      centerIndex = HeightMapTools.computeCenterIndex(parameters.mapLength, parameters.resolution);
+      numberOfCells = 2 * centerIndex + 1;
    }
 
    public void create(int imageWidth, int imageHeight, ByteBuffer sourceData, double fx, double fy, double cx, double cy)
@@ -167,17 +168,13 @@ public class SimpleGPUHeightMapUpdater
 
    private void populateParametersBuffer()
    {
-      parametersBuffer.getBytedecoFloatBufferPointer().put(0, (float) numberOfCells);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(1, (float) numberOfCells);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(2, (float) parameters.resolution);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(3, (float) parameters.minValidDistance);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(4, (float) parameters.maxHeightRange);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(5, (float) parameters.rampedHeightRangeA);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(6, (float) parameters.rampedHeightRangeB);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(7, (float) parameters.rampedHeightRangeC);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(8, (float) parameters.sensorNoiseFactor);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(9, (float) parameters.initialVariance);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(10, (float) parameters.maxVariance);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(0, (float) parameters.resolution);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(1, (float) parameters.minValidDistance);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(2, (float) parameters.maxHeightRange);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(3, (float) parameters.rampedHeightRangeA);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(4, (float) parameters.rampedHeightRangeB);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(5, (float) parameters.rampedHeightRangeC);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(6, (float) centerIndex);
    }
 
    boolean firstRun = true;
