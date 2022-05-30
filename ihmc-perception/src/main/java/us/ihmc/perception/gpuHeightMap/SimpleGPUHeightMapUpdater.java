@@ -225,9 +225,6 @@ public class SimpleGPUHeightMapUpdater
          intrinsicsBuffer.writeOpenCLBufferObject(openCLManager);
       }
 
-      LogTools.info("expected input bytes " + backingByteBuffer.capacity());
-      LogTools.info("processed bytes " + imageHeight * imageWidth * depthImage.getBytesPerPixel());
-
       openCLManager.setKernelArgument(zeroValuesKernel, 0, parametersBuffer.getOpenCLBufferObject());
       openCLManager.setKernelArgument(zeroValuesKernel, 1, centroidData);
       openCLManager.setKernelArgument(zeroValuesKernel, 2, varianceData);

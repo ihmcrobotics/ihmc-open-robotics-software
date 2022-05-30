@@ -13,6 +13,12 @@ import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.HeightMapMessage;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.geometry.BoundingBox2D;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
 import us.ihmc.idl.IDLSequence;
@@ -105,6 +111,8 @@ public class GDXHeightMapGraphic implements RenderableProvider
 
       int centerIndex = HeightMapTools.computeCenterIndex(gridSizeXy, gridResolutionXY);
 
+      ConvexPolygon2DReadOnly localPoints = generatePointsForHeightPatch(gridResolutionXY);
+
       for (int i = 0; i < numberOfOccupiedCells; i++)
       {
          GDXMultiColorMeshBuilder meshBuilder = new GDXMultiColorMeshBuilder();
@@ -116,7 +124,8 @@ public class GDXHeightMapGraphic implements RenderableProvider
          double height = heightsProvider.applyAsDouble(i);
          double renderedHeight = height - groundHeight + 0.02;
 
-         meshBuilder.addBox(gridResolutionXY, gridResolutionXY, renderedHeight, new Point3D(x, y, groundHeight + 0.5 * renderedHeight), olive);
+         RigidBodyTransformReadOnly transform = generateTransformForHeightPatch(x, y, renderedHeight);
+         meshBuilder.addPolygon(transform, localPoints, olive);
          meshBuilders.add(meshBuilder);
       }
 
@@ -155,6 +164,25 @@ public class GDXHeightMapGraphic implements RenderableProvider
       };
 
       isGeneratingMeshes.set(false);
+   }
+
+   public ConvexPolygon2DBasics generatePointsForHeightPatch(double resolution)
+   {
+      ConvexPolygon2DBasics polygon = new ConvexPolygon2D();
+      polygon.addVertex(new Point2D(0.5 * resolution, 0.5 * resolution));
+      polygon.addVertex(new Point2D(0.5 * resolution, -0.5 * resolution));
+      polygon.addVertex(new Point2D(-0.5 * resolution, -0.5 * resolution));
+      polygon.addVertex(new Point2D(-0.5 * resolution, 0.5 * resolution));
+      polygon.update();
+
+      return polygon;
+   }
+
+   public RigidBodyTransformReadOnly generateTransformForHeightPatch(double x, double y, double z)
+   {
+      RigidBodyTransform transform = new RigidBodyTransform();
+      transform.getTranslation().set(x, y, z);
+      return transform;
    }
 
 
