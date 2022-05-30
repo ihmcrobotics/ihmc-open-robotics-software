@@ -9,7 +9,9 @@ import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.robotics.heightMap.HeightMapTools;
 
 public class SimpleGPUHeightMap
@@ -23,6 +25,7 @@ public class SimpleGPUHeightMap
    private final TIntArrayList occupiedCells = new TIntArrayList();
 
    private final RecyclingArrayList<Point3DBasics> centroids = new RecyclingArrayList<>(Point3D::new);
+   private final RecyclingArrayList<Vector3DBasics> normals = new RecyclingArrayList<>(Vector3D::new);
    private final TDoubleArrayList varianceDataMap = new TDoubleArrayList();
    private final TIntArrayList countDataMap = new TIntArrayList();
 
@@ -56,8 +59,12 @@ public class SimpleGPUHeightMap
       boundingBox.getMaxPoint().set(maxX, maxY);
 
       centroids.clear();
+      normals.clear();
       for (int i = 0; i < cellsPerSide * cellsPerSide; i++)
+      {
          centroids.add();
+         normals.add();
+      }
 
       reset();
    }
@@ -70,6 +77,8 @@ public class SimpleGPUHeightMap
 
       for (Point3DBasics centroid : centroids)
          centroid.setToNaN();
+      for (Vector3DBasics normal : normals)
+         normal.setToNaN();
       varianceDataMap.fill(0, cellsPerSide * cellsPerSide, Double.NaN);
       countDataMap.fill(0, cellsPerSide * cellsPerSide, -1);
 
@@ -173,6 +182,9 @@ public class SimpleGPUHeightMap
                                           Mat centroidYBuffer,
                                           Mat centroidZBuffer,
                                           Mat varianceZBuffer,
+                                          Mat normalXBuffer,
+                                          Mat normalYBuffer,
+                                          Mat normalZBuffer,
                                           Mat countMat)
    {
       occupiedBoundingBox.setToNaN();
@@ -189,8 +201,13 @@ public class SimpleGPUHeightMap
             {
                int key = HeightMapTools.coordinateToKey(xPosition, yPosition, gridCenter.getX(), gridCenter.getY(), gridResolution, centerIndex);
 
+               double nx = normalXBuffer.ptr(y, x).getFloat();
+               double ny = normalYBuffer.ptr(y, x).getFloat();
+               double nz = normalZBuffer.ptr(y, x).getFloat();
+
                occupiedCells.add(key);
                centroids.get(key).set(xPosition, yPosition, centroidZBuffer.ptr(y, x).getFloat());
+               normals.get(key).set(nx, ny, nz);
                varianceDataMap.set(key, varianceZBuffer.ptr(y, x).getFloat());
 
                occupiedBoundingBox.updateToIncludePoint(xPosition, yPosition);
