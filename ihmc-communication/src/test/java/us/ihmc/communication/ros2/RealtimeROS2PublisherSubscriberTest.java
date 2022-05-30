@@ -12,12 +12,12 @@ import us.ihmc.tools.time.FrequencyStatisticPrinter;
 
 import java.io.IOException;
 
-public class RealtimeROS2PublisherTest
+public class RealtimeROS2PublisherSubscriberTest
 {
    private RealtimeROS2Node realtimeROS2Node;
    private RealtimeROS2Publisher<BigVideoPacket> publisher;
 
-   public RealtimeROS2PublisherTest()
+   public RealtimeROS2PublisherSubscriberTest()
    {
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "videotest");
       try
@@ -80,6 +80,6 @@ public class RealtimeROS2PublisherTest
 
    public static void main(String[] args)
    {
-      new RealtimeROS2PublisherTest();
+      new RealtimeROS2PublisherSubscriberTest();
    }
 }
