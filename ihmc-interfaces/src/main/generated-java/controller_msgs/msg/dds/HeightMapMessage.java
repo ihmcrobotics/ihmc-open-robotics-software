@@ -43,12 +43,30 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
             * List of heights, which correspond to the list of keys
             */
    public us.ihmc.idl.IDLSequence.Float  heights_;
+   /**
+            * List of variances, which correspond to the list of keys. May be empty.
+            */
+   public us.ihmc.idl.IDLSequence.Float  variances_;
+   /**
+            * List of centroids for each cell, which correspond to the list of keys. May be empty
+            * Note: The z coordinate of each point is ignored, but should correspond to the height.
+            */
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  centroids_;
+   /**
+            * List of normals for each cell, which correspond to the list of keys. May be empty.
+            */
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Vector3D>  normals_;
 
    public HeightMapMessage()
    {
       keys_ = new us.ihmc.idl.IDLSequence.Integer (30000, "type_2");
 
       heights_ = new us.ihmc.idl.IDLSequence.Float (30000, "type_5");
+
+      variances_ = new us.ihmc.idl.IDLSequence.Float (30000, "type_5");
+
+      centroids_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (30000, new geometry_msgs.msg.dds.PointPubSubType());
+      normals_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Vector3D> (30000, new geometry_msgs.msg.dds.Vector3PubSubType());
 
    }
 
@@ -74,6 +92,9 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
 
       keys_.set(other.keys_);
       heights_.set(other.heights_);
+      variances_.set(other.variances_);
+      centroids_.set(other.centroids_);
+      normals_.set(other.normals_);
    }
 
    /**
@@ -185,6 +206,34 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
    }
 
 
+   /**
+            * List of variances, which correspond to the list of keys. May be empty.
+            */
+   public us.ihmc.idl.IDLSequence.Float  getVariances()
+   {
+      return variances_;
+   }
+
+
+   /**
+            * List of centroids for each cell, which correspond to the list of keys. May be empty
+            * Note: The z coordinate of each point is ignored, but should correspond to the height.
+            */
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getCentroids()
+   {
+      return centroids_;
+   }
+
+
+   /**
+            * List of normals for each cell, which correspond to the list of keys. May be empty.
+            */
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Vector3D>  getNormals()
+   {
+      return normals_;
+   }
+
+
    public static Supplier<HeightMapMessagePubSubType> getPubSubType()
    {
       return HeightMapMessagePubSubType::new;
@@ -218,6 +267,22 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.heights_, other.heights_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.variances_, other.variances_, epsilon)) return false;
+
+      if (this.centroids_.size() != other.centroids_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.centroids_.size(); i++)
+         {  if (!this.centroids_.get(i).epsilonEquals(other.centroids_.get(i), epsilon)) return false; }
+      }
+
+      if (this.normals_.size() != other.normals_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.normals_.size(); i++)
+         {  if (!this.normals_.get(i).epsilonEquals(other.normals_.get(i), epsilon)) return false; }
+      }
+
 
       return true;
    }
@@ -245,6 +310,9 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
 
       if (!this.keys_.equals(otherMyClass.keys_)) return false;
       if (!this.heights_.equals(otherMyClass.heights_)) return false;
+      if (!this.variances_.equals(otherMyClass.variances_)) return false;
+      if (!this.centroids_.equals(otherMyClass.centroids_)) return false;
+      if (!this.normals_.equals(otherMyClass.normals_)) return false;
 
       return true;
    }
@@ -270,7 +338,13 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
       builder.append("keys=");
       builder.append(this.keys_);      builder.append(", ");
       builder.append("heights=");
-      builder.append(this.heights_);
+      builder.append(this.heights_);      builder.append(", ");
+      builder.append("variances=");
+      builder.append(this.variances_);      builder.append(", ");
+      builder.append("centroids=");
+      builder.append(this.centroids_);      builder.append(", ");
+      builder.append("normals=");
+      builder.append(this.normals_);
       builder.append("}");
       return builder.toString();
    }
