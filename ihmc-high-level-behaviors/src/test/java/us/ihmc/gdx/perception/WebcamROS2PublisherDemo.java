@@ -11,6 +11,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_videoio.VideoCapture;
 import org.bytedeco.opencv.opencv_videoio.VideoWriter;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.imgui.ImGuiPanel;
@@ -27,7 +28,6 @@ import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.ros2.RealtimeROS2Publisher;
 import us.ihmc.tools.thread.Activator;
-import us.ihmc.tools.thread.Throttler;
 
 import java.io.IOException;
 
@@ -46,14 +46,23 @@ public class WebcamROS2PublisherDemo
    private double reportedFPS = 30.0;
    private String backendName = "";
    private Mat bgrImage;
+   private BytePointer jpegImageBytePointer;
+   private Mat yuv420Image;
    private ImGuiOpenCVSwapVideoPanel swapCVPanel;
-   private ImPlotStopwatchPlot readPerformancePlot = new ImPlotStopwatchPlot("VideoCapture read(Mat) Duration");
-   private ImPlotFrequencyPlot readFrequencyPlot = new ImPlotFrequencyPlot("Webcam OpenCV Read and ROS 2 Publish Frequency");
-   private ImPlotIntegerPlot compressedBytesPlot = new ImPlotIntegerPlot("Compressed bytes");
+   private final ImPlotStopwatchPlot readDurationPlot = new ImPlotStopwatchPlot("Read Duration");
+   private final ImPlotStopwatchPlot encodeDurationPlot = new ImPlotStopwatchPlot("Encode Duration");
+   private final ImPlotFrequencyPlot readFrequencyPlot = new ImPlotFrequencyPlot("Read Frequency");
+   private final ImPlotFrequencyPlot encodeFrequencyPlot = new ImPlotFrequencyPlot("Encode Frequency");
+   private final ImPlotIntegerPlot compressedBytesPlot = new ImPlotIntegerPlot("Compressed bytes");
+   private final Stopwatch threadOneDuration = new Stopwatch();
+   private final Stopwatch threadTwoDuration = new Stopwatch();
    private RealtimeROS2Node realtimeROS2Node;
    private RealtimeROS2Publisher<BigVideoPacket> publisher;
-   private BigVideoPacket videoPacket = new BigVideoPacket();
-   private Throttler throttler = new Throttler();
+   private final BigVideoPacket videoPacket = new BigVideoPacket();
+   private IntPointer compressionParameters;
+   private final Runnable encodeAndPublish = this::encodeAndPublish;
+   private final Object measurementSyncObject = new Object();
+   private final Object encodeAndPublishMakeSureTheresOne = new Object();
 
    public WebcamROS2PublisherDemo()
    {
@@ -110,26 +119,42 @@ public class WebcamROS2PublisherDemo
                   LogTools.info("Format: {}", videoCapture.get(opencv_videoio.CAP_PROP_FORMAT));
 
                   bgrImage = new Mat();
-                  Mat yuv420Image = new Mat();
-                  BytePointer jpegImageBytePointer = new BytePointer();
+                  yuv420Image = new Mat();
+                  jpegImageBytePointer = new BytePointer();
 
                   swapCVPanel = new ImGuiOpenCVSwapVideoPanel("Video", false);
                   baseUI.getImGuiPanelManager().addPanel(swapCVPanel.getVideoPanel());
                   baseUI.getPerspectiveManager().reloadPerspective();
 
-                  readPerformancePlot = new ImPlotStopwatchPlot("VideoCapture read(Mat)");
-
-                  IntPointer compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 75);
+                  compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 75);
 
                   ThreadTools.startAsDaemon(() ->
                   {
                      while (true)
                      {
-//                        throttler.waitAndRun(0.1);
+                        // If encoding is running slower than reading, we want to wait a little so the read
+                        // is freshest going into the encode and publish. We do this because we don't want
+                        // to there to be more than one publish thread going
+                        boolean shouldSleep;
+                        double sleepTime;
+                        synchronized (measurementSyncObject)
+                        {
+                           double averageThreadTwoDuration = threadTwoDuration.averageLap();
+                           double averageThreadOneDuration = threadOneDuration.averageLap();
+                           shouldSleep = !Double.isNaN(averageThreadTwoDuration) && !Double.isNaN(averageThreadOneDuration)
+                                       && averageThreadTwoDuration > averageThreadOneDuration;
+                           sleepTime = averageThreadTwoDuration - averageThreadOneDuration;
 
-                        readPerformancePlot.start();
+                           if (Double.isNaN(threadOneDuration.lap()))
+                              threadOneDuration.reset();
+                        }
+
+                        if (shouldSleep)
+                           ThreadTools.sleepSeconds(sleepTime);
+
+                        readDurationPlot.start();
                         boolean imageWasRead = videoCapture.read(bgrImage);
-                        readPerformancePlot.stop();
+                        readDurationPlot.stop();
                         readFrequencyPlot.ping();
 
                         if (!imageWasRead)
@@ -137,21 +162,23 @@ public class WebcamROS2PublisherDemo
                            LogTools.error("Image was not read!");
                         }
 
-                        opencv_imgproc.cvtColor(bgrImage, yuv420Image, opencv_imgproc.COLOR_BGR2YUV_I420);
-                        opencv_imgcodecs.imencode(".jpg", yuv420Image, jpegImageBytePointer, compressionParameters);
-
-                        byte[] heapByteArrayData = new byte[jpegImageBytePointer.asBuffer().remaining()];
-                        jpegImageBytePointer.asBuffer().get(heapByteArrayData);
-                        videoPacket.getData().reset();
-                        videoPacket.getData().add(heapByteArrayData);
-                        compressedBytesPlot.addValue(videoPacket.getData().size());
-                        publisher.publish(videoPacket);
+                        // Convert colors are pretty fast. Encoding is slow, so let's do it in parallel.
 
                         swapCVPanel.getDataSwapReferenceManager().accessOnLowPriorityThread(data ->
                         {
                            data.updateOnImageUpdateThread(imageWidth, imageHeight);
                            opencv_imgproc.cvtColor(bgrImage, data.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA, 0);
                         });
+
+                        opencv_imgproc.cvtColor(bgrImage, yuv420Image, opencv_imgproc.COLOR_BGR2YUV_I420);
+
+                        synchronized (measurementSyncObject)
+                        {
+                           threadOneDuration.suspend();
+                        }
+
+                        ThreadTools.startAThread(encodeAndPublish, "EncodeAndPublish");
+//                        encodeAndPublish.run();
                      }
                   }, "CameraRead");
                }
@@ -175,6 +202,38 @@ public class WebcamROS2PublisherDemo
       });
    }
 
+   private void encodeAndPublish()
+   {
+      synchronized (encodeAndPublishMakeSureTheresOne)
+      {
+         synchronized (measurementSyncObject)
+         {
+            if (Double.isNaN(threadTwoDuration.lap()))
+               threadTwoDuration.reset();
+         }
+
+         encodeDurationPlot.start();
+
+         opencv_imgcodecs.imencode(".jpg", yuv420Image, jpegImageBytePointer, compressionParameters);
+
+         byte[] heapByteArrayData = new byte[jpegImageBytePointer.asBuffer().remaining()];
+         jpegImageBytePointer.asBuffer().get(heapByteArrayData);
+         videoPacket.getData().resetQuick();
+         videoPacket.getData().add(heapByteArrayData);
+         compressedBytesPlot.addValue(videoPacket.getData().size());
+         publisher.publish(videoPacket);
+
+         encodeFrequencyPlot.ping();
+
+         encodeDurationPlot.stop();
+
+         synchronized (measurementSyncObject)
+         {
+            threadTwoDuration.suspend();
+         }
+      }
+   }
+
    private void renderImGuiWidgets()
    {
       if (nativesLoadedActivator.peek())
@@ -183,8 +242,10 @@ public class WebcamROS2PublisherDemo
          ImGui.text("Image dimensions: " + imageWidth + " x " + imageHeight);
          ImGui.text("Reported fps: " + reportedFPS);
          ImGui.text("Backend name: " + backendName);
-         readPerformancePlot.renderImGuiWidgets();
          readFrequencyPlot.renderImGuiWidgets();
+         encodeFrequencyPlot.renderImGuiWidgets();
+         readDurationPlot.renderImGuiWidgets();
+         encodeDurationPlot.renderImGuiWidgets();
          compressedBytesPlot.renderImGuiWidgets();
       }
    }
