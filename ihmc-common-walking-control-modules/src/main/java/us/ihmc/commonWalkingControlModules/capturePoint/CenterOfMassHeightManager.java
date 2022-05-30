@@ -105,7 +105,6 @@ public class CenterOfMassHeightManager
    {
       pelvisHeightControlState.setWeights(weight);
       centerOfMassHeightControlState.setWeights(weight);
-      heightControlThroughKneesState.setWeights(weight);
    }
 
    public void setPrepareForLocomotion(boolean value)
@@ -247,7 +246,6 @@ public class CenterOfMassHeightManager
    public void initializeToNominalDesiredHeight()
    {
       centerOfMassHeightControlState.initializeToNominalDesiredHeight();
-      heightControlThroughKneesState.initializeToNominalDesiredHeight();
    }
 
    public void initializeTransitionToFall(double transitionDuration)
