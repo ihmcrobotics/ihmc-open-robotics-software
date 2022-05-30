@@ -156,8 +156,8 @@ void kernel addPointsFromImageKernel(read_only image2d_t depth_image,
                                      global int* counter_data)
 {
     // recall that the pixels are bottom left, and go width to height
-    int image_y = get_global_id(0);
-    int image_x = get_global_id(1);
+    int image_x = get_global_id(0);
+    int image_y = get_global_id(1);
 
     float3 point_in_camera_frame = get_point_from_image(depth_image, image_x, image_y, intrinsics);
     float3 sensor = (float3) (localization[tx], localization[ty], localization[tz]);
@@ -275,26 +275,27 @@ void kernel computeNormalsKernel(read_only image2d_t centroid_x,
             {
                 float dzdx = read_imagef(centroid_z, key_x).x - z;
                 float dx = read_imagef(centroid_x, key_x).x - x;
-                normal_y += (-dzdx / dx);
-                count_y++;
+                normal_x += (-dzdx / dx);
+                count_x++;
             }
             if (mod_y > 0 && mod_y <= max_val && read_imageui(counter, key_y).x > 0)
             {
                 float dzdy = read_imagef(centroid_z, key_y).x - z;
                 float dy = read_imagef(centroid_y, key_y).x - y;
-                normal_x += (-dzdy / dy);
-                count_x++;
+                normal_y += (-dzdy / dy);
+                count_y++;
             }
         }
 
-        normal_y /= (float) count_y;
         normal_x /= (float) count_x;
+        normal_y /= (float) count_y;
         float norm = sqrt((normal_x * normal_x) + (normal_y * normal_y) + 1);
 
         normal_x /= norm;
         normal_y /= norm;
         float normal_z = 1.0 / norm;
 
+        // switch the x and y, because the indices are wrong for the global coordinates
         write_imagef(normal_x_mat, key, (float4)(normal_x, 0, 0, 0));
         write_imagef(normal_y_mat, key, (float4)(normal_y, 0, 0, 0));
         write_imagef(normal_z_mat, key, (float4)(normal_z, 0, 0, 0));

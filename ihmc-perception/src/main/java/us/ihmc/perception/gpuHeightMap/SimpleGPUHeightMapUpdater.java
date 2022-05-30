@@ -258,7 +258,7 @@ public class SimpleGPUHeightMapUpdater
       openCLManager.setKernelArgument(computeNormalsKernel, 7, normalZImage.getOpenCLImageObject());
 
       openCLManager.execute2D(zeroValuesKernel, numberOfCells, numberOfCells);
-      openCLManager.execute2D(addPointsFromImageKernel, imageHeight, imageWidth);
+      openCLManager.execute2D(addPointsFromImageKernel, imageWidth, imageHeight);
       openCLManager.execute2D(averageMapKernel, numberOfCells, numberOfCells);
       openCLManager.execute2D(computeNormalsKernel, numberOfCells, numberOfCells);
 

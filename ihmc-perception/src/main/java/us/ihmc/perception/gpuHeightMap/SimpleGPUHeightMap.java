@@ -201,9 +201,8 @@ public class SimpleGPUHeightMap
             {
                int key = HeightMapTools.coordinateToKey(xPosition, yPosition, gridCenter.getX(), gridCenter.getY(), gridResolution, centerIndex);
 
-               // NOTE THAT X AND Y ARE SWITCHED, SO THE NORMALS ARE SWITCHED
-               double nx = normalYBuffer.ptr(y, x).getFloat();
-               double ny = normalXBuffer.ptr(y, x).getFloat();
+               double nx = normalXBuffer.ptr(y, x).getFloat();
+               double ny = normalYBuffer.ptr(y, x).getFloat();
                double nz = normalZBuffer.ptr(y, x).getFloat();
 
                occupiedCells.add(key);
