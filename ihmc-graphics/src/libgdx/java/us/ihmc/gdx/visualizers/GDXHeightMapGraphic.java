@@ -12,6 +12,8 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.HeightMapMessage;
 import org.lwjgl.opengl.GL41;
+import us.ihmc.commons.InterpolationTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
@@ -85,12 +87,18 @@ public class GDXHeightMapGraphic implements RenderableProvider
       IntToDoubleFunction heightProvider = (d) -> (double) heightMapMessage.getHeights().get(d);
       IntFunction<Integer> keyProvider = (d) -> heightMapMessage.getKeys().get(d);
       IntFunction<Vector3DReadOnly> normalsProvider;
+      IntToDoubleFunction variancesProvider;
       if (heightMapMessage.getNormals().size() != heightMapMessage.getHeights().size())
          normalsProvider = null;
       else
          normalsProvider = (d) -> heightMapMessage.getNormals().get(d);
+      if (heightMapMessage.getVariances().size() != heightMapMessage.getHeights().size())
+         variancesProvider = null;
+      else
+         variancesProvider = (d) -> heightMapMessage.getVariances().get(d);
 
       generateMeshes(heightProvider,
+                     variancesProvider,
                      keyProvider,
                      normalsProvider,
                      heightMapMessage.getHeights().size(),
@@ -103,6 +111,7 @@ public class GDXHeightMapGraphic implements RenderableProvider
 
 
    public synchronized void generateMeshes(IntToDoubleFunction heightsProvider,
+                                           IntToDoubleFunction variancesProvider,
                                            IntFunction<Integer> keysProvider,
                                            IntFunction<Vector3DReadOnly> normalsProvider,
                                            int numberOfOccupiedCells,
@@ -113,7 +122,8 @@ public class GDXHeightMapGraphic implements RenderableProvider
                                            double groundHeight)
    {
       List<GDXMultiColorMeshBuilder> meshBuilders = new ArrayList<>();
-      Color olive = Color.OLIVE;
+      Color perfectColor = Color.TEAL;
+      Color terribleColor = Color.RED;
       Color blue = Color.BLUE;
 
       if (Double.isNaN(groundHeight))
@@ -137,8 +147,11 @@ public class GDXHeightMapGraphic implements RenderableProvider
          Vector3DReadOnly normal = null;
          if (normalsProvider != null)
             normal = normalsProvider.apply(i);
+         Color color = Color.OLIVE;
+         if (variancesProvider != null)
+            color = computeColor(perfectColor, terribleColor, MathTools.clamp(Math.abs(variancesProvider.applyAsDouble(i) / 0.05), 0.0, 1.0));
          RigidBodyTransformReadOnly transform = generateTransformForHeightPatch(x, y, renderedHeight, normal);
-         meshBuilder.addPolygon(transform, localPoints, olive);
+         meshBuilder.addPolygon(transform, localPoints, color);
          meshBuilders.add(meshBuilder);
       }
 
@@ -179,6 +192,15 @@ public class GDXHeightMapGraphic implements RenderableProvider
       isGeneratingMeshes.set(false);
    }
 
+   public Color computeColor(Color noVariance, Color highVariance, double alpha)
+   {
+      float r = (float) InterpolationTools.linearInterpolate(noVariance.r, highVariance.r, alpha);
+      float g = (float) InterpolationTools.linearInterpolate(noVariance.g, highVariance.g, alpha);
+      float b = (float) InterpolationTools.linearInterpolate(noVariance.b, highVariance.b, alpha);
+      float a = (float) InterpolationTools.linearInterpolate(noVariance.a, highVariance.a, alpha);
+
+      return new Color(r, g, b, a);
+   }
    public ConvexPolygon2DBasics generatePointsForHeightPatch(double resolution)
    {
       ConvexPolygon2DBasics polygon = new ConvexPolygon2D();
