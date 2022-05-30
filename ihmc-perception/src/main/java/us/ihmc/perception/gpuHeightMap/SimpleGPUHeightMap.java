@@ -178,13 +178,9 @@ public class SimpleGPUHeightMap
       return occupiedBoundingBox;
    }
 
-   public void updateFromFloatBufferImage(Mat centroidXBuffer,
-                                          Mat centroidYBuffer,
-                                          Mat centroidZBuffer,
+   public void updateFromFloatBufferImage(Mat centroidBuffer,
                                           Mat varianceZBuffer,
-                                          Mat normalXBuffer,
-                                          Mat normalYBuffer,
-                                          Mat normalZBuffer,
+                                          Mat normalBuffer,
                                           Mat countMat)
    {
       occupiedBoundingBox.setToNaN();
@@ -192,8 +188,8 @@ public class SimpleGPUHeightMap
       {
          for (int x = 0; x < cellsPerSide; x++)
          {
-            double xPosition = centroidXBuffer.ptr(y, x).getFloat();
-            double yPosition = centroidYBuffer.ptr(y, x).getFloat();
+            double xPosition = centroidBuffer.ptr(y, x).getFloat();
+            double yPosition = centroidBuffer.ptr(y, x).getFloat(1);
 
             int count = Byte.toUnsignedInt(countMat.ptr(y, x).get());
 
@@ -201,12 +197,12 @@ public class SimpleGPUHeightMap
             {
                int key = HeightMapTools.coordinateToKey(xPosition, yPosition, gridCenter.getX(), gridCenter.getY(), gridResolution, centerIndex);
 
-               double nx = normalXBuffer.ptr(y, x).getFloat();
-               double ny = normalYBuffer.ptr(y, x).getFloat();
-               double nz = normalZBuffer.ptr(y, x).getFloat();
+               double nx = normalBuffer.ptr(y, x).getFloat();
+               double ny = normalBuffer.ptr(y, x).getFloat(1);
+               double nz = normalBuffer.ptr(y, x).getFloat(2);
 
                occupiedCells.add(key);
-               centroids.get(key).set(xPosition, yPosition, centroidZBuffer.ptr(y, x).getFloat());
+               centroids.get(key).set(xPosition, yPosition, centroidBuffer.ptr(y, x).getFloat(2));
                normals.get(key).set(nx, ny, nz);
                varianceDataMap.set(key, varianceZBuffer.ptr(y, x).getFloat());
 

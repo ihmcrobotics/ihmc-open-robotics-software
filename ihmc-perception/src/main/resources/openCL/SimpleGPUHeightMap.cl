@@ -196,9 +196,7 @@ void kernel averageMapImagesKernel(global int* centroid_buffer,
                                    global int* variance_buffer,
                                    global int* counter_buffer,
                                    global float* params,
-                                   write_only image2d_t centroid_x,
-                                   write_only image2d_t centroid_y,
-                                   write_only image2d_t centroid_z,
+                                   write_only image2d_t centroid,
                                    write_only image2d_t variance_z,
                                    write_only image2d_t counter)
 {
@@ -227,21 +225,15 @@ void kernel averageMapImagesKernel(global int* centroid_buffer,
         float y = new_y / new_cnt;
         float z = new_z / new_cnt;
 
-        write_imagef(centroid_x, key, (float4)(x,0,0,0));
-        write_imagef(centroid_y, key, (float4)(y,0,0,0));
-        write_imagef(centroid_z, key, (float4)(z,0,0,0));
+        write_imagef(centroid, key, (float4)(x,y,z,0));
         write_imagef(variance_z, key, (float4)(var_z,0,0,0));
     }
 }
 
-void kernel computeNormalsKernel(read_only image2d_t centroid_x,
-                                   read_only image2d_t centroid_y,
-                                   read_only image2d_t centroid_z,
+void kernel computeNormalsKernel(read_only image2d_t centroid,
                                    read_only image2d_t counter,
                                    global float* params,
-                                   write_only image2d_t normal_x_mat,
-                                   write_only image2d_t normal_y_mat,
-                                   write_only image2d_t normal_z_mat)
+                                   write_only image2d_t normal_mat)
 {
     int idx_x = get_global_id(0);
     int idx_y = get_global_id(1);
@@ -256,9 +248,9 @@ void kernel computeNormalsKernel(read_only image2d_t centroid_x,
         float normal_y = 0;
         int count_x = 0;
         int count_y = 0;
-        float x = read_imagef(centroid_x, key).x;
-        float y = read_imagef(centroid_y, key).x;
-        float z = read_imagef(centroid_z, key).x;
+        float x = read_imagef(centroid, key).x;
+        float y = read_imagef(centroid, key).y;
+        float z = read_imagef(centroid, key).z;
         int max_val = 2 * params[CENTER_INDEX] + 1;
 
         for (int i = -params[CELLS_OVER_FOR_NORMAL]; i <= params[CELLS_OVER_FOR_NORMAL]; i++)
@@ -273,15 +265,15 @@ void kernel computeNormalsKernel(read_only image2d_t centroid_x,
 
             if (mod_x > 0 && mod_x <= max_val && read_imageui(counter, key_x).x > 0)
             {
-                float dzdx = read_imagef(centroid_z, key_x).x - z;
-                float dx = read_imagef(centroid_x, key_x).x - x;
+                float dzdx = read_imagef(centroid, key_x).z - z;
+                float dx = read_imagef(centroid, key_x).x - x;
                 normal_x += (-dzdx / dx);
                 count_x++;
             }
             if (mod_y > 0 && mod_y <= max_val && read_imageui(counter, key_y).x > 0)
             {
-                float dzdy = read_imagef(centroid_z, key_y).x - z;
-                float dy = read_imagef(centroid_y, key_y).x - y;
+                float dzdy = read_imagef(centroid, key_y).z - z;
+                float dy = read_imagef(centroid, key_y).y - y;
                 normal_y += (-dzdy / dy);
                 count_y++;
             }
@@ -296,9 +288,7 @@ void kernel computeNormalsKernel(read_only image2d_t centroid_x,
         float normal_z = 1.0 / norm;
 
         // switch the x and y, because the indices are wrong for the global coordinates
-        write_imagef(normal_x_mat, key, (float4)(normal_x, 0, 0, 0));
-        write_imagef(normal_y_mat, key, (float4)(normal_y, 0, 0, 0));
-        write_imagef(normal_z_mat, key, (float4)(normal_z, 0, 0, 0));
+        write_imagef(normal_mat, key, (float4)(normal_x, normal_y, normal_z, 0));
     }
 }
 
