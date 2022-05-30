@@ -1,10 +1,14 @@
-package us.ihmc.gdx.perception;
+package us.ihmc.tools;
 
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
 
-public class Addresser
+/**
+ * These things were copied in from various things found on the internet.
+ * Probably doesn't work.
+ */
+public class UnsafeTools
 {
    private static Unsafe unsafe;
 
@@ -78,9 +82,9 @@ public class Addresser
    {
       Object mine = "Hi there".toCharArray();
       long address = addressOf(mine);
-      System.out.println("Addess: " + address);
+      System.out.println("Address: " + address);
 
-      //Verify address works - should see the characters in the array in the output
+      // Verify address works - should see the characters in the array in the output
       printBytes(address, 27);
    }
 
