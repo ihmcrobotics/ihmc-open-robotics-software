@@ -62,12 +62,6 @@ public class BytedecoImage
          openCLChannelOrder = OpenCL.CL_R;
          openCLChannelDataType = OpenCL.CL_FLOAT;
       }
-      else if (cvMatType == opencv_core.CV_32FC3)
-      {
-         bytesPerPixel = 12;
-         openCLChannelOrder = OpenCL.CL_RGB;
-         openCLChannelDataType = OpenCL.CL_FLOAT;
-      }
       else if (cvMatType == opencv_core.CV_32FC(6))
       {
          bytesPerPixel = 4 * 6;
@@ -127,7 +121,6 @@ public class BytedecoImage
          openCLImageObject.releaseReference();
       }
    }
-
 
    public void changeAddress(long address)
    {
@@ -216,10 +209,5 @@ public class BytedecoImage
    public int getImageHeight()
    {
       return imageHeight;
-   }
-
-   public int getBytesPerPixel()
-   {
-      return bytesPerPixel;
    }
 }

@@ -260,7 +260,6 @@ public class GPUPlanarRegionExtraction
       openCLManager.execute2D(packKernel, patchImageHeight, patchImageWidth);
       openCLManager.execute2D(mergeKernel, patchImageHeight, patchImageWidth);
 
-
       openCLManager.enqueueReadImage(filteredDepthImage.getOpenCLImageObject(), imageWidth, imageHeight, filteredDepthImage.getBytedecoByteBufferPointer());
       openCLManager.enqueueReadImage(nxImage.getOpenCLImageObject(), patchImageWidth, patchImageHeight, nxImage.getBytedecoByteBufferPointer());
       openCLManager.enqueueReadImage(nyImage.getOpenCLImageObject(), patchImageWidth, patchImageHeight, nyImage.getBytedecoByteBufferPointer());

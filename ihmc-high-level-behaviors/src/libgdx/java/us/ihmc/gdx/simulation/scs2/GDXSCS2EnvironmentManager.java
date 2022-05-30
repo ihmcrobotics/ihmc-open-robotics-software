@@ -47,6 +47,7 @@ public class GDXSCS2EnvironmentManager
    {
       create(baseUI, robotModel, ros2CommunicationMode, 0.3, 0.0, 0.0);
    }
+
    public void create(GDXImGuiBasedUI baseUI, DRCRobotModel robotModel, CommunicationMode ros2CommunicationMode, double initialYaw, double initialX, double initialY)
    {
       this.baseUI = baseUI;

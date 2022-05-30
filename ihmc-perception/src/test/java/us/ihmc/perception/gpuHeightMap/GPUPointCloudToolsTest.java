@@ -1,7 +1,6 @@
 package us.ihmc.perception.gpuHeightMap;
 
 import org.junit.jupiter.api.Test;
-import org.ojalgo.random.RandomNumber;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -14,16 +13,15 @@ import us.ihmc.log.LogTools;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.Timer;
 import java.util.stream.Collectors;
 
-public class GPUHeightMapToolsTest
+public class GPUPointCloudToolsTest
 {
    @Test
    public void testTransformPoints()
    {
       int maxPoints = 5000;
-      GPUHeightMapTools tools = new GPUHeightMapTools(5000);
+      GPUPointCloudTools tools = new GPUPointCloudTools(5000);
 
       Random random = new Random(1738L);
 
