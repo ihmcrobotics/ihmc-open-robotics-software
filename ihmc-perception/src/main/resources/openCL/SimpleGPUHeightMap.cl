@@ -291,9 +291,15 @@ void kernel computeNormalsKernel(read_only image2d_t centroid_x,
         normal_x /= (float) count_x;
         float norm = sqrt((normal_x * normal_x) + (normal_y * normal_y) + 1);
 
-        write_imagef(normal_x_mat, key, (float4)((normal_x / norm), 0, 0, 0));
-        write_imagef(normal_y_mat, key, (float4)((normal_y / norm), 0, 0, 0));
-        write_imagef(normal_z_mat, key, (float4)((1 / norm), 0, 0, 0));
+        normal_x /= norm;
+        normal_y /= norm;
+        float normal_z = 1.0 / norm;
+
+        printf("Normal (%f, %f, %f)\n", normal_x, normal_y, normal_z);
+
+        write_imagef(normal_x_mat, key, (float4)(normal_x, 0, 0, 0));
+        write_imagef(normal_y_mat, key, (float4)(normal_y, 0, 0, 0));
+        write_imagef(normal_z_mat, key, (float4)(normal_z, 0, 0, 0));
     }
 }
 
