@@ -4,9 +4,12 @@ import controller_msgs.msg.dds.HeightMapMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.robotics.heightMap.HeightMapTools;
 
 public class SimpleGPUHeightMap
@@ -19,9 +22,7 @@ public class SimpleGPUHeightMap
 
    private final TIntArrayList occupiedCells = new TIntArrayList();
 
-   private final TDoubleArrayList xDataMap = new TDoubleArrayList();
-   private final TDoubleArrayList yDataMap = new TDoubleArrayList();
-   private final TDoubleArrayList zDataMap = new TDoubleArrayList();
+   private final RecyclingArrayList<Point3DBasics> centroids = new RecyclingArrayList<>(Point3D::new);
    private final TDoubleArrayList varianceDataMap = new TDoubleArrayList();
    private final TIntArrayList countDataMap = new TIntArrayList();
 
@@ -54,21 +55,21 @@ public class SimpleGPUHeightMap
       boundingBox.getMinPoint().set(minX, minY);
       boundingBox.getMaxPoint().set(maxX, maxY);
 
+      centroids.clear();
+      for (int i = 0; i < cellsPerSide * cellsPerSide; i++)
+         centroids.add();
+
       reset();
    }
 
    public void reset()
    {
       occupiedCells.reset();
-      xDataMap.reset();
-      yDataMap.reset();
-      zDataMap.reset();
       varianceDataMap.reset();
       countDataMap.reset();
 
-      xDataMap.fill(0, cellsPerSide * cellsPerSide, Double.NaN);
-      yDataMap.fill(0, cellsPerSide * cellsPerSide, Double.NaN);
-      zDataMap.fill(0, cellsPerSide * cellsPerSide, Double.NaN);
+      for (Point3DBasics centroid : centroids)
+         centroid.setToNaN();
       varianceDataMap.fill(0, cellsPerSide * cellsPerSide, Double.NaN);
       countDataMap.fill(0, cellsPerSide * cellsPerSide, -1);
 
@@ -87,17 +88,17 @@ public class SimpleGPUHeightMap
 
    public double getCellCentroidX(int element)
    {
-      return xDataMap.get(element);
+      return centroids.get(element).getX();
    }
 
    public double getCellCentroidY(int element)
    {
-      return yDataMap.get(element);
+      return centroids.get(element).getY();
    }
 
    public double getCellZ(int element)
    {
-      return zDataMap.get(element);
+      return centroids.get(element).getZ();
    }
 
    public double getVariance(int element)
@@ -138,7 +139,7 @@ public class SimpleGPUHeightMap
    public double getHeightAtPoint(double x, double y)
    {
       int key = HeightMapTools.coordinateToKey(x, y, gridCenter.getX(), gridCenter.getY(), gridResolution, centerIndex);
-      return zDataMap.get(key);
+      return centroids.get(key).getZ();
    }
 
    public double getVarianceAtPoint(Point2DReadOnly point)
@@ -174,6 +175,7 @@ public class SimpleGPUHeightMap
                                           Mat varianceZBuffer,
                                           Mat countMat)
    {
+      occupiedBoundingBox.setToNaN();
       for (int y = 0; y < cellsPerSide; y++)
       {
          for (int x = 0; x < cellsPerSide; x++)
@@ -188,12 +190,10 @@ public class SimpleGPUHeightMap
                int key = HeightMapTools.coordinateToKey(xPosition, yPosition, gridCenter.getX(), gridCenter.getY(), gridResolution, centerIndex);
 
                occupiedCells.add(key);
-               xDataMap.set(key, xPosition);
-               yDataMap.set(key, yPosition);
-               zDataMap.set(key, centroidZBuffer.ptr(y, x).getFloat());
+               centroids.get(key).set(xPosition, yPosition, centroidZBuffer.ptr(y, x).getFloat());
                varianceDataMap.set(key, varianceZBuffer.ptr(y, x).getFloat());
 
-               boundingBox.updateToIncludePoint(xPosition, yPosition);
+               occupiedBoundingBox.updateToIncludePoint(xPosition, yPosition);
                countDataMap.set(key, count);
             }
          }
@@ -212,9 +212,8 @@ public class SimpleGPUHeightMap
       for (int i = 0; i < occupiedCells.size(); i++)
       {
          message.getKeys().add(occupiedCells.get(i));
-         message.getHeights().add((float) zDataMap.get(occupiedCells.get(i)));
+         message.getHeights().add((float) centroids.get(occupiedCells.get(i)).getZ());
       }
-
 
       return message;
    }
