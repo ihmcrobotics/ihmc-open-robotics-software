@@ -18,19 +18,19 @@ public class SpinnakerHardwareManager
       assertNoError(Spinnaker_C.spinSystemGetCameras(spinSystem, spinCameraList), "Unable to retrieve camera list from Spinnaker system");
    }
 
-   public BytedecoBlackfly buildBlackfly(String serialNumber)
+   public SpinnakerBlackfly buildBlackfly(String serialNumber)
    {
       return buildBlackfly(serialNumber, "Continuous");
    }
 
    // acquisitionMode = Single/Multi(?)/Continuous. Should be continuous in almost all cases
-   public BytedecoBlackfly buildBlackfly(String serialNumber, String acquisitionMode)
+   public SpinnakerBlackfly buildBlackfly(String serialNumber, String acquisitionMode)
    {
       spinCamera blackflyCamera = new spinCamera();
       assertNoError(Spinnaker_C.spinCameraListGetBySerial(spinCameraList, new BytePointer(serialNumber), blackflyCamera),
                     "Unable to create spinCamera from serial number!");
-      // Note: the BytedecoBlackfly class is responsible for releasing the new camera. This is done with the destroy() call
-      return new BytedecoBlackfly(blackflyCamera, acquisitionMode, serialNumber);
+      // Note: the SpinnakerBlackfly class is responsible for releasing the new camera. This is done with the destroy() call
+      return new SpinnakerBlackfly(blackflyCamera, acquisitionMode, serialNumber);
    }
 
    /**

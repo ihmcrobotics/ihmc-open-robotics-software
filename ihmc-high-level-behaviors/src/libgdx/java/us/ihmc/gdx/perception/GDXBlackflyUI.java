@@ -9,7 +9,7 @@ import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.tools.ImPlotStopwatchPlot;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
-import us.ihmc.perception.spinnaker.BytedecoBlackfly;
+import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
 import us.ihmc.perception.spinnaker.SpinnakerHardwareManager;
 import us.ihmc.tools.thread.Activator;
 import us.ihmc.tools.time.FrequencyCalculator;
@@ -22,7 +22,7 @@ public class GDXBlackflyUI
                                                               "ihmc-open-robotics-software",
                                                               "ihmc-high-level-behaviors/src/main/resources");
    private final Activator nativesLoadedActivator;
-   private BytedecoBlackfly blackfly;
+   private SpinnakerBlackfly blackfly;
    private SpinnakerHardwareManager spinnakerHardwareManager;
    private GDXCVImagePanel imagePanel;
    private BytePointer imageData;
