@@ -59,6 +59,8 @@ public class HeightThroughKneeControlState implements PelvisAndCenterOfMassHeigh
    private final YoDouble hackZDesired = new YoDouble("hackZDesired", registry);
    private final YoDouble hackZCurrent = new YoDouble("hackZCurrent", registry);
    private final YoEnum<RobotSide> kneeSideToControl = new YoEnum<>("kneeSideToControl", registry, RobotSide.class);
+   private final YoEnum<RobotSide> supportLegSide = new YoEnum<>("kneeControlSupportLegSide", registry, RobotSide.class);
+
 
    private final DoubleProvider currentTime;
    private final YoDouble transitionDurationToFall = new YoDouble("comHeightTransitionDurationToFall", registry);
@@ -172,6 +174,7 @@ public class HeightThroughKneeControlState implements PelvisAndCenterOfMassHeigh
 
    public void setSupportLeg(RobotSide supportLeg)
    {
+      supportLegSide.set(supportLeg);
    }
 
 
@@ -189,7 +192,6 @@ public class HeightThroughKneeControlState implements PelvisAndCenterOfMassHeigh
    public void computeCoMHeightCommand(FrameVector2DReadOnly desiredICPVelocity,
                                        FrameVector2DReadOnly desiredCoMVelocity,
                                        boolean isInDoubleSupport,
-                                       RobotSide supportSide,
                                        double omega0,
                                        FeetManager feetManager)
    {
@@ -234,9 +236,9 @@ public class HeightThroughKneeControlState implements PelvisAndCenterOfMassHeigh
       }
       else
       {
-         OneDoFJointBasics supportKnee = kneeJoints.get(supportSide);
+         OneDoFJointBasics supportKnee = kneeJoints.get(supportLegSide.getValue());
          hackStraightestKneeAngle.set(supportKnee.getQ());
-         kneeSideToControl.set(supportSide);
+         kneeSideToControl.set(supportLegSide.getValue());
       }
 
       double control = -hackKp.getValue() * (hackDesiredKneeAngle.getValue() - hackStraightestKneeAngle.getValue());

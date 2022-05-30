@@ -368,7 +368,6 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
    public void computeCoMHeightCommand(FrameVector2DReadOnly desiredICPVelocity,
                                        FrameVector2DReadOnly desiredCoMVelocity,
                                        boolean isInDoubleSupport,
-                                       RobotSide supportSide,
                                        double omega0,
                                        FeetManager feetManager)
    {
