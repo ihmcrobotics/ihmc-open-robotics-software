@@ -43,6 +43,7 @@ public class CenterOfMassHeightManager
 
    /** Manages the height of the robot by default, Tries to adjust the pelvis based on the nominal height requested **/
    private final CenterOfMassHeightControlState centerOfMassHeightControlState;
+   private final HeightThroughKneeControlState heightControlThroughKneesState;
 
    /** User Controlled Pelvis Height Mode, tries to achieve a desired pelvis height regardless of the robot configuration**/
    private final PelvisHeightControlState pelvisHeightControlState;
@@ -66,6 +67,7 @@ public class CenterOfMassHeightManager
       String namePrefix = getClass().getSimpleName();
       requestedState = new YoEnum<>(namePrefix + "RequestedControlMode", registry, PelvisHeightControlMode.class, true);
       centerOfMassHeightControlState = new CenterOfMassHeightControlState(controllerToolbox, walkingControllerParameters, registry);
+      heightControlThroughKneesState = new HeightThroughKneeControlState(controllerToolbox, walkingControllerParameters, registry);
       stateMachine = setupStateMachine(namePrefix, yoTime);
    }
 
@@ -89,6 +91,7 @@ public class CenterOfMassHeightManager
 
       stateMachine.resetToInitialState();
       centerOfMassHeightControlState.initialize();
+      heightControlThroughKneesState.initialize();
       pelvisHeightControlState.initialize();
    }
 
@@ -99,6 +102,7 @@ public class CenterOfMassHeightManager
    {
       pelvisHeightControlState.setWeights(weight);
       centerOfMassHeightControlState.setWeights(weight);
+      heightControlThroughKneesState.setWeights(weight);
    }
 
    public void setPrepareForLocomotion(boolean value)
@@ -109,6 +113,7 @@ public class CenterOfMassHeightManager
    public void compute(FrameVector2DReadOnly desiredICPVelocity,
                        FrameVector2DReadOnly desiredCoMVelocity,
                        boolean isInDoubleSupport,
+                       RobotSide supportSide,
                        double omega0,
                        FeetManager feetManager)
    {
@@ -117,6 +122,7 @@ public class CenterOfMassHeightManager
                   .computeCoMHeightCommand(desiredICPVelocity,
                                            desiredCoMVelocity,
                                            isInDoubleSupport,
+                                           supportSide,
                                            omega0,
                                            feetManager);
    }
@@ -137,6 +143,7 @@ public class CenterOfMassHeightManager
       {
          //need to check if setting the actual to the desireds here is a bad idea, might be better to go from desired to desired
          centerOfMassHeightControlState.initializeDesiredHeightToCurrent();
+         heightControlThroughKneesState.initializeDesiredHeightToCurrent();
          requestState(PelvisHeightControlMode.WALKING_CONTROLLER);
       }
    }
@@ -175,6 +182,7 @@ public class CenterOfMassHeightManager
       }
 
       centerOfMassHeightControlState.handlePelvisTrajectoryCommand(command);
+      heightControlThroughKneesState.handlePelvisTrajectoryCommand(command);
       requestState(PelvisHeightControlMode.WALKING_CONTROLLER);
    }
 
@@ -198,6 +206,7 @@ public class CenterOfMassHeightManager
       }
 
       centerOfMassHeightControlState.handlePelvisHeightTrajectoryCommand(command);
+      heightControlThroughKneesState.handlePelvisHeightTrajectoryCommand(command);
       requestState(PelvisHeightControlMode.WALKING_CONTROLLER);
    }
 
@@ -218,21 +227,25 @@ public class CenterOfMassHeightManager
    public void setSupportLeg(RobotSide supportLeg)
    {
       centerOfMassHeightControlState.setSupportLeg(supportLeg);
+      heightControlThroughKneesState.setSupportLeg(supportLeg);
    }
 
    public void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double extraToeOffHeight)
    {
       centerOfMassHeightControlState.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
+      heightControlThroughKneesState.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
    }
 
    public void initializeToNominalDesiredHeight()
    {
       centerOfMassHeightControlState.initializeToNominalDesiredHeight();
+      heightControlThroughKneesState.initializeToNominalDesiredHeight();
    }
 
    public void initializeTransitionToFall(double transitionDuration)
    {
       centerOfMassHeightControlState.initializeTransitionToFall(transitionDuration);
+      heightControlThroughKneesState.initializeTransitionToFall(transitionDuration);
    }
 
    public FeedbackControlCommand<?> getFeedbackControlCommand()
@@ -267,6 +280,7 @@ public class CenterOfMassHeightManager
                                  PIDGainsReadOnly userModeCoMHeightGains)
    {
       centerOfMassHeightControlState.setGains(walkingControllerComHeightGains, walkingControllerMaxComHeightVelocity);
+      heightControlThroughKneesState.setGains(walkingControllerComHeightGains, walkingControllerMaxComHeightVelocity);
       pelvisHeightControlState.setGains(userModeCoMHeightGains);
    }
 
