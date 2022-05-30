@@ -250,13 +250,11 @@ public class SimpleGPUHeightMapUpdater
 
    private void updateMapObject(double centerX, double centerY)
    {
-      simpleGPUHeightMap.setResolution(parameters.resolution);
-      simpleGPUHeightMap.setCenter(centerX, centerY);
+      simpleGPUHeightMap.reshape(parameters.resolution, parameters.mapLength, centerX, centerY);
       simpleGPUHeightMap.updateFromFloatBufferImage(centroidXImage.getBytedecoOpenCVMat(),
                                                     centroidYImage.getBytedecoOpenCVMat(),
                                                     centroidZImage.getBytedecoOpenCVMat(),
                                                     varianceZImage.getBytedecoOpenCVMat(),
-                                                    countImage.getBytedecoOpenCVMat(),
-                                                    numberOfCells);
+                                                    countImage.getBytedecoOpenCVMat());
    }
 }
