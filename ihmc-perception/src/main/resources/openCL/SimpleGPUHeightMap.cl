@@ -22,6 +22,7 @@
 #define RAMPED_HEIGHT_RANGE_B 4
 #define RAMPED_HEIGHT_RANGE_C 5
 #define CENTER_INDEX 6
+#define CELLS_OVER_FOR_NORMAL 7
 
 #define DEPTH_CX 0
 #define DEPTH_CY 1
@@ -230,6 +231,69 @@ void kernel averageMapImagesKernel(global int* centroid_buffer,
         write_imagef(centroid_y, key, (float4)(y,0,0,0));
         write_imagef(centroid_z, key, (float4)(z,0,0,0));
         write_imagef(variance_z, key, (float4)(var_z,0,0,0));
+    }
+}
+
+void kernel computeNormalsKernel(read_only image2d_t centroid_x,
+                                   read_only image2d_t centroid_y,
+                                   read_only image2d_t centroid_z,
+                                   read_only image2d_t counter,
+                                   global float* params,
+                                   write_only image2d_t normal_x_mat,
+                                   write_only image2d_t normal_y_mat,
+                                   write_only image2d_t normal_z_mat)
+{
+    int idx_x = get_global_id(0);
+    int idx_y = get_global_id(1);
+
+    int2 key = (int2) (idx_x, idx_y);
+
+    int cnt = read_imageui(counter, key).x;
+
+    if (cnt > 0)
+    {
+        float normal_x = 0;
+        float normal_y = 0;
+        int count_x = 0;
+        int count_y = 0;
+        float x = read_imagef(centroid_x, key).x;
+        float y = read_imagef(centroid_y, key).x;
+        float z = read_imagef(centroid_z, key).x;
+        int max_val = 2 * params[CENTER_INDEX] + 1;
+
+        for (int i = -params[CELLS_OVER_FOR_NORMAL]; i <= params[CELLS_OVER_FOR_NORMAL]; i++)
+        {
+            if (i == 0)
+                continue;
+
+            int mod_x = idx_x + i;
+            int mod_y = idx_y + i;
+            int2 key_x = (int2) (mod_x, idx_y);
+            int2 key_y = (int2) (idx_x, mod_y);
+
+            if (mod_x > 0 && mod_x <= max_val && read_imageui(counter, key_x).x > 0)
+            {
+                float dzdx = read_imagef(centroid_z, key_x).x - z;
+                float dx = read_imagef(centroid_x, key_x).x - x;
+                normal_y += (-dzdx / dx);
+                count_y++;
+            }
+            if (mod_y > 0 && mod_y <= max_val && read_imageui(counter, key_y).x > 0)
+            {
+                float dzdy = read_imagef(centroid_z, key_y).x - z;
+                float dy = read_imagef(centroid_y, key_y).x - y;
+                normal_x += (-dzdy / dy);
+                count_x++;
+            }
+        }
+
+        normal_y /= (float) count_y;
+        normal_x /= (float) count_x;
+        float norm = sqrt((normal_x * normal_x) + (normal_y * normal_y) + 1);
+
+        write_imagef(normal_x_mat, key, (float4)((normal_x / norm), 0, 0, 0));
+        write_imagef(normal_y_mat, key, (float4)((normal_y / norm), 0, 0, 0));
+        write_imagef(normal_z_mat, key, (float4)((1 / norm), 0, 0, 0));
     }
 }
 
