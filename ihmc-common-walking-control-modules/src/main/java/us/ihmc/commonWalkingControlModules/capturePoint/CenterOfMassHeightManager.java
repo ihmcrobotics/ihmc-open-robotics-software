@@ -238,7 +238,7 @@ public class CenterOfMassHeightManager
    public void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double extraToeOffHeight)
    {
       centerOfMassHeightControlState.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
-      heightControlThroughKneesState.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
+      heightControlThroughKneesState.initialize();
    }
 
    public void initializeToNominalDesiredHeight()
@@ -249,7 +249,6 @@ public class CenterOfMassHeightManager
    public void initializeTransitionToFall(double transitionDuration)
    {
       centerOfMassHeightControlState.initializeTransitionToFall(transitionDuration);
-      heightControlThroughKneesState.initializeTransitionToFall(transitionDuration);
    }
 
    public FeedbackControlCommand<?> getFeedbackControlCommand()
@@ -284,7 +283,7 @@ public class CenterOfMassHeightManager
                                  PIDGainsReadOnly userModeCoMHeightGains)
    {
       centerOfMassHeightControlState.setGains(walkingControllerComHeightGains, walkingControllerMaxComHeightVelocity);
-      heightControlThroughKneesState.setGains(walkingControllerComHeightGains, walkingControllerMaxComHeightVelocity);
+      heightControlThroughKneesState.setGains(walkingControllerComHeightGains);
       pelvisHeightControlState.setGains(userModeCoMHeightGains);
    }
 
