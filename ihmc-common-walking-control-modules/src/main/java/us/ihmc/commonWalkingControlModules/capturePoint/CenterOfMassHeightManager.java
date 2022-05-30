@@ -294,7 +294,7 @@ public class CenterOfMassHeightManager
                                  PIDGainsReadOnly userModeCoMHeightGains)
    {
       centerOfMassHeightControlState.setGains(walkingControllerComHeightGains, walkingControllerMaxComHeightVelocity);
-      heightControlThroughKneesState.setGains(walkingControllerComHeightGains);
+      heightControlThroughKneesState.setPelvisHeightGains(walkingControllerComHeightGains);
       pelvisHeightControlState.setGains(userModeCoMHeightGains);
    }
 
