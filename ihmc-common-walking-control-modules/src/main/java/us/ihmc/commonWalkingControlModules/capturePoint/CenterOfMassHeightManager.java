@@ -53,7 +53,7 @@ public class CenterOfMassHeightManager
    private final YoBoolean enableUserPelvisControlDuringWalking = new YoBoolean("centerOfMassHeightManagerEnableUserPelvisControlDuringWalking", registry);
    private final YoBoolean doPrepareForLocomotion = new YoBoolean("doPrepareCenterOfMassHeightForLocomotion", registry);
 
-   private final BooleanParameter controlKneesInLocomotion = new BooleanParameter("controlKneesInLocomotion", registry, false);
+   private final BooleanParameter controlKneesInLocomotion = new BooleanParameter("controlKneesInLocomotion", registry, true);
 
    public CenterOfMassHeightManager(HighLevelHumanoidControllerToolbox controllerToolbox,
                                     WalkingControllerParameters walkingControllerParameters,
@@ -136,22 +136,33 @@ public class CenterOfMassHeightManager
       if (!doPrepareForLocomotion.getValue())
          return;
 
-      if (enableUserPelvisControlDuringWalking.getBooleanValue())
-         return;
-
       if (stateMachine.getCurrentStateKey().equals(PelvisHeightControlMode.USER))
       {
-         if (controlKneesInLocomotion.getValue())
+         if (!enableUserPelvisControlDuringWalking.getValue())
          {
-            heightControlThroughKneesState.initializeDesiredHeightToCurrent();
-            requestState(PelvisHeightControlMode.KNEE_JOINTS);
+            if (controlKneesInLocomotion.getValue())
+            {
+               heightControlThroughKneesState.initializeDesiredHeightToCurrent();
+               requestState(PelvisHeightControlMode.KNEE_JOINTS);
+            }
+            else
+            {
+               //need to check if setting the actual to the desireds here is a bad idea, might be better to go from desired to desired
+               centerOfMassHeightControlState.initializeDesiredHeightToCurrent();
+               requestState(PelvisHeightControlMode.WALKING_CONTROLLER);
+            }
          }
-         else
-         {
-            //need to check if setting the actual to the desireds here is a bad idea, might be better to go from desired to desired
-            centerOfMassHeightControlState.initializeDesiredHeightToCurrent();
-            requestState(PelvisHeightControlMode.WALKING_CONTROLLER);
-         }
+      }
+      else if (controlKneesInLocomotion.getValue() && !stateMachine.getCurrentStateKey().equals(PelvisHeightControlMode.KNEE_JOINTS))
+      {
+         heightControlThroughKneesState.initializeDesiredHeightToCurrent();
+         requestState(PelvisHeightControlMode.KNEE_JOINTS);
+      }
+      else if (!controlKneesInLocomotion.getValue() && !stateMachine.getCurrentStateKey().equals(PelvisHeightControlMode.WALKING_CONTROLLER))
+      {
+         //need to check if setting the actual to the desireds here is a bad idea, might be better to go from desired to desired
+         centerOfMassHeightControlState.initializeDesiredHeightToCurrent();
+         requestState(PelvisHeightControlMode.WALKING_CONTROLLER);
       }
    }
 
