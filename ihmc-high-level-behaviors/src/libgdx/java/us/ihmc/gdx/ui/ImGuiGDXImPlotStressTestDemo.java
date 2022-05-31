@@ -19,8 +19,8 @@ public class ImGuiGDXImPlotStressTestDemo
    private GDXImGuiBasedUI baseUI;
    private AtomicInteger numPlotsToShow = new AtomicInteger(50);
    private final Timer timer = new Timer();
-   private final Double[] xs = new Double[500];
-   private final Double[] ys = new Double[500];
+   private final double[] xs = new double[500];
+   private final double[] ys = new double[500];
    private final Random random = new Random();
    private boolean recalculate = true;
 
@@ -85,13 +85,13 @@ public class ImGuiGDXImPlotStressTestDemo
                if (ImPlot.beginPlot("Plot " + i, "X", "Y", new ImVec2(225, 150)))
                {
                   if (random.nextBoolean())
-                     ImPlot.plotLine("line" + i, xs, ys);
+                     ImPlot.plotLine("line" + i, xs, ys, xs.length, 0);
                   if (random.nextBoolean())
-                     ImPlot.plotBars("bars" + i, xs, ys);
+                     ImPlot.plotBars("bars" + i, xs, ys, xs.length, 0.67f, 0);
                   if (random.nextBoolean())
-                     ImPlot.plotScatter("bars" + i, xs, ys);
+                     ImPlot.plotScatter("bars" + i, xs, ys, xs.length, 0);
                   if (random.nextBoolean())
-                     ImPlot.plotBarsH("bars" + i, xs, ys);
+                     ImPlot.plotBarsH("bars" + i, xs, ys, xs.length, 0.67f, 0);
 
                   ImPlot.endPlot();
                }
