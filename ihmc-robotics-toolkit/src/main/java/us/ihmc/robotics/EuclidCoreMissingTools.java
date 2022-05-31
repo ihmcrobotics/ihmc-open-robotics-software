@@ -984,7 +984,6 @@ public class EuclidCoreMissingTools
       return EuclidCoreTools.acos(dotProduct);
    }
 
-<<<<<<< HEAD
    /**
     * Computes the coordinates of the intersection between a plane and an infinitely long line.
     * <a href="https://en.wikipedia.org/wiki/Line%E2%80%93plane_intersection"> Useful link </a>.
