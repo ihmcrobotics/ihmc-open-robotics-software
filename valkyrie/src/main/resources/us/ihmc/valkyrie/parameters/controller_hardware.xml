@@ -27,8 +27,8 @@
                   <parameter name="kpXSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="150.0" />
                   <parameter name="kpYSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="100.0" />
                   <parameter name="kpZSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="250.0" />
-                  <parameter name="kpXSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="200.0" />
-                  <parameter name="kpYSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="200.0" />
+                  <parameter name="kpXSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="125.0" />
+                  <parameter name="kpYSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="125.0" />
                   <parameter name="kpZSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="200.0" />
                   <parameter name="zetaXSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.8" />
                   <parameter name="zetaYSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.7" />
@@ -38,8 +38,8 @@
                   <parameter name="zetaZSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.75" />
                   <parameter name="maxDerivativeErrorSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
                   <parameter name="maxProportionalErrorSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
-                  <parameter name="maximumFeedbackSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="10.0" />
-                  <parameter name="maximumFeedbackRateSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="250.0" />
+                  <parameter name="maximumFeedbackSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="30.0" />
+                  <parameter name="maximumFeedbackRateSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="1500.0" />
                   <parameter name="maxDerivativeErrorSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
                   <parameter name="maxProportionalErrorSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
                   <parameter name="maximumFeedbackSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="100.0" />
