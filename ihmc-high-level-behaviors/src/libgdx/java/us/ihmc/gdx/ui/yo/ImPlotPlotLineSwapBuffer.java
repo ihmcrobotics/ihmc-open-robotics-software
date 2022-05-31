@@ -14,5 +14,5 @@ public interface ImPlotPlotLineSwapBuffer
 
    public void copyPreviousToUpdated(int srcPos, int destPos, int length);
 
-   public void plot(String labelID, Integer[] xValues, int offset);
+   public void plot(String labelID, double[] xValues, int offset);
 }
