@@ -105,6 +105,7 @@ public class CenterOfMassHeightManager
    {
       pelvisHeightControlState.setWeights(weight);
       centerOfMassHeightControlState.setWeights(weight);
+      heightControlThroughKneesState.setWeights(weight);
    }
 
    public void setPrepareForLocomotion(boolean value)

@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -57,6 +58,7 @@ public class HeightThroughKneeControlState implements PelvisAndCenterOfMassHeigh
    private final DoubleParameter nonSupportKneeWeight;
    private final ParameterizedPDGains kneeGains;
 
+   private Vector3DReadOnly pelvisTaskpaceFeedbackWeight;
    private final FullHumanoidRobotModel fullRobotModel;
 
    private final SideDependentList<OneDoFJointBasics> kneeJoints = new SideDependentList<>();
@@ -264,11 +266,17 @@ public class HeightThroughKneeControlState implements PelvisAndCenterOfMassHeigh
       pelvisHeightControlCommand.setGains(pelvisGainsTemp);
       pelvisHeightControlCommand.getSpatialAccelerationCommand().getWeightMatrix().setWeightFrames(null, worldFrame);
       pelvisHeightControlCommand.getSpatialAccelerationCommand().getWeightMatrix().setAngularWeights(0.0, 0.0, 0.0);
+      pelvisHeightControlCommand.getSpatialAccelerationCommand().getWeightMatrix().getLinearPart().set(pelvisTaskpaceFeedbackWeight);
    }
 
    @Override
    public TaskspaceTrajectoryStatusMessage pollStatusToReport()
    {
       return null;
+   }
+
+   public void setWeights(Vector3DReadOnly weight)
+   {
+      this.pelvisTaskpaceFeedbackWeight = weight;
    }
 }
