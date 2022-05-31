@@ -18,7 +18,7 @@ public abstract class ImPlotPlotLineBasics implements ImPlotPlotLine
    private double timeForOneBufferEntry;
    private long lastTickIndex = 0;
    private long tickIndex = 0;
-   private final Integer[] xValues;
+   private final double[] xValues;
    private boolean isA = true;
    private int filledIndex = 0;
 
