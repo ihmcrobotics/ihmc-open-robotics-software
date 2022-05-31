@@ -11,6 +11,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -41,7 +42,7 @@ public class HeightThroughKneeControlState implements PelvisAndCenterOfMassHeigh
    private final YoDouble desiredHeightFromKneeControl = new YoDouble("desiredHeightFromKneeControl", registry);
    private final YoDouble currentHeightFromKneeControl = new YoDouble("currentHeightFromKneeControl", registry);
    private final DoubleParameter maximumHeightChangeFromKneeControl = new DoubleParameter("maximumHeightChangeFromKneeControl", registry, 0.2);
-   private final YoDouble heightChangeFromKneeControl = new YoDouble("maximumHeightChangeFromKneeControl", registry);
+   private final YoDouble heightChangeFromKneeControl = new YoDouble("heightChangeFromKneeControl", registry);
 
    private final YoEnum<RobotSide> kneeSideToControl = new YoEnum<>("kneeSideToControl", registry, RobotSide.class);
    private final YoEnum<RobotSide> supportLegSide = new YoEnum<>("kneeControlSupportLegSide", registry, RobotSide.class);
@@ -107,6 +108,7 @@ public class HeightThroughKneeControlState implements PelvisAndCenterOfMassHeigh
       pelvisPoint.changeFrame(fullRobotModel.getPelvis().getBodyFixedFrame());
       pelvisHeightControlCommand.setBodyFixedPointToControl(pelvisPoint);
       pelvisHeightControlCommand.setSelectionMatrix(selectionMatrix);
+      pelvisHeightControlCommand.setWeightsForSolver(new Vector3D(0.0, 0.0, 10.0));
 
 
       parentRegistry.addChild(registry);
@@ -216,6 +218,16 @@ public class HeightThroughKneeControlState implements PelvisAndCenterOfMassHeigh
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
       return feedbackCommandList;
+   }
+
+   @Override
+   public FeedbackControlCommand<?> createFeedbackControlTemplate()
+   {
+      FeedbackControlCommandList list = new FeedbackControlCommandList();
+      for (RobotSide robotSide : RobotSide.values)
+         list.addCommand(kneeControlCommands.get(robotSide));
+
+      return list;
    }
 
    @Override

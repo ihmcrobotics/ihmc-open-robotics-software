@@ -278,8 +278,12 @@ public class CenterOfMassHeightManager
       for (PelvisHeightControlMode mode : PelvisHeightControlMode.values())
       {
          PelvisAndCenterOfMassHeightControlState state = stateMachine.getState(mode);
-         if (state != null && state.getFeedbackControlCommand() != null)
-            ret.addCommand(state.getFeedbackControlCommand());
+         if (state != null)
+         {
+            FeedbackControlCommand<?> feedbackControlCommand = state.createFeedbackControlTemplate();
+            if (feedbackControlCommand != null)
+               ret.addCommand(feedbackControlCommand);
+         }
       }
       return ret;
    }

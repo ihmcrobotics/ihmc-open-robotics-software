@@ -36,6 +36,11 @@ public interface PelvisAndCenterOfMassHeightControlState extends State
 
    FeedbackControlCommand<?> getHeightControlCommand();
 
+   default FeedbackControlCommand<?> createFeedbackControlTemplate()
+   {
+      return getFeedbackControlCommand();
+   }
+
    boolean getControlHeightWithMomentum();
 
    /**
