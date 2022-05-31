@@ -40,7 +40,8 @@ public class AtlasFlatGroundWalkingTrackSCS2Bullet
 
    public AtlasFlatGroundWalkingTrackSCS2Bullet()
    {
-      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS);
+      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ);
+      robotModel.setUseHandMutatorCollisions(true);
       robotModel.setUseSDFCollisions(true);
       FlatGroundEnvironment environment = new FlatGroundEnvironment();
 
