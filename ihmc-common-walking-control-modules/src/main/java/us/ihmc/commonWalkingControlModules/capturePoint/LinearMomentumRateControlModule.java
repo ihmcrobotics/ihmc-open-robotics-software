@@ -277,6 +277,7 @@ public class LinearMomentumRateControlModule
    public void setInputFromWalkingStateMachine(LinearMomentumRateControlModuleInput input)
    {
       this.omega0 = input.getOmega0();
+      heightControlCommand = null;
       if (input.getUsePelvisHeightCommand())
          heightControlCommand = input.getPelvisHeightControlCommand();
       else
