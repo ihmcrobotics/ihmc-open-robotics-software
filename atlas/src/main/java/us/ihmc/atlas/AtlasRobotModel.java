@@ -114,10 +114,12 @@ public class AtlasRobotModel implements DRCRobotModel
    private AtlasSensorSuiteManager sensorSuiteManager;
 
    private Consumer<RobotDefinition> robotDefinitionMutator;
+   private Consumer<RobotDefinition> robotDefinitionHandMutator;
    private RobotDefinition robotDefinition, robotDefinitionWithSDFCollision;
    private String simpleRobotName = "Atlas";
    private StepReachabilityData stepReachabilityData = null;
    private boolean useSDFCollisions = false;
+   private boolean useHandMutatorCollisions = false;
 
    public AtlasRobotModel(AtlasRobotVersion atlasVersion)
    {
@@ -241,7 +243,10 @@ public class AtlasRobotModel implements DRCRobotModel
          RobotDefinitionTools.setDefaultMaterial(robotDefinition, new MaterialDefinition(ColorDefinitions.Black()));
 
       getRobotDefinitionMutator().accept(robotDefinition);
-
+      
+      if (isUseHandMutatorCollisions() && selectedVersion.hasRobotiqHands())
+         getRobotDefinitionHandMutator().accept(robotDefinition);
+      
       return robotDefinition;
    }
 
@@ -278,6 +283,14 @@ public class AtlasRobotModel implements DRCRobotModel
          robotDefinitionMutator = new AtlasRobotDefinitionMutator(getJointMap(), getSensorInformation());
       return robotDefinitionMutator;
    }
+   
+   public Consumer<RobotDefinition> getRobotDefinitionHandMutator()
+   {
+      if (robotDefinitionHandMutator == null)
+         robotDefinitionHandMutator = new AtlasRobotDefinitionHandMutator();
+      return robotDefinitionHandMutator;
+   }
+
 
    @Override
    public HighLevelControllerParameters getHighLevelControllerParameters()
@@ -704,5 +717,15 @@ public class AtlasRobotModel implements DRCRobotModel
          throw new RuntimeException("Must set before RobotDefinition is created!");
 
       this.useSDFCollisions = useSDFCollisions;
+   }
+
+   public boolean isUseHandMutatorCollisions()
+   {
+      return useHandMutatorCollisions;
+   }
+
+   public void setUseHandMutatorCollisions(boolean useHandMutatorCollisions)
+   {
+      this.useHandMutatorCollisions = useHandMutatorCollisions;
    }
 }
