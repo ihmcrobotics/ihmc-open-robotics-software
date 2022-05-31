@@ -42,7 +42,7 @@ public class HeightThroughKneeControlState implements PelvisAndCenterOfMassHeigh
    private final YoDouble straightestKneeAngle = new YoDouble("straightestKneeAngle", registry);
    private final YoDouble desiredHeightFromKneeControl = new YoDouble("desiredHeightFromKneeControl", registry);
    private final YoDouble currentHeightFromKneeControl = new YoDouble("currentHeightFromKneeControl", registry);
-   private final DoubleParameter maximumHeightChangeFromKneeControl = new DoubleParameter("maximumHeightChangeFromKneeControl", registry, 0.2);
+   private final DoubleParameter maximumHeightChangeFromKneeControl = new DoubleParameter("maximumHeightChangeFromKneeControl", registry, 0.02);
    private final YoDouble heightChangeFromKneeControl = new YoDouble("heightChangeFromKneeControl", registry);
 
    private final YoEnum<RobotSide> kneeSideToControl = new YoEnum<>("kneeSideToControl", registry, RobotSide.class);
@@ -110,7 +110,6 @@ public class HeightThroughKneeControlState implements PelvisAndCenterOfMassHeigh
       pelvisPoint.changeFrame(fullRobotModel.getPelvis().getBodyFixedFrame());
       pelvisHeightControlCommand.setBodyFixedPointToControl(pelvisPoint);
       pelvisHeightControlCommand.setSelectionMatrix(selectionMatrix);
-      pelvisHeightControlCommand.setWeightsForSolver(new Vector3D(0.0, 0.0, 10.0));
 
 
       parentRegistry.addChild(registry);
