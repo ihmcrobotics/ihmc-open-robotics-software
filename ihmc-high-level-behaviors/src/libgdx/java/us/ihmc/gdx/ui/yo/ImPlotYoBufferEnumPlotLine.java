@@ -14,8 +14,8 @@ public class ImPlotYoBufferEnumPlotLine extends ImPlotYoBufferPlotLineBasics
 {
    private final YoEnum yoEnum;
    private LinkedYoVariable<YoEnum> linkedYoEnumVariable;
-   private Integer[] xValues = ImPlotTools.createIndex(1);
-   private Byte[] plotData = ImPlotTools.newZeroFilledByteBuffer(1);
+   private double[] xValues = ImPlotTools.createIndex(1);
+   private double[] plotData = ImPlotTools.newZeroFilledBuffer(1);
 
    public ImPlotYoBufferEnumPlotLine(YoEnum yoEnum, Consumer<YoVariable> removeSelf)
    {
@@ -48,7 +48,7 @@ public class ImPlotYoBufferEnumPlotLine extends ImPlotYoBufferPlotLineBasics
             if (plotData.length != sampleLength)
             {
                xValues = ImPlotTools.createIndex(sampleLength);
-               plotData = ImPlotTools.newZeroFilledByteBuffer(sampleLength);
+               plotData = ImPlotTools.newZeroFilledBuffer(sampleLength);
             }
             for (int i = 0; i < bufferSample.getBufferProperties().getActiveBufferLength(); i++)
             {
@@ -64,12 +64,12 @@ public class ImPlotYoBufferEnumPlotLine extends ImPlotYoBufferPlotLineBasics
    protected void plot(String labelID)
    {
       int offset = 0; // This is believed to be the index in the array we are passing in which implot will start reading
-      ImPlot.plotLine(labelID, xValues, plotData, offset);
+      ImPlot.plotLine(labelID, xValues, plotData, xValues.length, offset);
    }
 
    @Override
    public String getValueString(int bufferIndex)
    {
-      return plotData[bufferIndex] > -1 ? yoEnum.getEnumValuesAsString()[plotData[bufferIndex]] : "null";
+      return plotData[bufferIndex] > -1 ? yoEnum.getEnumValuesAsString()[(int) plotData[bufferIndex]] : "null";
    }
 }

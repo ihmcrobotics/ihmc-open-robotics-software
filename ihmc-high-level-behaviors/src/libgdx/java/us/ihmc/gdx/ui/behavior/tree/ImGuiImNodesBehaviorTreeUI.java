@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.ImColor;
 import imgui.extension.imnodes.ImNodes;
 import imgui.extension.imnodes.flag.ImNodesColorStyle;
+import imgui.extension.imnodes.flag.ImNodesMiniMapLocation;
 import imgui.extension.imnodes.flag.ImNodesStyleVar;
 import imgui.internal.ImGui;
 import org.apache.commons.lang3.mutable.MutableInt;
@@ -90,6 +91,7 @@ public class ImGuiImNodesBehaviorTreeUI
          loadLayoutNodesFromFile();
       }
 
+      ImNodes.miniMap(0.1f, ImNodesMiniMapLocation.BottomRight);
       ImNodes.endNodeEditor();
       ImGui.popFont();
    }
