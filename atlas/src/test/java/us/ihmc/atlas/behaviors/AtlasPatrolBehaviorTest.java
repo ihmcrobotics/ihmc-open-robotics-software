@@ -18,6 +18,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
@@ -80,7 +81,7 @@ public class AtlasPatrolBehaviorTest
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
       robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
-      SimulationConstructionSet scs = HumanoidDynamicsSimulation.createForAutomatedTest(robotModel, new FlatGroundEnvironment()).getSimulationConstructionSet();
+      SimulationConstructionSet2 scs = HumanoidDynamicsSimulation.createForAutomatedTest(robotModel, new FlatGroundEnvironment()).getSimulationConstructionSet();
       variables = new AtlasBehaviorTestYoVariables(scs);
       conductor = new GoalOrientedTestConductor(scs, simulationTestingParameters);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

@@ -7,6 +7,7 @@ import us.ihmc.avatar.AvatarTestYoVariables;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationTest;
+import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class AtlasKinematicsSimulationTest extends HumanoidKinematicsSimulationTest
@@ -15,7 +16,7 @@ public class AtlasKinematicsSimulationTest extends HumanoidKinematicsSimulationT
 
 
    @Override
-   public AvatarTestYoVariables createTestYoVariables(SimulationConstructionSet scs)
+   public AvatarTestYoVariables createTestYoVariables(SimulationConstructionSet2 scs)
    {
       return new AtlasBehaviorTestYoVariables(scs);
    }
@@ -27,7 +28,7 @@ public class AtlasKinematicsSimulationTest extends HumanoidKinematicsSimulationT
    }
 
    @Override
-   public SimulationConstructionSet createSCS()
+   public SimulationConstructionSet2 createSCS()
    {
       return null; // TODO
    }
