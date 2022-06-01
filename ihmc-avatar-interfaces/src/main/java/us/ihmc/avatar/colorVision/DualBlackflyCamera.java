@@ -16,6 +16,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.OpenCVArUcoMarkerDetection;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2QosProfile;
@@ -48,6 +49,7 @@ public class DualBlackflyCamera
    private final Stopwatch convertColorDuration = new Stopwatch();
    private final Stopwatch encodingDuration = new Stopwatch();
    private final Stopwatch copyDuration = new Stopwatch();
+   private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
 
    public DualBlackflyCamera(String serialNumber)
    {
@@ -84,12 +86,21 @@ public class DualBlackflyCamera
 
             blackflySourceImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC3);
             yuv420Image = new Mat();
+
             jpegImageBytePointer = new BytePointer();
             compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 75);
 
             ROS2Topic<BigVideoPacket> videoTopic = ROS2Tools.BLACKFLY_VIDEO.get(side);
             LogTools.info("Publishing ROS 2 color video: {}", videoTopic);
             ros2VideoPublisher = ROS2Tools.createPublisher(realtimeROS2Node, videoTopic, ROS2QosProfile.BEST_EFFORT());
+
+            if (side == RobotSide.RIGHT)
+            {
+//               CameraPinholeBrown cameraPinholeBrown = new CameraPinholeBrown();
+//
+//               arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
+//               arUcoMarkerDetection.create(blackflySourceImage, cameraPinholeBrown, ReferenceFrame.getWorldFrame());
+            }
          }
          else // We don't want to publish until the node is spinning which will be next time
          {
