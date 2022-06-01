@@ -53,7 +53,6 @@ public class GDXOpenCVColorByteOrderDemo
 
             highLevelDepthSensorSimulator = GDXSimulatedSensorFactory.createL515ImageOnlyNoComms(sensorPoseGizmo.getGizmoFrame());
             baseUI.getImGuiPanelManager().addPanel(highLevelDepthSensorSimulator);
-            highLevelDepthSensorSimulator.create();
             highLevelDepthSensorSimulator.setSensorEnabled(true);
             highLevelDepthSensorSimulator.getLowLevelSimulator().setDepthEnabled(false);
             highLevelDepthSensorSimulator.setRenderColorVideoDirectly(true);

@@ -73,7 +73,7 @@ public class AssimpResourceImporter
 
          AILogStream assimpLogStream = AILogStream.create();
          assimpLogStream.callback(assimpLogStreamCallback);
-         assimpLogStream.user(MemoryUtil.memAddress(MemoryUtil.memAlloc(1)));
+         assimpLogStream.user(1);
          Assimp.aiAttachLogStream(assimpLogStream);
       }
    }

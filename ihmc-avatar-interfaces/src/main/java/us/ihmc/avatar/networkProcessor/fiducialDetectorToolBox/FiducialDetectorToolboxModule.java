@@ -14,7 +14,6 @@ import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 
@@ -42,7 +41,7 @@ public class FiducialDetectorToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(RealtimeROS2Node realtimeROS2Node)
    {
-      ROS2Tools.createCallbackSubscription(realtimeROS2Node, ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.RIGHT), videoPacket ->
+      ROS2Tools.createCallbackSubscription(realtimeROS2Node, ROS2Tools.VIDEO, videoPacket ->
       {
          if (controller != null)
          {

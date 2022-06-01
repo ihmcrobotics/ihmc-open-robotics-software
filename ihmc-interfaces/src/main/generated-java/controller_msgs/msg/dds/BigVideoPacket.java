@@ -11,7 +11,8 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class BigVideoPacket extends Packet<BigVideoPacket> implements Settable<BigVideoPacket>, EpsilonComparable<BigVideoPacket>
 {
-   public long acquisition_time_nanos_;
+   public long acquisition_time_seconds_since_epoch_;
+   public long acquisition_time_additional_nanos_;
    public int image_width_;
    public int image_height_;
    public us.ihmc.idl.IDLSequence.Byte  data_;
@@ -30,7 +31,9 @@ public class BigVideoPacket extends Packet<BigVideoPacket> implements Settable<B
 
    public void set(BigVideoPacket other)
    {
-      acquisition_time_nanos_ = other.acquisition_time_nanos_;
+      acquisition_time_seconds_since_epoch_ = other.acquisition_time_seconds_since_epoch_;
+
+      acquisition_time_additional_nanos_ = other.acquisition_time_additional_nanos_;
 
       image_width_ = other.image_width_;
 
@@ -39,13 +42,22 @@ public class BigVideoPacket extends Packet<BigVideoPacket> implements Settable<B
       data_.set(other.data_);
    }
 
-   public void setAcquisitionTimeNanos(long acquisition_time_nanos)
+   public void setAcquisitionTimeSecondsSinceEpoch(long acquisition_time_seconds_since_epoch)
    {
-      acquisition_time_nanos_ = acquisition_time_nanos;
+      acquisition_time_seconds_since_epoch_ = acquisition_time_seconds_since_epoch;
    }
-   public long getAcquisitionTimeNanos()
+   public long getAcquisitionTimeSecondsSinceEpoch()
    {
-      return acquisition_time_nanos_;
+      return acquisition_time_seconds_since_epoch_;
+   }
+
+   public void setAcquisitionTimeAdditionalNanos(long acquisition_time_additional_nanos)
+   {
+      acquisition_time_additional_nanos_ = acquisition_time_additional_nanos;
+   }
+   public long getAcquisitionTimeAdditionalNanos()
+   {
+      return acquisition_time_additional_nanos_;
    }
 
    public void setImageWidth(int image_width)
@@ -90,7 +102,9 @@ public class BigVideoPacket extends Packet<BigVideoPacket> implements Settable<B
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.acquisition_time_nanos_, other.acquisition_time_nanos_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.acquisition_time_seconds_since_epoch_, other.acquisition_time_seconds_since_epoch_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.acquisition_time_additional_nanos_, other.acquisition_time_additional_nanos_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.image_width_, other.image_width_, epsilon)) return false;
 
@@ -111,7 +125,9 @@ public class BigVideoPacket extends Packet<BigVideoPacket> implements Settable<B
 
       BigVideoPacket otherMyClass = (BigVideoPacket) other;
 
-      if(this.acquisition_time_nanos_ != otherMyClass.acquisition_time_nanos_) return false;
+      if(this.acquisition_time_seconds_since_epoch_ != otherMyClass.acquisition_time_seconds_since_epoch_) return false;
+
+      if(this.acquisition_time_additional_nanos_ != otherMyClass.acquisition_time_additional_nanos_) return false;
 
       if(this.image_width_ != otherMyClass.image_width_) return false;
 
@@ -128,8 +144,10 @@ public class BigVideoPacket extends Packet<BigVideoPacket> implements Settable<B
       StringBuilder builder = new StringBuilder();
 
       builder.append("BigVideoPacket {");
-      builder.append("acquisition_time_nanos=");
-      builder.append(this.acquisition_time_nanos_);      builder.append(", ");
+      builder.append("acquisition_time_seconds_since_epoch=");
+      builder.append(this.acquisition_time_seconds_since_epoch_);      builder.append(", ");
+      builder.append("acquisition_time_additional_nanos=");
+      builder.append(this.acquisition_time_additional_nanos_);      builder.append(", ");
       builder.append("image_width=");
       builder.append(this.image_width_);      builder.append(", ");
       builder.append("image_height=");

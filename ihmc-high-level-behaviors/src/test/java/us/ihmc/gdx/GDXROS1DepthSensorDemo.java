@@ -51,14 +51,6 @@ public class GDXROS1DepthSensorDemo
             double minRange = 0.105;
             double maxRange = 5.0;
             l515 = new GDXHighLevelDepthSensorSimulator("Stepping L515",
-                                                        ros1Node,
-                                                        RosTools.MAPSENSE_DEPTH_IMAGE,
-                                                        RosTools.MAPSENSE_DEPTH_CAMERA_INFO,
-                                                        RosTools.L515_VIDEO,
-                                                        RosTools.L515_COLOR_CAMERA_INFO,
-                                                        null,
-                                                        null,
-                                                        null,
                                                         poseGizmo.getGizmoFrame(),
                                                         () -> 0L,
                                                         verticalFOV,
@@ -66,9 +58,9 @@ public class GDXROS1DepthSensorDemo
                                                         imageHeight,
                                                         minRange,
                                                         maxRange,
-                                                        publishRateHz,
-                                                        false);
-            l515.create();
+                                                        publishRateHz);
+            l515.setupForROS1Depth(ros1Node, RosTools.MAPSENSE_DEPTH_IMAGE, RosTools.MAPSENSE_DEPTH_CAMERA_INFO);
+            l515.setupForROS1Color(ros1Node, RosTools.L515_VIDEO, RosTools.L515_COLOR_CAMERA_INFO);
             globalVisualizersUI = new ImGuiGDXGlobalVisualizersPanel();
             globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("L515 Depth Video", RosTools.L515_DEPTH));
             globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("L515 Color Video", RosTools.L515_VIDEO));
@@ -84,7 +76,6 @@ public class GDXROS1DepthSensorDemo
             l515.setRenderColorVideoDirectly(true);
             l515.setRenderDepthVideoDirectly(true);
             l515.setPublishColorImageROS1(true);
-            l515.create();
 
             baseUI.get3DSceneManager().addRenderableProvider(l515, GDXSceneLevel.VIRTUAL);
             globalVisualizersUI.create();

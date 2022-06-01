@@ -319,7 +319,7 @@ public class AvatarSimulationFactory
       int controllerDivisor = (int) Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT());
       int handControlDivisor = (int) Math.round(robotModel.getSimulatedHandControlDT() / robotModel.getSimulateDT());
       HumanoidRobotControlTask estimatorTask = new EstimatorTask(estimatorThread, estimatorDivisor, robotModel.getSimulateDT(), masterFullRobotModel);
-      HumanoidRobotControlTask controllerTask = new ControllerTask(controllerThread, controllerDivisor, robotModel.getSimulateDT(), masterFullRobotModel);
+      HumanoidRobotControlTask controllerTask = new ControllerTask("Controller", controllerThread, controllerDivisor, robotModel.getSimulateDT(), masterFullRobotModel);
 
       AvatarSimulatedHandControlThread handControlThread = robotModel.createSimulatedHandController(realtimeROS2Node.get());
       SimulatedHandControlTask handControlTask = null;

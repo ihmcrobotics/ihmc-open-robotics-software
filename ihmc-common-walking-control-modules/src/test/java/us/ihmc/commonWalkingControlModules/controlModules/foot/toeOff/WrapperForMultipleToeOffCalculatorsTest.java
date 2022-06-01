@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator;
+package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -9,7 +9,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;

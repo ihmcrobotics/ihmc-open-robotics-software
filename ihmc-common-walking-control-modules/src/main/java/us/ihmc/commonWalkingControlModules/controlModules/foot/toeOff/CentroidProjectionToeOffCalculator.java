@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator;
+package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff;
 
 import java.awt.*;
 import java.util.List;
@@ -214,7 +214,7 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
       if (!hasComputedToeOffContactPoint.getBooleanValue())
          computeToeOffContactPoint(null, trailingLeg);
 
-      contactPointToPack.set(toeOffContactPoint2d);
+      contactPointToPack.setIncludingFrame(toeOffContactPoint2d);
    }
 
    @Override

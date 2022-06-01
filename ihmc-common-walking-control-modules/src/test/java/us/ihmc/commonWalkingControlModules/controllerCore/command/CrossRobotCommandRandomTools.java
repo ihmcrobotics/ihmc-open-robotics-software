@@ -1620,6 +1620,7 @@ public class CrossRobotCommandRandomTools
       next.setSchedulerTick(random.nextLong());
       next.setControllerRan(random.nextBoolean());
       next.setEstimatorRan(random.nextBoolean());
+      next.setPerceptionRan(random.nextBoolean());
       return next;
    }
 
@@ -1656,6 +1657,7 @@ public class CrossRobotCommandRandomTools
       next.setSchedulerTick(random.nextLong());
       next.setControllerRan(random.nextBoolean());
       next.setEstimatorRan(random.nextBoolean());
+      next.setPerceptionRan(random.nextBoolean());
       return next;
    }
 
