@@ -55,7 +55,7 @@ public class DualBlackflyCamera
       this.realtimeROS2Node = realtimeROS2Node;
 
       blackfly.setAcquisitionMode(Spinnaker_C.spinAcquisitionModeEnums.AcquisitionMode_Continuous);
-      blackfly.setPixelFormat(Spinnaker_C.spinPixelFormatEnums.PixelFormat_BGR8);
+      blackfly.setPixelFormat(Spinnaker_C.spinPixelFormatEnums.PixelFormat_RGB8);
       blackfly.startAcquiringImages();
    }
 
@@ -115,5 +115,10 @@ public class DualBlackflyCamera
    public String getSerialNumber()
    {
       return serialNumber;
+   }
+
+   public IHMCRealtimeROS2Publisher<BigVideoPacket> getRos2VideoPublisher()
+   {
+      return ros2VideoPublisher;
    }
 }

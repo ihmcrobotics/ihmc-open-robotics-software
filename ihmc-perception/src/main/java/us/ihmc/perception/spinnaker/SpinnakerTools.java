@@ -1,11 +1,15 @@
 package us.ihmc.perception.spinnaker;
 
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.CharPointer;
 import org.bytedeco.javacpp.SizeTPointer;
 import org.bytedeco.spinnaker.Spinnaker_C.*;
+import org.bytedeco.spinnaker.global.Spinnaker_C;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.BytedecoTools;
 import us.ihmc.tools.string.StringTools;
 
+import java.nio.charset.StandardCharsets;
 import java.util.function.Supplier;
 
 import static org.bytedeco.spinnaker.global.Spinnaker_C.*;
@@ -85,10 +89,10 @@ public class SpinnakerTools
    private static boolean isAvailableAndReadable(spinNodeHandle spinNodeHandle, String nodeName)
    {
       BytePointer booleanAvailable = new BytePointer(1);
-      assertNoError(spinNodeIsAvailable(spinNodeHandle, booleanAvailable), "Unable to retrieve node availability (" + nodeName + " node)");
+      assertNoError(spinNodeIsAvailable(spinNodeHandle, booleanAvailable), "Retrieving " + nodeName + " node availability");
 
       BytePointer booleanReadable = new BytePointer(1);
-      assertNoError(spinNodeIsReadable(spinNodeHandle, booleanReadable), "Unable to retrieve node readability (" + nodeName + " node)");
+      assertNoError(spinNodeIsReadable(spinNodeHandle, booleanReadable), "Retrieving " + nodeName + " node readability");
       return booleanReadable.getBool() && booleanAvailable.getBool();
    }
 
@@ -96,7 +100,23 @@ public class SpinnakerTools
    {
       if (error.value != spinError.SPINNAKER_ERR_SUCCESS.value)
       {
-         Supplier<String> message = StringTools.format("Error code: {}: {}", error.value, errorMessage);
+         long size = 1000;
+         BytePointer fullMessage = new BytePointer(size);
+         SizeTPointer errorMessageSize = new SizeTPointer(1L);
+         errorMessageSize.put(size);
+         Spinnaker_C.spinErrorGetLastFullMessage(fullMessage, errorMessageSize);
+         String fullMessageString = "";
+         long errorMessageSizeInt = errorMessageSize.get();
+         for (int i = 0; i < errorMessageSizeInt + 1; i++)
+         {
+            fullMessageString += new String(new byte[] {fullMessage.get(i)}, StandardCharsets.UTF_8);
+         }
+
+         Supplier<String> message = StringTools.format("Error code: {}: {}: {}: {}",
+                                                       error.value,
+                                                       error.toString(),
+                                                       fullMessageString,
+                                                       errorMessage);
          LogTools.fatal(message);
          throw new RuntimeException(message.get());
       }
