@@ -186,7 +186,7 @@ public class DirectionalControlController extends ToolboxController
 
    // Scheduler for sub-tasks
    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
-
+   
    /**
     * Main constructor.
     * 
@@ -660,8 +660,28 @@ public class DirectionalControlController extends ToolboxController
       DirectionalControlInputCommand inputMessage = controlInputCommand.getAndSet(null);
       if (inputMessage != null)
       {
-         updateForwardVelocity(inputMessage.getForward());
-         updateLateralVelocity(-inputMessage.getRight());
+    	 double forward = inputMessage.getForward();
+    	 double right = inputMessage.getRight();
+    	 byte controlMode = inputMessage.getControlMode();
+    	 
+    	 switch (controlMode) {
+    	    case DirectionalControlInputMessage.CONTROL_MODE_FREE:
+               updateForwardVelocity(forward);
+               updateLateralVelocity(-right);
+               break;
+    	    case DirectionalControlInputMessage.CONTROL_MODE_CARDINAL:
+    	   	   if (Math.abs(forward) > Math.abs(right)) {
+                  updateForwardVelocity(forward);
+                  updateLateralVelocity(0.0);
+    	   	   } else {
+                  updateForwardVelocity(0.0);
+                  updateLateralVelocity(-right);    	   		  
+    	   	   }
+               break;
+            default:
+               LogTools.error("Unknown directional control mode: " + String.valueOf(controlMode));
+               break;
+    	 }
          updateTurningVelocity(-inputMessage.getClockwise());
       }
    }

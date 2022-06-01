@@ -48,6 +48,8 @@ public class DirectionalControlInputMessagePubSubType implements us.ihmc.pubsub.
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -73,6 +75,9 @@ public class DirectionalControlInputMessagePubSubType implements us.ihmc.pubsub.
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -87,6 +92,8 @@ public class DirectionalControlInputMessagePubSubType implements us.ihmc.pubsub.
 
       cdr.write_type_6(data.getClockwise());
 
+      cdr.write_type_9(data.getControlMode());
+
    }
 
    public static void read(controller_msgs.msg.dds.DirectionalControlInputMessage data, us.ihmc.idl.CDR cdr)
@@ -99,6 +106,8 @@ public class DirectionalControlInputMessagePubSubType implements us.ihmc.pubsub.
       	
       data.setClockwise(cdr.read_type_6());
       	
+      data.setControlMode(cdr.read_type_9());
+      	
 
    }
 
@@ -109,6 +118,7 @@ public class DirectionalControlInputMessagePubSubType implements us.ihmc.pubsub.
       ser.write_type_6("forward", data.getForward());
       ser.write_type_6("right", data.getRight());
       ser.write_type_6("clockwise", data.getClockwise());
+      ser.write_type_9("control_mode", data.getControlMode());
    }
 
    @Override
@@ -118,6 +128,7 @@ public class DirectionalControlInputMessagePubSubType implements us.ihmc.pubsub.
       data.setForward(ser.read_type_6("forward"));
       data.setRight(ser.read_type_6("right"));
       data.setClockwise(ser.read_type_6("clockwise"));
+      data.setControlMode(ser.read_type_9("control_mode"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.DirectionalControlInputMessage src, controller_msgs.msg.dds.DirectionalControlInputMessage dest)

@@ -9,6 +9,7 @@ public class DirectionalControlInputCommand implements Command<DirectionalContro
    private double forward;
    private double right;
    private double clockwise;
+   private byte controlMode;
 
    @Override
    public void set(DirectionalControlInputCommand other)
@@ -19,6 +20,7 @@ public class DirectionalControlInputCommand implements Command<DirectionalContro
       forward = other.forward;
       right = other.right;
       clockwise = other.clockwise;
+      controlMode = other.controlMode;
    }
 
    @Override
@@ -28,6 +30,7 @@ public class DirectionalControlInputCommand implements Command<DirectionalContro
       forward = 0.0;
       right = 0.0;
       clockwise = 0.0;
+      controlMode = DirectionalControlInputMessage.CONTROL_MODE_FREE;
    }
 
    @Override
@@ -43,6 +46,7 @@ public class DirectionalControlInputCommand implements Command<DirectionalContro
       forward = message.getForward();
       right = message.getRight();
       clockwise = message.getClockwise();
+      controlMode = message.getControlMode();
    }
 
    @Override
@@ -77,10 +81,19 @@ public class DirectionalControlInputCommand implements Command<DirectionalContro
    {
       return clockwise;
    }
+   
+   public byte getControlMode()
+   {
+	   return controlMode;
+   }
 
    public String toString()
    {
-      return getClass().getSimpleName() + ": " + "{ forward  : " + String.valueOf(forward) + ", right    : " + String.valueOf(right) + ", clockwise: "
-            + String.valueOf(clockwise) + "}";
+      return getClass().getSimpleName() + ": " 
+             + "{ forward  : " + String.valueOf(forward) 
+             + ", right    : " + String.valueOf(right) 
+             + ", clockwise: " + String.valueOf(clockwise)
+             + ", controlMode: " + String.valueOf(controlMode)
+             + "}";
    }
 }

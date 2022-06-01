@@ -21,10 +21,13 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class DirectionalControlInputMessage extends Packet<DirectionalControlInputMessage> implements Settable<DirectionalControlInputMessage>, EpsilonComparable<DirectionalControlInputMessage>
 {
+   public static final byte CONTROL_MODE_FREE = (byte) 0;
+   public static final byte CONTROL_MODE_CARDINAL = (byte) 1;
    public long sequence_id_;
    public double forward_;
    public double right_;
    public double clockwise_;
+   public byte control_mode_;
 
    public DirectionalControlInputMessage()
    {
@@ -45,6 +48,8 @@ public class DirectionalControlInputMessage extends Packet<DirectionalControlInp
       right_ = other.right_;
 
       clockwise_ = other.clockwise_;
+
+      control_mode_ = other.control_mode_;
 
    }
 
@@ -84,6 +89,15 @@ public class DirectionalControlInputMessage extends Packet<DirectionalControlInp
       return clockwise_;
    }
 
+   public void setControlMode(byte control_mode)
+   {
+      control_mode_ = control_mode;
+   }
+   public byte getControlMode()
+   {
+      return control_mode_;
+   }
+
 
    public static Supplier<DirectionalControlInputMessagePubSubType> getPubSubType()
    {
@@ -110,6 +124,8 @@ public class DirectionalControlInputMessage extends Packet<DirectionalControlInp
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.clockwise_, other.clockwise_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.control_mode_, other.control_mode_, epsilon)) return false;
+
 
       return true;
    }
@@ -131,6 +147,8 @@ public class DirectionalControlInputMessage extends Packet<DirectionalControlInp
 
       if(this.clockwise_ != otherMyClass.clockwise_) return false;
 
+      if(this.control_mode_ != otherMyClass.control_mode_) return false;
+
 
       return true;
    }
@@ -148,7 +166,9 @@ public class DirectionalControlInputMessage extends Packet<DirectionalControlInp
       builder.append("right=");
       builder.append(this.right_);      builder.append(", ");
       builder.append("clockwise=");
-      builder.append(this.clockwise_);
+      builder.append(this.clockwise_);      builder.append(", ");
+      builder.append("control_mode=");
+      builder.append(this.control_mode_);
       builder.append("}");
       return builder.toString();
    }

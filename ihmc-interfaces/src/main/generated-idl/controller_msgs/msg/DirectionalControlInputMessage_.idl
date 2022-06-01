@@ -7,6 +7,12 @@ module controller_msgs
   {
     module dds
     {
+      const octet CONTROL_MODE_FREE =
+      0;
+
+      const octet CONTROL_MODE_CARDINAL =
+      1;
+
 
       /**
        * This message is sent to command the robot to move as if controlled by a joystick.
@@ -28,6 +34,7 @@ module controller_msgs
         double forward;
         double right;
         double clockwise;
+        octet control_mode;
       };
     };
   };
