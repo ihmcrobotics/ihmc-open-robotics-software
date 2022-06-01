@@ -8,7 +8,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiVideoPanel;
-import us.ihmc.gdx.ui.visualizers.ImGuiFrequencyPlot;
+import us.ihmc.gdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
@@ -18,7 +18,8 @@ public class GDXOpenCVVideoVisualizer extends ImGuiGDXVisualizer
    private Mat rgba8Mat;
    private boolean needNewTexture = false;
    private BytePointer rgba8888BytePointer;
-   private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
+   private final ImPlotFrequencyPlot frequencyPlot = new ImPlotFrequencyPlot("Hz", 30);
+   private boolean hasReceivedOne = false;
 
    private final ResettableExceptionHandlingExecutorService threadQueue;
    private Pixmap pixmap;
@@ -34,7 +35,8 @@ public class GDXOpenCVVideoVisualizer extends ImGuiGDXVisualizer
 
    protected void doReceiveMessageOnThread(Runnable receiveMessageOnThread)
    {
-      frequencyPlot.recordEvent();
+      hasReceivedOne = true;
+      frequencyPlot.ping();
       if (isActive())
       {
          getThreadQueue().clearQueueAndExecute(receiveMessageOnThread);
@@ -106,8 +108,13 @@ public class GDXOpenCVVideoVisualizer extends ImGuiGDXVisualizer
       return threadQueue;
    }
 
-   protected ImGuiFrequencyPlot getFrequencyPlot()
+   protected ImPlotFrequencyPlot getFrequencyPlot()
    {
       return frequencyPlot;
+   }
+
+   public boolean getHasReceivedOne()
+   {
+      return hasReceivedOne;
    }
 }

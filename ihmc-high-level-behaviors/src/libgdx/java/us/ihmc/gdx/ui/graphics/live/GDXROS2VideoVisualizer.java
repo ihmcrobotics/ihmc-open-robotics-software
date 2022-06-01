@@ -100,6 +100,7 @@ public class GDXROS2VideoVisualizer extends GDXOpenCVVideoVisualizer
    {
       super.renderImGuiWidgets();
       ImGui.text(topic.getName());
-      getFrequencyPlot().renderImGuiWidgets();
+      if (getHasReceivedOne())
+         getFrequencyPlot().renderImGuiWidgets();
    }
 }
