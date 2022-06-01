@@ -25,6 +25,7 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
    private final Activator nativesLoadedActivator;
    private final ROS2Helper ros2Helper;
    private final RealtimeROS2Node realtimeROS2Node;
+   private boolean nodeSpun = false;
    private final SideDependentList<DualBlackflyCamera> blackflies = new SideDependentList<>();
 
    private SpinnakerSystemManager spinnakerSystemManager;
@@ -61,13 +62,26 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
                                ros2Helper,
                                realtimeROS2Node);
             }
-
-            realtimeROS2Node.spin();
          }
 
          for (RobotSide side : blackflies.sides())
          {
             blackflies.get(side).update();
+         }
+
+         if (!nodeSpun)
+         {
+            boolean allInitialized = true;
+            for (RobotSide side : blackflies.sides())
+            {
+               allInitialized &= blackflies.get(side).getRos2VideoPublisher() != null;
+            }
+
+            if (allInitialized)
+            {
+               nodeSpun = true;
+               realtimeROS2Node.spin();
+            }
          }
       }
    }

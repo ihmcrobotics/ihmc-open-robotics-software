@@ -31,9 +31,9 @@ public class SpinnakerBlackfly
 
       transportLayerDeviceNodeMap = new spinNodeMapHandle();
       cameraNodeMap = new spinNodeMapHandle();
-      assertNoError(Spinnaker_C.spinCameraGetTLDeviceNodeMap(spinCamera, transportLayerDeviceNodeMap), "Unable to get transport layer device node map");
-      assertNoError(Spinnaker_C.spinCameraInit(spinCamera), "Unable to initialize camera");
-      assertNoError(Spinnaker_C.spinCameraGetNodeMap(spinCamera, cameraNodeMap), "Unable to retrieve GenICam nodemap");
+      assertNoError(Spinnaker_C.spinCameraGetTLDeviceNodeMap(spinCamera, transportLayerDeviceNodeMap), "Getting transport layer device node map");
+      assertNoError(Spinnaker_C.spinCameraInit(spinCamera), "Initializing camera");
+      assertNoError(Spinnaker_C.spinCameraGetNodeMap(spinCamera, cameraNodeMap), "Retrieving GenICam node map");
    }
 
    /**
@@ -47,17 +47,20 @@ public class SpinnakerBlackfly
    {
       // Acquisition mode
       spinNodeHandle acquisitionModeNode = new spinNodeHandle();
-      assertNoError(Spinnaker_C.spinNodeMapGetNode(cameraNodeMap, new BytePointer("AcquisitionMode"), acquisitionModeNode), "Unable to set acquisition mode");
+      assertNoError(Spinnaker_C.spinNodeMapGetNode(cameraNodeMap, new BytePointer("AcquisitionMode"), acquisitionModeNode),
+                    "Getting acquisition mode node map node");
 
       // TODO: What the heck is going on here? Doesn't seem like these are doing anything
       spinNodeHandle setAcquisitionMode = new spinNodeHandle();
-      assertNoError(Spinnaker_C.spinEnumerationGetEntryByName(acquisitionModeNode, new BytePointer(acquisitionMode.toString()), setAcquisitionMode),
-                    "Unable to set acquisition mode");
+      String acquisitionModeString = acquisitionMode.toString();
+      String selectorString = acquisitionModeString.substring(acquisitionModeString.lastIndexOf("_") + 1);
+      assertNoError(Spinnaker_C.spinEnumerationGetEntryByName(acquisitionModeNode, new BytePointer(selectorString), setAcquisitionMode),
+                    "Getting acquisition mode entry by name: " + selectorString);
       LongPointer acquisitionModePointer = new LongPointer(1);
       assertNoError(Spinnaker_C.spinEnumerationEntryGetIntValue(setAcquisitionMode, acquisitionModePointer),
-                    "Unable to set acquisition mode (int value retrieval)");
+                    "Getting acquisition mode int value");
       assertNoError(Spinnaker_C.spinEnumerationSetIntValue(acquisitionModeNode, acquisitionModePointer.get()),
-                    "Unable to set acquisition mode (int value set)");
+                    "Setting acquisition mode int value");
    }
 
    /** See http://softwareservices.flir.com/BFS-U3-04S2/latest/Model/public/ImageFormatControl.html */
@@ -65,19 +68,21 @@ public class SpinnakerBlackfly
    {
       // Pixel format
       spinNodeHandle pixelFormatNode = new spinNodeHandle();
-      assertNoError(Spinnaker_C.spinNodeMapGetNode(cameraNodeMap, new BytePointer("PixelFormat"), pixelFormatNode), "Unable to set pixel format");
+      assertNoError(Spinnaker_C.spinNodeMapGetNode(cameraNodeMap, new BytePointer("PixelFormat"), pixelFormatNode), "Getting pixel format node map node");
 
-      spinNodeHandle setPixelFormat = new spinNodeHandle();
-      assertNoError(Spinnaker_C.spinEnumerationGetEntryByName(pixelFormatNode, new BytePointer(pixelFormat.toString()), setPixelFormat),
-                    "Unable to set pixel format");
-      LongPointer ptrPixelFormat = new LongPointer(1);
-      assertNoError(Spinnaker_C.spinEnumerationEntryGetIntValue(setPixelFormat, ptrPixelFormat), "Unable to set pixel format (int value retrieval)");
-      assertNoError(Spinnaker_C.spinEnumerationSetIntValue(pixelFormatNode, ptrPixelFormat.get()), "Unable to set pixel format (int value set)");
+      spinNodeHandle pixelFormatEntryNodeHandle = new spinNodeHandle();
+      String pixelFormatString = pixelFormat.toString();
+      String selectorString = pixelFormatString.substring(pixelFormatString.lastIndexOf("_") + 1);
+      assertNoError(Spinnaker_C.spinEnumerationGetEntryByName(pixelFormatNode, new BytePointer(selectorString), pixelFormatEntryNodeHandle),
+                    "Getting pixel format entry by name: " + selectorString);
+      LongPointer ptrPixelFormat = new LongPointer(1L);
+      assertNoError(Spinnaker_C.spinEnumerationEntryGetIntValue(pixelFormatEntryNodeHandle, ptrPixelFormat), "Getting pixel format int value");
+      assertNoError(Spinnaker_C.spinEnumerationSetIntValue(pixelFormatNode, ptrPixelFormat.get()), "Setting pixel format int value");
    }
 
    public void startAcquiringImages()
    {
-      assertNoError(Spinnaker_C.spinCameraBeginAcquisition(spinCamera), "Failed to begin acquiring images");
+      assertNoError(Spinnaker_C.spinCameraBeginAcquisition(spinCamera), "Beginning camera acquisition");
    }
 
    public boolean getNextImage(spinImage spinImageToPack)
@@ -95,14 +100,14 @@ public class SpinnakerBlackfly
    public int getHeight(spinImage spinImage)
    {
       SizeTPointer heightPointer = new SizeTPointer(1);
-      assertNoError(Spinnaker_C.spinImageGetHeight(spinImage, heightPointer), "Height could not be determined");
+      assertNoError(Spinnaker_C.spinImageGetHeight(spinImage, heightPointer), "Getting image height");
       return (int) heightPointer.get();
    }
 
    public int getWidth(spinImage spinImage)
    {
       SizeTPointer widthPointer = new SizeTPointer(1);
-      assertNoError(Spinnaker_C.spinImageGetWidth(spinImage, widthPointer), "Width could not be determined");
+      assertNoError(Spinnaker_C.spinImageGetWidth(spinImage, widthPointer), "Getting image width");
       return (int) widthPointer.get();
    }
 
