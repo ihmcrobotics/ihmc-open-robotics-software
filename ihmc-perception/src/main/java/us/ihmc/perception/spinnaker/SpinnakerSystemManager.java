@@ -3,6 +3,7 @@ package us.ihmc.perception.spinnaker;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.spinnaker.Spinnaker_C.*;
 import org.bytedeco.spinnaker.global.Spinnaker_C;
+import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
 
@@ -23,6 +24,7 @@ public class SpinnakerSystemManager
 
    public SpinnakerBlackfly createBlackfly(String serialNumber)
    {
+      LogTools.info("Creating Blackfly with serial number {}", serialNumber);
       spinCamera blackflyCamera = new spinCamera();
       assertNoError(Spinnaker_C.spinCameraListGetBySerial(spinCameraList, new BytePointer(serialNumber), blackflyCamera),
                     "Unable to create spinCamera from serial number!");
