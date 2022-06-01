@@ -134,7 +134,7 @@ public class GDXSCS2EnvironmentManager
          avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
          avatarSimulation.setSystemExitOnDestroy(false);
 
-         scs2SimulationSession = new GDXSCS2BulletSimulationSession(avatarSimulation.getSimulationSession());
+         scs2SimulationSession = new GDXSCS2BulletSimulationSession(avatarSimulation.getSimulationConstructionSet().getSimulationSession());
          scs2SimulationSession.getOnSessionStartedRunnables().addAll(onSessionStartedRunnables);
 
          avatarSimulation.beforeSessionThreadStart();
