@@ -51,14 +51,6 @@ public class GDXHighLevelDepthSensorDemo
             double minRange = 0.105;
             double maxRange = 5.0;
             highLevelDepthSensorSimulator = new GDXHighLevelDepthSensorSimulator("Stepping L515",
-                                                                                 null,
-                                                                                 null,
-                                                                                 null,
-                                                                                 null,
-                                                                                 null,
-                                                                                 null,
-                                                                                 null,
-                                                                                 null,
                                                                                  sensorPoseGizmo.getGizmoFrame(),
                                                                                  () -> 0L,
                                                                                  verticalFOV,
@@ -66,10 +58,8 @@ public class GDXHighLevelDepthSensorDemo
                                                                                  imageHeight,
                                                                                  minRange,
                                                                                  maxRange,
-                                                                                 publishRateHz,
-                                                                                 false);
+                                                                                 publishRateHz);
             baseUI.getImGuiPanelManager().addPanel(highLevelDepthSensorSimulator);
-            highLevelDepthSensorSimulator.create();
             highLevelDepthSensorSimulator.setSensorEnabled(true);
             highLevelDepthSensorSimulator.setPublishPointCloudROS2(false);
             highLevelDepthSensorSimulator.setRenderPointCloudDirectly(true);
