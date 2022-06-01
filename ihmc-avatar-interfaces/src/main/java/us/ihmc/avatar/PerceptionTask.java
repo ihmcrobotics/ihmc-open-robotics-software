@@ -10,12 +10,12 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.time.ThreadTimer;
 import us.ihmc.yoVariables.variable.YoLong;
 
-public class ControllerTask extends HumanoidRobotControlTask
+public class PerceptionTask extends HumanoidRobotControlTask
 {
-   private final CrossRobotCommandResolver controllerResolver;
+   private final CrossRobotCommandResolver threadResolver;
    private final CrossRobotCommandResolver masterResolver;
 
-   private final AvatarControllerThreadInterface controllerThread;
+   private final AvatarControllerThreadInterface thread;
 
    private final long divisor;
    private final ThreadTimer timer;
@@ -24,27 +24,26 @@ public class ControllerTask extends HumanoidRobotControlTask
    private final List<Runnable> taskThreadRunnables = new ArrayList<>();
    private final List<Runnable> schedulerThreadRunnables = new ArrayList<>();
 
-   public ControllerTask(String prefix, AvatarControllerThreadInterface controllerThread, long divisor, double schedulerDt, FullHumanoidRobotModel masterFullRobotModel)
+   public PerceptionTask(String prefix, AvatarControllerThreadInterface thread, long divisor, double schedulerDt, FullHumanoidRobotModel masterFullRobotModel)
    {
       super(divisor);
       this.divisor = divisor;
-      this.controllerThread = controllerThread;
+      this.thread = thread;
 
-      controllerResolver = new CrossRobotCommandResolver(controllerThread.getFullRobotModel());
+      threadResolver = new CrossRobotCommandResolver(thread.getFullRobotModel());
       masterResolver = new CrossRobotCommandResolver(masterFullRobotModel);
 
-//      String prefix = "Controller";
-      timer = new ThreadTimer(prefix, schedulerDt * divisor, controllerThread.getYoVariableRegistry());
-      ticksBehindScheduled = new YoLong(prefix + "TicksBehindScheduled", controllerThread.getYoVariableRegistry());
+      timer = new ThreadTimer(prefix, schedulerDt * divisor, thread.getYoVariableRegistry());
+      ticksBehindScheduled = new YoLong(prefix + "TicksBehindScheduled", thread.getYoVariableRegistry());
    }
 
    @Override
    protected void execute()
    {
       timer.start();
-      long schedulerTick = controllerThread.getHumanoidRobotContextData().getSchedulerTick();
+      long schedulerTick = thread.getHumanoidRobotContextData().getSchedulerTick();
       ticksBehindScheduled.set(schedulerTick - timer.getTickCount() * divisor);
-      controllerThread.run();
+      thread.run();
       runAll(taskThreadRunnables);
       timer.stop();
    }
@@ -53,14 +52,14 @@ public class ControllerTask extends HumanoidRobotControlTask
    protected void updateMasterContext(HumanoidRobotContextData masterContext)
    {
       runAll(schedulerThreadRunnables);
-      masterResolver.resolveHumanoidRobotContextDataController(controllerThread.getHumanoidRobotContextData(), masterContext);
+      masterResolver.resolveHumanoidRobotContextDataPerception(thread.getHumanoidRobotContextData(), masterContext);
    }
 
    @Override
    protected void updateLocalContext(HumanoidRobotContextData masterContext)
    {
-      controllerResolver.resolveHumanoidRobotContextDataScheduler(masterContext, controllerThread.getHumanoidRobotContextData());
-      controllerResolver.resolveHumanoidRobotContextDataEstimator(masterContext, controllerThread.getHumanoidRobotContextData());
+      threadResolver.resolveHumanoidRobotContextDataScheduler(masterContext, thread.getHumanoidRobotContextData());
+      threadResolver.resolveHumanoidRobotContextDataEstimator(masterContext, thread.getHumanoidRobotContextData());
    }
 
    @Override
