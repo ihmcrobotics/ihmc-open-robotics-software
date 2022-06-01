@@ -28,6 +28,8 @@ import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.rapidRegions.GPUPlanarRegion;
+import us.ihmc.perception.rapidRegions.GPURegionRing;
 import us.ihmc.robotEnvironmentAwareness.geometry.*;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerTools;
