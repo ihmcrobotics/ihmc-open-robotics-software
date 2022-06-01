@@ -374,7 +374,7 @@ public class KSTTools
       for (RobotSide robotSide : RobotSide.values)
       {
          if (areHandTaskspaceOutputsEnabled.get(robotSide).getValue())
-            trajectoryMessageFactory.computeHandTrajectoryMessage(robotSide);
+            trajectoryMessageFactory.computeHandTrajectoryMessage(robotSide, desiredFullRobotModel.getChest().getBodyFixedFrame());
 
          if (areArmJointspaceOutputsEnabled.get(robotSide).getValue())
             trajectoryMessageFactory.computeArmTrajectoryMessage(robotSide);
