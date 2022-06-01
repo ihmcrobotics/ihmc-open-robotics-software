@@ -80,15 +80,14 @@ public class DualBlackflyCamera
             LogTools.info("Publishing ROS 2 color video: {}", videoTopic);
             ros2VideoPublisher = ROS2Tools.createPublisher(realtimeROS2Node, videoTopic, ROS2QosProfile.BEST_EFFORT());
          }
-
-         if (ros2VideoPublisher != null)
+         else // We don't want to publish until the node is spinning which will be next time
          {
             long acquisitionTime = System.nanoTime();
             blackfly.setBytedecoPointerToSpinImageData(spinImage, spinImageDataPointer);
             blackflySourceImage.rewind();
             blackflySourceImage.changeAddress(spinImageDataPointer.address());
 
-            opencv_imgproc.cvtColor(blackflySourceImage.getBytedecoOpenCVMat(), yuv420Image, opencv_imgproc.COLOR_BGR2YUV_I420);
+            opencv_imgproc.cvtColor(blackflySourceImage.getBytedecoOpenCVMat(), yuv420Image, opencv_imgproc.COLOR_RGB2YUV_I420);
             opencv_imgcodecs.imencode(".jpg", yuv420Image, jpegImageBytePointer, compressionParameters);
 
             byte[] heapByteArrayData = new byte[jpegImageBytePointer.asBuffer().remaining()];
@@ -101,6 +100,7 @@ public class DualBlackflyCamera
             imagePublishRateCalculator.ping();
          }
       }
+      Spinnaker_C.spinImageRelease(spinImage);
 
       Float64 float64Message = new Float64();
       float64Message.setData(imagePublishRateCalculator.getFrequency());
