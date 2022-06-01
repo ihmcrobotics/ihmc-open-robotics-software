@@ -39,7 +39,7 @@ public class GDXROS2BigVideoVisualizer extends GDXOpenCVVideoVisualizer
       {
          synchronized (syncObject)
          {
-            videoPacket.getData().reset();
+            videoPacket.getData().resetQuick();
             subscriber.takeNextData(videoPacket, sampleInfo);
          }
          doReceiveMessageOnThread(() ->
