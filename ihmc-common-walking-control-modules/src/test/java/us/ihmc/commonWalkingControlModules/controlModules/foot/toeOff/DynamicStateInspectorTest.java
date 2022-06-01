@@ -30,6 +30,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLineSegment2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.listener.YoParameterChangedListener;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -85,6 +86,8 @@ public class DynamicStateInspectorTest
    {
       DynamicStateInspectorParameters parameters = new DynamicStateInspectorParameters(registry);
       DynamicStateInspector inspector = new DynamicStateInspector(registry);
+
+      new DefaultParameterReader().readParametersInRegistry(registry);
 
       FramePose3D leftFootPose = new FramePose3D();
       FramePose3D rightFootPose = new FramePose3D();
@@ -280,6 +283,8 @@ public class DynamicStateInspectorTest
       DynamicStateInspectorParameters parameters = new DynamicStateInspectorParameters(registry);
       DynamicStateInspector inspector = new DynamicStateInspector(registry);
 
+      new DefaultParameterReader().readParametersInRegistry(registry);
+
       leftPolygon.clear(worldFrame);
       rightPolygon.clear(worldFrame);
 
@@ -386,6 +391,8 @@ public class DynamicStateInspectorTest
       DynamicStateInspectorParameters parameters = new DynamicStateInspectorParameters(registry);
       DynamicStateInspector inspector = new DynamicStateInspector(registry);
 
+      new DefaultParameterReader().readParametersInRegistry(registry);
+
       leftPolygon.clear(worldFrame);
       rightPolygon.clear(worldFrame);
 
@@ -485,6 +492,8 @@ public class DynamicStateInspectorTest
       DynamicStateInspectorParameters parameters = new DynamicStateInspectorParameters(registry);
       DynamicStateInspector inspector = new DynamicStateInspector(registry);
 
+      new DefaultParameterReader().readParametersInRegistry(registry);
+
       leftPolygon.clear(worldFrame);
       rightPolygon.clear(worldFrame);
 
@@ -581,6 +590,8 @@ public class DynamicStateInspectorTest
    {
       DynamicStateInspectorParameters parameters = new DynamicStateInspectorParameters(registry);
       DynamicStateInspector inspector = new DynamicStateInspector(registry);
+
+      new DefaultParameterReader().readParametersInRegistry(registry);
 
       leftPolygon.clear(worldFrame);
       rightPolygon.clear(worldFrame);
@@ -686,6 +697,8 @@ public class DynamicStateInspectorTest
       DynamicStateInspectorParameters parameters = new DynamicStateInspectorParameters(registry);
       DynamicStateInspector inspector = new DynamicStateInspector(registry);
 
+      new DefaultParameterReader().readParametersInRegistry(registry);
+
       leftPolygon.clear(worldFrame);
       rightPolygon.clear(worldFrame);
 
@@ -781,6 +794,8 @@ public class DynamicStateInspectorTest
    {
       DynamicStateInspectorParameters parameters = new DynamicStateInspectorParameters(registry);
       DynamicStateInspector inspector = new DynamicStateInspector(registry);
+
+      new DefaultParameterReader().readParametersInRegistry(registry);
 
       leftPolygon.clear(worldFrame);
       rightPolygon.clear(worldFrame);
@@ -887,6 +902,8 @@ public class DynamicStateInspectorTest
       DynamicStateInspectorParameters parameters = new DynamicStateInspectorParameters(registry);
       DynamicStateInspector inspector = new DynamicStateInspector(registry);
 
+      new DefaultParameterReader().readParametersInRegistry(registry);
+
       leftPolygon.clear(worldFrame);
       rightPolygon.clear(worldFrame);
 
@@ -987,6 +1004,8 @@ public class DynamicStateInspectorTest
    {
       DynamicStateInspectorParameters parameters = new DynamicStateInspectorParameters(registry);
       DynamicStateInspector inspector = new DynamicStateInspector(registry);
+
+      new DefaultParameterReader().readParametersInRegistry(registry);
 
       leftPolygon.clear(worldFrame);
       rightPolygon.clear(worldFrame);
