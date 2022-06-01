@@ -279,11 +279,13 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(robotModel, flatGround, simulationTestingParameters);
       simulationTestHelper.start();
+      ((YoBoolean) simulationTestHelper.findVariable("speedUpTransferDynamicsFromError")).set(true);
       ((YoBoolean) simulationTestHelper.findVariable("controllerAllowStepAdjustment")).set(true);
       ((YoBoolean) simulationTestHelper.findVariable("controllerSwingSpeedUpEnabled")).set(true);
       ((YoBoolean) simulationTestHelper.findVariable("leftFootSwingIsSpeedUpEnabled")).set(true);
       ((YoBoolean) simulationTestHelper.findVariable("rightFootSwingIsSpeedUpEnabled")).set(true);
       ((YoDouble) simulationTestHelper.findVariable("icpDistanceFromFootPolygonThreshold")).set(0.15);
+
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       pushRobotController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationSession().getTime(), simulationTestHelper.getRobot(), fullRobotModel);
       simulationTestHelper.addYoGraphicDefinition(pushRobotController.getForceVizDefinition());

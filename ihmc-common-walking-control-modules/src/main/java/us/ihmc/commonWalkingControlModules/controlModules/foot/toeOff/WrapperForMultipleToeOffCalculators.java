@@ -1,10 +1,7 @@
-package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator;
+package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff;
 
 import java.util.EnumMap;
 
-import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoRegistry;
