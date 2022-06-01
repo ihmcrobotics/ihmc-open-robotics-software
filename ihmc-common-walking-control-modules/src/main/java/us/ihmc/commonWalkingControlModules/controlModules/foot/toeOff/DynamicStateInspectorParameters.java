@@ -1,30 +1,32 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff;
 
+import us.ihmc.yoVariables.listener.YoParameterChangedListener;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DynamicStateInspectorParameters
 {
    /** This checks to make sure the ICP isn't falling to the outside of the trailing foot. **/
-   private final YoDouble minLateralDistanceInside;
+   private final DoubleParameter minLateralDistanceInside;
 
    /**
     * These variables make sure the ICP is far enough from the toe off point. If they're far enough, then there's probably enough control
     * authority to control them
     */
-   private final YoDouble minDistanceFromTheToe;
-   private final YoDouble minFractionOfStrideFromTheToe;
+   private final DoubleParameter minDistanceFromTheToe;
+   private final DoubleParameter minFractionOfStrideFromTheToe;
 
-   private final YoDouble minDistanceAlongErrorFromOutsideEdge;
-   private final YoDouble minOrthogonalDistanceFromOutsideEdge;
-   private final YoDouble minDistanceAlongErrorFromInsideEdge;
-   private final YoDouble minOrthogonalDistanceFromInsideEdge;
+   private final DoubleParameter minDistanceAlongErrorFromOutsideEdge;
+   private final DoubleParameter minOrthogonalDistanceFromOutsideEdge;
+   private final DoubleParameter minDistanceAlongErrorFromInsideEdge;
+   private final DoubleParameter minOrthogonalDistanceFromInsideEdge;
 
-   private final YoDouble minNormalizedDistanceFromOutsideEdge;
-   private final YoDouble minNormalizedDistanceFromInsideEdge;
-   private final YoDouble maxRatioOfControlDecreaseFromToeingOff;
-   private final YoDouble maxNormalizedErrorNeededForControl;
+   private final DoubleParameter minNormalizedDistanceFromOutsideEdge;
+   private final DoubleParameter minNormalizedDistanceFromInsideEdge;
+   private final DoubleParameter maxRatioOfControlDecreaseFromToeingOff;
+   private final DoubleParameter maxNormalizedErrorNeededForControl;
 
    public DynamicStateInspectorParameters(YoRegistry parentRegistry)
    {
@@ -35,36 +37,20 @@ public class DynamicStateInspectorParameters
    {
       YoRegistry registry = new YoRegistry(getClass().getSimpleName() + suffix);
 
-      minLateralDistanceInside = new YoDouble("minLatDistInside" + suffix, registry);
+      minLateralDistanceInside = new DoubleParameter("minLatDistInside" + suffix, registry, 0.05);
 
-      minDistanceFromTheToe = new YoDouble("minDistanceFromToe" + suffix, registry);
-      minFractionOfStrideFromTheToe = new YoDouble("minFractionOfStrideFromToe" + suffix, registry);
+      minDistanceFromTheToe = new DoubleParameter("minDistanceFromToe" + suffix, registry, 0.05);
+      minFractionOfStrideFromTheToe = new DoubleParameter("minFractionOfStrideFromToe" + suffix, registry, 0.5);
 
-      minDistanceAlongErrorFromOutsideEdge = new YoDouble("minDistAlongErrorFromOutEdge" + suffix, registry);
-      minOrthogonalDistanceFromOutsideEdge = new YoDouble("minOrthoDistFromOutEdge" + suffix, registry);
-      minDistanceAlongErrorFromInsideEdge = new YoDouble("minDistAlongErrorFromInEdge" + suffix, registry);
-      minOrthogonalDistanceFromInsideEdge = new YoDouble("minOrthoDistFromInEdge" + suffix, registry);
+      minDistanceAlongErrorFromOutsideEdge = new DoubleParameter("minDistAlongErrorFromOutEdge" + suffix, registry, -0.025);
+      minOrthogonalDistanceFromOutsideEdge = new DoubleParameter("minOrthoDistFromOutEdge" + suffix, registry, -0.015);
+      minDistanceAlongErrorFromInsideEdge = new DoubleParameter("minDistAlongErrorFromInEdge" + suffix, registry, -0.01);
+      minOrthogonalDistanceFromInsideEdge = new DoubleParameter("minOrthoDistFromInEdge" + suffix, registry, -0.0075);
 
-      minNormalizedDistanceFromOutsideEdge = new YoDouble("minNormDistFromOutEdge" + suffix, registry);
-      minNormalizedDistanceFromInsideEdge = new YoDouble("minNormDistFromInEdge" + suffix, registry);
-      maxRatioOfControlDecreaseFromToeingOff = new YoDouble("maxRatioOfControlDecreaseFromToeingOff" + suffix, registry);
-      maxNormalizedErrorNeededForControl = new YoDouble("maxNormErrorNeededForControl" + suffix, registry);
-
-      maxNormalizedErrorNeededForControl.set(1.0);
-      maxRatioOfControlDecreaseFromToeingOff.set(2.0);
-
-      minDistanceAlongErrorFromInsideEdge.set(-0.01);
-      minOrthogonalDistanceFromInsideEdge.set(-0.0075);
-
-      minDistanceAlongErrorFromOutsideEdge.set(-0.025);
-      minOrthogonalDistanceFromOutsideEdge.set(-0.015);
-
-      minNormalizedDistanceFromInsideEdge.set(0.3);
-      minNormalizedDistanceFromOutsideEdge.set(0.35);
-
-      minLateralDistanceInside.set(0.05);
-      minFractionOfStrideFromTheToe.set(0.5);
-      minDistanceFromTheToe.set(0.05);
+      minNormalizedDistanceFromOutsideEdge = new DoubleParameter("minNormDistFromOutEdge" + suffix, registry, 0.35);
+      minNormalizedDistanceFromInsideEdge = new DoubleParameter("minNormDistFromInEdge" + suffix, registry, 0.3);
+      maxRatioOfControlDecreaseFromToeingOff = new DoubleParameter("maxRatioOfControlDecreaseFromToeingOff" + suffix, registry, 2.0);
+      maxNormalizedErrorNeededForControl = new DoubleParameter("maxNormErrorNeededForControl" + suffix, registry, 1.0);
 
 
       parentRegistry.addChild(registry);
@@ -72,60 +58,60 @@ public class DynamicStateInspectorParameters
 
    public double getMinLateralDistanceInside()
    {
-      return minLateralDistanceInside.getDoubleValue();
+      return minLateralDistanceInside.getValue();
    }
 
    public double getMinDistanceFromTheToe()
    {
-      return minDistanceFromTheToe.getDoubleValue();
+      return minDistanceFromTheToe.getValue();
    }
 
    public double getMinFractionOfStrideFromTheToe()
    {
-      return minFractionOfStrideFromTheToe.getDoubleValue();
+      return minFractionOfStrideFromTheToe.getValue();
    }
 
    public double getMinDistanceAlongErrorFromOutsideEdge()
    {
-      return minDistanceAlongErrorFromOutsideEdge.getDoubleValue();
+      return minDistanceAlongErrorFromOutsideEdge.getValue();
    }
 
    public double getMinNormalizedDistanceFromOutsideEdge()
    {
-      return minNormalizedDistanceFromOutsideEdge.getDoubleValue();
+      return minNormalizedDistanceFromOutsideEdge.getValue();
    }
 
    public double getMinNormalizedDistanceFromInsideEdge()
    {
-      return minNormalizedDistanceFromInsideEdge.getDoubleValue();
+      return minNormalizedDistanceFromInsideEdge.getValue();
    }
 
    public double getMinOrthogonalDistanceFromOutsideEdge()
    {
-      return minOrthogonalDistanceFromOutsideEdge.getDoubleValue();
+      return minOrthogonalDistanceFromOutsideEdge.getValue();
    }
 
    public double getMinDistanceAlongErrorFromInsideEdge()
    {
-      return minDistanceAlongErrorFromInsideEdge.getDoubleValue();
+      return minDistanceAlongErrorFromInsideEdge.getValue();
    }
 
    public double getMinOrthogonalDistanceFromInsideEdge()
    {
-      return minOrthogonalDistanceFromInsideEdge.getDoubleValue();
+      return minOrthogonalDistanceFromInsideEdge.getValue();
    }
 
    public double getMaxNormalizedErrorNeededForControl()
    {
-      return maxNormalizedErrorNeededForControl.getDoubleValue();
+      return maxNormalizedErrorNeededForControl.getValue();
    }
 
    public double getMaxRatioOfControlDecreaseFromToeingOff()
    {
-      return maxRatioOfControlDecreaseFromToeingOff.getDoubleValue();
+      return maxRatioOfControlDecreaseFromToeingOff.getValue();
    }
 
-   public void attachParameterChangeListener(YoVariableChangedListener changedListener)
+   public void attachParameterChangeListener(YoParameterChangedListener changedListener)
    {
       minLateralDistanceInside.addListener(changedListener);
       minDistanceFromTheToe.addListener(changedListener);
