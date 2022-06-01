@@ -131,7 +131,6 @@ public class GDXPerceptionVisualizerUI
             //                simulatedDepthSensor.create();
             //                baseUI.getSceneManager().addRenderableProvider(simulatedDepthSensor, GDXSceneLevel.VIRTUAL);
 
-            ousterLidar.create();
             baseUI.get3DSceneManager().addRenderableProvider(ousterLidar, GDXSceneLevel.VIRTUAL);
             baseUI.getImGuiPanelManager().addPanel(ousterLidar);
 
