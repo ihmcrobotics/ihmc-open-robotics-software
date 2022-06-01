@@ -51,8 +51,7 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
                                     HumanoidRobotContextDataFactory contextDataFactory,
                                     StatusMessageOutputManager walkingOutputManager,
                                     CommandInputManager walkingCommandInputManager,
-                                    DRCRobotModel drcRobotModel,
-                                    double perceptionDt)
+                                    DRCRobotModel drcRobotModel)
    {
       this.fullRobotModel = drcRobotModel.createFullRobotModel();
 
@@ -74,7 +73,7 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
 
       humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       csg = csgPluginFactory.buildPlugin(humanoidReferenceFrames,
-                                         perceptionDt,
+                                         drcRobotModel.getStepGeneratorDT(),
                                          drcRobotModel.getWalkingControllerParameters(),
                                          walkingOutputManager,
                                          walkingCommandInputManager,
