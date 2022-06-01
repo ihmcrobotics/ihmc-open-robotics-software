@@ -167,7 +167,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
 
       if (getSessionVisualizerControls() != null)
       {
-         getSessionVisualizerControls().waitUntilFullyUp();
+         getSessionVisualizerControls().waitUntilVisualizerFullyUp();
          getSessionVisualizerControls().addVisualizerShutdownListener(() -> isVisualizerGoingDown.set(true));
 
          SixDoFJointStateBasics initialRootJointState = (SixDoFJointStateBasics) getRobotDefinition().getRootJointDefinitions().get(0).getInitialJointState();
@@ -379,25 +379,25 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    public void setInPoint()
    {
       checkSimulationSessionAlive();
-      getSimulationSessionControls().setBufferInPointIndexToCurrent();
+      getSimulationSessionControls().setBufferInPoint();
    }
 
    public void setOutPoint()
    {
       checkSimulationSessionAlive();
-      getSimulationSessionControls().setBufferOutPointIndexToCurrent();
+      getSimulationSessionControls().setBufferOutPoint();
    }
 
    public void gotoInPoint()
    {
       checkSimulationSessionAlive();
-      getSimulationSessionControls().setBufferCurrentIndexToInPoint();
+      getSimulationSessionControls().gotoBufferInPoint();
    }
 
    public void gotoOutPoint()
    {
       checkSimulationSessionAlive();
-      getSimulationSessionControls().setBufferCurrentIndexToOutPoint();
+      getSimulationSessionControls().gotoBufferOutPoint();
    }
 
    public void stepBufferIndexForward()
@@ -550,7 +550,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
          {
             if (!isVisualizerGoingDown.get())
             {
-               Window primaryWindow = getSessionVisualizerControls().getPrimaryWindow();
+               Window primaryWindow = getSessionVisualizerControls().getPrimaryGUIWindow();
                primaryWindow.requestFocus();
                Alert alert = new Alert(AlertType.INFORMATION, "Test complete!", ButtonType.OK);
                SessionVisualizerIOTools.addSCSIconToDialog(alert);
@@ -562,7 +562,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
                alert.showAndWait();
             }
          });
-         getSessionVisualizerControls().waitUntilDown();
+         getSessionVisualizerControls().waitUntilVisualizerDown();
       }
       else
       {
@@ -854,7 +854,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
          @Override
          public void gotoOutPointNow()
          {
-            getSimulationSessionControls().setBufferCurrentIndexToOutPoint();
+            getSimulationSessionControls().gotoBufferOutPoint();
          }
 
          @Override

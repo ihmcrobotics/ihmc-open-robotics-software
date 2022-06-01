@@ -899,7 +899,7 @@ public class EndToEndTestTools
 
       // Stop the sim and disable the GUI:
       simulationTestHelper.getSimulationSession().stopSessionThread();
-      simulationTestHelper.getSessionVisualizerControls().disableUserControls();
+      simulationTestHelper.getSessionVisualizerControls().disableGUIControls();
 
       // Crop the Buffer to In/Out. This is important because of how we use the DataBuffer later and we assume that in point is at index=0:
       simulationTestHelper.cropBuffer();
@@ -969,7 +969,7 @@ public class EndToEndTestTools
       simulationTestHelper.exportVideo(new File(dataFolder, tagName + "_Video.mov"));
       LogTools.info("done creating video");
 
-      simulationTestHelper.getSessionVisualizerControls().enableUserControls();
+      simulationTestHelper.getSessionVisualizerControls().enableGUIControls();
    }
 
    private static void writeReadme(File readmeFile, String info)

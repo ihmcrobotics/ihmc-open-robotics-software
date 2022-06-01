@@ -120,7 +120,7 @@ public class SCS2AvatarSimulation
       if (simulationSession != null)
       {
          if (showGUI)
-            sessionVisualizerControls.shutdownNow();
+            sessionVisualizerControls.shutdownSession();
          simulationSession.shutdownSession();
          simulationSession = null;
       }
