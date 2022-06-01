@@ -55,6 +55,6 @@ public class AtlasBehaviorDoNothingTest
    @AfterAll
    public static void printMemoryUsageAfterClass()
    {
-      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(AtlasStepInPlaceBehaviorTest.class + " after class.");
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(AtlasBehaviorDoNothingTest.class + " after class.");
    }
 }
