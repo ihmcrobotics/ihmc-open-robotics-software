@@ -10,9 +10,9 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.Pool;
+import controller_msgs.msg.dds.BigVideoPacket;
 import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import controller_msgs.msg.dds.VideoPacket;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
@@ -45,7 +45,6 @@ import us.ihmc.gdx.sceneManager.GDX3DSceneBasics;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudMessageTools;
 import us.ihmc.ros2.ROS2NodeInterface;
@@ -77,10 +76,10 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
    private final int imageHeight;
    private final GDXPointCloudRenderer pointCloudRenderer = new GDXPointCloudRenderer();
 
-   private final RosNodeInterface ros1Node;
-   private final String ros1DepthImageTopic;
-   private final String ros1ColorImageTopic;
-   private final ROS2Topic<?> ros2PointCloudTopic;
+   private RosNodeInterface ros1Node;
+   private String ros1DepthImageTopic;
+   private String ros1ColorImageTopic;
+   private ROS2Topic<?> ros2PointCloudTopic;
    private String ros1PointCloudTopic;
    private RosImagePublisher ros1DepthPublisher;
    private RosPointCloudPublisher ros1PointCloudPublisher;
@@ -90,10 +89,10 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
    private RosCameraInfoPublisher ros1ColorCameraInfoPublisher;
    private ChannelBuffer ros1ColorChannelBuffer;
 
-   private final ROS2NodeInterface ros2Node;
+   private ROS2NodeInterface ros2Node;
    private boolean ros2IsLidarScan;
    private IHMCROS2Publisher<?> publisher;
-   private IHMCROS2Publisher<VideoPacket> ros2VideoPublisher;
+   private IHMCROS2Publisher<BigVideoPacket> ros2VideoPublisher;
    private JPEGEncoder encoder;
    private RGBPicture rgbPicture;
    private ByteBuffer jpegOutputByteBuffer;
@@ -132,14 +131,6 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
    private ByteBuffer rgb8Buffer;
 
    public GDXHighLevelDepthSensorSimulator(String sensorName,
-                                           RosNodeInterface ros1Node,
-                                           String ros1DepthImageTopic,
-                                           String ros1DepthCameraInfoTopic,
-                                           String ros1ColorImageTopic,
-                                           String ros1ColorCameraInfoTopic,
-                                           ROS2NodeInterface ros2Node,
-                                           ROS2Topic<?> ros2PointCloudTopic,
-                                           ROS2Topic<VideoPacket> ros2VideoTopic,
                                            ReferenceFrame sensorFrame,
                                            LongSupplier timestampSupplier,
                                            double verticalFOV,
@@ -147,56 +138,62 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
                                            int imageHeight,
                                            double minRange,
                                            double maxRange,
-                                           double publishRateHz,
-                                           boolean renderPointCloudDirectly)
+                                           double publishRateHz)
    {
       super(ImGuiTools.uniqueLabel(INDEX.getAndIncrement(), sensorName + " Simulator"));
       setRenderMethod(this::renderImGuiWidgets);
-      this.ros1Node = ros1Node;
-      this.ros1DepthImageTopic = ros1DepthImageTopic;
-      this.ros1ColorImageTopic = ros1ColorImageTopic;
-      this.ros2Node = ros2Node;
-      this.ros2PointCloudTopic = ros2PointCloudTopic;
+      depthSensorSimulator = new GDXLowLevelDepthSensorSimulator(sensorName, verticalFOV, imageWidth, imageHeight, minRange, maxRange);
+
       this.sensorFrame = sensorFrame;
       this.timestampSupplier = timestampSupplier;
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
       this.publishRateHz = publishRateHz;
-      this.renderPointCloudDirectly.set(renderPointCloudDirectly);
-
-      depthSensorSimulator = new GDXLowLevelDepthSensorSimulator(sensorName, verticalFOV, imageWidth, imageHeight, minRange, maxRange);
-
-      if (ros1Node != null)
-      {
-         LogTools.info("Publishing ROS 1 depth: {} {}", ros1DepthImageTopic, ros1DepthCameraInfoTopic);
-         ros1DepthPublisher = new RosImagePublisher();
-         ros1DepthCameraInfoPublisher = new RosCameraInfoPublisher();
-         ros1PointCloudPublisher = new RosPointCloudPublisher(PointType.XYZ, false);
-         ros1Node.attachPublisher(ros1DepthCameraInfoTopic, ros1DepthCameraInfoPublisher);
-         ros1Node.attachPublisher(ros1DepthImageTopic, ros1DepthPublisher);
-         ros1DepthChannelBuffer = ros1DepthPublisher.getChannelBufferFactory().getBuffer(2 * imageWidth * imageHeight);
-         LogTools.info("Publishing ROS 1 color: {} {}", ros1ColorImageTopic, ros1ColorCameraInfoTopic);
-         ros1ColorPublisher = new RosImagePublisher();
-         ros1ColorCameraInfoPublisher = new RosCameraInfoPublisher();
-         ros1Node.attachPublisher(ros1ColorCameraInfoTopic, ros1ColorCameraInfoPublisher);
-         ros1Node.attachPublisher(ros1ColorImageTopic, ros1ColorPublisher);
-         ros1ColorChannelBuffer = ros1ColorPublisher.getChannelBufferFactory().getBuffer(3 * imageWidth * imageHeight);
-      }
-      if (ros2Node != null && ros2PointCloudTopic != null)
-      {
-         ros2PointsToPublish = new RecyclingArrayList<>(imageWidth * imageHeight, Point3D::new);
-         ros2IsLidarScan = ros2PointCloudTopic.getType().equals(LidarScanMessage.class);
-         if (!ros2IsLidarScan)
-            ros2ColorsToPublish = new int[imageWidth * imageHeight];
-         LogTools.info("Publishing ROS 2: {}", ros2PointCloudTopic.getName());
-         publisher = ROS2Tools.createPublisher(ros2Node, ros2PointCloudTopic, ROS2QosProfile.DEFAULT());
-      }
-      if (ros2Node != null && ros2VideoTopic != null)
-      {
-         ros2VideoPublisher = ROS2Tools.createPublisher(ros2Node, ros2VideoTopic);
-      }
 
       throttleTimer.reset();
+   }
+
+   public void setupForROS1Depth(RosNodeInterface ros1Node, String ros1DepthImageTopic, String ros1DepthCameraInfoTopic)
+   {
+      this.ros1Node = ros1Node;
+      this.ros1DepthImageTopic = ros1DepthImageTopic;
+      LogTools.info("Publishing ROS 1 depth: {} {}", ros1DepthImageTopic, ros1DepthCameraInfoTopic);
+      ros1DepthPublisher = new RosImagePublisher();
+      ros1DepthCameraInfoPublisher = new RosCameraInfoPublisher();
+      ros1PointCloudPublisher = new RosPointCloudPublisher(PointType.XYZ, false);
+      ros1Node.attachPublisher(ros1DepthCameraInfoTopic, ros1DepthCameraInfoPublisher);
+      ros1Node.attachPublisher(ros1DepthImageTopic, ros1DepthPublisher);
+      ros1DepthChannelBuffer = ros1DepthPublisher.getChannelBufferFactory().getBuffer(2 * imageWidth * imageHeight);
+   }
+
+   public void setupForROS1Color(RosNodeInterface ros1Node, String ros1ColorImageTopic, String ros1ColorCameraInfoTopic)
+   {
+      this.ros1Node = ros1Node;
+      this.ros1ColorImageTopic = ros1ColorImageTopic;
+      LogTools.info("Publishing ROS 1 color: {} {}", ros1ColorImageTopic, ros1ColorCameraInfoTopic);
+      ros1ColorPublisher = new RosImagePublisher();
+      ros1ColorCameraInfoPublisher = new RosCameraInfoPublisher();
+      ros1Node.attachPublisher(ros1ColorCameraInfoTopic, ros1ColorCameraInfoPublisher);
+      ros1Node.attachPublisher(ros1ColorImageTopic, ros1ColorPublisher);
+      ros1ColorChannelBuffer = ros1ColorPublisher.getChannelBufferFactory().getBuffer(3 * imageWidth * imageHeight);
+   }
+
+   public void setupForROS2PointCloud(ROS2NodeInterface ros2Node, ROS2Topic<?> ros2PointCloudTopic)
+   {
+      this.ros2Node = ros2Node;
+      this.ros2PointCloudTopic = ros2PointCloudTopic;
+      ros2PointsToPublish = new RecyclingArrayList<>(imageWidth * imageHeight, Point3D::new);
+      ros2IsLidarScan = ros2PointCloudTopic.getType().equals(LidarScanMessage.class);
+      if (!ros2IsLidarScan)
+         ros2ColorsToPublish = new int[imageWidth * imageHeight];
+      LogTools.info("Publishing ROS 2 point cloud: {}", ros2PointCloudTopic.getName());
+      publisher = ROS2Tools.createPublisher(ros2Node, ros2PointCloudTopic, ROS2QosProfile.DEFAULT());
+   }
+
+   public void setupForROS2Color(ROS2NodeInterface ros2Node, ROS2Topic<BigVideoPacket> ros2VideoTopic)
+   {
+      this.ros2Node = ros2Node;
+      ros2VideoPublisher = ROS2Tools.createPublisher(ros2Node, ros2VideoTopic);
    }
 
    public void create()
@@ -314,17 +311,17 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
       {
          colorROS2Executor.execute(() ->
          {
-            VideoPacket videoPacket = new VideoPacket();
-            videoPacket.setVideoSource(VideoPacket.VIDEO_SOURCE_MULTISENSE_LEFT_EYE);
+            BigVideoPacket videoPacket = new BigVideoPacket();
+//            videoPacket.setVideoSource(VideoPacket.VIDEO_SOURCE_MULTISENSE_LEFT_EYE);
             long timestamp = timestampSupplier == null ? System.nanoTime() : timestampSupplier.getAsLong();
-            videoPacket.setTimestamp(timestamp);
+            videoPacket.setAcquisitionTimeNanos(timestamp);
             tempSensorFramePose2.setToZero(sensorFrame);
             tempSensorFramePose2.changeFrame(ReferenceFrame.getWorldFrame());
-            videoPacket.getPosition().set(tempSensorFramePose2.getPosition());
-            videoPacket.getOrientation().set(tempSensorFramePose2.getOrientation());
+//            videoPacket.getPosition().set(tempSensorFramePose2.getPosition());
+//            videoPacket.getOrientation().set(tempSensorFramePose2.getOrientation());
             if (tuning)
                updateCameraPinholeBrown();
-            videoPacket.getIntrinsicParameters().set(HumanoidMessageTools.toIntrinsicParametersMessage(depthCameraIntrinsics));
+//            videoPacket.getIntrinsicParameters().set(HumanoidMessageTools.toIntrinsicParametersMessage(depthCameraIntrinsics));
 
             // Note: OpenCV doesn't support encoding YUV to JPEG, so we need IHMC Video Codecs for this
             // See JPEGCompressor for more info
