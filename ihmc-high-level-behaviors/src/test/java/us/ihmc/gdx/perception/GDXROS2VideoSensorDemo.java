@@ -12,6 +12,7 @@ import us.ihmc.gdx.ui.graphics.live.GDXROS2VideoVisualizer;
 import us.ihmc.gdx.ui.graphics.live.ROS2VideoFormat;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXGlobalVisualizersPanel;
 import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 
 public class GDXROS2VideoSensorDemo
@@ -67,14 +68,6 @@ public class GDXROS2VideoSensorDemo
             double minRange = 0.105;
             double maxRange = 5.0;
             highLevelDepthSensorSimulator = new GDXHighLevelDepthSensorSimulator("Stepping L515",
-                                                                                 null,
-                                                                                 null,
-                                                                                 null,
-                                                                                 null,
-                                                                                 null,
-                                                                                 ros2Node,
-                                                                                 null,
-                                                                                 ROS2Tools.VIDEO,
                                                                                  sensorPoseGizmo.getGizmoFrame(),
                                                                                  () -> 0L,
                                                                                  verticalFOV,
@@ -82,8 +75,8 @@ public class GDXROS2VideoSensorDemo
                                                                                  imageHeight,
                                                                                  minRange,
                                                                                  maxRange,
-                                                                                 publishRateHz,
-                                                                                 false);
+                                                                                 publishRateHz);
+            highLevelDepthSensorSimulator.setupForROS2Color(ros2Node, ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.RIGHT));
             baseUI.getImGuiPanelManager().addPanel(highLevelDepthSensorSimulator);
             highLevelDepthSensorSimulator.create();
             highLevelDepthSensorSimulator.setSensorEnabled(true);

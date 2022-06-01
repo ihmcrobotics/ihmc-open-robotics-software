@@ -95,14 +95,6 @@ public class GDXFFMPEGL515DepthLoggingDemo
                   double minRange = 0.105;
                   double maxRange = 5.0;
                   l515 = new GDXHighLevelDepthSensorSimulator("Stepping L515",
-                                                              null,
-                                                              null,
-                                                              null,
-                                                              null,
-                                                              null,
-                                                              null,
-                                                              null,
-                                                              null,
                                                               l515PoseGizmo.getGizmoFrame(),
                                                               () -> 0L,
                                                               verticalFOV,
@@ -110,8 +102,7 @@ public class GDXFFMPEGL515DepthLoggingDemo
                                                               imageHeight,
                                                               minRange,
                                                               maxRange,
-                                                              publishRateHz,
-                                                              false);
+                                                              publishRateHz);
                   baseUI.getImGuiPanelManager().addPanel(l515);
                   l515.create();
                   l515.setSensorEnabled(true);
