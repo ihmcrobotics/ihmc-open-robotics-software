@@ -146,7 +146,7 @@ public final class KinematicsToolboxControllerTest
          guiControls.setCameraFocusPosition(0.0, 0.0, 1.0);
          guiControls.setCameraPosition(8.0, 0.0, 3.0);
          LogTools.info("Waiting for GUI");
-         guiControls.waitUntilFullyUp();
+         guiControls.waitUntilVisualizerFullyUp();
          LogTools.info("GUI's up");
       }
    }
@@ -168,7 +168,7 @@ public final class KinematicsToolboxControllerTest
       if (visualize)
       {
          session.setSessionMode(SessionMode.PAUSE);
-         guiControls.waitUntilDown();
+         guiControls.waitUntilVisualizerDown();
          LogTools.info("GUI's down");
       }
 
@@ -180,7 +180,7 @@ public final class KinematicsToolboxControllerTest
 
       if (guiControls != null)
       {
-         guiControls.shutdownNow();
+         guiControls.shutdownSession();
          guiControls = null;
       }
 
