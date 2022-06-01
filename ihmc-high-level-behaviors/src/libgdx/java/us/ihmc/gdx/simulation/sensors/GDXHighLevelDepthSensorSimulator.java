@@ -62,6 +62,7 @@ import us.ihmc.utilities.ros.publisher.RosPointCloudPublisher;
 import us.ihmc.utilities.ros.types.PointType;
 
 import java.nio.ByteBuffer;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.function.LongSupplier;
 
@@ -307,7 +308,9 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
          colorROS2Executor.execute(() ->
          {
             long timestamp = timestampSupplier == null ? System.nanoTime() : timestampSupplier.getAsLong();
-            videoPacket.setAcquisitionTimeNanos(timestamp);
+            Instant now = Instant.now();
+            videoPacket.setAcquisitionTimeSecondsSinceEpoch(now.getEpochSecond());
+            videoPacket.setAcquisitionTimeAdditionalNanos(now.getNano());
 
             opencv_imgproc.cvtColor(rgba8Mat, yuv420Image, opencv_imgproc.COLOR_RGBA2YUV_I420);
             opencv_imgcodecs.imencode(".jpg", yuv420Image, jpegImageBytePointer, compressionParameters);

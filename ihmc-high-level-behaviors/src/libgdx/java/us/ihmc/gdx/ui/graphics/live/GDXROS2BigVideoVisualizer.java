@@ -7,28 +7,35 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.gdx.ui.tools.ImPlotDoublePlot;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.common.SampleInfo;
+import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.string.StringTools;
 
+import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalField;
+
 public class GDXROS2BigVideoVisualizer extends GDXOpenCVVideoVisualizer
 {
    private final ROS2Topic<BigVideoPacket> topic;
    private final RealtimeROS2Node realtimeROS2Node;
-
    private final BigVideoPacket videoPacket = new BigVideoPacket();
    private final SampleInfo sampleInfo = new SampleInfo();
    private final Object syncObject = new Object();
-
    private final byte[] messageDataHeapArray = new byte[25000000];
    private final BytePointer messageEncodedBytePointer = new BytePointer(25000000);
    private final Mat inputJPEGMat = new Mat(1, 1, opencv_core.CV_8UC1);
    private final Mat inputYUVI420Mat = new Mat(1, 1, opencv_core.CV_8UC1);
+   private final ImPlotDoublePlot delayPlot = new ImPlotDoublePlot("Delay", 30);
 
    public GDXROS2BigVideoVisualizer(String title, PubSubImplementation pubSubImplementation, ROS2Topic<BigVideoPacket> topic)
    {
@@ -41,6 +48,7 @@ public class GDXROS2BigVideoVisualizer extends GDXOpenCVVideoVisualizer
          {
             videoPacket.getData().resetQuick();
             subscriber.takeNextData(videoPacket, sampleInfo);
+            delayPlot.addValue(TimeTools.calculateDelay(videoPacket.getAcquisitionTimeSecondsSinceEpoch(), videoPacket.getAcquisitionTimeAdditionalNanos()));
          }
          doReceiveMessageOnThread(() ->
          {
@@ -74,7 +82,11 @@ public class GDXROS2BigVideoVisualizer extends GDXOpenCVVideoVisualizer
    {
       super.renderImGuiWidgets();
       ImGui.text(topic.getName());
-      getFrequencyPlot().renderImGuiWidgets();
+      if (getHasReceivedOne())
+      {
+         getFrequencyPlot().renderImGuiWidgets();
+         delayPlot.renderImGuiWidgets();
+      }
    }
 
    @Override

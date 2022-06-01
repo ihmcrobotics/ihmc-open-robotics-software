@@ -10,6 +10,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.spinnaker.Spinnaker_C.spinImage;
 import org.bytedeco.spinnaker.global.Spinnaker_C;
 import std_msgs.msg.dds.Float64;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -21,6 +22,8 @@ import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.time.FrequencyCalculator;
+
+import java.time.Instant;
 
 public class DualBlackflyCamera
 {
@@ -41,6 +44,10 @@ public class DualBlackflyCamera
    private Mat yuv420Image;
    private final BigVideoPacket videoPacket = new BigVideoPacket();
    private IntPointer compressionParameters;
+   private final Stopwatch getNextImageDuration = new Stopwatch();
+   private final Stopwatch convertColorDuration = new Stopwatch();
+   private final Stopwatch encodingDuration = new Stopwatch();
+   private final Stopwatch copyDuration = new Stopwatch();
 
    public DualBlackflyCamera(String serialNumber)
    {
@@ -61,8 +68,12 @@ public class DualBlackflyCamera
 
    public void update()
    {
+      Instant now = Instant.now();
+      getNextImageDuration.start();
       if (blackfly.getNextImage(spinImage))
       {
+         getNextImageDuration.suspend();
+
          if (ros2VideoPublisher == null)
          {
             imageWidth = blackfly.getWidth(spinImage);
@@ -87,14 +98,22 @@ public class DualBlackflyCamera
             blackflySourceImage.rewind();
             blackflySourceImage.changeAddress(spinImageDataPointer.address());
 
+            convertColorDuration.start();
             opencv_imgproc.cvtColor(blackflySourceImage.getBytedecoOpenCVMat(), yuv420Image, opencv_imgproc.COLOR_RGB2YUV_I420);
-            opencv_imgcodecs.imencode(".jpg", yuv420Image, jpegImageBytePointer, compressionParameters);
+            convertColorDuration.suspend();
 
+            encodingDuration.start();
+            opencv_imgcodecs.imencode(".jpg", yuv420Image, jpegImageBytePointer, compressionParameters);
+            encodingDuration.suspend();
+
+            copyDuration.start();
             byte[] heapByteArrayData = new byte[jpegImageBytePointer.asBuffer().remaining()];
             jpegImageBytePointer.asBuffer().get(heapByteArrayData);
             videoPacket.getData().resetQuick();
             videoPacket.getData().add(heapByteArrayData);
-            videoPacket.setAcquisitionTimeNanos(acquisitionTime);
+            copyDuration.suspend();
+            videoPacket.setAcquisitionTimeSecondsSinceEpoch(now.getEpochSecond());
+            videoPacket.setAcquisitionTimeAdditionalNanos(now.getNano());
             ros2VideoPublisher.publish(videoPacket);
 
             imagePublishRateCalculator.ping();
@@ -102,9 +121,27 @@ public class DualBlackflyCamera
       }
       Spinnaker_C.spinImageRelease(spinImage);
 
+      sendStatisticMessage(getNextImageDuration, DualBlackflyComms.GET_IMAGE_DURATION);
+      sendStatisticMessage(convertColorDuration, DualBlackflyComms.CONVERT_COLOR_DURATION);
+      sendStatisticMessage(encodingDuration, DualBlackflyComms.ENCODING_DURATION);
+      sendStatisticMessage(copyDuration, DualBlackflyComms.COPY_DURATION);
+      sendStatisticMessage(imagePublishRateCalculator.getFrequency(), DualBlackflyComms.PUBLISH_RATE.get(side));
+   }
+
+   private void sendStatisticMessage(Stopwatch stopwatch, ROS2Topic<Float64> topic)
+   {
+      double elapsed = stopwatch.totalElapsed();
+      if (!Double.isNaN(elapsed))
+      {
+         sendStatisticMessage(elapsed, topic);
+      }
+   }
+
+   private void sendStatisticMessage(double value, ROS2Topic<Float64> topic)
+   {
       Float64 float64Message = new Float64();
-      float64Message.setData(imagePublishRateCalculator.getFrequency());
-      ros2Helper.publish(DualBlackflyComms.PUBLISH_RATE.get(side), float64Message);
+      float64Message.setData(value);
+      ros2Helper.publish(topic, float64Message);
    }
 
    public void destroy()
