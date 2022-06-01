@@ -37,8 +37,16 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
    {
       nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
 
-      blackflies.put(RobotSide.LEFT, new DualBlackflyCamera(LEFT_SERIAL_NUMBER));
-//      blackflies.put(RobotSide.RIGHT, new DualBlackflyCamera(RIGHT_SERIAL_NUMBER));
+      if (!LEFT_SERIAL_NUMBER.equals("00000000"))
+      {
+         LogTools.info("Adding Blackfly LEFT with serial number: {}", LEFT_SERIAL_NUMBER);
+         blackflies.put(RobotSide.LEFT, new DualBlackflyCamera(LEFT_SERIAL_NUMBER));
+      }
+      if (!RIGHT_SERIAL_NUMBER.equals("00000000"))
+      {
+         LogTools.info("Adding Blackfly RIGHT with serial number: {}", RIGHT_SERIAL_NUMBER);
+         blackflies.put(RobotSide.RIGHT, new DualBlackflyCamera(RIGHT_SERIAL_NUMBER));
+      }
 
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "blackfly_node");
       ros2Helper = new ROS2Helper(ros2Node);
