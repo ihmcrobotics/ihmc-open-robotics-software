@@ -1,6 +1,7 @@
 package us.ihmc.robotics;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.Random;
 
@@ -13,6 +14,7 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
@@ -365,6 +367,29 @@ public class EuclidCoreMissingToolsTest
          EuclidCoreTestTools.assertTuple3DEquals(tangentialPart, actualTangentialPart, EPSILON);
       }
    }
+
+   @Test
+   public void testIntersectionBetweenRay2DAndLine2D()
+   {
+      Point2D rayOrigin = new Point2D(8.689, 0.5687);
+      Point2D pointOnRay = new Point2D(8.6432, 0.4951);
+      Vector2D rayDirection = new Vector2D();
+      rayDirection.sub(pointOnRay, rayOrigin);
+
+      Point2D lineStart = new Point2D(8.4521, 0.4323);
+      Point2D lineEnd = new Point2D(8.776, 0.5267);
+      Vector2D lineDirection = new Vector2D();
+      lineDirection.sub(lineEnd, lineStart);
+
+      Point2D intersectionToPac = new Point2D();
+      assertTrue(EuclidCoreMissingTools.intersectionBetweenRay2DAndLine2D(rayOrigin, rayDirection, lineStart, lineDirection, intersectionToPac));
+
+      Point2D intersectionExpected = new Point2D();
+      EuclidGeometryTools.intersectionBetweenLine2DAndLineSegment2D(rayOrigin, rayDirection, lineStart, lineEnd, intersectionExpected);
+
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(intersectionExpected, intersectionToPac, 1e-5);
+   }
+
 
    @Test
    public void testSetNormalPart()

@@ -183,7 +183,7 @@ public class TransferToStandingState extends WalkingState
 
       double extraToeOffHeight = 0.0;
       if (feetManager.getCurrentConstraintType(supportingSide.getOppositeSide()) == FootControlModule.ConstraintType.TOES)
-         extraToeOffHeight = feetManager.getToeOffManager().getExtraCoMMaxHeightWithToes();
+         extraToeOffHeight = feetManager.getExtraCoMMaxHeightWithToes();
 
       TransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport = walkingMessageHandler.createTransferToAndNextFootstepDataForDoubleSupport(supportingSide);
       comHeightManager.setSupportLeg(supportingSide);

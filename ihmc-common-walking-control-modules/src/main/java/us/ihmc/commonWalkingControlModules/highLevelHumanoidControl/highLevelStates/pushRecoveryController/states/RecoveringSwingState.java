@@ -205,8 +205,8 @@ public class RecoveringSwingState extends PushRecoveryState
                                                                                                                                                 swingSide);
       transferToAndNextFootstepsData.setComAtEndOfState(balanceManager.getFinalDesiredCoMPosition());
       double extraToeOffHeight = 0.0;
-      if (feetManager.canDoSingleSupportToeOff(nextFootstep.getFootstepPose(), swingSide) && feetManager.getToeOffManager().isSteppingUp())
-         extraToeOffHeight = feetManager.getToeOffManager().getExtraCoMMaxHeightWithToes();
+      if (feetManager.canDoSingleSupportToeOff(nextFootstep.getFootstepPose(), swingSide) && feetManager.isSteppingUp())
+         extraToeOffHeight = feetManager.getExtraCoMMaxHeightWithToes();
       comHeightManager.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
    }
 
