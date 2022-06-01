@@ -23,11 +23,18 @@
 #define RAMPED_HEIGHT_RANGE_C 5
 #define CENTER_INDEX 6
 #define CELLS_OVER_FOR_NORMAL 7
+#define MIN_POINTS_TO_ADD_TO_REGION 8
+#define MERGE_ANGULAR_THRESHOLD 9
+#define MAX_OUT_OF_PLANE_MERGE_DISTANCE 10
+#define MIN_Z_TO_COMPUTE_REGIONS 11
+#define MAX_VARIANCE_TO_COMPUTE_REGIONS 12
 
 #define DEPTH_CX 0
 #define DEPTH_CY 1
 #define DEPTH_FX 2
 #define DEPTH_FY 3
+
+
 
 int clamp_val(int x, int min_x, int max_x)
 {
@@ -130,6 +137,22 @@ float3 get_point_from_image(read_only image2d_t depth_image, int x, int y, globa
     }
 }
 
+bool is_connected(float3 centroid_a, float3 normal_a, float3 centroid_b, float3 normal_b, global float* params)
+{
+    float3 vec = centroid_a - centroid_b;
+    float distance = length(vec);
+    float sim = fabs(dot(normal_a, normal_b));
+    float averageOutOfPlaneDistance = 0.5 * (fabs(dot(vec, normal_b)) + fabs(dot(vec, normal_a)));
+    if (averageOutOfPlaneDistance < params[MAX_OUT_OF_PLANE_MERGE_DISTANCE] && sim > params[MERGE_ANGULAR_THRESHOLD])
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 void kernel zeroValuesKernel(global float* params,
                              global int* centroid_data,
                              global int* variance_data,
@@ -174,7 +197,6 @@ void kernel addPointsFromImageKernel(read_only image2d_t depth_image,
         // row major index
         int idx = get_idx_in_layer(idx_x, idx_y, params);
 
-        // TODO pretty sure this is always true by construction
             float new_variance_z = pointInWorld.z * pointInWorld.z;
 
             int variance_z = (int) (new_variance_z * FLOAT_TO_INT_SCALE);
@@ -301,6 +323,78 @@ void kernel computeNormalsKernel(read_only image2d_t centroid_x,
         write_imagef(normal_z_mat, key, (float4)(normal_z, 0, 0, 0));
     }
 }
+
+/* Merge Kernel: Creates the graph-based structure by adding connections between the neighboring
+ * patches based on similarity.
+ */
+void kernel mergeKernel(read_only image2d_t normal_x_image,
+                        read_only image2d_t normal_y_image,
+                        read_only image2d_t normal_z_image,
+                        read_only image2d_t centroid_x_image,
+                        read_only image2d_t centroid_y_image,
+                        read_only image2d_t centroid_z_image,
+                        read_only image2d_t counter,
+                        write_only image2d_t graph_image,
+                        global float* params)
+{
+    int idx_x = get_global_id(0);
+    int idx_y = get_global_id(1);
+
+    int m = 2;
+
+    int max_val = 2 * params[CENTER_INDEX] + 1 - m;
+    int2 key_a = (int2) (idx_x, idx_y);
+
+    int cnt = read_imageui(counter, key_a).x;
+
+    if(idx_y >= m && idx_y < max_val && idx_x >= m && idx_x < max_val && cnt > params[MIN_POINTS_TO_ADD_TO_REGION])
+    {
+       float normal_z_a = read_imagef(normal_z_image, key_a).x;
+       if (normal_z_a < params[MIN_Z_TO_COMPUTE_REGIONS])
+            return;
+
+       float normal_x_a = read_imagef(normal_x_image, key_a).x;
+       float normal_y_a = read_imagef(normal_y_image, key_a).x;
+       float centroid_x_a = read_imagef(centroid_x_image, key_a).x;
+       float centroid_y_a = read_imagef(centroid_y_image, key_a).x;
+       float centroid_z_a = read_imagef(centroid_z_image, key_a).x;
+
+       float3 centroid_a = (float3)(centroid_x_a, centroid_y_a, centroid_z_a);
+       float3 normal_a = (float3)(normal_x_a, normal_y_a, normal_z_a);
+
+       uint boundaryConnectionsEncodedAsOnes = (uint)(0);
+
+       int count = 0;
+       for(int i = -m; i < m + 1; i += m)
+       {
+           for(int j = -m; j < m + 1; j += m)
+           {
+               if (!(j == 0 && i == 0))
+               {
+                   int2 key_b = (int2) (idx_x + i, idx_y + j);
+                   float normal_x_b = read_imagef(normal_x_image, key_b).x;
+                   float normal_y_b = read_imagef(normal_y_image, key_b).x;
+                   float normal_z_b = read_imagef(normal_z_image, key_b).x;
+                   float centroid_x_b = read_imagef(centroid_x_image, key_b).x;
+                   float centroid_y_b = read_imagef(centroid_y_image, key_b).x;
+                   float centroid_z_b = read_imagef(centroid_z_image, key_b).x;
+
+                   float3 centroid_b = (float3)(centroid_x_b, centroid_y_b, centroid_z_b);
+                   float3 normal_b = (float3)(normal_x_b, normal_y_b, normal_z_b);
+
+                   if (is_connected(centroid_a, normal_a, centroid_b, normal_b, params))
+                   {
+                       // printf("Connected: (%d,%d)\n",x+i, y+j);
+                       boundaryConnectionsEncodedAsOnes = (1 << count) | boundaryConnectionsEncodedAsOnes;
+                   }
+                   count++;
+               }
+           }
+       }
+       write_imageui(graph_image, key_a, (uint4)(boundaryConnectionsEncodedAsOnes, 0, 0, 0));
+    }
+}
+
 
 
 
