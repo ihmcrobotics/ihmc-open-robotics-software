@@ -72,7 +72,7 @@ public class WebcamROS2SubscriberDemo
 
                synchronized (syncObject)
                {
-                  videoPacket.getData().reset();
+                  videoPacket.getData().resetQuick();
                   subscriber.takeNextData(videoPacket, sampleInfo);
                   gotImageYet = true;
                }
