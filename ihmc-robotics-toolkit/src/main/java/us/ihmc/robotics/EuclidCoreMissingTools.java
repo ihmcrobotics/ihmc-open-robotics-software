@@ -21,9 +21,9 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
@@ -58,7 +58,7 @@ public class EuclidCoreMissingTools
     * </p>
     *
     * @param lineSegmentStart the first endpoint of the line segment. Not modified.
-    * @param lineSegmentEnd the second endpoint of the line segment. Not modified.
+    * @param lineSegmentEnd   the second endpoint of the line segment. Not modified.
     * @return {@code true} if the query is considered to be lying on the line, {@code false} otherwise.
     */
    public static boolean isPoint2DOnLineSegment2D(double pointX, double pointY, Point2DReadOnly lineSegmentStart, Point2DReadOnly lineSegmentEnd)
@@ -79,9 +79,9 @@ public class EuclidCoreMissingTools
     * </p>
     *
     * @param rotation is the original rotation to be projected onto {@code axis}
-    * @param axis is the desired rotation axis of the result.
-    * @param result will be modified to contain the component of {@code rotation} that is around
-    *       {@code axis}
+    * @param axis     is the desired rotation axis of the result.
+    * @param result   will be modified to contain the component of {@code rotation} that is around
+    *                 {@code axis}
     */
    public static void projectRotationOnAxis(QuaternionReadOnly rotation, Vector3DReadOnly axis, QuaternionBasics result)
    {
@@ -131,20 +131,21 @@ public class EuclidCoreMissingTools
     * <ul>
     * <li>if the two lines are parallel but not collinear, the two lines do not intersect and the
     * returned value is {@link Double#NaN}.
-    * <li>if the two lines are collinear, the two lines are assumed to be intersecting infinitely the returned value {@code Double.POSITIVE_INFINITY}.
+    * <li>if the two lines are collinear, the two lines are assumed to be intersecting infinitely the
+    * returned value {@code Double.POSITIVE_INFINITY}.
     * </ul>
     * </p>
     *
-    * @param startPoint1x x-coordinate of a point located on the first line.
-    * @param startPoint1y y-coordinate of a point located on the first line.
+    * @param startPoint1x    x-coordinate of a point located on the first line.
+    * @param startPoint1y    y-coordinate of a point located on the first line.
     * @param segmentTravel1x x-component of the first line direction.
     * @param segmentTravel1y y-component of the first line direction.
-    * @param startPoint2x x-coordinate of a point located on the second line.
-    * @param startPoint2y y-coordinate of a point located on the second line.
+    * @param startPoint2x    x-coordinate of a point located on the second line.
+    * @param startPoint2y    y-coordinate of a point located on the second line.
     * @param segmentTravel2x x-component of the second line direction.
     * @param segmentTravel2y y-component of the second line direction.
     * @return {@code alpha} the percentage along the first line of the intersection location. This
-    *       method returns {@link Double#NaN} if the lines do not intersect.
+    *         method returns {@link Double#NaN} if the lines do not intersect.
     */
    public static double percentageOfIntersectionBetweenTwoLine2DsInfCase(double startPoint1x,
                                                                          double startPoint1y,
@@ -169,13 +170,13 @@ public class EuclidCoreMissingTools
 
       if (Math.abs(determinant) < EuclidGeometryTools.ONE_TRILLIONTH)
       { // The lines are parallel
-         // Check if they are collinear
+        // Check if they are collinear
          double cross = dx * segmentTravel1y - dy * segmentTravel1x;
          if (Math.abs(cross) < EuclidGeometryTools.ONE_TRILLIONTH)
          {
             /*
-             * The two lines are collinear. There's an infinite number of intersection. Let's set the
-             * result to infinity, i.e. alpha = infinity so it can be handled.
+             * The two lines are collinear. There's an infinite number of intersection. Let's set the result to
+             * infinity, i.e. alpha = infinity so it can be handled.
              */
             return Double.POSITIVE_INFINITY;
          }
@@ -201,9 +202,9 @@ public class EuclidCoreMissingTools
     * {@link EuclidGeometryTools#orientation3DFromZUpToVector3D(Vector3DReadOnly, Orientation3DBasics)}
     * except that it does not rely on {@code Math#acos(double)} making it faster.
     *
-    * @param vector the vector that is rotated with respect to {@code zUp}. Not modified.
+    * @param vector         the vector that is rotated with respect to {@code zUp}. Not modified.
     * @param rotationToPack the minimum rotation from {@code zUp} to the given {@code vector}.
-    *       Modified.
+    *                       Modified.
     * @see EuclidGeometryTools#orientation3DFromZUpToVector3D(Vector3DReadOnly, Orientation3DBasics)
     */
    public static void rotationMatrix3DFromZUpToVector3D(Vector3DReadOnly vector, CommonMatrix3DBasics rotationToPack)
@@ -216,13 +217,13 @@ public class EuclidCoreMissingTools
     * {@link EuclidGeometryTools#orientation3DFromFirstToSecondVector3D(Vector3DReadOnly, Vector3DReadOnly, Orientation3DBasics)}
     * except that it does not rely on {@code Math#acos(double)} making it faster.
     *
-    * @param firstVector the first vector. Not modified.
-    * @param secondVector the second vector that is rotated with respect to the first vector. Not
-    *       modified.
+    * @param firstVector    the first vector. Not modified.
+    * @param secondVector   the second vector that is rotated with respect to the first vector. Not
+    *                       modified.
     * @param rotationToPack the minimum rotation from {@code firstVector} to the {@code secondVector}.
-    *       Modified.
+    *                       Modified.
     * @see EuclidGeometryTools#orientation3DFromFirstToSecondVector3D(Vector3DReadOnly,
-    *       Vector3DReadOnly, Orientation3DBasics)
+    *      Vector3DReadOnly, Orientation3DBasics)
     */
    public static void rotationMatrix3DFromFirstToSecondVector3D(Vector3DReadOnly firstVector,
                                                                 Vector3DReadOnly secondVector,
@@ -242,19 +243,19 @@ public class EuclidCoreMissingTools
     * {@link EuclidGeometryTools#orientation3DFromFirstToSecondVector3D(double, double, double, double, double, double, Orientation3DBasics)}
     * except that it does not rely on {@code Math#acos(double)} making it faster.
     *
-    * @param firstVectorX x-component of the first vector.
-    * @param firstVectorY y-component of the first vector.
-    * @param firstVectorZ z-component of the first vector.
-    * @param secondVectorX x-component of the second vector that is rotated with respect to the first
-    *       vector.
-    * @param secondVectorY y-component of the second vector that is rotated with respect to the first
-    *       vector.
-    * @param secondVectorZ z-component of the second vector that is rotated with respect to the first
-    *       vector.
+    * @param firstVectorX   x-component of the first vector.
+    * @param firstVectorY   y-component of the first vector.
+    * @param firstVectorZ   z-component of the first vector.
+    * @param secondVectorX  x-component of the second vector that is rotated with respect to the first
+    *                       vector.
+    * @param secondVectorY  y-component of the second vector that is rotated with respect to the first
+    *                       vector.
+    * @param secondVectorZ  z-component of the second vector that is rotated with respect to the first
+    *                       vector.
     * @param rotationToPack the minimum rotation from {@code firstVector} to the {@code secondVector}.
-    *       Modified.
+    *                       Modified.
     * @see EuclidGeometryTools#orientation3DFromFirstToSecondVector3D(double, double, double, double,
-    *       double, double, Orientation3DBasics)
+    *      double, double, Orientation3DBasics)
     */
    public static void rotationMatrix3DFromFirstToSecondVector3D(double firstVectorX,
                                                                 double firstVectorY,
@@ -325,14 +326,18 @@ public class EuclidCoreMissingTools
     * between the two 2D line segments. <a href="http://geomalgorithms.com/a07-_distance.html"> Useful
     * link</a>.
     *
-    * @param lineSegmentStart1 the first endpoint of the first line segment. Not modified.
-    * @param lineSegmentEnd1 the second endpoint of the first line segment. Not modified.
-    * @param lineSegmentStart2 the first endpoint of the second line segment. Not modified.
-    * @param lineSegmentEnd2 the second endpoint of the second line segment. Not modified.
+    * @param lineSegmentStart1                the first endpoint of the first line segment. Not
+    *                                         modified.
+    * @param lineSegmentEnd1                  the second endpoint of the first line segment. Not
+    *                                         modified.
+    * @param lineSegmentStart2                the first endpoint of the second line segment. Not
+    *                                         modified.
+    * @param lineSegmentEnd2                  the second endpoint of the second line segment. Not
+    *                                         modified.
     * @param closestPointOnLineSegment1ToPack the 2D coordinates of the point P are packed in this 2D
-    *       point. Modified. Can be {@code null}.
+    *                                         point. Modified. Can be {@code null}.
     * @param closestPointOnLineSegment2ToPack the 2D coordinates of the point Q are packed in this 2D
-    *       point. Modified. Can be {@code null}.
+    *                                         point. Modified. Can be {@code null}.
     * @return the minimum distance between the two line segments.
     */
    public static double closestPoint2DsBetweenTwoLineSegment2Ds(Point2DReadOnly lineSegmentStart1,
@@ -445,9 +450,9 @@ public class EuclidCoreMissingTools
     * <a href="http://geomalgorithms.com/a07-_distance.html"> Useful link</a>.
     *
     * @param lineSegmentStart1 the first endpoint of the first line segment. Not modified.
-    * @param lineSegmentEnd1 the second endpoint of the first line segment. Not modified.
+    * @param lineSegmentEnd1   the second endpoint of the first line segment. Not modified.
     * @param lineSegmentStart2 the first endpoint of the second line segment. Not modified.
-    * @param lineSegmentEnd2 the second endpoint of the second line segment. Not modified.
+    * @param lineSegmentEnd2   the second endpoint of the second line segment. Not modified.
     * @return the minimum distance between the two line segments.
     */
    public static double distanceBetweenTwoLineSegment2Ds(Point2DReadOnly lineSegmentStart1,
@@ -712,48 +717,95 @@ public class EuclidCoreMissingTools
       tupleToModify.scaleAdd(dot, normalAxis, tupleToModify);
    }
 
-   public static int intersectionBetweenLineSegment2DAndCylinder3D(double circleRadius, Point2DReadOnly circlePosition,
-                                                                   Point2DReadOnly startPoint, Point2DReadOnly endPoint,
+   public static int intersectionBetweenLineSegment2DAndCylinder3D(double circleRadius,
+                                                                   Point2DReadOnly circlePosition,
+                                                                   Point2DReadOnly startPoint,
+                                                                   Point2DReadOnly endPoint,
                                                                    Point2DBasics firstIntersectionToPack,
                                                                    Point2DBasics secondIntersectionToPack)
    {
-      return intersectionBetweenLine2DAndCircle(circleRadius, circlePosition.getX(), circlePosition.getY(), startPoint.getX(), startPoint.getY(), false,
-                                                endPoint.getX(), endPoint.getY(), false, firstIntersectionToPack, secondIntersectionToPack);
+      return intersectionBetweenLine2DAndCircle(circleRadius,
+                                                circlePosition.getX(),
+                                                circlePosition.getY(),
+                                                startPoint.getX(),
+                                                startPoint.getY(),
+                                                false,
+                                                endPoint.getX(),
+                                                endPoint.getY(),
+                                                false,
+                                                firstIntersectionToPack,
+                                                secondIntersectionToPack);
    }
 
-   public static int intersectionBetweenRay2DAndCircle(double circleRadius, Point2DReadOnly circlePosition,
-                                                       Point2DReadOnly startPoint, Point2DReadOnly pointOnRay,
+   public static int intersectionBetweenRay2DAndCircle(double circleRadius,
+                                                       Point2DReadOnly circlePosition,
+                                                       Point2DReadOnly startPoint,
+                                                       Point2DReadOnly pointOnRay,
                                                        Point2DBasics firstIntersectionToPack,
                                                        Point2DBasics secondIntersectionToPack)
    {
-      return intersectionBetweenLine2DAndCircle(circleRadius, circlePosition.getX(), circlePosition.getY(), startPoint.getX(), startPoint.getY(), false,
-                                                pointOnRay.getX(), pointOnRay.getY(), true,
-                                                firstIntersectionToPack, secondIntersectionToPack);
+      return intersectionBetweenLine2DAndCircle(circleRadius,
+                                                circlePosition.getX(),
+                                                circlePosition.getY(),
+                                                startPoint.getX(),
+                                                startPoint.getY(),
+                                                false,
+                                                pointOnRay.getX(),
+                                                pointOnRay.getY(),
+                                                true,
+                                                firstIntersectionToPack,
+                                                secondIntersectionToPack);
    }
 
-   public static int intersectionBetweenRay2DAndCircle(double circleRadius, Point2DReadOnly circlePosition,
-                                                       Point2DReadOnly startPoint, Vector2DReadOnly direction,
+   public static int intersectionBetweenRay2DAndCircle(double circleRadius,
+                                                       Point2DReadOnly circlePosition,
+                                                       Point2DReadOnly startPoint,
+                                                       Vector2DReadOnly direction,
                                                        Point2DBasics firstIntersectionToPack,
                                                        Point2DBasics secondIntersectionToPack)
    {
-      return intersectionBetweenLine2DAndCircle(circleRadius, circlePosition.getX(), circlePosition.getY(), startPoint.getX(), startPoint.getY(), false,
-                                                startPoint.getX() + direction.getX(), startPoint.getY() + direction.getY(), true,
-                                                firstIntersectionToPack, secondIntersectionToPack);
+      return intersectionBetweenLine2DAndCircle(circleRadius,
+                                                circlePosition.getX(),
+                                                circlePosition.getY(),
+                                                startPoint.getX(),
+                                                startPoint.getY(),
+                                                false,
+                                                startPoint.getX() + direction.getX(),
+                                                startPoint.getY() + direction.getY(),
+                                                true,
+                                                firstIntersectionToPack,
+                                                secondIntersectionToPack);
    }
 
-   public static int intersectionBetweenLine2DAndCircle(double circleRadius, Point2DReadOnly circlePosition,
-                                                        Point2DReadOnly pointOnLine, Vector2DReadOnly direction,
+   public static int intersectionBetweenLine2DAndCircle(double circleRadius,
+                                                        Point2DReadOnly circlePosition,
+                                                        Point2DReadOnly pointOnLine,
+                                                        Vector2DReadOnly direction,
                                                         Point2DBasics firstIntersectionToPack,
                                                         Point2DBasics secondIntersectionToPack)
    {
-      return intersectionBetweenLine2DAndCircle(circleRadius, circlePosition.getX(), circlePosition.getY(), pointOnLine.getX(), pointOnLine.getY(), true,
-                                                pointOnLine.getX() + direction.getX(), pointOnLine.getY() + direction.getY(), true,
-                                                firstIntersectionToPack, secondIntersectionToPack);
+      return intersectionBetweenLine2DAndCircle(circleRadius,
+                                                circlePosition.getX(),
+                                                circlePosition.getY(),
+                                                pointOnLine.getX(),
+                                                pointOnLine.getY(),
+                                                true,
+                                                pointOnLine.getX() + direction.getX(),
+                                                pointOnLine.getY() + direction.getY(),
+                                                true,
+                                                firstIntersectionToPack,
+                                                secondIntersectionToPack);
    }
 
-   private static int intersectionBetweenLine2DAndCircle(double circleRadius, double circlePositionX, double circlePositionY,
-                                                         double startX, double startY, boolean canIntersectionOccurBeforeStart,
-                                                         double endX, double endY, boolean canIntersectionOccurAfterEnd,
+   private static int intersectionBetweenLine2DAndCircle(double circleRadius,
+                                                         double circlePositionX,
+                                                         double circlePositionY,
+                                                         double startX,
+                                                         double startY,
+                                                         boolean canIntersectionOccurBeforeStart,
+                                                         double endX,
+                                                         double endY,
+                                                         boolean canIntersectionOccurAfterEnd,
                                                          Point2DBasics firstIntersectionToPack,
                                                          Point2DBasics secondIntersectionToPack)
    {
@@ -796,7 +848,8 @@ public class EuclidCoreMissingTools
          double intersection1X = dCircle1 * dx + startX;
          double intersection1Y = dCircle1 * dy + startY;
 
-         if (Math.abs(EuclidGeometryTools.percentageAlongLine2D(intersection1X, intersection1Y, circlePositionX, circlePositionY, 1.0, 0.0)) > circleRadius - ONE_TRILLIONTH)
+         if (Math.abs(EuclidGeometryTools.percentageAlongLine2D(intersection1X, intersection1Y, circlePositionX, circlePositionY, 1.0, 0.0)) > circleRadius
+               - ONE_TRILLIONTH)
             dCircle1 = Double.NaN;
 
          if (Double.isFinite(dCircle1))
@@ -819,7 +872,8 @@ public class EuclidCoreMissingTools
          double intersection2X = dCircle2 * dx + startX;
          double intersection2Y = dCircle2 * dy + startY;
 
-         if (Math.abs(EuclidGeometryTools.percentageAlongLine2D(intersection2X, intersection2Y, circlePositionX, circlePositionY, 1.0, 0.0)) > circleRadius - ONE_TRILLIONTH)
+         if (Math.abs(EuclidGeometryTools.percentageAlongLine2D(intersection2X, intersection2Y, circlePositionX, circlePositionY, 1.0, 0.0)) > circleRadius
+               - ONE_TRILLIONTH)
             dCircle2 = Double.NaN;
          else if (Math.abs(dCircle1 - dCircle2) < ONE_TRILLIONTH)
             dCircle2 = Double.NaN;
@@ -887,5 +941,49 @@ public class EuclidCoreMissingTools
          secondIntersectionToPack.add(startX, startY);
       }
 
-      return 2;   }
+      return 2;
+   }
+
+   /**
+    * Computes the angle in radians from the first 3D vector to the second 3D vector. The computed
+    * angle is in the range [0; <i>pi</i>].
+    *
+    * @param firstVector  the first vector. Not modified.
+    * @param secondVector the second vector. Not modified.
+    * @return the angle in radians from the first vector to the second vector.
+    */
+   public static double angleFromFirstToSecondVector3D(Vector3DReadOnly firstVector, Vector3DReadOnly secondVector)
+   {
+      return angleFromFirstToSecondVector3D(firstVector.getX(),
+                                            firstVector.getY(),
+                                            firstVector.getZ(),
+                                            firstVector instanceof UnitVector3DReadOnly,
+                                            secondVector.getX(),
+                                            secondVector.getY(),
+                                            secondVector.getZ(),
+                                            secondVector instanceof UnitVector3DReadOnly);
+   }
+
+   private static double angleFromFirstToSecondVector3D(double firstVectorX,
+                                                        double firstVectorY,
+                                                        double firstVectorZ,
+                                                        boolean isFirstVectorUnitary,
+                                                        double secondVectorX,
+                                                        double secondVectorY,
+                                                        double secondVectorZ,
+                                                        boolean isSecondVectorUnitary)
+   {
+      double firstVectorLength = isFirstVectorUnitary ? 1.0 : EuclidCoreTools.norm(firstVectorX, firstVectorY, firstVectorZ);
+      double secondVectorLength = isSecondVectorUnitary ? 1.0 : EuclidCoreTools.norm(secondVectorX, secondVectorY, secondVectorZ);
+
+      double dotProduct = firstVectorX * secondVectorX + firstVectorY * secondVectorY + firstVectorZ * secondVectorZ;
+      dotProduct /= firstVectorLength * secondVectorLength;
+
+      if (dotProduct > 1.0)
+         dotProduct = 1.0;
+      else if (dotProduct < -1.0)
+         dotProduct = -1.0;
+
+      return EuclidCoreTools.acos(dotProduct);
+   }
 }

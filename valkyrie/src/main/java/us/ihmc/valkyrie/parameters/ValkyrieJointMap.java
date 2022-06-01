@@ -180,6 +180,15 @@ public class ValkyrieJointMap implements HumanoidJointNameMap
    }
 
    @Override
+   public double getJointBLimit(String jointName)
+   {
+      if (jointName.contains("Wrist"))
+         return 5.0;
+      else
+         return HumanoidJointNameMap.super.getJointBLimit(jointName);
+   }
+
+   @Override
    public double getModelScale()
    {
       return modelScale;

@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.DoubleUnaryOperator;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
@@ -31,12 +32,15 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -867,5 +871,139 @@ public class EndToEndTestTools
          path = path.resolve(folderName);
       FileTools.ensureDirectoryExists(path);
       return path.toFile();
+   }
+
+   public static FootstepDataListMessage forwardSteps(RobotSide initialStepSide,
+                                                      int numberOfSteps,
+                                                      DoubleUnaryOperator stepLengthFunction,
+                                                      double stepWidth,
+                                                      double swingTime,
+                                                      double transferTime,
+                                                      Pose3DReadOnly startPose,
+                                                      boolean squareUp)
+   {
+      FootstepDataListMessage message = new FootstepDataListMessage();
+      FootstepDataMessage footstep = message.getFootstepDataList().add();
+
+      RobotSide stepSide = initialStepSide;
+      Pose3D stepPose = new Pose3D(startPose);
+      stepPose.appendTranslation(0.5 * stepLengthFunction.applyAsDouble(0.0), stepSide.negateIfRightSide(0.5 * stepWidth), 0.0);
+      footstep.setRobotSide(stepSide.toByte());
+      footstep.getLocation().set(stepPose.getPosition());
+      footstep.getOrientation().set(stepPose.getOrientation());
+      footstep.setSwingDuration(swingTime);
+
+      for (int i = 1; i < numberOfSteps; i++)
+      {
+         stepSide = stepSide.getOppositeSide();
+         stepPose.appendTranslation(stepLengthFunction.applyAsDouble(i / (numberOfSteps - 1.0)), stepSide.negateIfRightSide(stepWidth), 0.0);
+         footstep = message.getFootstepDataList().add();
+         footstep.setRobotSide(stepSide.toByte());
+         footstep.getLocation().set(stepPose.getPosition());
+         footstep.getOrientation().set(stepPose.getOrientation());
+         footstep.setTransferDuration(transferTime);
+         footstep.setSwingDuration(swingTime);
+      }
+
+      if (squareUp)
+      {
+         stepSide = stepSide.getOppositeSide();
+         stepPose.appendTranslation(0.0, stepSide.negateIfRightSide(stepWidth), 0.0);
+         footstep = message.getFootstepDataList().add();
+         footstep.setRobotSide(stepSide.toByte());
+         footstep.getLocation().set(stepPose.getPosition());
+         footstep.getOrientation().set(stepPose.getOrientation());
+         footstep.setTransferDuration(transferTime);
+         footstep.setSwingDuration(swingTime);
+      }
+
+      return message;
+   }
+
+   public static FootstepDataListMessage circleSteps(RobotSide initialStepSide,
+                                                     int numberOfSteps,
+                                                     DoubleUnaryOperator stepLengthFunction,
+                                                     double stepWidth,
+                                                     double swingTime,
+                                                     double transferTime,
+                                                     Pose3DReadOnly startPose,
+                                                     boolean squareUp,
+                                                     RobotSide turnSide,
+                                                     double circleRadius)
+   {
+      if (turnSide == RobotSide.RIGHT)
+         circleRadius = -circleRadius;
+
+      FootstepDataListMessage message = new FootstepDataListMessage();
+      FootstepDataMessage footstep = message.getFootstepDataList().add();
+
+      RobotSide stepSide = initialStepSide;
+      Pose3D circleCenter = new Pose3D(startPose);
+      circleCenter.appendTranslation(0.0, circleRadius, 0.0);
+      Pose3D stepPose = new Pose3D(startPose);
+      double stepLength = 0.5 * stepLengthFunction.applyAsDouble(0.0);
+      double angle = stepLength / circleRadius;
+      stepPose.appendTranslation(yawAboutPoint(angle, circleCenter.getPosition(), 0.0, stepSide.negateIfRightSide(0.5 * stepWidth), 0.0));
+      stepPose.appendYawRotation(angle);
+      footstep.setRobotSide(stepSide.toByte());
+      footstep.getLocation().set(stepPose.getPosition());
+      footstep.getOrientation().set(stepPose.getOrientation());
+      footstep.setSwingDuration(swingTime);
+
+      for (int i = 1; i < numberOfSteps; i++)
+      {
+         stepSide = stepSide.getOppositeSide();
+         stepLength = stepLengthFunction.applyAsDouble(i / (numberOfSteps - 1.0));
+         angle = stepLength / circleRadius;
+         stepPose.appendTranslation(yawAboutPoint(angle, circleCenter.getPosition(), 0.0, stepSide.negateIfRightSide(stepWidth), 0.0));
+         stepPose.getOrientation().appendYawRotation(angle);
+         footstep = message.getFootstepDataList().add();
+         footstep.setRobotSide(stepSide.toByte());
+         footstep.getLocation().set(stepPose.getPosition());
+         footstep.getOrientation().set(stepPose.getOrientation());
+         footstep.setTransferDuration(transferTime);
+         footstep.setSwingDuration(swingTime);
+      }
+
+      if (squareUp)
+      {
+         stepSide = stepSide.getOppositeSide();
+         stepPose.appendTranslation(0.0, stepSide.negateIfRightSide(stepWidth), 0.0);
+         footstep = message.getFootstepDataList().add();
+         footstep.setRobotSide(stepSide.toByte());
+         footstep.getLocation().set(stepPose.getPosition());
+         footstep.getOrientation().set(stepPose.getOrientation());
+         footstep.setTransferDuration(transferTime);
+         footstep.setSwingDuration(swingTime);
+      }
+
+      return message;
+   }
+
+   public static Point3D yawAboutPoint(double yaw, Point3DReadOnly center, double x, double y, double z)
+   {
+      return yawAboutPoint(yaw, center, new Point3D(x, y, z));
+   }
+
+   public static Point3D yawAboutPoint(double yaw, Point3DReadOnly center, Point3DReadOnly pointToTransform)
+   {
+      Point3D output = new Point3D();
+      output.sub(pointToTransform, center);
+      RotationMatrixTools.applyYawRotation(yaw, output, output);
+      output.add(center);
+      return output;
+   }
+
+   public static DoubleUnaryOperator trapezoidFunction(double bottomValue, double plateauValue, double startPlateau, double endPlateau)
+   {
+      return percent ->
+      {
+         if (percent < startPlateau)
+            return EuclidCoreTools.interpolate(bottomValue, plateauValue, percent / startPlateau);
+         else if (percent > endPlateau)
+            return EuclidCoreTools.interpolate(plateauValue, bottomValue, (percent - endPlateau) / (1.0 - endPlateau));
+         else
+            return plateauValue;
+      };
    }
 }
