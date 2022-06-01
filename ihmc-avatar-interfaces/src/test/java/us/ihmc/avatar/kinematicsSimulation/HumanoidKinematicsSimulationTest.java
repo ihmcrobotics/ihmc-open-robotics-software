@@ -1,17 +1,18 @@
 package us.ihmc.avatar.kinematicsSimulation;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+
+import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.AvatarTestScripts;
 import us.ihmc.avatar.AvatarTestYoVariables;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 
@@ -41,11 +42,11 @@ public abstract class HumanoidKinematicsSimulationTest
 //
 //   }
 
-   public abstract AvatarTestYoVariables createTestYoVariables(SimulationConstructionSet scs);
+   public abstract AvatarTestYoVariables createTestYoVariables(SimulationConstructionSet2 scs);
 
    public abstract DRCRobotModel createRobotModel();
 
-   public abstract SimulationConstructionSet createSCS();
+   public abstract SimulationConstructionSet2 createSCS();
 
    @AfterEach
    public void destroySimulationAndRecycleMemory()
@@ -60,7 +61,7 @@ public abstract class HumanoidKinematicsSimulationTest
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
       robotModel = createRobotModel();
-      SimulationConstructionSet scs = createSCS();
+      SimulationConstructionSet2 scs = createSCS();
       variables = createTestYoVariables(scs);
       conductor = new GoalOrientedTestConductor(scs, simulationTestingParameters);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
