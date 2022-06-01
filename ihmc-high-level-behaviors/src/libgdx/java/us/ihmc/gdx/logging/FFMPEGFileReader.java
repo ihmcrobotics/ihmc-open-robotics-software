@@ -7,6 +7,7 @@ import org.bytedeco.ffmpeg.avformat.AVFormatContext;
 import org.bytedeco.ffmpeg.avformat.AVStream;
 import org.bytedeco.ffmpeg.avutil.AVDictionary;
 import org.bytedeco.ffmpeg.avutil.AVFrame;
+import org.bytedeco.ffmpeg.avutil.AVRational;
 import org.bytedeco.ffmpeg.global.avcodec;
 import org.bytedeco.ffmpeg.global.avformat;
 import org.bytedeco.ffmpeg.global.avutil;
@@ -21,6 +22,12 @@ public class FFMPEGFileReader
    private AVFrame videoFrame;
    private AVPacket packet;
    private boolean isClosed = false;
+   private final AVRational timeBase;
+   private final int width;
+   private final int height;
+   private final long duration;
+   private final long startTime;
+
    public FFMPEGFileReader(String file) {
       LogTools.info("Initializing ffmpeg contexts for playback from {}", file);
       avFormatContext = new AVFormatContext();
@@ -34,6 +41,12 @@ public class FFMPEGFileReader
 
       LogTools.debug("FILE PROPERTIES: Width: {}\tHeight: {}\tFormat:{}",
                      decoderContext.width(), decoderContext.height(), avutil.av_get_pix_fmt_name(decoderContext.pix_fmt()).getString());
+
+      width = decoderContext.width();
+      height = decoderContext.height();
+      timeBase = decoderContext.time_base();
+      duration = avFormatContext.duration();
+      startTime = avFormatContext.start_time();
 
       avformat.av_dump_format(avFormatContext, 0, file, 0);
 
@@ -105,5 +118,30 @@ public class FFMPEGFileReader
       avutil.av_frame_free(videoFrame);
 
       isClosed = true;
+   }
+
+   public AVRational getTimeBase()
+   {
+      return timeBase;
+   }
+
+   public int getWidth()
+   {
+      return width;
+   }
+
+   public int getHeight()
+   {
+      return height;
+   }
+
+   public long getDuration()
+   {
+      return duration;
+   }
+
+   public long getStartTime()
+   {
+      return startTime;
    }
 }

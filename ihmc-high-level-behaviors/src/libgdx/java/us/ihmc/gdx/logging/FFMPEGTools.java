@@ -1,5 +1,6 @@
 package us.ihmc.gdx.logging;
 
+import org.bytedeco.ffmpeg.avutil.AVRational;
 import org.bytedeco.ffmpeg.global.*;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.Pointer;
@@ -11,6 +12,11 @@ import java.util.function.Supplier;
 
 public class FFMPEGTools
 {
+   public static double rationalToFloatingPoint(AVRational rational)
+   {
+      return rational.num() / (double) rational.den();
+   }
+
    public static void checkError(int returnCode, Pointer pointerToCheck, String message)
    {
       checkNonZeroError(returnCode, message);
