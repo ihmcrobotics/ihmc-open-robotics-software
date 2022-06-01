@@ -215,7 +215,7 @@ public class ValkyrieExternalForceEstimationTest
             Vector3D force = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, j == 0 ? 0.0 : forceMagnitude);
             testConfigs.get(i).desiredSimulatedForceInWorld.set(force);
             TimeConsumer forceUpdater = time -> testConfig.applyDesiredForce();
-            simulationTestHelper.getSimulationSession().addBeforePhysicsCallback(forceUpdater);
+            simulationTestHelper.getSimulationConstructionSet().addBeforePhysicsCallback(forceUpdater);
 
             initializeToolbox.set(true);
             updateToolbox.set(true);
@@ -224,7 +224,7 @@ public class ValkyrieExternalForceEstimationTest
                                   "Estimator failed to estimate force applied on " + testConfig.endEffectorName + ", simulated force: " + force
                                         + ", estimated force: " + testConfig.estimatedForce);
 
-            simulationTestHelper.getSimulationSession().removeBeforePhysicsCallback(forceUpdater);
+            simulationTestHelper.getSimulationConstructionSet().removeBeforePhysicsCallback(forceUpdater);
          }
 
          testConfigs.get(i).desiredSimulatedForceInWorld.setToZero();

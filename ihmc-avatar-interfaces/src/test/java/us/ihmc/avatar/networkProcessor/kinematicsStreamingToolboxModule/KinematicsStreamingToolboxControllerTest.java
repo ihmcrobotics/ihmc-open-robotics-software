@@ -65,6 +65,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.definition.controller.interfaces.ControllerOutputBasics;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
@@ -226,19 +227,15 @@ public abstract class KinematicsStreamingToolboxControllerTest
 
       if (visualize)
       {
-         SimulationSession session = new SimulationSession();
-         session.addRobot(robot);
+         SimulationConstructionSet2 scs = new SimulationConstructionSet2();
+         scs.addRobot(robot);
          if (ghost != null)
-            session.addRobot(ghost);
-         session.getRootRegistry().addChild(toolboxRegistry);
-         session.setSessionDTSeconds(toolboxControllerPeriod);
-         session.initializeBufferRecordTickPeriod(1);
+            scs.addRobot(ghost);
+         scs.getRootRegistry().addChild(toolboxRegistry);
+         scs.setDT(toolboxControllerPeriod);
+         scs.initializeBufferRecordTickPeriod(1);
 
-         simulationTestHelper = new SCS2AvatarTestingSimulation(session,
-                                                                robotModel,
-                                                                desiredFullRobotModel,
-                                                                yoGraphicsListRegistry,
-                                                                simulationTestingParameters);
+         simulationTestHelper = new SCS2AvatarTestingSimulation(scs, robotModel, desiredFullRobotModel, yoGraphicsListRegistry, simulationTestingParameters);
          simulationTestHelper.setKeepSCSUp(simulationTestingParameters.getKeepSCSUp());
          simulationTestHelper.start(false);
          simulationTestHelper.setCamera(new Point3D(0, 0, 1), new Point3D(6, 0, 1));

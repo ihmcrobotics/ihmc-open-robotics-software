@@ -314,7 +314,7 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
       simulationTestHelper.start();
       simulationTestHelper.setCameraPosition(0.0, -3.0, 1.0);
       simulationTestHelper.setCameraFocusPosition(0.0, 0.0, 0.2);
-      pushController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationSession().getTime(),
+      pushController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationConstructionSet().getTime(),
                                                    simulationTestHelper.getRobot(),
                                                    robotModel.createFullRobotModel().getChest().getParentJoint().getName(),
                                                    new Vector3D(0, 0, 0.15));

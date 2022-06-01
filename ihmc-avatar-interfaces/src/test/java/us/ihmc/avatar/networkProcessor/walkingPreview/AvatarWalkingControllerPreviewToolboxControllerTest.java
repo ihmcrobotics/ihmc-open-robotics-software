@@ -56,6 +56,7 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.definition.controller.interfaces.ControllerOutputBasics;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
@@ -156,12 +157,12 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       toolboxUpdater = createToolboxUpdater(robot);
       robot.addController(toolboxUpdater);
 
-      SimulationSession simulationSession = new SimulationSession();
-      simulationSession.addRobot(robot);
-      simulationSession.setSessionDTSeconds(toolboxController.getIntegrationDT());
-      simulationSession.initializeBufferRecordTickPeriod(1);
+      SimulationConstructionSet2 scs = new SimulationConstructionSet2();
+      scs.addRobot(robot);
+      scs.setDT(toolboxController.getIntegrationDT());
+      scs.initializeBufferRecordTickPeriod(1);
 
-      simulationTestHelper = new SCS2AvatarTestingSimulation(simulationSession, getRobotModel(), null, yoGraphicsListRegistry, simulationTestingParameters);
+      simulationTestHelper = new SCS2AvatarTestingSimulation(scs, getRobotModel(), null, yoGraphicsListRegistry, simulationTestingParameters);
       simulationTestHelper.start();
 
       FullHumanoidRobotModel fullRobotModelAtInitialConfiguration = createFullRobotModelAtInitialConfiguration(2.0);
@@ -239,7 +240,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       simulationTestHelperFactory.addSecondaryRobot(ghost);
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       simulationTestHelper.getRootRegistry().addChild(toolboxMainRegistry);
-      simulationTestHelper.getSimulationSession().getYoGraphicDefinitions().addAll(SCS1GraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
+      simulationTestHelper.getSimulationConstructionSet().addYoGraphics(SCS1GraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
       simulationTestHelper.start();
 
       //root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WalkingHighLevelHumanoidController.walkingCurrentState
@@ -358,7 +359,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
                                                                                               EuclidCoreRandomTools.nextDouble(random, Math.PI)));
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       simulationTestHelper.getRootRegistry().addChild(toolboxMainRegistry);
-      simulationTestHelper.getSimulationSession().getYoGraphicDefinitions().addAll(SCS1GraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
+      simulationTestHelper.getSimulationConstructionSet().addYoGraphics(SCS1GraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
       simulationTestHelper.start();
 
       //root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WalkingHighLevelHumanoidController.walkingCurrentState
