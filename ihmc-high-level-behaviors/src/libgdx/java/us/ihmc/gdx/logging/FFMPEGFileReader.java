@@ -2,9 +2,11 @@ package us.ihmc.gdx.logging;
 
 import org.bytedeco.ffmpeg.avcodec.AVCodec;
 import org.bytedeco.ffmpeg.avcodec.AVCodecContext;
+import org.bytedeco.ffmpeg.avcodec.AVPacket;
 import org.bytedeco.ffmpeg.avformat.AVFormatContext;
 import org.bytedeco.ffmpeg.avformat.AVStream;
 import org.bytedeco.ffmpeg.avutil.AVDictionary;
+import org.bytedeco.ffmpeg.avutil.AVFrame;
 import org.bytedeco.ffmpeg.global.avcodec;
 import org.bytedeco.ffmpeg.global.avformat;
 import org.bytedeco.ffmpeg.global.avutil;
@@ -14,9 +16,11 @@ import us.ihmc.perception.BytedecoImage;
 public class FFMPEGFileReader
 {
    private AVFormatContext avFormatContext;
-
    private int streamIndex;
    private AVCodecContext decoderContext;
+   private AVFrame videoFrame;
+   private AVPacket packet;
+   private boolean isClosed = false;
    public FFMPEGFileReader(String file) {
       LogTools.info("Initializing ffmpeg contexts for playback from {}", file);
       avFormatContext = new AVFormatContext();
@@ -32,20 +36,17 @@ public class FFMPEGFileReader
                      decoderContext.width(), decoderContext.height(), avutil.av_get_pix_fmt_name(decoderContext.pix_fmt()).getString());
 
       avformat.av_dump_format(avFormatContext, 0, file, 0);
+
+      videoFrame = avutil.av_frame_alloc();
+      packet = avcodec.av_packet_alloc();
    }
 
    //Adapted from demuxing_decoding.c. Currently assumes video stream, but could be adapted for audio use, too
    private void openCodecContext()
    {
-      int ret;
+      streamIndex = avformat.av_find_best_stream(avFormatContext, avutil.AVMEDIA_TYPE_VIDEO, -1, -1, (AVCodec) null, 0);
+      FFMPEGTools.checkNegativeError(streamIndex, "Finding video stream");
 
-      if ((ret = avformat.av_find_best_stream(avFormatContext, avutil.AVMEDIA_TYPE_VIDEO,
-                                             -1, -1, (AVCodec) null, 0)) < 0)
-      {
-         FFMPEGTools.checkNonZeroError(ret, "Finding video stream");
-      }
-
-      streamIndex = ret;
       AVStream stream = avFormatContext.streams(streamIndex);
       AVCodec decoder = avcodec.avcodec_find_decoder(stream.codecpar().codec_id());
       FFMPEGTools.checkPointer(decoder, "Finding codec");
@@ -57,11 +58,52 @@ public class FFMPEGFileReader
       FFMPEGTools.checkNonZeroError(avcodec.avcodec_open2(decoderContext, decoder, (AVDictionary) null), "Opening codec");
    }
 
-   public boolean hasNextFrame() {
-      return false;
+   public void seek(long timestamp)
+   {
+      FFMPEGTools.checkNegativeError(avformat.av_seek_frame(avFormatContext, streamIndex, timestamp, 0), "Seeking frame via timestamp", false);
    }
 
-   public void getNextFrame(BytedecoImage image) {
+   /***
+    * @param image BytedecoImage of proper resolution/format to store data from frame into
+    * @return true on success, false on failure/EOF
+    */
+   public boolean getNextFrame(BytedecoImage image) {
+      int returnCode = avformat.av_read_frame(avFormatContext, packet);
+      if (returnCode == avutil.AVERROR_EOF())
+         return false;
+      FFMPEGTools.checkNegativeError(returnCode, "Getting next frame from stream");
 
+      if (packet.stream_index() == streamIndex)
+      {
+         FFMPEGTools.checkNonZeroError(avcodec.avcodec_send_packet(decoderContext, packet), "Sending packet for decoding");
+
+         //Note: video packets always contain exactly one frame. For audio, etc. care must be taken to ensure all frames are read
+         do
+         {
+            returnCode = avcodec.avcodec_receive_frame(decoderContext, videoFrame);
+         }
+         while (returnCode == avutil.AVERROR_EAGAIN() || returnCode == avutil.AVERROR_EOF());
+         FFMPEGTools.checkNegativeError(returnCode, "Decoding frame from packet");
+
+         image.getBackingDirectByteBuffer().put(videoFrame.data().asByteBuffer());
+      }
+
+      avcodec.av_packet_unref(packet); //This is NOT freeing the packet, which is done later
+
+      return true;
+   }
+
+   public void close()
+   {
+      if (isClosed)
+         return;
+
+      avcodec.avcodec_free_context(decoderContext);
+      avformat.avformat_close_input(avFormatContext);
+
+      avcodec.av_packet_free(packet);
+      avutil.av_frame_free(videoFrame);
+
+      isClosed = true;
    }
 }
