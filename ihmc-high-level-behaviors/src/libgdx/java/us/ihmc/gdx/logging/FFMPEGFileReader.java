@@ -78,32 +78,38 @@ public class FFMPEGFileReader
 
    /***
     * @param image BytedecoImage of proper resolution/format to store data from frame into
-    * @return true on success, false on failure/EOF
+    * @return -1 when end of file reached (AVERROR_EOF), timestamp in time base units otherwise
     */
-   public boolean getNextFrame(BytedecoImage image) {
-      int returnCode = avformat.av_read_frame(avFormatContext, packet);
-      if (returnCode == avutil.AVERROR_EOF())
-         return false;
-      FFMPEGTools.checkNegativeError(returnCode, "Getting next frame from stream");
-
-      if (packet.stream_index() == streamIndex)
+   public long getNextFrame(BytedecoImage image) {
+      int returnCode;
+      do
       {
-         FFMPEGTools.checkNonZeroError(avcodec.avcodec_send_packet(decoderContext, packet), "Sending packet for decoding");
-
-         //Note: video packets always contain exactly one frame. For audio, etc. care must be taken to ensure all frames are read
-         do
-         {
-            returnCode = avcodec.avcodec_receive_frame(decoderContext, videoFrame);
-         }
-         while (returnCode == avutil.AVERROR_EAGAIN() || returnCode == avutil.AVERROR_EOF());
-         FFMPEGTools.checkNegativeError(returnCode, "Decoding frame from packet");
-
-         image.getBackingDirectByteBuffer().put(videoFrame.data().asByteBuffer());
+         returnCode = avformat.av_read_frame(avFormatContext, packet);
+         if (returnCode == avutil.AVERROR_EOF())
+            return -1;
+         FFMPEGTools.checkNegativeError(returnCode, "Getting next frame from stream");
       }
+      while (packet.stream_index() != streamIndex);
+
+      FFMPEGTools.checkNonZeroError(avcodec.avcodec_send_packet(decoderContext, packet), "Sending packet for decoding");
+
+      //Note: video packets always contain exactly one frame. For audio, etc. care must be taken to ensure all frames are read
+      do
+      {
+         returnCode = avcodec.avcodec_receive_frame(decoderContext, videoFrame);
+      }
+      while (returnCode == avutil.AVERROR_EAGAIN() || returnCode == avutil.AVERROR_EOF());
+      FFMPEGTools.checkNegativeError(returnCode, "Decoding frame from packet");
+
+      image.getBackingDirectByteBuffer().put(videoFrame.data().asByteBuffer());
+
+      long approxTimestamp = videoFrame.best_effort_timestamp();
+
+      avutil.av_frame_unref(videoFrame);
 
       avcodec.av_packet_unref(packet); //This is NOT freeing the packet, which is done later
 
-      return true;
+      return approxTimestamp;
    }
 
    public void close()
