@@ -24,7 +24,7 @@ public class SimpleGPUHeightMapUpdater
    private final OpenCLManager openCLManager;
 
    private final OpenCLFloatBuffer localizationBuffer = new OpenCLFloatBuffer(14);
-   private final OpenCLFloatBuffer parametersBuffer = new OpenCLFloatBuffer(8);
+   private final OpenCLFloatBuffer parametersBuffer = new OpenCLFloatBuffer(13);
    private final OpenCLFloatBuffer intrinsicsBuffer = new OpenCLFloatBuffer(4);
 
    private _cl_mem varianceData;
@@ -284,7 +284,7 @@ public class SimpleGPUHeightMapUpdater
       openCLManager.execute2D(addPointsFromImageKernel, imageWidth, imageHeight);
       openCLManager.execute2D(averageMapKernel, numberOfCells, numberOfCells);
       openCLManager.execute2D(computeNormalsKernel, numberOfCells, numberOfCells);
-//      openCLManager.execute2D(mergeKernel, numberOfCells, numberOfCells);
+      openCLManager.execute2D(mergeKernel, numberOfCells, numberOfCells);
 
       openCLManager.enqueueReadImage(centroidXImage.getOpenCLImageObject(), numberOfCells, numberOfCells, centroidXImage.getBytedecoByteBufferPointer());
       openCLManager.enqueueReadImage(centroidYImage.getOpenCLImageObject(), numberOfCells, numberOfCells, centroidYImage.getBytedecoByteBufferPointer());
@@ -294,7 +294,7 @@ public class SimpleGPUHeightMapUpdater
       openCLManager.enqueueReadImage(normalXImage.getOpenCLImageObject(), numberOfCells, numberOfCells, normalXImage.getBytedecoByteBufferPointer());
       openCLManager.enqueueReadImage(normalYImage.getOpenCLImageObject(), numberOfCells, numberOfCells, normalYImage.getBytedecoByteBufferPointer());
       openCLManager.enqueueReadImage(normalZImage.getOpenCLImageObject(), numberOfCells, numberOfCells, normalZImage.getBytedecoByteBufferPointer());
-//      openCLManager.enqueueReadImage(graphImage.getOpenCLImageObject(), numberOfCells, numberOfCells, graphImage.getBytedecoByteBufferPointer());
+      openCLManager.enqueueReadImage(graphImage.getOpenCLImageObject(), numberOfCells, numberOfCells, graphImage.getBytedecoByteBufferPointer());
 
       openCLManager.finish();
    }
