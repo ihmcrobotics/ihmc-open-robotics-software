@@ -28,6 +28,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLine2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLineSegment2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.listener.YoParameterChangedListener;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -1271,7 +1272,7 @@ public class DynamicStateInspectorTest
 
       scs.startOnAThread();
 
-      YoVariableChangedListener changedListener = v -> updateListener(stepLength, stepWidth, parameters, inspector, leadingFootPose, validPoints, invalidPoints, scs);
+      YoParameterChangedListener changedListener = v -> updateListener(stepLength, stepWidth, parameters, inspector, leadingFootPose, validPoints, invalidPoints, scs);
       parameters.attachParameterChangeListener(changedListener);
 
       updateListener(stepLength, stepWidth, parameters, inspector, leadingFootPose, validPoints, invalidPoints, scs);
