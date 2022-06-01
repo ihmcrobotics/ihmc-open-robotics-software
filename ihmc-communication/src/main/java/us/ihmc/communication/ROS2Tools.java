@@ -1,10 +1,5 @@
 package us.ihmc.communication;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.util.function.Consumer;
-import java.util.function.Function;
-
 import controller_msgs.msg.dds.*;
 import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Float64;
@@ -16,6 +11,11 @@ import us.ihmc.ros2.*;
 import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
 import us.ihmc.util.PeriodicThreadSchedulerFactory;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class ROS2Tools
 {
@@ -113,6 +113,7 @@ public class ROS2Tools
          = REA.withInput().withType(PolygonizerParametersStringMessage.class).withSuffix("polygonizer_parameters");
 
    public static final ROS2Topic<VideoPacket> VIDEO = IHMC_ROOT.withTypeName(VideoPacket.class);
+   public static final ROS2Topic<BigVideoPacket> BIG_VIDEO = IHMC_ROOT.withTypeName(BigVideoPacket.class);
    public static final ROS2Topic<VideoPacket> D435_VIDEO = IHMC_ROOT.withModule(D435_NAME).withType(VideoPacket.class).withSuffix("video");
    public static final ROS2Topic<VideoPacket> L515_VIDEO = IHMC_ROOT.withModule(L515_NAME).withType(VideoPacket.class).withSuffix("video");
    public static final ROS2Topic<VideoPacket> L515_DEPTH = IHMC_ROOT.withModule(L515_NAME).withType(VideoPacket.class).withSuffix("depth");
@@ -420,6 +421,14 @@ public class ROS2Tools
    public static <T> void createCallbackSubscription(RealtimeROS2Node realtimeROS2Node, ROS2Topic<T> topic, NewMessageListener<T> newMessageListener)
    {
       createCallbackSubscription(realtimeROS2Node, topic.getType(), topic.getName(), newMessageListener);
+   }
+
+   public static <T> void createCallbackSubscription(RealtimeROS2Node realtimeROS2Node,
+                                                     ROS2Topic<T> topic,
+                                                     ROS2QosProfile qosProfile,
+                                                     NewMessageListener<T> newMessageListener)
+   {
+      createCallbackSubscription(realtimeROS2Node, topic.getType(), topic.getName(), newMessageListener, qosProfile, RUNTIME_EXCEPTION);
    }
 
    public static <T> void createCallbackSubscription(RealtimeROS2Node realtimeROS2Node,

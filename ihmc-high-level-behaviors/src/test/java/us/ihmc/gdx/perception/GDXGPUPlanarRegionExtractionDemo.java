@@ -79,7 +79,6 @@ public class GDXGPUPlanarRegionExtractionDemo
                                                               maxRange,
                                                               publishRateHz);
                   baseUI.getImGuiPanelManager().addPanel(l515);
-                  l515.create();
                   l515.setSensorEnabled(true);
                   l515.setPublishPointCloudROS2(false);
                   l515.setRenderPointCloudDirectly(false);

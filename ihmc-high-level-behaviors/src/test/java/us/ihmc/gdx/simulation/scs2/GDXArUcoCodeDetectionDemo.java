@@ -73,7 +73,6 @@ public class GDXArUcoCodeDetectionDemo
                if (nativesLoadedActivator.isNewlyActivated())
                {
                   cameraSensor = GDXSimulatedSensorFactory.createBlackflyFisheyeImageOnlyNoComms(sensorPoseGizmo.getGizmoFrame());
-                  cameraSensor.create();
                   cameraSensor.setSensorEnabled(true);
                   cameraSensor.setRenderColorVideoDirectly(true);
                   baseUI.getImGuiPanelManager().addPanel(cameraSensor);
