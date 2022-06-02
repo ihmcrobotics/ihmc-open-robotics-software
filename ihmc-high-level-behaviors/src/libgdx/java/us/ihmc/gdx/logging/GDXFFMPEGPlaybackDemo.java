@@ -70,15 +70,18 @@ public class GDXFFMPEGPlaybackDemo
             if (video != null)
                ImGui.text("Resolution: " + video.getWidth() + " x " + video.getHeight());
 
+            if (video != null)
+               ImGui.text("Pos: " + video.getCurrentTimestampInMillis() / 1000 + "s of " + video.getVideoDurationInMillis() / 1000 + 's');
+
             if (ImGui.button("Play"))
                video.play();
 
             if (ImGui.button("Pause"))
                video.pause();
 
-            ImGui.inputInt("Seek to: ", seekLocation);
+            ImGui.inputInt("Go to (s) ", seekLocation);
             if (ImGui.button("Seek"))
-               video.seek(seekLocation.get());
+               video.seek(seekLocation.get() * 1000);
          }
 
          @Override
