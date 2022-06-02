@@ -14,7 +14,8 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::BigVideoPacket_")
       struct BigVideoPacket
       {
-        long long acquisition_time_nanos;
+        long long acquisition_time_seconds_since_epoch;
+        long long acquisition_time_additional_nanos;
         unsigned short image_width;
         unsigned short image_height;
         sequence<octet, 25000000> data;

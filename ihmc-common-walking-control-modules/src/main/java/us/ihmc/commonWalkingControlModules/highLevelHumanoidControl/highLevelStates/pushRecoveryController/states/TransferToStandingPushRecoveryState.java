@@ -17,7 +17,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 public class TransferToStandingPushRecoveryState extends PushRecoveryState
 {
@@ -168,7 +167,7 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
 
       double extraToeOffHeight = 0.0;
       if (feetManager.getCurrentConstraintType(supportingSide.getOppositeSide()) == FootControlModule.ConstraintType.TOES)
-         extraToeOffHeight = feetManager.getToeOffManager().getExtraCoMMaxHeightWithToes();
+         extraToeOffHeight = feetManager.getExtraCoMMaxHeightWithToes();
 
       TransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport = walkingMessageHandler
             .createTransferToAndNextFootstepDataForDoubleSupport(supportingSide);
