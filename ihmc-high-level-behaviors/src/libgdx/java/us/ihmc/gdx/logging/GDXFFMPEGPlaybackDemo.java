@@ -26,16 +26,17 @@ public class GDXFFMPEGPlaybackDemo
 
    //example.webm contains licensing information at attribution.txt in same directory. Used with permission from https://en.wikipedia.org/wiki/File:Schlossbergbahn.webm
    private final WorkspaceFile exampleVideo = new WorkspaceFile(new WorkspaceDirectory("ihmc-open-robotics-software",
-                                                                                       "ihmc-high-level-behaviors/src/main/resources/us/ihmc/gdx/logging"), "example.webm");
+                                                                                       "ihmc-high-level-behaviors/src/main/resources/us/ihmc/gdx/logging"),
+                                                                "example.webm");
 
    private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/main/resources");
    private GDXCVImagePanel imagePanel;
    private GDXCVImagePanel oldImagePanel;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private FFMPEGVideoPlaybackManager video;
-   private boolean videoReload = false;
+   private boolean videoReload;
    private final ImInt location = new ImInt();
-   private boolean isScrubbing = false;
+   private boolean isScrubbing;
 
    public GDXFFMPEGPlaybackDemo()
    {
