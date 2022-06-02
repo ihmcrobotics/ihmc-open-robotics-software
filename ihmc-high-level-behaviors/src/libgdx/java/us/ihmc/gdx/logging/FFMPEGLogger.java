@@ -321,7 +321,6 @@ public class FFMPEGLogger
 
       avutil.av_frame_free(avFrameToBeEncoded);
       avutil.av_frame_free(avFrameToBeScaled);
-      avutil.av_frame_free(avFrameToBeScaled);
       avcodec.av_packet_free(avPacket);
 
       swscale.sws_freeContext(swsContext);
