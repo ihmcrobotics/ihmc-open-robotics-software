@@ -1,6 +1,7 @@
 package us.ihmc.gdx.logging;
 
 import imgui.ImGui;
+import imgui.type.ImInt;
 import org.bytedeco.ffmpeg.ffmpeg;
 import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
@@ -22,6 +23,7 @@ public class GDXFFMPEGPlaybackDemo
    private GDXCVImagePanel imagePanel;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private FFMPEGVideoPlaybackManager video;
+   private final ImInt seekLocation = new ImInt();
 
    public GDXFFMPEGPlaybackDemo()
    {
@@ -67,6 +69,16 @@ public class GDXFFMPEGPlaybackDemo
             ImGui.text("System native byte order: " + ByteOrder.nativeOrder().toString());
             if (video != null)
                ImGui.text("Resolution: " + video.getWidth() + " x " + video.getHeight());
+
+            if (ImGui.button("Play"))
+               video.play();
+
+            if (ImGui.button("Pause"))
+               video.pause();
+
+            ImGui.inputInt("Seek to: ", seekLocation);
+            if (ImGui.button("Seek"))
+               video.seek(seekLocation.get());
          }
 
          @Override
