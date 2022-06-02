@@ -51,7 +51,7 @@ public class FFMPEGVideoPlaybackManager
 
    public void seek(long milliseconds)
    {
-      file.seek(millisToBaseUnits(milliseconds));
+      file.seek(millisToBaseUnits(milliseconds) + file.getStartTime());
    }
 
    public void play()
@@ -88,12 +88,12 @@ public class FFMPEGVideoPlaybackManager
 
    public long getCurrentTimestampInMillis()
    {
-      return baseUnitsToMillis(previousBaseUnitsTimestamp);
+      return baseUnitsToMillis(previousBaseUnitsTimestamp - file.getStartTime());
    }
 
    private long millisToBaseUnits(long millis)
    {
-      return (long) (millis / FFMPEGTools.rationalToFloatingPoint(timeBase) / 1000);
+      return (long) (millis / 1000 / FFMPEGTools.rationalToFloatingPoint(timeBase));
    }
 
    private long baseUnitsToMillis(long baseUnits)

@@ -2,6 +2,7 @@ package us.ihmc.gdx.logging;
 
 import imgui.ImGui;
 import imgui.extension.imguifiledialog.ImGuiFileDialog;
+import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import org.bytedeco.ffmpeg.ffmpeg;
 import org.bytedeco.opencv.global.opencv_core;
@@ -33,7 +34,8 @@ public class GDXFFMPEGPlaybackDemo
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private FFMPEGVideoPlaybackManager video;
    private boolean videoReload = false;
-   private final ImInt seekLocation = new ImInt();
+   private final ImInt location = new ImInt();
+   private boolean isScrubbing = false;
 
    public GDXFFMPEGPlaybackDemo()
    {
@@ -119,7 +121,24 @@ public class GDXFFMPEGPlaybackDemo
 
             if (video != null)
             {
-               ImGui.progressBar(video.getCurrentTimestampInMillis() / (float) video.getVideoDurationInMillis());
+               //FFMPEG freaks out of you seek to the end but there isn't a great way to fix that
+               if (ImGui.sliderInt("##videoProgress", location.getData(), 0, (int) (video.getVideoDurationInMillis())))
+               {
+                  isScrubbing = true;
+                  video.pause();
+               }
+               else
+               {
+                  if (isScrubbing)
+                  {
+                     video.seek(location.get());
+                     video.play();
+
+                     isScrubbing = false;
+                  }
+                  else
+                     location.set((int) video.getCurrentTimestampInMillis());
+               }
 
                if (ImGui.button("Play"))
                   video.play();
@@ -128,11 +147,6 @@ public class GDXFFMPEGPlaybackDemo
                   video.pause();
                ImGui.sameLine();
                ImGui.text(video.getCurrentTimestampInMillis() / 1000 + "s of " + video.getVideoDurationInMillis() / 1000 + 's');
-
-               ImGui.inputInt("##seekBox", seekLocation);
-               ImGui.sameLine();
-               if (ImGui.button("Seek"))
-                  video.seek(seekLocation.get() * 1000);
             }
          }
 
