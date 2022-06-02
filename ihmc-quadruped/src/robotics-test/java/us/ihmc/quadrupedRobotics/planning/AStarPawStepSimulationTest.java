@@ -123,8 +123,6 @@ public abstract class AStarPawStepSimulationTest implements QuadrupedMultiRobotT
 
       stepTeleopManager.getXGaitSettings().setQuadrupedSpeed(QuadrupedSpeed.FAST);
 
-      conductor.getScs().setCameraTracking(true, true, true, false);
-
       ROS2Topic footstepPlannerOutputTopic = PawStepPlannerCommunicationProperties.outputTopic(quadrupedTestFactory.getRobotName());
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(stepTeleopManager.getROS2Node(), PawStepPlanningToolboxOutputStatus.class, footstepPlannerOutputTopic,

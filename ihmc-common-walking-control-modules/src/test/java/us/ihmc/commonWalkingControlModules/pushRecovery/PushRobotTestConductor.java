@@ -3,8 +3,8 @@ package us.ihmc.commonWalkingControlModules.pushRecovery;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -20,7 +20,7 @@ public class PushRobotTestConductor
    private final YoDouble pushDelay;
    private final YoDouble yoTime;
    
-   public PushRobotTestConductor(SimulationConstructionSet scs, String jointName)
+   public PushRobotTestConductor(YoVariableHolder scs, String jointName)
    {
       this.jointName = jointName;
       

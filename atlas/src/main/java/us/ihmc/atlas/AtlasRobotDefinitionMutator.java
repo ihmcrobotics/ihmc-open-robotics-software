@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
-import us.ihmc.avatar.factory.RobotDefinitionTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.scs2.definition.geometry.ModelFileGeometryDefinition;
 import us.ihmc.scs2.definition.robot.IMUSensorDefinition;
@@ -14,6 +13,7 @@ import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.robot.WrenchSensorDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
+import us.ihmc.simulationToolkit.RobotDefinitionTools;
 
 public class AtlasRobotDefinitionMutator implements Consumer<RobotDefinition>
 {

@@ -50,6 +50,7 @@ public class GoalOrientedTestConductor
       YoDouble yoTime = scs.getTime();
       yoTime.addListener(this::notifyOfVariableChange);
       scs.startSimulationThread();
+      scs.waitUntilVisualizerFullyUp(); 
       scs.addSimulationThrowableListener(t -> simulationDoneWithException(t));
    }
 
@@ -234,7 +235,7 @@ public class GoalOrientedTestConductor
    {
       if (simulationTestingParameters.getKeepSCSUp())
       {
-         ThreadTools.sleepForever();
+         scs.waitUntilVisualizerDown();
       }
 
       if (simulationTestingParameters.getCreateSCSVideos())
@@ -252,7 +253,7 @@ public class GoalOrientedTestConductor
    {
       if (simulationTestingParameters.getKeepSCSUp())
       {
-         ThreadTools.sleepForever();
+         scs.waitUntilVisualizerDown();
       }
 
       if (simulationTestingParameters.getCreateSCSVideos())
