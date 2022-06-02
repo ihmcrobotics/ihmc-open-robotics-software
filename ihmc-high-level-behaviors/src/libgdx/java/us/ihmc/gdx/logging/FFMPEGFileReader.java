@@ -17,7 +17,6 @@ import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.PointerPointer;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoImage;
 
 import java.nio.ByteBuffer;
 

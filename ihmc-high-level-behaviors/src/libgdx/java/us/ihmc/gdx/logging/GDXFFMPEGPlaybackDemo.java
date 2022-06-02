@@ -8,7 +8,6 @@ import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.perception.GDXCVImagePanel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.tools.thread.Activator;
 
