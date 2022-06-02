@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.perception.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.perception.geometry.SimpleConcaveHullFactory;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionSegmentationRawDataImporter;

@@ -20,6 +20,9 @@ import us.ihmc.javaFXToolkit.JavaFXTools;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
+import us.ihmc.perception.geometry.ConcaveHull;
+import us.ihmc.perception.geometry.ConcaveHullCollection;
+import us.ihmc.perception.geometry.Triangle3D;
 
 public class REAGraphics3DTools
 {

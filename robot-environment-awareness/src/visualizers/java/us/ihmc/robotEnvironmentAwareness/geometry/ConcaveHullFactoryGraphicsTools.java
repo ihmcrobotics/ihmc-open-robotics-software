@@ -16,6 +16,7 @@ import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.perception.geometry.JTSTools;
 import us.ihmc.perception.geometry.SimpleConcaveHullFactory.ConcaveHullFactoryResult;
 import us.ihmc.perception.geometry.SimpleConcaveHullFactory.ConcaveHullVariables;
+import us.ihmc.perception.geometry.Triangle3D;
 
 public class ConcaveHullFactoryGraphicsTools
 {

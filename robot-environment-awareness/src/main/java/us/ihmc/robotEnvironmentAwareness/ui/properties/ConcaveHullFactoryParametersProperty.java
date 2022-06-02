@@ -1,7 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.ui.properties;
 
 import javafx.beans.property.Property;
-import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
+import us.ihmc.perception.geometry.ConcaveHullFactoryParameters;
 
 public class ConcaveHullFactoryParametersProperty extends ParametersProperty<ConcaveHullFactoryParameters>
 {

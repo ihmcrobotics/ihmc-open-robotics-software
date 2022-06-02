@@ -1,7 +1,7 @@
 package us.ihmc.perception.geometry;
 
 import static us.ihmc.commons.lists.ListWrappingIndexTools.*;
-import static us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullTools.*;
+import static us.ihmc.perception.geometry.ConcaveHullTools.findClosestIntersectionWithRay;
 
 import java.util.ArrayList;
 import java.util.List;
