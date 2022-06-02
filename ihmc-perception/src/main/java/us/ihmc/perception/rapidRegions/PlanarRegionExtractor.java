@@ -47,9 +47,9 @@ public class PlanarRegionExtractor
 
    private int numberOfBoundaryPatchesInWholeImage = 0;
 
-   private ConcaveHullFactoryParameters concaveHullFactoryParameters = new ConcaveHullFactoryParameters("ForGPURegions");
-   private PolygonizerParameters polygonizerParameters = new PolygonizerParameters("ForGPURegions");
-   private GPUPlanarRegionExtractionParameters parameters;
+   private final ConcaveHullFactoryParameters concaveHullFactoryParameters;
+   private final PolygonizerParameters polygonizerParameters;
+   private final GPUPlanarRegionExtractionParameters parameters;
 
    private final PlanarRegionsList planarRegionsList = new PlanarRegionsList();
    private final Comparator<GPURegionRing> boundaryIndexComparator = Comparator.comparingInt(regionRing -> regionRing.getBoundaryIndices().size());
@@ -57,6 +57,13 @@ public class PlanarRegionExtractor
    private final GPUPlanarRegionIsland tempIsland = new GPUPlanarRegionIsland();
 
    private final RecyclingArrayList<GPUPlanarRegion> gpuPlanarRegions = new RecyclingArrayList<>(GPUPlanarRegion::new);
+
+   public PlanarRegionExtractor(ConcaveHullFactoryParameters concaveHullFactoryParameters, PolygonizerParameters polygonizerParameters,GPUPlanarRegionExtractionParameters parameters)
+   {
+      this.concaveHullFactoryParameters = concaveHullFactoryParameters;
+      this.polygonizerParameters = polygonizerParameters;
+      this.parameters = parameters;
+   }
 
    public void createRegionsFromConnectedCells(PlanarRegionExtractorInputData data, Consumer<GPUPlanarRegionIsland> forDrawingDebugPanel)
    {

@@ -153,7 +153,7 @@ public class GPUPlanarRegionExtraction
 //      boundaryMatrix = new BMatrixRMaj(patchImageHeight, patchImageWidth);
 //      regionMatrix = new DMatrixRMaj(patchImageHeight, patchImageWidth);
 
-      planarRegionExtractor = new PlanarRegionExtractor();
+      planarRegionExtractor = new PlanarRegionExtractor(concaveHullFactoryParameters, polygonizerParameters, parameters);
       extractionData = new PlanarRegionExtractor.PlanarRegionExtractorInputData();
    }
 
