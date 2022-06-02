@@ -1,7 +1,11 @@
 package us.ihmc.gdx.logging;
 
 import org.bytedeco.ffmpeg.avutil.AVRational;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
+import us.ihmc.tools.thread.ExecutorServiceTools;
+import us.ihmc.tools.thread.Throttler;
 
 public class FFMPEGVideoPlaybackManager
 {
@@ -9,6 +13,31 @@ public class FFMPEGVideoPlaybackManager
    private BytedecoImage image;
    private AVRational timeBase;
    private long previousBaseUnitsTimestamp;
+   private boolean isPaused = true;
+   private Thread currentPlaybackThread = null;
+   private final Runnable playbackRunnable = new Runnable()
+   {
+      final Throttler throttler = new Throttler();
+      @Override
+      public void run()
+      {
+         final double period = FFMPEGTools.rationalToFloatingPoint(timeBase);
+
+         while (!isPaused) {
+            long returnCode = file.getNextFrame(image);
+
+            if (returnCode == -1) //EOF
+            {
+               isPaused = true;
+               break;
+            }
+
+            previousBaseUnitsTimestamp = returnCode;
+
+            throttler.waitAndRun(period);
+         }
+      }
+   };
 
    public FFMPEGVideoPlaybackManager(String file) {
       this.file = new FFMPEGFileReader(file);
@@ -20,11 +49,28 @@ public class FFMPEGVideoPlaybackManager
    }
 
    public void play() {
+      if (!isPaused)
+         return;
 
+      currentPlaybackThread = ThreadTools.startAThread(playbackRunnable, "Video playback");
+
+      isPaused = false;
    }
 
    public void pause() {
+      if (isPaused || currentPlaybackThread == null)
+         return;
 
+      isPaused = true;
+
+      try
+      {
+         currentPlaybackThread.wait();
+      }
+      catch (InterruptedException ex)
+      {
+         LogTools.error(ex);
+      }
    }
 
    public long getVideoDurationInMillis() {
