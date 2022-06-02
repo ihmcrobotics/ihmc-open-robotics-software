@@ -48,10 +48,12 @@ public class GDXFFMPEGPlaybackDemo
                if (nativesLoadedActivator.isNewlyActivated())
                {
                   video = new FFMPEGVideoPlaybackManager(logDirectory.listFiles()[0].getAbsolutePath());
-                  video.play();
 
                   image = new BytedecoImage(video.getWidth(), video.getHeight(), opencv_core.CV_8UC4);
                   imagePanel = new GDXCVImagePanel("Playback Video", image);
+
+                  video.setDestinationImage(image);
+                  video.play();
 
                   baseUI.getImGuiPanelManager().addPanel(imagePanel.getVideoPanel());
                   baseUI.getPerspectiveManager().reloadPerspective();
@@ -74,6 +76,7 @@ public class GDXFFMPEGPlaybackDemo
          @Override
          public void dispose()
          {
+            video.close();
             baseUI.dispose();
          }
       });
