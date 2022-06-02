@@ -20,7 +20,7 @@ public class FFMPEGVideoPlaybackManager
       @Override
       public void run()
       {
-         final double period = FFMPEGTools.rationalToFloatingPoint(timeBase);
+         final double period = 1 / FFMPEGTools.rationalToFloatingPoint(file.getFramerate());
 
          while (!isPaused) {
             long returnCode = file.getNextFrame(image);
