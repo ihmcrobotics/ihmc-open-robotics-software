@@ -94,8 +94,6 @@ public abstract class AvatarBigStepDownTest implements MultiRobotTestInterface
 
       @SuppressWarnings("unchecked")
       YoEnum<FootControlModule.ConstraintType> leftFootState = ((YoEnum<FootControlModule.ConstraintType>) simulationTestHelper.findVariable("rightFootCurrentState"));
-      YoBoolean forceToeOffAtJointLimit = ((YoBoolean) simulationTestHelper.findVariable("forceToeOffAtJointLimit"));
-      forceToeOffAtJointLimit.set(true);
 
       simulationTestHelper.publishToController(HumanoidMessageTools.createFootstepDataListMessage(firstStep));
 
@@ -174,9 +172,6 @@ public abstract class AvatarBigStepDownTest implements MultiRobotTestInterface
       FootstepDataMessage secondStep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT,
                                                                                       new Point3D(-5.8 - 0.15, -7.471 + 0.15, 0.0),
                                                                                       footRotation);
-
-      YoBoolean forceToeOffAtJointLimit = ((YoBoolean) simulationTestHelper.findVariable("forceToeOffAtJointLimit"));
-      forceToeOffAtJointLimit.set(true);
 
       simulationTestHelper.publishToController(HumanoidMessageTools.createFootstepDataListMessage(firstStep));
 

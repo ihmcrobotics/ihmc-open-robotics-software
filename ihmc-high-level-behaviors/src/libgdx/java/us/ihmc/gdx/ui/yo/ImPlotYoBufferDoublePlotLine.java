@@ -16,8 +16,8 @@ public class ImPlotYoBufferDoublePlotLine extends ImPlotYoBufferPlotLineBasics
    private static final DecimalFormat decimal5DPrintFormatter = new DecimalFormat("0.00000");
    private final YoDouble yoDouble;
    private LinkedYoVariable<YoDouble> linkedYoDoubleVariable;
-   private Integer[] xValues = ImPlotTools.createIndex(1);
-   private Double[] plotData = ImPlotTools.newNaNFilledDoubleBuffer(1);
+   private double[] xValues = ImPlotTools.createIndex(1);
+   private double[] plotData = ImPlotTools.newNaNFilledBuffer(1);
 
    public ImPlotYoBufferDoublePlotLine(YoDouble yoDouble, Consumer<YoVariable> removeSelf)
    {
@@ -50,7 +50,7 @@ public class ImPlotYoBufferDoublePlotLine extends ImPlotYoBufferPlotLineBasics
             if (plotData.length != sampleLength)
             {
                xValues = ImPlotTools.createIndex(sampleLength);
-               plotData = ImPlotTools.newNaNFilledDoubleBuffer(sampleLength);
+               plotData = ImPlotTools.newNaNFilledBuffer(sampleLength);
             }
             for (int i = 0; i < bufferSample.getBufferProperties().getActiveBufferLength(); i++)
             {
@@ -66,7 +66,7 @@ public class ImPlotYoBufferDoublePlotLine extends ImPlotYoBufferPlotLineBasics
    protected void plot(String labelID)
    {
       int offset = 0; // This is believed to be the index in the array we are passing in which implot will start reading
-      ImPlot.plotLine(labelID, xValues, plotData, offset);
+      ImPlot.plotLine(labelID, xValues, plotData, xValues.length, offset);
    }
 
    @Override
