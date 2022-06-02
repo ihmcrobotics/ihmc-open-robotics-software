@@ -11,6 +11,11 @@ import org.bytedeco.ffmpeg.avutil.AVRational;
 import org.bytedeco.ffmpeg.global.avcodec;
 import org.bytedeco.ffmpeg.global.avformat;
 import org.bytedeco.ffmpeg.global.avutil;
+import org.bytedeco.ffmpeg.global.swscale;
+import org.bytedeco.ffmpeg.swscale.SwsContext;
+import org.bytedeco.javacpp.DoublePointer;
+import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.javacpp.PointerPointer;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 
@@ -20,7 +25,9 @@ public class FFMPEGFileReader
    private int streamIndex;
    private AVCodecContext decoderContext;
    private AVFrame videoFrame;
+   private AVFrame rgbFrame;
    private AVPacket packet;
+   private SwsContext swsContext;
    private boolean isClosed = false;
    private final AVRational timeBase;
    private final int width;
@@ -30,7 +37,7 @@ public class FFMPEGFileReader
 
    public FFMPEGFileReader(String file) {
       LogTools.info("Initializing ffmpeg contexts for playback from {}", file);
-      avFormatContext = new AVFormatContext();
+      avFormatContext = avformat.avformat_alloc_context();
       FFMPEGTools.checkNonZeroError(avformat.avformat_open_input(avFormatContext, file, null, null), "Initializing format context");
 
       FFMPEGTools.checkNonZeroError(avformat.avformat_find_stream_info(avFormatContext, (AVDictionary) null), "Finding stream information");
@@ -44,7 +51,7 @@ public class FFMPEGFileReader
 
       width = decoderContext.width();
       height = decoderContext.height();
-      timeBase = decoderContext.time_base();
+      timeBase = new AVRational().num(1).den(30); //TODO workaround because time_base() and framerate() aren't working
       duration = avFormatContext.duration();
       startTime = avFormatContext.start_time();
 
@@ -52,6 +59,28 @@ public class FFMPEGFileReader
 
       videoFrame = avutil.av_frame_alloc();
       packet = avcodec.av_packet_alloc();
+
+      if (decoderContext.pix_fmt() != avutil.AV_PIX_FMT_RGBA)
+      {
+         rgbFrame = avutil.av_frame_alloc();
+         rgbFrame.width(width);
+         rgbFrame.height(height);
+         rgbFrame.format(avutil.AV_PIX_FMT_RGBA);
+
+         FFMPEGTools.checkNonZeroError(avutil.av_frame_get_buffer(rgbFrame, 0), "Allocating buffer for rgbFrame");
+
+         swsContext = swscale.sws_getContext(width,
+                                             height,
+                                             decoderContext.pix_fmt(),
+                                             width,
+                                             height,
+                                             avutil.AV_PIX_FMT_RGBA,
+                                             swscale.SWS_BICUBIC,
+                                             null,
+                                             null,
+                                             (DoublePointer) null);
+         FFMPEGTools.checkPointer(swsContext, "Allocating SWS context");
+      }
    }
 
    //Adapted from demuxing_decoding.c. Currently assumes video stream, but could be adapted for audio use, too
@@ -101,7 +130,30 @@ public class FFMPEGFileReader
       while (returnCode == avutil.AVERROR_EAGAIN() || returnCode == avutil.AVERROR_EOF());
       FFMPEGTools.checkNegativeError(returnCode, "Decoding frame from packet");
 
-      image.getBackingDirectByteBuffer().put(videoFrame.data().asByteBuffer());
+      if (swsContext != null)
+      {
+         FFMPEGTools.checkNonZeroError(avutil.av_frame_make_writable(rgbFrame), "Ensuring frame data is writable");
+
+         PointerPointer sourceSlice = videoFrame.data();
+         IntPointer sourceStride = videoFrame.linesize();
+         int sourceSliceY = 0;
+         int sourceSliceHeight = height;
+         PointerPointer destination = rgbFrame.data();
+         IntPointer destinationStride = rgbFrame.linesize();
+         swscale.sws_scale(swsContext, sourceSlice, sourceStride, sourceSliceY, sourceSliceHeight, destination, destinationStride);
+
+         for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+               int data = rgbFrame.data(0).getInt(4 * (i * width + j));
+               image.getBackingDirectByteBuffer().putInt(4 * (i * width + j), data);
+            }
+         }
+         //image.getBackingDirectByteBuffer().put(rgbFrame.data(0).asByteBuffer());
+      }
+      else
+      {
+         image.getBackingDirectByteBuffer().put(videoFrame.data(0).asByteBuffer());
+      }
 
       long approxTimestamp = videoFrame.best_effort_timestamp();
 
@@ -117,11 +169,17 @@ public class FFMPEGFileReader
       if (isClosed)
          return;
 
+      if (swsContext != null)
+         swscale.sws_freeContext(swsContext);
+
       avcodec.avcodec_free_context(decoderContext);
       avformat.avformat_close_input(avFormatContext);
 
       avcodec.av_packet_free(packet);
       avutil.av_frame_free(videoFrame);
+
+      if (rgbFrame != null)
+         avutil.av_frame_free(rgbFrame);
 
       isClosed = true;
    }
