@@ -30,6 +30,7 @@ public class FFMPEGFileReader
    private SwsContext swsContext;
    private boolean isClosed = false;
    private final AVRational timeBase;
+   private final AVRational framerate;
    private final int width;
    private final int height;
    private final long duration;
@@ -51,9 +52,11 @@ public class FFMPEGFileReader
 
       width = decoderContext.width();
       height = decoderContext.height();
-      timeBase = new AVRational().num(1).den(30); //TODO workaround because time_base() and framerate() aren't working
       duration = avFormatContext.duration();
       startTime = avFormatContext.start_time();
+
+      timeBase = stream.time_base();
+      framerate = stream.avg_frame_rate(); //TODO Simple workaround fix for framerate. Does not work with variable framerate streams, but should be fine for IHMC webms
 
       avformat.av_dump_format(avFormatContext, 0, file, 0);
 
@@ -187,6 +190,11 @@ public class FFMPEGFileReader
    public AVRational getTimeBase()
    {
       return timeBase;
+   }
+
+   public AVRational getFramerate()
+   {
+      return framerate;
    }
 
    public int getWidth()
