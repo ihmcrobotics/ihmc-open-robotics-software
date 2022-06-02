@@ -39,7 +39,6 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
@@ -74,16 +73,15 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
+import us.ihmc.scs2.SimulationConstructionSet2;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.session.tools.SCS1GraphicConversionTools;
+import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-import us.ihmc.simulationToolkit.outputWriters.PerfectSimulatedOutputWriter;
-import us.ihmc.simulationconstructionset.FloatingJoint;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
@@ -143,12 +141,12 @@ public class WalkingControllerTest
 
    private final SideDependentList<YoEnum<ConstraintType>> footStates = new SideDependentList<>();
 
-   private SimulationConstructionSet scs;
+   private SimulationConstructionSet2 scs;
    private SideDependentList<TestFootSwitch> updatableFootSwitches;
    private FullHumanoidRobotModel fullRobotModel;
    private CenterOfMassStateProvider centerOfMassStateProvider;
    private HumanoidReferenceFrames referenceFrames;
-   private PerfectSimulatedOutputWriter writer;
+   private Runnable writer;
    private OneDoFJointBasics[] oneDoFJoints;
 
    private WalkingHighLevelHumanoidController walkingController;
@@ -193,9 +191,9 @@ public class WalkingControllerTest
 
          if (showSCS)
          {
-            writer.updateRobotConfigurationBasedOnFullRobotModel();
-            scs.setTime(yoTime.getDoubleValue());
-            scs.tickAndUpdate();
+            writer.run();
+            scs.getTime().set(yoTime.getDoubleValue());
+            scs.tickAndWrite();
          }
          else
          {
@@ -526,13 +524,19 @@ public class WalkingControllerTest
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
-      HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
+      RobotDefinition robotDefinition = robotModel.getRobotDefinition();
       fullRobotModel = robotModel.createFullRobotModel();
       centerOfMassStateProvider = CenterOfMassStateProvider.createJacobianBasedStateCalculator(fullRobotModel.getElevator(), ReferenceFrame.getWorldFrame());
       referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       oneDoFJoints = fullRobotModel.getOneDoFJoints();
 
-      setupRobotAndCopyConfiguration(robot);
+      robotDefinition.ignoreAllJoints();
+      RobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
+      initialSetup.initializeRobotDefinition(robotDefinition);
+      initialSetup.initializeFullRobotModel(fullRobotModel);
+      fullRobotModel.updateFrames();
+      referenceFrames.updateFrames();
+
       createWalkingControllerAndSetUpManagerFactory();
       createControllerCore();
 
@@ -560,45 +564,16 @@ public class WalkingControllerTest
       {
          SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
          parameters.setCreateGUI(true);
-         scs = new SimulationConstructionSet(robot);
-         scs.setDT(robotModel.getControllerDT(), 1);
-         SimulationOverheadPlotterFactory plotterFactory = scs.createSimulationOverheadPlotterFactory();
-         plotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
-         plotterFactory.createOverheadPlotter();
-         scs.setCameraTracking(true, true, true, true);
-         scs.addYoRegistry(registry);
-         scs.setGroundVisible(false);
-         scs.addYoGraphicsListRegistry(yoGraphicsListRegistry, true);
-         scs.setTime(0.0);
-         scs.tickAndUpdate();
+         scs = new SimulationConstructionSet2();
+         Robot robot = scs.addRobot(robotDefinition);
+         List<? extends JointBasics> allControllerJoints = fullRobotModel.getRootJoint().subtreeList();
+         writer = () -> allControllerJoints.forEach(joint -> robot.getControllerOutput().getJointOutput(joint).set(joint));
+         scs.setDT(robotModel.getControllerDT());
+         scs.addRegistry(registry);
+         scs.addYoGraphics(SCS1GraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
+         writer.run();
+         scs.tickAndWrite();
       }
-   }
-
-   private void setupRobotAndCopyConfiguration(HumanoidFloatingRootJointRobot robot)
-   {
-      robot.setDynamic(false);
-      RobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
-      initialSetup.initializeRobot(robot);
-
-      writer = new PerfectSimulatedOutputWriter(robot, fullRobotModel);
-
-      for (OneDoFJointBasics revoluteJoint : fullRobotModel.getOneDoFJoints())
-      {
-         String name = revoluteJoint.getName();
-         OneDegreeOfFreedomJoint oneDoFJoint = robot.getOneDegreeOfFreedomJoint(name);
-         revoluteJoint.setQ(oneDoFJoint.getQ());
-         oneDoFJoint.setQd(0.0);
-         revoluteJoint.setQd(0.0);
-      }
-
-      FloatingJoint floatingJoint = robot.getRootJoint();
-      FloatingJointBasics sixDoFJoint = fullRobotModel.getRootJoint();
-      RigidBodyTransform transform = new RigidBodyTransform();
-      floatingJoint.getTransformToWorld(transform);
-      sixDoFJoint.setJointConfiguration(transform);
-
-      fullRobotModel.updateFrames();
-      referenceFrames.updateFrames();
    }
 
    @AfterEach
@@ -606,17 +581,17 @@ public class WalkingControllerTest
    {
       if (showSCS)
       {
-         scs.setCurrentIndex(1);
-         scs.setInPoint();
+         scs.gotoBufferIndex(1);
+         scs.setBufferInPoint();
          scs.cropBuffer();
          scs.play();
-         scs.startOnAThread();
-         ThreadTools.sleepForever();
+         scs.startSimulationThread();
+         scs.waitUntilVisualizerDown();
       }
 
       if (scs != null)
       {
-         scs.closeAndDispose();
+         scs.shutdownSession();
          scs = null;
       }
 
