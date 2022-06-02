@@ -4,7 +4,6 @@ import org.bytedeco.ffmpeg.avutil.AVRational;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
-import us.ihmc.tools.thread.ExecutorServiceTools;
 import us.ihmc.tools.thread.Throttler;
 
 public class FFMPEGVideoPlaybackManager
