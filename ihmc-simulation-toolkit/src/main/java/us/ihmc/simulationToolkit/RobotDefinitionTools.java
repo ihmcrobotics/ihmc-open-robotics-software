@@ -1,4 +1,4 @@
-package us.ihmc.avatar.factory;
+package us.ihmc.simulationToolkit;
 
 import java.io.InputStream;
 import java.util.Collection;
