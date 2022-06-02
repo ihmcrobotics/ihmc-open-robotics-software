@@ -22,6 +22,7 @@ import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -99,7 +100,7 @@ public class GDXJoystickBasedStepping
       continuousStepGenerator.setDesiredTurningVelocityProvider(turningVelocity::get);
       continuousStepGenerator.setDesiredVelocityProvider(() -> new Vector2D(forwardVelocity.get(), lateralVelocity.get()));
       continuousStepGenerator.configureWith(walkingControllerParameters);
-      continuousStepGenerator.setFootstepAdjustment(this::adjustFootstep);
+      continuousStepGenerator.addFootstepAdjustment(this::adjustFootstep);
       continuousStepGenerator.setFootstepMessenger(this::prepareFootsteps);
       continuousStepGenerator.setFootPoseProvider(robotSide -> lastSupportFootPoses.get(robotSide));
       continuousStepGenerator.addFootstepValidityIndicator(this::isStepSnappable);
@@ -290,13 +291,16 @@ public class GDXJoystickBasedStepping
       footstepPlanGraphic.getRenderables(renderables, pool);
    }
 
-   private FramePose3DReadOnly adjustFootstep(FramePose2DReadOnly footstepPose, RobotSide footSide)
+   private boolean adjustFootstep(FramePose2DReadOnly footstepPose, RobotSide footSide, FixedFramePose3DBasics adjustedFootstep)
    {
       FramePose3D adjustedBasedOnStanceFoot = new FramePose3D();
       adjustedBasedOnStanceFoot.getPosition().set(footstepPose.getPosition());
       adjustedBasedOnStanceFoot.setZ(continuousStepGenerator.getCurrentSupportFootPose().getZ());
       adjustedBasedOnStanceFoot.getOrientation().set(footstepPose.getOrientation());
-      return adjustedBasedOnStanceFoot;
+      
+      adjustedFootstep.set(adjustedBasedOnStanceFoot);
+      return true;
+//      return adjustedBasedOnStanceFoot;
    }
 
    private void prepareFootsteps(FootstepDataListMessage footstepDataListMessage)

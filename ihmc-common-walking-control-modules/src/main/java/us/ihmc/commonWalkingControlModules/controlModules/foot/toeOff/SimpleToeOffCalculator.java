@@ -1,53 +1,33 @@
-package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator;
+package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLineSegment2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-import java.util.List;
-
-public class ICPPlanToeOffCalculator implements ToeOffCalculator
+public class SimpleToeOffCalculator implements ToeOffCalculator
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-   private static final String namePrefix = "icpProj";
+   private static final String namePrefix = "simple";
 
-   private final SideDependentList<List<YoContactPoint>> contactPoints = new SideDependentList<>();
-
-   private final FramePoint3D exitCMP = new FramePoint3D();
-   private final FramePoint2D exitCMP2d = new FramePoint2D();
+   private final SideDependentList<ContactableFoot> feet;
 
    private final FramePoint2D toeOffContactPoint2d = new FramePoint2D();
-   private final LineSegment2D toeOffContactLine2d = new LineSegment2D();
-
-   private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
+   private final FrameLineSegment2D toeOffContactLine2d = new FrameLineSegment2D();
 
    private final YoBoolean hasComputedToeOffContactPoint;
    private final YoBoolean hasComputedToeOffContactLine;
 
-   public ICPPlanToeOffCalculator(SideDependentList<YoPlaneContactState> contactStates, SideDependentList<? extends ContactablePlaneBody> feet,
-         YoRegistry parentRegistry)
+   public SimpleToeOffCalculator(SideDependentList<ContactableFoot> feet, YoRegistry parentRegistry)
    {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         ReferenceFrame soleFrame = feet.get(robotSide).getSoleFrame();
-         soleFrames.put(robotSide, soleFrame);
-
-         contactPoints.put(robotSide, contactStates.get(robotSide).getContactPoints());
-      }
+      this.feet = feet;
 
       hasComputedToeOffContactPoint = new YoBoolean(namePrefix + "HasComputedToeOffContactPoint", registry);
       hasComputedToeOffContactLine = new YoBoolean(namePrefix + "HasComputedToeOffContactLine", registry);
@@ -58,29 +38,25 @@ public class ICPPlanToeOffCalculator implements ToeOffCalculator
    @Override
    public ToeOffEnum getEnum()
    {
-      return ToeOffEnum.ICP_PLAN;
+      return ToeOffEnum.SIMPLE;
    }
 
    @Override
    public void clear()
    {
-      exitCMP2d.setToNaN();
       hasComputedToeOffContactPoint.set(false);
+      hasComputedToeOffContactLine.set(false);
    }
 
    @Override
    public void setExitCMP(FramePoint3DReadOnly exitCMP, RobotSide trailingLeg)
    {
-      ReferenceFrame soleFrame = soleFrames.get(trailingLeg);
-      this.exitCMP.setIncludingFrame(exitCMP);
-      this.exitCMP.changeFrame(soleFrame);
-      exitCMP2d.setToZero(soleFrame);
-      exitCMP2d.setIncludingFrame(this.exitCMP);
    }
 
    @Override
    public void computeToeOffContactPoint(FramePoint2DReadOnly desiredCMP, RobotSide trailingLeg)
    {
+      feet.get(trailingLeg).getToeOffContactPoint(toeOffContactPoint2d);
       hasComputedToeOffContactPoint.set(true);
    }
 
@@ -96,6 +72,7 @@ public class ICPPlanToeOffCalculator implements ToeOffCalculator
    @Override
    public void computeToeOffContactLine(FramePoint2DReadOnly desiredCMP, RobotSide trailingLeg)
    {
+      feet.get(trailingLeg).getToeOffContactLine(toeOffContactLine2d);
       hasComputedToeOffContactLine.set(true);
    }
 

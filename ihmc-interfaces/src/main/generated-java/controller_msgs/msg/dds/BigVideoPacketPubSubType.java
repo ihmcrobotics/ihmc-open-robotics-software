@@ -42,6 +42,8 @@ public class BigVideoPacketPubSubType implements us.ihmc.pubsub.TopicDataType<co
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
@@ -64,6 +66,9 @@ public class BigVideoPacketPubSubType implements us.ihmc.pubsub.TopicDataType<co
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
 
@@ -80,7 +85,9 @@ public class BigVideoPacketPubSubType implements us.ihmc.pubsub.TopicDataType<co
 
    public static void write(controller_msgs.msg.dds.BigVideoPacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_11(data.getAcquisitionTimeNanos());
+      cdr.write_type_11(data.getAcquisitionTimeSecondsSinceEpoch());
+
+      cdr.write_type_11(data.getAcquisitionTimeAdditionalNanos());
 
       cdr.write_type_3(data.getImageWidth());
 
@@ -94,7 +101,9 @@ public class BigVideoPacketPubSubType implements us.ihmc.pubsub.TopicDataType<co
 
    public static void read(controller_msgs.msg.dds.BigVideoPacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setAcquisitionTimeNanos(cdr.read_type_11());
+      data.setAcquisitionTimeSecondsSinceEpoch(cdr.read_type_11());
+      	
+      data.setAcquisitionTimeAdditionalNanos(cdr.read_type_11());
       	
       data.setImageWidth(cdr.read_type_3());
       	
@@ -107,7 +116,8 @@ public class BigVideoPacketPubSubType implements us.ihmc.pubsub.TopicDataType<co
    @Override
    public final void serialize(controller_msgs.msg.dds.BigVideoPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_11("acquisition_time_nanos", data.getAcquisitionTimeNanos());
+      ser.write_type_11("acquisition_time_seconds_since_epoch", data.getAcquisitionTimeSecondsSinceEpoch());
+      ser.write_type_11("acquisition_time_additional_nanos", data.getAcquisitionTimeAdditionalNanos());
       ser.write_type_3("image_width", data.getImageWidth());
       ser.write_type_3("image_height", data.getImageHeight());
       ser.write_type_e("data", data.getData());
@@ -116,7 +126,8 @@ public class BigVideoPacketPubSubType implements us.ihmc.pubsub.TopicDataType<co
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.BigVideoPacket data)
    {
-      data.setAcquisitionTimeNanos(ser.read_type_11("acquisition_time_nanos"));
+      data.setAcquisitionTimeSecondsSinceEpoch(ser.read_type_11("acquisition_time_seconds_since_epoch"));
+      data.setAcquisitionTimeAdditionalNanos(ser.read_type_11("acquisition_time_additional_nanos"));
       data.setImageWidth(ser.read_type_3("image_width"));
       data.setImageHeight(ser.read_type_3("image_height"));
       ser.read_type_e("data", data.getData());

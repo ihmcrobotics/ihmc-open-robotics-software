@@ -1,13 +1,9 @@
-package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator;
+package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff;
 
-import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLineSegment2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public interface ToeOffCalculator
