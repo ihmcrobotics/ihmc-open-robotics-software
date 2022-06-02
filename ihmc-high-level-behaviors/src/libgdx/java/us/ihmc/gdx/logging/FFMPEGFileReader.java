@@ -56,9 +56,9 @@ public class FFMPEGFileReader
 
       width = decoderContext.width();
       height = decoderContext.height();
-      duration = avFormatContext.duration();
-      startTime = avFormatContext.start_time();
-
+      
+      duration = stream.duration();
+      startTime = stream.start_time();
       timeBase = stream.time_base();
       framerate = stream.avg_frame_rate(); //TODO Simple workaround fix for framerate. Does not work with variable framerate streams, but should be fine for IHMC webms
 
