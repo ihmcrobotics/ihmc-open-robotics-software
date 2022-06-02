@@ -112,4 +112,9 @@ public class FFMPEGVideoPlaybackManager
    {
       this.image = image;
    }
+
+   public void close() {
+      pause();
+      file.close();
+   }
 }
