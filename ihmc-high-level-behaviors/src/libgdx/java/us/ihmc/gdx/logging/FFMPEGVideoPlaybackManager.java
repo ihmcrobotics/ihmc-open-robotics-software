@@ -73,7 +73,7 @@ public class FFMPEGVideoPlaybackManager
 
       try
       {
-         currentPlaybackThread.wait();
+         currentPlaybackThread.join();
       }
       catch (InterruptedException ex)
       {
