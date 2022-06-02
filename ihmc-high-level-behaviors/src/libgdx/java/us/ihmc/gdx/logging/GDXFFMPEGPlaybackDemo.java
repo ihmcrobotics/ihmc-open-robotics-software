@@ -22,7 +22,6 @@ public class GDXFFMPEGPlaybackDemo
    private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/main/resources");
    private GDXCVImagePanel imagePanel;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private BytedecoImage image;
    private FFMPEGVideoPlaybackManager video;
 
    public GDXFFMPEGPlaybackDemo()
@@ -49,10 +48,8 @@ public class GDXFFMPEGPlaybackDemo
                {
                   video = new FFMPEGVideoPlaybackManager(logDirectory.listFiles()[0].getAbsolutePath());
 
-                  image = new BytedecoImage(video.getWidth(), video.getHeight(), opencv_core.CV_8UC4);
-                  imagePanel = new GDXCVImagePanel("Playback Video", image);
+                  imagePanel = new GDXCVImagePanel("Playback Video", video.getImage());
 
-                  video.setDestinationImage(image);
                   video.play();
 
                   baseUI.getImGuiPanelManager().addPanel(imagePanel.getVideoPanel());

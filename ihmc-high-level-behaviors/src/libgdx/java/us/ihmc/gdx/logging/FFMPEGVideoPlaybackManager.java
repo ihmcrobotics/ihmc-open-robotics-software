@@ -1,6 +1,7 @@
 package us.ihmc.gdx.logging;
 
 import org.bytedeco.ffmpeg.avutil.AVRational;
+import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
@@ -23,7 +24,7 @@ public class FFMPEGVideoPlaybackManager
          final double period = 1 / FFMPEGTools.rationalToFloatingPoint(file.getFramerate());
 
          while (!isPaused) {
-            long returnCode = file.getNextFrame(image);
+            long returnCode = file.getNextFrame();
 
             if (returnCode == -1) //EOF
             {
@@ -41,6 +42,8 @@ public class FFMPEGVideoPlaybackManager
    public FFMPEGVideoPlaybackManager(String file) {
       this.file = new FFMPEGFileReader(file);
       this.timeBase = this.file.getTimeBase();
+
+      this.image = new BytedecoImage(getWidth(), getHeight(), opencv_core.CV_8UC4, this.file.getFrameDataBuffer());
    }
 
    public void seek(long milliseconds) {
@@ -108,9 +111,9 @@ public class FFMPEGVideoPlaybackManager
       return file.getHeight();
    }
 
-   public void setDestinationImage(BytedecoImage image)
+   public BytedecoImage getImage()
    {
-      this.image = image;
+      return image;
    }
 
    public void close() {

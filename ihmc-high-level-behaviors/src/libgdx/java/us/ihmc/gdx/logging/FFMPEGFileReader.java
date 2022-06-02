@@ -19,6 +19,8 @@ import org.bytedeco.javacpp.PointerPointer;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 
+import java.nio.ByteBuffer;
+
 public class FFMPEGFileReader
 {
    private AVFormatContext avFormatContext;
@@ -63,15 +65,16 @@ public class FFMPEGFileReader
       videoFrame = avutil.av_frame_alloc();
       packet = avcodec.av_packet_alloc();
 
+      //Because vidoeFrame's buffers move around in memory, we build rgbFrame regardless of if the format is already RGBA
+      rgbFrame = avutil.av_frame_alloc();
+      rgbFrame.width(width);
+      rgbFrame.height(height);
+      rgbFrame.format(avutil.AV_PIX_FMT_RGBA);
+
+      FFMPEGTools.checkNonZeroError(avutil.av_frame_get_buffer(rgbFrame, 0), "Allocating buffer for rgbFrame");
+
       if (decoderContext.pix_fmt() != avutil.AV_PIX_FMT_RGBA)
       {
-         rgbFrame = avutil.av_frame_alloc();
-         rgbFrame.width(width);
-         rgbFrame.height(height);
-         rgbFrame.format(avutil.AV_PIX_FMT_RGBA);
-
-         FFMPEGTools.checkNonZeroError(avutil.av_frame_get_buffer(rgbFrame, 0), "Allocating buffer for rgbFrame");
-
          swsContext = swscale.sws_getContext(width,
                                              height,
                                              decoderContext.pix_fmt(),
@@ -109,10 +112,10 @@ public class FFMPEGFileReader
    }
 
    /***
-    * @param image BytedecoImage of proper resolution/format to store data from frame into
+    * Gets next frame, and stores in native memory (access with {@link #getFrameDataBuffer()})
     * @return -1 when end of file reached (AVERROR_EOF), timestamp in time base units otherwise
     */
-   public long getNextFrame(BytedecoImage image) {
+   public long getNextFrame() {
       int returnCode;
       do
       {
@@ -133,10 +136,14 @@ public class FFMPEGFileReader
       while (returnCode == avutil.AVERROR_EAGAIN() || returnCode == avutil.AVERROR_EOF());
       FFMPEGTools.checkNegativeError(returnCode, "Decoding frame from packet");
 
-      if (swsContext != null)
-      {
-         FFMPEGTools.checkNonZeroError(avutil.av_frame_make_writable(rgbFrame), "Ensuring frame data is writable");
+      FFMPEGTools.checkNonZeroError(avutil.av_frame_make_writable(rgbFrame), "Ensuring frame data is writable");
 
+      if (swsContext == null)
+      {
+         avutil.av_frame_copy(rgbFrame, videoFrame);
+      }
+      else
+      {
          PointerPointer sourceSlice = videoFrame.data();
          IntPointer sourceStride = videoFrame.linesize();
          int sourceSliceY = 0;
@@ -144,18 +151,6 @@ public class FFMPEGFileReader
          PointerPointer destination = rgbFrame.data();
          IntPointer destinationStride = rgbFrame.linesize();
          swscale.sws_scale(swsContext, sourceSlice, sourceStride, sourceSliceY, sourceSliceHeight, destination, destinationStride);
-
-         for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-               int data = rgbFrame.data(0).getInt(4 * (i * width + j));
-               image.getBackingDirectByteBuffer().putInt(4 * (i * width + j), data);
-            }
-         }
-         //image.getBackingDirectByteBuffer().put(rgbFrame.data(0).asByteBuffer());
-      }
-      else
-      {
-         image.getBackingDirectByteBuffer().put(videoFrame.data(0).asByteBuffer());
       }
 
       long approxTimestamp = videoFrame.best_effort_timestamp();
@@ -185,6 +180,11 @@ public class FFMPEGFileReader
          avutil.av_frame_free(rgbFrame);
 
       isClosed = true;
+   }
+
+   public ByteBuffer getFrameDataBuffer()
+   {
+      return rgbFrame.data(0).asByteBuffer();
    }
 
    public AVRational getTimeBase()
