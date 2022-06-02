@@ -1,8 +1,4 @@
-package us.ihmc.robotEnvironmentAwareness.geometry;
-
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+package us.ihmc.perception.geometry;
 
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -11,7 +7,14 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerTools;
+import us.ihmc.perception.segmentationTools.PolygonizerTools;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ConcaveHull implements Iterable<Point2D>
 {

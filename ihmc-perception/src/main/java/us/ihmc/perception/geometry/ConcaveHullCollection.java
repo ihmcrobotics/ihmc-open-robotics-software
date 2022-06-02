@@ -1,4 +1,4 @@
-package us.ihmc.robotEnvironmentAwareness.geometry;
+package us.ihmc.perception.geometry;
 
 import java.util.Collection;
 import java.util.HashSet;

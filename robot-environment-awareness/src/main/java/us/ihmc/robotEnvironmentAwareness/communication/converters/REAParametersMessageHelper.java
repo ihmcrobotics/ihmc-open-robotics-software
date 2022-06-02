@@ -5,7 +5,7 @@ import controller_msgs.msg.dds.PlanarRegionSegmentationParametersMessage;
 import controller_msgs.msg.dds.PolygonizerParametersMessage;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
+import us.ihmc.perception.segmentationTools.PolygonizerParameters;
 
 public class REAParametersMessageHelper
 {

@@ -22,15 +22,15 @@ import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.imgui.ImGuiVideoPanel;
 import us.ihmc.perception.rapidRegions.GPUPlanarRegion;
 import us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegionExtraction;
-import us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegionExtractionParameters;
+import us.ihmc.perception.rapidRegions.GPUPlanarRegionExtractionParameters;
 import us.ihmc.perception.rapidRegions.GPURegionRing;
 import us.ihmc.gdx.visualizers.GDXHeightMapGraphic;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.gpuHeightMap.SimpleGPUHeightMapParameters;
 import us.ihmc.perception.gpuHeightMap.SimpleGPUHeightMapUpdater;
-import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
+import us.ihmc.perception.geometry.ConcaveHullFactoryParameters;
+import us.ihmc.perception.segmentationTools.PolygonizerParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.perception.ProjectionTools;
 

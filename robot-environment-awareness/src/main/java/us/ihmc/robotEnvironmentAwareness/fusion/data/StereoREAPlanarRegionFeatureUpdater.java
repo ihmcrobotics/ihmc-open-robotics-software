@@ -20,7 +20,7 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionIntersectionCa
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionPolygonizer;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationNodeData;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
+import us.ihmc.perception.segmentationTools.PolygonizerParameters;
 import us.ihmc.robotEnvironmentAwareness.updaters.RegionFeaturesProvider;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;

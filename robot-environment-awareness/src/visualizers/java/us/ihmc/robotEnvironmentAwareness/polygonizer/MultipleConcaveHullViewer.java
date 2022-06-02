@@ -21,7 +21,7 @@ import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.MessagerAPIFactory.TypedTopicTheme;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullCollection;
-import us.ihmc.robotEnvironmentAwareness.geometry.SimpleConcaveHullFactory.ConcaveHullFactoryResult;
+import us.ihmc.perception.geometry.SimpleConcaveHullFactory.ConcaveHullFactoryResult;
 import us.ihmc.robotEnvironmentAwareness.polygonizer.ConcaveHullViewer.ConcaveHullViewerInput;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder;
 

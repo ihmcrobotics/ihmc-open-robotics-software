@@ -33,7 +33,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParame
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionModule;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
+import us.ihmc.perception.segmentationTools.PolygonizerParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.SurfaceNormalFilterParameters;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 import us.ihmc.tools.thread.ExecutorServiceTools.ExceptionHandling;

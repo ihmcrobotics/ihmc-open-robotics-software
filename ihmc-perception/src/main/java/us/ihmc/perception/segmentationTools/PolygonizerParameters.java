@@ -1,9 +1,9 @@
-package us.ihmc.robotEnvironmentAwareness.planarRegion;
+package us.ihmc.perception.segmentationTools;
 
 import java.util.Scanner;
 
 import us.ihmc.jOctoMap.tools.ScannerTools;
-import us.ihmc.robotEnvironmentAwareness.geometry.SimpleConcaveHullFactory;
+import us.ihmc.perception.geometry.SimpleConcaveHullFactory;
 import us.ihmc.tools.property.*;
 
 public class PolygonizerParameters extends StoredPropertySet implements PolygonizerParametersBasics

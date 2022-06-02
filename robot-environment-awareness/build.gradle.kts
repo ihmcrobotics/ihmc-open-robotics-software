@@ -37,6 +37,7 @@ mainDependencies {
    api("us.ihmc:ihmc-graphics-jmonkeyengine:source")
    api("us.ihmc:ihmc-robot-data-logger:0.23.2")
    api("us.ihmc:ihmc-ros-tools:source")
+   api("us.ihmc:ihmc-perception:source")
 
    apiBytedecoNatives("javacpp")
    apiBytedecoNatives("openblas", "0.3.19-")

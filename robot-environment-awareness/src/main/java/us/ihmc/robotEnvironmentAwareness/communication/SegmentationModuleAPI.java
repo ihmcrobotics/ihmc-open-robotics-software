@@ -1,15 +1,13 @@
 package us.ihmc.robotEnvironmentAwareness.communication;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.Category;
 import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
+import us.ihmc.perception.segmentationTools.PolygonizerParameters;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.*;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.*;

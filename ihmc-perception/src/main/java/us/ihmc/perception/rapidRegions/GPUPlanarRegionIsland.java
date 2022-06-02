@@ -1,4 +1,4 @@
-package us.ihmc.avatar.gpuPlanarRegions;
+package us.ihmc.perception.rapidRegions;
 
 import us.ihmc.perception.rapidRegions.GPUPlanarRegion;
 

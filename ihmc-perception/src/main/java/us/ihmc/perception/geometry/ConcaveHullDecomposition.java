@@ -1,4 +1,4 @@
-package us.ihmc.robotEnvironmentAwareness.geometry;
+package us.ihmc.perception.geometry;
 
 import static us.ihmc.commons.lists.ListWrappingIndexTools.*;
 import static us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullTools.*;

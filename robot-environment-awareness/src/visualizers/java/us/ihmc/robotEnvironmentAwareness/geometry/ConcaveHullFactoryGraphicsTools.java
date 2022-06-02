@@ -13,8 +13,9 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
-import us.ihmc.robotEnvironmentAwareness.geometry.SimpleConcaveHullFactory.ConcaveHullFactoryResult;
-import us.ihmc.robotEnvironmentAwareness.geometry.SimpleConcaveHullFactory.ConcaveHullVariables;
+import us.ihmc.perception.geometry.JTSTools;
+import us.ihmc.perception.geometry.SimpleConcaveHullFactory.ConcaveHullFactoryResult;
+import us.ihmc.perception.geometry.SimpleConcaveHullFactory.ConcaveHullVariables;
 
 public class ConcaveHullFactoryGraphicsTools
 {

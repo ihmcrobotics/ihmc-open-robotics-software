@@ -19,6 +19,7 @@ import geometry_msgs.msg.dds.Vector3PubSubType;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.perception.segmentationTools.PolygonizerParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.*;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.net.NetClassList;

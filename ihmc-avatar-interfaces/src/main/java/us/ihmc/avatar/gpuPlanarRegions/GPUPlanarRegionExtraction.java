@@ -28,11 +28,13 @@ import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.geometry.*;
 import us.ihmc.perception.rapidRegions.GPUPlanarRegion;
+import us.ihmc.perception.rapidRegions.GPUPlanarRegionExtractionParameters;
+import us.ihmc.perception.rapidRegions.GPUPlanarRegionIsland;
 import us.ihmc.perception.rapidRegions.GPURegionRing;
-import us.ihmc.robotEnvironmentAwareness.geometry.*;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerTools;
+import us.ihmc.perception.segmentationTools.PolygonizerParameters;
+import us.ihmc.perception.segmentationTools.PolygonizerTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -43,7 +45,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegionExtractionParameters.*;
+import static us.ihmc.perception.rapidRegions.GPUPlanarRegionExtractionParameters.*;
 
 public class GPUPlanarRegionExtraction
 {

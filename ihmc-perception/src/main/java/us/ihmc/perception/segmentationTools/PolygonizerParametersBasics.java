@@ -1,4 +1,4 @@
-package us.ihmc.robotEnvironmentAwareness.planarRegion;
+package us.ihmc.perception.segmentationTools;
 
 import us.ihmc.tools.property.StoredPropertySetBasics;
 

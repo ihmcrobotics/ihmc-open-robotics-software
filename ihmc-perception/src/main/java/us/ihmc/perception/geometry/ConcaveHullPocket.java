@@ -1,4 +1,4 @@
-package us.ihmc.robotEnvironmentAwareness.geometry;
+package us.ihmc.perception.geometry;
 
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 

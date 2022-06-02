@@ -25,6 +25,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.MutableBytePointer;
+import us.ihmc.perception.rapidRegions.GPUPlanarRegionIsland;
 import us.ihmc.perception.rapidRegions.GPURegionRing;
 import us.ihmc.perception.realsense.BytedecoRealsenseL515;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
