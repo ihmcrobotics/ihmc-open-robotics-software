@@ -6,7 +6,11 @@ import java.util.List;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.robotics.graphics.VisualDefinitionConverter;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -31,18 +35,24 @@ public class RampsEnvironment implements CommonAvatarEnvironmentInterface
       double xRampStart = 0.5 * flatgroundLengthAtZero;
       boolean up = true;
 
+      AppearanceDefinition appearance = VisualDefinitionConverter.toAppearanceDefinition(new MaterialDefinition(ColorDefinitions.DarkGrey(),
+                                                                                                                ColorDefinitions.DarkGrey(),
+                                                                                                                ColorDefinitions.White(),
+                                                                                                                null,
+                                                                                                                10));
+
       while (xRampStart <= 0.5 * terrainSize.getX())
       {
          double xRampEnd = xRampStart + rampLength;
          if (up)
          {
-            rampsGround.addRamp(xRampStart, -halfWidth, xRampEnd, halfWidth, rampHeight, YoAppearance.Brown());
-            rampsGround.addRamp(-xRampStart, -halfWidth, -xRampEnd, halfWidth, rampHeight, YoAppearance.OldLace());
+            rampsGround.addRamp(xRampStart, -halfWidth, xRampEnd, halfWidth, rampHeight, appearance);
+            rampsGround.addRamp(-xRampStart, -halfWidth, -xRampEnd, halfWidth, rampHeight, appearance);
          }
          else
          {
-            rampsGround.addRamp(xRampEnd, -halfWidth, xRampStart, halfWidth, rampHeight, YoAppearance.LavenderBlush());
-            rampsGround.addRamp(-xRampEnd, -halfWidth, -xRampStart, halfWidth, rampHeight, YoAppearance.Crimson());
+            rampsGround.addRamp(xRampEnd, -halfWidth, xRampStart, halfWidth, rampHeight, appearance);
+            rampsGround.addRamp(-xRampEnd, -halfWidth, -xRampStart, halfWidth, rampHeight, appearance);
          }
 
          up = !up;
