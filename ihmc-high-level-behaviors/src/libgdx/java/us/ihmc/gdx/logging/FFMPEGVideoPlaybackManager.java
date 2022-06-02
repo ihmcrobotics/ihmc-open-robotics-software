@@ -93,7 +93,7 @@ public class FFMPEGVideoPlaybackManager
 
    private long millisToBaseUnits(long millis)
    {
-      return (long) (millis * FFMPEGTools.rationalToFloatingPoint(timeBase) / 1000);
+      return (long) (millis / FFMPEGTools.rationalToFloatingPoint(timeBase) / 1000);
    }
 
    private long baseUnitsToMillis(long baseUnits)
@@ -103,11 +103,11 @@ public class FFMPEGVideoPlaybackManager
       {
          //This method increases accuracy when the time base is simple (which is often the case)
          millis = baseUnits / timeBase.den() * 1000;
-         millis += (baseUnits % timeBase.den()) / FFMPEGTools.rationalToFloatingPoint(timeBase) * 1000;
+         millis += (baseUnits % timeBase.den()) * FFMPEGTools.rationalToFloatingPoint(timeBase) * 1000;
       }
       else
       {
-         millis = (long) (baseUnits / FFMPEGTools.rationalToFloatingPoint(timeBase) * 1000);
+         millis = (long) (baseUnits * FFMPEGTools.rationalToFloatingPoint(timeBase) * 1000);
       }
 
       return millis;
