@@ -5,11 +5,9 @@ import imgui.ImGui;
 import org.bytedeco.ffmpeg.ffmpeg;
 import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.imgui.ImGuiPanel;
-import us.ihmc.gdx.perception.GDXCVImagePanel;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.environment.GDXEnvironmentBuilder;
 import us.ihmc.gdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
@@ -17,7 +15,6 @@ import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.affordances.GDXInteractableReferenceFrame;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.gdx.ui.graphics.ImGuiOpenCVSwapVideoPanel;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.BytedecoTools;
@@ -95,14 +92,6 @@ public class GDXFFMPEGL515DepthLoggingDemo
                   double minRange = 0.105;
                   double maxRange = 5.0;
                   l515 = new GDXHighLevelDepthSensorSimulator("Stepping L515",
-                                                              null,
-                                                              null,
-                                                              null,
-                                                              null,
-                                                              null,
-                                                              null,
-                                                              null,
-                                                              null,
                                                               l515PoseGizmo.getGizmoFrame(),
                                                               () -> 0L,
                                                               verticalFOV,
@@ -110,10 +99,8 @@ public class GDXFFMPEGL515DepthLoggingDemo
                                                               imageHeight,
                                                               minRange,
                                                               maxRange,
-                                                              publishRateHz,
-                                                              false);
+                                                              publishRateHz);
                   baseUI.getImGuiPanelManager().addPanel(l515);
-                  l515.create();
                   l515.setSensorEnabled(true);
                   l515.setPublishPointCloudROS2(false);
                   l515.setRenderPointCloudDirectly(false);

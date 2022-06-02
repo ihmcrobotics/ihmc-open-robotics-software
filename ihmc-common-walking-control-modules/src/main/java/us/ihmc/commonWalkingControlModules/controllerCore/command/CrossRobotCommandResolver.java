@@ -231,6 +231,15 @@ public class CrossRobotCommandResolver
       out.setControllerRan(in.getControllerRan());
    }
 
+   
+   /**
+    * Resolves only the part of the context data that is updated by the perception thread.
+    */
+   public void resolveHumanoidRobotContextDataPerception(HumanoidRobotContextData in, HumanoidRobotContextData out)
+   {
+      out.setPerceptionRan(in.getPerceptionRan());
+   }
+
    /**
     * Resolves only the part of the context data that is updated by the estimator thread.
     */

@@ -121,7 +121,8 @@ public class GDXROS1VideoVisualizer extends GDXOpenCVVideoVisualizer implements 
    {
       super.renderImGuiWidgets();
       ImGui.text(topic);
-      getFrequencyPlot().renderImGuiWidgets();
+      if (getHasReceivedOne())
+         getFrequencyPlot().renderImGuiWidgets();
    }
 
    public void updateSubscribers(RosNodeInterface ros1Node)
