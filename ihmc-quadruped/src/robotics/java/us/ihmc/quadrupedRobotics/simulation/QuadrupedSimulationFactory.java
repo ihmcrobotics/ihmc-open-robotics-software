@@ -377,8 +377,7 @@ public class QuadrupedSimulationFactory
 
    private void setupSDFRobot()
    {
-      int simulationTicksPerControllerTick = (int) Math.round(controlDT.get() / simulationDT.get());
-      sdfRobot.get().addThrottledController(simulationController, simulationTicksPerControllerTick);
+      sdfRobot.get().addThrottledController(simulationController, controlDT.get());
 
       sdfRobot.get().initializeState();
 
