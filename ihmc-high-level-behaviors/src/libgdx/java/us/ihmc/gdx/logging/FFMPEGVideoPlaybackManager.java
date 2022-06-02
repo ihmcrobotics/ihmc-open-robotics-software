@@ -10,20 +10,21 @@ import us.ihmc.tools.thread.Throttler;
 public class FFMPEGVideoPlaybackManager
 {
    private final FFMPEGFileReader file;
-   private BytedecoImage image;
-   private AVRational timeBase;
+   private final BytedecoImage image;
+   private final AVRational timeBase;
    private long previousBaseUnitsTimestamp;
    private boolean isPaused = true;
-   private Thread currentPlaybackThread = null;
    private final Runnable playbackRunnable = new Runnable()
    {
       final Throttler throttler = new Throttler();
+
       @Override
       public void run()
       {
-         final double period = 1 / FFMPEGTools.rationalToFloatingPoint(file.getFramerate());
+         double period = 1 / FFMPEGTools.rationalToFloatingPoint(file.getFramerate());
 
-         while (!isPaused) {
+         while (!isPaused)
+         {
             long returnCode = file.getNextFrame();
 
             if (returnCode == -1) //EOF
@@ -38,19 +39,23 @@ public class FFMPEGVideoPlaybackManager
          }
       }
    };
+   private Thread currentPlaybackThread;
 
-   public FFMPEGVideoPlaybackManager(String file) {
+   public FFMPEGVideoPlaybackManager(String file)
+   {
       this.file = new FFMPEGFileReader(file);
-      this.timeBase = this.file.getTimeBase();
+      timeBase = this.file.getTimeBase();
 
-      this.image = new BytedecoImage(getWidth(), getHeight(), opencv_core.CV_8UC4, this.file.getFrameDataBuffer());
+      image = new BytedecoImage(getWidth(), getHeight(), opencv_core.CV_8UC4, this.file.getFrameDataBuffer());
    }
 
-   public void seek(long milliseconds) {
+   public void seek(long milliseconds)
+   {
       file.seek(millisToBaseUnits(milliseconds));
    }
 
-   public void play() {
+   public void play()
+   {
       if (!isPaused)
          return;
 
@@ -59,7 +64,8 @@ public class FFMPEGVideoPlaybackManager
       isPaused = false;
    }
 
-   public void pause() {
+   public void pause()
+   {
       if (isPaused || currentPlaybackThread == null)
          return;
 
@@ -75,19 +81,23 @@ public class FFMPEGVideoPlaybackManager
       }
    }
 
-   public long getVideoDurationInMillis() {
+   public long getVideoDurationInMillis()
+   {
       return baseUnitsToMillis(file.getDuration());
    }
 
-   public long getCurrentTimestampInMillis() {
+   public long getCurrentTimestampInMillis()
+   {
       return baseUnitsToMillis(previousBaseUnitsTimestamp);
    }
 
-   private long millisToBaseUnits(long millis) {
+   private long millisToBaseUnits(long millis)
+   {
       return (long) (millis * FFMPEGTools.rationalToFloatingPoint(timeBase) / 1000);
    }
 
-   private long baseUnitsToMillis(long baseUnits) {
+   private long baseUnitsToMillis(long baseUnits)
+   {
       long millis = 0;
       if (timeBase.num() == 1) //Should basically always be one, but just to be safe
       {
@@ -103,11 +113,13 @@ public class FFMPEGVideoPlaybackManager
       return millis;
    }
 
-   public int getWidth() {
+   public int getWidth()
+   {
       return file.getWidth();
    }
 
-   public int getHeight() {
+   public int getHeight()
+   {
       return file.getHeight();
    }
 
@@ -116,7 +128,8 @@ public class FFMPEGVideoPlaybackManager
       return image;
    }
 
-   public void close() {
+   public void close()
+   {
       pause();
       file.close();
    }

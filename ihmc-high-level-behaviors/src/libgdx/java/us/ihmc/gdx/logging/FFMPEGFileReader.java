@@ -23,14 +23,14 @@ import java.nio.ByteBuffer;
 
 public class FFMPEGFileReader
 {
-   private AVFormatContext avFormatContext;
+   private final AVFormatContext avFormatContext;
    private int streamIndex;
    private AVCodecContext decoderContext;
-   private AVFrame videoFrame;
-   private AVFrame rgbFrame;
-   private AVPacket packet;
+   private final AVFrame videoFrame;
+   private final AVFrame rgbFrame;
+   private final AVPacket packet;
    private SwsContext swsContext;
-   private boolean isClosed = false;
+   private boolean isClosed;
    private final AVRational timeBase;
    private final AVRational framerate;
    private final int width;
@@ -38,7 +38,8 @@ public class FFMPEGFileReader
    private final long duration;
    private final long startTime;
 
-   public FFMPEGFileReader(String file) {
+   public FFMPEGFileReader(String file)
+   {
       LogTools.info("Initializing ffmpeg contexts for playback from {}", file);
       avFormatContext = avformat.avformat_alloc_context();
       FFMPEGTools.checkNonZeroError(avformat.avformat_open_input(avFormatContext, file, null, null), "Initializing format context");
@@ -50,7 +51,9 @@ public class FFMPEGFileReader
       AVStream stream = avFormatContext.streams(streamIndex);
 
       LogTools.debug("FILE PROPERTIES: Width: {}\tHeight: {}\tFormat:{}",
-                     decoderContext.width(), decoderContext.height(), avutil.av_get_pix_fmt_name(decoderContext.pix_fmt()).getString());
+                     decoderContext.width(),
+                     decoderContext.height(),
+                     avutil.av_get_pix_fmt_name(decoderContext.pix_fmt()).getString());
 
       width = decoderContext.width();
       height = decoderContext.height();
@@ -115,7 +118,8 @@ public class FFMPEGFileReader
     * Gets next frame, and stores in native memory (access with {@link #getFrameDataBuffer()})
     * @return -1 when end of file reached (AVERROR_EOF), timestamp in time base units otherwise
     */
-   public long getNextFrame() {
+   public long getNextFrame()
+   {
       int returnCode;
       do
       {

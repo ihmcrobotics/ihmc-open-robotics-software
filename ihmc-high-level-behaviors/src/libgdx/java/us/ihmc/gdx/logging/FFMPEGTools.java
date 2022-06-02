@@ -41,7 +41,7 @@ public class FFMPEGTools
       if (returnCode >= 0)
          return;
 
-      handleError(StringTools.format("Code {} {}: {}", returnCode, FFMPEGTools.getErrorCodeString(returnCode), message), throwException);
+      handleError(StringTools.format("Code {} {}: {}", returnCode, getErrorCodeString(returnCode), message), throwException);
    }
 
    public static void checkNonZeroError(int returnCode, String message)
@@ -54,7 +54,7 @@ public class FFMPEGTools
       if (returnCode == 0)
          return;
 
-      handleError(StringTools.format("Code {} {}: {}", returnCode, FFMPEGTools.getErrorCodeString(returnCode), message), throwException);
+      handleError(StringTools.format("Code {} {}: {}", returnCode, getErrorCodeString(returnCode), message), throwException);
    }
 
    private static void handleError(Supplier<String> messageSupplier, boolean throwException)
@@ -96,9 +96,10 @@ public class FFMPEGTools
 
       StringBuilder sb = new StringBuilder();
       sb.append("FFMPEG License(s):");
-      licenses.forEach((String key, String value) -> {
-         sb.append(' ').append(key).append(": ").append(value).append(".");
-      });
+      licenses.forEach((String key, String value) ->
+                       {
+                          sb.append(' ').append(key).append(": ").append(value).append(".");
+                       });
 
       LogTools.debug(sb.toString());
    }
