@@ -56,8 +56,14 @@ public class FFMPEGFileReader
 
       width = decoderContext.width();
       height = decoderContext.height();
-      
-      duration = stream.duration();
+
+      //Extremely strange but working method for determining duration. Webms have weird durations sometimes so we get it from avFormatContext
+      //It just so happens that avFormatContext.duration() is exactly 1000 times too large, so we make it smaller.
+      if ((stream.duration() == 0 || stream.duration() == 0x8000000000000000L))
+         duration = avFormatContext.duration() / 1000;
+      else
+         duration = stream.duration();
+
       startTime = stream.start_time();
       timeBase = stream.time_base();
       framerate = stream.avg_frame_rate(); //TODO Simple workaround fix for framerate. Does not work with variable framerate streams, but should be fine for IHMC webms
