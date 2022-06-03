@@ -117,8 +117,7 @@ public class GenericQuadrupedSimulationFactory
       {
          GenericQuadrupedSimulationFactory simulationFactory = new GenericQuadrupedSimulationFactory();
          SimulationConstructionSet2 scs = simulationFactory.createSimulation();
-         scs.startSimulationThread();
-         scs.waitUntilVisualizerFullyUp();
+         scs.start(true, false, false);
          scs.simulate();
       }
       catch (IOException ioException)

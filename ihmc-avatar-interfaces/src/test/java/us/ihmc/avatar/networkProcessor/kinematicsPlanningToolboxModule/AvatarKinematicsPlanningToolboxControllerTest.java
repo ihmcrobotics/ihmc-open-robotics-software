@@ -131,11 +131,9 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
          scs.addRobot(robot);
          scs.addRobot(ghost);
          scs.addYoGraphics(SCS1GraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
-         scs.setJavaFXThreadImplicitExit(false);
-         scs.startSimulationThread();
+         scs.start(true, true, true);
          scs.setCameraFocusPosition(0.0, 0.0, 1.0);
          scs.setCameraPosition(8.0, 0.0, 3.0);
-         scs.waitUntilVisualizerFullyUp();
       }
    }
 

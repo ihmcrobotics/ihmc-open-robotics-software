@@ -66,7 +66,6 @@ public abstract class HumanoidRobotTransformOptimizerTest
       SimulationConstructionSet2 scs = new SimulationConstructionSet2();
       scs.setJavaFXThreadImplicitExit(false);
       scs.addRobots(Arrays.asList(robots));
-      scs.startSimulationThread();
       scs.waitUntilVisualizerDown();
    }
 
