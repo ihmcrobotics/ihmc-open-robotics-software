@@ -253,6 +253,7 @@ public class ThreePotatoAngularMomentumCalculator
                rightPotatoRelativeVelocity.sub(centerOfMassVelocity, rightPotatoVelocity);
             }
          }
+         // TODO:
          observeAngularMomentumResidual(centerOfMassPosition, centerOfMassVelocity,
                                         leftPotatoRelativePosition, leftPotatoRelativeVelocity,
                                         rightPotatoRelativePosition, rightPotatoRelativeVelocity, threePotatoResidualPredicted);
@@ -293,6 +294,14 @@ public class ThreePotatoAngularMomentumCalculator
       computeAngularMomentumAtInstant(predictedCoMTrajectory, predictedRightFootTrajectory, potatoMass.getDoubleValue(), angularMomentum, torque);
       totalAngularMomentum.add(angularMomentum);
       totalTorque.add(torque);
+
+      // TODO:
+      observeAngularMomentumResidual(centerOfMassPosition, centerOfMassVelocity,
+                                     leftPotatoRelativePosition, leftPotatoRelativeVelocity,
+                                     rightPotatoRelativePosition, rightPotatoRelativeVelocity, threePotatoResidualPredicted);
+      threePotatoResidualPredicted.scale(threePotatoResidualModelMassFraction);
+      threePotatoResidualPredicted.scale(1 / potatoMassFraction.getValue());
+      totalAngularMomentum.add(threePotatoResidualPredicted);
 
       predictedCoMPosition.set(predictedCoMTrajectory.getPosition());
       predictedCoMVelocity.set(predictedCoMTrajectory.getVelocity());
@@ -373,6 +382,13 @@ public class ThreePotatoAngularMomentumCalculator
 
                totalTorque.add(torque);
             }
+            // TODO:
+            observeAngularMomentumResidual(centerOfMassPosition, centerOfMassVelocity,
+                                           leftPotatoRelativePosition, leftPotatoRelativeVelocity,
+                                           rightPotatoRelativePosition, rightPotatoRelativeVelocity, threePotatoResidualPredicted);
+            threePotatoResidualPredicted.scale(threePotatoResidualModelMassFraction);
+            threePotatoResidualPredicted.scale(1 / potatoMassFraction.getValue());
+            totalAngularMomentum.add(threePotatoResidualPredicted);
 
             if (debug && totalAngularMomentum.containsNaN() || Double.isInfinite(totalAngularMomentum.length()))
                throw new RuntimeException("Error.");
