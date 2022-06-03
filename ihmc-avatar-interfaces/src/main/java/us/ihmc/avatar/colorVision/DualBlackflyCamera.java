@@ -96,6 +96,9 @@ public class DualBlackflyCamera
 
             if (side == RobotSide.RIGHT)
             {
+//               opencv_calib3d.fisheye
+//               opencv_imgproc.undistort
+
 //               CameraPinholeBrown cameraPinholeBrown = new CameraPinholeBrown();
 //
 //               arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
