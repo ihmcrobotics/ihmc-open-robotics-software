@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import imgui.type.ImDouble;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -56,6 +57,8 @@ public class GDXWalkAction implements GDXBehaviorAction
    private FootstepDataListMessage footstepDataListMessage;
    private final SideDependentList<ImBoolean> editGoalFootPoses = new SideDependentList<>();
    private final SideDependentList<GDXPose3DGizmo> editGoalFootGizmos = new SideDependentList<>();
+   private final ImDouble swingDuration = new ImDouble(1.2);
+   private final ImDouble transferDuration = new ImDouble(0.8);
 
    public void create(GDXFocusBasedCamera camera3D,
                       DRCRobotModel robotModel,
@@ -173,6 +176,10 @@ public class GDXWalkAction implements GDXBehaviorAction
          if (side == RobotSide.LEFT)
             ImGui.sameLine();
       }
+      ImGui.pushItemWidth(80.0f);
+      ImGui.inputDouble(labels.get("Swing duration"), swingDuration);
+      ImGui.inputDouble(labels.get("Transfer duration"), transferDuration);
+      ImGui.popItemWidth();
    }
 
    @Override
@@ -204,6 +211,8 @@ public class GDXWalkAction implements GDXBehaviorAction
          ObjectNode goalFootNode = jsonNode.putObject(side.getCamelCaseName() + "GoalFootTransform");
          JSONTools.toJSON(goalFootNode, editGoalFootGizmos.get(side).getTransformToParent());
       }
+      jsonNode.put("swingDuration", swingDuration.get());
+      jsonNode.put("transferDuration", transferDuration.get());
    }
 
    @Override
@@ -220,6 +229,10 @@ public class GDXWalkAction implements GDXBehaviorAction
          JsonNode goalFootNode = jsonNode.get(side.getCamelCaseName() + "GoalFootTransform");
          JSONTools.toEuclid(goalFootNode, editGoalFootGizmos.get(side).getTransformToParent());
       }
+      if (jsonNode.has("swingDuration"))
+         swingDuration.set(jsonNode.get("swingDuration").asDouble());
+      if (jsonNode.has("transferDuration"))
+         transferDuration.set(jsonNode.get("transferDuration").asDouble());
    }
 
    private void updateParentFrame(ReferenceFrame newParentFrame)
@@ -259,6 +272,9 @@ public class GDXWalkAction implements GDXBehaviorAction
       footstepPlannerRequest.setAssumeFlatGround(true); // FIXME Assuming flat ground
 
       footstepPlanner.getFootstepPlannerParameters().set(footstepPlannerParameters);
+      double idealFootstepLength = 0.5;
+      footstepPlanner.getFootstepPlannerParameters().setIdealFootstepLength(idealFootstepLength);
+      footstepPlanner.getFootstepPlannerParameters().setMaximumStepReach(idealFootstepLength);
       LogTools.info("Planning footsteps...");
       FootstepPlannerOutput footstepPlannerOutput = footstepPlanner.handleRequest(footstepPlannerRequest);
       LogTools.info("Footstep planner completed with {}, {} step(s)",
@@ -286,11 +302,9 @@ public class GDXWalkAction implements GDXBehaviorAction
          footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlannerOutput.getFootstepPlan(),
                                                                                                  "Walk Action Planned"));
 
-         double swingDuration = 1.2;
-         double transferDuration = 0.8;
          footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlannerOutput.getFootstepPlan(),
-                                                                       swingDuration,
-                                                                       transferDuration);
+                                                                       swingDuration.get(),
+                                                                       transferDuration.get());
          footstepDataListMessage.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
          footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
       }
