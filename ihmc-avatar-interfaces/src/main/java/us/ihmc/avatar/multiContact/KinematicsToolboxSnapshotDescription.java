@@ -50,6 +50,7 @@ public class KinematicsToolboxSnapshotDescription
 
    public KinematicsToolboxSnapshotDescription(KinematicsToolboxSnapshotDescription other)
    {
+      name = other.name;
       controllerConfiguration = new RobotConfigurationData(other.controllerConfiguration);
       ikSolution = new KinematicsToolboxOutputStatus(other.ikSolution);
       ikPrivilegedConfiguration = new KinematicsToolboxPrivilegedConfigurationMessage(other.ikPrivilegedConfiguration);

@@ -68,9 +68,29 @@ public class MultiContactScriptWriter
       messagesToWrite.add(description);
    }
 
+   public int getCurrentScriptSize()
+   {
+      return messagesToWrite.size();
+   }
+
+   public KinematicsToolboxSnapshotDescription getKeyFrame(int index)
+   {
+      return messagesToWrite.get(index);
+   }
+
+   public void remove(int index)
+   {
+      messagesToWrite.remove(index);
+   }
+
    public boolean isEmpty()
    {
       return messagesToWrite.isEmpty();
+   }
+
+   public List<KinematicsToolboxSnapshotDescription> getAllItems()
+   {
+      return messagesToWrite;
    }
 
    public boolean removeLast()
