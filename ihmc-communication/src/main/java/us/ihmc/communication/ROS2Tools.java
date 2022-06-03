@@ -157,6 +157,8 @@ public class ROS2Tools
    private static final ROS2Topic<BipedalSupportPlanarRegionParametersMessage> BIPEDAL_SUPPORT_REGION_PARAMETERS
          = BIPED_SUPPORT_REGION_PUBLISHER.withInput().withType(BipedalSupportPlanarRegionParametersMessage.class);
 
+   public static final ROS2Topic<Float64> BOX_MASS = IHMC_ROOT.withSuffix("box_mass").withType(Float64.class);
+
    public static final Function<String, String> NAMED_BY_TYPE = typeName -> typeName;
 
    public static ROS2Topic<BipedalSupportPlanarRegionParametersMessage> getBipedalSupportRegionParametersTopic(String robotName)
