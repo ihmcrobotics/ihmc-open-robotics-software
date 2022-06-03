@@ -11,6 +11,7 @@ import javafx.scene.Node;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.javaFXToolkit.node.JavaFXGraphics3DNode;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -42,13 +43,18 @@ public class JavaFXRobotVisualizer
 
    public JavaFXRobotVisualizer(FullHumanoidRobotModelFactory fullRobotModelFactory)
    {
+      this(fullRobotModelFactory, null);
+   }
+
+   public JavaFXRobotVisualizer(FullHumanoidRobotModelFactory fullRobotModelFactory, AppearanceDefinition appearance)
+   {
       fullRobotModel = fullRobotModelFactory.createFullRobotModel();
 
       allJoints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
 
       jointNameHash = calculateJointNameHash(allJoints, fullRobotModel.getForceSensorDefinitions(), fullRobotModel.getIMUDefinitions());
 
-      new Thread(() -> loadRobotModelAndGraphics(fullRobotModelFactory), "RobotVisualizerLoading").start();
+      new Thread(() -> loadRobotModelAndGraphics(fullRobotModelFactory, appearance), "RobotVisualizerLoading").start();
 
       animationTimer = new AnimationTimer()
       {
@@ -103,13 +109,13 @@ public class JavaFXRobotVisualizer
       return (int) crc.getValue();
    }
 
-   private void loadRobotModelAndGraphics(FullHumanoidRobotModelFactory fullRobotModelFactory)
+   private void loadRobotModelAndGraphics(FullHumanoidRobotModelFactory fullRobotModelFactory, AppearanceDefinition appearance)
    {
       RobotDefinition robotDefinition = fullRobotModelFactory.getRobotDefinition();
       graphicsRobot = new GraphicsIDRobot(robotDefinition.getName(),
                                           fullRobotModel.getElevator(),
                                           RobotDefinitionConverter.toGraphicsObjectsHolder(robotDefinition));
-      robotRootNode = new JavaFXGraphics3DNode(graphicsRobot.getRootNode());
+      robotRootNode = new JavaFXGraphics3DNode(graphicsRobot.getRootNode(), appearance);
       robotRootNode.setMouseTransparent(true);
       addNodesRecursively(graphicsRobot.getRootNode(), robotRootNode);
       robotRootNode.update();

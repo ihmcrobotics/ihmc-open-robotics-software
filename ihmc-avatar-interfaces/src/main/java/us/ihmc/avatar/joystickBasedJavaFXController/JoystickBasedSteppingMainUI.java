@@ -22,6 +22,8 @@ import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
@@ -103,7 +105,9 @@ public class JoystickBasedSteppingMainUI
       Pane subScene = view3dFactory.getSubSceneWrappedInsidePane();
       mainPane.setCenter(subScene);
 
-      robotVisualizer = new JavaFXRobotVisualizer(fullRobotModelFactory);
+      /* This is where I want to test the new constructor */
+      AppearanceDefinition appearance = YoAppearance.Red();
+      robotVisualizer = new JavaFXRobotVisualizer(fullRobotModelFactory, YoAppearance.Red());
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     RobotConfigurationData.class,
                                                     ROS2Tools.getControllerOutputTopic(robotName),
