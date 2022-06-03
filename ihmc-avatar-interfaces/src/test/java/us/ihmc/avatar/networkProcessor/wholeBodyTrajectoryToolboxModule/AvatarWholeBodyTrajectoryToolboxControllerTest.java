@@ -31,12 +31,10 @@ import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxCommandConverter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -47,11 +45,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.graphicsDescription.MeshDataHolder;
-import us.ihmc.graphicsDescription.SegmentedLine3DMeshDataGenerator;
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
@@ -59,26 +52,34 @@ import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputCon
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools.FunctionTrajectory;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.scs2.SimulationConstructionSet2;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
+import us.ihmc.scs2.definition.geometry.TriangleMesh3DDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
+import us.ihmc.scs2.definition.visual.SegmentedLine3DTriangleMeshFactory;
+import us.ihmc.scs2.definition.visual.VisualDefinition;
+import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
+import us.ihmc.scs2.session.tools.SCS1GraphicConversionTools;
+import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationToolkit.RobotDefinitionTools;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
-import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -106,11 +107,11 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
    private YoBoolean initializationSucceeded;
    private YoInteger numberOfIterations;
 
-   private SimulationConstructionSet scs;
+   private SimulationConstructionSet2 scs;
 
-   private HumanoidFloatingRootJointRobot robot;
-   private HumanoidFloatingRootJointRobot ghost;
-   private RobotController toolboxUpdater;
+   private Robot robot;
+   private Robot ghost;
+   private Controller toolboxUpdater;
 
    private WholeBodyTrajectoryToolboxCommandConverter commandConversionHelper;
    private KinematicsToolboxOutputConverter converter;
@@ -153,53 +154,49 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
                                                                    yoGraphicsListRegistry,
                                                                    visualize);
 
-      robot = robotModel.createHumanoidFloatingRootJointRobot(false);
+      robot = new Robot(robotModel.getRobotDefinition(), SimulationConstructionSet2.inertialFrame);
       toolboxUpdater = createToolboxUpdater();
-      robot.setController(toolboxUpdater);
-      robot.setDynamic(false);
-      robot.setGravity(0);
+      robot.addController(toolboxUpdater);
 
       DRCRobotModel ghostRobotModel = getGhostRobotModel();
       RobotDefinition robotDefinition = ghostRobotModel.getRobotDefinition();
       robotDefinition.setName("Ghost");
       RobotDefinitionTools.setRobotDefinitionMaterial(robotDefinition, ghostMaterial);
-      ghost = ghostRobotModel.createHumanoidFloatingRootJointRobot(false);
-      ghost.setDynamic(false);
-      ghost.setGravity(0);
+      ghost = new Robot(ghostRobotModel.getRobotDefinition(), SimulationConstructionSet2.inertialFrame);
       hideGhost();
 
       if (visualize)
       {
-         scs = new SimulationConstructionSet(new Robot[] {robot, ghost}, simulationTestingParameters);
-         scs.addYoGraphicsListRegistry(yoGraphicsListRegistry, true);
-         scs.setCameraFix(0.0, 0.0, 1.0);
+         scs = new SimulationConstructionSet2(SimulationConstructionSet2.doNothingPhysicsEngine());
+         scs.addRobot(robot);
+         scs.addRobot(ghost);
+         scs.addYoGraphics(SCS1GraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
+         scs.start(true, true, true);
+         scs.setCameraFocusPosition(0.0, 0.0, 1.0);
          scs.setCameraPosition(8.0, 0.0, 3.0);
-         scs.startOnAThread();
       }
    }
 
    private void hideGhost()
    {
-      ghost.setPositionInWorld(new Point3D(-100.0, -100.0, -100.0));
-      ghost.update();
+      ghost.getFloatingRootJoint().getJointPose().setX(Double.POSITIVE_INFINITY);
    }
 
    private void hideRobot()
    {
-      robot.setPositionInWorld(new Point3D(-100.0, -100.0, -100.0));
-      robot.update();
+      robot.getFloatingRootJoint().getJointPose().setX(Double.POSITIVE_INFINITY);
    }
 
    private void snapGhostToFullRobotModel(FullHumanoidRobotModel fullHumanoidRobotModel)
    {
-      new JointAnglesWriter(ghost, fullHumanoidRobotModel).updateRobotConfigurationBasedOnFullRobotModel();
+      MultiBodySystemTools.copyJointsState(fullHumanoidRobotModel.getRootJoint().subtreeList(), ghost.getAllJoints(), JointStateType.CONFIGURATION);
    }
 
    @AfterEach
    public void tearDown()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
-         ThreadTools.sleepForever();
+      if (visualize && simulationTestingParameters.getKeepSCSUp())
+         scs.waitUntilVisualizerDown();
 
       if (mainRegistry != null)
       {
@@ -221,13 +218,13 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
 
       if (scs != null)
       {
-         scs.closeAndDispose();
+         scs.shutdownSession();
          scs = null;
       }
    }
 
    @Test
-   public void testOneBigCircle() throws Exception, UnreasonableAccelerationException
+   public void testOneBigCircle()
    {
       // Trajectory parameters
       double trajectoryTime = 10.0;
@@ -286,12 +283,12 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
             rigidBodyConfigurations.add(rigidBodyConfiguration);
 
             if (visualize)
-               scs.addStaticLinkGraphics(createFunctionTrajectoryVisualization(handFunction,
-                                                                               0.0,
-                                                                               trajectoryTime,
-                                                                               timeResolution,
-                                                                               0.01,
-                                                                               YoAppearance.AliceBlue()));
+               scs.addStaticVisuals(createFunctionTrajectoryVisualization(handFunction,
+                                                                          0.0,
+                                                                          trajectoryTime,
+                                                                          timeResolution,
+                                                                          0.01,
+                                                                          ColorDefinitions.AliceBlue()));
          }
       }
 
@@ -305,7 +302,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
    }
 
    @Test
-   public void testHandCirclePositionAndYaw() throws Exception, UnreasonableAccelerationException
+   public void testHandCirclePositionAndYaw()
    {
       // Trajectory parameters
       double trajectoryTime = 10.0;
@@ -361,7 +358,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
          rigidBodyConfigurations.add(rigidBodyConfiguration);
 
          if (visualize)
-            scs.addStaticLinkGraphics(createFunctionTrajectoryVisualization(handFunction, 0.0, trajectoryTime, timeResolution, 0.01, YoAppearance.AliceBlue()));
+            scs.addStaticVisuals(createFunctionTrajectoryVisualization(handFunction, 0.0, trajectoryTime, timeResolution, 0.01, ColorDefinitions.AliceBlue()));
       }
 
       WholeBodyTrajectoryToolboxMessage message = HumanoidMessageTools.createWholeBodyTrajectoryToolboxMessage(configuration,
@@ -374,7 +371,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
    }
 
    @Test
-   public void testHandCirclePositionAndYawPitchRoll() throws Exception, UnreasonableAccelerationException
+   public void testHandCirclePositionAndYawPitchRoll()
    {
       // Trajectory parameters
       double trajectoryTime = 5.0;
@@ -440,7 +437,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       runTrajectoryTest(message, maxNumberOfIterations);
    }
 
-   protected void runTrajectoryTest(WholeBodyTrajectoryToolboxMessage message, int maxNumberOfIterations) throws UnreasonableAccelerationException
+   protected void runTrajectoryTest(WholeBodyTrajectoryToolboxMessage message, int maxNumberOfIterations)
    {
       List<WaypointBasedTrajectoryMessage> endEffectorTrajectories = message.getEndEffectorTrajectories();
       double t0 = Double.POSITIVE_INFINITY;
@@ -466,7 +463,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
                continue; // The position part is not dictated by trajectory, let's not visualize.
 
             if (visualize)
-               scs.addStaticLinkGraphics(createTrajectoryMessageVisualization(trajectoryMessage, 0.01, YoAppearance.AliceBlue()));
+               scs.addStaticVisuals(createTrajectoryMessageVisualization(trajectoryMessage, 0.01, ColorDefinitions.AliceBlue()));
          }
       }
 
@@ -494,7 +491,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       }
    }
 
-   protected void runReachingTest(WholeBodyTrajectoryToolboxMessage message, int maxNumberOfIterations) throws UnreasonableAccelerationException
+   protected void runReachingTest(WholeBodyTrajectoryToolboxMessage message, int maxNumberOfIterations)
    {
       List<ReachingManifoldMessage> reachingManifolds = message.getReachingManifolds();
       if (reachingManifolds != null)
@@ -503,7 +500,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
          {
             ReachingManifoldMessage manifold = reachingManifolds.get(i);
             if (visualize)
-               scs.addStaticLinkGraphics(createTrajectoryMessageVisualization(manifold, 0.01, YoAppearance.AliceBlue()));
+               scs.addStaticVisuals(createTrajectoryMessageVisualization(manifold, 0.01, ColorDefinitions.AliceBlue()));
          }
       }
 
@@ -560,7 +557,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
             if (rigidBodyOfOutputFullRobotModel == null)
             {
                if (VERBOSE)
-                  PrintTools.info("there is no rigid body");
+                  LogTools.info("there is no rigid body");
                fail("there is no rigid body");
             }
             else
@@ -586,11 +583,11 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
                                                                                                             trajectory);
 
                if (VERBOSE)
-                  PrintTools.info("" + positionError + " " + orientationError);
+                  LogTools.info("" + positionError + " " + orientationError);
 
                if (positionError > TRACKING_TRAJECTORY_POSITION_ERROR_THRESHOLD || orientationError > TRACKING_TRAJECTORY_ORIENTATION_ERROR_THRESHOLD)
                {
-                  PrintTools.info("rigid body of the solution is far from the given trajectory");
+                  LogTools.info("rigid body of the solution is far from the given trajectory");
                   fail("rigid body of the solution is far from the given trajectory");
                }
 
@@ -662,7 +659,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
          whik.update();
          System.out.println(whik.getSolution().getSolutionQuality());
          snapGhostToFullRobotModel(desiredFullRobotModel);
-         scs.tickAndUpdate();
+         scs.simulateNow(1);
       }
 
       if (whik.getSolution().getSolutionQuality() > 0.005)
@@ -682,8 +679,14 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       return handPoses;
    }
 
-   private static Pose3D computeCircleTrajectory(double time, double trajectoryTime, double circleRadius, Point3DReadOnly circleCenter,
-                                                 Quaternion circleRotation, QuaternionReadOnly constantOrientation, boolean ccw, double phase)
+   private static Pose3D computeCircleTrajectory(double time,
+                                                 double trajectoryTime,
+                                                 double circleRadius,
+                                                 Point3DReadOnly circleCenter,
+                                                 Quaternion circleRotation,
+                                                 QuaternionReadOnly constantOrientation,
+                                                 boolean ccw,
+                                                 double phase)
    {
       double theta = (ccw ? -time : time) / trajectoryTime * 2.0 * Math.PI + phase;
       double z = circleRadius * Math.sin(theta);
@@ -695,43 +698,48 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       return new Pose3D(point, constantOrientation);
    }
 
-   private static Graphics3DObject createFunctionTrajectoryVisualization(FunctionTrajectory trajectoryToVisualize, double t0, double tf, double timeResolution,
-                                                                         double radius, AppearanceDefinition appearance)
+   private static List<VisualDefinition> createFunctionTrajectoryVisualization(FunctionTrajectory trajectoryToVisualize,
+                                                                               double t0,
+                                                                               double tf,
+                                                                               double timeResolution,
+                                                                               double radius,
+                                                                               ColorDefinition color)
    {
       int numberOfWaypoints = (int) Math.round((tf - t0) / timeResolution) + 1;
       double dT = (tf - t0) / (numberOfWaypoints - 1);
 
       int radialResolution = 16;
-      SegmentedLine3DMeshDataGenerator segmentedLine3DMeshGenerator = new SegmentedLine3DMeshDataGenerator(numberOfWaypoints, radialResolution, radius);
+      SegmentedLine3DTriangleMeshFactory segmentedLine3DMeshGenerator = new SegmentedLine3DTriangleMeshFactory(numberOfWaypoints, radialResolution, radius);
       Point3DReadOnly[] waypoints = IntStream.range(0, numberOfWaypoints).mapToDouble(i -> t0 + i * dT).mapToObj(trajectoryToVisualize::compute)
                                              .map(pose -> new Point3D(pose.getPosition())).toArray(size -> new Point3D[size]);
       segmentedLine3DMeshGenerator.compute(waypoints);
 
-      Graphics3DObject graphics = new Graphics3DObject();
-      for (MeshDataHolder mesh : segmentedLine3DMeshGenerator.getMeshDataHolders())
+      VisualDefinitionFactory factory = new VisualDefinitionFactory();
+      for (TriangleMesh3DDefinition mesh : segmentedLine3DMeshGenerator.getTriangleMesh3DDefinitions())
       {
-         graphics.addMeshData(mesh, appearance);
+         factory.addGeometryDefinition(mesh, color);
       }
-      return graphics;
+      return factory.getVisualDefinitions();
    }
 
-   private static Graphics3DObject createTrajectoryMessageVisualization(WaypointBasedTrajectoryMessage trajectoryMessage, double radius,
-                                                                        AppearanceDefinition appearance)
+   private static List<VisualDefinition> createTrajectoryMessageVisualization(WaypointBasedTrajectoryMessage trajectoryMessage,
+                                                                              double radius,
+                                                                              ColorDefinition color)
    {
       double t0 = trajectoryMessage.getWaypointTimes().get(0);
       double tf = trajectoryMessage.getWaypointTimes().get(trajectoryMessage.getWaypoints().size() - 1);
       double timeResolution = (tf - t0) / trajectoryMessage.getWaypoints().size();
       FunctionTrajectory trajectoryToVisualize = WholeBodyTrajectoryToolboxMessageTools.createFunctionTrajectory(trajectoryMessage);
-      return createFunctionTrajectoryVisualization(trajectoryToVisualize, t0, tf, timeResolution, radius, appearance);
+      return createFunctionTrajectoryVisualization(trajectoryToVisualize, t0, tf, timeResolution, radius, color);
    }
 
-   private static Graphics3DObject createTrajectoryMessageVisualization(ReachingManifoldMessage reachingMessage, double radius, AppearanceDefinition appearance)
+   private static List<VisualDefinition> createTrajectoryMessageVisualization(ReachingManifoldMessage reachingMessage, double radius, ColorDefinition color)
    {
       int configurationValueResolution = 20;
       int numberOfPoints = (int) Math.pow(configurationValueResolution, reachingMessage.getManifoldConfigurationSpaceNames().size());
       int radialResolution = 16;
 
-      SegmentedLine3DMeshDataGenerator segmentedLine3DMeshGenerator = new SegmentedLine3DMeshDataGenerator(numberOfPoints, radialResolution, radius);
+      SegmentedLine3DTriangleMeshFactory segmentedLine3DMeshGenerator = new SegmentedLine3DTriangleMeshFactory(numberOfPoints, radialResolution, radius);
 
       Point3D[] points = new Point3D[numberOfPoints];
 
@@ -782,19 +790,18 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
 
       segmentedLine3DMeshGenerator.compute(points);
 
-      Graphics3DObject graphics = new Graphics3DObject();
-      for (MeshDataHolder mesh : segmentedLine3DMeshGenerator.getMeshDataHolders())
+      VisualDefinitionFactory factory = new VisualDefinitionFactory();
+      for (TriangleMesh3DDefinition mesh : segmentedLine3DMeshGenerator.getTriangleMesh3DDefinitions())
       {
-         graphics.addMeshData(mesh, appearance);
+         factory.addGeometryDefinition(mesh, color);
       }
-
-      return graphics;
+      return factory.getVisualDefinitions();
    }
 
-   private void visualizeSolution(WholeBodyTrajectoryToolboxOutputStatus solution, double timeResolution) throws UnreasonableAccelerationException
+   private void visualizeSolution(WholeBodyTrajectoryToolboxOutputStatus solution, double timeResolution)
    {
       hideRobot();
-      robot.getControllers().clear();
+      robot.getControllerManager().getControllers().clear();
 
       FullHumanoidRobotModel robotForViz = getRobotModel().createFullRobotModel();
       FloatingJointBasics rootJoint = robotForViz.getRootJoint();
@@ -812,7 +819,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
 
          robotForViz.updateFrames();
          snapGhostToFullRobotModel(robotForViz);
-         scs.simulateOneTimeStep();
+         scs.simulateNow(1);
       }
    }
 
@@ -886,7 +893,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       joint.setQ(0.5 * (jointLimitUpper + jointLimitLower));
    }
 
-   private WholeBodyTrajectoryToolboxOutputStatus runToolboxController(int maxNumberOfIterations) throws UnreasonableAccelerationException
+   private WholeBodyTrajectoryToolboxOutputStatus runToolboxController(int maxNumberOfIterations)
    {
       AtomicReference<WholeBodyTrajectoryToolboxOutputStatus> status = new AtomicReference<>(null);
       statusOutputManager.attachStatusMessageListener(WholeBodyTrajectoryToolboxOutputStatus.class, status::set);
@@ -897,7 +904,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       if (visualize)
       {
          for (int i = 0; !toolboxController.isDone() && i < maxNumberOfIterations; i++)
-            scs.simulateOneTimeStep();
+            scs.simulateNow(1);
       }
       else
       {
@@ -907,11 +914,11 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       return status.getAndSet(null);
    }
 
-   private RobotController createToolboxUpdater()
+   private Controller createToolboxUpdater()
    {
-      return new RobotController()
+      return new Controller()
       {
-         private final JointAnglesWriter jointAnglesWriter = new JointAnglesWriter(robot, toolboxController.getSolverFullRobotModel());
+         private final List<? extends JointBasics> solverJoints = toolboxController.getSolverFullRobotModel().getRootJoint().subtreeList();
 
          @Override
          public void doControl()
@@ -929,14 +936,9 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
                {
                   e.printStackTrace();
                }
-               jointAnglesWriter.updateRobotConfigurationBasedOnFullRobotModel();
+               MultiBodySystemTools.copyJointsState(solverJoints, robot.getAllJoints(), JointStateType.CONFIGURATION);
                numberOfIterations.increment();
             }
-         }
-
-         @Override
-         public void initialize()
-         {
          }
 
          @Override
@@ -949,12 +951,6 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
          public String getName()
          {
             return mainRegistry.getName();
-         }
-
-         @Override
-         public String getDescription()
-         {
-            return null;
          }
       };
    }
