@@ -18,9 +18,11 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -33,7 +35,6 @@ import us.ihmc.robotics.math.DeadbandTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2Input;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 
 import java.util.ArrayList;
@@ -67,7 +68,7 @@ public class GDXJoystickBasedStepping
    private final ImDouble turnStepWidth = new ImDouble();
    private final ImDouble turnMaxAngleInward = new ImDouble();
    private final ImDouble turnMaxAngleOutward = new ImDouble();
-   private ROS2Input<CapturabilityBasedStatus> capturabilityBasedStatusInput;
+   private IHMCROS2Input<CapturabilityBasedStatus> capturabilityBasedStatusInput;
    private ROS2ControllerHelper controllerHelper;
    private ROS2SyncedRobotModel syncedRobot;
 
@@ -99,7 +100,7 @@ public class GDXJoystickBasedStepping
       continuousStepGenerator.setDesiredTurningVelocityProvider(turningVelocity::get);
       continuousStepGenerator.setDesiredVelocityProvider(() -> new Vector2D(forwardVelocity.get(), lateralVelocity.get()));
       continuousStepGenerator.configureWith(walkingControllerParameters);
-      continuousStepGenerator.setFootstepAdjustment(this::adjustFootstep);
+      continuousStepGenerator.addFootstepAdjustment(this::adjustFootstep);
       continuousStepGenerator.setFootstepMessenger(this::prepareFootsteps);
       continuousStepGenerator.setFootPoseProvider(robotSide -> lastSupportFootPoses.get(robotSide));
       continuousStepGenerator.addFootstepValidityIndicator(this::isStepSnappable);
@@ -290,13 +291,16 @@ public class GDXJoystickBasedStepping
       footstepPlanGraphic.getRenderables(renderables, pool);
    }
 
-   private FramePose3DReadOnly adjustFootstep(FramePose2DReadOnly footstepPose, RobotSide footSide)
+   private boolean adjustFootstep(FramePose2DReadOnly footstepPose, RobotSide footSide, FixedFramePose3DBasics adjustedFootstep)
    {
       FramePose3D adjustedBasedOnStanceFoot = new FramePose3D();
       adjustedBasedOnStanceFoot.getPosition().set(footstepPose.getPosition());
       adjustedBasedOnStanceFoot.setZ(continuousStepGenerator.getCurrentSupportFootPose().getZ());
       adjustedBasedOnStanceFoot.getOrientation().set(footstepPose.getOrientation());
-      return adjustedBasedOnStanceFoot;
+      
+      adjustedFootstep.set(adjustedBasedOnStanceFoot);
+      return true;
+//      return adjustedBasedOnStanceFoot;
    }
 
    private void prepareFootsteps(FootstepDataListMessage footstepDataListMessage)

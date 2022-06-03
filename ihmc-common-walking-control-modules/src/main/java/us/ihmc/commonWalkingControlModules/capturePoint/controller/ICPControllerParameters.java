@@ -1,6 +1,9 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * Parameters to tune the ICP Optimization based controller for each robot. The ICP Optimization
@@ -138,23 +141,56 @@ public abstract class ICPControllerParameters
       return 0.06;
    }
 
-   /**
-    * Minimum distance that the CMP can get towards the ICP when being projected into the foot, away
-    * from an edge. Once the CoP is inside the foot, and once the CMP gets this close to the ICP, do
-    * not push the CMP any closer towards the ICP.
-    */
-   public double getMinICPPushDelta()
+
+   public void createFeedForwardAlphaCalculator(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      return 0.05;
    }
 
-   /**
-    * The maximum distance to project the CoP into the foot, away from the edge. Once it is projected
-    * this far, then do not push it any further inside the foot.
-    */
-   public double getMaxCoPProjectionInside()
+   public void createFeedbackAlphaCalculator(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      return 0.04;
    }
 
+   public void createFeedbackProjectionOperator(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+   }
+
+   public FeedForwardAlphaCalculator getFeedForwardAlphaCalculator()
+   {
+      return null;
+   }
+
+   public FeedbackAlphaCalculator getFeedbackAlphaCalculator()
+   {
+      return null;
+   }
+
+   public FeedbackProjectionOperator getFeedbackProjectionOperator()
+   {
+      return null;
+   }
+
+   public interface FeedForwardAlphaCalculator
+   {
+      double computeAlpha(FramePoint2DReadOnly currentICP,
+                          FramePoint2DReadOnly referenceICP,
+                          FramePoint2DReadOnly finalICP,
+                          FramePoint2DReadOnly referenceCMP,
+                          FramePoint2DReadOnly unconstrainedFeedbackCMP,
+                          FrameConvexPolygon2DReadOnly supportPolygon);
+   }
+
+   public interface FeedbackAlphaCalculator
+   {
+      double computeAlpha(FramePoint2DReadOnly currentICP, FrameConvexPolygon2DReadOnly supportPolygon);
+   }
+
+   public interface FeedbackProjectionOperator
+   {
+      void projectFeedback(FramePoint2DReadOnly currentICP,
+                           FramePoint2DReadOnly unconstrainedFeedbackCMP,
+                           FrameVector2DReadOnly cmpOffset,
+                           FrameConvexPolygon2DReadOnly supportPolygonInWorld,
+                           FixedFramePoint2DBasics feedbackCoPToPack,
+                           FixedFramePoint2DBasics feedbackCMPToPack);
+   }
 }

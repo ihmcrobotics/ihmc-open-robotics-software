@@ -75,6 +75,8 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += controller_msgs.msg.dds.StepConstraintsListMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -141,6 +143,8 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += controller_msgs.msg.dds.StepConstraintsListMessagePubSubType.getCdrSerializedSize(data.getStepConstraints(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -185,6 +189,7 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       cdr.write_type_6(data.getLiftoffDuration());
 
+      controller_msgs.msg.dds.StepConstraintsListMessagePubSubType.write(data.getStepConstraints(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.FootstepDataMessage data, us.ihmc.idl.CDR cdr)
@@ -215,6 +220,7 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       	
       data.setLiftoffDuration(cdr.read_type_6());
       	
+      controller_msgs.msg.dds.StepConstraintsListMessagePubSubType.read(data.getStepConstraints(), cdr);	
 
    }
 
@@ -239,6 +245,8 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       ser.write_type_6("execution_delay_time", data.getExecutionDelayTime());
       ser.write_type_6("touchdown_duration", data.getTouchdownDuration());
       ser.write_type_6("liftoff_duration", data.getLiftoffDuration());
+      ser.write_type_a("step_constraints", new controller_msgs.msg.dds.StepConstraintsListMessagePubSubType(), data.getStepConstraints());
+
    }
 
    @Override
@@ -262,6 +270,8 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       data.setExecutionDelayTime(ser.read_type_6("execution_delay_time"));
       data.setTouchdownDuration(ser.read_type_6("touchdown_duration"));
       data.setLiftoffDuration(ser.read_type_6("liftoff_duration"));
+      ser.read_type_a("step_constraints", new controller_msgs.msg.dds.StepConstraintsListMessagePubSubType(), data.getStepConstraints());
+
    }
 
    public static void staticCopy(controller_msgs.msg.dds.FootstepDataMessage src, controller_msgs.msg.dds.FootstepDataMessage dest)

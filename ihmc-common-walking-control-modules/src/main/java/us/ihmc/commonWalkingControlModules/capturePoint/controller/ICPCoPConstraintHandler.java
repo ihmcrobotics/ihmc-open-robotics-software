@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -15,6 +16,8 @@ public class ICPCoPConstraintHandler
    private final boolean hasICPControlPolygons;
    private final BooleanProvider useICPControlPolygons;
    private final YoBoolean keepCoPInsideSupportPolygon;
+
+   private final FrameConvexPolygon2D copConstraint = new FrameConvexPolygon2D();
 
    private int numberOfVertices = 0;
    private boolean hasSupportPolygonChanged;
@@ -68,10 +71,19 @@ public class ICPCoPConstraintHandler
             hasSupportPolygonChanged = false;
          }
 
+         copConstraint.setIncludingFrame(supportPolygon);
          return supportPolygon;
       }
 
       return null;
+   }
+
+   public FrameConvexPolygon2DReadOnly getCoPConstraint()
+   {
+      if (keepCoPInsideSupportPolygon.getBooleanValue())
+         return copConstraint;
+      else
+         return null;
    }
 
    /**

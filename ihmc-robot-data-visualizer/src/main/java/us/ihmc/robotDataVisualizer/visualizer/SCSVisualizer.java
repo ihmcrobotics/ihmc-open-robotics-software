@@ -71,6 +71,9 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    private final Object disconnectLock = new Object();
    private final JButton disconnectButton = new JButton("Waiting for connection...");
    private final JButton clearLogButton = new JButton("<html><center>Clear<br>log</center></html>");
+   
+   private final JButton restartLogButton = new JButton("<html><center>Restart<br>log</center></html>");
+   
    private final JTextField updateRateField = new JTextField("", 6);
 
    private final DecimalFormat delayFormat = new DecimalFormat("0000");
@@ -392,6 +395,21 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
             {
                yoVariableClientInterface.sendClearLogRequest();
             }
+         }
+      });
+      
+      scs.addButton(restartLogButton);
+      restartLogButton.addActionListener(new ActionListener()
+      {
+         
+         @Override
+         public void actionPerformed(ActionEvent e)
+         {
+            if (yoVariableClientInterface != null)
+            {
+               yoVariableClientInterface.sendCommand(DataServerCommand.RESTART_LOG, 0);
+            }
+            
          }
       });
 

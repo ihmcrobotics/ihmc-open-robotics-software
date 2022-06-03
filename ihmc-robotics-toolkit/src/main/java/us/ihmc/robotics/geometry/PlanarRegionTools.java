@@ -15,6 +15,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.*;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.RegionInWorldInterface;
 
 import java.util.ArrayList;
@@ -1092,33 +1093,91 @@ public class PlanarRegionTools
     * Will return the intersection point between a line and a single planar region. If the line does
     * not intersect the region this method will return null.
     */
-   public static Point3D intersectRegionWithLine(RegionInWorldInterface region, Line3DReadOnly projectionLineInWorld)
+   public static <T extends RegionInWorldInterface<T>> Point3D intersectRegionWithLine(RegionInWorldInterface<T> region, Line3DReadOnly projectionLineInWorld)
    {
-      Vector3D planeNormal = new Vector3D();
-      Point3D pointOnPlane = new Point3D();
-      region.getNormal(planeNormal);
-      region.getOrigin(pointOnPlane);
+      Point3D pointToReturn = new Point3D();
 
-      Point3D intersectionWithPlane = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pointOnPlane,
-                                                                                              planeNormal,
-                                                                                              projectionLineInWorld.getPoint(),
-                                                                                              projectionLineInWorld.getDirection());
-
-      if (intersectionWithPlane == null)
-      {
+      if (intersectRegionWithLine(region, projectionLineInWorld, pointToReturn))
+         return pointToReturn;
+      else
          return null;
-      }
+   }
 
-      RigidBodyTransformReadOnly regionToLocal = region.getTransformToLocal();
-      Point3DBasics intersectionInLocal = new Point3D(intersectionWithPlane);
-      regionToLocal.transform(intersectionInLocal);
+   /**
+    * Will pack the intersection point between a line and a single planar region. If the line does
+    * not intersect the region this method will return false, and the point will be NaN.
+    */
+   public static <T extends RegionInWorldInterface<T>> boolean intersectRegionWithLine(RegionInWorldInterface<T> region,
+                                                                                       Line3DReadOnly projectionLineInWorld,
+                                                                                       Point3DBasics intersectionToPack)
+   {
+      return intersectRegionWithLine(region, projectionLineInWorld.getPoint(), projectionLineInWorld.getDirection(), intersectionToPack);
+   }
 
-      if (region.isPointInside(intersectionInLocal.getX(), intersectionInLocal.getY()))
+   /**
+    * Will pack the intersection point between a line and a single planar region. If the line does
+    * not intersect the region this method will return false, and the point will be NaN.
+    */
+   public static <T extends RegionInWorldInterface<T>> boolean intersectRegionWithLine(RegionInWorldInterface<T> region,
+                                                                                       Point3DReadOnly lineOriginInWorld,
+                                                                                       Vector3DReadOnly lineDirectionInWorld,
+                                                                                       Point3DBasics intersectionToPack)
+   {
+      return intersectRegionWithLine(region,
+                                     lineOriginInWorld.getX(),
+                                     lineOriginInWorld.getY(),
+                                     lineOriginInWorld.getZ(),
+                                     lineDirectionInWorld.getX(),
+                                     lineDirectionInWorld.getY(),
+                                     lineDirectionInWorld.getZ(),
+                                     intersectionToPack);
+   }
+
+   /**
+    * Will pack the intersection point between a line and a single planar region. If the line does
+    * not intersect the region this method will return false, and the point will be NaN.
+    */
+   public static <T extends RegionInWorldInterface<T>> boolean intersectRegionWithLine(RegionInWorldInterface<T> region,
+                                                                                       double lineOriginInWorldX,
+                                                                                       double lineOriginInWorldY,
+                                                                                       double lineOriginInWorldZ,
+                                                                                       double lineDirectionInWorldX,
+                                                                                       double lineDirectionInWorldY,
+                                                                                       double lineDirectionInWorldZ,
+                                                                                       Point3DBasics intersectionToPack)
+   {
+      Point3DReadOnly pointOnPlane = region.getPoint();
+      Vector3DReadOnly planeNormal = region.getNormal();
+      boolean intersectsPlane = EuclidCoreMissingTools.intersectionBetweenLine3DAndPlane3D(pointOnPlane.getX(),
+                                                                                           pointOnPlane.getY(),
+                                                                                           pointOnPlane.getZ(),
+                                                                                           planeNormal.getX(),
+                                                                                           planeNormal.getY(),
+                                                                                           planeNormal.getZ(),
+                                                                                           lineOriginInWorldX,
+                                                                                           lineOriginInWorldY,
+                                                                                           lineOriginInWorldZ,
+                                                                                           lineDirectionInWorldX,
+                                                                                           lineDirectionInWorldY,
+                                                                                           lineDirectionInWorldZ,
+                                                                                           intersectionToPack);
+
+      if (!intersectsPlane)
       {
-         return intersectionWithPlane;
+         intersectionToPack.setToNaN();
+         return false;
       }
 
-      return null;
+      region.getTransformToLocal().transform(intersectionToPack);
+
+      if (region.isPointInside(intersectionToPack.getX(), intersectionToPack.getY()))
+      {
+         region.getTransformToWorld().transform(intersectionToPack);
+         return true;
+      }
+
+      intersectionToPack.setToNaN();
+      return false;
    }
 
    public static ImmutablePair<Point3D, PlanarRegion> intersectRegionsWithRay(PlanarRegionsList regions, Point3DReadOnly rayStart, Vector3D rayDirection)
@@ -1212,7 +1271,7 @@ public class PlanarRegionTools
       return projectPointToPlanesVertically(pointInWorld, regions, null);
    }
 
-   public static <T extends RegionInWorldInterface> Point3D projectPointToPlanesVertically(Point3DReadOnly pointInWorld, List<T> regions, T highestRegionToPack)
+   public static <T extends RegionInWorldInterface<T>> Point3D projectPointToPlanesVertically(Point3DReadOnly pointInWorld, List<T> regions, T highestRegionToPack)
    {
       Point3D highestIntersection = null;
 
@@ -1250,6 +1309,56 @@ public class PlanarRegionTools
          return null;
 
       return highestIntersection;
+   }
+
+   public static <T extends RegionInWorldInterface<T>> boolean projectPointToPlanesVertically(Point3DReadOnly pointInWorldToProject,
+                                                                                              List<T> regions,
+                                                                                              Point3DBasics projectedPointToPack,
+                                                                                              T highestRegionToPack)
+   {
+      if (regions == null)
+      {
+         projectedPointToPack.setToNaN();
+         return false;
+      }
+
+      double originalX = projectedPointToPack.getX();
+      double originalY = projectedPointToPack.getY();
+
+      double highestZ = Double.NEGATIVE_INFINITY;
+
+      for (int i = 0; i < regions.size(); i++)
+      {
+         T region = regions.get(i);
+         if (!intersectRegionWithLine(region,
+                                      pointInWorldToProject.getX(),
+                                      pointInWorldToProject.getY(),
+                                      pointInWorldToProject.getZ(),
+                                      0.0,
+                                      0.0,
+                                      1.0,
+                                      projectedPointToPack))
+            continue;
+
+         double height = projectedPointToPack.getZ();
+
+         if (highestZ < height)
+         {
+            highestZ = height;
+            if (highestRegionToPack != null)
+               highestRegionToPack.set(region);
+         }
+      }
+
+      if (Double.isInfinite(highestZ))
+      {
+         projectedPointToPack.setToNaN();
+         return false;
+      }
+
+      projectedPointToPack.set(originalX, originalY, highestZ);
+
+      return true;
    }
 
    public static boolean isPointOnRegion(PlanarRegion region, Point3D point, double epsilon)

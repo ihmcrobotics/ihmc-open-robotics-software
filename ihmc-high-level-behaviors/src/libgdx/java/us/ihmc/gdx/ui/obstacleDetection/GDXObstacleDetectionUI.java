@@ -7,7 +7,7 @@ import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.graphics.live.GDXROS1BoxVisualizer;
 import us.ihmc.gdx.ui.graphics.live.GDXROS1PointCloudVisualizer;
@@ -54,7 +54,7 @@ public class GDXObstacleDetectionUI
          public void create()
          {
             baseUI.create();
-            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
+            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelBuilder.createCoordinateFrame(0.3)));
 
 
             ros1PointCloudVisualizer.create();

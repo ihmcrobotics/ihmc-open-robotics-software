@@ -2,7 +2,8 @@ package us.ihmc.avatar.behaviorTests;
 
 import static us.ihmc.robotics.Assert.assertTrue;
 
-import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -10,21 +11,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
-import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
-import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
-import us.ihmc.commons.PrintTools;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
+import us.ihmc.avatar.testTools.scs2.SCS2BehaviorTestHelper;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandDesiredConfigurationBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
+import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
+import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
-import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 
@@ -41,16 +41,11 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
    @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
-      {
-         ThreadTools.sleepForever();
-      }
-
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcBehaviorTestHelper != null)
+      if (behaviorTestHelper != null)
       {
-         drcBehaviorTestHelper.closeAndDispose();
-         drcBehaviorTestHelper = null;
+         behaviorTestHelper.finishTest();
+         behaviorTestHelper = null;
       }
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
@@ -63,23 +58,26 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
    }
 
    private final boolean DEBUG = false;
-   private DRCBehaviorTestHelper drcBehaviorTestHelper;
+   private SCS2BehaviorTestHelper behaviorTestHelper;
 
    @BeforeEach
    public void setUp()
    {
       DefaultCommonAvatarEnvironment testEnvironment = new DefaultCommonAvatarEnvironment();
 
-      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(), DRCObstacleCourseStartingLocation.DEFAULT,
-                                                        simulationTestingParameters, getRobotModel());
+      SCS2AvatarTestingSimulation simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(),
+                                                                                                                        testEnvironment,
+                                                                                                                        simulationTestingParameters);
+      simulationTestHelper.start();
+      behaviorTestHelper = new SCS2BehaviorTestHelper(simulationTestHelper);
    }
 
    @Test
-   public void testCloseHand() throws SimulationExceededMaximumTimeException
+   public void testCloseHand()
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      boolean success = behaviorTestHelper.simulateNow(1.0);
       assertTrue(success);
       RobotSide robotSide = RobotSide.LEFT;
       double trajectoryTime = 2.0;
@@ -88,12 +86,12 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
       HandDesiredConfigurationBehavior behavior = testHandDesiredConfigurationBehavior(HumanoidMessageTools.createHandDesiredConfigurationMessage(robotSide,
                                                                                                                                                   HandConfiguration.CLOSE),
                                                                                        trajectoryTime);
-      success = drcBehaviorTestHelper.executeBehaviorUntilDone(behavior);
+      success = behaviorTestHelper.executeBehaviorUntilDone(behavior);
       assertTrue(success);
       double fingerJointQFinal = getTotalFingerJointQ(robotSide);
 
-      PrintTools.debug(this, "fingerJointQInitial: " + fingerJointQInitial);
-      PrintTools.debug(this, "fingerJointQFinal : " + fingerJointQFinal);
+      LogTools.info("fingerJointQInitial: " + fingerJointQInitial);
+      LogTools.info("fingerJointQFinal : " + fingerJointQFinal);
 
       assertTrue(fingerJointQFinal > fingerJointQInitial);
       assertTrue(behavior.isDone());
@@ -102,39 +100,39 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
    }
 
    @Test
-   public void testStopCloseHand() throws SimulationExceededMaximumTimeException
+   public void testStopCloseHand()
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      PrintTools.debug(this, "Initializing Simulation");
-      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      LogTools.info("Initializing Simulation");
+      boolean success = behaviorTestHelper.simulateNow(1.0);
       assertTrue(success);
 
       RobotSide robotSide = RobotSide.LEFT;
       double trajectoryTime = 0.3; // [0.3] Hand closes quickly!
       double stopTime = trajectoryTime / 2.0;
 
-      PrintTools.debug(this, "Initializing Behavior");
+      LogTools.info("Initializing Behavior");
       HandDesiredConfigurationBehavior behavior = testHandDesiredConfigurationBehavior(HumanoidMessageTools.createHandDesiredConfigurationMessage(robotSide,
                                                                                                                                                   HandConfiguration.CLOSE),
                                                                                        trajectoryTime);
 
-      PrintTools.debug(this, "Starting Behavior");
+      LogTools.info("Starting Behavior");
       double fingerJointQInitial = getTotalFingerJointQ(robotSide);
-      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(behavior, stopTime);
+      success = behaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(behavior, stopTime);
       assertTrue(success);
-      PrintTools.debug(this, "Stopping Behavior");
+      LogTools.info("Stopping Behavior");
       double fingerJointQAtStop = getTotalFingerJointQ(robotSide);
       behavior.abort();
       assertTrue(!behavior.isDone());
 
-      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(behavior, 1.0);
+      success = behaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(behavior, 1.0);
       assertTrue(success);
       double fingerJointQFinal = getTotalFingerJointQ(robotSide);
 
-      PrintTools.debug(this, "fingerJointQInitial: " + fingerJointQInitial);
-      PrintTools.debug(this, "fingerJointQAtStop : " + fingerJointQAtStop);
-      PrintTools.debug(this, "fingerJointQFinal : " + fingerJointQFinal);
+      LogTools.info("fingerJointQInitial: " + fingerJointQInitial);
+      LogTools.info("fingerJointQAtStop : " + fingerJointQAtStop);
+      LogTools.info("fingerJointQFinal : " + fingerJointQFinal);
 
       assertTrue(Math.abs(fingerJointQFinal - fingerJointQAtStop) < 3.0);
       assertTrue(!behavior.isDone());
@@ -143,48 +141,48 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
    }
 
    @Test
-   public void testPauseAndResumeCloseHand() throws SimulationExceededMaximumTimeException
+   public void testPauseAndResumeCloseHand()
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      PrintTools.debug(this, "Initializing Simulation");
-      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      LogTools.info("Initializing Simulation");
+      boolean success = behaviorTestHelper.simulateNow(1.0);
       assertTrue(success);
 
       RobotSide robotSide = RobotSide.LEFT;
       double trajectoryTime = 0.3; // [0.3] Hand closes quickly!
       double stopTime = trajectoryTime / 2.0;
 
-      PrintTools.debug(this, "Initializing Behavior");
+      LogTools.info("Initializing Behavior");
       HandDesiredConfigurationBehavior behavior = testHandDesiredConfigurationBehavior(HumanoidMessageTools.createHandDesiredConfigurationMessage(robotSide,
                                                                                                                                                   HandConfiguration.CLOSE),
                                                                                        trajectoryTime);
 
-      PrintTools.debug(this, "Starting Behavior");
+      LogTools.info("Starting Behavior");
       double fingerJointQInitial = getTotalFingerJointQ(robotSide);
-      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(behavior, stopTime);
+      success = behaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(behavior, stopTime);
       assertTrue(success);
-      PrintTools.debug(this, "Pausing Behavior");
+      LogTools.info("Pausing Behavior");
       double fingerJointQAtPause = getTotalFingerJointQ(robotSide);
       behavior.pause();
 
-      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(behavior, 1.0);
+      success = behaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(behavior, 1.0);
       assertTrue(success);
-      PrintTools.debug(this, "Resuming Behavior");
+      LogTools.info("Resuming Behavior");
       double fingerJointQAtResume = getTotalFingerJointQ(robotSide);
       behavior.resume();
       assertTrue(!behavior.isDone());
 
-      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(behavior, 1.0);
+      success = behaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(behavior, 1.0);
       assertTrue(success);
-      PrintTools.debug(this, "Behavior Should Be Done");
+      LogTools.info("Behavior Should Be Done");
       double fingerJointQFinal = getTotalFingerJointQ(robotSide);
       behavior.resume();
 
-      PrintTools.debug(this, "fingerJointQInitial: " + fingerJointQInitial);
-      PrintTools.debug(this, "fingerJointQAtPause : " + fingerJointQAtPause);
-      PrintTools.debug(this, "fingerJointQAtResume : " + fingerJointQAtResume);
-      PrintTools.debug(this, "fingerJointQFinal : " + fingerJointQFinal);
+      LogTools.info("fingerJointQInitial: " + fingerJointQInitial);
+      LogTools.info("fingerJointQAtPause : " + fingerJointQAtPause);
+      LogTools.info("fingerJointQAtResume : " + fingerJointQAtResume);
+      LogTools.info("fingerJointQFinal : " + fingerJointQFinal);
 
       assertTrue(Math.abs(fingerJointQAtResume - fingerJointQAtPause) < 3.0);
       assertTrue(fingerJointQFinal > fingerJointQAtResume);
@@ -196,19 +194,18 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
    {
       double ret = 0.0;
 
-      ArrayList<OneDegreeOfFreedomJoint> fingerJoints = new ArrayList<OneDegreeOfFreedomJoint>();
-      HumanoidJointNameMap jointNameMap = (HumanoidJointNameMap) drcBehaviorTestHelper.getSDFFullRobotModel().getRobotSpecificJointNames();
-      Joint wristJoint = drcBehaviorTestHelper.getRobot().getJoint(jointNameMap.getJointBeforeHandName(robotSide));
-      wristJoint.recursiveGetOneDegreeOfFreedomJoints(fingerJoints);
-      fingerJoints.remove(0);
+      HumanoidJointNameMap jointNameMap = (HumanoidJointNameMap) behaviorTestHelper.getSDFFullRobotModel().getRobotSpecificJointNames();
+      List<OneDoFJointReadOnly> fingerJoints = SubtreeStreams.fromChildren(OneDoFJointReadOnly.class,
+                                                                           behaviorTestHelper.getRobot().getRigidBody(jointNameMap.getHandName(robotSide)))
+                                                             .collect(Collectors.toList());
 
-      for (OneDegreeOfFreedomJoint fingerJoint : fingerJoints)
+      for (OneDoFJointReadOnly fingerJoint : fingerJoints)
       {
-         double q = fingerJoint.getQYoVariable().getDoubleValue() * getFingerClosedJointAngleSign(robotSide);
+         double q = fingerJoint.getQ() * getFingerClosedJointAngleSign(robotSide);
          ret += q;
          if (DEBUG)
          {
-            PrintTools.debug(this, fingerJoint.getName() + " q : " + q);
+            LogTools.info(fingerJoint.getName() + " q : " + q);
          }
       }
 
@@ -217,10 +214,12 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
 
    private HandDesiredConfigurationBehavior testHandDesiredConfigurationBehavior(HandDesiredConfigurationMessage handDesiredConfigurationMessage,
                                                                                  double trajectoryTime)
-         throws SimulationExceededMaximumTimeException
+
    {
-      final HandDesiredConfigurationBehavior behavior = new HandDesiredConfigurationBehavior(drcBehaviorTestHelper.getRobotName(), "test",
-                                                                                             drcBehaviorTestHelper.getROS2Node(), drcBehaviorTestHelper.getYoTime());
+      final HandDesiredConfigurationBehavior behavior = new HandDesiredConfigurationBehavior(behaviorTestHelper.getRobotName(),
+                                                                                             "test",
+                                                                                             behaviorTestHelper.getROS2Node(),
+                                                                                             behaviorTestHelper.getYoTime());
 
       behavior.initialize();
       behavior.setInput(handDesiredConfigurationMessage);
@@ -228,7 +227,7 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
 
       return behavior;
    }
-   
+
    protected double getFingerClosedJointAngleSign(RobotSide robotSide)
    {
       return 1.0;

@@ -5,6 +5,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.simulation.scs2.GDXYoManager;
+import us.ihmc.log.LogTools;
 import us.ihmc.yoVariables.variable.*;
 
 import java.util.ArrayList;
@@ -83,6 +84,11 @@ public class ImPlotModifiableYoPlot
             booleanPlotLine.setupLinkedVariable(yoManager);
          plotLine = booleanPlotLine;
          imPlotPlot.getPlotLines().add(booleanPlotLine);
+      }
+      else if (yoVariable == null)
+      {
+         LogTools.warn("YoVariable was null");
+         return;
       }
       else
       {

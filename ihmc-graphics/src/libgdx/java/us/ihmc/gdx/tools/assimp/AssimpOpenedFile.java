@@ -12,7 +12,9 @@ import us.ihmc.tools.string.StringTools;
 
 import java.net.URL;
 import java.nio.ByteBuffer;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.function.Supplier;
 
 public class AssimpOpenedFile
 {
@@ -25,7 +27,14 @@ public class AssimpOpenedFile
       String openMode = MemoryUtil.memUTF8(openModeAddress);
       LogTools.debug("{}: Opening in mode: {}", fileName, openMode);
 
-      URL url = ResourceTools.getResourceSystem(Paths.get(fileName));
+      Path filePath = Paths.get(fileName);
+      URL url = ResourceTools.getResourceSystem(filePath);
+      if (url == null)
+      {
+         Supplier<String> message = StringTools.format("Could not get resource: {}", filePath);
+         LogTools.error(message);
+         throw new RuntimeException(message.get());
+      }
 
       byte[] byteArray = ExceptionTools.handle(() -> IOUtils.toByteArray(url), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
 

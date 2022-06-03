@@ -61,6 +61,7 @@ public class SimulatedRobotiqHandsController implements RobotController
 
    private final FullRobotModel fullRobotModel;
    private final JointDesiredOutputListBasics jointDesiredOutputList;
+   private RobotSide[] sides;
    private final JointDesiredControlMode jointDesiredControlMode;
 
    public SimulatedRobotiqHandsController(FullRobotModel fullRobotModel,
@@ -68,9 +69,10 @@ public class SimulatedRobotiqHandsController implements RobotController
                                           DoubleProvider yoTime,
                                           RealtimeROS2Node realtimeROS2Node,
                                           ROS2Topic<?> outputTopic,
-                                          ROS2Topic<?> inputTopic)
+                                          ROS2Topic<?> inputTopic,
+                                          RobotSide[] sides)
    {
-      this(fullRobotModel, jointDesiredOutputList, yoTime, realtimeROS2Node, outputTopic, inputTopic, JointDesiredControlMode.EFFORT);
+      this(fullRobotModel, jointDesiredOutputList, yoTime, realtimeROS2Node, outputTopic, inputTopic, sides, JointDesiredControlMode.EFFORT);
    }
 
    public SimulatedRobotiqHandsController(FullRobotModel fullRobotModel,
@@ -79,10 +81,12 @@ public class SimulatedRobotiqHandsController implements RobotController
                                           RealtimeROS2Node realtimeROS2Node,
                                           ROS2Topic<?> outputTopic,
                                           ROS2Topic<?> inputTopic,
+                                          RobotSide[] sides,
                                           JointDesiredControlMode jointDesiredControlMode)
    {
       this.fullRobotModel = fullRobotModel;
       this.jointDesiredOutputList = jointDesiredOutputList;
+      this.sides = sides;
       this.jointDesiredControlMode = jointDesiredControlMode;
       sendFingerJointGains = new YoBoolean("sendFingerJointGains", registry);
       fingerTrajectoryTime = new YoDouble("FingerTrajectoryTime", registry);
@@ -107,7 +111,7 @@ public class SimulatedRobotiqHandsController implements RobotController
 
       setupGains(kpEnumMap, kdEnumMap, registry);
 
-      for (RobotSide robotSide : RobotSide.values)
+      for (RobotSide robotSide : sides)
       {
          palmMiddleFingerJoints.put(robotSide, fullRobotModel.getOneDoFJointByName(RobotiqHandModel.getPalmFingerMiddleJointName(robotSide)));
          allFingerJoints.put(robotSide, new ArrayList<>());
@@ -226,13 +230,13 @@ public class SimulatedRobotiqHandsController implements RobotController
 
       checkForNewHandDesiredConfigurationRequested();
 
-      for (RobotSide robotSide : RobotSide.values)
+      for (RobotSide robotSide : sides)
       {
          if (hasRobotiqHand.get(robotSide))
             individualHandControllers.get(robotSide).doControl();
       }
 
-      for (RobotSide robotSide : RobotSide.values)
+      for (RobotSide robotSide : sides)
       {
          if (hasRobotiqHand.get(robotSide))
          {
@@ -261,7 +265,7 @@ public class SimulatedRobotiqHandsController implements RobotController
 
    private void checkForNewHandDesiredConfigurationRequested()
    {
-      for (RobotSide robotSide : RobotSide.values)
+      for (RobotSide robotSide : sides)
       {
          if (!hasRobotiqHand.get(robotSide))
             continue;

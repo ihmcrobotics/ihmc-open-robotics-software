@@ -101,6 +101,7 @@ public class LinearMomentumRateControlModule
 
    private final FixedFramePoint2DBasics desiredCapturePoint = new FramePoint2D();
    private final FixedFrameVector2DBasics desiredCapturePointVelocity = new FrameVector2D();
+   private final FixedFramePoint2DBasics desiredCapturePointAtEndOfState = new FramePoint2D();
 
    private final FixedFramePoint2DBasics perfectCMP = new FramePoint2D();
    private final FixedFramePoint2DBasics perfectCoP = new FramePoint2D();
@@ -283,6 +284,7 @@ public class LinearMomentumRateControlModule
       this.useRecoveryMomentumWeight.set(input.getUseMomentumRecoveryMode());
       this.desiredCapturePoint.setMatchingFrame(input.getDesiredCapturePoint());
       this.desiredCapturePointVelocity.setMatchingFrame(input.getDesiredCapturePointVelocity());
+      this.desiredCapturePointAtEndOfState.setMatchingFrame(input.getDesiredCapturePointAtEndOfState());
       this.minimizingAngularMomentumRateZ.set(input.getMinimizeAngularMomentumRateZ());
       this.perfectCMP.setMatchingFrame(input.getPerfectCMP());
       this.perfectCoP.setMatchingFrame(input.getPerfectCoP());
@@ -463,12 +465,12 @@ public class LinearMomentumRateControlModule
       if (perfectCoP.containsNaN())
       {
          perfectCMPDelta.setToZero();
-         icpController.compute(supportPolygonInWorld, desiredCapturePoint, desiredCapturePointVelocity, perfectCMP, capturePoint, centerOfMass2d, omega0);
+         icpController.compute(supportPolygonInWorld, desiredCapturePoint, desiredCapturePointVelocity, desiredCapturePointAtEndOfState, perfectCMP, capturePoint, centerOfMass2d, omega0);
       }
       else
       {
          perfectCMPDelta.sub(perfectCMP, perfectCoP);
-         icpController.compute(supportPolygonInWorld, desiredCapturePoint, desiredCapturePointVelocity, perfectCoP, perfectCMPDelta, capturePoint, centerOfMass2d, omega0);
+         icpController.compute(supportPolygonInWorld, desiredCapturePoint, desiredCapturePointVelocity, desiredCapturePointAtEndOfState, perfectCoP, perfectCMPDelta, capturePoint, centerOfMass2d, omega0);
       }
 
       icpController.getDesiredCMP(desiredCMP);

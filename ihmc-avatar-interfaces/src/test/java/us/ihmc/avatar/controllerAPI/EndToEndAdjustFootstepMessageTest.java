@@ -56,7 +56,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
       simulationTestHelper.start();
 
-      boolean success = simulationTestHelper.simulateAndWait(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -67,7 +67,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
       final SideDependentList<StateTransitionCondition> singleSupportStartConditions = new SideDependentList<>();
       final SideDependentList<StateTransitionCondition> doubleSupportStartConditions = new SideDependentList<>();
 
-      findWalkingStateVariables(simulationTestHelper.getControllerRegistry(), singleSupportStartConditions, doubleSupportStartConditions);
+      findWalkingStateVariables(simulationTestHelper, singleSupportStartConditions, doubleSupportStartConditions);
 
       final AtomicBoolean hasControllerAdjustedFootstep = new AtomicBoolean(false);
 
@@ -95,7 +95,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
                   if (time >= swingInitialTime + delayBeforeAdjusting)
                   {
                      Quaternion orientation = new Quaternion();
-                     Pose3D nextFootstepPose = findNextFootstepPose(simulationTestHelper.getControllerRegistry());
+                     Pose3D nextFootstepPose = findNextFootstepPose(simulationTestHelper);
                      adjustedLocation.set(nextFootstepPose.getPosition());
                      orientation.set(nextFootstepPose.getOrientation());
                      adjustedLocation.setX(adjustedLocation.getX() + 0.1);
@@ -111,7 +111,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
                {
                   if (time >= swingInitialTime + delayBeforeAdjusting + delayBeforeChecking)
                   {
-                     Pose3D nextFootstepPose = findNextFootstepPose(simulationTestHelper.getControllerRegistry());
+                     Pose3D nextFootstepPose = findNextFootstepPose(simulationTestHelper);
                      boolean xEquals = MathTools.epsilonEquals(adjustedLocation.getX(), nextFootstepPose.getX(), 1.0e-10);
                      boolean yEquals = MathTools.epsilonEquals(adjustedLocation.getY(), nextFootstepPose.getY(), 1.0e-10);
                      boolean zEquals = MathTools.epsilonEquals(adjustedLocation.getZ(), nextFootstepPose.getZ(), 1.0e-10);
@@ -123,7 +123,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
          }
       });
 
-      success = simulationTestHelper.simulateAndWait(7.0);
+      success = simulationTestHelper.simulateNow(7.0);
       assertTrue(success);
       assertTrue("Controller did not adjust footstep", hasControllerAdjustedFootstep.get());
    }
@@ -258,7 +258,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
       // Do this here in case a test fails. That way the memory will be recycled.
       if (simulationTestHelper != null)
       {
-         simulationTestHelper.finishTest(simulationTestingParameters.getKeepSCSUp());
+         simulationTestHelper.finishTest();
          simulationTestHelper = null;
       }
 

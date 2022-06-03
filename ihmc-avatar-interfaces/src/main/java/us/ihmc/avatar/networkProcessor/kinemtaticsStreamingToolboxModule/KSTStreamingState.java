@@ -47,7 +47,7 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
-import us.ihmc.tools.UnitConversions;
+import us.ihmc.yoVariables.euclid.YoVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
@@ -60,8 +60,6 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class KSTStreamingState implements State
 {
-   private static final double defautlInitialBlendDuration = 2.0;
-
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -98,9 +96,9 @@ public class KSTStreamingState implements State
 
    private final YoDouble defaultArmMessageWeight = new YoDouble("defaultArmMessageWeight", registry);
    private final YoDouble defaultNeckMessageWeight = new YoDouble("defaultNeckMessageWeight", registry);
-   private final YoDouble defaultPelvisMessageLinearWeight = new YoDouble("defaultPelvisMessageLinearWeight", registry);
-   private final YoDouble defaultPelvisMessageAngularWeight = new YoDouble("defaultPelvisMessageAngularWeight", registry);
-   private final YoDouble defaultChestMessageAngularWeight = new YoDouble("defaultChestMessageAngularWeight", registry);
+   private final YoVector3D defaultPelvisMessageLinearWeight = new YoVector3D("defaultPelvisMessageLinearWeight", registry);
+   private final YoVector3D defaultPelvisMessageAngularWeight = new YoVector3D("defaultPelvisMessageAngularWeight", registry);
+   private final YoVector3D defaultChestMessageAngularWeight = new YoVector3D("defaultChestMessageAngularWeight", registry);
 
    private final YoDouble defaultPelvisMessageLockWeight = new YoDouble("defaultPelvisMessageLockWeight", registry);
    private final YoDouble defaultChestMessageLockWeight = new YoDouble("defaultChestMessageLockWeight", registry);
@@ -108,7 +106,7 @@ public class KSTStreamingState implements State
    //   private final YoDouble preferredArmConfigWeight = new YoDouble("preferredArmConfigWeight", registry);
    //   private final SideDependentList<List<KinematicsToolboxOneDoFJointMessage>> preferredArmJointMessages = new SideDependentList<>();
 
-   private final YoDouble inputDecayFactor;
+   private final YoDouble inputWeightDecayFactor;
    private final YoInteger numberOfDecayingInputs = new YoInteger("numberOfDecayingInputs", registry);
 
    /**
@@ -167,13 +165,14 @@ public class KSTStreamingState implements State
    public KSTStreamingState(KSTTools tools)
    {
       useStreamingPublisher.set(true);
+      KinematicsStreamingToolboxParameters parameters = tools.getParameters();
       this.tools = tools;
       toolboxControllerPeriod = tools.getToolboxControllerPeriod();
       ikController = tools.getIKController();
       ikSolverSpatialGains = ikController.getDefaultSpatialGains();
       ikSolverJointGains = ikController.getDefaultJointGains();
-      ikController.getCenterOfMassSafeMargin().set(0.05);
-      ikController.setPublishingSolutionPeriod(UnitConversions.hertzToSeconds(60.0));
+      ikController.getCenterOfMassSafeMargin().set(parameters.getCenterOfMassSafeMargin());
+      ikController.setPublishingSolutionPeriod(parameters.getPublishingSolutionPeriod());
       desiredFullRobotModel = tools.getDesiredFullRobotModel();
       ikCommandInputManager = tools.getIKCommandInputManager();
 
@@ -203,17 +202,17 @@ public class KSTStreamingState implements State
                                            .collect(Collectors.toList()));
       }
 
-      defaultArmMessageWeight.set(10.0);
-      defaultNeckMessageWeight.set(10.0);
-      defaultPelvisMessageLinearWeight.set(2.5);
-      defaultPelvisMessageAngularWeight.set(1.0);
-      defaultChestMessageAngularWeight.set(0.75);
+      defaultArmMessageWeight.set(parameters.getDefaultArmMessageWeight());
+      defaultNeckMessageWeight.set(parameters.getDefaultNeckMessageWeight());
+      defaultPelvisMessageLinearWeight.set(parameters.getDefaultPelvisMessageLinearWeight());
+      defaultPelvisMessageAngularWeight.set(parameters.getDefaultPelvisMessageAngularWeight());
+      defaultChestMessageAngularWeight.set(parameters.getDefaultChestMessageAngularWeight());
 
-      defaultPelvisMessageLockWeight.set(1000.0);
-      defaultChestMessageLockWeight.set(1000.0);
+      defaultPelvisMessageLockWeight.set(parameters.getDefaultPelvisMessageLockWeight());
+      defaultChestMessageLockWeight.set(parameters.getDefaultChestMessageLockWeight());
 
-      defaultLinearWeight.set(20.0);
-      defaultAngularWeight.set(1.0);
+      defaultLinearWeight.set(parameters.getDefaultLinearWeight());
+      defaultAngularWeight.set(parameters.getDefaultAngularWeight());
       /*
        * TODO This was introduced to reduce the risk of shoulder flip on Valkyrie, but it seems that it is
        * impacting too much the task-space objectives and preventing the privileged configuration to kick
@@ -231,11 +230,11 @@ public class KSTStreamingState implements State
 
       publishingPeriod.set(5.0 * tools.getWalkingControllerPeriod());
 
-      defaultLinearRateLimit.set(1.5);
-      defaultAngularRateLimit.set(10.0);
-      outputJointVelocityScale.set(0.75);
+      defaultLinearRateLimit.set(parameters.getDefaultLinearRateLimit());
+      defaultAngularRateLimit.set(parameters.getDefaultAngularRateLimit());
+      outputJointVelocityScale.set(parameters.getOutputJointVelocityScale());
 
-      streamingBlendingDuration.set(defautlInitialBlendDuration);
+      streamingBlendingDuration.set(parameters.getDefaultStreamingBlendingDuration());
       solutionFilterBreakFrequency.set(Double.POSITIVE_INFINITY);
       FloatingJointBasics rootJoint = desiredFullRobotModel.getRootJoint();
       OneDoFJointBasics[] oneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(desiredFullRobotModel);
@@ -248,14 +247,15 @@ public class KSTStreamingState implements State
       YoDouble inputFrequencyAlpha = new YoDouble("inputFrequencyFilter", registry);
       inputFrequencyAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(2.0, toolboxControllerPeriod));
       inputFrequency = new AlphaFilteredYoVariable("inputFrequency", registry, inputFrequencyAlpha, rawInputFrequency);
-      inputDecayFactor = new YoDouble("inputDecayFactor", registry);
-      inputDecayFactor.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(1.0 / 3.0, toolboxControllerPeriod));
+      inputWeightDecayFactor = new YoDouble("inputDecayFactor", registry);
+      inputWeightDecayFactor.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(1.0 / parameters.getInputWeightDecayDuration(),
+                                                                                                 toolboxControllerPeriod));
 
       Collection<? extends RigidBodyBasics> controllableRigidBodies = tools.getIKController().getControllableRigidBodies();
       DoubleProvider inputsAlphaProvider = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(inputsFilterBreakFrequency.getValue(),
                                                                                                                  toolboxControllerPeriod);
-      inputsFilterBreakFrequency.set(2.0);
-      inputVelocityDecayDuration.set(0.5);
+      inputsFilterBreakFrequency.set(parameters.getInputPoseLPFBreakFrequency());
+      inputVelocityDecayDuration.set(parameters.getInputVelocityDecayDuration());
 
       for (RigidBodyBasics rigidBody : controllableRigidBodies)
       {
@@ -378,8 +378,8 @@ public class KSTStreamingState implements State
          defaultPelvisMessage.getDesiredOrientationInWorld().setToYawOrientation(lockPelvisPose.getYaw());
          defaultPelvisMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(false, false, true, worldFrame));
          defaultPelvisMessage.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, true, worldFrame));
-         MessageTools.packWeightMatrix3DMessage(defaultPelvisMessageLinearWeight.getValue(), defaultPelvisMessage.getLinearWeightMatrix());
-         MessageTools.packWeightMatrix3DMessage(defaultPelvisMessageAngularWeight.getValue(), defaultPelvisMessage.getAngularWeightMatrix());
+         MessageTools.packWeightMatrix3DMessage(defaultPelvisMessageLinearWeight, defaultPelvisMessage.getLinearWeightMatrix());
+         MessageTools.packWeightMatrix3DMessage(defaultPelvisMessageAngularWeight, defaultPelvisMessage.getAngularWeightMatrix());
       }
 
       lockChest.set(tools.getConfigurationCommand().isLockChest());
@@ -402,7 +402,7 @@ public class KSTStreamingState implements State
          defaultChestMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(false, false, false, worldFrame));
          defaultChestMessage.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, true, worldFrame));
          MessageTools.packWeightMatrix3DMessage(0.0, defaultChestMessage.getLinearWeightMatrix());
-         MessageTools.packWeightMatrix3DMessage(defaultChestMessageAngularWeight.getValue(), defaultChestMessage.getAngularWeightMatrix());
+         MessageTools.packWeightMatrix3DMessage(defaultChestMessageAngularWeight, defaultChestMessage.getAngularWeightMatrix());
       }
 
       for (RobotSide robotSide : RobotSide.values)
@@ -658,7 +658,7 @@ public class KSTStreamingState implements State
          if (latestInput.getStreamInitialBlendDuration() > 0.0)
             streamingBlendingDuration.set(latestInput.getStreamInitialBlendDuration());
          else
-            streamingBlendingDuration.set(defautlInitialBlendDuration);
+            streamingBlendingDuration.set(tools.getParameters().getDefaultStreamingBlendingDuration());
          if (latestInput.getAngularRateLimitation() > 0.0)
             angularRateLimit.set(latestInput.getAngularRateLimitation());
          else
@@ -919,7 +919,7 @@ public class KSTStreamingState implements State
       for (int i = decayingInputs.size() - 1; i >= 0; i--)
       {
          KinematicsToolboxRigidBodyCommand decayingInput = decayingInputs.get(i);
-         decayingInput.getWeightMatrix().scale(inputDecayFactor.getValue());
+         decayingInput.getWeightMatrix().scale(inputWeightDecayFactor.getValue());
 
          if (findMaximumWeightValue(decayingInput.getWeightMatrix()) < 0.1)
             decayingInputs.remove(i);

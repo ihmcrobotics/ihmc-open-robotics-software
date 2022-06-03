@@ -174,6 +174,8 @@ public class RobotDefinitionTools
       RigidBodyTransform pose = new RigidBodyTransform();
       GeometryDefinition geometry = null;
       CollisionShapeDefinition output = new CollisionShapeDefinition();
+      if (source.getRigidBody() != null)
+         output.setName(source.getRigidBody().getName());
       output.setCollisionMask(source.getCollisionMask());
       output.setCollisionGroup(source.getCollisionGroup());
 

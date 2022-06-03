@@ -13,7 +13,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.log.LogTools;
@@ -43,9 +43,9 @@ public class GDXLibGDXBulletPhysicsDemo
             Vector3 gravity = new Vector3(0.0f, 0.0f, -9.81f);
             world = new BulletWorld(gravity);
 
-            ModelInstance ground = GDXModelPrimitives.createBox(1000.0f, 1000.0f, 0.5f, Color.DARK_GRAY);
+            ModelInstance ground = GDXModelBuilder.createBox(1000.0f, 1000.0f, 0.5f, Color.DARK_GRAY);
             double boxSizeZ = 0.1;
-            ModelInstance box = GDXModelPrimitives.createBox(0.1f, 0.08f, (float) boxSizeZ, Color.RED);
+            ModelInstance box = GDXModelBuilder.createBox(0.1f, 0.08f, (float) boxSizeZ, Color.RED);
 
             world.addConstructor("ground", new BulletConstructor(ground.model, 0.0f));
             world.addConstructor("box", new BulletConstructor(box.model, 0.2f));

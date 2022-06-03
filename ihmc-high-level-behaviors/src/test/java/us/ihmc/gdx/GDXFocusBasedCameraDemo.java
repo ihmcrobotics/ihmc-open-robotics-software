@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.graphics.GDXReferenceFrameGraphic;
 
@@ -31,7 +31,7 @@ public class GDXFocusBasedCameraDemo
             focusBasedCamera = baseUI.get3DSceneManager().getCamera3D();
             focusBasedCamera.changeCameraPosition(5.0, 5.0, 5.0);
 
-            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
+            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelBuilder.createCoordinateFrame(0.3)));
 
             cameraFrameGraphic = new GDXReferenceFrameGraphic(0.3, Color.SKY);
             baseUI.get3DSceneManager().addRenderableProvider(cameraFrameGraphic);

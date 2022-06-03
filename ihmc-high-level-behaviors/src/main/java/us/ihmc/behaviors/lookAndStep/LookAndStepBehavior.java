@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.property.StoredPropertySetMessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -100,13 +101,9 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
 
       helper.subscribeViaCallback(LOOK_AND_STEP_PARAMETERS, parameters ->
       {
-         List<String> values = Arrays.asList(parameters.getStrings().toStringArray());
-
-         if (!lookAndStepParameters.getAllAsStrings().equals(values))
-         {
-            statusLogger.info("Accepting new look and step parameters");
-            lookAndStepParameters.setAllFromStrings(values);
-         }
+         StoredPropertySetMessageTools.copyToStoredPropertySet(parameters,
+                                                               lookAndStepParameters,
+                                                               () -> statusLogger.info("Accepting new look and step parameters"));
       });
       helper.subscribeViaCallback(FootstepPlannerParameters, parameters ->
       {

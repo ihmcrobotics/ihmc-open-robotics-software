@@ -53,7 +53,7 @@ public class ImGuiYoVariableSearchPanel
             if (!RegularExpression.check(yoVariable.getFullNameString(), searchBar.get()))
                continue;
 
-            ImGui.selectable(yoVariable.getFullNameString() + " (" + yoVariable.getClass().getSimpleName() + ": " + yoVariable.getValueAsString() + ")");
+            ImGui.selectable(yoVariable.getFullNameString() + " (" + yoVariable.getClass().getSimpleName() + ": " + yoVariable.getValueAsString("%.5f") + ")");
             if (ImGui.isItemClicked())
             {
                selectedVariable = yoVariable;

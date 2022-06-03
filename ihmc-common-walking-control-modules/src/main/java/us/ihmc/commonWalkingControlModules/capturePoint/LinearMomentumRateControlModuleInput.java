@@ -41,6 +41,11 @@ public class LinearMomentumRateControlModuleInput
    private final FrameVector2D desiredCapturePointVelocity = new FrameVector2D();
 
    /**
+    * The desired capture point at teh end of the current state that the ICP controller should track.
+    */
+   private final FramePoint2D desiredCapturePointAtEndOfState = new FramePoint2D();
+
+   /**
     * Assuming to tracking error for the ICP this is the location that the CMP should be placed at according to the ICP
     * plan.
     */
@@ -135,6 +140,16 @@ public class LinearMomentumRateControlModuleInput
    public FrameVector2D getDesiredCapturePointVelocity()
    {
       return desiredCapturePointVelocity;
+   }
+
+   public void setDesiredCapturePointAtEndOfState(FramePoint2DReadOnly desiredCapturePointAtEndOfState)
+   {
+      this.desiredCapturePointAtEndOfState.setIncludingFrame(desiredCapturePointAtEndOfState);
+   }
+
+   public FramePoint2D getDesiredCapturePointAtEndOfState()
+   {
+      return desiredCapturePointAtEndOfState;
    }
 
    public void setUsePelvisHeightCommand(boolean usePelvisHeightCommand)
@@ -246,6 +261,7 @@ public class LinearMomentumRateControlModuleInput
       useMomentumRecoveryMode = other.useMomentumRecoveryMode;
       desiredCapturePoint.setIncludingFrame(other.desiredCapturePoint);
       desiredCapturePointVelocity.setIncludingFrame(other.desiredCapturePointVelocity);
+      desiredCapturePointAtEndOfState.setIncludingFrame(other.desiredCapturePointAtEndOfState);
       perfectCMP.setIncludingFrame(other.perfectCMP);
       perfectCoP.setIncludingFrame(other.perfectCoP);
       controlHeightWithMomentum = other.controlHeightWithMomentum;
@@ -274,6 +290,8 @@ public class LinearMomentumRateControlModuleInput
          if (!desiredCapturePoint.equals(other.desiredCapturePoint))
             return false;
          if (!desiredCapturePointVelocity.equals(other.desiredCapturePointVelocity))
+            return false;
+         if (!desiredCapturePointAtEndOfState.equals(other.desiredCapturePointAtEndOfState))
             return false;
          if (!perfectCMP.equals(other.perfectCMP))
             return false;

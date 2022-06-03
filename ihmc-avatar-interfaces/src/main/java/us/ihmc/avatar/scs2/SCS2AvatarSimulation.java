@@ -1,24 +1,34 @@
 package us.ihmc.avatar.scs2;
 
+import gnu.trove.map.TObjectDoubleMap;
+import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.AvatarEstimatorThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.avatar.factory.DisposableRobotController;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.session.SessionMode;
-import us.ihmc.scs2.session.SessionState;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizer;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizerControls;
 import us.ihmc.scs2.simulation.SimulationSession;
+import us.ihmc.scs2.simulation.SimulationSessionControls;
 import us.ihmc.scs2.simulation.robot.Robot;
+import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimJointBasics;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.util.RobotController;
 
 public class SCS2AvatarSimulation
@@ -29,10 +39,12 @@ public class SCS2AvatarSimulation
    private YoVariableServer yoVariableServer;
    private IntraprocessYoVariableLogger intraprocessYoVariableLogger;
    private DisposableRobotController robotController;
+   private HumanoidRobotContextData masterContext;
    private AvatarEstimatorThread estimatorThread;
    private AvatarControllerThread controllerThread;
    private SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
    private FullHumanoidRobotModel controllerFullRobotModel;
+   private RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup;
    private DRCRobotModel robotModel;
    private boolean showGUI;
    private boolean automaticallyStartSimulation;
@@ -48,7 +60,7 @@ public class SCS2AvatarSimulation
    {
       beforeSessionThreadStart();
 
-      simulationSession.setSessionState(SessionState.ACTIVE);
+      simulationSession.startSessionThread();
 
       if (showGUI)
       {
@@ -118,6 +130,45 @@ public class SCS2AvatarSimulation
          // TODO Remove this when pub-sub is released with the IntraProcessDomainImpl threads setup as daemon.
          System.exit(0);
       }
+   }
+
+   public void resetRobot()
+   {
+      resetRobot(true);
+   }
+
+   public void resetRobot(boolean simulateAfterReset)
+   {
+      SimulationSessionControls simulationSessionControls = simulationSession.getSimulationSessionControls();
+
+      simulationSessionControls.pause();
+
+      simulationSession.stopSessionThread();
+
+      for (SimJointBasics joint : robot.getAllJoints())
+      {
+         joint.setJointConfigurationToZero();
+         joint.setJointTwistToZero();
+         joint.setJointAccelerationToZero();
+         joint.setJointTauToZero();
+      }
+
+      robotInitialSetup.initializeRobot(robot.getRootBody());
+      robot.updateFrames();
+      FloatingJointBasics rootJoint = (FloatingJointBasics) robot.getRootBody().getChildrenJoints().get(0);
+      RigidBodyTransform rootJointTransform = new RigidBodyTransform(rootJoint.getJointPose().getOrientation(), rootJoint.getJointPose().getPosition());
+
+      TObjectDoubleMap<String> jointPositions = new TObjectDoubleHashMap<>();
+      SubtreeStreams.fromChildren(OneDoFJointBasics.class, robot.getRootBody()).forEach(joint -> jointPositions.put(joint.getName(), joint.getQ()));
+      estimatorThread.initializeStateEstimators(rootJointTransform, jointPositions);
+      controllerThread.initialize();
+      masterContext.set(estimatorThread.getHumanoidRobotContextData());
+
+      simulationSession.reinitializeSession();
+      simulationSession.startSessionThread();
+
+      if (simulateAfterReset)
+         simulationSessionControls.simulate();
    }
 
    public boolean hasBeenDestroyed()
@@ -198,6 +249,11 @@ public class SCS2AvatarSimulation
       this.robotController = robotController;
    }
 
+   public void setMasterContext(HumanoidRobotContextData masterContext)
+   {
+      this.masterContext = masterContext;
+   }
+
    public void setEstimatorThread(AvatarEstimatorThread estimatorThread)
    {
       this.estimatorThread = estimatorThread;
@@ -246,6 +302,16 @@ public class SCS2AvatarSimulation
    public RobotDefinition getRobotDefinition()
    {
       return robot.getRobotDefinition();
+   }
+
+   public void setRobotInitialSetup(RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)
+   {
+      this.robotInitialSetup = robotInitialSetup;
+   }
+
+   public RobotInitialSetup<HumanoidFloatingRootJointRobot> getRobotInitialSetup()
+   {
+      return robotInitialSetup;
    }
 
    public void setRobotModel(DRCRobotModel robotModel)

@@ -113,6 +113,10 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
             * foot pitch.
             */
    public double liftoff_duration_ = -1.0;
+   /**
+            * Step constraint regions to be used by this footstep
+            */
+   public controller_msgs.msg.dds.StepConstraintsListMessage step_constraints_;
 
    public FootstepDataMessage()
    {
@@ -123,6 +127,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       custom_position_waypoints_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (12, new geometry_msgs.msg.dds.PointPubSubType());
       swing_trajectory_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.SE3TrajectoryPointMessage> (12, new controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType());
+      step_constraints_ = new controller_msgs.msg.dds.StepConstraintsListMessage();
 
    }
 
@@ -160,6 +165,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       liftoff_duration_ = other.liftoff_duration_;
 
+      controller_msgs.msg.dds.StepConstraintsListMessagePubSubType.staticCopy(other.step_constraints_, step_constraints_);
    }
 
    /**
@@ -410,6 +416,15 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    }
 
 
+   /**
+            * Step constraint regions to be used by this footstep
+            */
+   public controller_msgs.msg.dds.StepConstraintsListMessage getStepConstraints()
+   {
+      return step_constraints_;
+   }
+
+
    public static Supplier<FootstepDataMessagePubSubType> getPubSubType()
    {
       return FootstepDataMessagePubSubType::new;
@@ -472,6 +487,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.liftoff_duration_, other.liftoff_duration_, epsilon)) return false;
 
+      if (!this.step_constraints_.epsilonEquals(other.step_constraints_, epsilon)) return false;
 
       return true;
    }
@@ -511,6 +527,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       if(this.liftoff_duration_ != otherMyClass.liftoff_duration_) return false;
 
+      if (!this.step_constraints_.equals(otherMyClass.step_constraints_)) return false;
 
       return true;
    }
@@ -552,7 +569,9 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       builder.append("touchdown_duration=");
       builder.append(this.touchdown_duration_);      builder.append(", ");
       builder.append("liftoff_duration=");
-      builder.append(this.liftoff_duration_);
+      builder.append(this.liftoff_duration_);      builder.append(", ");
+      builder.append("step_constraints=");
+      builder.append(this.step_constraints_);
       builder.append("}");
       return builder.toString();
    }

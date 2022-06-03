@@ -17,7 +17,6 @@ import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 @Tag("humanoid-obstacle")
 public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
@@ -28,7 +27,7 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
    @Override
    @Disabled("Revisit when there are contact patches.")
    @Test
-   public void testUnknownStepDownTwoFeetOnEachStep() throws SimulationExceededMaximumTimeException
+   public void testUnknownStepDownTwoFeetOnEachStep()
    {
       double stepDownHeight = 0.08;
       setStepDownHeight(stepDownHeight);
@@ -38,7 +37,7 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
    /** {@inheritDoc} */
    @Override
    @Test
-   public void testUnknownStepDownOneFootOnEachStep() throws SimulationExceededMaximumTimeException
+   public void testUnknownStepDownOneFootOnEachStep()
    {
       double stepDownHeight = 0.07;
       double stepLength = 0.32;
@@ -52,7 +51,7 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
    /** {@inheritDoc} */
    @Override
    @Test
-   public void testUnknownStepDownOneFootOnEachStepLong() throws SimulationExceededMaximumTimeException
+   public void testUnknownStepDownOneFootOnEachStepLong()
    {
       double stepDownHeight = 0.08;
       double stepLength = 0.4;
@@ -67,7 +66,7 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
    @Override
    @Disabled
    @Test
-   public void testUnknownStepDownOneFootOnEachStepWithUncertainty() throws SimulationExceededMaximumTimeException
+   public void testUnknownStepDownOneFootOnEachStepWithUncertainty()
    {
       double stepDownHeight = 0.07;
       double stepLength = 0.345;
@@ -82,7 +81,7 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
    @Override
    @Disabled("Re-enable when planar region constraints are used.")
    @Test
-   public void testRandomHeightField() throws SimulationExceededMaximumTimeException
+   public void testRandomHeightField()
    {
       super.testRandomHeightField();
    }
@@ -90,7 +89,7 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
    /** {@inheritDoc} */
    @Override
    @Test
-   public void testDropOffsWhileWalking() throws SimulationExceededMaximumTimeException
+   public void testDropOffsWhileWalking()
    {
       double stepDownHeight = 0.08;
       setStepDownHeight(stepDownHeight);

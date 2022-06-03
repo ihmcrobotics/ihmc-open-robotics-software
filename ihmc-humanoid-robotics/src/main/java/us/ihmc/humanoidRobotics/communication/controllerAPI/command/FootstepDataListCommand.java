@@ -4,6 +4,7 @@ import java.util.List;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.StepConstraintsListMessage;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -17,6 +18,7 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
    private double finalTransferDuration;
    private ExecutionTiming executionTiming = ExecutionTiming.CONTROL_DURATIONS;
    private final RecyclingArrayList<FootstepDataCommand> footsteps = new RecyclingArrayList<>(30, FootstepDataCommand.class);
+   private final StepConstraintsListCommand defaultStepConstraints = new StepConstraintsListCommand();
 
    /** If {@code false} the controller adjust each footstep height to be at the support sole height. */
    private boolean trustHeightOfFootsteps = true;
@@ -40,6 +42,7 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
       defaultTransferDuration = 0.0;
       finalTransferDuration = 0.0;
       footsteps.clear();
+      defaultStepConstraints.clear();
       clearQueuableCommandVariables();
    }
 
@@ -63,6 +66,11 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
       {
          for (int i = 0; i < dataList.size(); i++)
             footsteps.add().set(worldFrame, dataList.get(i));
+      }
+      StepConstraintsListMessage stepConstraints = message.getDefaultStepConstraints();
+      if (stepConstraints != null)
+      {
+         defaultStepConstraints.setFromMessage(stepConstraints);
       }
       setQueueableCommandVariables(message.getQueueingProperties());
    }
@@ -88,6 +96,7 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
          for (int i = 0; i < otherFootsteps.size(); i++)
             footsteps.add().set(otherFootsteps.get(i));
       }
+      defaultStepConstraints.set(other.getDefaultStepConstraints());
       setQueueableCommandVariables(other);
    }
 
@@ -124,6 +133,11 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
    public double getFinalTransferDuration()
    {
       return finalTransferDuration;
+   }
+
+   public StepConstraintsListCommand getDefaultStepConstraints()
+   {
+      return defaultStepConstraints;
    }
 
    public ExecutionTiming getExecutionTiming()

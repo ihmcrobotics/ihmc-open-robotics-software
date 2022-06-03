@@ -35,6 +35,8 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
+import java.util.List;
+
 public class CaptureRegionStepAdjustmentController implements StepAdjustmentController
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -204,14 +206,8 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
    }
 
    @Override
-   public void setStepConstraintRegion(StepConstraintRegion stepConstraintRegion)
+   public void setStepConstraintRegions(List<StepConstraintRegion> stepConstraintRegions)
    {
-   }
-
-   @Override
-   public boolean hasStepConstraintRegion()
-   {
-      return false;
    }
 
    @Override

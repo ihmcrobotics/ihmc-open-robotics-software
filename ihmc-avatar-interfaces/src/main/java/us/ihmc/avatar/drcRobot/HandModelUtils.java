@@ -13,15 +13,15 @@ import java.util.HashMap;
 
 public class HandModelUtils
 {
-   public static void getHandJoints(HandModel handModel,
+   public static void getHandJoints(SideDependentList<HandModel> handModels,
                                     FullHumanoidRobotModel fullRobotModel,
                                     SideDependentList<HashMap<HandJointName, OneDoFJointBasics>> handJoints)
    {
-      for (RobotSide side : RobotSide.values)
+      for (RobotSide side : handModels.sides())
       {
          final HashMap<HandJointName, OneDoFJointBasics> joints = new HashMap<>();
 
-         for (HandJointName jointName : handModel.getHandJointNames())
+         for (HandJointName jointName : handModels.get(side).getHandJointNames())
          {
             joints.put(jointName, fullRobotModel.getOneDoFJointByName(jointName.getJointName(side)));
          }
@@ -30,16 +30,16 @@ public class HandModelUtils
       }
    }
 
-   public static void copyHandJointAnglesFromMessagesToOneDoFJoints(HandModel handModel,
+   public static void copyHandJointAnglesFromMessagesToOneDoFJoints(SideDependentList<HandModel> handModels,
                                                                     SideDependentList<HashMap<HandJointName, OneDoFJointBasics>> handJoints,
                                                                     SideDependentList<HandJointAnglePacket> handJointAnglePackets)
    {
-      for (RobotSide robotSide : RobotSide.values)
+      for (RobotSide robotSide : handModels.sides())
       {
          HandJointAnglePacket handJointAnglePacket = handJointAnglePackets.get(robotSide);
          if (handJointAnglePacket != null)
          {
-            for (HandJointName jointName : handModel.getHandJointNames())
+            for (HandJointName jointName : handModels.get(robotSide).getHandJointNames())
             {
                double jointAngle = HumanoidMessageTools.unpackJointAngle(handJointAnglePacket, jointName);
                OneDoFJointBasics oneDoFJoint = handJoints.get(robotSide).get(jointName);

@@ -28,13 +28,14 @@ public class SimulatedRobotiqHandKinematicController implements SimulatedHandKin
    public SimulatedRobotiqHandKinematicController(String simpleRobotName,
                                                   FullHumanoidRobotModel fullRobotModel,
                                                   RealtimeROS2Node realtimeROS2Node,
-                                                  DoubleProvider controllerTime)
+                                                  DoubleProvider controllerTime,
+                                                  RobotSide[] sides)
    {
       this.fullRobotModel = fullRobotModel;
       this.realtimeROS2Node = realtimeROS2Node;
       this.controllerTime = controllerTime;
 
-      for (RobotSide robotSide : RobotSide.values)
+      for (RobotSide robotSide : sides)
       {
          SubtreeStreams.fromChildren(OneDoFJointBasics.class, fullRobotModel.getHand(robotSide)).forEach(controlledFingerJoints::add);
       }
@@ -48,6 +49,7 @@ public class SimulatedRobotiqHandKinematicController implements SimulatedHandKin
                                                        realtimeROS2Node,
                                                        ROS2Tools.getControllerOutputTopic(simpleRobotName),
                                                        ROS2Tools.getControllerInputTopic(simpleRobotName),
+                                                       sides,
                                                        JointDesiredControlMode.POSITION);
       registry.addChild(controller.getYoRegistry());
    }

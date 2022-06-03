@@ -179,6 +179,7 @@ public class MultiStepCaptureRegionCalculator
 
    private final ConvexPolygon2D reachabilityPolygon = new ConvexPolygon2D();
    private final Point2D stancePosition = new Point2D();
+   private final Point2D tempPoint = new Point2D();
 
    private final RigidBodyTransform transform = new RigidBodyTransform();
 
@@ -203,7 +204,8 @@ public class MultiStepCaptureRegionCalculator
       // move the reachability polygon far away from the edge. that prevents the two from intersecting, which you want to avoid to compute the "best" location.
       edgeToExtrude.perpendicular(true, vectorPerpendicularToEdge);
       vectorPerpendicularToEdge.scale(3.0);
-      transform.getTranslation().set(edgeToExtrude.midpoint());
+      edgeToExtrude.midpoint(tempPoint);
+      transform.getTranslation().set(tempPoint);
       transform.getTranslation().add(vectorPerpendicularToEdge.getX(), vectorPerpendicularToEdge.getY(), 0.0);
 
       reachabilityPolygon.applyTransform(transform);

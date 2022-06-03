@@ -4,12 +4,18 @@ import java.text.DecimalFormat;
 
 public class ImPlotDoublePlotLine extends ImPlotPlotLineBasics
 {
-   private static final DecimalFormat decimal5DPrintFormatter = new DecimalFormat("0.00000");
+   private final DecimalFormat decimalFormatter;
    private final ImPlotPlotLineDoubleSwapBuffer doubleSwapBuffer;
 
    public ImPlotDoublePlotLine(String variableName)
    {
-      super(variableName, "NaN");
+      this(variableName, 100, 3.0, new DecimalFormat("0.00000"));
+   }
+
+   public ImPlotDoublePlotLine(String variableName, int bufferSize, double history, DecimalFormat decimalFormatter)
+   {
+      super(variableName, "NaN", bufferSize, history);
+      this.decimalFormatter = decimalFormatter;
 
       doubleSwapBuffer = new ImPlotPlotLineDoubleSwapBuffer();
       setSwapBuffer(doubleSwapBuffer);
@@ -18,12 +24,12 @@ public class ImPlotDoublePlotLine extends ImPlotPlotLineBasics
    public void addValue(double value)
    {
       doubleSwapBuffer.addValue(value);
-      super.addValue(decimal5DPrintFormatter.format(value));
+      super.addValue(decimalFormatter.format(value));
    }
 
    @Override
    public String getValueString(int bufferIndex)
    {
-      return decimal5DPrintFormatter.format(doubleSwapBuffer.getValue(bufferIndex));
+      return decimalFormatter.format(doubleSwapBuffer.getValue(bufferIndex));
    }
 }

@@ -32,8 +32,8 @@ mainDependencies {
    api("us.ihmc:euclid-frame:0.17.2")
    api("us.ihmc:euclid-frame-shape:0.17.2")
    api("us.ihmc:euclid-shape:0.17.2")
-   api("us.ihmc:mecano:0.10.0")
-   api("us.ihmc:mecano-yovariables:0.10.0")
+   api("us.ihmc:mecano:0.11.0")
+   api("us.ihmc:mecano-yovariables:0.11.0")
    api("us.ihmc:ihmc-commons:0.30.5")
    api("us.ihmc:ihmc-messager-kryo:0.1.7")
    api("us.ihmc:ihmc-yovariables:0.9.12")
@@ -41,7 +41,7 @@ mainDependencies {
    api("us.ihmc:ihmc-graphics-description:0.19.4")
    api("us.ihmc:simulation-construction-set-utilities:0.21.16")
    api("us.ihmc:ihmc-native-library-loader:1.3.1")
-   api("us.ihmc:scs2-definition:0.5.1-bullet-alpha-1")
+   api("us.ihmc:scs2-definition:0.7.0-bullet-alpha-3")
    // NOTE: IHMCRoboticsToolkit should not depend on any other IHMC project(!), especially it should not depend on IHMCJavaToolkit.
 }
 

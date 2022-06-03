@@ -22,11 +22,12 @@ mainDependencies {
    api("com.github.quickhull3d:quickhull3d:1.0.0")
    api("com.github.wendykierp:JTransforms:3.1")
    api("org.reflections:reflections:0.9.10")
-   api("com.hierynomus:sshj:0.27.0")
+   api("com.hierynomus:sshj:0.32.0")
 
    api("us.ihmc:jinput:2.0.6-ihmc2")
    api("us.ihmc:euclid:0.17.2")
    api("us.ihmc:euclid-geometry:0.17.2")
+   api("us.ihmc:mecano-graphviz:0.10.0")
    api("us.ihmc:ihmc-yovariables:0.9.12")
    api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.8")
    api("us.ihmc:simulation-construction-set:0.21.16")
@@ -53,9 +54,9 @@ mainDependencies {
    api("us.ihmc:ihmc-robot-data-visualizer:source")
    api("us.ihmc:ihmc-footstep-planning:source")
    api("us.ihmc:simulation-construction-set-tools:source")
-   api("us.ihmc:scs2-simulation:0.5.1-bullet-alpha-1")
-   api("us.ihmc:scs2-bullet-simulation:0.5.1-bullet-alpha-1")
-   api("us.ihmc:scs2-session-visualizer-jfx:0.5.1-bullet-alpha-1")
+   api("us.ihmc:scs2-simulation:0.7.0-bullet-alpha-3")
+   api("us.ihmc:scs2-bullet-simulation:0.7.0-bullet-alpha-3")
+   api("us.ihmc:scs2-session-visualizer-jfx:0.7.0-bullet-alpha-3")
 }
 
 testDependencies {

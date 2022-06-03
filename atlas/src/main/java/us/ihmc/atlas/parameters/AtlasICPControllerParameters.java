@@ -2,13 +2,18 @@ package us.ihmc.atlas.parameters;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.CoPProjectionTowardsMidpoint;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /** {@inheritDoc} */
 public class AtlasICPControllerParameters extends ICPControllerParameters
 {
    private final boolean runningOnRealRobot;
    private final boolean useAngularMomentum = true;
+
+   private FeedbackProjectionOperator feedbackProjectionOperator;
 
    public AtlasICPControllerParameters(boolean runningOnRealRobot)
    {
@@ -105,5 +110,17 @@ public class AtlasICPControllerParameters extends ICPControllerParameters
    public boolean useSmartICPIntegrator()
    {
       return true;
+   }
+
+   @Override
+   public void createFeedbackProjectionOperator(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      feedbackProjectionOperator = new CoPProjectionTowardsMidpoint(registry, yoGraphicsListRegistry);
+   }
+
+   @Override
+   public FeedbackProjectionOperator getFeedbackProjectionOperator()
+   {
+      return feedbackProjectionOperator;
    }
 }

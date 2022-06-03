@@ -9,7 +9,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.MultiRobotTestInterface;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -19,13 +20,11 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.simulation.TimeConsumer;
+import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationToolkit.controllers.OscillateFeetPerturber;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.scripts.Script;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.PelvisKinematicsBasedLinearStateCalculator;
 import us.ihmc.tools.MemoryTools;
@@ -36,7 +35,7 @@ public abstract class DRCObstacleCourseFlatWithErrorsTest implements MultiRobotT
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
-   private DRCSimulationTestHelper drcSimulationTestHelper;
+   private SCS2AvatarTestingSimulation simulationTestHelper;
 
    @BeforeEach
    public void showMemoryUsageBeforeTest()
@@ -47,79 +46,84 @@ public abstract class DRCObstacleCourseFlatWithErrorsTest implements MultiRobotT
    @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
-      {
-         ThreadTools.sleepForever();
-      }
-
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcSimulationTestHelper != null)
+      if (simulationTestHelper != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
+         simulationTestHelper.finishTest();
+         simulationTestHelper = null;
       }
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
+   public SideDependentList<String> getFootNames()
+   {
+      return new SideDependentList<>(side -> getRobotModel().getJointMap().getFootName(side));
+   }
+
    @Test
-   public void testSimpleFlatGroundScriptWithRandomFootSlip() throws SimulationExceededMaximumTimeException
+   public void testSimpleFlatGroundScriptWithRandomFootSlip()
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      String name = "DRCSimpleFlatGroundScriptTest";
-
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.setTestEnvironment(flatGround);
-      drcSimulationTestHelper.createSimulation(name);
-      HumanoidFloatingRootJointRobot robot = drcSimulationTestHelper.getRobot();
+      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), flatGround, simulationTestingParameters);
+      simulationTestHelper.start();
+      simulationTestHelper.getQueuedControllerCommands();
       setupCameraForWalkingUpToRamp();
-      SlipRandomOnNextStepPerturber slipRandomOnEachStepPerturber = new SlipRandomOnNextStepPerturber(robot, 1002L);
+      SlipRandomOnNextStepPerturber slipRandomOnEachStepPerturber = new SlipRandomOnNextStepPerturber(simulationTestHelper.getSimulationSession().getTime(),
+                                                                                                      simulationTestHelper.getRobot(),
+                                                                                                      getFootNames(),
+                                                                                                      1002L);
       slipRandomOnEachStepPerturber.setTranslationRangeToSlipNextStep(new double[] {0.01, 0.01, 0.0}, new double[] {0.06, 0.06, 0.005});
       slipRandomOnEachStepPerturber.setRotationRangeToSlipNextStep(new double[] {0.03, 0.0, 0.0}, new double[] {0.3, 0.0, 0.0});
       slipRandomOnEachStepPerturber.setSlipAfterStepTimeDeltaRange(0.005, 0.25);
       slipRandomOnEachStepPerturber.setSlipPercentSlipPerTickRange(0.005, 0.5);
       slipRandomOnEachStepPerturber.setProbabilityOfSlip(0.0);
 
-      robot.setController(slipRandomOnEachStepPerturber, 10);
+      simulationTestHelper.getRobot().addThrottledController(slipRandomOnEachStepPerturber,
+                                                             10.0 * simulationTestHelper.getSimulationSession().getSessionDTSeconds());
 
       ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      boolean success = simulationTestHelper.simulateNow(1.0);
       slipRandomOnEachStepPerturber.setProbabilityOfSlip(0.5);
 
       String scriptName = "scripts/ExerciseAndJUnitScripts/SimpleFlatGroundScript.xml";
       loadScriptFileInLeftSoleFrame(scriptName);
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(16.0);
+      success = success && simulationTestHelper.simulateNow(16.0);
 
-      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
-      drcSimulationTestHelper.checkNothingChanged();
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
+      //      simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
 
       Point3D center = new Point3D(1.2315617729419353, 0.14530717103231391, 0.8358344340816537);
       Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
-      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+      simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
-   public void testSimpleFlatGroundScriptWithOscillatingFeet() throws SimulationExceededMaximumTimeException
+   public void testSimpleFlatGroundScriptWithOscillatingFeet()
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), flatGround);
-      drcSimulationTestHelper.getSCSInitialSetup().enableGroundSlipping(0.7, 0.7);
-      drcSimulationTestHelper.createSimulation("DRCSimpleFlatGroundScriptTest");
-      SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
-      HumanoidFloatingRootJointRobot robot = drcSimulationTestHelper.getRobot();
+      SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
+                                                                                                                                             flatGround,
+                                                                                                                                             simulationTestingParameters);
+      //      simulationTestHelperFactory.getSCSInitialSetup().enableGroundSlipping(0.7, 0.7); FIXME
+      simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+      simulationTestHelper.start();
+      simulationTestHelper.getQueuedControllerCommands();
       setupCameraForWalkingUpToRamp();
 
       int ticksPerPerturbation = 10;
-      OscillateFeetPerturber oscillateFeetPerturber = new OscillateFeetPerturber(robot, simulationConstructionSet.getDT() * (ticksPerPerturbation));
+      OscillateFeetPerturber oscillateFeetPerturber = new OscillateFeetPerturber(simulationTestHelper.getRobot(),
+                                                                                 getFootNames(),
+                                                                                 simulationTestHelper.getSimulationDT() * (ticksPerPerturbation));
       oscillateFeetPerturber.setTranslationMagnitude(new double[] {0.008, 0.011, 0.004});
       oscillateFeetPerturber.setRotationMagnitudeYawPitchRoll(new double[] {0.012, 0.047, 0.009});
 
@@ -129,53 +133,52 @@ public abstract class DRCObstacleCourseFlatWithErrorsTest implements MultiRobotT
       oscillateFeetPerturber.setRotationFrequencyHzYawPitchRoll(RobotSide.LEFT, new double[] {5.0, 0.5, 0.3});
       oscillateFeetPerturber.setRotationFrequencyHzYawPitchRoll(RobotSide.RIGHT, new double[] {0.2, 3.4, 1.11});
 
-      robot.setController(oscillateFeetPerturber, ticksPerPerturbation);
+      simulationTestHelper.getRobot().addThrottledController(oscillateFeetPerturber, ticksPerPerturbation * simulationTestHelper.getSimulationDT());
 
       ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      boolean success = simulationTestHelper.simulateNow(1.0);
 
       // Load script file:
       String scriptName = "scripts/ExerciseAndJUnitScripts/SimpleFlatGroundScript.xml";
       loadScriptFileInLeftSoleFrame(scriptName);
 
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(16.0);
+      success = success && simulationTestHelper.simulateNow(16.0);
 
-      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
-      drcSimulationTestHelper.checkNothingChanged();
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
+      //      simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
 
       Point3D center = new Point3D(1.199355605426889, 0.15130115291430654, 0.8414863015120644);
       Vector3D plusMinusVector = new Vector3D(0.2, 0.3, 0.5);
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
-      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+      simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private void loadScriptFileInLeftSoleFrame(String scriptName)
    {
-      FullHumanoidRobotModel controllerFullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      FullHumanoidRobotModel controllerFullRobotModel = simulationTestHelper.getControllerFullRobotModel();
       ReferenceFrame leftSoleFrame = controllerFullRobotModel.getSoleFrame(RobotSide.LEFT);
       InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
-      drcSimulationTestHelper.loadScriptFile(scriptInputStream, leftSoleFrame);
+      simulationTestHelper.loadScriptFile(scriptInputStream, leftSoleFrame);
    }
 
    @Test
-   public void testStandingWithOscillatingFeet() throws SimulationExceededMaximumTimeException
+   public void testStandingWithOscillatingFeet()
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.setTestEnvironment(flatGround);
-      drcSimulationTestHelper.createSimulation("DRCSimpleFlatGroundScriptTest");
-      SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
-      HumanoidFloatingRootJointRobot robot = drcSimulationTestHelper.getRobot();
+      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), flatGround, simulationTestingParameters);
+      simulationTestHelper.start();
       setupCameraForWalkingUpToRamp();
 
       int ticksPerPerturbation = 10;
-      OscillateFeetPerturber oscillateFeetPerturber = new OscillateFeetPerturber(robot, simulationConstructionSet.getDT() * (ticksPerPerturbation));
+      OscillateFeetPerturber oscillateFeetPerturber = new OscillateFeetPerturber(simulationTestHelper.getRobot(),
+                                                                                 getFootNames(),
+                                                                                 simulationTestHelper.getSimulationDT() * (ticksPerPerturbation));
       oscillateFeetPerturber.setTranslationMagnitude(new double[] {0.01, 0.015, 0.005});
       oscillateFeetPerturber.setRotationMagnitudeYawPitchRoll(new double[] {0.017, 0.012, 0.011});
 
@@ -185,75 +188,75 @@ public abstract class DRCObstacleCourseFlatWithErrorsTest implements MultiRobotT
       oscillateFeetPerturber.setRotationFrequencyHzYawPitchRoll(RobotSide.LEFT, new double[] {5.0, 0.5, 7.3});
       oscillateFeetPerturber.setRotationFrequencyHzYawPitchRoll(RobotSide.RIGHT, new double[] {0.2, 3.4, 1.11});
 
-      robot.setController(oscillateFeetPerturber, ticksPerPerturbation);
+      simulationTestHelper.getRobot().addThrottledController(oscillateFeetPerturber, ticksPerPerturbation * simulationTestHelper.getSimulationDT());
 
       ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0);
+      boolean success = simulationTestHelper.simulateNow(6.0);
 
-      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
-      drcSimulationTestHelper.checkNothingChanged();
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
+      //      simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
 
       Point3D center = new Point3D(0.011508654344298094, -0.005208268357032689, 0.780662368979778);
       Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
-      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+      simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   public void testStandingWithStateEstimatorDrift() throws SimulationExceededMaximumTimeException
+   public void testStandingWithStateEstimatorDrift()
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.setTestEnvironment(flatGround);
-      drcSimulationTestHelper.createSimulation("DRCSimpleFlatGroundScriptTest");
-      SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
-      HumanoidFloatingRootJointRobot robot = drcSimulationTestHelper.getRobot();
-      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), flatGround, simulationTestingParameters);
+      simulationTestHelper.start();
+      simulationTestHelper.getQueuedControllerCommands();
+      FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
       setupCameraForWalkingUpToRamp();
       Vector3DReadOnly slidingVelocity = new Vector3D(0.10, 0.0, 0.0);
-      double simDT = simulationConstructionSet.getDT();
+      double simDT = simulationTestHelper.getSimulationDT();
 
-      Script stateEstimatorDriftator = createStateEstimatorDriftator(simulationConstructionSet, fullRobotModel, slidingVelocity, simDT);
-      simulationConstructionSet.addScript(stateEstimatorDriftator);
+      TimeConsumer stateEstimatorDriftator = createStateEstimatorDriftator(simulationTestHelper, fullRobotModel, slidingVelocity, simDT);
+      simulationTestHelper.getSimulationSession().addAfterPhysicsCallback(stateEstimatorDriftator);
 
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10.0);
+      boolean success = simulationTestHelper.simulateNow(10.0);
 
-      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
-      drcSimulationTestHelper.checkNothingChanged();
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
+      //      simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
 
       Point3D center = new Point3D(0.0, 0.0, 0.86);
       Vector3D plusMinusVector = new Vector3D(0.06, 0.06, 0.05);
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
-      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+      simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   private Script createStateEstimatorDriftator(SimulationConstructionSet simulationConstructionSet, FullHumanoidRobotModel fullRobotModel,
-                                                Vector3DReadOnly slidingVelocity, double simDT)
+   private TimeConsumer createStateEstimatorDriftator(SCS2AvatarTestingSimulation simulationTestHelper,
+                                                      FullHumanoidRobotModel fullRobotModel,
+                                                      Vector3DReadOnly slidingVelocity,
+                                                      double simDT)
    {
       SideDependentList<YoFramePoint3D> stateEstimatorFootPosition = new SideDependentList<>();
       for (RobotSide robotSide : RobotSide.values)
       {
          String namespace = PelvisKinematicsBasedLinearStateCalculator.class.getSimpleName();
          String namePrefix = fullRobotModel.getFoot(robotSide).getName() + "FootPositionInWorld";
-         YoDouble x = (YoDouble) simulationConstructionSet.findVariable(namespace, namePrefix + "X");
-         YoDouble y = (YoDouble) simulationConstructionSet.findVariable(namespace, namePrefix + "Y");
-         YoDouble z = (YoDouble) simulationConstructionSet.findVariable(namespace, namePrefix + "Z");
+         YoDouble x = (YoDouble) simulationTestHelper.findVariable(namespace, namePrefix + "X");
+         YoDouble y = (YoDouble) simulationTestHelper.findVariable(namespace, namePrefix + "Y");
+         YoDouble z = (YoDouble) simulationTestHelper.findVariable(namespace, namePrefix + "Z");
          stateEstimatorFootPosition.put(robotSide, new YoFramePoint3D(x, y, z, ReferenceFrame.getWorldFrame()));
       }
 
-      Script stateEstimatorDriftator = new Script()
+      TimeConsumer stateEstimatorDriftator = new TimeConsumer()
       {
          @Override
-         public void doScript(double t)
+         public void accept(double time)
          {
             for (RobotSide robotSide : RobotSide.values)
             {
@@ -266,89 +269,95 @@ public abstract class DRCObstacleCourseFlatWithErrorsTest implements MultiRobotT
    }
 
    @Test
-   public void testSideStepsWithSlipping() throws SimulationExceededMaximumTimeException
+   public void testSideStepsWithSlipping()
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.setTestEnvironment(flatGround);
-      drcSimulationTestHelper.createSimulation("DRCLongStepsMaxHeightPauseAndRestartTest");
+      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), flatGround, simulationTestingParameters);
+      simulationTestHelper.start();
+      simulationTestHelper.getQueuedControllerCommands();
 
-      HumanoidFloatingRootJointRobot robot = drcSimulationTestHelper.getRobot();
+      Robot robot = simulationTestHelper.getRobot();
 
-      SlipOnNextStepPerturber slipOnEachStepPerturber = new SlipOnNextStepPerturber(robot, RobotSide.LEFT);
+      SlipOnNextStepPerturber slipOnEachStepPerturber = new SlipOnNextStepPerturber(simulationTestHelper.getSimulationSession().getTime(),
+                                                                                    robot,
+                                                                                    RobotSide.LEFT,
+                                                                                    getFootNames().get(RobotSide.LEFT));
       slipOnEachStepPerturber.setAmountToSlipNextStep(getFootSlipVector());
       slipOnEachStepPerturber.setRotationToSlipNextStep(-0.15, 0.0, 0.0);
       slipOnEachStepPerturber.setSlipAfterStepTimeDelta(getFootSlipTimeDeltaAfterTouchdown());
       slipOnEachStepPerturber.setPercentToSlipPerTick(0.1);
-      robot.setController(slipOnEachStepPerturber, 10);
+      robot.addThrottledController(slipOnEachStepPerturber, 10 * simulationTestHelper.getSimulationDT());
 
       setupCameraForSideStepSlipping();
 
       ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.5);
 
       String scriptName = "scripts/ExerciseAndJUnitScripts/LongSideStepsLeft.xml";
       loadScriptFileInLeftSoleFrame(scriptName);
 
       slipOnEachStepPerturber.setSlipNextStep(true);
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(14.0);
+      success = success && simulationTestHelper.simulateNow(14.0);
 
-      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
-      drcSimulationTestHelper.checkNothingChanged();
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
+      //      simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
 
       Point3D center = new Point3D(0.09590605437816137, 1.0379918543616593, 0.8383906558584916);
       Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
-      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+      simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
-   public void testSideStepsWithRandomSlipping() throws SimulationExceededMaximumTimeException
+   public void testSideStepsWithRandomSlipping()
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.setTestEnvironment(flatGround);
-      drcSimulationTestHelper.createSimulation("DRCSideStepsWithSlippingTest");
+      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), flatGround, simulationTestingParameters);
+      simulationTestHelper.start();
+      simulationTestHelper.getQueuedControllerCommands();
 
-      HumanoidFloatingRootJointRobot robot = drcSimulationTestHelper.getRobot();
+      Robot robot = simulationTestHelper.getRobot();
 
-      SlipRandomOnNextStepPerturber slipRandomOnEachStepPerturber = new SlipRandomOnNextStepPerturber(robot, 1000L);
+      SlipRandomOnNextStepPerturber slipRandomOnEachStepPerturber = new SlipRandomOnNextStepPerturber(simulationTestHelper.getSimulationSession().getTime(),
+                                                                                                      robot,
+                                                                                                      getFootNames(),
+                                                                                                      1000L);
       slipRandomOnEachStepPerturber.setTranslationRangeToSlipNextStep(new double[] {0.0, 0.0, 0.0}, new double[] {0.04, 0.04, 0.01});
       slipRandomOnEachStepPerturber.setRotationRangeToSlipNextStep(new double[] {0.0, 0.0, 0.0}, new double[] {0.2, 0.05, 0.02});
       slipRandomOnEachStepPerturber.setSlipAfterStepTimeDeltaRange(0.01, 1.0);
       slipRandomOnEachStepPerturber.setSlipPercentSlipPerTickRange(0.02, 1.0);
       slipRandomOnEachStepPerturber.setProbabilityOfSlip(0.70);
 
-      robot.setController(slipRandomOnEachStepPerturber, 10);
+      robot.addThrottledController(slipRandomOnEachStepPerturber, 10 * simulationTestHelper.getSimulationDT());
 
       setupCameraForSideStepSlipping();
 
       ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.5);
 
       String scriptName = "scripts/ExerciseAndJUnitScripts/LongSideStepsLeft.xml";
       loadScriptFileInLeftSoleFrame(scriptName);
 
       slipRandomOnEachStepPerturber.setProbabilityOfSlip(0.5);
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(9.0);
+      success = success && simulationTestHelper.simulateNow(9.0);
 
-      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
-      drcSimulationTestHelper.checkNothingChanged();
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
+      //      simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
 
       Point3D center = new Point3D(0.022704922237925088, 1.0831838988457891, 0.8389256934215261);
       Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
-      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+      simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
@@ -358,7 +367,7 @@ public abstract class DRCObstacleCourseFlatWithErrorsTest implements MultiRobotT
       Point3D cameraFix = new Point3D(1.8375, -0.16, 0.89);
       Point3D cameraPosition = new Point3D(1.10, 8.30, 1.37);
 
-      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
+      simulationTestHelper.setCamera(cameraFix, cameraPosition);
    }
 
    private void setupCameraForSideStepSlipping()
@@ -366,7 +375,7 @@ public abstract class DRCObstacleCourseFlatWithErrorsTest implements MultiRobotT
       Point3D cameraFix = new Point3D(2.0, 0.4, 0.75);
       Point3D cameraPosition = new Point3D(6.5, 0.4, 0.75);
 
-      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
+      simulationTestHelper.setCamera(cameraFix, cameraPosition);
    }
 
    protected abstract Vector3D getFootSlipVector();

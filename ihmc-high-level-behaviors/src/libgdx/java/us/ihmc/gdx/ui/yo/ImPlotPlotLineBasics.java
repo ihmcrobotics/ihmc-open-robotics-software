@@ -14,20 +14,23 @@ public abstract class ImPlotPlotLineBasics implements ImPlotPlotLine
    private ImPlotPlotLineSwapBuffer swapBuffer;
    private double history = 3.0;
    private final Stopwatch stopwatch = new Stopwatch();
-   private int bufferSize = 100;
-   private double timeForOneBufferEntry = history / bufferSize;
+   private final int bufferSize;
+   private double timeForOneBufferEntry;
    private long lastTickIndex = 0;
    private long tickIndex = 0;
-   private final Integer[] xValues = ImPlotTools.createIndex(bufferSize);
+   private final double[] xValues;
    private boolean isA = true;
    private int filledIndex = 0;
 
-   public ImPlotPlotLineBasics(String variableName, String initialValueString)
+   public ImPlotPlotLineBasics(String variableName, String initialValueString, int bufferSize, double history)
    {
       this.variableName = variableName;
+      this.bufferSize = bufferSize;
+      timeForOneBufferEntry = history / bufferSize;
       variableNameBase = variableName + " ";
       variableNamePostfix = "###" + variableName;
       labelID = variableNameBase + initialValueString + variableNamePostfix;
+      xValues = ImPlotTools.createIndex(bufferSize);
    }
 
    public void setSwapBuffer(ImPlotPlotLineSwapBuffer swapBuffer)

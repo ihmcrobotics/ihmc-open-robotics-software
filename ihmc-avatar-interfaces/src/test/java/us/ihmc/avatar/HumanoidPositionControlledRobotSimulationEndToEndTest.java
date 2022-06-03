@@ -71,7 +71,7 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
    {
       if (simulationTestHelper != null)
       {
-         simulationTestHelper.finishTest(simulationTestingParameters.getKeepSCSUp());
+         simulationTestHelper.finishTest();
          simulationTestHelper = null;
       }
    }
@@ -117,7 +117,7 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
       factory.setUseImpulseBasedPhysicsEngine(true);
       simulationTestHelper = factory.createAvatarTestingSimulation();
       simulationTestHelper.start();
-      assertTrue(simulationTestHelper.simulateAndWait(3.0));
+      assertTrue(simulationTestHelper.simulateNow(3.0));
    }
 
    @Test
@@ -125,7 +125,7 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
    {
       createSimulation(testInfo, null, new FlatGroundEnvironment());
       simulationTestHelper.start();
-      assertTrue(simulationTestHelper.simulateAndWait(1.0));
+      assertTrue(simulationTestHelper.simulateNow(1.0));
 
       WholeBodyJointspaceTrajectoryMessage message = new WholeBodyJointspaceTrajectoryMessage();
 
@@ -142,7 +142,7 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
 
       simulationTestHelper.publishToController(message);
 
-      assertTrue(simulationTestHelper.simulateAndWait(3.0));
+      assertTrue(simulationTestHelper.simulateNow(3.0));
    }
 
    private void createSimulation(TestInfo testInfo,
@@ -216,7 +216,7 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
          scriptReader.applyTransform(scriptMatcher.getScriptTransform());
          totalNumberOfFrames.set(scriptReader.size());
 
-         assertTrue(simulationTestHelper.simulateAndWait(1.0));
+         assertTrue(simulationTestHelper.simulateNow(1.0));
 
          OneDoFJointReadOnly[] allJoints = FullRobotModelUtils.getAllJointsExcludingHands(simulationTestHelper.getControllerFullRobotModel());
 
@@ -229,7 +229,7 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
             WholeBodyJointspaceTrajectoryMessage message = toWholeBodyJointspaceTrajectoryMessage(nextItem.getIkSolution(), allJoints, itemDuration);
             setSCSRobotConfiguration(nextItem.getIkSolution(), allJoints, ghostRobot);
             simulationTestHelper.publishToController(message);
-            assertTrue(simulationTestHelper.simulateAndWait(itemDuration + 0.1));
+            assertTrue(simulationTestHelper.simulateNow(itemDuration + 0.1));
          }
       }
    }
@@ -266,14 +266,14 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
          MultiContactScriptReader scriptReader = new MultiContactScriptReader();
          assertTrue(scriptReader.loadScript(scriptInputStream), "Failed to load the script");
          assertTrue(scriptReader.hasNext(), "Script is empty");
-         assertTrue(simulationTestHelper.simulateAndWait(1.0));
+         assertTrue(simulationTestHelper.simulateNow(1.0));
 
          MultiContactScriptPostProcessor scriptPostProcessor = new MultiContactScriptPostProcessor(getRobotModel());
          scriptPostProcessor.setDurationPerKeyframe(durationPerKeyframe);
-         WholeBodyJointspaceTrajectoryMessage message = scriptPostProcessor.process1(scriptReader.getAllItems());
+         WholeBodyJointspaceTrajectoryMessage message = scriptPostProcessor.process1(scriptReader.getAllItems(), true);
 
          simulationTestHelper.publishToController(message);
-         assertTrue(simulationTestHelper.simulateAndWait(message.getJointTrajectoryMessages().get(0).getTrajectoryPoints().getLast().getTime() + 2.0));
+         assertTrue(simulationTestHelper.simulateNow(message.getJointTrajectoryMessages().get(0).getTrajectoryPoints().getLast().getTime() + 2.0));
       }
    }
 

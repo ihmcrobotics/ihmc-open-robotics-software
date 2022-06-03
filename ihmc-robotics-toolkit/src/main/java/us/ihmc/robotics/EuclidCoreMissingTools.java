@@ -21,10 +21,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.*;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
@@ -985,5 +982,275 @@ public class EuclidCoreMissingTools
          dotProduct = -1.0;
 
       return EuclidCoreTools.acos(dotProduct);
+   }
+
+   /**
+    * Computes the coordinates of the intersection between a plane and an infinitely long line.
+    * <a href="https://en.wikipedia.org/wiki/Line%E2%80%93plane_intersection"> Useful link </a>.
+    * <p>
+    * Edge cases:
+    * <ul>
+    * <li>If the line is parallel to the plane, this methods fails and returns {@code false}.
+    * </ul>
+    * </p>
+    *
+    * @param intersectionToPack point in which the coordinates of the intersection are stored.
+    * @return {@code true} if the method succeeds, {@code false} otherwise.
+    */
+   public static boolean intersectionBetweenLine3DAndPlane3D(double pointOnPlaneX,
+                                                             double pointOnPlaneY,
+                                                             double pointOnPlaneZ,
+                                                             double planeNormalX,
+                                                             double planeNormalY,
+                                                             double planeNormalZ,
+                                                             double pointOnLineX,
+                                                             double pointOnLineY,
+                                                             double pointOnLineZ,
+                                                             double lineDirectionX,
+                                                             double lineDirectionY,
+                                                             double lineDirectionZ,
+                                                             Point3DBasics intersectionToPack)
+   {
+      // Switching to the notation used in https://en.wikipedia.org/wiki/Line%E2%80%93plane_intersection
+      // Note: the algorithm is independent from the magnitudes of planeNormal and lineDirection
+
+      // Let's compute the value of the coefficient d = ( (p0 - l0).n ) / ( l.n )
+      double numerator, denominator;
+      numerator = (pointOnPlaneX - pointOnLineX) * planeNormalX;
+      numerator += (pointOnPlaneY - pointOnLineY) * planeNormalY;
+      numerator += (pointOnPlaneZ - pointOnLineZ) * planeNormalZ;
+      denominator = planeNormalX * lineDirectionX + planeNormalY * lineDirectionY + planeNormalZ * lineDirectionZ;
+
+      // Check if the line is parallel to the plane
+      if (Math.abs(denominator) < ONE_TRILLIONTH)
+      {
+         return false;
+      }
+      else
+      {
+         double d = numerator / denominator;
+
+         intersectionToPack.setX(d * lineDirectionX + pointOnLineX);
+         intersectionToPack.setY(d * lineDirectionY + pointOnLineY);
+         intersectionToPack.setZ(d * lineDirectionZ + pointOnLineZ);
+         return true;
+      }
+   }
+
+   public static boolean intersectionBetweenRay2DAndLine2D(Point2DReadOnly rayOrigin,
+                                                           Vector2DReadOnly rayDirection,
+                                                           Point2DReadOnly lineOrigin,
+                                                           Vector2DReadOnly lineDirection,
+                                                           Point2DBasics intersectionToPack)
+   {
+      return intersectionBetweenRay2DAndLine2D(rayOrigin.getX(),
+                                               rayOrigin.getY(),
+                                               rayDirection.getX(),
+                                               rayDirection.getY(),
+                                               lineOrigin.getX(),
+                                               lineOrigin.getY(),
+                                               lineDirection.getX(),
+                                               lineDirection.getY(),
+                                               intersectionToPack);
+   }
+
+   public static boolean intersectionBetweenRay2DAndLine2D(Point2DReadOnly rayOrigin,
+                                                           Vector2DReadOnly rayDirection,
+                                                           Point2DReadOnly linePoint1,
+                                                           Point2DReadOnly linePoint2,
+                                                           Point2DBasics intersectionToPack)
+   {
+      return intersectionBetweenRay2DAndLine2D(rayOrigin.getX(),
+                                               rayOrigin.getY(),
+                                               rayDirection.getX(),
+                                               rayDirection.getY(),
+                                               linePoint1.getX(),
+                                               linePoint1.getY(),
+                                               linePoint2.getX() - linePoint1.getX(),
+                                               linePoint2.getY() - linePoint1.getY(),
+                                               intersectionToPack);
+   }
+
+   /**
+    * Just a more thorough version
+    */
+   public static boolean intersectionBetweenRay2DAndLine2D(double rayOriginX,
+                                                                  double rayOriginY,
+                                                                  double rayDirectionX,
+                                                                  double rayDirectionY,
+                                                                  double lineOriginX,
+                                                                  double lineOriginY,
+                                                                  double lineDirectionX,
+                                                                  double lineDirectionY,
+                                                                  Point2DBasics intersectionToPack)
+   {
+      double start1x = rayOriginX;
+      double start1y = rayOriginY;
+      double end1x = rayOriginX + rayDirectionX;
+      double end1y = rayOriginY + rayDirectionY;
+      double start2x = lineOriginX;
+      double start2y = lineOriginY;
+      double end2x = lineOriginX + lineDirectionX;
+      double end2y = lineOriginY + lineDirectionY;
+      return intersectionBetweenTwoLine2DsImpl(start1x, start1y, false, end1x, end1y, true, start2x, start2y, true, end2x, end2y, true, intersectionToPack);
+   }
+
+   /**
+    * This is only included here because it's a private method in the euclid class
+    */
+   private static boolean intersectionBetweenTwoLine2DsImpl(double start1x,
+                                                            double start1y,
+                                                            boolean canIntersectionOccurBeforeStart1,
+                                                            double end1x,
+                                                            double end1y,
+                                                            boolean canIntersectionOccurBeforeEnd1,
+                                                            double start2x,
+                                                            double start2y,
+                                                            boolean canIntersectionOccurBeforeStart2,
+                                                            double end2x,
+                                                            double end2y,
+                                                            boolean canIntersectionOccurBeforeEnd2,
+                                                            Point2DBasics intersectionToPack)
+   {
+      double epsilon = EuclidGeometryTools.ONE_TEN_MILLIONTH;
+
+      double direction1x = end1x - start1x;
+      double direction1y = end1y - start1y;
+      double direction2x = end2x - start2x;
+      double direction2y = end2y - start2y;
+
+      double determinant = -direction1x * direction2y + direction1y * direction2x;
+
+      double zeroish = 0.0 - epsilon;
+
+      if (Math.abs(determinant) < epsilon)
+      { // The lines are parallel
+         // Check if they are collinear
+         double dx = start2x - start1x;
+         double dy = start2y - start1y;
+         double cross = dx * direction1y - dy * direction1x;
+
+         if (Math.abs(cross) < epsilon)
+         {
+            if (canIntersectionOccurBeforeStart1 && canIntersectionOccurBeforeEnd1)
+            { // (start1, end1) represents a line
+               if (canIntersectionOccurBeforeStart2 && canIntersectionOccurBeforeEnd2)
+               { // (start2, end2) represents a line
+                  if (intersectionToPack != null)
+                     intersectionToPack.set(start1x, start1y);
+                  return true;
+               }
+
+               if (intersectionToPack != null)
+                  intersectionToPack.set(start2x, start2y);
+               return true;
+            }
+
+            if (canIntersectionOccurBeforeStart2 && canIntersectionOccurBeforeEnd2)
+            { // (start2, end2) represents a line
+               if (intersectionToPack != null)
+                  intersectionToPack.set(start1x, start1y);
+               return true;
+            }
+
+            // Let's find the first endpoint that is inside the other line segment and return it.
+            double direction1LengthSquare = EuclidCoreTools.normSquared(direction1x, direction1y);
+            double dot;
+
+            // Check if start2 is inside (start1, end1)
+            dx = start2x - start1x;
+            dy = start2y - start1y;
+            dot = dx * direction1x + dy * direction1y;
+
+            if ((canIntersectionOccurBeforeStart1 || zeroish < dot) && (canIntersectionOccurBeforeEnd1 || dot < direction1LengthSquare + epsilon))
+            {
+               if (intersectionToPack != null)
+                  intersectionToPack.set(start2x, start2y);
+               return true;
+            }
+
+            // Check if end2 is inside (start1, end1)
+            dx = end2x - start1x;
+            dy = end2y - start1y;
+            dot = dx * direction1x + dy * direction1y;
+
+            if ((canIntersectionOccurBeforeStart1 || zeroish < dot) && (canIntersectionOccurBeforeEnd1 || dot < direction1LengthSquare + epsilon))
+            {
+               if (intersectionToPack != null)
+                  intersectionToPack.set(end2x, end2y);
+               return true;
+            }
+
+            double direction2LengthSquare = EuclidCoreTools.normSquared(direction2x, direction2y);
+
+            // Check if start1 is inside (start2, end2)
+            dx = start1x - start2x;
+            dy = start1y - start2y;
+            dot = dx * direction2x + dy * direction2y;
+
+            if ((canIntersectionOccurBeforeStart2 || zeroish < dot) && (canIntersectionOccurBeforeEnd2 || dot < direction2LengthSquare + epsilon))
+            {
+               if (intersectionToPack != null)
+                  intersectionToPack.set(start1x, start1y);
+               return true;
+            }
+
+            // Check if end1 is inside (start2, end2)
+            dx = end1x - start2x;
+            dy = end1y - start2y;
+            dot = dx * direction2x + dy * direction2y;
+
+            if ((canIntersectionOccurBeforeStart2 || zeroish < dot) && (canIntersectionOccurBeforeEnd2 || dot < direction2LengthSquare + epsilon))
+            {
+               if (intersectionToPack != null)
+                  intersectionToPack.set(end1x, end1y);
+               return true;
+            }
+
+            // (start1, end1) and (start2, end2) represent ray and/or line segment and they are collinear but do not overlap.
+            if (intersectionToPack != null)
+               intersectionToPack.setToNaN();
+            return false;
+         }
+         // The lines are parallel but are not collinear, they do not intersect.
+         else
+         {
+            if (intersectionToPack != null)
+               intersectionToPack.setToNaN();
+            return false;
+         }
+      }
+
+      double dx = start2x - start1x;
+      double dy = start2y - start1y;
+
+      double oneOverDeterminant = 1.0 / determinant;
+      double AInverse00 = -direction2y;
+      double AInverse01 = direction2x;
+      double AInverse10 = -direction1y;
+      double AInverse11 = direction1x;
+
+      double alpha = oneOverDeterminant * (AInverse00 * dx + AInverse01 * dy);
+      double beta = oneOverDeterminant * (AInverse10 * dx + AInverse11 * dy);
+
+      double oneish = 1.0 + epsilon;
+
+      boolean areIntersecting = (canIntersectionOccurBeforeStart1 || zeroish < alpha) && (canIntersectionOccurBeforeEnd1 || alpha < oneish);
+      if (areIntersecting)
+         areIntersecting = (canIntersectionOccurBeforeStart2 || zeroish < beta) && (canIntersectionOccurBeforeEnd2 || beta < oneish);
+
+      if (intersectionToPack != null)
+      {
+         if (areIntersecting)
+         {
+            intersectionToPack.set(start1x + alpha * direction1x, start1y + alpha * direction1y);
+         }
+         else
+         {
+            intersectionToPack.setToNaN();
+         }
+      }
+
+      return areIntersecting;
    }
 }

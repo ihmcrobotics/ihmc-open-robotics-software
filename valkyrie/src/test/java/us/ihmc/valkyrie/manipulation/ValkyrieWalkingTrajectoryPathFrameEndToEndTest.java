@@ -147,16 +147,16 @@ public class ValkyrieWalkingTrajectoryPathFrameEndToEndTest
       pendulumAttachmentController.rootJoint.getJointTwist().setToZero();
 
       assertWalkingFrameMatchMidFeetZUpFrame();
-      assertTrue(simulationTestHelper.simulateAndWait(2.0));
+      assertTrue(simulationTestHelper.simulateNow(2.0));
       assertCorrectControlMode();
-      assertTrue(simulationTestHelper.simulateAndWait(EndToEndTestTools.computeWalkingDuration(stepsInPlace, robotModel.getWalkingControllerParameters())));
+      assertTrue(simulationTestHelper.simulateNow(EndToEndTestTools.computeWalkingDuration(stepsInPlace, robotModel.getWalkingControllerParameters())));
       assertTrue(pendulumAttachmentController.angleStandardDeviation.getValue() < 0.03);
       assertWalkingFrameMatchMidFeetZUpFrame();
    }
 
    private void assertWalkingFrameMatchMidFeetZUpFrame()
    {
-      RigidBodyTransform midFeetZUpFrameTransform = simulationTestHelper.getReferenceFrames().getMidFeetZUpFrame().getTransformToRoot();
+      RigidBodyTransform midFeetZUpFrameTransform = simulationTestHelper.getControllerReferenceFrames().getMidFeetZUpFrame().getTransformToRoot();
       RigidBodyTransform walkingTrajectoryPathFrameTransform = simulationTestHelper.getHighLevelHumanoidControllerFactory()
                                                                                    .getHighLevelHumanoidControllerToolbox().getWalkingTrajectoryPath()
                                                                                    .getWalkingTrajectoryPathFrame().getTransformToRoot();
@@ -191,7 +191,7 @@ public class ValkyrieWalkingTrajectoryPathFrameEndToEndTest
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
-      FramePose3D startPose = new FramePose3D(simulationTestHelper.getReferenceFrames().getMidFootZUpGroundFrame());
+      FramePose3D startPose = new FramePose3D(simulationTestHelper.getControllerReferenceFrames().getMidFootZUpGroundFrame());
       startPose.changeFrame(worldFrame);
       FootstepDataListMessage steps = EndToEndTestTools.generateForwardSteps(RobotSide.LEFT,
                                                                              6,
@@ -207,9 +207,9 @@ public class ValkyrieWalkingTrajectoryPathFrameEndToEndTest
       pendulumAttachmentController.rootJoint.getJointTwist().setToZero();
 
       assertWalkingFrameMatchMidFeetZUpFrame();
-      assertTrue(simulationTestHelper.simulateAndWait(2.0));
+      assertTrue(simulationTestHelper.simulateNow(2.0));
       assertCorrectControlMode();
-      assertTrue(simulationTestHelper.simulateAndWait(EndToEndTestTools.computeWalkingDuration(steps, robotModel.getWalkingControllerParameters())));
+      assertTrue(simulationTestHelper.simulateNow(EndToEndTestTools.computeWalkingDuration(steps, robotModel.getWalkingControllerParameters())));
       assertTrue(pendulumAttachmentController.angleStandardDeviation.getValue() < 0.03);
       assertWalkingFrameMatchMidFeetZUpFrame();
    }
@@ -232,7 +232,7 @@ public class ValkyrieWalkingTrajectoryPathFrameEndToEndTest
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
-      FramePose3D startPose = new FramePose3D(simulationTestHelper.getReferenceFrames().getMidFootZUpGroundFrame());
+      FramePose3D startPose = new FramePose3D(simulationTestHelper.getControllerReferenceFrames().getMidFootZUpGroundFrame());
       startPose.changeFrame(worldFrame);
       FootstepDataListMessage steps = EndToEndTestTools.generateCircleSteps(RobotSide.LEFT,
                                                                             10,
@@ -250,9 +250,9 @@ public class ValkyrieWalkingTrajectoryPathFrameEndToEndTest
       pendulumAttachmentController.rootJoint.getJointTwist().setToZero();
 
       assertWalkingFrameMatchMidFeetZUpFrame();
-      assertTrue(simulationTestHelper.simulateAndWait(2.0));
+      assertTrue(simulationTestHelper.simulateNow(2.0));
       assertCorrectControlMode();
-      assertTrue(simulationTestHelper.simulateAndWait(EndToEndTestTools.computeWalkingDuration(steps, robotModel.getWalkingControllerParameters())));
+      assertTrue(simulationTestHelper.simulateNow(EndToEndTestTools.computeWalkingDuration(steps, robotModel.getWalkingControllerParameters())));
       assertTrue(pendulumAttachmentController.angleStandardDeviation.getValue() < 0.04);
       assertWalkingFrameMatchMidFeetZUpFrame();
    }
@@ -284,7 +284,7 @@ public class ValkyrieWalkingTrajectoryPathFrameEndToEndTest
 
    private void prepareHand(String handName, FreeFloatingPendulumRobotDefinition pendulumRobotDefinition)
    {
-      assertTrue(simulationTestHelper.simulateAndWait(0.5));
+      assertTrue(simulationTestHelper.simulateNow(0.5));
 
       simulationTestHelper.findVariable(handName + "TaskspaceUseBaseFrameForControl").setValueFromDouble(1.0);
 
@@ -305,7 +305,7 @@ public class ValkyrieWalkingTrajectoryPathFrameEndToEndTest
          simulationTestHelper.publishToController(handWrenchTrajectoryMessage);
       }
 
-      CommonHumanoidReferenceFrames referenceFrames = simulationTestHelper.getReferenceFrames();
+      CommonHumanoidReferenceFrames referenceFrames = simulationTestHelper.getControllerReferenceFrames();
       FullHumanoidRobotModel controllerFullRobotModel = simulationTestHelper.getControllerFullRobotModel();
       MovingReferenceFrame chestFrame = controllerFullRobotModel.getChest().getBodyFixedFrame();
       FramePose3D handPose = new FramePose3D(chestFrame, getHandDesiredPoseInChestFrame());
@@ -316,7 +316,7 @@ public class ValkyrieWalkingTrajectoryPathFrameEndToEndTest
                                                                                                      WalkingTrajectoryPath.WALKING_TRAJECTORY_FRAME_ID);
       simulationTestHelper.publishToController(handTrajectoryMessage);
 
-      assertTrue(simulationTestHelper.simulateAndWait(2.5));
+      assertTrue(simulationTestHelper.simulateNow(2.5));
    }
 
    @SuppressWarnings("unchecked")

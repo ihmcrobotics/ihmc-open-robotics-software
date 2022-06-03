@@ -27,6 +27,8 @@ public class ImPlotPlot
    private int yFlags;
    private final ImVec2 outerBoundsDimensionsPixels;
    private final ConcurrentLinkedQueue<ImPlotPlotLine> removalQueue = new ConcurrentLinkedQueue<>();
+   private Runnable customBeforePlotLogic = () -> {};
+   private Runnable customDuringPlotLogic = () -> {};
 
    public ImPlotPlot()
    {
@@ -74,8 +76,11 @@ public class ImPlotPlot
 
       outerBoundsDimensionsPixels.x = plotWidth;
       outerBoundsDimensionsPixels.y = plotHeight;
+      customBeforePlotLogic.run();
       if (ImPlot.beginPlot(labels.get("Plot"), xLabel, yLabel, outerBoundsDimensionsPixels, flags, xFlags, yFlags))
       {
+         customDuringPlotLogic.run();
+
          boolean outside = true;
          ImPlot.setLegendLocation(ImPlotLocation.SouthWest, ImPlotOrientation.Horizontal, outside);
 
@@ -141,5 +146,30 @@ public class ImPlotPlot
    public void queueRemovePlotLine(ImPlotPlotLine plotLineToRemove)
    {
       removalQueue.add(plotLineToRemove);
+   }
+
+   public void setFlags(int flags)
+   {
+      this.flags = flags;
+   }
+
+   public void setXFlags(int xFlags)
+   {
+      this.xFlags = xFlags;
+   }
+
+   public void setYFlags(int yFlags)
+   {
+      this.yFlags = yFlags;
+   }
+
+   public void setCustomDuringPlotLogic(Runnable customDuringPlotLogic)
+   {
+      this.customDuringPlotLogic = customDuringPlotLogic;
+   }
+
+   public void setCustomBeforePlotLogic(Runnable customBeforePlotLogic)
+   {
+      this.customBeforePlotLogic = customBeforePlotLogic;
    }
 }

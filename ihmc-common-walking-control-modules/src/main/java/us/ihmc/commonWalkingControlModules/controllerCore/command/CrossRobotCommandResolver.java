@@ -231,6 +231,15 @@ public class CrossRobotCommandResolver
       out.setControllerRan(in.getControllerRan());
    }
 
+   
+   /**
+    * Resolves only the part of the context data that is updated by the perception thread.
+    */
+   public void resolveHumanoidRobotContextDataPerception(HumanoidRobotContextData in, HumanoidRobotContextData out)
+   {
+      out.setPerceptionRan(in.getPerceptionRan());
+   }
+
    /**
     * Resolves only the part of the context data that is updated by the estimator thread.
     */
@@ -856,6 +865,7 @@ public class CrossRobotCommandResolver
       out.setUseMomentumRecoveryMode(in.getUseMomentumRecoveryMode());
       resolveFrameTuple2D(in.getDesiredCapturePoint(), out.getDesiredCapturePoint());
       resolveFrameTuple2D(in.getDesiredCapturePointVelocity(), out.getDesiredCapturePointVelocity());
+      resolveFrameTuple2D(in.getDesiredCapturePointAtEndOfState(), out.getDesiredCapturePointAtEndOfState());
       resolveFrameTuple2D(in.getPerfectCMP(), out.getPerfectCMP());
       resolveFrameTuple2D(in.getPerfectCoP(), out.getPerfectCoP());
       out.setControlHeightWithMomentum(in.getControlHeightWithMomentum());

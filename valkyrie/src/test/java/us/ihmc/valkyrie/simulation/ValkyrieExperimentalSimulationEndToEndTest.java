@@ -8,7 +8,7 @@ import org.junit.jupiter.api.TestInfo;
 import us.ihmc.avatar.HumanoidExperimentalSimulationEndToEndTest;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.initialSetup.HumanoidRobotInitialSetup;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -49,18 +49,18 @@ public class ValkyrieExperimentalSimulationEndToEndTest extends HumanoidExperime
       ValkyrieRobotModel robotModel = getRobotModel();
       robotModel.setRobotInitialSetup(new FlyingValkyrieInitialSetup(robotModel.getJointMap()));
       FlatGroundEnvironment testEnvironment = new FlatGroundEnvironment();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, testEnvironment);
-      drcSimulationTestHelper.getSCSInitialSetup().setUseExperimentalPhysicsEngine(true);
-      drcSimulationTestHelper.createSimulation(testInfo.getTestClass().getClass().getSimpleName() + "." + testInfo.getTestMethod().get().getName() + "()");
+      SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
+                                                                                                                                             testEnvironment,
+                                                                                                                                             simulationTestingParameters);
+      simulationTestHelperFactory.setUseImpulseBasedPhysicsEngine(true);
+      simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+      simulationTestHelper.start();
       // Switch to zero-torque controller.
-      drcSimulationTestHelper.getAvatarSimulation().getHighLevelHumanoidControllerFactory().getRequestedControlStateEnum()
-                             .set(HighLevelControllerName.DO_NOTHING_BEHAVIOR);
+      simulationTestHelper.getHighLevelHumanoidControllerFactory().getRequestedControlStateEnum().set(HighLevelControllerName.DO_NOTHING_BEHAVIOR);
 
-      drcSimulationTestHelper.getSimulationConstructionSet().setCameraTracking(true, true, true, true);
-      drcSimulationTestHelper.getSimulationConstructionSet().setCameraDolly(true, true, true, true);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0));
+      assertTrue(simulationTestHelper.simulateNow(3.0));
 
-      RigidBodyBasics elevator = drcSimulationTestHelper.getControllerFullRobotModel().getElevator();
+      RigidBodyBasics elevator = simulationTestHelper.getControllerFullRobotModel().getElevator();
       assertRigidBodiesAreAboveFlatGround(elevator,
                                           p -> testEnvironment.getTerrainObject3D().getHeightMapIfAvailable().heightAt(p.getX(), p.getY(), p.getZ()),
                                           0.0);
@@ -97,7 +97,7 @@ public class ValkyrieExperimentalSimulationEndToEndTest extends HumanoidExperime
          rootJointOrientation.setYawPitchRoll(0.0, 1.0, 0.0);
          rootJointPosition.set(-20.0, 0.0, 1.0);
          rootJointAngularVelocityInBody.set(0.0, 1.0, 0.0);
-         rootJointLinearVelocityInWorld.set(8.0, 0.0, 20.0);
+         rootJointLinearVelocityInWorld.set(20.0, 0.0, 8.0);
       }
    }
 }

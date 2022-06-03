@@ -14,7 +14,8 @@ import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.trajectories.PositionOptimizedTrajectoryGenerator;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.MessageTools;
@@ -43,31 +44,31 @@ import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInterface
 {
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-   private DRCSimulationTestHelper drcSimulationTestHelper;
+   private SCS2AvatarTestingSimulation simulationTestHelper;
 
    @Test
-   public void testCrazySwingIsRejected() throws SimulationExceededMaximumTimeException
+   public void testCrazySwingIsRejected()
    {
       DRCRobotModel robotModel = getRobotModel();
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, new FlatGroundEnvironment());
-      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
-      drcSimulationTestHelper.setupCameraForUnitTest(new Point3D(0.0, -0.2, 0.3), new Point3D(0.0, 3.8, 0.15));
-      ThreadTools.sleep(1000);
-      Assert.assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25));
+      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(robotModel,
+                                                                                            new FlatGroundEnvironment(),
+                                                                                            simulationTestingParameters);
+      simulationTestHelper.start();
+      simulationTestHelper.setCamera(new Point3D(0.0, -0.2, 0.3), new Point3D(0.0, 3.8, 0.15));
+      Assert.assertTrue(simulationTestHelper.simulateNow(0.25));
 
-      drcSimulationTestHelper.getYoVariable("MaxStepDistance").setValueFromDouble(1.0);
-      drcSimulationTestHelper.getYoVariable("MaxSwingDistance").setValueFromDouble(0.5);
+      simulationTestHelper.findVariable("MaxStepDistance").setValueFromDouble(1.0);
+      simulationTestHelper.findVariable("MaxSwingDistance").setValueFromDouble(0.5);
 
       RobotSide robotSide = RobotSide.LEFT;
-      MovingReferenceFrame soleFrame = drcSimulationTestHelper.getReferenceFrames().getSoleFrame(robotSide);
+      MovingReferenceFrame soleFrame = simulationTestHelper.getControllerReferenceFrames().getSoleFrame(robotSide);
       FramePose3D initialPose = new FramePose3D(soleFrame);
       initialPose.changeFrame(ReferenceFrame.getWorldFrame());
 
@@ -81,9 +82,9 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
          footstepData.getLocation().set(footstepPose.getPosition());
          footstepData.getOrientation().set(footstepPose.getOrientation());
 
-         drcSimulationTestHelper.publishToController(footsteps);
-         Assert.assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25));
-         Assert.assertEquals(0, drcSimulationTestHelper.getYoVariable("currentNumberOfFootsteps").getValueAsLongBits());
+         simulationTestHelper.publishToController(footsteps);
+         Assert.assertTrue(simulationTestHelper.simulateNow(0.25));
+         Assert.assertEquals(0, simulationTestHelper.findVariable("currentNumberOfFootsteps").getValueAsLongBits());
       }
 
       // Test weird swing is rejected.
@@ -101,27 +102,28 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
 
          footstepData.getCustomPositionWaypoints().get(0).addY(1.0);
 
-         drcSimulationTestHelper.publishToController(footsteps);
-         Assert.assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25));
-         Assert.assertEquals(0, drcSimulationTestHelper.getYoVariable("currentNumberOfFootsteps").getValueAsLongBits());
+         simulationTestHelper.publishToController(footsteps);
+         Assert.assertTrue(simulationTestHelper.simulateNow(0.25));
+         Assert.assertEquals(0, simulationTestHelper.findVariable("currentNumberOfFootsteps").getValueAsLongBits());
       }
    }
 
    @Test
-   public void testSwingWithWaypointsAndNotTrustingHeight() throws SimulationExceededMaximumTimeException
+   public void testSwingWithWaypointsAndNotTrustingHeight()
    {
       DRCRobotModel robotModel = getRobotModel();
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, new FlatGroundEnvironment());
-      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
-      drcSimulationTestHelper.setupCameraForUnitTest(new Point3D(0.0, -0.2, 0.3), new Point3D(0.0, 3.8, 0.15));
-      ThreadTools.sleep(1000);
-      Assert.assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25));
+      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(robotModel,
+                                                                                            new FlatGroundEnvironment(),
+                                                                                            simulationTestingParameters);
+      simulationTestHelper.start();
+      simulationTestHelper.setCamera(new Point3D(0.0, -0.2, 0.3), new Point3D(0.0, 3.8, 0.15));
+      Assert.assertTrue(simulationTestHelper.simulateNow(0.25));
 
-      drcSimulationTestHelper.getYoVariable("blindFootstepsHeightOffset").setValueFromDouble(0.0);
+      simulationTestHelper.findVariable("blindFootstepsHeightOffset").setValueFromDouble(0.0);
 
       RobotSide robotSide = RobotSide.LEFT;
-      MovingReferenceFrame soleFrame = drcSimulationTestHelper.getReferenceFrames().getSoleFrame(robotSide);
+      MovingReferenceFrame soleFrame = simulationTestHelper.getControllerReferenceFrames().getSoleFrame(robotSide);
       FramePose3D initialPose = new FramePose3D(soleFrame);
       initialPose.changeFrame(ReferenceFrame.getWorldFrame());
 
@@ -175,28 +177,27 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
 
       footsteps.setTrustHeightOfFootsteps(false);
 
-      drcSimulationTestHelper.publishToController(footsteps);
+      simulationTestHelper.publishToController(footsteps);
       double initialTransfer = robotModel.getWalkingControllerParameters().getDefaultInitialTransferTime();
-      Assert.assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(initialTransfer + swingDuration / 2.0));
+      Assert.assertTrue(simulationTestHelper.simulateNow(initialTransfer + swingDuration / 2.0));
 
-      double waypointHeight = drcSimulationTestHelper.getYoVariable("SwingWaypoint" + robotSide.getPascalCaseName() + waypoints + "Z").getValueAsDouble();
+      double waypointHeight = simulationTestHelper.findVariable("SwingWaypoint" + robotSide.getPascalCaseName() + waypoints + "Z").getValueAsDouble();
       Assert.assertEquals(0.0, waypointHeight, 0.05);
 
-      Assert.assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(swingDuration));
+      Assert.assertTrue(simulationTestHelper.simulateNow(swingDuration));
    }
 
    @Test
-   public void testRegularSwingWithWaypoints() throws SimulationExceededMaximumTimeException
+   public void testRegularSwingWithWaypoints()
    {
-      String className = getClass().getSimpleName();
       TestingEnvironment environment = new TestingEnvironment();
       DRCRobotModel robotModel = getRobotModel();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, environment);
-      drcSimulationTestHelper.createSimulation(className);
-      drcSimulationTestHelper.getSimulationConstructionSet().setCameraPosition(8.0, -8.0, 5.0);
-      drcSimulationTestHelper.getSimulationConstructionSet().setCameraFix(1.5, 0.0, 0.8);
+      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(robotModel, environment, simulationTestingParameters);
+      simulationTestHelper.start();
+      simulationTestHelper.setCameraPosition(8.0, -8.0, 5.0);
+      simulationTestHelper.setCameraFocusPosition(1.5, 0.0, 0.8);
       ThreadTools.sleep(1000);
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      simulationTestHelper.simulateNow(0.5);
 
       double swingTime = 2.0;
       double transferTime = 0.8;
@@ -300,9 +301,9 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
                new Point3D(footstepX - (stepLength * 2.0 * 0.15), footstepY - offsetY, swingHeight)}, footstep1.getCustomPositionWaypoints());
       }
 
-      drcSimulationTestHelper.publishToController(footsteps);
+      simulationTestHelper.publishToController(footsteps);
       double simulationTime = (swingTime + transferTime) * steps + 1.0;
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+      simulationTestHelper.simulateNow(simulationTime);
 
       Point3D rootJointPosition = new Point3D(2.81, 0.0, 0.82);
       Vector3D epsilon = new Vector3D(0.05, 0.05, 0.10);
@@ -310,23 +311,24 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
       Point3D max = new Point3D(rootJointPosition);
       min.sub(epsilon);
       max.add(epsilon);
-      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(new BoundingBox3D(min, max));
+      simulationTestHelper.assertRobotsRootJointIsInBoundingBox(new BoundingBox3D(min, max));
 
-      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    @Test
-   public void testSwingWithWaypointsRotated() throws SimulationExceededMaximumTimeException
+   public void testSwingWithWaypointsRotated()
    {
-      String className = getClass().getSimpleName();
       FlatGroundEnvironment environment = new FlatGroundEnvironment();
       DRCStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT_BUT_ALMOST_PI;
       DRCRobotModel robotModel = getRobotModel();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, environment);
-      drcSimulationTestHelper.setStartingLocation(startingLocation);
-      drcSimulationTestHelper.createSimulation(className);
-      ThreadTools.sleep(1000);
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
+                                                                                                                                             environment,
+                                                                                                                                             simulationTestingParameters);
+      simulationTestHelperFactory.setStartingLocationOffset(startingLocation.getStartingLocationOffset());
+      simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+      simulationTestHelper.start();
+      simulationTestHelper.simulateNow(0.5);
 
       double swingTime = 2.0;
       double transferTime = 0.8;
@@ -358,9 +360,9 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
       footstepData.setTrajectoryType(TrajectoryType.CUSTOM.toByte());
       MessageTools.copyData(new Point3D[] {waypoint1, waypoint2}, footstepData.getCustomPositionWaypoints());
 
-      drcSimulationTestHelper.publishToController(footsteps);
+      simulationTestHelper.publishToController(footsteps);
       double simulationTime = swingTime + transferTime + 1.0;
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+      simulationTestHelper.simulateNow(simulationTime);
    }
 
    @BeforeEach
@@ -372,16 +374,11 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
    @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
-      {
-         ThreadTools.sleepForever();
-      }
-
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcSimulationTestHelper != null)
+      if (simulationTestHelper != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
+         simulationTestHelper.finishTest();
+         simulationTestHelper = null;
       }
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());

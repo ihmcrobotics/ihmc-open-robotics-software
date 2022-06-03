@@ -1,6 +1,5 @@
 package us.ihmc.atlas.ObstacleCourseTests;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -10,7 +9,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseDoNothingTest;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasObstacleCourseDoNothingTest extends DRCObstacleCourseDoNothingTest
 {
@@ -30,24 +28,9 @@ public class AtlasObstacleCourseDoNothingTest extends DRCObstacleCourseDoNothing
 
    @Tag("humanoid-flat-ground")
    @Test
-   public void testDoNothing() throws SimulationExceededMaximumTimeException
+   public void testDoNothing()
    {
       robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
-      super.testDoNothing1();
-   }
-
-   @Disabled // FIXME: Shape collision is not working
-   @Test
-   public void testDoNothingShapeCollision() throws SimulationExceededMaximumTimeException
-   {
-      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false, false, true)
-      {
-         @Override
-         public double getSimulateDT()
-         {
-            return 0.0001;
-         }
-      };
       super.testDoNothing1();
    }
 }

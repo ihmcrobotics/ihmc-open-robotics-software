@@ -16,11 +16,13 @@ public class ImGuiMessagerManagerWidget
    private String messagerConnectedHost = "";
    private final MessagerHelper messagerHelper;
    private final Supplier<String> hostSupplier;
+   private final int port;
 
-   public ImGuiMessagerManagerWidget(MessagerHelper messagerHelper, Supplier<String> hostSupplier)
+   public ImGuiMessagerManagerWidget(MessagerHelper messagerHelper, Supplier<String> hostSupplier, int port)
    {
       this.messagerHelper = messagerHelper;
       this.hostSupplier = hostSupplier;
+      this.port = port;
    }
 
    public void renderImGuiWidgets()
@@ -98,7 +100,7 @@ public class ImGuiMessagerManagerWidget
 
    private void connectKryo()
    {
-      messagerHelper.connectViaKryo(hostSupplier.get(), NetworkPorts.BEHAVIOR_MODULE_MESSAGER_PORT.getPort());
+      messagerHelper.connectViaKryo(hostSupplier.get(), port);
       messagerConnectedHost = hostSupplier.get();
       messagerConnecting = true;
    }

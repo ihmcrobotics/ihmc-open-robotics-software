@@ -3,6 +3,7 @@ package us.ihmc.robotEnvironmentAwareness.communication.converters;
 import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
+import us.ihmc.communication.packets.StereoPointCloudCompression;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;

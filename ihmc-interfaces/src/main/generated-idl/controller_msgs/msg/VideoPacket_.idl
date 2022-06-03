@@ -42,7 +42,9 @@ module controller_msgs
         @defaultValue(value=255)
         octet video_source;
         long long timestamp;
-        sequence<octet, 262144> data;
+        sequence<octet, 2000000> data;
+        unsigned short image_width;
+        unsigned short image_height;
         geometry_msgs::msg::dds::Point position;
         geometry_msgs::msg::dds::Quaternion orientation;
         controller_msgs::msg::dds::IntrinsicParametersMessage intrinsic_parameters;

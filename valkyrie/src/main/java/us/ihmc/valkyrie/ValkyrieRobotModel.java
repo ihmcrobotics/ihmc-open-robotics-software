@@ -266,6 +266,11 @@ public class ValkyrieRobotModel implements DRCRobotModel
       this.modelSizeScale = modelSizeScale;
    }
 
+   public void disableOneDoFJointDamping()
+   {
+      setRobotDefinitionMutator(getRobotDefinitionMutator().andThen(def -> def.forEachOneDoFJointDefinition(joint -> joint.setDamping(0.0))));
+   }
+
    public void setRobotDefinitionMutator(Consumer<RobotDefinition> robotDefinitionMutator)
    {
       if (robotDefinition != null)
@@ -357,8 +362,12 @@ public class ValkyrieRobotModel implements DRCRobotModel
       return valkyrieInitialSetup;
    }
 
-   @Override
    public ValkyrieHandModel getHandModel()
+   {
+      return getHandModel(null);
+   }
+
+   public ValkyrieHandModel getHandModel(RobotSide side)
    {
       return new ValkyrieHandModel();
    }

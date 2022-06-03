@@ -5,7 +5,7 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.behaviors.tools.behaviorTree.*;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.behavior.tree.ImGuiImNodesBehaviorTreeUI;
 import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIInterface;
@@ -137,7 +137,7 @@ public class GDXBehaviorTreeDevelopmentUI
          public void create()
          {
             baseUI.create();
-            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
+            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelBuilder.createCoordinateFrame(0.3)));
             baseUI.getImGuiPanelManager().addPanel("Tree Control", this::renderPanel);
             baseUI.getImGuiPanelManager().addPanel("Behavior Tree Panel", () -> {
                treeGui.syncTree(tree);

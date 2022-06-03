@@ -51,6 +51,7 @@ public class KSTTools
    private final CommandInputManager commandInputManager;
    private final CommandInputManager ikCommandInputManager;
    private final StatusMessageOutputManager statusOutputManager;
+   private final KinematicsStreamingToolboxParameters parameters;
    private final FullHumanoidRobotModel desiredFullRobotModel;
    private final FullHumanoidRobotModelFactory fullRobotModelFactory;
    private final DoubleProvider time;
@@ -97,6 +98,7 @@ public class KSTTools
 
    public KSTTools(CommandInputManager commandInputManager,
                    StatusMessageOutputManager statusOutputManager,
+                   KinematicsStreamingToolboxParameters parameters,
                    FullHumanoidRobotModel desiredFullRobotModel,
                    FullHumanoidRobotModelFactory fullRobotModelFactory,
                    double walkingControllerPeriod,
@@ -107,6 +109,7 @@ public class KSTTools
    {
       this.commandInputManager = commandInputManager;
       this.statusOutputManager = statusOutputManager;
+      this.parameters = parameters;
       this.desiredFullRobotModel = desiredFullRobotModel;
       this.fullRobotModelFactory = fullRobotModelFactory;
       this.walkingControllerPeriod = walkingControllerPeriod;
@@ -133,10 +136,12 @@ public class KSTTools
                                                              yoGraphicsListRegistry,
                                                              registry);
 
-      commandInputManager.registerConversionHelper(new KinematicsStreamingToolboxCommandConverter(ikController.getCurrentFullRobotModel(),
-                                                                                                  ikController.getCurrentReferenceFrames(),
-                                                                                                  desiredFullRobotModel,
-                                                                                                  ikController.getDesiredReferenceFrames()));
+      KinematicsStreamingToolboxCommandConverter commandConversionHelper = new KinematicsStreamingToolboxCommandConverter(ikController.getCurrentFullRobotModel(),
+                                                                                                                          ikController.getCurrentReferenceFrames(),
+                                                                                                                          desiredFullRobotModel,
+                                                                                                                          ikController.getDesiredReferenceFrames());
+      commandInputManager.registerConversionHelper(commandConversionHelper);
+      commandConversionHelper.process(configurationCommand, parameters.getDefaultConfiguration()); // Initialize the configurationCommand from the parameters' message
 
       ikCommandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel, ikController.getDesiredReferenceFrames()));
 
@@ -215,6 +220,11 @@ public class KSTTools
          rootJointPose.set(robotConfigurationDataInternal.getRootTranslation(), robotConfigurationDataInternal.getRootOrientation());
          currentFullRobotModel.updateFrames();
       }
+   }
+
+   public KinematicsStreamingToolboxParameters getParameters()
+   {
+      return parameters;
    }
 
    public double getTime()

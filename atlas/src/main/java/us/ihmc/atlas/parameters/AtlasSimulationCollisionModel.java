@@ -176,7 +176,7 @@ public class AtlasSimulationCollisionModel implements RobotCollisionModel
             collidables.add(new Collidable(forearm, collisionMask, collisionGroup, forearmShape));
          }
 
-         if (atlasRobotVersion.hasRobotiqHands())
+         if (atlasRobotVersion.hasRobotiqHands(robotSide))
          { // RobotiQ hand
             JointBasics lastWristJoint = RobotCollisionModel.findJoint(jointMap.getArmJointName(robotSide, ArmJointName.SECOND_WRIST_PITCH), multiBodySystem);
             MovingReferenceFrame wristFrame = lastWristJoint.getFrameAfterJoint();

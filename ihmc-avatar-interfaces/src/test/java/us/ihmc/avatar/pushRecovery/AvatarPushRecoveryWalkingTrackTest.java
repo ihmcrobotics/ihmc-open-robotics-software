@@ -1,98 +1,77 @@
 package us.ihmc.avatar.pushRecovery;
 
-import controller_msgs.msg.dds.FootstepStatusMessage;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+
+import controller_msgs.msg.dds.FootstepStatusMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.AvatarSimulation;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
-import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
-import us.ihmc.simulationToolkit.controllers.PushRobotController;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.SimulationDoneListener;
-import us.ihmc.simulationconstructionset.util.ControllerFailureException;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationToolkit.controllers.PushRobotControllerSCS2;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import static us.ihmc.robotics.Assert.assertTrue;
-import static us.ihmc.robotics.Assert.fail;
-
 @Tag("video")
 public abstract class AvatarPushRecoveryWalkingTrackTest implements MultiRobotTestInterface
 {
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-   private BlockingSimulationRunner blockingSimulationRunner;
-   private DRCSimulationTestHelper drcSimulationTestHelper;
+   private SCS2AvatarTestingSimulation simulationTestHelper;
 
    private static final double standingTimeDuration = 1.0;
    private static final double defaultWalkingTimeDuration = 30.0;
    private static final boolean useVelocityAndHeadingScript = true;
-   private static final boolean cheatWithGroundHeightAtForFootstep = false;
 
    private static final double pushDuration = 0.05;
 
-   private SimulationConstructionSet scs;
    private SideDependentList<AtomicInteger> footstepsCompletedPerSide;
    private SideDependentList<StateTransitionCondition> swingStartConditions = new SideDependentList<>();
    private SideDependentList<StateTransitionCondition> swingFinishConditions = new SideDependentList<>();
-   private final AtomicBoolean simulationCrashed = new AtomicBoolean(false);
 
    @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
-      simulationCrashed.set(false);
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 
    @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
-      {
-         ThreadTools.sleepForever();
-      }
-
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcSimulationTestHelper != null)
+      if (simulationTestHelper != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
+         simulationTestHelper.finishTest();
+         simulationTestHelper = null;
       }
-      if (blockingSimulationRunner != null)
-      {
-         blockingSimulationRunner.destroySimulation();
-         blockingSimulationRunner = null;
-      }
-      scs = null;
       footstepsCompletedPerSide = null;
       swingStartConditions = null;
       swingFinishConditions = null;
@@ -132,60 +111,61 @@ public abstract class AvatarPushRecoveryWalkingTrackTest implements MultiRobotTe
 
    public abstract double getInwardPushInTransferDeltaV();
 
-
    @Tag("humanoid-flat-ground")
    @Test
-   public void testFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
+   public void testFlatGroundWalking()
    {
       DRCRobotModel robotModel = getRobotModel();
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       //      simulationTestingParameters.setUsePefectSensors(getUsePerfectSensors());
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.setTestEnvironment(flatGround);
-      drcSimulationTestHelper.setAddFootstepMessageGenerator(true);
-      drcSimulationTestHelper.setUseHeadingAndVelocityScript(useVelocityAndHeadingScript);
-      drcSimulationTestHelper.setCheatWithGroundHeightAtFootstep(cheatWithGroundHeightAtForFootstep);
-      drcSimulationTestHelper.createSimulation(robotModel.getSimpleRobotName() + "FlatGroundWalking");
-
-      scs = drcSimulationTestHelper.getSimulationConstructionSet();
-      scs.addSimulateDoneListener(new DoneListener());
+      SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
+                                                                                                                                             flatGround,
+                                                                                                                                             simulationTestingParameters);
+      simulationTestHelperFactory.setDefaultHighLevelHumanoidControllerFactory(useVelocityAndHeadingScript, new HeadingAndVelocityEvaluationScriptParameters());
+      simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+      simulationTestHelper.start();
 
       setupStateMonitors();
 
-      ((YoBoolean) scs.findVariable("controllerAllowStepAdjustment")).set(true);
-      ((YoBoolean) scs.findVariable("controllerAllowCrossOverSteps")).set(true);
-      ((YoBoolean) scs.findVariable("stepsAreAdjustableCSG")).set(true);
-      ((YoBoolean) scs.findVariable("shiftUpcomingStepsWithTouchdownCSG")).set(true);
+      ((YoBoolean) simulationTestHelper.findVariable("controllerAllowStepAdjustment")).set(true);
+      ((YoBoolean) simulationTestHelper.findVariable("controllerAllowCrossOverSteps")).set(true);
+      ((YoBoolean) simulationTestHelper.findVariable("stepsAreAdjustableCSG")).set(true);
+      ((YoBoolean) simulationTestHelper.findVariable("shiftUpcomingStepsWithTouchdownCSG")).set(true);
 
-      PushRobotController pushRobotController = new PushRobotController(drcSimulationTestHelper.getRobot(),
-                                                                        drcSimulationTestHelper.getControllerFullRobotModel());
+      PushRobotControllerSCS2 pushRobotController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationSession().getTime(),
+                                                                                simulationTestHelper.getRobot(),
+                                                                                simulationTestHelper.getControllerFullRobotModel());
+      simulationTestHelper.addYoGraphicDefinition(pushRobotController.getForceVizDefinition());
 
-      setupCameraForUnitTest(scs);
-      simulateAndAssertGoodWalking(drcSimulationTestHelper, pushRobotController);
-
-      if (simulationTestingParameters.getCheckNothingChangedInSimulation())
-         drcSimulationTestHelper.checkNothingChanged();
+      setupCameraForUnitTest();
+      simulateAndAssertGoodWalking(simulationTestHelper, pushRobotController);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   private void simulateAndAssertGoodWalking(DRCSimulationTestHelper drcSimulationTestHelper, PushRobotController pushRobotController)
-         throws SimulationExceededMaximumTimeException, ControllerFailureException
+   private void simulateAndAssertGoodWalking(SCS2AvatarTestingSimulation simulationTestHelper, PushRobotControllerSCS2 pushRobotController)
    {
-      YoBoolean walk = (YoBoolean) scs.findVariable("walkCSG");
-      YoDouble desiredXVelocity = (YoDouble) scs.findVariable("scriptDesiredVelocityRateLimitedX");
-      YoDouble desiredYVelocity = (YoDouble) scs.findVariable("scriptDesiredVelocityRateLimitedY");
-      YoDouble desiredTurningVelocity = (YoDouble) scs.findVariable("scriptDesiredTurningVelocityRateLimited");
+      YoBoolean walk = (YoBoolean) simulationTestHelper.findVariable("walkCSG");
+      YoDouble desiredXVelocity = (YoDouble) simulationTestHelper.findVariable("scriptDesiredVelocityRateLimitedX");
+      YoDouble desiredYVelocity = (YoDouble) simulationTestHelper.findVariable("scriptDesiredVelocityRateLimitedY");
+      YoDouble desiredTurningVelocity = (YoDouble) simulationTestHelper.findVariable("scriptDesiredTurningVelocityRateLimited");
 
-      drcSimulationTestHelper.simulateAndBlock(standingTimeDuration);
+      assertTrue(simulationTestHelper.simulateNow(standingTimeDuration));
 
       walk.set(true);
 
       Random random = new Random(1738L);
 
-      while (!simulationCrashed.get() && scs.getTime() - standingTimeDuration < defaultWalkingTimeDuration)
+      double stepsToTakeWithEachFoot = 3;
+      simulationTestHelper.addSimulationTerminalCondition(() ->
+      {
+         return footstepsCompletedPerSide.get(RobotSide.LEFT).get() >= stepsToTakeWithEachFoot
+               && footstepsCompletedPerSide.get(RobotSide.RIGHT).get() >= stepsToTakeWithEachFoot;
+      });
+
+      while (simulationTestHelper.getSimulationTime() - standingTimeDuration < defaultWalkingTimeDuration)
       {
          for (RobotSide robotSide : RobotSide.values)
             footstepsCompletedPerSide.get(robotSide).set(0);
@@ -204,7 +184,8 @@ public abstract class AvatarPushRecoveryWalkingTrackTest implements MultiRobotTe
             double pushMagnitude = getPushDeltaVForMidSwing(pushDirection,
                                                             new Vector2D(desiredXVelocity.getDoubleValue(), desiredYVelocity.getDoubleValue()),
                                                             desiredTurningVelocity.getDoubleValue(),
-                                                            swingSideForPush) / pushDuration * totalMass;
+                                                            swingSideForPush)
+                  / pushDuration * totalMass;
 
             double percentOfState = 0.5;
             double delay = getRobotModel().getWalkingControllerParameters().getDefaultSwingTime() * percentOfState;
@@ -224,7 +205,8 @@ public abstract class AvatarPushRecoveryWalkingTrackTest implements MultiRobotTe
             double pushMagnitude = getPushDeltaVForTransfer(pushDirection,
                                                             new Vector2D(desiredXVelocity.getDoubleValue(), desiredYVelocity.getDoubleValue()),
                                                             desiredTurningVelocity.getDoubleValue(),
-                                                            swingSideForPush) / pushDuration * totalMass;
+                                                            swingSideForPush)
+                  / pushDuration * totalMass;
 
             double percentOfState = 0.5;
             double delay = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime() * percentOfState;
@@ -232,27 +214,18 @@ public abstract class AvatarPushRecoveryWalkingTrackTest implements MultiRobotTe
             pushRobotController.applyForceDelayed(swingFinishConditions.get(swingSideForPush), delay, forceDirection, pushMagnitude, pushDuration);
          }
 
-         scs.simulate();
-
-         double stepsToTakeWithEachFoot = 3;
-         while (!simulationCrashed.get() && footstepsCompletedPerSide.get(RobotSide.LEFT).get() < stepsToTakeWithEachFoot && footstepsCompletedPerSide.get(RobotSide.RIGHT).get() < stepsToTakeWithEachFoot)
-         {
-            Thread.yield();
-         }
-
-         scs.stop();
+         LogTools.info("Resume simulation!");
+         // Simulate until reaching the desired number of footstep, see terminal condition setup before this loop.
+         boolean success = simulationTestHelper.simulateNow();
+         LogTools.info("Simulation has stopped: success={}", success);
+         assertTrue(success);
       }
-   }
-
-   private void stop()
-   {
-      scs.stop();
    }
 
    private void setupStateMonitors()
    {
       footstepsCompletedPerSide = new SideDependentList<>(new AtomicInteger(), new AtomicInteger());
-      drcSimulationTestHelper.createSubscriberFromController(FootstepStatusMessage.class, m ->
+      simulationTestHelper.createSubscriberFromController(FootstepStatusMessage.class, m ->
       {
          if (FootstepStatus.fromByte(m.getFootstepStatus()) == FootstepStatus.COMPLETED)
          {
@@ -265,11 +238,12 @@ public abstract class AvatarPushRecoveryWalkingTrackTest implements MultiRobotTe
       {
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          String footPrefix = sidePrefix + "Foot";
-         @SuppressWarnings("unchecked") final YoEnum<FootControlModule.ConstraintType> footConstraintType = (YoEnum<FootControlModule.ConstraintType>) scs.findVariable(
-               sidePrefix + "FootControlModule", footPrefix + "CurrentState");
-         @SuppressWarnings("unchecked") final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.findVariable(
-               "WalkingHighLevelHumanoidController",
-               "walkingCurrentState");
+         @SuppressWarnings("unchecked")
+         final YoEnum<FootControlModule.ConstraintType> footConstraintType = (YoEnum<FootControlModule.ConstraintType>) simulationTestHelper.findVariable(sidePrefix
+               + "FootControlModule", footPrefix + "CurrentState");
+         @SuppressWarnings("unchecked")
+         final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) simulationTestHelper.findVariable("WalkingHighLevelHumanoidController",
+                                                                                                                    "walkingCurrentState");
          swingStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType));
          swingFinishConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
       }
@@ -333,40 +307,18 @@ public abstract class AvatarPushRecoveryWalkingTrackTest implements MultiRobotTe
       return magnitudeScaler * magnitudeAlongEllipse;
    }
 
-
    private AvatarSimulation avatarSimulation;
    private RobotVisualizer robotVisualizer;
 
-   private void setupCameraForUnitTest(SimulationConstructionSet scs)
+   private void setupCameraForUnitTest()
    {
-      CameraConfiguration cameraConfiguration = new CameraConfiguration("testCamera");
-      cameraConfiguration.setCameraFix(0.6, 0.4, 1.1);
-      cameraConfiguration.setCameraPosition(-0.15, 10.0, 3.0);
-      cameraConfiguration.setCameraTracking(true, true, true, false);
-      cameraConfiguration.setCameraDolly(true, true, true, false);
-      scs.setupCamera(cameraConfiguration);
-      scs.selectCamera("testCamera");
+      simulationTestHelper.setCameraFocusPosition(0.6, 0.4, 1.1);
+      simulationTestHelper.setCameraPosition(-0.15, 10.0, 3.0);
    }
 
    public SimulationTestingParameters getSimulationTestingParameters()
    {
       return simulationTestingParameters;
-   }
-
-   private class DoneListener implements SimulationDoneListener
-   {
-
-      @Override
-      public void simulationDone()
-      {
-//         simulationCrashed.set(true);
-      }
-
-      @Override
-      public void simulationDoneWithException(Throwable throwable)
-      {
-         simulationCrashed.set(true);
-      }
    }
 
    private static class SingleSupportStartCondition implements StateTransitionCondition

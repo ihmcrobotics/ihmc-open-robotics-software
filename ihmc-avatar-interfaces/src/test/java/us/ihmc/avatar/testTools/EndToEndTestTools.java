@@ -10,8 +10,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.DoubleUnaryOperator;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -19,6 +21,7 @@ import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.JointspaceTrajectoryStatusMessage;
 import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointControlHelper;
@@ -31,7 +34,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackContr
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.nio.FileTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
@@ -51,7 +53,10 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryExecutionStatus;
+import us.ihmc.idl.IDLSequence.Object;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.yoVariables.multiBodySystem.interfaces.YoOneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
@@ -59,11 +64,11 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SO3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.sharedMemory.YoSharedBuffer;
+import us.ihmc.scs2.simulation.robot.Robot;
+import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimJointBasics;
 import us.ihmc.simulationConstructionSetTools.dataExporter.DataExporterExcelWorkbookCreator;
 import us.ihmc.simulationConstructionSetTools.dataExporter.TorqueSpeedDataExporterGraphCreator;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
@@ -820,46 +825,85 @@ public class EndToEndTestTools
       return message;
    }
 
-   public static void writeJointStatesMatlab(SimulationConstructionSet scs, File destination)
+   public static FootstepDataListMessage generateFootstepsFromPose3Ds(RobotSide initialStepSide, Pose3DReadOnly[] footstepPoses)
    {
-      Robot robot = scs.getRobots()[0];
-      List<OneDegreeOfFreedomJoint> joints = new ArrayList<>();
-      robot.getAllOneDegreeOfFreedomJoints(joints);
-
-      List<String> jointStateVariableNames = new ArrayList<>();
-      joints.forEach(joint -> jointStateVariableNames.add(joint.getQYoVariable().getFullNameString()));
-      joints.forEach(joint -> jointStateVariableNames.add(joint.getQDYoVariable().getFullNameString()));
-      joints.forEach(joint -> jointStateVariableNames.add(joint.getTauYoVariable().getFullNameString()));
-      scs.setupVarGroup("jointState", jointStateVariableNames.toArray(new String[0]));
-
-      scs.writeMatlabData("jointState", destination);
+      return generateFootstepsFromPose3Ds(initialStepSide, footstepPoses, 0, 0);
    }
 
-   public static void exportTorqueSpeedCurves(SimulationConstructionSet scs, File dataParentFolder, String dataNameSuffix)
+   public static FootstepDataListMessage generateFootstepsFromPose3Ds(RobotSide initialStepSide,
+                                                                      Pose3DReadOnly[] footstepPoses,
+                                                                      double swingTime,
+                                                                      double transferTime)
    {
-      exportTorqueSpeedCurves(scs, dataParentFolder, dataNameSuffix, null);
+      return generateFootstepsFromPose3Ds(initialStepSide, Arrays.asList(footstepPoses), swingTime, transferTime);
+   }
+
+   public static FootstepDataListMessage generateFootstepsFromPose3Ds(RobotSide initialStepSide, List<? extends Pose3DReadOnly> footstepPoses)
+   {
+      return generateFootstepsFromPose3Ds(initialStepSide, footstepPoses, 0, 0);
+   }
+
+   public static FootstepDataListMessage generateFootstepsFromPose3Ds(RobotSide initialStepSide,
+                                                                      List<? extends Pose3DReadOnly> footstepPoses,
+                                                                      double swingTime,
+                                                                      double transferTime)
+   {
+      FootstepDataListMessage footstepDataList = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
+      RobotSide side = initialStepSide;
+
+      Object<FootstepDataMessage> list = footstepDataList.getFootstepDataList();
+
+      for (int i = 0; i < footstepPoses.size(); i++)
+      {
+         list.add().set(HumanoidMessageTools.createFootstepDataMessage(side, footstepPoses.get(i)));
+         side = side.getOppositeSide();
+      }
+
+      return footstepDataList;
+   }
+
+   public static void writeJointStatesMatlab(SCS2AvatarTestingSimulation simulationTestHelper, File destination) throws IOException
+   {
+      Robot robot = simulationTestHelper.getRobot();
+
+      Set<YoVariable> jointStateVariables = new HashSet<>();
+
+      for (SimJointBasics joint : robot.getAllJoints())
+      {
+         if (joint instanceof YoOneDoFJointBasics)
+         {
+            YoOneDoFJointBasics yoOneDoFJoint = (YoOneDoFJointBasics) joint;
+            jointStateVariables.add(yoOneDoFJoint.getYoQ());
+            jointStateVariables.add(yoOneDoFJoint.getYoQd());
+            jointStateVariables.add(yoOneDoFJoint.getYoTau());
+         }
+      }
+
+      simulationTestHelper.getSimulationSession().getBuffer()
+                          .exportDataMatlab(destination, var -> jointStateVariables.contains(var), reg -> reg == robot.getRegistry());
+   }
+
+   public static void exportTorqueSpeedCurves(SCS2AvatarTestingSimulation simulationTestHelper, File dataParentFolder, String dataNameSuffix)
+   {
+      exportTorqueSpeedCurves(simulationTestHelper, dataParentFolder, dataNameSuffix, null);
    }
 
    // Pattern-matched from TorqueSpeedDataExporter
-   public static void exportTorqueSpeedCurves(SimulationConstructionSet scs, File dataParentFolder, String dataNameSuffix, String info)
+   public static void exportTorqueSpeedCurves(SCS2AvatarTestingSimulation simulationTestHelper, File dataParentFolder, String dataNameSuffix, String info)
    {
-      Robot robot = scs.getRobots()[0];
-      TorqueSpeedDataExporterGraphCreator graphCreator = new TorqueSpeedDataExporterGraphCreator(robot, scs.getDataBuffer());
-      DataExporterExcelWorkbookCreator excelWorkbookCreator = new DataExporterExcelWorkbookCreator(robot, scs.getDataBuffer());
+      YoDouble time = simulationTestHelper.getSimulationSession().getTime();
+      YoSharedBuffer buffer = simulationTestHelper.getSimulationSession().getBuffer();
+      us.ihmc.scs2.simulation.robot.Robot robot = simulationTestHelper.getRobot();
+      TorqueSpeedDataExporterGraphCreator graphCreator = new TorqueSpeedDataExporterGraphCreator(time, robot, buffer);
+      DataExporterExcelWorkbookCreator excelWorkbookCreator = new DataExporterExcelWorkbookCreator(time, robot, buffer);
 
       // Stop the sim and disable the GUI:
-      scs.stop();
-      scs.disableGUIComponents();
-
-      // Wait till done running:
-      while (scs.isSimulating())
-      {
-         ThreadTools.sleep(1000);
-      }
+      simulationTestHelper.getSimulationSession().stopSessionThread();
+      simulationTestHelper.getSessionVisualizerControls().disableUserControls();
 
       // Crop the Buffer to In/Out. This is important because of how we use the DataBuffer later and we assume that in point is at index=0:
-      scs.cropBuffer();
-      scs.gotoInPointNow();
+      simulationTestHelper.cropBuffer();
+      simulationTestHelper.gotoInPoint();
 
       String timeStamp = FormattingTools.getDateString() + "_" + FormattingTools.getTimeString();
       String tagName;
@@ -873,51 +917,59 @@ public class EndToEndTestTools
 
       if (info != null)
       {
-         System.out.println("Saving ReadMe");
+         LogTools.info("Saving ReadMe");
          writeReadme(new File(dataFolder, tagName + ".txt"), info);
-         System.out.println("Done Saving ReadMe");
+         LogTools.info("Done Saving ReadMe");
       }
 
       try
       {
-         System.out.println("Saving data");
-         scs.writeMatlabData("all", new File(dataFolder, tagName + ".mat"));
-         System.out.println("Done Saving Data");
+         LogTools.info("Saving data");
+         simulationTestHelper.getSimulationSession().getBuffer().exportDataMatlab(new File(dataFolder, tagName + ".mat"));
+         LogTools.info("Done Saving Data");
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
       }
       catch (OutOfMemoryError exception)
       {
-         System.err.println("Ran out of memory while saving to Matlab format. Try again with fewer points.");
+         LogTools.error("Ran out of memory while saving to Matlab format. Try again with fewer points.");
          exception.printStackTrace();
       }
 
       try
       {
-         System.out.println("Saving data in Matlab format");
-         writeJointStatesMatlab(scs, new File(dataFolder, tagName + "_jointStates.mat"));
-         System.out.println("Done Saving Data in Matlab format");
+         LogTools.info("Saving data in Matlab format");
+         writeJointStatesMatlab(simulationTestHelper, new File(dataFolder, tagName + "_jointStates.mat"));
+         LogTools.info("Done Saving Data in Matlab format");
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
       }
       catch (OutOfMemoryError exception)
       {
-         System.err.println("Ran out of memory while saving to Matlab format. Try again with fewer points.");
+         LogTools.error("Ran out of memory while saving to Matlab format. Try again with fewer points.");
          exception.printStackTrace();
       }
 
-      System.out.println("creating torque and speed spreadsheet");
+      LogTools.info("creating torque and speed spreadsheet");
       excelWorkbookCreator.createAndSaveTorqueAndSpeedSpreadSheet(dataFolder, tagName);
-      System.out.println("done creating torque and speed spreadsheet");
+      LogTools.info("done creating torque and speed spreadsheet");
 
-      System.out.println("creating torque and speed graphs");
+      LogTools.info("creating torque and speed graphs");
       // make graph directory inside destination directory
       File graphDirectory = new File(dataFolder, "graphs");
       graphDirectory.mkdir();
       graphCreator.createJointTorqueSpeedGraphs(graphDirectory, tagName, true, false);
-      System.out.println("done creating torque and speed graphs");
+      LogTools.info("done creating torque and speed graphs");
 
-      System.out.println("creating video");
-      scs.getStandardSimulationGUI().getViewportPanel().getStandardGUIActions().createVideo(new File(dataFolder, tagName + "_Video.mov"));
-      System.out.println("done creating video");
+      LogTools.info("creating video");
+      simulationTestHelper.exportVideo(new File(dataFolder, tagName + "_Video.mov"));
+      LogTools.info("done creating video");
 
-      scs.enableGUIComponents();
+      simulationTestHelper.getSessionVisualizerControls().enableUserControls();
    }
 
    private static void writeReadme(File readmeFile, String info)
@@ -934,7 +986,7 @@ public class EndToEndTestTools
       }
    }
 
-   public static final Path DATA_PATH = Paths.get("D:/DataAndVideos");
+   public static final Path DATA_PATH = Paths.get("/home/val/DataAndVideos");
 
    public static File getDataOutputFolder(String robotName, String folderName) throws IOException
    {

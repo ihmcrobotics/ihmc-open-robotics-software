@@ -2,6 +2,7 @@ package us.ihmc.atlas.networkProcessor.footstepPostProcessing;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
@@ -12,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 
 public class AtlasPostProcessingTest extends AvatarPostProcessingTests
 {
@@ -53,7 +53,7 @@ public class AtlasPostProcessingTest extends AvatarPostProcessingTests
    @Tag("humanoid-obstacle-2")
    @Override
    @Test
-   public void testWalkingOffOfMediumPlatform() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
+   public void testWalkingOffOfMediumPlatform()
    {
       super.testWalkingOffOfMediumPlatform();
    }
@@ -61,7 +61,7 @@ public class AtlasPostProcessingTest extends AvatarPostProcessingTests
    @Tag("humanoid-obstacle-2")
    @Override
    @Test
-   public void testSwingOverPlanarRegions() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
+   public void testSwingOverPlanarRegions()
    {
       super.testSwingOverPlanarRegions();
    }
@@ -69,7 +69,7 @@ public class AtlasPostProcessingTest extends AvatarPostProcessingTests
    @Tag("humanoid-obstacle-2")
    @Override
    @Test
-   public void testWalkingOnStraightForwardLines() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
+   public void testWalkingOnStraightForwardLines()
    {
       super.testWalkingOnStraightForwardLines();
    }

@@ -108,7 +108,7 @@ public class ICPControllerTest
       FramePoint2D currentCoMPosition = new FramePoint2D(currentICP);
 
       controller.initialize();
-      controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition, omega);
+      controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, new FramePoint2D(), perfectCMP, currentICP, currentCoMPosition, omega);
 
       FramePoint2D desiredCMP = new FramePoint2D();
       controller.getDesiredCMP(desiredCMP);
@@ -175,7 +175,7 @@ public class ICPControllerTest
       FramePoint2D currentCoM = new FramePoint2D(currentICP);
 
       controller.initialize();
-      controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoM, omega);
+      controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, new FramePoint2D(), perfectCMP, currentICP, currentCoM, omega);
 
       FramePoint2D desiredCMP = new FramePoint2D();
       controller.getDesiredCMP(desiredCMP);
@@ -242,7 +242,7 @@ public class ICPControllerTest
       FramePoint2D currentCoMPosition = new FramePoint2D(currentICP);
 
       controller.initialize();
-      controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition, omega);
+      controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, new FramePoint2D(), perfectCMP, currentICP, currentCoMPosition, omega);
 
       FramePoint2D desiredCMP = new FramePoint2D();
       controller.getDesiredCMP(desiredCMP);
@@ -319,7 +319,7 @@ public class ICPControllerTest
       FramePoint2D currentCoMPosition = new FramePoint2D(currentICP);
 
       controller.initialize();
-      controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition, omega);
+      controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, new FramePoint2D(), perfectCMP, currentICP, currentCoMPosition, omega);
 
       FramePoint2D desiredCMP = new FramePoint2D();
       controller.getDesiredCMP(desiredCMP);
@@ -405,7 +405,7 @@ public class ICPControllerTest
       FramePoint2D currentCoMPosition = new FramePoint2D(currentICP);
 
       controller.initialize();
-      controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition, omega);
+      controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, new FramePoint2D(), perfectCMP, currentICP, currentCoMPosition, omega);
 
       FramePoint2D desiredCMP = new FramePoint2D();
       controller.getDesiredCMP(desiredCMP);

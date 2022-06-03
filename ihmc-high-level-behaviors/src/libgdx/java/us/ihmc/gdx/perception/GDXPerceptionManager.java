@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.gdx.simulation.environment.object.objects.door.GDXArUcoVirtualBox;
 import us.ihmc.gdx.simulation.environment.object.objects.door.GDXArUcoVirtualDoorFrame;
 import us.ihmc.gdx.simulation.environment.object.objects.door.GDXArUcoVirtualDoorPanel;
 import us.ihmc.gdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
@@ -26,10 +27,12 @@ public class GDXPerceptionManager
    private final ImBoolean showGraphics = new ImBoolean(true);
    private GDXArUcoVirtualDoorPanel pullDoorPanel;
    private GDXArUcoVirtualDoorFrame pullDoorFrame;
+   private GDXArUcoVirtualBox box;
    private boolean isPullDoorDetected = false;
    private boolean isPullDoorDetectedOnce = false;
    private boolean isFrameLockedIn = false;
-   private FramePose3D cameraPose = new FramePose3D();
+   private boolean isBoxDetected = false;
+   private final FramePose3D cameraPose = new FramePose3D();
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
    private GDXOpenCVArUcoMarkerDetectionUI arUcoMarkerDetectionUI;
    private GDXHighLevelDepthSensorSimulator objectDetectionBlackflySimulator;
@@ -40,6 +43,7 @@ public class GDXPerceptionManager
 
       pullDoorPanel = new GDXArUcoVirtualDoorPanel(0);
       pullDoorFrame = new GDXArUcoVirtualDoorFrame(0);
+      box = new GDXArUcoVirtualBox(2);
 
       arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
       arUcoMarkerDetection.create(objectDetectionBlackflySimulator.getLowLevelSimulator().getRGBA8888ColorImage(),
@@ -48,6 +52,7 @@ public class GDXPerceptionManager
       arUcoMarkerDetectionUI = new GDXOpenCVArUcoMarkerDetectionUI("from Blackfly Right");
       ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
       markersToTrack.add(pullDoorPanel.getArUcoMarker());
+      markersToTrack.add(box.getArUcoMarker());
       arUcoMarkerDetectionUI.create(arUcoMarkerDetection, markersToTrack, objectDetectionBlackflySimulator.getSensorFrame());
 
       panel.addChild(arUcoMarkerDetectionUI.getMainPanel());
@@ -59,6 +64,7 @@ public class GDXPerceptionManager
       {
          arUcoMarkerDetection.update();
          isPullDoorDetected = arUcoMarkerDetection.isDetected(pullDoorPanel.getArUcoMarker());
+         isBoxDetected = arUcoMarkerDetection.isDetected(box.getArUcoMarker());
          if (isPullDoorDetected)
          {
             isPullDoorDetectedOnce = true;
@@ -84,8 +90,15 @@ public class GDXPerceptionManager
                }
             }
          }
+         if (isBoxDetected)
+         {
+            FramePose3DBasics boxMarkerPose = arUcoMarkerDetection.getPose(box.getArUcoMarker());
+            boxMarkerPose.changeFrame(ReferenceFrame.getWorldFrame());
+            boxMarkerPose.get(box.getMarkerToWorld());
+         }
          pullDoorPanel.update();
          pullDoorFrame.update();
+         box.update();
          arUcoMarkerDetectionUI.update();
       }
    }
@@ -108,6 +121,10 @@ public class GDXPerceptionManager
          {
             pullDoorFrame.getRenderables(renderables, pool);
          }
+         if (isBoxDetected)
+         {
+            box.getRenderables(renderables, pool);
+         }
       }
    }
 
@@ -119,6 +136,11 @@ public class GDXPerceptionManager
    public ReferenceFrame getPullDoorFrameFrame()
    {
       return pullDoorFrame.getVirtualFrame();
+   }
+
+   public ReferenceFrame getBoxFrame()
+   {
+      return box.getVirtualFrame();
    }
 
    public GDXOpenCVArUcoMarkerDetectionUI getArUcoMarkerDetectionUI()

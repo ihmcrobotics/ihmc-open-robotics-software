@@ -8,10 +8,9 @@ import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
-import us.ihmc.gdx.ui.graphics.live.GDXROS2VideoVisualizer;
+import us.ihmc.gdx.ui.graphics.live.GDXROS2BigVideoVisualizer;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXGlobalVisualizersPanel;
-import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.ros2.ROS2Node;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 
 public class GDXROS2VideoSensorDemo
 {
@@ -48,10 +47,11 @@ public class GDXROS2VideoSensorDemo
             baseUI.addImGui3DViewInputProcessor(sensorPoseGizmo::process3DViewInput);
             baseUI.get3DSceneManager().addRenderableProvider(sensorPoseGizmo, GDXSceneLevel.VIRTUAL);
 
-            ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.INTRAPROCESS, "test_node");
-
+            PubSubImplementation pubSubImplementation = PubSubImplementation.INTRAPROCESS;
             globalVisualizersPanel = new ImGuiGDXGlobalVisualizersPanel(false);
-            GDXROS2VideoVisualizer videoVisualizer = new GDXROS2VideoVisualizer("Video", ros2Node, ROS2Tools.VIDEO);
+            GDXROS2BigVideoVisualizer videoVisualizer = new GDXROS2BigVideoVisualizer("Video",
+                                                                                      pubSubImplementation,
+                                                                                      ROS2Tools.BIG_VIDEO);
             globalVisualizersPanel.addVisualizer(videoVisualizer);
             globalVisualizersPanel.create();
             baseUI.getImGuiPanelManager().addPanel(globalVisualizersPanel);
@@ -66,14 +66,6 @@ public class GDXROS2VideoSensorDemo
             double minRange = 0.105;
             double maxRange = 5.0;
             highLevelDepthSensorSimulator = new GDXHighLevelDepthSensorSimulator("Stepping L515",
-                                                                                 null,
-                                                                                 null,
-                                                                                 null,
-                                                                                 null,
-                                                                                 null,
-                                                                                 ros2Node,
-                                                                                 null,
-                                                                                 ROS2Tools.VIDEO,
                                                                                  sensorPoseGizmo.getGizmoFrame(),
                                                                                  () -> 0L,
                                                                                  verticalFOV,
@@ -81,10 +73,9 @@ public class GDXROS2VideoSensorDemo
                                                                                  imageHeight,
                                                                                  minRange,
                                                                                  maxRange,
-                                                                                 publishRateHz,
-                                                                                 false);
+                                                                                 publishRateHz);
+            highLevelDepthSensorSimulator.setupForROS2Color(pubSubImplementation, ROS2Tools.BIG_VIDEO);
             baseUI.getImGuiPanelManager().addPanel(highLevelDepthSensorSimulator);
-            highLevelDepthSensorSimulator.create();
             highLevelDepthSensorSimulator.setSensorEnabled(true);
             highLevelDepthSensorSimulator.getLowLevelSimulator().setDepthEnabled(false);
             highLevelDepthSensorSimulator.setPublishPointCloudROS2(false);

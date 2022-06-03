@@ -10,6 +10,9 @@ public class ImGuiVideoPanel extends ImGuiPanel
 
    private Texture texture;
    private final boolean flipY;
+   private float mouseXRightFromLeft;
+   private float mouseYDownFromTop;
+   private Runnable userImGuiImageInteraction;
 
    public ImGuiVideoPanel(String name, boolean flipY)
    {
@@ -27,6 +30,17 @@ public class ImGuiVideoPanel extends ImGuiPanel
 
    public void renderImGuiWidgets()
    {
+      float rawWindowPosX = ImGui.getWindowPosX();
+      float rawWindowPosY = ImGui.getWindowPosY();
+
+      mouseXRightFromLeft = ImGui.getMousePosX() - rawWindowPosX;
+      mouseYDownFromTop = ImGui.getMousePosY() - rawWindowPosY;
+
+      if (userImGuiImageInteraction != null)
+      {
+         userImGuiImageInteraction.run();
+      }
+
       if (texture != null)
       {
          //      float posX = ImGui.getWindowPosX() + ImGui.getWindowContentRegionMinX();
@@ -34,8 +48,8 @@ public class ImGuiVideoPanel extends ImGuiPanel
          //      float sizeX = ImGui.getWindowContentRegionMaxX();
          //      float sizeY = ImGui.getWindowContentRegionMaxY();
          float tableHeader = 22.0f;
-         float posX = ImGui.getWindowPosX();
-         float posY = ImGui.getWindowPosY() + tableHeader;
+         float posX = rawWindowPosX;
+         float posY = rawWindowPosY + tableHeader;
          float sizeX = ImGui.getWindowSizeX();
          float sizeY = ImGui.getWindowSizeY() - tableHeader;
 
@@ -62,5 +76,20 @@ public class ImGuiVideoPanel extends ImGuiPanel
 
          ImGui.getWindowDrawList().addImage(texture.getTextureObjectHandle(), startX, startY, endX, endY);
       }
+   }
+
+   public void setUserImGuiImageInteraction(Runnable userImGuiImageInteraction)
+   {
+      this.userImGuiImageInteraction = userImGuiImageInteraction;
+   }
+
+   public float getMouseXRightFromLeft()
+   {
+      return mouseXRightFromLeft;
+   }
+
+   public float getMouseYDownFromTop()
+   {
+      return mouseYDownFromTop;
    }
 }

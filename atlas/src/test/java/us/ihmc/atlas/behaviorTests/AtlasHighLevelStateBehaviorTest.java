@@ -10,7 +10,6 @@ import us.ihmc.avatar.behaviorTests.DRCHighLevelStateBehaviorTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasHighLevelStateBehaviorTest extends DRCHighLevelStateBehaviorTest
 {
@@ -36,7 +35,7 @@ public class AtlasHighLevelStateBehaviorTest extends DRCHighLevelStateBehaviorTe
    @Tag("humanoid-behaviors")
    @Override
    @Test
-   public void testWalkingState() throws SimulationExceededMaximumTimeException
+   public void testWalkingState()
    {
       super.testWalkingState();
    }
@@ -44,7 +43,7 @@ public class AtlasHighLevelStateBehaviorTest extends DRCHighLevelStateBehaviorTe
    @Tag("humanoid-behaviors-slow")
    @Override
    @Test
-   public void testDoNothingBahviourState() throws SimulationExceededMaximumTimeException
+   public void testDoNothingBahviourState()
    {
       super.testDoNothingBahviourState();
    }
@@ -53,7 +52,7 @@ public class AtlasHighLevelStateBehaviorTest extends DRCHighLevelStateBehaviorTe
    @Override
    @Disabled
    @Test
-   public void testDiagnosticsState() throws SimulationExceededMaximumTimeException
+   public void testDiagnosticsState()
    {
       super.testDiagnosticsState();
    }

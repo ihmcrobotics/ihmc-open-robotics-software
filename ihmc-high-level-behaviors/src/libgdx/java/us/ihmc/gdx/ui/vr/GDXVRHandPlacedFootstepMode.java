@@ -17,7 +17,6 @@ import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.graphics.GDXFootstepGraphic;
 import us.ihmc.gdx.vr.GDXVRContext;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -64,7 +63,7 @@ public class GDXVRHandPlacedFootstepMode
             throw new RuntimeException("Could not find a foot model visual");
          }
 
-         footModels.put(side, GDXModelLoader.loadG3DModel(modelFileGeometryDefinition.getFileName()));
+         footModels.put(side, GDXModelLoader.load(modelFileGeometryDefinition.getFileName()));
 //         unplacedFadeInFootsteps.set(side, new ModelInstance(footModels.get(side)));
       }
    }

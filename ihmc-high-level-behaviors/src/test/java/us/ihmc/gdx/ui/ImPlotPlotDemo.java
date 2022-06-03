@@ -46,8 +46,13 @@ public class ImPlotPlotDemo
       baseUI.getImGuiDockSystem().getPanelManager().addPanel(plotPanel);
       ThreadTools.startAThread(() ->
       {
-         baseUI.run(this::render, () -> System.exit(0));
+         baseUI.run(this::create, this::render, () -> System.exit(0));
       }, "ImPlot Demo");
+   }
+
+   private void create()
+   {
+
    }
 
    private void render()

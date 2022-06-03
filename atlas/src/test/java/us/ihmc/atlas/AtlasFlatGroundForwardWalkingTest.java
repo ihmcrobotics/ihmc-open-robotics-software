@@ -14,7 +14,6 @@ import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPController
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 @Tag("humanoid-flat-ground-slow-2")
 public class AtlasFlatGroundForwardWalkingTest extends AvatarFlatGroundForwardWalkingTest
@@ -67,14 +66,14 @@ public class AtlasFlatGroundForwardWalkingTest extends AvatarFlatGroundForwardWa
 
    @Override
    @Test
-   public void testForwardWalk() throws SimulationExceededMaximumTimeException
+   public void testForwardWalk()
    {
       super.testForwardWalk();
    }
 
    @Override
    @Test
-   public void testForwardWalkWithForceDisturbances() throws SimulationExceededMaximumTimeException
+   public void testForwardWalkWithForceDisturbances()
    {
       super.testForwardWalkWithForceDisturbances();
    }

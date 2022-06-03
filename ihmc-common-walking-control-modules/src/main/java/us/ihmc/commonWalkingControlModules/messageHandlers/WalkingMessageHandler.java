@@ -30,15 +30,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AdjustFootstepCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CenterOfMassTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.MomentumTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StepConstraintRegionCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -69,6 +61,8 @@ public class WalkingMessageHandler
    private static final int maxNumberOfFootsteps = 100;
    private final RecyclingArrayList<Footstep> upcomingFootsteps = new RecyclingArrayList<>(maxNumberOfFootsteps, Footstep.class);
    private final RecyclingArrayList<FootstepTiming> upcomingFootstepTimings = new RecyclingArrayList<>(maxNumberOfFootsteps, FootstepTiming.class);
+   private final RecyclingArrayList<StepConstraintsListCommand> upcomingStepConstraints = new RecyclingArrayList<>(maxNumberOfFootsteps, StepConstraintsListCommand::new);
+
    private final RecyclingArrayList<MutableDouble> pauseDurationAfterStep = new RecyclingArrayList<>(maxNumberOfFootsteps, MutableDouble.class);
 
    private final YoBoolean isPausedWithSteps = new YoBoolean("IsPausedWithSteps", registry);
@@ -273,6 +267,10 @@ public class WalkingMessageHandler
          setFootstepTiming(command.getFootstep(i), command.getExecutionTiming(), upcomingFootstepTimings.add(), pauseDurationAfterStep.add(),
                            command.getExecutionMode());
          setFootstep(command.getFootstep(i), trustHeightOfFootsteps, areFootstepsAdjustable, upcomingFootsteps.add());
+         if (command.getFootstep(i).getStepConstraints().getNumberOfConstraints() > 0)
+            upcomingStepConstraints.add().set(command.getFootstep(i).getStepConstraints());
+         else
+            upcomingStepConstraints.add().set(command.getDefaultStepConstraints());
          currentNumberOfFootsteps.increment();
       }
 
@@ -299,6 +297,11 @@ public class WalkingMessageHandler
    public void handleStepConstraintRegionCommand(StepConstraintRegionCommand stepConstraintRegionCommand)
    {
       stepConstraintRegionHandler.handleStepConstraintRegionCommand(stepConstraintRegionCommand);
+   }
+
+   public void handleStepConstraintsListCommand(StepConstraintsListCommand stepConstraintsListCommand)
+   {
+      stepConstraintRegionHandler.handleStepConstraintsListCommand(stepConstraintsListCommand);
    }
 
    public PlanarRegionsListHandler getPlanarRegionsListHandler()
@@ -454,6 +457,12 @@ public class WalkingMessageHandler
       upcomingFootsteps.remove(0);
    }
 
+   public void pollStepConstraints(StepConstraintsListCommand commandToPack)
+   {
+      commandToPack.set(upcomingStepConstraints.get(0));
+      upcomingStepConstraints.remove(0);
+   }
+
    /**
     * This method can be used to adjust the timing of the upcoming footstep. It will throw a {@link RuntimeException} if
     * there are no footsteps in the queue.
@@ -599,6 +608,7 @@ public class WalkingMessageHandler
    {
       upcomingFootsteps.clear();
       upcomingFootstepTimings.clear();
+      upcomingStepConstraints.clear();
       pauseDurationAfterStep.clear();
       currentNumberOfFootsteps.set(0);
       currentFootstepIndex.set(0);

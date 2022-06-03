@@ -2,13 +2,11 @@ package us.ihmc.footstepPlanning.bodyPath;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
-import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -18,6 +16,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.BodyPathPlanningResult;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
+import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.log.AStarBodyPathEdgeData;
 import us.ihmc.footstepPlanning.log.AStarBodyPathIterationData;
@@ -26,10 +25,10 @@ import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.graph.structure.NodeComparator;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.heightMap.HeightMapData;
 import us.ihmc.robotics.heightMap.HeightMapTools;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -43,6 +42,7 @@ import java.util.function.Consumer;
 
 public class AStarBodyPathPlanner
 {
+   private static final boolean debug = false;
    private static final boolean checkForCollisions = true;
    private static final boolean computeSurfaceNormalCost = true;
    private static final boolean useRANSACTraversibility = true;
@@ -98,8 +98,9 @@ public class AStarBodyPathPlanner
    private final List<AStarBodyPathIterationData> iterationData = new ArrayList<>();
    private final HashMap<GraphEdge<BodyPathLatticePoint>, AStarBodyPathEdgeData> edgeDataMap = new HashMap<>();
 
-   private final List<Consumer<FootstepPlannerOutput>> statusCallbacks = new ArrayList<>();
-   private final Stopwatch stopwatch = new Stopwatch();
+   private final List<Consumer<FootstepPlannerOutput>> statusCallbacks;
+   private final Stopwatch stopwatch;
+   private double planningStartTime;
    private int iterations = 0;
    private BodyPathPlanningResult result = null;
    private boolean reachedGoal = false;
@@ -117,7 +118,19 @@ public class AStarBodyPathPlanner
 
    public AStarBodyPathPlanner(FootstepPlannerParametersReadOnly parameters, SideDependentList<ConvexPolygon2D> footPolygons)
    {
+      this(parameters, footPolygons, new Stopwatch());
+   }
+
+   public AStarBodyPathPlanner(FootstepPlannerParametersReadOnly parameters, SideDependentList<ConvexPolygon2D> footPolygons, Stopwatch stopwatch)
+   {
+      this(parameters, footPolygons, new ArrayList<>(), stopwatch);
+   }
+
+   public AStarBodyPathPlanner(FootstepPlannerParametersReadOnly parameters, SideDependentList<ConvexPolygon2D> footPolygons, List<Consumer<FootstepPlannerOutput>> statusCallbacks, Stopwatch stopwatch)
+   {
       this.parameters = parameters;
+      this.statusCallbacks = statusCallbacks;
+      this.stopwatch = stopwatch;
       stack = new PriorityQueue<>(new NodeComparator<>(graph, this::heuristics));
 
       if (useRANSACTraversibility)
@@ -222,6 +235,8 @@ public class AStarBodyPathPlanner
       reachedGoal = false;
       stopwatch.start();
       result = BodyPathPlanningResult.PLANNING;
+      planningStartTime = stopwatch.totalElapsed();
+      stopwatch.lap();
 
       iterationData.clear();
       edgeDataMap.clear();
@@ -287,7 +302,10 @@ public class AStarBodyPathPlanner
          if (node == null)
          {
             result = BodyPathPlanningResult.NO_PATH_EXISTS;
-            LogTools.info("Stack is empty, no path exists...");
+            if (debug)
+            {
+               LogTools.info("Stack is empty, no path exists...");
+            }
             break;
          }
 
@@ -458,12 +476,14 @@ public class AStarBodyPathPlanner
 
    private void reportStatus(FootstepPlannerRequest request, FootstepPlannerOutput outputToPack)
    {
-      LogTools.info("Reporting status");
+      if (debug)
+      {
+         LogTools.info("Reporting status");
+      }
+
       boolean performSmoothing = result == BodyPathPlanningResult.FOUND_SOLUTION;
 
-      outputToPack.setRequestId(request.getRequestId());
       outputToPack.setBodyPathPlanningResult(result);
-
       outputToPack.getBodyPath().clear();
       outputToPack.getBodyPathUnsmoothed().clear();
 
@@ -503,6 +523,14 @@ public class AStarBodyPathPlanner
 
             outputToPack.getBodyPath().add(waypoint);
          }
+      }
+
+      outputToPack.getPlannerTimings().setTimePlanningBodyPathSeconds(stopwatch.totalElapsed() - planningStartTime);
+      outputToPack.getPlannerTimings().setTotalElapsedSeconds(stopwatch.totalElapsed());
+
+      if (reachedGoal)
+      {
+         outputToPack.setFootstepPlanningResult(FootstepPlanningResult.PLANNING);
       }
 
       markSolutionEdges(terminalNode);
@@ -638,12 +666,6 @@ public class AStarBodyPathPlanner
    private double heuristics(BodyPathLatticePoint node)
    {
       return xyDistance(node, goalNode);
-   }
-
-   public void setStatusCallbacks(List<Consumer<FootstepPlannerOutput>> statusCallbacks)
-   {
-      this.statusCallbacks.clear();
-      this.statusCallbacks.addAll(statusCallbacks);
    }
 
    public void halt()

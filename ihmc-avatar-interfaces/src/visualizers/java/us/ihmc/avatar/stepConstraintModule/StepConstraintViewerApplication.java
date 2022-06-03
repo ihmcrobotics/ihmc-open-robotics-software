@@ -84,7 +84,7 @@ public class StepConstraintViewerApplication extends Application
       messager.submitMessage(StepConstraintCalculatorViewerAPI.StepConstraintRegionData, stepConstraintRegionList);
    }
 
-   public void submitObstacleExtrusions(HashMap<RegionInWorldInterface, List<ConcavePolygon2DBasics>> obstacleExtrusions)
+   public void submitObstacleExtrusions(HashMap<RegionInWorldInterface<?>, List<ConcavePolygon2DBasics>> obstacleExtrusions)
    {
       messager.submitMessage(StepConstraintCalculatorViewerAPI.ObstacleExtrusionsData, obstacleExtrusions);
    }
@@ -104,7 +104,7 @@ public class StepConstraintViewerApplication extends Application
       messager.submitMessage(StepConstraintCalculatorViewerAPI.MaskedRegionsData, new PlanarRegionsList(maskedRegions));
    }
 
-   public void submitMaskedRegionsObstacleExtrusions(HashMap<RegionInWorldInterface, List<ConcavePolygon2DBasics>> extrusions)
+   public void submitMaskedRegionsObstacleExtrusions(HashMap<RegionInWorldInterface<?>, List<ConcavePolygon2DBasics>> extrusions)
    {
       messager.submitMessage(StepConstraintCalculatorViewerAPI.MaskedRegionsObstacleExtrusionsData, extrusions);
    }

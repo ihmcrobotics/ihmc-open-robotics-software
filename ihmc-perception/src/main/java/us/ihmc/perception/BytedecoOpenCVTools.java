@@ -30,10 +30,10 @@ public class BytedecoOpenCVTools
       opencv_core.normalize(source, destination, min, max, normType, depthType, mask);
    }
 
-   public static void clamp32BitFloatTo8BitUnsignedChar(Mat source, Mat destination, double min, double max)
+   public static void clampTo8BitUnsignedChar(Mat source, Mat destination, double min, double max)
    {
       int normType = opencv_core.NORM_MINMAX;
-      int depthType = opencv_core.CV_8U; // converting 32 bit to 8 bit
+      int depthType = opencv_core.CV_8U; // converting to 8 bit
       Mat mask = opencv_core.noArray(); // no operations
       opencv_core.normalize(source, destination, min, max, normType, depthType, mask);
    }

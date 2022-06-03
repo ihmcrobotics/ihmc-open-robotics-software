@@ -10,7 +10,6 @@ import us.ihmc.avatar.behaviorTests.DRCHeadTrajectoryBehaviorTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 @Tag("humanoid-behaviors-slow")
 public class AtlasHeadTrajectoryBehaviorTest extends DRCHeadTrajectoryBehaviorTest
@@ -36,7 +35,7 @@ public class AtlasHeadTrajectoryBehaviorTest extends DRCHeadTrajectoryBehaviorTe
 
    @Override
    @Test
-   public void testHeadPitch() throws SimulationExceededMaximumTimeException
+   public void testHeadPitch()
    {
       super.testHeadPitch();
    }
@@ -44,7 +43,7 @@ public class AtlasHeadTrajectoryBehaviorTest extends DRCHeadTrajectoryBehaviorTe
    @Override
    @Disabled
    @Test
-   public void testHeadRoll() throws SimulationExceededMaximumTimeException
+   public void testHeadRoll()
    {
       super.testHeadRoll();
    }
@@ -52,7 +51,7 @@ public class AtlasHeadTrajectoryBehaviorTest extends DRCHeadTrajectoryBehaviorTe
    @Override
    @Disabled
    @Test
-   public void testHeadYaw() throws SimulationExceededMaximumTimeException
+   public void testHeadYaw()
    {
       super.testHeadYaw();
    }
@@ -60,7 +59,7 @@ public class AtlasHeadTrajectoryBehaviorTest extends DRCHeadTrajectoryBehaviorTe
    @Override
    @Disabled
    @Test
-   public void testRandomOrientation() throws SimulationExceededMaximumTimeException
+   public void testRandomOrientation()
    {
       super.testRandomOrientation();
    }

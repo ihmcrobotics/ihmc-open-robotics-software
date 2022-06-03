@@ -1,5 +1,8 @@
 package us.ihmc.valkyrie.externalForceEstimation;
 
+import static us.ihmc.avatar.testTools.scs2.YoGraphicDefinitionFactory.newYoGraphicArrow3DDefinition;
+import static us.ihmc.avatar.testTools.scs2.YoGraphicDefinitionFactory.newYoGraphicPoint3DDefinition;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -18,30 +21,33 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ExternalForceEstimationToolboxController;
 import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ExternalForceEstimationToolboxModule;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
+import us.ihmc.scs2.definition.robot.ExternalWrenchPointDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicArrow3DDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicPoint3DDefinition;
+import us.ihmc.scs2.simulation.TimeConsumer;
+import us.ihmc.scs2.simulation.robot.Robot;
+import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimJointBasics;
+import us.ihmc.scs2.simulation.robot.trackers.ExternalWrenchPoint;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
-import us.ihmc.simulationconstructionset.ExternalForcePoint;
-import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -57,7 +63,7 @@ public class ValkyrieExternalForceEstimationTest
 
    private YoRegistry registry;
    private DRCRobotModel robotModel;
-   private DRCSimulationTestHelper drcSimulationTestHelper;
+   private SCS2AvatarTestingSimulation simulationTestHelper;
    private ExternalForceEstimationToolboxController toolboxController;
 
    private List<TestConfig> testConfigs;
@@ -67,16 +73,24 @@ public class ValkyrieExternalForceEstimationTest
    {
       String endEffectorName;
       Vector3D efpOffset;
-      ExternalForcePoint externalForcePoint;
+      Vector3D desiredSimulatedForceInWorld = new Vector3D();
+      ExternalWrenchPointDefinition externalWrenchPointDefinition;
       RigidBodyBasics endEffector;
       YoFrameVector3D estimatedForce;
+
+      ExternalWrenchPoint externalWrenchPoint;
 
       public TestConfig(String endEffectorName, Vector3D efpOffset)
       {
          this.endEffectorName = endEffectorName;
          this.efpOffset = efpOffset;
-         this.externalForcePoint = new ExternalForcePoint("efp_" + endEffectorName, efpOffset, registry);
+         this.externalWrenchPointDefinition = new ExternalWrenchPointDefinition("efp_" + endEffectorName, efpOffset);
          this.estimatedForce = new YoFrameVector3D(endEffectorName + "estimatedForce", ReferenceFrame.getWorldFrame(), registry);
+      }
+
+      public void applyDesiredForce()
+      {
+         externalWrenchPoint.getWrench().getLinearPart().setMatchingFrame(externalWrenchPoint.getFrame().getRootFrame(), desiredSimulatedForceInWorld);
       }
    }
 
@@ -102,83 +116,60 @@ public class ValkyrieExternalForceEstimationTest
    {
       robotModel = newRobotModel();
       FlatGroundEnvironment testEnvironment = new FlatGroundEnvironment();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, newRobotModel(), testEnvironment);
+      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(robotModel, testEnvironment, simulationTestingParameters);
 
       AtomicBoolean initializeToolbox = new AtomicBoolean(true);
       AtomicBoolean updateToolbox = new AtomicBoolean();
 
-      Robot dummyRobot = new Robot("dummyRobot");
-      dummyRobot.setController(new RobotController()
+      simulationTestHelper.getRobot().addThrottledController(new Controller()
       {
          @Override
          public void doControl()
          {
-            if(toolboxController == null)
+            if (toolboxController == null)
                return;
-            if(initializeToolbox.getAndSet(false))
+            if (initializeToolbox.getAndSet(false))
                toolboxController.initialize();
-            if(updateToolbox.get())
+            if (updateToolbox.get())
                toolboxController.update();
          }
+      }, ExternalForceEstimationToolboxModule.UPDATE_PERIOD_MILLIS * 1.0e-3);
 
-         @Override
-         public void initialize()
-         {
-
-         }
-
-         @Override
-         public YoRegistry getYoRegistry()
-         {
-            return new YoRegistry("toolboxUpdater");
-         }
-      }, (int) (ExternalForceEstimationToolboxModule.UPDATE_PERIOD_MILLIS / (1000 * robotModel.getSimulateDT())));
-      testEnvironment.addEnvironmentRobot(dummyRobot);
-
-      drcSimulationTestHelper.createSimulation("external_force_estimation_test", false, true);
-      drcSimulationTestHelper.getYoVariableRegistry().addChild(registry);
+      simulationTestHelper.start();
+      simulationTestHelper.getRootRegistry().addChild(registry);
 
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-      YoRegistry scsRootRegistry = drcSimulationTestHelper.getAvatarSimulation().getSimulationConstructionSet().getRootRegistry();
+      YoRegistry scsRootRegistry = simulationTestHelper.getRootRegistry();
 
-      HumanoidFloatingRootJointRobot scsRobot = drcSimulationTestHelper.getRobot();
+      Robot scsRobot = simulationTestHelper.getRobot();
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      YoGraphicsList externalForcePointViz = new YoGraphicsList("externalForceVectors");
 
       for (int i = 0; i < testConfigs.size(); i++)
       {
          TestConfig testConfig = testConfigs.get(i);
 
-         Joint scsEndEffector = scsRobot.getJoint(testConfig.endEffectorName);
-         scsEndEffector.addExternalForcePoint(testConfig.externalForcePoint);
+         SimJointBasics scsEndEffector = scsRobot.getJoint(testConfig.endEffectorName);
+         testConfig.externalWrenchPoint = scsEndEffector.getAuxialiryData().addExternalWrenchPoint(testConfig.externalWrenchPointDefinition);
          JointBasics joint = fullRobotModel.getOneDoFJointByName(testConfig.endEffectorName);
          testConfig.endEffector = joint.getSuccessor();
 
-         AppearanceDefinition simulatedForceColor = YoAppearance.Red();
-         AppearanceDefinition estimatedForceColor = YoAppearance.Green();
+         ColorDefinition simulatedForceColor = ColorDefinitions.Red();
+         ColorDefinition estimatedForceColor = ColorDefinitions.Green();
 
-         YoGraphicVector simulatedForceVector = new YoGraphicVector("simulatedForceVector",
-                                                                    testConfig.externalForcePoint.getYoPosition(),
-                                                                    testConfig.externalForcePoint.getYoForce(),
-                                                                    forceGraphicScale,
-                                                                    simulatedForceColor);
-
-         YoGraphicVector estimatedForceVector = new YoGraphicVector("estimatedForceVector",
-                                                                    testConfig.externalForcePoint.getYoPosition(),
-                                                                    testConfig.estimatedForce,
-                                                                    forceGraphicScale,
-                                                                    estimatedForceColor);
-
-         YoGraphicPosition simulatedForcePoint = new YoGraphicPosition("simulatedForcePoint", testConfig.externalForcePoint.getYoPosition(), 0.025, simulatedForceColor);
-
-         externalForcePointViz.add(simulatedForceVector);
-         externalForcePointViz.add(estimatedForceVector);
-         externalForcePointViz.add(simulatedForcePoint);
+         YoFramePoint3D efp_point = testConfig.externalWrenchPoint.getOffset().getPosition();
+         YoFrameVector3D simulatedForce = testConfig.externalWrenchPoint.getWrench().getLinearPart();
+         YoGraphicArrow3DDefinition simulatedFoceViz = newYoGraphicArrow3DDefinition("simulatedForceVector"
+               + i, efp_point, simulatedForce, forceGraphicScale, simulatedForceColor);
+         YoGraphicArrow3DDefinition estimatedForceViz = newYoGraphicArrow3DDefinition("estimatedForceVector"
+               + i, efp_point, testConfig.estimatedForce, forceGraphicScale, estimatedForceColor);
+         YoGraphicPoint3DDefinition simulatedPointViz = newYoGraphicPoint3DDefinition("simulatedForcePoint" + i, efp_point, 0.025, simulatedForceColor);
+         simulationTestHelper.addYoGraphicDefinition(new YoGraphicGroupDefinition("externalForceVectors",
+                                                                                  simulatedFoceViz,
+                                                                                  estimatedForceViz,
+                                                                                  simulatedPointViz));
       }
 
-      graphicsListRegistry.registerYoGraphicsList(externalForcePointViz);
-
-      drcSimulationTestHelper.getAvatarSimulation().getSimulationConstructionSet().addYoGraphicsListRegistry(graphicsListRegistry);
+      simulationTestHelper.addYoGraphicsListRegistry(graphicsListRegistry);
 
       CommandInputManager commandInputManager = new CommandInputManager(getClass().getSimpleName(),
                                                                         ExternalForceEstimationToolboxModule.getSupportedCommands());
@@ -190,22 +181,20 @@ public class ValkyrieExternalForceEstimationTest
                                                                        null,
                                                                        ExternalForceEstimationToolboxModule.UPDATE_PERIOD_MILLIS,
                                                                        scsRootRegistry);
-      drcSimulationTestHelper.createSubscriberFromController(RobotConfigurationData.class, toolboxController::updateRobotConfigurationData);
-      drcSimulationTestHelper.createSubscriberFromController(RobotDesiredConfigurationData.class, toolboxController::updateRobotDesiredConfigurationData);
+      simulationTestHelper.createSubscriberFromController(RobotConfigurationData.class, toolboxController::updateRobotConfigurationData);
+      simulationTestHelper.createSubscriberFromController(RobotDesiredConfigurationData.class, toolboxController::updateRobotDesiredConfigurationData);
       statusOutputManager.attachStatusMessageListener(ExternalForceEstimationOutputStatus.class, status ->
       {
          for (int i = 0; i < testConfigs.size(); i++)
          {
-            if(i == testIndex.get())
+            if (i == testIndex.get())
                testConfigs.get(testIndex.get()).estimatedForce.set(status.getEstimatedExternalForces().get(0));
             else
                testConfigs.get(i).estimatedForce.set(0.0, 0.0, 0.0);
          }
       });
 
-      drcSimulationTestHelper.getAvatarSimulation().start();
-
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      boolean success = simulationTestHelper.simulateNow(1.0);
       Assertions.assertTrue(success);
 
       for (int i = 0; i < testConfigs.size(); i++)
@@ -224,27 +213,31 @@ public class ValkyrieExternalForceEstimationTest
          for (int j = 0; j < iterations; j++)
          {
             Vector3D force = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, j == 0 ? 0.0 : forceMagnitude);
-            testConfigs.get(i).externalForcePoint.setForce(force);
+            testConfigs.get(i).desiredSimulatedForceInWorld.set(force);
+            TimeConsumer forceUpdater = time -> testConfig.applyDesiredForce();
+            simulationTestHelper.getSimulationSession().addBeforePhysicsCallback(forceUpdater);
 
             initializeToolbox.set(true);
             updateToolbox.set(true);
-            drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0);
+            simulationTestHelper.simulateNow(5.0);
             Assertions.assertTrue(force.epsilonEquals(testConfig.estimatedForce, epsilon),
                                   "Estimator failed to estimate force applied on " + testConfig.endEffectorName + ", simulated force: " + force
-                                  + ", estimated force: " + testConfig.estimatedForce);
+                                        + ", estimated force: " + testConfig.estimatedForce);
+
+            simulationTestHelper.getSimulationSession().removeBeforePhysicsCallback(forceUpdater);
          }
 
-         testConfigs.get(i).externalForcePoint.setForce(0.0, 0.0, 0.0);
+         testConfigs.get(i).desiredSimulatedForceInWorld.setToZero();
       }
    }
 
    @AfterEach
    public void tearDown()
    {
-      drcSimulationTestHelper.destroySimulation();
+      simulationTestHelper.finishTest();
 
       robotModel = null;
-      drcSimulationTestHelper = null;
+      simulationTestHelper = null;
       toolboxController = null;
       testConfigs = null;
       registry = null;

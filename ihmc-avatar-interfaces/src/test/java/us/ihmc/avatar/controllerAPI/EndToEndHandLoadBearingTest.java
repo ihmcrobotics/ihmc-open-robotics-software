@@ -63,7 +63,7 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       simulationTestHelper.setCameraFocusPosition(0.2, 0.0, 1.0);
       simulationTestHelper.addYoGraphicDefinition(pushRobotController.getForceVizDefinition());
 
-      boolean success = simulationTestHelper.simulateAndWait(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
@@ -75,7 +75,7 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       chestOrientation.appendPitchRotation(Math.PI / 4.0);
       ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(1.0, chestOrientation, worldFrame, pelvisZUpFrame);
       simulationTestHelper.publishToController(chestTrajectoryMessage);
-      success = simulationTestHelper.simulateAndWait(1.5);
+      success = simulationTestHelper.simulateNow(1.5);
       assertTrue(success);
 
       Quaternion handOrientation = new Quaternion();
@@ -89,7 +89,7 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       se3Trajectory1.getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
       se3Trajectory1.getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(1.0, new Point3D(0.45, 0.3, 0.6), handOrientation, new Vector3D(), new Vector3D()));
       simulationTestHelper.publishToController(handTrajectoryMessage1);
-      success = simulationTestHelper.simulateAndWait(2.0);
+      success = simulationTestHelper.simulateNow(2.0);
       assertTrue(success);
 
       HandTrajectoryMessage handTrajectoryMessage2 = new HandTrajectoryMessage();
@@ -99,7 +99,7 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       se3Trajectory2.getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
       se3Trajectory2.getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(1.0, new Point3D(0.45, 0.3, 0.55), handOrientation, new Vector3D(), new Vector3D()));
       simulationTestHelper.publishToController(handTrajectoryMessage2);
-      success = simulationTestHelper.simulateAndWait(1.5);
+      success = simulationTestHelper.simulateNow(1.5);
       assertTrue(success);
 
       // Activate load bearing
@@ -113,7 +113,7 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       loadBearingMessage.getLoadBearingMessage().getContactNormalInWorldFrame().set(0.0, 0.0, 1.0);
       loadBearingMessage.getLoadBearingMessage().getBodyFrameToContactFrame().set(transformToContactFrame);
       simulationTestHelper.publishToController(loadBearingMessage);
-      success = simulationTestHelper.simulateAndWait(1.0);
+      success = simulationTestHelper.simulateNow(1.0);
       assertTrue(success);
 
       // Now push the robot
@@ -123,10 +123,10 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       double duration = 2.0;
       pushRobotController.applyForce(forceDirection, magnitude, duration);
 
-      success = simulationTestHelper.simulateAndWait(3.0);
+      success = simulationTestHelper.simulateNow(3.0);
       assertTrue(success);
       
-      simulationTestHelper.createVideo(getSimpleRobotName(), 2);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    public class TestingEnvironment implements CommonAvatarEnvironmentInterface
@@ -181,7 +181,7 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       // Do this here in case a test fails. That way the memory will be recycled.
       if (simulationTestHelper != null)
       {
-         simulationTestHelper.finishTest(simulationTestingParameters.getKeepSCSUp());
+         simulationTestHelper.finishTest();
          simulationTestHelper = null;
       }
 

@@ -98,4 +98,7 @@ float64 touchdown_duration
 # Field default value -1.0
 float64 liftoff_duration
 
+# Step constraint regions to be used by this footstep
+controller_msgs/StepConstraintsListMessage step_constraints
+
 

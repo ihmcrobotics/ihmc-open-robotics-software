@@ -294,6 +294,7 @@ public class PushRecoveryBalanceManager
       linearMomentumRateControlModuleInput.setUseMomentumRecoveryMode(true); // TODO
       linearMomentumRateControlModuleInput.setDesiredCapturePoint(yoDesiredCapturePoint);
       linearMomentumRateControlModuleInput.setDesiredCapturePointVelocity(yoDesiredICPVelocity);
+      linearMomentumRateControlModuleInput.setDesiredCapturePointAtEndOfState(yoFinalDesiredICP);
       linearMomentumRateControlModuleInput.setPerfectCMP(perfectCMP2d);
       linearMomentumRateControlModuleInput.setPerfectCoP(perfectCoP2d);
       linearMomentumRateControlModuleInput.setMinimizeAngularMomentumRateZ(minimizeAngularMomentumRateZ);

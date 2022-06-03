@@ -10,7 +10,7 @@ import imgui.internal.ImGui;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXROS1Visualizer;
@@ -83,7 +83,7 @@ public class GDXROS1OdometryVisualizer extends ImGuiGDXROS1Visualizer implements
          RosTools.toEuclid(pose.getPose(), framePose);
          framePose.changeFrame(ReferenceFrame.getWorldFrame());
 
-         modelInstance = GDXModelPrimitives.createCoordinateFrameInstance(0.1);
+         modelInstance = GDXModelBuilder.createCoordinateFrameInstance(0.1);
          GDXTools.toGDX(framePose, tempTransform, modelInstance.transform);
          poseModels.clear();
          poseModels.add(modelInstance);

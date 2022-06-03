@@ -1,13 +1,12 @@
 package us.ihmc.atlas.pushRecovery;
 
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.pushRecovery.AvatarPushRecoveryWalkingTrackTest;
-import us.ihmc.simulationconstructionset.util.ControllerFailureException;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 
 public class AtlasPushRecoveryWalkingTrackTest extends AvatarPushRecoveryWalkingTrackTest
 {
@@ -69,7 +68,7 @@ public class AtlasPushRecoveryWalkingTrackTest extends AvatarPushRecoveryWalking
 
    @Override
    @Test
-   public void testFlatGroundWalking() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException, ControllerFailureException
+   public void testFlatGroundWalking()
    {
       robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
       super.testFlatGroundWalking();

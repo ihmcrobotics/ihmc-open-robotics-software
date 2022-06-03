@@ -6,7 +6,12 @@ public class ImPlotIntegerPlotLine extends ImPlotPlotLineBasics
 
    public ImPlotIntegerPlotLine(String variableName)
    {
-      super(variableName, "0");
+      this(variableName, 100, 3.0);
+   }
+
+   public ImPlotIntegerPlotLine(String variableName, int bufferSize, double history)
+   {
+      super(variableName, "0", bufferSize, history);
 
       integerSwapBuffer = new ImPlotPlotLineIntegerSwapBuffer();
       setSwapBuffer(integerSwapBuffer);

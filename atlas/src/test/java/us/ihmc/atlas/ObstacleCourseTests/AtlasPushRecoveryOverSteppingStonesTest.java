@@ -5,7 +5,11 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.atlas.parameters.*;
+import us.ihmc.atlas.parameters.AtlasICPControllerParameters;
+import us.ihmc.atlas.parameters.AtlasStepAdjustmentParameters;
+import us.ihmc.atlas.parameters.AtlasSteppingParameters;
+import us.ihmc.atlas.parameters.AtlasToeOffParameters;
+import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.AvatarPushRecoveryOverSteppingStonesTest;
@@ -15,7 +19,6 @@ import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 @Tag("humanoid-obstacle-slow-3")
 public class AtlasPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryOverSteppingStonesTest
@@ -95,7 +98,6 @@ public class AtlasPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryO
                }
             };
 
-
          }
       };
 
@@ -110,7 +112,7 @@ public class AtlasPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryO
 
    @Override
    @Test
-   public void testWalkingOverSteppingStonesForwardPush() throws SimulationExceededMaximumTimeException
+   public void testWalkingOverSteppingStonesForwardPush()
    {
       super.testWalkingOverSteppingStonesForwardPush();
    }

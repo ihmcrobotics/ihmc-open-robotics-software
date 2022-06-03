@@ -31,7 +31,7 @@ public class GDXROS2PlanarRegionsVisualizer extends ImGuiGDXVisualizer implement
 
    public GDXROS2PlanarRegionsVisualizer(String title, ROS2NodeInterface ros2Node, ROS2Topic<PlanarRegionsListMessage> topic)
    {
-      super(title);
+      super(title + " (ROS 2)");
       this.topic = topic;
       new IHMCROS2Callback<>(ros2Node, topic, this::acceptMessage);
 

@@ -1,7 +1,6 @@
 package us.ihmc.communication.net;
 
 import java.io.IOException;
-import java.util.Collection;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.ByteBufferOutputStream;
@@ -9,10 +8,9 @@ import com.esotericsoftware.kryo.io.Output;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
-
 import com.esotericsoftware.kryonet.serialization.KryoSerialization;
 import com.esotericsoftware.kryonet.serialization.Serialization;
-import us.ihmc.commons.PrintTools;
+
 import us.ihmc.log.LogTools;
 
 public class KryoObjectServer extends KryoObjectCommunicator
@@ -107,7 +105,7 @@ public class KryoObjectServer extends KryoObjectCommunicator
          int size = calculateObjectSize(object, writeBufferSize);
          if (size > maximumObjectSize)
          {
-            PrintTools.error(this, "Dropping the object of " + object.getClass() + ", because it is too big " + size + " > " + maximumObjectSize);
+            LogTools.error("Dropping the object of " + object.getClass() + ", because it is too big " + size + " > " + maximumObjectSize);
             return 0;
          }
       }
@@ -117,7 +115,7 @@ public class KryoObjectServer extends KryoObjectCommunicator
          // Do not send if the write buffer > 90% full
          if (((double) connection.getTcpWriteBufferSize()) / ((double) writeBufferSize) > 0.9)
          {
-            LogTools.error(this, "Dropping the object of " + object.getClass() + ", because the write buffer is > 90% full!");
+            LogTools.error("Dropping the object of " + object.getClass() + ", because the write buffer is > 90% full!");
             continue;
          }
 

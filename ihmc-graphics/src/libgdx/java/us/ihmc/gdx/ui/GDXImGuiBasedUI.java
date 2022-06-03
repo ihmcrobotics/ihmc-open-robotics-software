@@ -9,6 +9,7 @@ import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
+import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.time.Stopwatch;
@@ -25,6 +26,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.HybridDirectory;
 import us.ihmc.tools.io.HybridFile;
 import us.ihmc.tools.io.JSONFileTools;
+import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -50,6 +52,7 @@ public class GDXImGuiBasedUI
    private String configurationExtraPath;
    private final HybridDirectory configurationBaseDirectory;
    private HybridFile libGDXSettingsFile;
+   private final FrequencyCalculator fpsCalculator = new FrequencyCalculator();
    private final Stopwatch runTime = new Stopwatch().start();
    private String statusText = ""; // TODO: Add status at bottom of window
    private final ImGuiPanelSizeHandler view3DPanelSizeHandler = new ImGuiPanelSizeHandler();
@@ -63,6 +66,7 @@ public class GDXImGuiBasedUI
    private final ImBoolean vsync = new ImBoolean(false);
    private final ImBoolean shadows = new ImBoolean(false);
    private final ImInt libGDXLogLevel = new ImInt(GDXTools.toGDX(LogTools.getLevel()));
+   private final ImFloat imguiFontScale = new ImFloat(1.0f);
    private final GDXImGuiPerspectiveManager perspectiveManager;
    private long renderIndex = 0;
 
@@ -163,7 +167,7 @@ public class GDXImGuiBasedUI
    public void renderBeforeOnScreenUI()
    {
       vrManager.pollEventsAndRender(this, sceneManager);
-      Gdx.graphics.setTitle(windowTitle + " - " + Gdx.graphics.getFramesPerSecond() + " FPS");
+      Gdx.graphics.setTitle(windowTitle);
       imGuiWindowAndDockSystem.beforeWindowManagement();
       render3DView();
       renderMenuBar();
@@ -203,10 +207,21 @@ public class GDXImGuiBasedUI
          {
             Gdx.app.setLogLevel(libGDXLogLevel.get());
          }
+         if (ImGui.inputFloat("Font Size", imguiFontScale, 0.1f))
+         {
+            ImGui.getIO().setFontGlobalScale(imguiFontScale.get());
+         }
          ImGui.popItemWidth();
          ImGui.endMenu();
       }
-      ImGui.sameLine(ImGui.getWindowSizeX() - 170.0f);
+      ImGui.sameLine(ImGui.getWindowSizeX() - 220.0f);
+      fpsCalculator.ping();
+      String fpsString = String.valueOf((int) fpsCalculator.getFrequency());
+      while (fpsString.length() < 3)
+      {
+         fpsString = " " + fpsString;
+      }
+      ImGui.text(fpsString + " Hz");
       ImGui.text(FormattingTools.getFormattedDecimal2D(runTime.totalElapsed()) + " s");
       ImGui.sameLine(ImGui.getWindowSizeX() - 100.0f);
       vrManager.renderImGuiEnableWidget();

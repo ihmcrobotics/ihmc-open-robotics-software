@@ -22,7 +22,7 @@ public class GDXGPUPlanarRegionExtractionDemo
    private GDXInteractableReferenceFrame robotInteractableReferenceFrame;
    private GDXPose3DGizmo l515PoseGizmo = new GDXPose3DGizmo();
    private GDXEnvironmentBuilder environmentBuilder;
-   private GDXGPUPlanarRegionExtraction gpuPlanarRegionExtraction;
+   private GDXGPUPlanarRegionExtractionUI gpuPlanarRegionExtraction;
 
    public GDXGPUPlanarRegionExtractionDemo()
    {
@@ -70,14 +70,6 @@ public class GDXGPUPlanarRegionExtractionDemo
                   double minRange = 0.105;
                   double maxRange = 5.0;
                   l515 = new GDXHighLevelDepthSensorSimulator("Stepping L515",
-                                                              null,
-                                                              null,
-                                                              null,
-                                                              null,
-                                                              null,
-                                                              null,
-                                                              null,
-                                                              null,
                                                               l515PoseGizmo.getGizmoFrame(),
                                                               () -> 0L,
                                                               verticalFOV,
@@ -85,10 +77,8 @@ public class GDXGPUPlanarRegionExtractionDemo
                                                               imageHeight,
                                                               minRange,
                                                               maxRange,
-                                                              publishRateHz,
-                                                              false);
+                                                              publishRateHz);
                   baseUI.getImGuiPanelManager().addPanel(l515);
-                  l515.create();
                   l515.setSensorEnabled(true);
                   l515.setPublishPointCloudROS2(false);
                   l515.setRenderPointCloudDirectly(false);
@@ -101,7 +91,7 @@ public class GDXGPUPlanarRegionExtractionDemo
                   CameraPinholeBrown cameraIntrinsics = l515.getDepthCameraIntrinsics();
                   baseUI.get3DSceneManager().addRenderableProvider(l515, GDXSceneLevel.VIRTUAL);
 
-                  gpuPlanarRegionExtraction = new GDXGPUPlanarRegionExtraction();
+                  gpuPlanarRegionExtraction = new GDXGPUPlanarRegionExtractionUI();
                   gpuPlanarRegionExtraction.create(imageWidth,
                                                    imageHeight,
                                                    l515.getLowLevelSimulator().getMetersDepthFloatBuffer(),

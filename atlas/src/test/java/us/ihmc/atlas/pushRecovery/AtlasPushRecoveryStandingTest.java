@@ -8,7 +8,6 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.pushRecovery.AvatarPushRecoveryStandingTest;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasPushRecoveryStandingTest extends AvatarPushRecoveryStandingTest
 {
@@ -27,7 +26,7 @@ public class AtlasPushRecoveryStandingTest extends AvatarPushRecoveryStandingTes
    @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
-   public void testControllerFailureKicksIn() throws SimulationExceededMaximumTimeException
+   public void testControllerFailureKicksIn()
    {
       super.testControllerFailureKicksIn();
    }
@@ -35,7 +34,7 @@ public class AtlasPushRecoveryStandingTest extends AvatarPushRecoveryStandingTes
    @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
-   public void testLongBackwardPushWhileStanding() throws SimulationExceededMaximumTimeException
+   public void testLongBackwardPushWhileStanding()
    {
       super.testLongBackwardPushWhileStanding();
    }
@@ -43,7 +42,7 @@ public class AtlasPushRecoveryStandingTest extends AvatarPushRecoveryStandingTes
    @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
-   public void testLongBackwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
+   public void testLongBackwardPushWhileStandingAfterControllerFailureKickedIn()
    {
       setMagnitude(100.0);
       super.testLongBackwardPushWhileStandingAfterControllerFailureKickedIn();
@@ -52,7 +51,7 @@ public class AtlasPushRecoveryStandingTest extends AvatarPushRecoveryStandingTes
    @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
-   public void testLongForwardPushWhileStanding() throws SimulationExceededMaximumTimeException
+   public void testLongForwardPushWhileStanding()
    {
       super.testLongForwardPushWhileStanding();
    }
@@ -60,7 +59,7 @@ public class AtlasPushRecoveryStandingTest extends AvatarPushRecoveryStandingTes
    @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
-   public void testLongForwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
+   public void testLongForwardPushWhileStandingAfterControllerFailureKickedIn()
    {
       setMagnitude(100.0);
       super.testLongForwardPushWhileStandingAfterControllerFailureKickedIn();
@@ -69,7 +68,7 @@ public class AtlasPushRecoveryStandingTest extends AvatarPushRecoveryStandingTes
    @Tag("humanoid-push-recovery")
    @Override
    @Test
-   public void testPushWhileStanding() throws SimulationExceededMaximumTimeException
+   public void testPushWhileStanding()
    {
       super.testPushWhileStanding();
    }
@@ -77,7 +76,7 @@ public class AtlasPushRecoveryStandingTest extends AvatarPushRecoveryStandingTes
    @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
-   public void testPushWhileStandingRecoveringAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
+   public void testPushWhileStandingRecoveringAfterControllerFailureKickedIn()
    {
       super.testPushWhileStandingRecoveringAfterControllerFailureKickedIn();
    }
@@ -86,7 +85,7 @@ public class AtlasPushRecoveryStandingTest extends AvatarPushRecoveryStandingTes
    @Tag("humanoid-push-recovery")
    @Override
    @Test
-   public void testRecoveryWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
+   public void testRecoveryWhileInFlamingoStance()
    {
       super.testRecoveryWhileInFlamingoStance();
    }
@@ -94,7 +93,7 @@ public class AtlasPushRecoveryStandingTest extends AvatarPushRecoveryStandingTes
    @Tag("humanoid-push-recovery")
    @Override
    @Test
-   public void testRecoveryForwardWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
+   public void testRecoveryForwardWhileInFlamingoStance()
    {
       super.testRecoveryForwardWhileInFlamingoStance();
    }
@@ -102,7 +101,7 @@ public class AtlasPushRecoveryStandingTest extends AvatarPushRecoveryStandingTes
    @Tag("humanoid-push-recovery")
    @Override
    @Test
-   public void testRecoverySidewaysWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
+   public void testRecoverySidewaysWhileInFlamingoStance()
    {
       super.testRecoverySidewaysWhileInFlamingoStance();
    }
@@ -110,7 +109,7 @@ public class AtlasPushRecoveryStandingTest extends AvatarPushRecoveryStandingTes
    @Tag("humanoid-push-recovery")
    @Override
    @Test
-   public void testRecoveryAngledWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
+   public void testRecoveryAngledWhileInFlamingoStance()
    {
       super.testRecoveryAngledWhileInFlamingoStance();
    }
@@ -118,7 +117,7 @@ public class AtlasPushRecoveryStandingTest extends AvatarPushRecoveryStandingTes
    @Tag("humanoid-push-recovery")
    @Override
    @Test
-   public void testRecoveryPushForwardWhileInFlamingoStanceAndAfterTouchDown() throws SimulationExceededMaximumTimeException
+   public void testRecoveryPushForwardWhileInFlamingoStanceAndAfterTouchDown()
    {
       super.testRecoveryPushForwardWhileInFlamingoStanceAndAfterTouchDown();
    }
@@ -126,7 +125,7 @@ public class AtlasPushRecoveryStandingTest extends AvatarPushRecoveryStandingTes
    @Tag("humanoid-push-recovery")
    @Override
    @Test
-   public void testFailureAfterRecoveryStep() throws SimulationExceededMaximumTimeException
+   public void testFailureAfterRecoveryStep()
    {
       super.testFailureAfterRecoveryStep();
    }

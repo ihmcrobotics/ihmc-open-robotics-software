@@ -57,6 +57,7 @@ import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.AngularExcursionCalculator;
 import us.ihmc.robotics.screwTheory.MomentumCalculator;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
@@ -152,7 +153,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
    private final YoDouble omega0 = new YoDouble("omega0", registry);
 
-   private final MomentumCalculator momentumCalculator;
+   private final AngularExcursionCalculator angularExcursionCalculator;
    private final YoFrameVector3D yoAngularMomentum, yoLinearMomentum;
    private final FilteredVelocityYoFrameVector yoAngularMomentumRate, yoLinearMomentumRate;
 
@@ -381,7 +382,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       yoCenterOfPressure.setToNaN();
 
       this.totalMass.set(totalMass);
-      momentumCalculator = new MomentumCalculator(fullRobotModel.getElevator().subtreeArray());
+      angularExcursionCalculator = new AngularExcursionCalculator(centerOfMassFrame, fullRobotModel.getElevator(), controlDT, registry, yoGraphicsListRegistry);
       yoAngularMomentum = new YoFrameVector3D("AngularMomentum", centerOfMassFrame, registry);
       yoLinearMomentum = new YoFrameVector3D("LinearMomentum", centerOfMassFrame, registry);
       
@@ -511,15 +512,14 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
    private final FrameVector3D angularMomentum = new FrameVector3D();
    private final FrameVector3D linearMomentum = new FrameVector3D();
-   private final Momentum robotMomentum = new Momentum();
 
    private void computeAngularAndLinearMomentum()
    {
-      robotMomentum.setToZero(centerOfMassFrame);
-      momentumCalculator.computeAndPack(robotMomentum);
-      angularMomentum.setIncludingFrame(robotMomentum.getAngularPart());
+      angularExcursionCalculator.compute();
+      linearMomentum.setIncludingFrame(angularExcursionCalculator.getLinearMomentum());
+      angularMomentum.setIncludingFrame(angularExcursionCalculator.getAngularMomentum());
+
       yoAngularMomentum.set(angularMomentum);
-      linearMomentum.setIncludingFrame(robotMomentum.getLinearPart());
       yoLinearMomentum.set(linearMomentum);
 
       filteredYoAngularMomentum.update();
@@ -534,7 +534,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
    public void getAdjustedDesiredCapturePoint(FramePoint2DReadOnly desiredCapturePoint, FramePoint2DBasics adjustedDesiredCapturePointToPack)
    {
-      angularMomentum.set(filteredYoAngularMomentum);
+      angularMomentum.setIncludingFrame(filteredYoAngularMomentum);
       ReferenceFrame comFrame = angularMomentum.getReferenceFrame();
       localDesiredCapturePoint.setIncludingFrame(desiredCapturePoint);
       localDesiredCapturePoint.changeFrameAndProjectToXYPlane(comFrame);
@@ -923,6 +923,11 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    public void attachControllerFailureListener(ControllerFailureListener listener)
    {
       this.controllerFailureListeners.add(listener);
+   }
+
+   public boolean detachControllerFailureListener(ControllerFailureListener listener)
+   {
+      return this.controllerFailureListeners.add(listener);
    }
 
    public void reportControllerFailureToListeners(FrameVector2D fallingDirection)

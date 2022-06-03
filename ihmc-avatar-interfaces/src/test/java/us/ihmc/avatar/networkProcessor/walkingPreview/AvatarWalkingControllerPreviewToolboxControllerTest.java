@@ -5,8 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.Random;
 import java.util.stream.Stream;
 
@@ -27,12 +25,11 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.RobotDefinitionTools;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
-import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxControllerTest;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
@@ -44,11 +41,11 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -59,20 +56,17 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
+import us.ihmc.scs2.definition.controller.interfaces.ControllerOutputBasics;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
-import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
+import us.ihmc.scs2.session.tools.SCS1GraphicConversionTools;
+import us.ihmc.scs2.simulation.SimulationSession;
+import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
-import us.ihmc.simulationconstructionset.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -89,8 +83,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
    private static final MaterialDefinition ghostMaterial = new MaterialDefinition(ColorDefinitions.Yellow().derive(0, 1, 1, 0.25));
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
-   private DRCSimulationTestHelper drcSimulationTestHelper;
-   private SimulationConstructionSet scs;
+   private SCS2AvatarTestingSimulation simulationTestHelper;
 
    private CommandInputManager toolboxInputManager;
    private StatusMessageOutputManager toolboxOutputManager;
@@ -102,14 +95,8 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
    private YoBoolean pauseToolboxUpdater;
    private YoBoolean initializationSucceeded;
 
-   private HumanoidFloatingRootJointRobot ghost;
-   private RobotController toolboxUpdater;
-
-   /**
-    * Returns a separate instance of the robot model that will be modified in this test to create a
-    * ghost robot.
-    */
-   public abstract DRCRobotModel getGhostRobotModel();
+   private Robot ghost;
+   private Controller toolboxUpdater;
 
    public void setup(double integrationDT)
    {
@@ -130,67 +117,53 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
                                                                         toolboxOutputManager,
                                                                         yoGraphicsListRegistry,
                                                                         toolboxMainRegistry);
+   }
 
-      DRCRobotModel ghostRobotModel = getGhostRobotModel();
-      RobotDefinition robotDefinition = ghostRobotModel.getRobotDefinition();
-      robotDefinition.setName("Ghost");
-      RobotDefinitionTools.setRobotDefinitionMaterial(robotDefinition, ghostMaterial);
-      ghost = ghostRobotModel.createHumanoidFloatingRootJointRobot(false);
-      ghost.setDynamic(false);
-      ghost.setGravity(0);
+   private void createGhostRobot()
+   {
+      DRCRobotModel robotModel = getRobotModel();
+      RobotDefinition ghostRobotDefinition = new RobotDefinition(robotModel.getRobotDefinition());
+      ghostRobotDefinition.setName("Ghost");
+      ghostRobotDefinition.ignoreAllJoints();
+      RobotDefinitionTools.setRobotDefinitionMaterial(ghostRobotDefinition, ghostMaterial);
+      ghost = new Robot(ghostRobotDefinition, SimulationSession.DEFAULT_INERTIAL_FRAME);
    }
 
    @AfterEach
    public void teardown()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
-      {
-         ThreadTools.sleepForever();
-      }
-
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcSimulationTestHelper != null)
+      if (simulationTestHelper != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
-      }
-
-      if (scs != null)
-      {
-         scs.closeAndDispose();
-         scs = null;
+         simulationTestHelper.finishTest();
+         simulationTestHelper = null;
       }
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
    @Test
-   public void testWalkingPreviewAlone() throws SimulationExceededMaximumTimeException, ControllerFailureException
+   public void testWalkingPreviewAlone()
    {
       double dt = 0.02;
       setup(dt);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      HumanoidFloatingRootJointRobot robot = getRobotModel().createHumanoidFloatingRootJointRobot(false);
-      robot.setDynamic(false);
+      RobotDefinition robotDefinition = getRobotModel().getRobotDefinition();
+      robotDefinition.ignoreAllJoints();
+      getRobotModel().getDefaultRobotInitialSetup(0.0, 0.0).initializeRobotDefinition(robotDefinition);
+      Robot robot = new Robot(robotDefinition, SimulationSession.DEFAULT_INERTIAL_FRAME);
       toolboxUpdater = createToolboxUpdater(robot);
-      robot.setController(toolboxUpdater);
+      robot.addController(toolboxUpdater);
 
-      scs = new SimulationConstructionSet(robot, simulationTestingParameters);
-      scs.setDT(toolboxController.getIntegrationDT(), 1);
-      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry, true);
-      scs.setCameraFix(0.0, 0.0, 1.0);
-      scs.setCameraPosition(8.0, 0.0, 3.0);
-      scs.startOnAThread();
-      if (simulationTestingParameters.getCreateGUI())
-      {
-         SimulationOverheadPlotterFactory plotterFactory = scs.createSimulationOverheadPlotterFactory();
-         plotterFactory.setShowOnStart(true);
-         plotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
-         plotterFactory.createOverheadPlotter();
-      }
+      SimulationSession simulationSession = new SimulationSession();
+      simulationSession.addRobot(robot);
+      simulationSession.setSessionDTSeconds(toolboxController.getIntegrationDT());
+      simulationSession.initializeBufferRecordTickPeriod(1);
 
-      getRobotModel().getDefaultRobotInitialSetup(0.0, 0.0).initializeRobot(robot);
+      simulationTestHelper = new SCS2AvatarTestingSimulation(simulationSession, getRobotModel(), null, yoGraphicsListRegistry, simulationTestingParameters);
+      simulationTestHelper.start();
+
       FullHumanoidRobotModel fullRobotModelAtInitialConfiguration = createFullRobotModelAtInitialConfiguration(2.0);
       RobotConfigurationData robotConfigurationData = HumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData(fullRobotModelAtInitialConfiguration);
       toolboxController.updateRobotConfigurationData(robotConfigurationData);
@@ -225,12 +198,10 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
 
       for (int i = 0; i < 1000; i++)
       {
-         toolboxUpdater.doControl();
+         simulationTestHelper.simulateOneTickNow();
 
          if (toolboxController.isWalkingControllerResetDone())
             expectedNumberOfFrames++;
-
-         scs.tickAndUpdate();
 
          if (toolboxController.isDone())
             break;
@@ -253,32 +224,36 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
 
    @SuppressWarnings("unchecked")
    @Test
-   public void testStepsInPlacePreviewAtControllerDT() throws SimulationExceededMaximumTimeException
+   public void testStepsInPlacePreviewAtControllerDT()
    {
       setup(getRobotModel().getControllerDT());
+      createGhostRobot();
       simulationTestingParameters.setRunMultiThreaded(false);
       simulationTestingParameters.setUsePefectSensors(true);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       toolboxUpdater = createToolboxUpdater(ghost);
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), new FlatGroundWithGhost(ghost));
-      drcSimulationTestHelper.createSimulation("WalkingPreview_OneStep");
-      drcSimulationTestHelper.getSimulationConstructionSet().addYoGraphicsListRegistry(yoGraphicsListRegistry);
+      SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
+                                                                                                                                             new FlatGroundEnvironment(),
+                                                                                                                                             simulationTestingParameters);
+      simulationTestHelperFactory.addSecondaryRobot(ghost);
+      simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+      simulationTestHelper.getRootRegistry().addChild(toolboxMainRegistry);
+      simulationTestHelper.getSimulationSession().getYoGraphicDefinitions().addAll(SCS1GraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
+      simulationTestHelper.start();
 
       //root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WalkingHighLevelHumanoidController.walkingCurrentState
       //root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.toolboxMain.WalkingControllerPreviewToolboxController.WalkingHighLevelHumanoidController.walkingCurrentState
-      YoEnum<WalkingStateEnum> controllerWalkingState = (YoEnum<WalkingStateEnum>) drcSimulationTestHelper.getYoVariableRegistry()
-                                                                                                          .findVariable("walkingCurrentState");
+      YoEnum<WalkingStateEnum> controllerWalkingState = (YoEnum<WalkingStateEnum>) simulationTestHelper.findVariable("walkingCurrentState");
       YoEnum<WalkingStateEnum> previewWalkingState = (YoEnum<WalkingStateEnum>) toolboxUpdater.getYoRegistry().findVariable("walkingCurrentState");
 
       assertNotNull(controllerWalkingState);
       assertNotNull(previewWalkingState);
 
-      FullHumanoidRobotModel controllerFullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      FullHumanoidRobotModel controllerFullRobotModel = simulationTestHelper.getControllerFullRobotModel();
       FullHumanoidRobotModel previewFullRobotModel = toolboxController.getFullRobotModel();
-      drcSimulationTestHelper.getAvatarSimulation().getHighLevelHumanoidControllerFactory().addUpdatable(t -> toolboxUpdater.doControl());
-      drcSimulationTestHelper.getSimulationConstructionSet().addYoRegistry(toolboxMainRegistry);
-      drcSimulationTestHelper.addRobotControllerOnControllerThread(new Synchronizer(controllerWalkingState, previewWalkingState));
+      simulationTestHelper.getAvatarSimulation().getHighLevelHumanoidControllerFactory().addUpdatable(t -> toolboxUpdater.doControl());
+      simulationTestHelper.addRobotControllerOnControllerThread(new Synchronizer(controllerWalkingState, previewWalkingState));
 
       SideDependentList<RigidBodyTrackingWatcher> footTrackingWatchers = new SideDependentList<>();
       SideDependentList<RigidBodyTrackingWatcher> handTrackingWatchers = new SideDependentList<>();
@@ -290,16 +265,16 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       {
          RigidBodyTrackingWatcher footTrackingWatcher = new RigidBodyTrackingWatcher(controllerFullRobotModel.getFoot(robotSide),
                                                                                      previewFullRobotModel.getFoot(robotSide));
-         drcSimulationTestHelper.addRobotControllerOnControllerThread(footTrackingWatcher);
+         simulationTestHelper.addRobotControllerOnControllerThread(footTrackingWatcher);
          footTrackingWatchers.put(robotSide, footTrackingWatcher);
 
          RigidBodyTrackingWatcher handTrackingWatcher = new RigidBodyTrackingWatcher(controllerFullRobotModel.getHand(robotSide),
                                                                                      previewFullRobotModel.getHand(robotSide));
-         drcSimulationTestHelper.addRobotControllerOnControllerThread(handTrackingWatcher);
+         simulationTestHelper.addRobotControllerOnControllerThread(handTrackingWatcher);
          handTrackingWatchers.put(robotSide, handTrackingWatcher);
       }
 
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      boolean success = simulationTestHelper.simulateNow(2.0);
       assertTrue(success);
 
       RobotConfigurationData robotConfigurationData = HumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData(controllerFullRobotModel);
@@ -325,7 +300,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
          footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(side, footPose.getPosition(), footPose.getOrientation()));
       }
 
-      drcSimulationTestHelper.publishToController(new FootstepDataListMessage(input.getFootsteps()));
+      simulationTestHelper.publishToController(new FootstepDataListMessage(input.getFootsteps()));
       toolboxInputManager.submitMessage(input);
 
       enableToolboxUpdater.set(true);
@@ -361,41 +336,45 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
     */
    @SuppressWarnings("unchecked")
    @Test
-   public void testResetFeature() throws SimulationExceededMaximumTimeException
+   public void testResetFeature()
    { // We check that the preview properly snaps to the current robot configuration before starting the preview.
       Random random = new Random(4720615);
 
       setup(getRobotModel().getControllerDT());
+      createGhostRobot();
       simulationTestingParameters.setRunMultiThreaded(false);
       simulationTestingParameters.setUsePefectSensors(true);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       toolboxUpdater = createToolboxUpdater(ghost);
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), new FlatGroundWithGhost(ghost));
+      SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
+                                                                                                                                             new FlatGroundEnvironment(),
+                                                                                                                                             simulationTestingParameters);
+      simulationTestHelperFactory.addSecondaryRobot(ghost);
       // Spawning at a random location
-      drcSimulationTestHelper.setStartingLocation(new OffsetAndYawRobotInitialSetup(EuclidCoreRandomTools.nextDouble(random, 5.0),
-                                                                                    EuclidCoreRandomTools.nextDouble(random, 5.0),
-                                                                                    0.0,
-                                                                                    EuclidCoreRandomTools.nextDouble(random, Math.PI)));
-      drcSimulationTestHelper.createSimulation("WalkingPreview_OneStep");
-      drcSimulationTestHelper.getSimulationConstructionSet().addYoGraphicsListRegistry(yoGraphicsListRegistry);
+      simulationTestHelperFactory.setStartingLocationOffset(new OffsetAndYawRobotInitialSetup(EuclidCoreRandomTools.nextDouble(random, 5.0),
+                                                                                              EuclidCoreRandomTools.nextDouble(random, 5.0),
+                                                                                              0.0,
+                                                                                              EuclidCoreRandomTools.nextDouble(random, Math.PI)));
+      simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+      simulationTestHelper.getRootRegistry().addChild(toolboxMainRegistry);
+      simulationTestHelper.getSimulationSession().getYoGraphicDefinitions().addAll(SCS1GraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
+      simulationTestHelper.start();
 
       //root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WalkingHighLevelHumanoidController.walkingCurrentState
       //root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.toolboxMain.WalkingControllerPreviewToolboxController.WalkingHighLevelHumanoidController.walkingCurrentState
-      YoEnum<WalkingStateEnum> controllerWalkingState = (YoEnum<WalkingStateEnum>) drcSimulationTestHelper.getYoVariableRegistry()
-                                                                                                          .findVariable("walkingCurrentState");
+      YoEnum<WalkingStateEnum> controllerWalkingState = (YoEnum<WalkingStateEnum>) simulationTestHelper.findVariable("walkingCurrentState");
       YoEnum<WalkingStateEnum> previewWalkingState = (YoEnum<WalkingStateEnum>) toolboxUpdater.getYoRegistry().findVariable("walkingCurrentState");
 
       assertNotNull(controllerWalkingState);
       assertNotNull(previewWalkingState);
 
-      FullHumanoidRobotModel controllerFullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      FullHumanoidRobotModel controllerFullRobotModel = simulationTestHelper.getControllerFullRobotModel();
       FullHumanoidRobotModel previewFullRobotModel = toolboxController.getFullRobotModel();
-      drcSimulationTestHelper.getAvatarSimulation().getHighLevelHumanoidControllerFactory().addUpdatable(t -> toolboxUpdater.doControl());
-      drcSimulationTestHelper.getSimulationConstructionSet().addYoRegistry(toolboxMainRegistry);
+      simulationTestHelper.getAvatarSimulation().getHighLevelHumanoidControllerFactory().addUpdatable(t -> toolboxUpdater.doControl());
       Synchronizer synchronizer = new Synchronizer(controllerWalkingState, previewWalkingState);
       synchronizer.synchronize.set(false);
-      drcSimulationTestHelper.addRobotControllerOnControllerThread(synchronizer);
+      simulationTestHelper.addRobotControllerOnControllerThread(synchronizer);
 
       SideDependentList<RigidBodyTrackingWatcher> footTrackingWatchers = new SideDependentList<>();
       SideDependentList<RigidBodyTrackingWatcher> handTrackingWatchers = new SideDependentList<>();
@@ -407,29 +386,21 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       {
          RigidBodyTrackingWatcher footTrackingWatcher = new RigidBodyTrackingWatcher(controllerFullRobotModel.getFoot(robotSide),
                                                                                      previewFullRobotModel.getFoot(robotSide));
-         drcSimulationTestHelper.addRobotControllerOnControllerThread(footTrackingWatcher);
+         simulationTestHelper.addRobotControllerOnControllerThread(footTrackingWatcher);
          footTrackingWatchers.put(robotSide, footTrackingWatcher);
 
          RigidBodyTrackingWatcher handTrackingWatcher = new RigidBodyTrackingWatcher(controllerFullRobotModel.getHand(robotSide),
                                                                                      previewFullRobotModel.getHand(robotSide));
-         drcSimulationTestHelper.addRobotControllerOnControllerThread(handTrackingWatcher);
+         simulationTestHelper.addRobotControllerOnControllerThread(handTrackingWatcher);
          handTrackingWatchers.put(robotSide, handTrackingWatcher);
       }
 
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      boolean success = simulationTestHelper.simulateNow(1.0);
       assertTrue(success);
 
       RigidBodyBasics chest = controllerFullRobotModel.getChest();
       RigidBodyBasics pelvis = controllerFullRobotModel.getPelvis();
       MovingReferenceFrame pelvisFrame = pelvis.getBodyFixedFrame();
-      { // Camera
-         FramePose3D cameraPose = new FramePose3D(pelvisFrame);
-         cameraPose.changeFrame(worldFrame);
-         Point3D cameraFix = new Point3D(cameraPose.getPosition());
-         cameraPose.getOrientation().setToYawOrientation(cameraPose.getYaw());
-         cameraPose.appendTranslation(6.0, 0.0, 0.5);
-         drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, new Point3D(cameraPose.getPosition()));
-      }
 
       ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       /////////////////////////////// That's where we mess up with the robot configuration by requesting the controller to move around:
@@ -441,10 +412,10 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
          footstep.appendYawRotation(Math.toRadians(30.0));
          FootstepDataListMessage message = new FootstepDataListMessage();
          message.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, footstep));
-         drcSimulationTestHelper.publishToController(message);
+         simulationTestHelper.publishToController(message);
       }
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
+      success = simulationTestHelper.simulateNow(3.0);
       assertTrue(success);
 
       for (RobotSide robotSide : RobotSide.values)
@@ -453,7 +424,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
          double[] desiredJointPositions = Stream.of(MultiBodySystemTools.createOneDoFJointPath(chest, hand))
                                                 .mapToDouble(joint -> nextJointConfiguration(random, 0.5, joint)).toArray();
          ArmTrajectoryMessage message = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, 1.0, desiredJointPositions);
-         drcSimulationTestHelper.publishToController(message);
+         simulationTestHelper.publishToController(message);
       }
 
       { // Let's move the neck joints
@@ -461,7 +432,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
          double[] desiredJointPositions = Stream.of(MultiBodySystemTools.createOneDoFJointPath(chest, head))
                                                 .mapToDouble(joint -> nextJointConfiguration(random, 0.5, joint)).toArray();
          NeckTrajectoryMessage message = HumanoidMessageTools.createNeckTrajectoryMessage(1.0, desiredJointPositions);
-         drcSimulationTestHelper.publishToController(message);
+         simulationTestHelper.publishToController(message);
       }
 
       { // Now the chest
@@ -471,7 +442,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
 
          FrameQuaternion chestOrientation = new FrameQuaternion(spineJointsCopy[spineJointsCopy.length - 1].getSuccessor().getBodyFixedFrame());
          chestOrientation.changeFrame(pelvisFrame);
-         drcSimulationTestHelper.publishToController(HumanoidMessageTools.createChestTrajectoryMessage(1.0, chestOrientation, pelvisFrame));
+         simulationTestHelper.publishToController(HumanoidMessageTools.createChestTrajectoryMessage(1.0, chestOrientation, pelvisFrame));
       }
 
       { // The pelvis
@@ -479,10 +450,10 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
          pelvisPose.changeFrame(worldFrame);
          pelvisPose.appendRotation(EuclidCoreRandomTools.nextQuaternion(random, Math.toRadians(10.0)));
          pelvisPose.prependTranslation(EuclidCoreRandomTools.nextPoint3D(random, 0.15));
-         drcSimulationTestHelper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(1.0, pelvisPose));
+         simulationTestHelper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(1.0, pelvisPose));
       }
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      success = simulationTestHelper.simulateNow(2.0);
       assertTrue(success);
       ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -510,7 +481,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
          footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(side, footPose));
       }
 
-      drcSimulationTestHelper.publishToController(new FootstepDataListMessage(input.getFootsteps()));
+      simulationTestHelper.publishToController(new FootstepDataListMessage(input.getFootsteps()));
       toolboxInputManager.submitMessage(input);
 
       enableToolboxUpdater.set(true);
@@ -577,13 +548,13 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       assertTrue(angularVelocityMean < angularVelocityTreshold, errorMessage);
    }
 
-   private void runToolboxController(int maxNumberOfIterations) throws SimulationExceededMaximumTimeException
+   private void runToolboxController(int maxNumberOfIterations)
    {
       enableToolboxUpdater.set(true);
 
       for (int i = 0; i < maxNumberOfIterations; i++)
       {
-         if (!drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25))
+         if (!simulationTestHelper.simulateNow(0.25))
             break;
          if (toolboxController.isDone())
             break;
@@ -592,11 +563,12 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       enableToolboxUpdater.set(false);
    }
 
-   private RobotController createToolboxUpdater(Robot robotToUpdate)
+   private Controller createToolboxUpdater(Robot robotToUpdate)
    {
-      return new RobotController()
+      return new Controller()
       {
-         private final JointAnglesWriter jointAnglesWriter = new JointAnglesWriter(robotToUpdate, toolboxController.getFullRobotModel());
+         private final JointReadOnly[] desiredJoints = MultiBodySystemTools.collectSubtreeJoints(toolboxController.getFullRobotModel().getElevator());
+         private final ControllerOutputBasics scsInput = robotToUpdate.getControllerOutput();
 
          @Override
          public void doControl()
@@ -609,14 +581,13 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
                if (initializationSucceeded.getBooleanValue() && !pauseToolboxUpdater.getValue())
                {
                   toolboxController.updateInternal();
-                  jointAnglesWriter.updateRobotConfigurationBasedOnFullRobotModel();
+
+                  for (JointReadOnly joint : desiredJoints)
+                  {
+                     scsInput.getJointOutput(joint).setConfiguration(joint);
+                  }
                }
             }
-         }
-
-         @Override
-         public void initialize()
-         {
          }
 
          @Override
@@ -631,22 +602,6 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
             return toolboxMainRegistry.getName();
          }
       };
-   }
-
-   private static class FlatGroundWithGhost extends FlatGroundEnvironment
-   {
-      private final Robot ghost;
-
-      public FlatGroundWithGhost(Robot ghost)
-      {
-         this.ghost = ghost;
-      }
-
-      @Override
-      public List<Robot> getEnvironmentRobots()
-      {
-         return Collections.singletonList(ghost);
-      }
    }
 
    private class RigidBodyTrackingWatcher implements RobotController
@@ -841,15 +796,9 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
 
    private FullHumanoidRobotModel createFullRobotModelAtInitialConfiguration(double initialYaw)
    {
-      DRCRobotModel robotModel = getRobotModel();
-      FullHumanoidRobotModel initialFullRobotModel = robotModel.createFullRobotModel();
-      HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
-      robotModel.getDefaultRobotInitialSetup(0.0, initialYaw).initializeRobot(robot);
-      DRCPerfectSensorReaderFactory drcPerfectSensorReaderFactory = new DRCPerfectSensorReaderFactory(robot, 0);
-      drcPerfectSensorReaderFactory.build(initialFullRobotModel.getRootJoint(), null, null, null, null);
-      SensorDataContext sensorDataContext = new SensorDataContext();
-      long timestamp = drcPerfectSensorReaderFactory.getSensorReader().read(sensorDataContext);
-      drcPerfectSensorReaderFactory.getSensorReader().compute(timestamp, sensorDataContext);
+      FullHumanoidRobotModel initialFullRobotModel = getRobotModel().createFullRobotModel();
+      getRobotModel().getDefaultRobotInitialSetup(0.0, initialYaw).initializeRobot(initialFullRobotModel.getElevator());
+      initialFullRobotModel.updateFrames();
       return initialFullRobotModel;
    }
 }

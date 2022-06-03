@@ -46,7 +46,11 @@ public class VideoPacketPubSubType implements us.ihmc.pubsub.TopicDataType<contr
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (262144 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (2000000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -80,6 +84,12 @@ public class VideoPacketPubSubType implements us.ihmc.pubsub.TopicDataType<contr
       current_alignment += (data.getData().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getPosition(), current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getOrientation(), current_alignment);
@@ -98,9 +108,13 @@ public class VideoPacketPubSubType implements us.ihmc.pubsub.TopicDataType<contr
 
       cdr.write_type_11(data.getTimestamp());
 
-      if(data.getData().size() <= 262144)
+      if(data.getData().size() <= 2000000)
       cdr.write_type_e(data.getData());else
           throw new RuntimeException("data field exceeds the maximum length");
+
+      cdr.write_type_3(data.getImageWidth());
+
+      cdr.write_type_3(data.getImageHeight());
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getPosition(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getOrientation(), cdr);
@@ -116,6 +130,10 @@ public class VideoPacketPubSubType implements us.ihmc.pubsub.TopicDataType<contr
       data.setTimestamp(cdr.read_type_11());
       	
       cdr.read_type_e(data.getData());	
+      data.setImageWidth(cdr.read_type_3());
+      	
+      data.setImageHeight(cdr.read_type_3());
+      	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getPosition(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getOrientation(), cdr);	
       controller_msgs.msg.dds.IntrinsicParametersMessagePubSubType.read(data.getIntrinsicParameters(), cdr);	
@@ -129,6 +147,8 @@ public class VideoPacketPubSubType implements us.ihmc.pubsub.TopicDataType<contr
       ser.write_type_9("video_source", data.getVideoSource());
       ser.write_type_11("timestamp", data.getTimestamp());
       ser.write_type_e("data", data.getData());
+      ser.write_type_3("image_width", data.getImageWidth());
+      ser.write_type_3("image_height", data.getImageHeight());
       ser.write_type_a("position", new geometry_msgs.msg.dds.PointPubSubType(), data.getPosition());
 
       ser.write_type_a("orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientation());
@@ -144,6 +164,8 @@ public class VideoPacketPubSubType implements us.ihmc.pubsub.TopicDataType<contr
       data.setVideoSource(ser.read_type_9("video_source"));
       data.setTimestamp(ser.read_type_11("timestamp"));
       ser.read_type_e("data", data.getData());
+      data.setImageWidth(ser.read_type_3("image_width"));
+      data.setImageHeight(ser.read_type_3("image_height"));
       ser.read_type_a("position", new geometry_msgs.msg.dds.PointPubSubType(), data.getPosition());
 
       ser.read_type_a("orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientation());

@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.Map;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import us.ihmc.communication.packets.StereoPointCloudCompression;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression;
 
 public class StereoVisionPointCloudDataLoader
 {

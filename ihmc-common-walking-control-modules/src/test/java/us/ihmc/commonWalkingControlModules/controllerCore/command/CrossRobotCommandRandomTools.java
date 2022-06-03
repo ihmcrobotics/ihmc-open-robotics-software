@@ -1620,6 +1620,7 @@ public class CrossRobotCommandRandomTools
       next.setSchedulerTick(random.nextLong());
       next.setControllerRan(random.nextBoolean());
       next.setEstimatorRan(random.nextBoolean());
+      next.setPerceptionRan(random.nextBoolean());
       return next;
    }
 
@@ -1656,6 +1657,7 @@ public class CrossRobotCommandRandomTools
       next.setSchedulerTick(random.nextLong());
       next.setControllerRan(random.nextBoolean());
       next.setEstimatorRan(random.nextBoolean());
+      next.setPerceptionRan(random.nextBoolean());
       return next;
    }
 
@@ -1854,6 +1856,7 @@ public class CrossRobotCommandRandomTools
       next.setUseMomentumRecoveryMode(random.nextBoolean());
       next.setDesiredCapturePoint(nextFramePoint2D(random, possibleFrames));
       next.setDesiredCapturePointVelocity(nextFrameVector2D(random, possibleFrames));
+      next.setDesiredCapturePointAtEndOfState(nextFramePoint2D(random, possibleFrames));
       next.setInitializeOnStateChange(random.nextBoolean());
       next.setKeepCoPInsideSupportPolygon(random.nextBoolean());
       next.setMinimizeAngularMomentumRateZ(random.nextBoolean());

@@ -492,6 +492,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(HeadTrajectoryMessagePubSubType.class);
       registerPacketField(WalkOverTerrainGoalPacketPubSubType.class);
       registerPacketField(PlanarRegionsListMessagePubSubType.class);
+      registerPacketField(StepConstraintsListMessagePubSubType.class);
       registerPacketField(HeightMapMessagePubSubType.class);
       registerPacketField(BehaviorControlModePacketPubSubType.class);
       registerPacketField(AccelStampedPubSubType.class);
@@ -704,6 +705,8 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       // Planar regions
       registerPacketClass(PlanarRegionsListMessage.class);
       registerPacketField(PlanarRegionsListMessage.class);
+      registerPacketClass(StepConstraintsListMessage.class);
+      registerPacketField(StepConstraintsListMessage.class);
       registerPacketClass(PlanarRegionMessage.class);
       registerPacketField(PlanarRegionMessage.class);
       registerPacketField(PlanarRegionMessage[].class);

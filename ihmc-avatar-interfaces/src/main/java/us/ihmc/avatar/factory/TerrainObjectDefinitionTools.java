@@ -12,6 +12,14 @@ import us.ihmc.simulationToolkit.physicsEngine.ExperimentalSimulation;
 
 public class TerrainObjectDefinitionTools
 {
+   public static TerrainObjectDefinition toTerrainObjectDefinition(CommonAvatarEnvironmentInterface environment)
+   {
+      CollidableHelper collidableHelper = new CollidableHelper();
+      String robotCollisionName = "robot";
+      String terrainCollisionName = "terrain";
+      return toTerrainObjectDefinition(environment, collidableHelper, robotCollisionName, terrainCollisionName);
+   }
+
    public static TerrainObjectDefinition toTerrainObjectDefinition(CommonAvatarEnvironmentInterface environment,
                                                                    CollidableHelper collidableHelper,
                                                                    String terrainCollisionMask,

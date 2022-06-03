@@ -113,26 +113,19 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters);
       this.visibilityGraphPlanner = new VisibilityGraphPathPlanner(visibilityGraphParameters, pathPostProcessor);
       this.narrowPassageBodyPathOptimizer = new NarrowPassageBodyPathOptimizer(footstepPlannerParameters, null);
-      this.bodyPathPlanner = new AStarBodyPathPlanner(footstepPlannerParameters, footPolygons);
+      this.bodyPathPlanner = new AStarBodyPathPlanner(footstepPlannerParameters, footPolygons, stopwatch);
       this.planThenSnapPlanner = new PlanThenSnapPlanner(footstepPlannerParameters, footPolygons);
       this.aStarFootstepPlanner = new AStarFootstepPlanner(footstepPlannerParameters,
                                                            footPolygons,
                                                            bodyPathPlanHolder,
                                                            swingPlannerParameters,
                                                            walkingControllerParameters,
-                                                           stepReachabilityData);
+                                                           stepReachabilityData,
+                                                           stopwatch,
+                                                           statusCallbacks);
 
       this.bodyPathVariableDescriptors = collectVariableDescriptors(bodyPathPlanner.getRegistry());
       this.footstepPlanVariableDescriptors = collectVariableDescriptors(aStarFootstepPlanner.getRegistry());
-
-      addStatusCallback(output ->
-                        {
-                           if (output.getFootstepPlanningResult() == null)
-                              output.getPlannerTimings().setTimePlanningBodyPathSeconds(stopwatch.lapElapsed());
-                           else
-                              output.getPlannerTimings().setTimePlanningStepsSeconds(stopwatch.lapElapsed());
-                        });
-      addStatusCallback(output -> output.getPlannerTimings().setTotalElapsedSeconds(stopwatch.totalElapsed()));
    }
 
    public FootstepPlannerOutput handleRequest(FootstepPlannerRequest request)
@@ -174,6 +167,8 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       this.request.set(request);
       requestCallbacks.forEach(callback -> callback.accept(request));
       output.setRequestId(request.getRequestId());
+      output.setRequestId(request.getRequestId());
+      output.setPlanarRegionsList(request.getPlanarRegionsList());
       bodyPathPlanHolder.getPlan().clear();
 
       aStarFootstepPlanner.clearLoggedData();
@@ -204,6 +199,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
       // record time
       output.getPlannerTimings().setTimeBeforePlanningSeconds(stopwatch.lap());
+      output.getPlannerTimings().setTotalElapsedSeconds(stopwatch.totalElapsed());
 
       if (request.getPlanBodyPath() && !flatGroundMode && !heightMapAvailable)
       {
@@ -223,11 +219,9 @@ public class FootstepPlanningModule implements CloseableAndDisposable
             bodyPathPlannerResult = narrowPassageBodyPathOptimizer.getBodyPathPlanningResult();
          }
 
-         if (!bodyPathPlannerResult.validForExecution() || (waypoints.size() < 2 && request.getAbortIfBodyPathPlannerFails()))
+         if ((!bodyPathPlannerResult.validForExecution() || (waypoints.size() < 2) && request.getAbortIfBodyPathPlannerFails()))
          {
             reportBodyPathPlan(bodyPathPlannerResult);
-            output.setBodyPathPlanningResult(bodyPathPlannerResult);
-            statusCallbacks.forEach(callback -> callback.accept(output));
             return;
          }
          else if (waypoints.size() < 2 && !request.getAbortIfBodyPathPlannerFails())
@@ -249,8 +243,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       else if (request.getPlanBodyPath() && !flatGroundMode && heightMapAvailable)
       {
          bodyPathPlanner.setHeightMapData(heightMapData);
-         bodyPathPlanner.setStatusCallbacks(statusCallbacks);
-
          bodyPathPlanner.handleRequest(request, output);
          List<Pose3D> bodyPathWaypoints = output.getBodyPath();
 
@@ -314,7 +306,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
       if (request.getPerformAStarSearch())
       {
-         aStarFootstepPlanner.setStatusCallbacks(statusCallbacks);
          aStarFootstepPlanner.handleRequest(request, output);
       }
       else
@@ -450,6 +441,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
    public void halt()
    {
+      bodyPathPlanner.halt();
       aStarFootstepPlanner.halt();
    }
 

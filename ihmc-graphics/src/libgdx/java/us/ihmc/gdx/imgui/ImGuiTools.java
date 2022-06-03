@@ -5,6 +5,9 @@ import imgui.*;
 import imgui.flag.ImGuiFreeTypeBuilderFlags;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiKey;
+import imgui.type.ImDouble;
+import imgui.type.ImFloat;
+import imgui.type.ImInt;
 import imgui.type.ImString;
 import org.apache.commons.lang3.SystemUtils;
 import org.lwjgl.glfw.GLFW;
@@ -32,6 +35,7 @@ public class ImGuiTools
    public static final float FLOAT_MIN = -3.40282346638528859811704183484516925e+38F / 2.0f;
    public static final float FLOAT_MAX = 3.40282346638528859811704183484516925e+38F / 2.0f;
 
+   private static ImFont consoleFont;
    private static ImFont mediumFont;
    private static ImFont bigFont;
    private static ImFont nodeFont;
@@ -54,6 +58,27 @@ public class ImGuiTools
    {
       glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
       glClear(GL41.GL_COLOR_BUFFER_BIT);
+   }
+
+   public static boolean volatileInputInt(String label, ImInt imInt)
+   {
+      int inputTextFlags = ImGuiInputTextFlags.None;
+      inputTextFlags += ImGuiInputTextFlags.EnterReturnsTrue;
+      return ImGui.inputInt(label, imInt, 1, 100, inputTextFlags);
+   }
+
+   public static boolean volatileInputFloat(String label, ImFloat imFloat)
+   {
+      int inputTextFlags = ImGuiInputTextFlags.None;
+      inputTextFlags += ImGuiInputTextFlags.EnterReturnsTrue;
+      return ImGui.inputFloat(label, imFloat, 0, 0, "%.3f", inputTextFlags);
+   }
+
+   public static boolean volatileInputDouble(String label, ImDouble imDouble)
+   {
+      int inputTextFlags = ImGuiInputTextFlags.None;
+      inputTextFlags += ImGuiInputTextFlags.EnterReturnsTrue;
+      return ImGui.inputDouble(label, imDouble, 0, 0, "%.6f", inputTextFlags);
    }
 
    public static boolean inputText(String label, ImString text)
@@ -95,6 +120,7 @@ public class ImGuiTools
    public static ImFont setupFonts(ImGuiIO io, int fontSizeLevel)
    {
       final ImFontConfig fontConfig = new ImFontConfig(); // Natively allocated object, should be explicitly destroyed
+      final ImFontConfig consoleFontConfig = new ImFontConfig();
       final ImFontConfig mediumFontConfig = new ImFontConfig();
       final ImFontConfig bigFontConfig = new ImFontConfig();
       final ImFontConfig nodeFontConfig = new ImFontConfig();
@@ -113,6 +139,7 @@ public class ImGuiTools
 //      fontConfig.setRasterizerMultiply(2.0f);
 //      fontConfig.setPixelSnapH(true);
       fontConfig.setFontBuilderFlags(fontsFlags);
+      consoleFontConfig.setFontBuilderFlags(fontsFlags);
       mediumFontConfig.setFontBuilderFlags(fontsFlags);
       bigFontConfig.setFontBuilderFlags(fontsFlags);
       nodeFontConfig.setFontBuilderFlags(fontsFlags);
@@ -156,6 +183,25 @@ public class ImGuiTools
          nodeFontConfig.setName("DejaVuSans.ttf, 26px 1/2");
          nodeFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 26.0f, nodeFontConfig);
       }
+      Path lucidaConsole = Paths.get(fontDir, "lucon.ttf");
+
+      ImFontGlyphRangesBuilder glyphRangesBuilder = new ImFontGlyphRangesBuilder();
+      glyphRangesBuilder.addRanges(ImGui.getIO().getFonts().getGlyphRangesDefault());
+      glyphRangesBuilder.addRanges(new short[] {0x2500, 0x257F, 0}); // Box drawing https://www.compart.com/en/unicode/block/U+2500
+      glyphRangesBuilder.addRanges(new short[] {0x2580, 0x259F, 0}); // Block elements https://www.compart.com/en/unicode/block/U+2580
+      glyphRangesBuilder.addRanges(new short[] {0x25A0, 0x25FF, 0}); // Geometric shapes https://www.compart.com/en/unicode/block/U+25A0
+      short[] glyphRanges = glyphRangesBuilder.buildRanges();
+
+      if (Files.exists(lucidaConsole))
+      {
+         consoleFontConfig.setName("lucon.ttf, 12px");
+         consoleFont = io.getFonts().addFontFromFileTTF(lucidaConsole.toAbsolutePath().toString(), 12.0f, consoleFontConfig, glyphRanges);
+      }
+      else
+      {
+         consoleFontConfig.setName("dejaVu/DejaVuSansMono.ttf, 12px");
+         consoleFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSansMono.ttf"), 12.0f, consoleFontConfig, glyphRanges);
+      }
 //      fontConfig.setName("Roboto-Regular.ttf, 14px"); // This name will be displayed in Style Editor
 //      fontToReturn = fontAtlas.addFontFromMemoryTTF(loadFromResources("Roboto-Regular.ttf"), size, fontConfig);
 //      fontConfig.setName("Roboto-Regular.ttf, 16px"); // We can apply a new config value every time we add a new font
@@ -169,6 +215,7 @@ public class ImGuiTools
       ImGui.getIO().getFonts().build();
 
       fontConfig.destroy(); // After all fonts were added we don't need this config more
+      consoleFontConfig.destroy();
       mediumFontConfig.destroy();
       bigFontConfig.destroy();
       nodeFontConfig.destroy();
@@ -185,8 +232,18 @@ public class ImGuiTools
       return bigFont;
    }
 
+   public static ImFont getMediumFont()
+   {
+      return mediumFont;
+   }
+
    public static ImFont getNodeFont() {
       return nodeFont;
+   }
+
+   public static ImFont getConsoleFont()
+   {
+      return consoleFont;
    }
 
    public static byte[] loadFromResources(final String fileName)

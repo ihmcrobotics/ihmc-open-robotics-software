@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.gizmo.DynamicGDXModel;
 
@@ -25,7 +25,7 @@ public class FrameGDXGraphicsNode
       this.referenceFrame = referenceFrame;
 
       if (ENABLE_REFERENCE_FRAME_GRAPHICS)
-         coordinateFrame = GDXModelPrimitives.createCoordinateFrameInstance(0.15);
+         coordinateFrame = GDXModelBuilder.createCoordinateFrameInstance(0.15);
    }
 
    public void addModelPart(DynamicGDXModel model, String name)
