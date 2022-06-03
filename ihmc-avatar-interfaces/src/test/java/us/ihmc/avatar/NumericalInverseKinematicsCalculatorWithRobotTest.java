@@ -16,7 +16,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -107,7 +106,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
       if (VISUALIZE)
       {
-         scs = new SimulationConstructionSet2();
+         scs = new SimulationConstructionSet2(SimulationConstructionSet2.doNothingPhysicsEngine());
          scs.addRobot(sdfRobot);
          scs.addRegistry(registry);
 
@@ -127,8 +126,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
          yoGraphicsListRegistry.registerYoGraphic("InverseKinematicsCalculatorTest", testPositionInverseKinematicsViz);
 
          scs.addYoGraphics(SCS1GraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
-         scs.startSimulationThread();
-         scs.waitUntilVisualizerFullyUp();
+         scs.start(true, true, true);
       }
 
       fullRobotModel = robotModel.createFullRobotModel();
@@ -213,7 +211,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
             {
                yoErrorScalar.set(errorScalar);
                jointAnglesWriter.run();
-               scs.tickAndWrite();
+               scs.simulateNow(1);
             }
          };
 
@@ -224,7 +222,12 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
    @AfterEach
    public void tearDown()
    {
-      ReferenceFrameTools.clearWorldFrameTree();
+      if (scs != null)
+      {
+         scs.waitUntilVisualizerDown();
+         scs.shutdownSession();
+         scs = null;
+      }
    }
 
    @Test
@@ -344,7 +347,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
       jointAnglesWriter.run();
       if (scs != null)
-         scs.tickAndWrite();
+         scs.simulateNow(1);
 
       boolean positionErrorAcceptable = (positionError.getDoubleValue() < errorThreshold);
 

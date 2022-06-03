@@ -49,8 +49,7 @@ public class GoalOrientedTestConductor
 
       YoDouble yoTime = scs.getTime();
       yoTime.addListener(this::notifyOfVariableChange);
-      scs.startSimulationThread();
-      scs.waitUntilVisualizerFullyUp(); 
+      scs.start(true, false, true);
       scs.addSimulationThrowableListener(t -> simulationDoneWithException(t));
    }
 

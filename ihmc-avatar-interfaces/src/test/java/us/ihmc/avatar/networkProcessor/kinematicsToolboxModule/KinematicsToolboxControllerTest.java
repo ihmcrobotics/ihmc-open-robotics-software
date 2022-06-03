@@ -139,13 +139,9 @@ public final class KinematicsToolboxControllerTest
          scs.addRobot(robot);
          scs.addYoGraphics(SCS1GraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
 
-         scs.setJavaFXThreadImplicitExit(false);
-         scs.startSimulationThread();
+         scs.start(true, true, true);
          scs.setCameraFocusPosition(0.0, 0.0, 1.0);
          scs.setCameraPosition(8.0, 0.0, 3.0);
-         LogTools.info("Waiting for GUI");
-         scs.waitUntilVisualizerFullyUp();
-         LogTools.info("GUI's up");
       }
    }
 
