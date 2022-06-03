@@ -52,6 +52,7 @@ public class AngularMomentumHandlerTest
                                                                                                                  gravityZ,
                                                                                                                  null,
                                                                                                                  null,
+                                                                                                                 null,
                                                                                                                  SettableContactStateProvider::new,
                                                                                                                  registry,
                                                                                                                  null);
@@ -274,6 +275,7 @@ public class AngularMomentumHandlerTest
 
       AngularMomentumHandler<SettableContactStateProvider> angularMomentumHandler = new AngularMomentumHandler<>(1.0,
                                                                                                                  gravityZ,
+                                                                                                                 null,
                                                                                                                  null,
                                                                                                                  null,
                                                                                                                  SettableContactStateProvider::new,
