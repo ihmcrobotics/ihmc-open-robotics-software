@@ -12,6 +12,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.spinnaker.Spinnaker_C.spinImage;
 import org.bytedeco.spinnaker.global.Spinnaker_C;
 import std_msgs.msg.dds.Float64;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -32,6 +33,7 @@ import java.time.Instant;
 public class DualBlackflyCamera
 {
    private String serialNumber;
+   private ROS2SyncedRobotModel syncedRobot;
    private SpinnakerBlackfly blackfly;
    private final spinImage spinImage = new spinImage();
    private BytePointer spinImageDataPointer;
@@ -59,9 +61,10 @@ public class DualBlackflyCamera
    private final Stopwatch copyDuration = new Stopwatch();
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
 
-   public DualBlackflyCamera(String serialNumber)
+   public DualBlackflyCamera(String serialNumber, ROS2SyncedRobotModel syncedRobot)
    {
       this.serialNumber = serialNumber;
+      this.syncedRobot = syncedRobot;
    }
 
    public void create(SpinnakerBlackfly blackfly, RobotSide side, ROS2Helper ros2Helper, RealtimeROS2Node realtimeROS2Node)
@@ -122,13 +125,32 @@ public class DualBlackflyCamera
          }
          else // We don't want to publish until the node is spinning which will be next time
          {
-            long acquisitionTime = System.nanoTime();
             blackfly.setBytedecoPointerToSpinImageData(spinImage, spinImageDataPointer);
             blackflySourceImage.rewind();
             blackflySourceImage.changeAddress(spinImageDataPointer.address());
 
+            opencv_calib3d.undistort(blackflySourceImage.getBytedecoOpenCVMat(), undistortedImageMat, cameraMatrix, distortionCoefficients);
+
+            if (side == RobotSide.RIGHT)
+            {
+
+               if (arUcoMarkerDetection == null)
+               {
+                  undistortedImage = new BytedecoImage(undistortedImageMat);
+
+                  arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
+                  arUcoMarkerDetection.create(undistortedImage, cameraPinholeBrown, syncedRobot.getReferenceFrames().getObjectDetectionCameraFrame());
+               }
+
+               syncedRobot.update();
+
+               arUcoMarkerDetection.update();
+
+
+            }
+
             convertColorDuration.start();
-            opencv_imgproc.cvtColor(blackflySourceImage.getBytedecoOpenCVMat(), yuv420Image, opencv_imgproc.COLOR_RGB2YUV_I420);
+            opencv_imgproc.cvtColor(undistortedImageMat, yuv420Image, opencv_imgproc.COLOR_RGB2YUV_I420);
             convertColorDuration.suspend();
 
             encodingDuration.start();
@@ -146,20 +168,6 @@ public class DualBlackflyCamera
             ros2VideoPublisher.publish(videoPacket);
 
             imagePublishRateCalculator.ping();
-
-            if (side == RobotSide.RIGHT)
-            {
-               opencv_calib3d.undistort(blackflySourceImage.getBytedecoOpenCVMat(), undistortedImageMat, cameraMatrix, distortionCoefficients);
-
-               if (undistortedImage == null)
-               {
-                  undistortedImage = new BytedecoImage(undistortedImageMat);
-
-                  arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
-                  arUcoMarkerDetection.create(undistortedImage, cameraPinholeBrown, ReferenceFrame.getWorldFrame());
-               }
-
-            }
          }
       }
       Spinnaker_C.spinImageRelease(spinImage);
