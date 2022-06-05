@@ -350,12 +350,12 @@ public class MotionQPInputCalculator
 
       if (commandToConvert.isNullspaceProjected())
       {
-         tempTaskVelocityJacobianNative.set(qpInputToPack.taskJacobian);
+         tempTaskJacobianNative.set(qpInputToPack.taskJacobian);
          allTaskJacobianNative.set(allTaskJacobian);
-         velocityNativeNullspaceProjector.project(tempTaskVelocityJacobianNative,
-                                                  allTaskJacobianNative,
-                                                  projectedTaskJacobian,
-                                                  nullspaceProjectionAlpha.getValue());
+         accelerationNativeNullspaceProjector.project(tempTaskJacobianNative,
+                                                      allTaskJacobianNative,
+                                                      projectedTaskJacobian,
+                                                      nullspaceProjectionAlpha.getValue());
          
          projectedTaskJacobian.get(qpInputToPack.taskJacobian);
       }
