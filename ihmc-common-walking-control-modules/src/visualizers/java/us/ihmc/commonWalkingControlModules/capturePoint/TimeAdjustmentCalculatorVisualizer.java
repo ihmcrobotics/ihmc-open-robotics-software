@@ -95,8 +95,8 @@ public class TimeAdjustmentCalculatorVisualizer
 
       timeRemainingText = new YoArtifactText("Time Remaining", "Time Remaining: ", currentTimeRemaining, Color.black);
       adjustedTimeRemainingText = new YoArtifactText("Adjusted Time Remaining", "Adjusted Time Remaining: ", adjustedTimeRemaining, Color.black);
-      adjustedTimeRemainingText.setTextPosition(-0.4, -0.27);
-      timeRemainingText.setTextPosition(-0.4, -0.3);
+      timeRemainingText.setTextPosition(-0.4, -0.27);
+      adjustedTimeRemainingText.setTextPosition(-0.4, -0.3);
 
       double size = 0.01;
       YoGraphicPosition desiredICPAtTouchdownArtifact = new YoGraphicPosition("Desired ICP At Touchdown", desiredICPAtTouchdown, size, YoAppearance.Red(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
@@ -168,11 +168,12 @@ public class TimeAdjustmentCalculatorVisualizer
 
 
          moveCurrentICP();
+//         currentICP.set(0.30800, 0.15840);
 
-         adjustmentTime.set(timeAdjustmentCalculator.estimateDeltaTimeBetweenDesiredICPAndActualICP(desiredICP, desiredICPAtTouchdown, perfectCMP, currentICP, omega.getDoubleValue()));
+         adjustmentTime.set(timeAdjustmentCalculator.estimateDeltaTimeBetweenDesiredICPAndActualICP(desiredICP, perfectCMP, desiredICPAtTouchdown, currentICP, omega.getDoubleValue()));
          projectedICP.set(timeAdjustmentCalculator.getProjectedICPEstimate());
 
-         adjustedTimeRemaining.set(currentTimeRemaining.getDoubleValue() + adjustmentTime.getValue());
+         adjustedTimeRemaining.set(currentTimeRemaining.getDoubleValue() - adjustmentTime.getValue());
       }
 
       private void moveCurrentICP()
