@@ -141,12 +141,12 @@ public class ControllerNaturalPostureManager
       CommonOps_DDRM.setIdentity(pelvisQPselectionMatrix);
       pPosePelvisPitch.set(0.0);
       pPosePelvisYaw.set(0.0);
-      pPosePelvisYawKp.set(1000.0);
-      pPosePelvisPitchKp.set(3000);
-      pPosePelvisRollKp.set(1000.0);
-      pPosePelvisYawKdFactor.set(0.25);
+      pPosePelvisYawKp.set(3000.0);
+      pPosePelvisPitchKp.set(4000);
+      pPosePelvisRollKp.set(4000.0);
+      pPosePelvisYawKdFactor.set(0.15);
       pPosePelvisPitchKdFactor.set(0.15);
-      pPosePelvisRollKdFactor.set(0.25);      
+      pPosePelvisRollKdFactor.set(0.15);      
       
       parentRegistry.addChild(registry);
    }

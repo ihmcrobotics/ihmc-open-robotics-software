@@ -339,11 +339,11 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       pPoseElbow.set(-1.0);
 
       pPoseSpineRollKp.set(50.0);
-      pPoseSpineYawKp.set(300.0);
-      pPoseShoulderPitchKp.set(5);
-      pPoseShoulderRollKp.set(10);
-      pPoseShoulderYawKp.set(10);
-      pPoseElbowKp.set(5);
+      pPoseSpineYawKp.set(200.0);
+      pPoseShoulderPitchKp.set(100.0);
+      pPoseShoulderRollKp.set(100.0);
+      pPoseShoulderYawKp.set(100.0);
+      pPoseElbowKp.set(50.0);
       
       pPoseSpineRollKdFactor.set(0.15);
       pPoseSpineYawKdFactor.set(0.15);
@@ -1036,9 +1036,11 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    {
       planeContactStateCommandPool.clear();
       
+      // Privileged configuration:
       updatePrivilegedConfigurationCommand();
       controllerCoreCommand.addInverseDynamicsCommand(privilegedConfigurationCommand);
       
+      // Joint limits:
       if (!limitCommandSent.getBooleanValue())
       {
          controllerCoreCommand.addInverseDynamicsCommand(jointLimitEnforcementMethodCommand);
@@ -1047,6 +1049,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       boolean isHighCoPDampingNeeded = controllerToolbox.estimateIfHighCoPDampingNeeded(footDesiredCoPs);
 
+      // Foot control:
       for (RobotSide robotSide : RobotSide.values)
       {
          controllerCoreCommand.addFeedbackControlCommand(feetManager.getFeedbackControlCommand(robotSide));
@@ -1060,6 +1063,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          controllerCoreCommand.addInverseDynamicsCommand(planeContactStateCommand);
       }
 
+      // Body managers:
       if (useBodyManagerCommands.getValue())
       {
          for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
@@ -1073,22 +1077,26 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          }
       }
       
+      // Natural posture:
       if ((naturalPostureManager != null) && (useNaturalPostureCommand.getValue()))
       {
          controllerCoreCommand.addInverseDynamicsCommand(naturalPostureManager.getQPObjectiveCommand());
       }
       
+      // Privileged pelvis control:
       if ((naturalPostureManager != null) && (usePelvisPrivilegedPoseCommand.getValue()))
       {
          controllerCoreCommand.addInverseDynamicsCommand(naturalPostureManager.getPelvisPrivilegedPoseCommand());
       }
       
+      // Higher-level pelvis control:
       if (usePelvisOrientationCommand.getValue())
       {
          controllerCoreCommand.addFeedbackControlCommand(pelvisOrientationManager.getFeedbackControlCommand());
          //      controllerCoreCommand.addInverseDynamicsCommand(pelvisOrientationManager.getInverseDynamicsCommand());
       }
       
+      // CoM height control:
       controllerCoreCommand.addFeedbackControlCommand(comHeightManager.getFeedbackControlCommand());
 
       controllerCoreCommand.addInverseDynamicsCommand(controllerCoreOptimizationSettings.getCommand());
@@ -1100,6 +1108,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private void updatePrivilegedConfigurationCommand()
    {
       privilegedConfigurationCommand.clear();
+      privilegedConfigurationCommand.enable();
       privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_ZERO);
 
       //TODO: This is hardcoded here. It should be moved to a parameter setting instead. This is not the long term place for it.
