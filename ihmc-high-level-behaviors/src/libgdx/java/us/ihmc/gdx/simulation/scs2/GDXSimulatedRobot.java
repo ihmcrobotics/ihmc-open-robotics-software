@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -72,5 +71,8 @@ public class GDXSimulatedRobot
       return robotDefinition;
    }
 
-   public GDXRigidBody getRootBody() {return rootBody;}
+   public GDXRigidBody getRootBody()
+   {
+      return rootBody;
+   }
 }
