@@ -55,6 +55,13 @@ public class FullHumanoidRobotModelWrapper extends FullRobotModelWrapper impleme
       setupRobotDescription(robotDescription);
    }
 
+   public FullHumanoidRobotModelWrapper(RigidBodyBasics elevator, RobotDefinition robotDefinition, HumanoidJointNameMap jointNameMap)
+   {
+      this(elevator);
+      setupHumanoidJointNameMap(jointNameMap);
+      setupRobotDefinition(robotDefinition);
+   }
+
    public FullHumanoidRobotModelWrapper(RigidBodyBasics elevator)
    {
       super(elevator);
