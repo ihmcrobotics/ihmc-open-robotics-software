@@ -1,8 +1,7 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -87,13 +86,8 @@ public class SpiralBasedAlgorithm
       Vector3D rayThroughSphere = new Vector3D();
       Point3D[] pointsOnSphere = generatePointsOnSphere(0.01, numberOfRays, deltaN);
 
-      AxisAngle rotationForXAxisAlignedWithRay = new AxisAngle();
-      AxisAngle rotationAroundRay = new AxisAngle();
-      RotationMatrix finalRotationMatrix = new RotationMatrix();
-      RotationMatrix rotationMatrixForXAxisAlignedWithRay = new RotationMatrix();
-      RotationMatrix rotationMatrixAroundRay = new RotationMatrix();
+      Quaternion rotationForXAxisAlignedWithRay = new Quaternion();
 
-      Vector3D xAxis = new Vector3D(1.0, 0.0, 0.0);
       double stepSizeAngleArounRay = 2.0 * Math.PI / numberOfRotationsAroundRay;
 
       for (int rayIndex = 0; rayIndex < numberOfRays; rayIndex++)
@@ -102,19 +96,13 @@ public class SpiralBasedAlgorithm
          rayThroughSphere.sub(sphereOrigin, pointsOnSphere[rayIndex]);
          rayThroughSphere.normalize();
 
-         EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(xAxis, rayThroughSphere, rotationForXAxisAlignedWithRay);
-         rotationMatrixForXAxisAlignedWithRay.set(rotationForXAxisAlignedWithRay);
+         EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.X, rayThroughSphere, rotationForXAxisAlignedWithRay);
 
          for (int rotationAroundRayIndex = 0; rotationAroundRayIndex < numberOfRotationsAroundRay; rotationAroundRayIndex++)
          {
             double angle = rotationAroundRayIndex * stepSizeAngleArounRay;
-            rotationAroundRay.set(rayThroughSphere, angle);
-            rotationMatrixAroundRay.set(rotationAroundRay);
-
-            finalRotationMatrix.set(rotationMatrixAroundRay);
-            finalRotationMatrix.multiply(rotationMatrixForXAxisAlignedWithRay);
-
-            Quaternion rotation = new Quaternion(finalRotationMatrix);
+            Quaternion rotation = new Quaternion(rotationForXAxisAlignedWithRay);
+            rotation.appendRollRotation(angle);
             rotations[rayIndex][rotationAroundRayIndex] = rotation;
          }
       }
