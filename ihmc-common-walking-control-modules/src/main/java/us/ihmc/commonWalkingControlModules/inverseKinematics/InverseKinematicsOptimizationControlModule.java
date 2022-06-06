@@ -9,7 +9,7 @@ import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand.JointVelocityLimitMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand.ActivationState;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsSolution;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
@@ -57,13 +57,16 @@ public class InverseKinematicsOptimizationControlModule
    private final DMatrixRMaj qDotMinMatrix, qDotMaxMatrix;
    private final JointIndexHandler jointIndexHandler;
 
+   private final YoBoolean computeJointTorques = new YoBoolean("computeJointTorques", registry);
    private final YoBoolean hasNotConvergedInPast = new YoBoolean("hasNotConvergedInPast", registry);
    private final YoInteger hasNotConvergedCounts = new YoInteger("hasNotConvergedCounts", registry);
 
    private final InverseKinematicsSolution inverseKinematicsSolution;
+   private final WholeBodyControlCoreToolbox toolbox;
 
    public InverseKinematicsOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, YoRegistry parentRegistry)
    {
+      this.toolbox = toolbox;
       jointIndexHandler = toolbox.getJointIndexHandler();
       jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
       oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
@@ -88,6 +91,11 @@ public class InverseKinematicsOptimizationControlModule
       }
 
       ControllerCoreOptimizationSettings optimizationSettings = toolbox.getOptimizationSettings();
+      if (optimizationSettings != null)
+      {
+         computeJointTorques.set(optimizationSettings.areJointTorquesMinimized());
+      }
+
       ActiveSetQPSolverWithInactiveVariablesInterface activeSetQPSolver;
       if (optimizationSettings == null)
          activeSetQPSolver = new SimpleEfficientActiveSetQPSolverWithInactiveVariables();
@@ -116,6 +124,7 @@ public class InverseKinematicsOptimizationControlModule
    {
       NoConvergenceException noConvergenceException = null;
 
+      computeJointTorqueMinimization();
       computePrivilegedJointVelocities();
       computeJointVelocityLimits();
       qpSolver.setMaxJointVelocities(qDotMaxMatrix);
@@ -135,8 +144,8 @@ public class InverseKinematicsOptimizationControlModule
       {
          if (!hasNotConvergedInPast.getBooleanValue())
          {
-            e.printStackTrace();
-            LogTools.warn("Only showing the stack trace of the first " + e.getClass().getSimpleName() + ". This may be happening more than once.");
+            LogTools.warn("First failure for the optimization " + e.getClass().getSimpleName() + ". Only reporting the first failure, see failure counter: "
+                  + hasNotConvergedCounts.getFullNameString());
          }
 
          hasNotConvergedInPast.set(true);
@@ -148,12 +157,27 @@ public class InverseKinematicsOptimizationControlModule
       DMatrixRMaj jointVelocities = qpSolver.getJointVelocities();
       MomentumReadOnly centroidalMomentumSoltuion = motionQPInputCalculator.computeCentroidalMomentumFromSolution(jointVelocities);
       inverseKinematicsSolution.setJointVelocities(jointVelocities);
+      if (computeJointTorques.getValue())
+         inverseKinematicsSolution.setJointTorques(toolbox.getGravityGradientCalculator().getTauMatrix());
       inverseKinematicsSolution.setCentroidalMomentumSolution(centroidalMomentumSoltuion);
 
       if (noConvergenceException != null)
          throw new InverseKinematicsOptimizationException(noConvergenceException, inverseKinematicsSolution);
 
       return inverseKinematicsSolution;
+   }
+
+   private void computeJointTorqueMinimization()
+   {
+      if (!computeJointTorques.getValue())
+         return;
+
+      boolean success = motionQPInputCalculator.computeGravityCompensationMinimization(qpInput,
+                                                                                       toolbox.getJointTorqueMinimizationWeightCalculator(),
+                                                                                       true,
+                                                                                       toolbox.getControlDT());
+      if (success)
+         qpSolver.addMotionInput(qpInput);
    }
 
    private void computeJointVelocityLimits()
@@ -234,6 +258,8 @@ public class InverseKinematicsOptimizationControlModule
       if (command.hasJointAccelerationWeight())
          qpSolver.setAccelerationRegularizationWeight(command.getJointAccelerationWeight());
       if (command.hashJointVelocityLimitMode())
-         boundCalculator.considerJointVelocityLimits(command.jointVelocityLimitMode == JointVelocityLimitMode.ENABLED);
+         boundCalculator.considerJointVelocityLimits(command.getJointVelocityLimitMode() == ActivationState.ENABLED);
+      if (command.hasComputeJointTorques())
+         computeJointTorques.set(command.getComputeJointTorques() == ActivationState.ENABLED);
    }
 }
