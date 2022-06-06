@@ -2,7 +2,6 @@ package us.ihmc.gdx.logging;
 
 import imgui.ImGui;
 import imgui.extension.imguifiledialog.ImGuiFileDialog;
-import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import org.bytedeco.ffmpeg.ffmpeg;
 import org.bytedeco.opencv.global.opencv_core;
@@ -36,7 +35,9 @@ public class GDXFFMPEGPlaybackDemo
    private FFMPEGVideoPlaybackManager video;
    private boolean videoReload;
    private final ImInt location = new ImInt();
+   private final ImInt manualSeekLocation = new ImInt();
    private boolean isScrubbing;
+   private boolean wasPausedBeforeScrub;
 
    public GDXFFMPEGPlaybackDemo()
    {
@@ -126,6 +127,7 @@ public class GDXFFMPEGPlaybackDemo
                if (ImGui.sliderInt("##videoProgress", location.getData(), 0, (int) (video.getVideoDurationInMillis())))
                {
                   isScrubbing = true;
+                  wasPausedBeforeScrub = video.isPaused();
                   video.pause();
                }
                else
@@ -133,7 +135,8 @@ public class GDXFFMPEGPlaybackDemo
                   if (isScrubbing)
                   {
                      video.seek(location.get());
-                     video.play();
+                     if (!wasPausedBeforeScrub)
+                        video.play();
 
                      isScrubbing = false;
                   }
@@ -148,6 +151,14 @@ public class GDXFFMPEGPlaybackDemo
                   video.pause();
                ImGui.sameLine();
                ImGui.text(video.getCurrentTimestampInMillis() / 1000 + "s of " + video.getVideoDurationInMillis() / 1000 + 's');
+
+               ImGui.inputInt("##SeekBox", manualSeekLocation);
+               ImGui.sameLine();
+               if (ImGui.button("Seek"))
+               {
+                  location.set(manualSeekLocation.get());
+                  video.seek(location.get());
+               }
             }
          }
 

@@ -114,23 +114,35 @@ public class FFMPEGFileReader
       FFMPEGTools.checkNonZeroError(avcodec.avcodec_open2(decoderContext, decoder, (AVDictionary) null), "Opening codec");
    }
 
-   public void seek(long timestamp)
+   public long seek(long timestamp)
    {
-      FFMPEGTools.checkNegativeError(avformat.av_seek_frame(avFormatContext, streamIndex, timestamp, 0), "Seeking frame via timestamp", false);
+      FFMPEGTools.checkNegativeError(avformat.av_seek_frame(avFormatContext, streamIndex, timestamp, avformat.AVSEEK_FLAG_BACKWARD), "Seeking frame via timestamp", false);
+
+      boolean firstRun = true;
+
+      do
+      {
+         if (firstRun)
+            firstRun = false;
+         else
+            avutil.av_frame_unref(videoFrame);
+
+         if (!loadNextFrame())
+            return -1;
+      }
+      while(videoFrame.best_effort_timestamp() < timestamp);
+
+      return getNextFrame(false);
    }
 
-   /***
-    * Gets next frame, and stores in native memory (access with {@link #getFrameDataBuffer()})
-    * @return -1 when end of file reached (AVERROR_EOF), timestamp in time base units otherwise
-    */
-   public long getNextFrame()
+   private boolean loadNextFrame()
    {
       int returnCode;
       do
       {
          returnCode = avformat.av_read_frame(avFormatContext, packet);
          if (returnCode == avutil.AVERROR_EOF())
-            return -1;
+            return false;
          FFMPEGTools.checkNegativeError(returnCode, "Getting next frame from stream");
       }
       while (packet.stream_index() != streamIndex);
@@ -144,6 +156,30 @@ public class FFMPEGFileReader
       }
       while (returnCode == avutil.AVERROR_EAGAIN() || returnCode == avutil.AVERROR_EOF());
       FFMPEGTools.checkNegativeError(returnCode, "Decoding frame from packet");
+
+      avcodec.av_packet_unref(packet); //This is NOT freeing the packet, which is done later
+
+      return true;
+   }
+
+   /***
+    * Gets next frame, and stores in native memory (access with {@link #getFrameDataBuffer()})
+    * @return -1 when end of file reached (AVERROR_EOF), timestamp in time base units otherwise
+    */
+   public long getNextFrame()
+   {
+      return getNextFrame(true);
+   }
+
+   /***
+    * Gets next frame, and stores in native memory (access with {@link #getFrameDataBuffer()})
+    * @param load Whether or not to laod the next frame, or to use the existing loaded one
+    * @return -1 when end of file reached (AVERROR_EOF), timestamp in time base units otherwise
+    */
+   protected long getNextFrame(boolean load)
+   {
+      if (load && !loadNextFrame()) //do not call loadNextFrame if load is false
+         return -1; //EOF
 
       FFMPEGTools.checkNonZeroError(avutil.av_frame_make_writable(rgbFrame), "Ensuring frame data is writable");
 
@@ -165,8 +201,6 @@ public class FFMPEGFileReader
       long approxTimestamp = videoFrame.best_effort_timestamp();
 
       avutil.av_frame_unref(videoFrame);
-
-      avcodec.av_packet_unref(packet); //This is NOT freeing the packet, which is done later
 
       return approxTimestamp;
    }

@@ -51,7 +51,15 @@ public class FFMPEGVideoPlaybackManager
 
    public void seek(long milliseconds)
    {
-      file.seek(millisToBaseUnits(milliseconds) + file.getStartTime());
+      long returnCode = file.seek(millisToBaseUnits(milliseconds) + file.getStartTime());
+
+      if (returnCode == -1) //EOF
+      {
+         isPaused = true;
+         return;
+      }
+
+      previousBaseUnitsTimestamp = returnCode;
    }
 
    public void play()
@@ -93,24 +101,27 @@ public class FFMPEGVideoPlaybackManager
 
    private long millisToBaseUnits(long millis)
    {
-      return (long) (millis / 1000 / FFMPEGTools.rationalToFloatingPoint(timeBase));
+      return millis;
+      //return (long) (millis / 1000 / FFMPEGTools.rationalToFloatingPoint(timeBase));
    }
 
    private long baseUnitsToMillis(long baseUnits)
    {
-      long millis = 0;
-      if (timeBase.num() == 1) //Should basically always be one, but just to be safe
-      {
-         //This method increases accuracy when the time base is simple (which is often the case)
-         millis = baseUnits / timeBase.den() * 1000;
-         millis += (baseUnits % timeBase.den()) * FFMPEGTools.rationalToFloatingPoint(timeBase) * 1000;
-      }
-      else
-      {
-         millis = (long) (baseUnits * FFMPEGTools.rationalToFloatingPoint(timeBase) * 1000);
-      }
+      return baseUnits;
 
-      return millis;
+//      long millis = 0;
+//      if (timeBase.num() == 1) //Should basically always be one, but just to be safe
+//      {
+//         //This method increases accuracy when the time base is simple (which is often the case)
+//         millis = baseUnits / timeBase.den() * 1000;
+//         millis += (baseUnits % timeBase.den()) * FFMPEGTools.rationalToFloatingPoint(timeBase) * 1000;
+//      }
+//      else
+//      {
+//         millis = (long) (baseUnits * FFMPEGTools.rationalToFloatingPoint(timeBase) * 1000);
+//      }
+//
+//      return millis;
    }
 
    public int getWidth()
@@ -126,6 +137,11 @@ public class FFMPEGVideoPlaybackManager
    public BytedecoImage getImage()
    {
       return image;
+   }
+
+   public boolean isPaused()
+   {
+      return isPaused;
    }
 
    public void close()
