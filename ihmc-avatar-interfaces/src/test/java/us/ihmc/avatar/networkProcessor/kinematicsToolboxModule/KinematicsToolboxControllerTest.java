@@ -546,9 +546,10 @@ public final class KinematicsToolboxControllerTest
 
       Sphere3D sphere = new Sphere3D(0.0, 0.75, 0.20, 0.5);
 
-      this.guiControls.addStaticVisual(new VisualDefinition(sphere.getCentroid(),
-                                                            new Sphere3DDefinition(sphere.getRadius()),
-                                                            new MaterialDefinition(ColorDefinitions.DarkSalmon())));
+      if (visualize)
+         scs.addStaticVisual(new VisualDefinition(sphere.getCentroid(),
+                                                  new Sphere3DDefinition(sphere.getRadius()),
+                                                  new MaterialDefinition(ColorDefinitions.DarkSalmon())));
 
       FrameSphere3D staticFrameSphere = new FrameSphere3D(worldFrame, sphere);
       Collidable staticCollidable = new Collidable(null, 0b001, 0b110, staticFrameSphere);
