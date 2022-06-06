@@ -329,7 +329,8 @@ public class RelativeEndEffectorControlTest
       }
 
       setup(robotDefinition);
-      scs.stopSimulationThread();
+      if (visualize)
+         scs.stopSimulationThread();
       createControllerCore();
 
       // Set to the same values as in the KinematicsToolboxController
