@@ -281,7 +281,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
       double forceMagnitude = fullRobotModel.getTotalMass() * 2.0;
       String pushJointName = fullRobotModel.getPelvis().getParentJoint().getName();
-      PushRobotControllerSCS2 pushController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationSession().getTime(),
+      PushRobotControllerSCS2 pushController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationConstructionSet().getTime(),
                                                                            simulationTestHelper.getRobot(),
                                                                            pushJointName,
                                                                            new Vector3D(),
