@@ -26,8 +26,6 @@ mainDependencies {
    api("us.ihmc:euclid-frame:0.17.2")
    api("us.ihmc:euclid-shape:0.17.2")
    api("us.ihmc:euclid-frame-shape:0.17.2")
-   api("us.ihmc:mecano:0.11.0")
-   api("us.ihmc:mecano-yovariables:0.11.0")
    api("us.ihmc:ihmc-realtime:1.5.0")
    api("us.ihmc:ihmc-ros-control:0.6.0")
    api("us.ihmc:simulation-construction-set:0.21.16")
@@ -59,8 +57,6 @@ testDependencies {
    api("us.ihmc:euclid-frame:0.17.2")
    api("us.ihmc:euclid-shape:0.17.2")
    api("us.ihmc:euclid-frame-shape:0.17.2")
-   api("us.ihmc:mecano:0.11.0")
-   api("us.ihmc:mecano-yovariables:0.11.0")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:ihmc-avatar-interfaces-test:source")
 }

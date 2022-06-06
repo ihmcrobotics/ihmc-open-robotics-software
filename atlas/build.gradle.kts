@@ -34,8 +34,6 @@ mainDependencies {
    api("us.ihmc:euclid-frame:0.17.2")
    api("us.ihmc:euclid-shape:0.17.2")
    api("us.ihmc:euclid-frame-shape:0.17.2")
-   api("us.ihmc:mecano:0.11.0")
-   api("us.ihmc:mecano-yovariables:0.11.0")
    api("us.ihmc:simulation-construction-set:0.21.16")
    api("us.ihmc:ihmc-robot-description:0.21.3")
    api("us.ihmc:ihmc-javafx-toolkit:0.21.0")
