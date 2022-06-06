@@ -146,7 +146,10 @@ public class GDXRigidBody implements RigidBodyBasics
       return rigidBody.getNameId();
    }
 
-   public RigidBodyBasics getRigidBody() {return rigidBody;}
+   public RigidBodyBasics getRigidBody()
+   {
+      return rigidBody;
+   }
 
    @Override
    public Iterable<? extends GDXRigidBody> subtreeIterable()
