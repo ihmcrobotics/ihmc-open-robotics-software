@@ -18,7 +18,6 @@ ihmc {
 
 mainDependencies {
    api("us.ihmc:euclid:0.17.2")
-   api("us.ihmc:ihmc-yovariables:0.9.12")
    api("commons-net:commons-net:3.3")
    api("org.yaml:snakeyaml:1.17") //1.11
    api("us.ihmc:ihmc-realtime:1.5.0")
@@ -35,7 +34,6 @@ mainDependencies {
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-robot-models:source")
-   api("us.ihmc:ihmc-graphics-description:0.19.4")
    api("us.ihmc:ihmc-robot-data-logger:0.23.0") {
       exclude group: "org.junit.jupiter", module: "junit-jupiter-api"
       exclude group: "org.junit.jupiter", module: "junit-jupiter-engine"
