@@ -85,30 +85,16 @@ public final class ImPlotTools
       return output;
    }
 
-   public static Double[] newNaNFilledDoubleBuffer(int bufferSize)
+   public static double[] newNaNFilledBuffer(int bufferSize)
    {
-      Double[] buffer = new Double[bufferSize];
+      double[] buffer = new double[bufferSize];
       Arrays.fill(buffer, Double.NaN);
       return buffer;
    }
 
-   public static Integer[] newZeroFilledIntegerBuffer(int bufferSize)
+   public static double[] newZeroFilledBuffer(int bufferSize)
    {
-      Integer[] buffer = new Integer[bufferSize];
-      Arrays.fill(buffer, 0);
-      return buffer;
-   }
-
-   public static Byte[] newZeroFilledByteBuffer(int bufferSize)
-   {
-      Byte[] buffer = new Byte[bufferSize];
-      Arrays.fill(buffer, (byte) 0);
-      return buffer;
-   }
-
-   public static Long[] newZeroFilledLongBuffer(int bufferSize)
-   {
-      Long[] buffer = new Long[bufferSize];
+      double[] buffer = new double[bufferSize];
       Arrays.fill(buffer, 0);
       return buffer;
    }
@@ -129,9 +115,9 @@ public final class ImPlotTools
       return output;
    }
 
-   public static Integer[] createIndex(int bufferSize)
+   public static double[] createIndex(int bufferSize)
    {
-      Integer[] index = new Integer[bufferSize];
+      double[] index = new double[bufferSize];
       for (int i = 0; i < bufferSize; i++)
       {
          index[i] = i;

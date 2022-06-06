@@ -178,12 +178,12 @@ public class RecoveryTransferState extends PushRecoveryState
                                                      balanceManager.getFinalDesiredICP(),
                                                      balanceManager.getLinearMomentumRateControlModuleInput().getPerfectCoP());
 
-         if (feetManager.okForPointToeOff())
+         if (feetManager.okForPointToeOff(false))
          {
             feetManager.requestPointToeOff(trailingLeg, trailingFootExitCMP, filteredDesiredCoP);
             return true;
          }
-         else if (feetManager.okForLineToeOff())
+         else if (feetManager.okForLineToeOff(false))
          {
             feetManager.requestLineToeOff(trailingLeg, trailingFootExitCMP, filteredDesiredCoP);
             return true;

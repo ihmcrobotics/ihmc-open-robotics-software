@@ -2,7 +2,6 @@ package us.ihmc.gdx.ui;
 
 import com.badlogic.gdx.math.Matrix4;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.PlanarRegionSLAMMapper;
 import us.ihmc.behaviors.tools.perception.PeriodicPlanarRegionPublisher;
 import us.ihmc.communication.IHMCROS2Callback;
@@ -26,7 +25,6 @@ import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeInterface;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.RosTools;
@@ -133,7 +131,6 @@ public class GDXPerceptionVisualizerUI
             //                simulatedDepthSensor.create();
             //                baseUI.getSceneManager().addRenderableProvider(simulatedDepthSensor, GDXSceneLevel.VIRTUAL);
 
-            ousterLidar.create();
             baseUI.get3DSceneManager().addRenderableProvider(ousterLidar, GDXSceneLevel.VIRTUAL);
             baseUI.getImGuiPanelManager().addPanel(ousterLidar);
 
@@ -213,24 +210,19 @@ public class GDXPerceptionVisualizerUI
       }
       double minRange = 0.105;
       double maxRange = 15.0;
-      return new GDXHighLevelDepthSensorSimulator("Ouster Lidar",
-                                                  ros1Node,
-                                                  RosTools.MAPSENSE_DEPTH_IMAGE,
-                                                  RosTools.MAPSENSE_DEPTH_CAMERA_INFO,
-                                                  RosTools.L515_VIDEO,
-                                                  RosTools.L515_COLOR_CAMERA_INFO,
-                                                  ros2Node,
-                                                  ROS2Tools.MULTISENSE_LIDAR_SCAN,
-                                                  null,
-                                                  null,
-                                                  null,
-                                                  verticalFOV,
-                                                  imageWidth,
-                                                  imageHeight,
-                                                  minRange,
-                                                  maxRange,
-                                                  publishRateHz,
-                                                  false);
+      GDXHighLevelDepthSensorSimulator highLevelDepthSensorSimulator = new GDXHighLevelDepthSensorSimulator("Ouster Lidar",
+                                                                                                            null,
+                                                                                                            () -> 0L,
+                                                                                                            verticalFOV,
+                                                                                                            imageWidth,
+                                                                                                            imageHeight,
+                                                                                                            minRange,
+                                                                                                            maxRange,
+                                                                                                            publishRateHz);
+      highLevelDepthSensorSimulator.setupForROS1Depth(ros1Node, RosTools.MAPSENSE_DEPTH_IMAGE, RosTools.MAPSENSE_DEPTH_CAMERA_INFO);
+      highLevelDepthSensorSimulator.setupForROS1Color(ros1Node, RosTools.L515_VIDEO, RosTools.L515_COLOR_CAMERA_INFO);
+      highLevelDepthSensorSimulator.setupForROS2PointCloud(ros2Node, ROS2Tools.MULTISENSE_LIDAR_SCAN);
+      return highLevelDepthSensorSimulator;
    }
 
    private GDXHighLevelDepthSensorSimulator createSimulatedL515(RosNodeInterface ros1Node)
@@ -246,29 +238,20 @@ public class GDXPerceptionVisualizerUI
       }
       double minRange = 0.105;
       double maxRange = 5.0;
-      ROS2NodeInterface ros2Node = null;
-      ROS2Topic<?> ros2Topic = null;
       ReferenceFrame sensorFrame = null;
-      ROS2SyncedRobotModel syncedRobot = null;
 
-      return new GDXHighLevelDepthSensorSimulator("L515",
-                                                  ros1Node,
-                                                  RosTools.MAPSENSE_DEPTH_IMAGE,
-                                                  RosTools.MAPSENSE_DEPTH_CAMERA_INFO,
-                                                  RosTools.L515_VIDEO,
-                                                  RosTools.L515_COLOR_CAMERA_INFO,
-                                                  ros2Node,
-                                                  ros2Topic,
-                                                  null,
-                                                  sensorFrame,
-                                                  syncedRobot::getTimestamp,
-                                                  verticalFOV,
-                                                  imageWidth,
-                                                  imageHeight,
-                                                  minRange,
-                                                  maxRange,
-                                                  publishRateHz,
-                                                  false);
+      GDXHighLevelDepthSensorSimulator highLevelDepthSensorSimulator = new GDXHighLevelDepthSensorSimulator("L515",
+                                                                                                            sensorFrame,
+                                                                                                            () -> 0L,
+                                                                                                            verticalFOV,
+                                                                                                            imageWidth,
+                                                                                                            imageHeight,
+                                                                                                            minRange,
+                                                                                                            maxRange,
+                                                                                                            publishRateHz);
+      highLevelDepthSensorSimulator.setupForROS1Depth(ros1Node, RosTools.MAPSENSE_DEPTH_IMAGE, RosTools.MAPSENSE_DEPTH_CAMERA_INFO);
+      highLevelDepthSensorSimulator.setupForROS1Color(ros1Node, RosTools.L515_VIDEO, RosTools.L515_COLOR_CAMERA_INFO);
+      return highLevelDepthSensorSimulator;
    }
 
    public static void main(String[] args) throws URISyntaxException
