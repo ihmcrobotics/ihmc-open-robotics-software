@@ -531,7 +531,8 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
 
    public void finishTest(boolean waitUntilGUIIsDone)
    {
-      if (waitUntilGUIIsDone && getSimulationConstructionSet() != null && !avatarSimulation.hasBeenDestroyed())
+      if (waitUntilGUIIsDone && getSimulationConstructionSet() != null && getSimulationConstructionSet().isVisualizerEnabled()
+            && !avatarSimulation.hasBeenDestroyed())
       {
          getSimulationConstructionSet().pause();
          getSimulationConstructionSet().startSimulationThread();
