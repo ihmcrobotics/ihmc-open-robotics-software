@@ -54,10 +54,10 @@ mainDependencies {
    api("us.ihmc:ihmc-robot-data-visualizer:source")
    api("us.ihmc:ihmc-footstep-planning:source")
    api("us.ihmc:simulation-construction-set-tools:source")
-   api("us.ihmc:scs2-simulation:0.8.2-bullet-alpha-5")
-   api("us.ihmc:scs2-bullet-simulation:0.8.2-bullet-alpha-5")
-   api("us.ihmc:scs2-session-visualizer-jfx:0.8.2-bullet-alpha-5")
-   api("us.ihmc:scs2-simulation-construction-set:0.8.2-bullet-alpha-5")
+   api("us.ihmc:scs2-simulation:0.8.3-bullet-alpha-5")
+   api("us.ihmc:scs2-bullet-simulation:0.8.3-bullet-alpha-5")
+   api("us.ihmc:scs2-session-visualizer-jfx:0.8.3-bullet-alpha-5")
+   api("us.ihmc:scs2-simulation-construction-set:0.8.3-bullet-alpha-5")
 }
 
 testDependencies {
