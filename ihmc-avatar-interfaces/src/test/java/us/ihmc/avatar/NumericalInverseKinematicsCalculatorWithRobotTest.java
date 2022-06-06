@@ -43,7 +43,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implements MultiRobotTestInterface
 {
    private boolean PRINT_OUT_TROUBLESOME = false;
-   private boolean VISUALIZE = true;
+   private boolean VISUALIZE = false;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -303,7 +303,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       }
 
       final double maximumTimeMillisMax = 600.0;
-      final double averageTimeMillisMax = 20.0;
+      final double averageTimeMillisMax = 40.0;
       assertTrue("Average Solving Time > " + averageTimeMillisMax + " ms", averageTimeMillis < averageTimeMillisMax);
       assertTrue("Maximal Solving Time > " + maximumTimeMillisMax + " ms", maximumTimeMillis < maximumTimeMillisMax);
 
