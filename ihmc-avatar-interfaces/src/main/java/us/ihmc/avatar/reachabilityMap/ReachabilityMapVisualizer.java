@@ -214,7 +214,7 @@ public class ReachabilityMapVisualizer
       ReferenceFrame controlFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("controlFrame", parentFrame, frameTransform);
 
       guiControls = SessionVisualizer.startSessionVisualizer(session);
-      guiControls.waitUntilFullyUp();
+      guiControls.waitUntilVisualizerFullyUp();
       session.stopSessionThread();
 
       guiControls.addStaticVisuals(ReachabilityMapTools.createReachibilityColorScaleVisuals());
