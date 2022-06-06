@@ -3,11 +3,11 @@ package us.ihmc.gdx.simulation.bullet;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.physics.bullet.dynamics.btMultiBodyDynamicsWorld;
 import com.badlogic.gdx.physics.bullet.linearmath.btIDebugDraw;
 import com.badlogic.gdx.physics.bullet.linearmath.btIDebugDraw.DebugDrawModes;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -15,12 +15,13 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletMultiBodyDynamicsWorld;
 
 public class GDXBulletPhysicsAsyncDebugger
 {
    private final btIDebugDraw btIDebugDraw;
    private int debugMode = DebugDrawModes.DBG_DrawWireframe; // TODO: Provide options in combo box
-   private final btMultiBodyDynamicsWorld multiBodyDynamicsWorld;
+   private final BulletMultiBodyDynamicsWorld multiBodyDynamicsWorld;
    private final RecyclingArrayList<GDXBulletPhysicsDebuggerModel> models = new RecyclingArrayList<>(GDXBulletPhysicsDebuggerModel::new);
    private final RecyclingArrayList<GDXBulletPhysicsDebuggerLineSegment> lineSegmentsToDraw = new RecyclingArrayList<>(GDXBulletPhysicsDebuggerLineSegment::new);
    private GDXBulletPhysicsDebuggerModel currentModel;
@@ -31,7 +32,7 @@ public class GDXBulletPhysicsAsyncDebugger
    private final ImBoolean showDebugDrawings = new ImBoolean(true);
    private final Notification newDebugDrawingsAvailable = new Notification();
 
-   public GDXBulletPhysicsAsyncDebugger(btMultiBodyDynamicsWorld multiBodyDynamicsWorld)
+   public GDXBulletPhysicsAsyncDebugger(BulletMultiBodyDynamicsWorld multiBodyDynamicsWorld)
    {
       this.multiBodyDynamicsWorld = multiBodyDynamicsWorld;
 
@@ -82,7 +83,7 @@ public class GDXBulletPhysicsAsyncDebugger
             return debugMode;
          }
       };
-      multiBodyDynamicsWorld.setDebugDrawer(btIDebugDraw);
+      multiBodyDynamicsWorld.setBtDebugDrawer(btIDebugDraw);
    }
 
    public void renderImGuiWidgets()
