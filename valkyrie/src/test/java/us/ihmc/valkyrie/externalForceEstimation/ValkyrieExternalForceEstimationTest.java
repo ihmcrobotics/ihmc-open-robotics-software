@@ -1,7 +1,7 @@
 package us.ihmc.valkyrie.externalForceEstimation;
 
-import static us.ihmc.avatar.testTools.scs2.YoGraphicDefinitionFactory.newYoGraphicArrow3DDefinition;
-import static us.ihmc.avatar.testTools.scs2.YoGraphicDefinitionFactory.newYoGraphicPoint3DDefinition;
+import static us.ihmc.avatar.scs2.YoGraphicDefinitionFactory.newYoGraphicArrow3DDefinition;
+import static us.ihmc.avatar.scs2.YoGraphicDefinitionFactory.newYoGraphicPoint3DDefinition;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.Scene?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.stage.Stage?>
+
+<Stage fx:id="stage" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1">
+    <scene>
+        <Scene>
+            <AnchorPane>
+            <children>
+               <HBox>
+                  <children>
+                     <VBox>
+                        <children>
+                           <GridPane hgap="10.0" vgap="10.0">
+                              <columnConstraints>
+                                 <ColumnConstraints hgrow="SOMETIMES" />
+                                 <ColumnConstraints hgrow="SOMETIMES" />
+                                 <ColumnConstraints hgrow="SOMETIMES" />
+                                 <ColumnConstraints hgrow="SOMETIMES" />
+                                 <ColumnConstraints hgrow="SOMETIMES" />
+                                 <ColumnConstraints hgrow="SOMETIMES" />
+                              </columnConstraints>
+                              <rowConstraints>
+                                 <RowConstraints vgrow="SOMETIMES" />
+                                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                 <RowConstraints vgrow="SOMETIMES" />
+                                 <RowConstraints vgrow="SOMETIMES" />
+                                 <RowConstraints vgrow="SOMETIMES" />
+                                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              </rowConstraints>
+                              <children>
+                                 <Label text="Visualization type:" />
+                                 <ComboBox fx:id="visualizationTypeComboBox" maxWidth="1.7976931348623157E308" prefWidth="150.0" GridPane.columnIndex="1" GridPane.columnSpan="3" />
+                                 <Label text="Target:" GridPane.rowIndex="1" />
+                                 <ComboBox fx:id="visualizationTargetComboBox" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                 <ToggleButton fx:id="normalizeDataToggleButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Normalize Data" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                                 <Label text="xMin:" GridPane.rowIndex="2" />
+                                 <Label text="xMax:" GridPane.rowIndex="3" />
+                                 <Label text="yMin:" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                                 <Label text="yMax:" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                                 <Label text="zMin:" GridPane.columnIndex="4" GridPane.rowIndex="2" />
+                                 <Label text="zMax:" GridPane.columnIndex="4" GridPane.rowIndex="3" />
+                                 <Spinner editable="true" prefWidth="125.0" GridPane.columnIndex="1" GridPane.rowIndex="2" fx:id="xMinSpinner" />
+                                 <Spinner editable="true" prefWidth="125.0" GridPane.columnIndex="1" GridPane.rowIndex="3" fx:id="xMaxSpinner" />
+                                 <Spinner fx:id="yMinSpinner" editable="true" prefWidth="125.0" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                                 <Spinner fx:id="yMaxSpinner" editable="true" prefWidth="125.0" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                                 <Spinner fx:id="zMinSpinner" editable="true" prefWidth="125.0" GridPane.columnIndex="5" GridPane.rowIndex="2" />
+                                 <Spinner fx:id="zMaxSpinner" editable="true" prefWidth="125.0" GridPane.columnIndex="5" GridPane.rowIndex="3" />
+                                 <Button mnemonicParsing="false" onAction="#refreshVisualization" text="Generate Visualization" GridPane.columnIndex="5" GridPane.rowIndex="4" />
+                                 <ToggleButton fx:id="heatmapToggleButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Heatmap" GridPane.columnIndex="5" GridPane.rowIndex="1" />
+                                 <Label text="Sphere scale:" GridPane.rowIndex="4" />
+                                 <Spinner fx:id="scaleSpinner" editable="true" prefWidth="125.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                                 <Spinner fx:id="payloadSpinner" editable="true" prefWidth="125.0" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                                 <Label text="Extra payload (kg):" GridPane.rowIndex="5" />
+                              </children>
+                              <padding>
+                                 <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                              </padding>
+                           </GridPane>
+                           <GridPane hgap="10.0" vgap="10.0">
+                             <columnConstraints>
+                               <ColumnConstraints hgrow="SOMETIMES" />
+                                 <ColumnConstraints hgrow="SOMETIMES" />
+                                 <ColumnConstraints hgrow="SOMETIMES" />
+                               <ColumnConstraints hgrow="SOMETIMES" />
+                             </columnConstraints>
+                             <rowConstraints>
+                               <RowConstraints vgrow="SOMETIMES" />
+                                 <RowConstraints vgrow="SOMETIMES" />
+                                 <RowConstraints vgrow="SOMETIMES" />
+                                 <RowConstraints vgrow="SOMETIMES" />
+                                 <RowConstraints vgrow="SOMETIMES" />
+                               <RowConstraints vgrow="SOMETIMES" />
+                               <RowConstraints vgrow="SOMETIMES" />
+                                 <RowConstraints vgrow="SOMETIMES" />
+                             </rowConstraints>
+                              <children>
+                                 <Label text="Joint Names:" />
+                                 <Label fx:id="jointLabel0" text="Joint 0" GridPane.rowIndex="1" />
+                                 <Label fx:id="jointLabel1" text="Joint 1" GridPane.rowIndex="2" />
+                                 <Label fx:id="jointLabel2" text="Joint 2" GridPane.rowIndex="3" />
+                                 <Label fx:id="jointLabel3" text="Joint 3" GridPane.rowIndex="4" />
+                                 <Label fx:id="jointLabel4" text="Joint 4" GridPane.rowIndex="5" />
+                                 <Label fx:id="jointLabel5" text="Joint 5" GridPane.rowIndex="6" />
+                                 <Label fx:id="jointLabel6" text="Joint 6" GridPane.rowIndex="7" />
+                                 <Label text="Joint Effort Max (abs):" GridPane.columnIndex="1" />
+                                 <TextField fx:id="jointTauMaxText0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                 <TextField fx:id="jointTauMaxText1" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                 <TextField fx:id="jointTauMaxText2" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                 <TextField fx:id="jointTauMaxText3" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                                 <TextField fx:id="jointTauMaxText4" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                                 <TextField fx:id="jointTauMaxText5" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                                 <TextField fx:id="jointTauMaxText6" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                                 <Label text="Joint Limit Lower:" GridPane.columnIndex="2" />
+                                 <TextField fx:id="jointQMinText0" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                                 <TextField fx:id="jointQMinText1" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                                 <TextField fx:id="jointQMinText2" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                                 <TextField fx:id="jointQMinText3" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+                                 <TextField fx:id="jointQMinText4" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+                                 <TextField fx:id="jointQMinText5" GridPane.columnIndex="2" GridPane.rowIndex="6" />
+                                 <TextField fx:id="jointQMinText6" GridPane.columnIndex="2" GridPane.rowIndex="7" />
+                                 <Label text="Joint Limit Upper:" GridPane.columnIndex="3" />
+                                 <TextField fx:id="jointQMaxText0" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                                 <TextField fx:id="jointQMaxText1" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                                 <TextField fx:id="jointQMaxText2" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                                 <TextField fx:id="jointQMaxText3" GridPane.columnIndex="3" GridPane.rowIndex="4" />
+                                 <TextField fx:id="jointQMaxText4" GridPane.columnIndex="3" GridPane.rowIndex="5" />
+                                 <TextField fx:id="jointQMaxText5" GridPane.columnIndex="3" GridPane.rowIndex="6" />
+                                 <TextField fx:id="jointQMaxText6" GridPane.columnIndex="3" GridPane.rowIndex="7" />
+                              </children>
+                              <padding>
+                                 <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                              </padding>
+                           </GridPane>
+                        </children>
+                     </VBox>
+                     <VBox fx:id="extraControlsContainer">
+                        <padding>
+                           <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                        </padding>
+                     </VBox>
+                  </children>
+               </HBox>
+            </children></AnchorPane>
+        </Scene>
+    </scene>
+</Stage>
