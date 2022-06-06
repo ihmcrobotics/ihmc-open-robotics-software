@@ -71,4 +71,6 @@ public class GDXSimulatedRobot
    {
       return robotDefinition;
    }
+
+   public GDXRigidBody getRootBody() {return rootBody;}
 }

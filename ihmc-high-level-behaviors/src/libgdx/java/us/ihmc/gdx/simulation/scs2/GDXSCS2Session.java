@@ -313,6 +313,8 @@ public class GDXSCS2Session
       showRobotPairs.clear();
    }
 
+   public ArrayList<GDXSimulatedRobot> getRobots() {return robots;}
+
    public Session getSession()
    {
       return session;
