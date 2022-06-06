@@ -19,6 +19,7 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -121,7 +122,6 @@ public class ContinuousStepGenerator implements Updatable
    private final YoBoolean walk = new YoBoolean("walk" + variableNameSuffix, registry);
    private final YoBoolean walkPreviousValue = new YoBoolean("walkPreviousValue" + variableNameSuffix, registry);
 
-
    private final YoEnum<RobotSide> currentSupportSide = new YoEnum<>("currentSupportSide" + variableNameSuffix, registry, RobotSide.class);
    private final YoFramePose3D currentSupportFootPose = new YoFramePose3D("currentSupportFootPose" + variableNameSuffix, worldFrame, registry);
 
@@ -135,7 +135,7 @@ public class ContinuousStepGenerator implements Updatable
    private DesiredTurningVelocityProvider desiredTurningVelocityProvider = () -> 0.0;
    private FootstepMessenger footstepMessenger;
    private StopWalkingMessenger stopWalkingMessenger;
-   private FootstepAdjustment footstepAdjustment;
+   private List<FootstepAdjustment> footstepAdjustments = new ArrayList<>();
    private List<FootstepValidityIndicator> footstepValidityIndicators = new ArrayList<>();
    private AlternateStepChooser alternateStepChooser = this::calculateSquareUpStep;
 
@@ -310,7 +310,9 @@ public class ContinuousStepGenerator implements Updatable
          nextFootstepPose2D.appendTranslation(0.0, -halfInPlaceWidth);
          nextFootstepPose2D.appendTranslation(xDisplacement, yDisplacement);
 
-         nextFootstepPose3D.set(footstepAdjustment.adjustFootstep(nextFootstepPose2D, swingSide));
+         nextFootstepPose3D.set(nextFootstepPose2D);
+         for (int adjustorIndex = 0; adjustorIndex < footstepAdjustments.size(); adjustorIndex++)
+            footstepAdjustments.get(adjustorIndex).adjustFootstep(nextFootstepPose2D, swingSide, nextFootstepPose3D);
 
          if (!isStepValid(nextFootstepPose3D, previousFootstepPose, swingSide))
          {
@@ -406,12 +408,12 @@ public class ContinuousStepGenerator implements Updatable
       parameters.setSwingDuration(swingTime);
       parameters.setTransferDuration(transferTime);
    }
-   
+
    public void setFootstepsAreAdjustable(boolean footstepsAreAdjustable)
    {
       parameters.setStepsAreAdjustable(footstepsAreAdjustable);
    }
-   
+
    public void setSwingHeight(double swingHeight)
    {
       parameters.setSwingHeight(swingHeight);
@@ -612,7 +614,23 @@ public class ContinuousStepGenerator implements Updatable
     */
    public void setFootstepAdjustment(FootstepAdjustment footstepAdjustment)
    {
-      this.footstepAdjustment = footstepAdjustment;
+      clearFootstepAdjustments();
+      addFootstepAdjustment(footstepAdjustment);
+   }
+
+   public void addFootstepAdjustment(FootstepAdjustment footstepAdjustment)
+   {
+      this.footstepAdjustments.add(footstepAdjustment);
+   }
+
+   public void clearFootstepAdjustments()
+   {
+      this.footstepAdjustments.clear();
+   }
+
+   public List<FootstepAdjustment> getFootstepAdjustments()
+   {
+      return footstepAdjustments;
    }
 
    /**
@@ -645,13 +663,17 @@ public class ContinuousStepGenerator implements Updatable
     */
    public void setSupportFootBasedFootstepAdjustment(boolean adjustPitchAndRoll)
    {
-      setFootstepAdjustment(new FootstepAdjustment()
+      setFootstepAdjustment(createSupportFootBasedFootstepAdjustment(adjustPitchAndRoll));
+   }
+
+   public FootstepAdjustment createSupportFootBasedFootstepAdjustment(boolean adjustPitchAndRoll)
+   {
+      return new FootstepAdjustment()
       {
          private final YawPitchRoll yawPitchRoll = new YawPitchRoll();
-         private final FramePose3D adjustedPose = new FramePose3D();
 
          @Override
-         public FramePose3DReadOnly adjustFootstep(FramePose2DReadOnly footstepPose, RobotSide footSide)
+         public boolean adjustFootstep(FramePose2DReadOnly footstepPose, RobotSide footSide, FixedFramePose3DBasics adjustedPose)
          {
             adjustedPose.getPosition().set(footstepPose.getPosition());
             adjustedPose.setZ(currentSupportFootPose.getZ());
@@ -665,9 +687,9 @@ public class ContinuousStepGenerator implements Updatable
             {
                adjustedPose.getOrientation().set(footstepPose.getOrientation());
             }
-            return adjustedPose;
+            return true;
          }
-      });
+      };
    }
 
    /**
@@ -681,17 +703,16 @@ public class ContinuousStepGenerator implements Updatable
       setFootstepAdjustment(new FootstepAdjustment()
       {
          private final YawPitchRoll yawPitchRoll = new YawPitchRoll();
-         private final FramePose3D adjustedPose = new FramePose3D();
 
          @Override
-         public FramePose3DReadOnly adjustFootstep(FramePose2DReadOnly footstepPose, RobotSide footSide)
+         public boolean adjustFootstep(FramePose2DReadOnly footstepPose, RobotSide footSide, FixedFramePose3DBasics adjustedPose)
          {
             adjustedPose.getPosition().set(footstepPose.getPosition());
             adjustedPose.setZ(heightMap.heightAt(footstepPose.getX(), footstepPose.getY(), 0.0));
             yawPitchRoll.set(currentSupportFootPose.getOrientation());
             yawPitchRoll.setYaw(footstepPose.getYaw());
             adjustedPose.getOrientation().set(yawPitchRoll);
-            return adjustedPose;
+            return true;
          }
       });
    }
@@ -865,6 +886,7 @@ public class ContinuousStepGenerator implements Updatable
    {
       alternateStepPose2D.set(stanceFootPose);
       alternateStepPose2D.appendTranslation(0.0, swingSide.negateIfRightSide(parameters.getDefaultStepWidth()));
-      touchdownPoseToPack.set(footstepAdjustment.adjustFootstep(alternateStepPose2D, swingSide));
+      for (int adjustorIndex = 0; adjustorIndex < footstepAdjustments.size(); adjustorIndex++)
+         footstepAdjustments.get(adjustorIndex).adjustFootstep(alternateStepPose2D, swingSide, touchdownPoseToPack);
    }
 }

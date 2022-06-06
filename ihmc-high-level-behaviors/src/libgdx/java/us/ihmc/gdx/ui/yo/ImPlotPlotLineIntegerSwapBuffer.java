@@ -5,8 +5,8 @@ import us.ihmc.gdx.ui.tools.ImPlotTools;
 
 public class ImPlotPlotLineIntegerSwapBuffer implements ImPlotPlotLineSwapBuffer
 {
-   private Integer[] yValuesA;
-   private Integer[] yValuesB;
+   private double[] yValuesA;
+   private double[] yValuesB;
    private int bufferSize;
    private int value = 0;
    private boolean isA = true;
@@ -15,8 +15,8 @@ public class ImPlotPlotLineIntegerSwapBuffer implements ImPlotPlotLineSwapBuffer
    public void initialize(int bufferSize)
    {
       this.bufferSize = bufferSize;
-      yValuesA = ImPlotTools.newZeroFilledIntegerBuffer(bufferSize);
-      yValuesB = ImPlotTools.newZeroFilledIntegerBuffer(bufferSize);
+      yValuesA = ImPlotTools.newZeroFilledBuffer(bufferSize);
+      yValuesB = ImPlotTools.newZeroFilledBuffer(bufferSize);
    }
 
    public void addValue(int value)
@@ -65,20 +65,20 @@ public class ImPlotPlotLineIntegerSwapBuffer implements ImPlotPlotLineSwapBuffer
    @Override
    public void copyPreviousToUpdated(int srcPos, int destPos, int length)
    {
-      Integer[] previousValues = isA ? yValuesA : yValuesB;
-      Integer[] updatedValues = isA ? yValuesB : yValuesA;
+      double[] previousValues = isA ? yValuesA : yValuesB;
+      double[] updatedValues = isA ? yValuesB : yValuesA;
       System.arraycopy(previousValues, srcPos, updatedValues, 0, length);
       isA = !isA;
    }
 
    @Override
-   public void plot(String labelID, Integer[] xValues, int offset)
+   public void plot(String labelID, double[] xValues, int offset)
    {
-      ImPlot.plotLine(labelID, xValues, isA ? yValuesA : yValuesB, offset);
+      ImPlot.plotLine(labelID, xValues, isA ? yValuesA : yValuesB, xValues.length, offset);
    }
 
    public int getValue(int bufferIndex)
    {
-      return isA ? yValuesA[bufferIndex] : yValuesB[bufferIndex];
+      return (int) (isA ? yValuesA[bufferIndex] : yValuesB[bufferIndex]);
    }
 }
