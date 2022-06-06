@@ -29,7 +29,6 @@ mainDependencies {
    api("us.ihmc:ihmc-realtime:1.5.0")
    api("us.ihmc:ihmc-ros-control:0.6.0")
    api("us.ihmc:simulation-construction-set:0.21.16")
-   api("us.ihmc:ihmc-robot-description:0.21.3")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-system-identification:source")

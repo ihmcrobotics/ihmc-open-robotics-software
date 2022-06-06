@@ -29,7 +29,6 @@ mainDependencies {
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:ihmc-common-walking-control-modules:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
-   api("us.ihmc:ihmc-robot-description:0.21.3")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-sensor-processing:source")
    api("us.ihmc:ihmc-robot-models:source")

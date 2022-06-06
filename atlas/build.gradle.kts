@@ -35,7 +35,6 @@ mainDependencies {
    api("us.ihmc:euclid-shape:0.17.2")
    api("us.ihmc:euclid-frame-shape:0.17.2")
    api("us.ihmc:simulation-construction-set:0.21.16")
-   api("us.ihmc:ihmc-robot-description:0.21.3")
    api("us.ihmc:ihmc-javafx-toolkit:0.21.1")
    api("us.ihmc:ihmc-humanoid-behaviors:source")
    api("us.ihmc:ihmc-mocap:source")

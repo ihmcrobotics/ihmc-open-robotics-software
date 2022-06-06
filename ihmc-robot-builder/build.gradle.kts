@@ -17,7 +17,6 @@ mainDependencies {
 
    api("us.ihmc:euclid:0.17.2")
    api("us.ihmc:ihmc-javafx-toolkit:0.21.1")
-   api("us.ihmc:ihmc-robot-description:0.21.3")
    api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.20.0")
    api("us.ihmc:ihmc-model-file-loader:source")
    api("us.ihmc:ihmc-java-toolkit:source")
