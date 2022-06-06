@@ -10,6 +10,7 @@ import imgui.type.ImDouble;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
@@ -25,7 +26,6 @@ import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.time.DurationCalculator;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -313,7 +313,10 @@ public class GDXSCS2Session
       showRobotPairs.clear();
    }
 
-   public ArrayList<GDXSimulatedRobot> getRobots() {return robots;}
+   public ArrayList<GDXSimulatedRobot> getRobots()
+   {
+      return robots;
+   }
 
    public Session getSession()
    {
