@@ -28,7 +28,6 @@ mainDependencies {
    api("us.ihmc:euclid:0.17.2")
    api("us.ihmc:euclid-geometry:0.17.2")
    api("us.ihmc:mecano-graphviz:0.11.1")
-   api("us.ihmc:simulation-construction-set:0.21.16")
    api("us.ihmc:robot-environment-awareness:source")
    api("us.ihmc:robot-environment-awareness-visualizers:source")
    api("us.ihmc:ihmc-ros-tools:source")
