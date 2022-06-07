@@ -254,7 +254,6 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
    public void runProcessedScriptTest(TestInfo testInfo,
                                       RobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup,
                                       CommonAvatarEnvironmentInterface environment,
-                                      double durationPerKeyframe,
                                       InputStream... scriptInputStreams)
          throws Exception
    {
@@ -269,8 +268,14 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
          assertTrue(simulationTestHelper.simulateNow(1.0));
 
          MultiContactScriptPostProcessor scriptPostProcessor = new MultiContactScriptPostProcessor(getRobotModel());
-         scriptPostProcessor.setDurationPerKeyframe(durationPerKeyframe);
-         WholeBodyJointspaceTrajectoryMessage message = scriptPostProcessor.process1(scriptReader.getAllItems(), true);
+
+         double timePerKeyframe = 1.0;
+         for (int i = 0; i < scriptReader.getAllItems().size(); i++)
+         {
+            scriptReader.getAllItems().get(i).setExecutionDuration(timePerKeyframe);
+         }
+
+         WholeBodyJointspaceTrajectoryMessage message = scriptPostProcessor.process1(scriptReader.getAllItems());
 
          simulationTestHelper.publishToController(message);
          assertTrue(simulationTestHelper.simulateNow(message.getJointTrajectoryMessages().get(0).getTrajectoryPoints().getLast().getTime() + 2.0));
