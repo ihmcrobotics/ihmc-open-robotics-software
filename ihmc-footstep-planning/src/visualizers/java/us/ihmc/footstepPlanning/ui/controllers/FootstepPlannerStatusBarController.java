@@ -107,7 +107,7 @@ public class FootstepPlannerStatusBarController
          }
       });
 
-      TableColumn<FootstepResponseTableRow, SwingTimeCellValue> swingTimeColumn = new TableColumn<>("Swing Time");;
+      TableColumn<FootstepResponseTableRow, SwingTimeCellValue> swingTimeColumn = new TableColumn<>("Swing Time");
       swingTimeColumn.setPrefWidth(100.0);
       swingTimeColumn.setCellValueFactory(tableRow -> new ReadOnlyObjectWrapper<>(new SwingTimeCellValue(tableRow.getValue())));
       swingTimeColumn.setCellFactory(param -> new SwingTimeCell());
