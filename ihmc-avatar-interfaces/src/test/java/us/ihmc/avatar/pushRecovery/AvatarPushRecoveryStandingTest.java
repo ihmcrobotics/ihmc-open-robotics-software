@@ -423,7 +423,7 @@ public abstract class AvatarPushRecoveryStandingTest
       simulationTestHelper.start();
       FullHumanoidRobotModel fullRobotModel = getRobotModel().createFullRobotModel();
       //      pushRobotController = new PushRobotController(drcSimulationTestHelper.getRobot(), fullRobotModel);
-      pushRobotController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationSession().getTime(),
+      pushRobotController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationConstructionSet().getTime(),
                                                         simulationTestHelper.getRobot(),
                                                         fullRobotModel.getChest().getParentJoint().getName(),
                                                         new Vector3D(0, 0, getPushPositionZHeightInChestFrame()));
