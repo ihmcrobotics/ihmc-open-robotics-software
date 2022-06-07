@@ -58,6 +58,7 @@ public class OpenCVArUcoMarkerDetection
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
    private int imageWidth;
    private int imageHeight;
+   private Scalar defaultBorderColor;
 
    public void create(BytedecoImage sourceColorImage, CameraPinholeBrown depthCameraIntrinsics, ReferenceFrame sensorFrame)
    {
@@ -88,6 +89,7 @@ public class OpenCVArUcoMarkerDetection
       rotationMatrix = new Mat(3, 3, opencv_core.CV_64FC1);
       translationVectors = new Mat();
       objectPoints = new Mat();
+      defaultBorderColor = new Scalar(0, 0, 255, 0);
 
       cameraMatrix.ptr(0, 0).putFloat((float) depthCameraIntrinsics.getFx());
       cameraMatrix.ptr(0, 1).putFloat(0.0f);
@@ -232,11 +234,16 @@ public class OpenCVArUcoMarkerDetection
       }
    }
 
-   public void drawDetectedMarkers(Mat imageForDrawing, Scalar idColor)
+   public void drawDetectedMarkers(Mat imageForDrawing)
+   {
+      drawDetectedMarkers(imageForDrawing, defaultBorderColor);
+   }
+
+   public void drawDetectedMarkers(Mat imageForDrawing, Scalar borderColor)
    {
       synchronized (detectionDataSync)
       {
-         opencv_aruco.drawDetectedMarkers(imageForDrawing, corners.getForThreadTwo(), ids.getForThreadTwo(), idColor);
+         opencv_aruco.drawDetectedMarkers(imageForDrawing, corners.getForThreadTwo(), ids.getForThreadTwo(), borderColor);
       }
    }
 
