@@ -105,14 +105,20 @@ public class DualBlackflyCamera
             cameraPinholeBrown.setCx(1043.8826790137316);
             cameraPinholeBrown.setCy(572.2558510618412);
 
-            cameraMatrix = new Mat(cameraPinholeBrown.getFx(), 0.0, cameraPinholeBrown.getCx(),
-                                   0.0, cameraPinholeBrown.getFy(), cameraPinholeBrown.getCy(),
-                                   0.0, 0.0, 1.0);
-            cameraMatrix.reshape(1, 3);
+            cameraMatrix = new Mat(3, 3, opencv_core.CV_64F);
+            cameraMatrix.ptr(0, 0).putDouble(cameraPinholeBrown.getFx());
+            cameraMatrix.ptr(0, 1).putDouble(0.0);
+            cameraMatrix.ptr(0, 2).putDouble(cameraPinholeBrown.getCx());
+            cameraMatrix.ptr(1, 0).putDouble(0.0);
+            cameraMatrix.ptr(1, 1).putDouble(cameraPinholeBrown.getFy());
+            cameraMatrix.ptr(1, 2).putDouble(cameraPinholeBrown.getCy());
+            cameraMatrix.ptr(2, 0).putDouble(0.0);
+            cameraMatrix.ptr(2, 1).putDouble(0.0);
+            cameraMatrix.ptr(2, 2).putDouble(1.0);
             distortionCoefficients = new Mat(-0.1304880574839372, 0.0343337720836711, 0, 0, 0.002347490605947351,
                                              0.163868408051474, -0.02493286434834704, 0.01394671162254435);
             distortionCoefficients.reshape(1, 8);
-            undistortedImageMat = new Mat();
+            undistortedImageMat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3);
 
             yuv420Image = new Mat();
 
