@@ -1852,6 +1852,7 @@ public class CrossRobotCommandRandomTools
       next.setCenterOfMassHeightControlCommand(nextCenterOfMassFeedbackControlCommand(random, rootBody, possibleFrames));
       next.setPelvisHeightControlCommand(nextPointFeedbackControlCommand(random, rootBody, possibleFrames));
       next.setUsePelvisHeightCommand(random.nextBoolean());
+      next.setHasHeightCommand(random.nextBoolean());
       next.setControlHeightWithMomentum(random.nextBoolean());
       next.setUseMomentumRecoveryMode(random.nextBoolean());
       next.setDesiredCapturePoint(nextFramePoint2D(random, possibleFrames));

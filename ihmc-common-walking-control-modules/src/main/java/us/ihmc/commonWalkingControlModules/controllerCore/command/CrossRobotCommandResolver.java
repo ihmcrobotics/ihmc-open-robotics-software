@@ -870,6 +870,7 @@ public class CrossRobotCommandResolver
       resolveFrameTuple2D(in.getPerfectCoP(), out.getPerfectCoP());
       out.setControlHeightWithMomentum(in.getControlHeightWithMomentum());
       out.setUsePelvisHeightCommand(in.getUsePelvisHeightCommand());
+      out.setHasHeightCommand(in.getHasHeightCommand());
       resolvePointFeedbackControlCommand(in.getPelvisHeightControlCommand(), out.getPelvisHeightControlCommand());
       resolveCenterOfMassFeedbackControlCommand(in.getCenterOfMassHeightControlCommand(), out.getCenterOfMassHeightControlCommand());
       out.setInitializeOnStateChange(in.getInitializeOnStateChange());

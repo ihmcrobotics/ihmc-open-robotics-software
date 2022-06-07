@@ -281,6 +281,7 @@ public class LinearMomentumRateControlModuleInput
       keepCoPInsideSupportPolygon = other.keepCoPInsideSupportPolygon;
       minimizeAngularMomentumRateZ = other.minimizeAngularMomentumRateZ;
       setUsePelvisHeightCommand(other.getUsePelvisHeightCommand());
+      setHasHeightCommand(other.getHasHeightCommand());
       setPelvisHeightControlCommand(other.getPelvisHeightControlCommand());
       setCenterOfMassHeightControlCommand(other.getCenterOfMassHeightControlCommand());
       for (RobotSide robotSide : RobotSide.values)
