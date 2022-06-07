@@ -86,6 +86,7 @@ public class LinearMomentumRateControlModule
    private final PelvisHeightController pelvisHeightController;
    private final CoMHeightController comHeightController;
 
+   private boolean hasHeightCommand = true;
    private FeedbackControlCommand<?> heightControlCommand;
 
    private double omega0;
@@ -278,10 +279,14 @@ public class LinearMomentumRateControlModule
    {
       this.omega0 = input.getOmega0();
       heightControlCommand = null;
-      if (input.getUsePelvisHeightCommand())
-         heightControlCommand = input.getPelvisHeightControlCommand();
-      else
-         heightControlCommand = input.getCenterOfMassHeightControlCommand();
+      hasHeightCommand = input.getHasHeightCommand();
+      if (hasHeightCommand)
+      {
+         if (input.getUsePelvisHeightCommand())
+            heightControlCommand = input.getPelvisHeightControlCommand();
+         else
+            heightControlCommand = input.getCenterOfMassHeightControlCommand();
+      }
       this.useRecoveryMomentumWeight.set(input.getUseMomentumRecoveryMode());
       this.desiredCapturePoint.setMatchingFrame(input.getDesiredCapturePoint());
       this.desiredCapturePointVelocity.setMatchingFrame(input.getDesiredCapturePointVelocity());
@@ -428,7 +433,7 @@ public class LinearMomentumRateControlModule
 
    private void updateHeightController()
    {
-      if (heightControlCommand == null)
+      if (!hasHeightCommand || heightControlCommand == null)
       {
          desiredCoMHeightAcceleration = 0.0;
          return;
