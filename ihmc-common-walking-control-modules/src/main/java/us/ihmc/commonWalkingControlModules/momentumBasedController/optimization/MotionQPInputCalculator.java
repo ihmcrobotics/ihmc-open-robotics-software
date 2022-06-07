@@ -52,6 +52,7 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class MotionQPInputCalculator
 {
@@ -100,6 +101,9 @@ public class MotionQPInputCalculator
 
    private final NativeNullspaceProjector accelerationNativeNullspaceProjector;
    private final NativeNullspaceProjector velocityNativeNullspaceProjector;
+   
+   private final YoInteger allTJSize = new YoInteger("allTJSize", registry);
+   private int prevallTJSize = 0;
 
    public MotionQPInputCalculator(ReferenceFrame centerOfMassFrame,
                                   CentroidalMomentumRateCalculator centroidalMomentumRateCalculator,
@@ -1043,6 +1047,11 @@ public class MotionQPInputCalculator
       int taskSize = taskJacobian.getNumRows();
       allTaskJacobian.reshape(allTaskJacobian.getNumRows() + taskSize, numberOfDoFs, true);
       CommonOps_DDRM.insert(taskJacobian, allTaskJacobian, allTaskJacobian.getNumRows() - taskSize, 0);
+      if (prevallTJSize > allTaskJacobian.getNumRows())
+      {
+         allTJSize.set(prevallTJSize);
+      }
+      prevallTJSize = allTaskJacobian.getNumRows();
    }
 
    public DMatrixRMaj getCentroidalMomentumMatrix()
