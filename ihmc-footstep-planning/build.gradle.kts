@@ -18,7 +18,7 @@ mainDependencies {
 
    api("us.ihmc:euclid:0.17.2")
    api("us.ihmc:ihmc-robotics-toolkit:source")
-   api("us.ihmc:ihmc-convex-optimization:0.17.11")
+   api("us.ihmc:ihmc-convex-optimization:0.17.12")
    api("us.ihmc:ihmc-path-planning:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-common-walking-control-modules:source")
