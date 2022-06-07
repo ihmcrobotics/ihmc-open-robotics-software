@@ -80,7 +80,7 @@ communicationTestDependencies {
 roboticsDependencies {
    api(ihmc.sourceSetProject("communication"))
 
-   api("us.ihmc:ihmc-convex-optimization:0.17.11")
+   api("us.ihmc:ihmc-convex-optimization:0.17.12")
    api("us.ihmc:ihmc-state-estimation:source")
    api("us.ihmc:ihmc-simulation-toolkit:source")
    api("us.ihmc:ihmc-system-identification:source")
