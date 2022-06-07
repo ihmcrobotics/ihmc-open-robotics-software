@@ -36,7 +36,7 @@ mainDependencies {
    api("org.ddogleg:ddogleg:0.18")
 
    api("us.ihmc:euclid:0.17.2")
-   api("us.ihmc:simulation-construction-set:0.21.16")
+   api("us.ihmc:simulation-construction-set:0.21.18")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-ros-tools:source")
@@ -94,7 +94,6 @@ fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoSelective(dependencyNotat
 
 testDependencies {
    api("us.ihmc:ihmc-commons-testing:0.30.5")
-   api("us.ihmc:simulation-construction-set:0.21.16")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")
