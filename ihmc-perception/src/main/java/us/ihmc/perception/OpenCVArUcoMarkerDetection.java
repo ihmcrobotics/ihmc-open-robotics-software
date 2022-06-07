@@ -300,20 +300,4 @@ public class OpenCVArUcoMarkerDetection
    {
       this.enabled = enabled;
    }
-
-   /**
-    * Save a ArUco marker image of id to file.
-    */
-   public static void main(String[] args)
-   {
-      Mat markerToSave = new Mat();
-      Dictionary dictionary = opencv_aruco.getPredefinedDictionary(DEFAULT_DICTIONARY);
-      int markerID = 0;
-      int totalImageSizePixels = 400;
-      for (; markerID < 100; markerID++)
-      {
-         opencv_aruco.drawMarker(dictionary, markerID, totalImageSizePixels, markerToSave, 2);
-         opencv_imgcodecs.imwrite("marker" + markerID + ".jpg", markerToSave);
-      }
-   }
 }
