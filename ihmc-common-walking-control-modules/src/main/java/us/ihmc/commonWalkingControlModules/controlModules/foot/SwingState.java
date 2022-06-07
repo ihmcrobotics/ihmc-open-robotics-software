@@ -45,6 +45,7 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameSE3Tr
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
@@ -196,6 +197,16 @@ public class SwingState extends AbstractFootControlState
       FramePose3D anklePoseInFoot = new FramePose3D(ankleFrame);
       anklePoseInFoot.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
       changeControlFrame(anklePoseInFoot);
+
+      // GMN: I don't see a getter for the selection matrix of spatialFeedbackControlCommand, so I'm doing this hack:
+      SelectionMatrix6D noXRotation = new SelectionMatrix6D();
+      noXRotation.selectAngularX(false);  // GMN: try to turn off x-rotation control for swing feet
+      noXRotation.selectAngularY(true);
+      noXRotation.selectAngularZ(true);
+      noXRotation.selectLinearX(true);
+      noXRotation.selectLinearY(true);
+      noXRotation.selectLinearZ(true);
+      spatialFeedbackControlCommand.setSelectionMatrix(noXRotation);
 
       liftOffKneeAcceleration = new YoDouble(namePrefix + "LiftOffKneeAcceleration", registry);
       FullHumanoidRobotModel fullRobotModel = footControlHelper.getHighLevelHumanoidControllerToolbox().getFullRobotModel();
