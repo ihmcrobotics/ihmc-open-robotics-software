@@ -1206,7 +1206,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       {
          createAndAddJointPrivilegedConfigurationParameters(robotSide,
                                                             LegJointName.HIP_PITCH,
-                                                            0.0,
+                                                            -0.25,
                                                             pPoseHipPitchKp.getDoubleValue(),
                                                             pPoseHipPitchKdFactor.getDoubleValue() * pPoseHipPitchKp.getDoubleValue());
          createAndAddJointPrivilegedConfigurationParameters(robotSide,
@@ -1221,15 +1221,15 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
                                                             pPoseHipYawKdFactor.getDoubleValue() * pPoseHipYawKp.getDoubleValue());
          createAndAddJointPrivilegedConfigurationParameters(robotSide,
                                                             LegJointName.KNEE_PITCH,
-                                                            0.0,
+                                                            0.5,
                                                             pPoseKneeKp.getDoubleValue(),
                                                             pPoseKneeKdFactor.getDoubleValue() * pPoseKneeKp.getDoubleValue());
       }
       
-      createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, LegJointName.ANKLE_ROLL, 0.0, 40.0, 6.0);
-      createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, LegJointName.ANKLE_ROLL, 0.0, 40.0, 6.0);
-      createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, LegJointName.ANKLE_PITCH, 0.0, 40.0, 6.0);
-      createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, LegJointName.ANKLE_PITCH, 0.0, 40.0, 6.0);
+      createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, LegJointName.ANKLE_ROLL, 0.0, 4.0, 0.6);
+      createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, LegJointName.ANKLE_ROLL, 0.0, 4.0, 0.6);
+      createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, LegJointName.ANKLE_PITCH, 0.0, 4.0, 0.6);
+      createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, LegJointName.ANKLE_PITCH, 0.0, 4.0, 0.6);
    }
 
    public ControllerCoreCommand getControllerCoreCommand()
