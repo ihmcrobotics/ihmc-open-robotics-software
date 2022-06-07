@@ -39,7 +39,7 @@ planningDependencies {
 
    api("us.ihmc:robot-environment-awareness:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")
-   api("us.ihmc:ihmc-robot-data-logger:0.23.0")
+   api("us.ihmc:ihmc-robot-data-logger:0.23.2")
    api("us.ihmc:ihmc-path-planning:source")
 }
 
