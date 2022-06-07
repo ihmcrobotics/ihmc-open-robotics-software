@@ -47,7 +47,7 @@ public class AtlasFallingOnGroundSCS2Bullet
       }
       else
       {
-         SCS2BulletSimulationTools.fixHumanoidCollisionGroupsMasksToPreventSelfCollision(robotDefinition);
+         AtlasSCS2BulletSimulationTools.fixHumanoidCollisionGroupsMasksToPreventSelfCollision(robotDefinition);
       }
 
       Set<String> lastSimulatedJoints = robotModel.getJointMap().getLastSimulatedJoints();
