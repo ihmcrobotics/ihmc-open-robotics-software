@@ -1,16 +1,20 @@
 package us.ihmc.quadrupedRobotics.controller.force.speedTorqueLimits;
 
+import java.io.IOException;
+
 import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotTestConductor;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
-import us.ihmc.quadrupedRobotics.*;
+import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
+import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
+import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
+import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
+import us.ihmc.quadrupedRobotics.QuadrupedTestYoVariables;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
+import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-
-import java.io.IOException;
 
 public abstract class QuadrupedSpeedTorqueLimitGraphing implements QuadrupedMultiRobotTestInterface
 {
@@ -19,7 +23,7 @@ public abstract class QuadrupedSpeedTorqueLimitGraphing implements QuadrupedMult
    private RemoteQuadrupedTeleopManager stepTeleopManager;
    private PushRobotTestConductor pusher;
 
-   public SimulationConstructionSet createSimulation() throws IOException
+   public SimulationConstructionSet2 createSimulation() throws IOException
    {
       QuadrupedTestFactory testFactory = createQuadrupedTestFactory();
       testFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);

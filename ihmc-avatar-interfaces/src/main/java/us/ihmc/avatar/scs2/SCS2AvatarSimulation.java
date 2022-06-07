@@ -20,12 +20,8 @@ import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
-import us.ihmc.scs2.session.SessionMode;
-import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizer;
-import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizerControls;
-import us.ihmc.scs2.simulation.SimulationSession;
-import us.ihmc.scs2.simulation.SimulationSessionControls;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimJointBasics;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -34,7 +30,7 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 public class SCS2AvatarSimulation
 {
    private Robot robot;
-   private SimulationSession simulationSession;
+   private SimulationConstructionSet2 simulationConstructionSet;
    private HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory;
    private YoVariableServer yoVariableServer;
    private IntraprocessYoVariableLogger intraprocessYoVariableLogger;
@@ -52,7 +48,6 @@ public class SCS2AvatarSimulation
 
    private boolean systemExitOnDestroy = true;
    private boolean javaFXThreadImplicitExit = true;
-   private SessionVisualizerControls sessionVisualizerControls;
 
    private boolean hasBeenDestroyed = false;
 
@@ -60,15 +55,13 @@ public class SCS2AvatarSimulation
    {
       beforeSessionThreadStart();
 
-      simulationSession.startSessionThread();
+      simulationConstructionSet.setJavaFXThreadImplicitExit(javaFXThreadImplicitExit);
+      simulationConstructionSet.setVisualizerEnabled(showGUI);
+      simulationConstructionSet.startSimulationThread();
+      simulationConstructionSet.addVisualizerShutdownListener(this::destroy);
 
-      if (showGUI)
-      {
-         sessionVisualizerControls = SessionVisualizer.startSessionVisualizer(simulationSession, javaFXThreadImplicitExit);
-         sessionVisualizerControls.addVisualizerShutdownListener(this::destroy);
-      }
       if (automaticallyStartSimulation)
-         simulationSession.setSessionMode(SessionMode.RUNNING);
+         simulationConstructionSet.simulate();
 
       afterSessionThreadStart();
    }
@@ -117,12 +110,10 @@ public class SCS2AvatarSimulation
          realtimeROS2Node = null;
       }
 
-      if (simulationSession != null)
+      if (simulationConstructionSet != null)
       {
-         if (showGUI)
-            sessionVisualizerControls.shutdownNow();
-         simulationSession.shutdownSession();
-         simulationSession = null;
+         simulationConstructionSet.shutdownSession();
+         simulationConstructionSet = null;
       }
 
       if (systemExitOnDestroy)
@@ -139,11 +130,8 @@ public class SCS2AvatarSimulation
 
    public void resetRobot(boolean simulateAfterReset)
    {
-      SimulationSessionControls simulationSessionControls = simulationSession.getSimulationSessionControls();
-
-      simulationSessionControls.pause();
-
-      simulationSession.stopSessionThread();
+      simulationConstructionSet.pause();
+      simulationConstructionSet.stopSimulationThread();
 
       for (SimJointBasics joint : robot.getAllJoints())
       {
@@ -164,11 +152,11 @@ public class SCS2AvatarSimulation
       controllerThread.initialize();
       masterContext.set(estimatorThread.getHumanoidRobotContextData());
 
-      simulationSession.reinitializeSession();
-      simulationSession.startSessionThread();
+      simulationConstructionSet.reinitializeSimulation();
+      simulationConstructionSet.startSimulationThread();
 
       if (simulateAfterReset)
-         simulationSessionControls.simulate();
+         simulationConstructionSet.simulate();
    }
 
    public boolean hasBeenDestroyed()
@@ -176,14 +164,9 @@ public class SCS2AvatarSimulation
       return hasBeenDestroyed;
    }
 
-   public SimulationSession getSimulationSession()
+   public SimulationConstructionSet2 getSimulationConstructionSet()
    {
-      return simulationSession;
-   }
-
-   public SessionVisualizerControls getSessionVisualizerControls()
-   {
-      return sessionVisualizerControls;
+      return simulationConstructionSet;
    }
 
    public FullHumanoidRobotModel getControllerFullRobotModel()
@@ -224,9 +207,9 @@ public class SCS2AvatarSimulation
       return simulatedRobotTimeProvider;
    }
 
-   public void setSimulationSession(SimulationSession simulationSession)
+   public void setSimulationConstructionSet(SimulationConstructionSet2 simulationConstructionSet)
    {
-      this.simulationSession = simulationSession;
+      this.simulationConstructionSet = simulationConstructionSet;
    }
 
    public void setHighLevelHumanoidControllerFactory(HighLevelHumanoidControllerFactory momentumBasedControllerFactory)

@@ -83,7 +83,7 @@ public class SCS2BehaviorTestHelper implements YoVariableHolder
    public SCS2BehaviorTestHelper(SCS2AvatarTestingSimulation avatarTestingSimulation)
    {
       this.avatarTestingSimulation = avatarTestingSimulation;
-      yoTimeRobot = avatarTestingSimulation.getSimulationSession().getTime();
+      yoTimeRobot = avatarTestingSimulation.getSimulationConstructionSet().getTime();
       yoTimeBehaviorDispatcher = new YoDouble("yoTimeBehaviorDispatcher", registry);
 
       this.drcRobotModel = avatarTestingSimulation.getRobotModel();

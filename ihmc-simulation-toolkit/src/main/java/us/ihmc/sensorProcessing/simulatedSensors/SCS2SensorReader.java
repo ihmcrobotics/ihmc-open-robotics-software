@@ -1,4 +1,4 @@
-package us.ihmc.avatar.scs2;
+package us.ihmc.sensorProcessing.simulatedSensors;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,9 +33,6 @@ import us.ihmc.sensorProcessing.imu.IMUSensor;
 import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
-import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -242,6 +239,9 @@ public class SCS2SensorReader implements SensorReader
 
    private void addWrenchSensors(ForceSensorDataHolder forceSensorDataHolderToUpdate)
    {
+      if (forceSensorDataHolderToUpdate == null || forceSensorDataHolderToUpdate.getForceSensorDefinitions() == null)
+         return;
+         
       for (ForceSensorDefinition definition : forceSensorDataHolderToUpdate.getForceSensorDefinitions())
       {
          addWrenchSensor(definition, forceSensorDataHolderToUpdate.get(definition));

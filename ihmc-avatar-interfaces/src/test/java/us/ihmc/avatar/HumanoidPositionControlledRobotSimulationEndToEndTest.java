@@ -202,8 +202,8 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
       createSimulation(testInfo, ghostRobot, initialSetup, environment);
       simulationTestHelper.start();
 
-      YoInteger totalNumberOfFrames = new YoInteger("totalNumberOfFrames", simulationTestHelper.getSimulationSession().getRootRegistry());
-      YoInteger frameIndex = new YoInteger("frameIndex", simulationTestHelper.getSimulationSession().getRootRegistry());
+      YoInteger totalNumberOfFrames = new YoInteger("totalNumberOfFrames", simulationTestHelper.getSimulationConstructionSet().getRootRegistry());
+      YoInteger frameIndex = new YoInteger("frameIndex", simulationTestHelper.getSimulationConstructionSet().getRootRegistry());
       //      scs.setupGraph(totalNumberOfFrames.getFullNameString(), frameIndex.getFullNameString()); // TODO
 
       for (InputStream scriptInputStream : scriptInputStreams)

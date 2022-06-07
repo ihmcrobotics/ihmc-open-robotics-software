@@ -34,6 +34,7 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
    private final boolean groundProfileVisible;
    private final boolean drawPlaneAtZ0;
    private boolean showOverheadView = SHOW_OVERHEAD_VIEW;
+   private String torqueSpeedExportDirectory = null;
 
    public DRCGuiInitialSetup(boolean groundProfileVisible, boolean drawPlaneAtZeroHeight,
                              SimulationConstructionSetParameters simulationConstructionSetParameters)
@@ -116,6 +117,10 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
          dataExporter.setRootDirectory("C:/DataAndVideos/");
          dataExporter.setRootDirectory("D:/DataAndVideos/");
          dataExporter.setRootDirectory("E:/DataAndVideos/");
+         if (torqueSpeedExportDirectory != null)
+         {
+            dataExporter.setRootDirectory(torqueSpeedExportDirectory);
+         }
          exportTorqueAndSpeedButton.addActionListener(dataExporter);
          scs.addButton(exportTorqueAndSpeedButton);
       }
@@ -127,6 +132,11 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
       {
          new WalkControllerSliderBoard(scs, scs.getRootRegistry(), null);
       }
+   }
+
+   public void setTorqueSpeedExportDirectory(String dir)
+   {
+      torqueSpeedExportDirectory = dir;
    }
 
    public boolean isGuiShown()

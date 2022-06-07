@@ -24,12 +24,10 @@ import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.avatar.factory.BarrierScheduledRobotController;
 import us.ihmc.avatar.factory.DisposableRobotController;
 import us.ihmc.avatar.factory.HumanoidRobotControlTask;
-import us.ihmc.avatar.factory.RobotDefinitionTools;
 import us.ihmc.avatar.factory.SimulatedHandControlTask;
 import us.ihmc.avatar.factory.SimulatedHandOutputWriter;
 import us.ihmc.avatar.factory.SimulatedHandSensorReader;
 import us.ihmc.avatar.factory.SingleThreadedRobotController;
-import us.ihmc.avatar.factory.TerrainObjectDefinitionTools;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
@@ -62,6 +60,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.controller.ControllerInput;
 import us.ihmc.scs2.definition.controller.ControllerOutput;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
@@ -71,7 +70,6 @@ import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.session.Session;
 import us.ihmc.scs2.session.tools.SCS1GraphicConversionTools;
-import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
 import us.ihmc.scs2.simulation.parameters.ContactParametersReadOnly;
 import us.ihmc.scs2.simulation.parameters.ContactPointBasedContactParameters;
@@ -83,10 +81,13 @@ import us.ihmc.scs2.simulation.robot.controller.SimControllerInput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
+import us.ihmc.sensorProcessing.simulatedSensors.SCS2SensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
+import us.ihmc.simulationToolkit.RobotDefinitionTools;
+import us.ihmc.simulationToolkit.TerrainObjectDefinitionTools;
 import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
 import us.ihmc.tools.factories.FactoryFieldNotSetException;
 import us.ihmc.tools.factories.FactoryTools;
@@ -136,7 +137,7 @@ public class SCS2AvatarSimulationFactory
    protected Robot robot;
    protected YoVariableServer yoVariableServer;
    protected IntraprocessYoVariableLogger intraprocessYoVariableLogger;
-   protected SimulationSession simulationSession;
+   protected SimulationConstructionSet2 simulationConstructionSet;
    protected JointDesiredOutputWriter simulationOutputWriter;
    protected HumanoidRobotContextData masterContext;
    protected AvatarEstimatorThread estimatorThread;
@@ -167,7 +168,7 @@ public class SCS2AvatarSimulationFactory
       SCS2AvatarSimulation avatarSimulation = new SCS2AvatarSimulation();
       avatarSimulation.setRobotModel(robotModel.get());
       avatarSimulation.setRobotInitialSetup(robotInitialSetup.get());
-      avatarSimulation.setSimulationSession(simulationSession);
+      avatarSimulation.setSimulationConstructionSet(simulationConstructionSet);
       avatarSimulation.setHighLevelHumanoidControllerFactory(highLevelHumanoidControllerFactory.get());
       avatarSimulation.setYoVariableServer(yoVariableServer);
       avatarSimulation.setIntraprocessYoVariableLogger(intraprocessYoVariableLogger);
@@ -254,25 +255,24 @@ public class SCS2AvatarSimulationFactory
       }
 
       String name = simulationName.hasValue() ? simulationName.get() : Session.retrieveCallerName();
-      simulationSession = new SimulationSession(name, physicsEngineFactory);
-      simulationSession.initializeBufferSize(simulationDataBufferSize.get());
-      simulationSession.initializeBufferRecordTickPeriod(simulationDataRecordTickPeriod.get());
+      simulationConstructionSet = new SimulationConstructionSet2(name, physicsEngineFactory);
+      simulationConstructionSet.initializeBufferSize(simulationDataBufferSize.get());
+      simulationConstructionSet.initializeBufferRecordTickPeriod(simulationDataRecordTickPeriod.get());
       if (terrainObjectDefinitions.isEmpty())
          throw new FactoryFieldNotSetException("terrainObjectDefinitions");
       for (TerrainObjectDefinition terrainObjectDefinition : terrainObjectDefinitions)
       {
-         simulationSession.addTerrainObject(terrainObjectDefinition);
+         simulationConstructionSet.addTerrainObject(terrainObjectDefinition);
       }
-      robot = simulationSession.addRobot(robotDefinition);
-      robot.getControllerManager()
-           .addController(new SCS2StateEstimatorDebugVariables(simulationSession.getInertialFrame(),
+      robot = simulationConstructionSet.addRobot(robotDefinition);
+      robot.addController(new SCS2StateEstimatorDebugVariables(simulationConstructionSet.getInertialFrame(),
                                                                gravity.get(),
                                                                robot.getControllerManager().getControllerInput()));
 
       for (Robot secondaryRobot : secondaryRobots.get())
-         simulationSession.addRobot(secondaryRobot);
+         simulationConstructionSet.addRobot(secondaryRobot);
 
-      simulationSession.setSessionDTSeconds(simulationDT.get());
+      simulationConstructionSet.setDT(simulationDT.get());
    }
 
    private void setupYoVariableServer()
@@ -347,7 +347,7 @@ public class SCS2AvatarSimulationFactory
                                                     realtimeROS2Node.get(),
                                                     gravity.get(),
                                                     robotModel.get().getEstimatorDT());
-      simulationSession.addYoGraphicDefinitions(SCS1GraphicConversionTools.toYoGraphicDefinitions(controllerThread.getYoGraphicsListRegistry()));
+      simulationConstructionSet.addYoGraphics(SCS1GraphicConversionTools.toYoGraphicDefinitions(controllerThread.getYoGraphicsListRegistry()));
    }
 
    private void setupMultiThreadedRobotController()
