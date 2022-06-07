@@ -9,6 +9,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.spinnaker.Spinnaker_C.spinImage;
 import org.bytedeco.spinnaker.global.Spinnaker_C;
 import std_msgs.msg.dds.Float64;
@@ -152,7 +153,8 @@ public class DualBlackflyCamera
 
                arUcoMarkerDetection.update();
 
-
+               arUcoMarkerDetection.drawDetectedMarkers(undistortedImageMat);
+               arUcoMarkerDetection.drawRejectedPoints(undistortedImageMat);
             }
 
             convertColorDuration.start();
