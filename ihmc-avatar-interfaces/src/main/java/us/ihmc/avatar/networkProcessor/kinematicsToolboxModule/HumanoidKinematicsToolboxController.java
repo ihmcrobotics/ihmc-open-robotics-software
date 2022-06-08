@@ -34,6 +34,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.concurrent.ConcurrentCopier;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -391,6 +392,13 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
             supportRegionSolver.initialize(supportRegionSolverInput);
             if (!supportRegionSolver.solve())
                return false;
+
+            ConvexPolygon2DReadOnly supportRegion = supportRegionSolver.getSupportRegion();
+            for (int i = 0; i < Math.min(supportRegion.getNumberOfVertices(), 16); i++)
+            {
+               status.getSupportRegion().add().set(supportRegion.getVertex(i));
+               getSolution().getSupportRegion().add().set(supportRegion.getVertex(i));
+            }
          }
 
          for (RobotSide robotSide : RobotSide.values)
@@ -673,9 +681,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          {
             usingMultiContactSupportRegion.set(true);
             for (int i = 0; i < supportRegionSolver.getSupportRegionVertices().size(); i++)
-            {
                activeContactPointPositions.add().set(supportRegionSolver.getSupportRegionVertices().get(i));
-            }
          }
          else
          {
