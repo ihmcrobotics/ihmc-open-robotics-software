@@ -764,6 +764,7 @@ public class KinematicsToolboxController extends ToolboxController
 
       // By default, always constrain the center of mass according to the current support polygon (if defined).
       enableSupportPolygonConstraint.set(true);
+      inverseKinematicsSolution.getSupportRegion().clear();
 
       return hasRobotConfigurationData;
    }
