@@ -10,8 +10,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import static org.bytedeco.opencv.global.opencv_imgcodecs.imwrite;
-
 public class GDXLogVideoVisualizer extends GDXOpenCVVideoVisualizer
 {
    private final String filename;
@@ -22,9 +20,6 @@ public class GDXLogVideoVisualizer extends GDXOpenCVVideoVisualizer
    {
       super(file, file, false);
       this.filename = file;
-
-      image = new Mat(1920, 1080, 1);
-      imwrite("temp.jpg", image);
 
       this.cap = new VideoCapture(file);
 
