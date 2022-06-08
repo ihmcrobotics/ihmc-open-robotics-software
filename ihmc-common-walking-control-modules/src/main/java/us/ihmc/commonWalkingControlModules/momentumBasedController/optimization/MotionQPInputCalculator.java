@@ -860,7 +860,14 @@ public class MotionQPInputCalculator
     */
    public boolean convertJointspaceAccelerationCommand(JointspaceAccelerationCommand commandToConvert, QPInputTypeA qpInputToPack)
    {
-      int taskSize = MultiBodySystemTools.computeDegreesOfFreedom(commandToConvert.getJoints());
+      int taskSize = 0;
+      double minWeight = 1.0e-12;
+
+      for (int jointIndex = 0; jointIndex < commandToConvert.getNumberOfJoints(); jointIndex++)
+      {
+         if (commandToConvert.getWeight(jointIndex) > minWeight)
+            taskSize++;
+      }
 
       if (taskSize == 0)
          return false;
@@ -874,6 +881,9 @@ public class MotionQPInputCalculator
       int row = 0;
       for (int jointIndex = 0; jointIndex < commandToConvert.getNumberOfJoints(); jointIndex++)
       {
+         if (commandToConvert.getWeight(jointIndex) <= minWeight)
+            continue;
+
          JointBasics joint = commandToConvert.getJoint(jointIndex);
          double weight = commandToConvert.getWeight(jointIndex);
          int[] columns = jointIndexHandler.getJointIndices(joint);
@@ -892,6 +902,40 @@ public class MotionQPInputCalculator
       recordTaskJacobian(qpInputToPack.taskJacobian);
       return true;
    }
+//   public boolean convertJointspaceAccelerationCommand(JointspaceAccelerationCommand commandToConvert, QPInputTypeA qpInputToPack)
+//   {
+//      int taskSize = MultiBodySystemTools.computeDegreesOfFreedom(commandToConvert.getJoints());
+//
+//      if (taskSize == 0)
+//         return false;
+//
+//      qpInputToPack.reshape(taskSize);
+//      qpInputToPack.setConstraintType(commandToConvert.isHardConstraint() ? ConstraintType.EQUALITY : ConstraintType.OBJECTIVE);
+//      qpInputToPack.taskJacobian.zero();
+//      qpInputToPack.taskWeightMatrix.zero();
+//      qpInputToPack.setUseWeightScalar(false);
+//
+//      int row = 0;
+//      for (int jointIndex = 0; jointIndex < commandToConvert.getNumberOfJoints(); jointIndex++)
+//      {
+//         JointBasics joint = commandToConvert.getJoint(jointIndex);
+//         double weight = commandToConvert.getWeight(jointIndex);
+//         int[] columns = jointIndexHandler.getJointIndices(joint);
+//         if (columns == null)
+//            return false;
+//
+//         CommonOps_DDRM.insert(commandToConvert.getDesiredAcceleration(jointIndex), qpInputToPack.taskObjective, row, 0);
+//         for (int column : columns)
+//         {
+//            qpInputToPack.taskJacobian.set(row, column, 1.0);
+//            qpInputToPack.taskWeightMatrix.set(row, row, weight);
+//            row++;
+//         }
+//      }
+//
+//      recordTaskJacobian(qpInputToPack.taskJacobian);
+//      return true;
+//   }
 
    /**
     * Converts a {@link JointspaceVelocityCommand} into a {@link QPInputTypeA}.
