@@ -250,7 +250,7 @@ public class TorqueSpeedDataExporter implements ActionListener
       System.out.println("Saving data using tag: " + tagName);
 
       // make destination directory
-      File dataAndVideosTagDirectory = new File(simulationDataAndVideoDirectory, tagName);
+      File dataAndVideosTagDirectory = new File(rootDirectory, tagName);
       dataAndVideosTagDirectory.mkdir();
 
       // make graph directory inside destination directory
