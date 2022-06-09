@@ -16,7 +16,7 @@ ihmc {
 mainDependencies {
    api("org.georegression:georegression:0.22")
    api("org.ddogleg:ddogleg:0.18")
-   api("org.apache.xmlgraphics:batik-dom:1.7")
+   api("org.apache.xmlgraphics:batik-dom:1.14")
    api("org.apache.ant:ant:1.9.0")
    api("com.martiansoftware:jsap:2.1")
    api("org.ejml:ejml-core:0.39")
