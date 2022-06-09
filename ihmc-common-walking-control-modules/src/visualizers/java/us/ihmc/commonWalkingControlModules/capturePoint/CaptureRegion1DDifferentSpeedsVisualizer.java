@@ -15,13 +15,12 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class CaptureRegion2DDifferentSpeedsVisualizer
+public class CaptureRegion1DDifferentSpeedsVisualizer
 {
    private static final double moveDuration = 3.0;
    private static final double maxStepLength = 1.0;
@@ -30,7 +29,7 @@ public class CaptureRegion2DDifferentSpeedsVisualizer
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
 
-   public CaptureRegion2DDifferentSpeedsVisualizer()
+   public CaptureRegion1DDifferentSpeedsVisualizer()
    {
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
@@ -293,6 +292,6 @@ public class CaptureRegion2DDifferentSpeedsVisualizer
 
    public static void main(String[] args)
    {
-      new CaptureRegion2DDifferentSpeedsVisualizer();
+      new CaptureRegion1DDifferentSpeedsVisualizer();
    }
 }
