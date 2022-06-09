@@ -70,7 +70,7 @@ public class PlanarRegionContactDetector extends FlatGroundContactDetector
       for (int i = 0; i < contactableRigidBodies.size(); i++)
       {
          List<ContactableShape> rigidBodyCollidables = contactableRigidBodyCollidables.get(contactableRigidBodies.get(i));
-         List<ContactPointVisualization> visualization = contactPointVisualizations.get(contactableRigidBodies.get(i));
+         List<DetectedContactPoint> visualization = contactPoints.get(contactableRigidBodies.get(i));
 
          List<FramePoint3DReadOnly> contactPoints = new ArrayList<>();
          PlanarRegion contactingRegion = null;
