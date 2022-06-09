@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.exploreArea;
+package us.ihmc.behaviors.javafx.behaviors.exploreArea;
 
 import javafx.animation.AnimationTimer;
 import javafx.scene.Scene;
@@ -8,6 +8,7 @@ import javafx.scene.text.FontPosture;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
+import us.ihmc.behaviors.exploreArea.ExploreAreaLatticePlanner;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 
 import java.util.List;
