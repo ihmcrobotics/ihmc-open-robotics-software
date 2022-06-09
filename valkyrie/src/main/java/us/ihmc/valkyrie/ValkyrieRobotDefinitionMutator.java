@@ -1,9 +1,11 @@
 package us.ihmc.valkyrie;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.scs2.definition.geometry.ModelFileGeometryDefinition;
+import us.ihmc.scs2.definition.robot.CameraSensorDefinition;
 import us.ihmc.scs2.definition.robot.JointDefinition;
 import us.ihmc.scs2.definition.robot.MomentOfInertiaDefinition;
 import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
@@ -46,6 +48,22 @@ public class ValkyrieRobotDefinitionMutator implements Consumer<RobotDefinition>
                {
                   ModelFileGeometryDefinition geometry = (ModelFileGeometryDefinition) visual.getGeometryDefinition();
                   geometry.setFileName(geometry.getFileName().replace(".dae", ".obj"));
+               }
+            }
+         }
+      }
+
+      for (RigidBodyDefinition body : robotDefinition.getAllRigidBodies())
+      {
+         if (body.getParentJoint() != null)
+         {
+            List<CameraSensorDefinition> cameras = body.getParentJoint().getSensorDefinitions(CameraSensorDefinition.class);
+            if (cameras != null && !cameras.isEmpty())
+            {
+               for (CameraSensorDefinition camera : cameras)
+               {
+                  camera.setClipFar(100000.0); // TODO Allows to view the entire scene, not sure if that's what we want
+                  camera.setUpdatePeriod(1000 / 25); // 25Hz // TODO Weird this is not present in the description.
                }
             }
          }
