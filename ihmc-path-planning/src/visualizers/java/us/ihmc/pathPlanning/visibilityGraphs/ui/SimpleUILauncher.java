@@ -1,10 +1,10 @@
 package us.ihmc.pathPlanning.visibilityGraphs.ui;
 
-import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import us.ihmc.javafx.ApplicationNoModule;
 
-public class SimpleUILauncher extends Application
+public class SimpleUILauncher extends ApplicationNoModule
 {
    private static final boolean SHOW_FILE_CHOOSER_ON_START = false;
 
