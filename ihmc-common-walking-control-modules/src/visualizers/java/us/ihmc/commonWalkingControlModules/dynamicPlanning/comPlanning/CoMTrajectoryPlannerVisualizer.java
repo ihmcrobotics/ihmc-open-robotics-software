@@ -43,7 +43,7 @@ public class CoMTrajectoryPlannerVisualizer
    private static final double finalVerticalOffsetBound = 0.0;
    private static final double verticalOffset = 0.0;
 
-   private static final boolean includeFlight = true;
+   private static final boolean includeFlight = false;
 
    private static final double simDt = 1e-3;
 
