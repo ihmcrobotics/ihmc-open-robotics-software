@@ -1,10 +1,14 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicLineSegment;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -42,6 +46,8 @@ public class CaptureRegion2DDifferentDurationsVisualizer
       robot3.setController(new Simple2DStepController("robot", "3", robot3, 0.75, graphicsListRegistry));
       robot4.setController(new Simple2DStepController("robot", "4", robot4, 0.875, graphicsListRegistry));
       robot5.setController(new Simple2DStepController("robot", "5", robot5, 1.0, graphicsListRegistry));
+
+      robot1.setController(new GraphicsController(initialPosition, initialVelocity, graphicsListRegistry));
 
       double dt = 0.001;
       SimulationConstructionSet scs = new SimulationConstructionSet(robot1);
@@ -143,7 +149,53 @@ public class CaptureRegion2DDifferentDurationsVisualizer
       }
    }
 
+   private static class GraphicsController implements RobotController
+   {
+      private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+      private final YoGraphicLineSegment oneStepRegion;
+      private final double xInitial;
 
+      public GraphicsController(FramePoint3DReadOnly initialCoMPosition, FrameVector3DReadOnly initialComVelocity, YoGraphicsListRegistry graphicsListRegistry)
+      {
+         double omega = Math.sqrt(9.81);
+
+         xInitial = initialCoMPosition.getX() + 1.0 / omega * initialComVelocity.getX();
+         AppearanceDefinition oneStep = YoAppearance.Yellow();
+         AppearanceDefinition twoStep = YoAppearance.Yellow();
+         AppearanceDefinition threeStep = YoAppearance.Yellow();
+         twoStep.setTransparency(0.5);
+         threeStep.setTransparency(0.75);
+         oneStepRegion = new YoGraphicLineSegment("oneStep", "CaptureRegion", worldFrame, oneStep, registry);
+
+         YoFramePoint3D cmp = new YoFramePoint3D("cmp", worldFrame, registry);
+         YoGraphicPosition cmpViz = new YoGraphicPosition("cmp", cmp, 0.05, YoAppearance.Blue());
+
+         cmp.set(0.0, 0.0, 0.02);
+
+         graphicsListRegistry.registerYoGraphic("graphics", oneStepRegion);
+         graphicsListRegistry.registerYoGraphic("graphics", cmpViz);
+      }
+
+      @Override
+      public void doControl()
+      {
+         double omega = Math.sqrt(9.81);
+         double exp = Math.exp(omega * 0.5);
+         oneStepRegion.setStartAndEnd(new Point3D(xInitial * exp, 0.0, 0.02), new Point3D(maxStepLength, 0.0, 0.02));
+      }
+
+      @Override
+      public void initialize()
+      {
+
+      }
+
+      @Override
+      public YoRegistry getYoRegistry()
+      {
+         return registry;
+      }
+   }
 
    private static class PointMassRobot extends Robot
    {
