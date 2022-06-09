@@ -4,6 +4,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -11,14 +12,13 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicLineSegment;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.*;
 import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -37,8 +37,8 @@ public class CaptureRegion2DDifferentDurationsVisualizer
    {
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
-      FramePoint3D initialPosition = new FramePoint3D(worldFrame, 0.07, 0.10, 1.0);
-      FrameVector3D initialVelocity = new FrameVector3D(worldFrame, 0.15, 0.10, 0.0);
+      FramePoint3D initialPosition = new FramePoint3D(worldFrame, 0.12, 0.10, 1.0);
+      FrameVector3D initialVelocity = new FrameVector3D(worldFrame, 0.15, 0.05, 0.0);
 
       FramePoint3D cmp1 = new FramePoint3D(worldFrame, 0.1, -0.05, 0.0);
       FramePoint3D cmp2 = new FramePoint3D(worldFrame, 0.1, 0.05, 0.0);
@@ -68,7 +68,7 @@ public class CaptureRegion2DDifferentDurationsVisualizer
       robot8.setController(new Simple2DStepController("robot", "8", robot8, 0.5 * (minDuration + time3), cmp3, graphicsListRegistry));
       robot9.setController(new Simple2DStepController("robot", "9", robot9, time3, cmp3, graphicsListRegistry));
 
-      robot1.setController(new GraphicsController(initialPosition, initialVelocity, graphicsListRegistry));
+      robot1.setController(new GraphicsController(initialPosition, initialVelocity, cmp1, cmp2, cmp3, graphicsListRegistry));
 
       double dt = 0.001;
       SimulationConstructionSet scs = new SimulationConstructionSet(robot1);
@@ -186,31 +186,68 @@ public class CaptureRegion2DDifferentDurationsVisualizer
       }
    }
 
-   private static class GraphicsController implements RobotController
+   private class GraphicsController implements RobotController
    {
       private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-      private final YoGraphicLineSegment oneStepRegion;
-      private final double xInitial;
+      private final YoGraphicPolygon footholdViz;
+      private final YoGraphicPolygon captureRegionViz;
 
-      public GraphicsController(FramePoint3DReadOnly initialCoMPosition, FrameVector3DReadOnly initialComVelocity, YoGraphicsListRegistry graphicsListRegistry)
+      public GraphicsController(FramePoint3DReadOnly initialCoMPosition, FrameVector3DReadOnly initialComVelocity,
+                                FramePoint3DReadOnly cmp1, FramePoint3DReadOnly cmp2, FramePoint3DReadOnly cmp3, YoGraphicsListRegistry graphicsListRegistry)
       {
+
+         YoFramePose3D yoFootstepPose = new YoFramePose3D("FootPose", worldFrame, registry);
+         YoFrameConvexPolygon2D yoFoothold = new YoFrameConvexPolygon2D("Foothold", "", worldFrame, 4, registry);
+         footholdViz = new YoGraphicPolygon("Foothold", yoFoothold, yoFootstepPose, 1.0, YoAppearance.Green());
+         graphicsListRegistry.registerYoGraphic("footholds", footholdViz);
+
+         yoFoothold.addVertex(0.1, 0.05);
+         yoFoothold.addVertex(0.1, -0.05);
+         yoFoothold.addVertex(-0.1, -0.05);
+         yoFoothold.addVertex(-0.1, 0.05);
+         yoFoothold.update();
+
+
+         YoFramePose3D captureRegionPose = new YoFramePose3D("captureRegionPose", worldFrame, registry);
+         YoFrameConvexPolygon2D yoCaptureRegion = new YoFrameConvexPolygon2D("yoCaptureRegion", "", worldFrame, 6, registry);
+         captureRegionViz = new YoGraphicPolygon("captureRegionViz", yoCaptureRegion, captureRegionPose, 1.0, YoAppearance.Yellow());
+         graphicsListRegistry.registerYoGraphic("footholds", captureRegionViz);
+
+         YoFramePoint3D capturePoint = new YoFramePoint3D("capturePoint", worldFrame, registry);
+
+         YoGraphicPosition capturePointViz = new YoGraphicPosition("capturePoitnViz", capturePoint, 0.05, YoAppearance.Blue());
+         graphicsListRegistry.registerYoGraphic("footholds", capturePointViz);
+
          double omega = Math.sqrt(9.81);
 
-         xInitial = initialCoMPosition.getX() + 1.0 / omega * initialComVelocity.getX();
-         AppearanceDefinition oneStep = YoAppearance.Yellow();
-         AppearanceDefinition twoStep = YoAppearance.Yellow();
-         AppearanceDefinition threeStep = YoAppearance.Yellow();
-         twoStep.setTransparency(0.5);
-         threeStep.setTransparency(0.75);
-         oneStepRegion = new YoGraphicLineSegment("oneStep", "CaptureRegion", worldFrame, oneStep, registry);
+         double time1 = getMaxDuration(initialCoMPosition, initialComVelocity, cmp1);
+         double time2 = getMaxDuration(initialCoMPosition, initialComVelocity, cmp2);
+         double time3 = getMaxDuration(initialCoMPosition, initialComVelocity, cmp3);
 
-         YoFramePoint3D cmp = new YoFramePoint3D("cmp", worldFrame, registry);
-         YoGraphicPosition cmpViz = new YoGraphicPosition("cmp", cmp, 0.05, YoAppearance.Blue());
+         capturePoint.scaleAdd(1.0 / omega, initialComVelocity, initialCoMPosition);
+         capturePoint.setZ(0.0);
 
-         cmp.set(0.0, 0.0, 0.02);
+         yoCaptureRegion.addVertex(computeVertex(capturePoint, cmp1, minDuration, omega));
+         yoCaptureRegion.addVertex(computeVertex(capturePoint, cmp1, time1, omega));
+         yoCaptureRegion.addVertex(computeVertex(capturePoint, cmp2, minDuration, omega));
+         yoCaptureRegion.addVertex(computeVertex(capturePoint, cmp2, time2, omega));
+         yoCaptureRegion.addVertex(computeVertex(capturePoint, cmp3, minDuration, omega));
+         yoCaptureRegion.addVertex(computeVertex(capturePoint, cmp3, time3, omega));
+         yoCaptureRegion.update();
+      }
 
-         graphicsListRegistry.registerYoGraphic("graphics", oneStepRegion);
-         graphicsListRegistry.registerYoGraphic("graphics", cmpViz);
+      private FramePoint2D computeVertex(FramePoint3DReadOnly capturePoint, FramePoint3DReadOnly cmp, double duration, double omega)
+      {
+         double exp = Math.exp(duration * omega);
+         FramePoint2D error = new FramePoint2D();
+         error.set(capturePoint);
+         error.sub(cmp.getX(), cmp.getY());
+         error.scale(exp);
+
+         FramePoint2D vertex = new FramePoint2D(cmp);
+         vertex.add(error);
+
+         return vertex;
       }
 
       @Override
@@ -218,7 +255,9 @@ public class CaptureRegion2DDifferentDurationsVisualizer
       {
          double omega = Math.sqrt(9.81);
          double exp = Math.exp(omega * 0.5);
-         oneStepRegion.setStartAndEnd(new Point3D(xInitial * exp, 0.0, 0.02), new Point3D(maxStepLength, 0.0, 0.02));
+
+         footholdViz.update();
+         captureRegionViz.update();
       }
 
       @Override
