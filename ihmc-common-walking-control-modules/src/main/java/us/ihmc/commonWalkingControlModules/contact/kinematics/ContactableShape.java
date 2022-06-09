@@ -17,7 +17,7 @@ import us.ihmc.robotics.physics.Collidable;
 
 import java.util.List;
 
-public class ContactableShapeDescription implements ContactableRigidBodyDescription
+public class ContactableShape
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final FrameVector3DReadOnly zDownWorld = new FrameVector3D(worldFrame, 0.0, 0.0, -1.0);
@@ -35,18 +35,16 @@ public class ContactableShapeDescription implements ContactableRigidBodyDescript
    private final ConvexPolytope3D polytopeInShapeFrame = new ConvexPolytope3D();
    private final BoundingBox3D shapeBoundingBoxInWorld = new BoundingBox3D();
 
-   public ContactableShapeDescription(Collidable collidable)
+   public ContactableShape(Collidable collidable)
    {
       this.collidable = collidable;
    }
 
-   @Override
    public Collidable getCollidable()
    {
       return collidable;
    }
 
-   @Override
    public double updateHeightInWorld()
    {
       supportDirection.setIncludingFrame(zDownWorld);
@@ -57,13 +55,11 @@ public class ContactableShapeDescription implements ContactableRigidBodyDescript
       return heightInWorld;
    }
 
-   @Override
    public double getHeightInWorld()
    {
       return heightInWorld;
    }
 
-   @Override
    public double packContactPoints(List<FramePoint3DReadOnly> contactPoints, double distanceThreshold, ConvexPolytope3DReadOnly contactablePolytope)
    {
       // Collision check in shape frame
@@ -87,7 +83,6 @@ public class ContactableShapeDescription implements ContactableRigidBodyDescript
       return collisionResult.getSignedDistance();
    }
 
-   @Override
    public void packContactPoints(List<FramePoint3DReadOnly> contactPoints, double heightThreshold)
    {
       if (heightInWorld < heightThreshold)
@@ -96,10 +91,10 @@ public class ContactableShapeDescription implements ContactableRigidBodyDescript
       }
    }
 
-   @Override
    public BoundingBox3DReadOnly getShapeBoundingBox()
    {
-       collidable.getShape().getBoundingBox(ReferenceFrame.getWorldFrame(), shapeBoundingBoxInWorld);
-       return shapeBoundingBoxInWorld;
+      collidable.getShape().getReferenceFrame().update();
+      collidable.getShape().getBoundingBox(ReferenceFrame.getWorldFrame(), shapeBoundingBoxInWorld);
+      return shapeBoundingBoxInWorld;
    }
 }
