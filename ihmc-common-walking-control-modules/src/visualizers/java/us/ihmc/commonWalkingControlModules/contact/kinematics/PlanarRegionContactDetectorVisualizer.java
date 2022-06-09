@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.contact.kinematics;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.referenceFrame.FrameCapsule3D;
 import us.ihmc.euclid.referenceFrame.FrameCylinder3D;
 import us.ihmc.euclid.referenceFrame.FrameSphere3D;
@@ -44,9 +45,10 @@ public class PlanarRegionContactDetectorVisualizer
 
    public static void main(String[] args)
    {
-//      visualizeSphereContact();
-//            visualizeCylinderContact();
-            visualizeCapsuleContact();
+      //      visualizeSphereContact();
+      //      visualizeCylinderContact();
+      //      visualizeCapsuleContact();
+      visualizeBoxContact();
    }
 
    private static void visualizeSphereContact()
@@ -120,6 +122,37 @@ public class PlanarRegionContactDetectorVisualizer
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
       PlanarRegionContactDetector contactDetector = new PlanarRegionContactDetector(idRobot, collisionModel, graphicsListRegistry, Arrays.asList(linkName));
       RobotFromDescription robot = setupRobot(cylinderRobot, idRobot, floatingJoint, contactDetector);
+
+      FloatingJoint scsFloatingJoint = (FloatingJoint) robot.getRootJoints().get(0);
+      scsFloatingJoint.getOrientation().set(new YawPitchRoll(0.4, 1.2, -0.3));
+
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
+      scs.addYoGraphicsListRegistry(graphicsListRegistry);
+
+      contactDetector.setContactThreshold(contactThreshold);
+      contactDetector.setPlanarRegionsList(regions);
+
+      setContactGraphics(scs, contactDetector);
+      scs.startOnAThread();
+      ThreadTools.sleepForever();
+   }
+
+   private static void visualizeBoxContact()
+   {
+      double sizeX = 0.24;
+      double sizeY = 0.3;
+      double sizeZ = 0.1;
+      AppearanceDefinition appearance = YoAppearance.DarkGreen();
+      appearance.setTransparency(0.3);
+      RobotDescription boxRobot = ContactDetectorTestTools.newBoxRobot("capsule", sizeX, sizeY, sizeZ, 1.00, 0.3, appearance);
+      String linkName = "capsuleLink";
+      RobotCollisionModel collisionModel = RobotCollisionModel.singleBodyCollisionModel(linkName, body -> new Collidable(body, -1, -1, new FrameBox3D(body.getBodyFixedFrame(), sizeX, sizeY, sizeZ)));
+      RigidBodyBasics idRobot = ContactDetectorTestTools.toInverseDynamicsRobot(boxRobot);
+      SixDoFJoint floatingJoint = (SixDoFJoint) idRobot.getChildrenJoints().get(0);
+
+      YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
+      PlanarRegionContactDetector contactDetector = new PlanarRegionContactDetector(idRobot, collisionModel, graphicsListRegistry, Arrays.asList(linkName));
+      RobotFromDescription robot = setupRobot(boxRobot, idRobot, floatingJoint, contactDetector);
 
       FloatingJoint scsFloatingJoint = (FloatingJoint) robot.getRootJoints().get(0);
       scsFloatingJoint.getOrientation().set(new YawPitchRoll(0.4, 1.2, -0.3));

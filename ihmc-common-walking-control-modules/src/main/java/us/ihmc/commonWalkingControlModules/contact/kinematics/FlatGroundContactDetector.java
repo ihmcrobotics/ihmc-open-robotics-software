@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.contact.kinematics;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameBox3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -30,8 +29,8 @@ public class FlatGroundContactDetector implements Updatable
    protected YoDouble contactThreshold = new YoDouble("contactThreshold", registry);
 
    protected final List<RigidBodyBasics> contactableRigidBodies = new ArrayList<>();
-   protected final List<ContactableRigidBodyDescription> allCollidables = new ArrayList<>();
-   protected final Map<RigidBodyBasics, List<ContactableRigidBodyDescription>> contactableRigidBodyCollidables = new HashMap<>();
+   protected final List<ContactableShape> allCollidables = new ArrayList<>();
+   protected final Map<RigidBodyBasics, List<ContactableShape>> contactableRigidBodyCollidables = new HashMap<>();
 
    protected final Map<RigidBodyBasics, List<FramePoint3DReadOnly>> contactPointMap = new HashMap<>();
    protected final Map<RigidBodyBasics, FrameVector3DReadOnly> contactNormalMap = new HashMap<>(); // down the road consider different normals per rigid body
@@ -56,20 +55,11 @@ public class FlatGroundContactDetector implements Updatable
 
          contactableRigidBodies.add(rigidBody);
          List<Collidable> collidables = allCollidableMap.get(rigidBody);
-         List<ContactableRigidBodyDescription> rigidBodyCollidables = new ArrayList<>();
-         int numberOfBoxes = 0;
+         List<ContactableShape> rigidBodyCollidables = new ArrayList<>();
 
          for (int j = 0; j < collidables.size(); j++)
          {
-            Collidable collidable = collidables.get(j);
-            if (collidable.getShape() instanceof FrameBox3DReadOnly)
-            {
-               rigidBodyCollidables.add(new ContactableBoxDescription(rigidBody.getName() + numberOfBoxes++, collidable));
-            }
-            else
-            {
-               rigidBodyCollidables.add(new ContactableShapeDescription(collidable));
-            }
+            rigidBodyCollidables.add(new ContactableShape(collidables.get(j)));
          }
 
          allCollidables.addAll(rigidBodyCollidables);
@@ -90,7 +80,7 @@ public class FlatGroundContactDetector implements Updatable
    @Override
    public void update(double time)
    {
-      double groundHeight = allCollidables.stream().mapToDouble(ContactableRigidBodyDescription::updateHeightInWorld).min().getAsDouble();
+      double groundHeight = allCollidables.stream().mapToDouble(ContactableShape::updateHeightInWorld).min().getAsDouble();
       if (useAbsoluteGroundLocation.getValue())
       {
          groundHeight = this.groundHeight.getValue();
@@ -101,7 +91,7 @@ public class FlatGroundContactDetector implements Updatable
 
       for (int i = 0; i < contactableRigidBodies.size(); i++)
       {
-         List<ContactableRigidBodyDescription> rigidBodyCollidables = contactableRigidBodyCollidables.get(contactableRigidBodies.get(i));
+         List<ContactableShape> rigidBodyCollidables = contactableRigidBodyCollidables.get(contactableRigidBodies.get(i));
          List<ContactPointVisualization> visualization = contactPointVisualizations.get(contactableRigidBodies.get(i));
 
          List<FramePoint3DReadOnly> contactPoints = new ArrayList<>();
