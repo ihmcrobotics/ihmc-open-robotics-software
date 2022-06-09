@@ -47,7 +47,8 @@ public class FFMPEGLogger
    private final int encoderAVPixelFormat;
    private final boolean formatWantsGlobalHeader;
    private boolean isInitialized = false;
-   private final AVDictionary avDictionary;
+   private final AVDictionary streamFlags;
+   private final AVDictionary metadata;
    private final AVFormatContext avFormatContext;
    private final String codecLongName;
    private final AVPacket avPacket;
@@ -78,13 +79,18 @@ public class FFMPEGLogger
       LogTools.info("Initializing ffmpeg contexts for {} output to {}", formatName, fileName);
 
       int avDictFlags = 0;
-      avDictionary = new AVDictionary();
-      avutil.av_dict_set(avDictionary, "lossless", lossless ? "1" : "0", avDictFlags);
+      streamFlags = new AVDictionary();
+      avutil.av_dict_set(streamFlags, "lossless", lossless ? "1" : "0", avDictFlags);
 
       // Allocate format context for an output format
       avFormatContext = new AVFormatContext();
       int returnCode = avformat.avformat_alloc_output_context2(avFormatContext, null, formatName, fileName);
       FFMPEGTools.checkError(returnCode, avFormatContext, formatName + " format request");
+
+      // Allow for saving metadata
+      metadata = new AVDictionary();
+      avutil.av_dict_set(metadata, "Source Pixel Format", avutil.av_get_pix_fmt_name(sourcePixelFormat).getString(), 0);
+      avFormatContext.metadata(metadata);
 
       // Find encoder and allocate encoder context
       AVOutputFormat outputFormat = avFormatContext.oformat();
@@ -136,7 +142,7 @@ public class FFMPEGLogger
       {
          isInitialized = true;
 
-         int returnCode = avcodec.avcodec_open2(avEncoderContext, avEncoderContext.codec(), avDictionary);
+         int returnCode = avcodec.avcodec_open2(avEncoderContext, avEncoderContext.codec(), streamFlags);
          FFMPEGTools.checkNonZeroError(returnCode, "Initializing codec context to use the codec");
 
          avFrameToBeEncoded = avutil.av_frame_alloc();
@@ -164,7 +170,7 @@ public class FFMPEGLogger
          FFMPEGTools.checkError(returnCode, avBytestreamIOContext, "Creating and initializing the I/O context");
          avFormatContext.pb(avBytestreamIOContext);
 
-         returnCode = avformat.avformat_write_header(avFormatContext, avDictionary);
+         returnCode = avformat.avformat_write_header(avFormatContext, streamFlags);
          FFMPEGTools.checkNonZeroError(returnCode, "Allocating the stream private data and writing the stream header to the output media file");
 
          if (sourceAVPixelFormat != encoderAVPixelFormat)
@@ -282,6 +288,8 @@ public class FFMPEGLogger
 
       returnCode = avformat.av_write_trailer(avFormatContext);
       FFMPEGTools.checkNonZeroError(returnCode, "Writing stream trailer to output media file");
+
+      avformat.avformat_flush(avFormatContext);
 
       avformat.avio_close(avFormatContext.pb());
       avformat.avformat_free_context(avFormatContext);
