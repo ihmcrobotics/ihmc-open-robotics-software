@@ -1,12 +1,12 @@
-package us.ihmc.commonWalkingControlModules.contact.geometry;
+package us.ihmc.commonWalkingControlModules.contact.kinematics;
 
-import us.ihmc.commonWalkingControlModules.contact.geometry.RigidBodyCollisionDescription;
+import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameBox3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.euclid.shape.convexPolytope.interfaces.ConvexPolytope3DReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -14,7 +14,7 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BoxCollisionDescription implements RigidBodyCollisionDescription
+public class ContactableBoxDescription implements ContactableRigidBodyDescription
 {
    private final Collidable collidable;
    private final FrameBox3DReadOnly collidableShape;
@@ -24,7 +24,7 @@ public class BoxCollisionDescription implements RigidBodyCollisionDescription
    private final FramePose3D boxPose = new FramePose3D();
    private final PoseReferenceFrame boxFrame;
 
-   public BoxCollisionDescription(String namePrefix, Collidable collidable)
+   public ContactableBoxDescription(String namePrefix, Collidable collidable)
    {
       checkShape(collidable);
 
@@ -101,7 +101,7 @@ public class BoxCollisionDescription implements RigidBodyCollisionDescription
    }
 
    @Override
-   public double packContactPoints(List<FramePoint3DReadOnly> contactPoints, double distanceThreshold, PlanarRegion planarRegion)
+   public double packContactPoints(List<FramePoint3DReadOnly> contactPoints, double distanceThreshold, ConvexPolytope3DReadOnly contactablePolytope)
    {
       updateBoxCorners();
       double closestDistance = Double.POSITIVE_INFINITY;
@@ -110,7 +110,7 @@ public class BoxCollisionDescription implements RigidBodyCollisionDescription
       {
          FramePoint3D boxCorner = boxCorners.get(i);
          boxCorner.changeFrame(ReferenceFrame.getWorldFrame());
-         double distance = PlanarRegionTools.distanceToPlanarRegion(boxCorner, planarRegion);
+         double distance = PlanarRegionTools.distanceToPlanarRegion(boxCorner, null);
          if (distance < distanceThreshold)
          {
             contactPoints.add(boxCorner);
@@ -121,6 +121,12 @@ public class BoxCollisionDescription implements RigidBodyCollisionDescription
       }
 
       return closestDistance;
+   }
+
+   @Override
+   public BoundingBox3DReadOnly getShapeBoundingBox()
+   {
+      return null;
    }
 
    private static void checkShape(Collidable collidable)

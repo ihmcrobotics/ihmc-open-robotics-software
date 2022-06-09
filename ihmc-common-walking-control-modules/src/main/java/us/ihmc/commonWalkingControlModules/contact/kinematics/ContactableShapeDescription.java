@@ -1,6 +1,7 @@
-package us.ihmc.commonWalkingControlModules.contact.geometry;
+package us.ihmc.commonWalkingControlModules.contact.kinematics;
 
-import us.ihmc.commonWalkingControlModules.contact.geometry.RigidBodyCollisionDescription;
+import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -9,13 +10,14 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
 import us.ihmc.euclid.shape.collision.epa.ExpandingPolytopeAlgorithm;
+import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
+import us.ihmc.euclid.shape.convexPolytope.interfaces.ConvexPolytope3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.physics.Collidable;
 
 import java.util.List;
 
-public class ShapeCollisionDescription implements RigidBodyCollisionDescription
+public class ContactableShapeDescription implements ContactableRigidBodyDescription
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final FrameVector3DReadOnly zDownWorld = new FrameVector3D(worldFrame, 0.0, 0.0, -1.0);
@@ -30,7 +32,10 @@ public class ShapeCollisionDescription implements RigidBodyCollisionDescription
    private final RigidBodyTransform shapeToWorldFrameTransform = new RigidBodyTransform();
    private final RigidBodyTransform worldToShapeFrameTransform = new RigidBodyTransform();
 
-   public ShapeCollisionDescription(Collidable collidable)
+   private final ConvexPolytope3D polytopeInShapeFrame = new ConvexPolytope3D();
+   private final BoundingBox3D shapeBoundingBoxInWorld = new BoundingBox3D();
+
+   public ContactableShapeDescription(Collidable collidable)
    {
       this.collidable = collidable;
    }
@@ -59,7 +64,7 @@ public class ShapeCollisionDescription implements RigidBodyCollisionDescription
    }
 
    @Override
-   public double packContactPoints(List<FramePoint3DReadOnly> contactPoints, double distanceThreshold, PlanarRegion planarRegion)
+   public double packContactPoints(List<FramePoint3DReadOnly> contactPoints, double distanceThreshold, ConvexPolytope3DReadOnly contactablePolytope)
    {
       // Collision check in shape frame
       FrameShape3DReadOnly collisionShape = collidable.getShape();
@@ -67,15 +72,12 @@ public class ShapeCollisionDescription implements RigidBodyCollisionDescription
       collisionShapeFrame.getTransformToDesiredFrame(shapeToWorldFrameTransform, ReferenceFrame.getWorldFrame());
       worldToShapeFrameTransform.setAndInvert(shapeToWorldFrameTransform);
 
-      planarRegion.applyTransform(worldToShapeFrameTransform);
-      planarRegion.update();
+      polytopeInShapeFrame.set(contactablePolytope);
+      polytopeInShapeFrame.applyTransform(worldToShapeFrameTransform);
 
-      collisionDetector.evaluateCollision(planarRegion, collisionShape, collisionResult);
+      collisionDetector.evaluateCollision(polytopeInShapeFrame, collisionShape, collisionResult);
 
-      planarRegion.applyTransform(shapeToWorldFrameTransform);
-      planarRegion.update();
-
-      if (collisionResult.getSignedDistance() < distanceThreshold)
+      if (collisionResult.areShapesColliding())
       {
          FramePoint3D contactPoint = new FramePoint3D(collisionShapeFrame, collisionResult.getPointOnB());
          contactPoint.changeFrame(ReferenceFrame.getWorldFrame());
@@ -92,5 +94,12 @@ public class ShapeCollisionDescription implements RigidBodyCollisionDescription
       {
          contactPoints.add(contactPoint);
       }
+   }
+
+   @Override
+   public BoundingBox3DReadOnly getShapeBoundingBox()
+   {
+       collidable.getShape().getBoundingBox(ReferenceFrame.getWorldFrame(), shapeBoundingBoxInWorld);
+       return shapeBoundingBoxInWorld;
    }
 }
