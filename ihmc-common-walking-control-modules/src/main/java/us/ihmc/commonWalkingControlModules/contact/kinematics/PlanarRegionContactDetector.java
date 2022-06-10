@@ -65,7 +65,7 @@ public class PlanarRegionContactDetector extends FlatGroundContactDetector
          return;
       }
 
-      reset();
+      clearContacts();
 
       for (int i = 0; i < contactableRigidBodies.size(); i++)
       {

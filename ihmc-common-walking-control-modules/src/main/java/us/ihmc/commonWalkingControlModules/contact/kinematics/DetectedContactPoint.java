@@ -18,11 +18,11 @@ public class DetectedContactPoint
 
    public DetectedContactPoint(String nameSuffix, YoRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
    {
-      contactPointPosition = new YoFramePoint3D("cp_" + nameSuffix, ReferenceFrame.getWorldFrame(), registry);
-      contactPointNormal = new YoFrameVector3D("cp_" + nameSuffix, ReferenceFrame.getWorldFrame(), registry);
+      contactPointPosition = new YoFramePoint3D("cpPos_" + nameSuffix, ReferenceFrame.getWorldFrame(), registry);
+      contactPointNormal = new YoFrameVector3D("cpNorm_" + nameSuffix, ReferenceFrame.getWorldFrame(), registry);
 
-      YoGraphicPosition contactPointGraphic = new YoGraphicPosition("cpGraphic_" + nameSuffix, contactPointPosition, 0.01, YoAppearance.Red());
-      YoGraphicVector contactNormalGraphic = new YoGraphicVector("cpGraphic_" + nameSuffix, contactPointPosition, contactPointNormal, 0.1, YoAppearance.Red());
+      YoGraphicPosition contactPointGraphic = new YoGraphicPosition("cpPosGraphic_" + nameSuffix, contactPointPosition, 0.01, YoAppearance.Red());
+      YoGraphicVector contactNormalGraphic = new YoGraphicVector("cpNormGraphic_" + nameSuffix, contactPointPosition, contactPointNormal, 0.1, YoAppearance.Red());
       graphicsListRegistry.registerYoGraphic("Contact Points", contactPointGraphic);
       graphicsListRegistry.registerYoGraphic("Contact Points", contactNormalGraphic);
    }
@@ -38,7 +38,7 @@ public class DetectedContactPoint
       contactPointNormal.set(normal);
    }
 
-   public void hide()
+   public void clearContact()
    {
       contactPointPosition.setToNaN();
    }
