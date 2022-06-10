@@ -22,6 +22,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.AngularMomentumHandler;
@@ -503,9 +504,11 @@ public class BalanceManager
          contactState.getPlaneContactStateCommand(contactStateCommands.get(robotSide));
       }
 
-
-
-      if (heightControlCommand.getCommandType() == ControllerCoreCommandType.POINT)
+      if (heightControlCommand == null)
+      {
+         linearMomentumRateControlModuleInput.setHasHeightCommand(false);
+      }
+      else if (heightControlCommand.getCommandType() == ControllerCoreCommandType.POINT)
       {
          linearMomentumRateControlModuleInput.setUsePelvisHeightCommand(true);
          linearMomentumRateControlModuleInput.setPelvisHeightControlCommand((PointFeedbackControlCommand) heightControlCommand);
