@@ -30,12 +30,12 @@ mainDependencies {
 
    api("us.ihmc:euclid-shape:0.17.2")
    api("us.ihmc:joctomap:1.12.2")
-   api("us.ihmc:ihmc-javafx-toolkit:0.21.1")
+   api("us.ihmc:ihmc-javafx-toolkit:17-0.21.1")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-graphics-javafx:source")
    api("us.ihmc:ihmc-graphics-jmonkeyengine:source")
-   api("us.ihmc:ihmc-robot-data-logger:0.23.2")
+   api("us.ihmc:ihmc-robot-data-logger:17-0.23.2")
    api("us.ihmc:ihmc-ros-tools:source")
 
    apiBytedecoNatives("javacpp")
