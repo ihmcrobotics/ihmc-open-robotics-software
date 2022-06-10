@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.contact.kinematics;
 
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.referenceFrame.FrameCapsule3D;
 import us.ihmc.euclid.referenceFrame.FrameCylinder3D;
 import us.ihmc.euclid.referenceFrame.FrameSphere3D;
@@ -32,9 +33,10 @@ public class FlatGroundContactDetectorVisualizer
 
    public static void main(String[] args)
    {
-      visualizeSphereContact();
+//      visualizeSphereContact();
 //      visualizeCylinderContact();
 //      visualizeCapsuleContact();
+      visualizeBoxContact();
    }
 
    private static void visualizeSphereContact()
@@ -48,12 +50,14 @@ public class FlatGroundContactDetectorVisualizer
       RigidBodyBasics idRobot = ContactDetectorTestTools.toInverseDynamicsRobot(sphereRobot);
       SixDoFJoint floatingJoint = (SixDoFJoint) idRobot.getChildrenJoints().get(0);
 
+      YoRegistry registry = new YoRegistry("visualizationRegistry");
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-      FlatGroundContactDetector contactDetector = new FlatGroundContactDetector(idRobot, collisionModel, graphicsListRegistry, Arrays.asList(linkName));
+      FlatGroundContactDetector contactDetector = new FlatGroundContactDetector(idRobot, collisionModel, graphicsListRegistry, Arrays.asList(linkName), registry);
       RobotFromDescription robot = setupRobot(sphereRobot, idRobot, floatingJoint, contactDetector);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
       scs.addYoGraphicsListRegistry(graphicsListRegistry);
+      scs.addYoRegistry(registry);
 
       setContactPlaneGraphics(contactDetector, scs, contactThreshold);
       scs.startOnAThread();
@@ -72,8 +76,9 @@ public class FlatGroundContactDetectorVisualizer
       RigidBodyBasics idRobot = ContactDetectorTestTools.toInverseDynamicsRobot(cylinderRobot);
       SixDoFJoint floatingJoint = (SixDoFJoint) idRobot.getChildrenJoints().get(0);
 
+      YoRegistry registry = new YoRegistry("visualizationRegistry");
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-      FlatGroundContactDetector contactDetector = new FlatGroundContactDetector(idRobot, collisionModel, graphicsListRegistry, Arrays.asList(linkName));
+      FlatGroundContactDetector contactDetector = new FlatGroundContactDetector(idRobot, collisionModel, graphicsListRegistry, Arrays.asList(linkName), registry);
 
       RobotFromDescription robot = setupRobot(cylinderRobot, idRobot, floatingJoint, contactDetector);
 
@@ -82,6 +87,7 @@ public class FlatGroundContactDetectorVisualizer
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
       scs.addYoGraphicsListRegistry(graphicsListRegistry);
+      scs.addYoRegistry(registry);
 
       setContactPlaneGraphics(contactDetector, scs, contactThreshold);
       scs.startOnAThread();
@@ -100,13 +106,45 @@ public class FlatGroundContactDetectorVisualizer
       RigidBodyBasics idRobot = ContactDetectorTestTools.toInverseDynamicsRobot(capsuleRobot);
       SixDoFJoint floatingJoint = (SixDoFJoint) idRobot.getChildrenJoints().get(0);
 
+      YoRegistry registry = new YoRegistry("visualizationRegistry");
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-      FlatGroundContactDetector contactDetector = new FlatGroundContactDetector(idRobot, collisionModel, graphicsListRegistry, Arrays.asList(linkName));
+      FlatGroundContactDetector contactDetector = new FlatGroundContactDetector(idRobot, collisionModel, graphicsListRegistry, Arrays.asList(linkName), registry);
 
       RobotFromDescription robot = setupRobot(capsuleRobot, idRobot, floatingJoint, contactDetector);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
       scs.addYoGraphicsListRegistry(graphicsListRegistry);
+      scs.addYoRegistry(registry);
+
+      setContactPlaneGraphics(contactDetector, scs, contactThreshold);
+      scs.startOnAThread();
+      ThreadTools.sleepForever();
+   }
+
+   private static void visualizeBoxContact()
+   {
+      double sizeX = 0.24;
+      double sizeY = 0.3;
+      double sizeZ = 0.1;
+      AppearanceDefinition appearance = YoAppearance.DarkGreen();
+      appearance.setTransparency(0.3);
+      RobotDescription boxRobot = ContactDetectorTestTools.newBoxRobot("box", sizeX, sizeY, sizeZ, 1.00, 0.3, appearance);
+      String linkName = "boxLink";
+      RobotCollisionModel collisionModel = RobotCollisionModel.singleBodyCollisionModel(linkName, body -> new Collidable(body, -1, -1, new FrameBox3D(body.getBodyFixedFrame(), sizeX, sizeY, sizeZ)));
+      RigidBodyBasics idRobot = ContactDetectorTestTools.toInverseDynamicsRobot(boxRobot);
+      SixDoFJoint floatingJoint = (SixDoFJoint) idRobot.getChildrenJoints().get(0);
+
+      YoRegistry registry = new YoRegistry("visualizationRegistry");
+      YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
+      PlanarRegionContactDetector contactDetector = new PlanarRegionContactDetector(idRobot, collisionModel, graphicsListRegistry, Arrays.asList(linkName), registry);
+      RobotFromDescription robot = setupRobot(boxRobot, idRobot, floatingJoint, contactDetector);
+
+      FloatingJoint scsFloatingJoint = (FloatingJoint) robot.getRootJoints().get(0);
+      scsFloatingJoint.getOrientation().set(new YawPitchRoll(0.4, 1.2, -0.3));
+
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
+      scs.addYoGraphicsListRegistry(graphicsListRegistry);
+      scs.addYoRegistry(registry);
 
       setContactPlaneGraphics(contactDetector, scs, contactThreshold);
       scs.startOnAThread();

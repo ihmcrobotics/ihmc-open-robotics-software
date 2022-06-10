@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.contact.kinematics;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
@@ -13,6 +14,10 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class DetectedContactPoint
 {
+   private static final AppearanceDefinition color = YoAppearance.Blue();
+   private static final double radius = 0.01;
+   private static final double arrowScale = 0.3;
+
    private final YoFramePoint3D contactPointPosition;
    private final YoFrameVector3D contactPointNormal;
 
@@ -21,10 +26,10 @@ public class DetectedContactPoint
       contactPointPosition = new YoFramePoint3D("cpPos_" + nameSuffix, ReferenceFrame.getWorldFrame(), registry);
       contactPointNormal = new YoFrameVector3D("cpNorm_" + nameSuffix, ReferenceFrame.getWorldFrame(), registry);
 
-      YoGraphicPosition contactPointGraphic = new YoGraphicPosition("cpPosGraphic_" + nameSuffix, contactPointPosition, 0.01, YoAppearance.Red());
-      YoGraphicVector contactNormalGraphic = new YoGraphicVector("cpNormGraphic_" + nameSuffix, contactPointPosition, contactPointNormal, 0.1, YoAppearance.Red());
-      graphicsListRegistry.registerYoGraphic("Contact Points", contactPointGraphic);
-      graphicsListRegistry.registerYoGraphic("Contact Points", contactNormalGraphic);
+      YoGraphicPosition contactPointGraphic = new YoGraphicPosition("cpPosGraphic_" + nameSuffix, contactPointPosition, radius, color);
+      YoGraphicVector contactNormalGraphic = new YoGraphicVector("cpNormGraphic_" + nameSuffix, contactPointPosition, contactPointNormal, arrowScale, color);
+      graphicsListRegistry.registerYoGraphic("MC Contact Points", contactPointGraphic);
+      graphicsListRegistry.registerYoGraphic("MC Contact Points", contactNormalGraphic);
    }
 
    public void setVerticalContactNormal()
