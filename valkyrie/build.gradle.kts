@@ -20,6 +20,7 @@ mainDependencies {
    api("org.ejml:ejml-simple:0.39")
    api("org.ejml:ejml-ddense:0.39")
    api("us.ihmc:jinput:2.0.6-ihmc2")
+   api("org.glassfish.jaxb:jaxb-runtime:2.3.2")
 
    api("us.ihmc:euclid:0.17.2")
    api("us.ihmc:euclid-geometry:0.17.2")
@@ -145,8 +146,6 @@ tasks.create("deploy") {
          put(file("launchScripts").toString(), directory)
          exec("chmod +x $directory/runNetworkProcessor.sh")
          exec("ls -halp $directory")
-         // For some reason, this jar needs to be removed to get the JAXB to work.
-         exec("rm ~/valkyrie/lib/jaxb-runtime-2.3.2.jar")
       }
 
       deployNetworkProcessor()
