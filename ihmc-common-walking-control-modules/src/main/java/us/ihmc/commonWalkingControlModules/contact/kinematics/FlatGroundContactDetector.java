@@ -31,14 +31,15 @@ public class FlatGroundContactDetector implements Updatable
    protected final List<RigidBodyBasics> contactableRigidBodies = new ArrayList<>();
    protected final List<ContactableShape> allCollidables = new ArrayList<>();
    protected final Map<RigidBodyBasics, List<ContactableShape>> contactableRigidBodyCollidables = new HashMap<>();
-   protected final Map<RigidBodyBasics, List<DetectedContactPoint>> contactPoints = new HashMap<>();
+   protected final Map<RigidBodyBasics, List<DetectedContactPoint>> allContactPoints = new HashMap<>();
 
    private final MultiContactBalanceStatus multiContactBalanceStatus = new MultiContactBalanceStatus();
 
    public FlatGroundContactDetector(RigidBodyBasics rootBody,
                                     RobotCollisionModel collisionModel,
                                     YoGraphicsListRegistry graphicsListRegistry,
-                                    List<String> collidableRigidBodies)
+                                    List<String> collidableRigidBodies,
+                                    YoRegistry parentRegistry)
    {
       contactThreshold.set(defaultContactThreshold);
 
@@ -58,45 +59,48 @@ public class FlatGroundContactDetector implements Updatable
 
          for (int j = 0; j < collidables.size(); j++)
          {
-            rigidBodyCollidables.add(new ContactableShape(collidables.get(j)));
+            rigidBodyCollidables.add(new ContactableShape(collidables.get(j).getRigidBody().getName() + j, collidables.get(j)));
          }
 
          allCollidables.addAll(rigidBodyCollidables);
          contactableRigidBodyCollidables.put(rigidBody, rigidBodyCollidables);
 
+         int maxNumberOfContactPoints = 0;
+         for (int j = 0; j < collidables.size(); j++)
+         {
+            maxNumberOfContactPoints += ContactableShape.getMaximumNumberOfContactPoints(collidables.get(j));
+         }
+
          List<DetectedContactPoint> contactPoints = new ArrayList<>();
-         for (int j = 0; j < 4 * collidables.size(); j++)
+         for (int j = 0; j < maxNumberOfContactPoints; j++)
          {
             DetectedContactPoint detectedContactPoint = new DetectedContactPoint(rigidBody.getName() + j, registry, graphicsListRegistry);
             detectedContactPoint.setVerticalContactNormal();
             contactPoints.add(detectedContactPoint);
          }
 
-         this.contactPoints.put(rigidBody, contactPoints);
+         this.allContactPoints.put(rigidBody, contactPoints);
       }
+
+      if (parentRegistry != null)
+         parentRegistry.addChild(registry);
    }
 
    @Override
    public void update(double time)
    {
-      double groundHeight = allCollidables.stream().mapToDouble(ContactableShape::updateHeightInWorld).min().getAsDouble();
-      if (useAbsoluteGroundLocation.getValue())
-      {
-         groundHeight = this.groundHeight.getValue();
-      }
-      double threshold = groundHeight + contactThreshold.getValue();
-
       clearContacts();
+      double flatGroundHeightThreshold = computeFlatGroundHeightThreshold();
 
       for (int i = 0; i < contactableRigidBodies.size(); i++)
       {
          List<ContactableShape> rigidBodyCollidables = contactableRigidBodyCollidables.get(contactableRigidBodies.get(i));
-         List<DetectedContactPoint> contactPoints = this.contactPoints.get(contactableRigidBodies.get(i));
+         List<DetectedContactPoint> contactPoints = this.allContactPoints.get(contactableRigidBodies.get(i));
 
          List<FramePoint3DReadOnly> contactFramePoints = new ArrayList<>();
          for (int j = 0; j < rigidBodyCollidables.size(); j++)
          {
-            rigidBodyCollidables.get(j).packContactPoints(contactFramePoints, threshold);
+            rigidBodyCollidables.get(j).packContactPoints(contactFramePoints, flatGroundHeightThreshold);
          }
 
          for (int j = 0; j < contactFramePoints.size(); j++)
@@ -114,7 +118,7 @@ public class FlatGroundContactDetector implements Updatable
          for (int i = 0; i < contactableRigidBodies.size(); i++)
          {
             RigidBodyBasics rigidBody = contactableRigidBodies.get(i);
-            List<DetectedContactPoint> contactPoints = this.contactPoints.get(contactableRigidBodies.get(i));
+            List<DetectedContactPoint> contactPoints = this.allContactPoints.get(contactableRigidBodies.get(i));
 
             for (int j = 0; j < contactPoints.size(); j++)
             {
@@ -131,9 +135,20 @@ public class FlatGroundContactDetector implements Updatable
       }
    }
 
+   protected double computeFlatGroundHeightThreshold()
+   {
+      double groundHeight = allCollidables.stream().mapToDouble(ContactableShape::updateHeightInWorld).min().getAsDouble();
+      if (useAbsoluteGroundLocation.getValue())
+      {
+         groundHeight = this.groundHeight.getValue();
+      }
+      double threshold = groundHeight + contactThreshold.getValue();
+      return threshold;
+   }
+
    public List<DetectedContactPoint> getContactPoints(RigidBodyBasics rigidBody)
    {
-      return contactPoints.get(rigidBody);
+      return allContactPoints.get(rigidBody);
    }
 
    protected void clearContacts()
@@ -141,7 +156,7 @@ public class FlatGroundContactDetector implements Updatable
       for (int i = 0; i < contactableRigidBodies.size(); i++)
       {
          RigidBodyBasics rigidBody = contactableRigidBodies.get(i);
-         List<DetectedContactPoint> visualization = contactPoints.get(rigidBody);
+         List<DetectedContactPoint> visualization = allContactPoints.get(rigidBody);
          for (int j = 0; j < visualization.size(); j++)
          {
             visualization.get(j).clearContact();

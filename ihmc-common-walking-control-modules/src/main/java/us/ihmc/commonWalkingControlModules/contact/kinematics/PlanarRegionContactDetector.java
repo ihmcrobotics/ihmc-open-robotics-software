@@ -11,6 +11,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.physics.RobotCollisionModel;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,9 +25,10 @@ public class PlanarRegionContactDetector extends FlatGroundContactDetector
    public PlanarRegionContactDetector(RigidBodyBasics rootBody,
                                       RobotCollisionModel collisionModel,
                                       YoGraphicsListRegistry graphicsListRegistry,
-                                      List<String> collidableRigidBodies)
+                                      List<String> collidableRigidBodies,
+                                      YoRegistry parentRegistry)
    {
-      super(rootBody, collisionModel, graphicsListRegistry, collidableRigidBodies);
+      super(rootBody, collisionModel, graphicsListRegistry, collidableRigidBodies, parentRegistry);
    }
 
    public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
@@ -66,17 +68,21 @@ public class PlanarRegionContactDetector extends FlatGroundContactDetector
       }
 
       clearContacts();
+      double flatGroundHeightThreshold = computeFlatGroundHeightThreshold();
 
       for (int i = 0; i < contactableRigidBodies.size(); i++)
       {
          List<ContactableShape> rigidBodyCollidables = contactableRigidBodyCollidables.get(contactableRigidBodies.get(i));
-         List<DetectedContactPoint> visualization = contactPoints.get(contactableRigidBodies.get(i));
+         List<DetectedContactPoint> rigidBodyContactPoints = allContactPoints.get(contactableRigidBodies.get(i));
 
-         List<FramePoint3DReadOnly> contactPoints = new ArrayList<>();
+         List<FramePoint3DReadOnly> contactFramePoints = new ArrayList<>();
          PlanarRegion contactingRegion = null;
 
          for (int j = 0; j < rigidBodyCollidables.size(); j++)
          {
+            /* First check for flat ground, give that precedence */
+            rigidBodyCollidables.get(j).packContactPoints(contactFramePoints, flatGroundHeightThreshold);
+
             BoundingBox3DReadOnly shapeBoundingBox = rigidBodyCollidables.get(j).getShapeBoundingBox();
 
             for (int k = 0; k < planarRegionsList.getNumberOfPlanarRegions(); k++)
@@ -85,8 +91,8 @@ public class PlanarRegionContactDetector extends FlatGroundContactDetector
                if (!shapeBoundingBox.intersectsExclusive(contactablePolytope.getBoundingBox()))
                   continue;
 
-               rigidBodyCollidables.get(j).packContactPoints(contactPoints, contactThreshold.getDoubleValue(), contactablePolytope);
-               if (!contactPoints.isEmpty())
+               rigidBodyCollidables.get(j).packContactPoints(contactFramePoints, contactThreshold.getDoubleValue(), contactablePolytope);
+               if (!rigidBodyContactPoints.isEmpty())
                {
                   contactingRegion = planarRegionsList.getPlanarRegion(k);
                   break;
@@ -94,10 +100,10 @@ public class PlanarRegionContactDetector extends FlatGroundContactDetector
             }
          }
 
-         for (int j = 0; j < contactPoints.size(); j++)
+         for (int j = 0; j < rigidBodyContactPoints.size(); j++)
          {
-            visualization.get(j).getContactPointPosition().set(contactPoints.get(j));
-            visualization.get(j).getContactPointNormal().set(contactingRegion.getNormal());
+            rigidBodyContactPoints.get(j).getContactPointPosition().set(contactFramePoints.get(j));
+            rigidBodyContactPoints.get(j).getContactPointNormal().set(contactingRegion.getNormal());
          }
       }
    }
