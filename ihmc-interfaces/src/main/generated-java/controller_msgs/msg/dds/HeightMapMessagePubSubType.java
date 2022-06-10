@@ -56,6 +56,14 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (30000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (30000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 30000; ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 30000; ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);}
 
       return current_alignment - initial_alignment;
    }
@@ -95,6 +103,20 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       current_alignment += (data.getHeights().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getVariances().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getCentroids().size(); ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getCentroids().get(i0), current_alignment);}
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getNormals().size(); ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getNormals().get(i0), current_alignment);}
+
 
       return current_alignment - initial_alignment;
    }
@@ -121,6 +143,18 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       cdr.write_type_e(data.getHeights());else
           throw new RuntimeException("heights field exceeds the maximum length");
 
+      if(data.getVariances().size() <= 30000)
+      cdr.write_type_e(data.getVariances());else
+          throw new RuntimeException("variances field exceeds the maximum length");
+
+      if(data.getCentroids().size() <= 30000)
+      cdr.write_type_e(data.getCentroids());else
+          throw new RuntimeException("centroids field exceeds the maximum length");
+
+      if(data.getNormals().size() <= 30000)
+      cdr.write_type_e(data.getNormals());else
+          throw new RuntimeException("normals field exceeds the maximum length");
+
    }
 
    public static void read(controller_msgs.msg.dds.HeightMapMessage data, us.ihmc.idl.CDR cdr)
@@ -139,6 +173,9 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       	
       cdr.read_type_e(data.getKeys());	
       cdr.read_type_e(data.getHeights());	
+      cdr.read_type_e(data.getVariances());	
+      cdr.read_type_e(data.getCentroids());	
+      cdr.read_type_e(data.getNormals());	
 
    }
 
@@ -153,6 +190,9 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       ser.write_type_6("estimated_ground_height", data.getEstimatedGroundHeight());
       ser.write_type_e("keys", data.getKeys());
       ser.write_type_e("heights", data.getHeights());
+      ser.write_type_e("variances", data.getVariances());
+      ser.write_type_e("centroids", data.getCentroids());
+      ser.write_type_e("normals", data.getNormals());
    }
 
    @Override
@@ -166,6 +206,9 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       data.setEstimatedGroundHeight(ser.read_type_6("estimated_ground_height"));
       ser.read_type_e("keys", data.getKeys());
       ser.read_type_e("heights", data.getHeights());
+      ser.read_type_e("variances", data.getVariances());
+      ser.read_type_e("centroids", data.getCentroids());
+      ser.read_type_e("normals", data.getNormals());
    }
 
    public static void staticCopy(controller_msgs.msg.dds.HeightMapMessage src, controller_msgs.msg.dds.HeightMapMessage dest)
