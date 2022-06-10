@@ -38,7 +38,7 @@ public class MultiStepCaptureRegionCalculator
 
    private final BooleanProvider useCrossOverSteps;
 
-   private final StepAdjustmentReachabilityConstraint reachabilityConstraint;
+   final StepAdjustmentReachabilityConstraint reachabilityConstraint;
 
    final FrameVector2D vertexExtrusionVector = new FrameVector2D();
    final FramePoint2D extrudedFirstVertex = new FramePoint2D();

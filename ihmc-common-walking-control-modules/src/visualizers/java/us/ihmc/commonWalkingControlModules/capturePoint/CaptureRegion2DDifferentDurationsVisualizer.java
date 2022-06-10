@@ -38,7 +38,7 @@ public class CaptureRegion2DDifferentDurationsVisualizer
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
       FramePoint3D initialPosition = new FramePoint3D(worldFrame, 0.12, 0.10, 1.0);
-      FrameVector3D initialVelocity = new FrameVector3D(worldFrame, 0.15, 0.05, 0.0);
+      FrameVector3D initialVelocity = new FrameVector3D(worldFrame, 0.13, 0.05, 0.0);
 
       FramePoint3D cmp1 = new FramePoint3D(worldFrame, 0.1, -0.05, 0.0);
       FramePoint3D cmp2 = new FramePoint3D(worldFrame, 0.1, 0.05, 0.0);

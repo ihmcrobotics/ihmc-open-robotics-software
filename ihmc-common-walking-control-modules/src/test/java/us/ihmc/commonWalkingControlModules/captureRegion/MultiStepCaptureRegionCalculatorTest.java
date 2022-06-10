@@ -50,7 +50,7 @@ import static us.ihmc.robotics.Assert.*;
 
 public class MultiStepCaptureRegionCalculatorTest
 {
-   private static final boolean PLOT_RESULTS = false;
+   private static final boolean PLOT_RESULTS = true;
    private static final boolean WAIT_FOR_BUTTON_PUSH = true;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -79,7 +79,7 @@ public class MultiStepCaptureRegionCalculatorTest
       double backwardLimit = 0.8;
       double innerLimit = 0.05;
       double outerLimit = 0.6;
-      double width = 0.3;
+      double width = 0.15;
       double swingDuration = 0.6;
       boolean useCrossOverSteps = false;
 
@@ -125,26 +125,42 @@ public class MultiStepCaptureRegionCalculatorTest
       {
 
          ReferenceFrame stanceFrame = ankleZUpFrames.get(swingSide.getOppositeSide());
-         FrameConvexPolygon2D captureRegion = new FrameConvexPolygon2D(stanceFrame);
-         captureRegion.addVertex(0.2, swingSide.negateIfRightSide(0.2));
-         captureRegion.addVertex(0.4, swingSide.negateIfRightSide(0.2));
-         captureRegion.addVertex(0.4, swingSide.negateIfRightSide(0.4));
-         captureRegion.addVertex(0.2, swingSide.negateIfRightSide(0.4));
-         captureRegion.update();
 
+         FrameConvexPolygon2D footPolygon = new FrameConvexPolygon2D(stanceFrame);
+         footPolygon.addVertex(0.5 * footLength, 0.5 * footWidth);
+         footPolygon.addVertex(0.5 * footLength, -0.5 * footWidth);
+         footPolygon.addVertex(-0.5 * footLength, -0.5 * footWidth);
+         footPolygon.addVertex(-0.5 * footLength, 0.5 * footWidth);
+         footPolygon.update();
+
+         FramePoint2D capturePoint = new FramePoint2D(stanceFrame);
+         capturePoint.set(0.075 + 0.5 * footLength, swingSide.negateIfRightSide(0.05 + 0.5 * footWidth));
+
+         YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
+
+         OneStepCaptureRegionCalculator captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth, () -> 1.5 * kinematicStepRange, ankleZUpFrames, false, "", registry, new YoGraphicsListRegistry());
+
+         captureRegionCalculator.calculateCaptureRegion(swingSide, 0.5, capturePoint, omega0, footPolygon);
+
+         FrameConvexPolygon2D captureRegion = new FrameConvexPolygon2D(captureRegionCalculator.getCaptureRegion());
          captureRegion.changeFrameAndProjectToXYPlane(worldFrame);
 
-         testTheRegions(multiStepRegionCalculator, captureRegion, swingDuration, omega0, kinematicStepRange, swingSide.getOppositeSide());
+//         testTheRegions(multiStepRegionCalculator, captureRegion, swingDuration, omega0, kinematicStepRange, swingSide.getOppositeSide());
 
          if (PLOT_RESULTS)
          {
-            YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-            YoFrameConvexPolygon2D yoOneStepRegion = new YoFrameConvexPolygon2D("oneStepRegion", worldFrame, 10, registry);
+            YoFrameConvexPolygon2D yoOneStepRegion = new YoFrameConvexPolygon2D("oneStepRegion", worldFrame, 20, registry);
             YoFrameConvexPolygon2D yoTwoStepRegion = new YoFrameConvexPolygon2D("twoStepRegion", worldFrame, 20, registry);
             YoFrameConvexPolygon2D yoThreeStepRegion = new YoFrameConvexPolygon2D("threeStepRegion", worldFrame, 20, registry);
             YoFrameConvexPolygon2D yoFourStepRegion = new YoFrameConvexPolygon2D("fourStepRegion", worldFrame, 20, registry);
             YoFrameConvexPolygon2D yoFiveStepRegion = new YoFrameConvexPolygon2D("fiveStepRegion", worldFrame, 20, registry);
             YoFrameConvexPolygon2D yoSixStepRegion = new YoFrameConvexPolygon2D("sixStepRegion", worldFrame, 20, registry);
+            YoFramePoint2D yoCapturePoint = new YoFramePoint2D("capturePoint", worldFrame, registry);
+
+
+            YoFrameConvexPolygon2D foot = new YoFrameConvexPolygon2D("foot", worldFrame, 20, registry);
+            YoFrameConvexPolygon2D leftReachability = new YoFrameConvexPolygon2D("leftReachability", worldFrame, 20, registry);
+            YoFrameConvexPolygon2D rightReachability = new YoFrameConvexPolygon2D("rightReachability", worldFrame, 20, registry);
 
             YoArtifactPolygon oneStepRegionGraphic = new YoArtifactPolygon("oneStepRegion", yoOneStepRegion, Color.green, false);
             YoArtifactPolygon twoStepRegionGraphic = new YoArtifactPolygon("twoStepRegion", yoTwoStepRegion, Color.blue, false);
@@ -153,12 +169,24 @@ public class MultiStepCaptureRegionCalculatorTest
             YoArtifactPolygon fiveStepRegionGraphic = new YoArtifactPolygon("fiveStepRegion", yoFiveStepRegion, Color.blue, false);
             YoArtifactPolygon sixStepRegionGraphic = new YoArtifactPolygon("sixStepRegion", yoSixStepRegion, Color.red, false);
 
+            YoGraphicPosition capturePointGraphic = new YoGraphicPosition("capturePointGraphic", yoCapturePoint, 0.02, YoAppearance.Blue(), GraphicType.BALL_WITH_CROSS);
+            YoArtifactPolygon footGraphic = new YoArtifactPolygon("footGraphic", foot, Color.blue, false);
+            YoArtifactPolygon leftReachabilityGraphic = new YoArtifactPolygon("leftReachability", leftReachability, Color.blue, false);
+            YoArtifactPolygon rightReachabilityGraphic = new YoArtifactPolygon("rightReachability", rightReachability, Color.blue, false);
+
+            graphicsListRegistry.registerArtifact("test", capturePointGraphic.createArtifact());
             graphicsListRegistry.registerArtifact("test", oneStepRegionGraphic);
             graphicsListRegistry.registerArtifact("test", twoStepRegionGraphic);
             graphicsListRegistry.registerArtifact("test", threeStepRegionGraphic);
             graphicsListRegistry.registerArtifact("test", fourStepRegionGraphic);
             graphicsListRegistry.registerArtifact("test", fiveStepRegionGraphic);
             graphicsListRegistry.registerArtifact("test", sixStepRegionGraphic);
+            graphicsListRegistry.registerArtifact("test", rightReachabilityGraphic);
+//            graphicsListRegistry.registerArtifact("test", leftReachabilityGraphic);
+            graphicsListRegistry.registerArtifact("test", footGraphic);
+
+            yoCapturePoint.setMatchingFrame(capturePoint);
+            foot.setMatchingFrame(footPolygon, false);
 
             Robot robot = new Robot("test");
             robot.getRobotsYoRegistry().addChild(registry);
@@ -176,7 +204,7 @@ public class MultiStepCaptureRegionCalculatorTest
             plotterFactory.addYoGraphicsListRegistries(graphicsListRegistry);
             plotterFactory.createOverheadPlotter();
 
-            //         multiStepRegionCalculator.attachVisualizer(visualizer);
+//                     multiStepRegionCalculator.attachVisualizer(visualizer);
 
             scs.startOnAThread();
 
@@ -187,6 +215,8 @@ public class MultiStepCaptureRegionCalculatorTest
                           captureRegion,
                           omega0,
                           swingSide.getOppositeSide(),
+                          leftReachability,
+                          rightReachability,
                           yoTwoStepRegion,
                           yoThreeStepRegion,
                           yoFourStepRegion,
@@ -203,12 +233,14 @@ public class MultiStepCaptureRegionCalculatorTest
                              captureRegion,
                              omega0,
                              swingSide.getOppositeSide(),
+                             leftReachability,
+                             rightReachability,
                              yoTwoStepRegion,
                              yoThreeStepRegion,
                              yoFourStepRegion,
                              yoFiveStepRegion,
                              yoSixStepRegion);
-               scs.tickAndUpdate();
+               scs.simulate(1);
             };
 
             yoUseCrossOverSteps.addListener(updatedListener);
@@ -219,8 +251,28 @@ public class MultiStepCaptureRegionCalculatorTest
             yoNominalWidth.addListener(updatedListener);
             yoSwingDuration.addListener(updatedListener);
 
-            scs.tickAndUpdate();
+            scs.simulate(5000);
 
+            double stepSize = 0.0005;
+            for (; yoInnerLimit.getValue() >= innerLimit - 0.25; yoInnerLimit.sub(stepSize));
+            for (; yoInnerLimit.getValue() <= 0.1; yoInnerLimit.add(stepSize));
+            for (; yoInnerLimit.getValue() >= innerLimit; yoInnerLimit.sub(stepSize));
+
+            for (; yoForwardLimit.getValue() >= forwardLimit - 0.25; yoForwardLimit.sub(stepSize));
+            for (; yoForwardLimit.getValue() <= forwardLimit + 0.25; yoForwardLimit.add(stepSize));
+            for (; yoForwardLimit.getValue() >= forwardLimit; yoForwardLimit.sub(stepSize));
+
+            /*
+            for (; yoBackwardLimit.getValue() >= backwardLimit - 0.25; yoBackwardLimit.sub(stepSize));
+            for (; yoBackwardLimit.getValue() <= backwardLimit + 0.25; yoBackwardLimit.add(stepSize));
+            for (; yoBackwardLimit.getValue() >= backwardLimit; yoBackwardLimit.sub(stepSize));
+
+
+            for (; yoOuterLimit.getValue() >= outerLimit - 0.25; yoOuterLimit.sub(stepSize));
+            for (; yoOuterLimit.getValue() <= outerLimit + 0.25; yoOuterLimit.add(stepSize));
+            for (; yoOuterLimit.getValue() >= outerLimit; yoOuterLimit.sub(stepSize));
+
+*/
             ThreadTools.sleepForever();
          }
       }
@@ -383,6 +435,8 @@ public class MultiStepCaptureRegionCalculatorTest
 
          scs.tickAndUpdate();
 
+
+
          ThreadTools.sleepForever();
       }
    }
@@ -441,8 +495,12 @@ public class MultiStepCaptureRegionCalculatorTest
                               FrameConvexPolygon2DReadOnly captureRegion,
                               double omega,
                               RobotSide stanceSide,
+                              YoFrameConvexPolygon2D leftReachability,
+                              YoFrameConvexPolygon2D rightReachability,
                               YoFrameConvexPolygon2D... polygons)
    {
+      leftReachability.setMatchingFrame(calculator.reachabilityConstraint.getReachabilityPolygonInFootFrame(RobotSide.LEFT), false);
+      rightReachability.setMatchingFrame(calculator.reachabilityConstraint.getReachabilityPolygonInFootFrame(RobotSide.RIGHT), false);
       int i = 1;
       for (YoFrameConvexPolygon2D polygon : polygons)
       {
