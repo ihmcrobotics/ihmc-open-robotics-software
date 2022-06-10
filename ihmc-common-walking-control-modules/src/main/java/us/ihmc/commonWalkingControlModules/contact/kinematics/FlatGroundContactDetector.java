@@ -86,22 +86,22 @@ public class FlatGroundContactDetector implements Updatable
       }
       double threshold = groundHeight + contactThreshold.getValue();
 
-      reset();
+      clearContacts();
 
       for (int i = 0; i < contactableRigidBodies.size(); i++)
       {
          List<ContactableShape> rigidBodyCollidables = contactableRigidBodyCollidables.get(contactableRigidBodies.get(i));
-         List<DetectedContactPoint> visualization = contactPoints.get(contactableRigidBodies.get(i));
+         List<DetectedContactPoint> contactPoints = this.contactPoints.get(contactableRigidBodies.get(i));
 
-         List<FramePoint3DReadOnly> contactPoints = new ArrayList<>();
+         List<FramePoint3DReadOnly> contactFramePoints = new ArrayList<>();
          for (int j = 0; j < rigidBodyCollidables.size(); j++)
          {
-            rigidBodyCollidables.get(j).packContactPoints(contactPoints, threshold);
+            rigidBodyCollidables.get(j).packContactPoints(contactFramePoints, threshold);
          }
 
-         for (int j = 0; j < contactPoints.size(); j++)
+         for (int j = 0; j < contactFramePoints.size(); j++)
          {
-            visualization.get(j).getContactPointPosition().set(contactPoints.get(j));
+            contactPoints.get(j).getContactPointPosition().set(contactFramePoints.get(j));
          }
       }
 
@@ -111,7 +111,23 @@ public class FlatGroundContactDetector implements Updatable
          multiContactBalanceStatus.getSupportRigidBodyIds().clear();
          multiContactBalanceStatus.getSurfaceNormalsInWorld().clear();
 
+         for (int i = 0; i < contactableRigidBodies.size(); i++)
+         {
+            RigidBodyBasics rigidBody = contactableRigidBodies.get(i);
+            List<DetectedContactPoint> contactPoints = this.contactPoints.get(contactableRigidBodies.get(i));
 
+            for (int j = 0; j < contactPoints.size(); j++)
+            {
+               if (contactPoints.get(j).isInContact())
+               {
+                  multiContactBalanceStatus.getSupportRigidBodyIds().add(rigidBody.hashCode());
+                  multiContactBalanceStatus.getContactPointsInWorld().add().set(contactPoints.get(j).getContactPointPosition());
+                  multiContactBalanceStatus.getSurfaceNormalsInWorld().add().set(contactPoints.get(j).getContactPointNormal());
+               }
+            }
+         }
+
+         statusOutputManager.reportStatusMessage(multiContactBalanceStatus);
       }
    }
 
@@ -120,7 +136,7 @@ public class FlatGroundContactDetector implements Updatable
       return contactPoints.get(rigidBody);
    }
 
-   protected void reset()
+   protected void clearContacts()
    {
       for (int i = 0; i < contactableRigidBodies.size(); i++)
       {
@@ -128,7 +144,7 @@ public class FlatGroundContactDetector implements Updatable
          List<DetectedContactPoint> visualization = contactPoints.get(rigidBody);
          for (int j = 0; j < visualization.size(); j++)
          {
-            visualization.get(j).hide();
+            visualization.get(j).clearContact();
          }
       }
    }

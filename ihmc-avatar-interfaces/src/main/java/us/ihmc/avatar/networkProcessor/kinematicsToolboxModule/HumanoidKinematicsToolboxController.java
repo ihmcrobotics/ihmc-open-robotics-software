@@ -50,6 +50,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.idl.IDLSequence.Integer;
 import us.ihmc.idl.IDLSequence.Object;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -323,6 +324,12 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    @Override
    public boolean initialize()
    {
+      System.out.println("\n\n\n");
+      System.out.println("----------------------------------------------------------------------");
+      LogTools.info("Initializing");
+      System.out.println("----------------------------------------------------------------------");
+      System.out.println("\n\n\n");
+
       KinematicsToolboxOutputStatus status = new KinematicsToolboxOutputStatus();
       status.setJointNameHash(-1);
       status.setSolutionQuality(Double.NaN);
@@ -393,6 +400,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
             if (!supportRegionSolver.solve())
                return false;
 
+            LogTools.info("Solved for MC support region");
             ConvexPolygon2DReadOnly supportRegion = supportRegionSolver.getSupportRegion();
             for (int i = 0; i < Math.min(supportRegion.getNumberOfVertices(), 16); i++)
             {
