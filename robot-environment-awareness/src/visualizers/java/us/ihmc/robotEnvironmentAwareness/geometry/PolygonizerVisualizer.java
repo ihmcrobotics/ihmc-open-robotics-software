@@ -63,6 +63,7 @@ import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
+import us.ihmc.javafx.ApplicationNoModule;
 import us.ihmc.perception.geometry.*;
 import us.ihmc.perception.geometry.SimpleConcaveHullFactory.ConcaveHullFactoryResult;
 import us.ihmc.perception.geometry.SimpleConcaveHullFactory.ConcaveHullVariables;

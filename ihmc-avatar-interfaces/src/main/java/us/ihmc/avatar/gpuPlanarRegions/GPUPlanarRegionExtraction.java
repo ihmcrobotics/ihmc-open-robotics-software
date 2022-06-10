@@ -112,7 +112,6 @@ public class GPUPlanarRegionExtraction
 
 //   private final PlanarRegionsList planarRegionsList = new PlanarRegionsList();
 //   private final GPUPlanarRegionIsland tempIsland = new GPUPlanarRegionIsland();
-   private boolean firstRun = true;
 
    private PlanarRegionExtractor planarRegionExtractor;
    private PlanarRegionExtractor.PlanarRegionExtractorInputData extractionData;
@@ -228,22 +227,14 @@ public class GPUPlanarRegionExtraction
          cyImage.resize(patchImageWidth, patchImageHeight, openCLManager, null);
          czImage.resize(patchImageWidth, patchImageHeight, openCLManager, null);
          graphImage.resize(patchImageWidth, patchImageHeight, openCLManager, null);
-<<<<<<< HEAD
          if (onPatchSizeChanged != null)
             onPatchSizeChanged.run();
-         regionVisitedMatrix.reshape(patchImageHeight, patchImageWidth);
-         boundaryVisitedMatrix.reshape(patchImageHeight, patchImageWidth);
-         boundaryMatrix.reshape(patchImageHeight, patchImageWidth);
-         regionMatrix.reshape(patchImageHeight, patchImageWidth);
-=======
-         onPatchSizeChanged.run();
          extractionData.imageHeight = patchHeight;
          extractionData.imageWidth = patchWidth;
 //         regionVisitedMatrix.reshape(patchImageHeight, patchImageWidth);
 //         boundaryVisitedMatrix.reshape(patchImageHeight, patchImageWidth);
 //         boundaryMatrix.reshape(patchImageHeight, patchImageWidth);
 //         regionMatrix.reshape(patchImageHeight, patchImageWidth);
->>>>>>> fixed a bunch of compile stuff
       }
       if (firstRun)
       {
