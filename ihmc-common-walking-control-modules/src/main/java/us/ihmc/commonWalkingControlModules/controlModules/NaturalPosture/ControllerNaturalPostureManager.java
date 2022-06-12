@@ -118,18 +118,18 @@ public class ControllerNaturalPostureManager
       npQPselectionMatrix.reshape(3, 3);
       CommonOps_DDRM.setIdentity(npQPselectionMatrix);
       
-      npPitchDesired.set(0.0);
+      npPitchDesired.set(0.02);
 
-      npQPWeightX.set(500.0);
-      npQPWeightY.set(500.0);
-      npQPWeightZ.set(500.0);
+      npQPWeightX.set(5.0);
+      npQPWeightY.set(5.0);
+      npQPWeightZ.set(5.0);
 
       npKpYaw.set(150.0);
-      npKpPitch.set(150.0);
+      npKpPitch.set(50.0);
       npKpRoll.set(150.0);
 
       npKdYaw.set(40.0);
-      npKdPitch.set(40.0);
+      npKdPitch.set(10.0);
       npKdRoll.set(40.0);
 
       npVelocityAlpha.set(0.01);
@@ -141,11 +141,11 @@ public class ControllerNaturalPostureManager
       pelvisQPselectionMatrix.reshape(3, 3);
       CommonOps_DDRM.setIdentity(pelvisQPselectionMatrix);
       pPosePelvisYaw.set(0.0);
-      pPosePelvisPitch.set(0.0);
+      pPosePelvisPitch.set(0.02);
       pPosePelvisRoll.set(0.0);
-      pPosePelvisYawKp.set(3000.0);
-      pPosePelvisPitchKp.set(4000);
-      pPosePelvisRollKp.set(4000.0);
+      pPosePelvisYawKp.set(1000.0);
+      pPosePelvisPitchKp.set(3000);
+      pPosePelvisRollKp.set(1500.0);
       pPosePelvisYawKdFactor.set(0.15);
       pPosePelvisPitchKdFactor.set(0.15);
       pPosePelvisRollKdFactor.set(0.15);      
