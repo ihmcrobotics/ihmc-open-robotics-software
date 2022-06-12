@@ -119,8 +119,8 @@ public class HeightThroughKneeControlState implements PelvisAndCenterOfMassHeigh
                                          WalkingControllerParameters walkingControllerParameters,
                                          YoRegistry parentRegistry)
    {
-      leftDesiredSupportKneeAngle.set(0.4);
-      rightDesiredSupportKneeAngle.set(0.4);
+      leftDesiredSupportKneeAngle.set(0.15);
+      rightDesiredSupportKneeAngle.set(0.15);
 
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       fullRobotModel = controllerToolbox.getFullRobotModel();
