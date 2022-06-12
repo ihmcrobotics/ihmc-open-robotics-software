@@ -339,11 +339,11 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       pPoseElbow.set(-1.0);
 
       pPoseSpineRollKp.set(50.0);
-      pPoseSpineYawKp.set(200.0);
-      pPoseShoulderPitchKp.set(100.0);
-      pPoseShoulderRollKp.set(100.0);
-      pPoseShoulderYawKp.set(100.0);
-      pPoseElbowKp.set(50.0);
+      pPoseSpineYawKp.set(300.0);
+      pPoseShoulderPitchKp.set(80.0);
+      pPoseShoulderRollKp.set(80.0);
+      pPoseShoulderYawKp.set(80.0);
+      pPoseElbowKp.set(30.0);
       
       pPoseSpineRollKdFactor.set(0.15);
       pPoseSpineYawKdFactor.set(0.15);
@@ -352,13 +352,13 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       pPoseShoulderYawKdFactor.set(0.15);
       pPoseElbowKdFactor.set(0.15);
 
-      pPoseHipPitchKp.set(200);
+      pPoseHipPitchKp.set(100);
       pPoseHipPitchKdFactor.set(0.2);
-      pPoseHipRollKp.set(200);
+      pPoseHipRollKp.set(100);
       pPoseHipRollKdFactor.set(0.2);
-      pPoseHipYawKp.set(200);
+      pPoseHipYawKp.set(100);
       pPoseHipYawKdFactor.set(0.2);
-      pPoseKneeKp.set(200);
+      pPoseKneeKp.set(100);
       pPoseKneeKdFactor.set(0.2);
    }
 
