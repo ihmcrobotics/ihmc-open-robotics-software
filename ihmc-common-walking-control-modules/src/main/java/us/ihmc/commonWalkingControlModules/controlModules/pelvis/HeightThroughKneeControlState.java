@@ -243,6 +243,11 @@ public class HeightThroughKneeControlState implements PelvisAndCenterOfMassHeigh
       // FIXME this should be false?
       return true;
    }
+   
+   @Override
+   public void setControlHeightWithMomentum(boolean flag)
+   {
+   }
 
    @Override
    public void doAction(double timeInState)
