@@ -94,6 +94,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
 
+   private final YoBoolean turnOnNaturalPostureControl = new YoBoolean("turnOnNaturalPostureControl", registry);
    private final YoBoolean useNaturalPostureCommand = new YoBoolean("useNaturalPostureCommand", registry);
    private final YoBoolean usePelvisPrivilegedPoseCommand = new YoBoolean("usePelvisPrivilegedPoseCommand", registry);
    private final YoBoolean useBodyManagerCommands = new YoBoolean("useBodyManagerCommands", registry);
@@ -201,6 +202,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
                                              WalkingControllerParameters walkingControllerParameters,
                                              HighLevelHumanoidControllerToolbox controllerToolbox)
    {
+      turnOnNaturalPostureControl.set(false);
       useNaturalPostureCommand.set(false);
       usePelvisPrivilegedPoseCommand.set(false);
       useBodyManagerCommands.set(true);
@@ -1037,6 +1039,15 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    private void submitControllerCoreCommands()
    {
+      if (turnOnNaturalPostureControl.getValue())
+      {
+         useNaturalPostureCommand.set(true);
+         usePelvisPrivilegedPoseCommand.set(true);
+         usePelvisOrientationCommand.set(false);
+         useBodyManagerCommands.set(false);
+         comHeightManager.setControlHeightWithMomentum(false);
+      }
+      
       planeContactStateCommandPool.clear();
       
       // Privileged configuration:
