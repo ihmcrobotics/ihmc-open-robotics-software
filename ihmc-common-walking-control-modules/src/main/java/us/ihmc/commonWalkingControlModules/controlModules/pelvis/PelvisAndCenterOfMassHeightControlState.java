@@ -64,4 +64,6 @@ public interface PelvisAndCenterOfMassHeightControlState extends State
    {
       return null;
    }
+
+   default void setControlHeightWithMomentum(boolean flag) {}
 }

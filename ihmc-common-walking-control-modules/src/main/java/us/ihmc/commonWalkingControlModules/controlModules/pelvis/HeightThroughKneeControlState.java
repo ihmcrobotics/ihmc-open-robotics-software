@@ -556,6 +556,12 @@ public class HeightThroughKneeControlState implements PelvisAndCenterOfMassHeigh
    {
       return controlHeightWithMomentum.getValue();
    }
+   
+   @Override
+   public void setControlHeightWithMomentum(boolean flag)
+   {
+      this.controlHeightWithMomentum.set(flag);
+   }
 
    @Override
    public void doAction(double timeInState)

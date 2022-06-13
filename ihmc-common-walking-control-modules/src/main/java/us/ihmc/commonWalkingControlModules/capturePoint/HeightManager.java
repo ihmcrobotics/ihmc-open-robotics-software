@@ -63,4 +63,5 @@ public interface HeightManager
 
    public abstract FeedbackControlCommand<?> createFeedbackControlTemplate();
 
+   public abstract void setControlHeightWithMomentum(boolean flag);
 }

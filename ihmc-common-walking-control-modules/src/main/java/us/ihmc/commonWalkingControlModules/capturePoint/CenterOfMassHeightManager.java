@@ -284,4 +284,10 @@ public class CenterOfMassHeightManager implements HeightManager
    {
       return stateMachine.getCurrentState().pollStatusToReport();
    }
+
+   @Override
+   public void setControlHeightWithMomentum(boolean flag)
+   {
+      stateMachine.getCurrentState().setControlHeightWithMomentum(flag);
+   }
 }
