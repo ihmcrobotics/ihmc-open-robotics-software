@@ -67,7 +67,7 @@ public class LinearMomentumRateControlModuleInput
     */
    private boolean usePelvisHeightCommand;
 
-   private boolean hasHeightCommand;
+   private boolean hasHeightCommand = true;
 
    /**
     * Contains the feedback command information for the center of mass height. Used to compute the necessary vertical momentum.
