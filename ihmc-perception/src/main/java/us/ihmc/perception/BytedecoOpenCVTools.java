@@ -1,10 +1,18 @@
 package us.ihmc.perception;
 
 import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.javacv.Java2DFrameUtils;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Size;
+
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import java.nio.ByteBuffer;
+
+import static org.bytedeco.opencv.global.opencv_core.CV_8UC3;
+import static org.bytedeco.opencv.global.opencv_core.CV_8UC4;
 
 public class BytedecoOpenCVTools
 {
@@ -96,16 +104,44 @@ public class BytedecoOpenCVTools
    {
       int numImgTypes = 35; // 7 base types, with five channel options each (none or C1, ..., C4)
 
-      int enum_ints[] =       {opencv_core.CV_8U,  opencv_core.CV_8UC1,  opencv_core.CV_8UC2,  opencv_core.CV_8UC3,  opencv_core.CV_8UC4,
-                               opencv_core.CV_8S,  opencv_core.CV_8SC1,  opencv_core.CV_8SC2,  opencv_core.CV_8SC3,  opencv_core.CV_8SC4,
-                               opencv_core.CV_16U, opencv_core.CV_16UC1, opencv_core.CV_16UC2, opencv_core.CV_16UC3, opencv_core.CV_16UC4,
-                               opencv_core.CV_16S, opencv_core.CV_16SC1, opencv_core.CV_16SC2, opencv_core.CV_16SC3, opencv_core.CV_16SC4,
-                               opencv_core.CV_32S, opencv_core.CV_32SC1, opencv_core.CV_32SC2, opencv_core.CV_32SC3, opencv_core.CV_32SC4,
-                               opencv_core.CV_32F, opencv_core.CV_32FC1, opencv_core.CV_32FC2, opencv_core.CV_32FC3, opencv_core.CV_32FC4,
-                               opencv_core.CV_64F, opencv_core.CV_64FC1, opencv_core.CV_64FC2, opencv_core.CV_64FC3, opencv_core.CV_64FC4};
+      int enum_ints[] = {opencv_core.CV_8U,
+                         opencv_core.CV_8UC1,
+                         opencv_core.CV_8UC2,
+                         opencv_core.CV_8UC3,
+                         opencv_core.CV_8UC4,
+                         opencv_core.CV_8S,
+                         opencv_core.CV_8SC1,
+                         opencv_core.CV_8SC2,
+                         opencv_core.CV_8SC3,
+                         opencv_core.CV_8SC4,
+                         opencv_core.CV_16U,
+                         opencv_core.CV_16UC1,
+                         opencv_core.CV_16UC2,
+                         opencv_core.CV_16UC3,
+                         opencv_core.CV_16UC4,
+                         opencv_core.CV_16S,
+                         opencv_core.CV_16SC1,
+                         opencv_core.CV_16SC2,
+                         opencv_core.CV_16SC3,
+                         opencv_core.CV_16SC4,
+                         opencv_core.CV_32S,
+                         opencv_core.CV_32SC1,
+                         opencv_core.CV_32SC2,
+                         opencv_core.CV_32SC3,
+                         opencv_core.CV_32SC4,
+                         opencv_core.CV_32F,
+                         opencv_core.CV_32FC1,
+                         opencv_core.CV_32FC2,
+                         opencv_core.CV_32FC3,
+                         opencv_core.CV_32FC4,
+                         opencv_core.CV_64F,
+                         opencv_core.CV_64FC1,
+                         opencv_core.CV_64FC2,
+                         opencv_core.CV_64FC3,
+                         opencv_core.CV_64FC4};
 
-      String enum_strings[] = {"CV_8U",  "CV_8UC1",  "CV_8UC2",  "CV_8UC3",  "CV_8UC4",
-                               "CV_8S",  "CV_8SC1",  "CV_8SC2",  "CV_8SC3",  "CV_8SC4",
+      String enum_strings[] = {"CV_8U", "CV_8UC1", "CV_8UC2", "CV_8UC3", "CV_8UC4",
+                               "CV_8S", "CV_8SC1", "CV_8SC2", "CV_8SC3", "CV_8SC4",
                                "CV_16U", "CV_16UC1", "CV_16UC2", "CV_16UC3", "CV_16UC4",
                                "CV_16S", "CV_16SC1", "CV_16SC2", "CV_16SC3", "CV_16SC4",
                                "CV_32S", "CV_32SC1", "CV_32SC2", "CV_32SC3", "CV_32SC4",
@@ -118,5 +154,10 @@ public class BytedecoOpenCVTools
             return enum_strings[i];
       }
       return "unknown image type";
+   }
+
+   public static Mat convertBufferedImageToMat(BufferedImage image)
+   {
+      return Java2DFrameUtils.toMat(image);
    }
 }

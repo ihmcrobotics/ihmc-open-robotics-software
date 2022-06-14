@@ -61,6 +61,7 @@ bytedecoDependencies {
    apiBytedecoNatives("librealsense2", "2.50.0-")
    apiBytedecoNatives("spinnaker", "2.4.0.143-")
    apiBytedecoNatives("ffmpeg", "5.0-")
+   apiBytedecoNatives("hdf5", "1.12.1-")
 }
 
 javacvDependencies {

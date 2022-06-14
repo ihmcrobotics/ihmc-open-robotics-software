@@ -18,7 +18,6 @@ public class GDXROS2VideoVisualizer extends GDXOpenCVVideoVisualizer
    private final ROS2Node ros2Node;
    private final ROS2Topic<VideoPacket> topic;
    private final ROS2VideoFormat format;
-
    private Mat inputJPEGYUVI420Mat;
    private Mat input16UC1Mat;
    private Mat input8UC1Mat;
