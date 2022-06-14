@@ -262,16 +262,31 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     *                                      {@code bodyFixedPoint} with respect to the {@code base}. Not
     *                                      modified.
     */
-   public void setInverseDynamics(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly desiredLinearVelocity,
+   public void setInverseDynamics(FramePoint3DReadOnly desiredPosition,
+                                  FrameVector3DReadOnly desiredLinearVelocity,
                                   FrameVector3DReadOnly feedForwardLinearAcceleration)
    {
       setControlMode(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
       ReferenceFrame trajectoryFrame = desiredPosition.getReferenceFrame();
       referencePosition.setIncludingFrame(desiredPosition);
-      referenceLinearVelocity.setIncludingFrame(desiredLinearVelocity);
-      referenceLinearVelocity.checkReferenceFrameMatch(trajectoryFrame);
-      referenceLinearAcceleration.setIncludingFrame(feedForwardLinearAcceleration);
-      referenceLinearAcceleration.checkReferenceFrameMatch(trajectoryFrame);
+      if (desiredLinearVelocity != null)
+      {
+         referenceLinearVelocity.setIncludingFrame(desiredLinearVelocity);
+         referenceLinearVelocity.checkReferenceFrameMatch(trajectoryFrame);
+      }
+      else
+      {
+         referenceLinearVelocity.setToZero(trajectoryFrame);
+      }
+      if (feedForwardLinearAcceleration != null)
+      {
+         referenceLinearAcceleration.setIncludingFrame(feedForwardLinearAcceleration);
+         referenceLinearAcceleration.checkReferenceFrameMatch(trajectoryFrame);
+      }
+      else
+      {
+         referenceLinearAcceleration.setToZero(trajectoryFrame);
+      }
       referenceForce.setToZero(trajectoryFrame);
    }
 
