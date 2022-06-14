@@ -334,10 +334,10 @@ public class VideoDataPlayer
       Camera camera = new Camera();
       camera.setName("test");
       camera.setInterlaced(false);
-      camera.setTimestampFile("Camera-1_Timestamps.dat");
-      camera.setVideoFile("Camera-1_Video.mov");
+      camera.setTimestampFile("AtlasNorth_Timestamps.dat");
+      camera.setVideoFile("AtlasNorth_Video.mov");
 
-      File dataDirectory = new File("/home/jesper/robotLogs/20170724_135638_AtlasControllerFactory/");
+      File dataDirectory = new File("/home/quantum/Workspace/Storage/Other/Temp/Atlas_Logs/Run_1/");
 
       VideoDataPlayer player = new VideoDataPlayer(camera, dataDirectory, true);
 
@@ -353,7 +353,6 @@ public class VideoDataPlayer
             System.out.println("Non-monotonic video timestamps");
             System.out.println(player.videoTimestamps[i - 1]);
          }
-
       }
 
       player.viewer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

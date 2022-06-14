@@ -1,10 +1,18 @@
 package us.ihmc.perception;
 
 import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.javacv.Java2DFrameUtils;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Size;
+
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import java.nio.ByteBuffer;
+
+import static org.bytedeco.opencv.global.opencv_core.CV_8UC3;
+import static org.bytedeco.opencv.global.opencv_core.CV_8UC4;
 
 public class BytedecoOpenCVTools
 {
@@ -90,5 +98,10 @@ public class BytedecoOpenCVTools
                                   sigmaX,
                                   sigmaY,
                                   borderType);
+   }
+
+   public static Mat convertBufferedImageToMat(BufferedImage image)
+   {
+      return Java2DFrameUtils.toMat(image);
    }
 }
