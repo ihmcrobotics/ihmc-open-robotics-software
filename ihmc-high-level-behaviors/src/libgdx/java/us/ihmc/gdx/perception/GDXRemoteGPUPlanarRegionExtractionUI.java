@@ -6,7 +6,7 @@ import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegionExtractionComms;
-import us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegionExtractionParameters;
+import us.ihmc.perception.rapidRegions.GPUPlanarRegionExtractionParameters;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.property.StoredPropertySetMessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -14,8 +14,8 @@ import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.ui.graphics.live.GDXROS1VideoVisualizer;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
+import us.ihmc.perception.geometry.ConcaveHullFactoryParameters;
+import us.ihmc.perception.segmentationTools.PolygonizerParameters;
 import us.ihmc.utilities.ros.ROS1Helper;
 
 public class GDXRemoteGPUPlanarRegionExtractionUI

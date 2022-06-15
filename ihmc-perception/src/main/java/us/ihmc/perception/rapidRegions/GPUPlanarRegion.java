@@ -1,4 +1,4 @@
-package us.ihmc.avatar.gpuPlanarRegions;
+package us.ihmc.perception.rapidRegions;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.decomposition.svd.SvdImplicitQrDecompose_DDRM;

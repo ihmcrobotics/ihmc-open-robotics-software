@@ -1,7 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.ui.properties;
 
 import javafx.beans.property.Property;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
+import us.ihmc.perception.segmentationTools.PolygonizerParameters;
 
 public class PolygonizerParametersProperty extends ParametersProperty<PolygonizerParameters>
 {

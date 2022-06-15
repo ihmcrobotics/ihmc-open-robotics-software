@@ -26,8 +26,8 @@ import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.MeshView;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullCollection;
-import us.ihmc.robotEnvironmentAwareness.geometry.SimpleConcaveHullFactory.ConcaveHullFactoryResult;
+import us.ihmc.perception.geometry.ConcaveHullCollection;
+import us.ihmc.perception.geometry.SimpleConcaveHullFactory.ConcaveHullFactoryResult;
 
 public class ConcaveHullViewer extends AnimationTimer
 {

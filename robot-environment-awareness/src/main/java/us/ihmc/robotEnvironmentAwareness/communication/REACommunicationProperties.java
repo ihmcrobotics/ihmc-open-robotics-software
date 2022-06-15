@@ -19,6 +19,7 @@ import geometry_msgs.msg.dds.Vector3PubSubType;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.perception.segmentationTools.PolygonizerParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.*;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.net.NetClassList;
@@ -41,7 +42,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessa
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeNodeMessage;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.OcTreeKeyMessage;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.PlanarRegionSegmentationMessage;
-import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
+import us.ihmc.perception.geometry.ConcaveHullFactoryParameters;
 
 /**
  * Created by adrien on 11/18/16.

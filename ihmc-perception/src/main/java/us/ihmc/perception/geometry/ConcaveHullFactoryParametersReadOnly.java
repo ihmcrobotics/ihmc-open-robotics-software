@@ -1,8 +1,8 @@
-package us.ihmc.robotEnvironmentAwareness.geometry;
+package us.ihmc.perception.geometry;
 
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
-import static us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters.*;
+import static us.ihmc.perception.geometry.ConcaveHullFactoryParameters.*;
 
 public interface ConcaveHullFactoryParametersReadOnly extends StoredPropertySetReadOnly
 {

@@ -1,8 +1,8 @@
-package us.ihmc.robotEnvironmentAwareness.planarRegion;
+package us.ihmc.perception.segmentationTools;
 
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
-import static us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters.*;
+import static us.ihmc.perception.segmentationTools.PolygonizerParameters.*;
 
 public interface PolygonizerParametersReadOnly extends StoredPropertySetReadOnly
 {

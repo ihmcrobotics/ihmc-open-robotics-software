@@ -1,13 +1,4 @@
-package us.ihmc.robotEnvironmentAwareness.geometry;
-
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
-import org.apache.commons.lang3.mutable.MutableInt;
-import org.apache.commons.lang3.time.StopWatch;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
+package us.ihmc.perception.geometry;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.LineString;
@@ -16,7 +7,10 @@ import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jts.triangulate.ConformingDelaunayTriangulationBuilder;
 import com.vividsolutions.jts.triangulate.ConstraintEnforcementException;
 import com.vividsolutions.jts.triangulate.quadedge.*;
-
+import org.apache.commons.lang3.mutable.MutableInt;
+import org.apache.commons.lang3.time.StopWatch;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.lists.ListWrappingIndexTools;
@@ -25,6 +19,13 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.geometry.ConcaveHull;
+import us.ihmc.perception.geometry.ConcaveHullCollection;
+import us.ihmc.perception.geometry.ConcaveHullFactoryParameters;
+
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Computes the concave hull of a 2D point cloud based on the paper

@@ -1,18 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.planarRegion;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Deque;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.apache.commons.lang3.mutable.MutableBoolean;
-
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.jOctoMap.boundingBox.OcTreeBoundingBoxInterface;
@@ -22,8 +10,12 @@ import us.ihmc.jOctoMap.node.NormalOcTreeNode;
 import us.ihmc.jOctoMap.rules.interfaces.IteratorSelectionRule;
 import us.ihmc.jOctoMap.tools.OcTreeNearestNeighborTools;
 import us.ihmc.jOctoMap.tools.OcTreeNearestNeighborTools.NeighborActionRule;
+import us.ihmc.perception.segmentationTools.PolygonizerTools;
 import us.ihmc.robotEnvironmentAwareness.exception.PlanarRegionSegmentationException;
 import us.ihmc.robotics.geometry.PlanarRegion;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class PlanarRegionSegmentationCalculator
 {

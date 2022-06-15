@@ -1,4 +1,4 @@
-package us.ihmc.robotEnvironmentAwareness.geometry;
+package us.ihmc.perception.geometry;
 
 import static us.ihmc.commons.lists.ListWrappingIndexTools.getNext;
 import static us.ihmc.commons.lists.ListWrappingIndexTools.getPrevious;

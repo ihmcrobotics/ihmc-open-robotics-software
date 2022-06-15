@@ -17,4 +17,10 @@ public class SimpleGPUHeightMapParameters
    double rampedHeightRangeA = 0.3;
    // if z > max(d - rapmed_height_range_b, 0) * ramped_height_range_a + ramped_height_range_c, reject
    double rampedHeightRangeC = 0.2;
+   int minPointsToAddToRegion = 10;
+   double mergeAngularThreshold = Math.cos(Math.toRadians(20));
+   double maxOutOfPlaneMergeDistance = 0.02;
+   double minZToComputeRegions = 0.7;
+   double maxVarianceToComputeRegions = 0.05;
+
 }

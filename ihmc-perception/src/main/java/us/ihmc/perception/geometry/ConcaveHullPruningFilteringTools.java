@@ -1,4 +1,4 @@
-package us.ihmc.robotEnvironmentAwareness.geometry;
+package us.ihmc.perception.geometry;
 
 import static us.ihmc.commons.lists.ListWrappingIndexTools.getNext;
 import static us.ihmc.commons.lists.ListWrappingIndexTools.getPrevious;
@@ -6,10 +6,10 @@ import static us.ihmc.commons.lists.ListWrappingIndexTools.next;
 import static us.ihmc.commons.lists.ListWrappingIndexTools.previous;
 import static us.ihmc.commons.lists.ListWrappingIndexTools.removeAllExclusive;
 import static us.ihmc.commons.lists.ListWrappingIndexTools.subLengthInclusive;
-import static us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullTools.computeConcaveHullPocket;
-import static us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullTools.findClosestIntersectionWithRay;
-import static us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullTools.isConvexAtVertex;
-import static us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullTools.isVertexPreventingKink;
+import static us.ihmc.perception.geometry.ConcaveHullTools.computeConcaveHullPocket;
+import static us.ihmc.perception.geometry.ConcaveHullTools.findClosestIntersectionWithRay;
+import static us.ihmc.perception.geometry.ConcaveHullTools.isConvexAtVertex;
+import static us.ihmc.perception.geometry.ConcaveHullTools.isVertexPreventingKink;
 
 import java.util.List;
 
