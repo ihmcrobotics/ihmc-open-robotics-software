@@ -386,8 +386,10 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * @param feedForwardLinearVelocity  the feed-forward linear velocity of the {@code controlFrame}'s
     *                                   origin with respect to the {@code base}. Not modified.
     */
-   public void setInverseKinematics(FrameOrientation3DReadOnly desiredOrientation, FramePoint3DReadOnly desiredPosition,
-                                    FrameVector3DReadOnly feedForwardAngularVelocity, FrameVector3DReadOnly feedForwardLinearVelocity)
+   public void setInverseKinematics(FrameOrientation3DReadOnly desiredOrientation,
+                                    FramePoint3DReadOnly desiredPosition,
+                                    FrameVector3DReadOnly feedForwardAngularVelocity,
+                                    FrameVector3DReadOnly feedForwardLinearVelocity)
    {
       setInverseKinematics(desiredOrientation, feedForwardAngularVelocity);
       setInverseKinematics(desiredPosition, feedForwardLinearVelocity);
@@ -431,16 +433,34 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     *                                       {@code controlFrame} with respect to the {@code base}. Not
     *                                       modified.
     */
-   public void setInverseDynamics(FrameOrientation3DReadOnly desiredOrientation, FrameVector3DReadOnly desiredAngularVelocity,
+   public void setInverseDynamics(FrameOrientation3DReadOnly desiredOrientation,
+                                  FrameVector3DReadOnly desiredAngularVelocity,
                                   FrameVector3DReadOnly feedForwardAngularAcceleration)
    {
       setControlMode(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
       ReferenceFrame trajectoryFrame = desiredOrientation.getReferenceFrame();
       referenceOrientation.setIncludingFrame(desiredOrientation);
-      referenceAngularVelocity.setIncludingFrame(desiredAngularVelocity);
-      referenceAngularVelocity.checkReferenceFrameMatch(trajectoryFrame);
-      referenceAngularAcceleration.setIncludingFrame(feedForwardAngularAcceleration);
-      referenceAngularAcceleration.checkReferenceFrameMatch(trajectoryFrame);
+
+      if (desiredAngularVelocity != null)
+      {
+         referenceAngularVelocity.setIncludingFrame(desiredAngularVelocity);
+         referenceAngularVelocity.checkReferenceFrameMatch(trajectoryFrame);
+      }
+      else
+      {
+         referenceAngularVelocity.setToZero(trajectoryFrame);
+      }
+
+      if (feedForwardAngularAcceleration != null)
+      {
+         referenceAngularAcceleration.setIncludingFrame(feedForwardAngularAcceleration);
+         referenceAngularAcceleration.checkReferenceFrameMatch(trajectoryFrame);
+      }
+      else
+      {
+         referenceAngularAcceleration.setToZero(trajectoryFrame);
+      }
+
       referenceTorque.setToZero(trajectoryFrame);
    }
 
@@ -462,16 +482,34 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     *                                      {@code controlFrame}'s origin with respect to the
     *                                      {@code base}. Not modified.
     */
-   public void setInverseDynamics(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly desiredLinearVelocity,
+   public void setInverseDynamics(FramePoint3DReadOnly desiredPosition,
+                                  FrameVector3DReadOnly desiredLinearVelocity,
                                   FrameVector3DReadOnly feedForwardLinearAcceleration)
    {
       setControlMode(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
       ReferenceFrame trajectoryFrame = desiredPosition.getReferenceFrame();
       referencePosition.setIncludingFrame(desiredPosition);
-      referenceLinearVelocity.setIncludingFrame(desiredLinearVelocity);
-      referenceLinearVelocity.checkReferenceFrameMatch(trajectoryFrame);
-      referenceLinearAcceleration.setIncludingFrame(feedForwardLinearAcceleration);
-      referenceLinearAcceleration.checkReferenceFrameMatch(trajectoryFrame);
+
+      if (desiredLinearVelocity != null)
+      {
+         referenceLinearVelocity.setIncludingFrame(desiredLinearVelocity);
+         referenceLinearVelocity.checkReferenceFrameMatch(trajectoryFrame);
+      }
+      else
+      {
+         referenceLinearVelocity.setToZero(trajectoryFrame);
+      }
+
+      if (feedForwardLinearAcceleration != null)
+      {
+         referenceLinearAcceleration.setIncludingFrame(feedForwardLinearAcceleration);
+         referenceLinearAcceleration.checkReferenceFrameMatch(trajectoryFrame);
+      }
+      else
+      {
+         referenceLinearAcceleration.setToZero(trajectoryFrame);
+      }
+
       referenceForce.setToZero(trajectoryFrame);
    }
 
@@ -500,9 +538,12 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     *                                       {@code controlFrame}'s origin with respect to the
     *                                       {@code base}. Not modified.
     */
-   public void setInverseDynamics(FrameOrientation3DReadOnly desiredOrientation, FramePoint3DReadOnly desiredPosition,
-                                  FrameVector3DReadOnly desiredAngularVelocity, FrameVector3DReadOnly desiredLinearVelocity,
-                                  FrameVector3DReadOnly feedForwardAngularAcceleration, FrameVector3DReadOnly feedForwardLinearAcceleration)
+   public void setInverseDynamics(FrameOrientation3DReadOnly desiredOrientation,
+                                  FramePoint3DReadOnly desiredPosition,
+                                  FrameVector3DReadOnly desiredAngularVelocity,
+                                  FrameVector3DReadOnly desiredLinearVelocity,
+                                  FrameVector3DReadOnly feedForwardAngularAcceleration,
+                                  FrameVector3DReadOnly feedForwardLinearAcceleration)
    {
       setInverseDynamics(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
       setInverseDynamics(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
@@ -527,8 +568,29 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     */
    public void setInverseDynamics(FramePose3DReadOnly desiredPose, SpatialVectorReadOnly desiredVelocity, SpatialVectorReadOnly feedForwardAcceleration)
    {
-      setInverseDynamics(desiredPose.getOrientation(), desiredVelocity.getAngularPart(), feedForwardAcceleration.getAngularPart());
-      setInverseDynamics(desiredPose.getPosition(), desiredVelocity.getLinearPart(), feedForwardAcceleration.getLinearPart());
+      FrameQuaternionReadOnly desiredOrientation = desiredPose.getOrientation();
+      FramePoint3DReadOnly desiredPosition = desiredPose.getPosition();
+
+      FrameVector3DReadOnly desiredAngularVelocity = null;
+      FrameVector3DReadOnly desiredLinearVelocity = null;
+
+      FrameVector3DReadOnly feedForwardLinearAcceleration = null;
+      FrameVector3DReadOnly feedForwardAngularAcceleration = null;
+
+      if (desiredVelocity != null)
+      {
+         desiredAngularVelocity = desiredVelocity.getAngularPart();
+         desiredLinearVelocity = desiredVelocity.getLinearPart();
+      }
+
+      if (feedForwardAcceleration != null)
+      {
+         feedForwardLinearAcceleration = feedForwardAcceleration.getLinearPart();
+         feedForwardAngularAcceleration = feedForwardAcceleration.getAngularPart();
+      }
+
+      setInverseDynamics(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
+      setInverseDynamics(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
    }
 
    /**
@@ -548,7 +610,8 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * @param feedForwardTorque      the feed-forward torque to exert at {@code controlFrame}. Not
     *                               modified.
     */
-   public void setVirtualModelControl(FrameOrientation3DReadOnly desiredOrientation, FrameVector3DReadOnly desiredAngularVelocity,
+   public void setVirtualModelControl(FrameOrientation3DReadOnly desiredOrientation,
+                                      FrameVector3DReadOnly desiredAngularVelocity,
                                       FrameVector3DReadOnly feedForwardTorque)
    {
       setControlMode(WholeBodyControllerCoreMode.VIRTUAL_MODEL);
@@ -613,9 +676,12 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * @param feedForwardForce       the feed-forward force to exert at {@code controlFrame}. Not
     *                               modified.
     */
-   public void setVirtualModelControl(FrameOrientation3DReadOnly desiredOrientation, FramePoint3DReadOnly desiredPosition,
-                                      FrameVector3DReadOnly desiredAngularVelocity, FrameVector3DReadOnly desiredLinearVelocity,
-                                      FrameVector3DReadOnly feedForwardTorque, FrameVector3DReadOnly feedForwardForce)
+   public void setVirtualModelControl(FrameOrientation3DReadOnly desiredOrientation,
+                                      FramePoint3DReadOnly desiredPosition,
+                                      FrameVector3DReadOnly desiredAngularVelocity,
+                                      FrameVector3DReadOnly desiredLinearVelocity,
+                                      FrameVector3DReadOnly feedForwardTorque,
+                                      FrameVector3DReadOnly feedForwardForce)
    {
       setVirtualModelControl(desiredOrientation, desiredAngularVelocity, feedForwardTorque);
       setVirtualModelControl(desiredPosition, desiredLinearVelocity, feedForwardForce);
@@ -761,7 +827,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * </p>
     * 
     * @param linearSelectionMatrix the selection matrix to apply to the linear part of this command.
-    *           Not modified.
+    *                              Not modified.
     */
    public void setSelectionMatrixForLinearControl(SelectionMatrix3D linearSelectionMatrix)
    {
@@ -786,7 +852,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * </p>
     * 
     * @param angularSelectionMatrix the selection matrix to apply to the angular part of this command.
-    *           Not modified.
+    *                               Not modified.
     */
    public void setSelectionMatrixForAngularControl(SelectionMatrix3D angularSelectionMatrix)
    {
