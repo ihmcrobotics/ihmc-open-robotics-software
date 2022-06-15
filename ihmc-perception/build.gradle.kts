@@ -36,7 +36,7 @@ mainDependencies {
    api("org.ddogleg:ddogleg:0.18")
 
    api("us.ihmc:euclid:0.17.2")
-   api("us.ihmc:simulation-construction-set:0.22.1")
+   api("us.ihmc:simulation-construction-set:0.22.2")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-ros-tools:source")

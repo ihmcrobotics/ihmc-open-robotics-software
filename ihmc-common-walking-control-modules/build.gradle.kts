@@ -45,5 +45,5 @@ testDependencies {
 
 visualizersDependencies {
    api(ihmc.sourceSetProject("main"))
-   api("us.ihmc:simulation-construction-set:0.22.1")
+   api("us.ihmc:simulation-construction-set:0.22.2")
 }
