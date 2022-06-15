@@ -168,7 +168,7 @@ public class ReachabilityMapVisualizer
 
    public boolean loadReachabilityMapFromFile()
    {
-      ReachabilityMapSpreadsheetImporter importer = new ReachabilityMapSpreadsheetImporter();
+      ReachabilityMapMatlabImporter importer = new ReachabilityMapMatlabImporter();
       File file = importer.openSelectionFileDialog();
       if (file == null)
          return false;
