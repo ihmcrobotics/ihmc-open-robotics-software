@@ -156,17 +156,32 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
     * @param feedForwardLinearAcceleration feed-forward linear acceleration with respect to root frame.
     *                                      Not modified.
     */
-   public void setInverseDynamics(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly desiredLinearVelocity,
+   public void setInverseDynamics(FramePoint3DReadOnly desiredPosition,
+                                  FrameVector3DReadOnly desiredLinearVelocity,
                                   FrameVector3DReadOnly feedForwardLinearAcceleration)
    {
       setControlMode(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
       ReferenceFrame rootFrame = desiredPosition.getReferenceFrame().getRootFrame();
       referencePositionInRootFrame.setIncludingFrame(desiredPosition);
       referencePositionInRootFrame.changeFrame(rootFrame);
-      referenceLinearVelocityInRootFrame.setIncludingFrame(desiredLinearVelocity);
-      referenceLinearVelocityInRootFrame.changeFrame(rootFrame);
-      referenceLinearAccelerationInRootFrame.setIncludingFrame(feedForwardLinearAcceleration);
-      referenceLinearAccelerationInRootFrame.changeFrame(rootFrame);
+      if (desiredLinearVelocity != null)
+      {
+         referenceLinearVelocityInRootFrame.setIncludingFrame(desiredLinearVelocity);
+         referenceLinearVelocityInRootFrame.changeFrame(rootFrame);
+      }
+      else
+      {
+         referenceLinearVelocityInRootFrame.setToZero(rootFrame);
+      }
+      if (feedForwardLinearAcceleration != null)
+      {
+         referenceLinearAccelerationInRootFrame.setIncludingFrame(feedForwardLinearAcceleration);
+         referenceLinearAccelerationInRootFrame.changeFrame(rootFrame);
+      }
+      else
+      {
+         referenceLinearAccelerationInRootFrame.setToZero(rootFrame);
+      }
    }
 
    /**
@@ -183,7 +198,8 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
     * @param feedForwardLinearAcceleration feed-forward linear acceleration with respect to root frame.
     *                                      Not modified.
     */
-   public void setVirtualModelControl(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly desiredLinearVelocity,
+   public void setVirtualModelControl(FramePoint3DReadOnly desiredPosition,
+                                      FrameVector3DReadOnly desiredLinearVelocity,
                                       FrameVector3DReadOnly feedForwardLinearAcceleration)
    {
       setInverseDynamics(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
