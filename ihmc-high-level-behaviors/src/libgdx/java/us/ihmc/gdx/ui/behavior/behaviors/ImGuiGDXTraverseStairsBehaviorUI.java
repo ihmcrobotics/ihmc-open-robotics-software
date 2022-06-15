@@ -40,7 +40,7 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends ImGuiGDXBehaviorUIInterfac
                                                                                                   ImGuiGDXTraverseStairsBehaviorUI::new);
 
    private final BehaviorHelper helper;
-   private final GDXFootstepPlanGraphic footstepPlanGraphic = new GDXFootstepPlanGraphic();
+   private final GDXFootstepPlanGraphic footstepPlanGraphic;
    private final GDXPlanarRegionsGraphic planarRegionsGraphic = new GDXPlanarRegionsGraphic();
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private final Stopwatch completedStopwatch = new Stopwatch();
@@ -63,6 +63,7 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends ImGuiGDXBehaviorUIInterfac
    public ImGuiGDXTraverseStairsBehaviorUI(BehaviorHelper helper)
    {
       this.helper = helper;
+      footstepPlanGraphic = new GDXFootstepPlanGraphic(helper.getRobotModel().getContactPointParameters().getControllerFootGroundContactPoints());
       helper.subscribeViaCallback(TraverseStairsBehaviorAPI.PLANNED_STEPS, footsteps ->
       {
          footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps, DEFINITION.getName()));
