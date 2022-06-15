@@ -143,7 +143,6 @@ public class LookAndStepPlanarRegionsManager
          regionsCreatedLocally.add(bipedalSupportPlanarRegionCalculator.getSupportRegionsAsList());
       }
 
-
       String status;
       if (lookAndStepParameters.getAssumeFlatGround())
       {
@@ -160,10 +159,11 @@ public class LookAndStepPlanarRegionsManager
          List<PlanarRegion> largeEnoughRegions = new ArrayList<>();
          for (PlanarRegionsList regions : regionsToUseFromHistory)
          {
-            largeEnoughRegions.addAll(regions.getPlanarRegionsAsList().stream()
-                                                             .filter(region -> PlanarRegionTools.computePlanarRegionArea(region)
-                                                                               > lookAndStepParameters.getDetectFlatGroundMinRegionAreaToConsider())
-                                                             .collect(Collectors.toList()));
+            largeEnoughRegions.addAll(regions.getPlanarRegionsAsList()
+                                             .stream()
+                                             .filter(region -> PlanarRegionTools.computePlanarRegionArea(region)
+                                                               > lookAndStepParameters.getDetectFlatGroundMinRegionAreaToConsider())
+                                             .toList());
          }
 
          // are the feet coplanar
@@ -177,37 +177,51 @@ public class LookAndStepPlanarRegionsManager
             Point3DReadOnly leftFootPosition = startFootPoses.get(RobotSide.LEFT).getSolePoseInWorld().getPosition();
             Vector3DReadOnly footNormal = getFootNormal(startFootPoses.get(RobotSide.LEFT));
 
-            List<PlanarRegion> largeNonCoplanarRegions = largeEnoughRegions.stream().filter(region ->
-                                                                                            {
-                                                                                               boolean areHeightsTheSame = EuclidCoreTools.epsilonEquals(
-                                                                                                     leftFootPosition.getZ(),
-                                                                                                     region.getPlaneZGivenXY(leftFootPosition.getX(),
-                                                                                                                             leftFootPosition.getY()),
-                                                                                                     lookAndStepParameters.getDetectFlatGroundZTolerance());
-                                                                                               if (!areHeightsTheSame)
-                                                                                                  return true;
-
-                                                                                               return region.getNormal().angle(footNormal)
-                                                                                                      > lookAndStepParameters.getDetectFlatGroundOrientationTolerance();
-                                                                                            }).collect(Collectors.toList());
-
-            double closestNonCoplanarDistance = lookAndStepParameters.getAssumedFlatGroundCircleRadius();
-            for (int i = 0; i < largeNonCoplanarRegions.size(); i++)
+            List<PlanarRegion> largeNonCoplanarRegions = new ArrayList<>();
+            List<PlanarRegion> largeCoplanarRegions = new ArrayList<>();
+            for (PlanarRegion largeEnoughRegion : largeEnoughRegions)
             {
-               PlanarRegion planarRegion = largeNonCoplanarRegions.get(i);
-               double distanceToRegionFromMidstance = planarRegion.distanceToPointByProjectionOntoXYPlane(midFeetPose.getPosition().getX(),
-                                                                                                          midFeetPose.getPosition().getY());
-               closestNonCoplanarDistance = Math.min(closestNonCoplanarDistance, distanceToRegionFromMidstance);
+               boolean isAtFootHeight = EuclidCoreTools.epsilonEquals(leftFootPosition.getZ(),
+                                                                         largeEnoughRegion.getPlaneZGivenXY(leftFootPosition.getX(), leftFootPosition.getY()),
+                                                                         lookAndStepParameters.getDetectFlatGroundZTolerance());
+               boolean isParallelWithFootPlane = largeEnoughRegion.getNormal().angle(footNormal) > lookAndStepParameters.getDetectFlatGroundOrientationTolerance();
+
+               boolean isCoplanar = isAtFootHeight && isParallelWithFootPlane;
+
+               if (isCoplanar)
+               {
+                  largeCoplanarRegions.add(largeEnoughRegion);
+               }
+               else
+               {
+                  largeNonCoplanarRegions.add(largeEnoughRegion);
+               }
             }
 
-            if (closestNonCoplanarDistance >= lookAndStepParameters.getDetectFlatGroundMinRadius())
+            if (!largeCoplanarRegions.isEmpty())
             {
-               status = "Flat ground detected.";
-               regionsCreatedLocally.add(constructFlatGroundCircleRegion(midFeetPose, 0.9 * closestNonCoplanarDistance));
+               double closestNonCoplanarDistance = lookAndStepParameters.getAssumedFlatGroundCircleRadius();
+               for (int i = 0; i < largeNonCoplanarRegions.size(); i++)
+               {
+                  PlanarRegion planarRegion = largeNonCoplanarRegions.get(i);
+                  double distanceToRegionFromMidstance = planarRegion.distanceToPointByProjectionOntoXYPlane(midFeetPose.getPosition().getX(),
+                                                                                                             midFeetPose.getPosition().getY());
+                  closestNonCoplanarDistance = Math.min(closestNonCoplanarDistance, distanceToRegionFromMidstance);
+               }
+
+               if (closestNonCoplanarDistance >= lookAndStepParameters.getDetectFlatGroundMinRadius())
+               {
+                  status = "Flat ground detected.";
+                  regionsCreatedLocally.add(constructFlatGroundCircleRegion(midFeetPose, 0.9 * closestNonCoplanarDistance));
+               }
+               else
+               {
+                  status = "Flat ground not detected. Closest non-coplanar distance < min radius.";
+               }
             }
             else
             {
-               status = "Flat ground not detected.";
+               status = "Flat ground not detected. No large coplanar regions.";
             }
          }
       }
