@@ -18,7 +18,7 @@ mainDependencies {
    api("org.ejml:ejml-core:0.39")
    api("org.ejml:ejml-ddense:0.39")
    api("org.boofcv:boofcv-geo:0.36")
-   api("org.jfree:jfreechart:1.0.17")
+   api("org.jfree:jfreechart:1.0.19")
    api("com.github.quickhull3d:quickhull3d:1.0.0")
    api("com.github.wendykierp:JTransforms:3.1")
    api("org.reflections:reflections:0.9.10")
@@ -27,11 +27,7 @@ mainDependencies {
    api("us.ihmc:jinput:2.0.6-ihmc2")
    api("us.ihmc:euclid:0.17.2")
    api("us.ihmc:euclid-geometry:0.17.2")
-   api("us.ihmc:mecano-graphviz:0.10.0")
-   api("us.ihmc:ihmc-yovariables:0.9.12")
-   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.8")
-   api("us.ihmc:simulation-construction-set:0.21.16")
-   api("us.ihmc:ihmc-graphics-description:0.19.4")
+   api("us.ihmc:mecano-graphviz:0.11.1")
    api("us.ihmc:robot-environment-awareness:source")
    api("us.ihmc:robot-environment-awareness-visualizers:source")
    api("us.ihmc:ihmc-ros-tools:source")
@@ -54,9 +50,10 @@ mainDependencies {
    api("us.ihmc:ihmc-robot-data-visualizer:source")
    api("us.ihmc:ihmc-footstep-planning:source")
    api("us.ihmc:simulation-construction-set-tools:source")
-   api("us.ihmc:scs2-simulation:0.7.0-bullet-alpha-3")
-   api("us.ihmc:scs2-bullet-simulation:0.7.0-bullet-alpha-3")
-   api("us.ihmc:scs2-session-visualizer-jfx:0.7.0-bullet-alpha-3")
+   api("us.ihmc:scs2-simulation:17-0.8.5-bullet-alpha-6")
+   api("us.ihmc:scs2-bullet-simulation:17-0.8.5-bullet-alpha-6")
+   api("us.ihmc:scs2-session-visualizer-jfx:17-0.8.5-bullet-alpha-6")
+   api("us.ihmc:scs2-simulation-construction-set:17-0.8.5-bullet-alpha-6")
 }
 
 testDependencies {
@@ -72,7 +69,7 @@ testDependencies {
 visualizersDependencies {
    api(ihmc.sourceSetProject("main"))
 
-   api("us.ihmc:ihmc-javafx-toolkit:0.21.0")
+   api("us.ihmc:ihmc-javafx-toolkit:17-0.21.1")
    api("us.ihmc:robot-environment-awareness-application:source")
    api("us.ihmc:ihmc-path-planning-visualizers:source")
    api("us.ihmc:ihmc-footstep-planning-visualizers:source")

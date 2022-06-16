@@ -4,7 +4,6 @@ import java.util.EnumMap;
 
 import controller_msgs.msg.dds.GroundPlaneMessage;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.factory.RobotDefinitionTools;
 import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessorParameters;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
@@ -30,6 +29,7 @@ import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
+import us.ihmc.simulationToolkit.RobotDefinitionTools;
 import us.ihmc.valkyrie.ValkyrieInitialSetupFactories;
 import us.ihmc.valkyrie.ValkyrieMutableInitialSetup;
 import us.ihmc.valkyrie.ValkyrieRobotModel;

@@ -1,6 +1,8 @@
 #ifndef __controller_msgs__msg__HeightMapMessage__idl__
 #define __controller_msgs__msg__HeightMapMessage__idl__
 
+#include "geometry_msgs/msg/./Point_.idl"
+#include "geometry_msgs/msg/./Vector3_.idl"
 module controller_msgs
 {
   module msg
@@ -48,6 +50,19 @@ module controller_msgs
          * List of heights, which correspond to the list of keys
          */
         sequence<float, 30000> heights;
+        /**
+         * List of variances, which correspond to the list of keys. May be empty.
+         */
+        sequence<float, 30000> variances;
+        /**
+         * List of centroids for each cell, which correspond to the list of keys. May be empty
+         * Note: The z coordinate of each point is ignored, but should correspond to the height.
+         */
+        sequence<geometry_msgs::msg::dds::Point, 30000> centroids;
+        /**
+         * List of normals for each cell, which correspond to the list of keys. May be empty.
+         */
+        sequence<geometry_msgs::msg::dds::Vector3, 30000> normals;
       };
     };
   };

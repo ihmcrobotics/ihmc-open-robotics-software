@@ -1,5 +1,7 @@
 package us.ihmc.avatar.colorVision;
 
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -33,23 +35,25 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
    private final Throttler throttler = new Throttler();
    private volatile boolean running = true;
 
-   public DualBlackflyAndAruCoMarkerOnRobotProcess()
+   public DualBlackflyAndAruCoMarkerOnRobotProcess(DRCRobotModel robotModel)
    {
       nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
+
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "blackfly_node");
+      ros2Helper = new ROS2Helper(ros2Node);
+
+      ROS2SyncedRobotModel syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
 
       if (!LEFT_SERIAL_NUMBER.equals("00000000"))
       {
          LogTools.info("Adding Blackfly LEFT with serial number: {}", LEFT_SERIAL_NUMBER);
-         blackflies.put(RobotSide.LEFT, new DualBlackflyCamera(LEFT_SERIAL_NUMBER));
+         blackflies.put(RobotSide.LEFT, new DualBlackflyCamera(LEFT_SERIAL_NUMBER, syncedRobot));
       }
       if (!RIGHT_SERIAL_NUMBER.equals("00000000"))
       {
          LogTools.info("Adding Blackfly RIGHT with serial number: {}", RIGHT_SERIAL_NUMBER);
-         blackflies.put(RobotSide.RIGHT, new DualBlackflyCamera(RIGHT_SERIAL_NUMBER));
+         blackflies.put(RobotSide.RIGHT, new DualBlackflyCamera(RIGHT_SERIAL_NUMBER, syncedRobot));
       }
-
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "blackfly_node");
-      ros2Helper = new ROS2Helper(ros2Node);
 
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "videopub");
 
@@ -112,6 +116,5 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
    public static void main(String[] args)
    {
 //      SpinnakerTools.printAllConnectedDevicesInformation();
-      new DualBlackflyAndAruCoMarkerOnRobotProcess();
    }
 }

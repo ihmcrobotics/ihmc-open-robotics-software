@@ -44,7 +44,7 @@ public class GDXNettyOusterUI
                if (nativesLoadedActivator.isNewlyActivated())
                {
                   ouster = new NettyOuster();
-                  ouster.start();
+                  ouster.bind();
                }
 
                if (imagePanel == null && ouster.isInitialized())
@@ -80,7 +80,7 @@ public class GDXNettyOusterUI
          @Override
          public void dispose()
          {
-            ouster.stop();
+            ouster.destroy();
             baseUI.dispose();
          }
       });

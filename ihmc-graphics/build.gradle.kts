@@ -16,7 +16,7 @@ mainDependencies {
    api("us.ihmc:ihmc-robot-models:source")
    api("us.ihmc:ihmc-interfaces:source")
    api("us.ihmc:ihmc-java-toolkit:source")
-   api("us.ihmc:ihmc-graphics-description:0.19.4")
+   api("us.ihmc:ihmc-graphics-description:0.19.6")
    api("us.ihmc:ihmc-video-codecs:2.1.6")
 }
 
@@ -27,7 +27,7 @@ testDependencies {
 javafxDependencies {
    api(ihmc.sourceSetProject("main"))
 
-   api("us.ihmc:ihmc-javafx-toolkit:0.21.0")
+   api("us.ihmc:ihmc-javafx-toolkit:17-0.21.1")
    api("us.ihmc:simulation-construction-set-tools:source")
 }
 
@@ -39,6 +39,9 @@ jmonkeyengineDependencies {
    api(ihmc.sourceSetProject("main"))
 
    api("us.ihmc:simulation-construction-set-tools:source")
+
+   var javaFXVersion = "17.0.2"
+   api(ihmc.javaFXModule("graphics", javaFXVersion)) // JFX Color
 }
 
 jmonkeyengineTestDependencies {
@@ -70,6 +73,9 @@ libgdxDependencies {
    api("io.github.spair:imgui-java-natives-linux-ft:$imguiVersion")
    api("io.github.spair:imgui-java-natives-macos-ft:$imguiVersion")
    api("io.github.spair:imgui-java-natives-windows-ft:$imguiVersion")
+
+   var javaFXVersion = "17.0.2"
+   api(ihmc.javaFXModule("graphics", javaFXVersion)) // JFX Color
 }
 
 libgdxTestDependencies {

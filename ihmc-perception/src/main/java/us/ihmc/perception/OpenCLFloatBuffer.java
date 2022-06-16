@@ -22,7 +22,32 @@ public class OpenCLFloatBuffer
 
    public OpenCLFloatBuffer(int numberOfFloats, FloatBuffer backingDirectFloatBuffer)
    {
+      resize(numberOfFloats, null, backingDirectFloatBuffer);
+   }
+
+   public void resize(int numberOfFloats, OpenCLManager openCLManager)
+   {
+      resize(numberOfFloats, openCLManager, null);
+   }
+
+   public void destroy(OpenCLManager openCLManager)
+   {
+      if (openCLBufferObject != null)
+      {
+         openCLManager.releaseBufferObject(openCLBufferObject);
+         openCLBufferObject.releaseReference();
+      }
+   }
+
+   public void resize(int numberOfFloats,  OpenCLManager openCLManager, FloatBuffer backingDirectFloatBuffer)
+   {
       this.numberOfFloats = numberOfFloats;
+
+      boolean openCLObjectCreated = openCLBufferObject != null;
+      if (openCLObjectCreated)
+      {
+         openCLManager.releaseBufferObject(openCLBufferObject);
+      }
 
       if (backingDirectFloatBuffer == null)
       {
@@ -36,6 +61,11 @@ public class OpenCLFloatBuffer
       }
 
       bytedecoFloatBufferPointer = new FloatPointer(this.backingDirectFloatBuffer);
+
+      if (openCLObjectCreated)
+      {
+         createOpenCLBufferObject(openCLManager);
+      }
    }
 
    public void createOpenCLBufferObject(OpenCLManager openCLManager)

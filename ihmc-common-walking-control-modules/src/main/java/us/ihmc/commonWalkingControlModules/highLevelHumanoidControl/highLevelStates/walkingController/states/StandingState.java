@@ -133,10 +133,9 @@ public class StandingState extends WalkingState
          chestManager.prepareForLocomotion();
 
       if (pelvisOrientationManager != null)
-      {
          pelvisOrientationManager.prepareForLocomotion(walkingMessageHandler.getNextStepTime());
+      if (comHeightManager != null)
          comHeightManager.prepareForLocomotion();
-      }
 
       balanceManager.disablePelvisXYControl();
       controllerToolbox.reportChangeOfRobotMotionStatus(RobotMotionStatus.IN_MOTION);

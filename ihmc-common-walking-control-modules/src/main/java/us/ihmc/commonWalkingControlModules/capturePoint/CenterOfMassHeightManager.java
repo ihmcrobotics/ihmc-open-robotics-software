@@ -18,6 +18,7 @@ import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -43,6 +44,7 @@ public class CenterOfMassHeightManager
 
    /** Manages the height of the robot by default, Tries to adjust the pelvis based on the nominal height requested **/
    private final CenterOfMassHeightControlState centerOfMassHeightControlState;
+   private final HeightThroughKneeControlState heightControlThroughKneesState;
 
    /** User Controlled Pelvis Height Mode, tries to achieve a desired pelvis height regardless of the robot configuration**/
    private final PelvisHeightControlState pelvisHeightControlState;
@@ -51,6 +53,7 @@ public class CenterOfMassHeightManager
    private final YoBoolean enableUserPelvisControlDuringWalking = new YoBoolean("centerOfMassHeightManagerEnableUserPelvisControlDuringWalking", registry);
    private final YoBoolean doPrepareForLocomotion = new YoBoolean("doPrepareCenterOfMassHeightForLocomotion", registry);
 
+   private final BooleanParameter controlKneesInLocomotion = new BooleanParameter("controlKneesInLocomotion", registry, false);
 
    public CenterOfMassHeightManager(HighLevelHumanoidControllerToolbox controllerToolbox,
                                     WalkingControllerParameters walkingControllerParameters,
@@ -66,6 +69,7 @@ public class CenterOfMassHeightManager
       String namePrefix = getClass().getSimpleName();
       requestedState = new YoEnum<>(namePrefix + "RequestedControlMode", registry, PelvisHeightControlMode.class, true);
       centerOfMassHeightControlState = new CenterOfMassHeightControlState(controllerToolbox, walkingControllerParameters, registry);
+      heightControlThroughKneesState = new HeightThroughKneeControlState(controllerToolbox, walkingControllerParameters, registry);
       stateMachine = setupStateMachine(namePrefix, yoTime);
    }
 
@@ -76,6 +80,7 @@ public class CenterOfMassHeightManager
 
       factory.addState(PelvisHeightControlMode.WALKING_CONTROLLER, centerOfMassHeightControlState);
       factory.addState(PelvisHeightControlMode.USER, pelvisHeightControlState);
+      factory.addState(PelvisHeightControlMode.KNEE_JOINTS, heightControlThroughKneesState);
 
       for (PelvisHeightControlMode from : PelvisHeightControlMode.values())
          factory.addRequestedTransition(from, requestedState);
@@ -89,6 +94,7 @@ public class CenterOfMassHeightManager
 
       stateMachine.resetToInitialState();
       centerOfMassHeightControlState.initialize();
+      heightControlThroughKneesState.initialize();
       pelvisHeightControlState.initialize();
    }
 
@@ -99,6 +105,7 @@ public class CenterOfMassHeightManager
    {
       pelvisHeightControlState.setWeights(weight);
       centerOfMassHeightControlState.setWeights(weight);
+      heightControlThroughKneesState.setWeights(weight);
    }
 
    public void setPrepareForLocomotion(boolean value)
@@ -130,10 +137,29 @@ public class CenterOfMassHeightManager
       if (!doPrepareForLocomotion.getValue())
          return;
 
-      if (enableUserPelvisControlDuringWalking.getBooleanValue())
-         return;
-
       if (stateMachine.getCurrentStateKey().equals(PelvisHeightControlMode.USER))
+      {
+         if (!enableUserPelvisControlDuringWalking.getValue())
+         {
+            if (controlKneesInLocomotion.getValue())
+            {
+               heightControlThroughKneesState.initializeDesiredHeightToCurrent();
+               requestState(PelvisHeightControlMode.KNEE_JOINTS);
+            }
+            else
+            {
+               //need to check if setting the actual to the desireds here is a bad idea, might be better to go from desired to desired
+               centerOfMassHeightControlState.initializeDesiredHeightToCurrent();
+               requestState(PelvisHeightControlMode.WALKING_CONTROLLER);
+            }
+         }
+      }
+      else if (controlKneesInLocomotion.getValue() && !stateMachine.getCurrentStateKey().equals(PelvisHeightControlMode.KNEE_JOINTS))
+      {
+         heightControlThroughKneesState.initializeDesiredHeightToCurrent();
+         requestState(PelvisHeightControlMode.KNEE_JOINTS);
+      }
+      else if (!controlKneesInLocomotion.getValue() && !stateMachine.getCurrentStateKey().equals(PelvisHeightControlMode.WALKING_CONTROLLER))
       {
          //need to check if setting the actual to the desireds here is a bad idea, might be better to go from desired to desired
          centerOfMassHeightControlState.initializeDesiredHeightToCurrent();
@@ -218,11 +244,13 @@ public class CenterOfMassHeightManager
    public void setSupportLeg(RobotSide supportLeg)
    {
       centerOfMassHeightControlState.setSupportLeg(supportLeg);
+      heightControlThroughKneesState.setSupportLeg(supportLeg);
    }
 
    public void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double extraToeOffHeight)
    {
       centerOfMassHeightControlState.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
+      heightControlThroughKneesState.initialize();
    }
 
    public void initializeToNominalDesiredHeight()
@@ -251,8 +279,12 @@ public class CenterOfMassHeightManager
       for (PelvisHeightControlMode mode : PelvisHeightControlMode.values())
       {
          PelvisAndCenterOfMassHeightControlState state = stateMachine.getState(mode);
-         if (state != null && state.getFeedbackControlCommand() != null)
-            ret.addCommand(state.getFeedbackControlCommand());
+         if (state != null)
+         {
+            FeedbackControlCommand<?> feedbackControlCommand = state.createFeedbackControlTemplate();
+            if (feedbackControlCommand != null)
+               ret.addCommand(feedbackControlCommand);
+         }
       }
       return ret;
    }
@@ -267,6 +299,7 @@ public class CenterOfMassHeightManager
                                  PIDGainsReadOnly userModeCoMHeightGains)
    {
       centerOfMassHeightControlState.setGains(walkingControllerComHeightGains, walkingControllerMaxComHeightVelocity);
+      heightControlThroughKneesState.setPelvisHeightGains(walkingControllerComHeightGains);
       pelvisHeightControlState.setGains(userModeCoMHeightGains);
    }
 

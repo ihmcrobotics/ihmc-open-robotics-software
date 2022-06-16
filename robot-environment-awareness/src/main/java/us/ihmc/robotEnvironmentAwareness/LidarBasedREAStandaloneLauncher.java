@@ -5,16 +5,16 @@ import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationPr
 import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.outputTopic;
 import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.stereoOutputTopic;
 
-import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import us.ihmc.javafx.ApplicationNoModule;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.ui.LIDARBasedEnvironmentAwarenessUI;
 import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
 import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
 import us.ihmc.robotEnvironmentAwareness.updaters.REAPlanarRegionPublicNetworkProvider;
 
-public class LidarBasedREAStandaloneLauncher extends Application
+public class LidarBasedREAStandaloneLauncher extends ApplicationNoModule
 {
    private static final String MODULE_CONFIGURATION_FILE_NAME = "./Configurations/defaultREAModuleConfiguration.txt";
 
