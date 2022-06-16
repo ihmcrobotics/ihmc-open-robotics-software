@@ -19,6 +19,7 @@ import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class ContactableShape
@@ -132,10 +133,12 @@ public class ContactableShape
          boxCorners.get(6).setIncludingFrame(boxFrame, -halfX, -halfY, halfZ);
          boxCorners.get(7).setIncludingFrame(boxFrame, -halfX, -halfY, -halfZ);
 
+         boxCorners.forEach(corner -> corner.changeFrame(ReferenceFrame.getWorldFrame()));
+         boxCorners.sort(Comparator.comparingDouble(FramePoint3D::getZ));
+
          int addedContacts = 0;
          for (int i = 0; i < boxCorners.size(); i++)
          {
-            boxCorners.get(i).changeFrame(ReferenceFrame.getWorldFrame());
             if (boxCorners.get(i).getZ() < heightThreshold)
             {
                addedContacts++;
