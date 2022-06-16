@@ -17,6 +17,7 @@ import us.ihmc.perception.BytedecoImage;
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.time.Instant;
 
 /**
  * Ouster Firmware User Manual: https://data.ouster.io/downloads/software-user-manual/firmware-user-manual-v2.3.0.pdf
@@ -43,6 +44,8 @@ public class NettyOuster
    private final EventLoopGroup group;
    private final Bootstrap bootstrap;
    private BytedecoImage image;
+   private Runnable onFrameReceived = null;
+   private Instant aquisitionInstant;
 
    public NettyOuster()
    {
@@ -53,6 +56,8 @@ public class NettyOuster
          @Override
          protected void channelRead0(ChannelHandlerContext context, DatagramPacket packet)
          {
+            aquisitionInstant = Instant.now();
+
             if (!tcpInitialized)
             {
                if (!configureTCP(packet.sender().getAddress().toString().substring(1)))
@@ -60,7 +65,8 @@ public class NettyOuster
                   LogTools.error("Failed to initialize Ouster using TCP API.");
                   return;
                }
-               buildImage();
+               image = new BytedecoImage(columnsPerFrame, pixelsPerColumn, opencv_core.CV_32FC1);
+               image.getBytedecoOpenCVMat().setTo(new Mat(0.0f)); //Initialize matrix to 0
 
                actualLidarPacketSize = columnsPerPacket * (16 + (pixelsPerColumn * 12) + 4);
             }
@@ -101,17 +107,14 @@ public class NettyOuster
                }
             }
 
+            if (onFrameReceived != null)
+               onFrameReceived.run();
+
             bufferedData.release();
          }
       });
 
       bootstrap.option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(MAX_PACKET_SIZE));
-   }
-
-   private void buildImage()
-   {
-      image = new BytedecoImage(columnsPerFrame, pixelsPerColumn, opencv_core.CV_32FC1);
-      image.getBytedecoOpenCVMat().setTo(new Mat(0.0f)); //Initialize matrix to 0
    }
 
    private boolean configureTCP(String host)
@@ -208,13 +211,13 @@ public class NettyOuster
     * Bind to UDP, and begin receiving data.
     * Note that data will not be processed until Ouster's TCP API is queried for image data, which will not happen until after this call.
     */
-   public void start()
+   public void bind()
    {
       LogTools.info("Binding to UDP port " + UDP_PORT);
       bootstrap.bind(UDP_PORT);
    }
 
-   public void stop()
+   public void destroy()
    {
       LogTools.info("Unbinding from UDP port " + UDP_PORT);
       group.shutdownGracefully();
@@ -238,5 +241,15 @@ public class NettyOuster
    public BytedecoImage getBytedecoImage()
    {
       return image;
+   }
+
+   public void setOnFrameReceived(Runnable onFrameReceived)
+   {
+      this.onFrameReceived = onFrameReceived;
+   }
+
+   public Instant getAquisitionInstant()
+   {
+      return aquisitionInstant;
    }
 }

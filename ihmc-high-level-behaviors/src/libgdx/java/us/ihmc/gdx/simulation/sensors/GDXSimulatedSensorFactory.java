@@ -85,7 +85,7 @@ public class GDXSimulatedSensorFactory
       return highLevelDepthSensorSimulator;
    }
 
-   public static GDXHighLevelDepthSensorSimulator createChestL515ForMapSense(ROS2SyncedRobotModel syncedRobot, RosNodeInterface ros1Node)
+   public static GDXHighLevelDepthSensorSimulator createChestL515ForMapSense(ROS2SyncedRobotModel syncedRobot)
    {
       double publishRateHz = 5.0;
       double verticalFOV = 55.0;
@@ -108,8 +108,6 @@ public class GDXSimulatedSensorFactory
                                                                                                             minRange,
                                                                                                             maxRange,
                                                                                                             publishRateHz);
-      highLevelDepthSensorSimulator.setupForROS1Depth(ros1Node, RosTools.MAPSENSE_DEPTH_IMAGE, RosTools.MAPSENSE_DEPTH_CAMERA_INFO);
-      highLevelDepthSensorSimulator.setupForROS1Color(ros1Node, RosTools.L515_VIDEO, RosTools.L515_COLOR_CAMERA_INFO);
       return highLevelDepthSensorSimulator;
    }
 

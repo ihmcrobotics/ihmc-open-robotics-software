@@ -1,15 +1,15 @@
 package us.ihmc.behaviors.javafx.slam;
 
-import javafx.application.Application;
-import javafx.stage.Stage;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
-import us.ihmc.javaFXToolkit.scenes.View3DFactory;
-import us.ihmc.robotics.PlanarRegionFileTools;
-
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class PlanarRegionSLAMDataSetViewer extends Application
+import javafx.stage.Stage;
+import us.ihmc.javaFXToolkit.scenes.View3DFactory;
+import us.ihmc.javafx.ApplicationNoModule;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
+import us.ihmc.robotics.PlanarRegionFileTools;
+
+public class PlanarRegionSLAMDataSetViewer extends ApplicationNoModule
 {
    @Override
    public void start(Stage primaryStage) throws Exception

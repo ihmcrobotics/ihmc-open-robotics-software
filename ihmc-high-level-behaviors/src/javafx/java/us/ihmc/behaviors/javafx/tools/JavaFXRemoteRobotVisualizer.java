@@ -6,7 +6,6 @@ import javafx.scene.Group;
 import javafx.scene.transform.Translate;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.avatar.factory.RobotDefinitionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
@@ -17,6 +16,7 @@ import us.ihmc.javafx.PrivateAnimationTimer;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.simulationConstructionSetTools.grahics.GraphicsIDRobot;
+import us.ihmc.simulationToolkit.RobotDefinitionTools;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
 import us.ihmc.tools.thread.Activator;
 

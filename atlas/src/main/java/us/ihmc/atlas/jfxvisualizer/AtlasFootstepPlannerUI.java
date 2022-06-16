@@ -1,10 +1,12 @@
 package us.ihmc.atlas.jfxvisualizer;
 
+import java.util.List;
+
+import org.apache.commons.lang3.tuple.Triple;
+
 import controller_msgs.msg.dds.REAStateRequestMessage;
-import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
-import org.apache.commons.lang3.tuple.Triple;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasUIAuxiliaryData;
@@ -21,18 +23,17 @@ import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.javafx.ApplicationNoModule;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.ros2.RealtimeROS2Node;
-
-import java.util.List;
 
 /**
  * This class provides a visualizer for the footstep planner module.
  * It allows user to create plans, log and load plans from disk, tune parameters,
  * and debug plans.
  */
-public class AtlasFootstepPlannerUI extends Application
+public class AtlasFootstepPlannerUI extends ApplicationNoModule
 {
    private static final double GOAL_DISTANCE_PROXIMITY = 0.1;
 

@@ -21,8 +21,7 @@ basicsDependencies {
    api("us.ihmc:euclid-frame:0.17.2")
    api("us.ihmc:euclid-frame-shape:0.17.2")
    api("us.ihmc:euclid-shape:0.17.2")
-   api("us.ihmc:ihmc-yovariables:0.9.12")
-   api("us.ihmc:ihmc-robot-description:0.21.3")
+   api("us.ihmc:ihmc-robot-description:0.21.4")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
 }
@@ -40,7 +39,7 @@ planningDependencies {
 
    api("us.ihmc:robot-environment-awareness:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")
-   api("us.ihmc:ihmc-robot-data-logger:0.23.0")
+   api("us.ihmc:ihmc-robot-data-logger:17-0.23.2")
    api("us.ihmc:ihmc-path-planning:source")
 }
 
@@ -81,7 +80,7 @@ communicationTestDependencies {
 roboticsDependencies {
    api(ihmc.sourceSetProject("communication"))
 
-   api("us.ihmc:ihmc-convex-optimization:0.17.11")
+   api("us.ihmc:ihmc-convex-optimization:0.17.12")
    api("us.ihmc:ihmc-state-estimation:source")
    api("us.ihmc:ihmc-simulation-toolkit:source")
    api("us.ihmc:ihmc-system-identification:source")
