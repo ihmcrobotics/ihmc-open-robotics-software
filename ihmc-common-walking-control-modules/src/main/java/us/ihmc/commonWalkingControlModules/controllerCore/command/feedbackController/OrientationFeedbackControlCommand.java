@@ -262,10 +262,27 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
       setControlMode(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
       ReferenceFrame trajectoryFrame = desiredOrientation.getReferenceFrame();
       referenceOrientation.setIncludingFrame(desiredOrientation);
-      referenceAngularVelocity.setIncludingFrame(desiredAngularVelocity);
-      referenceAngularVelocity.checkReferenceFrameMatch(trajectoryFrame);
-      referenceAngularAcceleration.setIncludingFrame(feedForwardAngularAcceleration);
-      referenceAngularAcceleration.checkReferenceFrameMatch(trajectoryFrame);
+
+      if (desiredAngularVelocity != null)
+      {
+         referenceAngularVelocity.setIncludingFrame(desiredAngularVelocity);
+         referenceAngularVelocity.checkReferenceFrameMatch(trajectoryFrame);
+      }
+      else
+      {
+         referenceAngularVelocity.setToZero(trajectoryFrame);
+      }
+
+      if (feedForwardAngularAcceleration != null)
+      {
+         referenceAngularAcceleration.setIncludingFrame(feedForwardAngularAcceleration);
+         referenceAngularAcceleration.checkReferenceFrameMatch(trajectoryFrame);
+      }
+      else
+      {
+         referenceAngularAcceleration.setToZero(trajectoryFrame);
+      }
+
       referenceTorque.setToZero(trajectoryFrame);
    }
 
