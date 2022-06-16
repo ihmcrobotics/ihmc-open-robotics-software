@@ -979,6 +979,11 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       copToPack.setIncludingFrame(yoCenterOfPressure);
    }
 
+   public FrameVector3DReadOnly getAngularMomentum()
+   {
+      return angularMomentum;
+   }
+
    public void getAngularMomentum(FrameVector3D upperBodyAngularMomentumToPack)
    {
       upperBodyAngularMomentumToPack.setIncludingFrame(angularMomentum);
