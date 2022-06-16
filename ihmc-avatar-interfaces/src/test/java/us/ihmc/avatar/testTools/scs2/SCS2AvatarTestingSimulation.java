@@ -28,13 +28,9 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
-import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
@@ -46,7 +42,6 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
-import us.ihmc.scs2.definition.state.interfaces.SixDoFJointStateBasics;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.session.tools.SCS1GraphicConversionTools;
@@ -68,10 +63,6 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 public class SCS2AvatarTestingSimulation implements YoVariableHolder
 {
-   private static final double CAMERA_PITCH_FROM_ROBOT = Math.toRadians(-15.0);
-   private static final double CAMERA_YAW_FROM_ROBOT = Math.toRadians(15.0);
-   private static final double CAMERA_DISTANCE_FROM_ROBOT = 6.0;
-
    private final SCS2AvatarSimulation avatarSimulation;
 
    private final ControllerFailureListener exceptionOnFailureListener = fallingDirection ->
@@ -167,9 +158,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
          getSimulationConstructionSet().waitUntilVisualizerFullyUp();
          getSimulationConstructionSet().addVisualizerShutdownListener(() -> isVisualizerGoingDown.set(true));
 
-         SixDoFJointStateBasics initialRootJointState = (SixDoFJointStateBasics) getRobotDefinition().getRootJointDefinitions().get(0).getInitialJointState();
-         if (initialRootJointState != null)
-            initializeCamera(initialRootJointState.getOrientation(), initialRootJointState.getPosition());
+         setCameraDefaultRobotView();
          if (cameraTracksPelvis)
             requestCameraRigidBodyTracking(getRobotModel().getSimpleRobotName(), getRobot().getFloatingRootJoint().getSuccessor().getName());
       }
@@ -188,19 +177,6 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    {
       if (getHighLevelHumanoidControllerFactory() != null)
          getHighLevelHumanoidControllerFactory().detachControllerFailureListener(exceptionOnFailureListener);
-   }
-
-   private void initializeCamera(Orientation3DReadOnly robotOrientation, Tuple3DReadOnly robotPosition)
-   {
-      Point3D focusPosition = new Point3D(robotPosition);
-      Point3D cameraPosition = new Point3D(10, 0, 0);
-      RotationMatrixTools.applyPitchRotation(CAMERA_PITCH_FROM_ROBOT, cameraPosition, cameraPosition);
-      RotationMatrixTools.applyYawRotation(CAMERA_YAW_FROM_ROBOT, cameraPosition, cameraPosition);
-      RotationMatrixTools.applyYawRotation(robotOrientation.getYaw(), cameraPosition, cameraPosition);
-      cameraPosition.scale(CAMERA_DISTANCE_FROM_ROBOT / cameraPosition.distanceFromOrigin());
-      cameraPosition.add(focusPosition);
-
-      setCamera(focusPosition, cameraPosition);
    }
 
    // Simulation controls:
@@ -410,10 +386,14 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    }
 
    // GUI controls:
+   public void setCameraDefaultRobotView()
+   {
+      getAvatarSimulation().setCameraDefaultRobotView();
+   }
+
    public void setCameraZoom(double distanceFromFocus)
    {
-      checkSimulationSessionAlive();
-      getSimulationConstructionSet().setCameraZoom(distanceFromFocus);
+      getAvatarSimulation().setCameraZoom(distanceFromFocus);
    }
 
    /**
@@ -426,8 +406,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
     */
    public void setCameraFocusPosition(Point3DReadOnly focus)
    {
-      checkSimulationSessionAlive();
-      setCameraFocusPosition(focus.getX(), focus.getY(), focus.getZ());
+      getAvatarSimulation().setCameraFocusPosition(focus);
    }
 
    /**
@@ -442,8 +421,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
     */
    public void setCameraFocusPosition(double x, double y, double z)
    {
-      checkSimulationSessionAlive();
-      getSimulationConstructionSet().setCameraFocusPosition(x, y, z);
+      getAvatarSimulation().setCameraFocusPosition(x, y, z);
    }
 
    /**
@@ -456,7 +434,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
     */
    public void setCameraPosition(Point3DReadOnly position)
    {
-      setCameraPosition(position.getX(), position.getY(), position.getZ());
+      getAvatarSimulation().setCameraPosition(position);
    }
 
    /**
@@ -471,8 +449,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
     */
    public void setCameraPosition(double x, double y, double z)
    {
-      checkSimulationSessionAlive();
-      getSimulationConstructionSet().setCameraPosition(x, y, z);
+      getAvatarSimulation().setCameraPosition(x, y, z);
    }
 
    /**
@@ -483,14 +460,12 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
     */
    public void setCamera(Point3DReadOnly cameraFocus, Point3DReadOnly cameraPosition)
    {
-      setCameraFocusPosition(cameraFocus);
-      setCameraPosition(cameraPosition);
+      getAvatarSimulation().setCamera(cameraFocus, cameraPosition);
    }
 
    public void requestCameraRigidBodyTracking(String robotName, String rigidBodyName)
    {
-      checkSimulationSessionAlive();
-      getSimulationConstructionSet().requestCameraRigidBodyTracking(robotName, rigidBodyName);
+      getAvatarSimulation().requestCameraRigidBodyTracking(robotName, rigidBodyName);
    }
 
    public void addStaticVisuals(Collection<? extends VisualDefinition> visualDefinitions)
