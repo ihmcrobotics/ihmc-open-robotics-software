@@ -119,6 +119,15 @@ public class BytedecoImage
       }
    }
 
+   public void destroy(OpenCLManager openCLManager)
+   {
+      if (openCLImageObject != null)
+      {
+         openCLManager.releaseBufferObject(openCLImageObject);
+         openCLImageObject.releaseReference();
+      }
+   }
+
    public void changeAddress(long address)
    {
       bytedecoByteBufferPointer.setAddress(address);

@@ -1485,8 +1485,8 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       double forceMagnitude = fullRobotModel.getTotalMass() * 0.1;
       double zOffset = 0.3;
       String pushJointName = fullRobotModel.getChest().getParentJoint().getName();
-      PushRobotControllerSCS2 pushController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationSession().getTime(),
-                                                                           simulationTestHelper.getSimulationSession().getPhysicsEngine().getRobots().get(0),
+      PushRobotControllerSCS2 pushController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationConstructionSet().getTime(),
+                                                                           simulationTestHelper.getSimulationConstructionSet().getRobots().get(0),
                                                                            pushJointName,
                                                                            new Vector3D(0, 0, zOffset),
                                                                            1.0 / forceMagnitude);

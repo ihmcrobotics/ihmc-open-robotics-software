@@ -107,7 +107,8 @@ public class DynamicGDXModel
 
    public void dispose()
    {
-      mesh.dispose();
+      if (mesh != null)
+         mesh.dispose();
    }
 
    public ModelInstance newModelInstance()

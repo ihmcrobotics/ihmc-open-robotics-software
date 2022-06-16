@@ -879,7 +879,7 @@ public class EndToEndTestTools
          }
       }
 
-      simulationTestHelper.getSimulationSession().getBuffer()
+      simulationTestHelper.getSimulationConstructionSet().getBuffer()
                           .exportDataMatlab(destination, var -> jointStateVariables.contains(var), reg -> reg == robot.getRegistry());
    }
 
@@ -891,15 +891,15 @@ public class EndToEndTestTools
    // Pattern-matched from TorqueSpeedDataExporter
    public static void exportTorqueSpeedCurves(SCS2AvatarTestingSimulation simulationTestHelper, File dataParentFolder, String dataNameSuffix, String info)
    {
-      YoDouble time = simulationTestHelper.getSimulationSession().getTime();
-      YoSharedBuffer buffer = simulationTestHelper.getSimulationSession().getBuffer();
+      YoDouble time = simulationTestHelper.getSimulationConstructionSet().getTime();
+      YoSharedBuffer buffer = simulationTestHelper.getSimulationConstructionSet().getBuffer();
       us.ihmc.scs2.simulation.robot.Robot robot = simulationTestHelper.getRobot();
       TorqueSpeedDataExporterGraphCreator graphCreator = new TorqueSpeedDataExporterGraphCreator(time, robot, buffer);
       DataExporterExcelWorkbookCreator excelWorkbookCreator = new DataExporterExcelWorkbookCreator(time, robot, buffer);
 
       // Stop the sim and disable the GUI:
-      simulationTestHelper.getSimulationSession().stopSessionThread();
-      simulationTestHelper.getSessionVisualizerControls().disableUserControls();
+      simulationTestHelper.getSimulationConstructionSet().stopSimulationThread();
+      simulationTestHelper.getSimulationConstructionSet().disableGUIControls();
 
       // Crop the Buffer to In/Out. This is important because of how we use the DataBuffer later and we assume that in point is at index=0:
       simulationTestHelper.cropBuffer();
@@ -925,7 +925,7 @@ public class EndToEndTestTools
       try
       {
          LogTools.info("Saving data");
-         simulationTestHelper.getSimulationSession().getBuffer().exportDataMatlab(new File(dataFolder, tagName + ".mat"));
+         simulationTestHelper.getSimulationConstructionSet().getBuffer().exportDataMatlab(new File(dataFolder, tagName + ".mat"));
          LogTools.info("Done Saving Data");
       }
       catch (IOException e)
@@ -969,7 +969,7 @@ public class EndToEndTestTools
       simulationTestHelper.exportVideo(new File(dataFolder, tagName + "_Video.mov"));
       LogTools.info("done creating video");
 
-      simulationTestHelper.getSessionVisualizerControls().enableUserControls();
+      simulationTestHelper.getSimulationConstructionSet().enableGUIControls();
    }
 
    private static void writeReadme(File readmeFile, String info)

@@ -952,7 +952,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
       createSimulationTestHelper();
       simulationTestHelper.start();
-      simulationTestHelper.getSimulationSession().getRootRegistry().addChild(testRegistry);
+      simulationTestHelper.getSimulationConstructionSet().getRootRegistry().addChild(testRegistry);
 
       ThreadTools.sleep(1000);
       boolean success = simulationTestHelper.simulateNow(1.5);

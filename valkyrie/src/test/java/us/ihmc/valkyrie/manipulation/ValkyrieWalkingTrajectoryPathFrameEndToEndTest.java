@@ -273,7 +273,7 @@ public class ValkyrieWalkingTrajectoryPathFrameEndToEndTest
 
       if (ADD_PENDULUM)
       {
-         Robot pendulumRobot = simulationTestHelper.getSimulationSession().addRobot(pendulumRobotDefinition);
+         Robot pendulumRobot = simulationTestHelper.getSimulationConstructionSet().addRobot(pendulumRobotDefinition);
 
          pendulumAttachmentController = new PendulumAttachmentController(robotAttachmentPoint, pendulumRobot);
          pendulumRobot.getControllerManager().addController(pendulumAttachmentController);
