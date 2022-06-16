@@ -1,0 +1,10 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "Diagnostics" : true,
+    "Test Image 1" : true,
+    "Undistorted Video" : true,
+    "VR Thread Debugger" : false,
+    "Video" : true
+  }
+}
