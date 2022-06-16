@@ -7,9 +7,9 @@ import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.referenceFrame.FrameCapsule3D;
 import us.ihmc.euclid.referenceFrame.FrameCylinder3D;
 import us.ihmc.euclid.referenceFrame.FrameSphere3D;
-import us.ihmc.euclid.referenceFrame.polytope.FrameConvexPolytope3D;
 import us.ihmc.euclid.shape.convexPolytope.interfaces.ConvexPolytope3DReadOnly;
 import us.ihmc.euclid.shape.convexPolytope.interfaces.Face3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -30,26 +30,28 @@ import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.RobotFromDescription;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
-import static us.ihmc.commonWalkingControlModules.contact.kinematics.FlatGroundContactDetectorVisualizer.setupRobot;
-
-public class PlanarRegionContactDetectorVisualizer
+public class MeshBasedContactDetectorVisualizer
 {
    private static final double contactThreshold = 0.04;
+   private static boolean addRegions = false;
    private static final PlanarRegionsList regions = generateRegions();
 
    public static void main(String[] args)
    {
-      //      visualizeSphereContact();
-      //      visualizeCylinderContact();
-      //      visualizeCapsuleContact();
-      visualizeBoxContact();
+//      visualizeSphereContact();
+      visualizeCylinderContact();
+//      visualizeCapsuleContact();
+//      visualizeBoxContact();
    }
 
    private static void visualizeSphereContact()
@@ -65,7 +67,7 @@ public class PlanarRegionContactDetectorVisualizer
 
       YoRegistry registry = new YoRegistry("visualizationRegistry");
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-      PlanarRegionContactDetector contactDetector = new PlanarRegionContactDetector(idRobot, collisionModel, graphicsListRegistry, Arrays.asList(linkName), registry);
+      MeshBasedContactDetector contactDetector = new MeshBasedContactDetector(idRobot, collisionModel, graphicsListRegistry, Arrays.asList(linkName), registry);
       RobotFromDescription robot = setupRobot(sphereRobot, idRobot, floatingJoint, contactDetector);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
@@ -73,9 +75,8 @@ public class PlanarRegionContactDetectorVisualizer
       scs.addYoRegistry(registry);
 
       contactDetector.setContactThreshold(contactThreshold);
-      contactDetector.setPlanarRegionsList(regions);
+      setContactGraphics(contactDetector, scs);
 
-      setContactGraphics(scs, contactDetector);
       scs.startOnAThread();
       ThreadTools.sleepForever();
    }
@@ -94,7 +95,8 @@ public class PlanarRegionContactDetectorVisualizer
 
       YoRegistry registry = new YoRegistry("visualizationRegistry");
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-      PlanarRegionContactDetector contactDetector = new PlanarRegionContactDetector(idRobot, collisionModel, graphicsListRegistry, Arrays.asList(linkName), registry);
+      MeshBasedContactDetector contactDetector = new MeshBasedContactDetector(idRobot, collisionModel, graphicsListRegistry, Arrays.asList(linkName), registry);
+
       RobotFromDescription robot = setupRobot(cylinderRobot, idRobot, floatingJoint, contactDetector);
 
       FloatingJoint scsFloatingJoint = (FloatingJoint) robot.getRootJoints().get(0);
@@ -104,10 +106,7 @@ public class PlanarRegionContactDetectorVisualizer
       scs.addYoGraphicsListRegistry(graphicsListRegistry);
       scs.addYoRegistry(registry);
 
-      contactDetector.setContactThreshold(contactThreshold);
-      contactDetector.setPlanarRegionsList(regions);
-
-      setContactGraphics(scs, contactDetector);
+      setContactGraphics(contactDetector, scs);
       scs.startOnAThread();
       ThreadTools.sleepForever();
    }
@@ -118,28 +117,23 @@ public class PlanarRegionContactDetectorVisualizer
       double height = 0.4;
       AppearanceDefinition appearance = YoAppearance.DarkGreen();
       appearance.setTransparency(0.3);
-      RobotDescription cylinderRobot = ContactDetectorTestTools.newCapsuleRobot("capsule", radius, height, 1.0, 0.1, appearance);
+      RobotDescription capsuleRobot = ContactDetectorTestTools.newCapsuleRobot("capsule", radius, height, 1.0, 0.1, appearance);
       String linkName = "capsuleLink";
       RobotCollisionModel collisionModel = RobotCollisionModel.singleBodyCollisionModel(linkName, body -> new Collidable(body, -1, -1, new FrameCapsule3D(body.getBodyFixedFrame(), height, radius)));
-      RigidBodyBasics idRobot = ContactDetectorTestTools.toInverseDynamicsRobot(cylinderRobot);
+      RigidBodyBasics idRobot = ContactDetectorTestTools.toInverseDynamicsRobot(capsuleRobot);
       SixDoFJoint floatingJoint = (SixDoFJoint) idRobot.getChildrenJoints().get(0);
 
       YoRegistry registry = new YoRegistry("visualizationRegistry");
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-      PlanarRegionContactDetector contactDetector = new PlanarRegionContactDetector(idRobot, collisionModel, graphicsListRegistry, Arrays.asList(linkName), registry);
-      RobotFromDescription robot = setupRobot(cylinderRobot, idRobot, floatingJoint, contactDetector);
+      MeshBasedContactDetector contactDetector = new MeshBasedContactDetector(idRobot, collisionModel, graphicsListRegistry, Arrays.asList(linkName), registry);
 
-      FloatingJoint scsFloatingJoint = (FloatingJoint) robot.getRootJoints().get(0);
-      scsFloatingJoint.getOrientation().set(new YawPitchRoll(0.4, 1.2, -0.3));
+      RobotFromDescription robot = setupRobot(capsuleRobot, idRobot, floatingJoint, contactDetector);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
       scs.addYoGraphicsListRegistry(graphicsListRegistry);
       scs.addYoRegistry(registry);
 
-      contactDetector.setContactThreshold(contactThreshold);
-      contactDetector.setPlanarRegionsList(regions);
-
-      setContactGraphics(scs, contactDetector);
+      setContactGraphics(contactDetector, scs);
       scs.startOnAThread();
       ThreadTools.sleepForever();
    }
@@ -159,7 +153,7 @@ public class PlanarRegionContactDetectorVisualizer
 
       YoRegistry registry = new YoRegistry("visualizationRegistry");
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-      PlanarRegionContactDetector contactDetector = new PlanarRegionContactDetector(idRobot, collisionModel, graphicsListRegistry, Arrays.asList(linkName), registry);
+      MeshBasedContactDetector contactDetector = new MeshBasedContactDetector(idRobot, collisionModel, graphicsListRegistry, Arrays.asList(linkName), registry);
       RobotFromDescription robot = setupRobot(boxRobot, idRobot, floatingJoint, contactDetector);
 
       FloatingJoint scsFloatingJoint = (FloatingJoint) robot.getRootJoints().get(0);
@@ -169,32 +163,49 @@ public class PlanarRegionContactDetectorVisualizer
       scs.addYoGraphicsListRegistry(graphicsListRegistry);
       scs.addYoRegistry(registry);
 
-      contactDetector.setContactThreshold(contactThreshold);
-      contactDetector.setPlanarRegionsList(regions);
-
-      setContactGraphics(scs, contactDetector);
+      setContactGraphics(contactDetector, scs);
       scs.startOnAThread();
       ThreadTools.sleepForever();
    }
 
-   private static void setContactGraphics(SimulationConstructionSet scs, PlanarRegionContactDetector contactDetector)
+   private static void setContactGraphics(MeshBasedContactDetector contactDetector, SimulationConstructionSet scs)
    {
-      Graphics3DObject contactPlaneGraphics = new Graphics3DObject();
-
-      for (int i = 0; i < regions.getNumberOfPlanarRegions(); i++)
-      {
-         Graphics3DObjectTools.addPlanarRegion(contactPlaneGraphics, regions.getPlanarRegion(i), 0.001, YoAppearance.OrangeRed());
-      }
-
-      for (int i = 0; i < regions.getNumberOfPlanarRegions(); i++)
-      {
-         ConvexPolytope3DReadOnly contactablePolytope = contactDetector.getContactableVolumeMap().get(regions.getPlanarRegion(i));
-         contactPlaneGraphics.addMeshData(newConvexPolytope3DMesh(contactablePolytope), YoAppearance.Glass(0.4));
-      }
-
-      scs.addStaticLinkGraphics(contactPlaneGraphics);
       scs.setGroundVisible(false);
       scs.setSimulateNoFasterThanRealTime(true);
+
+      if (addRegions)
+      {
+         contactDetector.setPlanarRegionsList(regions);
+         Graphics3DObject contactPlaneGraphics = new Graphics3DObject();
+
+         for (int i = 0; i < regions.getNumberOfPlanarRegions(); i++)
+         {
+            Graphics3DObjectTools.addPlanarRegion(contactPlaneGraphics, regions.getPlanarRegion(i), 0.001, YoAppearance.OrangeRed());
+         }
+
+         for (int i = 0; i < regions.getNumberOfPlanarRegions(); i++)
+         {
+            ConvexPolytope3DReadOnly contactablePolytope = contactDetector.getContactableVolumeMap().get(regions.getPlanarRegion(i));
+            contactPlaneGraphics.addMeshData(newConvexPolytope3DMesh(contactablePolytope), YoAppearance.Glass(0.4));
+         }
+
+         scs.addStaticLinkGraphics(contactPlaneGraphics);
+      }
+      else
+      {
+         Graphics3DObject contactPlaneGraphics = new Graphics3DObject();
+         contactPlaneGraphics.translate(0.0, 0.0, contactThreshold);
+         ConvexPolygon2D contactPlanePolygon = new ConvexPolygon2D();
+         contactPlanePolygon.addVertex(-3.0, -3.0);
+         contactPlanePolygon.addVertex(-3.0, 3.0);
+         contactPlanePolygon.addVertex(3.0, -3.0);
+         contactPlanePolygon.addVertex(3.0, 3.0);
+         contactPlanePolygon.update();
+         AppearanceDefinition gray = YoAppearance.Gray();
+         gray.setTransparency(0.2);
+         contactPlaneGraphics.addExtrudedPolygon(contactPlanePolygon, 0.002, gray);
+         scs.addStaticLinkGraphics(contactPlaneGraphics);
+      }
    }
 
    private static MeshDataHolder newConvexPolytope3DMesh(ConvexPolytope3DReadOnly convexPolytope3D)
@@ -209,6 +220,54 @@ public class PlanarRegionContactDetectorVisualizer
       }
 
       return meshBuilder.generateMeshDataHolder();
+   }
+
+   static RobotFromDescription setupRobot(RobotDescription robotDescription,
+                                           RigidBodyBasics idRobot,
+                                           SixDoFJoint floatingJoint,
+                                           MeshBasedContactDetector contactDetector)
+   {
+      RobotFromDescription robot = new RobotFromDescription(robotDescription);
+      FloatingJoint scsFloatingJoint = (FloatingJoint) robot.getRootJoints().get(0);
+      robot.setDynamic(false);
+      contactDetector.setUseAbsoluteGroundLocation(true);
+      contactDetector.setGroundHeight(0.0);
+      scsFloatingJoint.getPosition().setZ(0.2);
+
+      YoRegistry registry = new YoRegistry("readerReg");
+      Random random = new Random(390);
+
+      YoBoolean setToRandomOrientation = new YoBoolean("setToRandomOrientation", registry);
+      RobotController reader = new RobotController()
+      {
+         @Override
+         public void doControl()
+         {
+            if (setToRandomOrientation.getValue())
+            {
+               setToRandomOrientation.set(false);
+               scsFloatingJoint.getOrientation().set(EuclidCoreRandomTools.nextOrientation3D(random));
+            }
+
+            floatingJoint.getJointPose().set(scsFloatingJoint.getPosition(), scsFloatingJoint.getOrientation());
+            idRobot.updateFramesRecursively();
+            contactDetector.update(0.0);
+         }
+
+         @Override
+         public void initialize()
+         {
+
+         }
+
+         @Override
+         public YoRegistry getYoRegistry()
+         {
+            return registry;
+         }
+      };
+      robot.setController(reader);
+      return robot;
    }
 
    private static PlanarRegionsList generateRegions()

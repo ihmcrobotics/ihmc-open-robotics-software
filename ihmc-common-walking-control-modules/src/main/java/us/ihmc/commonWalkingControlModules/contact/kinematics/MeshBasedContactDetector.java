@@ -3,9 +3,20 @@ package us.ihmc.commonWalkingControlModules.contact.kinematics;
 import controller_msgs.msg.dds.MultiContactBalanceStatus;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
+import us.ihmc.euclid.shape.convexPolytope.interfaces.ConvexPolytope3DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -18,7 +29,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class FlatGroundContactDetector implements Updatable
+/**
+ * Using simples collision shapes, performs contact detection for flat ground or planar regions.
+ * Provides contact points and contact normals.
+ */
+public class MeshBasedContactDetector implements Updatable
 {
    private static final double defaultContactThreshold = 0.03;
 
@@ -33,13 +48,16 @@ public class FlatGroundContactDetector implements Updatable
    protected final Map<RigidBodyBasics, List<ContactableShape>> contactableRigidBodyCollidables = new HashMap<>();
    protected final Map<RigidBodyBasics, List<DetectedContactPoint>> allContactPoints = new HashMap<>();
 
+   private PlanarRegionsList planarRegionsList = null;
+   private final HashMap<PlanarRegion, ConvexPolytope3DReadOnly> contactableVolumeMap = new HashMap<>();
+
    private final MultiContactBalanceStatus multiContactBalanceStatus = new MultiContactBalanceStatus();
 
-   public FlatGroundContactDetector(RigidBodyBasics rootBody,
-                                    RobotCollisionModel collisionModel,
-                                    YoGraphicsListRegistry graphicsListRegistry,
-                                    List<String> collidableRigidBodies,
-                                    YoRegistry parentRegistry)
+   public MeshBasedContactDetector(RigidBodyBasics rootBody,
+                                   RobotCollisionModel collisionModel,
+                                   YoGraphicsListRegistry graphicsListRegistry,
+                                   List<String> collidableRigidBodies,
+                                   YoRegistry parentRegistry)
    {
       contactThreshold.set(defaultContactThreshold);
 
@@ -95,20 +113,99 @@ public class FlatGroundContactDetector implements Updatable
       for (int i = 0; i < contactableRigidBodies.size(); i++)
       {
          List<ContactableShape> rigidBodyCollidables = contactableRigidBodyCollidables.get(contactableRigidBodies.get(i));
+         List<FramePoint3DReadOnly> contactFramePoints = new ArrayList<>();
          List<DetectedContactPoint> contactPoints = this.allContactPoints.get(contactableRigidBodies.get(i));
 
-         List<FramePoint3DReadOnly> contactFramePoints = new ArrayList<>();
+         /* Limit to one plane contact per rigid body */
+         Vector3D contactNormal = new Vector3D();
+
          for (int j = 0; j < rigidBodyCollidables.size(); j++)
          {
-            rigidBodyCollidables.get(j).packContactPoints(contactFramePoints, flatGroundHeightThreshold);
+            if (rigidBodyCollidables.get(j).detectFlatGroundContact(contactFramePoints, flatGroundHeightThreshold))
+            {
+               contactNormal.set(Axis3D.Z);
+               break;
+            }
+            else if (detectPlanarRegionContact(rigidBodyCollidables.get(j), contactFramePoints, contactNormal))
+            {
+               break;
+            }
          }
 
          for (int j = 0; j < contactFramePoints.size(); j++)
          {
             contactPoints.get(j).getContactPointPosition().set(contactFramePoints.get(j));
+            contactPoints.get(j).getContactPointNormal().set(contactNormal);
          }
       }
 
+      reportStatus();
+   }
+
+   private boolean detectPlanarRegionContact(ContactableShape contactableShape, List<FramePoint3DReadOnly> contactFramePoints, Vector3D contactNormal)
+   {
+      if (planarRegionsList == null || planarRegionsList.isEmpty())
+      {
+         return false;
+      }
+
+      BoundingBox3DReadOnly shapeBoundingBox = contactableShape.getShapeBoundingBox();
+
+      for (int k = 0; k < planarRegionsList.getNumberOfPlanarRegions(); k++)
+      {
+         ConvexPolytope3DReadOnly contactablePolytope = contactableVolumeMap.get(planarRegionsList.getPlanarRegion(k));
+         if (!shapeBoundingBox.intersectsExclusive(contactablePolytope.getBoundingBox()))
+            continue;
+
+         if (contactableShape.detectPolytopeContact(contactFramePoints, contactThreshold.getDoubleValue(), contactablePolytope))
+         {
+            contactNormal.set(planarRegionsList.getPlanarRegion(k).getNormal());
+            FramePoint3D bodyFixedFrame = new FramePoint3D(contactableShape.getCollidable().getRigidBody().getBodyFixedFrame());
+            bodyFixedFrame.changeFrame(ReferenceFrame.getWorldFrame());
+            bodyFixedFrame.applyTransform(planarRegionsList.getPlanarRegion(k).getTransformToLocal());
+            if (bodyFixedFrame.getZ() < 0.0)
+               contactNormal.negate();
+            return true;
+         }
+      }
+
+      return false;
+   }
+
+   public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
+   {
+      this.planarRegionsList = planarRegionsList;
+      contactableVolumeMap.clear();
+
+      if (planarRegionsList == null)
+         return;
+
+      for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
+      {
+         PlanarRegion region = planarRegionsList.getPlanarRegion(i);
+         ConvexPolytope3D contactablePolytope = new ConvexPolytope3D();
+
+         ConvexPolygon2D convexHull = region.getConvexHull();
+         for (double sign : new double[]{-1.0, 1.0})
+         {
+            for (int j = 0; j < convexHull.getNumberOfVertices(); j++)
+            {
+               Point3D vertex = new Point3D(convexHull.getVertex(j).getX(), convexHull.getVertex(j).getY(), sign * contactThreshold.getValue());
+               vertex.applyTransform(region.getTransformToWorld());
+               contactablePolytope.addVertex(vertex);
+            }
+         }
+         contactableVolumeMap.put(region, contactablePolytope);
+      }
+   }
+
+   public HashMap<PlanarRegion, ConvexPolytope3DReadOnly> getContactableVolumeMap()
+   {
+      return contactableVolumeMap;
+   }
+
+   private void reportStatus()
+   {
       if (statusOutputManager != null)
       {
          multiContactBalanceStatus.getContactPointsInWorld().clear();
