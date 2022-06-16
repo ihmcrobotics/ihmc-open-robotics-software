@@ -88,30 +88,7 @@ public class ContactableShape
       return heightInWorld;
    }
 
-   public double packContactPoints(List<FramePoint3DReadOnly> contactPoints, double distanceThreshold, ConvexPolytope3DReadOnly contactablePolytope)
-   {
-      // Collision check in shape frame
-      FrameShape3DReadOnly collisionShape = collidable.getShape();
-      ReferenceFrame collisionShapeFrame = collisionShape.getReferenceFrame();
-      collisionShapeFrame.getTransformToDesiredFrame(shapeToWorldFrameTransform, ReferenceFrame.getWorldFrame());
-      worldToShapeFrameTransform.setAndInvert(shapeToWorldFrameTransform);
-
-      polytopeInShapeFrame.set(contactablePolytope);
-      polytopeInShapeFrame.applyTransform(worldToShapeFrameTransform);
-
-      collisionDetector.evaluateCollision(polytopeInShapeFrame, collisionShape, collisionResult);
-
-      if (collisionResult.areShapesColliding())
-      {
-         FramePoint3D contactPoint = new FramePoint3D(collisionShapeFrame, collisionResult.getPointOnB());
-         contactPoint.changeFrame(ReferenceFrame.getWorldFrame());
-         contactPoints.add(contactPoint);
-      }
-
-      return collisionResult.getSignedDistance();
-   }
-
-   public void packContactPoints(List<FramePoint3DReadOnly> contactPoints, double heightThreshold)
+   public boolean detectFlatGroundContact(List<FramePoint3DReadOnly> contactPoints, double heightThreshold)
    {
       if (isABox)
       {
@@ -147,14 +124,41 @@ public class ContactableShape
             if (addedContacts == 4)
                break;
          }
+
+         return addedContacts > 0;
       }
       else
       {
-         if (heightInWorld < heightThreshold)
+         boolean isInContact = heightInWorld < heightThreshold;
+         if (isInContact)
          {
             contactPoints.add(contactPoint);
          }
+         return isInContact;
       }
+   }
+
+   public boolean detectPolytopeContact(List<FramePoint3DReadOnly> contactPoints, double distanceThreshold, ConvexPolytope3DReadOnly contactablePolytope)
+   {
+      // Collision check in shape frame
+      FrameShape3DReadOnly collisionShape = collidable.getShape();
+      ReferenceFrame collisionShapeFrame = collisionShape.getReferenceFrame();
+      collisionShapeFrame.getTransformToDesiredFrame(shapeToWorldFrameTransform, ReferenceFrame.getWorldFrame());
+      worldToShapeFrameTransform.setAndInvert(shapeToWorldFrameTransform);
+
+      polytopeInShapeFrame.set(contactablePolytope);
+      polytopeInShapeFrame.applyTransform(worldToShapeFrameTransform);
+
+      collisionDetector.evaluateCollision(polytopeInShapeFrame, collisionShape, collisionResult);
+
+      if (collisionResult.areShapesColliding())
+      {
+         FramePoint3D contactPoint = new FramePoint3D(collisionShapeFrame, collisionResult.getPointOnB());
+         contactPoint.changeFrame(ReferenceFrame.getWorldFrame());
+         contactPoints.add(contactPoint);
+      }
+
+      return collisionResult.areShapesColliding();
    }
 
    public BoundingBox3DReadOnly getShapeBoundingBox()
