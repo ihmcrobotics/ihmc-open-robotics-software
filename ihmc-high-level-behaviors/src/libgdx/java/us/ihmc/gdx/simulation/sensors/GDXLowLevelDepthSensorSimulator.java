@@ -18,7 +18,6 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.imgui.ImGuiVideoPanel;
@@ -62,7 +61,8 @@ public class GDXLowLevelDepthSensorSimulator
    private final ImFloat principalOffsetYPixels = new ImFloat();
    private final double updatePeriod;
    private final Timer throttleTimer = new Timer();
-   private final Vector3D32 noiseVector = new Vector3D32();
+   private final float noiseAmplitudeAtMinRange;
+   private final float noiseAmplitudeAtMaxRange;
 
    /** Simulated camera that observes the current GDX Scene **/
    private PerspectiveCamera camera;
@@ -94,13 +94,22 @@ public class GDXLowLevelDepthSensorSimulator
    private OpenCLFloatBuffer parametersBuffer;
    private boolean firstRender = true;
 
-   public GDXLowLevelDepthSensorSimulator(String sensorName, double fieldOfViewY, int imageWidth, int imageHeight, double minRange, double maxRange)
+   public GDXLowLevelDepthSensorSimulator(String sensorName,
+                                          double fieldOfViewY,
+                                          int imageWidth,
+                                          int imageHeight,
+                                          double minRange,
+                                          double maxRange,
+                                          double noiseAmplitudeAtMinRange,
+                                          double noiseAmplitudeAtMaxRange)
    {
       depthWindowName = ImGuiTools.uniqueLabel(sensorName + " Depth");
       colorWindowName = ImGuiTools.uniqueLabel(sensorName + " Color");
       this.fieldOfViewY.set((float) fieldOfViewY);
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
+      this.noiseAmplitudeAtMinRange = (float) noiseAmplitudeAtMinRange;
+      this.noiseAmplitudeAtMaxRange = (float) noiseAmplitudeAtMaxRange;
       numberOfPoints = imageWidth * imageHeight;
       principalOffsetXPixels.set(imageWidth / 2.0f);
       principalOffsetYPixels.set(imageHeight / 2.0f);
@@ -142,16 +151,16 @@ public class GDXLowLevelDepthSensorSimulator
       normalizedDeviceCoordinateDepthImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1);
       noiseImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1);
       noiseLow = new Mat(1, 1, opencv_core.CV_32FC1);
-      noiseLow.ptr().putFloat(0.0035f);
+      noiseLow.ptr().putFloat(-1.0f);
       noiseHigh = new Mat(1, 1, opencv_core.CV_32FC1);
-      noiseHigh.ptr().putFloat(-0.0035f);
+      noiseHigh.ptr().putFloat(1.0f);
       metersDepthImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1);
       rgba8888ColorImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4);
       if (pointCloudRenderingBufferToPack != null)
          pointCloudRenderingBuffer = new OpenCLFloatBuffer(numberOfPoints * 8, pointCloudRenderingBufferToPack);
       else
          pointCloudRenderingBuffer = new OpenCLFloatBuffer(1);
-      parametersBuffer = new OpenCLFloatBuffer(28);
+      parametersBuffer = new OpenCLFloatBuffer(30);
 
       // TODO these panels should be removable to a separate class
       depthPanel = new GDXCVImagePanel(depthWindowName, imageWidth, imageHeight);
@@ -269,6 +278,8 @@ public class GDXLowLevelDepthSensorSimulator
       parametersBuffer.getBytedecoFloatBufferPointer().put(25, camera.position.x);
       parametersBuffer.getBytedecoFloatBufferPointer().put(26, camera.position.y);
       parametersBuffer.getBytedecoFloatBufferPointer().put(27, camera.position.z);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(28, noiseAmplitudeAtMinRange);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(29, noiseAmplitudeAtMaxRange);
       if (firstRender)
       {
          firstRender = false;

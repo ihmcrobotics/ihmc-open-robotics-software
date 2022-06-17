@@ -140,12 +140,21 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
                                            int imageHeight,
                                            double minRange,
                                            double maxRange,
+                                           double noiseAmplitudeAtMinRange,
+                                           double noiseAmplitudeAtMaxRange,
                                            double publishRateHz)
    {
       super(ImGuiTools.uniqueLabel(INDEX.getAndIncrement(), sensorName + " Simulator"));
       this.sensorName = sensorName;
       setRenderMethod(this::renderImGuiWidgets);
-      depthSensorSimulator = new GDXLowLevelDepthSensorSimulator(sensorName, verticalFOV, imageWidth, imageHeight, minRange, maxRange);
+      depthSensorSimulator = new GDXLowLevelDepthSensorSimulator(sensorName,
+                                                                 verticalFOV,
+                                                                 imageWidth,
+                                                                 imageHeight,
+                                                                 minRange,
+                                                                 maxRange,
+                                                                 noiseAmplitudeAtMinRange,
+                                                                 noiseAmplitudeAtMaxRange);
 
       this.sensorFrame = sensorFrame;
       this.timestampSupplier = timestampSupplier;

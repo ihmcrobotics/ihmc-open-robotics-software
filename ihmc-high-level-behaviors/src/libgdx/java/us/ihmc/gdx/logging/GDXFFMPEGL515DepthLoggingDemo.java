@@ -99,6 +99,8 @@ public class GDXFFMPEGL515DepthLoggingDemo
                                                               imageHeight,
                                                               minRange,
                                                               maxRange,
+                                                              0.005,
+                                                              0.005,
                                                               publishRateHz);
                   baseUI.getImGuiPanelManager().addPanel(l515);
                   l515.setSensorEnabled(true);
