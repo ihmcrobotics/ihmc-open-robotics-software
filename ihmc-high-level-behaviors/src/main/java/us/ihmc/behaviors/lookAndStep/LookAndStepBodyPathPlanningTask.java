@@ -180,7 +180,7 @@ public class LookAndStepBodyPathPlanningTask
          behaviorState = behaviorStateReference.get();
          neckTrajectoryTimerSnapshot = neckTrajectoryTimer.createSnapshot(1.0);
 
-         neckPitch = syncedRobot.getFramePoseReadOnly(frames -> frames.getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH)).getOrientation().getPitch();
+         // neckPitch = syncedRobot.getFramePoseReadOnly(frames -> frames.getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH)).getOrientation().getPitch();
 
          if (suppressor.evaulateShouldAccept())
          {
