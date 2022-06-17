@@ -63,6 +63,7 @@ public class GDXLowLevelDepthSensorSimulator
    private final Timer throttleTimer = new Timer();
    private final float noiseAmplitudeAtMinRange;
    private final float noiseAmplitudeAtMaxRange;
+   private final float simulateL515Noise;
 
    /** Simulated camera that observes the current GDX Scene **/
    private PerspectiveCamera camera;
@@ -101,7 +102,8 @@ public class GDXLowLevelDepthSensorSimulator
                                           double minRange,
                                           double maxRange,
                                           double noiseAmplitudeAtMinRange,
-                                          double noiseAmplitudeAtMaxRange)
+                                          double noiseAmplitudeAtMaxRange,
+                                          boolean simulateL515Noise)
    {
       depthWindowName = ImGuiTools.uniqueLabel(sensorName + " Depth");
       colorWindowName = ImGuiTools.uniqueLabel(sensorName + " Color");
@@ -110,6 +112,7 @@ public class GDXLowLevelDepthSensorSimulator
       this.imageHeight = imageHeight;
       this.noiseAmplitudeAtMinRange = (float) noiseAmplitudeAtMinRange;
       this.noiseAmplitudeAtMaxRange = (float) noiseAmplitudeAtMaxRange;
+      this.simulateL515Noise = simulateL515Noise ? 1.0f : 0.0f;
       numberOfPoints = imageWidth * imageHeight;
       principalOffsetXPixels.set(imageWidth / 2.0f);
       principalOffsetYPixels.set(imageHeight / 2.0f);
@@ -160,7 +163,7 @@ public class GDXLowLevelDepthSensorSimulator
          pointCloudRenderingBuffer = new OpenCLFloatBuffer(numberOfPoints * 8, pointCloudRenderingBufferToPack);
       else
          pointCloudRenderingBuffer = new OpenCLFloatBuffer(1);
-      parametersBuffer = new OpenCLFloatBuffer(30);
+      parametersBuffer = new OpenCLFloatBuffer(31);
 
       // TODO these panels should be removable to a separate class
       depthPanel = new GDXCVImagePanel(depthWindowName, imageWidth, imageHeight);
@@ -280,6 +283,7 @@ public class GDXLowLevelDepthSensorSimulator
       parametersBuffer.getBytedecoFloatBufferPointer().put(27, camera.position.z);
       parametersBuffer.getBytedecoFloatBufferPointer().put(28, noiseAmplitudeAtMinRange);
       parametersBuffer.getBytedecoFloatBufferPointer().put(29, noiseAmplitudeAtMaxRange);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(30, simulateL515Noise);
       if (firstRender)
       {
          firstRender = false;

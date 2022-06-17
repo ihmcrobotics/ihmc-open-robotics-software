@@ -33,6 +33,7 @@ public class GDXSimulatedSensorFactory
                                                                                                             maxRange,
                                                                                                             0.001,
                                                                                                             0.001,
+                                                                                                            false,
                                                                                                             publishRateHz);
       highLevelDepthSensorSimulator.setupForROS2PointCloud(ros2Node, ROS2Tools.MULTISENSE_LIDAR_SCAN);
       return highLevelDepthSensorSimulator;
@@ -57,6 +58,7 @@ public class GDXSimulatedSensorFactory
                                                                                                             maxRange,
                                                                                                             0.001,
                                                                                                             0.001,
+                                                                                                            false,
                                                                                                             publishRateHz);
       return highLevelDepthSensorSimulator;
    }
@@ -85,6 +87,7 @@ public class GDXSimulatedSensorFactory
                                                                                                             maxRange,
                                                                                                             0.001,
                                                                                                             0.001,
+                                                                                                            false,
                                                                                                             publishRateHz);
       highLevelDepthSensorSimulator.setupForROS1Depth(ros1Node, RosTools.D435_DEPTH, RosTools.D435_DEPTH_CAMERA_INFO);
       highLevelDepthSensorSimulator.setupForROS1Color(ros1Node, RosTools.D435_VIDEO, RosTools.D435_CAMERA_INFO);
@@ -114,6 +117,7 @@ public class GDXSimulatedSensorFactory
                                                                                                             maxRange,
                                                                                                             0.005,
                                                                                                             0.009,
+                                                                                                            true,
                                                                                                             publishRateHz);
       return highLevelDepthSensorSimulator;
    }
@@ -141,6 +145,7 @@ public class GDXSimulatedSensorFactory
                                                                                                             maxRange,
                                                                                                             0.015,
                                                                                                             0.05,
+                                                                                                            false,
                                                                                                             publishRateHz);
       return highLevelDepthSensorSimulator;
    }
@@ -164,29 +169,7 @@ public class GDXSimulatedSensorFactory
                                                                                                             maxRange,
                                                                                                             0.001,
                                                                                                             0.001,
-                                                                                                            publishRateHz);
-      return highLevelDepthSensorSimulator;
-   }
-
-   public static GDXHighLevelDepthSensorSimulator createL515ImageOnlyNoComms(ReferenceFrame sensorFrame)
-   {
-      double publishRateHz = 1.0;
-      double verticalFOV = 55.0;
-      int imageWidth = 640;
-      int imageHeight = 480;
-      double minRange = 0.105;
-      double maxRange = 5.0;
-      LongSupplier timeSupplier = null;
-      GDXHighLevelDepthSensorSimulator highLevelDepthSensorSimulator = new GDXHighLevelDepthSensorSimulator("L515",
-                                                                                                            sensorFrame,
-                                                                                                            timeSupplier,
-                                                                                                            verticalFOV,
-                                                                                                            imageWidth,
-                                                                                                            imageHeight,
-                                                                                                            minRange,
-                                                                                                            maxRange,
-                                                                                                            0.005,
-                                                                                                            0.009,
+                                                                                                            false,
                                                                                                             publishRateHz);
       return highLevelDepthSensorSimulator;
    }

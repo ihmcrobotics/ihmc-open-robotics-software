@@ -51,7 +51,8 @@ public class GDXVRDepthSensorDemo
                                                                                                  0.05,
                                                                                                  10.0,
                                                                                                  0.03,
-                                                                                                 0.07);
+                                                                                                 0.07,
+                                                                                                 false);
       GDXPointCloudRenderer pointCloudRenderer = new GDXPointCloudRenderer();
       SideDependentList<ModelInstance> controllerCoordinateFrames = new SideDependentList<>();
 

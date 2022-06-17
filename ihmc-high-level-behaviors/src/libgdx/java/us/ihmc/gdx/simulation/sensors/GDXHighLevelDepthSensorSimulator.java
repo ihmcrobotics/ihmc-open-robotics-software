@@ -142,6 +142,7 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
                                            double maxRange,
                                            double noiseAmplitudeAtMinRange,
                                            double noiseAmplitudeAtMaxRange,
+                                           boolean simulateL515Noise,
                                            double publishRateHz)
    {
       super(ImGuiTools.uniqueLabel(INDEX.getAndIncrement(), sensorName + " Simulator"));
@@ -154,7 +155,8 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
                                                                  minRange,
                                                                  maxRange,
                                                                  noiseAmplitudeAtMinRange,
-                                                                 noiseAmplitudeAtMaxRange);
+                                                                 noiseAmplitudeAtMaxRange,
+                                                                 simulateL515Noise);
 
       this.sensorFrame = sensorFrame;
       this.timestampSupplier = timestampSupplier;
