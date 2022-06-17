@@ -239,7 +239,7 @@ public class GDXGPUPlanarRegionExtractionUI
 
 
       gpuHeightMapStopwatch.start();
-      simpleGPUHeightMapUpdater.computeFromDepthMap(cameraFrame.getTransformToWorldFrame());
+//      simpleGPUHeightMapUpdater.computeFromDepthMap(cameraFrame.getTransformToWorldFrame());
       gpuHeightMapStopwatch.suspend();
 
       wholeAlgorithmDurationStopwatch.suspend();
@@ -278,7 +278,7 @@ public class GDXGPUPlanarRegionExtractionUI
       if (!render3DHeightMap.get())
          return;
 
-      heightMapGraphic.generateMeshes(simpleGPUHeightMapUpdater.getHeightMap().buildMessage());
+//      heightMapGraphic.generateMeshes(simpleGPUHeightMapUpdater.getHeightMap().buildMessage());
       heightMapGraphic.update();
    }
 
