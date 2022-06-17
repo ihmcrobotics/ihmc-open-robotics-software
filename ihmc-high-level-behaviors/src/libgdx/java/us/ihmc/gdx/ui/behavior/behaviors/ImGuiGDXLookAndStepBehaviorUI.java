@@ -235,7 +235,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
       }
       impassibilityDetectedPlot.setNextValue(impassibilityDetected.get() ? 1.0f : 0.0f);
       impassibilityDetectedPlot.calculate(impassibilityDetected.get() ? "OBSTRUCTED" : "ALL CLEAR");
-      footholdVolumePlot.render();
+//      footholdVolumePlot.render();
 
 
 //      ImGui.checkbox("Show graphics", showGraphics);
