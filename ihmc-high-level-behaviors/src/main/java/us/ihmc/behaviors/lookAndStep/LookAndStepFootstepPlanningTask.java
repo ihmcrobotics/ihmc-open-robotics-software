@@ -468,8 +468,8 @@ public class LookAndStepFootstepPlanningTask
          {
             uiPublisher.publishToUI(PlanningFailed, true);
             doFailureAction("Footstep planning produced unreachable steps. Aborting task...");
+            return;
          }
-
 
          FootstepPlan reducedPlan = new FootstepPlan();
          for (int i = 0; i < lookAndStepParameters.getMaxStepsToSendToController() && i < fullPlan.getNumberOfSteps(); i++)
@@ -571,9 +571,6 @@ public class LookAndStepFootstepPlanningTask
          footstep.setTransferDuration(lookAndStepParameters.getTransferDuration()); // But probably keep this.
       }
    }
-
-
-
 
    private void doFailureAction(String message)
    {
