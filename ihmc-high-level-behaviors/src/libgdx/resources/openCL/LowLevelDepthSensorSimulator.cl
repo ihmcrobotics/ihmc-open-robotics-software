@@ -43,6 +43,7 @@ kernel void lowLevelDepthSensorSimulator(read_only image2d_t normalizedDeviceCoo
    float noiseAmplitudeAtMinRange = parameters[28];
    float noiseAmplitudeAtMaxRange = parameters[29];
    float noiseAmplitudeRange = noiseAmplitudeAtMaxRange - noiseAmplitudeAtMinRange;
+   bool simulateL515Noise = (bool) parameters[30];
    float randomNegativeOneToOne = read_imagef(noiseImage, (int2) (x, y)).x;
    float normalizedDeviceCoordinateZ = read_imagef(normalizedDeviceCoordinateDepthImage, (int2) (x,y)).x;
 
@@ -60,6 +61,33 @@ kernel void lowLevelDepthSensorSimulator(read_only image2d_t normalizedDeviceCoo
       float farPlusNear = cameraFar + cameraNear;
       float farMinusNear = cameraFar - cameraNear;
       eyeDepth = (twoXCameraFarNear / (farPlusNear - normalizedDeviceCoordinateZ * farMinusNear));
+
+      if (simulateL515Noise)
+      {
+         // nominal 1.5 m read
+         float rangePastAMeter = clamp(eyeDepth - 1.0, 0.0, 1.0);
+         // apply the effect 50/50 at a meter or less, 100% at 2 meters or more
+         if ((randomNegativeOneToOne + rangePastAMeter) > 1.0)
+         {
+            float imageHalfWidthFloat = parameters[6] / 2;
+            float imageHalfHeightFloat = parameters[7] / 2;
+            float xFromCenterFloat = x - imageHalfWidthFloat;
+            if (xFromCenterFloat < 0.0)
+               xFromCenterFloat = -xFromCenterFloat;
+            float yFromCenterFloat = y - imageHalfHeightFloat;
+            //float yFromCenterFloat = y;
+            if (yFromCenterFloat < 0.0)
+               yFromCenterFloat = -yFromCenterFloat;
+            float maxDistance = imageHalfWidthFloat * imageHalfWidthFloat + imageHalfHeightFloat * imageHalfHeightFloat;
+            float pixelDistance = xFromCenterFloat * xFromCenterFloat + yFromCenterFloat * yFromCenterFloat;
+            float percentToEdge = pixelDistance / maxDistance;
+            if (randomNegativeOneToOne - 0.5 + percentToEdge > 1.0)
+            {
+               eyeDepth = 0.0f;
+            }
+         }
+      }
+
       float nearToFarInterpolation = (eyeDepth - cameraNear) / farMinusNear;
       float noiseAmplitude = noiseAmplitudeAtMinRange + (nearToFarInterpolation * noiseAmplitudeRange);
       eyeDepth += randomNegativeOneToOne * noiseAmplitude;

@@ -51,7 +51,7 @@ public class GDXOpenCVColorByteOrderDemo
             baseUI.addImGui3DViewInputProcessor(sensorPoseGizmo::process3DViewInput);
             baseUI.get3DSceneManager().addRenderableProvider(sensorPoseGizmo, GDXSceneLevel.VIRTUAL);
 
-            highLevelDepthSensorSimulator = GDXSimulatedSensorFactory.createL515ImageOnlyNoComms(sensorPoseGizmo.getGizmoFrame());
+            highLevelDepthSensorSimulator = GDXSimulatedSensorFactory.createRealsenseL515(sensorPoseGizmo.getGizmoFrame(), null);
             baseUI.getImGuiPanelManager().addPanel(highLevelDepthSensorSimulator);
             highLevelDepthSensorSimulator.setSensorEnabled(true);
             highLevelDepthSensorSimulator.getLowLevelSimulator().setDepthEnabled(false);

@@ -60,6 +60,7 @@ public class GDXHighLevelDepthSensorDemo
                                                                                  maxRange,
                                                                                  0.03,
                                                                                  0.05,
+                                                                                 true,
                                                                                  publishRateHz);
             baseUI.getImGuiPanelManager().addPanel(highLevelDepthSensorSimulator);
             highLevelDepthSensorSimulator.setSensorEnabled(true);
