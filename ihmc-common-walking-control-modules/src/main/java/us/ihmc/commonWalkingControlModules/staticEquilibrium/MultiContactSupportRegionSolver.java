@@ -35,7 +35,7 @@ import static us.ihmc.commonWalkingControlModules.staticEquilibrium.ContactPoint
  */
 public class MultiContactSupportRegionSolver
 {
-   private static final int defaultNumberOfDirectionsToOptimize = 32;
+   private static final int defaultNumberOfDirectionsToOptimize = 16;
    static final double rhoMax = 2.0;
    static final double mass = 1.0;
 
