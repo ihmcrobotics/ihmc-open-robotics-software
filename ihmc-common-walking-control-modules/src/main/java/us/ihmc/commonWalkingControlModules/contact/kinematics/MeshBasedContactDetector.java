@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 
 /**
@@ -52,6 +53,9 @@ public class MeshBasedContactDetector implements Updatable
    private final HashMap<PlanarRegion, ConvexPolytope3DReadOnly> contactableVolumeMap = new HashMap<>();
 
    private final MultiContactBalanceStatus multiContactBalanceStatus = new MultiContactBalanceStatus();
+
+   private int counter = 0;
+   private int updateFrequency = 1;
 
    public MeshBasedContactDetector(RigidBodyBasics rootBody,
                                    RobotCollisionModel collisionModel,
@@ -107,6 +111,15 @@ public class MeshBasedContactDetector implements Updatable
    @Override
    public void update(double time)
    {
+      if (++counter < updateFrequency)
+      {
+         return;
+      }
+      else
+      {
+         counter = 0;
+      }
+
       clearContacts();
       double flatGroundHeightThreshold = computeFlatGroundHeightThreshold();
 
@@ -202,6 +215,11 @@ public class MeshBasedContactDetector implements Updatable
    public HashMap<PlanarRegion, ConvexPolytope3DReadOnly> getContactableVolumeMap()
    {
       return contactableVolumeMap;
+   }
+
+   public void setUpdateFrequency(int updateFrequency)
+   {
+      this.updateFrequency = updateFrequency;
    }
 
    private void reportStatus()
