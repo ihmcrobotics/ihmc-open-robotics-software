@@ -7,9 +7,9 @@ import com.badlogic.gdx.utils.Pool;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
+import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImString;
 import us.ihmc.commons.nio.BasicPathVisitor;
@@ -31,7 +31,8 @@ import us.ihmc.gdx.simulation.bullet.GDXBulletPhysicsManager;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObjectFactory;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObjectLibrary;
-import us.ihmc.gdx.simulation.environment.object.objects.*;
+import us.ihmc.gdx.simulation.environment.object.objects.GDXDirectionalLightObject;
+import us.ihmc.gdx.simulation.environment.object.objects.GDXPointLightObject;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.log.LogTools;
@@ -64,6 +65,7 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
    private final ImGuiPanel poseGizmoTunerPanel = pose3DGizmo.createTunerPanel(getClass().getSimpleName());
    private final Point3D tempIntersection = new Point3D();
    private final GDXBulletPhysicsManager bulletPhysicsManager = new GDXBulletPhysicsManager();
+   private final ImBoolean inputsEnabled = new ImBoolean(true);
 
    public GDXEnvironmentBuilder(GDX3DSceneManager sceneManager)
    {
@@ -88,65 +90,71 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
 
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      if (selectedObject != null && !isPlacing)
+      if (inputsEnabled.get())
       {
-         pose3DGizmo.calculate3DViewPick(input);
+         if (selectedObject != null && !isPlacing)
+         {
+            pose3DGizmo.calculate3DViewPick(input);
+         }
       }
    }
 
    public void process3DViewInput(ImGui3DViewInput viewInput)
    {
-      if (selectedObject != null)
+      if (inputsEnabled.get())
       {
-         if (isPlacing)
+         if (selectedObject != null)
          {
-            Line3DReadOnly pickRay = viewInput.getPickRayInWorld();
-            Point3D pickPoint = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(EuclidCoreTools.origin3D,
-                                                                                        Axis3D.Z,
-                                                                                        pickRay.getPoint(),
-                                                                                        pickRay.getDirection());
-            selectedObject.setPositionInWorld(pickPoint);
-            pose3DGizmo.getTransformToParent().set(selectedObject.getObjectTransform());
-
-            selectedObject.copyThisTransformToBulletMultiBody();
-
-            if (viewInput.isWindowHovered() && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
+            if (isPlacing)
             {
-               isPlacing = false;
-            }
-         }
-         else
-         {
-            pose3DGizmo.process3DViewInput(viewInput);
-            selectedObject.setTransformToWorld(pose3DGizmo.getTransformToParent());
+               Line3DReadOnly pickRay = viewInput.getPickRayInWorld();
+               Point3D pickPoint = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(EuclidCoreTools.origin3D,
+                                                                                           Axis3D.Z,
+                                                                                           pickRay.getPoint(),
+                                                                                           pickRay.getDirection());
+               selectedObject.setPositionInWorld(pickPoint);
+               pose3DGizmo.getTransformToParent().set(selectedObject.getObjectTransform());
 
-            selectedObject.copyThisTransformToBulletMultiBodyParentOnly();
+               selectedObject.copyThisTransformToBulletMultiBody();
 
-            intersectedObject = calculatePickedObject(viewInput.getPickRayInWorld());
-            if (viewInput.isWindowHovered() && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
-            {
-               if (intersectedObject != selectedObject)
+               if (viewInput.isWindowHovered() && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
                {
-                  updateObjectSelected(selectedObject, intersectedObject);
-                  if (selectedObject != null)
+                  isPlacing = false;
+               }
+            }
+            else
+            {
+               pose3DGizmo.process3DViewInput(viewInput);
+               selectedObject.setTransformToWorld(pose3DGizmo.getTransformToParent());
+
+               selectedObject.copyThisTransformToBulletMultiBodyParentOnly();
+
+               intersectedObject = calculatePickedObject(viewInput.getPickRayInWorld());
+               if (viewInput.isWindowHovered() && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
+               {
+                  if (intersectedObject != selectedObject)
                   {
-                     pose3DGizmo.getTransformToParent().set(selectedObject.getObjectTransform());
+                     updateObjectSelected(selectedObject, intersectedObject);
+                     if (selectedObject != null)
+                     {
+                        pose3DGizmo.getTransformToParent().set(selectedObject.getObjectTransform());
+                     }
                   }
                }
             }
          }
-      }
-      else
-      {
-         isPlacing = false;
-         if (viewInput.isWindowHovered())
+         else
          {
-            intersectedObject = calculatePickedObject(viewInput.getPickRayInWorld());
-
-            if (intersectedObject != null && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
+            isPlacing = false;
+            if (viewInput.isWindowHovered())
             {
-               updateObjectSelected(selectedObject, intersectedObject);
-               pose3DGizmo.getTransformToParent().set(selectedObject.getObjectTransform());
+               intersectedObject = calculatePickedObject(viewInput.getPickRayInWorld());
+
+               if (intersectedObject != null && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
+               {
+                  updateObjectSelected(selectedObject, intersectedObject);
+                  pose3DGizmo.getTransformToParent().set(selectedObject.getObjectTransform());
+               }
             }
          }
       }
@@ -195,6 +203,9 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
       bulletPhysicsManager.renderImGuiWidgets();
 
       ImGui.separator();
+
+      ImGui.checkbox(labels.get("Inputs enabled"), inputsEnabled);
+
       if (ImGui.sliderFloat("Ambient light", ambientLightAmount.getData(), 0.0f, 1.0f))
       {
          sceneManager.getSceneBasics().setAmbientLight(ambientLightAmount.get());
@@ -469,5 +480,10 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
    public ArrayList<GDXEnvironmentObject> getAllObjects()
    {
       return allObjects;
+   }
+
+   public ImBoolean getInputsEnabled()
+   {
+      return inputsEnabled;
    }
 }
