@@ -55,6 +55,7 @@ public class LookAndStepPlanarRegionsManager
 
    private final PlanarRegionSLAM planarRegionSLAM = new PlanarRegionSLAM();
    private final PlanarRegionSLAMParameters parameters = new PlanarRegionSLAMParameters();
+   private final FramePose3D sensorPose = new FramePose3D();
 
    public LookAndStepPlanarRegionsManager(LookAndStepBehaviorParametersReadOnly lookAndStepParameters,
                                           DRCRobotModel robotModel,
@@ -262,7 +263,30 @@ public class LookAndStepPlanarRegionsManager
          planarRegionsForPlanning.addAll(regionsCreatedLocally);
       }
 
+      for (PlanarRegionsList planarRegionsListForPlanning : planarRegionsForPlanning)
+      {
+         removeCloseRegionsToExcludeThoseFromTheBody(planarRegionsListForPlanning);
+      }
+
       return status;
+   }
+
+   private void removeCloseRegionsToExcludeThoseFromTheBody(PlanarRegionsList planarRegionsList)
+   {
+      // filter the planar regions from colliding with the body
+      sensorPose.setToZero(syncedRobot.getReferenceFrames().getSteppingCameraFrame());
+      sensorPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+      for (PlanarRegion planarRegion : planarRegionsList.getPlanarRegionsAsList())
+      {
+         double distance = PlanarRegionTools.distanceToPlanarRegion(sensorPose.getPosition(), planarRegion);
+         if (distance < 0.6)
+         {
+            planarRegionsList.queuePlanarRegionForRemoval(planarRegion);
+         }
+      }
+
+      planarRegionsList.removeQueuedPlanarRegions();
    }
 
    private void addPlanarRegionsToHistory(PlanarRegionsList planarRegions)

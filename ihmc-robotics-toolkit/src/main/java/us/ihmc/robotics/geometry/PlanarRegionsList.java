@@ -481,6 +481,26 @@ public class PlanarRegionsList
       {
          regions.remove(planarRegionToRemove);
       }
+
+      placeholderForRemovingRegions.clear();
+   }
+
+   public void queuePlanarRegionForRemoval(PlanarRegion planarRegionToRemove)
+   {
+      if (placeholderForRemovingRegions == null)
+         placeholderForRemovingRegions = new ArrayList<>();
+
+      placeholderForRemovingRegions.add(planarRegionToRemove);
+   }
+
+   public void removeQueuedPlanarRegions()
+   {
+      for (PlanarRegion regionToRemove : placeholderForRemovingRegions)
+      {
+         regions.remove(regionToRemove);
+      }
+
+      placeholderForRemovingRegions.clear();
    }
 
    public boolean epsilonEquals(PlanarRegionsList other, double epsilon) {
