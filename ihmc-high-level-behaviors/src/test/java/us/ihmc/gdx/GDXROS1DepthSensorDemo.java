@@ -58,6 +58,8 @@ public class GDXROS1DepthSensorDemo
                                                         imageHeight,
                                                         minRange,
                                                         maxRange,
+                                                        0.03,
+                                                        0.05,
                                                         publishRateHz);
             l515.setupForROS1Depth(ros1Node, RosTools.MAPSENSE_DEPTH_IMAGE, RosTools.MAPSENSE_DEPTH_CAMERA_INFO);
             l515.setupForROS1Color(ros1Node, RosTools.L515_VIDEO, RosTools.L515_COLOR_CAMERA_INFO);

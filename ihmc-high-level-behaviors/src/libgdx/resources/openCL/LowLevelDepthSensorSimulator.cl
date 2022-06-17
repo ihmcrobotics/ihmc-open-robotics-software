@@ -40,7 +40,10 @@ kernel void lowLevelDepthSensorSimulator(read_only image2d_t normalizedDeviceCoo
    float principalOffsetYPixels = parameters[3];
    float focalLengthPixels = parameters[4];
    bool calculatePointCloud = (bool) parameters[5];
-   float noiseAmount = read_imagef(noiseImage, (int2) (x, y)).x;
+   float noiseAmplitudeAtMinRange = parameters[28];
+   float noiseAmplitudeAtMaxRange = parameters[29];
+   float noiseAmplitudeRange = noiseAmplitudeAtMaxRange - noiseAmplitudeAtMinRange;
+   float randomNegativeOneToOne = read_imagef(noiseImage, (int2) (x, y)).x;
    float normalizedDeviceCoordinateZ = read_imagef(normalizedDeviceCoordinateDepthImage, (int2) (x,y)).x;
 
    bool depthIsZero = normalizedDeviceCoordinateZ == 0.0f;
@@ -57,7 +60,9 @@ kernel void lowLevelDepthSensorSimulator(read_only image2d_t normalizedDeviceCoo
       float farPlusNear = cameraFar + cameraNear;
       float farMinusNear = cameraFar - cameraNear;
       eyeDepth = (twoXCameraFarNear / (farPlusNear - normalizedDeviceCoordinateZ * farMinusNear));
-      eyeDepth += noiseAmount;
+      float nearToFarInterpolation = (eyeDepth - cameraNear) / farMinusNear;
+      float noiseAmplitude = noiseAmplitudeAtMinRange + (nearToFarInterpolation * noiseAmplitudeRange);
+      eyeDepth += randomNegativeOneToOne * noiseAmplitude;
    }
 
    write_imagef(metersDepthImage, (int2) (x, y), eyeDepth);
