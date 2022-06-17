@@ -113,15 +113,10 @@ public class GDXSimulatedSensorFactory
 
    public static GDXHighLevelDepthSensorSimulator createOusterLidar(ROS2SyncedRobotModel syncedRobot, ROS2NodeInterface ros2Node)
    {
-      double publishRateHz = 5.0;
-      double verticalFOV = 90.0;
+      double publishRateHz = 20.0;
+      double verticalFOV = 80.0;
       int imageWidth = 1024;
       int imageHeight = 128;
-      if (LOW_RESOLUTION_SENSORS)
-      {
-         imageWidth /= 2;
-         imageHeight /= 2;
-      }
       double minRange = 0.105;
       double maxRange = 15.0;
       GDXHighLevelDepthSensorSimulator highLevelDepthSensorSimulator = new GDXHighLevelDepthSensorSimulator("Ouster Lidar",
@@ -134,7 +129,6 @@ public class GDXSimulatedSensorFactory
                                                                                                             minRange,
                                                                                                             maxRange,
                                                                                                             publishRateHz);
-      highLevelDepthSensorSimulator.setupForROS2PointCloud(ros2Node, ROS2Tools.MULTISENSE_LIDAR_SCAN);
       return highLevelDepthSensorSimulator;
    }
 
