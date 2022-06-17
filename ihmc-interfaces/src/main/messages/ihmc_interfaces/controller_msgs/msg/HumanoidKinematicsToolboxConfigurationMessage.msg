@@ -18,3 +18,5 @@ bool enable_auto_support_polygon true
 # - when the walking controller is running, the rigid-bodies in question are the feet.
 # - when a multi-contact controller is running, any rigid-body of the robot can be in contact.
 bool hold_support_rigid_bodies true
+# If this is true and the solver receives a MultiContactBalanceStatus, it will solve for the multi-contact support region
+bool enable_multi_contact_support_region_solver false
