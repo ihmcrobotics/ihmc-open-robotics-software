@@ -495,12 +495,15 @@ public class PlanarRegionsList
 
    public void removeQueuedPlanarRegions()
    {
-      for (PlanarRegion regionToRemove : placeholderForRemovingRegions)
+      if (placeholderForRemovingRegions != null)
       {
-         regions.remove(regionToRemove);
-      }
+         for (PlanarRegion regionToRemove : placeholderForRemovingRegions)
+         {
+            regions.remove(regionToRemove);
+         }
 
-      placeholderForRemovingRegions.clear();
+         placeholderForRemovingRegions.clear();
+      }
    }
 
    public boolean epsilonEquals(PlanarRegionsList other, double epsilon) {
