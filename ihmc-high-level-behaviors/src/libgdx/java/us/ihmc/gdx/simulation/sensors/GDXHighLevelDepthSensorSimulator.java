@@ -130,7 +130,7 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
    private final ImBoolean useSensorColor = new ImBoolean(false);
    private final Color pointColorFromPicker = new Color();
    private final ImFloat pointSize = new ImFloat(0.01f);
-   private final float[] color = new float[] {0.0f, 0.0f, 0.0f, 1.0f};
+   private final float[] color = new float[] {1.0f, 1.0f, 1.0f, 1.0f};
 
    public GDXHighLevelDepthSensorSimulator(String sensorName,
                                            ReferenceFrame sensorFrame,
