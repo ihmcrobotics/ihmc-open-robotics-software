@@ -36,10 +36,10 @@ public class GDX3DSceneManager
 
    public void create()
    {
-      create(GDXInputMode.libGDX);
+      create(GDXInputMode.libGDX, GDXSceneLevel.REAL_ENVIRONMENT, GDXSceneLevel.VIRTUAL);
    }
 
-   public void create(GDXInputMode inputMode)
+   public void create(GDXInputMode inputMode, GDXSceneLevel... sceneLevels)
    {
       if (GDXTools.ENABLE_OPENGL_DEBUGGER)
          glProfiler = GDXTools.createGLProfiler();
@@ -55,7 +55,7 @@ public class GDX3DSceneManager
          inputMultiplexer.addProcessor(camera3D.setInputForLibGDX());
       }
 
-      sceneBasics.create();
+      sceneBasics.create(sceneLevels);
 
       if (addFocusSphere)
          sceneBasics.addModelInstance(camera3D.getFocusPointSphere(), GDXSceneLevel.VIRTUAL);
