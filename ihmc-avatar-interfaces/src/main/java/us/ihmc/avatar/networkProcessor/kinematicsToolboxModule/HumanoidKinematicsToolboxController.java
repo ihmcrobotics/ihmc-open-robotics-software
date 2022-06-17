@@ -112,6 +112,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    private final YoFramePoint3D initialCenterOfMassPosition = new YoFramePoint3D("initialCenterOfMass", worldFrame, registry);
 
    /** Multi-contact support region solver */
+   private final YoBoolean enableMultiContactSupportRegionSolver = new YoBoolean("enableMultiContactSupportRegionSolver", registry);
    private final MultiContactSupportRegionSolver supportRegionSolver = new MultiContactSupportRegionSolver();
    private final MultiContactSupportRegionSolverInput supportRegionSolverInput = new MultiContactSupportRegionSolverInput();
    /**
@@ -409,6 +410,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
          holdCenterOfMassXYPosition.set(command.holdCurrentCenterOfMassXYPosition());
          holdSupportRigidBodies.set(command.holdSupportRigidBodies());
+         enableMultiContactSupportRegionSolver.set(command.enableMultiContactSupportRegionSolver());
       }
 
       super.updateInternal();
@@ -628,6 +630,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    private boolean solveForMultiContactSupportRegion(MultiContactBalanceStatus multiContactBalanceStatus)
    {
       if (isUserProvidingSupportPolygon())
+         return false;
+      if (!enableMultiContactSupportRegionSolver.getValue())
          return false;
       boolean hasSurfaceNormalData = multiContactBalanceStatus.getSurfaceNormalsInWorld().size() == multiContactBalanceStatus.getContactPointsInWorld().size();
       if (!hasSurfaceNormalData)
