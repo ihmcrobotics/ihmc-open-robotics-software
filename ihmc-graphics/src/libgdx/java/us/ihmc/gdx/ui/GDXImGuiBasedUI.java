@@ -141,10 +141,15 @@ public class GDXImGuiBasedUI
 
    public void create()
    {
+      create(GDXSceneLevel.REAL_ENVIRONMENT, GDXSceneLevel.VIRTUAL);
+   }
+
+   public void create(GDXSceneLevel... sceneLevels)
+   {
       LogTools.info("Creating...");
       GDXTools.printGLVersion();
 
-      sceneManager.create(GDXInputMode.ImGui);
+      sceneManager.create(GDXInputMode.ImGui, sceneLevels);
       inputCalculator = new ImGui3DViewInput(sceneManager.getCamera3D(), this::getViewportSizeX, this::getViewportSizeY);
 
       Gdx.input.setInputProcessor(null); // detach from getting input events from GDX. TODO: Should we do this here?

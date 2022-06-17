@@ -26,7 +26,9 @@ public class GDX3DSceneBasics
 {
    private final HashSet<ModelInstance> modelInstances = new HashSet<>();
    private final HashMap<GDXSceneLevel, ArrayList<RenderableProvider>> renderables = new HashMap<>();
+   private final HashSet<RenderableProvider> uniqueRenderables = new HashSet<>();
 
+   private GDXSceneLevel[] sceneLevelsToRender;
    private float ambientLight = 0.4f;
    private boolean shadowsEnabled = false;
    private GDXShadowManager shadowManager;
@@ -37,6 +39,13 @@ public class GDX3DSceneBasics
 
    public void create()
    {
+      create(GDXSceneLevel.REAL_ENVIRONMENT, GDXSceneLevel.VIRTUAL);
+   }
+
+   public void create(GDXSceneLevel... sceneLevelsToRender)
+   {
+      this.sceneLevelsToRender = sceneLevelsToRender;
+
       renderables.put(GDXSceneLevel.REAL_ENVIRONMENT, new ArrayList<>());
       renderables.put(GDXSceneLevel.VIRTUAL, new ArrayList<>());
 
@@ -69,7 +78,7 @@ public class GDX3DSceneBasics
       }
       else
       {
-         renderInternal(shadowsDisabledModelBatch, GDXSceneLevel.VIRTUAL);
+         renderInternal(shadowsDisabledModelBatch, sceneLevelsToRender);
       }
    }
 
@@ -99,22 +108,22 @@ public class GDX3DSceneBasics
       else
       {
          shadowsDisabledModelBatch.begin(camera);
-         renderInternal(shadowsDisabledModelBatch, GDXSceneLevel.VIRTUAL);
+         renderInternal(shadowsDisabledModelBatch, sceneLevelsToRender);
       }
       postRender(camera, GDXSceneLevel.VIRTUAL);
    }
 
-   private void renderInternal(ModelBatch modelBatch, GDXSceneLevel sceneLevel)
+   private void renderInternal(ModelBatch modelBatch, GDXSceneLevel... sceneLevels)
    {
       // All rendering except modelBatch.begin() and end()
-
-      int level = sceneLevel.ordinal();
-      while (level >= 0)
+      // Avoid rendering things twice
+      uniqueRenderables.clear();
+      for (GDXSceneLevel sceneLevel : sceneLevels)
       {
-         GDXSceneLevel levelToRender = GDXSceneLevel.values()[level];
-         renderInternal(modelBatch, renderables.get(levelToRender));
-         --level;
+         uniqueRenderables.addAll(renderables.get(sceneLevel));
       }
+
+      renderInternal(modelBatch, uniqueRenderables);
    }
 
    private void renderInternal(ModelBatch modelBatch, Iterable<RenderableProvider> renderables)
