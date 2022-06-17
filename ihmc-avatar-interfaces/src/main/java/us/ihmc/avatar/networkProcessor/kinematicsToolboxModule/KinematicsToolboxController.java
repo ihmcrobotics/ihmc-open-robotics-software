@@ -65,6 +65,7 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
@@ -93,8 +94,10 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.time.ThreadTimer;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -797,6 +800,7 @@ public class KinematicsToolboxController extends ToolboxController
       }
       getAdditionalInverseKinematicsCommands(inverseKinematicsCommandBuffer);
       computeCollisionCommands(collisionResults, inverseKinematicsCommandBuffer);
+      computeSupportPolygonFeedback(inverseKinematicsCommandBuffer);
 
       // Save all commands used for this control tick for computing the solution quality.
       allFeedbackControlCommands.clear();
@@ -876,7 +880,7 @@ public class KinematicsToolboxController extends ToolboxController
    {
       consumeUserConfigurationCommands();
       consumeUserMotionObjectiveCommands(fbCommandBufferToPack, ikCommandBufferToPack);
-      consumeUserContactStateCommands(ikCommandBufferToPack);
+      consumeUserContactStateCommands();
    }
 
    private void consumeUserConfigurationCommands()
@@ -1112,7 +1116,7 @@ public class KinematicsToolboxController extends ToolboxController
          if (command.hasConstactStateInput())
          {
             KinematicsToolboxContactStateCommand contactStateInput = command.getContactStateInput();
-            processUserContactStateCommand(contactStateInput, ikCommandBufferToPack);
+            processUserContactStateCommand(contactStateInput);
          }
       }
 
@@ -1137,16 +1141,16 @@ public class KinematicsToolboxController extends ToolboxController
       }
    }
 
-   private void consumeUserContactStateCommands(InverseKinematicsCommandBuffer bufferToPack)
+   private void consumeUserContactStateCommands()
    {
       if (commandInputManager.isNewCommandAvailable(KinematicsToolboxContactStateCommand.class))
       {
          KinematicsToolboxContactStateCommand command = commandInputManager.pollNewestCommand(KinematicsToolboxContactStateCommand.class);
-         processUserContactStateCommand(command, bufferToPack);
+         processUserContactStateCommand(command);
       }
    }
 
-   private void processUserContactStateCommand(KinematicsToolboxContactStateCommand command, InverseKinematicsCommandBuffer bufferToPack)
+   private void processUserContactStateCommand(KinematicsToolboxContactStateCommand command)
    {
       isUserProvidingSupportPolygon.set(command.getNumberOfContacts() > 0);
       if (command.getCenterOfMassMargin() >= 0.0)
@@ -1160,10 +1164,10 @@ public class KinematicsToolboxController extends ToolboxController
       }
 
       if (!contactPointLocations.isEmpty())
-         updateSupportPolygonConstraint(contactPointLocations, bufferToPack);
+         updateSupportPolygonConstraint(contactPointLocations);
    }
 
-   protected void updateSupportPolygonConstraint(List<? extends FramePoint3DReadOnly> contactPoints, InverseKinematicsCommandBuffer bufferToPack)
+   protected void updateSupportPolygonConstraint(List<? extends FramePoint3DReadOnly> contactPoints)
    {
       if (!enableSupportPolygonConstraint.getValue())
          return;
@@ -1177,7 +1181,11 @@ public class KinematicsToolboxController extends ToolboxController
 
       // If the support polygon is empty or too small, we don't apply the constraint, it would likely cause the QP to fail.
       if (newSupportPolygon.getNumberOfVertices() <= 2 || newSupportPolygon.getArea() < MathTools.square(0.01))
+      {
+         shrunkSupportPolygon.clear();
+         shrunkSupportPolygonVertices.clear();
          return;
+      }
 
       if (!newSupportPolygon.epsilonEquals(supportPolygon, 5.0e-3))
       { // Update the polygon only if there is an actual update.
@@ -1197,6 +1205,14 @@ public class KinematicsToolboxController extends ToolboxController
                shrunkSupportPolygonVertices.remove(i);
          }
       }
+   }
+
+   private void computeSupportPolygonFeedback(InverseKinematicsCommandBuffer bufferToPack)
+   {
+      if (!enableSupportPolygonConstraint.getValue())
+         return;
+      if (shrunkSupportPolygonVertices.isEmpty())
+         return;
 
       centerOfMass.setToZero(centerOfMassFrame);
       centerOfMass.changeFrame(worldFrame);
