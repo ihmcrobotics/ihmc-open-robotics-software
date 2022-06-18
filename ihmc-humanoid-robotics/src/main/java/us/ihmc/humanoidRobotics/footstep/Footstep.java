@@ -29,6 +29,7 @@ public class Footstep implements Settable<Footstep>
 
    private final PoseReferenceFrame footstepSoleFrame = new PoseReferenceFrame("FootstepSoleFrame", ReferenceFrame.getWorldFrame());
    private final FramePose3D footstepPose = new FramePose3D();
+   private long sequenceID = -1;
    private RobotSide robotSide;
 
    private final RecyclingArrayList<Point2D> predictedContactPoints = new RecyclingArrayList<>(6, Point2D.class);
@@ -105,6 +106,7 @@ public class Footstep implements Settable<Footstep>
    @Override
    public void set(Footstep other)
    {
+      this.sequenceID = other.sequenceID;
       this.robotSide = other.robotSide;
       this.swingTrajectoryBlendDuration = other.swingTrajectoryBlendDuration;
       this.trustHeight = other.trustHeight;
@@ -144,6 +146,7 @@ public class Footstep implements Settable<Footstep>
     */
    public void set(FootstepDataCommand command, boolean trustHeight, boolean isAdjustable)
    {
+      this.sequenceID = command.getSequenceId();
       this.robotSide = command.getRobotSide();
       this.swingTrajectoryBlendDuration = command.getSwingTrajectoryBlendDuration();
       this.trajectoryType = command.getTrajectoryType();
@@ -199,6 +202,7 @@ public class Footstep implements Settable<Footstep>
     */
    public void clear()
    {
+      sequenceID = -1;
       robotSide = null;
       footstepPose.setToZero(ReferenceFrame.getWorldFrame());
       predictedContactPoints.clear();
@@ -556,4 +560,8 @@ public class Footstep implements Settable<Footstep>
       return footsteps;
    }
 
+   public long getSequenceID()
+   {
+      return sequenceID;
+   }
 }
