@@ -54,12 +54,13 @@ public class WalkingFootstepTracker
             }
          }
 
-         LogTools.info(format("{} footstep completed. Completion: {}/{} -> {}/{}",
+         LogTools.info(format("{} footstep completed. Completion: {}/{} -> {}/{}. ID: {}",
                               RobotSide.fromByte(footstepStatusMessage.getRobotSide()),
                               priorNumerator,
                               priorDenominator,
                               stepsCompleted,
-                              stepsCommanded));
+                              stepsCommanded,
+                              footstepStatusMessage.getSequenceId()));
       }
    }
 
@@ -81,21 +82,25 @@ public class WalkingFootstepTracker
          stepsCommanded += size;
       }
 
+      long[] ids = new long[size];
+
       // handles same foot steps twice in a row
       for (int i = 0; i < size; i++)
       {
          FootstepDataMessage footstep = footstepDataListMessage.getFootstepDataList().get(i);
          lastCommandedFootsteps.set(RobotSide.fromByte(footstep.getRobotSide()), footstep);
+         ids[i] = footstep.getSequenceId();
       }
 
-      LogTools.info(format("{}ing {} footstep{}. Completion: {}/{} -> {}/{}",
+      LogTools.info(format("{}ing {} footstep{}. Completion: {}/{} -> {}/{}. IDs: {}",
                            executionMode.name(),
                            size,
                            size > 1 ? "s" : "",
                            priorNumerator,
                            priorDenominator,
                            stepsCompleted,
-                           stepsCommanded));
+                           stepsCommanded,
+                           ids));
    }
 
    public ImmutablePair<FootstepDataMessage, FootstepDataMessage> getLastCommandedFootsteps()

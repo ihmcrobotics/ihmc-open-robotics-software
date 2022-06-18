@@ -620,9 +620,9 @@ public class WalkingMessageHandler
    private final FootstepStatusMessage footstepStatus = new FootstepStatusMessage();
 
    public void reportFootstepStarted(RobotSide robotSide, FramePose3DReadOnly desiredFootPoseInWorld, FramePose3DReadOnly actualFootPoseInWorld,
-                                     double swingDuration)
+                                     double swingDuration, long sequenceID)
    {
-      reportFootstepStatus(robotSide, FootstepStatus.STARTED, desiredFootPoseInWorld, actualFootPoseInWorld, swingDuration);
+      reportFootstepStatus(robotSide, FootstepStatus.STARTED, desiredFootPoseInWorld, actualFootPoseInWorld, swingDuration, sequenceID);
       executingFootstep.set(true);
 
       if (yoTime != null)
@@ -630,19 +630,20 @@ public class WalkingMessageHandler
    }
 
    public void reportFootstepCompleted(RobotSide robotSide, FramePose3DReadOnly desiredFootPoseInWorld, FramePose3DReadOnly actualFootPoseInWorld,
-                                       double swingDuration)
+                                       double swingDuration, long sequenceID)
    {
-      reportFootstepStatus(robotSide, FootstepStatus.COMPLETED, desiredFootPoseInWorld, actualFootPoseInWorld, swingDuration);
+      reportFootstepStatus(robotSide, FootstepStatus.COMPLETED, desiredFootPoseInWorld, actualFootPoseInWorld, swingDuration, sequenceID);
       executingFootstep.set(false);
    }
 
    private void reportFootstepStatus(RobotSide robotSide, FootstepStatus status, FramePose3DReadOnly desiredFootPoseInWorld,
-                                     FramePose3DReadOnly actualFootPoseInWorld, double swingDuration)
+                                     FramePose3DReadOnly actualFootPoseInWorld, double swingDuration, long sequenceID)
    {
       desiredFootPoseInWorld.checkReferenceFrameMatch(worldFrame);
       actualFootPoseInWorld.checkReferenceFrameMatch(worldFrame);
 
       footstepStatus.setFootstepStatus(status.toByte());
+      footstepStatus.setSequenceId(sequenceID);
       footstepStatus.setRobotSide(robotSide.toByte());
       footstepStatus.setFootstepIndex(currentFootstepIndex.getIntegerValue());
       footstepStatus.getActualFootOrientationInWorld().set(actualFootPoseInWorld.getOrientation());
