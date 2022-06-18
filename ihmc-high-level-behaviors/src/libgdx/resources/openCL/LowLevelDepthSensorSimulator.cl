@@ -75,7 +75,6 @@ kernel void lowLevelDepthSensorSimulator(read_only image2d_t normalizedDeviceCoo
             if (xFromCenterFloat < 0.0)
                xFromCenterFloat = -xFromCenterFloat;
             float yFromCenterFloat = y - imageHalfHeightFloat;
-            //float yFromCenterFloat = y;
             if (yFromCenterFloat < 0.0)
                yFromCenterFloat = -yFromCenterFloat;
             float maxDistance = imageHalfWidthFloat * imageHalfWidthFloat + imageHalfHeightFloat * imageHalfHeightFloat;
