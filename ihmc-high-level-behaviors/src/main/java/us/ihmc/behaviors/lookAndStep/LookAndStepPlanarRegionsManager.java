@@ -15,6 +15,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
@@ -185,7 +186,9 @@ public class LookAndStepPlanarRegionsManager
                boolean isAtFootHeight = EuclidCoreTools.epsilonEquals(leftFootPosition.getZ(),
                                                                          largeEnoughRegion.getPlaneZGivenXY(leftFootPosition.getX(), leftFootPosition.getY()),
                                                                          lookAndStepParameters.getDetectFlatGroundZTolerance());
-               boolean isParallelWithFootPlane = largeEnoughRegion.getNormal().angle(footNormal) > lookAndStepParameters.getDetectFlatGroundOrientationTolerance();
+               UnitVector3DReadOnly largeEnoughRegionNormal = largeEnoughRegion.getNormal();
+               double angleDifference = largeEnoughRegionNormal.angle(footNormal);
+               boolean isParallelWithFootPlane = angleDifference < lookAndStepParameters.getDetectFlatGroundOrientationTolerance();
 
                boolean isCoplanar = isAtFootHeight && isParallelWithFootPlane;
 
