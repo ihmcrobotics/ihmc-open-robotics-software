@@ -261,12 +261,14 @@ public class WalkingMessageHandler
 
       boolean trustHeightOfFootsteps = command.isTrustHeightOfFootsteps();
       boolean areFootstepsAdjustable = command.areFootstepsAdjustable();
+      boolean shouldCheckPlanForReachability = command.getShouldCheckForReachability();
 
       for (int i = 0; i < command.getNumberOfFootsteps(); i++)
       {
+         boolean shouldCheckStepForReachability = shouldCheckPlanForReachability || command.getFootstep(i).getShouldCheckForReacahbility();
          setFootstepTiming(command.getFootstep(i), command.getExecutionTiming(), upcomingFootstepTimings.add(), pauseDurationAfterStep.add(),
                            command.getExecutionMode());
-         setFootstep(command.getFootstep(i), trustHeightOfFootsteps, areFootstepsAdjustable, upcomingFootsteps.add());
+         setFootstep(command.getFootstep(i), trustHeightOfFootsteps, areFootstepsAdjustable, shouldCheckStepForReachability, upcomingFootsteps.add());
          if (command.getFootstep(i).getStepConstraints().getNumberOfConstraints() > 0)
             upcomingStepConstraints.add().set(command.getFootstep(i).getStepConstraints());
          else
@@ -842,9 +844,9 @@ public class WalkingMessageHandler
       return transferToAndNextFootstepsData;
    }
 
-   private void setFootstep(FootstepDataCommand footstepData, boolean trustHeight, boolean isAdjustable, Footstep footstepToSet)
+   private void setFootstep(FootstepDataCommand footstepData, boolean trustHeight, boolean isAdjustable, boolean shouldCheckForReachability, Footstep footstepToSet)
    {
-      footstepToSet.set(footstepData, trustHeight, isAdjustable);
+      footstepToSet.set(footstepData, trustHeight, isAdjustable, shouldCheckForReachability);
       footstepToSet.addOffset(planOffsetInWorld);
    }
 
