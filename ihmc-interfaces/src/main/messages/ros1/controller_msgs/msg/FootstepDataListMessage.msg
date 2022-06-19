@@ -61,6 +61,7 @@ controller_msgs/QueueableMessage queueing_properties
 controller_msgs/StepConstraintsListMessage default_step_constraints
 
 # If the controller should check and fail if the steps are not reachable
+# Field default value True
 bool should_check_for_reachability
 
 

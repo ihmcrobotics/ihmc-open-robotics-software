@@ -102,6 +102,7 @@ float64 liftoff_duration
 controller_msgs/StepConstraintsListMessage step_constraints
 
 # If the controller should check and fail if the step is not reachable
+# Field default value True
 bool should_check_for_reachability
 
 

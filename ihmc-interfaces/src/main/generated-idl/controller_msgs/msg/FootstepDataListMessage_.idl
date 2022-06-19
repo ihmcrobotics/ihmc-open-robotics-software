@@ -94,6 +94,7 @@ module controller_msgs
         /**
          * If the controller should check and fail if the steps are not reachable
          */
+        @defaultValue(value=True)
         boolean should_check_for_reachability;
       };
     };
