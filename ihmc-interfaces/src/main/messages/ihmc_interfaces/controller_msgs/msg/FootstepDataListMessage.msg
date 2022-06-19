@@ -47,4 +47,4 @@ QueueableMessage queueing_properties
 StepConstraintsListMessage default_step_constraints
 
 # If the controller should check and fail if the steps are not reachable
-bool should_check_for_reachability true
+bool should_check_for_reachability false
