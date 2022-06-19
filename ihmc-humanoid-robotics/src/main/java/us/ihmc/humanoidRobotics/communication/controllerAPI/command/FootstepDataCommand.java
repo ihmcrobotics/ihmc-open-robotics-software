@@ -52,6 +52,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    private double executionDelayTime;
    /** the execution time. This number is set if the execution delay is non zero **/
    public double adjustedExecutionTime;
+   public boolean shouldCheckeForReachability;
 
    private final StepConstraintsListCommand stepConstraints = new StepConstraintsListCommand();
 
@@ -81,6 +82,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       liftoffDuration = Double.NaN;
 
       stepConstraints.clear();
+      shouldCheckeForReachability = false;
    }
 
    @Override
@@ -90,6 +92,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       robotSide = RobotSide.fromByte(message.getRobotSide());
       trajectoryType = TrajectoryType.fromByte(message.getTrajectoryType());
       swingHeight = message.getSwingHeight();
+      shouldCheckeForReachability = message.getShouldCheckForReachability();
       swingTrajectoryBlendDuration = message.getSwingTrajectoryBlendDuration();
       position.setIncludingFrame(worldFrame, message.getLocation());
       orientation.setIncludingFrame(worldFrame, message.getOrientation());
@@ -158,6 +161,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       swingTrajectoryBlendDuration = other.swingTrajectoryBlendDuration;
       position.setIncludingFrame(other.position);
       orientation.setIncludingFrame(other.orientation);
+      shouldCheckeForReachability = other.shouldCheckeForReachability;
 
       RecyclingArrayList<MutableDouble> otherWaypointProportions = other.customWaypointProportions;
       customWaypointProportions.clear();
@@ -214,6 +218,11 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    public void setSwingHeight(double swingHeight)
    {
       this.swingHeight = swingHeight;
+   }
+
+   public void setShouldCheckeForReachability(boolean shouldCheckeForReachability)
+   {
+      this.shouldCheckeForReachability = shouldCheckeForReachability;
    }
 
    public void setTrajectoryType(TrajectoryType trajectoryType)
@@ -306,6 +315,11 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    public StepConstraintsListCommand getStepConstraints()
    {
       return stepConstraints;
+   }
+
+   public boolean getShouldCheckForReacahbility()
+   {
+      return shouldCheckeForReachability;
    }
 
    @Override
