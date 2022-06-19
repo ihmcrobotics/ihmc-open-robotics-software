@@ -80,7 +80,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
    /**
             * If the controller should check and fail if the steps are not reachable
             */
-   public boolean should_check_for_reachability_ = true;
+   public boolean should_check_for_reachability_;
 
    public FootstepDataListMessage()
    {
