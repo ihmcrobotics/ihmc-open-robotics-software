@@ -35,6 +35,7 @@ import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorParameters;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.gdx.visualizers.GDXSphereAndArrowGraphic;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
@@ -90,7 +91,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
          goalAffordance.setLatestRegions(regions);
          ++numberOfSteppingRegionsReceived;
          if (regions != null)
-            planarRegionsGraphic.generateMeshesAsync(regions);
+            planarRegionsGraphic.generateMeshesAsync(regions.copy());
       });
       helper.subscribeViaCallback(ReceivedPlanarRegionsForUI, regions ->
       {
