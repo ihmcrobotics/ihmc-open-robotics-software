@@ -131,7 +131,7 @@ public class LookAndStepSteppingTask
       {
          executionMode = previousStepMessageId == 0L ? ExecutionMode.OVERRIDE : ExecutionMode.QUEUE;
       }
-      imminentStanceTracker.addCommandedFootsteps(footstepPlan, executionMode);
+      imminentStanceTracker.addCommandedFootsteps(footstepPlan);
 
       footstepDataListMessage.getQueueingProperties().setExecutionMode(executionMode.toByte());
       long messageId = UUID.randomUUID().getLeastSignificantBits();
@@ -164,11 +164,10 @@ public class LookAndStepSteppingTask
       while (true)
       {
          double moreRobustRobotTime = getMoreRobustRobotTime(estimatedRobotTimeWhenPlanWasSent);
-         // FIXME: What if the queue size was larger? Need to know when the step we sent is started
-         boolean stepHasStarted = imminentStanceTracker.getStepsStartedSinceCommanded() > 0;
+         boolean stepHasStarted = imminentStanceTracker.getFirstCommandedStepHasStarted();
          boolean haveWaitedMaxDuration = moreRobustRobotTime >= robotTimeToStopWaitingRegardless;
          boolean robotIsNotWalkingAnymoreForSomeReason = !controllerStatusTracker.isWalking();
-         boolean stepCompletedEarly = imminentStanceTracker.getStepsCompletedSinceCommanded() > 0;
+         boolean stepCompletedEarly = imminentStanceTracker.getFirstCommandedStepHasCompleted();
 
          // Part 1: Wait for the step to start with a timeout
          if (haveWaitedMaxDuration)

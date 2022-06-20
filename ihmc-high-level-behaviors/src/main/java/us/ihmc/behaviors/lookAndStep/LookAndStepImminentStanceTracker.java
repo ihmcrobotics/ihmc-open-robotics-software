@@ -5,37 +5,38 @@ import controller_msgs.msg.dds.FootstepStatusMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
-import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.PlannedFootstepReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-import java.util.ArrayDeque;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * Footsteps get "commanded" given to this class and sent to the controller simultaneously.
+ * When any "started" or "completed" footstep status comes in, that's an imminent stance,
+ * so we store it.
+ * We track when the first step newly commanded is started and completed and provide that
+ * status for the "wait for part of swing" method, so it can be robust.
+ */
 public class LookAndStepImminentStanceTracker
 {
-   private final ArrayDeque<PlannedFootstepReadOnly> commandedFootstepQueue = new ArrayDeque<>();
-   private final SideDependentList<PlannedFootstepReadOnly> commandedImminentStanceFootsteps = new SideDependentList<>();
+   private final HashMap<Long, PlannedFootstepReadOnly> footstepHistory = new HashMap<>();
+   private PlannedFootstepReadOnly firstCommandedStep = null;
+   private boolean firstCommandedStepHasStarted = false;
+   private boolean firstCommandedStepHasCompleted = false;
+   private final SideDependentList<PlannedFootstepReadOnly> imminentStanceFootsteps = new SideDependentList<>();
    private final ROS2SyncedRobotModel syncedRobot;
-   private int stepsCompletedSinceCommanded = Integer.MAX_VALUE;
-   private int stepsStartedSinceCommanded = -1;
-//   private int previousStepsCompletedSinceCommanded = Integer.MAX_VALUE;
    private final TypedInput<CapturabilityBasedStatus> capturabilityBasedStatusInput = new TypedInput<>();
-
-   private final AtomicReference<PlannedFootstepReadOnly> lastCompletedFootstep = new AtomicReference<>(null);
-   private final AtomicReference<PlannedFootstepReadOnly> lastStartedFootstep = new AtomicReference<>(null);
+   private volatile RobotSide lastStartedRobotSide = null;
 
    public LookAndStepImminentStanceTracker(BehaviorHelper helper)
    {
@@ -48,44 +49,27 @@ public class LookAndStepImminentStanceTracker
       synchronized (this)
       {
          RobotSide robotSide = RobotSide.fromByte(footstepStatusMessage.getRobotSide());
+         PlannedFootstepReadOnly imminentFootstep = footstepHistory.get(footstepStatusMessage.getSequenceId());
+         if (imminentFootstep != null)
+         {
+            imminentStanceFootsteps.put(robotSide, imminentFootstep);
+         }
 
          if (FootstepStatus.fromByte(footstepStatusMessage.getFootstepStatus()) == FootstepStatus.STARTED)
          {
-            Pose3D completedPose = new Pose3D(footstepStatusMessage.getDesiredFootPositionInWorld(),
-                                              footstepStatusMessage.getDesiredFootOrientationInWorld());
-            FramePose3D commandedPose = new FramePose3D();
+            lastStartedRobotSide = robotSide;
 
-            lastStartedFootstep.set(new PlannedFootstepCopier(commandedImminentStanceFootsteps.get(robotSide)));
-
-            stepsStartedSinceCommanded++;
-
-            if (!commandedFootstepQueue.isEmpty())
+            if (firstCommandedStep != null && firstCommandedStep.getSequenceId() == footstepStatusMessage.getSequenceId())
             {
-               commandedFootstepQueue.getFirst().getFootstepPose(commandedPose);
-               commandedPose.changeFrame(ReferenceFrame.getWorldFrame());
-               if (completedPose.getPosition().epsilonEquals(commandedPose.getPosition(), 0.03)) // they should be exactly the same
-               {
-                  LogTools.info("Commanded step {} completed. {}", stepsCompletedSinceCommanded,
-                                robotSide.name());
-
-                  PlannedFootstepReadOnly stepStarted = commandedFootstepQueue.removeFirst();
-                  commandedImminentStanceFootsteps.put(stepStarted.getRobotSide(), stepStarted);
-               }
+               firstCommandedStepHasStarted = true;
             }
          }
-         else
+         else // received completed footstep status
          {
-            PlannedFootstepReadOnly commandedImminentStanceFootstep = commandedImminentStanceFootsteps.get(robotSide);
-            if (commandedImminentStanceFootstep != null)
+            if (firstCommandedStep != null && firstCommandedStep.getSequenceId() == footstepStatusMessage.getSequenceId())
             {
-               lastCompletedFootstep.set(new PlannedFootstepCopier(commandedImminentStanceFootstep));
+               firstCommandedStepHasCompleted = true;
             }
-            if (!commandedFootstepQueue.isEmpty())
-            {
-               commandedImminentStanceFootsteps.put(commandedFootstepQueue.getFirst().getRobotSide(), commandedFootstepQueue.getFirst());
-            }
-
-            ++stepsCompletedSinceCommanded;
          }
       }
    }
@@ -95,22 +79,19 @@ public class LookAndStepImminentStanceTracker
       capturabilityBasedStatusInput.set(capturabilityBasedStatus);
    }
 
-   public void addCommandedFootsteps(FootstepPlan commandedFootstepPlan, ExecutionMode executionMode)
+   public void addCommandedFootsteps(FootstepPlan commandedFootstepPlan)
    {
       synchronized (this)
       {
-         if (executionMode == ExecutionMode.OVERRIDE)
-            commandedFootstepQueue.clear();
+         firstCommandedStepHasStarted = false;
+         firstCommandedStepHasCompleted = false;
+         firstCommandedStep = commandedFootstepPlan.getFootstep(0);
 
          for (int i = 0; i < commandedFootstepPlan.getNumberOfSteps(); i++)
          {
-            commandedFootstepQueue.addLast(commandedFootstepPlan.getFootstep(i));
+            PlannedFootstep footstep = commandedFootstepPlan.getFootstep(i);
+            footstepHistory.put(footstep.getSequenceId(), footstep);
          }
-
-         commandedImminentStanceFootsteps.put(commandedFootstepQueue.getFirst().getRobotSide(), commandedFootstepQueue.getFirst());
-
-         stepsCompletedSinceCommanded = 0;
-         stepsStartedSinceCommanded = 0;
       }
    }
 
@@ -123,7 +104,7 @@ public class LookAndStepImminentStanceTracker
          CapturabilityBasedStatus capturabilityBasedStatus = capturabilityBasedStatusInput.getLatest();
          for (RobotSide side : RobotSide.values)
          {
-            if (commandedImminentStanceFootsteps.get(side) == null) // in the case we are just starting to walk and haven't sent a step for this foot yet
+            if (imminentStanceFootsteps.get(side) == null) // in the case we are just starting to walk and haven't sent a step for this foot yet
             {
                FramePose3D solePose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(side));
                solePose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -137,86 +118,45 @@ public class LookAndStepImminentStanceTracker
             }
             else
             {
-               // TODO: We need to operate not on "eventual stance", but stance after this. This should be settable.
-               // currently executing step would finish. We want to be reactive on each step.
-               FramePose3D stepPose = new FramePose3D();
-               commandedImminentStanceFootsteps.get(side).getFootstepPose(stepPose);
-               stepPose.changeFrame(ReferenceFrame.getWorldFrame());
-               imminentStanceFeet.set(side,
-                                      new MinimalFootstep(side,
-                                                          stepPose,
-                                                          commandedImminentStanceFootsteps.get(side).getFoothold(),
-                                                          side.getPascalCaseName() + " Imminent Stance (Commanded)"));
+               FramePose3D solePose = new FramePose3D();
+               PlannedFootstepReadOnly commandedStep = imminentStanceFootsteps.get(side);
+               commandedStep.getFootstepPose(solePose);
+               solePose.changeFrame(ReferenceFrame.getWorldFrame());
+               MinimalFootstep imminentCommandedFootstep = new MinimalFootstep(side,
+                                                                               solePose,
+                                                                               commandedStep.getFoothold(),
+                                                                               side.getPascalCaseName() + " Imminent Stance (Commanded)");
+               imminentStanceFeet.set(side, imminentCommandedFootstep);
             }
          }
       }
       return imminentStanceFeet;
    }
 
-   public int getStepsCompletedSinceCommanded()
+   public boolean getFirstCommandedStepHasStarted()
    {
-      return stepsCompletedSinceCommanded;
+      return firstCommandedStepHasStarted;
    }
 
-   public int getStepsStartedSinceCommanded()
+   public boolean getFirstCommandedStepHasCompleted()
    {
-      return stepsStartedSinceCommanded;
+      return firstCommandedStepHasCompleted;
    }
 
-   public PlannedFootstepReadOnly getLastCompletedFootstep()
+   public RobotSide getLastStartedRobotSide()
    {
-      return lastCompletedFootstep.get();
-   }
-
-   public PlannedFootstepReadOnly getLastStartedFootstep()
-   {
-      return lastStartedFootstep.get();
+      return lastStartedRobotSide;
    }
 
    public void clear()
    {
       synchronized (this)
       {
-         commandedFootstepQueue.clear();
-         commandedImminentStanceFootsteps.clear();
-         lastCompletedFootstep.set(null);
-         lastStartedFootstep.set(null);
-      }
-   }
-
-   private static class PlannedFootstepCopier implements PlannedFootstepReadOnly
-   {
-      private final RobotSide robotSide;
-      private final FramePose3D footstepPose = new FramePose3D();
-      private final ConvexPolygon2D convexPolygon2D;
-      private final boolean hasFoothold;
-
-      public PlannedFootstepCopier(PlannedFootstepReadOnly other)
-      {
-         robotSide = other.getRobotSide();
-         other.getFootstepPose(footstepPose);
-         convexPolygon2D = new ConvexPolygon2D(other.getFoothold());
-         hasFoothold = other.hasFoothold();
-      }
-
-      public RobotSide getRobotSide()
-      {
-         return robotSide;
-      }
-
-      public void getFootstepPose(FramePose3D footstepPoseToPack)
-      {
-         footstepPoseToPack.set(footstepPose);
-      }
-
-      public ConvexPolygon2DReadOnly getFoothold()
-      {
-         return convexPolygon2D;
-      }
-
-      public boolean hasFoothold()
-      {
-         return hasFoothold;
+         imminentStanceFootsteps.clear();
+         lastStartedRobotSide = null;
+         firstCommandedStepHasStarted = false;
+         firstCommandedStepHasCompleted = false;
+         firstCommandedStep = null;
       }
    }
 }

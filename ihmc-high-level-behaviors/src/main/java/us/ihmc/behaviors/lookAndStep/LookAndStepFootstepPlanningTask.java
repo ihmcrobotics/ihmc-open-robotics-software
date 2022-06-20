@@ -243,8 +243,9 @@ public class LookAndStepFootstepPlanningTask
          syncedRobot.update();
          robotDataReceptionTimerSnaphot = syncedRobot.getDataReceptionTimerSnapshot()
                                                      .withExpiration(lookAndStepParameters.getRobotConfigurationDataExpiration());
-         PlannedFootstepReadOnly lastStartedFootstep = imminentStanceTracker.getLastStartedFootstep();
-         stanceSideWhenLastFootstepStarted = lastStartedFootstep == null ? null : lastStartedFootstep.getRobotSide().getOppositeSide();
+         RobotSide lastStartedRobotSide = imminentStanceTracker.getLastStartedRobotSide();
+         // FIXME: I could see this going out of date and being wrong for multiple footsteps
+         stanceSideWhenLastFootstepStarted = lastStartedRobotSide == null ? null : lastStartedRobotSide.getOppositeSide();
          behaviorState = behaviorStateReference.get();
          numberOfIncompleteFootsteps = controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps();
          numberOfCompletedFootsteps = controllerStatusTracker.getFootstepTracker().getNumberOfCompletedFootsteps();
@@ -456,6 +457,7 @@ public class LookAndStepFootstepPlanningTask
             fullPlan.addFootstep(new PlannedFootstep(footstepPlannerOutput.getFootstepPlan().getFootstep(i)));
          }
 
+         // This whole thing seems kinda dangerous
          if (stepsStartedWhilePlanning.size() > 0)
          {
             if (!removeStepsThatWereCompletedWhilePlanning(fullPlan))
