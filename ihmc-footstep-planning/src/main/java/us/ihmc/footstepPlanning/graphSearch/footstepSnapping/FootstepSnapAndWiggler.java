@@ -345,7 +345,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       snapData.getWiggleTransformInWorld().preMultiply(wiggleTransformInLocal);
       snapData.getWiggleTransformInWorld().preMultiply(planarRegionToPack.getTransformToWorld());
 
-      if (!parameters.getEnableConcaveHullWiggler() && stanceStep != null && snapDataHolder.containsKey(stanceStep))
+      if (stanceStep != null && snapDataHolder.containsKey(stanceStep))
       {
          FootstepSnapData stanceStepSnapData = snapDataHolder.get(stanceStep);
 
