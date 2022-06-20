@@ -7,6 +7,7 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -195,12 +196,18 @@ public class LookAndStepSteppingTask
             }
             else if (stepCompletedEarly)
             {
-               statusLogger.info("Step completed {} s early. Done waiting.", robotTimeToStopWaiting - moreRobustRobotTime);
+               statusLogger.info("Step completed {} s early. Done waiting.",
+                                 FormattingTools.getFormattedDecimal3D(robotTimeToStopWaiting - moreRobustRobotTime));
                break;
             }
             else if (moreRobustRobotTime >= robotTimeToStopWaiting)
             {
-               statusLogger.info("{} % of swing complete! Done waiting.", (moreRobustRobotTime - estimatedRobotTimeWhenPlanWasSent) / swingDuration);
+               double durationSinceSwingStarted = moreRobustRobotTime - robotTimeInWhichStepStarted;
+               double durationWaited = moreRobustRobotTime - estimatedRobotTimeWhenPlanWasSent;
+               statusLogger.info("{} % of swing complete! Done waiting. We waited for {} s since step started. ({} s total)",
+                                 FormattingTools.getFormattedDecimal3D(durationSinceSwingStarted / swingDuration * 100.0),
+                                 FormattingTools.getFormattedDecimal3D(durationSinceSwingStarted),
+                                 FormattingTools.getFormattedDecimal3D(durationWaited));
                break;
             }
          }
