@@ -98,9 +98,9 @@ public class LookAndStepImminentStanceTracker
    public SideDependentList<MinimalFootstep> calculateImminentStancePoses()
    {
       SideDependentList<MinimalFootstep> imminentStanceFeet = new SideDependentList<>();
-      syncedRobot.update();
       synchronized (this)
       {
+         syncedRobot.update();
          CapturabilityBasedStatus capturabilityBasedStatus = capturabilityBasedStatusInput.getLatest();
          for (RobotSide side : RobotSide.values)
          {
