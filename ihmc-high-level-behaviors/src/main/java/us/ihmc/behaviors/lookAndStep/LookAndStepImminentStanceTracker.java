@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class LookAndStepImminentStanceTracker
 {
    private final ArrayDeque<PlannedFootstepReadOnly> commandedFootstepQueue = new ArrayDeque<>();
-   private final SideDependentList<PlannedFootstepReadOnly> commandedImminentStancePoses = new SideDependentList<>();
+   private final SideDependentList<PlannedFootstepReadOnly> commandedImminentStanceFootsteps = new SideDependentList<>();
    private final ROS2SyncedRobotModel syncedRobot;
    private int stepsCompletedSinceCommanded = Integer.MAX_VALUE;
    private int stepsStartedSinceCommanded = -1;
@@ -55,7 +55,7 @@ public class LookAndStepImminentStanceTracker
                                               footstepStatusMessage.getDesiredFootOrientationInWorld());
             FramePose3D commandedPose = new FramePose3D();
 
-            lastStartedFootstep.set(new PlannedFootstepCopier(commandedImminentStancePoses.get(robotSide)));
+            lastStartedFootstep.set(new PlannedFootstepCopier(commandedImminentStanceFootsteps.get(robotSide)));
 
             stepsStartedSinceCommanded++;
 
@@ -69,20 +69,20 @@ public class LookAndStepImminentStanceTracker
                                 robotSide.name());
 
                   PlannedFootstepReadOnly stepStarted = commandedFootstepQueue.removeFirst();
-                  commandedImminentStancePoses.put(stepStarted.getRobotSide(), stepStarted);
+                  commandedImminentStanceFootsteps.put(stepStarted.getRobotSide(), stepStarted);
                }
             }
          }
          else
          {
-            PlannedFootstepReadOnly commandedImminentStanceFootstep = commandedImminentStancePoses.get(robotSide);
+            PlannedFootstepReadOnly commandedImminentStanceFootstep = commandedImminentStanceFootsteps.get(robotSide);
             if (commandedImminentStanceFootstep != null)
             {
                lastCompletedFootstep.set(new PlannedFootstepCopier(commandedImminentStanceFootstep));
             }
             if (!commandedFootstepQueue.isEmpty())
             {
-               commandedImminentStancePoses.put(commandedFootstepQueue.getFirst().getRobotSide(), commandedFootstepQueue.getFirst());
+               commandedImminentStanceFootsteps.put(commandedFootstepQueue.getFirst().getRobotSide(), commandedFootstepQueue.getFirst());
             }
 
             ++stepsCompletedSinceCommanded;
@@ -107,7 +107,7 @@ public class LookAndStepImminentStanceTracker
             commandedFootstepQueue.addLast(commandedFootstepPlan.getFootstep(i));
          }
 
-         commandedImminentStancePoses.put(commandedFootstepQueue.getFirst().getRobotSide(), commandedFootstepQueue.getFirst());
+         commandedImminentStanceFootsteps.put(commandedFootstepQueue.getFirst().getRobotSide(), commandedFootstepQueue.getFirst());
 
          stepsCompletedSinceCommanded = 0;
          stepsStartedSinceCommanded = 0;
@@ -123,7 +123,7 @@ public class LookAndStepImminentStanceTracker
          CapturabilityBasedStatus capturabilityBasedStatus = capturabilityBasedStatusInput.getLatest();
          for (RobotSide side : RobotSide.values)
          {
-            if (commandedImminentStancePoses.get(side) == null) // in the case we are just starting to walk and haven't sent a step for this foot yet
+            if (commandedImminentStanceFootsteps.get(side) == null) // in the case we are just starting to walk and haven't sent a step for this foot yet
             {
                FramePose3D solePose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(side));
                solePose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -140,12 +140,12 @@ public class LookAndStepImminentStanceTracker
                // TODO: We need to operate not on "eventual stance", but stance after this. This should be settable.
                // currently executing step would finish. We want to be reactive on each step.
                FramePose3D stepPose = new FramePose3D();
-               commandedImminentStancePoses.get(side).getFootstepPose(stepPose);
+               commandedImminentStanceFootsteps.get(side).getFootstepPose(stepPose);
                stepPose.changeFrame(ReferenceFrame.getWorldFrame());
                imminentStanceFeet.set(side,
                                       new MinimalFootstep(side,
                                                           stepPose,
-                                                          commandedImminentStancePoses.get(side).getFoothold(),
+                                                          commandedImminentStanceFootsteps.get(side).getFoothold(),
                                                           side.getPascalCaseName() + " Imminent Stance (Commanded)"));
             }
          }
@@ -178,7 +178,7 @@ public class LookAndStepImminentStanceTracker
       synchronized (this)
       {
          commandedFootstepQueue.clear();
-         commandedImminentStancePoses.clear();
+         commandedImminentStanceFootsteps.clear();
          lastCompletedFootstep.set(null);
          lastStartedFootstep.set(null);
       }
