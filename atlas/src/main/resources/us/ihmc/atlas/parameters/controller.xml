@@ -216,6 +216,9 @@
                            <parameter name="ankleLowerLimitToTriggerToeOff" type="DoubleParameter" min="0.0" max="1.0" value="-0.94"/>
                         </registry>
                      </registry>
+                     <registry name="DynamicStateInspectorParameters">
+                        <parameter name="maxNormErrorNeededForControl" type="DoubleParameter" min="0.0" max="1.0" value="2.0"/>
+                     </registry>
                      <parameter name="Verification_PerpendicularCoPErrorThreshold" type="DoubleParameter" min="0.0" max="1.0" value="0.005" />
                      <parameter name="Verification_DistanceFromLineToComputeDesiredCoPOccupancy" type="DoubleParameter" min="0.0" max="1.0" value="0.005" />
                      <parameter name="Velocity_omegaMagnitudeThreshold" type="DoubleParameter" min="0.0" max="1.0" value="1.5" />
