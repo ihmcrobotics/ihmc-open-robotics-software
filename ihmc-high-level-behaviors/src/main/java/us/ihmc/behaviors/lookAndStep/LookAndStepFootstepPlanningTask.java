@@ -467,12 +467,12 @@ public class LookAndStepFootstepPlanningTask
             startFootPoses = imminentStanceTracker.calculateImminentStancePoses();
          }
 
-         if (!checkToMakeSurePlanIsStillReachable(fullPlan, startFootPoses))
-         {
-            uiPublisher.publishToUI(PlanningFailed, true);
-            doFailureAction("Footstep planning produced unreachable steps. Aborting task...");
-            return;
-         }
+//         if (!checkToMakeSurePlanIsStillReachable(fullPlan, startFootPoses))
+//         {
+//            uiPublisher.publishToUI(PlanningFailed, true);
+//            doFailureAction("Footstep planning produced unreachable steps. Aborting task...");
+//            return;
+//         }
 
          FootstepPlan reducedPlan = new FootstepPlan();
          for (int i = 0; i < lookAndStepParameters.getMaxStepsToSendToController() && i < fullPlan.getNumberOfSteps(); i++)
