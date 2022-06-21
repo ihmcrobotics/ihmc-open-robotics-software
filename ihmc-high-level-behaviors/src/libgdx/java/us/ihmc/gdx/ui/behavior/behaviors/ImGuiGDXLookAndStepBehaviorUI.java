@@ -96,7 +96,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
       helper.subscribeViaCallback(ReceivedPlanarRegionsForUI, regions ->
       {
          if (regions != null)
-            receivedRegionsGraphic.generateMeshesAsync(regions);
+            receivedRegionsGraphic.generateMeshesAsync(regions.copy());
       });
       helper.subscribeViaCallback(GoalForUI, goalAffordance::setGoalPoseNoCallbacks);
       helper.subscribeViaCallback(SubGoalForUI, subGoalGraphic::setToPose);
