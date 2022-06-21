@@ -23,7 +23,7 @@ public class ImPlotBasicDoublePlotLine implements ImPlotPlotLine
    @Override
    public String getVariableName()
    {
-
+      return "";
    }
 
    @Override
