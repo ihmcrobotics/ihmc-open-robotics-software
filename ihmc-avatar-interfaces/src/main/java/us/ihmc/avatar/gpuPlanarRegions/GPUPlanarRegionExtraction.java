@@ -38,6 +38,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -74,7 +75,7 @@ public class GPUPlanarRegionExtraction
    private final int[] adjacentY = {-1, 0, 1, 1, 1, 0, -1, -1};
    private final int[] adjacentX = {-1, -1, -1, 0, 1, 1, 1, 0};
    private final RecyclingArrayList<GPUPlanarRegion> gpuPlanarRegions = new RecyclingArrayList<>(GPUPlanarRegion::new);
-   private final Comparator<GPURegionRing> boundaryIndexComparator = Comparator.comparingInt(regionRing -> regionRing.getBoundaryIndices().size());
+   private final Comparator<GPURegionRing> boundaryLengthComparator = Comparator.comparingInt(regionRing -> regionRing.getBoundaryIndices().size());
    private int imageWidth;
    private int imageHeight;
    private Size gaussianKernelSize;
@@ -380,6 +381,7 @@ public class GPUPlanarRegionExtraction
       {
          int leafPatchIndex = 0;
          int regionRingIndex = 0;
+         planarRegion.getRegionsRingsBySize().clear();
          for (Point2D leafPatch : planarRegion.getBorderIndices())
          {
             GPURegionRing regionRing = planarRegion.getRegionRings().add();
@@ -396,6 +398,8 @@ public class GPUPlanarRegionExtraction
                if (forDrawingDebugPanel != null)
                   forDrawingDebugPanel.accept(regionRing);
                ++regionRingIndex;
+               regionRing.updateConvexPolygon();
+               planarRegion.getRegionsRingsBySize().add(regionRing);
             }
             else
             {
@@ -403,7 +407,31 @@ public class GPUPlanarRegionExtraction
             }
             ++leafPatchIndex;
          }
-         planarRegion.getRegionRings().sort(boundaryIndexComparator);
+
+         // remove holes
+         for (GPURegionRing regionRing : planarRegion.getRegionsRingsBySize())
+         {
+            planarRegion.getHoleRingsToRemove().clear();
+            for (GPURegionRing otherRegionRing : planarRegion.getRegionRings())
+            {
+               if (otherRegionRing != regionRing)
+               {
+                  // We probably only need to check one
+                  Vector2D boundaryIndex = otherRegionRing.getBoundaryIndices().get(0);
+                  if (regionRing.getConvexPolygon().isPointInside(boundaryIndex.getX(), boundaryIndex.getY()))
+                  {
+                     planarRegion.getHoleRingsToRemove().add(otherRegionRing);
+                  }
+               }
+            }
+            for (GPURegionRing regionRingToRemove : planarRegion.getHoleRingsToRemove())
+            {
+               planarRegion.getRegionRings().remove(regionRingToRemove);
+            }
+         }
+
+
+         planarRegion.getRegionRings().sort(boundaryLengthComparator);
       });
    }
 
