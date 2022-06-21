@@ -156,12 +156,12 @@ public class FootstepPlannerLogger
     */
    public boolean logSession(String logDirectory)
    {
-      if (!logDirectory.endsWith(File.separator))
-      {
-         logDirectory += File.separator;
-      }
+      String sessionDirectory = generateALogFolderName(logDirectory);
+      return logSessionWithExactFolderName(sessionDirectory);
+   }
 
-      String sessionDirectory = logDirectory + dateFormat.format(new Date()) + FOOTSTEP_PLANNER_LOG_POSTFIX + File.separator;
+   public boolean logSessionWithExactFolderName(String sessionDirectory)
+   {
       latestLogDirectory = sessionDirectory;
 
       try
@@ -640,5 +640,20 @@ public class FootstepPlannerLogger
    public static String getDefaultLogsDirectory()
    {
       return defaultLogsDirectory;
+   }
+
+   public static String generateALogFolderName()
+   {
+      return generateALogFolderName(defaultLogsDirectory);
+   }
+
+   public static String generateALogFolderName(String logDirectory)
+   {
+      if (!logDirectory.endsWith(File.separator))
+      {
+         logDirectory += File.separator;
+      }
+
+      return logDirectory + dateFormat.format(new Date()) + FOOTSTEP_PLANNER_LOG_POSTFIX + File.separator;
    }
 }
