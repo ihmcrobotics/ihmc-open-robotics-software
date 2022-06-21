@@ -13,6 +13,7 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -21,6 +22,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.graphSearch.collision.BodyCollisionData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshotWithExpiration;
@@ -284,6 +286,7 @@ public class LookAndStepFootstepPlanningTask
    protected int numberOfCompletedFootsteps;
    protected SwingPlannerType swingPlannerType;
    protected final List<FootstepStatusMessage> stepsStartedWhilePlanning = new ArrayList<>();
+   private final Object logSessionSyncObject = new Object();
 
    protected void performTask()
    {
@@ -423,12 +426,20 @@ public class LookAndStepFootstepPlanningTask
                         footstepPlannerOutput.getPlannerTimings().getTimePlanningStepsSeconds(),
                         plannerTimeout));
 
-      // print log duration?
-      FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanningModule);
-      footstepPlannerLogger.logSession();
-      statusLogger.info("Footstep planner log folder: {}", footstepPlannerLogger.getLatestLogDirectory());
-      uiPublisher.publishToUI(FootstepPlannerLatestLogPath, footstepPlannerLogger.getLatestLogDirectory());
-      ThreadTools.startAThread(() -> FootstepPlannerLogger.deleteOldLogs(50), "FootstepPlanLogDeletion");
+      String latestLogDirectory = FootstepPlannerLogger.generateALogFolderName();
+      statusLogger.info("Footstep planner log folder: {}", latestLogDirectory);
+      uiPublisher.publishToUI(FootstepPlannerLatestLogPath, latestLogDirectory);
+      ThreadTools.startAThread(() ->
+      {
+         synchronized (logSessionSyncObject)
+         {
+            Stopwatch stopwatch = new Stopwatch().start();
+            FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanningModule);
+            footstepPlannerLogger.logSessionWithExactFolderName(latestLogDirectory);
+            FootstepPlannerLogger.deleteOldLogs(50);
+            LogTools.info("Logged footstep planner data in {} s", FormattingTools.getFormattedDecimal3D(stopwatch.totalElapsed()));
+         }
+      }, "FootstepPlanLogging");
 
       // TODO: Detect step down and reject unless we planned two steps.
       // Should get closer to the edge somehow?  Solve this in the footstep planner?
