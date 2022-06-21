@@ -401,6 +401,7 @@ public class LookAndStepFootstepPlanningTask
       footstepPlannerRequest.setTimeout(plannerTimeout);
       footstepPlannerRequest.setSwingPlannerType(swingPlannerType);
       footstepPlannerRequest.setSnapGoalSteps(true);
+      footstepPlannerRequest.setMaximumIterations(100);
 
       footstepPlanningModule.getFootstepPlannerParameters().set(footstepPlannerParameters);
       footstepPlanningModule.getSwingPlanningModule().getSwingPlannerParameters().set(swingPlannerParameters);
@@ -411,6 +412,7 @@ public class LookAndStepFootstepPlanningTask
       stepInPlaceChecker.setStanceFeetPoses(startFootPoses.get(RobotSide.LEFT).getSolePoseInWorld(), startFootPoses.get(RobotSide.RIGHT).getSolePoseInWorld());
       footstepPlanningModule.getChecker().clearCustomFootstepCheckers();
       footstepPlanningModule.getChecker().attachCustomFootstepChecker(stepInPlaceChecker);
+      int iterations = footstepPlanningModule.getAStarFootstepPlanner().getIterations();
 
       statusLogger.info("Stance side: {}", stanceSide.name());
       statusLogger.info("Planning footsteps with {}...", swingPlannerType.name());
@@ -437,7 +439,9 @@ public class LookAndStepFootstepPlanningTask
             FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanningModule);
             footstepPlannerLogger.logSessionWithExactFolderName(latestLogDirectory);
             FootstepPlannerLogger.deleteOldLogs(50);
-            LogTools.info("Logged footstep planner data in {} s", FormattingTools.getFormattedDecimal3D(stopwatch.totalElapsed()));
+            LogTools.info("Logged footstep planner data in {} s. {} iterations",
+                          FormattingTools.getFormattedDecimal3D(stopwatch.totalElapsed()),
+                          iterations);
          }
       }, "FootstepPlanLogging");
 

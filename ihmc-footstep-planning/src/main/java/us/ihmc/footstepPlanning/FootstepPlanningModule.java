@@ -590,6 +590,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       return aStarFootstepPlanner.getSwingPlanningModule();
    }
 
+   public AStarFootstepPlanner getAStarFootstepPlanner()
+   {
+      return aStarFootstepPlanner;
+   }
+
    @Override
    public void closeAndDispose()
    {
