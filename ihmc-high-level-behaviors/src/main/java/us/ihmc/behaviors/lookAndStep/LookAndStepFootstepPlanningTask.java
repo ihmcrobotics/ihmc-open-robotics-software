@@ -79,6 +79,7 @@ public class LookAndStepFootstepPlanningTask
    protected Timer planningFailedTimer = new Timer();
    protected AtomicReference<Boolean> plannerFailedLastTime = new AtomicReference<>();
    protected YoDouble footholdVolume;
+   protected YoDouble footstepPlanningDuration;
 
    public static class LookAndStepFootstepPlanning extends LookAndStepFootstepPlanningTask
    {
@@ -112,6 +113,7 @@ public class LookAndStepFootstepPlanningTask
          controllerStatusTracker = lookAndStep.controllerStatusTracker;
          imminentStanceTracker = lookAndStep.imminentStanceTracker;
          footholdVolume = new YoDouble("footholdVolume", lookAndStep.yoRegistry);
+         footstepPlanningDuration = new YoDouble("footstepPlanningDuration", lookAndStep.yoRegistry);
          helper = lookAndStep.helper;
          autonomousOutput = footstepPlan ->
          {
@@ -427,6 +429,7 @@ public class LookAndStepFootstepPlanningTask
                         footstepPlannerOutput.getPlannerTimings().getTimeBeforePlanningSeconds(),
                         footstepPlannerOutput.getPlannerTimings().getTimePlanningStepsSeconds(),
                         plannerTimeout));
+      footstepPlanningDuration.set(footstepPlannerOutput.getPlannerTimings().getTotalElapsedSeconds());
 
       String latestLogDirectory = FootstepPlannerLogger.generateALogFolderName();
       statusLogger.info("Footstep planner log folder: {}", latestLogDirectory);
