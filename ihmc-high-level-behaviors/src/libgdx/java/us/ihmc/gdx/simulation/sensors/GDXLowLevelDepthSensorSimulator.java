@@ -221,7 +221,7 @@ public class GDXLowLevelDepthSensorSimulator
       modelBatch.begin(camera);
       GL41.glViewport(0, 0, imageWidth, imageHeight);
 
-      sceneBasics.renderExternalBatch(modelBatch, GDXSceneLevel.REAL_ENVIRONMENT);
+      sceneBasics.renderExternalBatch(modelBatch, GDX3DSceneBasics.REAL_ENVIRONMENT_ONLY);
 
       modelBatch.end();
 
