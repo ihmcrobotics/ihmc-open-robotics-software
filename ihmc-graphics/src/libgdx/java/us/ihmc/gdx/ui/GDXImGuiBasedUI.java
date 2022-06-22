@@ -55,6 +55,7 @@ public class GDXImGuiBasedUI
    private final FrequencyCalculator fpsCalculator = new FrequencyCalculator();
    private final Stopwatch runTime = new Stopwatch().start();
    private String statusText = ""; // TODO: Add status at bottom of window
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiPanelSizeHandler view3DPanelSizeHandler = new ImGuiPanelSizeHandler();
    private ImGui3DViewInput inputCalculator;
    private final ArrayList<Consumer<ImGui3DViewInput>> imgui3DViewPickCalculators = new ArrayList<>();
@@ -196,25 +197,42 @@ public class GDXImGuiBasedUI
       if (ImGui.beginMenu("Settings"))
       {
          ImGui.pushItemWidth(80.0f);
-         if (ImGui.inputInt("Foreground FPS", foregroundFPS, 1))
+         if (ImGui.inputInt(labels.get("Foreground FPS"), foregroundFPS, 1))
          {
             Gdx.graphics.setForegroundFPS(foregroundFPS.get());
          }
-         if (ImGui.checkbox("Vsync", vsync))
+         if (ImGui.checkbox(labels.get("Vsync"), vsync))
          {
             Gdx.graphics.setVSync(vsync.get());
          }
-         if (ImGui.checkbox("Shadows", shadows))
+         if (ImGui.checkbox(labels.get("Shadows"), shadows))
          {
             sceneManager.getSceneBasics().setShadowsEnabled(shadows.get());
          }
-         if (ImGui.inputInt("libGDX log level", libGDXLogLevel, 1))
+         if (ImGui.inputInt(labels.get("libGDX log level"), libGDXLogLevel, 1))
          {
             Gdx.app.setLogLevel(libGDXLogLevel.get());
          }
-         if (ImGui.inputFloat("Font Size", imguiFontScale, 0.1f))
+         if (ImGui.inputFloat(labels.get("Font Size"), imguiFontScale, 0.1f))
          {
             ImGui.getIO().setFontGlobalScale(imguiFontScale.get());
+         }
+         ImGui.separator();
+         boolean renderingRealEnvironment = sceneManager.getSceneBasics().getSceneLevelsToRender().contains(GDXSceneLevel.REAL_ENVIRONMENT);
+         if (ImGui.checkbox(labels.get("Render Real Environment"), renderingRealEnvironment))
+         {
+            if (renderingRealEnvironment)
+               sceneManager.getSceneBasics().getSceneLevelsToRender().remove(GDXSceneLevel.REAL_ENVIRONMENT);
+            else
+               sceneManager.getSceneBasics().getSceneLevelsToRender().add(GDXSceneLevel.REAL_ENVIRONMENT);
+         }
+         boolean renderingVirtualEnvironment = sceneManager.getSceneBasics().getSceneLevelsToRender().contains(GDXSceneLevel.VIRTUAL);
+         if (ImGui.checkbox(labels.get("Render Virtual Environment"), renderingVirtualEnvironment))
+         {
+            if (renderingVirtualEnvironment)
+               sceneManager.getSceneBasics().getSceneLevelsToRender().remove(GDXSceneLevel.VIRTUAL);
+            else
+               sceneManager.getSceneBasics().getSceneLevelsToRender().add(GDXSceneLevel.VIRTUAL);
          }
          ImGui.popItemWidth();
          ImGui.endMenu();

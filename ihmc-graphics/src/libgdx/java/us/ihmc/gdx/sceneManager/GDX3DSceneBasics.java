@@ -18,17 +18,17 @@ import us.ihmc.gdx.lighting.GDXShadowManager;
 import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 
 public class GDX3DSceneBasics
 {
+   public static final Set<GDXSceneLevel> REAL_ENVIRONMENT_ONLY = Collections.singleton(GDXSceneLevel.REAL_ENVIRONMENT);
+
    private final HashSet<ModelInstance> modelInstances = new HashSet<>();
    private final HashMap<GDXSceneLevel, ArrayList<RenderableProvider>> renderables = new HashMap<>();
    private final HashSet<RenderableProvider> uniqueRenderables = new HashSet<>();
 
-   private GDXSceneLevel[] sceneLevelsToRender;
+   private TreeSet<GDXSceneLevel> sceneLevelsToRender;
    private float ambientLight = 0.4f;
    private boolean shadowsEnabled = false;
    private GDXShadowManager shadowManager;
@@ -44,7 +44,8 @@ public class GDX3DSceneBasics
 
    public void create(GDXSceneLevel... sceneLevelsToRender)
    {
-      this.sceneLevelsToRender = sceneLevelsToRender;
+      this.sceneLevelsToRender = new TreeSet<>();
+      Collections.addAll(this.sceneLevelsToRender, sceneLevelsToRender);
 
       renderables.put(GDXSceneLevel.REAL_ENVIRONMENT, new ArrayList<>());
       renderables.put(GDXSceneLevel.VIRTUAL, new ArrayList<>());
@@ -74,7 +75,7 @@ public class GDX3DSceneBasics
    {
       if (shadowsEnabled)
       {
-         renderInternal(shadowManager.getShadowSceneBatch(), GDXSceneLevel.REAL_ENVIRONMENT);
+         renderInternal(shadowManager.getShadowSceneBatch(), REAL_ENVIRONMENT_ONLY);
       }
       else
       {
@@ -92,7 +93,7 @@ public class GDX3DSceneBasics
    }
 
    // For simulated sensors in particular
-   public void renderExternalBatch(ModelBatch batch, GDXSceneLevel sceneLevel)
+   public void renderExternalBatch(ModelBatch batch, Set<GDXSceneLevel> sceneLevel)
    {
       renderInternal(batch, sceneLevel);
    }
@@ -103,7 +104,7 @@ public class GDX3DSceneBasics
       if (shadowsEnabled)
       {
          shadowManager.preRender(camera);
-         renderInternal(shadowManager.getShadowSceneBatch(), GDXSceneLevel.REAL_ENVIRONMENT);
+         renderInternal(shadowManager.getShadowSceneBatch(), REAL_ENVIRONMENT_ONLY);
       }
       else
       {
@@ -113,7 +114,7 @@ public class GDX3DSceneBasics
       postRender(camera, GDXSceneLevel.VIRTUAL);
    }
 
-   private void renderInternal(ModelBatch modelBatch, GDXSceneLevel... sceneLevels)
+   private void renderInternal(ModelBatch modelBatch, Set<GDXSceneLevel> sceneLevels)
    {
       // All rendering except modelBatch.begin() and end()
       // Avoid rendering things twice
@@ -276,5 +277,10 @@ public class GDX3DSceneBasics
    public GDXShadowManager getShadowManager()
    {
       return shadowManager;
+   }
+
+   public TreeSet<GDXSceneLevel> getSceneLevelsToRender()
+   {
+      return sceneLevelsToRender;
    }
 }
