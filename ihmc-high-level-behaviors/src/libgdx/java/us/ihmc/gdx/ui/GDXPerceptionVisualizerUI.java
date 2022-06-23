@@ -112,7 +112,7 @@ public class GDXPerceptionVisualizerUI
       //        baseUI.getImGuiPanelManager().addPanel("L515 Transform Tuner", l515TransformTuner::renderImGuiWidgets);
 
       ousterLidar = createOusterLidar(ros1Node, ros2Node);
-      ousterLidar.attachPointCloudPublisherROS1(RosTools.OUSTER_POINT_CLOUD);
+      ousterLidar.setupForROS1PointCloud(ros1Node, RosTools.OUSTER_POINT_CLOUD);
       ousterLidar.setSensorEnabled(true);
       ousterLidar.setRenderPointCloudDirectly(true);
       ousterLidar.setSensorFrameToWorldTransform(depthSensorTransform);
