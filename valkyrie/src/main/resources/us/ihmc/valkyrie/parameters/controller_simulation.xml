@@ -798,6 +798,9 @@
                   <parameter name="LoadedAnkleRollVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="LoadedAnkleRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
                   <parameter name="LoadedAnkleRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadhipPitchVelocityReferenceAlpha" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                  <parameter name="NoLoadkneePitchVelocityReferenceAlpha" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                  <parameter name="NoLoadanklePitchVelocityReferenceAlpha" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
                </registry>
                <parameter name="UseCenterOfPressureObjectiveFromPlanner" type="BooleanParameter" value="false" />
             </registry>

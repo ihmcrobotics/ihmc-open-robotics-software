@@ -1008,29 +1008,29 @@
                   <parameter name="NoLoadHipRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
                   <parameter name="NoLoadHipRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
                   <parameter name="NoLoadHipPitchControlMode" type="EnumParameter" value="EFFORT" />
-                  <parameter name="NoLoadHipPitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="7.5" />
-                  <parameter name="NoLoadHipPitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="4.0" />
+                  <parameter name="NoLoadHipPitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="0.0" />
+                  <parameter name="NoLoadHipPitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="8.0" />
                   <parameter name="NoLoadHipPitchMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="NoLoadHipPitchVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="NoLoadHipPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
                   <parameter name="NoLoadHipPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
                   <parameter name="NoLoadKneePitchControlMode" type="EnumParameter" value="EFFORT" />
-                  <parameter name="NoLoadKneePitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="7.5" />
-                  <parameter name="NoLoadKneePitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="4.0" />
+                  <parameter name="NoLoadKneePitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="0.0" />
+                  <parameter name="NoLoadKneePitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="8.0" />
                   <parameter name="NoLoadKneePitchMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="NoLoadKneePitchVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="NoLoadKneePitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
                   <parameter name="NoLoadKneePitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
                   <parameter name="NoLoadAnklePitchControlMode" type="EnumParameter" value="EFFORT" />
-                  <parameter name="NoLoadAnklePitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="20.0" />
-                  <parameter name="NoLoadAnklePitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="3.0" />
+                  <parameter name="NoLoadAnklePitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="0.0" />
+                  <parameter name="NoLoadAnklePitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="15.0" />
                   <parameter name="NoLoadAnklePitchMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="NoLoadAnklePitchVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="NoLoadAnklePitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
                   <parameter name="NoLoadAnklePitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
                   <parameter name="NoLoadAnkleRollControlMode" type="EnumParameter" value="EFFORT" />
-                  <parameter name="NoLoadAnkleRollStiffness" type="DoubleParameter" min="0.0" max="10.0" value="30.0" />
-                  <parameter name="NoLoadAnkleRollDamping" type="DoubleParameter" min="0.0" max="10.0" value="3.0" />
+                  <parameter name="NoLoadAnkleRollStiffness" type="DoubleParameter" min="0.0" max="10.0" value="0.0" />
+                  <parameter name="NoLoadAnkleRollDamping" type="DoubleParameter" min="0.0" max="10.0" value="7.0" />
                   <parameter name="NoLoadAnkleRollMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="NoLoadAnkleRollVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="NoLoadAnkleRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
@@ -1168,6 +1168,9 @@
                   <parameter name="LoadedAnkleRollVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="LoadedAnkleRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
                   <parameter name="LoadedAnkleRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadhipPitchVelocityReferenceAlpha" type="DoubleParameter" min="0.0" max="1.0" value="0.5" />
+                  <parameter name="NoLoadkneePitchVelocityReferenceAlpha" type="DoubleParameter" min="0.0" max="1.0" value="0.5" />
+                  <parameter name="NoLoadanklePitchVelocityReferenceAlpha" type="DoubleParameter" min="0.0" max="1.0" value="0.5" />
                </registry>
                <registry name="WholeBodyControllerCore">
                   <registry name="WholeBodyFeedbackController">
