@@ -10,7 +10,7 @@ public class HumanoidKinematicsToolboxConfigurationCommand
    private boolean holdCurrentCenterOfMassXYPosition = true;
    private boolean enableAutoSupportPolygon = true;
    private boolean holdSupportRigidBodies = true;
-   private boolean enableMultiContactSupportRegionSolver = true;
+   private boolean enableMultiContactSupportRegionSolver = false;
 
    @Override
    public void clear()
@@ -19,7 +19,7 @@ public class HumanoidKinematicsToolboxConfigurationCommand
       holdCurrentCenterOfMassXYPosition = true;
       enableAutoSupportPolygon = true;
       holdSupportRigidBodies = true;
-      enableMultiContactSupportRegionSolver = true;
+      enableMultiContactSupportRegionSolver = false;
    }
 
    @Override
