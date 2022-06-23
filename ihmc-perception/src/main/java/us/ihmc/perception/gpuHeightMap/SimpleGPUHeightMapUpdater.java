@@ -8,7 +8,6 @@ import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
@@ -65,7 +64,7 @@ public class SimpleGPUHeightMapUpdater
       this.parameters = parameters;
 
       // the added two are for the borders
-      centerIndex = HeightMapTools.computeCenterIndex(parameters.mapLength, parameters.resolution);
+      centerIndex = HeightMapTools.computeCenterIndex(parameters.getMapLength(), parameters.getResolution());
       numberOfCells = 2 * centerIndex + 1;
    }
 
@@ -180,12 +179,12 @@ public class SimpleGPUHeightMapUpdater
 
    private void populateParametersBuffer()
    {
-      parametersBuffer.getBytedecoFloatBufferPointer().put(0, (float) parameters.resolution);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(1, (float) parameters.minValidDistance);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(2, (float) parameters.maxHeightRange);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(3, (float) parameters.rampedHeightRangeA);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(4, (float) parameters.rampedHeightRangeB);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(5, (float) parameters.rampedHeightRangeC);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(0, (float) parameters.getResolution());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(1, (float) parameters.getMinValidDistance());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(2, (float) parameters.getMaxHeightRange());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(3, (float) parameters.getRampedHeightRangeA());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(4, (float) parameters.getRampedHeightRangeB());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(5, (float) parameters.getRampedHeightRangeC());
       parametersBuffer.getBytedecoFloatBufferPointer().put(6, (float) centerIndex);
       parametersBuffer.getBytedecoFloatBufferPointer().put(7, (float) 1);
    }
@@ -276,7 +275,7 @@ public class SimpleGPUHeightMapUpdater
 
    private void updateMapObject(double centerX, double centerY)
    {
-      simpleGPUHeightMap.reshape(parameters.resolution, parameters.mapLength, centerX, centerY);
+      simpleGPUHeightMap.reshape(parameters.getResolution(), parameters.getMapLength(), centerX, centerY);
       simpleGPUHeightMap.updateFromFloatBufferImage(centroidXImage.getBytedecoOpenCVMat(),
                                                     centroidYImage.getBytedecoOpenCVMat(),
                                                     centroidZImage.getBytedecoOpenCVMat(),
