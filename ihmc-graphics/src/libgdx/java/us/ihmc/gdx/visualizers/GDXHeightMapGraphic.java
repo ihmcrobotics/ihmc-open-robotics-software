@@ -11,34 +11,30 @@ import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.HeightMapMessage;
+import imgui.type.ImBoolean;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.tools.AxisAngleTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
-import us.ihmc.idl.IDLSequence;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.heightMap.HeightMapTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.IntFunction;
 import java.util.function.IntToDoubleFunction;
-import java.util.function.Supplier;
 
 public class GDXHeightMapGraphic implements RenderableProvider
 {
@@ -47,15 +43,8 @@ public class GDXHeightMapGraphic implements RenderableProvider
    private volatile Runnable buildMeshAndCreateModelInstance = null;
    private ModelInstance modelInstance;
    private Model lastModel;
-
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
-
-   private boolean renderGroundPlane = true;
-
-   public void setRenderGroundPlane(boolean renderGroundPlane)
-   {
-      this.renderGroundPlane = renderGroundPlane;
-   }
+   private final ImBoolean renderGroundPlane = new ImBoolean(true);
 
    public void clear()
    {
@@ -72,8 +61,7 @@ public class GDXHeightMapGraphic implements RenderableProvider
 
    public void generateMeshesAsync(HeightMapMessage heightMapMessage)
    {
-      LogTools.info(
-            "Receiving height map with " + heightMapMessage.getKeys().size() + " cells, ground plane at " + heightMapMessage.getEstimatedGroundHeight());
+      LogTools.debug("Receiving height map with {} cells, ground plane at {}", heightMapMessage.getKeys().size(), heightMapMessage.getEstimatedGroundHeight());
 
       if (!isGeneratingMeshes.getAndSet(true))
       {
@@ -155,7 +143,7 @@ public class GDXHeightMapGraphic implements RenderableProvider
          meshBuilders.add(meshBuilder);
       }
 
-      if (renderGroundPlane)
+      if (renderGroundPlane.get())
       {
          GDXMultiColorMeshBuilder groundMeshBuilder = new GDXMultiColorMeshBuilder();
          double renderedGroundPlaneHeight = 0.005;
@@ -233,5 +221,15 @@ public class GDXHeightMapGraphic implements RenderableProvider
    public void destroy()
    {
       executorService.destroy();
+   }
+
+   public void setRenderGroundPlane(boolean renderGroundPlane)
+   {
+      this.renderGroundPlane.set(renderGroundPlane);
+   }
+
+   public ImBoolean getRenderGroundPlane()
+   {
+      return renderGroundPlane;
    }
 }
