@@ -7,6 +7,7 @@ import imgui.type.ImInt;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.PathTools;
 import us.ihmc.gdx.imgui.ImGuiPanel;
+import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.tools.property.*;
 
 import java.nio.file.FileVisitResult;
@@ -93,7 +94,7 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
       {
          if (propertyKey.getType().equals(Double.class))
          {
-            if (ImGui.inputDouble(propertyKey.getTitleCasedName(), doubleValues.get(propertyKey), 0.01, 0.5))
+            if (ImGuiTools.volatileInputDouble(propertyKey.getTitleCasedName(), doubleValues.get(propertyKey), 0.01, 0.5))
             {
                DoubleStoredPropertyKey key = (DoubleStoredPropertyKey) propertyKey;
                storedPropertySet.set(key, doubleValues.get(key).get());
@@ -102,7 +103,7 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
          }
          else if (propertyKey.getType().equals(Integer.class))
          {
-            if (ImGui.inputInt(propertyKey.getTitleCasedName(), integerValues.get(propertyKey), 1))
+            if (ImGuiTools.volatileInputInt(propertyKey.getTitleCasedName(), integerValues.get(propertyKey), 1))
             {
                IntegerStoredPropertyKey key = (IntegerStoredPropertyKey) propertyKey;
                storedPropertySet.set(key, integerValues.get(key).get());
