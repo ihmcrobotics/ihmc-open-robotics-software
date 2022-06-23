@@ -195,11 +195,11 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
    @AfterEach
    public void tearDown()
    {
-//      if (visualize && simulationTestingParameters.getKeepSCSUp())
-//      {
-//         scs.startSimulationThread();
-//         scs.waitUntilVisualizerDown();
-//      }
+      if (visualize && simulationTestingParameters.getKeepSCSUp())
+      {
+         scs.startSimulationThread();
+         scs.waitUntilVisualizerDown();
+      }
 
       if (mainRegistry != null)
       {

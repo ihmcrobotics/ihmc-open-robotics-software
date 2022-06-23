@@ -23,13 +23,13 @@ public class DetectedContactPoint
 
    public DetectedContactPoint(String nameSuffix, YoRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
    {
-      contactPointPosition = new YoFramePoint3D("cpPos_" + nameSuffix, ReferenceFrame.getWorldFrame(), registry);
-      contactPointNormal = new YoFrameVector3D("cpNorm_" + nameSuffix, ReferenceFrame.getWorldFrame(), registry);
+      contactPointPosition = new YoFramePoint3D("contactPosition_" + nameSuffix, ReferenceFrame.getWorldFrame(), registry);
+      contactPointNormal = new YoFrameVector3D("contactNormal_" + nameSuffix, ReferenceFrame.getWorldFrame(), registry);
 
-      YoGraphicPosition contactPointGraphic = new YoGraphicPosition("cpPosGraphic_" + nameSuffix, contactPointPosition, radius, color);
-      YoGraphicVector contactNormalGraphic = new YoGraphicVector("cpNormGraphic_" + nameSuffix, contactPointPosition, contactPointNormal, arrowScale, color);
-      graphicsListRegistry.registerYoGraphic("MC Contact Points", contactPointGraphic);
-      graphicsListRegistry.registerYoGraphic("MC Contact Points", contactNormalGraphic);
+      YoGraphicPosition contactPointGraphic = new YoGraphicPosition("contactPositionGraphic_" + nameSuffix, contactPointPosition, radius, color);
+      YoGraphicVector contactNormalGraphic = new YoGraphicVector("contactNormalGraphic" + nameSuffix, contactPointPosition, contactPointNormal, arrowScale, color);
+      graphicsListRegistry.registerYoGraphic("Kinematic-Detected Contact Points", contactPointGraphic);
+      graphicsListRegistry.registerYoGraphic("Kinematic-Detected Contact Points", contactNormalGraphic);
    }
 
    public void setVerticalContactNormal()
