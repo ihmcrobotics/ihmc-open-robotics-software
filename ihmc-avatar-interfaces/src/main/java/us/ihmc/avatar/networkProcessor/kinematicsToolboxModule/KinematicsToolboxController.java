@@ -65,12 +65,11 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxContactStateCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxSupportRegionCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxInputCollectionCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxOneDoFJointCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxPrivilegedConfigurationCommand;
@@ -94,10 +93,8 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.time.ThreadTimer;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -1113,10 +1110,10 @@ public class KinematicsToolboxController extends ToolboxController
          }
 
          // Contact state
-         if (command.hasConstactStateInput())
+         if (command.hasSupportRegionInput())
          {
-            KinematicsToolboxContactStateCommand contactStateInput = command.getContactStateInput();
-            processUserContactStateCommand(contactStateInput);
+            KinematicsToolboxSupportRegionCommand supportRegionInput = command.getSupportRegionInput();
+            processUserSupportRegionInput(supportRegionInput);
          }
       }
 
@@ -1143,14 +1140,14 @@ public class KinematicsToolboxController extends ToolboxController
 
    private void consumeUserContactStateCommands()
    {
-      if (commandInputManager.isNewCommandAvailable(KinematicsToolboxContactStateCommand.class))
+      if (commandInputManager.isNewCommandAvailable(KinematicsToolboxSupportRegionCommand.class))
       {
-         KinematicsToolboxContactStateCommand command = commandInputManager.pollNewestCommand(KinematicsToolboxContactStateCommand.class);
-         processUserContactStateCommand(command);
+         KinematicsToolboxSupportRegionCommand command = commandInputManager.pollNewestCommand(KinematicsToolboxSupportRegionCommand.class);
+         processUserSupportRegionInput(command);
       }
    }
 
-   private void processUserContactStateCommand(KinematicsToolboxContactStateCommand command)
+   private void processUserSupportRegionInput(KinematicsToolboxSupportRegionCommand command)
    {
       isUserProvidingSupportPolygon.set(command.getNumberOfContacts() > 0);
       if (command.getCenterOfMassMargin() >= 0.0)
@@ -1160,7 +1157,7 @@ public class KinematicsToolboxController extends ToolboxController
 
       for (int i = 0; i < command.getNumberOfContacts(); i++)
       {
-         contactPointLocations.add(command.getContactPoint(i).getPosition());
+         contactPointLocations.add(command.getContactPoint(i).getVertexPosition());
       }
 
       if (!contactPointLocations.isEmpty())

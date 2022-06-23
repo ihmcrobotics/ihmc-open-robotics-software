@@ -13,17 +13,11 @@ import java.util.Random;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import controller_msgs.msg.dds.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
-import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
-import controller_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage;
-import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
-import controller_msgs.msg.dds.MultiContactBalanceStatus;
-import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
@@ -100,7 +94,7 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final MaterialDefinition ghostMaterial = new MaterialDefinition(ColorDefinitions.Yellow().derive(0, 1, 1, 0.25));
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-   private static final boolean visualize = simulationTestingParameters.getCreateGUI();
+   private static final boolean visualize = false; // simulationTestingParameters.getCreateGUI();
    static
    {
       simulationTestingParameters.setDataBufferSize(1 << 16);
@@ -201,11 +195,11 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
    @AfterEach
    public void tearDown()
    {
-      if (visualize && simulationTestingParameters.getKeepSCSUp())
-      {
-         scs.startSimulationThread();
-         scs.waitUntilVisualizerDown();
-      }
+//      if (visualize && simulationTestingParameters.getKeepSCSUp())
+//      {
+//         scs.startSimulationThread();
+//         scs.waitUntilVisualizerDown();
+//      }
 
       if (mainRegistry != null)
       {
@@ -604,6 +598,9 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
       centerOfMassMessage.getSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, false));
       centerOfMassMessage.getWeights().set(MessageTools.createWeightMatrix3DMessage(0.1));
 
+      HumanoidKinematicsToolboxConfigurationMessage configurationMessage = new HumanoidKinematicsToolboxConfigurationMessage();
+      configurationMessage.setEnableMultiContactSupportRegionSolver(true);
+
       for (RobotSide side : RobotSide.values())
       {
          footMessages.put(side,
@@ -629,6 +626,7 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
       commandInputManager.submitMessage(privilegedConfigurationMessage);
       commandInputManager.submitMessage(centerOfMassMessage);
       commandInputManager.submitMessage(chestOrientationObjective);
+      commandInputManager.submitMessage(configurationMessage);
 
       RobotConfigurationData robotConfigurationData = extractRobotConfigurationData(toolboxController.getDesiredFullRobotModel());
       toolboxController.updateRobotConfigurationData(robotConfigurationData);
