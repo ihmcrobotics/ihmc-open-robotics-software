@@ -115,7 +115,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
       this.target = target;
       this.robotVersion = robotVersion;
 
-      controllerDT = target == RobotTarget.SCS ? 0.004 : 0.006;
+      controllerDT = 0.004;
       estimatorDT = 0.002;
       simulateDT = estimatorDT / 3.0;
    }
