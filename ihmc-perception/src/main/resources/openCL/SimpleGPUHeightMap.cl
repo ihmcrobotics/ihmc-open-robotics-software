@@ -118,7 +118,10 @@ float3 project_from_image_frame_to_camera_frame(float3 point_in_image_frame)
 float3 get_point_from_image(read_only image2d_t depth_image, int x, int y, global float* params)
 {
     int2 key = (int2)(x,y);
-    float Z = ((float)read_imageui(depth_image, key).x)/(float) 1000;
+//    float Z = ((float)read_imageui(depth_image, key).x)/(float) 1000;
+    float Z = ((float)read_imagef(depth_image, key).x);
+
+//    printf("Z: %.3f\n", Z);
 
     if (Z > 0.1f)
     {
@@ -160,6 +163,9 @@ void kernel addPointsFromImageKernel(read_only image2d_t depth_image,
     int image_y = get_global_id(1);
 
     float3 point_in_camera_frame = get_point_from_image(depth_image, image_x, image_y, intrinsics);
+
+//    printf("PointInCameraFrame(%.3lf,%.3lf,%.3lf), \n", point_in_camera_frame.x, point_in_camera_frame.y, point_in_camera_frame.z);
+
     float3 sensor = (float3) (localization[tx], localization[ty], localization[tz]);
     float3 rx = (float3) (localization[r00], localization[r01], localization[r02]);
     float3 ry = (float3) (localization[r10], localization[r11], localization[r12]);

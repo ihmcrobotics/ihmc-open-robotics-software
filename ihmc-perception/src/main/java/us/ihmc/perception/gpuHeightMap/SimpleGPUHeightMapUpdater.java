@@ -30,7 +30,7 @@ public class SimpleGPUHeightMapUpdater
    private _cl_mem counterData;
    private _cl_mem centroidData;
 
-   private BytedecoImage depthImage;
+   private BytedecoImage depthImageMeters;
    private BytedecoImage centroidXImage;
    private BytedecoImage centroidYImage;
    private BytedecoImage centroidZImage;
@@ -55,7 +55,6 @@ public class SimpleGPUHeightMapUpdater
    private float cx;
    private float cy;
 
-   private ByteBuffer backingByteBuffer;
    private int centerIndex;
 
    public SimpleGPUHeightMapUpdater(SimpleGPUHeightMapParameters parameters)
@@ -68,9 +67,8 @@ public class SimpleGPUHeightMapUpdater
       numberOfCells = 2 * centerIndex + 1;
    }
 
-   public void create(int imageWidth, int imageHeight, ByteBuffer sourceData, double fx, double fy, double cx, double cy)
+   public void create(int imageWidth, int imageHeight, ByteBuffer source16UC1DepthImageByteBuffer, double fx, double fy, double cx, double cy)
    {
-      this.backingByteBuffer = sourceData;
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
 
@@ -80,7 +78,7 @@ public class SimpleGPUHeightMapUpdater
       this.cy = (float) cy;
 
       // todo this depth image probably doesn't need to be created.
-      this.depthImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_16UC1, sourceData);
+      this.depthImageMeters = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1, source16UC1DepthImageByteBuffer);
 
       // these are the outputs structure of the map
       this.centroidXImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_32FC1);
@@ -118,7 +116,7 @@ public class SimpleGPUHeightMapUpdater
       varianceData.releaseReference();
       counterData.releaseReference();
 
-      depthImage.destroy(openCLManager);
+      depthImageMeters.destroy(openCLManager);
       centroidXImage.destroy(openCLManager);
       centroidYImage.destroy(openCLManager);
       centroidZImage.destroy(openCLManager);
@@ -133,7 +131,7 @@ public class SimpleGPUHeightMapUpdater
 
    public void computeFromDepthMap(RigidBodyTransformReadOnly transformToWorld)
    {
-      populateLocalizaitonBuffer(transformToWorld.getTranslation().getX32(), transformToWorld.getTranslation().getY32(), transformToWorld);
+      populateLocalizationBuffer(transformToWorld.getTranslation().getX32(), transformToWorld.getTranslation().getY32(), transformToWorld);
       populateParametersBuffer();
       populateIntrinsicsBuffer();
 
@@ -149,7 +147,7 @@ public class SimpleGPUHeightMapUpdater
 
    private final RotationMatrixBasics rotation = new RotationMatrix();
 
-   private void populateLocalizaitonBuffer(float centerX, float centerY, RigidBodyTransformReadOnly transformToDesiredFrame)
+   private void populateLocalizationBuffer(float centerX, float centerY, RigidBodyTransformReadOnly transformToDesiredFrame)
    {
       rotation.set(transformToDesiredFrame.getRotation());
 
@@ -205,7 +203,7 @@ public class SimpleGPUHeightMapUpdater
          counterData = openCLManager.createBufferObject(cellsSize, null);
 
          intrinsicsBuffer.createOpenCLBufferObject(openCLManager);
-         depthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
+         depthImageMeters.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
          centroidXImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
          centroidYImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
          centroidZImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
@@ -217,7 +215,7 @@ public class SimpleGPUHeightMapUpdater
       }
       else
       {
-         depthImage.writeOpenCLImage(openCLManager);
+         depthImageMeters.writeOpenCLImage(openCLManager);
 
          localizationBuffer.writeOpenCLBufferObject(openCLManager);
          parametersBuffer.writeOpenCLBufferObject(openCLManager);
@@ -229,7 +227,7 @@ public class SimpleGPUHeightMapUpdater
       openCLManager.setKernelArgument(zeroValuesKernel, 2, varianceData);
       openCLManager.setKernelArgument(zeroValuesKernel, 3, counterData);
 
-      openCLManager.setKernelArgument(addPointsFromImageKernel, 0, depthImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(addPointsFromImageKernel, 0, depthImageMeters.getOpenCLImageObject());
       openCLManager.setKernelArgument(addPointsFromImageKernel, 1, localizationBuffer.getOpenCLBufferObject());
       openCLManager.setKernelArgument(addPointsFromImageKernel, 2, parametersBuffer.getOpenCLBufferObject());
       openCLManager.setKernelArgument(addPointsFromImageKernel, 3, intrinsicsBuffer.getOpenCLBufferObject());

@@ -15,10 +15,12 @@ import imgui.type.ImBoolean;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -45,6 +47,7 @@ public class GDXHeightMapGraphic implements RenderableProvider
    private Model lastModel;
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
    private final ImBoolean renderGroundPlane = new ImBoolean(true);
+   private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
    public void clear()
    {
@@ -98,6 +101,8 @@ public class GDXHeightMapGraphic implements RenderableProvider
                      heightMapMessage.getEstimatedGroundHeight());
    }
 
+   RotationMatrix rotationMatrix = new RotationMatrix();
+
    public synchronized void generateMeshes(IntToDoubleFunction heightsProvider,
                                            IntToDoubleFunction variancesProvider,
                                            IntFunction<Integer> keysProvider,
@@ -138,9 +143,21 @@ public class GDXHeightMapGraphic implements RenderableProvider
          Color color = Color.OLIVE;
          if (variancesProvider != null)
             color = computeColor(perfectColor, terribleColor, MathTools.clamp(Math.abs(variancesProvider.applyAsDouble(i) / 0.05), 0.0, 1.0));
-         RigidBodyTransformReadOnly transform = generateTransformForHeightPatch(x, y, renderedHeight, normal);
-         meshBuilder.addPolygon(transform, localPoints, color);
-         meshBuilders.add(meshBuilder);
+         RigidBodyTransform transform = generateTransformForHeightPatch(x, y, renderedHeight, normal);
+         if (!transform.containsNaN())
+         {
+            transformToWorld.transform(transform);
+
+            if (!transform.getRotation().geometricallyEquals(rotationMatrix, Math.PI / 2.0))
+            {
+               transform.getRotation().appendPitchRotation(Math.PI);
+            }
+
+            meshBuilder.addPolygon(transform, localPoints, color);
+//               transform.getRotation().appendPitchRotation(Math.PI);
+//            meshBuilder.addPolygon(transform, localPoints, color);
+            meshBuilders.add(meshBuilder);
+         }
       }
 
       if (renderGroundPlane.get())
@@ -198,7 +215,7 @@ public class GDXHeightMapGraphic implements RenderableProvider
       return polygon;
    }
 
-   public RigidBodyTransformReadOnly generateTransformForHeightPatch(double x, double y, double z, Vector3DReadOnly normal)
+   public RigidBodyTransform generateTransformForHeightPatch(double x, double y, double z, Vector3DReadOnly normal)
    {
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.getTranslation().set(x, y, z);
@@ -231,5 +248,10 @@ public class GDXHeightMapGraphic implements RenderableProvider
    public ImBoolean getRenderGroundPlane()
    {
       return renderGroundPlane;
+   }
+
+   public RigidBodyTransform getTransformToWorld()
+   {
+      return transformToWorld;
    }
 }
