@@ -240,4 +240,9 @@ public class SimpleGPUHeightMap
 
       return message;
    }
+
+   public RecyclingArrayList<Point3DBasics> getCentroids()
+   {
+      return centroids;
+   }
 }

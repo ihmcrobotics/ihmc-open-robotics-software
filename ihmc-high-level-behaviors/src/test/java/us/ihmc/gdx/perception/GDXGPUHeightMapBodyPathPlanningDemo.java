@@ -4,6 +4,7 @@ import imgui.ImGui;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.gdx.GDXPointCloudRenderer;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
@@ -35,6 +36,7 @@ public class GDXGPUHeightMapBodyPathPlanningDemo
    private GDXPose3DGizmo ousterPoseGizmo = new GDXPose3DGizmo();
    private GDXEnvironmentBuilder environmentBuilder;
    private GDXHeightMapGraphic heightMapGraphic;
+   private SimpleGPUHeightMapParameters simpleGPUHeightMapParameters;
    private SimpleGPUHeightMapUpdater simpleGPUHeightMapUpdater;
    private RosMainNode ros1Node;
    private GDXPose3DGizmo heightMapPoseGizmo;
@@ -47,7 +49,6 @@ public class GDXGPUHeightMapBodyPathPlanningDemo
          public void create()
          {
             nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
-
             baseUI.create();
 
             environmentBuilder = new GDXEnvironmentBuilder(baseUI.get3DSceneManager());
@@ -64,13 +65,13 @@ public class GDXGPUHeightMapBodyPathPlanningDemo
             baseUI.get3DSceneManager().addRenderableProvider(robotInteractableReferenceFrame::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
             ousterPoseGizmo = new GDXPose3DGizmo(robotInteractableReferenceFrame.getRepresentativeReferenceFrame());
             ousterPoseGizmo.create(baseUI.get3DSceneManager().getCamera3D());
-            ousterPoseGizmo.setResizeAutomatically(false);
+            ousterPoseGizmo.setResizeAutomatically(true);
             baseUI.addImGui3DViewPickCalculator(ousterPoseGizmo::calculate3DViewPick);
             baseUI.addImGui3DViewInputProcessor(ousterPoseGizmo::process3DViewInput);
             baseUI.get3DSceneManager().addRenderableProvider(ousterPoseGizmo, GDXSceneLevel.VIRTUAL);
             ousterPoseGizmo.getTransformToParent().appendPitchRotation(Math.toRadians(60.0));
 
-            ros1Node = RosTools.createRosNode(NetworkParameters.getROSURI(), "height_map_planning_demo_ui");
+//            ros1Node = RosTools.createRosNode(NetworkParameters.getROSURI(), "height_map_planning_demo_ui");
          }
 
          @Override
@@ -81,26 +82,26 @@ public class GDXGPUHeightMapBodyPathPlanningDemo
                if (nativesLoadedActivator.isNewlyActivated())
                {
                   ouster = GDXSimulatedSensorFactory.createOusterLidar(ousterPoseGizmo.getGizmoFrame(), () -> 0L);
-                  ouster.setupForROS1PointCloud(ros1Node, RosTools.OUSTER_POINT_CLOUD);
+//                  ouster.setupForROS1PointCloud(ros1Node, RosTools.OUSTER_POINT_CLOUD);
                   baseUI.getImGuiPanelManager().addPanel(ouster);
                   ouster.setSensorEnabled(true);
                   ouster.setRenderPointCloudDirectly(true);
-                  ouster.setPublishPointCloudROS1(true);
+//                  ouster.setPublishPointCloudROS1(true);
                   baseUI.get3DSceneManager().addRenderableProvider(ouster, GDXSceneLevel.VIRTUAL);
 
                   heightMapPoseGizmo = new GDXPose3DGizmo();
                   heightMapPoseGizmo.create(baseUI.get3DSceneManager().getCamera3D());
                   heightMapPoseGizmo.getTransformToParent().getTranslation().set(1.7, 0.0, 0.0);
-                  heightMapPoseGizmo.setResizeAutomatically(false);
+                  heightMapPoseGizmo.setResizeAutomatically(true);
                   baseUI.addImGui3DViewPickCalculator(heightMapPoseGizmo::calculate3DViewPick);
                   baseUI.addImGui3DViewInputProcessor(heightMapPoseGizmo::process3DViewInput);
                   baseUI.get3DSceneManager().addRenderableProvider(heightMapPoseGizmo, GDXSceneLevel.VIRTUAL);
 
-                  SimpleGPUHeightMapParameters parameters = new SimpleGPUHeightMapParameters();
+                  simpleGPUHeightMapParameters = new SimpleGPUHeightMapParameters();
                   ImGuiStoredPropertySetTuner heightMapParameterTuner = new ImGuiStoredPropertySetTuner("Height Map Parameters");
-                  heightMapParameterTuner.create(parameters, SimpleGPUHeightMapParameters.keys, () -> { });
+                  heightMapParameterTuner.create(simpleGPUHeightMapParameters, SimpleGPUHeightMapParameters.keys, () -> { });
                   baseUI.getImGuiPanelManager().addPanel(heightMapParameterTuner);
-                  simpleGPUHeightMapUpdater = new SimpleGPUHeightMapUpdater(parameters);
+                  simpleGPUHeightMapUpdater = new SimpleGPUHeightMapUpdater(simpleGPUHeightMapParameters);
                   simpleGPUHeightMapUpdater.create(ouster.getLowLevelSimulator().getImageWidth(),
                                                    ouster.getLowLevelSimulator().getImageHeight(),
                                                    ouster.getLowLevelSimulator().getMetersDepthFloatBuffer(),
@@ -109,18 +110,22 @@ public class GDXGPUHeightMapBodyPathPlanningDemo
                                                    ouster.getDepthCameraIntrinsics().getCx(),
                                                    ouster.getDepthCameraIntrinsics().getCy());
 
+
+
                   heightMapGraphic = new GDXHeightMapGraphic();
                   baseUI.get3DSceneManager().addRenderableProvider(heightMapGraphic, GDXSceneLevel.VIRTUAL);
                   baseUI.getImGuiPanelManager().addPanel("Height Map", this::renderHeightMapImGuiWidgets);
 
-                  ros1Node.execute();
+//                  ros1Node.execute();
                   baseUI.getPerspectiveManager().reloadPerspective();
                }
 
                ouster.render(baseUI.get3DSceneManager());
                RigidBodyTransform heightMapToWorld = heightMapPoseGizmo.getGizmoFrame().getTransformToWorldFrame();
                RigidBodyTransform sensorTransformToWorld = ousterPoseGizmo.getGizmoFrame().getTransformToWorldFrame();
-               simpleGPUHeightMapUpdater.computeFromDepthMap(sensorTransformToWorld);
+               simpleGPUHeightMapUpdater.computeFromDepthMap((float) heightMapToWorld.getTranslationX(),
+                                                             (float) heightMapToWorld.getTranslationY(),
+                                                             sensorTransformToWorld);
                SimpleGPUHeightMap heightMap = simpleGPUHeightMapUpdater.getHeightMap();
 
                heightMapGraphic.getTransformToWorld().set(new RigidBodyTransform());

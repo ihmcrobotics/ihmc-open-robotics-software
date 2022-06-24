@@ -131,13 +131,18 @@ public class SimpleGPUHeightMapUpdater
 
    public void computeFromDepthMap(RigidBodyTransformReadOnly transformToWorld)
    {
-      populateLocalizationBuffer(transformToWorld.getTranslation().getX32(), transformToWorld.getTranslation().getY32(), transformToWorld);
+      computeFromDepthMap(transformToWorld.getTranslation().getX32(), transformToWorld.getTranslation().getY32(), transformToWorld);
+   }
+
+   public void computeFromDepthMap(float centerX, float centerY, RigidBodyTransformReadOnly transformToWorld)
+   {
+      populateLocalizationBuffer(centerX, centerY, transformToWorld);
       populateParametersBuffer();
       populateIntrinsicsBuffer();
 
       updateMapWithKernel();
 
-      updateMapObject(transformToWorld.getTranslation().getX32(), transformToWorld.getTranslation().getY32());
+      updateMapObject(centerX, centerY);
    }
 
    public SimpleGPUHeightMap getHeightMap()
