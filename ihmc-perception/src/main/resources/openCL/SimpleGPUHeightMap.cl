@@ -55,6 +55,13 @@ float point_sensor_distance(float3 point, float3 sensor)
     return dot(delta, delta);
 }
 
+/*
+ * Resolution is the size of a "pixel" in the height map.
+ * Center index is the index from the edge of the height map region.
+ * Center is the distance in meters from world to the center of the height map region.
+ * Coordinate is the distance in meters from world to the "pixel" in the height map.
+ * Therefore, we get the index of the "pixel" (x, y, bottom left corner) from a world point.
+ */
 int coordinate_to_index(float coordinate, float center, float resolution, int centerIndex)
 {
     int index = ((int) round((coordinate - center) / resolution)) + centerIndex;
@@ -112,7 +119,7 @@ float3 back_project_to_image_frame(int2 pos, float Z, global float* params)
 
 float3 project_from_image_frame_to_camera_frame(float3 point_in_image_frame)
 {
-    return (float3) (point_in_image_frame.z, -point_in_image_frame.x, point_in_image_frame.y);
+    return (float3) (point_in_image_frame.z, -point_in_image_frame.x, -point_in_image_frame.y);
 }
 
 float3 get_point_from_image(read_only image2d_t depth_image, int x, int y, global float* params)
