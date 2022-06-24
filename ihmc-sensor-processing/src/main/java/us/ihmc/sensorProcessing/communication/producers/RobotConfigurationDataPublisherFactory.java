@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -49,6 +50,10 @@ public class RobotConfigurationDataPublisherFactory
 
    private final RequiredFactoryField<RealtimeROS2Node> realtimeROS2NodeField = new RequiredFactoryField<>("realtimeROS2Node");
    private final RequiredFactoryField<ROS2Topic<?>> outputTopicField = new RequiredFactoryField<>("outputTopic");
+
+   private List<ReferenceFrame> frameDataToPublish = new ArrayList<>();
+
+   //   private final RequiredFactoryField<List<? extends ReferenceFrame>> frameData = new RequiredFactoryField<>("referenceFrameData");
 
    public RobotConfigurationDataPublisherFactory()
    {
@@ -111,8 +116,10 @@ public class RobotConfigurationDataPublisherFactory
     * @param forceSensorDataHolder to get the force sensor data.
     * @param imuSensorOutputs      to get the IMU data.
     */
-   public void setSensorSource(SensorTimestampHolder sensorTimestampHolder, FloatingJointStateReadOnly rootJointStateOutput,
-                               List<? extends OneDoFJointStateReadOnly> jointSensorOutputs, ForceSensorDataHolderReadOnly forceSensorDataHolder,
+   public void setSensorSource(SensorTimestampHolder sensorTimestampHolder,
+                               FloatingJointStateReadOnly rootJointStateOutput,
+                               List<? extends OneDoFJointStateReadOnly> jointSensorOutputs,
+                               ForceSensorDataHolderReadOnly forceSensorDataHolder,
                                List<? extends IMUSensorReadOnly> imuSensorOutputs)
    {
       oneDoFJointSensorData.set(jointSensorOutputs);
@@ -204,17 +211,20 @@ public class RobotConfigurationDataPublisherFactory
    public RobotConfigurationDataPublisher createRobotConfigurationDataPublisher()
    {
       FactoryTools.checkAllFactoryFieldsAreSet(this);
-
+      
+      frameDataToPublish.clear();
       List<OneDoFJointStateReadOnly> jointSensorDataToPublish = filterJointSensorDataToPublish();
       List<IMUSensorReadOnly> imuSensorDataToPublish = filterIMUSensorDataToPublish();
       List<ForceSensorDataReadOnly> forceSensorDataToPublish = filterForceSensorDataToPublish();
+      
 
       RobotConfigurationDataPublisher publisher = new RobotConfigurationDataPublisher(realtimeROS2NodeField.get(),
                                                                                       outputTopicField.get(),
                                                                                       rootJointSensorData.get(),
                                                                                       jointSensorDataToPublish,
                                                                                       imuSensorDataToPublish,
-                                                                                      forceSensorDataToPublish,
+                                                                                      forceSensorDataToPublish,                                                                                      
+                                                                                      frameDataToPublish,
                                                                                       timestampHolder.get(),
                                                                                       robotMotionStatusHolderField.get(),
                                                                                       publishPeriod.get());
@@ -236,6 +246,10 @@ public class RobotConfigurationDataPublisherFactory
          Optional<? extends OneDoFJointStateReadOnly> sensorDataOptional = allSensorData.stream()
                                                                                         .filter(sensorData -> sensorData.getJointName().equals(joint.getName()))
                                                                                         .findFirst();
+         // frame data > >
+         ReferenceFrame ref = joint.getFrameBeforeJoint();
+         frameDataToPublish.add(ref);
+         // < < frame data
 
          if (sensorDataOptional.isPresent())
          {
@@ -273,6 +287,11 @@ public class RobotConfigurationDataPublisherFactory
                                                                                  .filter(sensorData -> sensorData.getSensorName().equals(imu.getName()))
                                                                                  .findFirst();
 
+         // frame data > >
+         ReferenceFrame imuFrame = imu.getIMUFrame();
+         frameDataToPublish.add(imuFrame);
+         // < < frame data
+
          if (sensorDataOptional.isPresent())
          {
             sensorDataToPublish.add(sensorDataOptional.get());
@@ -306,6 +325,11 @@ public class RobotConfigurationDataPublisherFactory
       for (ForceSensorDefinition forceSensor : forceSensorSelection)
       {
          ForceSensorDataReadOnly sensorData = allSensorData.get(forceSensor);
+
+         // frame data > >
+         ReferenceFrame forceSensorFrame = forceSensor.getSensorFrame();
+         frameDataToPublish.add(forceSensorFrame);
+         // < < frame data
 
          if (sensorData != null)
          {

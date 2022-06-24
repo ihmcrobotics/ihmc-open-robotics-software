@@ -1,13 +1,16 @@
 package us.ihmc.sensorProcessing.communication.producers;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import controller_msgs.msg.dds.IMUPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.RobotFrameData;
 import controller_msgs.msg.dds.SpatialVectorMessage;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.robotController.RawOutputWriter;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.ros2.ROS2Topic;
@@ -26,11 +29,17 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
    private final List<? extends OneDoFJointStateReadOnly> jointSensorData;
    private final List<? extends IMUSensorReadOnly> imuSensorData;
    private final List<? extends ForceSensorDataReadOnly> forceSensorData;
+   private final List<? extends ReferenceFrame> frameData;
+
+   private List<RobotFrameDataPublisher> robotFrameDataPublishers = new ArrayList<>();
    private final SensorTimestampHolder timestampHolder;
    private final RobotMotionStatusHolder robotMotionStatusHolder;
 
    private final RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
    private final IHMCRealtimeROS2Publisher<RobotConfigurationData> robotConfigurationDataPublisher;
+
+   //   private final RobotFrameData robotFrameData = new RobotFrameData();
+//   private final IHMCRealtimeROS2Publisher<RobotFrameData> robotFrameDataPublisher;
 
    private final long publishPeriod;
    private long lastPublishTime = -1;
@@ -51,21 +60,34 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
     * @param robotMotionStatusHolder the data provider for the robot motion status.
     * @param publishPeriod           period in nanoseconds to publish.
     */
-   public RobotConfigurationDataPublisher(RealtimeROS2Node realtimeROS2Node, ROS2Topic<?> outputTopic, FloatingJointStateReadOnly rootJointSensorData,
-                                          List<? extends OneDoFJointStateReadOnly> jointSensorData, List<? extends IMUSensorReadOnly> imuSensorData,
-                                          List<? extends ForceSensorDataReadOnly> forceSensorData, SensorTimestampHolder timestampHolder,
-                                          RobotMotionStatusHolder robotMotionStatusHolder, long publishPeriod)
+   public RobotConfigurationDataPublisher(RealtimeROS2Node realtimeROS2Node,
+                                          ROS2Topic<?> outputTopic,
+                                          FloatingJointStateReadOnly rootJointSensorData,
+                                          List<? extends OneDoFJointStateReadOnly> jointSensorData,
+                                          List<? extends IMUSensorReadOnly> imuSensorData,
+                                          List<? extends ForceSensorDataReadOnly> forceSensorData,
+                                          List<? extends ReferenceFrame> frameData,
+                                          SensorTimestampHolder timestampHolder,
+                                          RobotMotionStatusHolder robotMotionStatusHolder,
+                                          long publishPeriod)
    {
       this.rootJointSensorData = rootJointSensorData;
       this.jointSensorData = jointSensorData;
       this.imuSensorData = imuSensorData;
       this.forceSensorData = forceSensorData;
+      this.frameData = frameData;
       this.timestampHolder = timestampHolder;
       this.robotMotionStatusHolder = robotMotionStatusHolder;
       this.publishPeriod = publishPeriod;
 
       robotConfigurationData.setJointNameHash(RobotConfigurationDataFactory.calculateJointNameHash(jointSensorData, forceSensorData, imuSensorData));
       robotConfigurationDataPublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, RobotConfigurationData.class, outputTopic);
+
+      for (ReferenceFrame frame : frameData)
+      {
+         System.out.println("current frame name : " + frame.getName());
+         robotFrameDataPublishers.add(new RobotFrameDataPublisher(frame, realtimeROS2Node, outputTopic));
+      }
    }
 
    @Override
@@ -150,6 +172,31 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
       MessageTools.setRobotConfigurationDataSequenceId(robotConfigurationData, this.sequenceId);
 
       robotConfigurationDataPublisher.publish(robotConfigurationData);
+
+      // - - - > Frame data
+
+      // time
+      //      robotFrameData.setTimestamp(timestampHolder.getSyncTimestamp());
+      //
+      //      if (frameData != null)
+      //      {
+      //         robotFrameData.getFrameName().clear();
+      //         for (int i = 0; i < frameData.size(); ++i)
+      //         {
+      //            ReferenceFrame frame = frameData.get(i);
+      //
+      //            robotFrameData.getFrameName().add(frame.getName());
+      //            robotFrameData.getFramePoseInWorld().set(frame.getTransformToWorldFrame());
+      //         }
+      //      }
+      //
+      //      robotFrameDataPublisher.publish(robotFrameData);
+
+      for (RobotFrameDataPublisher rfdPub : robotFrameDataPublishers)
+      {
+         rfdPub.publish();
+      }
+
    }
 
    @Override
