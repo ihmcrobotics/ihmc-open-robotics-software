@@ -53,9 +53,12 @@ public class JointspacePositionControllerState extends HighLevelControllerState
 
    private final RecyclingArrayList<JointspaceTrajectoryStatusMessage> combinedStatuses = new RecyclingArrayList<>(JointspaceTrajectoryStatusMessage::new);
 
-   public JointspacePositionControllerState(HighLevelControllerName stateEnum, CommandInputManager commandInputManager,
-                                            StatusMessageOutputManager statusOutputManager, OneDoFJointBasics[] controlledJoints,
-                                            HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
+   public JointspacePositionControllerState(HighLevelControllerName stateEnum,
+                                            CommandInputManager commandInputManager,
+                                            StatusMessageOutputManager statusOutputManager,
+                                            OneDoFJointBasics[] controlledJoints,
+                                            HighLevelHumanoidControllerToolbox controllerToolbox,
+                                            HighLevelControllerParameters highLevelControllerParameters,
                                             JointDesiredOutputListReadOnly highLevelControllerOutput)
    {
       super(stateEnum, highLevelControllerParameters, controlledJoints);

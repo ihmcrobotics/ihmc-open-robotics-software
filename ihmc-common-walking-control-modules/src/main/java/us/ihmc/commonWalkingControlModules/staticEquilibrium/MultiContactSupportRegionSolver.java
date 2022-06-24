@@ -35,7 +35,7 @@ import static us.ihmc.commonWalkingControlModules.staticEquilibrium.ContactPoint
  */
 public class MultiContactSupportRegionSolver
 {
-   static final int numberOfDirectionsToOptimize = 32;
+   private static final int defaultNumberOfDirectionsToOptimize = 16;
    static final double rhoMax = 2.0;
    static final double mass = 1.0;
 
@@ -71,24 +71,21 @@ public class MultiContactSupportRegionSolver
    private final YoFramePoint3D averageContactPointPosition = new YoFramePoint3D("averageContactPointPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D directionToOptimize = new YoFrameVector3D("directionToOptimize", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D optimizedCoM = new YoFramePoint3D("optimizedCoM", ReferenceFrame.getWorldFrame(), registry);
-
-   private static final List<Vector2D> directionsToOptimize = new ArrayList<>();
-
-   static
-   {
-      double dTheta = 2.0 * Math.PI / numberOfDirectionsToOptimize;
-      for (int i = 0; i < numberOfDirectionsToOptimize; i++)
-      {
-         directionsToOptimize.add(new Vector2D(Math.cos(i * dTheta), Math.sin(i * dTheta)));
-      }
-   }
+   private final List<Vector2D> directionsToOptimize = new ArrayList<>();
 
    public MultiContactSupportRegionSolver()
+   {
+      this(defaultNumberOfDirectionsToOptimize);
+   }
+
+   public MultiContactSupportRegionSolver(int numberOfDirectionsToOptimize)
    {
       for (int i = 0; i < MultiContactSupportRegionSolverInput.maxContactPoints; i++)
       {
          contactPoints.add(new ContactPoint(i, registry, graphicsListRegistry));
       }
+
+      setNumberOfDirectionsToOptimize(numberOfDirectionsToOptimize);
 
       YoGraphicVector directionToOptimizeGraphic = new YoGraphicVector("directionToOptimizeGraphic", averageContactPointPosition, directionToOptimize, 0.5);
       graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), directionToOptimizeGraphic);
@@ -179,6 +176,21 @@ public class MultiContactSupportRegionSolver
          averageContactPointPosition.add(input.getContactPointPositions().get(i));
       }
       averageContactPointPosition.scale(1.0 / input.getNumberOfContacts());
+   }
+
+   public void setNumberOfDirectionsToOptimize(int numberOfDirectionsToOptimize)
+   {
+      if (numberOfDirectionsToOptimize == directionsToOptimize.size())
+      {
+         return;
+      }
+
+      directionsToOptimize.clear();
+      double deltaAngle = 2.0 * Math.PI / numberOfDirectionsToOptimize;
+      for (int i = 0; i < numberOfDirectionsToOptimize; i++)
+      {
+         directionsToOptimize.add(new Vector2D(Math.cos(i * deltaAngle), Math.sin(i * deltaAngle)));
+      }
    }
 
    public boolean solve()
