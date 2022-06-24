@@ -163,7 +163,7 @@ public class GDXLowLevelDepthSensorSimulator
          pointCloudRenderingBuffer = new OpenCLFloatBuffer(numberOfPoints * 8, pointCloudRenderingBufferToPack);
       else
          pointCloudRenderingBuffer = new OpenCLFloatBuffer(1);
-      parametersBuffer = new OpenCLFloatBuffer(31);
+      parametersBuffer = new OpenCLFloatBuffer(28);
 
       // TODO these panels should be removable to a separate class
       depthPanel = new GDXCVImagePanel(depthWindowName, imageWidth, imageHeight);
@@ -278,12 +278,9 @@ public class GDXLowLevelDepthSensorSimulator
       parametersBuffer.getBytedecoFloatBufferPointer().put(22, (float) transformToWorldFrame.getRotation().getM20());
       parametersBuffer.getBytedecoFloatBufferPointer().put(23, (float) transformToWorldFrame.getRotation().getM21());
       parametersBuffer.getBytedecoFloatBufferPointer().put(24, (float) transformToWorldFrame.getRotation().getM22());
-      parametersBuffer.getBytedecoFloatBufferPointer().put(25, camera.position.x);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(26, camera.position.y);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(27, camera.position.z);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(28, noiseAmplitudeAtMinRange);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(29, noiseAmplitudeAtMaxRange);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(30, simulateL515Noise);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(25, noiseAmplitudeAtMinRange);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(26, noiseAmplitudeAtMaxRange);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(27, simulateL515Noise);
       if (firstRender)
       {
          firstRender = false;
