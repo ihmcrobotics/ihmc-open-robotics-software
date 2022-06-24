@@ -359,6 +359,19 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
       }
    }
 
+   @Override
+   public List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersUnderLoad(HighLevelControllerName state)
+   {
+      switch (state)
+      {
+         case WALKING:
+         case PUSH_RECOVERY:
+            return getJointAccelerationIntegrationParametersForWalking();
+         default:
+            return null;
+      }
+   }
+
    private List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersForWalking()
    {
       List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> ret = new ArrayList<>();
