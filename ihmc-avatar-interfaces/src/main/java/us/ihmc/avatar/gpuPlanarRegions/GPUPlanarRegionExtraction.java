@@ -38,7 +38,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.TreeSet;
+import java.util.Stack;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -91,6 +91,7 @@ public class GPUPlanarRegionExtraction
    private int patchWidth;
    private int filterPatchImageHeight;
    private int filterPatchImageWidth;
+   private final Stack<GPUPlanarRegionExtractionDepthFirstSearchQuery> depthFirstSearchStack = new Stack<>();
 
    private final PlanarRegionsList planarRegionsList = new PlanarRegionsList();
    private final GPUPlanarRegionIsland tempIsland = new GPUPlanarRegionIsland();
@@ -308,7 +309,13 @@ public class GPUPlanarRegionExtraction
                numberOfRegionPatches = 0; // also number of patches traversed
                GPUPlanarRegion planarRegion = gpuPlanarRegions.add();
                planarRegion.reset(planarRegionIslandIndex);
-               regionsDepthFirstSearch(row, column, planarRegionIslandIndex, planarRegion, 1);
+               // We use a stack object instead of using the JVM's stack because it's very tall and would require special
+               // settings and breaks profiling. It would crash YourKit.
+               depthFirstSearchStack.push(new GPUPlanarRegionExtractionDepthFirstSearchQuery(row, column, planarRegionIslandIndex, planarRegion, 1));
+               while (!depthFirstSearchStack.empty())
+               {
+                  depthFirstSearchStack.pop().performQuery();
+               }
                if (numberOfRegionPatches >= parameters.getRegionMinPatches())
                {
                   ++planarRegionIslandIndex;
@@ -332,44 +339,70 @@ public class GPUPlanarRegionExtraction
       }
    }
 
-   private void regionsDepthFirstSearch(int row, int column, int planarRegionIslandIndex, GPUPlanarRegion planarRegion, int searchDepth)
+   public class GPUPlanarRegionExtractionDepthFirstSearchQuery
    {
-      if (regionVisitedMatrix.get(row, column) || searchDepth > parameters.getSearchDepthLimit())
-         return;
+      private final int row;
+      private final int column;
+      private final int planarRegionIslandIndex;
+      private final GPUPlanarRegion planarRegion;
+      private final int searchDepth;
 
-      if (searchDepth > regionMaxSearchDepth)
-         regionMaxSearchDepth = searchDepth;
-
-      ++numberOfRegionPatches;
-      regionVisitedMatrix.set(row, column, true);
-      regionMatrix.set(row, column, planarRegionIslandIndex);
-      // kernel coordinates is in left-handed frame, so lets flip it to IHMC Z up
-      float ny = -nxImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
-      float nz = nyImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
-      float nx = nzImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
-      float cy = -cxImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
-      float cz = cyImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
-      float cx = czImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
-      planarRegion.addRegionPatch(row, column, nx, ny, nz, cx, cy, cz);
-
-      int count = 0;
-      for (int i = 0; i < 8; i++)
+      public GPUPlanarRegionExtractionDepthFirstSearchQuery(int row,
+                                                            int column,
+                                                            int planarRegionIslandIndex,
+                                                            GPUPlanarRegion planarRegion,
+                                                            int searchDepth)
       {
-         if (row + adjacentY[i] < patchImageHeight - 1 && row + adjacentY[i] > 1 && column + adjacentX[i] < patchImageWidth - 1 && column + adjacentX[i] > 1)
+         this.row = row;
+         this.column = column;
+         this.planarRegionIslandIndex = planarRegionIslandIndex;
+         this.planarRegion = planarRegion;
+         this.searchDepth = searchDepth;
+      }
+
+      public void performQuery()
+      {
+         if (regionVisitedMatrix.get(row, column) || searchDepth > parameters.getSearchDepthLimit())
+            return;
+
+         if (searchDepth > regionMaxSearchDepth)
+            regionMaxSearchDepth = searchDepth;
+
+         ++numberOfRegionPatches;
+         regionVisitedMatrix.set(row, column, true);
+         regionMatrix.set(row, column, planarRegionIslandIndex);
+         // kernel coordinates is in left-handed frame, so lets flip it to IHMC Z up
+         float ny = -nxImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
+         float nz = nyImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
+         float nx = nzImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
+         float cy = -cxImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
+         float cz = cyImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
+         float cx = czImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
+         planarRegion.addRegionPatch(row, column, nx, ny, nz, cx, cy, cz);
+
+         int count = 0;
+         for (int i = 0; i < 8; i++)
          {
-            int boundaryConnectionsEncodedAsOnes
-                  = Byte.toUnsignedInt(graphImage.getBytedecoOpenCVMat().ptr((row + adjacentY[i]), (column + adjacentX[i])).get());
-            if (boundaryConnectionsEncodedAsOnes == 255) // all ones; fully connected
+            if (row + adjacentY[i] < patchImageHeight - 1 && row + adjacentY[i] > 1 && column + adjacentX[i] < patchImageWidth - 1 && column + adjacentX[i] > 1)
             {
-               ++count;
-               regionsDepthFirstSearch(row + adjacentY[i], column + adjacentX[i], planarRegionIslandIndex, planarRegion, searchDepth + 1);
+               int boundaryConnectionsEncodedAsOnes
+                     = Byte.toUnsignedInt(graphImage.getBytedecoOpenCVMat().ptr((row + adjacentY[i]), (column + adjacentX[i])).get());
+               if (boundaryConnectionsEncodedAsOnes == 255) // all ones; fully connected
+               {
+                  ++count;
+                  depthFirstSearchStack.push(new GPUPlanarRegionExtractionDepthFirstSearchQuery(row + adjacentY[i],
+                                                                                                column + adjacentX[i],
+                                                                                                planarRegionIslandIndex,
+                                                                                                planarRegion,
+                                                                                                searchDepth + 1));
+               }
             }
          }
-      }
-      if (count != 8)
-      {
-         boundaryMatrix.set(row, column, true);
-         planarRegion.getBorderIndices().add().set(column, row);
+         if (count != 8)
+         {
+            boundaryMatrix.set(row, column, true);
+            planarRegion.getBorderIndices().add().set(column, row);
+         }
       }
    }
 
