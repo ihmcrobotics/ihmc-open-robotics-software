@@ -424,7 +424,7 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
          ImGui.checkbox(ImGuiTools.uniqueLabel(this, "ROS 1 Depth image (" + ros1DepthImageTopic + ")"), publishDepthImageROS1);
       if (ros1ColorImageTopic != null)
          ImGui.checkbox(ImGuiTools.uniqueLabel(this, "ROS 1 Color image (" + ros1ColorImageTopic + ")"), publishColorImageROS1);
-      if (ros1ColorImageTopic != null)
+      if (ros1PointCloudTopic != null)
          ImGui.checkbox(ImGuiTools.uniqueLabel(this, "ROS 1 Point Cloud (" + ros1PointCloudTopic + ")"), publishPointCloudROS1);
       if (ros2PointCloudTopic != null)
          ImGui.checkbox(ImGuiTools.uniqueLabel(this, "ROS 2 Point cloud (" + ros2PointCloudTopic + ")"), publishPointCloudROS2);
