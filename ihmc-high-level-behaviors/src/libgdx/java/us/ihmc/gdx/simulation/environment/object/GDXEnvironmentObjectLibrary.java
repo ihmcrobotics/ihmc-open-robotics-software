@@ -24,6 +24,8 @@ public class GDXEnvironmentObjectLibrary
       objectFactories.add(GDXDirectionalLightObject.FACTORY);
       objectFactories.add(GDXL515SensorObject.FACTORY);
       objectFactories.add(GDXMultiBodySnakeObject.FACTORY);
+      objectFactories.add(GDXRightJerseyBarrierObject.FACTORY);
+      objectFactories.add(GDXLeftJerseyBarrierObject.FACTORY);
    }
 
    public static ArrayList<GDXEnvironmentObjectFactory> getObjectFactories()
