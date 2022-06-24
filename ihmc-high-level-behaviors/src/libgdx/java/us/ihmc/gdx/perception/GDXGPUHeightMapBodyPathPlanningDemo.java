@@ -1,10 +1,10 @@
 package us.ihmc.gdx.perception;
 
+import controller_msgs.msg.dds.HeightMapMessage;
 import imgui.ImGui;
-import us.ihmc.communication.configuration.NetworkParameters;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.gdx.GDXPointCloudRenderer;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
@@ -20,15 +20,14 @@ import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.gpuHeightMap.SimpleGPUHeightMap;
 import us.ihmc.perception.gpuHeightMap.SimpleGPUHeightMapParameters;
 import us.ihmc.perception.gpuHeightMap.SimpleGPUHeightMapUpdater;
+import us.ihmc.robotics.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.tools.thread.Activator;
 import us.ihmc.utilities.ros.RosMainNode;
-import us.ihmc.utilities.ros.RosTools;
 
 public class GDXGPUHeightMapBodyPathPlanningDemo
 {
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
-                                                              "ihmc-open-robotics-software",
-                                                              "ihmc-high-level-behaviors/src/test/resources");
+   private final GDXImGuiBasedUI baseUI;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private Activator nativesLoadedActivator;
    private GDXHighLevelDepthSensorSimulator ouster;
@@ -41,8 +40,9 @@ public class GDXGPUHeightMapBodyPathPlanningDemo
    private RosMainNode ros1Node;
    private GDXPose3DGizmo heightMapPoseGizmo;
 
-   public GDXGPUHeightMapBodyPathPlanningDemo()
+   public GDXGPUHeightMapBodyPathPlanningDemo(GDXImGuiBasedUI baseUI, DRCRobotModel robotModel)
    {
+      this.baseUI = baseUI;
       baseUI.launchGDXApplication(new Lwjgl3ApplicationAdapter()
       {
          @Override
@@ -110,8 +110,6 @@ public class GDXGPUHeightMapBodyPathPlanningDemo
                                                    ouster.getDepthCameraIntrinsics().getCx(),
                                                    ouster.getDepthCameraIntrinsics().getCy());
 
-
-
                   heightMapGraphic = new GDXHeightMapGraphic();
                   baseUI.get3DSceneManager().addRenderableProvider(heightMapGraphic, GDXSceneLevel.VIRTUAL);
                   baseUI.getImGuiPanelManager().addPanel("Height Map", this::renderHeightMapImGuiWidgets);
@@ -129,8 +127,11 @@ public class GDXGPUHeightMapBodyPathPlanningDemo
                SimpleGPUHeightMap heightMap = simpleGPUHeightMapUpdater.getHeightMap();
 
                heightMapGraphic.getTransformToWorld().set(new RigidBodyTransform());
-               heightMapGraphic.generateMeshesAsync(heightMap.buildMessage());
+               HeightMapMessage heightMapMessage = heightMap.buildMessage();
+               heightMapGraphic.generateMeshesAsync(heightMapMessage);
                heightMapGraphic.update();
+
+               HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
             }
 
             baseUI.renderBeforeOnScreenUI();
@@ -153,10 +154,5 @@ public class GDXGPUHeightMapBodyPathPlanningDemo
             baseUI.dispose();
          }
       });
-   }
-
-   public static void main(String[] args)
-   {
-      new GDXGPUHeightMapBodyPathPlanningDemo();
    }
 }
