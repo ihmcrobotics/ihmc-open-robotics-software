@@ -40,10 +40,10 @@ kernel void lowLevelDepthSensorSimulator(read_only image2d_t normalizedDeviceCoo
    float principalOffsetYPixels = parameters[3];
    float focalLengthPixels = parameters[4];
    bool calculatePointCloud = (bool) parameters[5];
-   float noiseAmplitudeAtMinRange = parameters[28];
-   float noiseAmplitudeAtMaxRange = parameters[29];
+   float noiseAmplitudeAtMinRange = parameters[25];
+   float noiseAmplitudeAtMaxRange = parameters[26];
    float noiseAmplitudeRange = noiseAmplitudeAtMaxRange - noiseAmplitudeAtMinRange;
-   bool simulateL515Noise = (bool) parameters[30];
+   bool simulateL515Noise = (bool) parameters[27];
    float randomNegativeOneToOne = read_imagef(noiseImage, (int2) (x, y)).x;
    float normalizedDeviceCoordinateZ = read_imagef(normalizedDeviceCoordinateDepthImage, (int2) (x,y)).x;
 
@@ -125,9 +125,6 @@ kernel void lowLevelDepthSensorSimulator(read_only image2d_t normalizedDeviceCoo
          float rotationMatrixM20 = parameters[22];
          float rotationMatrixM21 = parameters[23];
          float rotationMatrixM22 = parameters[24];
-         float cameraPositionX = parameters[25];
-         float cameraPositionY = parameters[26];
-         float cameraPositionZ = parameters[27];
 
          if (pointColorR < 0.0f)
          {
