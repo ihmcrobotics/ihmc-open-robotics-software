@@ -223,7 +223,7 @@ public class BytedecoImage
 
    public float getFloat(int x, int y)
    {
-      return pointerForAccessSpeed.getFloat((long) y * imageWidth + x);
+      return pointerForAccessSpeed.getFloat(((long) y * imageWidth + x) * Float.BYTES);
    }
 
    public int getByteAsInteger(int x, int y)
