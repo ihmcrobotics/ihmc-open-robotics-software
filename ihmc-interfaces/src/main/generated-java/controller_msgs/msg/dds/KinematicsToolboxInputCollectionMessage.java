@@ -31,14 +31,14 @@ public class KinematicsToolboxInputCollectionMessage extends Packet<KinematicsTo
    /**
             * Input for overriding the default support polygon with a custom one.
             */
-   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxContactStateMessage>  contact_state_input_;
+   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxSupportRegionMessage>  contact_state_input_;
 
    public KinematicsToolboxInputCollectionMessage()
    {
       center_of_mass_inputs_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage> (3, new controller_msgs.msg.dds.KinematicsToolboxCenterOfMassMessagePubSubType());
       rigid_body_inputs_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage> (20, new controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessagePubSubType());
       joint_inputs_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage> (20, new controller_msgs.msg.dds.KinematicsToolboxOneDoFJointMessagePubSubType());
-      contact_state_input_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxContactStateMessage> (1, new controller_msgs.msg.dds.KinematicsToolboxContactStateMessagePubSubType());
+      contact_state_input_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxSupportRegionMessage> (1, new controller_msgs.msg.dds.KinematicsToolboxSupportRegionMessagePubSubType());
 
    }
 
@@ -104,7 +104,7 @@ public class KinematicsToolboxInputCollectionMessage extends Packet<KinematicsTo
    /**
             * Input for overriding the default support polygon with a custom one.
             */
-   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxContactStateMessage>  getContactStateInput()
+   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxSupportRegionMessage>  getContactStateInput()
    {
       return contact_state_input_;
    }
