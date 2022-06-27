@@ -24,4 +24,7 @@ bool enable_auto_support_polygon
 # Field default value True
 bool hold_support_rigid_bodies
 
+# If this is true and the solver receives a MultiContactBalanceStatus, it will solve for the multi-contact support region
+bool enable_multi_contact_support_region_solver
+
 
