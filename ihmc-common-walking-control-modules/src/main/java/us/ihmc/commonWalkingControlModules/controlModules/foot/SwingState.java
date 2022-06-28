@@ -157,7 +157,7 @@ public class SwingState extends AbstractFootControlState
 
    public SwingState(FootControlHelper footControlHelper, PIDSE3GainsReadOnly gains, YoRegistry registry)
    {
-      super(footControlHelper);https://docs.google.com/presentation/d/12i5LEtJ3fhls473-GU12CIHcB90Rw2BSH1xPaiHnFvg/edit?usp=sharing
+      super(footControlHelper);
       this.gains = gains;
 
       this.workspaceLimiterControlModule = footControlHelper.getWorkspaceLimiterControlModule();
