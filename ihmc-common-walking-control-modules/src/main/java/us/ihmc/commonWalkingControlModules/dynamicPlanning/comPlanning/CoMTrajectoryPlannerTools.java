@@ -7,6 +7,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
 import java.util.List;
 
@@ -2436,12 +2437,12 @@ public class CoMTrajectoryPlannerTools
    }
 
    public static void constructDesiredCoMPosition(FixedFramePoint3DBasics comPositionToPack,
-                                                  FramePoint3DReadOnly firstCoefficient,
-                                                  FramePoint3DReadOnly secondCoefficient,
-                                                  FramePoint3DReadOnly thirdCoefficient,
-                                                  FramePoint3DReadOnly fourthCoefficient,
-                                                  FramePoint3DReadOnly fifthCoefficient,
-                                                  FramePoint3DReadOnly sixthCoefficient,
+                                                  Point3DReadOnly firstCoefficient,
+                                                  Point3DReadOnly secondCoefficient,
+                                                  Point3DReadOnly thirdCoefficient,
+                                                  Point3DReadOnly fourthCoefficient,
+                                                  Point3DReadOnly fifthCoefficient,
+                                                  Point3DReadOnly sixthCoefficient,
                                                   double timeInPhase,
                                                   double omega)
    {
@@ -2455,12 +2456,12 @@ public class CoMTrajectoryPlannerTools
    }
 
    public static void constructDesiredCoMVelocity(FixedFrameVector3DBasics comVelocityToPack,
-                                                  FramePoint3DReadOnly firstCoefficient,
-                                                  FramePoint3DReadOnly secondCoefficient,
-                                                  FramePoint3DReadOnly thirdCoefficient,
-                                                  FramePoint3DReadOnly fourthCoefficient,
-                                                  FramePoint3DReadOnly fifthCoefficient,
-                                                  FramePoint3DReadOnly sixthCoefficient,
+                                                  Point3DReadOnly firstCoefficient,
+                                                  Point3DReadOnly secondCoefficient,
+                                                  Point3DReadOnly thirdCoefficient,
+                                                  Point3DReadOnly fourthCoefficient,
+                                                  Point3DReadOnly fifthCoefficient,
+                                                  Point3DReadOnly sixthCoefficient,
                                                   double timeInPhase,
                                                   double omega)
    {
@@ -2474,12 +2475,12 @@ public class CoMTrajectoryPlannerTools
    }
 
    public static void constructDesiredCoMAcceleration(FixedFrameVector3DBasics comAccelerationToPack,
-                                                      FramePoint3DReadOnly firstCoefficient,
-                                                      FramePoint3DReadOnly secondCoefficient,
-                                                      FramePoint3DReadOnly thirdCoefficient,
-                                                      FramePoint3DReadOnly fourthCoefficient,
-                                                      FramePoint3DReadOnly fifthCoefficient,
-                                                      FramePoint3DReadOnly sixthCoefficient,
+                                                      Point3DReadOnly firstCoefficient,
+                                                      Point3DReadOnly secondCoefficient,
+                                                      Point3DReadOnly thirdCoefficient,
+                                                      Point3DReadOnly fourthCoefficient,
+                                                      Point3DReadOnly fifthCoefficient,
+                                                      Point3DReadOnly sixthCoefficient,
                                                       double timeInPhase,
                                                       double omega)
    {
@@ -2493,12 +2494,12 @@ public class CoMTrajectoryPlannerTools
    }
 
    public static void constructDesiredDCMPosition(FixedFramePoint3DBasics dcmPositionToPack,
-                                                  FramePoint3DReadOnly firstCoefficient,
-                                                  FramePoint3DReadOnly secondCoefficient,
-                                                  FramePoint3DReadOnly thirdCoefficient,
-                                                  FramePoint3DReadOnly fourthCoefficient,
-                                                  FramePoint3DReadOnly fifthCoefficient,
-                                                  FramePoint3DReadOnly sixthCoefficient,
+                                                  Point3DReadOnly firstCoefficient,
+                                                  Point3DReadOnly secondCoefficient,
+                                                  Point3DReadOnly thirdCoefficient,
+                                                  Point3DReadOnly fourthCoefficient,
+                                                  Point3DReadOnly fifthCoefficient,
+                                                  Point3DReadOnly sixthCoefficient,
                                                   double timeInPhase,
                                                   double omega)
    {
@@ -2513,12 +2514,12 @@ public class CoMTrajectoryPlannerTools
    }
 
    public static void constructDesiredVRPPosition(FixedFramePoint3DBasics vrpPositionToPack,
-                                                  FramePoint3DReadOnly firstCoefficient,
-                                                  FramePoint3DReadOnly secondCoefficient,
-                                                  FramePoint3DReadOnly thirdCoefficient,
-                                                  FramePoint3DReadOnly fourthCoefficient,
-                                                  FramePoint3DReadOnly fifthCoefficient,
-                                                  FramePoint3DReadOnly sixthCoefficient,
+                                                  Point3DReadOnly firstCoefficient,
+                                                  Point3DReadOnly secondCoefficient,
+                                                  Point3DReadOnly thirdCoefficient,
+                                                  Point3DReadOnly fourthCoefficient,
+                                                  Point3DReadOnly fifthCoefficient,
+                                                  Point3DReadOnly sixthCoefficient,
                                                   double timeInPhase,
                                                   double omega)
    {
@@ -2530,12 +2531,12 @@ public class CoMTrajectoryPlannerTools
    }
 
    public static void constructDesiredVRPVelocity(FixedFrameVector3DBasics vrpVelocityToPack,
-                                                  FramePoint3DReadOnly firstCoefficient,
-                                                  FramePoint3DReadOnly secondCoefficient,
-                                                  FramePoint3DReadOnly thirdCoefficient,
-                                                  FramePoint3DReadOnly fourthCoefficient,
-                                                  FramePoint3DReadOnly fifthCoefficient,
-                                                  FramePoint3DReadOnly sixthCoefficient,
+                                                  Point3DReadOnly firstCoefficient,
+                                                  Point3DReadOnly secondCoefficient,
+                                                  Point3DReadOnly thirdCoefficient,
+                                                  Point3DReadOnly fourthCoefficient,
+                                                  Point3DReadOnly fifthCoefficient,
+                                                  Point3DReadOnly sixthCoefficient,
                                                   double timeInPhase,
                                                   double omega)
    {
