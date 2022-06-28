@@ -1,13 +1,27 @@
 package us.ihmc.gdx.perception;
 
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
+import controller_msgs.msg.dds.StoredPropertySetMessage;
 import std_msgs.msg.dds.Float64;
 import us.ihmc.avatar.colorVision.DualBlackflyComms;
+import us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegionExtractionComms;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
 import us.ihmc.gdx.imgui.ImGuiPanel;
+import us.ihmc.gdx.simulation.environment.GDXModelInstance;
+import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.tools.ImPlotDoublePlot;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+
+import java.util.List;
 
 public class GDXRemoteBlackflyArUcoDetectionUI
 {
@@ -22,6 +36,12 @@ public class GDXRemoteBlackflyArUcoDetectionUI
    private final ImPlotDoublePlot encodingDurationPlot;
    private final IHMCROS2Input<Float64> copyDurationInput;
    private final ImPlotDoublePlot copyDurationPlot;
+
+   private final TypedNotification<StoredPropertySetMessage> arUcoPoseROS2Notification = new TypedNotification<>();
+   private List<GDXModelInstance> modelInstancesGDX;
+
+
+   //private final IHMCROS2Input
 
    public GDXRemoteBlackflyArUcoDetectionUI(ROS2Helper ros2Helper)
    {
@@ -38,6 +58,8 @@ public class GDXRemoteBlackflyArUcoDetectionUI
       encodingDurationPlot = new ImPlotDoublePlot("Encoding duration", 30);
       copyDurationInput = ros2Helper.subscribe(DualBlackflyComms.COPY_DURATION);
       copyDurationPlot = new ImPlotDoublePlot("Copy duration", 30);
+
+      ros2Helper.subscribeViaCallback(GPUPlanarRegionExtractionComms.PARAMETERS_OUTPUT, arUcoPoseROS2Notification::set);
    }
 
    public void update()
@@ -65,6 +87,20 @@ public class GDXRemoteBlackflyArUcoDetectionUI
       convertColorDurationPlot.renderImGuiWidgets();
       encodingDurationPlot.renderImGuiWidgets();
       copyDurationPlot.renderImGuiWidgets();
+   }
+
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+     //? FramePose3DBasics - use I think
+      //GDXModelInstance - wont load in Comms
+
+     /* if (showGraphics.get())
+      {
+         GDXModelInstance g;
+         g.setPoseInWorldFrame(new Pose3D());
+
+      }*/
+
    }
 
    public void destroy()
