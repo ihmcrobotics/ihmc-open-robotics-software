@@ -13,6 +13,7 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -21,6 +22,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.graphSearch.collision.BodyCollisionData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshotWithExpiration;
@@ -77,6 +79,7 @@ public class LookAndStepFootstepPlanningTask
    protected Timer planningFailedTimer = new Timer();
    protected AtomicReference<Boolean> plannerFailedLastTime = new AtomicReference<>();
    protected YoDouble footholdVolume;
+   protected YoDouble footstepPlanningDuration;
 
    public static class LookAndStepFootstepPlanning extends LookAndStepFootstepPlanningTask
    {
@@ -110,6 +113,7 @@ public class LookAndStepFootstepPlanningTask
          controllerStatusTracker = lookAndStep.controllerStatusTracker;
          imminentStanceTracker = lookAndStep.imminentStanceTracker;
          footholdVolume = new YoDouble("footholdVolume", lookAndStep.yoRegistry);
+         footstepPlanningDuration = new YoDouble("footstepPlanningDuration", lookAndStep.yoRegistry);
          helper = lookAndStep.helper;
          autonomousOutput = footstepPlan ->
          {
@@ -243,8 +247,9 @@ public class LookAndStepFootstepPlanningTask
          syncedRobot.update();
          robotDataReceptionTimerSnaphot = syncedRobot.getDataReceptionTimerSnapshot()
                                                      .withExpiration(lookAndStepParameters.getRobotConfigurationDataExpiration());
-         PlannedFootstepReadOnly lastStartedFootstep = imminentStanceTracker.getLastStartedFootstep();
-         stanceSideWhenLastFootstepStarted = lastStartedFootstep == null ? null : lastStartedFootstep.getRobotSide().getOppositeSide();
+         RobotSide lastStartedRobotSide = imminentStanceTracker.getLastStartedRobotSide();
+         // FIXME: I could see this going out of date and being wrong for multiple footsteps
+         stanceSideWhenLastFootstepStarted = lastStartedRobotSide == null ? null : lastStartedRobotSide.getOppositeSide();
          behaviorState = behaviorStateReference.get();
          numberOfIncompleteFootsteps = controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps();
          numberOfCompletedFootsteps = controllerStatusTracker.getFootstepTracker().getNumberOfCompletedFootsteps();
@@ -283,6 +288,7 @@ public class LookAndStepFootstepPlanningTask
    protected int numberOfCompletedFootsteps;
    protected SwingPlannerType swingPlannerType;
    protected final List<FootstepStatusMessage> stepsStartedWhilePlanning = new ArrayList<>();
+   private final Object logSessionSyncObject = new Object();
 
    protected void performTask()
    {
@@ -397,6 +403,7 @@ public class LookAndStepFootstepPlanningTask
       footstepPlannerRequest.setTimeout(plannerTimeout);
       footstepPlannerRequest.setSwingPlannerType(swingPlannerType);
       footstepPlannerRequest.setSnapGoalSteps(true);
+      footstepPlannerRequest.setMaximumIterations(100);
 
       footstepPlanningModule.getFootstepPlannerParameters().set(footstepPlannerParameters);
       footstepPlanningModule.getSwingPlanningModule().getSwingPlannerParameters().set(swingPlannerParameters);
@@ -407,6 +414,7 @@ public class LookAndStepFootstepPlanningTask
       stepInPlaceChecker.setStanceFeetPoses(startFootPoses.get(RobotSide.LEFT).getSolePoseInWorld(), startFootPoses.get(RobotSide.RIGHT).getSolePoseInWorld());
       footstepPlanningModule.getChecker().clearCustomFootstepCheckers();
       footstepPlanningModule.getChecker().attachCustomFootstepChecker(stepInPlaceChecker);
+      int iterations = footstepPlanningModule.getAStarFootstepPlanner().getIterations();
 
       statusLogger.info("Stance side: {}", stanceSide.name());
       statusLogger.info("Planning footsteps with {}...", swingPlannerType.name());
@@ -421,12 +429,24 @@ public class LookAndStepFootstepPlanningTask
                         footstepPlannerOutput.getPlannerTimings().getTimeBeforePlanningSeconds(),
                         footstepPlannerOutput.getPlannerTimings().getTimePlanningStepsSeconds(),
                         plannerTimeout));
+      footstepPlanningDuration.set(footstepPlannerOutput.getPlannerTimings().getTotalElapsedSeconds());
 
-      // print log duration?
-      FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanningModule);
-      footstepPlannerLogger.logSession();
-      uiPublisher.publishToUI(FootstepPlannerLatestLogPath, footstepPlannerLogger.getLatestLogDirectory());
-      ThreadTools.startAThread(() -> FootstepPlannerLogger.deleteOldLogs(50), "FootstepPlanLogDeletion");
+      String latestLogDirectory = FootstepPlannerLogger.generateALogFolderName();
+      statusLogger.info("Footstep planner log folder: {}", latestLogDirectory);
+      uiPublisher.publishToUI(FootstepPlannerLatestLogPath, latestLogDirectory);
+      ThreadTools.startAThread(() ->
+      {
+         synchronized (logSessionSyncObject)
+         {
+            Stopwatch stopwatch = new Stopwatch().start();
+            FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanningModule);
+            footstepPlannerLogger.logSessionWithExactFolderName(latestLogDirectory);
+            FootstepPlannerLogger.deleteOldLogs(50);
+            LogTools.info("Logged footstep planner data in {} s. {} iterations",
+                          FormattingTools.getFormattedDecimal3D(stopwatch.totalElapsed()),
+                          iterations);
+         }
+      }, "FootstepPlanLogging");
 
       // TODO: Detect step down and reject unless we planned two steps.
       // Should get closer to the edge somehow?  Solve this in the footstep planner?
@@ -456,6 +476,7 @@ public class LookAndStepFootstepPlanningTask
             fullPlan.addFootstep(new PlannedFootstep(footstepPlannerOutput.getFootstepPlan().getFootstep(i)));
          }
 
+         // This whole thing seems kinda dangerous
          if (stepsStartedWhilePlanning.size() > 0)
          {
             if (!removeStepsThatWereCompletedWhilePlanning(fullPlan))
@@ -464,12 +485,12 @@ public class LookAndStepFootstepPlanningTask
             startFootPoses = imminentStanceTracker.calculateImminentStancePoses();
          }
 
-         if (!checkToMakeSurePlanIsStillReachable(fullPlan, startFootPoses))
-         {
-            uiPublisher.publishToUI(PlanningFailed, true);
-            doFailureAction("Footstep planning produced unreachable steps. Aborting task...");
-         }
-
+//         if (!checkToMakeSurePlanIsStillReachable(fullPlan, startFootPoses))
+//         {
+//            uiPublisher.publishToUI(PlanningFailed, true);
+//            doFailureAction("Footstep planning produced unreachable steps. Aborting task...");
+//            return;
+//         }
 
          FootstepPlan reducedPlan = new FootstepPlan();
          for (int i = 0; i < lookAndStepParameters.getMaxStepsToSendToController() && i < fullPlan.getNumberOfSteps(); i++)
@@ -571,9 +592,6 @@ public class LookAndStepFootstepPlanningTask
          footstep.setTransferDuration(lookAndStepParameters.getTransferDuration()); // But probably keep this.
       }
    }
-
-
-
 
    private void doFailureAction(String message)
    {
