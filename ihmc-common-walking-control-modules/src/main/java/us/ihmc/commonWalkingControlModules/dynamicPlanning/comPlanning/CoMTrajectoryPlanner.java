@@ -84,7 +84,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
    private final DMatrixRMaj vrpYWaypoints = new DMatrixRMaj(0, 1);
    private final DMatrixRMaj vrpZWaypoints = new DMatrixRMaj(0, 1);
 
-   private final LinearSolverSparse<DMatrixSparseCSC, DMatrixRMaj> sparseSolver = LinearSolverFactory_DSCC.qr(FillReducing.NONE);
+   private final LinearSolverSparse<DMatrixSparseCSC, DMatrixRMaj> sparseSolver = LinearSolverFactory_DSCC.lu(FillReducing.NONE);
 
    final DMatrixRMaj xCoefficientVector = new DMatrixRMaj(0, 1);
    final DMatrixRMaj yCoefficientVector = new DMatrixRMaj(0, 1);
