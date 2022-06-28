@@ -82,7 +82,7 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
 
       for (ReferenceFrame frame : frameData)
       {
-         System.out.println("current frame name : " + frame.getName());
+//         System.out.println("current frame name : " + frame.getName());
          robotFrameDataPublishers.add(new RobotFrameDataPublisher(frame, realtimeROS2Node, outputTopic));
       }
    }

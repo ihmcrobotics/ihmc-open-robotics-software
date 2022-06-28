@@ -9,11 +9,14 @@ import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.RobotFrameData;
+import controller_msgs.msg.dds.RobotFrameDataPubSubType;
+import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -23,6 +26,7 @@ import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -35,6 +39,8 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -49,7 +55,7 @@ public abstract class EndToEndFrameDataPublisherTest implements MultiRobotTestIn
    private static final DRCStartingLocation location = DRCObstacleCourseStartingLocation.DEFAULT;
 
    private SCS2AvatarTestingSimulation simulationTestHelper;
-   
+
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private void createSimulationTestHelper(CommonAvatarEnvironmentInterface environment, DRCStartingLocation location)
@@ -62,7 +68,7 @@ public abstract class EndToEndFrameDataPublisherTest implements MultiRobotTestIn
       simulationTestHelper = factory.createAvatarTestingSimulation();
    }
 
-   @Test   
+   @Test
    public void testQueuing() throws SimulationExceededMaximumTimeException
    {
       DRCRobotModel robotModel = getRobotModel();
@@ -143,6 +149,7 @@ public abstract class EndToEndFrameDataPublisherTest implements MultiRobotTestIn
       for (int messageIdx = 0; messageIdx < messages.size(); messageIdx++)
       {
          simulationTestHelper.publishToController(messages.get(messageIdx));
+         System.out.println("checking step list message: \n" + messages.get(messageIdx).toString());
          expectedNumberOfSteps += messages.get(messageIdx).getFootstepDataList().size();
          assertTrue(simulationTestHelper.simulateNow(timeBetweenSendingMessages));
          assertEquals(expectedNumberOfSteps, (int) numberOfStepsInController.getValueAsLongBits());
@@ -153,47 +160,100 @@ public abstract class EndToEndFrameDataPublisherTest implements MultiRobotTestIn
       assertEquals(0, (int) numberOfStepsInController.getValueAsLongBits());
    }
 
+   @Tag("controller-api")
    @Test
+   //   @Disabled
    public void testWalking() throws SimulationExceededMaximumTimeException
    {
       DRCRobotModel robotModel = getRobotModel();
       createSimulationTestHelper(environment, location);
       simulationTestHelper.start();
-//      ThreadTools.sleep(1000);
-      
-      RobotSide stepSide = RobotSide.LEFT;
-      int numberOfSteps = 2;
-      double totalTime = robotModel.getWalkingControllerParameters().getDefaultFinalTransferTime();
+      ThreadTools.sleep(1000);
+      assertTrue(simulationTestHelper.simulateNow(0.25));
+
+      double maxStepWidth = robotModel.getWalkingControllerParameters().getSteppingParameters().getMaxStepWidth();
+      double minStepWidth = robotModel.getWalkingControllerParameters().getSteppingParameters().getMinStepWidth();
+      double halfStepWidth = (maxStepWidth + minStepWidth) / 4.0;
       double stepLength = robotModel.getWalkingControllerParameters().getSteppingParameters().getDefaultStepLength() * 0.5;
-      double stepWidth = robotModel.getWalkingControllerParameters().getSteppingParameters().getMaxStepWidth() * 0.5;
-      double swingTime = robotModel.getWalkingControllerParameters().getDefaultSwingTime();      
-      double transferTime = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
-//      FootstepDataListMessage footStepDataListMessage = EndToEndTestTools.generateForwardSteps(stepSide,numberOfSteps, stepLength, stepWidth, swingTime, transferTime, new Pose3D(), false);
+      double nominalSwingTime = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
+      double nominalTransferTime = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
+      Random random = new Random(24384523737236643L);
+      double swingTime = (1.0 + 0.5 * (random.nextDouble() + 0.5)) * nominalSwingTime;
+      double transferTime = (1.0 + 0.5 * (random.nextDouble() + 0.5)) * nominalTransferTime;
+
+      //            FootstepDataListMessage footStepDataListMessage = EndToEndTestTools.generateForwardSteps(stepSide,numberOfSteps, stepLength, stepWidth, swingTime, transferTime, new Pose3D(), false);
+
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
       FramePose3D startPose = new FramePose3D(simulationTestHelper.getControllerReferenceFrames().getMidFootZUpGroundFrame());
       startPose.changeFrame(worldFrame);
-      FootstepDataListMessage steps = EndToEndTestTools.generateForwardSteps(RobotSide.LEFT,
-                                                                             6,
-                                                                             a -> steppingParameters.getDefaultStepLength(),
-                                                                             steppingParameters.getInPlaceWidth(),
-                                                                             0.75,
-                                                                             0.25,
-                                                                             startPose,
-                                                                             true);
+      //      FootstepDataListMessage steps = EndToEndTestTools.generateForwardSteps(RobotSide.LEFT,
+      //                                                                             6,
+      //                                                                             a -> steppingParameters.getDefaultStepLength(),
+      //                                                                             steppingParameters.getInPlaceWidth(),
+      //                                                                             swingTime,
+      //                                                                             transferTime,
+      //                                                                             startPose,
+      //                                                                             true);
+
+      //      FootstepDataListMessage steps = EndToEndTestTools.generateForwardSteps(RobotSide.LEFT, 6, 0.5, 0.25, swingTime, transferTime, startPose, true);
+
+      FootstepDataListMessage steps = EndToEndTestTools.generateCircleSteps(RobotSide.LEFT,
+                                                                            4,
+                                                                            a -> steppingParameters.getDefaultStepLength(),
+                                                                            steppingParameters.getInPlaceWidth(),
+                                                                            0.75,
+                                                                            0.25,
+                                                                            startPose,
+                                                                            true,
+                                                                            RobotSide.RIGHT,
+                                                                            1.0);
       
+
       
+//      simulationTestHelper.createSubscriberFromController(RobotFrameData.class, robotFrameData ->  {
+//         frameMessages.add(robotFrameData);
+//         System.out.println("frame name in callback: " + robotFrameData.getFrameName());
+//         System.out.println("frame pose in callback: " + robotFrameData.getFramePoseInWorld().toString());
+//         
+//      });
+      //    simulationTestHelper.createSubscriber(RobotFrameData.class, topicName, frameMessages::add);
       
-      FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();      
-      
+
       simulationTestHelper.publishToController(steps);
-//      simulationTestHelper.simulateNow(totalTime + 0.25);
-      double duration = EndToEndTestTools.computeWalkingDuration(steps, robotModel.getWalkingControllerParameters());
-      System.out.println("duration = " + duration);
-      simulationTestHelper.simulateNow(duration);
+      
+      //      fullRobotModel.updateFrames();
+      ROS2Topic<RobotFrameData> ros2Topic = ControllerAPIDefinition.getOutputTopic(robotModel.getSimpleRobotName()).withSuffix("afterL_arm_ely").withType(RobotFrameData.class);
+      List<RobotFrameData> frameMessages = new ArrayList<>();
       
       
       
+      assertTrue(simulationTestHelper.simulateNow(EndToEndTestTools.computeWalkingDuration(steps, robotModel.getWalkingControllerParameters())));
+      
+      simulationTestHelper.createSubscriber(RobotFrameData.class, ros2Topic, robotFrameData -> {
+         frameMessages.add(robotFrameData);
+         System.out.println("frame name in callback: " + robotFrameData.getFrameName());
+         System.out.println("frame pose in callback: " + robotFrameData.getFramePoseInWorld().toString());
+      });
+      
+      
+      // yoGraphic referenceFrame . . . 
+      // update 
+      
+      
+      for (RobotFrameData rfd : frameMessages)
+      {
+         System.out.println("NAME : " + rfd.getFrameName().toString());
+         System.out.println("POSE : " + rfd.getFramePoseInWorld().toString());
+      }
+
+      String topic = "framedata";
+
+      String topicName = "frame data";
+
+      FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
+      
+//      fullRobotModel.
    }
 
    protected void testMessageIsHandled(FootstepDataListMessage messageInMidFeetZUp) throws SimulationExceededMaximumTimeException

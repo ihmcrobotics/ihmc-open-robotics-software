@@ -67,6 +67,7 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
+import us.ihmc.sensorProcessing.communication.producers.RobotFrameDataPublisher;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
@@ -387,6 +388,13 @@ public class HumanoidKinematicsSimulation
          while (updateTimer.totalElapsed() < kinematicsSimulationParameters.getDt() / kinematicsSimulationParameters.getMaxRealtimeRate())
             ThreadTools.sleep(1);
       }
+      
+      
+//      for (ReferenceFrame frame : frameData)
+//      {
+//         System.out.println("current frame name : " + frame.getName());
+//         robotFrameDataPublishers.add(new RobotFrameDataPublisher(frame, realtimeROS2Node, outputTopic));
+//      }
    }
 
    private void doControl()
