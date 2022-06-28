@@ -9,24 +9,29 @@ import us.ihmc.ros2.RealtimeROS2Node;
 
 public class RobotFrameDataPublisher
 {
-   //   private ReferenceFrame referenceFrame;
-
    private IHMCRealtimeROS2Publisher<RobotFrameData> ros2Publisher;
 
    private RobotFrameData robotFrameData = new RobotFrameData();
 
+   private ReferenceFrame myReferenceFrame;
+
    public RobotFrameDataPublisher(ReferenceFrame referenceFrame, RealtimeROS2Node realtimeROS2Node, ROS2Topic<?> outputTopic)
    {
+      myReferenceFrame = referenceFrame;
       robotFrameData.getFrameName().add(referenceFrame.getName());
-      robotFrameData.getFramePoseInWorld().set(referenceFrame.getTransformToWorldFrame());
-      ROS2Topic<?> ros2Topic = outputTopic.withSuffix("FrameData");
+      
+      ROS2Topic<?> ros2Topic = outputTopic.withSuffix(referenceFrame.getName());
 
       ros2Publisher = ROS2Tools.createPublisher(realtimeROS2Node, RobotFrameData.class, ros2Topic);
-      System.out.println("frame topic: " + ros2Topic.toString());
+//      System.out.println("frame topic: " + ros2Topic.toString());
    }
 
    public boolean publish()
    {
+//      System.out.println("in RobotFrameDataPublisher publish() . . . ");
+//      System.out.println("name:" + robotFrameData.getFrameName().toString());
+//      System.out.println("pose:" + robotFrameData.getFramePoseInWorld().toString());
+      robotFrameData.getFramePoseInWorld().set(myReferenceFrame.getTransformToWorldFrame());
       return ros2Publisher.publish(robotFrameData);
    }
 }
