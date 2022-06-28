@@ -31,6 +31,9 @@ public class GDXSimulatedSensorFactory
                                                                                                             height,
                                                                                                             minRange,
                                                                                                             maxRange,
+                                                                                                            0.001,
+                                                                                                            0.001,
+                                                                                                            false,
                                                                                                             publishRateHz);
       highLevelDepthSensorSimulator.setupForROS2PointCloud(ros2Node, ROS2Tools.MULTISENSE_LIDAR_SCAN);
       return highLevelDepthSensorSimulator;
@@ -53,6 +56,9 @@ public class GDXSimulatedSensorFactory
                                                                                                             imageHeight,
                                                                                                             minRange,
                                                                                                             maxRange,
+                                                                                                            0.001,
+                                                                                                            0.001,
+                                                                                                            false,
                                                                                                             publishRateHz);
       return highLevelDepthSensorSimulator;
    }
@@ -79,6 +85,9 @@ public class GDXSimulatedSensorFactory
                                                                                                             imageHeight,
                                                                                                             minRange,
                                                                                                             maxRange,
+                                                                                                            0.001,
+                                                                                                            0.001,
+                                                                                                            false,
                                                                                                             publishRateHz);
       highLevelDepthSensorSimulator.setupForROS1Depth(ros1Node, RosTools.D435_DEPTH, RosTools.D435_DEPTH_CAMERA_INFO);
       highLevelDepthSensorSimulator.setupForROS1Color(ros1Node, RosTools.D435_VIDEO, RosTools.D435_CAMERA_INFO);
@@ -87,54 +96,57 @@ public class GDXSimulatedSensorFactory
 
    public static GDXHighLevelDepthSensorSimulator createChestL515ForMapSense(ROS2SyncedRobotModel syncedRobot)
    {
+      return createRealsenseL515(syncedRobot.getReferenceFrames().getSteppingCameraFrame(), syncedRobot::getTimestamp);
+   }
+
+   public static GDXHighLevelDepthSensorSimulator createRealsenseL515(ReferenceFrame sensorFrame, LongSupplier timestampSupplier)
+   {
       double publishRateHz = 5.0;
       double verticalFOV = 55.0;
       int imageWidth = 1024;
       int imageHeight = 768;
-//      if (LOW_RESOLUTION_SENSORS)
-//      {
-//         imageWidth /= 2;
-//         imageHeight /= 2;
-//      }
       double minRange = 0.105;
       double maxRange = 5.0;
       GDXHighLevelDepthSensorSimulator highLevelDepthSensorSimulator = new GDXHighLevelDepthSensorSimulator("Stepping L515",
-                                                                                                            syncedRobot.getReferenceFrames()
-                                                                                                                       .getSteppingCameraFrame(),
-                                                                                                            syncedRobot::getTimestamp,
+                                                                                                            sensorFrame,
+                                                                                                            timestampSupplier,
                                                                                                             verticalFOV,
                                                                                                             imageWidth,
                                                                                                             imageHeight,
                                                                                                             minRange,
                                                                                                             maxRange,
+                                                                                                            0.005,
+                                                                                                            0.009,
+                                                                                                            true,
                                                                                                             publishRateHz);
       return highLevelDepthSensorSimulator;
    }
 
-   public static GDXHighLevelDepthSensorSimulator createOusterLidar(ROS2SyncedRobotModel syncedRobot, ROS2NodeInterface ros2Node)
+   public static GDXHighLevelDepthSensorSimulator createOusterLidar(ROS2SyncedRobotModel syncedRobot)
    {
-      double publishRateHz = 5.0;
-      double verticalFOV = 90.0;
+      return createOusterLidar(syncedRobot.getReferenceFrames().getOusterLidarFrame(), syncedRobot::getTimestamp);
+   }
+
+   public static GDXHighLevelDepthSensorSimulator createOusterLidar(ReferenceFrame sensorFrame, LongSupplier timestampSupplier)
+   {
+      double publishRateHz = 20.0;
+      double verticalFOV = 80.0;
       int imageWidth = 1024;
       int imageHeight = 128;
-      if (LOW_RESOLUTION_SENSORS)
-      {
-         imageWidth /= 2;
-         imageHeight /= 2;
-      }
       double minRange = 0.105;
       double maxRange = 15.0;
       GDXHighLevelDepthSensorSimulator highLevelDepthSensorSimulator = new GDXHighLevelDepthSensorSimulator("Ouster Lidar",
-                                                                                                            syncedRobot.getReferenceFrames()
-                                                                                                                       .getOusterLidarFrame(),
-                                                                                                            syncedRobot::getTimestamp,
+                                                                                                            sensorFrame,
+                                                                                                            timestampSupplier,
                                                                                                             verticalFOV,
                                                                                                             imageWidth,
                                                                                                             imageHeight,
                                                                                                             minRange,
                                                                                                             maxRange,
+                                                                                                            0.015,
+                                                                                                            0.05,
+                                                                                                            false,
                                                                                                             publishRateHz);
-      highLevelDepthSensorSimulator.setupForROS2PointCloud(ros2Node, ROS2Tools.MULTISENSE_LIDAR_SCAN);
       return highLevelDepthSensorSimulator;
    }
 
@@ -155,27 +167,9 @@ public class GDXSimulatedSensorFactory
                                                                                                             imageHeight,
                                                                                                             minRange,
                                                                                                             maxRange,
-                                                                                                            publishRateHz);
-      return highLevelDepthSensorSimulator;
-   }
-
-   public static GDXHighLevelDepthSensorSimulator createL515ImageOnlyNoComms(ReferenceFrame sensorFrame)
-   {
-      double publishRateHz = 1.0;
-      double verticalFOV = 55.0;
-      int imageWidth = 640;
-      int imageHeight = 480;
-      double minRange = 0.105;
-      double maxRange = 5.0;
-      LongSupplier timeSupplier = null;
-      GDXHighLevelDepthSensorSimulator highLevelDepthSensorSimulator = new GDXHighLevelDepthSensorSimulator("L515",
-                                                                                                            sensorFrame,
-                                                                                                            timeSupplier,
-                                                                                                            verticalFOV,
-                                                                                                            imageWidth,
-                                                                                                            imageHeight,
-                                                                                                            minRange,
-                                                                                                            maxRange,
+                                                                                                            0.001,
+                                                                                                            0.001,
+                                                                                                            false,
                                                                                                             publishRateHz);
       return highLevelDepthSensorSimulator;
    }
