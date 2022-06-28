@@ -269,10 +269,10 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
 
       trajectoryHandler.setCoefficientsFromSolution(omega.getValue(), contactSequence, xCoefficientVector, yCoefficientVector, zCoefficientVector);
 
-      updateCornerPoints(contactSequence);
-
       if (viewer != null)
       {
+         updateCornerPoints(contactSequence);
+
          viewer.updateDCMCornerPoints(dcmCornerPoints);
          viewer.updateCoMCornerPoints(comCornerPoints);
          viewer.updateVRPWaypoints(vrpSegments);
