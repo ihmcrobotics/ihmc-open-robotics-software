@@ -154,8 +154,6 @@ public class GDXHeightMapGraphic implements RenderableProvider
             }
 
             meshBuilder.addPolygon(transform, localPoints, color);
-//               transform.getRotation().appendPitchRotation(Math.PI);
-//            meshBuilder.addPolygon(transform, localPoints, color);
             meshBuilders.add(meshBuilder);
          }
       }
