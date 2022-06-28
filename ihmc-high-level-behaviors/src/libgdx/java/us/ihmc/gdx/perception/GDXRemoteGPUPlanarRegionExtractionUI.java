@@ -183,7 +183,7 @@ public class GDXRemoteGPUPlanarRegionExtractionUI
       anyChanged |= ImGui.sliderFloat(labels.get("Merge distance threshold"), mergeDistanceThreshold.getData(), 0.0f, 0.1f);
       anyChanged |= ImGui.sliderFloat(labels.get("Merge angular threshold"), mergeAngularThreshold.getData(), 0.0f, 1.0f);
       anyChanged |= ImGui.sliderInt(labels.get("Search depth limit"), searchDepthLimit.getData(), 1, 50000);
-      anyChanged |= ImGui.sliderInt(labels.get("Region min patches"), regionMinPatches.getData(), 1, 1000);
+      anyChanged |= ImGui.sliderInt(labels.get("Region min patches"), regionMinPatches.getData(), 1, 3000);
       anyChanged |= ImGui.sliderInt(labels.get("Boundary min patches"), boundaryMinPatches.getData(), 1, 1000);
       anyChanged |= ImGui.inputFloat(labels.get("Filter disparity threshold"), filterDisparityThreshold);
       anyChanged |= ImGui.sliderFloat(labels.get("Region growth factor"), regionGrowthFactor.getData(), 0.005f, 0.1f);
