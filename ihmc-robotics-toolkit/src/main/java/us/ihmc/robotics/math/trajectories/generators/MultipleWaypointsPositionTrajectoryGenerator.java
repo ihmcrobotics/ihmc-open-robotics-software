@@ -95,13 +95,11 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
 
    public void clear()
    {
+      for (int i = 0; i < numberOfWaypoints.getIntegerValue(); i++)
+         waypoints.get(i).setToNaN();
+
       numberOfWaypoints.set(0);
       currentWaypointIndex.set(0);
-
-      for (int i = 0; i < maximumNumberOfWaypoints; i++)
-      {
-         waypoints.get(i).setToNaN();
-      }
    }
 
    public void clear(ReferenceFrame referenceFrame)
