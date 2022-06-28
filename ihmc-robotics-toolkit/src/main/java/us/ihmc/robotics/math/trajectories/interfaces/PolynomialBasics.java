@@ -543,7 +543,7 @@ public interface PolynomialBasics extends PolynomialReadOnly
    {
       reset();
 
-      setTime(0.0, duration);
+      getTimeInterval().setIntervalUnsafe(0.0, duration);
       reshape(4);
 
       double d2 = duration * duration;
