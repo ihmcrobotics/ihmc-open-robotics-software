@@ -3,6 +3,7 @@ package us.ihmc.gdx.perception;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import controller_msgs.msg.dds.ArUcoMarkerPoses;
 import controller_msgs.msg.dds.StoredPropertySetMessage;
 import std_msgs.msg.dds.Float64;
 import us.ihmc.avatar.colorVision.DualBlackflyComms;
@@ -12,15 +13,18 @@ import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.simulation.environment.GDXModelInstance;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.tools.ImPlotDoublePlot;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class GDXRemoteBlackflyArUcoDetectionUI
@@ -37,8 +41,10 @@ public class GDXRemoteBlackflyArUcoDetectionUI
    private final IHMCROS2Input<Float64> copyDurationInput;
    private final ImPlotDoublePlot copyDurationPlot;
 
-   private final TypedNotification<StoredPropertySetMessage> arUcoPoseROS2Notification = new TypedNotification<>();
-   private List<GDXModelInstance> modelInstancesGDX;
+   private final TypedNotification<ArUcoMarkerPoses> arUcoPoseROS2Notification = new TypedNotification<>();
+   private ArrayList<GDXModelInstance> markerPoseCoordinateFrames = new ArrayList<>();
+   private ArrayList<Long> markerIds = new ArrayList<>();
+   private int numberOfMarkers =0;
 
 
    //private final IHMCROS2Input
@@ -59,7 +65,7 @@ public class GDXRemoteBlackflyArUcoDetectionUI
       copyDurationInput = ros2Helper.subscribe(DualBlackflyComms.COPY_DURATION);
       copyDurationPlot = new ImPlotDoublePlot("Copy duration", 30);
 
-      ros2Helper.subscribeViaCallback(GPUPlanarRegionExtractionComms.PARAMETERS_OUTPUT, arUcoPoseROS2Notification::set);
+      ros2Helper.subscribeViaCallback(DualBlackflyComms.FRAME_POSE, arUcoPoseROS2Notification::set);
    }
 
    public void update()
@@ -91,15 +97,27 @@ public class GDXRemoteBlackflyArUcoDetectionUI
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-     //? FramePose3DBasics - use I think
-      //GDXModelInstance - wont load in Comms
-
-     /* if (showGraphics.get())
+      ArUcoMarkerPoses markerPoses;
+      if(arUcoPoseROS2Notification.poll() == true)
       {
-         GDXModelInstance g;
-         g.setPoseInWorldFrame(new Pose3D());
+         markerPoses = arUcoPoseROS2Notification.read();
 
-      }*/
+         for (int i=0; i< markerPoses.marker_id_.size(); i++)
+         {
+            if(markerIds.contains(markerPoses.getMarkerId().get(i)) == false)
+            {
+               markerPoseCoordinateFrames.add(new GDXModelInstance(GDXModelBuilder.createCoordinateFrame(0.4)));
+               markerIds.add(markerPoses.getMarkerId().get(i));
+            }
+
+         }
+
+         for (GDXModelInstance markerPoseCoordinateFrame : markerPoseCoordinateFrames)
+         {
+            markerPoseCoordinateFrame.getRenderables(renderables, pool);
+         }
+
+      }
 
    }
 
