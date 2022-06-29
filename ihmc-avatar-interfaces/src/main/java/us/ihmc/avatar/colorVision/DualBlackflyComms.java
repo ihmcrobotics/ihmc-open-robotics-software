@@ -27,7 +27,6 @@ public class DualBlackflyComms
 
 
 
-   public static final ROS2Topic<ArUcoMarkerPoses> FRAME_POSE
-         = BASE_TOPIC.withType(ArUcoMarkerPoses.class).withSuffix("frame_pose");
+   public static final ROS2Topic<ArUcoMarkerPoses> FRAME_POSE = BASE_TOPIC.withType(ArUcoMarkerPoses.class).withSuffix("frame_pose");
 
 }
