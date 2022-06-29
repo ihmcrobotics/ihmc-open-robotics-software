@@ -3,14 +3,14 @@ package us.ihmc.behaviors.tools.walkingController;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2NodeInterface;
+
+import java.util.ArrayList;
 
 import static us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition.getTopic;
 import static us.ihmc.tools.string.StringTools.format;
@@ -23,10 +23,8 @@ import static us.ihmc.tools.string.StringTools.format;
  */
 public class WalkingFootstepTracker
 {
-   private int stepsCommanded = 0;
-   private int stepsCompleted = 0;
-
-   private final SideDependentList<FootstepDataMessage> lastCommandedFootsteps = new SideDependentList<>();
+   private final ArrayList<FootstepDataMessage> footsteps = new ArrayList<>();
+   private volatile int completedIndex = 0;
 
    public WalkingFootstepTracker(ROS2NodeInterface ros2Node, String robotName)
    {
@@ -40,26 +38,28 @@ public class WalkingFootstepTracker
    {
       if (FootstepStatus.fromByte(footstepStatusMessage.getFootstepStatus()) == FootstepStatus.COMPLETED)
       {
-         int priorNumerator = stepsCompleted;
-         int priorDenominator = stepsCommanded;
+         int priorNumerator = completedIndex;
+         int priorDenominator = footsteps.size();
 
          synchronized (this)
          {
-            ++stepsCompleted;
-
-            if (stepsCommanded < stepsCompleted)
+            for (int i = 0; i < footsteps.size(); i++)
             {
-               LogTools.warn("Delayed message(s) detected.");
-               stepsCompleted = stepsCommanded;
+               if (footsteps.get(i).getSequenceId() == footstepStatusMessage.getSequenceId())
+               {
+                  completedIndex = i + 1;
+                  break;
+               }
             }
          }
 
-         LogTools.info(format("{} footstep completed. Completion: {}/{} -> {}/{}",
+         LogTools.info(format("{} footstep completed. Completion: {}/{} -> {}/{}. ID: {}",
                               RobotSide.fromByte(footstepStatusMessage.getRobotSide()),
                               priorNumerator,
                               priorDenominator,
-                              stepsCompleted,
-                              stepsCommanded));
+                              completedIndex,
+                              footsteps.size(),
+                              footstepStatusMessage.getSequenceId()));
       }
    }
 
@@ -67,40 +67,35 @@ public class WalkingFootstepTracker
    {
       ExecutionMode executionMode = ExecutionMode.fromByte(footstepDataListMessage.getQueueingProperties().getExecutionMode());
       int size = footstepDataListMessage.getFootstepDataList().size();
-      int priorNumerator = stepsCompleted;
-      int priorDenominator = stepsCommanded;
+      int priorNumerator = completedIndex;
+      int priorDenominator = footsteps.size();
+      long[] ids = new long[size];
 
       synchronized (this)
       {
          if (executionMode == ExecutionMode.OVERRIDE)
          {
-            stepsCommanded = 0;
-            stepsCompleted = 0;
+            footsteps.clear();
+            completedIndex = 0;
          }
 
-         stepsCommanded += size;
+         for (int i = 0; i < size; i++)
+         {
+            FootstepDataMessage footstep = footstepDataListMessage.getFootstepDataList().get(i);
+            ids[i] = footstep.getSequenceId();
+            footsteps.add(footstep);
+         }
       }
 
-      // handles same foot steps twice in a row
-      for (int i = 0; i < size; i++)
-      {
-         FootstepDataMessage footstep = footstepDataListMessage.getFootstepDataList().get(i);
-         lastCommandedFootsteps.set(RobotSide.fromByte(footstep.getRobotSide()), footstep);
-      }
-
-      LogTools.info(format("{}ing {} footstep{}. Completion: {}/{} -> {}/{}",
+      LogTools.info(format("{}ing {} footstep{}. Completion: {}/{} -> {}/{}. IDs: {}",
                            executionMode.name(),
                            size,
                            size > 1 ? "s" : "",
                            priorNumerator,
                            priorDenominator,
-                           stepsCompleted,
-                           stepsCommanded));
-   }
-
-   public ImmutablePair<FootstepDataMessage, FootstepDataMessage> getLastCommandedFootsteps()
-   {
-      return ImmutablePair.of(lastCommandedFootsteps.get(RobotSide.LEFT), lastCommandedFootsteps.get(RobotSide.RIGHT));
+                           completedIndex,
+                           footsteps.size(),
+                           ids));
    }
 
    public int getNumberOfIncompleteFootsteps()
@@ -108,23 +103,22 @@ public class WalkingFootstepTracker
       int numberOfIncompleteFootsteps;
       synchronized (this)
       {
-         numberOfIncompleteFootsteps = stepsCommanded - stepsCompleted;
+         numberOfIncompleteFootsteps = footsteps.size() - completedIndex;
       }
       return numberOfIncompleteFootsteps;
    }
 
    public int getNumberOfCompletedFootsteps()
    {
-      return stepsCompleted;
+      return completedIndex;
    }
 
    public void reset()
    {
       synchronized (this)
       {
-         stepsCommanded = 0;
-         stepsCompleted = 0;
+         footsteps.clear();
+         completedIndex = 0;
       }
-      lastCommandedFootsteps.clear();
    }
 }

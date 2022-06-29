@@ -62,9 +62,14 @@ public class ImGuiTools
 
    public static boolean volatileInputInt(String label, ImInt imInt)
    {
+      return volatileInputInt(label, imInt, 1);
+   }
+
+   public static boolean volatileInputInt(String label, ImInt imInt, int step)
+   {
       int inputTextFlags = ImGuiInputTextFlags.None;
       inputTextFlags += ImGuiInputTextFlags.EnterReturnsTrue;
-      return ImGui.inputInt(label, imInt, 1, 100, inputTextFlags);
+      return ImGui.inputInt(label, imInt, step, 100, inputTextFlags);
    }
 
    public static boolean volatileInputFloat(String label, ImFloat imFloat)
@@ -76,9 +81,14 @@ public class ImGuiTools
 
    public static boolean volatileInputDouble(String label, ImDouble imDouble)
    {
+      return volatileInputDouble(label, imDouble, 0, 0);
+   }
+
+   public static boolean volatileInputDouble(String label, ImDouble imDouble, double step, double stepFast)
+   {
       int inputTextFlags = ImGuiInputTextFlags.None;
       inputTextFlags += ImGuiInputTextFlags.EnterReturnsTrue;
-      return ImGui.inputDouble(label, imDouble, 0, 0, "%.6f", inputTextFlags);
+      return ImGui.inputDouble(label, imDouble, step, stepFast, "%.6f", inputTextFlags);
    }
 
    public static boolean inputText(String label, ImString text)

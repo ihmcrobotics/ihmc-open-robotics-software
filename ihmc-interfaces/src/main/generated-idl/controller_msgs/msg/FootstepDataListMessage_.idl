@@ -91,6 +91,10 @@ module controller_msgs
          * Default step constraints regions
          */
         controller_msgs::msg::dds::StepConstraintsListMessage default_step_constraints;
+        /**
+         * If the controller should check and fail if the steps are not reachable
+         */
+        boolean should_check_for_reachability;
       };
     };
   };

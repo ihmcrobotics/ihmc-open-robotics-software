@@ -8,7 +8,7 @@ import imgui.ImGuiStyle;
 import imgui.flag.*;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
-import imgui.internal.ImGui;
+import imgui.ImGui;
 import imgui.type.ImString;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.system.Callback;
@@ -293,10 +293,11 @@ public class GDXImGuiWindowAndDockSystem
       ImGui.render();
       imGuiGl3.renderDrawData(ImGui.getDrawData());
 
-      if (imgui.ImGui.getIO().hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
+      if (ImGui.getIO().hasConfigFlags(ImGuiConfigFlags.ViewportsEnable))
+      {
          final long backupWindowPtr = glfwGetCurrentContext();
-         imgui.ImGui.updatePlatformWindows();
-         imgui.ImGui.renderPlatformWindowsDefault();
+         ImGui.updatePlatformWindows();
+         ImGui.renderPlatformWindowsDefault();
          glfwMakeContextCurrent(backupWindowPtr);
       }
 

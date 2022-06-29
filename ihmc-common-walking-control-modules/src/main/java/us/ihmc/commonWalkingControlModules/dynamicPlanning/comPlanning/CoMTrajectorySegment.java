@@ -13,6 +13,8 @@ import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.robotics.time.TimeIntervalBasics;
 import us.ihmc.robotics.time.TimeIntervalProvider;
 
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools.sufficientlyLarge;
+
 public class CoMTrajectorySegment implements FixedFramePositionTrajectoryGenerator, TimeIntervalProvider, Settable<CoMTrajectorySegment>
 {
    private final FramePoint3D firstCoefficient = new FramePoint3D();
@@ -276,16 +278,44 @@ public class CoMTrajectorySegment implements FixedFramePositionTrajectoryGenerat
                        FixedFramePoint3DBasics dcmPositionToPack,
                        FixedFrameVector3DBasics dcmVelocityToPack,
                        FixedFramePoint3DBasics vrpPositionToPack,
-                       FixedFrameVector3DBasics vrpVelocityTPack)
+                       FixedFrameVector3DBasics vrpVelocityToPack)
    {
       currentTime = time;
-      computeCoMPosition(time, comPositionToPack);
-      computeCoMVelocity(time, comVelocityToPack);
-      computeCoMAcceleration(time, comAccelerationToPack);
 
-      CoMTrajectoryPlannerTools.constructDesiredVRPVelocity(vrpVelocityTPack, firstCoefficient, secondCoefficient, thirdCoefficient, fourthCoefficient, fifthCoefficient,
-                                                            sixthCoefficient, time, omega);
+      double exponential = Math.min(sufficientlyLarge, Math.exp(omega * time));
+      double negativeExponential = 1.0 / exponential;
+      double t = Math.min(sufficientlyLarge, time);
+      double t2 = Math.min(sufficientlyLarge, time * time);
+      double t3 = Math.min(sufficientlyLarge, time * t2);
 
+      double omega2 = omega * omega;
+
+      comPositionToPack.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      comPositionToPack.setAndScale(exponential, firstCoefficient);
+      comPositionToPack.scaleAdd(negativeExponential, secondCoefficient, comPositionToPack);
+      comPositionToPack.scaleAdd(t3, thirdCoefficient, comPositionToPack);
+      comPositionToPack.scaleAdd(t2, fourthCoefficient, comPositionToPack);
+      comPositionToPack.scaleAdd(t, fifthCoefficient, comPositionToPack);
+      comPositionToPack.add(sixthCoefficient);
+
+      comVelocityToPack.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      comVelocityToPack.setAndScale(omega * exponential, firstCoefficient);
+      comVelocityToPack.scaleAdd(-omega * negativeExponential, secondCoefficient, comVelocityToPack);
+      comVelocityToPack.scaleAdd(3.0 * t2, thirdCoefficient, comVelocityToPack);
+      comVelocityToPack.scaleAdd(2.0 * t, fourthCoefficient, comVelocityToPack);
+      comVelocityToPack.add(fifthCoefficient);
+
+      comAccelerationToPack.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      comAccelerationToPack.setAndScale(omega2 * exponential, firstCoefficient);
+      comAccelerationToPack.scaleAdd(omega2 * negativeExponential, secondCoefficient, comAccelerationToPack);
+      comAccelerationToPack.scaleAdd(6.0 * t, thirdCoefficient, comAccelerationToPack);
+      comAccelerationToPack.scaleAdd(2.0, fourthCoefficient, comAccelerationToPack);
+
+      vrpVelocityToPack.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      vrpVelocityToPack.setAndScale(t3 - 6.0 * t / omega2, thirdCoefficient);
+      vrpVelocityToPack.scaleAdd(t2 - 2.0 / omega2, fourthCoefficient, vrpVelocityToPack);
+      vrpVelocityToPack.scaleAdd(t, fifthCoefficient, vrpVelocityToPack);
+      vrpVelocityToPack.add(sixthCoefficient);
 
       CapturePointTools.computeCapturePointPosition(comPositionToPack, comVelocityToPack, omega, dcmPositionToPack);
       CapturePointTools.computeCapturePointVelocity(comVelocityToPack, comAccelerationToPack, omega, dcmVelocityToPack);
