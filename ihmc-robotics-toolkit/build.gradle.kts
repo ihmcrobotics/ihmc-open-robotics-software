@@ -34,7 +34,7 @@ mainDependencies {
    api("us.ihmc:euclid-shape:0.17.2")
    api("us.ihmc:mecano:0.11.1")
    api("us.ihmc:mecano-yovariables:0.11.1")
-   api("us.ihmc:ihmc-commons:0.30.5")
+   api("us.ihmc:ihmc-commons:0.31.0")
    api("us.ihmc:ihmc-messager-kryo:0.1.7")
    api("us.ihmc:ihmc-matrix-library:0.18.6")
    api("us.ihmc:ihmc-graphics-description:0.19.6")
@@ -50,5 +50,5 @@ testDependencies {
    api("us.ihmc:simulation-construction-set:0.22.3")
 
    api("us.ihmc:ihmc-matrix-library-test:0.18.6")
-   api("us.ihmc:ihmc-commons-testing:0.30.5")
+   api("us.ihmc:ihmc-commons-testing:0.31.0")
 }
