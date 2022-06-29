@@ -29,7 +29,6 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
    private final List<? extends OneDoFJointStateReadOnly> jointSensorData;
    private final List<? extends IMUSensorReadOnly> imuSensorData;
    private final List<? extends ForceSensorDataReadOnly> forceSensorData;
-   private final List<? extends ReferenceFrame> frameData;
 
    private List<RobotFrameDataPublisher> robotFrameDataPublishers = new ArrayList<>();
    private final SensorTimestampHolder timestampHolder;
@@ -72,7 +71,6 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
       this.jointSensorData = jointSensorData;
       this.imuSensorData = imuSensorData;
       this.forceSensorData = forceSensorData;
-      this.frameData = frameData;
       this.timestampHolder = timestampHolder;
       this.robotMotionStatusHolder = robotMotionStatusHolder;
       this.publishPeriod = publishPeriod;
@@ -170,25 +168,7 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
 
       robotConfigurationDataPublisher.publish(robotConfigurationData);
 
-      // - - - > Frame data
-
-      // time
-      //      robotFrameData.setTimestamp(timestampHolder.getSyncTimestamp());
-      //
-      //      if (frameData != null)
-      //      {
-      //         robotFrameData.getFrameName().clear();
-      //         for (int i = 0; i < frameData.size(); ++i)
-      //         {
-      //            ReferenceFrame frame = frameData.get(i);
-      //
-      //            robotFrameData.getFrameName().add(frame.getName());
-      //            robotFrameData.getFramePoseInWorld().set(frame.getTransformToWorldFrame());
-      //         }
-      //      }
-      //
-      //      robotFrameDataPublisher.publish(robotFrameData);
-
+      // publish robot frame data
       for (RobotFrameDataPublisher rfdPub : robotFrameDataPublishers)
       {
          rfdPub.publish();
