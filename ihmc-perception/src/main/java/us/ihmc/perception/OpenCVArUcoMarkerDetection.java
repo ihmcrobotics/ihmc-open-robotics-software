@@ -101,59 +101,61 @@ public class OpenCVArUcoMarkerDetection
       cameraMatrix.ptr(2, 1).putFloat(0.0f);
       cameraMatrix.ptr(2, 2).putFloat(1.0f);
    }
-   
+
    public void update()
    {
       if (enabled)
       {
          rgb888ColorImage.accessOnHighPriorityThread(rgb888ColorImage ->
-         {
-            if (alphaRemovalMode)
-            {
-               opencv_imgproc.cvtColor(sourceColorImage.getBytedecoOpenCVMat(), rgb888ColorImage.getBytedecoOpenCVMat(), opencv_imgproc.COLOR_RGBA2RGB);
-            }
-            else
-            {
-               sourceColorImage.getBytedecoOpenCVMat().copyTo(rgb888ColorImage.getBytedecoOpenCVMat());
-            }
-         });
+                                                     {
+                                                        if (alphaRemovalMode)
+                                                        {
+                                                           opencv_imgproc.cvtColor(sourceColorImage.getBytedecoOpenCVMat(),
+                                                                                   rgb888ColorImage.getBytedecoOpenCVMat(),
+                                                                                   opencv_imgproc.COLOR_RGBA2RGB);
+                                                        }
+                                                        else
+                                                        {
+                                                           sourceColorImage.getBytedecoOpenCVMat().copyTo(rgb888ColorImage.getBytedecoOpenCVMat());
+                                                        }
+                                                     });
 
          executorService.clearQueueAndExecute(() ->
-         {
-            synchronized (inputImageSync)
-            {
-               stopwatch.getForThreadOne().lap();
-               rgb888ColorImage.accessOnLowPriorityThread(rgb888ColorImage ->
-               {
-                  opencv_aruco.detectMarkers(rgb888ColorImage.getBytedecoOpenCVMat(),
-                                             dictionary,
-                                             corners.getForThreadOne(),
-                                             ids.getForThreadOne(),
-                                             detectorParameters,
-                                             rejectedImagePoints.getForThreadOne(),
-                                             cameraMatrix,
-                                             distortionCoefficients);
-               });
-               stopwatch.getForThreadOne().suspend();
-            }
+                                              {
+                                                 synchronized (inputImageSync)
+                                                 {
+                                                    stopwatch.getForThreadOne().lap();
+                                                    rgb888ColorImage.accessOnLowPriorityThread(rgb888ColorImage ->
+                                                                                               {
+                                                                                                  opencv_aruco.detectMarkers(rgb888ColorImage.getBytedecoOpenCVMat(),
+                                                                                                                             dictionary,
+                                                                                                                             corners.getForThreadOne(),
+                                                                                                                             ids.getForThreadOne(),
+                                                                                                                             detectorParameters,
+                                                                                                                             rejectedImagePoints.getForThreadOne(),
+                                                                                                                             cameraMatrix,
+                                                                                                                             distortionCoefficients);
+                                                                                               });
+                                                    stopwatch.getForThreadOne().suspend();
+                                                 }
 
-            synchronized (detectionDataSync)
-            {
-               corners.swap();
-               ids.swap();
-               rejectedImagePoints.swap();
-               stopwatch.swap();
+                                                 synchronized (detectionDataSync)
+                                                 {
+                                                    corners.swap();
+                                                    ids.swap();
+                                                    rejectedImagePoints.swap();
+                                                    stopwatch.swap();
 
-               idsAsList.clear();
-               idToCornersMap.clear();
-               for (int i = 0; i < ids.getForThreadTwo().rows(); i++)
-               {
-                  int markerID = ids.getForThreadTwo().ptr(i, 0).getInt();
-                  idsAsList.add(markerID);
-                  idToCornersMap.put(markerID, corners.getForThreadTwo().get(i));
-               }
-            }
-         });
+                                                    idsAsList.clear();
+                                                    idToCornersMap.clear();
+                                                    for (int i = 0; i < ids.getForThreadTwo().rows(); i++)
+                                                    {
+                                                       int markerID = ids.getForThreadTwo().ptr(i, 0).getInt();
+                                                       idsAsList.add(markerID);
+                                                       idToCornersMap.put(markerID, corners.getForThreadTwo().get(i));
+                                                    }
+                                                 }
+                                              });
       }
    }
 
@@ -299,5 +301,10 @@ public class OpenCVArUcoMarkerDetection
    public void setEnabled(boolean enabled)
    {
       this.enabled = enabled;
+   }
+
+   public SwapReference<Mat> getIds()
+   {
+      return ids;
    }
 }

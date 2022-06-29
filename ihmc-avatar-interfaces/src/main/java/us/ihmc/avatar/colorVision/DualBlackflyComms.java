@@ -1,6 +1,7 @@
 package us.ihmc.avatar.colorVision;
 
 import com.eclipsesource.v8.utils.typedarrays.Float64Array;
+import controller_msgs.msg.dds.ArUcoMarkerPoses;
 import controller_msgs.msg.dds.StoredPropertySetMessage;
 
 import std_msgs.msg.dds.Float64;
@@ -26,8 +27,7 @@ public class DualBlackflyComms
 
 
 
-   private static final ROS2Topic<FramePose3D> FRAME_POSE
-         = BASE_TOPIC.withType(FramePose3D.class).withSuffix("frame_pose");
-   public static final ROS2Topic<FramePose3D> FRAME_POSE_INPUT = FRAME_POSE.withInput();
-   public static final ROS2Topic<FramePose3D> FRAME_POSE_OUTPUT = FRAME_POSE.withOutput();
+   public static final ROS2Topic<ArUcoMarkerPoses> FRAME_POSE
+         = BASE_TOPIC.withType(ArUcoMarkerPoses.class).withSuffix("frame_pose");
+
 }
