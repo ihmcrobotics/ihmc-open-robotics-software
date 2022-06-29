@@ -54,7 +54,6 @@ public class Frame_RealtimeROS2PublisherSubscriberTest
                if (got)
                {
                   LogTools.info("Got from queued");
-//                  System.out.println("frame pose: " + RobotConfigurationData.getFramePoseInWorld().toString());
                }
                ThreadTools.sleep(1000);
             }
@@ -66,26 +65,6 @@ public class Frame_RealtimeROS2PublisherSubscriberTest
       }
 
       realtimeROS2Node.spin();
-
-//      ThreadTools.startAThread(() ->
-//      {
-//         while (true)
-//         {
-//            LogTools.info("Publishing...");
-//            RobotFrameData robotFrameData = new RobotFrameData();
-//            publisher.publish(robotFrameData);
-//            System.out.println("frame name: " + robotFrameData.getFrameName().toString());
-//            ThreadTools.sleep(1000);
-//         }
-//      }, "Publisher");
-//
-//      ROS2Topic<?> typedTopic = new ROS2Topic<>().withPrefix("/reference_frames").withType(RobotConfigurationData.class);
-//      LogTools.info("Subscribing to {}", typedTopic.toString());
-//      FrequencyStatisticPrinter hz = new FrequencyStatisticPrinter();
-//      ROS2Node node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "hz");
-//      new IHMCROS2Callback<>(node, typedTopic, ROS2QosProfile.BEST_EFFORT(), message -> hz.ping());
-      
-      
 
       ThreadTools.sleepForever();
    }
