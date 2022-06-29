@@ -239,7 +239,7 @@ public class GDXGPUPlanarRegionExtractionUI
 
 
       gpuHeightMapStopwatch.start();
-      simpleGPUHeightMapUpdater.computeFromDepthMap(cameraFrame.getTransformToWorldFrame());
+//      simpleGPUHeightMapUpdater.computeFromDepthMap(cameraFrame.getTransformToWorldFrame());
       gpuHeightMapStopwatch.suspend();
 
       wholeAlgorithmDurationStopwatch.suspend();
@@ -278,7 +278,7 @@ public class GDXGPUPlanarRegionExtractionUI
       if (!render3DHeightMap.get())
          return;
 
-      heightMapGraphic.generateMeshes(simpleGPUHeightMapUpdater.getHeightMap().buildMessage());
+//      heightMapGraphic.generateMeshes(simpleGPUHeightMapUpdater.getHeightMap().buildMessage());
       heightMapGraphic.update();
    }
 
@@ -363,7 +363,7 @@ public class GDXGPUPlanarRegionExtractionUI
       ImGui.sliderFloat(labels.get("Merge distance threshold"), mergeDistanceThreshold.getData(), 0.0f, 0.1f);
       ImGui.sliderFloat(labels.get("Merge angular threshold"), mergeAngularThreshold.getData(), 0.0f, 1.0f);
       ImGui.sliderInt(labels.get("Search depth limit"), searchDepthLimit.getData(), 1, 50000);
-      ImGui.sliderInt(labels.get("Region min patches"), regionMinPatches.getData(), 1, 1000);
+      ImGui.sliderInt(labels.get("Region min patches"), regionMinPatches.getData(), 1, 4000);
       ImGui.sliderInt(labels.get("Boundary min patches"), boundaryMinPatches.getData(), 1, 1000);
       ImGui.inputFloat(labels.get("Filter disparity threshold"), filterDisparityThreshold);
       ImGui.sliderFloat(labels.get("Region growth factor"), regionGrowthFactor.getData(), 0.005f, 0.1f);

@@ -70,6 +70,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
    private final YoBoolean useStepAdjustment = new YoBoolean(yoNamePrefix + "UseStepAdjustment", registry);
    private final YoBoolean footstepIsAdjustable = new YoBoolean(yoNamePrefix + "FootstepIsAdjustable", registry);
+   private final YoBoolean shouldCheckForReachability = new YoBoolean(yoNamePrefix + "ShouldCheckForReachability", registry);
    private final YoBoolean hasPlanarRegionBeenAssigned = new YoBoolean(yoNamePrefix + "HasPlanarRegionBeenAssigned", registry);
 
    private final YoDouble swingDuration = new YoDouble(yoNamePrefix + "SwingDuration", registry);
@@ -299,6 +300,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
          this.swingDuration.set(swingDuration);
 
          footstepIsAdjustable.set(footstep.getIsAdjustable());
+         shouldCheckForReachability.set(footstep.getShouldCheckReachability());
          useStepAdjustment.set(allowStepAdjustment.getValue() && footstepIsAdjustable.getBooleanValue());
          this.nextTransferDuration.set(nextTransferDuration);
       }
@@ -372,7 +374,23 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                                                nextFootstep == null ? 1 : 2); // fixme hardcoded.
 
       if (!useStepAdjustment.getBooleanValue())
+      {
+         if (shouldCheckForReachability.getValue())
+         {
+            boolean wasAdjusted = projectAdjustedStepIntoReachability();
+            footstepWasAdjusted.set(wasAdjusted);
+
+            if (wasAdjusted)
+            {
+               tempPoint.set(adjustedSolutionInControlPlane, upcomingFootstep.getPosition().getZ());
+               footstepSolution.getPosition().set(tempPoint);
+
+               if (CONTINUOUSLY_UPDATE_DESIRED_POSITION)
+                  upcomingFootstep.set(footstepSolution);
+            }
+         }
          return;
+      }
 
       icpError.sub(desiredICP, currentICP);
 
@@ -475,7 +493,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
          footstepAdjustmentFromErrorInControlPlane.set(residualICPError);
       }
       footstepAdjustmentFromErrorInControlPlane.scale(1.0 / footstepMultiplier.getDoubleValue());
-
    }
 
    private void projectAdjustedStepIntoCaptureRegion()
@@ -499,6 +516,21 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       footstepAdjustmentInControlPlane.set(adjustedSolutionInControlPlane);
       footstepAdjustmentInControlPlane.sub(referencePositionInControlPlane.getX(), referencePositionInControlPlane.getY());
    }
+
+   private boolean projectAdjustedStepIntoReachability()
+   {
+      adjustedSolutionInControlPlane.set(referencePositionInControlPlane);
+
+      FrameConvexPolygon2DReadOnly reachabilityPolygon = reachabilityConstraintHandler.getTotalReachabilityHull(upcomingFootstepSide.getEnumValue().getOppositeSide());
+      if (!reachabilityPolygon.isPointInside(adjustedSolutionInControlPlane))
+      {
+         reachabilityConstraintHandler.getReachabilityConstraint().orthogonalProjection(adjustedSolutionInControlPlane);
+         return true;
+      }
+
+      return false;
+   }
+
 
    private boolean isTheCaptureRegionReachable()
    {

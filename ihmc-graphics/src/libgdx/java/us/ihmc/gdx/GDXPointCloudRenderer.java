@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.Pool;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.gdx.shader.GDXShader;
 import us.ihmc.gdx.shader.GDXUniform;
@@ -130,6 +131,37 @@ public class GDXPointCloudRenderer implements RenderableProvider
          renderable.meshPart.size = pointsToRender.size();
          renderable.meshPart.mesh.setVertices(vertices, 0, pointsToRender.size() * floatsPerVertex);
 //         renderable.meshPart.update();
+      }
+   }
+
+   public void updateMesh(RecyclingArrayList<? extends Tuple3DBasics> pointsToRender, Color color)
+   {
+      if (pointsToRender != null)
+      {
+         if (pointsToRender.isEmpty()) // make sure there's always one point
+            pointsToRender.add().setToNaN();
+
+         for (int i = 0; i < pointsToRender.size(); i++)
+         {
+            int offset = i * floatsPerVertex;
+
+            Tuple3DReadOnly point = pointsToRender.get(i);
+            vertices[offset] = point.getX32();
+            vertices[offset + 1] = point.getY32();
+            vertices[offset + 2] = point.getZ32();
+
+            // color [0.0f - 1.0f]
+            vertices[offset + 3] = color.r;
+            vertices[offset + 4] = color.g;
+            vertices[offset + 5] = color.b;
+            vertices[offset + 6] = color.a;
+
+            vertices[offset + 7] = pointScale; // size
+         }
+
+         renderable.meshPart.size = pointsToRender.size();
+         renderable.meshPart.mesh.setVertices(vertices, 0, pointsToRender.size() * floatsPerVertex);
+         //         renderable.meshPart.update();
       }
    }
 

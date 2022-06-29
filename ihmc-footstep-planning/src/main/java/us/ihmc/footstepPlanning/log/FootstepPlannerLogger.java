@@ -82,6 +82,9 @@ public class FootstepPlannerLogger
    private PrintStream printStream = null;
    private FileWriter fileWriter = null;
 
+   // Disable unused files to speed up logging
+   private static final boolean logBodyPathPlannerParameters = false;
+
    private final FootstepPlanningRequestPacket requestPacket = new FootstepPlanningRequestPacket();
    private final FootstepPlannerParametersPacket footstepParametersPacket = new FootstepPlannerParametersPacket();
    private final VisibilityGraphsParametersPacket bodyPathParametersPacket = new VisibilityGraphsParametersPacket();
@@ -153,12 +156,12 @@ public class FootstepPlannerLogger
     */
    public boolean logSession(String logDirectory)
    {
-      if (!logDirectory.endsWith(File.separator))
-      {
-         logDirectory += File.separator;
-      }
+      String sessionDirectory = generateALogFolderName(logDirectory);
+      return logSessionWithExactFolderName(sessionDirectory);
+   }
 
-      String sessionDirectory = logDirectory + dateFormat.format(new Date()) + FOOTSTEP_PLANNER_LOG_POSTFIX + File.separator;
+   public boolean logSessionWithExactFolderName(String sessionDirectory)
+   {
       latestLogDirectory = sessionDirectory;
 
       try
@@ -170,10 +173,13 @@ public class FootstepPlannerLogger
          writeToFile(requestPacketFile, serializedRequest);
 
          // log body path parameters packet
-         String bodyPathParametersPacketFile = sessionDirectory + bodyPathParametersFileName;
-         FootstepPlannerMessageTools.copyParametersToPacket(bodyPathParametersPacket, planner.getVisibilityGraphParameters());
-         byte[] serializedBodyPathParameters = bodyPathParametersPacketSerializer.serializeToBytes(bodyPathParametersPacket);
-         writeToFile(bodyPathParametersPacketFile, serializedBodyPathParameters);
+         if (logBodyPathPlannerParameters)
+         {
+            String bodyPathParametersPacketFile = sessionDirectory + bodyPathParametersFileName;
+            FootstepPlannerMessageTools.copyParametersToPacket(bodyPathParametersPacket, planner.getVisibilityGraphParameters());
+            byte[] serializedBodyPathParameters = bodyPathParametersPacketSerializer.serializeToBytes(bodyPathParametersPacket);
+            writeToFile(bodyPathParametersPacketFile, serializedBodyPathParameters);
+         }
 
          // log footstep planner parameters packet
          String footstepParametersPacketFile = sessionDirectory + footstepParametersFileName;
@@ -634,5 +640,20 @@ public class FootstepPlannerLogger
    public static String getDefaultLogsDirectory()
    {
       return defaultLogsDirectory;
+   }
+
+   public static String generateALogFolderName()
+   {
+      return generateALogFolderName(defaultLogsDirectory);
+   }
+
+   public static String generateALogFolderName(String logDirectory)
+   {
+      if (!logDirectory.endsWith(File.separator))
+      {
+         logDirectory += File.separator;
+      }
+
+      return logDirectory + dateFormat.format(new Date()) + FOOTSTEP_PLANNER_LOG_POSTFIX + File.separator;
    }
 }
