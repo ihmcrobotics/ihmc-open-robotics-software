@@ -456,7 +456,7 @@ public class SwingState extends AbstractFootControlState
       else
       {
          currentTimeWithSwingSpeedUp.add(swingTimeSpeedUpFactor.getDoubleValue() * controlDT);
-         time = currentTimeWithSwingSpeedUp.getDoubleValue();
+         time = Math.max(currentTime.getValue(), currentTimeWithSwingSpeedUp.getDoubleValue());
       }
 
       FixedFramePoseTrajectoryGenerator activeTrajectory;

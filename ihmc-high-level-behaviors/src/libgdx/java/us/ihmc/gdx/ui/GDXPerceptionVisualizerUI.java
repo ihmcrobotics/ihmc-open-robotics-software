@@ -8,7 +8,6 @@ import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
@@ -17,6 +16,7 @@ import us.ihmc.gdx.simulation.environment.GDXEnvironmentBuilder;
 import us.ihmc.gdx.simulation.environment.object.objects.GDXL515SensorObject;
 import us.ihmc.gdx.simulation.environment.object.objects.GDXOusterSensorObject;
 import us.ihmc.gdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
+import us.ihmc.gdx.simulation.sensors.GDXSimulatedSensorFactory;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.graphics.live.*;
 import us.ihmc.gdx.ui.tools.GDXTransformTuner;
@@ -112,7 +112,7 @@ public class GDXPerceptionVisualizerUI
       //        baseUI.getImGuiPanelManager().addPanel("L515 Transform Tuner", l515TransformTuner::renderImGuiWidgets);
 
       ousterLidar = createOusterLidar(ros1Node, ros2Node);
-      ousterLidar.attachPointCloudPublisherROS1(RosTools.OUSTER_POINT_CLOUD);
+      ousterLidar.setupForROS1PointCloud(ros1Node, RosTools.OUSTER_POINT_CLOUD);
       ousterLidar.setSensorEnabled(true);
       ousterLidar.setRenderPointCloudDirectly(true);
       ousterLidar.setSensorFrameToWorldTransform(depthSensorTransform);
@@ -199,26 +199,7 @@ public class GDXPerceptionVisualizerUI
 
    public GDXHighLevelDepthSensorSimulator createOusterLidar(RosNodeInterface ros1Node, ROS2NodeInterface ros2Node)
    {
-      double publishRateHz = 5.0;
-      double verticalFOV = 90.0;
-      int imageWidth = 2048;
-      int imageHeight = 128;
-      if (LOW_RESOLUTION_SENSORS)
-      {
-         imageWidth /= 2;
-         imageHeight /= 2;
-      }
-      double minRange = 0.105;
-      double maxRange = 15.0;
-      GDXHighLevelDepthSensorSimulator highLevelDepthSensorSimulator = new GDXHighLevelDepthSensorSimulator("Ouster Lidar",
-                                                                                                            null,
-                                                                                                            () -> 0L,
-                                                                                                            verticalFOV,
-                                                                                                            imageWidth,
-                                                                                                            imageHeight,
-                                                                                                            minRange,
-                                                                                                            maxRange,
-                                                                                                            publishRateHz);
+      GDXHighLevelDepthSensorSimulator highLevelDepthSensorSimulator = GDXSimulatedSensorFactory.createOusterLidar(null, () -> 0L);
       highLevelDepthSensorSimulator.setupForROS1Depth(ros1Node, RosTools.MAPSENSE_DEPTH_IMAGE, RosTools.MAPSENSE_DEPTH_CAMERA_INFO);
       highLevelDepthSensorSimulator.setupForROS1Color(ros1Node, RosTools.L515_VIDEO, RosTools.L515_COLOR_CAMERA_INFO);
       highLevelDepthSensorSimulator.setupForROS2PointCloud(ros2Node, ROS2Tools.MULTISENSE_LIDAR_SCAN);
@@ -227,28 +208,7 @@ public class GDXPerceptionVisualizerUI
 
    private GDXHighLevelDepthSensorSimulator createSimulatedL515(RosNodeInterface ros1Node)
    {
-      double publishRateHz = 5.0;
-      double verticalFOV = 55.0;
-      int imageWidth = 640;
-      int imageHeight = 480;
-      if (LOW_RESOLUTION_SENSORS)
-      {
-         imageWidth /= 2;
-         imageHeight /= 2;
-      }
-      double minRange = 0.105;
-      double maxRange = 5.0;
-      ReferenceFrame sensorFrame = null;
-
-      GDXHighLevelDepthSensorSimulator highLevelDepthSensorSimulator = new GDXHighLevelDepthSensorSimulator("L515",
-                                                                                                            sensorFrame,
-                                                                                                            () -> 0L,
-                                                                                                            verticalFOV,
-                                                                                                            imageWidth,
-                                                                                                            imageHeight,
-                                                                                                            minRange,
-                                                                                                            maxRange,
-                                                                                                            publishRateHz);
+      GDXHighLevelDepthSensorSimulator highLevelDepthSensorSimulator = GDXSimulatedSensorFactory.createRealsenseL515(null, () -> 0L);
       highLevelDepthSensorSimulator.setupForROS1Depth(ros1Node, RosTools.MAPSENSE_DEPTH_IMAGE, RosTools.MAPSENSE_DEPTH_CAMERA_INFO);
       highLevelDepthSensorSimulator.setupForROS1Color(ros1Node, RosTools.L515_VIDEO, RosTools.L515_COLOR_CAMERA_INFO);
       return highLevelDepthSensorSimulator;

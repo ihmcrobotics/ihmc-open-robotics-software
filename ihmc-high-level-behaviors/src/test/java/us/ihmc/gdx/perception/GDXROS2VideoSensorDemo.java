@@ -73,6 +73,9 @@ public class GDXROS2VideoSensorDemo
                                                                                  imageHeight,
                                                                                  minRange,
                                                                                  maxRange,
+                                                                                 0.03,
+                                                                                 0.05,
+                                                                                 true,
                                                                                  publishRateHz);
             highLevelDepthSensorSimulator.setupForROS2Color(pubSubImplementation, ROS2Tools.BIG_VIDEO);
             baseUI.getImGuiPanelManager().addPanel(highLevelDepthSensorSimulator);
