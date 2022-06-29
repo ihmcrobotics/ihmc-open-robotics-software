@@ -55,6 +55,13 @@ float point_sensor_distance(float3 point, float3 sensor)
     return dot(delta, delta);
 }
 
+/*
+ * Resolution is the size of a "pixel" in the height map.
+ * Center index is the index from the edge of the height map region.
+ * Center is the distance in meters from world to the center of the height map region.
+ * Coordinate is the distance in meters from world to the "pixel" in the height map.
+ * Therefore, we get the index of the "pixel" (x, y, bottom left corner) from a world point.
+ */
 int coordinate_to_index(float coordinate, float center, float resolution, int centerIndex)
 {
     int index = ((int) round((coordinate - center) / resolution)) + centerIndex;
@@ -112,13 +119,16 @@ float3 back_project_to_image_frame(int2 pos, float Z, global float* params)
 
 float3 project_from_image_frame_to_camera_frame(float3 point_in_image_frame)
 {
-    return (float3) (point_in_image_frame.z, -point_in_image_frame.x, point_in_image_frame.y);
+    return (float3) (point_in_image_frame.z, -point_in_image_frame.x, -point_in_image_frame.y);
 }
 
 float3 get_point_from_image(read_only image2d_t depth_image, int x, int y, global float* params)
 {
     int2 key = (int2)(x,y);
-    float Z = ((float)read_imageui(depth_image, key).x)/(float) 1000;
+//    float Z = ((float)read_imageui(depth_image, key).x)/(float) 1000;
+    float Z = ((float)read_imagef(depth_image, key).x);
+
+//    printf("Z: %.3f\n", Z);
 
     if (Z > 0.1f)
     {
@@ -160,6 +170,9 @@ void kernel addPointsFromImageKernel(read_only image2d_t depth_image,
     int image_y = get_global_id(1);
 
     float3 point_in_camera_frame = get_point_from_image(depth_image, image_x, image_y, intrinsics);
+
+//    printf("PointInCameraFrame(%.3lf,%.3lf,%.3lf), \n", point_in_camera_frame.x, point_in_camera_frame.y, point_in_camera_frame.z);
+
     float3 sensor = (float3) (localization[tx], localization[ty], localization[tz]);
     float3 rx = (float3) (localization[r00], localization[r01], localization[r02]);
     float3 ry = (float3) (localization[r10], localization[r11], localization[r12]);

@@ -2311,8 +2311,7 @@ public class CoMTrajectoryPlannerTools
                                                   double omega)
    {
       comPositionToPack.checkReferenceFrameMatch(worldFrame);
-      comPositionToPack.setToZero();
-      comPositionToPack.scaleAdd(getCoMPositionFirstCoefficientTimeFunction(omega, timeInPhase), firstCoefficient, comPositionToPack);
+      comPositionToPack.setAndScale(getCoMPositionFirstCoefficientTimeFunction(omega, timeInPhase), firstCoefficient);
       comPositionToPack.scaleAdd(getCoMPositionSecondCoefficientTimeFunction(omega, timeInPhase), secondCoefficient, comPositionToPack);
       comPositionToPack.scaleAdd(getCoMPositionThirdCoefficientTimeFunction(timeInPhase), thirdCoefficient, comPositionToPack);
       comPositionToPack.scaleAdd(getCoMPositionFourthCoefficientTimeFunction(timeInPhase), fourthCoefficient, comPositionToPack);
@@ -2331,13 +2330,12 @@ public class CoMTrajectoryPlannerTools
                                                   double omega)
    {
       comVelocityToPack.checkReferenceFrameMatch(worldFrame);
-      comVelocityToPack.setToZero();
-      comVelocityToPack.scaleAdd(getCoMVelocityFirstCoefficientTimeFunction(omega, timeInPhase), firstCoefficient, comVelocityToPack);
+      comVelocityToPack.setAndScale(getCoMVelocityFirstCoefficientTimeFunction(omega, timeInPhase), firstCoefficient);
       comVelocityToPack.scaleAdd(getCoMVelocitySecondCoefficientTimeFunction(omega, timeInPhase), secondCoefficient, comVelocityToPack);
       comVelocityToPack.scaleAdd(getCoMVelocityThirdCoefficientTimeFunction(timeInPhase), thirdCoefficient, comVelocityToPack);
       comVelocityToPack.scaleAdd(getCoMVelocityFourthCoefficientTimeFunction(timeInPhase), fourthCoefficient, comVelocityToPack);
       comVelocityToPack.scaleAdd(getCoMVelocityFifthCoefficientTimeFunction(), fifthCoefficient, comVelocityToPack);
-      comVelocityToPack.scaleAdd(getCoMVelocitySixthCoefficientTimeFunction(), sixthCoefficient, comVelocityToPack);
+//      comVelocityToPack.scaleAdd(getCoMVelocitySixthCoefficientTimeFunction(), sixthCoefficient, comVelocityToPack);
    }
 
    public static void constructDesiredCoMAcceleration(FixedFrameVector3DBasics comAccelerationToPack,
@@ -2351,13 +2349,12 @@ public class CoMTrajectoryPlannerTools
                                                       double omega)
    {
       comAccelerationToPack.checkReferenceFrameMatch(worldFrame);
-      comAccelerationToPack.setToZero();
-      comAccelerationToPack.scaleAdd(getCoMAccelerationFirstCoefficientTimeFunction(omega, timeInPhase), firstCoefficient, comAccelerationToPack);
+      comAccelerationToPack.setAndScale(getCoMAccelerationFirstCoefficientTimeFunction(omega, timeInPhase), firstCoefficient);
       comAccelerationToPack.scaleAdd(getCoMAccelerationSecondCoefficientTimeFunction(omega, timeInPhase), secondCoefficient, comAccelerationToPack);
       comAccelerationToPack.scaleAdd(getCoMAccelerationThirdCoefficientTimeFunction(timeInPhase), thirdCoefficient, comAccelerationToPack);
       comAccelerationToPack.scaleAdd(getCoMAccelerationFourthCoefficientTimeFunction(), fourthCoefficient, comAccelerationToPack);
-      comAccelerationToPack.scaleAdd(getCoMAccelerationFifthCoefficientTimeFunction(), fifthCoefficient, comAccelerationToPack);
-      comAccelerationToPack.scaleAdd(getCoMAccelerationSixthCoefficientTimeFunction(), sixthCoefficient, comAccelerationToPack);
+//      comAccelerationToPack.scaleAdd(getCoMAccelerationFifthCoefficientTimeFunction(), fifthCoefficient, comAccelerationToPack);
+//      comAccelerationToPack.scaleAdd(getCoMAccelerationSixthCoefficientTimeFunction(), sixthCoefficient, comAccelerationToPack);
    }
 
    public static void constructDesiredDCMPosition(FixedFramePoint3DBasics dcmPositionToPack,
@@ -2372,8 +2369,8 @@ public class CoMTrajectoryPlannerTools
    {
       dcmPositionToPack.checkReferenceFrameMatch(worldFrame);
       dcmPositionToPack.setToZero();
-      dcmPositionToPack.scaleAdd(getDCMPositionFirstCoefficientTimeFunction(omega, timeInPhase), firstCoefficient, dcmPositionToPack);
-      dcmPositionToPack.scaleAdd(getDCMPositionSecondCoefficientTimeFunction(), secondCoefficient, dcmPositionToPack);
+      dcmPositionToPack.setAndScale(getDCMPositionFirstCoefficientTimeFunction(omega, timeInPhase), firstCoefficient);
+//      dcmPositionToPack.scaleAdd(getDCMPositionSecondCoefficientTimeFunction(), secondCoefficient, dcmPositionToPack);
       dcmPositionToPack.scaleAdd(getDCMPositionThirdCoefficientTimeFunction(omega, timeInPhase), thirdCoefficient, dcmPositionToPack);
       dcmPositionToPack.scaleAdd(getDCMPositionFourthCoefficientTimeFunction(omega, timeInPhase), fourthCoefficient, dcmPositionToPack);
       dcmPositionToPack.scaleAdd(getDCMPositionFifthCoefficientTimeFunction(omega, timeInPhase), fifthCoefficient, dcmPositionToPack);
@@ -2391,10 +2388,7 @@ public class CoMTrajectoryPlannerTools
                                                   double omega)
    {
       vrpPositionToPack.checkReferenceFrameMatch(worldFrame);
-      vrpPositionToPack.setToZero();
-      vrpPositionToPack.scaleAdd(getVRPPositionFirstCoefficientTimeFunction(), firstCoefficient, vrpPositionToPack);
-      vrpPositionToPack.scaleAdd(getVRPPositionSecondCoefficientTimeFunction(), secondCoefficient, vrpPositionToPack);
-      vrpPositionToPack.scaleAdd(getVRPPositionThirdCoefficientTimeFunction(omega, timeInPhase), thirdCoefficient, vrpPositionToPack);
+      vrpPositionToPack.setAndScale(getVRPPositionThirdCoefficientTimeFunction(omega, timeInPhase), thirdCoefficient);
       vrpPositionToPack.scaleAdd(getVRPPositionFourthCoefficientTimeFunction(omega, timeInPhase), fourthCoefficient, vrpPositionToPack);
       vrpPositionToPack.scaleAdd(getVRPPositionFifthCoefficientTimeFunction(timeInPhase), fifthCoefficient, vrpPositionToPack);
       vrpPositionToPack.scaleAdd(getVRPPositionSixthCoefficientTimeFunction(), sixthCoefficient, vrpPositionToPack);
@@ -2411,10 +2405,7 @@ public class CoMTrajectoryPlannerTools
                                                   double omega)
    {
       vrpVelocityToPack.checkReferenceFrameMatch(worldFrame);
-      vrpVelocityToPack.setToZero();
-      vrpVelocityToPack.scaleAdd(getVRPVelocityFirstCoefficientTimeFunction(), firstCoefficient, vrpVelocityToPack);
-      vrpVelocityToPack.scaleAdd(getVRPVelocitySecondCoefficientTimeFunction(), secondCoefficient, vrpVelocityToPack);
-      vrpVelocityToPack.scaleAdd(getVRPVelocityThirdCoefficientTimeFunction(omega, timeInPhase), thirdCoefficient, vrpVelocityToPack);
+      vrpVelocityToPack.setAndScale(getVRPVelocityThirdCoefficientTimeFunction(omega, timeInPhase), thirdCoefficient);
       vrpVelocityToPack.scaleAdd(getVRPVelocityFourthCoefficientTimeFunction(timeInPhase), fourthCoefficient, vrpVelocityToPack);
       vrpVelocityToPack.scaleAdd(getVRPVelocityFifthCoefficientTimeFunction(), fifthCoefficient, vrpVelocityToPack);
       vrpVelocityToPack.scaleAdd(getVRPVelocitySixthCoefficientTimeFunction(), sixthCoefficient, vrpVelocityToPack);

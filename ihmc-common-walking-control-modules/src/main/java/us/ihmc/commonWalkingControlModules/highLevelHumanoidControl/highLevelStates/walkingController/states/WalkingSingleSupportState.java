@@ -287,7 +287,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       actualFootPoseInWorld.setToZero(fullRobotModel.getSoleFrame(swingSide));
       actualFootPoseInWorld.changeFrame(worldFrame);
-      walkingMessageHandler.reportFootstepStarted(swingSide, desiredFootPoseInWorld, actualFootPoseInWorld, swingTime);
+      walkingMessageHandler.reportFootstepStarted(swingSide, desiredFootPoseInWorld, actualFootPoseInWorld, swingTime, nextFootstep.getSequenceID());
    }
 
    @Override
@@ -302,7 +302,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       touchdownErrorCompensator.registerDesiredFootstepPosition(swingSide, desiredFootPoseInWorld.getPosition());
 
-      walkingMessageHandler.reportFootstepCompleted(swingSide, desiredFootPoseInWorld, actualFootPoseInWorld, swingTime);
+      walkingMessageHandler.reportFootstepCompleted(swingSide, desiredFootPoseInWorld, actualFootPoseInWorld, swingTime, nextFootstep.getSequenceID());
       walkingMessageHandler.registerCompletedDesiredFootstep(nextFootstep);
 
       MovingReferenceFrame soleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(nextFootstep.getRobotSide());

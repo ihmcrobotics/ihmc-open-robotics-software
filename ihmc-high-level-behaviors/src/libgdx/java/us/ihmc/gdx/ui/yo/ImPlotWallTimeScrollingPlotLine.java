@@ -4,7 +4,13 @@ import imgui.extension.implot.ImPlot;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.gdx.ui.tools.ImPlotTools;
 
-public abstract class ImPlotPlotLineBasics implements ImPlotPlotLine
+/**
+ * This implmentation scrolls automatically based on wall time.
+ * It has a buffer size, which is a lot like resolution/fidelity
+ * and a history in seconds. You won't see data in this plot older
+ * than the history. It will have scrolled off.
+ */
+public abstract class ImPlotWallTimeScrollingPlotLine implements ImPlotPlotLine
 {
    private Runnable legendPopupImGuiRenderer;
    private final String variableNameBase;
@@ -22,7 +28,7 @@ public abstract class ImPlotPlotLineBasics implements ImPlotPlotLine
    private boolean isA = true;
    private int filledIndex = 0;
 
-   public ImPlotPlotLineBasics(String variableName, String initialValueString, int bufferSize, double history)
+   public ImPlotWallTimeScrollingPlotLine(String variableName, String initialValueString, int bufferSize, double history)
    {
       this.variableName = variableName;
       this.bufferSize = bufferSize;

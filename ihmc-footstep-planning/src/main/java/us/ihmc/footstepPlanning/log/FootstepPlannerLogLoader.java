@@ -169,10 +169,13 @@ public class FootstepPlannerLogLoader
 
          // load body path parameters packet
          File bodyPathParametersFile = new File(logDirectory, FootstepPlannerLogger.bodyPathParametersFileName);
-         InputStream bodyPathParametersPacketInputStream = new FileInputStream(bodyPathParametersFile);
-         jsonNode = objectMapper.readTree(bodyPathParametersPacketInputStream);
-         log.getBodyPathParametersPacket().set(bodyPathParametersSerializer.deserialize(jsonNode.toString()));
-         bodyPathParametersPacketInputStream.close();
+         if (bodyPathParametersFile.exists())
+         {
+            InputStream bodyPathParametersPacketInputStream = new FileInputStream(bodyPathParametersFile);
+            jsonNode = objectMapper.readTree(bodyPathParametersPacketInputStream);
+            log.getBodyPathParametersPacket().set(bodyPathParametersSerializer.deserialize(jsonNode.toString()));
+            bodyPathParametersPacketInputStream.close();
+         }
 
          // load footstep parameters packet
          File footstepParametersFile = new File(logDirectory, FootstepPlannerLogger.footstepParametersFileName);
