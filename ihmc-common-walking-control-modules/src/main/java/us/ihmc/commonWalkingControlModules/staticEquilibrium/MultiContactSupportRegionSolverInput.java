@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.shape.convexPolytope.interfaces.ConvexPolytope3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
@@ -16,8 +17,13 @@ import java.util.List;
 public class MultiContactSupportRegionSolverInput
 {
    public static final int maxContactPoints = 50;
-   private static final double defaultGravityMagnitude = 9.80665;
    private static final double defaultCoefficientOfFriction = 0.9;
+   private static final double defaultMaxNormalForce = 2.0;
+
+   /**
+    * Coefficient of friction
+    */
+   private double coefficientOfFriction = defaultCoefficientOfFriction;
 
    /**
     * The vector r in the paper above
@@ -29,27 +35,40 @@ public class MultiContactSupportRegionSolverInput
     */
    private final RecyclingArrayList<FrameVector3D> surfaceNormals = new RecyclingArrayList<>(20, FrameVector3D::new);
 
-   private double gravityMagnitude = defaultGravityMagnitude;
-
-   private double coefficientOfFriction = defaultCoefficientOfFriction;
+   /**
+    * Constraints on rho. Can either be fixed maximum or actuation-based polytope
+    */
+   private final RecyclingArrayList<ContactPointActuationConstraint> actuationConstraints = new RecyclingArrayList<>(20, ContactPointActuationConstraint::new);
 
    public void clear()
    {
       contactPointPositions.clear();
       surfaceNormals.clear();
-      gravityMagnitude = defaultGravityMagnitude;
+      actuationConstraints.clear();
       coefficientOfFriction = defaultCoefficientOfFriction;
    }
 
    public void addContactPoint(Point3DReadOnly contactPointPosition, Vector3DReadOnly surfaceNormal)
    {
-      this.contactPointPositions.add().set(contactPointPosition);
-      this.surfaceNormals.add().set(surfaceNormal);
+      addContactPoint(contactPointPosition, surfaceNormal, defaultMaxNormalForce);
    }
 
-   public void setGravityMagnitude(double gravityMagnitude)
+   public void addContactPoint(Point3DReadOnly contactPointPosition, Vector3DReadOnly surfaceNormal, double maxNormalForce)
    {
-      this.gravityMagnitude = gravityMagnitude;
+      this.contactPointPositions.add().set(contactPointPosition);
+      this.surfaceNormals.add().set(surfaceNormal);
+
+      ContactPointActuationConstraint forceConstraint = this.actuationConstraints.add();
+      forceConstraint.setToMaxNormalForce(maxNormalForce);
+   }
+
+   public void addContactPoint(Point3DReadOnly contactPointPosition, Vector3DReadOnly surfaceNormal, ConvexPolytope3DReadOnly forcePolytope)
+   {
+      this.contactPointPositions.add().set(contactPointPosition);
+      this.surfaceNormals.add().set(surfaceNormal);
+
+      ContactPointActuationConstraint forceConstraint = this.actuationConstraints.add();
+      forceConstraint.setToPolytopeConstraint(forcePolytope);
    }
 
    public int getNumberOfContacts()
@@ -72,9 +91,9 @@ public class MultiContactSupportRegionSolverInput
       return surfaceNormals;
    }
 
-   public double getGravityMagnitude()
+   public RecyclingArrayList<ContactPointActuationConstraint> getActuationConstraints()
    {
-      return gravityMagnitude;
+      return actuationConstraints;
    }
 
    public double getCoefficientOfFriction()

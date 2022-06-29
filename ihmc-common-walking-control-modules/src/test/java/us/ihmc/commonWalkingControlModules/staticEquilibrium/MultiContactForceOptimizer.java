@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static us.ihmc.commonWalkingControlModules.staticEquilibrium.ContactPoint.basisVectorsPerContactPoint;
-import static us.ihmc.commonWalkingControlModules.staticEquilibrium.MultiContactSupportRegionSolver.mass;
+import static us.ihmc.commonWalkingControlModules.staticEquilibrium.MultiContactSupportRegionSolver.mg;
 
 /**
  * This class solves for forces given a set of contact points, surface normals, and CoM xy position
@@ -91,9 +91,9 @@ public class MultiContactForceOptimizer
          }
       }
 
-      beq.set(2, 0, mass * input.getGravityMagnitude());
-      beq.set(3, 0, mass * input.getGravityMagnitude() * centerOfMassXY.getY());
-      beq.set(4, 0, - mass * input.getGravityMagnitude() * centerOfMassXY.getX());
+      beq.set(2, 0, mg);
+      beq.set(3, 0, mg * centerOfMassXY.getY());
+      beq.set(4, 0, -mg * centerOfMassXY.getX());
 
       double[] objectiveCoefficients = new double[numberOfDecisionVariables];
       Arrays.fill(objectiveCoefficients, 1.0);
