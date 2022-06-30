@@ -10,7 +10,7 @@ public class GDXSCS2EnvironmentBuilderUI extends Lwjgl3ApplicationAdapter
                                                               "ihmc-open-robotics-software",
                                                               "ihmc-high-level-behaviors/src/libgdx/resources",
                                                               "SCS 2 Environment Builder");
-   private final GDXSCS2EnvironmentBuilder environmentBuilder = new GDXSCS2EnvironmentBuilder(baseUI.get3DSceneManager());
+   private final GDXSCS2EnvironmentBuilder environmentBuilder = new GDXSCS2EnvironmentBuilder(baseUI.getPrimary3DPanel());
    private final ImGui3DViewInputDebugger inputDebugger = new ImGui3DViewInputDebugger();
 
    public GDXSCS2EnvironmentBuilderUI()
@@ -24,7 +24,7 @@ public class GDXSCS2EnvironmentBuilderUI extends Lwjgl3ApplicationAdapter
    {
       baseUI.create();
 
-      inputDebugger.create(baseUI);
+      inputDebugger.create(baseUI.getPrimary3DPanel());
       baseUI.getImGuiPanelManager().addPanel(inputDebugger.getWindowName(), inputDebugger::render);
 
       environmentBuilder.create(baseUI);

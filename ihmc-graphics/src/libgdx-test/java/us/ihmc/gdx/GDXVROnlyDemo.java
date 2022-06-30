@@ -16,8 +16,8 @@ public class GDXVROnlyDemo
          @Override
          public void create()
          {
-            vrApplication.getSceneBasics().addDefaultLighting();
-            vrApplication.getSceneBasics().addCoordinateFrame(1.0);
+            vrApplication.getScene().addDefaultLighting();
+            vrApplication.getScene().addCoordinateFrame(1.0);
 
             vrApplication.getVRContext().addVRInputProcessor(vrContext ->
             {
@@ -31,7 +31,7 @@ public class GDXVROnlyDemo
                });
             });
 
-            vrApplication.getSceneBasics().addRenderableProvider(((renderables, pool) ->
+            vrApplication.getScene().addRenderableProvider(((renderables, pool) ->
             {
                vrApplication.getVRContext().getControllerRenderables(renderables, pool);
                vrApplication.getVRContext().getBaseStationRenderables(renderables, pool);

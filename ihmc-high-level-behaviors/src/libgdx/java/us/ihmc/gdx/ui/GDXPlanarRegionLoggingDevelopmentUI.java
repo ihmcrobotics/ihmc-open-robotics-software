@@ -39,12 +39,12 @@ public class GDXPlanarRegionLoggingDevelopmentUI
          {
             baseUI.create();
 
-            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelBuilder.createCoordinateFrame(0.3)));
+            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(GDXModelBuilder.createCoordinateFrame(0.3)));
 
             panel = new ImGuiGDXPlanarRegionLoggingPanel();
             panel.create();
             baseUI.getImGuiPanelManager().addPanel(panel.getWindowName(), panel::renderImGuiWidgets);
-            baseUI.get3DSceneManager().addRenderableProvider(panel);
+            baseUI.getPrimaryScene().addRenderableProvider(panel);
 
             timer.scheduleAtFixedRate(new TimerTask()
             {

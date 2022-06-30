@@ -41,16 +41,16 @@ public class GDXGPUPlanarRegionExtractionL515HardwareDemo
             baseUI.create();
 
             robotInteractableReferenceFrame = new GDXInteractableReferenceFrame();
-            robotInteractableReferenceFrame.create(ReferenceFrame.getWorldFrame(), 0.15, baseUI.get3DSceneManager().getCamera3D());
+            robotInteractableReferenceFrame.create(ReferenceFrame.getWorldFrame(), 0.15, baseUI.getPrimary3DPanel().getCamera3D());
             robotInteractableReferenceFrame.getTransformToParent().getTranslation().add(2.2, 0.0, 1.0);
-            baseUI.addImGui3DViewInputProcessor(robotInteractableReferenceFrame::process3DViewInput);
-            baseUI.get3DSceneManager().addRenderableProvider(robotInteractableReferenceFrame::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(robotInteractableReferenceFrame::process3DViewInput);
+            baseUI.getPrimaryScene().addRenderableProvider(robotInteractableReferenceFrame::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
             l515PoseGizmo = new GDXPose3DGizmo(robotInteractableReferenceFrame.getRepresentativeReferenceFrame());
-            l515PoseGizmo.create(baseUI.get3DSceneManager().getCamera3D());
+            l515PoseGizmo.create(baseUI.getPrimary3DPanel().getCamera3D());
             l515PoseGizmo.setResizeAutomatically(false);
-            baseUI.addImGui3DViewPickCalculator(l515PoseGizmo::calculate3DViewPick);
-            baseUI.addImGui3DViewInputProcessor(l515PoseGizmo::process3DViewInput);
-            baseUI.get3DSceneManager().addRenderableProvider(l515PoseGizmo, GDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(l515PoseGizmo::calculate3DViewPick);
+            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(l515PoseGizmo::process3DViewInput);
+            baseUI.getPrimaryScene().addRenderableProvider(l515PoseGizmo, GDXSceneLevel.VIRTUAL);
             l515PoseGizmo.getTransformToParent().appendPitchRotation(Math.toRadians(60.0));
          }
 
@@ -88,7 +88,7 @@ public class GDXGPUPlanarRegionExtractionL515HardwareDemo
                                                       l515.getIntrinsicParameters().ppy());
                      gpuPlanarRegionExtraction.getEnabled().set(true);
                      baseUI.getImGuiPanelManager().addPanel(gpuPlanarRegionExtraction.getPanel());
-                     baseUI.get3DSceneManager().addRenderableProvider(gpuPlanarRegionExtraction::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+                     baseUI.getPrimaryScene().addRenderableProvider(gpuPlanarRegionExtraction::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
 
                      baseUI.getPerspectiveManager().reloadPerspective();
                   }

@@ -105,8 +105,8 @@ public class GDXSCS2Session
 
       session.startSessionThread(); // TODO: Need start/stop controls?
 
-      baseUI.get3DSceneManager().addRenderableProvider(getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
-      baseUI.get3DSceneManager().addRenderableProvider(getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+      baseUI.getPrimaryScene().addRenderableProvider(getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
+      baseUI.getPrimaryScene().addRenderableProvider(getVirtualRenderables, GDXSceneLevel.VIRTUAL);
 
       plotManager.create(baseUI.getPerspectiveManager(), yoManager, panel);
    }
@@ -304,8 +304,8 @@ public class GDXSCS2Session
 
    public void destroy(GDXImGuiBasedUI baseUI)
    {
-      baseUI.get3DSceneManager().getSceneBasics().removeRenderableProvider(getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
-      baseUI.get3DSceneManager().getSceneBasics().removeRenderableProvider(getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+      baseUI.getPrimaryScene().removeRenderableProvider(getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
+      baseUI.getPrimaryScene().removeRenderableProvider(getVirtualRenderables, GDXSceneLevel.VIRTUAL);
 
       plotManager.destroy();
 
