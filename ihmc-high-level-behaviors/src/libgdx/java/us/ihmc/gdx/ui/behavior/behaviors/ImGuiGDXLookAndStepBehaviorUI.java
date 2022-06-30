@@ -160,7 +160,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
       goalAffordance.create(baseUI, goalPose -> helper.publish(GOAL_INPUT, goalPose), Color.CYAN);
       subGoalGraphic.create(0.027, 0.027 * 6.0, Color.YELLOW);
 
-      baseUI.addImGui3DViewInputProcessor(this::processImGui3DViewInput);
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::processImGui3DViewInput);
    }
 
    public void setGoal(Pose3DBasics goal)

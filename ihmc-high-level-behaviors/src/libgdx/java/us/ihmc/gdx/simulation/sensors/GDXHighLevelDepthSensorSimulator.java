@@ -39,8 +39,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.gdx.GDXPointCloudRenderer;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiTools;
-import us.ihmc.gdx.sceneManager.GDX3DSceneBasics;
-import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
+import us.ihmc.gdx.sceneManager.GDX3DScene;
 import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.log.LogTools;
@@ -241,12 +240,7 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
       compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 75);
    }
 
-   public void render(GDX3DSceneManager sceneManager)
-   {
-      render(sceneManager.getSceneBasics());
-   }
-
-   public void render(GDX3DSceneBasics sceneBasics)
+   public void render(GDX3DScene scene)
    {
       if (sensorEnabled.get())
       {
@@ -264,12 +258,12 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
          {
             GDXTools.toGDX(color, pointColorFromPicker);
             Color pointColor = useSensorColor.get() ? null : pointColorFromPicker;
-            depthSensorSimulator.render(sceneBasics, pointColor, pointSize.get());
+            depthSensorSimulator.render(scene, pointColor, pointSize.get());
             pointCloudRenderer.updateMeshFastest(imageWidth * imageHeight);
          }
          else
          {
-            depthSensorSimulator.render(sceneBasics);
+            depthSensorSimulator.render(scene);
          }
          if (throttleTimer.isExpired(UnitConversions.hertzToSeconds(publishRateHz)))
          {

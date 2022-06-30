@@ -107,7 +107,7 @@ public class ImGuiGDXTargetFollowingBehaviorUI extends ImGuiGDXBehaviorUIInterfa
          RosTools.toRos(manualTargetPose, poseStampedMessage.getPose());
          manualTargetPublisher.publish(poseStampedMessage);
       }, Color.GREEN);
-      baseUI.addImGui3DViewInputProcessor(manualTargetAffordance::processImGui3DViewInput);
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(manualTargetAffordance::processImGui3DViewInput);
 
       lookAndStepUI.create(baseUI);
    }

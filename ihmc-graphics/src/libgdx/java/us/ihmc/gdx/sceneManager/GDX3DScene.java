@@ -20,7 +20,7 @@ import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 
 import java.util.*;
 
-public class GDX3DSceneBasics
+public class GDX3DScene
 {
    public static final Set<GDXSceneLevel> REAL_ENVIRONMENT_ONLY = Collections.singleton(GDXSceneLevel.REAL_ENVIRONMENT);
 

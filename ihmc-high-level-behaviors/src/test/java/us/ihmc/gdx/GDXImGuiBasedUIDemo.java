@@ -34,8 +34,8 @@ public class GDXImGuiBasedUIDemo
          {
             baseUI.create();
 
-            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelBuilder.createCoordinateFrame(0.3)));
-            baseUI.get3DSceneManager().addModelInstance(new BoxesDemoModel().newInstance());
+            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(GDXModelBuilder.createCoordinateFrame(0.3)));
+            baseUI.getPrimaryScene().addModelInstance(new BoxesDemoModel().newInstance());
 
             baseUI.getImGuiPanelManager().addPanel("Window 1", GDXImGuiBasedUIDemo.this::renderWindow1);
             baseUI.getImGuiPanelManager().addPanel("Window 2", GDXImGuiBasedUIDemo.this::renderWindow2);

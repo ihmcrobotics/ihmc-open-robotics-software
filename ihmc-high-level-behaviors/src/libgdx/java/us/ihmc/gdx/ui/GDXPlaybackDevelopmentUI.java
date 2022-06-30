@@ -45,10 +45,10 @@ public class GDXPlaybackDevelopmentUI
 
             baseUI.create();
 
-            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelBuilder.createCoordinateFrame(0.3)));
+            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(GDXModelBuilder.createCoordinateFrame(0.3)));
 
             planarRegionsGraphic = new GDXPlanarRegionsGraphic();
-            baseUI.get3DSceneManager().addRenderableProvider(planarRegionsGraphic);
+            baseUI.getPrimaryScene().addRenderableProvider(planarRegionsGraphic);
          }
 
          @Override
