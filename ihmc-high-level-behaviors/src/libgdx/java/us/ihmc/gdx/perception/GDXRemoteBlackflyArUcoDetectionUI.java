@@ -15,16 +15,19 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.simulation.environment.GDXModelInstance;
 import us.ihmc.gdx.tools.GDXModelBuilder;
+import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.tools.ImPlotDoublePlot;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class GDXRemoteBlackflyArUcoDetectionUI
@@ -40,14 +43,9 @@ public class GDXRemoteBlackflyArUcoDetectionUI
    private final ImPlotDoublePlot encodingDurationPlot;
    private final IHMCROS2Input<Float64> copyDurationInput;
    private final ImPlotDoublePlot copyDurationPlot;
-
    private final TypedNotification<ArUcoMarkerPoses> arUcoPoseROS2Notification = new TypedNotification<>();
-   private ArrayList<GDXModelInstance> markerPoseCoordinateFrames = new ArrayList<>();
-   private ArrayList<Long> markerIds = new ArrayList<>();
-   private int numberOfMarkers =0;
-
-
-   //private final IHMCROS2Input
+   private final HashMap<Long, GDXModelInstance> markerPoseCoordinateFrames = new HashMap<>();
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
    public GDXRemoteBlackflyArUcoDetectionUI(ROS2Helper ros2Helper)
    {
@@ -98,27 +96,29 @@ public class GDXRemoteBlackflyArUcoDetectionUI
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       ArUcoMarkerPoses markerPoses;
-      if(arUcoPoseROS2Notification.poll() == true)
+      if(arUcoPoseROS2Notification.poll())
       {
          markerPoses = arUcoPoseROS2Notification.read();
 
-         for (int i=0; i< markerPoses.marker_id_.size(); i++)
+         for (int i = 0; i < markerPoses.getMarkerId().size(); i++)
          {
-            if(markerIds.contains(markerPoses.getMarkerId().get(i)) == false)
+            long markerID = markerPoses.getMarkerId().get(i);
+            GDXModelInstance markerPoseFrame = markerPoseCoordinateFrames.get(markerID);
+            if (markerPoseFrame == null)
             {
-               markerPoseCoordinateFrames.add(new GDXModelInstance(GDXModelBuilder.createCoordinateFrame(0.4)));
-               markerIds.add(markerPoses.getMarkerId().get(i));
+               markerPoseFrame = new GDXModelInstance(GDXModelBuilder.createCoordinateFrame(0.4));
+               markerPoseCoordinateFrames.put(markerID, markerPoseFrame);
             }
 
+            tempTransform.set(markerPoses.getOrientation().get(i), markerPoses.getPosition().get(i));
+            markerPoseFrame.setTransformToWorldFrame(tempTransform);
          }
 
-         for (GDXModelInstance markerPoseCoordinateFrame : markerPoseCoordinateFrames)
+         for (GDXModelInstance markerPoseCoordinateFrame : markerPoseCoordinateFrames.values())
          {
             markerPoseCoordinateFrame.getRenderables(renderables, pool);
          }
-
       }
-
    }
 
    public void destroy()

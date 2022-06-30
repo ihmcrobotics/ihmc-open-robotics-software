@@ -78,12 +78,11 @@ public class DualBlackflyCamera
    private final Stopwatch copyDuration = new Stopwatch();
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
 
-   private ArrayList<OpenCVArUcoMarker> markersToTrack;
+   private final ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
    private ArrayList<FramePose3DBasics> framePosesOfMarkers;
-   private FramePose3D framePoseOfMarker;
-   private ROS2Helper markerPose;
-   private ArUcoMarkerPoses arUcoMarkerPoses = new ArUcoMarkerPoses();
-   private int numberOfArUcoMarkers=0;
+   private final FramePose3D framePoseOfMarker = new FramePose3D();
+   private final ArUcoMarkerPoses arUcoMarkerPoses = new ArUcoMarkerPoses();
+   private int numberOfArUcoMarkers = 0;
    private ArrayList<Integer> markerIds = new ArrayList<>();
 
 
@@ -167,13 +166,13 @@ public class DualBlackflyCamera
 
             if (side == RobotSide.RIGHT)
             {
-
+               ReferenceFrame cameraFrame = syncedRobot.getReferenceFrames().getObjectDetectionCameraFrame();
                if (arUcoMarkerDetection == null)
                {
                   undistortedImage = new BytedecoImage(undistortedImageMat);
 
                   arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
-                  arUcoMarkerDetection.create(undistortedImage, cameraPinholeBrown, syncedRobot.getReferenceFrames().getObjectDetectionCameraFrame());
+                  arUcoMarkerDetection.create(undistortedImage, cameraPinholeBrown, cameraFrame);
                }
 
                syncedRobot.update();
@@ -182,6 +181,29 @@ public class DualBlackflyCamera
 
                arUcoMarkerDetection.drawDetectedMarkers(undistortedImageMat);
                arUcoMarkerDetection.drawRejectedPoints(undistortedImageMat);
+
+               SwapReference<Mat> ids = arUcoMarkerDetection.getIds();
+               arUcoMarkerPoses.getMarkerId().clear();
+               arUcoMarkerPoses.getOrientation().clear();
+               arUcoMarkerPoses.getPosition().clear();
+               for (int i = 0; i < ids.getForThreadTwo().rows(); i++)
+               {
+                  int markerID = ids.getForThreadTwo().ptr(i, 0).getInt();
+                  if (!markerIds.contains(markerID))
+                  {
+                     markersToTrack.add(new OpenCVArUcoMarker(markerID, 0.2032));
+                     markerIds.add(markerID);
+                  }
+
+                  framePoseOfMarker.setIncludingFrame(cameraFrame, arUcoMarkerDetection.getPose(markersToTrack.get(markerID)));
+                  framePoseOfMarker.changeFrame(ReferenceFrame.getWorldFrame());
+
+                  arUcoMarkerPoses.getMarkerId().add(markerID);
+                  arUcoMarkerPoses.getOrientation().add().set(framePoseOfMarker.getOrientation());
+                  arUcoMarkerPoses.getPosition().add().set(framePoseOfMarker.getX(), framePoseOfMarker.getY(), framePoseOfMarker.getZ());
+               }
+
+               ros2Helper.publish(DualBlackflyComms.FRAME_POSE, arUcoMarkerPoses);
             }
 
             convertColorDuration.start();
@@ -213,30 +235,7 @@ public class DualBlackflyCamera
       sendStatisticMessage(copyDuration, DualBlackflyComms.COPY_DURATION);
       sendStatisticMessage(imagePublishRateCalculator.getFrequency(), DualBlackflyComms.PUBLISH_RATE.get(side));
 
-      SwapReference<Mat> ids =arUcoMarkerDetection.getIds();
 
-
-      for (int i = 0; i<ids.getForThreadTwo().rows(); i++)
-      {
-         int markerID = ids.getForThreadTwo().ptr(i, 0).getInt();
-
-         if(markerIds.contains(markerID) == false)
-         {
-            markersToTrack.add(new OpenCVArUcoMarker(markerID, 0.2032));
-            markerIds.add(markerID);
-         }
-
-         framePoseOfMarker.set(arUcoMarkerDetection.getPose(markersToTrack.get(markerID)));
-         framePoseOfMarker.changeFrame(ReferenceFrame.getWorldFrame());
-
-
-         arUcoMarkerPoses.marker_id_.set(i, markerID); //CHANGE EACH MARKER's ID HERE!
-         arUcoMarkerPoses.orientation_.set(i, new Quaternion(framePoseOfMarker.getOrientation()));
-         arUcoMarkerPoses.position_.set(i, new Point3D(framePoseOfMarker.getX(), framePoseOfMarker.getY(), framePoseOfMarker.getZ()));
-
-      }
-
-      markerPose.publish(DualBlackflyComms.FRAME_POSE, arUcoMarkerPoses);
    }
 
    private void sendStatisticMessage(Stopwatch stopwatch, ROS2Topic<Float64> topic)
