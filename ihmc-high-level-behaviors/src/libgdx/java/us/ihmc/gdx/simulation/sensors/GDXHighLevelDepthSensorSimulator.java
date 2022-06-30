@@ -585,6 +585,11 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
       publishPointCloudROS2.set(publish);
    }
 
+   public void setUseSensorColor(boolean useSensorColor)
+   {
+      this.useSensorColor.set(useSensorColor);
+   }
+
    public void setDebugCoordinateFrame(boolean debugCoordinateFrame)
    {
       this.debugCoordinateFrame.set(debugCoordinateFrame);
