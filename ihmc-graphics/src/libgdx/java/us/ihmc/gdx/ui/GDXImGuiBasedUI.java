@@ -41,6 +41,7 @@ public class GDXImGuiBasedUI
    private GLProfiler glProfiler;
    private final GDX3DScene primaryScene = new GDX3DScene();
    private final GDX3DPanel primary3DPanel;
+   private final ArrayList<GDX3DPanel> additional3DPanels = new ArrayList<>();
    private final GDXVRManager vrManager = new GDXVRManager();
    private final GDXImGuiWindowAndDockSystem imGuiWindowAndDockSystem;
 //   private final GDXLinuxGUIRecorder guiRecorder;
@@ -61,6 +62,7 @@ public class GDXImGuiBasedUI
    private final ImFloat imguiFontScale = new ImFloat(1.0f);
    private final GDXImGuiPerspectiveManager perspectiveManager;
    private long renderIndex = 0;
+   private double isoZoomOut = 0.7;
 
    public GDXImGuiBasedUI(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
    {
@@ -115,7 +117,6 @@ public class GDXImGuiBasedUI
       }
 
       primary3DPanel = new GDX3DPanel(VIEW_3D_WINDOW_NAME, ANTI_ALIASING, true);
-      imGuiWindowAndDockSystem.getPanelManager().addPrimaryPanel(VIEW_3D_WINDOW_NAME);
    }
 
    public void launchGDXApplication(Lwjgl3ApplicationAdapter applicationAdapter)
@@ -146,11 +147,13 @@ public class GDXImGuiBasedUI
          glProfiler = GDXTools.createGLProfiler();
 
       primaryScene.create(sceneLevels);
+      primaryScene.addDefaultLighting();
       primary3DPanel.create(GDXInputMode.ImGui, glProfiler, primaryScene);
+      imGuiWindowAndDockSystem.getPanelManager().addPanel(primary3DPanel.getImGuiPanel());
+      primary3DPanel.getImGuiPanel().getIsShowing().set(true);
 
       Gdx.input.setInputProcessor(null); // detach from getting input events from GDX. TODO: Should we do this here?
 
-      double isoZoomOut = 7.0;
       primary3DPanel.getCamera3D().changeCameraPosition(-isoZoomOut, -isoZoomOut, isoZoomOut);
       primaryScene.addCoordinateFrame(0.3);
 
@@ -170,6 +173,10 @@ public class GDXImGuiBasedUI
       Gdx.graphics.setTitle(windowTitle);
       imGuiWindowAndDockSystem.beforeWindowManagement();
       primary3DPanel.render();
+      for (GDX3DPanel additional3DPanel : additional3DPanels)
+      {
+         additional3DPanel.render();
+      }
       renderMenuBar();
    }
 
@@ -270,6 +277,14 @@ public class GDXImGuiBasedUI
       imGuiWindowAndDockSystem.dispose();
       vrManager.dispose();
       primaryScene.dispose();
+   }
+
+   public void add3DPanel(GDX3DPanel panel3D)
+   {
+      panel3D.create(GDXInputMode.ImGui, glProfiler, primaryScene);
+      panel3D.getCamera3D().changeCameraPosition(-isoZoomOut, -isoZoomOut, isoZoomOut);
+      imGuiWindowAndDockSystem.getPanelManager().addPanel(panel3D.getImGuiPanel());
+      additional3DPanels.add(panel3D);
    }
 
    public void addOnCloseRequestListener(Runnable onCloseRequest)

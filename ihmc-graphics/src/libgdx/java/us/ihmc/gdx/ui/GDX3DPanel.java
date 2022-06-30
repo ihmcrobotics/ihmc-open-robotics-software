@@ -15,6 +15,7 @@ import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.gdx.GDXFocusBasedCamera;
+import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiPanelSizeHandler;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.GDXInputMode;
@@ -33,6 +34,7 @@ public class GDX3DPanel
    private final ImGuiPanelSizeHandler view3DPanelSizeHandler = new ImGuiPanelSizeHandler();
    private final String panelName;
    private final int antiAliasing;
+   private ImGuiPanel imGuiPanel;
    private GDX3DScene scene;
    private GLProfiler glProfiler;
    private FrameBuffer frameBuffer;
@@ -63,6 +65,8 @@ public class GDX3DPanel
       this.glProfiler = glProfiler;
       this.scene = scene;
 
+      imGuiPanel = new ImGuiPanel(panelName, null, false);
+
       camera3D = new GDXFocusBasedCamera();
       if (inputMode == GDXInputMode.libGDX)
       {
@@ -83,75 +87,78 @@ public class GDX3DPanel
 
    public void render()
    {
-      view3DPanelSizeHandler.handleSizeBeforeBegin();
-      ImGui.pushStyleVar(ImGuiStyleVar.WindowPadding, 0.0f, 0.0f);
-      int flags = ImGuiWindowFlags.None;
-      //      flags |= ImGuiWindowFlags.NoDecoration;
-      //      flags |= ImGuiWindowFlags.NoBackground;
-      //      flags |= ImGuiWindowFlags.NoDocking;
-      //      flags |= ImGuiWindowFlags.MenuBar;
-      //      flags |= ImGuiWindowFlags.NoTitleBar;
-      //      flags |= ImGuiWindowFlags.NoMouseInputs;
-      ImGui.begin(panelName, flags);
-      view3DPanelSizeHandler.handleSizeAfterBegin();
-
-      float posX = ImGui.getWindowPosX();
-      float posY = ImGui.getWindowPosY() + ImGuiTools.TAB_BAR_HEIGHT;
-      sizeX = ImGui.getWindowSizeX();
-      sizeY = ImGui.getWindowSizeY() - ImGuiTools.TAB_BAR_HEIGHT;
-      float renderSizeX = sizeX * antiAliasing;
-      float renderSizeY = sizeY * antiAliasing;
-
-      inputCalculator.compute();
-      for (Consumer<ImGui3DViewInput> imgui3DViewPickCalculator : imgui3DViewPickCalculators)
+      if (imGuiPanel.getIsShowing().get())
       {
-         imgui3DViewPickCalculator.accept(inputCalculator);
+         view3DPanelSizeHandler.handleSizeBeforeBegin();
+         ImGui.pushStyleVar(ImGuiStyleVar.WindowPadding, 0.0f, 0.0f);
+         int flags = ImGuiWindowFlags.None;
+         //      flags |= ImGuiWindowFlags.NoDecoration;
+         //      flags |= ImGuiWindowFlags.NoBackground;
+         //      flags |= ImGuiWindowFlags.NoDocking;
+         //      flags |= ImGuiWindowFlags.MenuBar;
+         //      flags |= ImGuiWindowFlags.NoTitleBar;
+         //      flags |= ImGuiWindowFlags.NoMouseInputs;
+         ImGui.begin(panelName, flags);
+         view3DPanelSizeHandler.handleSizeAfterBegin();
+
+         float posX = ImGui.getWindowPosX();
+         float posY = ImGui.getWindowPosY() + ImGuiTools.TAB_BAR_HEIGHT;
+         sizeX = ImGui.getWindowSizeX();
+         sizeY = ImGui.getWindowSizeY() - ImGuiTools.TAB_BAR_HEIGHT;
+         float renderSizeX = sizeX * antiAliasing;
+         float renderSizeY = sizeY * antiAliasing;
+
+         inputCalculator.compute();
+         for (Consumer<ImGui3DViewInput> imgui3DViewPickCalculator : imgui3DViewPickCalculators)
+         {
+            imgui3DViewPickCalculator.accept(inputCalculator);
+         }
+         inputCalculator.calculateClosestPick();
+         for (Consumer<ImGui3DViewInput> imGuiInputProcessor : imgui3DViewInputProcessors)
+         {
+            imGuiInputProcessor.accept(inputCalculator);
+         }
+
+         // Allows for dynamically resizing the 3D view panel. Grows by 2x when needed, but never shrinks.
+         if (frameBuffer == null || frameBuffer.getWidth() < renderSizeX || frameBuffer.getHeight() < renderSizeY)
+         {
+            if (frameBuffer != null)
+               frameBuffer.dispose();
+
+            int newWidth = frameBuffer == null ? Gdx.graphics.getWidth() * antiAliasing : frameBuffer.getWidth() * 2;
+            int newHeight = frameBuffer == null ? Gdx.graphics.getHeight() * antiAliasing : frameBuffer.getHeight() * 2;
+            LogTools.info("Allocating framebuffer of size: {}x{}", newWidth, newHeight);
+            GLFrameBuffer.FrameBufferBuilder frameBufferBuilder = new GLFrameBuffer.FrameBufferBuilder(newWidth, newHeight);
+            frameBufferBuilder.addBasicColorTextureAttachment(Pixmap.Format.RGBA8888);
+            frameBufferBuilder.addBasicStencilDepthPackedRenderBuffer();
+            frameBuffer = frameBufferBuilder.build();
+         }
+
+         setViewportBounds(0, 0, (int) renderSizeX, (int) renderSizeY);
+         renderShadowMap(Gdx.graphics.getWidth() * antiAliasing, Gdx.graphics.getHeight() * antiAliasing);
+
+         frameBuffer.begin();
+         renderScene();
+         frameBuffer.end();
+
+         int frameBufferWidth = frameBuffer.getWidth();
+         int frameBufferHeight = frameBuffer.getHeight();
+         float percentOfFramebufferUsedX = renderSizeX / frameBufferWidth;
+         float percentOfFramebufferUsedY = renderSizeY / frameBufferHeight;
+         int textureID = frameBuffer.getColorBufferTexture().getTextureObjectHandle();
+         float pMinX = posX;
+         float pMinY = posY;
+         float pMaxX = posX + sizeX;
+         float pMaxY = posY + sizeY;
+         float uvMinX = 0.0f;
+         float uvMinY = percentOfFramebufferUsedY; // flip Y
+         float uvMaxX = percentOfFramebufferUsedX;
+         float uvMaxY = 0.0f;
+         ImGui.getWindowDrawList().addImage(textureID, pMinX, pMinY, pMaxX, pMaxY, uvMinX, uvMinY, uvMaxX, uvMaxY);
+
+         ImGui.end();
+         ImGui.popStyleVar();
       }
-      inputCalculator.calculateClosestPick();
-      for (Consumer<ImGui3DViewInput> imGuiInputProcessor : imgui3DViewInputProcessors)
-      {
-         imGuiInputProcessor.accept(inputCalculator);
-      }
-
-      // Allows for dynamically resizing the 3D view panel. Grows by 2x when needed, but never shrinks.
-      if (frameBuffer == null || frameBuffer.getWidth() < renderSizeX || frameBuffer.getHeight() < renderSizeY)
-      {
-         if (frameBuffer != null)
-            frameBuffer.dispose();
-
-         int newWidth = frameBuffer == null ? Gdx.graphics.getWidth() * antiAliasing : frameBuffer.getWidth() * 2;
-         int newHeight = frameBuffer == null ? Gdx.graphics.getHeight() * antiAliasing : frameBuffer.getHeight() * 2;
-         LogTools.info("Allocating framebuffer of size: {}x{}", newWidth, newHeight);
-         GLFrameBuffer.FrameBufferBuilder frameBufferBuilder = new GLFrameBuffer.FrameBufferBuilder(newWidth, newHeight);
-         frameBufferBuilder.addBasicColorTextureAttachment(Pixmap.Format.RGBA8888);
-         frameBufferBuilder.addBasicStencilDepthPackedRenderBuffer();
-         frameBuffer = frameBufferBuilder.build();
-      }
-
-      setViewportBounds(0, 0, (int) renderSizeX, (int) renderSizeY);
-      renderShadowMap(Gdx.graphics.getWidth() * antiAliasing, Gdx.graphics.getHeight() * antiAliasing);
-
-      frameBuffer.begin();
-      renderScene();
-      frameBuffer.end();
-
-      int frameBufferWidth = frameBuffer.getWidth();
-      int frameBufferHeight = frameBuffer.getHeight();
-      float percentOfFramebufferUsedX = renderSizeX / frameBufferWidth;
-      float percentOfFramebufferUsedY = renderSizeY / frameBufferHeight;
-      int textureID = frameBuffer.getColorBufferTexture().getTextureObjectHandle();
-      float pMinX = posX;
-      float pMinY = posY;
-      float pMaxX = posX + sizeX;
-      float pMaxY = posY + sizeY;
-      float uvMinX = 0.0f;
-      float uvMinY = percentOfFramebufferUsedY; // flip Y
-      float uvMaxX = percentOfFramebufferUsedX;
-      float uvMaxY = 0.0f;
-      ImGui.getWindowDrawList().addImage(textureID, pMinX, pMinY, pMaxX, pMaxY, uvMinX, uvMinY, uvMaxX, uvMaxY);
-
-      ImGui.end();
-      ImGui.popStyleVar();
    }
 
    private void renderShadowMap()
@@ -273,5 +280,10 @@ public class GDX3DPanel
    public GDX3DScene getScene()
    {
       return scene;
+   }
+
+   public ImGuiPanel getImGuiPanel()
+   {
+      return imGuiPanel;
    }
 }
