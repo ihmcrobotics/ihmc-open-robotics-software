@@ -119,6 +119,11 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
       thread.start();
    }
 
+   int val0;
+   int val1;
+   int val2;
+   int val3;
+
    private void update()
    {
       if (nativesLoadedActivator.poll())
@@ -187,6 +192,11 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
                }
                onPatchSizeResized();
             }
+
+            val0 = Short.toUnsignedInt(depthU16C1Image.ptr(0, 0).getShort());
+            val1 = Short.toUnsignedInt(depthU16C1Image.ptr(100, 200).getShort());
+            val2 = Short.toUnsignedInt(depthU16C1Image.ptr(400, 200).getShort());
+            val3 = Short.toUnsignedInt(depthU16C1Image.ptr(600, 50).getShort());
 
             depthU16C1Image.convertTo(depth32FC1Image.getBytedecoOpenCVMat(), opencv_core.CV_32FC1, l515.getDepthToMeterConversion(), 0.0);
 
