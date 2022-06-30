@@ -78,11 +78,15 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
       robotConfigurationData.setJointNameHash(RobotConfigurationDataFactory.calculateJointNameHash(jointSensorData, forceSensorData, imuSensorData));
       robotConfigurationDataPublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, RobotConfigurationData.class, outputTopic);
 
+      long startTime = System.nanoTime();    
       for (ReferenceFrame frame : frameData)
       {
 //         System.out.println("current frame name : " + frame.getName());
          robotFrameDataPublishers.add(new RobotFrameDataPublisher(frame, realtimeROS2Node, outputTopic));
       }
+      long estimatedTime = System.nanoTime() - startTime;
+      double elapsedTimeInSecond = (double) estimatedTime / 1_000_000_000;
+      System.out.println("\nTime elapsed (generating RobotFrameDataPublishers) : " + elapsedTimeInSecond);
    }
 
    @Override
@@ -169,10 +173,14 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
       robotConfigurationDataPublisher.publish(robotConfigurationData);
 
       // publish robot frame data
+      long startTime = System.nanoTime();       
       for (RobotFrameDataPublisher rfdPub : robotFrameDataPublishers)
       {
          rfdPub.publish();
       }
+      long estimatedTime = System.nanoTime() - startTime;
+      double elapsedTimeInSecond = (double) estimatedTime / 1_000_000_000;
+      System.out.println("\nTime elapsed (publishing robot frame data) : " + elapsedTimeInSecond);
 
    }
 
