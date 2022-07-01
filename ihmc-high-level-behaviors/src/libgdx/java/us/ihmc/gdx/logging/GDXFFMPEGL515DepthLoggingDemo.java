@@ -57,24 +57,24 @@ public class GDXFFMPEGL515DepthLoggingDemo
             ImGuiPanel panel = new ImGuiPanel("Diagnostics", this::renderImGuiWidgets);
             baseUI.getImGuiPanelManager().addPanel(panel);
 
-            environmentBuilder = new GDXEnvironmentBuilder(baseUI.get3DSceneManager());
-            environmentBuilder.create(baseUI);
+            environmentBuilder = new GDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
+            environmentBuilder.create();
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
-            baseUI.get3DSceneManager().addRenderableProvider(environmentBuilder::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
-            baseUI.get3DSceneManager().addRenderableProvider(environmentBuilder::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+            baseUI.getPrimaryScene().addRenderableProvider(environmentBuilder::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
+            baseUI.getPrimaryScene().addRenderableProvider(environmentBuilder::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
             environmentBuilder.loadEnvironment("DemoPullDoor.json");
 
             robotInteractableReferenceFrame = new GDXInteractableReferenceFrame();
-            robotInteractableReferenceFrame.create(ReferenceFrame.getWorldFrame(), 0.15, baseUI.get3DSceneManager().getCamera3D());
+            robotInteractableReferenceFrame.create(ReferenceFrame.getWorldFrame(), 0.15, baseUI.getPrimary3DPanel().getCamera3D());
             robotInteractableReferenceFrame.getTransformToParent().getTranslation().add(2.2, 0.0, 1.0);
-            baseUI.addImGui3DViewInputProcessor(robotInteractableReferenceFrame::process3DViewInput);
-            baseUI.get3DSceneManager().addRenderableProvider(robotInteractableReferenceFrame::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(robotInteractableReferenceFrame::process3DViewInput);
+            baseUI.getPrimaryScene().addRenderableProvider(robotInteractableReferenceFrame::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
             l515PoseGizmo = new GDXPose3DGizmo(robotInteractableReferenceFrame.getRepresentativeReferenceFrame());
-            l515PoseGizmo.create(baseUI.get3DSceneManager().getCamera3D());
+            l515PoseGizmo.create(baseUI.getPrimary3DPanel().getCamera3D());
             l515PoseGizmo.setResizeAutomatically(false);
-            baseUI.addImGui3DViewPickCalculator(l515PoseGizmo::calculate3DViewPick);
-            baseUI.addImGui3DViewInputProcessor(l515PoseGizmo::process3DViewInput);
-            baseUI.get3DSceneManager().addRenderableProvider(l515PoseGizmo, GDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(l515PoseGizmo::calculate3DViewPick);
+            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(l515PoseGizmo::process3DViewInput);
+            baseUI.getPrimaryScene().addRenderableProvider(l515PoseGizmo, GDXSceneLevel.VIRTUAL);
             l515PoseGizmo.getTransformToParent().appendPitchRotation(Math.toRadians(60.0));
          }
 
@@ -114,7 +114,7 @@ public class GDXFFMPEGL515DepthLoggingDemo
                   l515.setPublishColorImageROS1(false);
                   l515.setPublishColorImageROS2(false);
                   CameraPinholeBrown cameraIntrinsics = l515.getDepthCameraIntrinsics();
-                  baseUI.get3DSceneManager().addRenderableProvider(l515, GDXSceneLevel.VIRTUAL);
+                  baseUI.getPrimaryScene().addRenderableProvider(l515, GDXSceneLevel.VIRTUAL);
 
                   swapCVPanel = new ImGuiOpenCVSwapVideoPanel("Video", false);
                   baseUI.getImGuiPanelManager().addPanel(swapCVPanel.getVideoPanel());
@@ -133,7 +133,7 @@ public class GDXFFMPEGL515DepthLoggingDemo
                   baseUI.getPerspectiveManager().reloadPerspective();
                }
 
-               l515.render(baseUI.get3DSceneManager());
+               l515.render(baseUI.getPrimaryScene());
             }
 
             baseUI.renderBeforeOnScreenUI();

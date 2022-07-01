@@ -19,7 +19,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
-import us.ihmc.gdx.sceneManager.GDX3DSceneBasics;
+import us.ihmc.gdx.sceneManager.GDX3DScene;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -112,13 +112,13 @@ public class GDXVREye extends Camera
       }
    }
 
-   public void render(GDX3DSceneBasics sceneBasics)
+   public void render(GDX3DScene scene)
    {
       update();
       frameBuffer.begin();
       GL41.glViewport(0, 0, (int) viewportWidth, (int) viewportHeight);
       GDX3DSceneTools.glClearGray();
-      sceneBasics.renderToCamera(this);
+      scene.renderToCamera(this);
       frameBuffer.end();
    }
 

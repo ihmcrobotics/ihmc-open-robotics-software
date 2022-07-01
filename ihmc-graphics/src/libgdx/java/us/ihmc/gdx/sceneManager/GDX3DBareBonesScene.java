@@ -17,9 +17,9 @@ import us.ihmc.log.LogTools;
 /**
  * TODO: Pause and resume?
  */
-public class GDX3DSceneManager
+public class GDX3DBareBonesScene
 {
-   private final GDX3DSceneBasics sceneBasics = new GDX3DSceneBasics();
+   private final GDX3DScene scene = new GDX3DScene();
 
    private InputMultiplexer inputMultiplexer;
    private GDXFocusBasedCamera camera3D;
@@ -55,14 +55,14 @@ public class GDX3DSceneManager
          inputMultiplexer.addProcessor(camera3D.setInputForLibGDX());
       }
 
-      sceneBasics.create(sceneLevels);
+      scene.create(sceneLevels);
 
       if (addFocusSphere)
-         sceneBasics.addModelInstance(camera3D.getFocusPointSphere(), GDXSceneLevel.VIRTUAL);
+         scene.addModelInstance(camera3D.getFocusPointSphere(), GDXSceneLevel.VIRTUAL);
       viewport = new ScreenViewport(camera3D);
       viewport.setUnitsPerPixel(1.0f); // TODO: Is this relevant for high DPI displays?
 
-      sceneBasics.addDefaultLighting();
+      scene.addDefaultLighting();
       if (onCreate != null)
          onCreate.run();
    }
@@ -74,14 +74,14 @@ public class GDX3DSceneManager
 
    public void renderShadowMap(int x, int y)
    {
-      sceneBasics.renderShadowMap(camera3D, x, y);
+      scene.renderShadowMap(camera3D, x, y);
    }
 
    public void render()
    {
       preRender();
-      sceneBasics.render();
-      sceneBasics.postRender(camera3D, GDXSceneLevel.VIRTUAL);
+      scene.render();
+      scene.postRender(camera3D, GDXSceneLevel.VIRTUAL);
 
       if (GDXTools.ENABLE_OPENGL_DEBUGGER)
          glProfiler.reset();
@@ -102,7 +102,7 @@ public class GDX3DSceneManager
 
       viewport.update(width, height);
 
-      sceneBasics.preRender(camera3D);
+      scene.preRender(camera3D);
 
       GL41.glViewport(x, y, width, height);
       GDX3DSceneTools.glClearGray();
@@ -110,7 +110,7 @@ public class GDX3DSceneManager
 
    public void dispose()
    {
-      sceneBasics.dispose();
+      scene.dispose();
       ExceptionTools.handle(() -> camera3D.dispose(), DefaultExceptionHandler.PRINT_MESSAGE);
    }
    // End render public API
@@ -122,27 +122,27 @@ public class GDX3DSceneManager
 
    public void addModelInstance(ModelInstance modelInstance)
    {
-      sceneBasics.addModelInstance(modelInstance);
+      scene.addModelInstance(modelInstance);
    }
 
    public void addModelInstance(ModelInstance modelInstance, GDXSceneLevel sceneLevel)
    {
-      sceneBasics.addModelInstance(modelInstance, sceneLevel);
+      scene.addModelInstance(modelInstance, sceneLevel);
    }
 
    public void addCoordinateFrame(double size)
    {
-      sceneBasics.addCoordinateFrame(size);
+      scene.addCoordinateFrame(size);
    }
 
    public void addRenderableProvider(RenderableProvider renderableProvider)
    {
-      sceneBasics.addRenderableProvider(renderableProvider);
+      scene.addRenderableProvider(renderableProvider);
    }
 
    public void addRenderableProvider(RenderableProvider renderableProvider, GDXSceneLevel sceneLevel)
    {
-      sceneBasics.addRenderableProvider(renderableProvider, sceneLevel);
+      scene.addRenderableProvider(renderableProvider, sceneLevel);
    }
 
    public void setViewportBoundsToWindow()
@@ -160,7 +160,7 @@ public class GDX3DSceneManager
       this.width = width;
       this.height = height;
 
-      sceneBasics.getShadowManager().setViewportBounds(x, y, width, height);
+      scene.getShadowManager().setViewportBounds(x, y, width, height);
    }
 
    public int getCurrentWindowWidth()
@@ -200,8 +200,8 @@ public class GDX3DSceneManager
       this.onCreate = onCreate;
    }
 
-   public GDX3DSceneBasics getSceneBasics()
+   public GDX3DScene getScene()
    {
-      return sceneBasics;
+      return scene;
    }
 }

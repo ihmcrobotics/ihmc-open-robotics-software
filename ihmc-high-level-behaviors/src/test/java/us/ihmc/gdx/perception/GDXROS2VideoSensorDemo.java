@@ -34,18 +34,18 @@ public class GDXROS2VideoSensorDemo
          {
             baseUI.create();
 
-            environmentBuilder = new GDXEnvironmentBuilder(baseUI.get3DSceneManager());
-            environmentBuilder.create(baseUI);
+            environmentBuilder = new GDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
+            environmentBuilder.create();
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
-            baseUI.get3DSceneManager().addRenderableProvider(environmentBuilder::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
-            baseUI.get3DSceneManager().addRenderableProvider(environmentBuilder::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+            baseUI.getPrimaryScene().addRenderableProvider(environmentBuilder::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
+            baseUI.getPrimaryScene().addRenderableProvider(environmentBuilder::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
             environmentBuilder.loadEnvironment("DepthSensorZeroTest.json");
 
-            sensorPoseGizmo.create(baseUI.get3DSceneManager().getCamera3D());
+            sensorPoseGizmo.create(baseUI.getPrimary3DPanel().getCamera3D());
             sensorPoseGizmo.setResizeAutomatically(true);
-            baseUI.addImGui3DViewPickCalculator(sensorPoseGizmo::calculate3DViewPick);
-            baseUI.addImGui3DViewInputProcessor(sensorPoseGizmo::process3DViewInput);
-            baseUI.get3DSceneManager().addRenderableProvider(sensorPoseGizmo, GDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(sensorPoseGizmo::calculate3DViewPick);
+            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(sensorPoseGizmo::process3DViewInput);
+            baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGizmo, GDXSceneLevel.VIRTUAL);
 
             PubSubImplementation pubSubImplementation = PubSubImplementation.INTRAPROCESS;
             globalVisualizersPanel = new ImGuiGDXGlobalVisualizersPanel(false);
@@ -89,13 +89,13 @@ public class GDXROS2VideoSensorDemo
             highLevelDepthSensorSimulator.setRenderDepthVideoDirectly(false);
             highLevelDepthSensorSimulator.setPublishColorImageROS1(false);
             highLevelDepthSensorSimulator.setPublishColorImageROS2(true);
-            baseUI.get3DSceneManager().addRenderableProvider(highLevelDepthSensorSimulator, GDXSceneLevel.VIRTUAL);
+            baseUI.getPrimaryScene().addRenderableProvider(highLevelDepthSensorSimulator, GDXSceneLevel.VIRTUAL);
          }
 
          @Override
          public void render()
          {
-            highLevelDepthSensorSimulator.render(baseUI.get3DSceneManager());
+            highLevelDepthSensorSimulator.render(baseUI.getPrimaryScene());
             globalVisualizersPanel.update();
 
             for (GDXEnvironmentObject allObject : environmentBuilder.getAllObjects())

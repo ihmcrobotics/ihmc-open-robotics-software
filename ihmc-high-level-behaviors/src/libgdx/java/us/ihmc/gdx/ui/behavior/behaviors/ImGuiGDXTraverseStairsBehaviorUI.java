@@ -99,7 +99,7 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends ImGuiGDXBehaviorUIInterfac
    public void create(GDXImGuiBasedUI baseUI)
    {
       goalAffordance.create(baseUI, goalPose -> helper.publish(GOAL_INPUT, goalPose), Color.SALMON);
-      baseUI.addImGui3DViewInputProcessor(this::processImGui3DViewInput);
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::processImGui3DViewInput);
 
       FootstepPlannerParametersBasics footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters("_Stairs");
       footstepPlannerParameterTuner.create(footstepPlannerParameters,

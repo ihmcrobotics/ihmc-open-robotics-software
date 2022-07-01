@@ -7,7 +7,7 @@ import imgui.flag.ImGuiMouseButton;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
-import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 
 public class GDXPoseModifiableObject
@@ -18,11 +18,11 @@ public class GDXPoseModifiableObject
    private GDXEnvironmentObject object;
    private final Point3D tempIntersection = new Point3D();
 
-   public void create(GDXImGuiBasedUI baseUI, GDXEnvironmentObject object)
+   public void create(GDX3DPanel panel3D, GDXEnvironmentObject object)
    {
       this.object = object;
-      pose3DGizmo.create(baseUI.get3DSceneManager().getCamera3D());
-      baseUI.addImGui3DViewInputProcessor(this::process3DViewInput);
+      pose3DGizmo.create(panel3D.getCamera3D());
+      panel3D.addImGui3DViewInputProcessor(this::process3DViewInput);
       object.setTransformToWorld(pose3DGizmo.getTransformToParent());
    }
 

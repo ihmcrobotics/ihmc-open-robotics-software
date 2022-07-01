@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
+import us.ihmc.gdx.sceneManager.GDX3DBareBonesScene;
 import us.ihmc.gdx.tools.BoxesDemoModel;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
 import us.ihmc.gdx.tools.GDXModelBuilder;
@@ -16,7 +16,7 @@ public class GDXColorTexturesDemo
 {
    public GDXColorTexturesDemo()
    {
-      GDX3DSceneManager sceneManager = new GDX3DSceneManager();
+      GDX3DBareBonesScene sceneManager = new GDX3DBareBonesScene();
       GDXApplicationCreator.launchGDXApplication(new Lwjgl3ApplicationAdapter()
       {
          @Override
