@@ -2,6 +2,7 @@
   "dockspacePanels" : { },
   "windows" : {
     "3D View" : true,
+    "AR View" : true,
     "Environment###java.lang.Class:Environment" : true,
     "Global Visualizers" : false,
     "/ihmc/big_video###us.ihmc.gdx.ui.graphics.live.GDXROS2BigVideoVisualizer:/ihmc/big_video" : false,

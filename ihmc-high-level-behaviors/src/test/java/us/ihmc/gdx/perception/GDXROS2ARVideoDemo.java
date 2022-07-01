@@ -1,5 +1,9 @@
 package us.ihmc.gdx.perception;
 
+import com.badlogic.gdx.graphics.Pixmap;
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgproc;
+import org.bytedeco.opencv.opencv_core.Size;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
@@ -11,7 +15,12 @@ import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.gdx.ui.graphics.live.GDXROS2BigVideoVisualizer;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXGlobalVisualizersPanel;
+import us.ihmc.ihmcPerception.OpenCVTools;
+import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+
+import java.nio.ByteBuffer;
 
 public class GDXROS2ARVideoDemo
 {
@@ -22,21 +31,20 @@ public class GDXROS2ARVideoDemo
    private GDXHighLevelDepthSensorSimulator highLevelDepthSensorSimulator;
    private final GDXPose3DGizmo sensorPoseGizmo = new GDXPose3DGizmo();
    private GDXEnvironmentBuilder environmentBuilder;
+   private Pixmap pixmap;
 
    public GDXROS2ARVideoDemo()
    {
       baseUI.launchGDXApplication(new Lwjgl3ApplicationAdapter()
       {
 
+         private GDX3DPanel arPanel;
          private ImGuiGDXGlobalVisualizersPanel globalVisualizersPanel;
 
          @Override
          public void create()
          {
             baseUI.create();
-
-            GDX3DPanel arPanel = new GDX3DPanel("AR View", 2, false);
-            baseUI.add3DPanel(arPanel);
 
             environmentBuilder = new GDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
             environmentBuilder.create();
@@ -70,6 +78,11 @@ public class GDXROS2ARVideoDemo
             // it gets drastically less precise father away
             double minRange = 0.105;
             double maxRange = 5.0;
+
+            arPanel = new GDX3DPanel("AR View", 2, false);
+            pixmap = new Pixmap(imageWidth, imageHeight, Pixmap.Format.RGBA8888);
+            baseUI.add3DPanel(arPanel);
+
             highLevelDepthSensorSimulator = new GDXHighLevelDepthSensorSimulator("Stepping L515",
                                                                                  sensorPoseGizmo.getGizmoFrame(),
                                                                                  () -> 0L,
@@ -98,6 +111,35 @@ public class GDXROS2ARVideoDemo
 
             sensorPoseGizmo.getTransformToParent().getTranslation().set(0.2, 0.0, 1.0);
             sensorPoseGizmo.getTransformToParent().getRotation().setToPitchOrientation(Math.toRadians(45.0));
+
+            BytedecoImage tempImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4);
+
+            arPanel.setBackgroundRenderer(() ->
+            {
+               int newWidth = (int) Math.floor(arPanel.getViewportSizeX()) * arPanel.getAntiAliasing();
+               int newHeight = (int) Math.floor(arPanel.getViewportSizeY()) * arPanel.getAntiAliasing();
+               tempImage.resize(newWidth, newHeight, null, null);
+
+               if (pixmap.getWidth() != newWidth || pixmap.getHeight() != newHeight)
+               {
+                  pixmap = new Pixmap(newWidth, newHeight, Pixmap.Format.RGBA8888);
+               }
+
+               opencv_imgproc.resize(highLevelDepthSensorSimulator.getLowLevelSimulator().getRGBA8888ColorImage().getBytedecoOpenCVMat(),
+                                     tempImage.getBytedecoOpenCVMat(),
+                                     new Size(newWidth, newHeight));
+               BytedecoOpenCVTools.flipY(tempImage.getBytedecoOpenCVMat(), tempImage.getBytedecoOpenCVMat());
+//               highLevelDepthSensorSimulator.getLowLevelSimulator().getRGBA8888ColorImage().getBytedecoOpenCVMat().re
+
+               ByteBuffer pixels = pixmap.getPixels();
+               ByteBuffer backingDirectByteBuffer = tempImage.getBackingDirectByteBuffer();
+               pixels.rewind();
+               pixels.put(backingDirectByteBuffer);
+               backingDirectByteBuffer.rewind();
+               pixels.rewind();
+
+               arPanel.getFrameBuffer().getColorBufferTexture().draw(pixmap, 0, 0);
+            });
          }
 
          @Override
