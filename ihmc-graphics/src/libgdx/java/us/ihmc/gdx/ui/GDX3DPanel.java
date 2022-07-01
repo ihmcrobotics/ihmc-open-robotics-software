@@ -52,6 +52,7 @@ public class GDX3DPanel
    private int height = -1;
    private boolean firstRenderStarted = false;
    private boolean addFocusSphere;
+   private Runnable backgroundRenderer;
 
    public GDX3DPanel(String panelName, int antiAliasing, boolean addFocusSphere)
    {
@@ -92,12 +93,6 @@ public class GDX3DPanel
          view3DPanelSizeHandler.handleSizeBeforeBegin();
          ImGui.pushStyleVar(ImGuiStyleVar.WindowPadding, 0.0f, 0.0f);
          int flags = ImGuiWindowFlags.None;
-         //      flags |= ImGuiWindowFlags.NoDecoration;
-         //      flags |= ImGuiWindowFlags.NoBackground;
-         //      flags |= ImGuiWindowFlags.NoDocking;
-         //      flags |= ImGuiWindowFlags.MenuBar;
-         //      flags |= ImGuiWindowFlags.NoTitleBar;
-         //      flags |= ImGuiWindowFlags.NoMouseInputs;
          ImGui.begin(panelName, flags);
          view3DPanelSizeHandler.handleSizeAfterBegin();
 
@@ -154,6 +149,11 @@ public class GDX3DPanel
          float uvMinY = percentOfFramebufferUsedY; // flip Y
          float uvMaxX = percentOfFramebufferUsedX;
          float uvMaxY = 0.0f;
+
+         frameBuffer.begin();
+         renderScene();
+         frameBuffer.end();
+
          ImGui.getWindowDrawList().addImage(textureID, pMinX, pMinY, pMaxX, pMaxY, uvMinX, uvMinY, uvMaxX, uvMaxY);
 
          ImGui.end();
@@ -174,6 +174,10 @@ public class GDX3DPanel
    private void renderScene()
    {
       preRender();
+
+      if (backgroundRenderer != null)
+         backgroundRenderer.run();
+
       scene.render();
       scene.postRender(camera3D, GDXSceneLevel.VIRTUAL);
 
@@ -257,6 +261,11 @@ public class GDX3DPanel
       this.addFocusSphere = addFocusSphere;
    }
 
+   public void setBackgroundRenderer(Runnable backgroundRenderer)
+   {
+      this.backgroundRenderer = backgroundRenderer;
+   }
+
    public float getViewportSizeX()
    {
       return sizeX;
@@ -285,5 +294,15 @@ public class GDX3DPanel
    public ImGuiPanel getImGuiPanel()
    {
       return imGuiPanel;
+   }
+
+   public FrameBuffer getFrameBuffer()
+   {
+      return frameBuffer;
+   }
+
+   public int getAntiAliasing()
+   {
+      return antiAliasing;
    }
 }
