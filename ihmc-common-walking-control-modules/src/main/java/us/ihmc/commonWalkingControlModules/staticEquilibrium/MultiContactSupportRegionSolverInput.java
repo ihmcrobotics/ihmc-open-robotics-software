@@ -1,12 +1,18 @@
 package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 
+import controller_msgs.msg.dds.MultiContactBalanceStatus;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
 import us.ihmc.euclid.shape.convexPolytope.interfaces.ConvexPolytope3DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
+import java.io.*;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -99,5 +105,80 @@ public class MultiContactSupportRegionSolverInput
    public double getCoefficientOfFriction()
    {
       return coefficientOfFriction;
+   }
+
+   public void setFromMessage(MultiContactBalanceStatus multiContactBalanceStatus)
+   {
+      clear();
+
+      for (int i = 0; i < multiContactBalanceStatus.getContactPointsInWorld().size(); i++)
+      {
+         addContactPoint(multiContactBalanceStatus.getContactPointsInWorld().get(i), multiContactBalanceStatus.getSurfaceNormalsInWorld().get(i));
+      }
+   }
+
+   public void writeToFile(Writer writer) throws IOException
+   {
+      writer.write("Coefficient of friction:" + coefficientOfFriction + "\n");
+      writer.write("Number of points:" + contactPointPositions.size() + "\n");
+      for (int i = 0; i < contactPointPositions.size(); i++)
+      {
+         FramePoint3D position = contactPointPositions.get(i);
+         FrameVector3D normal = surfaceNormals.get(i);
+
+         writer.write(position.getX() + "," + position.getY() + "," + position.getZ() + "," + normal.getX() + "," + normal.getY() + "," + normal.getZ() + ",");
+
+         ContactPointActuationConstraint actuationConstraint = actuationConstraints.get(i);
+         if (actuationConstraint.isMaxNormalForceConstraint())
+         {
+            writer.write(Double.toString(actuationConstraint.getMaxNormalForce()));
+         }
+         else
+         {
+            ConvexPolytope3D polytopeConstraint = actuationConstraint.getPolytopeConstraint();
+            for (int j = 0; j < polytopeConstraint.getNumberOfVertices(); j++)
+            {
+               writer.write(polytopeConstraint.getVertex(j).getX() + "," + polytopeConstraint.getVertex(j).getY() + "," + polytopeConstraint.getVertex(j).getZ());
+               if (j < polytopeConstraint.getNumberOfVertices() - 1)
+                  writer.write(",");
+            }
+         }
+
+         writer.write("\n");
+      }
+   }
+
+   public static MultiContactSupportRegionSolverInput loadFromFile(BufferedReader reader) throws IOException
+   {
+      MultiContactSupportRegionSolverInput input = new MultiContactSupportRegionSolverInput();
+      input.setCoefficientOfFriction(Double.parseDouble(reader.readLine().split(":")[1]));
+      int numberOfPoints = Integer.parseInt(reader.readLine().split(":")[1]);
+
+      for (int i = 0; i < numberOfPoints; i++)
+      {
+         String[] dataStrings = reader.readLine().split(",");
+         double[] data = Arrays.stream(dataStrings).mapToDouble(Double::parseDouble).toArray();
+
+         Point3D point = new Point3D(data[0], data[1], data[2]);
+         Vector3D normal = new Vector3D(data[3], data[4], data[5]);
+
+         if (data.length == 7)
+         {
+            double maxForce = data[6];
+            input.addContactPoint(point, normal, maxForce);
+         }
+         else
+         {
+            int numberOfVertices = (data.length - 6) / 3;
+            ConvexPolytope3D polytope = new ConvexPolytope3D();
+            for (int j = 0; j < numberOfVertices; j++)
+            {
+               polytope.addVertex(new Point3D(data[6 + 3 * j], data[6 + 3 * j + 1], data[6 + 3 * j + 2]));
+            }
+            input.addContactPoint(point, normal, polytope);
+         }
+      }
+
+      return input;
    }
 }
