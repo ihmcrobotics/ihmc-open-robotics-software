@@ -22,7 +22,7 @@ public class GDXImGuiBasedUIWith3DSituatedImGuiPanelsDemo
          {
             baseUI.create();
 
-            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelBuilder.createCoordinateFrame(0.3)));
+            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(GDXModelBuilder.createCoordinateFrame(0.3)));
 
             baseUI.getImGuiPanelManager().addPanel("Window 1", this::renderWindow1);
 
@@ -30,9 +30,9 @@ public class GDXImGuiBasedUIWith3DSituatedImGuiPanelsDemo
                                              baseUI.getImGuiWindowAndDockSystem().getImFont());
             GDX3DSituatedImGuiPanel panel = new GDX3DSituatedImGuiPanel("Test Panel", this::renderWindow1);
             situatedImGuiPanelManager.addPanel(panel);
-            baseUI.addImGui3DViewInputProcessor(situatedImGuiPanelManager::processImGuiInput);
+            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(situatedImGuiPanelManager::processImGuiInput);
 
-            baseUI.get3DSceneManager().addRenderableProvider(situatedImGuiPanelManager);
+            baseUI.getPrimaryScene().addRenderableProvider(situatedImGuiPanelManager);
          }
 
          @Override

@@ -1,13 +1,19 @@
 package us.ihmc.gdx.perception;
 
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.environment.GDXEnvironmentBuilder;
+import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
+import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
+import us.ihmc.gdx.ui.graphics.live.GDXROS2BigVideoVisualizer;
+import us.ihmc.gdx.ui.visualizers.ImGuiGDXGlobalVisualizersPanel;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 
-public class GDXHighLevelDepthSensorDemo
+public class GDXROS2ARVideoDemo
 {
    private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
                                                               "ihmc-open-robotics-software",
@@ -17,32 +23,46 @@ public class GDXHighLevelDepthSensorDemo
    private final GDXPose3DGizmo sensorPoseGizmo = new GDXPose3DGizmo();
    private GDXEnvironmentBuilder environmentBuilder;
 
-   public GDXHighLevelDepthSensorDemo()
+   public GDXROS2ARVideoDemo()
    {
       baseUI.launchGDXApplication(new Lwjgl3ApplicationAdapter()
       {
+
+         private ImGuiGDXGlobalVisualizersPanel globalVisualizersPanel;
+
          @Override
          public void create()
          {
             baseUI.create();
+
+            GDX3DPanel arPanel = new GDX3DPanel("AR View", 2, false);
+            baseUI.add3DPanel(arPanel);
 
             environmentBuilder = new GDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
             environmentBuilder.create();
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
             baseUI.getPrimaryScene().addRenderableProvider(environmentBuilder::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
             baseUI.getPrimaryScene().addRenderableProvider(environmentBuilder::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
-            environmentBuilder.loadEnvironment("DepthSensorZeroTest.json");
+            baseUI.getPrimaryScene().getSceneLevelsToRender().remove(GDXSceneLevel.REAL_ENVIRONMENT);
+            environmentBuilder.loadEnvironment("LookAndStepHard.json");
 
             sensorPoseGizmo.create(baseUI.getPrimary3DPanel().getCamera3D());
             sensorPoseGizmo.setResizeAutomatically(true);
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(sensorPoseGizmo::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(sensorPoseGizmo::process3DViewInput);
             baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGizmo, GDXSceneLevel.VIRTUAL);
-//            sensorPoseGizmo.getTransformToParent().appendTranslation(2.2, 0.0, 1.0);
-//            sensorPoseGizmo.getTransformToParent().appendPitchRotation(Math.PI / 4.0);
+
+            PubSubImplementation pubSubImplementation = PubSubImplementation.INTRAPROCESS;
+            globalVisualizersPanel = new ImGuiGDXGlobalVisualizersPanel(false);
+            GDXROS2BigVideoVisualizer videoVisualizer = new GDXROS2BigVideoVisualizer("Video",
+                                                                                      pubSubImplementation,
+                                                                                      ROS2Tools.BIG_VIDEO);
+            globalVisualizersPanel.addVisualizer(videoVisualizer);
+            globalVisualizersPanel.create();
+            baseUI.getImGuiPanelManager().addPanel(globalVisualizersPanel);
 
             // https://www.scratchapixel.com/lessons/3d-basic-rendering/perspective-and-orthographic-projection-matrix/opengl-perspective-projection-matrix
-            double publishRateHz = 5.0;
+            double publishRateHz = 60.0;
             double verticalFOV = 55.0;
             int imageWidth = 640;
             int imageHeight = 480;
@@ -62,6 +82,7 @@ public class GDXHighLevelDepthSensorDemo
                                                                                  0.05,
                                                                                  true,
                                                                                  publishRateHz);
+            highLevelDepthSensorSimulator.setupForROS2Color(pubSubImplementation, ROS2Tools.BIG_VIDEO);
             baseUI.getImGuiPanelManager().addPanel(highLevelDepthSensorSimulator);
             highLevelDepthSensorSimulator.setSensorEnabled(true);
             highLevelDepthSensorSimulator.setPublishPointCloudROS2(false);
@@ -69,16 +90,21 @@ public class GDXHighLevelDepthSensorDemo
             highLevelDepthSensorSimulator.setPublishDepthImageROS1(false);
             highLevelDepthSensorSimulator.setDebugCoordinateFrame(false);
             highLevelDepthSensorSimulator.setRenderColorVideoDirectly(true);
-            highLevelDepthSensorSimulator.setRenderDepthVideoDirectly(true);
+            highLevelDepthSensorSimulator.setRenderDepthVideoDirectly(false);
             highLevelDepthSensorSimulator.setPublishColorImageROS1(false);
-            highLevelDepthSensorSimulator.setPublishColorImageROS2(false);
+            highLevelDepthSensorSimulator.setPublishColorImageROS2(true);
+            highLevelDepthSensorSimulator.setUseSensorColor(true);
             baseUI.getPrimaryScene().addRenderableProvider(highLevelDepthSensorSimulator, GDXSceneLevel.VIRTUAL);
+
+            sensorPoseGizmo.getTransformToParent().getTranslation().set(0.2, 0.0, 1.0);
+            sensorPoseGizmo.getTransformToParent().getRotation().setToPitchOrientation(Math.toRadians(45.0));
          }
 
          @Override
          public void render()
          {
             highLevelDepthSensorSimulator.render(baseUI.getPrimaryScene());
+            globalVisualizersPanel.update();
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
@@ -96,6 +122,6 @@ public class GDXHighLevelDepthSensorDemo
 
    public static void main(String[] args)
    {
-      new GDXHighLevelDepthSensorDemo();
+      new GDXROS2ARVideoDemo();
    }
 }

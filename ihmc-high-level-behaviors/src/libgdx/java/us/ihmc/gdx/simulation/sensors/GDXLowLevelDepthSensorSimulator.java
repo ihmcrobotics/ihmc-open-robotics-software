@@ -23,9 +23,8 @@ import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.imgui.ImGuiVideoPanel;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.gdx.perception.GDXCVImagePanel;
-import us.ihmc.gdx.sceneManager.GDX3DSceneBasics;
-import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
-import us.ihmc.gdx.sceneManager.GDXSceneLevel;
+import us.ihmc.gdx.sceneManager.GDX3DScene;
+import us.ihmc.gdx.sceneManager.GDX3DBareBonesScene;
 import us.ihmc.gdx.simulation.DepthSensorShaderProvider;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.visualizers.GDXFrustumVisualizer;
@@ -183,22 +182,12 @@ public class GDXLowLevelDepthSensorSimulator
       fieldOfViewY.set(2.0f * (float) Math.toDegrees(Math.atan((imageHeight / 2.0) / focalLengthPixels.get())));
    }
 
-   public void render(GDX3DSceneManager sceneManager)
+   public void render(GDX3DScene scene)
    {
-      render(sceneManager, null, 0.01f);
+      render(scene, null, 0.01f);
    }
 
-   public void render(GDX3DSceneBasics sceneBasics)
-   {
-      render(sceneBasics, null, 0.01f);
-   }
-
-   public void render(GDX3DSceneManager sceneManager, Color userPointColor, float pointSize)
-   {
-      render(sceneManager.getSceneBasics(), userPointColor, pointSize);
-   }
-
-   public void render(GDX3DSceneBasics sceneBasics, Color userPointColor, float pointSize)
+   public void render(GDX3DScene scene, Color userPointColor, float pointSize)
    {
       boolean updateThisTick = throttleTimer.isExpired(updatePeriod);
       if (updateThisTick)
@@ -221,7 +210,7 @@ public class GDXLowLevelDepthSensorSimulator
       modelBatch.begin(camera);
       GL41.glViewport(0, 0, imageWidth, imageHeight);
 
-      sceneBasics.renderExternalBatch(modelBatch, GDX3DSceneBasics.REAL_ENVIRONMENT_ONLY);
+      scene.renderExternalBatch(modelBatch, GDX3DScene.REAL_ENVIRONMENT_ONLY);
 
       modelBatch.end();
 

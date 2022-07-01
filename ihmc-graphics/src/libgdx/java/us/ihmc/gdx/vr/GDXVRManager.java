@@ -12,7 +12,7 @@ import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
-import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
+import us.ihmc.gdx.sceneManager.GDX3DScene;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.log.LogTools;
@@ -63,7 +63,7 @@ public class GDXVRManager
     * TODO: This thread has to be a multiple of the parent (240?)
     * TODO: If the rest of the app is too slow, can we run this one faster?
     */
-   public void pollEventsAndRender(GDXImGuiBasedUI baseUI, GDX3DSceneManager sceneManager)
+   public void pollEventsAndRender(GDXImGuiBasedUI baseUI, GDX3DScene scene)
    {
       boolean posesReady = pollEvents(baseUI);
       if (posesReady && isVRReady())
@@ -73,7 +73,7 @@ public class GDXVRManager
          waitGetToRenderDuration = waitGetToRenderStopwatch.totalElapsed();
          synchronized (syncObject)
          {
-            context.renderEyes(sceneManager.getSceneBasics());
+            context.renderEyes(scene);
          }
          skipHeadset = false;
       }
@@ -112,7 +112,7 @@ public class GDXVRManager
                baseUI.setForegroundFPS(350); // TODO: Do something better with this
             }
             baseUI.setVsync(false); // important to disable vsync for VR
-            scenePoseGizmo.create(baseUI.get3DSceneManager().getCamera3D());
+            scenePoseGizmo.create(baseUI.getPrimary3DPanel().getCamera3D());
             contextInitialized = true;
             waitGetPosesThreadRunning = true;
             ThreadTools.startAsDaemon(this::waitOnPoses, getClass().getSimpleName() + "WaitOnPosesThread");

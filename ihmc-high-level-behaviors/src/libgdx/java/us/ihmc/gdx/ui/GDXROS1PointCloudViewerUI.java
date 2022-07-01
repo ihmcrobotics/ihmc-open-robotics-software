@@ -28,10 +28,10 @@ public class GDXROS1PointCloudViewerUI
          public void create()
          {
             baseUI.create();
-            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelBuilder.createCoordinateFrame(0.3)));
+            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(GDXModelBuilder.createCoordinateFrame(0.3)));
             ros1PointCloudVisualizer.create();
             ros1PointCloudVisualizer.setActive(true);
-            baseUI.get3DSceneManager().addRenderableProvider(ros1PointCloudVisualizer);
+            baseUI.getPrimaryScene().addRenderableProvider(ros1PointCloudVisualizer);
 
             ros1Node.execute();
          }

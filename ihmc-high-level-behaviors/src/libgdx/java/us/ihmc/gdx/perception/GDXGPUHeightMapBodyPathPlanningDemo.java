@@ -11,7 +11,6 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.bodyPath.AStarBodyPathPlanner;
@@ -80,23 +79,23 @@ public class GDXGPUHeightMapBodyPathPlanningDemo
             nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
             baseUI.create();
 
-            environmentBuilder = new GDXEnvironmentBuilder(baseUI.get3DSceneManager());
-            environmentBuilder.create(baseUI);
+            environmentBuilder = new GDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
+            environmentBuilder.create();
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
-            baseUI.get3DSceneManager().addRenderableProvider(environmentBuilder::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
-            baseUI.get3DSceneManager().addRenderableProvider(environmentBuilder::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+            baseUI.getPrimaryScene().addRenderableProvider(environmentBuilder::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
+            baseUI.getPrimaryScene().addRenderableProvider(environmentBuilder::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
             environmentBuilder.loadEnvironment("CurvingBlockPathForBodyPath.json");
 
             robotInteractableReferenceFrame = new GDXInteractableReferenceFrame();
-            robotInteractableReferenceFrame.create(ReferenceFrame.getWorldFrame(), 0.15, baseUI.get3DSceneManager().getCamera3D());
+            robotInteractableReferenceFrame.create(ReferenceFrame.getWorldFrame(), 0.15, baseUI.getPrimary3DPanel().getCamera3D());
             robotInteractableReferenceFrame.getTransformToParent().getTranslation().add(0.0, 0.0, 1.7);
-            baseUI.addImGui3DViewInputProcessor(robotInteractableReferenceFrame::process3DViewInput);
-            baseUI.get3DSceneManager().addRenderableProvider(robotInteractableReferenceFrame::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(robotInteractableReferenceFrame::process3DViewInput);
+            baseUI.getPrimaryScene().addRenderableProvider(robotInteractableReferenceFrame::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
             ousterPoseGizmo = new GDXSelectablePose3DGizmo(robotInteractableReferenceFrame.getRepresentativeReferenceFrame());
-            ousterPoseGizmo.create(baseUI.get3DSceneManager().getCamera3D());
-            baseUI.addImGui3DViewPickCalculator(ousterPoseGizmo::calculate3DViewPick);
-            baseUI.addImGui3DViewInputProcessor(input -> ousterPoseGizmo.process3DViewInput(input));
-            baseUI.get3DSceneManager().addRenderableProvider(ousterPoseGizmo::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+            ousterPoseGizmo.create(baseUI.getPrimary3DPanel().getCamera3D());
+            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(ousterPoseGizmo::calculate3DViewPick);
+            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(input -> ousterPoseGizmo.process3DViewInput(input));
+            baseUI.getPrimaryScene().addRenderableProvider(ousterPoseGizmo::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
             ousterPoseGizmo.getPoseGizmo().getTransformToParent().appendPitchRotation(Math.toRadians(60.0));
 
 //            ros1Node = RosTools.createRosNode(NetworkParameters.getROSURI(), "height_map_planning_demo_ui");
@@ -115,14 +114,14 @@ public class GDXGPUHeightMapBodyPathPlanningDemo
                   ouster.setSensorEnabled(true);
                   ouster.setRenderPointCloudDirectly(true);
 //                  ouster.setPublishPointCloudROS1(true);
-                  baseUI.get3DSceneManager().addRenderableProvider(ouster, GDXSceneLevel.VIRTUAL);
+                  baseUI.getPrimaryScene().addRenderableProvider(ouster, GDXSceneLevel.VIRTUAL);
 
                   heightMapPoseGizmo = new GDXSelectablePose3DGizmo();
-                  heightMapPoseGizmo.create(baseUI.get3DSceneManager().getCamera3D());
+                  heightMapPoseGizmo.create(baseUI.getPrimary3DPanel().getCamera3D());
                   heightMapPoseGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(1.7, 0.0, 0.0);
-                  baseUI.addImGui3DViewPickCalculator(heightMapPoseGizmo::calculate3DViewPick);
-                  baseUI.addImGui3DViewInputProcessor(input -> heightMapPoseGizmo.process3DViewInput(input));
-                  baseUI.get3DSceneManager().addRenderableProvider(heightMapPoseGizmo::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+                  baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(heightMapPoseGizmo::calculate3DViewPick);
+                  baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(input -> heightMapPoseGizmo.process3DViewInput(input));
+                  baseUI.getPrimaryScene().addRenderableProvider(heightMapPoseGizmo::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
 
                   simpleGPUHeightMapParameters = new SimpleGPUHeightMapParameters();
                   ImGuiStoredPropertySetTuner heightMapParameterTuner = new ImGuiStoredPropertySetTuner("Height Map Parameters");
@@ -139,7 +138,7 @@ public class GDXGPUHeightMapBodyPathPlanningDemo
 
                   heightMapGraphic = new GDXHeightMapGraphic();
                   heightMapGraphic.getRenderGroundPlane().set(false);
-                  baseUI.get3DSceneManager().addRenderableProvider(heightMapGraphic, GDXSceneLevel.VIRTUAL);
+                  baseUI.getPrimaryScene().addRenderableProvider(heightMapGraphic, GDXSceneLevel.VIRTUAL);
                   baseUI.getImGuiPanelManager().addPanel("Height Map", this::renderHeightMapImGuiWidgets);
 
                   FootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
@@ -147,28 +146,28 @@ public class GDXGPUHeightMapBodyPathPlanningDemo
                   bodyPathPlanner = new AStarBodyPathPlanner(footstepPlannerParameters, footPolygons, bodyPathPlannerStopwatch);
 
                   bodyPathPlanGraphic = new GDXBodyPathPlanGraphic();
-                  baseUI.get3DSceneManager().addRenderableProvider(bodyPathPlanGraphic, GDXSceneLevel.VIRTUAL);
+                  baseUI.getPrimaryScene().addRenderableProvider(bodyPathPlanGraphic, GDXSceneLevel.VIRTUAL);
 
                   startPoseGizmo = new GDXSelectablePose3DGizmo();
-                  startPoseGizmo.create(baseUI.get3DSceneManager().getCamera3D());
+                  startPoseGizmo.create(baseUI.getPrimary3DPanel().getCamera3D());
                   startPoseGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(0.0, 0.0, 0.0);
-                  baseUI.addImGui3DViewPickCalculator(startPoseGizmo::calculate3DViewPick);
-                  baseUI.addImGui3DViewInputProcessor(input -> startPoseGizmo.process3DViewInput(input));
-                  baseUI.get3DSceneManager().addRenderableProvider(startPoseGizmo::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+                  baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(startPoseGizmo::calculate3DViewPick);
+                  baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(input -> startPoseGizmo.process3DViewInput(input));
+                  baseUI.getPrimaryScene().addRenderableProvider(startPoseGizmo::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
 
                   goalPoseGizmo = new GDXSelectablePose3DGizmo();
-                  goalPoseGizmo.create(baseUI.get3DSceneManager().getCamera3D());
+                  goalPoseGizmo.create(baseUI.getPrimary3DPanel().getCamera3D());
                   goalPoseGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(1.839, -1.142, 0.0);
                   goalPoseGizmo.getPoseGizmo().getTransformToParent().getRotation().appendYawRotation(-1.3767390862107274);
-                  baseUI.addImGui3DViewPickCalculator(goalPoseGizmo::calculate3DViewPick);
-                  baseUI.addImGui3DViewInputProcessor(input -> goalPoseGizmo.process3DViewInput(input));
-                  baseUI.get3DSceneManager().addRenderableProvider(goalPoseGizmo::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+                  baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(goalPoseGizmo::calculate3DViewPick);
+                  baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(input -> goalPoseGizmo.process3DViewInput(input));
+                  baseUI.getPrimaryScene().addRenderableProvider(goalPoseGizmo::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
 
                   //                  ros1Node.execute();
                   baseUI.getPerspectiveManager().reloadPerspective();
                }
 
-               ouster.render(baseUI.get3DSceneManager());
+               ouster.render(baseUI.getPrimaryScene());
 
                if (updateHeightMap.get())
                {
