@@ -374,14 +374,14 @@ public class TwistCalculatorTest
             FrameVector3D expectedLinearVelocity = computeExpectedLinearVelocityByFiniteDifference(dt, bodyFrame, bodyFrameInFuture, bodyFixedPoint);
 
             expectedLinearVelocity.checkReferenceFrameMatch(actualLinearVelocity);
-            EuclidCoreTestTools.assertTuple3DEquals(expectedLinearVelocity, actualLinearVelocity, 2.0e-5);
+            EuclidCoreTestTools.assertEquals(expectedLinearVelocity, actualLinearVelocity, 2.0e-5);
 
             FrameVector3D expectedAngularVelocity = computeAngularVelocityByFiniteDifference(dt, bodyFrame, bodyFrameInFuture);
             FrameVector3D actualAngularVelocity = new FrameVector3D();
             twistCalculator.getAngularVelocityOfBody(body, actualAngularVelocity);
 
             expectedAngularVelocity.checkReferenceFrameMatch(actualAngularVelocity);
-            EuclidCoreTestTools.assertTuple3DEquals(expectedAngularVelocity, actualAngularVelocity, 1.0e-5);
+            EuclidCoreTestTools.assertEquals(expectedAngularVelocity, actualAngularVelocity, 1.0e-5);
          }
       }
    }
@@ -467,7 +467,7 @@ public class TwistCalculatorTest
                                                                                                       baseFrameInFuture, bodyFixedPoint);
 
                expectedLinearVelocity.checkReferenceFrameMatch(actualLinearVelocity);
-               EuclidCoreTestTools.assertTuple3DEquals(expectedLinearVelocity, actualLinearVelocity, 2.0e-5);
+               EuclidCoreTestTools.assertEquals(expectedLinearVelocity, actualLinearVelocity, 2.0e-5);
 
                FrameVector3D expectedAngularVelocity = new FrameVector3D();
                expectedAngularVelocity.setIncludingFrame(expectedRelativeTwist.getAngularPart());
@@ -475,7 +475,7 @@ public class TwistCalculatorTest
                twistCalculator.getRelativeAngularVelocity(base, body, actualAngularVelocity);
 
                expectedAngularVelocity.checkReferenceFrameMatch(actualAngularVelocity);
-               EuclidCoreTestTools.assertTuple3DEquals(expectedAngularVelocity, actualAngularVelocity, 1.0e-5);
+               EuclidCoreTestTools.assertEquals(expectedAngularVelocity, actualAngularVelocity, 1.0e-5);
             }
          }
       }

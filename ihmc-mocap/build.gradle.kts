@@ -13,9 +13,9 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:euclid:0.17.2")
+   api("us.ihmc:euclid:0.18.1")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
-   api("us.ihmc:simulation-construction-set:0.22.3")
+   api("us.ihmc:simulation-construction-set:0.22.4")
 }
