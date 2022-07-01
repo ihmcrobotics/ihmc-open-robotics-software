@@ -18,10 +18,10 @@ basicsDependencies {
    api("org.ejml:ejml-ddense:0.39")
 
    api("us.ihmc:jinput:2.0.6-ihmc2")
-   api("us.ihmc:euclid-frame:0.17.2")
-   api("us.ihmc:euclid-frame-shape:0.17.2")
-   api("us.ihmc:euclid-shape:0.17.2")
-   api("us.ihmc:ihmc-robot-description:0.21.4")
+   api("us.ihmc:euclid-frame:0.18.1")
+   api("us.ihmc:euclid-frame-shape:0.18.1")
+   api("us.ihmc:euclid-shape:0.18.1")
+   api("us.ihmc:ihmc-robot-description:0.21.5")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
 }
@@ -39,7 +39,7 @@ planningDependencies {
 
    api("us.ihmc:robot-environment-awareness:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")
-   api("us.ihmc:ihmc-robot-data-logger:17-0.23.2")
+   api("us.ihmc:ihmc-robot-data-logger:17-0.23.3")
    api("us.ihmc:ihmc-path-planning:source")
 }
 
@@ -69,7 +69,7 @@ footstepPlanningTestDependencies {
 communicationDependencies {
    api(ihmc.sourceSetProject("footstep-planning"))
 
-   api("us.ihmc:euclid-geometry:0.17.2")
+   api("us.ihmc:euclid-geometry:0.18.1")
 }
 
 communicationTestDependencies {
@@ -80,7 +80,7 @@ communicationTestDependencies {
 roboticsDependencies {
    api(ihmc.sourceSetProject("communication"))
 
-   api("us.ihmc:ihmc-convex-optimization:0.17.12")
+   api("us.ihmc:ihmc-convex-optimization:0.17.13")
    api("us.ihmc:ihmc-state-estimation:source")
    api("us.ihmc:ihmc-simulation-toolkit:source")
    api("us.ihmc:ihmc-system-identification:source")

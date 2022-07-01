@@ -258,7 +258,7 @@ public class ICPControllerTest
       desiredCMPExpected.setX(Math.min(maxX, desiredCMPExpected.getX()));
       desiredCMPExpected.setY(Math.min(maxY, desiredCMPExpected.getY()));
 
-      EuclidFrameTestTools.assertFramePoint2DGeometricallyEquals(desiredCMPExpected, desiredCMP, epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(desiredCMPExpected, desiredCMP, epsilon);
    }
 
    @Test
@@ -334,12 +334,12 @@ public class ICPControllerTest
       desiredCMPExpected.add(expectedCMPFeedbackDelta);
       desiredCMPExpected.add(expectedCoPFeedbackDelta);
 
-      EuclidFrameTestTools.assertFrameVector2DGeometricallyEquals(icpError, controller.icpError, epsilon);
-      EuclidFrameTestTools.assertFramePoint2DGeometricallyEquals(perfectCMP, controller.perfectCoP, epsilon);
-      EuclidFrameTestTools.assertFramePoint2DGeometricallyEquals(perfectCMP, controller.perfectCMP, epsilon);
-      EuclidFrameTestTools.assertFrameVector2DGeometricallyEquals(expectedCMPFeedbackDelta, controller.feedbackCMPDelta, epsilon);
-      EuclidFrameTestTools.assertFrameVector2DGeometricallyEquals(expectedCoPFeedbackDelta, controller.feedbackCoPDelta, epsilon);
-      EuclidFrameTestTools.assertFramePoint2DGeometricallyEquals(desiredCMPExpected, desiredCMP, epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(icpError, controller.icpError, epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(perfectCMP, controller.perfectCoP, epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(perfectCMP, controller.perfectCMP, epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(expectedCMPFeedbackDelta, controller.feedbackCMPDelta, epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(expectedCoPFeedbackDelta, controller.feedbackCoPDelta, epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(desiredCMPExpected, desiredCMP, epsilon);
    }
 
    @Test
@@ -415,7 +415,7 @@ public class ICPControllerTest
       desiredCMPExpected.scale(feedbackGain + 1.0);
       desiredCMPExpected.add(perfectCMP);
 
-      EuclidFrameTestTools.assertFramePoint2DGeometricallyEquals(desiredCMPExpected, desiredCMP, epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(desiredCMPExpected, desiredCMP, epsilon);
    }
 
    private SideDependentList<FootSpoof> setupContactableFeet(double footLength, double footWidth, double totalWidth)

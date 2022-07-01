@@ -22,7 +22,7 @@ mainDependencies {
 
 javafxDependencies {
    api(ihmc.sourceSetProject("main"))
-   api("us.ihmc:ihmc-javafx-toolkit:17-0.21.1")
+   api("us.ihmc:ihmc-javafx-toolkit:17-0.21.2")
    api("us.ihmc:ihmc-graphics-javafx:source")
    api("us.ihmc:ihmc-graphics-jmonkeyengine:source")
    api("us.ihmc:ihmc-path-planning-visualizers:source")
@@ -32,7 +32,7 @@ javafxDependencies {
 missionControlDependencies {
    api("us.ihmc:ihmc-commons:0.31.0")
    api("us.ihmc:log-tools:0.6.3")
-   api("us.ihmc:ihmc-ros2-library:0.20.5")
+   api("us.ihmc:ihmc-ros2-library:0.20.8")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-interfaces:source")
@@ -45,8 +45,8 @@ libgdxDependencies {
    api("us.ihmc:ihmc-graphics-libgdx:source")
    api("us.ihmc:ihmc-perception-javacv:source")
    api("us.ihmc:ihmc-graphics-libgdx:source")
-   api("us.ihmc:scs2-simulation:17-0.8.5-bullet-alpha-6")
-   api("us.ihmc:mecano-graphviz:0.11.1")
+   api("us.ihmc:scs2-simulation:17-0.8.6-bullet-alpha-7")
+   api("us.ihmc:mecano-graphviz:0.11.2")
    api("com.badlogicgames.gdx-controllers:gdx-controllers-core:2.2.1")
    api("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:2.2.1")
    api("com.badlogicgames.gdx:gdx-bullet:1.11.0")
