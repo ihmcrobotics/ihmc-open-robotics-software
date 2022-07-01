@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 
 /**
@@ -58,23 +57,23 @@ public class MeshBasedContactDetector implements Updatable
    private int updateFrequency = 1;
 
    public MeshBasedContactDetector(RigidBodyBasics rootBody,
+                                   RobotCollisionModel collisionModel)
+   {
+      this(rootBody, collisionModel, null, null);
+   }
+
+   public MeshBasedContactDetector(RigidBodyBasics rootBody,
                                    RobotCollisionModel collisionModel,
                                    YoGraphicsListRegistry graphicsListRegistry,
-                                   List<String> collidableRigidBodies,
                                    YoRegistry parentRegistry)
    {
       contactThreshold.set(defaultContactThreshold);
 
       List<Collidable> robotCollidables = collisionModel.getRobotCollidables(rootBody);
       Map<RigidBodyBasics, List<Collidable>> allCollidableMap = robotCollidables.stream().collect(Collectors.groupingBy(Collidable::getRigidBody));
-      List<? extends RigidBodyBasics> allRigidBodies = rootBody.subtreeList();
 
-      for (int i = 0; i < allRigidBodies.size(); i++)
+      for (RigidBodyBasics rigidBody : allCollidableMap.keySet())
       {
-         RigidBodyBasics rigidBody = allRigidBodies.get(i);
-         if (!collidableRigidBodies.contains(rigidBody.getName()))
-            continue;
-
          contactableRigidBodies.add(rigidBody);
          List<Collidable> collidables = allCollidableMap.get(rigidBody);
          List<ContactableShape> rigidBodyCollidables = new ArrayList<>();
@@ -152,7 +151,11 @@ public class MeshBasedContactDetector implements Updatable
          }
       }
 
-      reportStatus();
+      if (statusOutputManager != null)
+      {
+         updateBalanceStatus(multiContactBalanceStatus);
+         statusOutputManager.reportStatusMessage(multiContactBalanceStatus);
+      }
    }
 
    private boolean detectPlanarRegionContact(ContactableShape contactableShape, List<FramePoint3DReadOnly> contactFramePoints, Vector3D contactNormal)
@@ -222,31 +225,26 @@ public class MeshBasedContactDetector implements Updatable
       this.updateFrequency = updateFrequency;
    }
 
-   private void reportStatus()
+   public void updateBalanceStatus(MultiContactBalanceStatus multiContactBalanceStatus)
    {
-      if (statusOutputManager != null)
+      multiContactBalanceStatus.getContactPointsInWorld().clear();
+      multiContactBalanceStatus.getSupportRigidBodyIds().clear();
+      multiContactBalanceStatus.getSurfaceNormalsInWorld().clear();
+
+      for (int i = 0; i < contactableRigidBodies.size(); i++)
       {
-         multiContactBalanceStatus.getContactPointsInWorld().clear();
-         multiContactBalanceStatus.getSupportRigidBodyIds().clear();
-         multiContactBalanceStatus.getSurfaceNormalsInWorld().clear();
+         RigidBodyBasics rigidBody = contactableRigidBodies.get(i);
+         List<DetectedContactPoint> contactPoints = this.allContactPoints.get(contactableRigidBodies.get(i));
 
-         for (int i = 0; i < contactableRigidBodies.size(); i++)
+         for (int j = 0; j < contactPoints.size(); j++)
          {
-            RigidBodyBasics rigidBody = contactableRigidBodies.get(i);
-            List<DetectedContactPoint> contactPoints = this.allContactPoints.get(contactableRigidBodies.get(i));
-
-            for (int j = 0; j < contactPoints.size(); j++)
+            if (contactPoints.get(j).isInContact())
             {
-               if (contactPoints.get(j).isInContact())
-               {
-                  multiContactBalanceStatus.getSupportRigidBodyIds().add(rigidBody.hashCode());
-                  multiContactBalanceStatus.getContactPointsInWorld().add().set(contactPoints.get(j).getContactPointPosition());
-                  multiContactBalanceStatus.getSurfaceNormalsInWorld().add().set(contactPoints.get(j).getContactPointNormal());
-               }
+               multiContactBalanceStatus.getSupportRigidBodyIds().add(rigidBody.hashCode());
+               multiContactBalanceStatus.getContactPointsInWorld().add().set(contactPoints.get(j).getContactPointPosition());
+               multiContactBalanceStatus.getSurfaceNormalsInWorld().add().set(contactPoints.get(j).getContactPointNormal());
             }
          }
-
-         statusOutputManager.reportStatusMessage(multiContactBalanceStatus);
       }
    }
 
