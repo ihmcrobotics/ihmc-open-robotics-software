@@ -106,6 +106,8 @@ public class MultiContactSupportRegionSolver
 
    public void initialize(MultiContactSupportRegionSolverInput input)
    {
+      clear();
+
       this.input = input;
 
       int rhoSize = basisVectorsPerContactPoint * input.getNumberOfContacts();
@@ -309,6 +311,17 @@ public class MultiContactSupportRegionSolver
       this.optimizedCoM.setZ(averageContactPointPosition.getZ());
 
       tickAndUpdatable.tickAndUpdate();
+   }
+
+   private void clear()
+   {
+      Aeq.zero();
+      beq.zero();
+      APosEq.zero();
+      Ain.zero();
+      bin.zero();
+      costVectorC.zero();
+      solution.zero();
    }
 
    //////////////////////////////////////////////////////////////////////////////////////////
