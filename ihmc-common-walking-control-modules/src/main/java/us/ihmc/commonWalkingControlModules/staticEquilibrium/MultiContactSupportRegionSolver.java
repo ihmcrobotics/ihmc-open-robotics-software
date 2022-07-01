@@ -40,6 +40,8 @@ import static us.ihmc.commonWalkingControlModules.staticEquilibrium.ContactPoint
  */
 public class MultiContactSupportRegionSolver
 {
+   private static final double optimizedCoMGraphicScale = 0.03;
+
    private static final int defaultNumberOfDirectionsToOptimize = 16;
    private static final int centerOfMassDimensions = 2;
    private static final int staticEquilibriumConstraints = 6;
@@ -98,7 +100,7 @@ public class MultiContactSupportRegionSolver
       YoGraphicVector directionToOptimizeGraphic = new YoGraphicVector("directionToOptimizeGraphic", averageContactPointPosition, directionToOptimize, 0.5);
       graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), directionToOptimizeGraphic);
 
-      YoGraphicPosition optimizedCoMGraphic = new YoGraphicPosition("optimizedCoMGraphic", optimizedCoM, 0.03, YoAppearance.DarkRed());
+      YoGraphicPosition optimizedCoMGraphic = new YoGraphicPosition("optimizedCoMGraphic", optimizedCoM, optimizedCoMGraphicScale, YoAppearance.DarkRed());
       graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), optimizedCoMGraphic);
    }
 
@@ -108,7 +110,7 @@ public class MultiContactSupportRegionSolver
 
       int rhoSize = basisVectorsPerContactPoint * input.getNumberOfContacts();
       nominalDecisionVariables = rhoSize + centerOfMassDimensions;
-      nonNegativeDecisionVariables = nominalDecisionVariables + 2 * centerOfMassDimensions;
+      nonNegativeDecisionVariables = nominalDecisionVariables + centerOfMassDimensions;
       int actuationConstraints = 0;
       for (int i = 0; i < input.getNumberOfContacts(); i++)
       {
@@ -173,7 +175,7 @@ public class MultiContactSupportRegionSolver
       MatrixTools.setMatrixBlock(bin, APosEq.getNumRows(), 0, beq, 0, 0, APosEq.getNumRows(), beq.getNumCols(), -1.0);
 
       // Add actuation constraints
-      int actuationConstraintIndex = 2 * staticEquilibriumConstraints;
+      int actuationConstraintIndex = 0;
       for (int i = 0; i < input.getNumberOfContacts(); i++)
       {
          ContactPointActuationConstraint actuationConstraint = input.getActuationConstraints().get(i);
@@ -209,7 +211,10 @@ public class MultiContactSupportRegionSolver
       }
    }
 
-   private void addActuationConstraint(int contactPointIndex, int actuationConstraintIndex, Tuple3DReadOnly constraintPlanePoint, Tuple3DReadOnly constraintPlaneNormal)
+   private void addActuationConstraint(int contactPointIndex,
+                                       int actuationConstraintIndex,
+                                       Tuple3DReadOnly constraintPlanePoint,
+                                       Tuple3DReadOnly constraintPlaneNormal)
    {
       int constraintRow = 2 * staticEquilibriumConstraints + actuationConstraintIndex;
 
@@ -217,10 +222,12 @@ public class MultiContactSupportRegionSolver
       {
          ContactPoint contactPoint = contactPoints.get(contactPointIndex);
          YoFrameVector3D basisVector = contactPoint.getBasisVector(i);
-         Ain.set(constraintRow, basisVectorsPerContactPoint * contactPointIndex + i, dot(basisVector, constraintPlaneNormal));
+         double dot = dot(basisVector, constraintPlaneNormal);
+         Ain.set(constraintRow, basisVectorsPerContactPoint * contactPointIndex + i, dot);
       }
 
-      bin.set(constraintRow, 0, dot(constraintPlanePoint, constraintPlaneNormal));
+      double dot0 = dot(constraintPlanePoint, constraintPlaneNormal);
+      bin.set(constraintRow, 0, dot0);
    }
 
    private static double dot(Tuple3DReadOnly t1, Tuple3DReadOnly t2)
