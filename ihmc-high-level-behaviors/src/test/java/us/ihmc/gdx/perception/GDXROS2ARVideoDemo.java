@@ -79,10 +79,6 @@ public class GDXROS2ARVideoDemo
             double minRange = 0.105;
             double maxRange = 5.0;
 
-            arPanel = new GDX3DPanel("AR View", 2, false);
-            pixmap = new Pixmap(imageWidth, imageHeight, Pixmap.Format.RGBA8888);
-            baseUI.add3DPanel(arPanel);
-
             highLevelDepthSensorSimulator = new GDXHighLevelDepthSensorSimulator("Stepping L515",
                                                                                  sensorPoseGizmo.getGizmoFrame(),
                                                                                  () -> 0L,
@@ -113,7 +109,10 @@ public class GDXROS2ARVideoDemo
             sensorPoseGizmo.getTransformToParent().getRotation().setToPitchOrientation(Math.toRadians(45.0));
 
             BytedecoImage tempImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4);
-
+            arPanel = new GDX3DPanel("AR View", 2, false);
+            pixmap = new Pixmap(imageWidth, imageHeight, Pixmap.Format.RGBA8888);
+            baseUI.add3DPanel(arPanel);
+            arPanel.getCamera3D().setInputEnabled(false);
             arPanel.setBackgroundRenderer(() ->
             {
                int newWidth = (int) Math.floor(arPanel.getViewportSizeX()) * arPanel.getAntiAliasing();
@@ -129,7 +128,6 @@ public class GDXROS2ARVideoDemo
                                      tempImage.getBytedecoOpenCVMat(),
                                      new Size(newWidth, newHeight));
                BytedecoOpenCVTools.flipY(tempImage.getBytedecoOpenCVMat(), tempImage.getBytedecoOpenCVMat());
-//               highLevelDepthSensorSimulator.getLowLevelSimulator().getRGBA8888ColorImage().getBytedecoOpenCVMat().re
 
                ByteBuffer pixels = pixmap.getPixels();
                ByteBuffer backingDirectByteBuffer = tempImage.getBackingDirectByteBuffer();
@@ -145,6 +143,8 @@ public class GDXROS2ARVideoDemo
          @Override
          public void render()
          {
+            arPanel.getCamera3D().setPose(highLevelDepthSensorSimulator.getSensorFrame().getTransformToWorldFrame());
+
             highLevelDepthSensorSimulator.render(baseUI.getPrimaryScene());
             globalVisualizersPanel.update();
 
