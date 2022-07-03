@@ -8,14 +8,12 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.environment.GDXEnvironmentBuilder;
-import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
 import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.gdx.ui.graphics.live.GDXROS2BigVideoVisualizer;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXGlobalVisualizersPanel;
-import us.ihmc.ihmcPerception.OpenCVTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -32,15 +30,13 @@ public class GDXROS2ARVideoDemo
    private final GDXPose3DGizmo sensorPoseGizmo = new GDXPose3DGizmo();
    private GDXEnvironmentBuilder environmentBuilder;
    private Pixmap pixmap;
+   private GDX3DPanel arPanel;
+   private ImGuiGDXGlobalVisualizersPanel globalVisualizersPanel;
 
    public GDXROS2ARVideoDemo()
    {
       baseUI.launchGDXApplication(new Lwjgl3ApplicationAdapter()
       {
-
-         private GDX3DPanel arPanel;
-         private ImGuiGDXGlobalVisualizersPanel globalVisualizersPanel;
-
          @Override
          public void create()
          {
@@ -113,8 +109,10 @@ public class GDXROS2ARVideoDemo
             pixmap = new Pixmap(imageWidth, imageHeight, Pixmap.Format.RGBA8888);
             baseUI.add3DPanel(arPanel);
             arPanel.getCamera3D().setInputEnabled(false);
+            arPanel.getCamera3D().setVerticalFieldOfView(verticalFOV);
             arPanel.setBackgroundRenderer(() ->
             {
+               arPanel.getCamera3D().setVerticalFieldOfView(60.0);
                int newWidth = (int) Math.floor(arPanel.getViewportSizeX()) * arPanel.getAntiAliasing();
                int newHeight = (int) Math.floor(arPanel.getViewportSizeY()) * arPanel.getAntiAliasing();
                tempImage.resize(newWidth, newHeight, null, null);
