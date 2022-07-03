@@ -47,14 +47,13 @@ public class GDXFocusBasedCamera extends Camera
    private final AxisAngle latitudeAxisAngle = new AxisAngle();
    private final AxisAngle focusPointAxisAngle = new AxisAngle();
 
-   private final float verticalFieldOfView;
-
    private final double zoomSpeedFactor = 0.1;
    private final double latitudeSpeed = 0.005;
    private final double longitudeSpeed = 0.005;
    private final double translateSpeedFactor = 0.5;
 
    private final FramePose3D focusPointPose;
+   private float verticalFieldOfView;
    private double latitude = 0.0;
    private double longitude = 0.0;
    private double zoom = 10.0;
@@ -354,5 +353,10 @@ public class GDXFocusBasedCamera extends Camera
    public void setInputEnabled(boolean inputEnabled)
    {
       this.inputEnabled = inputEnabled;
+   }
+
+   public void setVerticalFieldOfView(double verticalFieldOfView)
+   {
+      this.verticalFieldOfView = (float) verticalFieldOfView;
    }
 }
