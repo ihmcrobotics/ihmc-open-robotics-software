@@ -7,6 +7,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
+import us.ihmc.perception.OpenCVArUcoMarker;
 import us.ihmc.perception.spinnaker.SpinnakerSystemManager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -16,6 +17,8 @@ import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Activator;
 import us.ihmc.tools.thread.Throttler;
+
+import java.util.List;
 
 /** To run this you have to download the Spinnaker SDK, move it to the robot computer, then run
  *  the install script inside of it.
@@ -34,9 +37,11 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
    private final SideDependentList<DualBlackflyCamera> blackflies = new SideDependentList<>();
    private final Throttler throttler = new Throttler();
    private volatile boolean running = true;
+   private List<OpenCVArUcoMarker> arUcoMarkersToTrack;
 
-   public DualBlackflyAndAruCoMarkerOnRobotProcess(DRCRobotModel robotModel)
+   public DualBlackflyAndAruCoMarkerOnRobotProcess(DRCRobotModel robotModel, List<OpenCVArUcoMarker> arUcoMarkersToTrack)
    {
+      this.arUcoMarkersToTrack = arUcoMarkersToTrack;
       nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
 
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "blackfly_node");
@@ -75,7 +80,7 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
                for (RobotSide side : blackflies.sides())
                {
                   DualBlackflyCamera blackfly = blackflies.get(side);
-                  blackfly.create(spinnakerSystemManager.createBlackfly(blackfly.getSerialNumber()), side, ros2Helper, realtimeROS2Node);
+                  blackfly.create(spinnakerSystemManager.createBlackfly(blackfly.getSerialNumber()), side, ros2Helper, realtimeROS2Node, arUcoMarkersToTrack);
                }
             }
 
