@@ -85,7 +85,6 @@ public class DualBlackflyCamera
    private int numberOfArUcoMarkers = 0;
    private ArrayList<Integer> markerIds = new ArrayList<>();
 
-
    public DualBlackflyCamera(String serialNumber, ROS2SyncedRobotModel syncedRobot)
    {
       this.serialNumber = serialNumber;
@@ -191,7 +190,7 @@ public class DualBlackflyCamera
                   int markerID = ids.getForThreadTwo().ptr(i, 0).getInt();
                   if (!markerIds.contains(markerID))
                   {
-                     markersToTrack.add(new OpenCVArUcoMarker(markerID, 0.2032));
+                     markersToTrack.add(new OpenCVArUcoMarker(markerID, 0.1680));
                      markerIds.add(markerID);
                   }
 
