@@ -41,7 +41,7 @@ testDependencies {
    api(ihmc.sourceSetProject("data-sets"))
 
    api("us.ihmc:ihmc-commons-testing:0.31.0")
-   api("us.ihmc:simulation-construction-set:0.22.4")
+   api("us.ihmc:simulation-construction-set:0.22.5")
    api("us.ihmc:robot-environment-awareness-application:source")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
 }
