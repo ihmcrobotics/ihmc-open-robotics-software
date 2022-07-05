@@ -23,11 +23,11 @@ import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
-import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.environment.object.GDXSCS2EnvironmentObject;
 import us.ihmc.gdx.simulation.environment.object.GDXSCS2EnvironmentObjectFactory;
 import us.ihmc.gdx.simulation.environment.object.GDXSCS2EnvironmentObjectLibrary;
+import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.log.LogTools;
@@ -52,7 +52,7 @@ public class GDXSCS2EnvironmentBuilder extends ImGuiPanel
    private final Quaternion tempOrientation = new Quaternion();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final ImFloat ambientLightAmount = new ImFloat(0.4f);
-   private final GDX3DSceneManager sceneManager;
+   private final GDX3DPanel panel3D;
    private boolean isPlacing = false;
    private GDXSCS2EnvironmentObject selectedObject;
    private GDXSCS2EnvironmentObject intersectedObject;
@@ -60,10 +60,10 @@ public class GDXSCS2EnvironmentBuilder extends ImGuiPanel
    private final ImGuiPanel poseGizmoTunerPanel = pose3DGizmo.createTunerPanel(getClass().getSimpleName());
    private final Point3D tempIntersection = new Point3D();
 
-   public GDXSCS2EnvironmentBuilder(GDX3DSceneManager sceneManager)
+   public GDXSCS2EnvironmentBuilder(GDX3DPanel panel3D)
    {
       super(WINDOW_NAME);
-      this.sceneManager = sceneManager;
+      this.panel3D = panel3D;
       setRenderMethod(this::renderImGuiWidgets);
       addChild(poseGizmoTunerPanel);
    }
@@ -71,12 +71,12 @@ public class GDXSCS2EnvironmentBuilder extends ImGuiPanel
    public void create(GDXImGuiBasedUI baseUI)
    {
       // TODO: Implement hiding the real environment to emulate real world operation
-      sceneManager.addRenderableProvider(this::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
-      sceneManager.addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+      panel3D.getScene().addRenderableProvider(this::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
+      panel3D.getScene().addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
 
-      pose3DGizmo.create(sceneManager.getCamera3D());
-      baseUI.addImGui3DViewPickCalculator(this::calculate3DViewPick);
-      baseUI.addImGui3DViewInputProcessor(this::process3DViewInput);
+      pose3DGizmo.create(panel3D.getCamera3D());
+      baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this::calculate3DViewPick);
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::process3DViewInput);
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)
@@ -175,7 +175,7 @@ public class GDXSCS2EnvironmentBuilder extends ImGuiPanel
       ImGui.separator();
       if (ImGui.sliderFloat("Ambient light", ambientLightAmount.getData(), 0.0f, 1.0f))
       {
-         sceneManager.getSceneBasics().setAmbientLight(ambientLightAmount.get());
+         panel3D.getScene().setAmbientLight(ambientLightAmount.get());
       }
 
       ImGui.separator();
@@ -289,7 +289,7 @@ public class GDXSCS2EnvironmentBuilder extends ImGuiPanel
          {
             float ambientValue = (float) ambientLightNode.asDouble();
             ambientLightAmount.set(ambientValue);
-            sceneManager.getSceneBasics().setAmbientLight(ambientLightAmount.get());
+            panel3D.getScene().setAmbientLight(ambientLightAmount.get());
          }
          for (Iterator<JsonNode> it = node.withArray("objects").elements(); it.hasNext(); )
          {
@@ -353,13 +353,13 @@ public class GDXSCS2EnvironmentBuilder extends ImGuiPanel
 //      if (environmentObject instanceof GDXPointLightObject)
 //      {
 //         GDXPointLightObject pointLightObject = (GDXPointLightObject) environmentObject;
-//         sceneManager.getSceneBasics().addPointLight(pointLightObject.getLight());
+//         sceneManager.getscene().addPointLight(pointLightObject.getLight());
 //         lightObjects.add(pointLightObject);
 //      }
 //      else if (environmentObject instanceof GDXDirectionalLightObject)
 //      {
 //         GDXDirectionalLightObject directionalLightObject = (GDXDirectionalLightObject) environmentObject;
-//         sceneManager.getSceneBasics().addDirectionalLight(directionalLightObject.getLight());
+//         sceneManager.getscene().addDirectionalLight(directionalLightObject.getLight());
 //         lightObjects.add(directionalLightObject);
 //      }
    }
@@ -371,13 +371,13 @@ public class GDXSCS2EnvironmentBuilder extends ImGuiPanel
 //      if (environmentObject instanceof GDXPointLightObject)
 //      {
 //         GDXPointLightObject lightObject = (GDXPointLightObject) environmentObject;
-//         sceneManager.getSceneBasics().removePointLight(lightObject.getLight());
+//         sceneManager.getscene().removePointLight(lightObject.getLight());
 //         lightObjects.remove(environmentObject);
 //      }
 //      else if (environmentObject instanceof GDXDirectionalLightObject)
 //      {
 //         GDXDirectionalLightObject lightObject = (GDXDirectionalLightObject) environmentObject;
-//         sceneManager.getSceneBasics().removeDirectionalLight(lightObject.getLight());
+//         sceneManager.getscene().removeDirectionalLight(lightObject.getLight());
 //         lightObjects.remove(environmentObject);
 //      }
    }

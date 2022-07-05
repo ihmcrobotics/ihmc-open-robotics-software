@@ -76,7 +76,7 @@ public class GDXLibGDXBulletPhysicsDemo2
             groundCollisionObject.setCollisionShape(groundBoxShape);
             groundCollisionObject.setWorldTransform(groundModelInstance.transform);
             discreteDynamicsWorld.addCollisionObject(groundCollisionObject);
-            baseUI.get3DSceneManager().addModelInstance(groundModelInstance);
+            baseUI.getPrimaryScene().addModelInstance(groundModelInstance);
 
             int numberOfBlocks = 6;
             Random random = new Random(1886L);
@@ -120,7 +120,7 @@ public class GDXLibGDXBulletPhysicsDemo2
                rigidBodies.add(rigidBody);
                discreteDynamicsWorld.addRigidBody(rigidBody);
 
-               baseUI.get3DSceneManager().addModelInstance(boxModelInstance);
+               baseUI.getPrimaryScene().addModelInstance(boxModelInstance);
             }
 
             baseUI.getImGuiPanelManager().addPanel("libGDX Bullet Physics", this::renderImGuiWidgets);

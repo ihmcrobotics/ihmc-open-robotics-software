@@ -166,7 +166,7 @@ public class ValkyrieWalkingTrajectoryPathFrameEndToEndTest
       //      LogTools.info("Difference w.r.t. mid feet zup frame: angle= "
       //            + midFeetZUpFrameTransform.getRotation().distance(walkingTrajectoryPathFrameTransform.getRotation()) + ", distance= " + diff.length());
       // It doesn't match the mid feet zup yaw. 
-      //      EuclidCoreTestTools.assertRotationMatrixGeometricallyEquals(midFeetZUpFrameTransform.getRotation(),
+      //      EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(midFeetZUpFrameTransform.getRotation(),
       //                                                                  walkingTrajectoryPathFrameTransform.getRotation(),
       //                                                                  1.0e-3);
       EuclidCoreTestTools.assertVector3DGeometricallyEquals(midFeetZUpFrameTransform.getTranslation(),

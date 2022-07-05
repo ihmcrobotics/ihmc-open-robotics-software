@@ -98,7 +98,7 @@ public class SDFRobotTest
       Vector3D offsetTwo = new Vector3D();
       jointTwo.getOffset(offsetTwo);
 
-      EuclidCoreTestTools.assertTuple3DEquals(offsetOne, offsetTwo, 1e-7);
+      EuclidCoreTestTools.assertEquals(offsetOne, offsetTwo, 1e-7);
 
       checkGroundContactPointsMatch(jointOne, jointTwo);
 
@@ -146,7 +146,7 @@ public class SDFRobotTest
          GroundContactPoint pointOne = groundContactPointsOne.get(i);
          GroundContactPoint pointTwo = groundContactPointsTwo.get(i);
 
-         EuclidCoreTestTools.assertTuple3DEquals(pointOne.getOffsetCopy(), pointTwo.getOffsetCopy(), 1e-7);
+         EuclidCoreTestTools.assertEquals(pointOne.getOffsetCopy(), pointTwo.getOffsetCopy(), 1e-7);
       }
    }
 
@@ -155,7 +155,7 @@ public class SDFRobotTest
       assertEquals(linkOne.getName(), linkTwo.getName());
 
       assertEquals(linkOne.getMass(), linkTwo.getMass(), 1e-7);
-      EuclidCoreTestTools.assertTuple3DEquals(linkOne.getComOffset(), linkTwo.getComOffset(), 1e-7);
+      EuclidCoreTestTools.assertEquals(linkOne.getComOffset(), linkTwo.getComOffset(), 1e-7);
 
       Matrix3D momentOfInertiaOne = new Matrix3D();
       linkOne.getMomentOfInertia(momentOfInertiaOne);

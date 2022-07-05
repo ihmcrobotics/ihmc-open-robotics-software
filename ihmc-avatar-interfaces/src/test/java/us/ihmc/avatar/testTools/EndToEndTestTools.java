@@ -122,8 +122,8 @@ public class EndToEndTestTools
    {
       QuaternionReadOnly desiredOrientation = findFeedbackControllerDesiredOrientation(bodyName, yoVariableHolder);
       Vector3DReadOnly desiredAngularVelocity = findFeedbackControllerDesiredAngularVelocity(bodyName, yoVariableHolder);
-      EuclidCoreTestTools.assertQuaternionGeometricallyEquals("Orientation", expectedOrientation, desiredOrientation, epsilon, FORMAT);
-      EuclidCoreTestTools.assertTuple3DEquals("Angular Velocity", expectedAngularVelocity, desiredAngularVelocity, epsilon, FORMAT);
+      EuclidCoreTestTools.assertOrientation3DGeometricallyEquals("Orientation", expectedOrientation, desiredOrientation, epsilon, FORMAT);
+      EuclidCoreTestTools.assertEquals("Angular Velocity", expectedAngularVelocity, desiredAngularVelocity, epsilon, FORMAT);
    }
 
    public static void assertWaypointInGeneratorMatches(String bodyName,
@@ -135,12 +135,12 @@ public class EndToEndTestTools
       assertTrue(waypointIndexInController < RigidBodyTaskspaceControlState.maxPointsInGenerator, "Index too high: " + waypointIndexInController);
       SO3TrajectoryPoint actualWaypoint = findSO3TrajectoryPoint(bodyName, waypointIndexInController, yoVariableHolder);
       assertEquals(expectedWaypoint.getTime(), actualWaypoint.getTime(), epsilon, "Time");
-      EuclidCoreTestTools.assertQuaternionGeometricallyEquals("Orientation",
+      EuclidCoreTestTools.assertOrientation3DGeometricallyEquals("Orientation",
                                                               expectedWaypoint.getOrientation(),
                                                               actualWaypoint.getOrientationCopy(),
                                                               epsilon,
                                                               FORMAT);
-      EuclidCoreTestTools.assertTuple3DEquals("Angular Velocity",
+      EuclidCoreTestTools.assertEquals("Angular Velocity",
                                               expectedWaypoint.getAngularVelocity(),
                                               actualWaypoint.getAngularVelocityCopy(),
                                               epsilon,
@@ -298,7 +298,7 @@ public class EndToEndTestTools
       {
          if (!expectedDesiredPosition.containsNaN())
          {
-            EuclidCoreTestTools.assertTuple3DEquals(expectedDesiredPosition, statusMessage.getDesiredEndEffectorPosition(), epsilon);
+            EuclidCoreTestTools.assertEquals(expectedDesiredPosition, statusMessage.getDesiredEndEffectorPosition(), epsilon);
             assertFalse(statusMessage.getActualEndEffectorPosition().containsNaN());
          }
          else
@@ -355,7 +355,7 @@ public class EndToEndTestTools
 
       if (expectedDesiredOrientation != null)
       {
-         EuclidCoreTestTools.assertQuaternionGeometricallyEquals(new Quaternion(expectedDesiredOrientation),
+         EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(new Quaternion(expectedDesiredOrientation),
                                                                  statusMessage.getDesiredEndEffectorOrientation(),
                                                                  epsilon);
          assertFalse(statusMessage.getActualEndEffectorOrientation().containsNaN());

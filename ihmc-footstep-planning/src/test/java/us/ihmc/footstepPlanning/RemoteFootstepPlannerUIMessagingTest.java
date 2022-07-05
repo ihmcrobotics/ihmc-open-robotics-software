@@ -505,7 +505,7 @@ public class RemoteFootstepPlannerUIMessagingTest
          assertEquals("Planner Ids aren't equal.", planId, receivedPlanIdReference.getAndSet(null), epsilon);
          assertEquals("Planner results aren't equal.", result, plannerResultReference.getAndSet(null));
          EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Low level goal position results aren't equal.", lowLevelGoalPosition, lowLevelPositionGoalReference.getAndSet(null), epsilon);
-         EuclidCoreTestTools.assertQuaternionGeometricallyEquals("Low level goal orientation results aren't equal.", lowLevelGoalOrientation, lowLevelOrientationGoalReference.getAndSet(null), epsilon);
+         EuclidCoreTestTools.assertOrientation3DGeometricallyEquals("Low level goal orientation results aren't equal.", lowLevelGoalOrientation, lowLevelOrientationGoalReference.getAndSet(null), epsilon);
 
          for (int i = 0; i < 100; i++)
             ThreadTools.sleep(10);

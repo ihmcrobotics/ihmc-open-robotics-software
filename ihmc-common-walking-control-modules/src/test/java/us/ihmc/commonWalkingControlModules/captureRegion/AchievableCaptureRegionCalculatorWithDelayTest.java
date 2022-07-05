@@ -1,15 +1,15 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
+import java.util.Random;
+
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
-
-import java.util.Random;
 
 public class AchievableCaptureRegionCalculatorWithDelayTest
 {
@@ -36,7 +36,7 @@ public class AchievableCaptureRegionCalculatorWithDelayTest
          FramePoint2D outputICP = new FramePoint2D();
          CapturePointTools.computeDesiredCapturePointPosition(omega, duration, duration, initialICP, initialCoP, capturingCoP, outputICP);
 
-         EuclidFrameTestTools.assertFramePoint2DGeometricallyEquals(outputICP, capturingCoP, 1e-2);
+         EuclidFrameTestTools.assertGeometricallyEquals(outputICP, capturingCoP, 1e-2);
       }
    }
 
@@ -65,7 +65,7 @@ public class AchievableCaptureRegionCalculatorWithDelayTest
          AchievableCaptureRegionCalculatorWithDelay.
                  computeCapturePointBeforeTransfer(capturingCoP, initialCoP, omega, transferDuration, desiredLandingCapturePoint);
 
-         EuclidFrameTestTools.assertFramePoint2DGeometricallyEquals(landingCapturePoint, desiredLandingCapturePoint, 1.0e-2);
+         EuclidFrameTestTools.assertGeometricallyEquals(landingCapturePoint, desiredLandingCapturePoint, 1.0e-2);
       }
    }
 

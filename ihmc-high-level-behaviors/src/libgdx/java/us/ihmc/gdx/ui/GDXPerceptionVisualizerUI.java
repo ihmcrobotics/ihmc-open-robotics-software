@@ -98,8 +98,8 @@ public class GDXPerceptionVisualizerUI
       //        simulatedDepthSensor.setRenderPointCloudDirectly(true);
       //        simulatedDepthSensor.setDebugCoordinateFrame(true);
 
-      environmentBuilder = new GDXEnvironmentBuilder(baseUI.get3DSceneManager());
-      buildingConstructor = new GDXBuildingConstructor(baseUI.get3DSceneManager());
+      environmentBuilder = new GDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
+      buildingConstructor = new GDXBuildingConstructor(baseUI.getPrimary3DPanel());
 
       baseUI.getImGuiPanelManager().addPanel(globalVisualizersUI);
       baseUI.getImGuiPanelManager().addPanel(mapsenseRegionsVisualizer.getLoggingPanel());
@@ -126,29 +126,29 @@ public class GDXPerceptionVisualizerUI
          {
             baseUI.create();
 
-            baseUI.get3DSceneManager().addRenderableProvider(globalVisualizersUI, GDXSceneLevel.VIRTUAL);
+            baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersUI, GDXSceneLevel.VIRTUAL);
 
             //                simulatedDepthSensor.create();
             //                baseUI.getSceneManager().addRenderableProvider(simulatedDepthSensor, GDXSceneLevel.VIRTUAL);
 
-            baseUI.get3DSceneManager().addRenderableProvider(ousterLidar, GDXSceneLevel.VIRTUAL);
+            baseUI.getPrimaryScene().addRenderableProvider(ousterLidar, GDXSceneLevel.VIRTUAL);
             baseUI.getImGuiPanelManager().addPanel(ousterLidar);
 
-            environmentBuilder.create(baseUI);
-            baseUI.get3DSceneManager().addRenderableProvider(environmentBuilder::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
-            baseUI.get3DSceneManager().addRenderableProvider(environmentBuilder::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+            environmentBuilder.create();
+            baseUI.getPrimaryScene().addRenderableProvider(environmentBuilder::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
+            baseUI.getPrimaryScene().addRenderableProvider(environmentBuilder::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
             environmentBuilder.loadEnvironment("DemoPullDoor.json");
 
-            buildingConstructor.create(baseUI);
-            baseUI.get3DSceneManager().addRenderableProvider(buildingConstructor::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
-            baseUI.get3DSceneManager().addRenderableProvider(buildingConstructor::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
+            buildingConstructor.create();
+            baseUI.getPrimaryScene().addRenderableProvider(buildingConstructor::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+            baseUI.getPrimaryScene().addRenderableProvider(buildingConstructor::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
 
             globalVisualizersUI.create();
             //                l515Model = new GDXL515SensorObject();
             //                environmentBuilderUI.getModelInput().addInstance(l515Model);
 
             ousterModel = new GDXOusterSensorObject();
-            baseUI.get3DSceneManager().addRenderableProvider(ousterModel::getRealRenderables);
+            baseUI.getPrimaryScene().addRenderableProvider(ousterModel::getRealRenderables);
             environmentBuilder.addObject(ousterModel);
 
             //                environmentBuilderUI.getModelInput().addInstance(ousterModel);
@@ -165,7 +165,7 @@ public class GDXPerceptionVisualizerUI
             gdxSensorTransform.set(ousterModel.getRealisticModelInstance().transform);
             GDXTools.toEuclid(gdxSensorTransform, depthSensorTransform);
 
-            ousterLidar.render(baseUI.get3DSceneManager());
+            ousterLidar.render(baseUI.getPrimaryScene());
 
             globalVisualizersUI.update();
 

@@ -820,7 +820,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       });
 
       LogTools.info("Chest error: {}", initialChestOrientation.distance(finalChestOrientation));
-      EuclidCoreTestTools.assertQuaternionGeometricallyEquals(initialChestOrientation, finalChestOrientation, 1.0e-2);
+      EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(initialChestOrientation, finalChestOrientation, 1.0e-2);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -831,7 +831,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
                        initialHandPose.getPosition().distance(finalHandPose.getPosition()),
                        initialHandPose.getOrientation().distance(finalHandPose.getOrientation()));
          EuclidCoreTestTools.assertPoint3DGeometricallyEquals(initialHandPose.getPosition(), finalHandPose.getPosition(), 1.0e-2);
-         EuclidCoreTestTools.assertQuaternionGeometricallyEquals(initialHandPose.getOrientation(), finalHandPose.getOrientation(), 5.0e-2);
+         EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(initialHandPose.getOrientation(), finalHandPose.getOrientation(), 5.0e-2);
       }
    }
 

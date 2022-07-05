@@ -47,6 +47,7 @@ import static com.badlogic.gdx.graphics.VertexAttributes.Usage.*;
 
 public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
 {
+   private final boolean ENABLE_EXPERIMENTAL_TRACKING = false;
    private final AtomicLong INDEX = new AtomicLong(0);
    private ModelInstance modelInstance = null;
    private ImGuiImplGl3 imGuiGl3;
@@ -242,45 +243,49 @@ public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
       desiredPose.changeFrame(ReferenceFrame.getWorldFrame());
       updateCurrentPose(transform ->
       {
-//         transform.getTranslation().set(desiredPose.getPosition());
-//         transform.getRotation().set(desiredPose.getOrientation());
-
-         if (currentPose.getPosition().distance(desiredPose.getPosition()) > 0.003
-          && currentPose.getOrientation().distance(desiredPose.getOrientation()) > Math.toRadians(0.5))
+         if (ENABLE_EXPERIMENTAL_TRACKING)
          {
+//            transform.getTranslation().set(desiredPose.getPosition());
+//            transform.getRotation().set(desiredPose.getOrientation());
+            if (currentPose.getPosition().distance(desiredPose.getPosition()) > 0.003 && currentPose.getOrientation().distance(desiredPose.getOrientation()) > Math.toRadians(0.5))
+            {
 
+            }
+
+            double maxLinearSpeed = 0.1;
+            double maxAngularSpeed = 1.0;
+            double delta = timerForFollowSpeed.lap();
+            double linearDistance = currentPose.getPosition().distance(desiredPose.getPosition());
+            double angularDistance = currentPose.getOrientation().distance(desiredPose.getOrientation());
+            double distanceToMove = linearDistance * maxLinearSpeed * delta;
+            double angleToMove = angularDistance * maxAngularSpeed * delta;
+            if (linearDistance > 1e-5)
+            {
+               if (linearDistance < distanceToMove)
+               {
+                  transform.getTranslation().set(desiredPose.getPosition());
+               }
+               else
+               {
+                  currentPose.getPosition().interpolate(desiredPose.getPosition(), distanceToMove / linearDistance);
+                  transform.getTranslation().set(currentPose.getPosition());
+               }
+            }
+            if (angularDistance > 1e-5)
+            {
+               if (angularDistance < angleToMove)
+               {
+                  transform.getRotation().set(desiredPose.getOrientation());
+               }
+               else
+               {
+                  currentPose.getOrientation().interpolate(desiredPose.getOrientation(), angleToMove / angularDistance);
+                  transform.getRotation().set(currentPose.getOrientation());
+               }
+            }
          }
-
-         double maxLinearSpeed = 0.1;
-         double maxAngularSpeed = 1.0;
-         double delta = timerForFollowSpeed.lap();
-         double linearDistance = currentPose.getPosition().distance(desiredPose.getPosition());
-         double angularDistance = currentPose.getOrientation().distance(desiredPose.getOrientation());
-         double distanceToMove = linearDistance * maxLinearSpeed * delta;
-         double angleToMove = angularDistance * maxAngularSpeed * delta;
-         if (linearDistance > 1e-5)
+         else
          {
-            if (linearDistance < distanceToMove)
-            {
-               transform.getTranslation().set(desiredPose.getPosition());
-            }
-            else
-            {
-               currentPose.getPosition().interpolate(desiredPose.getPosition(), distanceToMove / linearDistance);
-               transform.getTranslation().set(currentPose.getPosition());
-            }
-         }
-         if (angularDistance > 1e-5)
-         {
-            if (angularDistance < angleToMove)
-            {
-               transform.getRotation().set(desiredPose.getOrientation());
-            }
-            else
-            {
-               currentPose.getOrientation().interpolate(desiredPose.getOrientation(), angleToMove / angularDistance);
-               transform.getRotation().set(currentPose.getOrientation());
-            }
          }
       });
    }
@@ -354,6 +359,9 @@ public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
       plane.applyTransform(transform);
       GDXTools.toGDX(transform, modelInstance.transform);
       centerXThroughZUpFrame.update();
+
+      desiredPose.setToZero(centerXThroughZUpFrame);
+      desiredPose.changeFrame(vrContext.getHeadset().getXForwardZUpHeadsetFrame());
    }
 
    public Plane3D getPlane()

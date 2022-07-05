@@ -1,21 +1,20 @@
 package us.ihmc.robotics.occupancyGrid;
 
+import static us.ihmc.robotics.Assert.assertEquals;
+
+import java.util.Random;
+
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameLine2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
-import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoRegistry;
-
-import java.util.Random;
-
-import static us.ihmc.robotics.Assert.assertEquals;
 
 public class OccupancyGridToolsTest
 {
@@ -48,7 +47,7 @@ public class OccupancyGridToolsTest
       OccupancyGridTools.computeConvexHullOfOccupancyGrid(occupancyGrid, hull);
 
       assertEquals(4, occupancyGrid.getNumberOfOccupiedCells());
-      EuclidGeometryTestTools.assertConvexPolygon2DEquals(expectedHull, hull, 1e-8);
+      EuclidCoreTestTools.assertEquals(expectedHull, hull, 1e-8);
 
       double decayRate = 0.1;
       int ticksToBarelyOccupied = (int) Math.floor(Math.log(0.5) / Math.log(1.0 - decayRate));
@@ -61,7 +60,7 @@ public class OccupancyGridToolsTest
       OccupancyGridTools.computeConvexHullOfOccupancyGrid(occupancyGrid, hull);
 
       assertEquals(4, occupancyGrid.getNumberOfOccupiedCells());
-      EuclidGeometryTestTools.assertConvexPolygon2DEquals(expectedHull, hull, 1e-8);
+      EuclidCoreTestTools.assertEquals(expectedHull, hull, 1e-8);
 
       expectedHull.clear();
       expectedHull.addVertex(pointA);
@@ -74,7 +73,7 @@ public class OccupancyGridToolsTest
       OccupancyGridTools.computeConvexHullOfOccupancyGrid(occupancyGrid, hull);
 
       assertEquals(2, occupancyGrid.getNumberOfOccupiedCells());
-      EuclidGeometryTestTools.assertConvexPolygon2DEquals(expectedHull, hull, 1e-8);
+      EuclidCoreTestTools.assertEquals(expectedHull, hull, 1e-8);
 
       for (; ticks < ticksToBarelyOccupied; ticks++)
          occupancyGrid.update();
@@ -82,7 +81,7 @@ public class OccupancyGridToolsTest
       OccupancyGridTools.computeConvexHullOfOccupancyGrid(occupancyGrid, hull);
 
       assertEquals(2, occupancyGrid.getNumberOfOccupiedCells());
-      EuclidGeometryTestTools.assertConvexPolygon2DEquals(expectedHull, hull, 1e-8);
+      EuclidCoreTestTools.assertEquals(expectedHull, hull, 1e-8);
 
       occupancyGrid.update();
 
@@ -90,7 +89,7 @@ public class OccupancyGridToolsTest
       OccupancyGridTools.computeConvexHullOfOccupancyGrid(occupancyGrid, hull);
 
       assertEquals(0, occupancyGrid.getNumberOfOccupiedCells());
-      EuclidGeometryTestTools.assertConvexPolygon2DEquals(expectedHull, hull, 1e-8);
+      EuclidCoreTestTools.assertEquals(expectedHull, hull, 1e-8);
    }
 
    @Test
@@ -112,7 +111,7 @@ public class OccupancyGridToolsTest
       polygon2D.update();
       FrameConvexPolygon2D hull = new FrameConvexPolygon2D();
       OccupancyGridTools.computeConvexHullOfOccupancyGrid(occupancyGrid, hull);
-      EuclidGeometryTestTools.assertConvexPolygon2DEquals(polygon2D, hull, 1e-8);
+      EuclidCoreTestTools.assertEquals(polygon2D, hull, 1e-8);
    }
 
 

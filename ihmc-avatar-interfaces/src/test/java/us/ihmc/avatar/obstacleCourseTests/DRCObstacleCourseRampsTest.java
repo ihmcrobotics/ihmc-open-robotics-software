@@ -23,8 +23,8 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -260,7 +260,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       scsRootJoint.setPinned(false);
       assertTrue(simulationTestHelper.simulateNow(2.0));
 
-      EuclidGeometryTestTools.assertPose3DEquals(initialPose, new Pose3D(scsRootJoint.getJointPose()), 0.05);
+      EuclidCoreTestTools.assertEquals(initialPose, new Pose3D(scsRootJoint.getJointPose()), 0.05);
    }
 
    private void doUpRampTest(FootstepDataListCorruptor footstepDataListCorruptor, StepLength stepLength)

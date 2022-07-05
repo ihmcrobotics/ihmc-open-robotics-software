@@ -208,7 +208,7 @@ public class TorqueSpeedDataExporter implements ActionListener
    }
 
    // This will ignore the root directory saved by setRootDirectory()
-   public void exportEverything(String fileName, String rootDirectoryName)
+   public void exportEverything(String fileName, String rootDirectoryName, boolean exportMatlabData)
    {
       // Find the root directory
       File rootDirectory = new File(rootDirectoryName);
@@ -246,7 +246,7 @@ public class TorqueSpeedDataExporter implements ActionListener
 
       // figure out svn revsision number for project
       long revisionNumber = -1;
-
+      System.out.println("---- Export process started -----");
       System.out.println("Saving data using tag: " + tagName);
 
       // make destination directory
@@ -269,16 +269,23 @@ public class TorqueSpeedDataExporter implements ActionListener
       saveDataFile(dataAndVideosTagDirectory, tagName);
       System.out.println("Done Saving Data");
 
-      System.out.println("Saving data in Matlab format");
-      try
+      if (exportMatlabData)
       {
-         saveMatlabDataFile(dataAndVideosTagDirectory, tagName);
-         System.out.println("Done Saving Data in Matlab format");
+            System.out.println("Saving data in Matlab format");
+            try
+            {
+               saveMatlabDataFile(dataAndVideosTagDirectory, tagName);
+               System.out.println("Done Saving Data in Matlab format");
+            }
+            catch (OutOfMemoryError exception)
+            {
+               System.err.println("Ran out of memory while saving to Matlab format. Try again with fewer points.");
+               exception.printStackTrace();
+            }
       }
-      catch (OutOfMemoryError exception)
+      else
       {
-         System.err.println("Ran out of memory while saving to Matlab format. Try again with fewer points.");
-         exception.printStackTrace();
+         System.out.println("Skipping matlab save...");
       }
 
       System.out.println("creating torque and speed spreadsheet");
@@ -292,6 +299,8 @@ public class TorqueSpeedDataExporter implements ActionListener
       System.out.println("creating video");
       createVideo(dataAndVideosTagDirectory, tagName);
       System.out.println("done creating video");
+
+      System.out.println("---- Export process completed -----");
 
       scs.enableGUIComponents();
    }

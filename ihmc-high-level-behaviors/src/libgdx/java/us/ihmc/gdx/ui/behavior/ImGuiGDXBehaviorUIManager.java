@@ -123,7 +123,7 @@ public class ImGuiGDXBehaviorUIManager
       imNodeBehaviorTreeUI.create();
 
       highestLevelUI.create(baseUI);
-      baseUI.get3DSceneManager().addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+      baseUI.getPrimaryScene().addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
    }
 
    public void handleVREvents(GDXVRContext vrContext)
