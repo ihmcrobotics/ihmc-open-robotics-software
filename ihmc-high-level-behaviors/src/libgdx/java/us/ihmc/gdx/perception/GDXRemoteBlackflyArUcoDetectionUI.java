@@ -79,22 +79,7 @@ public class GDXRemoteBlackflyArUcoDetectionUI
          encodingDurationPlot.addValue(encodingDurationInput.getLatest().getData());
          copyDurationPlot.addValue(copyDurationInput.getLatest().getData());
       }
-   }
 
-   public void renderImGuiWidgets()
-   {
-      for (RobotSide side : RobotSide.values)
-      {
-         publishRatePlots.get(side).renderImGuiWidgets();
-      }
-      getImageDurationPlot.renderImGuiWidgets();
-      convertColorDurationPlot.renderImGuiWidgets();
-      encodingDurationPlot.renderImGuiWidgets();
-      copyDurationPlot.renderImGuiWidgets();
-   }
-
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
-   {
       ArUcoMarkerPoses markerPoses;
       if(arUcoPoseROS2Notification.poll())
       {
@@ -113,12 +98,30 @@ public class GDXRemoteBlackflyArUcoDetectionUI
             tempTransform.set(markerPoses.getOrientation().get(i), markerPoses.getPosition().get(i));
             markerPoseFrame.setTransformToWorldFrame(tempTransform);
          }
+      }
+   }
+
+   public void renderImGuiWidgets()
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         publishRatePlots.get(side).renderImGuiWidgets();
+      }
+      getImageDurationPlot.renderImGuiWidgets();
+      convertColorDurationPlot.renderImGuiWidgets();
+      encodingDurationPlot.renderImGuiWidgets();
+      copyDurationPlot.renderImGuiWidgets();
+   }
+
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+
 
          for (GDXModelInstance markerPoseCoordinateFrame : markerPoseCoordinateFrames.values())
          {
             markerPoseCoordinateFrame.getRenderables(renderables, pool);
          }
-      }
+
    }
 
    public void destroy()
