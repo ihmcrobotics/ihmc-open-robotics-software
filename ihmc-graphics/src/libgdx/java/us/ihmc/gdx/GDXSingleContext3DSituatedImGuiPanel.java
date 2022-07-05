@@ -27,6 +27,8 @@ import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameLine3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -47,7 +49,9 @@ import static com.badlogic.gdx.graphics.VertexAttributes.Usage.*;
 
 public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
 {
-   private final boolean ENABLE_EXPERIMENTAL_TRACKING = false;
+   private boolean ENABLE_EXPERIMENTAL_TRACKING = true;
+   private boolean SUMMONING = false;
+   private boolean show = true;
    private final AtomicLong INDEX = new AtomicLong(0);
    private ModelInstance modelInstance = null;
    private ImGuiImplGl3 imGuiGl3;
@@ -82,11 +86,17 @@ public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
    private ModelInstance centerFrameCoordinateFrame;
    private ModelInstance graphicsFrameCoordinateFrame;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+   // Menu Panel frame pose
    private final FramePose3D centerFrameCoordinateFramePose = new FramePose3D();
    private final FramePose3D graphicsFrameCoordinateFramePose = new FramePose3D();
    private final RigidBodyTransform gripOffsetTransform = new RigidBodyTransform();
    private boolean grippedLastTime = false;
    private final Stopwatch timerForFollowSpeed = new Stopwatch().start();
+
+   // jae . . . yolo . . .
+   private Pose3D offSetPose3D = new Pose3D(5, 5, 0, 0, 0, 0);
+
+
 
    public void create(int panelWidth, int panelHeight, Runnable renderImGuiWidgets, GDXVRContext vrContext)
    {
@@ -174,6 +184,8 @@ public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
 
    public void processVRInput(GDXVRContext vrContext)
    {
+      ENABLE_EXPERIMENTAL_TRACKING = !grippedLastTime;
+
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
       {
          pickRay.setToZero(controller.getXForwardZUpControllerFrame());
@@ -199,12 +211,12 @@ public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
             leftMouseDown = false;
          }
 
-         if ((grippedLastTime || controller.getXForwardZUpPose().getPosition().distance(centerFrameCoordinateFramePose.getPosition()) < 0.05)
+         if ((grippedLastTime || controller.getXForwardZUpPose().getPosition().distance(centerFrameCoordinateFramePose.getPosition()) < 0.1)
              && controller.getGripActionData().x() > 0.9)
          {
             if (!grippedLastTime) // set up offset
             {
-               centerFrameCoordinateFramePose.changeFrame(controller.getXForwardZUpControllerFrame());
+               centerFrameCoordinateFramePose.setToZero(controller.getXForwardZUpControllerFrame());
                centerFrameCoordinateFramePose.get(gripOffsetTransform);
                centerFrameCoordinateFramePose.changeFrame(ReferenceFrame.getWorldFrame());
             }
@@ -222,7 +234,6 @@ public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
             grippedLastTime = false;
          }
 
-
          if (controller.getAButtonActionData().bChanged() && !controller.getAButtonActionData().bState())
          {
             updateDesiredPose(transform ->
@@ -233,6 +244,12 @@ public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
                desiredPose.get(transform);
             });
          }
+
+         if (controller.getJoystickPressActionData().bChanged() && controller.getJoystickPressActionData().bState())
+         {
+            SUMMONING = true;
+         }
+
       });
 
       // current moves towards the desired
@@ -243,16 +260,25 @@ public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
       desiredPose.changeFrame(ReferenceFrame.getWorldFrame());
       updateCurrentPose(transform ->
       {
-         if (ENABLE_EXPERIMENTAL_TRACKING)
+         if (SUMMONING)
          {
-//            transform.getTranslation().set(desiredPose.getPosition());
-//            transform.getRotation().set(desiredPose.getOrientation());
+            desiredPose.setToZero(vrContext.getController(RobotSide.RIGHT).getXForwardZUpControllerFrame());
+            desiredPose.getPosition().set(0.1, 0.0, 0.3);
+            desiredPose.getOrientation().appendPitchRotation(-30 * Math.PI / 180);
+            desiredPose.changeFrame(ReferenceFrame.getWorldFrame());
+            desiredPose.get(transform);
+            transform.getTranslation().set(desiredPose.getPosition());
+            transform.getRotation().set(desiredPose.getOrientation());
+            SUMMONING = false;
+         }
+         else if (ENABLE_EXPERIMENTAL_TRACKING)
+         {
             if (currentPose.getPosition().distance(desiredPose.getPosition()) > 0.003 && currentPose.getOrientation().distance(desiredPose.getOrientation()) > Math.toRadians(0.5))
             {
 
             }
 
-            double maxLinearSpeed = 0.1;
+            double maxLinearSpeed = 0.5;
             double maxAngularSpeed = 1.0;
             double delta = timerForFollowSpeed.lap();
             double linearDistance = currentPose.getPosition().distance(desiredPose.getPosition());
@@ -286,50 +312,59 @@ public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
          }
          else
          {
+            Pose3DReadOnly controllerPose =  vrContext.getController(RobotSide.RIGHT).getXForwardZUpPose();
+            transform.getTranslation().set(controllerPose.getPosition());
+            transform.getRotation().set(controllerPose.getOrientation());
          }
       });
    }
 
    public void render()
    {
-      ImGuiIO io = ImGui.getIO();
-      io.setDisplaySize(panelWidth, panelHeight);
-      io.setDisplayFramebufferScale(1.0f, 1.0f);
-      io.setMousePos(mousePosX, mousePosY);
-      io.setMouseDown(ImGuiMouseButton.Left, leftMouseDown);
+      if(show)
+      {
+         ImGuiIO io = ImGui.getIO();
+         io.setDisplaySize(panelWidth, panelHeight);
+         io.setDisplayFramebufferScale(1.0f, 1.0f);
+         io.setMousePos(mousePosX, mousePosY);
+         io.setMouseDown(ImGuiMouseButton.Left, leftMouseDown);
 
-      ImGuiPlatformIO platformIO = ImGui.getPlatformIO();
-      platformIO.resizeMonitors(0);
-      platformIO.pushMonitors(0.0f, 0.0f, panelWidth, panelHeight, 0.0f, 0.0f, panelWidth, panelHeight, 1.0f);
+         ImGuiPlatformIO platformIO = ImGui.getPlatformIO();
+         platformIO.resizeMonitors(0);
+         platformIO.pushMonitors(0.0f, 0.0f, panelWidth, panelHeight, 0.0f, 0.0f, panelWidth, panelHeight, 1.0f);
 
-      float deltaTime = Gdx.app.getGraphics().getDeltaTime();
-      io.setDeltaTime(deltaTime > 0.0f ? deltaTime : 1.0f / 60.0f);
+         float deltaTime = Gdx.app.getGraphics().getDeltaTime();
+         io.setDeltaTime(deltaTime > 0.0f ? deltaTime : 1.0f / 60.0f);
 
-      ImGui.newFrame();
-      ImGui.pushFont(font);
+         ImGui.newFrame();
+         ImGui.pushFont(font);
 
-      ImGui.setNextWindowPos(0.0f, 0.0f);
-      ImGui.setNextWindowSize(panelWidth, panelHeight);
-      ImGui.begin("Main Panel");
-      renderImGuiWidgets.run();
-      ImGui.end();
+         ImGui.setNextWindowPos(0.0f, 0.0f);
+         ImGui.setNextWindowSize(panelWidth, panelHeight);
+         ImGui.begin("Main Panel");
+         renderImGuiWidgets.run();
+         ImGui.end();
 
-      ImGui.popFont();
-      ImGui.render();
+         ImGui.popFont();
+         ImGui.render();
+         // yoloing . . .
+         //      ImGui.updatePlatformWindows();
 
-      frameBuffer.begin();
-      ImGuiTools.glClearDarkGray();
-      imGuiGl3.renderDrawData(ImGui.getDrawData());
-      frameBuffer.end();
+         frameBuffer.begin();
+         ImGuiTools.glClearDarkGray();
+         imGuiGl3.renderDrawData(ImGui.getDrawData());
+         frameBuffer.end();
 
-      centerFrameCoordinateFramePose.setToZero(centerXThroughZUpFrame);
-      centerFrameCoordinateFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-      centerFrameCoordinateFramePose.get(tempTransform);
-      GDXTools.toGDX(tempTransform, centerFrameCoordinateFrame.transform);
-      graphicsFrameCoordinateFramePose.setToZero(graphicsXRightYDownFrame);
-      graphicsFrameCoordinateFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-      graphicsFrameCoordinateFramePose.get(tempTransform);
-      GDXTools.toGDX(tempTransform, graphicsFrameCoordinateFrame.transform);
+         centerFrameCoordinateFramePose.setToZero(centerXThroughZUpFrame);
+         centerFrameCoordinateFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+         centerFrameCoordinateFramePose.get(tempTransform);
+         GDXTools.toGDX(tempTransform, centerFrameCoordinateFrame.transform);
+         graphicsFrameCoordinateFramePose.setToZero(graphicsXRightYDownFrame);
+         graphicsFrameCoordinateFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+         graphicsFrameCoordinateFramePose.get(tempTransform);
+         GDXTools.toGDX(tempTransform, graphicsFrameCoordinateFrame.transform);
+      }
+
    }
 
    @Override

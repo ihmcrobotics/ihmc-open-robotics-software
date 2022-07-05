@@ -618,6 +618,8 @@ public class GDXTools
    {
       String combinedString = Gdx.files.classpath(pathForLoadingFromClasspath).readString();
 
+      combinedString = combinedString.replaceAll("\\r\\n", "\n");
+
       String vertexMacro = "#type vertex\n";
       int vertexBegin = combinedString.indexOf(vertexMacro);
       String fragmentMacro = "#type fragment\n";
