@@ -1,18 +1,24 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
+import static us.ihmc.robotics.Assert.assertTrue;
+
+import java.awt.Color;
+import java.util.ArrayList;
+
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentReachabilityConstraint;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -24,7 +30,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
-import us.ihmc.robotics.geometry.FrameGeometry2dPlotter;
 import us.ihmc.robotics.geometry.FrameGeometryTestFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -41,12 +46,6 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
-
-import javax.swing.*;
-import java.awt.*;
-import java.util.ArrayList;
-
-import static us.ihmc.robotics.Assert.*;
 
 public class MultiStepCaptureRegionCalculatorTest
 {
@@ -397,7 +396,7 @@ public class MultiStepCaptureRegionCalculatorTest
       multiStepRegionCalculator.compute(stanceSide, captureRegion, swingDuration, omega0, 1);
       FrameConvexPolygon2DReadOnly oneStepRegion = new FrameConvexPolygon2D(multiStepRegionCalculator.getCaptureRegion());
 
-      EuclidGeometryTestTools.assertConvexPolygon2DEquals(captureRegion, oneStepRegion, 1e-5);
+      EuclidCoreTestTools.assertEquals(captureRegion, oneStepRegion, 1e-5);
 
       // check that the polygons increase in size as you increase the steps
       for (int i = 2; i < 6; i++)

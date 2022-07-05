@@ -206,7 +206,7 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
          averageQuaternionCalculator.compute();
          Quaternion actualAverageQuat = new Quaternion();
          averageQuaternionCalculator.getAverageQuaternion(actualAverageQuat);
-         aveagedPose.setOrientation(actualAverageQuat);
+         aveagedPose.getOrientation().set(actualAverageQuat);
          return aveagedPose;
       }
       else

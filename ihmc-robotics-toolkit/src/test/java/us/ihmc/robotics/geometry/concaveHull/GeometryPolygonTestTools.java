@@ -1,15 +1,12 @@
 package us.ihmc.robotics.geometry.concaveHull;
 
-import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
-import us.ihmc.euclid.tools.EuclidCoreTestTools;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DReadOnly;
+import static us.ihmc.euclid.tools.EuclidCoreIOTools.getTuple2DString;
 
 import java.util.List;
 
-import static us.ihmc.euclid.geometry.tools.EuclidGeometryIOTools.getConvexPolygon2DString;
-import static us.ihmc.euclid.tools.EuclidCoreIOTools.getTuple2DString;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DReadOnly;
 
 public class GeometryPolygonTestTools
 {

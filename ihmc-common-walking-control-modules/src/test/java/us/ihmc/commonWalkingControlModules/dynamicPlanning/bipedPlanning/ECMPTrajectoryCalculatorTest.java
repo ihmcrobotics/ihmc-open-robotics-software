@@ -159,8 +159,8 @@ public class ECMPTrajectoryCalculatorTest
          endCMPExpected.addY(-1.0 / gravityZ * endAMRate.get(i).getX());
 
          String errorMessage = "segment " + i + " failed.";
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(errorMessage, startCMPExpected, cmpTrajectories.get(i).getECMPStartPosition(), epsilon);
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(errorMessage, endCMPExpected, cmpTrajectories.get(i).getECMPEndPosition(), epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(errorMessage, startCMPExpected, cmpTrajectories.get(i).getECMPStartPosition(), epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(errorMessage, endCMPExpected, cmpTrajectories.get(i).getECMPEndPosition(), epsilon);
 
 
          FrameVector3D startCMPRateExpected = new FrameVector3D();
@@ -179,16 +179,16 @@ public class ECMPTrajectoryCalculatorTest
          endCMPRateExpected.addX(1.0 / gravityZ * amSegment.get(i).getAcceleration().getY());
          endCMPRateExpected.addY(-1.0 / gravityZ * amSegment.get(i).getAcceleration().getX());
 
-         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(errorMessage, startCMPRateExpected, cmpTrajectories.get(i).getECMPStartVelocity(), epsilon);
-         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(errorMessage, endCMPRateExpected, cmpTrajectories.get(i).getECMPEndVelocity(), epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(errorMessage, startCMPRateExpected, cmpTrajectories.get(i).getECMPStartVelocity(), epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(errorMessage, endCMPRateExpected, cmpTrajectories.get(i).getECMPEndVelocity(), epsilon);
       }
 
       int lastIdx = copTrajectories.size() - 1;
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(copTrajectories.get(lastIdx).getECMPStartPosition(), cmpTrajectories.get(lastIdx).getECMPStartPosition(), epsilon);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(copTrajectories.get(lastIdx).getECMPEndPosition(), cmpTrajectories.get(lastIdx).getECMPEndPosition(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(copTrajectories.get(lastIdx).getECMPStartPosition(), cmpTrajectories.get(lastIdx).getECMPStartPosition(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(copTrajectories.get(lastIdx).getECMPEndPosition(), cmpTrajectories.get(lastIdx).getECMPEndPosition(), epsilon);
 
-      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(copTrajectories.get(lastIdx).getECMPStartVelocity(), cmpTrajectories.get(lastIdx).getECMPStartVelocity(), epsilon);
-      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(copTrajectories.get(lastIdx).getECMPEndVelocity(), cmpTrajectories.get(lastIdx).getECMPEndVelocity(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(copTrajectories.get(lastIdx).getECMPStartVelocity(), cmpTrajectories.get(lastIdx).getECMPStartVelocity(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(copTrajectories.get(lastIdx).getECMPEndVelocity(), cmpTrajectories.get(lastIdx).getECMPEndVelocity(), epsilon);
 
       for (int i = 0; i < copTrajectories.size() - 1; i++)
       {
@@ -223,9 +223,9 @@ public class ECMPTrajectoryCalculatorTest
 
 
             String errorMessage = "failed at time " + time + " of segment " + i;
-            EuclidFrameTestTools.assertFrameVector2DGeometricallyEquals(errorMessage, ecmpOffsetExpected, desiredECMPOffset, epsilon);
-            EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(errorMessage, amSegment.get(i).getPosition(), desiredAngularMomentumTrajectories.getPosition(), epsilon);
-            EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(errorMessage, amSegment.get(i).getVelocity(), desiredAngularMomentumTrajectories.getVelocity(), 1e-3);
+            EuclidFrameTestTools.assertGeometricallyEquals(errorMessage, ecmpOffsetExpected, desiredECMPOffset, epsilon);
+            EuclidFrameTestTools.assertGeometricallyEquals(errorMessage, amSegment.get(i).getPosition(), desiredAngularMomentumTrajectories.getPosition(), epsilon);
+            EuclidFrameTestTools.assertGeometricallyEquals(errorMessage, amSegment.get(i).getVelocity(), desiredAngularMomentumTrajectories.getVelocity(), 1e-3);
 
             copTrajectory.compute(time);
             ecmpTrajectory.compute(time);
@@ -234,7 +234,7 @@ public class ECMPTrajectoryCalculatorTest
             desiredCoP.subX(desiredECMPOffset.getX());
             desiredCoP.subY(desiredECMPOffset.getY());
 
-            EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(errorMessage, copTrajectory.getPosition(), desiredCoP, epsilon);
+            EuclidFrameTestTools.assertGeometricallyEquals(errorMessage, copTrajectory.getPosition(), desiredCoP, epsilon);
          }
       }
 

@@ -539,6 +539,24 @@ public interface PolynomialBasics extends PolynomialReadOnly
       initialize();
    }
 
+   default void setCubicDirectly(double duration, double z0, double zd0, double zFinal, double zdFinal)
+   {
+      reset();
+
+      getTimeInterval().setIntervalUnsafe(0.0, duration);
+      reshape(4);
+
+      double d2 = duration * duration;
+      double d3 = duration * d2;
+      double c3 = 2.0 / d3 * (z0 - zFinal) + 1.0 / d2 * (zd0 + zdFinal);
+      double c2 = 1.0 / (2.0 * duration) * (zdFinal - zd0) - 1.5 * duration * c3;
+      setCoefficient(0, z0);
+      setCoefficient(1, zd0);
+      setCoefficient(2, c2);
+      setCoefficient(3, c3);
+      setIsConstraintMatrixUpToDate(false);
+   }
+
    default void setCubicWithIntermediatePositionAndInitialVelocityConstraint(double t0,
                                                                              double tIntermediate,
                                                                              double tFinal,
