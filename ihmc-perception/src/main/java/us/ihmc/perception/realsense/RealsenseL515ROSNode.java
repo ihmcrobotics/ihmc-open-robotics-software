@@ -118,7 +118,7 @@ public class RealsenseL515ROSNode
             {
                videoPacket.getData().add(dataPointer.get(i));
             }
-            ros2Helper.publish(ROS2Tools.L515_DEPTH, videoPacket);
+            ros2Helper.publish(ROS2Tools.IHMC_ROOT.withModule("l515").withType(VideoPacket.class).withSuffix("depth"), videoPacket);
 
             if (publishROS1 && ros1DepthPublisher.isConnected() && ros1DepthCameraInfoPublisher.isConnected())
             {
