@@ -140,7 +140,7 @@ public class ValkyrieWholeBodyPositionControlSimulation
       simulationStarter.getAvatarSimulation().getHighLevelHumanoidControllerFactory().getRequestedControlStateEnum().set(null);
       simulationStarter.getAvatarSimulation().getSimulationConstructionSet().setFastSimulate(true, 10);
 
-      KinematicsToolboxModule kinematicsToolboxModule = new KinematicsToolboxModule(robotModel, false, 10, false, PubSubImplementation.FAST_RTPS);
-      simulationStarter.getAvatarSimulation().getSimulationConstructionSet().addYoRegistry(kinematicsToolboxModule.getRegistry());
+//      KinematicsToolboxModule kinematicsToolboxModule = new KinematicsToolboxModule(robotModel, false, 10, false, PubSubImplementation.FAST_RTPS);
+//      simulationStarter.getAvatarSimulation().getSimulationConstructionSet().addYoRegistry(kinematicsToolboxModule.getRegistry());
    }
 }
