@@ -22,13 +22,13 @@ mainDependencies {
 
    api("us.ihmc:ihmc-realtime:1.5.0")
    api("us.ihmc:ihmc-native-library-loader:1.3.1")
-   api("us.ihmc:euclid:0.17.2")
-   api("us.ihmc:euclid-geometry:0.17.2")
+   api("us.ihmc:euclid:0.18.1")
+   api("us.ihmc:euclid-geometry:0.18.1")
    api("us.ihmc:ihmc-robot-models:source")
    api("us.ihmc:ihmc-sensor-processing:source")
    api("us.ihmc:ihmc-trajectory-optimization:source")
    api("us.ihmc:ihmc-communication:source")
-   api("us.ihmc:ihmc-convex-optimization:0.17.12")
+   api("us.ihmc:ihmc-convex-optimization:0.17.13")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
@@ -40,10 +40,10 @@ testDependencies {
    api("us.ihmc:simulation-construction-set-tools-test:source")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
-   api("us.ihmc:ihmc-convex-optimization-test:0.17.12")
+   api("us.ihmc:ihmc-convex-optimization-test:0.17.13")
 }
 
 visualizersDependencies {
    api(ihmc.sourceSetProject("main"))
-   api("us.ihmc:simulation-construction-set:0.22.3")
+   api("us.ihmc:simulation-construction-set:0.22.4")
 }

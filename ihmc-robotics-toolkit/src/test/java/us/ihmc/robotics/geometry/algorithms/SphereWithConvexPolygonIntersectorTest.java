@@ -50,7 +50,7 @@ public class SphereWithConvexPolygonIntersectorTest
       vertices.add(new Point2D(10.0, -10.0));
       polygon = new FrameConvexPolygon2D(WORLD, Vertex2DSupplier.asVertex2DSupplier(vertices));
       assertTrue(sphereWithConvexPolygonIntersector.checkIfIntersectionExists(sphere, polygon));
-      EuclidCoreTestTools.assertTuple3DEquals("intersection not right", new Point3D(5.0, 3.0, 0.0),
+      EuclidCoreTestTools.assertEquals("intersection not right", new Point3D(5.0, 3.0, 0.0),
                                      sphereWithConvexPolygonIntersector.getClosestPointOnPolygon(), Epsilons.ONE_TRILLIONTH);
 
       sphere = new FrameSphere3D(WORLD, 5.0, 3.0, 1.0, 0.5);
@@ -61,7 +61,7 @@ public class SphereWithConvexPolygonIntersectorTest
       vertices.add(new Point2D(10.0, -10.0));
       polygon = new FrameConvexPolygon2D(WORLD, Vertex2DSupplier.asVertex2DSupplier(vertices));
       assertFalse(sphereWithConvexPolygonIntersector.checkIfIntersectionExists(sphere, polygon));
-      EuclidCoreTestTools.assertTuple3DEquals("intersection not right", new Point3D(5.0, 3.0, 0.0),
+      EuclidCoreTestTools.assertEquals("intersection not right", new Point3D(5.0, 3.0, 0.0),
                                      sphereWithConvexPolygonIntersector.getClosestPointOnPolygon(), Epsilons.ONE_TRILLIONTH);
       
       sphere = new FrameSphere3D(WORLD, 5.0, 3.0, 1.0, 0.5);
@@ -72,7 +72,7 @@ public class SphereWithConvexPolygonIntersectorTest
       vertices.add(new Point2D(1.0, -1.0));
       polygon = new FrameConvexPolygon2D(WORLD, Vertex2DSupplier.asVertex2DSupplier(vertices));
       assertFalse(sphereWithConvexPolygonIntersector.checkIfIntersectionExists(sphere, polygon));
-      EuclidCoreTestTools.assertTuple3DEquals("intersection not right", new Point3D(1.0, 1.0, 0.0),
+      EuclidCoreTestTools.assertEquals("intersection not right", new Point3D(1.0, 1.0, 0.0),
                                      sphereWithConvexPolygonIntersector.getClosestPointOnPolygon(), Epsilons.ONE_TRILLIONTH);
       
       frame = new PoseReferenceFrame("testFrame1", WORLD);
@@ -86,10 +86,10 @@ public class SphereWithConvexPolygonIntersectorTest
       polygon = new FrameConvexPolygon2D(frame, Vertex2DSupplier.asVertex2DSupplier(vertices));
       assertFalse(sphereWithConvexPolygonIntersector.checkIfIntersectionExists(sphere, polygon));
       closestPointOnPolygon = sphereWithConvexPolygonIntersector.getClosestPointOnPolygon();
-      EuclidCoreTestTools.assertTuple3DEquals("intersection not right", new Point3D(5.0, 3.0, 0.0),
+      EuclidCoreTestTools.assertEquals("intersection not right", new Point3D(5.0, 3.0, 0.0),
                                      closestPointOnPolygon, Epsilons.ONE_TRILLIONTH);
       closestPointOnPolygon.changeFrame(frame);
-      EuclidCoreTestTools.assertTuple3DEquals("intersection not right", new Point3D(0.0, 0.0, 0.0),
+      EuclidCoreTestTools.assertEquals("intersection not right", new Point3D(0.0, 0.0, 0.0),
                                      closestPointOnPolygon, Epsilons.ONE_TRILLIONTH);
       
       frame = new PoseReferenceFrame("testFrame2", WORLD);
@@ -103,10 +103,10 @@ public class SphereWithConvexPolygonIntersectorTest
       polygon = new FrameConvexPolygon2D(frame, Vertex2DSupplier.asVertex2DSupplier(vertices));
       assertTrue(sphereWithConvexPolygonIntersector.checkIfIntersectionExists(sphere, polygon));
       closestPointOnPolygon = sphereWithConvexPolygonIntersector.getClosestPointOnPolygon();
-      EuclidCoreTestTools.assertTuple3DEquals("intersection not right", new Point3D(5.0, 3.0, 0.0),
+      EuclidCoreTestTools.assertEquals("intersection not right", new Point3D(5.0, 3.0, 0.0),
                                      closestPointOnPolygon, Epsilons.ONE_TRILLIONTH);
       closestPointOnPolygon.changeFrame(frame);
-      EuclidCoreTestTools.assertTuple3DEquals("intersection not right", new Point3D(0.0, 0.0, 0.0),
+      EuclidCoreTestTools.assertEquals("intersection not right", new Point3D(0.0, 0.0, 0.0),
                                      closestPointOnPolygon, Epsilons.ONE_TRILLIONTH);
       
       frame = new PoseReferenceFrame("testFrame3", WORLD);
@@ -120,10 +120,10 @@ public class SphereWithConvexPolygonIntersectorTest
       polygon = new FrameConvexPolygon2D(frame, Vertex2DSupplier.asVertex2DSupplier(vertices));
       assertTrue(sphereWithConvexPolygonIntersector.checkIfIntersectionExists(sphere, polygon));
       closestPointOnPolygon = sphereWithConvexPolygonIntersector.getClosestPointOnPolygon();
-      EuclidCoreTestTools.assertTuple3DEquals("intersection not right", new Point3D(5.0, 3.0, 0.0),
+      EuclidCoreTestTools.assertEquals("intersection not right", new Point3D(5.0, 3.0, 0.0),
                                      closestPointOnPolygon, Epsilons.ONE_TRILLIONTH);
       closestPointOnPolygon.changeFrame(frame);
-      EuclidCoreTestTools.assertTuple3DEquals("intersection not right", new Point3D(1.0, 1.0, 0.0),
+      EuclidCoreTestTools.assertEquals("intersection not right", new Point3D(1.0, 1.0, 0.0),
                                      closestPointOnPolygon, Epsilons.ONE_TRILLIONTH);
       
       frame = new PoseReferenceFrame("testFrame4", WORLD);
@@ -139,10 +139,10 @@ public class SphereWithConvexPolygonIntersectorTest
       polygon = new FrameConvexPolygon2D(frame2, Vertex2DSupplier.asVertex2DSupplier(vertices));
       assertTrue(sphereWithConvexPolygonIntersector.checkIfIntersectionExists(sphere, polygon));
       closestPointOnPolygon = sphereWithConvexPolygonIntersector.getClosestPointOnPolygon();
-      EuclidCoreTestTools.assertTuple3DEquals("intersection not right", new Point3D(9.0, 5.0, 0.0),
+      EuclidCoreTestTools.assertEquals("intersection not right", new Point3D(9.0, 5.0, 0.0),
                                      closestPointOnPolygon, Epsilons.ONE_TRILLIONTH);
       closestPointOnPolygon.changeFrame(frame2);
-      EuclidCoreTestTools.assertTuple3DEquals("intersection not right", new Point3D(-0.5, -0.5, 0.0),
+      EuclidCoreTestTools.assertEquals("intersection not right", new Point3D(-0.5, -0.5, 0.0),
                                      closestPointOnPolygon, Epsilons.ONE_TRILLIONTH);
    }
 }
