@@ -30,33 +30,33 @@ public class GDXGizmoDemo
          public void create()
          {
             baseUI.create();
-            focusBasedCamera = baseUI.get3DSceneManager().getCamera3D();
+            focusBasedCamera = baseUI.getPrimary3DPanel().getCamera3D();
 
-            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelBuilder.createCoordinateFrame(0.3)));
+            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(GDXModelBuilder.createCoordinateFrame(0.3)));
 
             clockHandTip = new ModelInstance(GDXModelBuilder.createSphere(0.1f, Color.RED));
-            baseUI.get3DSceneManager().addModelInstance(clockHandTip);
+            baseUI.getPrimaryScene().addModelInstance(clockHandTip);
             clockCenter = new ModelInstance(GDXModelBuilder.createSphere(0.1f, Color.BLUE));
-            baseUI.get3DSceneManager().addModelInstance(clockCenter);
+            baseUI.getPrimaryScene().addModelInstance(clockCenter);
 
             poseGizmo.create(focusBasedCamera);
-            baseUI.addImGui3DViewPickCalculator(poseGizmo::calculate3DViewPick);
-            baseUI.addImGui3DViewInputProcessor(poseGizmo::process3DViewInput);
-            baseUI.get3DSceneManager().addRenderableProvider(poseGizmo);
+            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(poseGizmo::calculate3DViewPick);
+            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(poseGizmo::process3DViewInput);
+            baseUI.getPrimaryScene().addRenderableProvider(poseGizmo);
             baseUI.getImGuiPanelManager().addPanel(poseGizmo.createTunerPanel(GDXGizmoDemo.class.getSimpleName()));
 
             poseGizmo.getTransformToParent().getTranslation().set(-1.0, -2.0, 0.1);
 
             footstepRingGizmo.create(focusBasedCamera);
-            baseUI.addImGui3DViewPickCalculator(footstepRingGizmo::calculate3DViewPick);
-            baseUI.addImGui3DViewInputProcessor(footstepRingGizmo::process3DViewInput);
-            baseUI.get3DSceneManager().addRenderableProvider(footstepRingGizmo);
+            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(footstepRingGizmo::calculate3DViewPick);
+            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(footstepRingGizmo::process3DViewInput);
+            baseUI.getPrimaryScene().addRenderableProvider(footstepRingGizmo);
             baseUI.getImGuiPanelManager().addPanel(footstepRingGizmo.createTunerPanel(GDXGizmoDemo.class.getSimpleName()));
 
             footstepRingGizmo.getTransformToParent().getTranslation().set(2.0, 1.0, 0.0);
 
             keyboardTransformationFrameGraphic = new GDXReferenceFrameGraphic(0.3, Color.SKY);
-            baseUI.get3DSceneManager().addRenderableProvider(keyboardTransformationFrameGraphic);
+            baseUI.getPrimaryScene().addRenderableProvider(keyboardTransformationFrameGraphic);
          }
 
          @Override

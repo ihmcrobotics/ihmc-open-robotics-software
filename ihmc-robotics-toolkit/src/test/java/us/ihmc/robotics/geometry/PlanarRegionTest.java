@@ -392,10 +392,10 @@ public class PlanarRegionTest
 
       Vector3D actualNormal = new Vector3D();
       planarRegion.getNormal(actualNormal);
-      EuclidCoreTestTools.assertTuple3DEquals("Wrong region normal.", new Vector3D(0.0, 0.0, 1.0), actualNormal, 1.0e-10);
+      EuclidCoreTestTools.assertEquals("Wrong region normal.", new Vector3D(0.0, 0.0, 1.0), actualNormal, 1.0e-10);
       Point3D actualOrigin = new Point3D();
       planarRegion.getPointInRegion(actualOrigin);
-      EuclidCoreTestTools.assertTuple3DEquals("Wrong region origin.", new Point3D(), actualOrigin, 1.0e-10);
+      EuclidCoreTestTools.assertEquals("Wrong region origin.", new Point3D(), actualOrigin, 1.0e-10);
       RigidBodyTransform actualTransform = new RigidBodyTransform();
       planarRegion.getTransformToWorld(actualTransform);
       assertTrue(regionTransform.epsilonEquals(actualTransform, 1.0e-10), "Wrong region transform to world.");
@@ -496,10 +496,10 @@ public class PlanarRegionTest
       assertEquals(2, intersectionsInPlaneFrame.size());
       Point2DBasics[] points = intersectionsInPlaneFrame.get(0);
       assertEquals(1, points.length);
-      EuclidCoreTestTools.assertTuple2DEquals(new Point2D(0.0, 1.0), points[0], 1e-7);
+      EuclidCoreTestTools.assertEquals(new Point2D(0.0, 1.0), points[0], 1e-7);
       points = intersectionsInPlaneFrame.get(1);
       assertEquals(1, points.length);
-      EuclidCoreTestTools.assertTuple2DEquals(new Point2D(0.0, 1.0), points[0], 1e-7);
+      EuclidCoreTestTools.assertEquals(new Point2D(0.0, 1.0), points[0], 1e-7);
 
       lineSegment = new LineSegment2D(2.5, 0.5, 3.0, 9.0);
       assertTrue(planarRegion.isLineSegmentIntersecting(lineSegment));
@@ -513,8 +513,8 @@ public class PlanarRegionTest
       assertEquals(1, intersectionsInPlaneFrame.size());
       points = intersectionsInPlaneFrame.get(0);
       assertEquals(2, points.length);
-      EuclidCoreTestTools.assertTuple2DEquals(new Point2D(2.0, 1.0), points[0], 1e-7);
-      EuclidCoreTestTools.assertTuple2DEquals(new Point2D(2.0, -1.0), points[1], 1e-7);
+      EuclidCoreTestTools.assertEquals(new Point2D(2.0, 1.0), points[0], 1e-7);
+      EuclidCoreTestTools.assertEquals(new Point2D(2.0, -1.0), points[1], 1e-7);
 
       ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
       convexPolygon.addVertex(0.2, 0.2);
@@ -636,12 +636,12 @@ public class PlanarRegionTest
          regionTransform.transform(expectedNormal);
          Vector3D actualNormal = new Vector3D();
          planarRegion.getNormal(actualNormal);
-         EuclidCoreTestTools.assertTuple3DEquals("Wrong region normal.", expectedNormal, actualNormal, 1.0e-10);
+         EuclidCoreTestTools.assertEquals("Wrong region normal.", expectedNormal, actualNormal, 1.0e-10);
          Point3D expectedOrigin = new Point3D();
          regionTransform.transform(expectedOrigin);
          Point3D actualOrigin = new Point3D();
          planarRegion.getPointInRegion(actualOrigin);
-         EuclidCoreTestTools.assertTuple3DEquals("Wrong region origin.", expectedOrigin, actualOrigin, 1.0e-10);
+         EuclidCoreTestTools.assertEquals("Wrong region origin.", expectedOrigin, actualOrigin, 1.0e-10);
          RigidBodyTransform actualTransform = new RigidBodyTransform();
          planarRegion.getTransformToWorld(actualTransform);
          assertTrue(regionTransform.epsilonEquals(actualTransform, 1.0e-10), "Wrong region transform to world.");

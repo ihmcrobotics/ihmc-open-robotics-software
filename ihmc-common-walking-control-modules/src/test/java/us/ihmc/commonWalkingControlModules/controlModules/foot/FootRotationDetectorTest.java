@@ -4,7 +4,6 @@ import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
 import us.ihmc.euclid.referenceFrame.FrameLine2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -13,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.spatial.Twist;
@@ -53,7 +53,7 @@ public class FootRotationDetectorTest
 
          FrameLine2DReadOnly lineEstimate = footRotationDetector.getLineOfRotation();
          FrameLine2D expectedLine = new FrameLine2D(soleFrame, new FramePoint2D(point), new FrameVector2D(omega));
-         EuclidGeometryTestTools.assertLine2DGeometricallyEquals(expectedLine, lineEstimate, 1.0e-5);
+         EuclidCoreTestTools.assertGeometricallyEquals(expectedLine, lineEstimate, 1.0e-5);
       }
 
       // Test for non-planar measurement:
@@ -74,7 +74,7 @@ public class FootRotationDetectorTest
 
          FrameLine2DReadOnly lineEstimate = footRotationDetector.getLineOfRotation();
          FrameLine2D expectedLine = new FrameLine2D(soleFrame, new FramePoint2D(point), new FrameVector2D(omega));
-         EuclidGeometryTestTools.assertLine2DGeometricallyEquals(expectedLine, lineEstimate, 1.0e-5);
+         EuclidCoreTestTools.assertGeometricallyEquals(expectedLine, lineEstimate, 1.0e-5);
       }
    }
 

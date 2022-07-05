@@ -29,9 +29,9 @@ public class GDXVROnlyPointCloudWithImGuiPanelDemo
          @Override
          public void create()
          {
-            vrApplication.getSceneBasics().addDefaultLighting();
-            vrApplication.getSceneBasics().addCoordinateFrame(1.0);
-            vrApplication.getSceneBasics().addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+            vrApplication.getScene().addDefaultLighting();
+            vrApplication.getScene().addCoordinateFrame(1.0);
+            vrApplication.getScene().addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
             vrApplication.getVRContext().addVRInputProcessor(this::processVRInput);
 
             ros2Node = ROS2Tools.createROS2Node(FAST_RTPS, "vr_viewer");
@@ -46,7 +46,7 @@ public class GDXVROnlyPointCloudWithImGuiPanelDemo
                transform.getTranslation().set(1.0f, 0.0f, 1.0f);
             });
             vrApplication.getVRContext().addVRInputProcessor(imGuiPanel::processVRInput);
-            vrApplication.getSceneBasics().addRenderableProvider(imGuiPanel);
+            vrApplication.getScene().addRenderableProvider(imGuiPanel);
          }
 
          private void processVRInput(GDXVRContext vrContext)

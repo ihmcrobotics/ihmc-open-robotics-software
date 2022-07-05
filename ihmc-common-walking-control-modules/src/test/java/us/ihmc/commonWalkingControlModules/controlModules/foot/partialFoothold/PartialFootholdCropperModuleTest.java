@@ -1,17 +1,33 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
-import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FrameLine2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -19,16 +35,9 @@ import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
-import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoInteger;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
-import static us.ihmc.robotics.Assert.*;
 
 public class PartialFootholdCropperModuleTest
 {
@@ -155,9 +164,9 @@ public class PartialFootholdCropperModuleTest
       expectedLine.getPoint().set(pointOfRotation);
       convexPolygonTools.cutPolygonWithLine(expectedLine, croppedFootPolygon, RobotSide.RIGHT);
 
-      EuclidGeometryTestTools.assertLine2DGeometricallyEquals(expectedLine, lineEstimate, 1.0e-5);
+      EuclidCoreTestTools.assertGeometricallyEquals(expectedLine, lineEstimate, 1.0e-5);
       assertTrue(partialFootholdModule.shouldApplyShrunkenFoothold());
-      EuclidGeometryTestTools.assertConvexPolygon2DEquals(croppedFootPolygon, partialFootholdModule.getShrunkenFootPolygon(), 1.0e-5);
+      EuclidCoreTestTools.assertEquals(croppedFootPolygon, partialFootholdModule.getShrunkenFootPolygon(), 1.0e-5);
 
       for (FramePoint2DReadOnly measuredCoP : measuredCoPs)
          assertTrue(partialFootholdModule.getShrunkenFootPolygon().signedDistance(measuredCoP) < 1e-3);
@@ -257,9 +266,9 @@ public class PartialFootholdCropperModuleTest
       expectedLine.getPoint().set(pointOfRotation);
       convexPolygonTools.cutPolygonWithLine(expectedLine, croppedFootPolygon, RobotSide.RIGHT);
 
-      EuclidGeometryTestTools.assertLine2DGeometricallyEquals(expectedLine, lineEstimate, 1.0e-5);
+      EuclidCoreTestTools.assertGeometricallyEquals(expectedLine, lineEstimate, 1.0e-5);
       assertTrue(partialFootholdModule.shouldApplyShrunkenFoothold());
-      EuclidGeometryTestTools.assertConvexPolygon2DEquals(croppedFootPolygon, partialFootholdModule.getShrunkenFootPolygon(), 1.0e-5);
+      EuclidCoreTestTools.assertEquals(croppedFootPolygon, partialFootholdModule.getShrunkenFootPolygon(), 1.0e-5);
 
       for (FramePoint2DReadOnly measuredCoP : measuredCoPs)
          assertTrue(partialFootholdModule.getShrunkenFootPolygon().signedDistance(measuredCoP) < 1e-3);
@@ -310,9 +319,9 @@ public class PartialFootholdCropperModuleTest
       expectedLine.getPoint().set(pointOfRotation);
       //      convexPolygonTools.cutPolygonWithLine(expectedLine, croppedFootPolygon, RobotSide.RIGHT);
 
-      EuclidGeometryTestTools.assertLine2DGeometricallyEquals(expectedLine, lineEstimate, 1.0e-5);
+      EuclidCoreTestTools.assertGeometricallyEquals(expectedLine, lineEstimate, 1.0e-5);
       assertFalse(partialFootholdModule.shouldApplyShrunkenFoothold());
-      EuclidGeometryTestTools.assertConvexPolygon2DEquals(croppedFootPolygon, partialFootholdModule.getShrunkenFootPolygon(), 1.0e-5);
+      EuclidCoreTestTools.assertEquals(croppedFootPolygon, partialFootholdModule.getShrunkenFootPolygon(), 1.0e-5);
 
       for (FramePoint2DReadOnly measuredCoP : measuredCoPs)
          assertTrue(partialFootholdModule.getShrunkenFootPolygon().isPointInside(measuredCoP));
@@ -350,9 +359,9 @@ public class PartialFootholdCropperModuleTest
       expectedLine.getPoint().set(pointOfRotation);
       convexPolygonTools.cutPolygonWithLine(expectedLine, croppedFootPolygon, RobotSide.RIGHT);
 
-      EuclidGeometryTestTools.assertLine2DGeometricallyEquals(expectedLine, lineEstimate, 1.0e-5);
+      EuclidCoreTestTools.assertGeometricallyEquals(expectedLine, lineEstimate, 1.0e-5);
       assertFalse(partialFootholdModule.shouldApplyShrunkenFoothold());
-      EuclidGeometryTestTools.assertConvexPolygon2DEquals(croppedFootPolygon, partialFootholdModule.getShrunkenFootPolygon(), 1.0e-5);
+      EuclidCoreTestTools.assertEquals(croppedFootPolygon, partialFootholdModule.getShrunkenFootPolygon(), 1.0e-5);
 
       for (FramePoint2DReadOnly measuredCoP : measuredCoPs)
          assertTrue(partialFootholdModule.getShrunkenFootPolygon().isPointInside(measuredCoP));

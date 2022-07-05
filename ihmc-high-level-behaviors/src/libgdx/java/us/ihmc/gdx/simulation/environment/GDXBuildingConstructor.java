@@ -20,15 +20,13 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewInput;
-import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.environment.object.GDXSimpleObject;
 import us.ihmc.gdx.simulation.environment.object.objects.GDXBuildingObject;
 import us.ihmc.gdx.tools.GDXModelBuilder;
-import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.gdx.ui.gizmo.StepCheckIsPointInsideAlgorithm;
-import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
 
@@ -48,7 +46,7 @@ public class GDXBuildingConstructor extends ImGuiPanel
    private final ImGuiPanel poseGizmoTunerPanel = pose3DGizmo.createTunerPanel(getClass().getSimpleName());
 
    private final StepCheckIsPointInsideAlgorithm stepCheckIsPointInsideAlgorithm = new StepCheckIsPointInsideAlgorithm();
-   private final GDX3DSceneManager sceneManager;
+   private final GDX3DPanel panel3D;
    private final Point3D tempIntersection = new Point3D();
 
    private final RigidBodyTransform translationTransform = new RigidBodyTransform();
@@ -63,19 +61,19 @@ public class GDXBuildingConstructor extends ImGuiPanel
    private GDXSimpleObject lastWallBase;
    private Mode mode = Mode.NONE;
 
-   public GDXBuildingConstructor(GDX3DSceneManager sceneManager)
+   public GDXBuildingConstructor(GDX3DPanel panel3D)
    {
       super(WINDOW_NAME);
-      this.sceneManager = sceneManager;
+      this.panel3D = panel3D;
       setRenderMethod(this::renderImGuiWidgets);
       addChild(poseGizmoTunerPanel);
    }
 
-   public void create(GDXImGuiBasedUI baseUI)
+   public void create()
    {
-      sceneManager.addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
-      pose3DGizmo.create(sceneManager.getCamera3D());
-      baseUI.addImGui3DViewInputProcessor(this::process3DViewInput);
+      panel3D.getScene().addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+      pose3DGizmo.create(panel3D.getCamera3D());
+      panel3D.addImGui3DViewInputProcessor(this::process3DViewInput);
    }
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
@@ -298,7 +296,7 @@ public class GDXBuildingConstructor extends ImGuiPanel
       ImGui.separator();
       if (ImGui.sliderFloat("Ambient light", ambientLightAmount.getData(), 0.0f, 1.0f))
       {
-         sceneManager.getSceneBasics().setAmbientLight(ambientLightAmount.get());
+         panel3D.getScene().setAmbientLight(ambientLightAmount.get());
       }
       ImGui.separator();
       if (mode == Mode.NONE)

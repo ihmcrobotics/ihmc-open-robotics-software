@@ -54,7 +54,7 @@ public class RateLimitedYoFrameOrientationTest
          if (distanceToGoal / dt < maxRate.doubleValue())
          { // Should converge in one step
             rateLimitedOrientation.update(goalQuaternion);
-            EuclidCoreTestTools.assertQuaternionGeometricallyEquals(goalQuaternion, new Quaternion(rateLimitedOrientation), EPSILON);
+            EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(goalQuaternion, new Quaternion(rateLimitedOrientation), EPSILON);
          }
          else
          {
@@ -76,7 +76,7 @@ public class RateLimitedYoFrameOrientationTest
             }
 
             rateLimitedOrientation.update(goalQuaternion);
-            EuclidCoreTestTools.assertQuaternionGeometricallyEquals(goalQuaternion, new Quaternion(rateLimitedOrientation), EPSILON);
+            EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(goalQuaternion, new Quaternion(rateLimitedOrientation), EPSILON);
          }
       }
    }

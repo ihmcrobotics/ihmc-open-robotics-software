@@ -76,6 +76,7 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -143,6 +144,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    private final ParameterizedControllerCoreOptimizationSettings controllerCoreOptimizationSettings;
 
+   private final ExecutionTimer walkingStateTimer = new ExecutionTimer("walkingStateTimer", registry);
+   private final ExecutionTimer managerUpdateTimer = new ExecutionTimer("managerUpdateTimer", registry);
    private final YoBoolean enableHeightFeedbackControl = new YoBoolean("enableHeightFeedbackControl", registry);
 
    private boolean firstTick = true;
@@ -600,16 +603,20 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       updateFailureDetection();
 
+      walkingStateTimer.startMeasurement();
       // Do transitions will request ICP planner updates.
       if (!firstTick) // this avoids doing two transitions in a single tick if the initialize reset the state machine.
          stateMachine.doTransitions();
       // Do action is relying on the ICP plan being valid.
       stateMachine.doAction();
+      walkingStateTimer.stopMeasurement();
 
       currentState = stateMachine.getCurrentState();
 
+      managerUpdateTimer.startMeasurement();
       updateManagers(currentState);
       reportStatusMessages();
+      managerUpdateTimer.stopMeasurement();
 
       handleChangeInContactState();
 

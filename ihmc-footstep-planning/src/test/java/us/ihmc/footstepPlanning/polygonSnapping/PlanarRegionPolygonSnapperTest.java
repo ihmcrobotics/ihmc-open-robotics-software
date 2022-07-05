@@ -154,7 +154,7 @@ public class PlanarRegionPolygonSnapperTest
 
       Vector3D actualSurfaceNormal = new Vector3D(0.0, 0.0, 1.0);
       snapTransform.transform(actualSurfaceNormal);
-      EuclidCoreTestTools.assertTuple3DEquals(expectedSurfaceNormal, actualSurfaceNormal, 1e-7);
+      EuclidCoreTestTools.assertEquals(expectedSurfaceNormal, actualSurfaceNormal, 1e-7);
 
       Vector3D xAxis = new Vector3D(1.0, 0.0, 0.0);
       snapTransform.transform(xAxis);

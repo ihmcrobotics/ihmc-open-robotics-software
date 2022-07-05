@@ -210,7 +210,7 @@ public class VisibilityGraphTestTools
          }
       };
       localFrame.update();
-      EuclidCoreTestTools.assertRigidBodyTransformGeometricallyEquals(transformExpected, clusterActual.getTransformToWorld(), epsilon);
+      EuclidCoreTestTools.assertGeometricallyEquals(transformExpected, clusterActual.getTransformToWorld(), epsilon);
 
       int numberOfRawPoints = clusterExpected.getRawPointsInLocal2D().size();
       assertEquals(numberOfRawPoints, clusterActual.getNumberOfRawPoints());
