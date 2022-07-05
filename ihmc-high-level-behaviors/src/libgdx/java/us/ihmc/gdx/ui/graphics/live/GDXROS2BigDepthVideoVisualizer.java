@@ -65,7 +65,7 @@ public class GDXROS2BigDepthVideoVisualizer extends GDXOpenCVVideoVisualizer
 
             synchronized (this) // synchronize with the update method
             {
-               updateImageDimensions(inputDepthMat.cols(), (int) (inputDepthMat.rows() / 1.5f));
+               updateImageDimensions(inputDepthMat.cols(), (int) (inputDepthMat.rows()));
                BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(normalizedScaledImage, getRGBA8Mat());
             }
          });
