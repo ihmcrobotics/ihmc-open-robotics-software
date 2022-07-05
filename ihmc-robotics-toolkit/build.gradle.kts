@@ -40,7 +40,7 @@ mainDependencies {
    api("us.ihmc:ihmc-graphics-description:0.19.7")
    api("us.ihmc:simulation-construction-set-utilities:0.22.4")
    api("us.ihmc:ihmc-native-library-loader:1.3.1")
-   api("us.ihmc:scs2-definition:17-0.8.6-bullet-alpha-7")
+   api("us.ihmc:scs2-definition:17-0.9.1")
    // NOTE: IHMCRoboticsToolkit should not depend on any other IHMC project(!), especially it should not depend on IHMCJavaToolkit.
 }
 
