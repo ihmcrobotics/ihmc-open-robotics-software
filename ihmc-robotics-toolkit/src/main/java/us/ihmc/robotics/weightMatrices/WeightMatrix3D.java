@@ -3,6 +3,7 @@ package us.ihmc.robotics.weightMatrices;
 import org.ejml.MatrixDimensionException;
 import org.ejml.data.DMatrixRMaj;
 
+import us.ihmc.euclid.interfaces.EuclidGeometry;
 import us.ihmc.euclid.referenceFrame.FrameMatrix3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -496,6 +497,12 @@ public class WeightMatrix3D implements Tuple3DReadOnly
 
          return true;
       }
+   }
+   
+   @Override
+   public boolean geometricallyEquals(EuclidGeometry geometry, double epsilon)
+   {
+      return epsilonEquals(geometry, epsilon);
    }
 
    @Override

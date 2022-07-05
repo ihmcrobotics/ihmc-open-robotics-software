@@ -298,7 +298,7 @@ public class CaptureRegionSafetyHeuristicsTest
          shrunkenRegion.changeFrame(closestVertex.getReferenceFrame());
 
          closestVertex.checkReferenceFrameMatch(expectedPointsOnBorder.get(i));
-         EuclidCoreTestTools.assertTuple2DEquals(closestVertex, expectedPointsOnBorder.get(i), 1.0e-6);
+         EuclidCoreTestTools.assertEquals(closestVertex, expectedPointsOnBorder.get(i), 1.0e-6);
          assertTrue(closestVertex.epsilonEquals(expectedPointsOnBorder.get(i), 10e-7));
 
          assertFalse(shrunkenRegion.pointIsOnPerimeter(expectedPointsOnBorder.get(i)));

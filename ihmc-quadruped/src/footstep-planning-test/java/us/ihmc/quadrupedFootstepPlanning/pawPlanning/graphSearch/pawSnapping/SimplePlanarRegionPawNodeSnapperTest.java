@@ -55,7 +55,7 @@ public class SimplePlanarRegionPawNodeSnapperTest
       Quaternion snapRotation = new Quaternion();
       snapRotation.set(snapTransform.getRotation());
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(expectedPoint, snappedPoint, epsilon);
-      EuclidCoreTestTools.assertQuaternionEquals(expectedSnapRotation, snapRotation, epsilon);
+      EuclidCoreTestTools.assertEquals(expectedSnapRotation, snapRotation, epsilon);
    }
 
    @Test
@@ -98,7 +98,7 @@ public class SimplePlanarRegionPawNodeSnapperTest
       Quaternion snapRotation = new Quaternion();
       snapRotation.set(snapTransform.getRotation());
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(expectedPoint, snappedPoint, epsilon);
-      EuclidCoreTestTools.assertQuaternionEquals(rotation, snapRotation, epsilon);
+      EuclidCoreTestTools.assertEquals(rotation, snapRotation, epsilon);
    }
 
    @Test
@@ -149,7 +149,7 @@ public class SimplePlanarRegionPawNodeSnapperTest
       snapRotation.set(snapTransform.getRotation());
 
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(expectedPoint, snappedPoint, epsilon);
-      EuclidCoreTestTools.assertQuaternionEquals(expectedSnapOrientation, snapRotation, epsilon);
+      EuclidCoreTestTools.assertEquals(expectedSnapOrientation, snapRotation, epsilon);
    }
 
    @Test

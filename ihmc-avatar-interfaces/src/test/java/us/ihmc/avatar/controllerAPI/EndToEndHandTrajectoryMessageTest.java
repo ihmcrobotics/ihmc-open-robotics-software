@@ -42,7 +42,6 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -882,8 +881,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       Quaternion desiredOrientation = EndToEndTestTools.findQuaternion(namespaceOrientationDesired, varnameOrientationDesired, simulationTestHelper);
 
       lastPoint.changeFrame(worldFrame);
-      EuclidCoreTestTools.assertTuple3DEquals(lastPoint.getPositionCopy(), desiredPosition, 0.001);
-      EuclidCoreTestTools.assertQuaternionEquals(lastPoint.getOrientationCopy(), desiredOrientation, 0.001);
+      EuclidCoreTestTools.assertEquals(lastPoint.getPositionCopy(), desiredPosition, 0.001);
+      EuclidCoreTestTools.assertEquals(lastPoint.getOrientationCopy(), desiredOrientation, 0.001);
 
       assertEquals(2 * handTrajectoryMessages.size(), statusMessages.size());
       double startTime = 0.0;
@@ -1380,7 +1379,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          FramePose3D currentHandPose = new FramePose3D(rightHandControlFrame);
          currentHandPose.changeFrame(ReferenceFrame.getWorldFrame());
          EuclidCoreTestTools.assertPoint3DGeometricallyEquals(poseToHold.getPosition(), currentHandPose.getPosition(), 1.0e-2);
-         EuclidCoreTestTools.assertQuaternionGeometricallyEquals(poseToHold.getOrientation(), currentHandPose.getOrientation(), Math.toRadians(10.0));
+         EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(poseToHold.getOrientation(), currentHandPose.getOrientation(), Math.toRadians(10.0));
       }
    }
 
@@ -1525,12 +1524,12 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
                                                                      currentDesiredTrajectoryPoint.getAngularVelocity(),
                                                                      currentDesiredTrajectoryPoint.getLinearVelocity());
 
-         EuclidGeometryTestTools.assertPose3DEquals(desiredPoses.get(robotSide), controllerDesiredPose, desiredEpsilon);
+         EuclidCoreTestTools.assertEquals(desiredPoses.get(robotSide), controllerDesiredPose, desiredEpsilon);
          MecanoTestTools.assertSpatialVectorEquals(desiredVelocities.get(robotSide), controllerDesiredVelocity, desiredEpsilon);
 
          FramePose3D currentPose = new FramePose3D(hand.getBodyFixedFrame());
          currentPose.changeFrame(worldFrame);
-         EuclidGeometryTestTools.assertPose3DGeometricallyEquals("Poor tracking for side: " + robotSide + " position: "
+         EuclidCoreTestTools.assertGeometricallyEquals("Poor tracking for side: " + robotSide + " position: "
                + currentPose.getPosition().distance(controllerDesiredPose.getPosition()) + ", orientation: "
                + Math.abs(AngleTools.trimAngleMinusPiToPi(currentPose.getOrientation().distance(controllerDesiredPose.getOrientation()))),
                                                                  controllerDesiredPose,
@@ -1553,17 +1552,17 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
                                                                      currentDesiredTrajectoryPoint.getAngularVelocity(),
                                                                      currentDesiredTrajectoryPoint.getLinearVelocity());
 
-         EuclidGeometryTestTools.assertPose3DEquals(desiredPoses.get(robotSide), controllerDesiredPose, desiredEpsilon);
+         EuclidCoreTestTools.assertEquals(desiredPoses.get(robotSide), controllerDesiredPose, desiredEpsilon);
          MecanoTestTools.assertSpatialVectorEquals(desiredVelocities.get(robotSide), controllerDesiredVelocity, desiredEpsilon);
 
          FramePose3D currentPose = new FramePose3D(hand.getBodyFixedFrame());
          currentPose.changeFrame(worldFrame);
-         EuclidCoreTestTools.assertTuple3DEquals("Poor position tracking for side: " + robotSide + " error: "
+         EuclidCoreTestTools.assertEquals("Poor position tracking for side: " + robotSide + " error: "
                + currentPose.getPosition().distance(controllerDesiredPose.getPosition()),
                                                  controllerDesiredPose.getPosition(),
                                                  currentPose.getPosition(),
                                                  3.0e-2);
-         EuclidCoreTestTools.assertQuaternionGeometricallyEquals("Poor orientation tracking for side: " + robotSide + " error: "
+         EuclidCoreTestTools.assertOrientation3DGeometricallyEquals("Poor orientation tracking for side: " + robotSide + " error: "
                + Math.abs(AngleTools.trimAngleMinusPiToPi(currentPose.getOrientation().distance(controllerDesiredPose.getOrientation()))),
                                                                  controllerDesiredPose.getOrientation(),
                                                                  currentPose.getOrientation(),
@@ -1598,10 +1597,10 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       EndToEndTestTools.assertTotalNumberOfWaypointsInTaskspaceManager(bodyName, 2, scs);
 
       Point3DReadOnly controllerDesiredPosition = EndToEndTestTools.findFeedbackControllerDesiredPosition(bodyName, scs);
-      EuclidCoreTestTools.assertTuple3DEquals(desiredPosition, controllerDesiredPosition, EPSILON_FOR_DESIREDS);
+      EuclidCoreTestTools.assertEquals(desiredPosition, controllerDesiredPosition, EPSILON_FOR_DESIREDS);
 
       QuaternionReadOnly controllerDesiredOrientation = EndToEndTestTools.findFeedbackControllerDesiredOrientation(bodyName, scs);
-      EuclidCoreTestTools.assertQuaternionGeometricallyEquals(desiredOrientation, controllerDesiredOrientation, EPSILON_FOR_DESIREDS);
+      EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(desiredOrientation, controllerDesiredOrientation, EPSILON_FOR_DESIREDS);
    }
 
    public static FootstepDataListMessage twoStepsInPlace(SideDependentList<? extends ReferenceFrame> soleFrames)
