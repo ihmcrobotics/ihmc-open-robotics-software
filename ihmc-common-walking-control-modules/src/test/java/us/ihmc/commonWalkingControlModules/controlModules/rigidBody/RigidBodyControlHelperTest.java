@@ -45,8 +45,8 @@ public class RigidBodyControlHelperTest
 
          // Assert that with no tracking error c2_d will match c2.
          c1_d.setPoseAndUpdate(c1.getTransformToDesiredFrame(c1_d.getParent()));
-         EuclidCoreTestTools.assertRigidBodyTransformEquals(c1.getTransformToWorldFrame(), c1_d.getTransformToWorldFrame(), epsilon);
-         EuclidCoreTestTools.assertRigidBodyTransformEquals(c2.getTransformToWorldFrame(), c2_d.getTransformToWorldFrame(), epsilon);
+         EuclidCoreTestTools.assertEquals(c1.getTransformToWorldFrame(), c1_d.getTransformToWorldFrame(), epsilon);
+         EuclidCoreTestTools.assertEquals(c2.getTransformToWorldFrame(), c2_d.getTransformToWorldFrame(), epsilon);
 
          // Set c1_d to some desired pose then move the control frame and compute the expected desired for c2.
          FramePoint3D desiredPosition_c1 = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame());
@@ -66,12 +66,12 @@ public class RigidBodyControlHelperTest
          RigidBodyTransform tempC1ToBody = new RigidBodyTransform(c1ToBody);
          RigidBodyPositionControlHelper.modifyControlFrame(actualDesiredPosition_c2, actualDesiredOrienation_c2, tempC1ToBody, c2ToBody);
          RigidBodyOrientationControlHelper.modifyControlFrame(actualDesiredOrienation_c2, c1_orientation, c2_orientation);
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(expectedDesiredPosition_c2, actualDesiredPosition_c2, epsilon);
-         EuclidFrameTestTools.assertFrameQuaternionGeometricallyEquals(expectedDesiredOrientation_c2, actualDesiredOrienation_c2, epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(expectedDesiredPosition_c2, actualDesiredPosition_c2, epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(expectedDesiredOrientation_c2, actualDesiredOrienation_c2, epsilon);
          // Orientation
          actualDesiredOrienation_c2.setIncludingFrame(desiredOrientation_c1);
          RigidBodyOrientationControlHelper.modifyControlFrame(actualDesiredOrienation_c2, c1_orientation, c2_orientation);
-         EuclidFrameTestTools.assertFrameQuaternionGeometricallyEquals(expectedDesiredOrientation_c2, actualDesiredOrienation_c2, epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(expectedDesiredOrientation_c2, actualDesiredOrienation_c2, epsilon);
       }
    }
 }

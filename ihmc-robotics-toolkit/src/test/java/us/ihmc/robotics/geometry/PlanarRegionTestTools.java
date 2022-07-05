@@ -1,10 +1,11 @@
 package us.ihmc.robotics.geometry;
 
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
+
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-
-import static us.ihmc.robotics.Assert.*;
 
 public class PlanarRegionTestTools
 {
@@ -14,13 +15,13 @@ public class PlanarRegionTestTools
       RigidBodyTransform actualTransform = new RigidBodyTransform();
       expected.getTransformToWorld(expectedTransform);
       actual.getTransformToWorld(actualTransform);
-      EuclidCoreTestTools.assertRigidBodyTransformGeometricallyEquals(expectedTransform, actualTransform, epsilon);
+      EuclidCoreTestTools.assertGeometricallyEquals(expectedTransform, actualTransform, epsilon);
 
       assertEquals(expected.getConcaveHullSize(), actual.getConcaveHullSize());
 
       for (int i = 0; i < expected.getConcaveHullSize(); i++)
       {
-         EuclidCoreTestTools.assertTuple2DEquals(expected.getConcaveHullVertex(i), actual.getConcaveHullVertex(i), epsilon);
+         EuclidCoreTestTools.assertEquals(expected.getConcaveHullVertex(i), actual.getConcaveHullVertex(i), epsilon);
       }
 
       assertEquals(expected.getNumberOfConvexPolygons(), actual.getNumberOfConvexPolygons());

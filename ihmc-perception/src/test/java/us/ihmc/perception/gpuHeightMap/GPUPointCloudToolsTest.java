@@ -71,7 +71,7 @@ public class GPUPointCloudToolsTest
 
          for (int i = 0; i < numberOfPoints; i++)
          {
-            EuclidCoreTestTools.assertTuple3DEquals(transformedPointsExpected.get(i), transformedPoints.get(i), 1e-5);
+            EuclidCoreTestTools.assertEquals(transformedPointsExpected.get(i), transformedPoints.get(i), 1e-5);
          }
       }
 

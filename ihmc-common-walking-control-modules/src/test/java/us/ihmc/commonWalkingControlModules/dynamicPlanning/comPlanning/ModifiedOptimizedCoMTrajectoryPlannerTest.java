@@ -91,16 +91,16 @@ public class ModifiedOptimizedCoMTrajectoryPlannerTest
       FramePoint3D vrp21 = new FramePoint3D(comPlanner.getDesiredVRPPosition());
 
 
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(startCoM, com00, 1e-4);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(com01, com10, 1e-4);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(com11, com20, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(startCoM, com00, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(com01, com10, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(com11, com20, 1e-4);
 
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(initialVRP, vrp00, 1e-4);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(initialVRP, vrp01, 1e-4);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(initialVRP, vrp10, 1e-4);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(finalVRP, vrp11, 1e-4);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(finalVRP, vrp20, 1e-4);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(finalVRP, vrp21, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(initialVRP, vrp00, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(initialVRP, vrp01, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(initialVRP, vrp10, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(finalVRP, vrp11, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(finalVRP, vrp20, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(finalVRP, vrp21, 1e-4);
    }
 
    @Test
@@ -186,21 +186,21 @@ public class ModifiedOptimizedCoMTrajectoryPlannerTest
 
 
       FrameVector3D zeroVector = new FrameVector3D();
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(startCoM, com00, 1e-4);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(com01, com10, 1e-4);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(com11, com20, 1e-4);
-      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(gravityVector, comAcceleration10, 1e-4);
-      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(gravityVector, comAcceleration11, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(startCoM, com00, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(com01, com10, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(com11, com20, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(gravityVector, comAcceleration10, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(gravityVector, comAcceleration11, 1e-4);
 
       assertTrue(initialVRP.distanceXY(vrp00) < 1e-4);
       assertTrue(initialVRP.distanceXY(vrp01) < 1e-4);
-      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(zeroVector, vrpVelocity00, 1e-4);
-      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(zeroVector, vrpVelocity01, 1e-4);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(finalVRP, vrp20, 1e-4);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(finalVRP, vrp21, 1e-4);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(finalVRP, dcm21, 1e-4);
-      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(zeroVector, vrpVelocity20, 1e-4);
-      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(zeroVector, vrpVelocity21, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(zeroVector, vrpVelocity00, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(zeroVector, vrpVelocity01, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(finalVRP, vrp20, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(finalVRP, vrp21, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(finalVRP, dcm21, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(zeroVector, vrpVelocity20, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(zeroVector, vrpVelocity21, 1e-4);
    }
 
    @Test
@@ -262,14 +262,14 @@ public class ModifiedOptimizedCoMTrajectoryPlannerTest
       FramePoint3D vrp11 = new FramePoint3D(comPlanner.getDesiredVRPPosition());
       FramePoint3D finalDCM = new FramePoint3D(comPlanner.getDesiredVRPPosition());
 
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(startCoM, com00, 1e-4);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(com01, com10, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(startCoM, com00, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(com01, com10, 1e-4);
 
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(initialVRP, vrp00, 1e-4);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(finalVRP, vrp01, 1e-4);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(finalVRP, vrp10, 1e-4);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(finalVRP, vrp11, 1e-4);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(finalVRP, finalDCM, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(initialVRP, vrp00, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(finalVRP, vrp01, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(finalVRP, vrp10, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(finalVRP, vrp11, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(finalVRP, finalDCM, 1e-4);
    }
 
    @Test
@@ -312,7 +312,7 @@ public class ModifiedOptimizedCoMTrajectoryPlannerTest
       FramePoint3D finalDCM = new FramePoint3D(comPlanner.getDesiredDCMPosition());
       FramePoint3D vrp01 = new FramePoint3D(comPlanner.getDesiredVRPPosition());
 
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(startCoM, com00, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(startCoM, com00, 1e-4);
 
       assertTrue(vrp.distanceXY(vrp00) < 1e-4);
       assertTrue(vrp.distanceXY(vrp01) < 1e-4);

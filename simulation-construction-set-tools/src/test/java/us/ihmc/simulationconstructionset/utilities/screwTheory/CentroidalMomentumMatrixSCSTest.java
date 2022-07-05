@@ -60,8 +60,8 @@ public class CentroidalMomentumMatrixSCSTest
       Vector3D angularMomentum = new Vector3D();
       robot.computeCOMMomentum(comPoint, linearMomentum, angularMomentum);
 
-      EuclidCoreTestTools.assertTuple3DEquals(linearMomentum, comMomentum.getLinearPart(), 1e-12);
-      EuclidCoreTestTools.assertTuple3DEquals(angularMomentum, comMomentum.getAngularPart(), 1e-12);
+      EuclidCoreTestTools.assertEquals(linearMomentum, comMomentum.getLinearPart(), 1e-12);
+      EuclidCoreTestTools.assertEquals(angularMomentum, comMomentum.getAngularPart(), 1e-12);
    }
 
 	@Test
@@ -125,8 +125,8 @@ public class CentroidalMomentumMatrixSCSTest
          centroidalMomentumMatrix.reset();
          Momentum comMomentum = computeCoMMomentum(elevator, centerOfMassFrame, centroidalMomentumMatrix);
 
-         EuclidCoreTestTools.assertTuple3DEquals(linearMomentum, comMomentum.getLinearPart(), 1e-12);
-         EuclidCoreTestTools.assertTuple3DEquals(angularMomentum, comMomentum.getAngularPart(), 1e-12);
+         EuclidCoreTestTools.assertEquals(linearMomentum, comMomentum.getLinearPart(), 1e-12);
+         EuclidCoreTestTools.assertEquals(angularMomentum, comMomentum.getAngularPart(), 1e-12);
       }
    }
 
