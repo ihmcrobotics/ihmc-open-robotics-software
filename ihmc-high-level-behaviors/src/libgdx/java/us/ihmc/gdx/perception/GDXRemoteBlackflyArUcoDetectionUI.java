@@ -4,31 +4,20 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.ArUcoMarkerPoses;
-import controller_msgs.msg.dds.StoredPropertySetMessage;
 import std_msgs.msg.dds.Float64;
 import us.ihmc.avatar.colorVision.DualBlackflyComms;
-import us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegionExtractionComms;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.simulation.environment.GDXModelInstance;
 import us.ihmc.gdx.tools.GDXModelBuilder;
-import us.ihmc.gdx.tools.GDXTools;
-import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.tools.ImPlotDoublePlot;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 public class GDXRemoteBlackflyArUcoDetectionUI
 {
@@ -81,7 +70,7 @@ public class GDXRemoteBlackflyArUcoDetectionUI
       }
 
       ArUcoMarkerPoses markerPoses;
-      if(arUcoPoseROS2Notification.poll())
+      if (arUcoPoseROS2Notification.poll())
       {
          markerPoses = arUcoPoseROS2Notification.read();
 
@@ -115,13 +104,10 @@ public class GDXRemoteBlackflyArUcoDetectionUI
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-
-
-         for (GDXModelInstance markerPoseCoordinateFrame : markerPoseCoordinateFrames.values())
-         {
-            markerPoseCoordinateFrame.getRenderables(renderables, pool);
-         }
-
+      for (GDXModelInstance markerPoseCoordinateFrame : markerPoseCoordinateFrames.values())
+      {
+         markerPoseCoordinateFrame.getRenderables(renderables, pool);
+      }
    }
 
    public void destroy()
