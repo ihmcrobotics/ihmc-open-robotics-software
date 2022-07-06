@@ -24,9 +24,9 @@ public class GDXROS2BigDepthVideoVisualizer extends GDXOpenCVVideoVisualizer
    private final BigVideoPacket videoPacket = new BigVideoPacket();
    private final SampleInfo sampleInfo = new SampleInfo();
    private final Object syncObject = new Object();
-   private final byte[] messageDataHeapArray = new byte[25000000];
-   private final BytePointer messageBytePointer = new BytePointer(25000000);
-   private final Mat inputDepthMat = new Mat(1, 1, opencv_core.CV_32FC1);
+   private byte[] messageDataHeapArray;
+   private BytePointer messageBytePointer;
+   private Mat inputDepthMat;
    private Mat normalizedScaledImage;
    private final ImPlotDoublePlot delayPlot = new ImPlotDoublePlot("Delay", 30);
 
@@ -48,24 +48,36 @@ public class GDXROS2BigDepthVideoVisualizer extends GDXOpenCVVideoVisualizer
             synchronized (syncObject)
             {
                IDLSequence.Byte imageTByteArrayList = videoPacket.getData();
+
+               if (messageDataHeapArray == null || messageDataHeapArray.length != imageTByteArrayList.size())
+               {
+                  messageDataHeapArray = new byte[imageTByteArrayList.size()];
+                  messageBytePointer = new BytePointer(imageTByteArrayList.size());
+               }
+
                imageTByteArrayList.toArray(messageDataHeapArray);
+               messageBytePointer.position(0);
                messageBytePointer.put(messageDataHeapArray, 0, imageTByteArrayList.size());
                messageBytePointer.limit(imageTByteArrayList.size());
 
-               inputDepthMat.cols(imageTByteArrayList.size());
+               if (inputDepthMat == null)
+               {
+                  inputDepthMat = new Mat(videoPacket.getImageHeight(), videoPacket.getImageWidth(), opencv_core.CV_32FC1);
+               }
+
                inputDepthMat.data(messageBytePointer);
             }
 
             if (normalizedScaledImage == null)
             {
-               normalizedScaledImage = new Mat(inputDepthMat.rows(), inputDepthMat.cols(), opencv_core.CV_32FC1);
+               normalizedScaledImage = new Mat(videoPacket.getImageHeight(), videoPacket.getImageWidth(), opencv_core.CV_32FC1);
             }
 
             BytedecoOpenCVTools.clampTo8BitUnsignedChar(inputDepthMat, normalizedScaledImage, 0.0, 255.0);
 
             synchronized (this) // synchronize with the update method
             {
-               updateImageDimensions(inputDepthMat.cols(), (int) (inputDepthMat.rows()));
+               updateImageDimensions(videoPacket.getImageWidth(), videoPacket.getImageHeight());
                BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(normalizedScaledImage, getRGBA8Mat());
             }
          });
