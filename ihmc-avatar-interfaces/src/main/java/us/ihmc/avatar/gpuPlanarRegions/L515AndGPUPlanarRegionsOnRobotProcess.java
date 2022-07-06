@@ -263,9 +263,9 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
 
             int depthFrameDataSize = l515.getDepthFrameDataSize();
 
-            ByteBuffer depthU16C1ByteBuffer = depthU16C1Image.ptr().asBuffer();
-            byte[] heapByteArrayData = new byte[depthU16C1ByteBuffer.remaining()];
-            depthU16C1ByteBuffer.get(heapByteArrayData);
+            depth32FC1Image.rewind();
+            byte[] heapByteArrayData = new byte[depth32FC1Image.getBackingDirectByteBuffer().remaining()];
+            depth32FC1Image.getBackingDirectByteBuffer().get(heapByteArrayData);
             depthImagePacket.getData().resetQuick();
             depthImagePacket.getData().add(heapByteArrayData);
             depthImagePacket.setImageHeight(depthHeight);
