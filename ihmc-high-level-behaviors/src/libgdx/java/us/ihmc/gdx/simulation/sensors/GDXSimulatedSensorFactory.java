@@ -3,6 +3,8 @@ package us.ihmc.gdx.simulation.sensors;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.RosTools;
@@ -171,6 +173,32 @@ public class GDXSimulatedSensorFactory
                                                                                                             0.001,
                                                                                                             false,
                                                                                                             publishRateHz);
+      return highLevelDepthSensorSimulator;
+   }
+
+   public static GDXHighLevelDepthSensorSimulator createChestRightBlackflyForObjectDetection(ROS2SyncedRobotModel syncedRobot,
+                                                                                             DomainFactory.PubSubImplementation pubSubImplementation)
+   {
+      double publishRateHz = 20.0;
+      double verticalFOV = 100.0;
+      int imageWidth = 1024;
+      int imageHeight = 1024;
+      double minRange = 0.105;
+      double maxRange = 5.0;
+      GDXHighLevelDepthSensorSimulator highLevelDepthSensorSimulator = new GDXHighLevelDepthSensorSimulator("Blackfly Right for Object Detection",
+                                                                                                            syncedRobot.getReferenceFrames()
+                                                                                                                       .getObjectDetectionCameraFrame(),
+                                                                                                            syncedRobot::getTimestamp,
+                                                                                                            verticalFOV,
+                                                                                                            imageWidth,
+                                                                                                            imageHeight,
+                                                                                                            minRange,
+                                                                                                            maxRange,
+                                                                                                            0.01,
+                                                                                                            0.01,
+                                                                                                            false,
+                                                                                                            publishRateHz);
+      highLevelDepthSensorSimulator.setupForROS2Color(pubSubImplementation, ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.RIGHT));
       return highLevelDepthSensorSimulator;
    }
 }
