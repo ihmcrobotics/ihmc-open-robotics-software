@@ -11,7 +11,9 @@ import us.ihmc.commons.MutationTestFacilitator;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -45,7 +47,7 @@ public class PlanarRegionPolygonSnapperTest
          RigidBodyTransform transformExpected = new RigidBodyTransform();
          transformExpected.getRotation().set(rotationMatrix);
 
-         EuclidCoreTestTools.assertRigidBodyTransformEquals(transformExpected, PlanarRegionPolygonSnapper.createTransformToMatchSurfaceNormalPreserveX(surfaceNormal), 1e-5);
+         EuclidCoreTestTools.assertEquals(transformExpected, PlanarRegionPolygonSnapper.createTransformToMatchSurfaceNormalPreserveX(surfaceNormal), 1e-5);
       }
    }
 
@@ -69,7 +71,7 @@ public class PlanarRegionPolygonSnapperTest
 
          PlanarRegionPolygonSnapper.setTranslationSettingZAndPreservingXAndY(highestVertex, trasnformToModify);
 
-         EuclidCoreTestTools.assertRigidBodyTransformEquals(transformExpected, trasnformToModify, 1e-5);
+         EuclidCoreTestTools.assertEquals(transformExpected, trasnformToModify, 1e-5);
       }
    }
 
