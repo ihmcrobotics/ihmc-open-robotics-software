@@ -244,7 +244,7 @@ public class AtlasRobotModel implements DRCRobotModel
 
       getRobotDefinitionMutator().accept(robotDefinition);
       
-      if (isUseHandMutatorCollisions() && selectedVersion.hasRobotiqHands())
+      if (isUseHandMutatorCollisions())
          getRobotDefinitionHandMutator().accept(robotDefinition);
       
       return robotDefinition;
