@@ -13,10 +13,7 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -97,7 +94,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
    }
 
    @Override
-   public FramePose3DReadOnly adjustFootstep(FramePose2DReadOnly footstepPose, RobotSide footSide)
+   public boolean adjustFootstep(FramePose2DReadOnly footstepPose, RobotSide footSide, FixedFramePose3DBasics adjustedPoseToPack)
    {
       footstepAtSameHeightAsStanceFoot.getPosition().set(footstepPose.getPosition());
       footstepAtSameHeightAsStanceFoot.setZ(continuousStepGenerator.getCurrentSupportFootPose().getZ());
@@ -113,7 +110,10 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
          {
             snapAndWiggle(adjustedFootstepPose, footPolygonToWiggle, wiggledPolygon);
             if (adjustedFootstepPose.containsNaN())
-               return footstepAtSameHeightAsStanceFoot;
+            {
+               adjustedPoseToPack.set(footstepAtSameHeightAsStanceFoot);
+               return false;
+            }
          }
          catch (RuntimeException e)
          {
@@ -122,11 +122,13 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
              * Let's just keep the adjusted footstep based on the pose of the current stance foot.
              */
          }
-         return adjustedFootstepPose;
+         adjustedPoseToPack.set(adjustedFootstepPose);
+         return true;
       }
       else
       {
-         return footstepAtSameHeightAsStanceFoot;
+         adjustedPoseToPack.set(footstepAtSameHeightAsStanceFoot);
+         return false;
       }
    }
 
