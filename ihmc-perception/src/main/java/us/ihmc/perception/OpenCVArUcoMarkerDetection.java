@@ -19,6 +19,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.tools.thread.SwapReference;
@@ -201,7 +202,15 @@ public class OpenCVArUcoMarkerDetection
 
          synchronized (detectionDataSync)
          {
-            cornerForPose.put(idToCornersMap.get(marker.getId()));
+            try
+            {
+               cornerForPose.put(idToCornersMap.get(marker.getId()));
+            }
+            catch (NullPointerException nullPointerException)
+            {
+               LogTools.error(nullPointerException.getMessage());
+               return;
+            }
          }
 
          opencv_aruco.estimatePoseSingleMarkers(cornerForPose,
