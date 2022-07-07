@@ -106,10 +106,10 @@ public class PlanarRegionToolsTest
 
       Vector3D actualNormal = new Vector3D();
       planarRegion.getNormal(actualNormal);
-      EuclidCoreTestTools.assertTuple3DEquals("Wrong region normal.", new Vector3D(0.0, 0.0, 1.0), actualNormal, 1.0e-10);
+      EuclidCoreTestTools.assertVector3DGeometricallyEquals("Wrong region normal.", new Vector3D(0.0, 0.0, 1.0), actualNormal, 1.0e-10);
       Point3D actualOrigin = new Point3D();
       planarRegion.getPointInRegion(actualOrigin);
-      EuclidCoreTestTools.assertTuple3DEquals("Wrong region origin.", new Point3D(), actualOrigin, 1.0e-10);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Wrong region origin.", new Point3D(), actualOrigin, 1.0e-10);
       RigidBodyTransform actualTransform = new RigidBodyTransform();
       planarRegion.getTransformToWorld(actualTransform);
       Assertions.assertTrue(regionTransform.epsilonEquals(actualTransform, 1.0e-10), "Wrong region transform to world.");
@@ -210,10 +210,10 @@ public class PlanarRegionToolsTest
       Assertions.assertEquals(2, intersectionsInPlaneFrame.size());
       Point2DBasics[] points = intersectionsInPlaneFrame.get(0);
       Assertions.assertEquals(1, points.length);
-      EuclidCoreTestTools.assertTuple2DEquals(new Point2D(0.0, 1.0), points[0], 1e-7);
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(0.0, 1.0), points[0], 1e-7);
       points = intersectionsInPlaneFrame.get(1);
       Assertions.assertEquals(1, points.length);
-      EuclidCoreTestTools.assertTuple2DEquals(new Point2D(0.0, 1.0), points[0], 1e-7);
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(0.0, 1.0), points[0], 1e-7);
 
       lineSegment = new LineSegment2D(2.5, 0.5, 3.0, 9.0);
       Assertions.assertTrue(planarRegion.isLineSegmentIntersecting(lineSegment));
@@ -227,8 +227,8 @@ public class PlanarRegionToolsTest
       Assertions.assertEquals(1, intersectionsInPlaneFrame.size());
       points = intersectionsInPlaneFrame.get(0);
       Assertions.assertEquals(2, points.length);
-      EuclidCoreTestTools.assertTuple2DEquals(new Point2D(2.0, 1.0), points[0], 1e-7);
-      EuclidCoreTestTools.assertTuple2DEquals(new Point2D(2.0, -1.0), points[1], 1e-7);
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(2.0, 1.0), points[0], 1e-7);
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(2.0, -1.0), points[1], 1e-7);
 
       ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
       convexPolygon.addVertex(0.2, 0.2);
