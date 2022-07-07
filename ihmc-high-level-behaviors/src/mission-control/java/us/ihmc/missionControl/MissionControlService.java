@@ -3,6 +3,7 @@ package us.ihmc.missionControl;
 import org.apache.commons.lang3.tuple.MutablePair;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.kryo.KryoMessager;
 import us.ihmc.tools.processManagement.ProcessTools;
@@ -104,7 +105,15 @@ public class MissionControlService
    {
       String statusOutput = ProcessTools.execSimpleCommand("systemctl status " + serviceName);
       String[] lines = statusOutput.split("\\R");
-      return lines[2].trim();
+      if (lines.length < 3)
+      {
+         LogTools.error("Got: {}", statusOutput);
+         return "error parsing systemd status";
+      }
+      else
+      {
+         return lines[2].trim();
+      }
    }
 
    private void destroy()
