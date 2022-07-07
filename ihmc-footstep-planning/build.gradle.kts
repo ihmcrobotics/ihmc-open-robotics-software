@@ -21,7 +21,7 @@ mainDependencies {
    api("us.ihmc:ihmc-convex-optimization:0.17.13")
    api("us.ihmc:ihmc-path-planning:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
-   api("us.ihmc:ihmc-common-walking-control-modules:source")
+//   api("us.ihmc:ihmc-common-walking-control-modules:source")
    api("us.ihmc:ihmc-path-planning-data-sets:source")
    api("us.ihmc:ihmc-pub-sub-serializers-extra:0.16.3")
 }
