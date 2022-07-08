@@ -428,4 +428,9 @@ public class GDXLowLevelDepthSensorSimulator
    {
       return numberOfPoints;
    }
+
+   public Texture getFrameBufferColorTexture()
+   {
+      return frameBuffer.getColorTexture();
+   }
 }
