@@ -143,6 +143,7 @@ public class GDXARBackgroundDemo
             material.set(ColorAttribute.createDiffuse(new Color(0.68235f, 0.688235f, 0.688235f, 1.0f)));
             modelBuilder.part(meshPart, material);
 
+            // TODO: Rebuild the model if the camera parameters change.
             Model model = modelBuilder.end();
             modelInstance = new ModelInstance(model);
             baseUI.getPrimaryScene().addRenderableProvider(modelInstance, GDXSceneLevel.VIRTUAL);
@@ -168,7 +169,7 @@ public class GDXARBackgroundDemo
 
             rigidBodyTransform.set(highLevelDepthSensorSimulator.getSensorFrame().getTransformToWorldFrame());
             rigidBodyTransform.appendYawRotation(-Math.PI / 2.0);
-            rigidBodyTransform.appendRollRotation(Math.PI / 2.0);
+            rigidBodyTransform.appendRollRotation(Math.PI / 2.0); // TODO: Why are these needed?
             GDXTools.toGDX(rigidBodyTransform, modelInstance.transform);
 
             baseUI.renderBeforeOnScreenUI();
