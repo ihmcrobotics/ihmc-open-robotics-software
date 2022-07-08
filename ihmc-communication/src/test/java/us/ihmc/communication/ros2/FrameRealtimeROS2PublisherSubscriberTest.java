@@ -19,12 +19,12 @@ import us.ihmc.ros2.RealtimeROS2Publisher;
 import us.ihmc.ros2.RealtimeROS2Subscription;
 import us.ihmc.tools.time.FrequencyStatisticPrinter;
 
-public class Frame_RealtimeROS2PublisherSubscriberTest
+public class FrameRealtimeROS2PublisherSubscriberTest
 {
    private RealtimeROS2Node realtimeROS2Node;
    private RealtimeROS2Publisher<RobotConfigurationData> publisher;
 
-   public Frame_RealtimeROS2PublisherSubscriberTest()
+   public FrameRealtimeROS2PublisherSubscriberTest()
    {
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "frameTest");
       try
@@ -71,6 +71,6 @@ public class Frame_RealtimeROS2PublisherSubscriberTest
 
    public static void main(String[] args)
    {
-      new Frame_RealtimeROS2PublisherSubscriberTest();
+      new FrameRealtimeROS2PublisherSubscriberTest();
    }
 }

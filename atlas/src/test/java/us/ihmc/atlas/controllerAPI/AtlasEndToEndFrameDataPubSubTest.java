@@ -1,6 +1,5 @@
 package us.ihmc.atlas.controllerAPI;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -15,12 +14,10 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 public class AtlasEndToEndFrameDataPubSubTest extends EndToEndFrameDataPublisherTest
 {
    private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
-//   private final DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
 
    @Tag("controller-api")
    @Test
    @Override
-   @Disabled
    public void testQueuing() throws SimulationExceededMaximumTimeException
    {
       super.testQueuing();
