@@ -20,6 +20,7 @@ import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.environment.GDXEnvironmentBuilder;
 import us.ihmc.gdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
+import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
@@ -105,30 +106,8 @@ public class GDXARBackgroundDemo
             highLevelDepthSensorSimulator.setUseSensorColor(true);
             baseUI.getPrimaryScene().addRenderableProvider(highLevelDepthSensorSimulator, GDXSceneLevel.VIRTUAL);
 
-            sensorPoseGizmo.getTransformToParent().getTranslation().set(0.2, 0.0, 1.0);
-            sensorPoseGizmo.getTransformToParent().getRotation().setToPitchOrientation(Math.toRadians(45.0));
+            highLevelDepthSensorSimulator.getLowLevelSimulator().getCamera().update();
 
-            BytedecoImage tempImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4);
-
-            baseUI.getPrimaryScene().addCoordinateFrame(0.3); //What is the 0.3 size?
-
-            arPanel = new GDX3DPanel("AR View", 2, false);
-
-            baseUI.add3DPanel(arPanel);
-            arPanel.getCamera3D().setInputEnabled(false);
-            arPanel.getCamera3D().setVerticalFieldOfView(verticalFOV);
-         }
-
-         @Override
-         public void render()
-         {
-            arPanel.getCamera3D().setPose(highLevelDepthSensorSimulator.getSensorFrame().getTransformToWorldFrame());
-
-            GDX3DSceneTools.glClearGray();
-
-            highLevelDepthSensorSimulator.render(baseUI.getPrimaryScene());
-            globalVisualizersPanel.update();
-            baseUI.getPrimaryScene().removeRenderableProvider(modelInstance, baseUI.getPrimaryScene().getSceneLevelsToRender().last());
             ModelBuilder modelBuilder = new ModelBuilder();
             modelBuilder.begin();
 
@@ -137,9 +116,7 @@ public class GDXARBackgroundDemo
 
             // Counter clockwise order
             // Draw so thumb faces away and index right
-
             Vector3[] planePoints = highLevelDepthSensorSimulator.getLowLevelSimulator().getCamera().frustum.planePoints;
-
             Vector3 topLeftPosition = planePoints[7];
             Vector3 bottomLeftPosition = planePoints[4];
             Vector3 bottomRightPosition = planePoints[5];
@@ -170,6 +147,27 @@ public class GDXARBackgroundDemo
             Model model = modelBuilder.end();
             modelInstance = new ModelInstance(model);
             baseUI.getPrimaryScene().addRenderableProvider(modelInstance, GDXSceneLevel.VIRTUAL);
+
+            sensorPoseGizmo.getTransformToParent().getTranslation().set(0.2, 0.0, 1.0);
+            sensorPoseGizmo.getTransformToParent().getRotation().setToPitchOrientation(Math.toRadians(45.0));
+
+            baseUI.getPrimaryScene().addCoordinateFrame(0.3);
+
+            arPanel = new GDX3DPanel("AR View", 2, false);
+
+            baseUI.add3DPanel(arPanel);
+            arPanel.getCamera3D().setInputEnabled(false);
+            arPanel.getCamera3D().setVerticalFieldOfView(verticalFOV);
+         }
+
+         @Override
+         public void render()
+         {
+            arPanel.getCamera3D().setPose(highLevelDepthSensorSimulator.getSensorFrame().getTransformToWorldFrame());
+            highLevelDepthSensorSimulator.render(baseUI.getPrimaryScene());
+            globalVisualizersPanel.update();
+
+            GDXTools.toGDX(highLevelDepthSensorSimulator.getSensorFrame().getTransformToWorldFrame(), modelInstance.transform);
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
