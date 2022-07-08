@@ -53,8 +53,6 @@ public class RobotConfigurationDataPublisherFactory
 
    private List<ReferenceFrame> frameDataToPublish = new ArrayList<>();
 
-   //   private final RequiredFactoryField<List<? extends ReferenceFrame>> frameData = new RequiredFactoryField<>("referenceFrameData");
-
    public RobotConfigurationDataPublisherFactory()
    {
       imuDefinitionsField.setDefaultValue(new IMUDefinition[0]);
@@ -245,10 +243,9 @@ public class RobotConfigurationDataPublisherFactory
          Optional<? extends OneDoFJointStateReadOnly> sensorDataOptional = allSensorData.stream()
                                                                                         .filter(sensorData -> sensorData.getJointName().equals(joint.getName()))
                                                                                         .findFirst();
-         // frame data > >
-         ReferenceFrame ref = joint.getFrameAfterJoint();
-         frameDataToPublish.add(ref);
-         // < < frame data
+
+         ReferenceFrame jointFrame = joint.getFrameAfterJoint();
+         frameDataToPublish.add(jointFrame);
 
          if (sensorDataOptional.isPresent())
          {
@@ -286,10 +283,8 @@ public class RobotConfigurationDataPublisherFactory
                                                                                  .filter(sensorData -> sensorData.getSensorName().equals(imu.getName()))
                                                                                  .findFirst();
 
-         // frame data > >
          ReferenceFrame imuFrame = imu.getIMUFrame();
          frameDataToPublish.add(imuFrame);
-         // < < frame data
 
          if (sensorDataOptional.isPresent())
          {
@@ -325,10 +320,8 @@ public class RobotConfigurationDataPublisherFactory
       {
          ForceSensorDataReadOnly sensorData = allSensorData.get(forceSensor);
 
-         // frame data > >
          ReferenceFrame forceSensorFrame = forceSensor.getSensorFrame();
          frameDataToPublish.add(forceSensorFrame);
-         // < < frame data
 
          if (sensorData != null)
          {
