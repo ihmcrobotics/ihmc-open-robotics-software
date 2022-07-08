@@ -153,6 +153,7 @@ public class GDXARDemo
 
             baseUI.getPrimaryScene().addCoordinateFrame(0.3);
 
+            // TODO: Make a new scene for this panel
             arPanel = new GDX3DPanel("AR View", 2, false);
 
             baseUI.add3DPanel(arPanel);
