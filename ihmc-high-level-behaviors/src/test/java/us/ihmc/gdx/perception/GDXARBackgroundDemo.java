@@ -12,11 +12,10 @@ import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import org.bytedeco.opencv.global.opencv_core;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.environment.GDXEnvironmentBuilder;
 import us.ihmc.gdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
@@ -26,7 +25,6 @@ import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.gdx.ui.graphics.live.GDXROS2BigVideoVisualizer;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXGlobalVisualizersPanel;
-import us.ihmc.perception.BytedecoImage;
 import us.ihmc.pubsub.DomainFactory;
 
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.*;
@@ -40,6 +38,7 @@ public class GDXARBackgroundDemo
    private ImGuiGDXGlobalVisualizersPanel globalVisualizersPanel;
    private GDX3DPanel arPanel;
    private ModelInstance modelInstance = null;
+   private final RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
 
    public GDXARBackgroundDemo()
    {
@@ -167,7 +166,10 @@ public class GDXARBackgroundDemo
             highLevelDepthSensorSimulator.render(baseUI.getPrimaryScene());
             globalVisualizersPanel.update();
 
-            GDXTools.toGDX(highLevelDepthSensorSimulator.getSensorFrame().getTransformToWorldFrame(), modelInstance.transform);
+            rigidBodyTransform.set(highLevelDepthSensorSimulator.getSensorFrame().getTransformToWorldFrame());
+            rigidBodyTransform.appendYawRotation(-Math.PI / 2.0);
+            rigidBodyTransform.appendRollRotation(Math.PI / 2.0);
+            GDXTools.toGDX(rigidBodyTransform, modelInstance.transform);
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
