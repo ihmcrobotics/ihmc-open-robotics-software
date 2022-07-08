@@ -83,7 +83,6 @@ public class GDX3DPanel
          scene.addModelInstance(camera3D.getFocusPointSphere(), GDXSceneLevel.VIRTUAL);
       viewport = new ScreenViewport(camera3D);
       viewport.setUnitsPerPixel(1.0f); // TODO: Is this relevant for high DPI displays?
-
    }
 
    public void render()
