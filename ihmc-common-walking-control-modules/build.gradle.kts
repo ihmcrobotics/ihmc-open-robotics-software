@@ -31,7 +31,7 @@ mainDependencies {
    api("us.ihmc:ihmc-convex-optimization:0.17.13")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-java-toolkit:source")
-   api("us.ihmc:ihmc-footstep-planning:source")
+//   api("us.ihmc:ihmc-footstep-planning:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
 }
 
