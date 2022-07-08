@@ -9,8 +9,11 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.gdx.simulation.scs2.GDXMultiBodySystemFactories;
 import us.ihmc.gdx.simulation.scs2.GDXRigidBody;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
+import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.CrossFourBarJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.scs2.definition.robot.CrossFourBarJointDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.tools.thread.Activator;
 
@@ -45,6 +48,21 @@ public class GDXMultiBodyGraphic extends ImGuiGDXVisualizer implements Renderabl
 
       for (JointBasics childrenJoint : rigidBody.getChildrenJoints())
       {
+         if (childrenJoint instanceof CrossFourBarJointReadOnly)
+         {
+            CrossFourBarJoint fourBarJoint = (CrossFourBarJoint) childrenJoint;
+            CrossFourBarJointDefinition fourBarJointDefinition = (CrossFourBarJointDefinition) robotDefinition.getJointDefinition(fourBarJoint.getName());
+
+            fourBarJoint.getJointA().setSuccessor(GDXMultiBodySystemFactories.toGDXRigidBody(fourBarJoint.getBodyDA(),
+                                                                                             fourBarJointDefinition.getBodyDA(),
+                                                                                             Gdx.app::postRunnable,
+                                                                                             robotDefinition.getResourceClassLoader()));
+            fourBarJoint.getJointB().setSuccessor(GDXMultiBodySystemFactories.toGDXRigidBody(fourBarJoint.getBodyBC(),
+                                                                                             fourBarJointDefinition.getBodyBC(),
+                                                                                             Gdx.app::postRunnable,
+                                                                                             robotDefinition.getResourceClassLoader()));
+         }
+
          childrenJoint.setSuccessor(loadRigidBody(childrenJoint.getSuccessor(), robotDefinition));
       }
 
