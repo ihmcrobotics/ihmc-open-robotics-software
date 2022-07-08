@@ -2,7 +2,10 @@ package us.ihmc.perception;
 
 import boofcv.struct.calib.CameraPinholeBrown;
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.opencv.global.*;
+import org.bytedeco.opencv.global.opencv_aruco;
+import org.bytedeco.opencv.global.opencv_calib3d;
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_aruco.DetectorParameters;
 import org.bytedeco.opencv.opencv_aruco.Dictionary;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -16,6 +19,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.tools.thread.SwapReference;
@@ -101,7 +105,7 @@ public class OpenCVArUcoMarkerDetection
       cameraMatrix.ptr(2, 1).putFloat(0.0f);
       cameraMatrix.ptr(2, 2).putFloat(1.0f);
    }
-   
+
    public void update()
    {
       if (enabled)
@@ -110,7 +114,9 @@ public class OpenCVArUcoMarkerDetection
          {
             if (alphaRemovalMode)
             {
-               opencv_imgproc.cvtColor(sourceColorImage.getBytedecoOpenCVMat(), rgb888ColorImage.getBytedecoOpenCVMat(), opencv_imgproc.COLOR_RGBA2RGB);
+               opencv_imgproc.cvtColor(sourceColorImage.getBytedecoOpenCVMat(),
+                                       rgb888ColorImage.getBytedecoOpenCVMat(),
+                                       opencv_imgproc.COLOR_RGBA2RGB);
             }
             else
             {
@@ -196,7 +202,15 @@ public class OpenCVArUcoMarkerDetection
 
          synchronized (detectionDataSync)
          {
-            cornerForPose.put(idToCornersMap.get(marker.getId()));
+            try
+            {
+               cornerForPose.put(idToCornersMap.get(marker.getId()));
+            }
+            catch (NullPointerException nullPointerException)
+            {
+               LogTools.error(nullPointerException.getMessage());
+               return;
+            }
          }
 
          opencv_aruco.estimatePoseSingleMarkers(cornerForPose,
@@ -299,5 +313,10 @@ public class OpenCVArUcoMarkerDetection
    public void setEnabled(boolean enabled)
    {
       this.enabled = enabled;
+   }
+
+   public SwapReference<Mat> getIds()
+   {
+      return ids;
    }
 }
