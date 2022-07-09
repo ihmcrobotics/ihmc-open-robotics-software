@@ -70,7 +70,7 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends ImGuiGDXBehaviorUIInt
          lookAndStepUI.setGoal(goalPose);
          traverseStairsUI.setGoal(goalPose);
       }, Color.GREEN);
-      baseUI.addImGui3DViewInputProcessor(goalAffordance::processImGui3DViewInput);
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(goalAffordance::processImGui3DViewInput);
 
       lookAndStepUI.create(baseUI);
       traverseStairsUI.create(baseUI);

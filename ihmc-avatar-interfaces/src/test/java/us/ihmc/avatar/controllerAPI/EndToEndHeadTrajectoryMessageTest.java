@@ -176,7 +176,7 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
    {
       assertEquals(2, findNumberOfWaypoints(bodyName, yoVariableHolder));
       Quaternion controllerDesiredOrientation = findControllerDesiredOrientation(bodyName, yoVariableHolder);
-      EuclidCoreTestTools.assertQuaternionEquals(desiredOrientation, controllerDesiredOrientation, EPSILON_FOR_DESIREDS);
+      EuclidCoreTestTools.assertEquals(desiredOrientation, controllerDesiredOrientation, EPSILON_FOR_DESIREDS);
    }
 
    @BeforeEach

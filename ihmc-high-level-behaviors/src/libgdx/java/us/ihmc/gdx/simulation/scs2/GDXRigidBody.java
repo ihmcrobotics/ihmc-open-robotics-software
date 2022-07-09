@@ -4,6 +4,8 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.CrossFourBarJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.iterators.RigidBodyIterable;
@@ -38,6 +40,18 @@ public class GDXRigidBody implements RigidBodyBasics
          visualGraphicsNode.updatePose();
       if (collisionGraphicsNode != null)
          collisionGraphicsNode.updatePose();
+
+      for (JointBasics childrenJoint : rigidBody.getChildrenJoints())
+      {
+         if (childrenJoint instanceof CrossFourBarJointReadOnly)
+         {
+            CrossFourBarJoint fourBarJoint = (CrossFourBarJoint) childrenJoint;
+            GDXRigidBody bodyDA = (GDXRigidBody) fourBarJoint.getJointA().getSuccessor();
+            bodyDA.updateGraphics();
+            GDXRigidBody bodyBC = (GDXRigidBody) fourBarJoint.getJointB().getSuccessor();
+            bodyBC.updateGraphics();
+         }
+      }
    }
 
    public void setVisualGraphics(FrameGDXGraphicsNode visualGraphicsNode)
@@ -69,6 +83,23 @@ public class GDXRigidBody implements RigidBodyBasics
          {
             rigidBody.getVisualGraphicsNode().getRenderables(renderables, pool);
          }
+         for (JointBasics childrenJoint : rigidBody.getChildrenJoints())
+         {
+            if (childrenJoint instanceof CrossFourBarJointReadOnly)
+            {
+               CrossFourBarJoint fourBarJoint = (CrossFourBarJoint) childrenJoint;
+               GDXRigidBody bodyDA = (GDXRigidBody) fourBarJoint.getJointA().getSuccessor();
+               if (bodyDA.getVisualGraphicsNode() != null)
+               {
+                  bodyDA.getVisualGraphicsNode().getRenderables(renderables, pool);
+               }
+               GDXRigidBody bodyBC = (GDXRigidBody) fourBarJoint.getJointB().getSuccessor();
+               if (bodyBC.getVisualGraphicsNode() != null)
+               {
+                  bodyBC.getVisualGraphicsNode().getRenderables(renderables, pool);
+               }
+            }
+         }
       }
    }
 
@@ -79,6 +110,23 @@ public class GDXRigidBody implements RigidBodyBasics
          if (rigidBody.getCollisionGraphicsNode() != null)
          {
             rigidBody.getCollisionGraphicsNode().getRenderables(renderables, pool);
+         }
+         for (JointBasics childrenJoint : rigidBody.getChildrenJoints())
+         {
+            if (childrenJoint instanceof CrossFourBarJointReadOnly)
+            {
+               CrossFourBarJoint fourBarJoint = (CrossFourBarJoint) childrenJoint;
+               GDXRigidBody bodyDA = (GDXRigidBody) fourBarJoint.getJointA().getSuccessor();
+               if (bodyDA.getCollisionGraphicsNode() != null)
+               {
+                  bodyDA.getCollisionGraphicsNode().getRenderables(renderables, pool);
+               }
+               GDXRigidBody bodyBC = (GDXRigidBody) fourBarJoint.getJointB().getSuccessor();
+               if (bodyBC.getCollisionGraphicsNode() != null)
+               {
+                  bodyBC.getCollisionGraphicsNode().getRenderables(renderables, pool);
+               }
+            }
          }
       }
    }

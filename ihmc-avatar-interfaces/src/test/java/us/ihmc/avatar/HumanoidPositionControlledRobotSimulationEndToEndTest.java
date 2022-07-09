@@ -202,8 +202,8 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
       createSimulation(testInfo, ghostRobot, initialSetup, environment);
       simulationTestHelper.start();
 
-      YoInteger totalNumberOfFrames = new YoInteger("totalNumberOfFrames", simulationTestHelper.getSimulationSession().getRootRegistry());
-      YoInteger frameIndex = new YoInteger("frameIndex", simulationTestHelper.getSimulationSession().getRootRegistry());
+      YoInteger totalNumberOfFrames = new YoInteger("totalNumberOfFrames", simulationTestHelper.getSimulationConstructionSet().getRootRegistry());
+      YoInteger frameIndex = new YoInteger("frameIndex", simulationTestHelper.getSimulationConstructionSet().getRootRegistry());
       //      scs.setupGraph(totalNumberOfFrames.getFullNameString(), frameIndex.getFullNameString()); // TODO
 
       for (InputStream scriptInputStream : scriptInputStreams)
@@ -254,7 +254,6 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
    public void runProcessedScriptTest(TestInfo testInfo,
                                       RobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup,
                                       CommonAvatarEnvironmentInterface environment,
-                                      double durationPerKeyframe,
                                       InputStream... scriptInputStreams)
          throws Exception
    {
@@ -269,8 +268,14 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
          assertTrue(simulationTestHelper.simulateNow(1.0));
 
          MultiContactScriptPostProcessor scriptPostProcessor = new MultiContactScriptPostProcessor(getRobotModel());
-         scriptPostProcessor.setDurationPerKeyframe(durationPerKeyframe);
-         WholeBodyJointspaceTrajectoryMessage message = scriptPostProcessor.process1(scriptReader.getAllItems(), true);
+
+         double timePerKeyframe = 1.0;
+         for (int i = 0; i < scriptReader.getAllItems().size(); i++)
+         {
+            scriptReader.getAllItems().get(i).setExecutionDuration(timePerKeyframe);
+         }
+
+         WholeBodyJointspaceTrajectoryMessage message = scriptPostProcessor.process1(scriptReader.getAllItems());
 
          simulationTestHelper.publishToController(message);
          assertTrue(simulationTestHelper.simulateNow(message.getJointTrajectoryMessages().get(0).getTrajectoryPoints().getLast().getTime() + 2.0));

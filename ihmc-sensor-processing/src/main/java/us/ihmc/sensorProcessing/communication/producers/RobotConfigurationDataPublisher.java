@@ -1,13 +1,16 @@
 package us.ihmc.sensorProcessing.communication.producers;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import controller_msgs.msg.dds.IMUPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.RobotFrameData;
 import controller_msgs.msg.dds.SpatialVectorMessage;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.robotController.RawOutputWriter;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.ros2.ROS2Topic;
@@ -26,6 +29,8 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
    private final List<? extends OneDoFJointStateReadOnly> jointSensorData;
    private final List<? extends IMUSensorReadOnly> imuSensorData;
    private final List<? extends ForceSensorDataReadOnly> forceSensorData;
+
+   private List<RobotFrameDataPublisher> robotFrameDataPublishers = new ArrayList<>();
    private final SensorTimestampHolder timestampHolder;
    private final RobotMotionStatusHolder robotMotionStatusHolder;
 
@@ -51,10 +56,16 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
     * @param robotMotionStatusHolder the data provider for the robot motion status.
     * @param publishPeriod           period in nanoseconds to publish.
     */
-   public RobotConfigurationDataPublisher(RealtimeROS2Node realtimeROS2Node, ROS2Topic<?> outputTopic, FloatingJointStateReadOnly rootJointSensorData,
-                                          List<? extends OneDoFJointStateReadOnly> jointSensorData, List<? extends IMUSensorReadOnly> imuSensorData,
-                                          List<? extends ForceSensorDataReadOnly> forceSensorData, SensorTimestampHolder timestampHolder,
-                                          RobotMotionStatusHolder robotMotionStatusHolder, long publishPeriod)
+   public RobotConfigurationDataPublisher(RealtimeROS2Node realtimeROS2Node,
+                                          ROS2Topic<?> outputTopic,
+                                          FloatingJointStateReadOnly rootJointSensorData,
+                                          List<? extends OneDoFJointStateReadOnly> jointSensorData,
+                                          List<? extends IMUSensorReadOnly> imuSensorData,
+                                          List<? extends ForceSensorDataReadOnly> forceSensorData,
+                                          List<? extends ReferenceFrame> frameData,
+                                          SensorTimestampHolder timestampHolder,
+                                          RobotMotionStatusHolder robotMotionStatusHolder,
+                                          long publishPeriod)
    {
       this.rootJointSensorData = rootJointSensorData;
       this.jointSensorData = jointSensorData;
@@ -66,6 +77,12 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
 
       robotConfigurationData.setJointNameHash(RobotConfigurationDataFactory.calculateJointNameHash(jointSensorData, forceSensorData, imuSensorData));
       robotConfigurationDataPublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, RobotConfigurationData.class, outputTopic);
+    
+      // Create RobotFrameDataPublishers here.
+      for (ReferenceFrame frame : frameData)
+      {
+         robotFrameDataPublishers.add(new RobotFrameDataPublisher(frame, realtimeROS2Node, outputTopic));
+      }
    }
 
    @Override
@@ -150,6 +167,12 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
       MessageTools.setRobotConfigurationDataSequenceId(robotConfigurationData, this.sequenceId);
 
       robotConfigurationDataPublisher.publish(robotConfigurationData);
+
+      // publish robot frame data
+      for (RobotFrameDataPublisher robotFrameDataPublisher : robotFrameDataPublishers)
+      {
+         robotFrameDataPublisher.publish();
+      }
    }
 
    @Override

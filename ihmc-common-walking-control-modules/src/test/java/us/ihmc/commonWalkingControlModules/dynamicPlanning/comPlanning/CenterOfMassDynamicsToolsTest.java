@@ -41,16 +41,16 @@ public class CenterOfMassDynamicsToolsTest
       CenterOfMassDynamicsTools.computeDesiredDCMPosition(omega, time, startDCM, startVRP, forwardDCM);
       CenterOfMassDynamicsTools.computeDesiredDCMPosition(omega, -time, forwardDCM, startVRP, backwardDCM);
 
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(startDCM, backwardDCM, epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(startDCM, backwardDCM, epsilon);
 
       time = 0.0;
       CenterOfMassDynamicsTools.computeDesiredDCMPosition(omega, time, startDCM, startVRP, forwardDCM);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(startDCM, forwardDCM, epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(startDCM, forwardDCM, epsilon);
 
       time = RandomNumbers.nextDouble(random, 1.0);
       startVRP.set(startDCM);
       CenterOfMassDynamicsTools.computeDesiredDCMPosition(omega, time, startDCM, startVRP, forwardDCM);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(startDCM, forwardDCM, epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(startDCM, forwardDCM, epsilon);
 
       for (int i = 0; i < iters; i++)
       {
@@ -79,24 +79,24 @@ public class CenterOfMassDynamicsToolsTest
          comExpected.scaleAdd(Math.exp(-omega * time), startCoM, comExpected);
          comExpected.scaleAdd(1.0 - 0.5 * (Math.exp(omega * time) + Math.exp(-omega * time)), startVRP, comExpected);
 
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(dcmExpected, dcmToTest, epsilon);
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(startDCM, backwardDcmToTest, epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(dcmExpected, dcmToTest, epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(startDCM, backwardDcmToTest, epsilon);
 
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(comExpected, comToTest, epsilon);
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(startCoM, backwardCoMToTest, epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(comExpected, comToTest, epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(startCoM, backwardCoMToTest, epsilon);
 
          if (time >= 0.0)
          {
             FramePoint3DReadOnly integratedDCM = integrateDCMForwardInTimeWithConstantVRP(time, omega, startDCM, startVRP);
-            EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(integratedDCM, dcmToTest, 1e-3);
+            EuclidFrameTestTools.assertGeometricallyEquals(integratedDCM, dcmToTest, 1e-3);
 
             FramePoint3DReadOnly integratedCoM = integrateCoMForwardInTimeWithConstantVRP(time, omega, startCoM, startDCM, startVRP);
-            EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(integratedCoM, comToTest, 1e-3);
+            EuclidFrameTestTools.assertGeometricallyEquals(integratedCoM, comToTest, 1e-3);
          }
          else
          { // FIXME
 //            FramePoint3DReadOnly integratedDCM = integrateDCMBackwardInTimeWithConstantVRP(time, omega, startDCM, startVRP);
-//            EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(integratedDCM, dcmToTest, 1e-3);
+//            EuclidFrameTestTools.assertGeometricallyEquals(integratedDCM, dcmToTest, 1e-3);
          }
       }
    }
@@ -177,24 +177,24 @@ public class CenterOfMassDynamicsToolsTest
       CenterOfMassDynamicsTools.computeDesiredDCMPositionForwardTime(omega, time, duration, startDCM, startVRP, endVRP, forwardDCM);
       CenterOfMassDynamicsTools.computeDesiredDCMPositionBackwardTime(omega, time, duration, forwardDCM, startVRP, endVRP, backwardDCM);
 
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(startDCM, backwardDCM, epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(startDCM, backwardDCM, epsilon);
 
       FramePoint3D forwardCoM = new FramePoint3D();
       FramePoint3D backwardCoM = new FramePoint3D();
       CenterOfMassDynamicsTools.computeDesiredCoMPositionForwardTime(omega, time, duration, startCoM, startDCM, startVRP, endVRP, forwardCoM);
       CenterOfMassDynamicsTools.computeDesiredCoMPositionBackwardTime(omega, time, duration, forwardCoM, forwardDCM, startVRP, endVRP, backwardCoM);
 
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(startCoM, backwardCoM, 2e-2);
+      EuclidFrameTestTools.assertGeometricallyEquals(startCoM, backwardCoM, 2e-2);
 
       CenterOfMassDynamicsTools.computeDesiredDCMPositionForwardTime(omega, duration, duration, startDCM, startVRP, endVRP, forwardDCM);
       CenterOfMassDynamicsTools.computeDesiredDCMPositionBackwardTime(omega, duration, duration, forwardDCM, startVRP, endVRP, backwardDCM);
 
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(startDCM, backwardDCM, epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(startDCM, backwardDCM, epsilon);
 
       CenterOfMassDynamicsTools.computeDesiredCoMPositionForwardTime(omega, duration, duration, startCoM, startDCM, startVRP, endVRP, forwardCoM);
       CenterOfMassDynamicsTools.computeDesiredCoMPositionBackwardTime(omega, duration, duration, forwardCoM, forwardDCM, startVRP, endVRP, backwardCoM);
 
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(startCoM, backwardCoM, 2e-2);
+      EuclidFrameTestTools.assertGeometricallyEquals(startCoM, backwardCoM, 2e-2);
 
 
       for (int i = 0; i < iters; i++)
@@ -217,8 +217,8 @@ public class CenterOfMassDynamicsToolsTest
          CenterOfMassDynamicsTools.computeDesiredDCMPositionBackwardTime(omega, time, duration, dcmToTestAlt, startVRP, endVRP, backwardDcmToTest);
          computeDesiredDCMPositionBackwardTime(omega, time, duration, dcmToTestAlt, startVRP, endVRP, backwardDcmToTestAlt);
 
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(dcmToTestAlt, dcmToTest, epsilon);
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(backwardDcmToTestAlt, backwardDcmToTest, epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(dcmToTestAlt, dcmToTest, epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(backwardDcmToTestAlt, backwardDcmToTest, epsilon);
 
          double alpha = 1.0 - time / duration - 1.0 / (omega * duration) - Math.exp(omega * time) * (1.0 - 1.0 / (omega * duration));
          double beta = time / duration + 1.0 / (omega * duration) - Math.exp(omega * time) / (omega * duration);
@@ -237,19 +237,19 @@ public class CenterOfMassDynamicsToolsTest
          comExpected.scaleAdd(startVRPCoefficient, startVRP, comExpected);
          comExpected.scaleAdd(endVRPCoefficient, endVRP, comExpected);
 
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(dcmExpected, dcmToTest, epsilon);
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(startDCM, backwardDcmToTest, epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(dcmExpected, dcmToTest, epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(startDCM, backwardDcmToTest, epsilon);
 
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(comExpected, comToTest, epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(comExpected, comToTest, epsilon);
 
          FramePoint3DReadOnly integratedDCM = integrateDCMForwardInTimeWithLinearVRP(time, duration, omega, startDCM, startVRP, endVRP);
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(integratedDCM, dcmToTest, 1e-3);
+         EuclidFrameTestTools.assertGeometricallyEquals(integratedDCM, dcmToTest, 1e-3);
 
          FramePoint3DReadOnly integratedCoM = integrateCoMForwardInTimeWithLinearVRP(time, duration, omega, startCoM, startDCM, startVRP, endVRP);
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(integratedCoM, comToTest, 1e-3);
+         EuclidFrameTestTools.assertGeometricallyEquals(integratedCoM, comToTest, 1e-3);
 
          FramePoint3DReadOnly backwardIntegratedDCM = integrateDCMBackwardInTimeWithLinearVRP(time, duration, omega, integratedDCM, startVRP, endVRP);
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(backwardIntegratedDCM, backwardDcmToTest, 1e-3);
+         EuclidFrameTestTools.assertGeometricallyEquals(backwardIntegratedDCM, backwardDcmToTest, 1e-3);
       }
    }
 

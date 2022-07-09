@@ -1,0 +1,24 @@
+#ifndef __controller_msgs__msg__RobotFrameData__idl__
+#define __controller_msgs__msg__RobotFrameData__idl__
+
+#include "geometry_msgs/msg/./Pose_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="controller_msgs::msg::dds_::RobotFrameData_")
+      struct RobotFrameData
+      {
+        long long timestamp;
+        long frame_name_hash;
+        geometry_msgs::msg::dds::Pose frame_pose_in_world;
+        sequence<string, 2056> frame_name;
+      };
+    };
+  };
+};
+
+#endif

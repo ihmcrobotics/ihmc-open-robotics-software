@@ -100,7 +100,7 @@ public class GDXImGuiBasedUI2D
       perspectiveManager.getSaveListeners().add(this::saveApplicationSettings);
       perspectiveManager.applyPerspectiveDirectory();
 
-      imGuiWindowAndDockSystem.getPanelManager().addPrimaryPanel(VIEW_2D_WINDOW_NAME);
+      imGuiWindowAndDockSystem.getPanelManager().addSelfManagedPanel(VIEW_2D_WINDOW_NAME);
    }
 
    public void launchGDXApplication(Lwjgl3ApplicationAdapter applicationAdapter)

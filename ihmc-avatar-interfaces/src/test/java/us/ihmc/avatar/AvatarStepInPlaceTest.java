@@ -90,7 +90,7 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
 
       double z = getForcePointOffsetZInChestFrame();
 
-      pushRobotController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationSession().getTime(),
+      pushRobotController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationConstructionSet().getTime(),
                                                         simulationTestHelper.getRobot(),
                                                         fullRobotModel.getPelvis().getParentJoint().getName(),
                                                         new Vector3D(0, 0, z));

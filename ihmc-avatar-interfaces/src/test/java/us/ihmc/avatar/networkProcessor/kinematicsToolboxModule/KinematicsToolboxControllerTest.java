@@ -52,6 +52,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.definition.geometry.Sphere3DDefinition;
 import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
@@ -61,11 +62,7 @@ import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
-import us.ihmc.scs2.session.SessionMode;
 import us.ihmc.scs2.session.tools.SCS1GraphicConversionTools;
-import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizer;
-import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizerControls;
-import us.ihmc.scs2.simulation.VisualizationSession;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.tools.MemoryTools;
@@ -91,8 +88,7 @@ public final class KinematicsToolboxControllerTest
    private YoInteger numberOfIterations;
    private YoDouble finalSolutionQuality;
 
-   private VisualizationSession session;
-   private SessionVisualizerControls guiControls;
+   private SimulationConstructionSet2 scs;
 
    private Robot robot;
    private Robot ghost;
@@ -124,32 +120,30 @@ public final class KinematicsToolboxControllerTest
                                                           yoGraphicsListRegistry,
                                                           mainRegistry);
 
-      robot = new Robot(robotDefinition, ReferenceFrame.getWorldFrame());
+      robotDefinition.ignoreAllJoints();
+      robot = new Robot(robotDefinition, SimulationConstructionSet2.inertialFrame);
       toolboxUpdater = createToolboxUpdater();
       robot.getControllerManager().addController(toolboxUpdater);
 
       if (ghostRobotDefinition != null)
       {
+         ghostRobotDefinition.ignoreAllJoints();
          ghostRobotDefinition.setName("Ghost");
          ghostRobotDefinition.getAllRigidBodies().forEach(body -> body.getVisualDefinitions().forEach(v -> v.setMaterialDefinition(ghostAppearance)));
-         ghost = new Robot(ghostRobotDefinition, ReferenceFrame.getWorldFrame());
+         ghost = new Robot(ghostRobotDefinition, SimulationConstructionSet2.inertialFrame);
       }
 
       if (visualize)
       {
-         session = new VisualizationSession();
+         scs = new SimulationConstructionSet2();
          if (ghost != null)
-            session.addRobot(ghost);
-         session.addRobot(robot);
-         session.getYoGraphicDefinitions().addAll(SCS1GraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
+            scs.addRobot(ghost);
+         scs.addRobot(robot);
+         scs.addYoGraphics(SCS1GraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
 
-         LogTools.info("Starting GUI");
-         guiControls = SessionVisualizer.startSessionVisualizer(session, false);
-         guiControls.setCameraFocusPosition(0.0, 0.0, 1.0);
-         guiControls.setCameraPosition(8.0, 0.0, 3.0);
-         LogTools.info("Waiting for GUI");
-         guiControls.waitUntilFullyUp();
-         LogTools.info("GUI's up");
+         scs.start(true, true, true);
+         scs.setCameraFocusPosition(0.0, 0.0, 1.0);
+         scs.setCameraPosition(8.0, 0.0, 3.0);
       }
    }
 
@@ -169,8 +163,8 @@ public final class KinematicsToolboxControllerTest
    {
       if (visualize)
       {
-         session.setSessionMode(SessionMode.PAUSE);
-         guiControls.waitUntilDown();
+         scs.pause();
+         scs.waitUntilVisualizerDown();
          LogTools.info("GUI's down");
       }
 
@@ -180,16 +174,10 @@ public final class KinematicsToolboxControllerTest
          mainRegistry = null;
       }
 
-      if (guiControls != null)
+      if (scs != null)
       {
-         guiControls.shutdownNow();
-         guiControls = null;
-      }
-
-      if (session != null)
-      {
-         session.shutdownSession();
-         session = null;
+         scs.shutdownSession();
+         scs = null;
       }
 
       commandInputManager = null;
@@ -558,9 +546,10 @@ public final class KinematicsToolboxControllerTest
 
       Sphere3D sphere = new Sphere3D(0.0, 0.75, 0.20, 0.5);
 
-      this.guiControls.addStaticVisual(new VisualDefinition(sphere.getCentroid(),
-                                                            new Sphere3DDefinition(sphere.getRadius()),
-                                                            new MaterialDefinition(ColorDefinitions.DarkSalmon())));
+      if (visualize)
+         scs.addStaticVisual(new VisualDefinition(sphere.getCentroid(),
+                                                  new Sphere3DDefinition(sphere.getRadius()),
+                                                  new MaterialDefinition(ColorDefinitions.DarkSalmon())));
 
       FrameSphere3D staticFrameSphere = new FrameSphere3D(worldFrame, sphere);
       Collidable staticCollidable = new Collidable(null, 0b001, 0b110, staticFrameSphere);
@@ -611,7 +600,7 @@ public final class KinematicsToolboxControllerTest
       {
          for (int i = 0; i < numberOfIterations; i++)
          {
-            session.runTick();
+            scs.simulateNow(1);
          }
       }
       else

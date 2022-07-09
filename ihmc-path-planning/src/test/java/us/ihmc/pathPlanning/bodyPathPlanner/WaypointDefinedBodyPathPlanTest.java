@@ -76,27 +76,27 @@ public class WaypointDefinedBodyPathPlanTest
       // test point along path method
       Pose3D testPose = new Pose3D();
       plan.getPointAlongPath(0.0, testPose);
-      EuclidCoreTestTools.assertTuple3DEquals(positionWaypoints.get(0), testPose.getPosition(), epsilon);
+      EuclidCoreTestTools.assertEquals(positionWaypoints.get(0), testPose.getPosition(), epsilon);
       plan.getPointAlongPath(segmentLength1 / toalLength, testPose);
-      EuclidCoreTestTools.assertTuple3DEquals(positionWaypoints.get(1), testPose.getPosition(), epsilon);
+      EuclidCoreTestTools.assertEquals(positionWaypoints.get(1), testPose.getPosition(), epsilon);
       plan.getPointAlongPath(1.0, testPose);
-      EuclidCoreTestTools.assertTuple3DEquals(positionWaypoints.get(2), testPose.getPosition(), epsilon);
+      EuclidCoreTestTools.assertEquals(positionWaypoints.get(2), testPose.getPosition(), epsilon);
 
       // test get closest point method
       double d1 = plan.getClosestPoint(new Point2D(-1.0, 0.0), testPose);
-      EuclidCoreTestTools.assertTuple3DEquals(positionWaypoints.get(0), testPose.getPosition(), epsilon);
+      EuclidCoreTestTools.assertEquals(positionWaypoints.get(0), testPose.getPosition(), epsilon);
       Assert.assertEquals(0.0, d1, epsilon);
       double d2 = plan.getClosestPoint(new Point2D(10.0, 0.0), testPose);
-      EuclidCoreTestTools.assertTuple3DEquals(positionWaypoints.get(2), testPose.getPosition(), epsilon);
+      EuclidCoreTestTools.assertEquals(positionWaypoints.get(2), testPose.getPosition(), epsilon);
       Assert.assertEquals(1.0, d2, epsilon);
       double d3 = plan.getClosestPoint(new Point2D(10.0, -10.0), testPose);
-      EuclidCoreTestTools.assertTuple3DEquals(positionWaypoints.get(1), testPose.getPosition(), epsilon);
+      EuclidCoreTestTools.assertEquals(positionWaypoints.get(1), testPose.getPosition(), epsilon);
       Assert.assertEquals(segmentLength1 / toalLength, d3, epsilon);
       double d4 = plan.getClosestPoint(new Point2D(0.25, 0.1), testPose);
-      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(0.25, 0.0, 0.0), testPose.getPosition(), epsilon);
+      EuclidCoreTestTools.assertEquals(new Point3D(0.25, 0.0, 0.0), testPose.getPosition(), epsilon);
       Assert.assertEquals(0.5 * segmentLength1 / toalLength, d4, epsilon);
       double d5 = plan.getClosestPoint(new Point2D(0.75 + 1.0, 0.5 - 0.5), testPose);
-      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(0.75, 0.5, 0.0), testPose.getPosition(), epsilon);
+      EuclidCoreTestTools.assertEquals(new Point3D(0.75, 0.5, 0.0), testPose.getPosition(), epsilon);
       Assert.assertEquals(1.0 - 0.5 * segmentLength2 / toalLength, d5, epsilon);
 
       if (showPlotter)

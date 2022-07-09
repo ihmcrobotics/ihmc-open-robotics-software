@@ -261,12 +261,14 @@ public class WalkingMessageHandler
 
       boolean trustHeightOfFootsteps = command.isTrustHeightOfFootsteps();
       boolean areFootstepsAdjustable = command.areFootstepsAdjustable();
+      boolean shouldCheckPlanForReachability = command.getShouldCheckForReachability();
 
       for (int i = 0; i < command.getNumberOfFootsteps(); i++)
       {
+         boolean shouldCheckStepForReachability = shouldCheckPlanForReachability || command.getFootstep(i).getShouldCheckForReacahbility();
          setFootstepTiming(command.getFootstep(i), command.getExecutionTiming(), upcomingFootstepTimings.add(), pauseDurationAfterStep.add(),
                            command.getExecutionMode());
-         setFootstep(command.getFootstep(i), trustHeightOfFootsteps, areFootstepsAdjustable, upcomingFootsteps.add());
+         setFootstep(command.getFootstep(i), trustHeightOfFootsteps, areFootstepsAdjustable, shouldCheckStepForReachability, upcomingFootsteps.add());
          if (command.getFootstep(i).getStepConstraints().getNumberOfConstraints() > 0)
             upcomingStepConstraints.add().set(command.getFootstep(i).getStepConstraints());
          else
@@ -620,9 +622,9 @@ public class WalkingMessageHandler
    private final FootstepStatusMessage footstepStatus = new FootstepStatusMessage();
 
    public void reportFootstepStarted(RobotSide robotSide, FramePose3DReadOnly desiredFootPoseInWorld, FramePose3DReadOnly actualFootPoseInWorld,
-                                     double swingDuration)
+                                     double swingDuration, long sequenceID)
    {
-      reportFootstepStatus(robotSide, FootstepStatus.STARTED, desiredFootPoseInWorld, actualFootPoseInWorld, swingDuration);
+      reportFootstepStatus(robotSide, FootstepStatus.STARTED, desiredFootPoseInWorld, actualFootPoseInWorld, swingDuration, sequenceID);
       executingFootstep.set(true);
 
       if (yoTime != null)
@@ -630,19 +632,20 @@ public class WalkingMessageHandler
    }
 
    public void reportFootstepCompleted(RobotSide robotSide, FramePose3DReadOnly desiredFootPoseInWorld, FramePose3DReadOnly actualFootPoseInWorld,
-                                       double swingDuration)
+                                       double swingDuration, long sequenceID)
    {
-      reportFootstepStatus(robotSide, FootstepStatus.COMPLETED, desiredFootPoseInWorld, actualFootPoseInWorld, swingDuration);
+      reportFootstepStatus(robotSide, FootstepStatus.COMPLETED, desiredFootPoseInWorld, actualFootPoseInWorld, swingDuration, sequenceID);
       executingFootstep.set(false);
    }
 
    private void reportFootstepStatus(RobotSide robotSide, FootstepStatus status, FramePose3DReadOnly desiredFootPoseInWorld,
-                                     FramePose3DReadOnly actualFootPoseInWorld, double swingDuration)
+                                     FramePose3DReadOnly actualFootPoseInWorld, double swingDuration, long sequenceID)
    {
       desiredFootPoseInWorld.checkReferenceFrameMatch(worldFrame);
       actualFootPoseInWorld.checkReferenceFrameMatch(worldFrame);
 
       footstepStatus.setFootstepStatus(status.toByte());
+      footstepStatus.setSequenceId(sequenceID);
       footstepStatus.setRobotSide(robotSide.toByte());
       footstepStatus.setFootstepIndex(currentFootstepIndex.getIntegerValue());
       footstepStatus.getActualFootOrientationInWorld().set(actualFootPoseInWorld.getOrientation());
@@ -841,9 +844,9 @@ public class WalkingMessageHandler
       return transferToAndNextFootstepsData;
    }
 
-   private void setFootstep(FootstepDataCommand footstepData, boolean trustHeight, boolean isAdjustable, Footstep footstepToSet)
+   private void setFootstep(FootstepDataCommand footstepData, boolean trustHeight, boolean isAdjustable, boolean shouldCheckForReachability, Footstep footstepToSet)
    {
-      footstepToSet.set(footstepData, trustHeight, isAdjustable);
+      footstepToSet.set(footstepData, trustHeight, isAdjustable, shouldCheckForReachability);
       footstepToSet.addOffset(planOffsetInWorld);
    }
 

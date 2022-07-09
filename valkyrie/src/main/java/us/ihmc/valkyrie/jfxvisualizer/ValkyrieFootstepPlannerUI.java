@@ -2,7 +2,6 @@ package us.ihmc.valkyrie.jfxvisualizer;
 
 import org.apache.commons.lang3.tuple.Triple;
 
-import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -15,6 +14,7 @@ import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.javafx.ApplicationNoModule;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.valkyrie.ValkyrieNetworkProcessor;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
@@ -26,7 +26,7 @@ import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
  * It allows user to create plans, log and load plans from disk, tune parameters,
  * and debug plans.
  */
-public class ValkyrieFootstepPlannerUI extends Application
+public class ValkyrieFootstepPlannerUI extends ApplicationNoModule
 {
    private SharedMemoryJavaFXMessager messager;
    private RemoteUIMessageConverter messageConverter;

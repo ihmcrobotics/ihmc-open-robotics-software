@@ -28,7 +28,7 @@ public class GDXXboxOneControllerJoystickTest
          {
             baseUI.create();
 
-            baseUI.get3DSceneManager().addRenderableProvider(this::getRenderables);
+            baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables);
             baseUI.getImGuiPanelManager().addPanel("Xbox Controller", this::renderImGuiWidgets);
          }
 

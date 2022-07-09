@@ -2,7 +2,10 @@ package us.ihmc.perception;
 
 import boofcv.struct.calib.CameraPinholeBrown;
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.opencv.global.*;
+import org.bytedeco.opencv.global.opencv_aruco;
+import org.bytedeco.opencv.global.opencv_calib3d;
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_aruco.DetectorParameters;
 import org.bytedeco.opencv.opencv_aruco.Dictionary;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -16,6 +19,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.tools.thread.SwapReference;
@@ -58,6 +62,7 @@ public class OpenCVArUcoMarkerDetection
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
    private int imageWidth;
    private int imageHeight;
+   private Scalar defaultBorderColor;
 
    public void create(BytedecoImage sourceColorImage, CameraPinholeBrown depthCameraIntrinsics, ReferenceFrame sensorFrame)
    {
@@ -88,6 +93,7 @@ public class OpenCVArUcoMarkerDetection
       rotationMatrix = new Mat(3, 3, opencv_core.CV_64FC1);
       translationVectors = new Mat();
       objectPoints = new Mat();
+      defaultBorderColor = new Scalar(0, 0, 255, 0);
 
       cameraMatrix.ptr(0, 0).putFloat((float) depthCameraIntrinsics.getFx());
       cameraMatrix.ptr(0, 1).putFloat(0.0f);
@@ -99,7 +105,7 @@ public class OpenCVArUcoMarkerDetection
       cameraMatrix.ptr(2, 1).putFloat(0.0f);
       cameraMatrix.ptr(2, 2).putFloat(1.0f);
    }
-   
+
    public void update()
    {
       if (enabled)
@@ -108,7 +114,9 @@ public class OpenCVArUcoMarkerDetection
          {
             if (alphaRemovalMode)
             {
-               opencv_imgproc.cvtColor(sourceColorImage.getBytedecoOpenCVMat(), rgb888ColorImage.getBytedecoOpenCVMat(), opencv_imgproc.COLOR_RGBA2RGB);
+               opencv_imgproc.cvtColor(sourceColorImage.getBytedecoOpenCVMat(),
+                                       rgb888ColorImage.getBytedecoOpenCVMat(),
+                                       opencv_imgproc.COLOR_RGBA2RGB);
             }
             else
             {
@@ -194,7 +202,15 @@ public class OpenCVArUcoMarkerDetection
 
          synchronized (detectionDataSync)
          {
-            cornerForPose.put(idToCornersMap.get(marker.getId()));
+            try
+            {
+               cornerForPose.put(idToCornersMap.get(marker.getId()));
+            }
+            catch (NullPointerException nullPointerException)
+            {
+               LogTools.error(nullPointerException.getMessage());
+               return;
+            }
          }
 
          opencv_aruco.estimatePoseSingleMarkers(cornerForPose,
@@ -232,11 +248,16 @@ public class OpenCVArUcoMarkerDetection
       }
    }
 
-   public void drawDetectedMarkers(Mat imageForDrawing, Scalar idColor)
+   public void drawDetectedMarkers(Mat imageForDrawing)
+   {
+      drawDetectedMarkers(imageForDrawing, defaultBorderColor);
+   }
+
+   public void drawDetectedMarkers(Mat imageForDrawing, Scalar borderColor)
    {
       synchronized (detectionDataSync)
       {
-         opencv_aruco.drawDetectedMarkers(imageForDrawing, corners.getForThreadTwo(), ids.getForThreadTwo(), idColor);
+         opencv_aruco.drawDetectedMarkers(imageForDrawing, corners.getForThreadTwo(), ids.getForThreadTwo(), borderColor);
       }
    }
 
@@ -294,19 +315,8 @@ public class OpenCVArUcoMarkerDetection
       this.enabled = enabled;
    }
 
-   /**
-    * Save a ArUco marker image of id to file.
-    */
-   public static void main(String[] args)
+   public SwapReference<Mat> getIds()
    {
-      Mat markerToSave = new Mat();
-      Dictionary dictionary = opencv_aruco.getPredefinedDictionary(DEFAULT_DICTIONARY);
-      int markerID = 0;
-      int totalImageSizePixels = 400;
-      for (; markerID < 100; markerID++)
-      {
-         opencv_aruco.drawMarker(dictionary, markerID, totalImageSizePixels, markerToSave, 2);
-         opencv_imgcodecs.imwrite("marker" + markerID + ".jpg", markerToSave);
-      }
+      return ids;
    }
 }

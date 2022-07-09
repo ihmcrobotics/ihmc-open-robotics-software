@@ -35,8 +35,8 @@ public class CombinedTerrainObjectTest
       expectedNormal.set(0.0, 1.0, 0.0);
 
       combinedTerrainObject.checkIfInside(pointToCheck.getX(), pointToCheck.getY(), pointToCheck.getZ(), resultIntersection, resultNormal);
-      EuclidCoreTestTools.assertTuple3DEquals(expectedIntersection, resultIntersection, 1e-4);
-      EuclidCoreTestTools.assertTuple3DEquals(expectedNormal, resultNormal, 1e-4);
+      EuclidCoreTestTools.assertEquals(expectedIntersection, resultIntersection, 1e-4);
+      EuclidCoreTestTools.assertEquals(expectedNormal, resultNormal, 1e-4);
    }
 
    private void setupTwoIntersectingBoxesMadeFromPolygons(CombinedTerrainObject3D combinedTerrainObject)

@@ -50,6 +50,10 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
             */
    public us.ihmc.euclid.tuple3D.Vector3D desired_root_linear_velocity_;
    public us.ihmc.euclid.tuple3D.Vector3D desired_root_angular_velocity_;
+   /**
+            * Support region used by the toolbox
+            */
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  support_region_;
    public double solution_quality_ = -1.0;
 
    public KinematicsToolboxOutputStatus()
@@ -62,6 +66,8 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
 
       desired_root_linear_velocity_ = new us.ihmc.euclid.tuple3D.Vector3D();
       desired_root_angular_velocity_ = new us.ihmc.euclid.tuple3D.Vector3D();
+      support_region_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (16, new geometry_msgs.msg.dds.PointPubSubType());
+
    }
 
    public KinematicsToolboxOutputStatus(KinematicsToolboxOutputStatus other)
@@ -84,6 +90,7 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       desired_joint_velocities_.set(other.desired_joint_velocities_);
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.desired_root_linear_velocity_, desired_root_linear_velocity_);
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.desired_root_angular_velocity_, desired_root_angular_velocity_);
+      support_region_.set(other.support_region_);
       solution_quality_ = other.solution_quality_;
 
    }
@@ -169,6 +176,15 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       return desired_root_angular_velocity_;
    }
 
+
+   /**
+            * Support region used by the toolbox
+            */
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getSupportRegion()
+   {
+      return support_region_;
+   }
+
    public void setSolutionQuality(double solution_quality)
    {
       solution_quality_ = solution_quality;
@@ -210,6 +226,13 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
 
       if (!this.desired_root_linear_velocity_.epsilonEquals(other.desired_root_linear_velocity_, epsilon)) return false;
       if (!this.desired_root_angular_velocity_.epsilonEquals(other.desired_root_angular_velocity_, epsilon)) return false;
+      if (this.support_region_.size() != other.support_region_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.support_region_.size(); i++)
+         {  if (!this.support_region_.get(i).epsilonEquals(other.support_region_.get(i), epsilon)) return false; }
+      }
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.solution_quality_, other.solution_quality_, epsilon)) return false;
 
 
@@ -237,6 +260,7 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       if (!this.desired_joint_velocities_.equals(otherMyClass.desired_joint_velocities_)) return false;
       if (!this.desired_root_linear_velocity_.equals(otherMyClass.desired_root_linear_velocity_)) return false;
       if (!this.desired_root_angular_velocity_.equals(otherMyClass.desired_root_angular_velocity_)) return false;
+      if (!this.support_region_.equals(otherMyClass.support_region_)) return false;
       if(this.solution_quality_ != otherMyClass.solution_quality_) return false;
 
 
@@ -267,6 +291,8 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       builder.append(this.desired_root_linear_velocity_);      builder.append(", ");
       builder.append("desired_root_angular_velocity=");
       builder.append(this.desired_root_angular_velocity_);      builder.append(", ");
+      builder.append("support_region=");
+      builder.append(this.support_region_);      builder.append(", ");
       builder.append("solution_quality=");
       builder.append(this.solution_quality_);
       builder.append("}");

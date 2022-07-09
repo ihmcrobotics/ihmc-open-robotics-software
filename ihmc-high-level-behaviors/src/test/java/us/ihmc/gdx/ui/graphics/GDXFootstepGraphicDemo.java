@@ -46,8 +46,8 @@ public class GDXFootstepGraphicDemo
             footsteps.add(new MinimalFootstep(RobotSide.RIGHT, rightPose, foothold, "Right"));
             footstepPlanGraphic.generateMeshes(footsteps);
 
-            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelBuilder.createCoordinateFrame(0.3)));
-            baseUI.get3DSceneManager().addRenderableProvider(footstepPlanGraphic);
+            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(GDXModelBuilder.createCoordinateFrame(0.3)));
+            baseUI.getPrimaryScene().addRenderableProvider(footstepPlanGraphic);
          }
 
          @Override

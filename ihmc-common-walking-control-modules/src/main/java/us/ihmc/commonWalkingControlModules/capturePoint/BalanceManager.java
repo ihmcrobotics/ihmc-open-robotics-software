@@ -22,6 +22,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.AngularMomentumHandler;
@@ -196,6 +197,7 @@ public class BalanceManager
    private final CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
    private final ExecutionTimer plannerTimer = new ExecutionTimer("icpPlannerTimer", registry);
+   private final ExecutionTimer amPlanningTimerTimer = new ExecutionTimer("amPlanningTimerTimer", registry);
 
    private boolean initializeOnStateChange = false;
    private boolean minimizeAngularMomentumRateZ = false;
@@ -503,15 +505,19 @@ public class BalanceManager
          contactState.getPlaneContactStateCommand(contactStateCommands.get(robotSide));
       }
 
-
-
-      if (heightControlCommand.getCommandType() == ControllerCoreCommandType.POINT)
+      if (heightControlCommand == null)
       {
+         linearMomentumRateControlModuleInput.setHasHeightCommand(false);
+      }
+      else if (heightControlCommand.getCommandType() == ControllerCoreCommandType.POINT)
+      {
+         linearMomentumRateControlModuleInput.setHasHeightCommand(true);
          linearMomentumRateControlModuleInput.setUsePelvisHeightCommand(true);
          linearMomentumRateControlModuleInput.setPelvisHeightControlCommand((PointFeedbackControlCommand) heightControlCommand);
       }
       else if (heightControlCommand.getCommandType() == ControllerCoreCommandType.MOMENTUM)
       {
+         linearMomentumRateControlModuleInput.setHasHeightCommand(true);
          linearMomentumRateControlModuleInput.setUsePelvisHeightCommand(false);
          linearMomentumRateControlModuleInput.setCenterOfMassHeightControlCommand((CenterOfMassFeedbackControlCommand) heightControlCommand);
       }
@@ -587,6 +593,7 @@ public class BalanceManager
       copTrajectory.compute(copTrajectoryState);
 
       List<SettableContactStateProvider> contactStateProviders = copTrajectory.getContactStateProviders();
+      amPlanningTimerTimer.startMeasurement();
       if (computeAngularMomentumOffset.getValue())
       {
          if (comTrajectoryPlanner.hasTrajectories())
@@ -607,6 +614,7 @@ public class BalanceManager
       {
          comTrajectoryPlanner.reset();
       }
+      amPlanningTimerTimer.stopMeasurement();
 
       comTrajectoryPlanner.solveForTrajectory(contactStateProviders);
 

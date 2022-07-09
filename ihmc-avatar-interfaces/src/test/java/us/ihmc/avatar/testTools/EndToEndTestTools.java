@@ -122,8 +122,8 @@ public class EndToEndTestTools
    {
       QuaternionReadOnly desiredOrientation = findFeedbackControllerDesiredOrientation(bodyName, yoVariableHolder);
       Vector3DReadOnly desiredAngularVelocity = findFeedbackControllerDesiredAngularVelocity(bodyName, yoVariableHolder);
-      EuclidCoreTestTools.assertQuaternionGeometricallyEquals("Orientation", expectedOrientation, desiredOrientation, epsilon, FORMAT);
-      EuclidCoreTestTools.assertTuple3DEquals("Angular Velocity", expectedAngularVelocity, desiredAngularVelocity, epsilon, FORMAT);
+      EuclidCoreTestTools.assertOrientation3DGeometricallyEquals("Orientation", expectedOrientation, desiredOrientation, epsilon, FORMAT);
+      EuclidCoreTestTools.assertEquals("Angular Velocity", expectedAngularVelocity, desiredAngularVelocity, epsilon, FORMAT);
    }
 
    public static void assertWaypointInGeneratorMatches(String bodyName,
@@ -135,12 +135,12 @@ public class EndToEndTestTools
       assertTrue(waypointIndexInController < RigidBodyTaskspaceControlState.maxPointsInGenerator, "Index too high: " + waypointIndexInController);
       SO3TrajectoryPoint actualWaypoint = findSO3TrajectoryPoint(bodyName, waypointIndexInController, yoVariableHolder);
       assertEquals(expectedWaypoint.getTime(), actualWaypoint.getTime(), epsilon, "Time");
-      EuclidCoreTestTools.assertQuaternionGeometricallyEquals("Orientation",
+      EuclidCoreTestTools.assertOrientation3DGeometricallyEquals("Orientation",
                                                               expectedWaypoint.getOrientation(),
                                                               actualWaypoint.getOrientationCopy(),
                                                               epsilon,
                                                               FORMAT);
-      EuclidCoreTestTools.assertTuple3DEquals("Angular Velocity",
+      EuclidCoreTestTools.assertEquals("Angular Velocity",
                                               expectedWaypoint.getAngularVelocity(),
                                               actualWaypoint.getAngularVelocityCopy(),
                                               epsilon,
@@ -298,7 +298,7 @@ public class EndToEndTestTools
       {
          if (!expectedDesiredPosition.containsNaN())
          {
-            EuclidCoreTestTools.assertTuple3DEquals(expectedDesiredPosition, statusMessage.getDesiredEndEffectorPosition(), epsilon);
+            EuclidCoreTestTools.assertEquals(expectedDesiredPosition, statusMessage.getDesiredEndEffectorPosition(), epsilon);
             assertFalse(statusMessage.getActualEndEffectorPosition().containsNaN());
          }
          else
@@ -355,7 +355,7 @@ public class EndToEndTestTools
 
       if (expectedDesiredOrientation != null)
       {
-         EuclidCoreTestTools.assertQuaternionGeometricallyEquals(new Quaternion(expectedDesiredOrientation),
+         EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(new Quaternion(expectedDesiredOrientation),
                                                                  statusMessage.getDesiredEndEffectorOrientation(),
                                                                  epsilon);
          assertFalse(statusMessage.getActualEndEffectorOrientation().containsNaN());
@@ -879,7 +879,7 @@ public class EndToEndTestTools
          }
       }
 
-      simulationTestHelper.getSimulationSession().getBuffer()
+      simulationTestHelper.getSimulationConstructionSet().getBuffer()
                           .exportDataMatlab(destination, var -> jointStateVariables.contains(var), reg -> reg == robot.getRegistry());
    }
 
@@ -891,15 +891,15 @@ public class EndToEndTestTools
    // Pattern-matched from TorqueSpeedDataExporter
    public static void exportTorqueSpeedCurves(SCS2AvatarTestingSimulation simulationTestHelper, File dataParentFolder, String dataNameSuffix, String info)
    {
-      YoDouble time = simulationTestHelper.getSimulationSession().getTime();
-      YoSharedBuffer buffer = simulationTestHelper.getSimulationSession().getBuffer();
+      YoDouble time = simulationTestHelper.getSimulationConstructionSet().getTime();
+      YoSharedBuffer buffer = simulationTestHelper.getSimulationConstructionSet().getBuffer();
       us.ihmc.scs2.simulation.robot.Robot robot = simulationTestHelper.getRobot();
       TorqueSpeedDataExporterGraphCreator graphCreator = new TorqueSpeedDataExporterGraphCreator(time, robot, buffer);
       DataExporterExcelWorkbookCreator excelWorkbookCreator = new DataExporterExcelWorkbookCreator(time, robot, buffer);
 
       // Stop the sim and disable the GUI:
-      simulationTestHelper.getSimulationSession().stopSessionThread();
-      simulationTestHelper.getSessionVisualizerControls().disableUserControls();
+      simulationTestHelper.getSimulationConstructionSet().stopSimulationThread();
+      simulationTestHelper.getSimulationConstructionSet().disableGUIControls();
 
       // Crop the Buffer to In/Out. This is important because of how we use the DataBuffer later and we assume that in point is at index=0:
       simulationTestHelper.cropBuffer();
@@ -925,7 +925,7 @@ public class EndToEndTestTools
       try
       {
          LogTools.info("Saving data");
-         simulationTestHelper.getSimulationSession().getBuffer().exportDataMatlab(new File(dataFolder, tagName + ".mat"));
+         simulationTestHelper.getSimulationConstructionSet().getBuffer().exportDataMatlab(new File(dataFolder, tagName + ".mat"));
          LogTools.info("Done Saving Data");
       }
       catch (IOException e)
@@ -969,7 +969,7 @@ public class EndToEndTestTools
       simulationTestHelper.exportVideo(new File(dataFolder, tagName + "_Video.mov"));
       LogTools.info("done creating video");
 
-      simulationTestHelper.getSessionVisualizerControls().enableUserControls();
+      simulationTestHelper.getSimulationConstructionSet().enableGUIControls();
    }
 
    private static void writeReadme(File readmeFile, String info)

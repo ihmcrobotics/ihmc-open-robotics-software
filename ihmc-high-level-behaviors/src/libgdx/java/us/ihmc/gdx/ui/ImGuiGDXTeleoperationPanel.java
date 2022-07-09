@@ -183,7 +183,7 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
    public void create(GDXImGuiBasedUI baseUI)
    {
       footstepGoal.create(baseUI, goal -> queueFootstepPlanning(), Color.YELLOW);
-      baseUI.addImGui3DViewInputProcessor(footstepGoal::processImGui3DViewInput);
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(footstepGoal::processImGui3DViewInput);
       footstepPlanningParametersTuner.create(footstepPlannerParameters,
                                              FootstepPlannerParameterKeys.keys,
                                              this::queueFootstepPlanning);

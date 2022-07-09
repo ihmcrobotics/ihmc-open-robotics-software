@@ -963,12 +963,12 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
          FrameVector3D expectedLinearVelocity = new FrameVector3D(ReferenceFrame.getWorldFrame(), trajectoryPoint.getLinearVelocity());
          expectedPosition.changeFrame(midFeetFrame);
          expectedLinearVelocity.changeFrame(midFeetFrame);
-         EuclidCoreTestTools.assertTuple3DEquals(expectedPosition, controllerTrajectoryPoint.getPosition(), EPSILON_FOR_DESIREDS);
-         EuclidCoreTestTools.assertTuple3DEquals(expectedLinearVelocity, controllerTrajectoryPoint.getLinearVelocity(), EPSILON_FOR_DESIREDS);
+         EuclidCoreTestTools.assertEquals(expectedPosition, controllerTrajectoryPoint.getPosition(), EPSILON_FOR_DESIREDS);
+         EuclidCoreTestTools.assertEquals(expectedLinearVelocity, controllerTrajectoryPoint.getLinearVelocity(), EPSILON_FOR_DESIREDS);
 
          // Check desired orientation in world frame
-         EuclidCoreTestTools.assertQuaternionEquals(trajectoryPoint.getOrientation(), controllerTrajectoryPoint.getOrientation(), EPSILON_FOR_DESIREDS);
-         EuclidCoreTestTools.assertTuple3DEquals(trajectoryPoint.getAngularVelocity(), controllerTrajectoryPoint.getAngularVelocity(), EPSILON_FOR_DESIREDS);
+         EuclidCoreTestTools.assertEquals(trajectoryPoint.getOrientation(), controllerTrajectoryPoint.getOrientation(), EPSILON_FOR_DESIREDS);
+         EuclidCoreTestTools.assertEquals(trajectoryPoint.getAngularVelocity(), controllerTrajectoryPoint.getAngularVelocity(), EPSILON_FOR_DESIREDS);
       }
 
       SE3TrajectoryPointMessage lastMessage = pelvisTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().getLast();
@@ -976,10 +976,10 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       assertTrue(success);
 
       SE3TrajectoryPoint controllerTrajectoryPoint = findCurrentDesiredTrajectoryPoint(pelvisName, simulationTestHelper, midFeetFrame);
-      EuclidCoreTestTools.assertTuple3DEquals(lastMessage.getPosition(), controllerTrajectoryPoint.getPosition(), EPSILON_FOR_DESIREDS);
-      EuclidCoreTestTools.assertTuple3DEquals(lastMessage.getLinearVelocity(), controllerTrajectoryPoint.getLinearVelocity(), EPSILON_FOR_DESIREDS);
-      EuclidCoreTestTools.assertQuaternionEquals(lastMessage.getOrientation(), controllerTrajectoryPoint.getOrientation(), EPSILON_FOR_DESIREDS);
-      EuclidCoreTestTools.assertTuple3DEquals(lastMessage.getAngularVelocity(), controllerTrajectoryPoint.getAngularVelocity(), EPSILON_FOR_DESIREDS);
+      EuclidCoreTestTools.assertEquals(lastMessage.getPosition(), controllerTrajectoryPoint.getPosition(), EPSILON_FOR_DESIREDS);
+      EuclidCoreTestTools.assertEquals(lastMessage.getLinearVelocity(), controllerTrajectoryPoint.getLinearVelocity(), EPSILON_FOR_DESIREDS);
+      EuclidCoreTestTools.assertEquals(lastMessage.getOrientation(), controllerTrajectoryPoint.getOrientation(), EPSILON_FOR_DESIREDS);
+      EuclidCoreTestTools.assertEquals(lastMessage.getAngularVelocity(), controllerTrajectoryPoint.getAngularVelocity(), EPSILON_FOR_DESIREDS);
    }
 
    @Test
@@ -1091,10 +1091,10 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
                                         fromMessage.getOrientation(),
                                         fromMessage.getLinearVelocity(),
                                         fromMessage.getAngularVelocity());
-            EuclidCoreTestTools.assertQuaternionEquals(expectedTrajectoryPoint.getOrientationCopy(),
+            EuclidCoreTestTools.assertEquals(expectedTrajectoryPoint.getOrientationCopy(),
                                                        controllerTrajectoryPoint.getOrientationCopy(),
                                                        EPSILON_FOR_DESIREDS);
-            EuclidCoreTestTools.assertTuple3DEquals(expectedTrajectoryPoint.getAngularVelocityCopy(),
+            EuclidCoreTestTools.assertEquals(expectedTrajectoryPoint.getAngularVelocityCopy(),
                                                     controllerTrajectoryPoint.getAngularVelocityCopy(),
                                                     EPSILON_FOR_DESIREDS);
             assertEquals(expectedTrajectoryPoint.getLinearVelocityZ(), controllerTrajectoryPoint.getLinearVelocityZ(), EPSILON_FOR_DESIREDS);
@@ -1121,7 +1121,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       // Not check the height on purpose as it is non-trivial.
       assertEquals(expectedTrajectoryPoint.getPositionX(), controllerTrajectoryPoint.getPositionX(), EPSILON_FOR_DESIREDS);
       assertEquals(expectedTrajectoryPoint.getPositionY(), controllerTrajectoryPoint.getPositionY(), EPSILON_FOR_DESIREDS);
-      EuclidCoreTestTools.assertTuple3DEquals(expectedTrajectoryPoint.getLinearVelocityCopy(),
+      EuclidCoreTestTools.assertEquals(expectedTrajectoryPoint.getLinearVelocityCopy(),
                                               controllerTrajectoryPoint.getLinearVelocityCopy(),
                                               EPSILON_FOR_DESIREDS);
 
@@ -1130,10 +1130,10 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
                                   fromMessage.getOrientation(),
                                   fromMessage.getLinearVelocity(),
                                   fromMessage.getAngularVelocity());
-      EuclidCoreTestTools.assertQuaternionEquals(expectedTrajectoryPoint.getOrientationCopy(),
+      EuclidCoreTestTools.assertEquals(expectedTrajectoryPoint.getOrientationCopy(),
                                                  controllerTrajectoryPoint.getOrientationCopy(),
                                                  EPSILON_FOR_DESIREDS);
-      EuclidCoreTestTools.assertTuple3DEquals(expectedTrajectoryPoint.getAngularVelocityCopy(),
+      EuclidCoreTestTools.assertEquals(expectedTrajectoryPoint.getAngularVelocityCopy(),
                                               controllerTrajectoryPoint.getAngularVelocityCopy(),
                                               EPSILON_FOR_DESIREDS);
    }
@@ -1219,8 +1219,8 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       QuaternionReadOnly controllerDesiredOrientationAfterStop = EndToEndTestTools.findFeedbackControllerDesiredOrientation(pelvisName, simulationTestHelper);
       Point2D controllerDesiredXYAfterStop = findControllerDesiredPositionXY(simulationTestHelper);
 
-      EuclidCoreTestTools.assertQuaternionEquals(controllerDesiredOrientationBeforeStop, controllerDesiredOrientationAfterStop, 1.0e-2);
-      EuclidCoreTestTools.assertTuple2DEquals("", controllerDesiredXYBeforeStop, controllerDesiredXYAfterStop, 1.0e-2);
+      EuclidCoreTestTools.assertEquals(controllerDesiredOrientationBeforeStop, controllerDesiredOrientationAfterStop, 1.0e-2);
+      EuclidCoreTestTools.assertEquals("", controllerDesiredXYBeforeStop, controllerDesiredXYAfterStop, 1.0e-2);
       //checking pelvis hieght only
       assertEquals(controllerDesiredPelvisHeightBeforeStop.getZ(), controllerDesiredPelvisHeightAfterStop.getZ(), 1.0e-2);
    }
@@ -1403,10 +1403,10 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
                                                             .getValue());
       SO3TrajectoryPoint currentDesiredTrajectoryPoint = EndToEndChestTrajectoryMessageTest.findCurrentDesiredTrajectoryPoint(simulationTestHelper, pelvis);
 
-      EuclidCoreTestTools.assertTuple3DEquals(desiredPose.getPosition(), controllerDesiredPosition, 5.0e-4);
-      EuclidCoreTestTools.assertTuple3DEquals(desiredVelocity.getLinearPart(), controllerDesiredLinearVelocity, 1.0e-7);
-      EuclidCoreTestTools.assertQuaternionGeometricallyEquals(desiredPose.getOrientation(), currentDesiredTrajectoryPoint.getOrientation(), 5.0e-3);
-      EuclidCoreTestTools.assertTuple3DEquals(desiredVelocity.getAngularPart(), currentDesiredTrajectoryPoint.getAngularVelocity(), 1.0e-7);
+      EuclidCoreTestTools.assertEquals(desiredPose.getPosition(), controllerDesiredPosition, 5.0e-4);
+      EuclidCoreTestTools.assertEquals(desiredVelocity.getLinearPart(), controllerDesiredLinearVelocity, 1.0e-7);
+      EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(desiredPose.getOrientation(), currentDesiredTrajectoryPoint.getOrientation(), 5.0e-3);
+      EuclidCoreTestTools.assertEquals(desiredVelocity.getAngularPart(), currentDesiredTrajectoryPoint.getAngularVelocity(), 1.0e-7);
 
       success = simulationTestHelper.simulateNow(0.5 * trajectoryTime.getValue() + 1.5);
       assertTrue(success);
@@ -1426,10 +1426,10 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
                                                             .getValue());
       currentDesiredTrajectoryPoint = EndToEndChestTrajectoryMessageTest.findCurrentDesiredTrajectoryPoint(simulationTestHelper, pelvis);
 
-      EuclidCoreTestTools.assertTuple3DEquals(desiredPose.getPosition(), controllerDesiredPosition, 1.0e-6);
-      EuclidCoreTestTools.assertTuple3DEquals(desiredVelocity.getLinearPart(), controllerDesiredLinearVelocity, 1.0e-7);
-      EuclidCoreTestTools.assertQuaternionGeometricallyEquals(desiredPose.getOrientation(), currentDesiredTrajectoryPoint.getOrientation(), 1.0e-7);
-      EuclidCoreTestTools.assertTuple3DEquals(desiredVelocity.getAngularPart(), currentDesiredTrajectoryPoint.getAngularVelocity(), 1.0e-7);
+      EuclidCoreTestTools.assertEquals(desiredPose.getPosition(), controllerDesiredPosition, 1.0e-6);
+      EuclidCoreTestTools.assertEquals(desiredVelocity.getLinearPart(), controllerDesiredLinearVelocity, 1.0e-7);
+      EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(desiredPose.getOrientation(), currentDesiredTrajectoryPoint.getOrientation(), 1.0e-7);
+      EuclidCoreTestTools.assertEquals(desiredVelocity.getAngularPart(), currentDesiredTrajectoryPoint.getAngularVelocity(), 1.0e-7);
    }
 
    public static Point2D findControllerDesiredPositionXY(YoVariableHolder yoVariableHolder)
@@ -1595,7 +1595,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       assertEquals(desiredPosition.getY(), desiredControllerXY.getY(), EPSILON_FOR_DESIREDS);
 
       QuaternionReadOnly desiredControllerOrientation = EndToEndTestTools.findFeedbackControllerDesiredOrientation(bodyName, yoVariableHolder);
-      EuclidCoreTestTools.assertQuaternionEquals(desiredOrientation, desiredControllerOrientation, EPSILON_FOR_DESIREDS);
+      EuclidCoreTestTools.assertEquals(desiredOrientation, desiredControllerOrientation, EPSILON_FOR_DESIREDS);
 
       if (isUsingPelvisHeightControl)
       {
