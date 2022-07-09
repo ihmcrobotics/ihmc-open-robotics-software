@@ -30,12 +30,14 @@ public class KinematicsToolboxSnapshotDescription
    public static final String COM_ANCHOR_JSON = "centerOfMassAnchor";
    public static final String SIX_DOF_ANCHORS_JSON = "sixDoFAnchors";
    public static final String ONE_DOF_ANCHORS_JSON = "oneDoFAnchors";
+   public static final String EXECUTION_DURATION_JSON = "executionDuration";
 
    private static final ObjectMapper objectMapper = new ObjectMapper(new JsonFactory());
    private static final JSONSerializer<RobotConfigurationData> rcdSerializer = new JSONSerializer<>(new RobotConfigurationDataPubSubType());
    private static final JSONSerializer<KinematicsToolboxOutputStatus> ktosSerializer = new JSONSerializer<>(new KinematicsToolboxOutputStatusPubSubType());
    private static final JSONSerializer<KinematicsToolboxPrivilegedConfigurationMessage> ktpcmSerializer = new JSONSerializer<>(new KinematicsToolboxPrivilegedConfigurationMessagePubSubType());
 
+   public double executionDuration = Double.NaN;
    public RobotConfigurationData controllerConfiguration;
    public KinematicsToolboxOutputStatus ikSolution;
    public KinematicsToolboxPrivilegedConfigurationMessage ikPrivilegedConfiguration;
@@ -49,6 +51,7 @@ public class KinematicsToolboxSnapshotDescription
 
    public KinematicsToolboxSnapshotDescription(KinematicsToolboxSnapshotDescription other)
    {
+      executionDuration = other.executionDuration;
       controllerConfiguration = new RobotConfigurationData(other.controllerConfiguration);
       ikSolution = new KinematicsToolboxOutputStatus(other.ikSolution);
       ikPrivilegedConfiguration = new KinematicsToolboxPrivilegedConfigurationMessage(other.ikPrivilegedConfiguration);
@@ -90,6 +93,12 @@ public class KinematicsToolboxSnapshotDescription
             oneDoFAnchors.add(OneDoFMotionControlAnchorDescription.fromJSON(oneDoFAnchorsNode.get(i)));
          description.setOneDoFAnchors(oneDoFAnchors);
 
+         JsonNode executionDurationNode = configurationNode.get(EXECUTION_DURATION_JSON);
+         if (executionDurationNode != null)
+         {
+            description.setExecutionDuration(executionDurationNode.asDouble());
+         }
+
          return description;
       }
       catch (IOException e)
@@ -122,6 +131,7 @@ public class KinematicsToolboxSnapshotDescription
          ArrayNode arrayOneDoFAnchorNode = configurationJSON.arrayNode(oneDoFAnchors.size());
          oneDoFAnchors.forEach(anchor -> arrayOneDoFAnchorNode.add(anchor.toJSON(objectMapper)));
          configurationJSON.set(ONE_DOF_ANCHORS_JSON, arrayOneDoFAnchorNode);
+         configurationJSON.put(EXECUTION_DURATION_JSON, executionDuration);
 
          return root;
       }
@@ -166,6 +176,11 @@ public class KinematicsToolboxSnapshotDescription
       return oneDoFAnchors;
    }
 
+   public double getExecutionDuration()
+   {
+      return executionDuration;
+   }
+
    public void setControllerConfiguration(RobotConfigurationData controllerConfiguration)
    {
       this.controllerConfiguration = controllerConfiguration;
@@ -194,6 +209,16 @@ public class KinematicsToolboxSnapshotDescription
    public void setOneDoFAnchors(List<OneDoFMotionControlAnchorDescription> oneDoFAnchors)
    {
       this.oneDoFAnchors = oneDoFAnchors;
+   }
+
+   public void setExecutionDuration(double executionDuration)
+   {
+      this.executionDuration = executionDuration;
+   }
+
+   public boolean hasExecutionDuration()
+   {
+      return !Double.isNaN(executionDuration);
    }
 
    public void applyTransform(Transform transform)

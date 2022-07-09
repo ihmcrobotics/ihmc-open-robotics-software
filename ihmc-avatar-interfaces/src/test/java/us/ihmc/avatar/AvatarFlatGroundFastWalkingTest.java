@@ -89,6 +89,11 @@ public abstract class AvatarFlatGroundFastWalkingTest implements MultiRobotTestI
       assertTrue(success);
    }
 
+   public void setUsePerfectSensors(boolean usePerfectSensors)
+   {
+      simulationTestingParameters.setUsePefectSensors(usePerfectSensors);
+   }
+
    private void setupSim(DRCRobotModel robotModel,
                          boolean useVelocityAndHeadingScript,
                          boolean cheatWithGroundHeightAtForFootstep,

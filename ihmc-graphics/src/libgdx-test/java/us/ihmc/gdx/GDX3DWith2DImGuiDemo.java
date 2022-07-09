@@ -10,7 +10,7 @@ import imgui.glfw.ImGuiImplGlfw;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.gdx.imgui.ImGuiTools;
-import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
+import us.ihmc.gdx.sceneManager.GDX3DBareBonesScene;
 import us.ihmc.gdx.tools.BoxesDemoModel;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
 import us.ihmc.gdx.tools.GDXModelBuilder;
@@ -26,7 +26,7 @@ public class GDX3DWith2DImGuiDemo
 
    public GDX3DWith2DImGuiDemo()
    {
-      GDX3DSceneManager sceneManager = new GDX3DSceneManager();
+      GDX3DBareBonesScene sceneManager = new GDX3DBareBonesScene();
       GDXApplicationCreator.launchGDXApplication(new Lwjgl3ApplicationAdapter()
       {
          @Override

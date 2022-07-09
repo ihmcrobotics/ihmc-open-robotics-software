@@ -104,7 +104,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
             pelvisInteractable.create(collisionLink,
                                       syncedRobot.getReferenceFrames().getPelvisFrame(),
                                       modelFileName,
-                                      baseUI.get3DSceneManager().getCamera3D());
+                                      baseUI.getPrimary3DPanel().getCamera3D());
             pelvisInteractable.setOnSpacePressed(() ->
             {
                ros2Helper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(trajectoryTime.get(), pelvisInteractable.getPose()));
@@ -121,7 +121,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
                interactableFoot.create(collisionLink,
                                        syncedRobot.getFullRobotModel().getFrameAfterLegJoint(side, LegJointName.ANKLE_ROLL),
                                        modelFileName,
-                                       baseUI.get3DSceneManager().getCamera3D());
+                                       baseUI.getPrimary3DPanel().getCamera3D());
                interactableFoot.setOnSpacePressed(() ->
                {
                   ros2Helper.publishToController(HumanoidMessageTools.createFootTrajectoryMessage(side, trajectoryTime.get(), interactableFoot.getPose()));
@@ -143,7 +143,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
                                        collisionFrame,
                                        handControlFrame,
                                        modelFileName,
-                                       baseUI.get3DSceneManager().getCamera3D());
+                                       baseUI.getPrimary3DPanel().getCamera3D());
                interactableHand.setOnSpacePressed(() ->
                {
                   ros2Helper.publishToController(HumanoidMessageTools.createHandTrajectoryMessage(side,
@@ -169,7 +169,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
          }
       }
 
-      walkPathControlRing.create(baseUI.get3DSceneManager().getCamera3D(), robotModel, syncedRobot, ros2Helper);
+      walkPathControlRing.create(baseUI.getPrimary3DPanel().getCamera3D(), robotModel, syncedRobot, ros2Helper);
    }
 
    public void update()

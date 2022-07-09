@@ -36,6 +36,9 @@ geometry_msgs/Vector3 desired_root_linear_velocity
 
 geometry_msgs/Vector3 desired_root_angular_velocity
 
+# Support region used by the toolbox
+geometry_msgs/Point[] support_region
+
 # Field default value -1.0
 float64 solution_quality
 

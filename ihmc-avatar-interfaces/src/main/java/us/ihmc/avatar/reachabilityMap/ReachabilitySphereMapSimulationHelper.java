@@ -92,10 +92,10 @@ public class ReachabilitySphereMapSimulationHelper
    {
       session.addYoGraphicDefinition(calculator.getYoGraphicVisuals());
       guiControls = SessionVisualizer.startSessionVisualizer(session);
-      guiControls.waitUntilFullyUp();
+      guiControls.waitUntilVisualizerFullyUp();
       session.stopSessionThread(); // We'll run the simulation in the current thread.
       guiControls.setCameraFocusPosition(calculator.getGridFramePose().getX(), calculator.getGridFramePose().getY(), calculator.getGridFramePose().getZ());
-      guiControls.setCameraOrientation(Math.toRadians(15.0), Math.toRadians(170.0), 0.0);
+      guiControls.setCameraOrientation(Math.toRadians(15.0), Math.toRadians(170.0));
       setupVisualization();
 
       SimulationSessionControls simControls = session.getSimulationSessionControls();

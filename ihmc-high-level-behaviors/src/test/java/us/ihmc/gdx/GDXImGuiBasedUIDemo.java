@@ -7,6 +7,7 @@ import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.gdx.imgui.ImGuiMovingPlot;
 import us.ihmc.gdx.tools.BoxesDemoModel;
 import us.ihmc.gdx.tools.GDXModelBuilder;
+import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.tools.ImGuiLogWidget;
 import us.ihmc.tools.string.StringTools;
@@ -34,12 +35,15 @@ public class GDXImGuiBasedUIDemo
          {
             baseUI.create();
 
-            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelBuilder.createCoordinateFrame(0.3)));
-            baseUI.get3DSceneManager().addModelInstance(new BoxesDemoModel().newInstance());
+            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(GDXModelBuilder.createCoordinateFrame(0.3)));
+            baseUI.getPrimaryScene().addModelInstance(new BoxesDemoModel().newInstance());
 
             baseUI.getImGuiPanelManager().addPanel("Window 1", GDXImGuiBasedUIDemo.this::renderWindow1);
             baseUI.getImGuiPanelManager().addPanel("Window 2", GDXImGuiBasedUIDemo.this::renderWindow2);
             baseUI.getImGuiPanelManager().addPanel("Window 3", GDXImGuiBasedUIDemo.this::renderWindow3);
+
+            GDX3DPanel second3DPanel = new GDX3DPanel("Second 3D View", 2, true);
+            baseUI.add3DPanel(second3DPanel);
 
             logWidget.submitEntry(Level.WARN, "WARN at " + LocalDateTime.now());
             logWidget.submitEntry(Level.ERROR, "ERROR at " + LocalDateTime.now());

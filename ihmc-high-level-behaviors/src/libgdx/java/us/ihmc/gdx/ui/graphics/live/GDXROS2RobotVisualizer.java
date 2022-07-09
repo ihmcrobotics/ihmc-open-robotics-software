@@ -98,4 +98,9 @@ public class GDXROS2RobotVisualizer extends GDXMultiBodyGraphic
    {
       super.destroy();
    }
+
+   public ImBoolean getTrackRobot()
+   {
+      return trackRobot;
+   }
 }

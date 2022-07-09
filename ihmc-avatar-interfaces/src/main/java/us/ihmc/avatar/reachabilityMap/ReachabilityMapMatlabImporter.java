@@ -15,6 +15,7 @@ import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DData;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.scs2.definition.robot.OneDoFJointDefinition;
 
 public class ReachabilityMapMatlabImporter implements ReachabilityMapFileReader
@@ -75,8 +76,7 @@ public class ReachabilityMapMatlabImporter implements ReachabilityMapFileReader
 
       if (!robotInformation.getRobotDefinition().getName().equals(robotNameInFile))
       {
-         throw new RuntimeException("Trying to load the data for another robot: Loading data for " + robotInformation.getRobotDefinition().getName()
-               + ", workbook contains data for " + robotNameInFile);
+         LogTools.warn("Robot name mismatch: expected {}, was: {}", robotInformation.getRobotDefinition().getName(), robotNameInFile);
       }
 
       ArrayList<String> jointNames = new ArrayList<>();

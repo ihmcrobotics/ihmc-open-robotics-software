@@ -53,7 +53,7 @@ public class KinematicsToolboxInputCollectionMessagePubSubType implements us.ihm
           current_alignment += controller_msgs.msg.dds.KinematicsToolboxOneDoFJointMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1; ++i0)
       {
-          current_alignment += controller_msgs.msg.dds.KinematicsToolboxContactStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+          current_alignment += controller_msgs.msg.dds.KinematicsToolboxSupportRegionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
 
       return current_alignment - initial_alignment;
    }
@@ -88,7 +88,7 @@ public class KinematicsToolboxInputCollectionMessagePubSubType implements us.ihm
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getContactStateInput().size(); ++i0)
       {
-          current_alignment += controller_msgs.msg.dds.KinematicsToolboxContactStateMessagePubSubType.getCdrSerializedSize(data.getContactStateInput().get(i0), current_alignment);}
+          current_alignment += controller_msgs.msg.dds.KinematicsToolboxSupportRegionMessagePubSubType.getCdrSerializedSize(data.getContactStateInput().get(i0), current_alignment);}
 
 
       return current_alignment - initial_alignment;

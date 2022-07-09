@@ -30,6 +30,7 @@ import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
@@ -78,6 +79,8 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
    private final IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> crashNotificationPublisher;
 
    private final HumanoidRobotContextData humanoidRobotContextData;
+
+   private final ExecutionTimer controllerThreadTimer;
 
    public AvatarControllerThread(String robotName,
                                  DRCRobotModel robotModel,
@@ -141,6 +144,9 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                                   arrayOfJointsToIgnore);
 
       createControllerRobotMotionStatusUpdater(controllerFactory, robotMotionStatusHolder);
+
+      controllerThreadTimer = new ExecutionTimer("controllerThreadTimer", registry);
+
 
       firstTick.set(true);
       registry.addChild(robotController.getYoRegistry());
@@ -286,6 +292,8 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
    @Override
    public void run()
    {
+      controllerThreadTimer.startMeasurement();
+
       runController.set(humanoidRobotContextData.getEstimatorRan());
       if (!runController.getValue())
       {
@@ -318,6 +326,8 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
 
          throw new RuntimeException(e);
       }
+
+      controllerThreadTimer.stopMeasurement();
    }
 
    @Override

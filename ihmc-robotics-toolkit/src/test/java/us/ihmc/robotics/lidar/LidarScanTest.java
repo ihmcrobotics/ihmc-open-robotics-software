@@ -142,8 +142,8 @@ public class LidarScanTest
 
    public static void assertLidarScanTransformsEqual(LidarScan lidarScan1, LidarScan lidarScan2, double transformTolerance)
    {
-      EuclidCoreTestTools.assertRigidBodyTransformEquals(lidarScan1.getStartTransform(), lidarScan2.getStartTransform(), transformTolerance);
-      EuclidCoreTestTools.assertRigidBodyTransformEquals(lidarScan1.getEndTransform(), lidarScan2.getEndTransform(), transformTolerance);
+      EuclidCoreTestTools.assertEquals(lidarScan1.getStartTransform(), lidarScan2.getStartTransform(), transformTolerance);
+      EuclidCoreTestTools.assertEquals(lidarScan1.getEndTransform(), lidarScan2.getEndTransform(), transformTolerance);
    }
 
    public static void assertLidarScanEquals(LidarScan lidarScan1, LidarScan lidarScan2, double transformTolerance, float rangeTolerance)

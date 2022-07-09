@@ -182,7 +182,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       DRCRobotModel robotModel = getRobotModel();
       useImpulseBasedPhysicsEngine = true;
       setupSimulation(cinderBlockFieldEnvironment);
-      ImpulseBasedPhysicsEngine physicsEngine = (ImpulseBasedPhysicsEngine) simulationTestHelper.getSimulationSession().getPhysicsEngine();
+      ImpulseBasedPhysicsEngine physicsEngine = (ImpulseBasedPhysicsEngine) simulationTestHelper.getSimulationConstructionSet().getPhysicsEngine();
       ContactParameters contactParameters = ContactParameters.defaultIneslasticContactParameters(true);
       contactParameters.setCoefficientOfFriction(0.80);
       contactParameters.setCoulombMomentFrictionRatio(0.6);
@@ -225,7 +225,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       ContactParameters contactParameters = ContactParameters.defaultIneslasticContactParameters(true);
       contactParameters.setCoefficientOfFriction(0.80);
       contactParameters.setCoulombMomentFrictionRatio(0.6);
-      ImpulseBasedPhysicsEngine physicsEngine = (ImpulseBasedPhysicsEngine) simulationTestHelper.getSimulationSession().getPhysicsEngine();
+      ImpulseBasedPhysicsEngine physicsEngine = (ImpulseBasedPhysicsEngine) simulationTestHelper.getSimulationConstructionSet().getPhysicsEngine();
       physicsEngine.setGlobalContactParameters(contactParameters);
       simulationTestHelper.start();
 
@@ -270,7 +270,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       ContactParameters contactParameters = ContactParameters.defaultIneslasticContactParameters(true);
       contactParameters.setCoefficientOfFriction(0.80);
       contactParameters.setCoulombMomentFrictionRatio(0.6);
-      ImpulseBasedPhysicsEngine physicsEngine = (ImpulseBasedPhysicsEngine) simulationTestHelper.getSimulationSession().getPhysicsEngine();
+      ImpulseBasedPhysicsEngine physicsEngine = (ImpulseBasedPhysicsEngine) simulationTestHelper.getSimulationConstructionSet().getPhysicsEngine();
       physicsEngine.setGlobalContactParameters(contactParameters);
       simulationTestHelper.start();
 

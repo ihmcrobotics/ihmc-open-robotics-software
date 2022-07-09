@@ -14,6 +14,7 @@ public class BytedecoImage
    private ByteBuffer backingDirectByteBuffer;
    private MutableBytePointer bytedecoByteBufferPointer;
    private Mat bytedecoOpenCVMat;
+   private BytePointer pointerForAccessSpeed = null;
    private final int openCLChannelOrder;
    private final int openCLChannelDataType;
    private int imageWidth;
@@ -60,6 +61,12 @@ public class BytedecoImage
       {
          bytesPerPixel = 4;
          openCLChannelOrder = OpenCL.CL_R;
+         openCLChannelDataType = OpenCL.CL_FLOAT;
+      }
+      else if (cvMatType == opencv_core.CV_32FC3) // Not sure if this one works
+      {
+         bytesPerPixel = 4 * 3;
+         openCLChannelOrder = OpenCL.CL_RGB;
          openCLChannelDataType = OpenCL.CL_FLOAT;
       }
       else if (cvMatType == opencv_core.CV_32FC(6))
@@ -111,6 +118,16 @@ public class BytedecoImage
       {
          bytedecoOpenCVMat = new Mat(imageHeight, imageWidth, cvMatType, bytedecoByteBufferPointer);
       }
+      pointerForAccessSpeed = bytedecoOpenCVMat.ptr(0);
+   }
+
+   public void destroy(OpenCLManager openCLManager)
+   {
+      if (openCLImageObject != null)
+      {
+         openCLManager.releaseBufferObject(openCLImageObject);
+         openCLImageObject.releaseReference();
+      }
    }
 
    public void changeAddress(long address)
@@ -118,6 +135,7 @@ public class BytedecoImage
       bytedecoByteBufferPointer.setAddress(address);
       backingDirectByteBuffer = bytedecoByteBufferPointer.asByteBuffer(); // Allocates, but on the native side?
       bytedecoOpenCVMat.data(bytedecoByteBufferPointer);
+      pointerForAccessSpeed = bytedecoOpenCVMat.ptr(0);
    }
 
    public void createOpenCLImage(OpenCLManager openCLManager, int flags)
@@ -159,6 +177,7 @@ public class BytedecoImage
       }
       bytedecoByteBufferPointer = new MutableBytePointer(backingDirectByteBuffer);
       bytedecoOpenCVMat = new Mat(imageHeight, imageWidth, cvMatType, bytedecoByteBufferPointer);
+      pointerForAccessSpeed = bytedecoOpenCVMat.ptr(0);
 
       if (openCLObjectCreated)
       {
@@ -200,5 +219,15 @@ public class BytedecoImage
    public int getImageHeight()
    {
       return imageHeight;
+   }
+
+   public float getFloat(int x, int y)
+   {
+      return pointerForAccessSpeed.getFloat(((long) y * imageWidth + x) * Float.BYTES);
+   }
+
+   public int getByteAsInteger(int x, int y)
+   {
+      return Byte.toUnsignedInt(pointerForAccessSpeed.get((long) y * imageWidth + x));
    }
 }
