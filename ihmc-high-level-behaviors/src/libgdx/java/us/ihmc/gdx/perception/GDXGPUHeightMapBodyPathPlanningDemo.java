@@ -91,7 +91,7 @@ public class GDXGPUHeightMapBodyPathPlanningDemo
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
             baseUI.getPrimaryScene().addRenderableProvider(environmentBuilder::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
             baseUI.getPrimaryScene().addRenderableProvider(environmentBuilder::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
-            environmentBuilder.loadEnvironment("CurvingBlockPathForBodyPath.json");
+            environmentBuilder.loadEnvironment("CurvingBlockPathForBodyPath2.json");
 
             robotInteractableReferenceFrame = new GDXInteractableReferenceFrame();
             robotInteractableReferenceFrame.create(ReferenceFrame.getWorldFrame(), 0.15, baseUI.getPrimary3DPanel().getCamera3D());
@@ -207,7 +207,13 @@ public class GDXGPUHeightMapBodyPathPlanningDemo
                         scanPoint.changeFrame(ouster.getSensorFrame());
                         scanPoints[i / 8] = new Point3D(scanPoint);
                      }
-                     heightMapMessage = heightMapUpdater.update(scanPoints, ouster.getSensorFrame());
+
+                     // Center the height map between the start and goal
+                     Point3D center = new Point3D();
+                     center.set(startPoseGizmo.getPoseGizmo().getPose().getPosition());
+                     center.interpolate(goalPoseGizmo.getPoseGizmo().getPose().getPosition(), 0.5);
+
+                     heightMapMessage = heightMapUpdater.update(scanPoints, ouster.getSensorFrame(), center);
                   }
 
                   heightMapGraphic.getTransformToWorld().set(new RigidBodyTransform());

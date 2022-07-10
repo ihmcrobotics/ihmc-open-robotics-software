@@ -1,6 +1,5 @@
 package us.ihmc.behaviors.lookAndStep;
 
-import com.google.common.util.concurrent.AtomicDouble;
 import controller_msgs.msg.dds.HeightMapMessage;
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
@@ -13,23 +12,14 @@ import us.ihmc.robotics.heightMap.HeightMapTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 
 import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class LookAndStepHeightMapUpdater
 {
    private final HeightMapParameters parameters;
-
    private final HeightMapManager heightMap;
-
-   private final AtomicBoolean clearRequested = new AtomicBoolean();
-   private final AtomicDouble gridCenterX = new AtomicDouble();
-   private final AtomicDouble gridCenterY = new AtomicDouble();
-   private final AtomicDouble maxHeight = new AtomicDouble();
-
    private final TIntArrayList holeKeyList = new TIntArrayList();
    private final TFloatArrayList holeHeights = new TFloatArrayList();
-
    private final AtomicInteger totalUpdateCount = new AtomicInteger();
 
    public LookAndStepHeightMapUpdater()
@@ -38,8 +28,12 @@ public class LookAndStepHeightMapUpdater
       heightMap = new HeightMapManager(parameters, parameters.getGridResolutionXY(), parameters.getGridSizeXY());
    }
 
-   public HeightMapMessage update(Point3D[] scanPoints, ReferenceFrame ousterFrame)
+   public HeightMapMessage update(Point3D[] scanPoints, ReferenceFrame ousterFrame, Point3D center)
    {
+      heightMap.setMaxHeight(center.getZ() + 2.0); // Set max to basically just over the robot's head.
+      heightMap.getGridCenterXY().set(center.getX(), center.getY());
+      heightMap.clear();
+
       PointCloudData pointCloud = new PointCloudData(System.nanoTime(), scanPoints, null);
 
       // Transform ouster data
@@ -48,13 +42,6 @@ public class LookAndStepHeightMapUpdater
          FramePoint3D point = new FramePoint3D(ousterFrame, pointCloud.getPointCloud()[i]);
          point.changeFrame(ReferenceFrame.getWorldFrame());
          pointCloud.getPointCloud()[i].set(point);
-      }
-
-      if (clearRequested.getAndSet(false))
-      {
-         heightMap.setMaxHeight(maxHeight.get());
-         heightMap.getGridCenterXY().set(gridCenterX.get(), gridCenterY.get());
-         heightMap.clear();
       }
 
       // Update height map
