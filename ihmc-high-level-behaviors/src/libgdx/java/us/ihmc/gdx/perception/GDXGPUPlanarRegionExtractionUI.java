@@ -35,6 +35,7 @@ import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.perception.ProjectionTools;
+import us.ihmc.tools.time.DurationStatisticPrinter;
 
 import java.nio.ByteBuffer;
 
@@ -97,6 +98,7 @@ public class GDXGPUPlanarRegionExtractionUI
    private final Stopwatch depthFirstSearchDurationStopwatch = new Stopwatch();
    private final Stopwatch planarRegionsSegmentationDurationStopwatch = new Stopwatch();
    private final Stopwatch gpuHeightMapStopwatch = new Stopwatch();
+   private final DurationStatisticPrinter wholeAlgorithmAverageDurationPrinter = new DurationStatisticPrinter(null, 10000, 100.0, getClass().getSimpleName());
    private ImGuiPanel imguiPanel;
    private GDXCVImagePanel blurredDepthPanel;
    private GDXCVImagePanel filteredDepthPanel;
@@ -170,6 +172,7 @@ public class GDXGPUPlanarRegionExtractionUI
       setParametersFromImGuiWidgets();
 
       wholeAlgorithmDurationStopwatch.start();
+      wholeAlgorithmAverageDurationPrinter.before();
 
 
       gpuDurationStopwatch.start();
@@ -243,6 +246,7 @@ public class GDXGPUPlanarRegionExtractionUI
       gpuHeightMapStopwatch.suspend();
 
       wholeAlgorithmDurationStopwatch.suspend();
+      wholeAlgorithmAverageDurationPrinter.after();
 
       render2DPanels();
       renderPlanarRegions();

@@ -51,6 +51,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.string.StringTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
+import us.ihmc.tools.time.DurationStatisticPrinter;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
@@ -289,9 +290,11 @@ public class LookAndStepFootstepPlanningTask
    protected SwingPlannerType swingPlannerType;
    protected final List<FootstepStatusMessage> stepsStartedWhilePlanning = new ArrayList<>();
    private final Object logSessionSyncObject = new Object();
+   private final DurationStatisticPrinter footstepPlanningDurationPrinter = new DurationStatisticPrinter(null, 10, 100.0, getClass().getSimpleName());
 
    protected void performTask()
    {
+      footstepPlanningDurationPrinter.before();
       // clear the list so we can inspect on completion
       stepsStartedWhilePlanning.clear();
 
@@ -447,6 +450,9 @@ public class LookAndStepFootstepPlanningTask
                           iterations);
          }
       }, "FootstepPlanLogging");
+
+
+      footstepPlanningDurationPrinter.after();
 
       // TODO: Detect step down and reject unless we planned two steps.
       // Should get closer to the edge somehow?  Solve this in the footstep planner?
