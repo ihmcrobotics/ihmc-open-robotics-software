@@ -28,11 +28,15 @@ public class LookAndStepHeightMapUpdater
       heightMap = new HeightMapManager(parameters, parameters.getGridResolutionXY(), parameters.getGridSizeXY());
    }
 
+   public void clear()
+   {
+      heightMap.clear();
+   }
+
    public HeightMapMessage update(Point3D[] scanPoints, ReferenceFrame ousterFrame, Point3D center)
    {
       heightMap.setMaxHeight(center.getZ() + 2.0); // Set max to basically just over the robot's head.
       heightMap.getGridCenterXY().set(center.getX(), center.getY());
-      heightMap.clear();
 
       PointCloudData pointCloud = new PointCloudData(System.nanoTime(), scanPoints, null);
 
