@@ -1,0 +1,274 @@
+package us.ihmc.gdx.perception;
+
+import com.google.common.util.concurrent.AtomicDouble;
+import controller_msgs.msg.dds.HeightMapMessage;
+import gnu.trove.list.array.TFloatArrayList;
+import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.PointCloudData;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.robotics.heightMap.HeightMapManager;
+import us.ihmc.robotics.heightMap.HeightMapTools;
+import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
+
+import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+
+public class GDXHeightMapUpdater
+{
+   private final HeightMapParameters parameters;
+
+   private final HeightMapManager heightMap;
+
+   private final AtomicBoolean clearRequested = new AtomicBoolean();
+   private final AtomicDouble gridCenterX = new AtomicDouble();
+   private final AtomicDouble gridCenterY = new AtomicDouble();
+   private final AtomicDouble maxHeight = new AtomicDouble();
+
+   private final TIntArrayList holeKeyList = new TIntArrayList();
+   private final TFloatArrayList holeHeights = new TFloatArrayList();
+
+   private final AtomicInteger totalUpdateCount = new AtomicInteger();
+
+   public GDXHeightMapUpdater()
+   {
+      parameters = new HeightMapParameters();
+      heightMap = new HeightMapManager(parameters, parameters.getGridResolutionXY(), parameters.getGridSizeXY());
+   }
+
+   public HeightMapMessage update(Point3D[] scanPoints, ReferenceFrame ousterFrame)
+   {
+      PointCloudData pointCloud = new PointCloudData(System.nanoTime(), scanPoints, null);
+
+      // Transform ouster data
+      for (int i = 0; i < pointCloud.getPointCloud().length; i++)
+      {
+         FramePoint3D point = new FramePoint3D(ousterFrame, pointCloud.getPointCloud()[i]);
+         point.changeFrame(ReferenceFrame.getWorldFrame());
+         pointCloud.getPointCloud()[i].set(point);
+      }
+
+      if (clearRequested.getAndSet(false))
+      {
+         heightMap.setMaxHeight(maxHeight.get());
+         heightMap.getGridCenterXY().set(gridCenterX.get(), gridCenterY.get());
+         heightMap.clear();
+      }
+
+      // Update height map
+      heightMap.update(pointCloud.getPointCloud());
+      totalUpdateCount.incrementAndGet();
+
+      /* estimate ground height */
+      double estimatedGroundHeight = estimateGroundHeight(pointCloud.getPointCloud());
+
+      /* filter near and below ground height and outliers that seem too high */
+      performFiltering(estimatedGroundHeight);
+
+      /* pack ROS message */
+      HeightMapMessage message = buildMessage();
+      message.setEstimatedGroundHeight(estimatedGroundHeight);
+      return message;
+   }
+
+   private HeightMapMessage buildMessage()
+   {
+      // Copy and report over messager
+      HeightMapMessage message = new HeightMapMessage();
+      message.setGridSizeXy(parameters.getGridSizeXY());
+      message.setXyResolution(parameters.getGridResolutionXY());
+      message.setGridCenterX(heightMap.getGridCenterXY().getX());
+      message.setGridCenterY(heightMap.getGridCenterXY().getY());
+
+      for (int i = 0; i < heightMap.getNumberOfCells(); i++)
+      {
+         if (heightMap.cellHasUnfilteredData(i))
+         {
+            int key = heightMap.getKey(i);
+            message.getKeys().add(key);
+            message.getHeights().add((float) heightMap.getHeightAt(i));
+         }
+      }
+
+      message.getKeys().addAll(holeKeyList);
+      message.getHeights().addAll(holeHeights);
+
+      return message;
+   }
+
+   private double estimateGroundHeight(Point3D[] pointCloud)
+   {
+      double[] sortedHeights = Arrays.stream(pointCloud).mapToDouble(Point3D::getZ).sorted().toArray();
+      double minPercentile = 0.02;
+      double maxPercentile = 0.06;
+      int minIndex = (int) (minPercentile * sortedHeights.length);
+      int maxIndex = (int) (maxPercentile * sortedHeights.length);
+
+      double estimatedGroundHeight = 0.0;
+      for (int i = minIndex; i < maxIndex; i++)
+      {
+         estimatedGroundHeight += sortedHeights[i];
+      }
+
+      return estimatedGroundHeight / (maxIndex - minIndex);
+   }
+
+   private static final int[] xOffsetEightConnectedGrid = new int[]{-1, -1, 0, 1, 1,  1, 0,  -1};
+   private static final int[] yOffsetEightConnectedGrid = new int[]{0,  1,  1, 1, 0, -1, -1 , -1};
+
+   private void performFiltering(double estimatedGroundHeight)
+   {
+      /* Remove cells near ground height */
+      double groundEpsilonToFilter = 0.03;
+      double groundHeightThreshold = groundEpsilonToFilter + estimatedGroundHeight;
+
+      for (int i = heightMap.getNumberOfCells() - 1; i >= 0; i--)
+      {
+         heightMap.setGroundCell(i, heightMap.getHeightAt(i) < groundHeightThreshold);
+      }
+
+      /* Remove cells with no neighbors and reset height of cells which are higher than all neighbors */
+      int minNumberOfNeighbors = 2;
+      int minNumberOfNeighborsToResetHeight = 3;
+      double epsilonHeightReset = 0.04;
+
+      outerLoop:
+      for (int i = heightMap.getNumberOfCells() - 1; i >= 0; i--)
+      {
+         int xIndex = heightMap.getXIndex(i);
+         int yIndex = heightMap.getYIndex(i);
+
+         if (xIndex == 0 || yIndex == 0 || xIndex == heightMap.getCellsPerAxis() - 1 || yIndex == heightMap.getCellsPerAxis() - 1)
+         {
+            continue;
+         }
+
+         boolean muchHigherThanAllNeighbors = true;
+         double heightThreshold = heightMap.getHeightAt(i) - epsilonHeightReset;
+         int numberOfNeighbors = 0;
+         for (int j = 0; j < xOffsetEightConnectedGrid.length; j++)
+         {
+            int xNeighbor = xIndex + xOffsetEightConnectedGrid[j];
+            int yNeighbor = yIndex + yOffsetEightConnectedGrid[j];
+            if (heightMap.cellHasData(xNeighbor, yNeighbor))
+            {
+               numberOfNeighbors++;
+               muchHigherThanAllNeighbors = muchHigherThanAllNeighbors && heightMap.getHeightAt(xNeighbor, yNeighbor) < heightThreshold;
+            }
+
+            if (numberOfNeighbors >= minNumberOfNeighbors && !muchHigherThanAllNeighbors)
+            {
+               heightMap.setHasSufficientNeighbors(i, true);
+               continue outerLoop;
+            }
+         }
+
+         if (numberOfNeighbors < minNumberOfNeighbors)
+         {
+            heightMap.setHasSufficientNeighbors(i, false);
+         }
+         else if (numberOfNeighbors >= minNumberOfNeighborsToResetHeight && muchHigherThanAllNeighbors)
+         {
+            double resetHeight = 0.0;
+            for (int j = 0; j < xOffsetEightConnectedGrid.length; j++)
+            {
+               int xNeighbor = xIndex + xOffsetEightConnectedGrid[j];
+               int yNeighbor = yIndex + yOffsetEightConnectedGrid[j];
+               if (heightMap.cellHasData(xNeighbor, yNeighbor))
+               {
+                  resetHeight += heightMap.getHeightAt(xNeighbor, yNeighbor);
+               }
+            }
+            heightMap.resetAtHeight(i, resetHeight / numberOfNeighbors);
+         }
+      }
+
+      /* Once the map has had a chance to initialize, fill in any holes. This is a very ad-hoc way to fill them in,
+      *  holes are detected as cells without data that does have data within both sides along either the x or y axis.
+      */
+      int holeProximityThreshold = 3;
+
+      if (totalUpdateCount.get() > 50)
+      {
+         holeKeyList.clear();
+         holeHeights.clear();
+
+         /* For any cell without data, populate with average of neighbors */
+         for (int xIndex = holeProximityThreshold; xIndex < heightMap.getCellsPerAxis() - holeProximityThreshold; xIndex++)
+         {
+            for (int yIndex = holeProximityThreshold; yIndex < heightMap.getCellsPerAxis() - holeProximityThreshold; yIndex++)
+            {
+               if (heightMap.cellHasData(xIndex, yIndex))
+                  continue;
+
+               double heightSearch;
+
+               if (!Double.isNaN(heightSearch = hasDataInDirection(xIndex, yIndex, true, holeProximityThreshold)))
+               {
+                  holeKeyList.add(HeightMapTools.indicesToKey(xIndex, yIndex, heightMap.getCenterIndex()));
+                  holeHeights.add((float) heightSearch);
+               }
+               else if (!Double.isNaN(heightSearch = hasDataInDirection(xIndex, yIndex, false, holeProximityThreshold)))
+               {
+                  holeKeyList.add(HeightMapTools.indicesToKey(xIndex, yIndex, heightMap.getCenterIndex()));
+                  holeHeights.add((float) heightSearch);
+               }
+            }
+         }
+      }
+   }
+
+   /**
+    * Searches along x or y axis for neighboring data. If data is found, returns average, otherwise returns Double.NaN
+    */
+   private double hasDataInDirection(int xIndex, int yIndex, boolean searchX, int maxDistanceToCheck)
+   {
+      double posHeight = Double.NaN;
+
+      for (int i = 1; i <= maxDistanceToCheck; i++)
+      {
+         int xQuery = xIndex + (searchX ? i : 0);
+         int yQuery = yIndex + (searchX ? 0 : i);
+         if (heightMap.cellHasUnfilteredData(xQuery, yQuery))
+         {
+            posHeight = heightMap.getHeightAt(xQuery, yQuery);
+            break;
+         }
+      }
+
+      if (Double.isNaN(posHeight))
+      {
+         return Double.NaN;
+      }
+
+      double negHeight = Double.NaN;
+
+      for (int i = 1; i <= maxDistanceToCheck; i++)
+      {
+         int xQuery = xIndex - (searchX ? i : 0);
+         int yQuery = yIndex - (searchX ? 0 : i);
+         if (heightMap.cellHasUnfilteredData(xQuery, yQuery))
+         {
+            negHeight = heightMap.getHeightAt(xQuery, yQuery);
+            break;
+         }
+      }
+
+      if (Double.isNaN(negHeight) || (Math.abs(posHeight - negHeight) > 0.2))
+      {
+         return Double.NaN;
+      }
+
+      double averageHeight = 0.5 * (posHeight + negHeight);
+      if (averageHeight < 0.07)
+      {
+         return Double.NaN;
+      }
+      else
+      {
+         return averageHeight;
+      }
+   }
+}
