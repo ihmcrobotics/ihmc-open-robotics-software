@@ -8,9 +8,11 @@ import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningMo
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.bodyPath.AStarBodyPathPlanner;
@@ -41,10 +43,13 @@ import us.ihmc.tools.string.StringTools;
 import us.ihmc.tools.thread.Activator;
 import us.ihmc.utilities.ros.RosMainNode;
 
+import java.nio.FloatBuffer;
 import java.util.List;
 
 public class GDXGPUHeightMapBodyPathPlanningDemo
 {
+   private static final boolean USE_SIMPLE_GPU_UPDATER = false;
+
    private final GDXImGuiBasedUI baseUI;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private Activator nativesLoadedActivator;
@@ -67,6 +72,7 @@ public class GDXGPUHeightMapBodyPathPlanningDemo
    private final FramePose3D goalFramePose = new FramePose3D();
    private final ImBoolean updateHeightMap = new ImBoolean(true);
    private HeightMapMessage heightMapMessage;
+   private GDXHeightMapUpdater heightMapUpdater;
 
    public GDXGPUHeightMapBodyPathPlanningDemo(GDXImGuiBasedUI baseUI, DRCRobotModel robotModel)
    {
@@ -127,14 +133,21 @@ public class GDXGPUHeightMapBodyPathPlanningDemo
                   ImGuiStoredPropertySetTuner heightMapParameterTuner = new ImGuiStoredPropertySetTuner("Height Map Parameters");
                   heightMapParameterTuner.create(simpleGPUHeightMapParameters, SimpleGPUHeightMapParameters.keys, () -> { });
                   baseUI.getImGuiPanelManager().addPanel(heightMapParameterTuner);
-                  simpleGPUHeightMapUpdater = new SimpleGPUHeightMapUpdater(simpleGPUHeightMapParameters);
-                  simpleGPUHeightMapUpdater.create(ouster.getLowLevelSimulator().getImageWidth(),
-                                                   ouster.getLowLevelSimulator().getImageHeight(),
-                                                   ouster.getLowLevelSimulator().getMetersDepthFloatBuffer(),
-                                                   ouster.getDepthCameraIntrinsics().getFx(),
-                                                   ouster.getDepthCameraIntrinsics().getFy(),
-                                                   ouster.getDepthCameraIntrinsics().getCx(),
-                                                   ouster.getDepthCameraIntrinsics().getCy());
+                  if (USE_SIMPLE_GPU_UPDATER)
+                  {
+                     simpleGPUHeightMapUpdater = new SimpleGPUHeightMapUpdater(simpleGPUHeightMapParameters);
+                     simpleGPUHeightMapUpdater.create(ouster.getLowLevelSimulator().getImageWidth(),
+                                                      ouster.getLowLevelSimulator().getImageHeight(),
+                                                      ouster.getLowLevelSimulator().getMetersDepthFloatBuffer(),
+                                                      ouster.getDepthCameraIntrinsics().getFx(),
+                                                      ouster.getDepthCameraIntrinsics().getFy(),
+                                                      ouster.getDepthCameraIntrinsics().getCx(),
+                                                      ouster.getDepthCameraIntrinsics().getCy());
+                  }
+                  else
+                  {
+                     heightMapUpdater = new GDXHeightMapUpdater();
+                  }
 
                   heightMapGraphic = new GDXHeightMapGraphic();
                   heightMapGraphic.getRenderGroundPlane().set(false);
@@ -173,13 +186,30 @@ public class GDXGPUHeightMapBodyPathPlanningDemo
                {
                   RigidBodyTransform heightMapToWorld = heightMapPoseGizmo.getPoseGizmo().getGizmoFrame().getTransformToWorldFrame();
                   RigidBodyTransform sensorTransformToWorld = ousterPoseGizmo.getPoseGizmo().getGizmoFrame().getTransformToWorldFrame();
-                  simpleGPUHeightMapUpdater.computeFromDepthMap((float) heightMapToWorld.getTranslationX(),
-                                                                (float) heightMapToWorld.getTranslationY(),
-                                                                sensorTransformToWorld);
-                  SimpleGPUHeightMap heightMap = simpleGPUHeightMapUpdater.getHeightMap();
+                  if (USE_SIMPLE_GPU_UPDATER)
+                  {
+                     simpleGPUHeightMapUpdater.computeFromDepthMap((float) heightMapToWorld.getTranslationX(),
+                                                                   (float) heightMapToWorld.getTranslationY(),
+                                                                   sensorTransformToWorld);
+                     SimpleGPUHeightMap heightMap = simpleGPUHeightMapUpdater.getHeightMap();
+                     heightMapMessage = heightMap.buildMessage();
+                  }
+                  else
+                  {
+                     FloatBuffer pointCloudBuffer = ouster.getLowLevelSimulator().getPointCloudBuffer();
+                     Point3D[] scanPoints = new Point3D[pointCloudBuffer.limit() / 8];
+                     FramePoint3D scanPoint = new FramePoint3D();
+                     for (int i = 0; i < pointCloudBuffer.limit(); i += 8)
+                     {
+                        scanPoint.setToZero(ReferenceFrame.getWorldFrame());
+                        scanPoint.set(pointCloudBuffer.get(i), pointCloudBuffer.get(i + 1), pointCloudBuffer.get(i + 2));
+                        scanPoint.changeFrame(ouster.getSensorFrame());
+                        scanPoints[i / 8] = new Point3D(scanPoint);
+                     }
+                     heightMapMessage = heightMapUpdater.update(scanPoints, ouster.getSensorFrame());
+                  }
 
                   heightMapGraphic.getTransformToWorld().set(new RigidBodyTransform());
-                  heightMapMessage = heightMap.buildMessage();
                   heightMapGraphic.generateMeshesAsync(heightMapMessage);
                   heightMapGraphic.update();
                }
@@ -263,7 +293,8 @@ public class GDXGPUHeightMapBodyPathPlanningDemo
             environmentBuilder.destroy();
             bodyPathPlanGraphic.destroy();
             ouster.dispose();
-            simpleGPUHeightMapUpdater.destroy();
+            if (USE_SIMPLE_GPU_UPDATER)
+               simpleGPUHeightMapUpdater.destroy();
             heightMapGraphic.destroy();
             baseUI.dispose();
          }
