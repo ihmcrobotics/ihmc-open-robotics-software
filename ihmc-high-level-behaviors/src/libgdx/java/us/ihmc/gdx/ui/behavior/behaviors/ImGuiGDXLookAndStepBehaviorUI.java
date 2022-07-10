@@ -333,7 +333,8 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
          commandedFootstepsGraphic.getRenderables(renderables, pool);
          startAndGoalFootstepsGraphic.getRenderables(renderables, pool);
          planarRegionsGraphic.getRenderables(renderables, pool);
-         heightMapGraphic.getRenderables(renderables, pool);
+         if (showHeightMap.get())
+            heightMapGraphic.getRenderables(renderables, pool);
          bodyPathPlanGraphic.getRenderables(renderables, pool);
          if (showReceivedRegions.get())
             receivedRegionsGraphic.getRenderables(renderables, pool);
