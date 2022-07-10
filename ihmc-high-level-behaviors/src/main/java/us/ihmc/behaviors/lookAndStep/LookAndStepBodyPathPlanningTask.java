@@ -28,6 +28,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
 import us.ihmc.robotics.heightMap.HeightMapData;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
@@ -273,7 +274,12 @@ public class LookAndStepBodyPathPlanningTask
             scanPointToModify.set(scanPoint);
          }
 
-         HeightMapMessage heightMapMessage = heightMapUpdater.update(scanPoints, ousterFrame);
+         // Center the height map between the start and goal
+         Point3D center = new Point3D();
+         center.set(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame).getPosition());
+         center.interpolate(goal.getPosition(), 0.5);
+
+         HeightMapMessage heightMapMessage = heightMapUpdater.update(scanPoints, ousterFrame, center);
          helper.publish(HEIGHT_MAP_FOR_UI, heightMapMessage);
          result = performTaskWithHeightMapPlanner(heightMapMessage);
       }
