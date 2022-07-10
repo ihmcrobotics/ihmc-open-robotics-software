@@ -25,17 +25,33 @@ public class DurationStatisticPrinter
 
    private final Stopwatch stopwatch = new Stopwatch();
 
-   private PausablePeriodicThread pausablePeriodicThread;
-   private final double expiration = 1.0;
+   private final PausablePeriodicThread pausablePeriodicThread;
+   private double expiration = 1.0;
    private final Timer expirationTimer = new Timer();
+   private final int history;
+   private String name;
 
    public DurationStatisticPrinter()
    {
-      this(null);
+      this(null, 10, 1.0, "");
+   }
+
+   public DurationStatisticPrinter(int history)
+   {
+      this(null, history, 1.0, "");
    }
 
    public DurationStatisticPrinter(Runnable onLogReport)
    {
+      this(onLogReport, 10, 1.0, "");
+   }
+
+   public DurationStatisticPrinter(Runnable onLogReport, int history, double expirationTime, String name)
+   {
+      this.history = history;
+      this.name = name;
+      this.expiration = expirationTime;
+
       reset();
 
       boolean runAsDaemon = true;
@@ -61,8 +77,8 @@ public class DurationStatisticPrinter
       }
       else
       {
-         LogTools.info(StringTools.format3SF("average duration: {}\n        min: {}s max: {}s std dev: {}s window: {}",
-                                            averageDuration, minDuration, maxDuration, standardDeviation, window));
+         LogTools.info(2, StringTools.format3SF(name + ": average duration: {}\n        min: {}s max: {}s std dev: {}s window: {}",
+                                                averageDuration, minDuration, maxDuration, standardDeviation, window).get());
       }
    }
 
@@ -92,7 +108,7 @@ public class DurationStatisticPrinter
 
       deltas.addLast(elapsed);
 
-      while (deltas.size() > 10)
+      while (deltas.size() > history)
       {
          deltas.removeFirst();
       }
