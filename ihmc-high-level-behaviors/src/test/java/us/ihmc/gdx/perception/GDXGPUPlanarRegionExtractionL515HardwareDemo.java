@@ -85,7 +85,8 @@ public class GDXGPUPlanarRegionExtractionL515HardwareDemo
                                                       l515.getIntrinsicParameters().fx(),
                                                       l515.getIntrinsicParameters().fy(),
                                                       l515.getIntrinsicParameters().ppx(),
-                                                      l515.getIntrinsicParameters().ppy());
+                                                      l515.getIntrinsicParameters().ppy(),
+                                                      l515PoseGizmo.getGizmoFrame());
                      gpuPlanarRegionExtraction.getEnabled().set(true);
                      baseUI.getImGuiPanelManager().addPanel(gpuPlanarRegionExtraction.getPanel());
                      baseUI.getPrimaryScene().addRenderableProvider(gpuPlanarRegionExtraction::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
@@ -94,7 +95,7 @@ public class GDXGPUPlanarRegionExtractionL515HardwareDemo
                   }
 
                   depthU16C1Image.convertTo(depth32FC1Image.getBytedecoOpenCVMat(), opencv_core.CV_32FC1, l515.getDepthToMeterConversion(), 0.0);
-                  gpuPlanarRegionExtraction.extractPlanarRegions(l515PoseGizmo.getGizmoFrame());
+                  gpuPlanarRegionExtraction.extractPlanarRegions();
                }
             }
 

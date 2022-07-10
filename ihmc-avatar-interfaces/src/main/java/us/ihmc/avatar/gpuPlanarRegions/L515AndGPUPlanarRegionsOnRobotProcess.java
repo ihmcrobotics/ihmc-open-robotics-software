@@ -250,7 +250,8 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
                                   StoredPropertySetMessageTools.newMessage(gpuPlanarRegionExtraction.getPolygonizerParameters()));
             }
 
-            gpuPlanarRegionExtraction.extractPlanarRegions(cameraFrame, onPatchSizeResized);
+            gpuPlanarRegionExtraction.readFromSourceImage();
+            gpuPlanarRegionExtraction.extractPlanarRegions(onPatchSizeResized);
 
             debugExtractionImage.getBytedecoOpenCVMat().setTo(BLACK_OPAQUE_RGBA8888);
 

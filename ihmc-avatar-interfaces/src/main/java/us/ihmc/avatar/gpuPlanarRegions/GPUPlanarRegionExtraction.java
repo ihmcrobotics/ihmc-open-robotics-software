@@ -11,6 +11,7 @@ import org.ejml.data.BMatrixRMaj;
 import org.ejml.data.DMatrixRMaj;
 import sensor_msgs.Image;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -161,18 +162,27 @@ public class GPUPlanarRegionExtraction
       //      ROSOpenCVTools.backMatWithNettyBuffer(inputDepthImageMat, image.getData());
    }
 
-   public void extractPlanarRegions(ReferenceFrame cameraFrame, Runnable onPatchSizeChanged)
+   /**
+    * This is the part that needs to be done in the same thread as the sensor
+    * simulator, as it's using the same memory.
+    */
+   public void readFromSourceImage()
    {
-      calculateDerivativeParameters();
-
       // convert float to unint16
       // multiply by 1000 and cast to int
       double scaleFactor = 1000.0; // convert meters to millimeters
       double delta = 0.0; // no delta added
       int resultType = -1; // the output matrix will have the same type as the input
       inputFloatDepthImage.getBytedecoOpenCVMat().convertTo(inputScaledFloatDepthImage.getBytedecoOpenCVMat(), resultType, scaleFactor, delta);
-      scaleFactor = 1.0;
-      resultType = opencv_core.CV_16UC1;
+   }
+
+   public void extractPlanarRegions(Runnable onPatchSizeChanged)
+   {
+      calculateDerivativeParameters();
+
+      double scaleFactor = 1.0;
+      double delta = 0.0; // no delta added
+      int resultType = opencv_core.CV_16UC1;
       inputScaledFloatDepthImage.getBytedecoOpenCVMat().convertTo(inputU16DepthImage.getBytedecoOpenCVMat(), resultType, scaleFactor, delta);
 
       // Flip so the Y+ goes up instead of down.
@@ -598,6 +608,11 @@ public class GPUPlanarRegionExtraction
                hullCounter++;
                regionId = 31 * regionId + hullCounter;
             }
+         }
+         catch (NotARotationMatrixException notARotationMatrixException)
+         {
+            LogTools.error("Normal: {}", gpuPlanarRegion.getNormal());
+            notARotationMatrixException.printStackTrace();
          }
          catch (RuntimeException e)
          {
