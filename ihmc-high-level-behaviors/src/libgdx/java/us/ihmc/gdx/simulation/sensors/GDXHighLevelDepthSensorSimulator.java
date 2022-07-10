@@ -441,9 +441,12 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
             float x = depthSensorSimulator.getPointCloudBuffer().get(Float.BYTES * 8 * i);
             float y = depthSensorSimulator.getPointCloudBuffer().get(Float.BYTES * 8 * i + 1);
             float z = depthSensorSimulator.getPointCloudBuffer().get(Float.BYTES * 8 * i + 2);
-            ros2PointsToPublish.add().set(x, y, z);
-            if (ros2ColorsToPublish != null)
-               ros2ColorsToPublish[i] = depthSensorSimulator.getColorRGBA8Buffer().getInt(Integer.BYTES * i);
+            if (!Float.isNaN(x) && !Float.isNaN(y) && !Float.isNaN(y))
+            {
+               ros2PointsToPublish.add().set(x, y, z);
+               if (ros2ColorsToPublish != null)
+                  ros2ColorsToPublish[i] = depthSensorSimulator.getColorRGBA8Buffer().getInt(Integer.BYTES * i);
+            }
          }
 
          if (!ros2PointsToPublish.isEmpty())
@@ -474,6 +477,7 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
                                                                                                          null);
                   message.getSensorPosition().set(tempSensorFramePose.getPosition());
                   message.getSensorOrientation().set(tempSensorFramePose.getOrientation());
+                  message.setIsDataLocalToSensor(false);
                   //      LogTools.info("Publishing point cloud of size {}", message.getNumberOfPoints());
                   ((IHMCROS2Publisher<StereoVisionPointCloudMessage>) publisher).publish(message);
                }

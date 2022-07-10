@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import controller_msgs.msg.dds.HeightMapMessage;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.internal.ImGui;
 import com.badlogic.gdx.graphics.*;
@@ -12,6 +13,7 @@ import imgui.type.ImString;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.tools.yo.YoDoubleClientHelper;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.StoredPropertySetMessageTools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.shape.primitives.Box3D;
@@ -32,6 +34,7 @@ import us.ihmc.gdx.ui.graphics.GDXBoxVisualizer;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.gdx.ui.yo.ImGuiYoDoublePlot;
 import us.ihmc.gdx.ui.yo.ImPlotYoHelperDoublePlotLine;
+import us.ihmc.gdx.visualizers.GDXHeightMapGraphic;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorParameters;
@@ -72,6 +75,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
    private final GDXSphereAndArrowGraphic subGoalGraphic = new GDXSphereAndArrowGraphic();
    private final GDXPlanarRegionsGraphic planarRegionsGraphic = new GDXPlanarRegionsGraphic();
    private final GDXPlanarRegionsGraphic receivedRegionsGraphic = new GDXPlanarRegionsGraphic();
+   private final GDXHeightMapGraphic heightMapGraphic = new GDXHeightMapGraphic();
    private final GDXBodyPathPlanGraphic bodyPathPlanGraphic = new GDXBodyPathPlanGraphic();
    private final GDXFootstepPlanGraphic footstepPlanGraphic;
    private final GDXFootstepPlanGraphic commandedFootstepsGraphic;
@@ -95,6 +99,11 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
          ++numberOfSteppingRegionsReceived;
          if (regions != null)
             planarRegionsGraphic.generateMeshesAsync(regions.copy());
+      });
+      heightMapGraphic.getRenderGroundPlane().set(false);
+      helper.subscribeViaCallback(HEIGHT_MAP_FOR_UI, heightMap ->
+      {
+         heightMapGraphic.generateMeshesAsync(heightMap);
       });
       helper.subscribeViaCallback(ReceivedPlanarRegionsForUI, regions ->
       {
@@ -184,6 +193,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
          commandedFootstepsGraphic.update();
          startAndGoalFootstepsGraphic.update();
          planarRegionsGraphic.update();
+         heightMapGraphic.update();
          bodyPathPlanGraphic.update();
          if (showReceivedRegions.get())
             receivedRegionsGraphic.update();
@@ -241,6 +251,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
       }
       impassibilityDetectedPlot.setNextValue(impassibilityDetected.get() ? 1.0f : 0.0f);
       impassibilityDetectedPlot.calculate(impassibilityDetected.get() ? "OBSTRUCTED" : "ALL CLEAR");
+
 //      footholdVolumePlot.render();
 
 //      ImGui.checkbox("Show graphics", showGraphics);
@@ -320,6 +331,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
          commandedFootstepsGraphic.getRenderables(renderables, pool);
          startAndGoalFootstepsGraphic.getRenderables(renderables, pool);
          planarRegionsGraphic.getRenderables(renderables, pool);
+         heightMapGraphic.getRenderables(renderables, pool);
          bodyPathPlanGraphic.getRenderables(renderables, pool);
          if (showReceivedRegions.get())
             receivedRegionsGraphic.getRenderables(renderables, pool);
@@ -334,6 +346,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
       commandedFootstepsGraphic.clear();
       startAndGoalFootstepsGraphic.clear();
       planarRegionsGraphic.clear();
+      heightMapGraphic.generateMeshesAsync(new HeightMapMessage());
       bodyPathPlanGraphic.clear();
       receivedRegionsGraphic.clear();
    }
@@ -345,6 +358,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
       commandedFootstepsGraphic.destroy();
       startAndGoalFootstepsGraphic.destroy();
       planarRegionsGraphic.destroy();
+      heightMapGraphic.destroy();
       bodyPathPlanGraphic.destroy();
       obstacleBoxVisualizer.dispose();
       receivedRegionsGraphic.destroy();

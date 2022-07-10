@@ -22,6 +22,7 @@ public class LookAndStepBehaviorParameters extends StoredPropertySet implements 
    public static final IntegerStoredPropertyKey planarRegionsHistorySize = keys.addIntegerKey("Planar regions history size");
    public static final IntegerStoredPropertyKey maxStepsToSendToController = keys.addIntegerKey("Max steps to send to controller");
    public static final BooleanStoredPropertyKey flatGroundBodyPathPlan = keys.addBooleanKey("Flat ground body path plan");
+   public static final BooleanStoredPropertyKey heightMapBodyPathPlan = keys.addBooleanKey("Height map body path plan");
    public static final IntegerStoredPropertyKey swingPlannerType = keys.addIntegerKey("Swing planner type");
    public static final DoubleStoredPropertyKey minimumStepTranslation = keys.addDoubleKey("Minimum step translation");
    public static final DoubleStoredPropertyKey minimumStepOrientation = keys.addDoubleKey("Minimum step orientation");

@@ -71,6 +71,11 @@ public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySet
       return get(flatGroundBodyPathPlan);
    }
 
+   default boolean getHeightMapBodyPathPlan()
+   {
+      return get(heightMapBodyPathPlan);
+   }
+
    default int getNumberOfStepsToTryToPlan()
    {
       return get(numberOfStepsToTryToPlan);

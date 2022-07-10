@@ -1,8 +1,7 @@
 package us.ihmc.behaviors.lookAndStep;
 
 import static us.ihmc.behaviors.lookAndStep.LookAndStepBehavior.State.BODY_PATH_PLANNING;
-import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.BodyPathPlanForUI;
-import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.PlanarRegionsForUI;
+import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,16 +10,27 @@ import java.util.function.Supplier;
 
 import controller_msgs.msg.dds.HeightMapMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.communication.packets.StereoPointCloudCompression;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.footstepPlanning.FootstepPlannerRequest;
+import us.ihmc.footstepPlanning.FootstepPlanningModule;
+import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
 import us.ihmc.robotics.heightMap.HeightMapData;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshotWithExpiration;
@@ -52,6 +62,10 @@ public class LookAndStepBodyPathPlanningTask
    protected VisibilityGraphsParametersReadOnly visibilityGraphParameters;
    protected LookAndStepBehaviorParametersReadOnly lookAndStepParameters;
    protected Supplier<Boolean> operatorReviewEnabled;
+   protected LookAndStepHeightMapUpdater heightMapUpdater;
+   protected FootstepPlanningModule footstepPlanningModule;
+   protected final FramePose3D startFramePose = new FramePose3D();
+   protected final FramePose3D goalFramePose = new FramePose3D();
 
    protected final LookAndStepReview<List<? extends Pose3DReadOnly>> review = new LookAndStepReview<>();
    protected Consumer<List<? extends Pose3DReadOnly>> output;
@@ -59,15 +73,31 @@ public class LookAndStepBodyPathPlanningTask
    protected final Timer planningFailedTimer = new Timer();
    protected final Stopwatch planningStopwatch = new Stopwatch();
 
+   protected PlanarRegionsList mapRegions;
+   protected StereoVisionPointCloudMessage ousterLidarScan;
+   protected Pose3DReadOnly goal;
+   protected ROS2SyncedRobotModel syncedRobot;
+   protected boolean doPlanarRegionsVisibilityGraphsPlan;
+   protected boolean doOusterHeightMapPlan;
+   protected RigidBodyTransform ousterToWorld = new RigidBodyTransform();
+   protected ReferenceFrame ousterFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("lookandstepousterframe",
+                                                                                                          ReferenceFrame.getWorldFrame(),
+                                                                                                          ousterToWorld);
+   protected RigidBodyTransform goalToWorld = new RigidBodyTransform();
+   protected ReferenceFrame goalFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), goalToWorld);
+
    public static class LookAndStepBodyPathPlanning extends LookAndStepBodyPathPlanningTask
    {
       private ResettableExceptionHandlingExecutorService executor;
       private final TypedInput<PlanarRegionsList> mapRegionsInput = new TypedInput<>();
       private final TypedInput<HeightMapData> heightMapInput = new TypedInput<>();
+      private final TypedInput<StereoVisionPointCloudMessage> ousterLidarInput = new TypedInput<>();
       private final TypedInput<Pose3DReadOnly> goalInput = new TypedInput<>();
       private final Timer mapRegionsExpirationTimer = new Timer();
       private final Timer heightMapExpirationTimer = new Timer();
+      private final Timer ousterLidarExpirationTimer = new Timer();
       private TimerSnapshotWithExpiration mapRegionsReceptionTimerSnapshot;
+      private TimerSnapshotWithExpiration ousterLidarReceptionTimerSnapshot;
       private Supplier<LookAndStepBehavior.State> behaviorStateReference;
       private BehaviorTaskSuppressor suppressor;
       private double neckPitch;
@@ -89,6 +119,8 @@ public class LookAndStepBodyPathPlanningTask
          behaviorStateReference = lookAndStep.behaviorStateReference::get;
          output = lookAndStep::bodyPathPlanInput;
          ControllerStatusTracker controllerStatusTracker = lookAndStep.controllerStatusTracker;
+         heightMapUpdater = new LookAndStepHeightMapUpdater();
+         footstepPlanningModule = FootstepPlanningModuleLauncher.createModule(helper.getRobotModel());
 
          Consumer<Double> commandPitchHeadWithRespectToChest = lookAndStep.robotInterface::pitchHeadWithRespectToChest;
          RobotTarget robotTarget = lookAndStep.helper.getRobotModel().getTarget();
@@ -99,6 +131,7 @@ public class LookAndStepBodyPathPlanningTask
          executor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
          mapRegionsInput.addCallback(data -> run());
+         ousterLidarInput.addCallback(data -> run());
          goalInput.addCallback(data -> run());
 
          suppressor = new BehaviorTaskSuppressor(statusLogger, "Body path planning");
@@ -126,6 +159,9 @@ public class LookAndStepBodyPathPlanningTask
 //         suppressor.addCondition(() -> "No regions. "
 //                                       + (mapRegions == null ? null : (" isEmpty: " + mapRegions.isEmpty())),
 //                                 () -> !(mapRegions != null && !mapRegions.isEmpty()));
+         suppressor.addCondition(() -> "Ouster lidar expired. haveReceivedAny: " + ousterLidarReceptionTimerSnapshot.hasBeenSet()
+                                       + " timeSinceLastUpdate: " + ousterLidarReceptionTimerSnapshot.getTimePassedSinceReset(),
+                                 () -> lookAndStepParameters.getHeightMapBodyPathPlan() && ousterLidarReceptionTimerSnapshot.isExpired());
          // TODO: This could be "run recently" instead of failed recently
          suppressor.addCondition("Failed recently", () -> planningFailureTimerSnapshot.isRunning());
          suppressor.addCondition("Is being reviewed", review::isBeingReviewed);
@@ -144,6 +180,12 @@ public class LookAndStepBodyPathPlanningTask
       {
          heightMapInput.set(HeightMapMessageTools.unpackMessage(heightMapMessage));
          heightMapExpirationTimer.reset();
+      }
+
+      public void acceptOusterLidar(StereoVisionPointCloudMessage ousterLidarScan)
+      {
+         ousterLidarInput.set(ousterLidarScan);
+         ousterLidarExpirationTimer.reset();
       }
 
       public void acceptGoal(Pose3DReadOnly goal)
@@ -179,14 +221,18 @@ public class LookAndStepBodyPathPlanningTask
       private void evaluateAndRun()
       {
          mapRegions = mapRegionsInput.getLatest();
+         ousterLidarScan = ousterLidarInput.getLatest();
          goal = goalInput.getLatest();
          syncedRobot.update();
          robotDataReceptionTimerSnaphot = syncedRobot.getDataReceptionTimerSnapshot()
                                                      .withExpiration(lookAndStepParameters.getRobotConfigurationDataExpiration());
          mapRegionsReceptionTimerSnapshot = mapRegionsExpirationTimer.createSnapshot(lookAndStepParameters.getPlanarRegionsExpiration());
+         ousterLidarReceptionTimerSnapshot = ousterLidarExpirationTimer.createSnapshot(lookAndStepParameters.getPlanarRegionsExpiration());
          planningFailureTimerSnapshot = planningFailedTimer.createSnapshot(lookAndStepParameters.getWaitTimeAfterPlanFailed());
          behaviorState = behaviorStateReference.get();
          neckTrajectoryTimerSnapshot = neckTrajectoryTimer.createSnapshot(1.0);
+         doPlanarRegionsVisibilityGraphsPlan = !lookAndStepParameters.getFlatGroundBodyPathPlan() && !lookAndStepParameters.getHeightMapBodyPathPlan();
+         doOusterHeightMapPlan = !lookAndStepParameters.getFlatGroundBodyPathPlan() && lookAndStepParameters.getHeightMapBodyPathPlan();
 
          // neckPitch = syncedRobot.getFramePoseReadOnly(frames -> frames.getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH)).getOrientation().getPitch();
 
@@ -202,20 +248,39 @@ public class LookAndStepBodyPathPlanningTask
       }
    }
 
-   protected PlanarRegionsList mapRegions;
-   protected Pose3DReadOnly goal;
-   protected ROS2SyncedRobotModel syncedRobot;
-
    protected void performTask()
    {
       statusLogger.info("Body path planning...");
-      // TODO: Add robot standing still for 20s for real robot?
-      uiPublisher.publishToUI(PlanarRegionsForUI, mapRegions);
-
-      // calculate and send body path plan
       final ArrayList<Pose3D> bodyPathPlanForReview = new ArrayList<>(); // TODO Review making this final
-      Pair<BodyPathPlanningResult, List<Pose3DReadOnly>> result
-            = lookAndStepParameters.getFlatGroundBodyPathPlan() ? performTaskWithFlatGround() : performTaskWithVisibilityGraphPlanner();
+      Pair<BodyPathPlanningResult, List<? extends Pose3DReadOnly>> result;
+      if (doPlanarRegionsVisibilityGraphsPlan)
+      {
+         uiPublisher.publishToUI(PlanarRegionsForUI, mapRegions);
+         result = performTaskWithVisibilityGraphPlanner();
+      }
+      else if (doOusterHeightMapPlan)
+      {
+         ousterToWorld.set(ousterLidarScan.getSensorOrientation(), ousterLidarScan.getSensorPosition());
+         ousterFrame.update();
+
+         Point3D[] scanPoints = StereoPointCloudCompression.decompressPointCloudToArray(ousterLidarScan);
+
+         FramePoint3D scanPoint = new FramePoint3D();
+         for (Point3D scanPointToModify : scanPoints)
+         {
+            scanPoint.setIncludingFrame(ReferenceFrame.getWorldFrame(), scanPointToModify);
+            scanPoint.changeFrame(ousterFrame);
+            scanPointToModify.set(scanPoint);
+         }
+
+         HeightMapMessage heightMapMessage = heightMapUpdater.update(scanPoints, ousterFrame);
+         helper.publish(HEIGHT_MAP_FOR_UI, heightMapMessage);
+         result = performTaskWithHeightMapPlanner(heightMapMessage);
+      }
+      else // flat ground body path
+      {
+         result = performTaskWithFlatGround();
+      }
 
       statusLogger.info("Body path plan completed with {}, {} waypoint(s)", result.getLeft(), result.getRight().size());
 
@@ -247,7 +312,7 @@ public class LookAndStepBodyPathPlanningTask
       }
    }
 
-   private Pair<BodyPathPlanningResult, List<Pose3DReadOnly>> performTaskWithVisibilityGraphPlanner()
+   private Pair<BodyPathPlanningResult, List<? extends Pose3DReadOnly>> performTaskWithVisibilityGraphPlanner()
    {
       // calculate and send body path plan
       BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters);
@@ -266,7 +331,7 @@ public class LookAndStepBodyPathPlanningTask
 //
 //   }
 
-   private Pair<BodyPathPlanningResult, List<Pose3DReadOnly>> performTaskWithFlatGround()
+   private Pair<BodyPathPlanningResult, List<? extends Pose3DReadOnly>> performTaskWithFlatGround()
    {
       double proximityForTurning = 0.25;
 
@@ -310,4 +375,42 @@ public class LookAndStepBodyPathPlanningTask
       return new MutablePair<>(BodyPathPlanningResult.FOUND_SOLUTION, waypoints);
    }
 
+   private Pair<BodyPathPlanningResult, List<? extends Pose3DReadOnly>> performTaskWithHeightMapPlanner(HeightMapMessage heightMapMessage)
+   {
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
+      heightMapData.setEstimatedGroundHeight(-1.0);
+
+      goalToWorld.set(goal);
+      goalFrame.update();
+
+      FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
+      startFramePose.setToZero(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT));
+      startFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+      footstepPlannerRequest.getStartFootPoses().put(RobotSide.LEFT, new Pose3D(startFramePose));
+      startFramePose.setToZero(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT));
+      startFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+      footstepPlannerRequest.getStartFootPoses().put(RobotSide.RIGHT, new Pose3D(startFramePose));
+      goalFramePose.setToZero(goalFrame);
+      goalFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+      LogTools.info(StringTools.tupleString(goalFramePose.getPosition()));
+      LogTools.info("Yaw: {}", goalFramePose.getOrientation().getYaw());
+      goalFramePose.setToZero(goalFrame);
+      goalFramePose.getPosition().setY(0.2);
+      goalFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+      footstepPlannerRequest.getGoalFootPoses().put(RobotSide.LEFT, new Pose3D(goalFramePose));
+      goalFramePose.setToZero(goalFrame);
+      goalFramePose.getPosition().setY(-0.2);
+      goalFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+      footstepPlannerRequest.getGoalFootPoses().put(RobotSide.RIGHT, new Pose3D(goalFramePose));
+      footstepPlannerRequest.setTimeout(10.0);
+
+      heightMapMessage.setEstimatedGroundHeight(-1.0);
+      footstepPlannerRequest.setHeightMapMessage(heightMapMessage);
+      footstepPlannerRequest.setPlanBodyPath(true);
+      footstepPlanningModule.handleRequest(footstepPlannerRequest);
+      FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanningModule);
+      footstepPlannerLogger.logSession();
+
+      return new MutablePair<>(footstepPlanningModule.getOutput().getBodyPathPlanningResult(), footstepPlanningModule.getOutput().getBodyPath());
+   }
 }

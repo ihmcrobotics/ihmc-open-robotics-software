@@ -1,4 +1,4 @@
-package us.ihmc.gdx.perception;
+package us.ihmc.behaviors.lookAndStep;
 
 import com.google.common.util.concurrent.AtomicDouble;
 import controller_msgs.msg.dds.HeightMapMessage;
@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class GDXHeightMapUpdater
+public class LookAndStepHeightMapUpdater
 {
    private final HeightMapParameters parameters;
 
@@ -32,7 +32,7 @@ public class GDXHeightMapUpdater
 
    private final AtomicInteger totalUpdateCount = new AtomicInteger();
 
-   public GDXHeightMapUpdater()
+   public LookAndStepHeightMapUpdater()
    {
       parameters = new HeightMapParameters();
       heightMap = new HeightMapManager(parameters, parameters.getGridResolutionXY(), parameters.getGridSizeXY());
