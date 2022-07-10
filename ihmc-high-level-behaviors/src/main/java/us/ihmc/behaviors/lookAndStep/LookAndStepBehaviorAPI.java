@@ -42,6 +42,7 @@ public class LookAndStepBehaviorAPI
    /** Look and step behavior parameters */
    public static final ROS2Topic<StoredPropertySetMessage> LOOK_AND_STEP_PARAMETERS
          = LOOK_AND_STEP_BEHAVIOR.withType(StoredPropertySetMessage.class).withSuffix("parameters");
+   public static final ROS2Topic<HeightMapMessage> HEIGHT_MAP_FOR_UI = LOOK_AND_STEP_BEHAVIOR.withType(HeightMapMessage.class).withSuffix("height_map_for_ui");
 
    /*
     * TODO: Add PAUSE and RESUME that work in any state.

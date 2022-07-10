@@ -5,6 +5,7 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
+import us.ihmc.behaviors.lookAndStep.LookAndStepHeightMapUpdater;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -72,7 +73,7 @@ public class GDXGPUHeightMapBodyPathPlanningDemo
    private final FramePose3D goalFramePose = new FramePose3D();
    private final ImBoolean updateHeightMap = new ImBoolean(true);
    private HeightMapMessage heightMapMessage;
-   private GDXHeightMapUpdater heightMapUpdater;
+   private LookAndStepHeightMapUpdater heightMapUpdater;
 
    public GDXGPUHeightMapBodyPathPlanningDemo(GDXImGuiBasedUI baseUI, DRCRobotModel robotModel)
    {
@@ -146,7 +147,7 @@ public class GDXGPUHeightMapBodyPathPlanningDemo
                   }
                   else
                   {
-                     heightMapUpdater = new GDXHeightMapUpdater();
+                     heightMapUpdater = new LookAndStepHeightMapUpdater();
                   }
 
                   heightMapGraphic = new GDXHeightMapGraphic();

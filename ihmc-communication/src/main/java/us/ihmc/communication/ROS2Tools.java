@@ -123,6 +123,8 @@ public class ROS2Tools
          = new SideDependentList<>(IHMC_ROOT.withModule(BLACKFLY_NAME + "left").withType(BigVideoPacket.class).withSuffix("video"),
                                    IHMC_ROOT.withModule(BLACKFLY_NAME + "right").withType(BigVideoPacket.class).withSuffix("video"));
    public static final ROS2Topic<BigVideoPacket> OUSTER_LIDAR = IHMC_ROOT.withModule("ouster").withType(BigVideoPacket.class).withSuffix("depth");
+   public static final ROS2Topic<StereoVisionPointCloudMessage> OUSTER_LIDAR_POINTS
+         = IHMC_ROOT.withModule("ouster").withType(StereoVisionPointCloudMessage.class).withSuffix("points");
    public static final ROS2Topic<BigVideoPacket> BIG_VIDEO_TEST = IHMC_ROOT.withModule(BLACKFLY_NAME).withType(BigVideoPacket.class).withSuffix("test");
 
    public static final ROS2Topic<LidarScanMessage> MULTISENSE_LIDAR_SCAN = IHMC_ROOT.withTypeName(LidarScanMessage.class);
