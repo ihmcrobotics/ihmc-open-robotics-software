@@ -67,6 +67,9 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
    private final ImBoolean stopForImpassibilities = new ImBoolean(true);
    private final ImPlotYoHelperDoublePlotLine footstepPlanningDurationPlot;
    private final ImGuiYoDoublePlot footholdVolumePlot;
+   private final ImBoolean invertShowGraphics = new ImBoolean(false);
+   private final ImBoolean showReceivedRegions = new ImBoolean(false);
+   private final ImBoolean showHeightMap = new ImBoolean(true);
 
    private boolean reviewingBodyPath = true;
    private final ImString latestFootstepPlannerLogPath = new ImString();
@@ -85,8 +88,6 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
    private final ImGuiStoredPropertySetTuner swingPlannerParameterTuner = new ImGuiStoredPropertySetTuner("Swing Planner Parameters (for Look and Step)");
    private final ImGuiGDXPoseGoalAffordance goalAffordance = new ImGuiGDXPoseGoalAffordance();
    private final GDXBoxVisualizer obstacleBoxVisualizer = new GDXBoxVisualizer();
-   private final ImBoolean invertShowGraphics = new ImBoolean(false);
-   private final ImBoolean showReceivedRegions = new ImBoolean(false);
 
    public ImGuiGDXLookAndStepBehaviorUI(BehaviorHelper helper)
    {
@@ -222,6 +223,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
 
       goalAffordance.renderPlaceGoalButton();
       ImGui.text(areGraphicsEnabled() ? "Showing graphics." : "Graphics hidden.");
+      ImGui.checkbox(labels.get("Show height map"), showHeightMap);
       ImGui.sameLine();
       if (ImGui.button(labels.get("Clear")))
          clearGraphics();
