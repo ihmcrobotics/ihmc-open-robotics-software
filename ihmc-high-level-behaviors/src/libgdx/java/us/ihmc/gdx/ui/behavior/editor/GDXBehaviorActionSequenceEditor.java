@@ -50,6 +50,7 @@ public class GDXBehaviorActionSequenceEditor
    private final MutablePair<Integer, Integer> reorderRequest = MutablePair.of(-1, 0);
 
    private double prevTime = 0;
+   private boolean ranFirstExecute = false;
 
    private ImBoolean autoExecute = new ImBoolean(false);
    private final ImBoolean trueImBoolean = new ImBoolean(true);
@@ -250,16 +251,25 @@ public class GDXBehaviorActionSequenceEditor
          else
          {
             // TODO: need to do these actions only after checking completion in each step.
-            if(playbackNextIndex == 0)
-            {
-               double elapsedTime = syncedRobot.getLatestRobotConfigurationData().getMonotonicTime()/1e9 - prevTime;
 
-               if
+            if(!ranFirstExecute)
+            {
+               GDXBehaviorAction action = actionSequence.get(playbackNextIndex);
+               action.performAction();
+               prevTime = syncedRobot.getLatestRobotConfigurationData().getMonotonicTime()/1e9;
+               ranFirstExecute = true;
+            }
+            else if(playbackNextIndex == 0)
+            {
+
+               double elapsedTime = syncedRobot.getLatestRobotConfigurationData().getMonotonicTime()/1e9 - prevTime;
                if( elapsedTime > 6)
                {
+                  playbackNextIndex++;
                   GDXBehaviorAction action = actionSequence.get(playbackNextIndex);
                   action.performAction();
-                  playbackNextIndex++;
+                  prevTime = syncedRobot.getLatestRobotConfigurationData().getMonotonicTime()/1e9;
+
 
                }
             }
@@ -268,9 +278,10 @@ public class GDXBehaviorActionSequenceEditor
                double elapsedTime = syncedRobot.getLatestRobotConfigurationData().getMonotonicTime()/1e9 - prevTime;
                if( elapsedTime > 4)
                {
+                  playbackNextIndex++;
                   GDXBehaviorAction action = actionSequence.get(playbackNextIndex);
                   action.performAction();
-                  playbackNextIndex++;
+                  prevTime = syncedRobot.getLatestRobotConfigurationData().getMonotonicTime()/1e9;
 
                }
             }
@@ -278,9 +289,11 @@ public class GDXBehaviorActionSequenceEditor
             {
                double elapsedTime = syncedRobot.getLatestRobotConfigurationData().getMonotonicTime()/1e9 - prevTime;
                if( elapsedTime > 3.5)
-               {GDXBehaviorAction action = actionSequence.get(playbackNextIndex);
-                  action.performAction();
+               {
                   playbackNextIndex++;
+                  GDXBehaviorAction action = actionSequence.get(playbackNextIndex);
+                  action.performAction();
+                  prevTime = syncedRobot.getLatestRobotConfigurationData().getMonotonicTime()/1e9;
 
                }
             }
@@ -288,15 +301,15 @@ public class GDXBehaviorActionSequenceEditor
             {
                double elapsedTime = syncedRobot.getLatestRobotConfigurationData().getMonotonicTime()/1e9 - prevTime;
                if( elapsedTime > 4)
-               {GDXBehaviorAction action = actionSequence.get(playbackNextIndex);
+               {
+                  //playbackNextIndex++;
+                  GDXBehaviorAction action = actionSequence.get(playbackNextIndex);
                   action.performAction();
-                  playbackNextIndex++;
+                  prevTime = syncedRobot.getLatestRobotConfigurationData().getMonotonicTime()/1e9;
 
                }
             }
 
-
-            prevTime = syncedRobot.getLatestRobotConfigurationData().getMonotonicTime()/1e9;
 
          }
 
