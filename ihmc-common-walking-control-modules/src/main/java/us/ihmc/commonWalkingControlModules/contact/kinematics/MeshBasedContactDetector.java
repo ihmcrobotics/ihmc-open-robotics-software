@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.contact.kinematics;
 
 import controller_msgs.msg.dds.MultiContactBalanceStatus;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.Axis3D;
@@ -9,6 +11,7 @@ import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
 import us.ihmc.euclid.shape.convexPolytope.interfaces.ConvexPolytope3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -33,9 +36,10 @@ import java.util.stream.Collectors;
  * Using simples collision shapes, performs contact detection for flat ground or planar regions.
  * Provides contact points and contact normals.
  */
-public class MeshBasedContactDetector implements Updatable
+public class MeshBasedContactDetector
 {
    private static final double defaultContactThreshold = 0.03;
+   private static final double coefficientOfFriction = 0.7;
 
    protected final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    protected StatusMessageOutputManager statusOutputManager;
@@ -50,11 +54,7 @@ public class MeshBasedContactDetector implements Updatable
 
    private PlanarRegionsList planarRegionsList = null;
    private final HashMap<PlanarRegion, ConvexPolytope3DReadOnly> contactableVolumeMap = new HashMap<>();
-
    private final MultiContactBalanceStatus multiContactBalanceStatus = new MultiContactBalanceStatus();
-
-   private int counter = 0;
-   private int updateFrequency = 1;
 
    public MeshBasedContactDetector(RigidBodyBasics rootBody,
                                    RobotCollisionModel collisionModel)
@@ -107,18 +107,13 @@ public class MeshBasedContactDetector implements Updatable
          parentRegistry.addChild(registry);
    }
 
-   @Override
-   public void update(double time)
+   public int getMaxNumberOfContactPointsPerBody()
    {
-      if (++counter < updateFrequency)
-      {
-         return;
-      }
-      else
-      {
-         counter = 0;
-      }
+      return 4;
+   }
 
+   public void update()
+   {
       clearContacts();
       double flatGroundHeightThreshold = computeFlatGroundHeightThreshold();
 
@@ -155,6 +150,31 @@ public class MeshBasedContactDetector implements Updatable
       {
          updateBalanceStatus(multiContactBalanceStatus);
          statusOutputManager.reportStatusMessage(multiContactBalanceStatus);
+      }
+   }
+
+   public void updatePlaneContactState(List<YoPlaneContactState> contactStatesToUpdate)
+   {
+      for (YoPlaneContactState contactState : contactStatesToUpdate)
+      {
+         contactState.clear();
+         contactState.setCoefficientOfFriction(coefficientOfFriction);
+
+         List<DetectedContactPoint> detectedContactPoints = allContactPoints.get(contactState.getRigidBody());
+         List<YoContactPoint> contactPoints = contactState.getContactPoints();
+
+         for (int i = 0; i < detectedContactPoints.size(); i++)
+         {
+            DetectedContactPoint contactPoint = detectedContactPoints.get(i);
+            if (!contactPoint.isInContact())
+               break;
+
+            contactState.setContactNormalVector(contactPoint.getContactPointNormal()); // TODO extract normal from DetectedContactPoint
+            contactPoints.get(i).setInContact(true);
+            contactPoints.get(i).setMatchingFrame(contactPoint.getContactPointPosition());
+         }
+
+         contactState.updateInContact();
       }
    }
 
@@ -218,11 +238,6 @@ public class MeshBasedContactDetector implements Updatable
    public HashMap<PlanarRegion, ConvexPolytope3DReadOnly> getContactableVolumeMap()
    {
       return contactableVolumeMap;
-   }
-
-   public void setUpdateFrequency(int updateFrequency)
-   {
-      this.updateFrequency = updateFrequency;
    }
 
    public void updateBalanceStatus(MultiContactBalanceStatus multiContactBalanceStatus)
