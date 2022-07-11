@@ -49,6 +49,8 @@ public class GDXBehaviorActionSequenceEditor
    private ROS2ControllerHelper ros2ControllerHelper;
    private final MutablePair<Integer, Integer> reorderRequest = MutablePair.of(-1, 0);
 
+   private double prevTime = 0;
+
    private ImBoolean autoExecute = new ImBoolean(false);
    private final ImBoolean trueImBoolean = new ImBoolean(true);
 
@@ -84,6 +86,8 @@ public class GDXBehaviorActionSequenceEditor
       this.syncedRobot = syncedRobot;
       this.referenceFrameLibrary = referenceFrameLibrary;
       ros2ControllerHelper = new ROS2ControllerHelper(ros2Node, robotModel);
+
+
    }
 
    public void loadNameFromFile()
@@ -238,14 +242,62 @@ public class GDXBehaviorActionSequenceEditor
                action.performAction();
 
                playbackNextIndex++;
+
+               LogTools.info("Time: {}", syncedRobot.getLatestRobotConfigurationData().getMonotonicTime()/1e9 - prevTime);
+               prevTime = syncedRobot.getLatestRobotConfigurationData().getMonotonicTime()/1e9;
             }
          }
          else
          {
             // TODO: need to do these actions only after checking completion in each step.
-            GDXBehaviorAction action = actionSequence.get(playbackNextIndex);
-            action.performAction();
-            playbackNextIndex++;
+            if(playbackNextIndex == 0)
+            {
+               double elapsedTime = syncedRobot.getLatestRobotConfigurationData().getMonotonicTime()/1e9 - prevTime;
+
+               if
+               if( elapsedTime > 6)
+               {
+                  GDXBehaviorAction action = actionSequence.get(playbackNextIndex);
+                  action.performAction();
+                  playbackNextIndex++;
+
+               }
+            }
+            else if(playbackNextIndex == 1)
+            {
+               double elapsedTime = syncedRobot.getLatestRobotConfigurationData().getMonotonicTime()/1e9 - prevTime;
+               if( elapsedTime > 4)
+               {
+                  GDXBehaviorAction action = actionSequence.get(playbackNextIndex);
+                  action.performAction();
+                  playbackNextIndex++;
+
+               }
+            }
+            else if(playbackNextIndex == 2)
+            {
+               double elapsedTime = syncedRobot.getLatestRobotConfigurationData().getMonotonicTime()/1e9 - prevTime;
+               if( elapsedTime > 3.5)
+               {GDXBehaviorAction action = actionSequence.get(playbackNextIndex);
+                  action.performAction();
+                  playbackNextIndex++;
+
+               }
+            }
+            else if(playbackNextIndex == 3)
+            {
+               double elapsedTime = syncedRobot.getLatestRobotConfigurationData().getMonotonicTime()/1e9 - prevTime;
+               if( elapsedTime > 4)
+               {GDXBehaviorAction action = actionSequence.get(playbackNextIndex);
+                  action.performAction();
+                  playbackNextIndex++;
+
+               }
+            }
+
+
+            prevTime = syncedRobot.getLatestRobotConfigurationData().getMonotonicTime()/1e9;
+
          }
 
 
