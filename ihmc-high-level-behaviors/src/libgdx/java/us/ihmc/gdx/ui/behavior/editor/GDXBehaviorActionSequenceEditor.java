@@ -49,6 +49,9 @@ public class GDXBehaviorActionSequenceEditor
    private ROS2ControllerHelper ros2ControllerHelper;
    private final MutablePair<Integer, Integer> reorderRequest = MutablePair.of(-1, 0);
 
+   private ImBoolean autoExecute = new ImBoolean(false);
+   private final ImBoolean trueImBoolean = new ImBoolean(true);
+
    public GDXBehaviorActionSequenceEditor(WorkspaceFile fileToLoadFrom)
    {
       this.workspaceFile = fileToLoadFrom;
@@ -227,13 +230,49 @@ public class GDXBehaviorActionSequenceEditor
       boolean endOfSequence = playbackNextIndex >= actionSequence.size();
       if (!endOfSequence)
       {
-         if (ImGui.button(labels.get("Execute")))
+         if (autoExecute.get()!=trueImBoolean.get())
          {
+            if (ImGui.button(labels.get("Execute")))
+            {
+               GDXBehaviorAction action = actionSequence.get(playbackNextIndex);
+               action.performAction();
+
+               playbackNextIndex++;
+            }
+         }
+         else
+         {
+            // TODO: need to do these actions only after checking completion in each step.
             GDXBehaviorAction action = actionSequence.get(playbackNextIndex);
             action.performAction();
             playbackNextIndex++;
          }
+
+
+
+//
+//            if(action.)
+//            {
+//               // action.performAll();
+//            }
+//            else
+//            {
+//         ImGui.sameLine();
+//         if (ImGui.checkbox(labels.get("AUTO"), action.getSe)
+//         {
+//            GDXBehaviorAction action = actionSequence.get(playbackNextIndex);
+//            action.performAction();
+//            playbackNextIndex++;
+//         }
       }
+
+      ImGui.sameLine();
+      ImGui.checkbox(labels.get("", "Selected"), autoExecute);
+      ImGui.sameLine();
+      ImGui.text("-AUTO-");
+
+//      System.out.println("checking checkbox status: " + autoExecute.toString());
+
       ImGui.sameLine();
       endOfSequence = playbackNextIndex >= actionSequence.size();
       if (endOfSequence)
