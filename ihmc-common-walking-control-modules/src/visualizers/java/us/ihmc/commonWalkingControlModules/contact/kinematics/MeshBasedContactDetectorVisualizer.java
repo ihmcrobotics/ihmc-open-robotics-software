@@ -251,7 +251,7 @@ public class MeshBasedContactDetectorVisualizer
 
             floatingJoint.getJointPose().set(scsFloatingJoint.getPosition(), scsFloatingJoint.getOrientation());
             idRobot.updateFramesRecursively();
-            contactDetector.update(0.0);
+            contactDetector.update();
          }
 
          @Override
