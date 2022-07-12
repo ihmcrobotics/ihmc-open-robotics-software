@@ -200,8 +200,8 @@ public class SwingState extends AbstractFootControlState
 
       // GMN: I don't see a getter for the selection matrix of spatialFeedbackControlCommand, so I'm doing this hack:
       SelectionMatrix6D noXRotation = new SelectionMatrix6D();
-      noXRotation.selectAngularX(false);  // GMN: try to turn off x-rotation control for swing feet
-      noXRotation.selectAngularY(true);
+      noXRotation.selectAngularX(true);  // GMN: try to turn off x-rotation control for swing feet
+      noXRotation.selectAngularY(true);  // GMN: another experiment
       noXRotation.selectAngularZ(true);
       noXRotation.selectLinearX(true);
       noXRotation.selectLinearY(true);
