@@ -19,9 +19,9 @@ import us.ihmc.yoVariables.variable.YoDouble;
 /* package-private */
 class ContactPoint
 {
-   private static final double basisVectorGraphicScale = 0.1;
-   private static final double forceVectorGraphicScale = 0.05;
-   public static final int basisVectorsPerContactPoint = 6;
+   public static final double basisVectorGraphicScale = 0.1;
+   public static final double forceVectorGraphicScale = 1.7;
+   public static final int basisVectorsPerContactPoint = 5;
 
    private final int contactPointIndex;
 
@@ -41,13 +41,11 @@ class ContactPoint
       for (int i = 0; i < polyhedraFrameBasisVectors.length; i++)
       {
          polyhedraFrameBasisVectors[i] = new YoFrameVector3D("beta" + contactPointIndex + "_" + i, ReferenceFrame.getWorldFrame(), registry);
-         YoGraphicVector basisVector = new YoGraphicVector("betaGraphic" + contactPointIndex + "_" + i, surfacePose.getPosition(), polyhedraFrameBasisVectors[i],
-                                                           basisVectorGraphicScale);
+         YoGraphicVector basisVector = new YoGraphicVector("betaGraphic" + contactPointIndex + "_" + i, surfacePose.getPosition(), polyhedraFrameBasisVectors[i], basisVectorGraphicScale, YoAppearance.Black(), true, 0.008);
          graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), basisVector);
       }
 
-      YoGraphicVector forceVector = new YoGraphicVector("forceGraphic" + contactPointIndex, surfacePose.getPosition(), force,
-                                                        forceVectorGraphicScale, YoAppearance.Red());
+      YoGraphicVector forceVector = new YoGraphicVector("forceGraphic" + contactPointIndex, surfacePose.getPosition(), force,forceVectorGraphicScale, YoAppearance.Red(), true, 0.008);
       graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), forceVector);
 
       for (int i = 0; i < rhoValues.length; i++)

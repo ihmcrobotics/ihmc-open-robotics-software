@@ -637,12 +637,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       if (!hasSurfaceNormalData)
          return false;
 
-      supportRegionSolverInput.clear();
-      for (int i = 0; i < multiContactBalanceStatusInternal.getContactPointsInWorld().size(); i++)
-      {
-         supportRegionSolverInput.addContactPoint(multiContactBalanceStatusInternal.getContactPointsInWorld().get(i),
-                                                  multiContactBalanceStatusInternal.getSurfaceNormalsInWorld().get(i));
-      }
+      supportRegionSolverInput.setFromMessage(multiContactBalanceStatus);
       supportRegionSolver.initialize(supportRegionSolverInput);
       return supportRegionSolver.solve();
    }

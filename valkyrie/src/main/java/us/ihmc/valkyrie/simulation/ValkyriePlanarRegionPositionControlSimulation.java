@@ -145,7 +145,7 @@ public class ValkyriePlanarRegionPositionControlSimulation
       });
 
       SCS2AvatarSimulation avatarSimulation = simulationFactory.createAvatarSimulation();
-      KinematicsToolboxModule kinematicsToolboxModule = new KinematicsToolboxModule(robotModel, false, 20, false, DomainFactory.PubSubImplementation.FAST_RTPS);
+//      KinematicsToolboxModule kinematicsToolboxModule = new KinematicsToolboxModule(robotModel, false, 20, false, DomainFactory.PubSubImplementation.FAST_RTPS);
 
       ContactParameters contactParameters = ContactParameters.defaultIneslasticContactParameters(true);
       contactParameters.setCoefficientOfFriction(1.0);

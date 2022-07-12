@@ -26,10 +26,13 @@ public class DetectedContactPoint
       contactPointPosition = new YoFramePoint3D("contactPosition_" + nameSuffix, ReferenceFrame.getWorldFrame(), registry);
       contactPointNormal = new YoFrameVector3D("contactNormal_" + nameSuffix, ReferenceFrame.getWorldFrame(), registry);
 
-      YoGraphicPosition contactPointGraphic = new YoGraphicPosition("contactPositionGraphic_" + nameSuffix, contactPointPosition, radius, color);
-      YoGraphicVector contactNormalGraphic = new YoGraphicVector("contactNormalGraphic" + nameSuffix, contactPointPosition, contactPointNormal, arrowScale, color);
-      graphicsListRegistry.registerYoGraphic("Kinematic-Detected Contact Points", contactPointGraphic);
-      graphicsListRegistry.registerYoGraphic("Kinematic-Detected Contact Points", contactNormalGraphic);
+      if (graphicsListRegistry != null)
+      {
+         YoGraphicPosition contactPointGraphic = new YoGraphicPosition("contactPositionGraphic_" + nameSuffix, contactPointPosition, radius, color);
+         YoGraphicVector contactNormalGraphic = new YoGraphicVector("contactNormalGraphic" + nameSuffix, contactPointPosition, contactPointNormal, arrowScale, color);
+         graphicsListRegistry.registerYoGraphic("Kinematic-Detected Contact Points", contactPointGraphic);
+         graphicsListRegistry.registerYoGraphic("Kinematic-Detected Contact Points", contactNormalGraphic);
+      }
    }
 
    public void setVerticalContactNormal()
