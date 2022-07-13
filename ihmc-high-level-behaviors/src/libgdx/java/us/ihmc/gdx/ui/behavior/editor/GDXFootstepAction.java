@@ -43,6 +43,9 @@ public class GDXFootstepAction implements GDXBehaviorAction
    private final ImBoolean selected = new ImBoolean();
    private boolean wasInitializedToPreviousStep;
 
+   private ROS2Topic<FootstepData> ros2Topic;
+   private IHMCROS2Input<RobotFrameData> subscription;
+
    public void create(GDXFocusBasedCamera camera3D,
                       DRCRobotModel robotModel,
                       ROS2SyncedRobotModel syncedRobot,
@@ -177,6 +180,35 @@ public class GDXFootstepAction implements GDXBehaviorAction
       footstepDataListMessage.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
       footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
       ros2ControllerHelper.publishToController(footstepDataListMessage);
+   }
+
+   @Override
+   public boolean checkComplete()
+   {
+      /*
+      public class AtlasGDXFrameDataVisualizationHelper
+      {
+         public String name;
+         public ImBoolean show = new ImBoolean(true);
+
+         private ROS2Topic<RobotFrameData> ros2Topic;
+         private IHMCROS2Input<RobotFrameData> subscription;
+         private GDXModelInstance modelInstance;
+         private Pose3D framePoseInWorld;
+
+         public AtlasGDXFrameDataVisualizationHelper(String frameName, AtlasRobotModel robotModel, ROS2ControllerHelper helper, GDXImGuiBasedUI baseUI)
+         {
+            // set up
+            name = frameName;
+            ros2Topic = ControllerAPIDefinition.getOutputTopic(robotModel.getSimpleRobotName()).withSuffix(name).withType(RobotFrameData.class);
+            modelInstance = new GDXModelInstance(GDXModelBuilder.createCoordinateFrame(0.3, new Color(rand.nextFloat(), rand.nextFloat(), rand.nextFloat(), 1)));
+            subscription = helper.subscribe(ros2Topic);
+
+            // add UI
+            addPanel(baseUI);
+         }
+       */
+
    }
 
    @Override

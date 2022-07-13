@@ -26,6 +26,9 @@ public interface GDXBehaviorAction
 
    public void performAction();
 
+   // TODO: This method should check if performAction() has completed the action and return boolean. (Need to subscribe to ros2Node)
+   public boolean checkComplete();
+
    public void destroy();
 
    public ImBoolean getSelected();
