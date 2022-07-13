@@ -1,7 +1,8 @@
 {
   "dockspacePanels" : { },
   "windows" : {
-    "Footstep Ring Gizmo Tuner (GDXFrameGizmoDemo)" : false,
-    "Pose3D Gizmo Tuner (GDXFrameGizmoDemo)" : false
+    "Footstep Ring Gizmo Tuner (GDXFrameGizmoDemo)" : true,
+    "Pose3D Gizmo Tuner (GDXFrameGizmoDemo)" : true,
+    "VR Thread Debugger" : false
   }
 }
