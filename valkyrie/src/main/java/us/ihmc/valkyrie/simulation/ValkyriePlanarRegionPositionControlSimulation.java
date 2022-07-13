@@ -9,6 +9,7 @@ import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolbox
 import us.ihmc.avatar.scs2.SCS2AvatarSimulation;
 import us.ihmc.avatar.scs2.SCS2AvatarSimulationFactory;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
+import us.ihmc.commonWalkingControlModules.contact.kinematics.MeshBasedContactDetector;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerStateTransitionFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
@@ -30,6 +31,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
+import us.ihmc.robotics.physics.CollidableHelper;
+import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -40,6 +43,7 @@ import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsLis
 import us.ihmc.simulationConstructionSetTools.util.planarRegions.PlanarRegionsListExamples;
 import us.ihmc.simulationToolkit.RobotDefinitionTools;
 import us.ihmc.tools.io.WorkspacePathTools;
+import us.ihmc.valkyrie.ValkyrieArmMassSimCollisionModel;
 import us.ihmc.valkyrie.ValkyrieInitialSetupFactories;
 import us.ihmc.valkyrie.ValkyrieMutableInitialSetup;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
@@ -109,6 +113,16 @@ public class ValkyriePlanarRegionPositionControlSimulation
             HighLevelHumanoidControllerToolbox controllerToolbox = controllerFactoryHelper.getHighLevelHumanoidControllerToolbox();
             HighLevelControllerParameters highLevelControllerParameters = controllerFactoryHelper.getHighLevelControllerParameters();
             JointDesiredOutputListReadOnly highLevelControllerOutput = controllerFactoryHelper.getLowLevelControllerOutput();
+            RobotCollisionModel collisionModel = robotModel.getSimulationRobotCollisionModel(new CollidableHelper(), "robot", "ground");
+
+            MeshBasedContactDetector contactDetector = new MeshBasedContactDetector(controllerToolbox.getFullRobotModel().getRootBody(),
+                                                                                    collisionModel,
+                                                                                    controllerToolbox.getYoGraphicsListRegistry(),
+                                                                                    controllerToolbox.getYoVariableRegistry());
+
+            contactDetector.setStatusOutputManager(statusOutputManager);
+            contactDetector.setPlanarRegionsList(regions);
+            controllerToolbox.addUpdatable(t -> contactDetector.update());
 
             controllerToolbox.addUpdatable(time ->
                                            {
