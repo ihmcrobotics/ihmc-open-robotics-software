@@ -121,4 +121,14 @@ public class WalkingFootstepTracker
          completedIndex = 0;
       }
    }
+
+   public ArrayList<FootstepDataMessage> getFootsteps()
+   {
+      return footsteps;
+   }
+
+   public int getCompletedIndex()
+   {
+      return completedIndex;
+   }
 }

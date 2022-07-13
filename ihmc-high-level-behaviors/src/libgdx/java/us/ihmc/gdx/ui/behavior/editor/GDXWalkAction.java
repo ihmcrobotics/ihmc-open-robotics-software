@@ -13,7 +13,9 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
+import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commons.FormattingTools;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -36,6 +38,7 @@ import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.io.JSONTools;
 
 import java.util.List;
@@ -43,6 +46,7 @@ import java.util.UUID;
 
 public class GDXWalkAction implements GDXBehaviorAction
 {
+   private WalkingFootstepTracker walkingFootstepTracker;
    private GDXFootstepPlanGraphic footstepPlanGraphic;
    private ROS2SyncedRobotModel syncedRobot;
    private ROS2ControllerHelper ros2ControllerHelper;
@@ -59,6 +63,8 @@ public class GDXWalkAction implements GDXBehaviorAction
    private final SideDependentList<GDXPose3DGizmo> editGoalFootGizmos = new SideDependentList<>();
    private final ImDouble swingDuration = new ImDouble(1.2);
    private final ImDouble transferDuration = new ImDouble(0.8);
+
+   Notification walkingCompleteNotification;
 
    public void create(GDXFocusBasedCamera camera3D,
                       DRCRobotModel robotModel,
@@ -95,6 +101,8 @@ public class GDXWalkAction implements GDXBehaviorAction
          goalFootGraphic.setPose(goalFootPose);
          goalFeetPoses.put(side, goalFootPose);
       }
+
+      walkingFootstepTracker = new WalkingFootstepTracker(ros2ControllerHelper.getROS2NodeInterface(), robotModel.getSimpleRobotName());
    }
 
    @Override
@@ -318,7 +326,24 @@ public class GDXWalkAction implements GDXBehaviorAction
       {
          ros2ControllerHelper.publishToController(footstepDataListMessage);
       }
+
    }
+
+   public void checkCompleted()
+   {
+      int stepsTaken = walkingFootstepTracker.getCompletedIndex();
+      int totalSteps = walkingFootstepTracker.getFootsteps().size();
+
+      if(stepsTaken==totalSteps && stepsTaken !=0)
+      {
+         System.out.println("It works? . . .");
+         System.out.println("It works? . . .");
+         System.out.println("It works? . . .");
+         System.out.println("It works? . . .");
+         System.out.println("It works? . . .");
+      }
+   }
+
 
    @Override
    public ImBoolean getSelected()

@@ -258,6 +258,8 @@ public class GDXBehaviorActionSequenceEditor
                action.performAction();
                prevTime = syncedRobot.getLatestRobotConfigurationData().getMonotonicTime()/1e9;
                ranFirstExecute = true;
+               if (action instanceof GDXWalkAction) ((GDXWalkAction) action).checkCompleted();
+
             }
             else if(playbackNextIndex == 0)
             {
@@ -269,7 +271,7 @@ public class GDXBehaviorActionSequenceEditor
                   GDXBehaviorAction action = actionSequence.get(playbackNextIndex);
                   action.performAction();
                   prevTime = syncedRobot.getLatestRobotConfigurationData().getMonotonicTime()/1e9;
-
+                  if (action instanceof GDXWalkAction) ((GDXWalkAction) action).checkCompleted();
 
                }
             }
