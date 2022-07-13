@@ -33,6 +33,9 @@ import java.util.List;
 
 public class GDXBehaviorActionSequenceEditor
 {
+   // TODO: Need to implement the auto exectue mode in door behavior in the milestone 1 later.
+   private final boolean autoMode = false;
+
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private ImGuiPanel panel;
    private final ImBoolean enabled = new ImBoolean(false);
@@ -250,22 +253,18 @@ public class GDXBehaviorActionSequenceEditor
                prevTime = syncedRobot.getLatestRobotConfigurationData().getMonotonicTime()/1e9;
             }
          }
-         else
+         else if(autoMode == true)
          {
-            // TODO: for now testing ControllerStatusTracker to check if walking is complete.
-
-
-
             // TODO: need to do these actions only after checking completion in each step.
-
 
             if(playbackNextIndex == 0)
             {
                double elapsedTime = syncedRobot.getLatestRobotConfigurationData().getMonotonicTime()/1e9 - prevTime;
-               GDXBehaviorAction action = actionSequence.get(playbackNextIndex);
+
 
                if(actionNumber==playbackNextIndex)
                {
+                  GDXBehaviorAction action = actionSequence.get(playbackNextIndex);
                   actionNumber++;
                   action.performAction();
                   prevTime = syncedRobot.getLatestRobotConfigurationData().getMonotonicTime()/1e9;
@@ -278,9 +277,9 @@ public class GDXBehaviorActionSequenceEditor
             else if(playbackNextIndex == 1)
             {
                double elapsedTime = syncedRobot.getLatestRobotConfigurationData().getMonotonicTime()/1e9 - prevTime;
-               GDXBehaviorAction action = actionSequence.get(playbackNextIndex);
                if(actionNumber==playbackNextIndex)
                {
+                  GDXBehaviorAction action = actionSequence.get(playbackNextIndex);
                   actionNumber++;
                   action.performAction();
                   prevTime = syncedRobot.getLatestRobotConfigurationData().getMonotonicTime()/1e9;
@@ -295,9 +294,9 @@ public class GDXBehaviorActionSequenceEditor
             else if(playbackNextIndex == 2)
             {
                double elapsedTime = syncedRobot.getLatestRobotConfigurationData().getMonotonicTime()/1e9 - prevTime;
-               GDXBehaviorAction action = actionSequence.get(playbackNextIndex);
                if(actionNumber==playbackNextIndex)
                {
+                  GDXBehaviorAction action = actionSequence.get(playbackNextIndex);
                   actionNumber++;
                   action.performAction();
                   prevTime = syncedRobot.getLatestRobotConfigurationData().getMonotonicTime()/1e9;
@@ -314,9 +313,10 @@ public class GDXBehaviorActionSequenceEditor
             else if(playbackNextIndex == 3)
             {
                double elapsedTime = syncedRobot.getLatestRobotConfigurationData().getMonotonicTime()/1e9 - prevTime;
-               GDXBehaviorAction action = actionSequence.get(playbackNextIndex);
+
                if(actionNumber==playbackNextIndex)
                {
+                  GDXBehaviorAction action = actionSequence.get(playbackNextIndex);
                   actionNumber++;
                   action.performAction();
                   prevTime = syncedRobot.getLatestRobotConfigurationData().getMonotonicTime()/1e9;
@@ -326,26 +326,7 @@ public class GDXBehaviorActionSequenceEditor
                   playbackNextIndex++;
                }
             }
-
-
          }
-
-
-
-//
-//            if(action.)
-//            {
-//               // action.performAll();
-//            }
-//            else
-//            {
-//         ImGui.sameLine();
-//         if (ImGui.checkbox(labels.get("AUTO"), action.getSe)
-//         {
-//            GDXBehaviorAction action = actionSequence.get(playbackNextIndex);
-//            action.performAction();
-//            playbackNextIndex++;
-//         }
       }
 
       ImGui.sameLine();

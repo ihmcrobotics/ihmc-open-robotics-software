@@ -326,58 +326,8 @@ public class GDXWalkAction implements GDXBehaviorAction
       {
          ros2ControllerHelper.publishToController(footstepDataListMessage);
       }
-
    }
 
-   public void checkCompleted()
-   {
-      int stepsTaken = walkingFootstepTracker.getCompletedIndex();
-      int totalSteps = walkingFootstepTracker.getFootsteps().size();
-
-      if(stepsTaken==totalSteps && stepsTaken !=0)
-      {
-         System.out.println("It works? . . .");
-         System.out.println("It works? . . .");
-         System.out.println("It works? . . .");
-         System.out.println("It works? . . .");
-         System.out.println("It works? . . .");
-      }
-   }
-
-
-   @Override
-   public boolean checkComplete()
-   {
-      /*
-      public class AtlasGDXFrameDataVisualizationHelper
-      {
-         public String name;
-         public ImBoolean show = new ImBoolean(true);
-
-         private ROS2Topic<RobotFrameData> ros2Topic;
-         private IHMCROS2Input<RobotFrameData> subscription;
-         private GDXModelInstance modelInstance;
-         private Pose3D framePoseInWorld;
-
-         public AtlasGDXFrameDataVisualizationHelper(String frameName, AtlasRobotModel robotModel, ROS2ControllerHelper helper, GDXImGuiBasedUI baseUI)
-         {
-            // set up
-            name = frameName;
-            ros2Topic = ControllerAPIDefinition.getOutputTopic(robotModel.getSimpleRobotName()).withSuffix(name).withType(RobotFrameData.class);
-            modelInstance = new GDXModelInstance(GDXModelBuilder.createCoordinateFrame(0.3, new Color(rand.nextFloat(), rand.nextFloat(), rand.nextFloat(), 1)));
-            subscription = helper.subscribe(ros2Topic);
-
-            // add UI
-            addPanel(baseUI);
-         }
-       */
-      ros2ControllerHelper.subscribeToControllerViaCallback(footstepDataListMessage.getClass(), message ->
-      {
-         message.
-      });
-
-
-   }
 
    @Override
    public ImBoolean getSelected()
