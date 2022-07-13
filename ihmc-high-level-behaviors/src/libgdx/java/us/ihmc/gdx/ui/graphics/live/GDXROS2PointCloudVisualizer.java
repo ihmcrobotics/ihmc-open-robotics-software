@@ -13,6 +13,7 @@ import imgui.type.ImFloat;
 import net.jpountz.lz4.LZ4Factory;
 import net.jpountz.lz4.LZ4FastDecompressor;
 import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.gdx.GDXPointCloudRenderer;
 import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
@@ -148,7 +149,7 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
 //                  float g = 1.0f;
 //                  float b = 1.0f;
 //                  float a = 1.0f;
-                  float size = pointSize.get(); // TODO: Add slider
+                  float size = pointSize.get();
                   xyzRGBASizeFloatBuffer.put(x);
                   xyzRGBASizeFloatBuffer.put(y);
                   xyzRGBASizeFloatBuffer.put(z);
@@ -160,6 +161,30 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
                }
                return pointsPerSegment;
             }, latestSegmentIndex);
+         }
+
+         LidarScanMessage latestLidarScanMessage = latestLidarScanMessageReference.getAndSet(null);
+
+         if (latestLidarScanMessage != null)
+         {
+            int numberOfScanPoints = latestLidarScanMessage.getNumberOfPoints();
+            pointCloudRenderer.updateMeshFastest(xyzRGBASizeFloatBuffer ->
+            {
+               LidarPointCloudCompression.decompressPointCloud(latestLidarScanMessage.getScan(), numberOfScanPoints, (i, x, y, z) ->
+               {
+                  float size = pointSize.get();
+                  xyzRGBASizeFloatBuffer.put((float) x);
+                  xyzRGBASizeFloatBuffer.put((float) y);
+                  xyzRGBASizeFloatBuffer.put((float) z);
+                  xyzRGBASizeFloatBuffer.put(color.r);
+                  xyzRGBASizeFloatBuffer.put(color.g);
+                  xyzRGBASizeFloatBuffer.put(color.b);
+                  xyzRGBASizeFloatBuffer.put(color.a);
+                  xyzRGBASizeFloatBuffer.put(size);
+               });
+
+               return numberOfScanPoints;
+            });
          }
       }
    }
