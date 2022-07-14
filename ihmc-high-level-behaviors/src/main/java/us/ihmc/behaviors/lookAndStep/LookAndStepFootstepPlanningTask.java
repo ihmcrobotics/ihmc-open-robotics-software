@@ -396,7 +396,8 @@ public class LookAndStepFootstepPlanningTask
       footstepPlannerRequest.setStartFootPoses(startFootPoses.get(RobotSide.LEFT).getSolePoseInWorld(),
                                                startFootPoses.get(RobotSide.RIGHT).getSolePoseInWorld());
 
-      double plannerTimeoutWhenMoving =  lookAndStepParameters.getPercentSwingToWait() * lookAndStepParameters.getSwingDuration();
+      // Make the timeout a little less so that we don't pause walking.
+      double plannerTimeoutWhenMoving =  lookAndStepParameters.getPercentSwingToWait() * lookAndStepParameters.getSwingDuration() - 0.008;
       boolean robotIsInMotion = RobotMotionStatus.fromByte(robotConfigurationData.getRobotMotionStatus()) == RobotMotionStatus.IN_MOTION;
       double plannerTimeout = robotIsInMotion ? plannerTimeoutWhenMoving : lookAndStepParameters.getFootstepPlannerTimeoutWhileStopped();
       // TODO: Set start footholds!!
