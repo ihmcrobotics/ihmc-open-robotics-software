@@ -16,6 +16,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.behaviors.tools.BehaviorHelper;
+import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.StereoPointCloudCompression;
@@ -288,7 +289,11 @@ public class LookAndStepBodyPathPlanningTask
          result = performTaskWithFlatGround();
       }
 
-      statusLogger.info("Body path plan completed with {}, {} waypoint(s)", result.getLeft(), result.getRight().size());
+      double pathLength = BodyPathPlannerTools.calculatePlanLength(result.getRight());
+      statusLogger.info("Body path plan completed with {}, {} waypoint(s), length: {}",
+                        result.getLeft(),
+                        result.getRight().size(),
+                        FormattingTools.getFormattedDecimal2D(pathLength));
 
       if (result.getRight() != null)
       {
