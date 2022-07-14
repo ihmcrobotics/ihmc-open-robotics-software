@@ -51,7 +51,7 @@ public class RobotConfigurationDataPublisherFactory
    private final RequiredFactoryField<RealtimeROS2Node> realtimeROS2NodeField = new RequiredFactoryField<>("realtimeROS2Node");
    private final RequiredFactoryField<ROS2Topic<?>> outputTopicField = new RequiredFactoryField<>("outputTopic");
 
-   private List<ReferenceFrame> frameDataToPublish = new ArrayList<>();
+   private final List<ReferenceFrame> frameDataToPublish = new ArrayList<>();
 
    public RobotConfigurationDataPublisherFactory()
    {
@@ -220,7 +220,7 @@ public class RobotConfigurationDataPublisherFactory
                                                                                       rootJointSensorData.get(),
                                                                                       jointSensorDataToPublish,
                                                                                       imuSensorDataToPublish,
-                                                                                      forceSensorDataToPublish,                                                                                      
+                                                                                      forceSensorDataToPublish,
                                                                                       frameDataToPublish,
                                                                                       timestampHolder.get(),
                                                                                       robotMotionStatusHolderField.get(),

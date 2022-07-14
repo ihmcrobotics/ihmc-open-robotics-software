@@ -37,4 +37,14 @@ public class RobotFrameDataPublisher
       robotFrameData.getFramePoseInWorld().set(myReferenceFrame.getTransformToWorldFrame());
       return ros2Publisher.publish(robotFrameData);
    }
+
+   public static ROS2Topic<RobotFrameData> getTopic(String robotName, ReferenceFrame referenceFrame)
+   {
+      return getTopic(robotName, referenceFrame.getName());
+   }
+
+   public static ROS2Topic<RobotFrameData> getTopic(String robotName, String referenceFrameName)
+   {
+      return ROS2Tools.getControllerOutputTopic(robotName).withType(RobotFrameData.class).withSuffix(referenceFrameName);
+   }
 }
