@@ -96,6 +96,16 @@ public class BodyPathPlannerTools
       return closestSegmentIndex;
    }
 
+   public static double calculatePlanLength(List<? extends Pose3DReadOnly> bodyPathPlan)
+   {
+      double length = 0.0;
+      for (int i = 0; i < bodyPathPlan.size() - 1; i++)
+      {
+         length += bodyPathPlan.get(i).getPosition().distance(bodyPathPlan.get(i + 1).getPosition());
+      }
+      return length;
+   }
+
    public static int movePointAlongBodyPath(List<? extends Pose3DReadOnly> bodyPathPlan,
                                             Point3DReadOnly startPoint,
                                             Point3DBasics movedPointToPack,
