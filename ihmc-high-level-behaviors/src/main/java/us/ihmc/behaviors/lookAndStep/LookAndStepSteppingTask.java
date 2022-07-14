@@ -150,6 +150,8 @@ public class LookAndStepSteppingTask
       timerSincePlanWasSent.reset();
 
       ThreadTools.startAsDaemon(() -> robotWalkingThread(walkingStatusNotification), "RobotWalking");
+      // TODO: Where do we wait for transfer? We should consider possible exploitations of transfer time to do useful stuff,
+      // TODO: but also make it explict where it is happening, wait for it, know when it stops and starts relative to this code
       waitForPartOfSwing(lookAndStepParameters.getSwingDuration());
    }
 
