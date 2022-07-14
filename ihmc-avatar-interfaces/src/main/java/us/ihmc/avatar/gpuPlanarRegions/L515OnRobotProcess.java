@@ -1,18 +1,21 @@
 package us.ihmc.avatar.gpuPlanarRegions;
 
 import boofcv.struct.calib.CameraPinholeBrown;
-import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.RobotFrameData;
+import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.StereoPointCloudCompression;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoTools;
@@ -39,7 +42,7 @@ public class L515OnRobotProcess
    private final PausablePeriodicThread thread;
    private final Activator nativesLoadedActivator;
    private final RealtimeROS2Node realtimeROS2Node;
-   private final IHMCRealtimeROS2Publisher<LidarScanMessage> ros2PointCloudPublisher;
+   private final IHMCRealtimeROS2Publisher<StereoVisionPointCloudMessage> ros2PointCloudPublisher;
    private final IHMCROS2Input<RobotFrameData> sensorFrameData;
    private final RigidBodyTransform cameraTransformToWorld = new RigidBodyTransform();
    private final ReferenceFrame cameraFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("steppingCamera",
@@ -52,6 +55,8 @@ public class L515OnRobotProcess
    private int depthWidth;
    private int depthHeight;
    private CameraPinholeBrown depthCameraIntrinsics;
+   private Point3D[] points;
+   private int[] colors;
 
    public L515OnRobotProcess()
    {
@@ -65,8 +70,8 @@ public class L515OnRobotProcess
 
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "l515_videopub");
 
-      ROS2Topic<LidarScanMessage> pointCloudTopic = ROS2Tools.MULTISENSE_LIDAR_SCAN;
-      LogTools.info("Publishing ROS 2 lidar scan: {}", pointCloudTopic);
+      ROS2Topic<StereoVisionPointCloudMessage> pointCloudTopic = ROS2Tools.IHMC_ROOT.withTypeName(StereoVisionPointCloudMessage.class);
+      LogTools.info("Publishing ROS 2 stereo vision: {}", pointCloudTopic);
       ros2PointCloudPublisher = ROS2Tools.createPublisher(realtimeROS2Node, pointCloudTopic, ROS2QosProfile.BEST_EFFORT());
       realtimeROS2Node.spin();
 
@@ -98,6 +103,12 @@ public class L515OnRobotProcess
 
             depthWidth = l515.getDepthWidth();
             depthHeight = l515.getDepthHeight();
+            points = new Point3D[depthWidth * depthHeight];
+            colors = new int[points.length];
+            for (int i = 0; i < points.length; i++)
+            {
+               points[i] = new Point3D();
+            }
 
             depthCameraIntrinsics = new CameraPinholeBrown();
          }
@@ -105,7 +116,8 @@ public class L515OnRobotProcess
          if (l515.readFrameData())
          {
             Instant now = Instant.now();
-            double dataAquisitionTime = Conversions.nanosecondsToSeconds(System.nanoTime());
+            long nanoTime = System.nanoTime();
+            double dataAquisitionTime = Conversions.nanosecondsToSeconds(nanoTime);
 
             l515.updateDataBytePointers();
 
@@ -124,15 +136,36 @@ public class L515OnRobotProcess
 
             depthU16C1Image.convertTo(depth32FC1Image.getBytedecoOpenCVMat(), opencv_core.CV_32FC1, l515.getDepthToMeterConversion(), 0.0);
 
-            cameraTransformToWorld.set(sensorFrameData.getLatest().getFramePoseInWorld());
+            Pose3D sensorPose = sensorFrameData.getLatest().getFramePoseInWorld();
+            cameraTransformToWorld.set(sensorPose);
             cameraFrame.update();
             // TODO: Wait for frame at time of data aquisition?
 
             int depthFrameDataSize = l515.getDepthFrameDataSize();
 
-            depth32FC1Image.rewind();
-            byte[] heapByteArrayData = new byte[depth32FC1Image.getBackingDirectByteBuffer().remaining()];
-            depth32FC1Image.getBackingDirectByteBuffer().get(heapByteArrayData);
+            // TODO: Put in OpenCL
+            for (int x = 0; x < depthWidth; x++)
+            {
+               for (int y = 0; y < depthHeight; y++)
+               {
+                  float eyeDepth = depth32FC1Image.getFloat(x, y);
+                  Point3D point = points[y * x + x];
+                  point.setX(eyeDepth);
+                  point.setY(-(x - depthCameraIntrinsics.getCx()) / l515.getFocalLengthPixelsX() * eyeDepth);
+                  point.setZ(-(y - depthCameraIntrinsics.getCy()) / l515.getFocalLengthPixelsY() * eyeDepth);
+               }
+            }
+
+            double minimumResolution = 0.005;
+            StereoVisionPointCloudMessage message = StereoPointCloudCompression.compressPointCloud(nanoTime,
+                                                                                                   points,
+                                                                                                   colors,
+                                                                                                   points.length,
+                                                                                                   minimumResolution,
+                                                                                                   null);
+            message.getSensorPosition().set(sensorPose.getPosition());
+            message.getSensorOrientation().set(sensorPose.getOrientation());
+            ros2PointCloudPublisher.publish(message);
          }
       }
    }
