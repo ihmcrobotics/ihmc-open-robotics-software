@@ -1,20 +1,19 @@
 package us.ihmc.avatar.gpuPlanarRegions;
 
 import boofcv.struct.calib.CameraPinholeBrown;
-import controller_msgs.msg.dds.RobotFrameData;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.StereoPointCloudCompression;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
@@ -27,7 +26,6 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.sensorProcessing.communication.producers.RobotFrameDataPublisher;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Activator;
 import us.ihmc.tools.thread.PausablePeriodicThread;
@@ -37,17 +35,17 @@ import java.time.Instant;
 public class L515OnRobotProcess
 {
    private static final String SERIAL_NUMBER = System.getProperty("l515.serial.number", "F0000000");
-   private static final String ROBOT_NAME = System.getProperty("robot.name");
 
    private final PausablePeriodicThread thread;
    private final Activator nativesLoadedActivator;
    private final RealtimeROS2Node realtimeROS2Node;
    private final IHMCRealtimeROS2Publisher<StereoVisionPointCloudMessage> ros2PointCloudPublisher;
-   private final IHMCROS2Input<RobotFrameData> sensorFrameData;
-   private final RigidBodyTransform cameraTransformToWorld = new RigidBodyTransform();
-   private final ReferenceFrame cameraFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("steppingCamera",
-                                                                                                              ReferenceFrame.getWorldFrame(),
-                                                                                                              cameraTransformToWorld);
+//   private final IHMCROS2Input<RobotFrameData> sensorFrameData;
+   private final ROS2Helper ros2Helper;
+   private final ROS2SyncedRobotModel syncedRobot;
+   private final FramePose3D cameraPose = new FramePose3D();
+   private final FramePoint3D framePoint = new FramePoint3D();
+   private final ROS2Topic<StereoVisionPointCloudMessage> pointCloudTopic;
    private RealSenseHardwareManager realSenseHardwareManager;
    private BytedecoRealsenseL515 l515;
    private Mat depthU16C1Image;
@@ -58,30 +56,26 @@ public class L515OnRobotProcess
    private Point3D[] points;
    private int[] colors;
 
-   public L515OnRobotProcess()
+   public L515OnRobotProcess(DRCRobotModel robotModel)
    {
-      if (ROBOT_NAME == null)
-      {
-         LogTools.error("-Drobot.name=<name> must be set!");
-         System.exit(1);
-      }
-
       nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
 
-      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "l515_videopub");
+      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "l515_point_cloud_realtime_node");
 
-      ROS2Topic<StereoVisionPointCloudMessage> pointCloudTopic = ROS2Tools.IHMC_ROOT.withTypeName(StereoVisionPointCloudMessage.class);
+      pointCloudTopic = ROS2Tools.IHMC_ROOT.withTypeName(StereoVisionPointCloudMessage.class);
       LogTools.info("Publishing ROS 2 stereo vision: {}", pointCloudTopic);
-      ros2PointCloudPublisher = ROS2Tools.createPublisher(realtimeROS2Node, pointCloudTopic, ROS2QosProfile.BEST_EFFORT());
+      ros2PointCloudPublisher = ROS2Tools.createPublisher(realtimeROS2Node, pointCloudTopic, ROS2QosProfile.DEFAULT());
       realtimeROS2Node.spin();
 
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "l515_node");
-      ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "l515_point_cloud_node");
+      ros2Helper = new ROS2Helper(ros2Node);
+      syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
 
-      ROS2Topic<RobotFrameData> sensorFrameTopic = RobotFrameDataPublisher.getTopic(ROBOT_NAME, "steppingCamera");
-      sensorFrameData = ros2Helper.subscribe(sensorFrameTopic);
+      // TODO: Controller should publish sensor frames
+//      ROS2Topic<RobotFrameData> sensorFrameTopic = RobotFrameDataPublisher.getTopic("", "steppingCamera");
+//      sensorFrameData = ros2Helper.subscribe(sensorFrameTopic);
 
-      thread = new PausablePeriodicThread("L515Node", UnitConversions.hertzToSeconds(31.0), 1, false, this::update);
+      thread = new PausablePeriodicThread("L515Node", UnitConversions.hertzToSeconds(2.0), 1, false, this::update);
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "L515Shutdown"));
       thread.start();
    }
@@ -136,12 +130,16 @@ public class L515OnRobotProcess
 
             depthU16C1Image.convertTo(depth32FC1Image.getBytedecoOpenCVMat(), opencv_core.CV_32FC1, l515.getDepthToMeterConversion(), 0.0);
 
-            Pose3D sensorPose = sensorFrameData.getLatest().getFramePoseInWorld();
-            cameraTransformToWorld.set(sensorPose);
-            cameraFrame.update();
+//            Pose3D sensorPose = sensorFrameData.getLatest().getFramePoseInWorld();
+//            cameraTransformToWorld.set(sensorPose);
+//            cameraFrame.update();
             // TODO: Wait for frame at time of data aquisition?
 
-            int depthFrameDataSize = l515.getDepthFrameDataSize();
+            syncedRobot.update();
+            ReferenceFrame cameraFrame =
+                  syncedRobot.hasReceivedFirstMessage() ? syncedRobot.getReferenceFrames().getSteppingCameraFrame() : ReferenceFrame.getWorldFrame();
+            cameraPose.setToZero(cameraFrame);
+            cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
             // TODO: Put in OpenCL
             for (int x = 0; x < depthWidth; x++)
@@ -149,10 +147,13 @@ public class L515OnRobotProcess
                for (int y = 0; y < depthHeight; y++)
                {
                   float eyeDepth = depth32FC1Image.getFloat(x, y);
+                  framePoint.setToZero(cameraFrame);
+                  framePoint.setX(eyeDepth);
+                  framePoint.setY(-(x - depthCameraIntrinsics.getCx()) / l515.getFocalLengthPixelsX() * eyeDepth);
+                  framePoint.setZ(-(y - depthCameraIntrinsics.getCy()) / l515.getFocalLengthPixelsY() * eyeDepth);
+                  framePoint.changeFrame(ReferenceFrame.getWorldFrame());
                   Point3D point = points[y * x + x];
-                  point.setX(eyeDepth);
-                  point.setY(-(x - depthCameraIntrinsics.getCx()) / l515.getFocalLengthPixelsX() * eyeDepth);
-                  point.setZ(-(y - depthCameraIntrinsics.getCy()) / l515.getFocalLengthPixelsY() * eyeDepth);
+                  point.set(framePoint);
                }
             }
 
@@ -163,8 +164,8 @@ public class L515OnRobotProcess
                                                                                                    points.length,
                                                                                                    minimumResolution,
                                                                                                    null);
-            message.getSensorPosition().set(sensorPose.getPosition());
-            message.getSensorOrientation().set(sensorPose.getOrientation());
+            message.getSensorPosition().set(cameraPose.getPosition());
+            message.getSensorOrientation().set(cameraPose.getOrientation());
             ros2PointCloudPublisher.publish(message);
          }
       }
