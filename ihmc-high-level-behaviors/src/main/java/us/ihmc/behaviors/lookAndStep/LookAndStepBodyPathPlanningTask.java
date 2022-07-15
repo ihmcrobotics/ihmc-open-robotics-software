@@ -55,6 +55,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.string.StringTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
+import us.ihmc.tools.time.DurationStatisticPrinter;
 
 public class LookAndStepBodyPathPlanningTask
 {
@@ -87,6 +88,7 @@ public class LookAndStepBodyPathPlanningTask
                                                                                                           ousterToWorld);
    protected RigidBodyTransform goalToWorld = new RigidBodyTransform();
    protected ReferenceFrame goalFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), goalToWorld);
+   private final DurationStatisticPrinter durationStatisticPrinter = new DurationStatisticPrinter(null, 5, 100.0, getClass().getSimpleName());
 
    public static class LookAndStepBodyPathPlanning extends LookAndStepBodyPathPlanningTask
    {
@@ -253,6 +255,7 @@ public class LookAndStepBodyPathPlanningTask
    protected void performTask()
    {
       statusLogger.info("Body path planning...");
+      durationStatisticPrinter.before();
       final ArrayList<Pose3D> bodyPathPlanForReview = new ArrayList<>(); // TODO Review making this final
       Pair<BodyPathPlanningResult, List<? extends Pose3DReadOnly>> result;
       if (doPlanarRegionsVisibilityGraphsPlan)
@@ -289,11 +292,14 @@ public class LookAndStepBodyPathPlanningTask
          result = performTaskWithFlatGround();
       }
 
+      double duration = durationStatisticPrinter.after();
+
       double pathLength = BodyPathPlannerTools.calculatePlanLength(result.getRight());
-      statusLogger.info("Body path plan completed with {}, {} waypoint(s), length: {}",
-                        result.getLeft(),
-                        result.getRight().size(),
-                        FormattingTools.getFormattedDecimal2D(pathLength));
+      statusLogger.info(StringTools.format("Body path plan completed with {}, {} waypoint(s), length: {}, planning duration: {} s",
+                                           result.getLeft(),
+                                           result.getRight().size(),
+                                           FormattingTools.getFormattedDecimal2D(pathLength),
+                                           duration));
 
       if (result.getRight() != null)
       {

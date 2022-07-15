@@ -48,6 +48,11 @@ public class DurationStatisticPrinter
 
    public DurationStatisticPrinter(Runnable onLogReport, int history, double expirationTime, String name)
    {
+      this(onLogReport, history, expirationTime, 1.0, name);
+   }
+
+   public DurationStatisticPrinter(Runnable onLogReport, int history, double expirationTime, double printFrequency, String name)
+   {
       this.history = history;
       this.name = name;
       this.expiration = expirationTime;
@@ -55,7 +60,7 @@ public class DurationStatisticPrinter
       reset();
 
       boolean runAsDaemon = true;
-      pausablePeriodicThread = new PausablePeriodicThread(getClass().getSimpleName(), 1.0, 0, runAsDaemon, () ->
+      pausablePeriodicThread = new PausablePeriodicThread(getClass().getSimpleName(), printFrequency, 0, runAsDaemon, () ->
       {
          logReport();
          if (onLogReport != null)
@@ -87,7 +92,7 @@ public class DurationStatisticPrinter
       stopwatch.reset();
    }
 
-   public synchronized void after()
+   public synchronized double after()
    {
       newEvents = true;
 
@@ -134,6 +139,8 @@ public class DurationStatisticPrinter
 
          standardDeviation = Math.sqrt(sumOfSquares / deltas.size());
       }
+
+      return elapsed;
    }
 
    public synchronized void reset()

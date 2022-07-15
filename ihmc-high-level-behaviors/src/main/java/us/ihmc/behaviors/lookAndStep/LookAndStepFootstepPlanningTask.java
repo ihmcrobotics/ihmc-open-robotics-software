@@ -290,7 +290,7 @@ public class LookAndStepFootstepPlanningTask
    protected SwingPlannerType swingPlannerType;
    protected final List<FootstepStatusMessage> stepsStartedWhilePlanning = new ArrayList<>();
    private final Object logSessionSyncObject = new Object();
-   private final DurationStatisticPrinter footstepPlanningDurationPrinter = new DurationStatisticPrinter(null, 10, 100.0, getClass().getSimpleName());
+   private final DurationStatisticPrinter footstepPlanningDurationPrinter = new DurationStatisticPrinter(null, 20, 100.0, getClass().getSimpleName());
 
    protected void performTask()
    {
