@@ -26,18 +26,18 @@ public class GDXHighLevelDepthSensorDemo
          {
             baseUI.create();
 
-            environmentBuilder = new GDXEnvironmentBuilder(baseUI.get3DSceneManager());
-            environmentBuilder.create(baseUI);
+            environmentBuilder = new GDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
+            environmentBuilder.create();
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
-            baseUI.get3DSceneManager().addRenderableProvider(environmentBuilder::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
-            baseUI.get3DSceneManager().addRenderableProvider(environmentBuilder::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+            baseUI.getPrimaryScene().addRenderableProvider(environmentBuilder::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
+            baseUI.getPrimaryScene().addRenderableProvider(environmentBuilder::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
             environmentBuilder.loadEnvironment("DepthSensorZeroTest.json");
 
-            sensorPoseGizmo.create(baseUI.get3DSceneManager().getCamera3D());
+            sensorPoseGizmo.create(baseUI.getPrimary3DPanel().getCamera3D());
             sensorPoseGizmo.setResizeAutomatically(true);
-            baseUI.addImGui3DViewPickCalculator(sensorPoseGizmo::calculate3DViewPick);
-            baseUI.addImGui3DViewInputProcessor(sensorPoseGizmo::process3DViewInput);
-            baseUI.get3DSceneManager().addRenderableProvider(sensorPoseGizmo, GDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(sensorPoseGizmo::calculate3DViewPick);
+            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(sensorPoseGizmo::process3DViewInput);
+            baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGizmo, GDXSceneLevel.VIRTUAL);
 //            sensorPoseGizmo.getTransformToParent().appendTranslation(2.2, 0.0, 1.0);
 //            sensorPoseGizmo.getTransformToParent().appendPitchRotation(Math.PI / 4.0);
 
@@ -51,14 +51,6 @@ public class GDXHighLevelDepthSensorDemo
             double minRange = 0.105;
             double maxRange = 5.0;
             highLevelDepthSensorSimulator = new GDXHighLevelDepthSensorSimulator("Stepping L515",
-                                                                                 null,
-                                                                                 null,
-                                                                                 null,
-                                                                                 null,
-                                                                                 null,
-                                                                                 null,
-                                                                                 null,
-                                                                                 null,
                                                                                  sensorPoseGizmo.getGizmoFrame(),
                                                                                  () -> 0L,
                                                                                  verticalFOV,
@@ -66,10 +58,11 @@ public class GDXHighLevelDepthSensorDemo
                                                                                  imageHeight,
                                                                                  minRange,
                                                                                  maxRange,
-                                                                                 publishRateHz,
-                                                                                 false);
+                                                                                 0.03,
+                                                                                 0.05,
+                                                                                 true,
+                                                                                 publishRateHz);
             baseUI.getImGuiPanelManager().addPanel(highLevelDepthSensorSimulator);
-            highLevelDepthSensorSimulator.create();
             highLevelDepthSensorSimulator.setSensorEnabled(true);
             highLevelDepthSensorSimulator.setPublishPointCloudROS2(false);
             highLevelDepthSensorSimulator.setRenderPointCloudDirectly(true);
@@ -79,13 +72,13 @@ public class GDXHighLevelDepthSensorDemo
             highLevelDepthSensorSimulator.setRenderDepthVideoDirectly(true);
             highLevelDepthSensorSimulator.setPublishColorImageROS1(false);
             highLevelDepthSensorSimulator.setPublishColorImageROS2(false);
-            baseUI.get3DSceneManager().addRenderableProvider(highLevelDepthSensorSimulator, GDXSceneLevel.VIRTUAL);
+            baseUI.getPrimaryScene().addRenderableProvider(highLevelDepthSensorSimulator, GDXSceneLevel.VIRTUAL);
          }
 
          @Override
          public void render()
          {
-            highLevelDepthSensorSimulator.render(baseUI.get3DSceneManager());
+            highLevelDepthSensorSimulator.render(baseUI.getPrimaryScene());
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();

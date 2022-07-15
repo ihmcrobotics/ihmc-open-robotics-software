@@ -38,26 +38,25 @@ public class GDXOpenCVColorByteOrderDemo
          {
             baseUI.create();
 
-            environmentBuilder = new GDXEnvironmentBuilder(baseUI.get3DSceneManager());
-            environmentBuilder.create(baseUI);
+            environmentBuilder = new GDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
+            environmentBuilder.create();
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
-            baseUI.get3DSceneManager().addRenderableProvider(environmentBuilder::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
-            baseUI.get3DSceneManager().addRenderableProvider(environmentBuilder::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+            baseUI.getPrimaryScene().addRenderableProvider(environmentBuilder::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
+            baseUI.getPrimaryScene().addRenderableProvider(environmentBuilder::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
             environmentBuilder.loadEnvironment("DepthSensorZeroTest.json");
 
-            sensorPoseGizmo.create(baseUI.get3DSceneManager().getCamera3D());
+            sensorPoseGizmo.create(baseUI.getPrimary3DPanel().getCamera3D());
             sensorPoseGizmo.setResizeAutomatically(true);
-            baseUI.addImGui3DViewPickCalculator(sensorPoseGizmo::calculate3DViewPick);
-            baseUI.addImGui3DViewInputProcessor(sensorPoseGizmo::process3DViewInput);
-            baseUI.get3DSceneManager().addRenderableProvider(sensorPoseGizmo, GDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(sensorPoseGizmo::calculate3DViewPick);
+            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(sensorPoseGizmo::process3DViewInput);
+            baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGizmo, GDXSceneLevel.VIRTUAL);
 
-            highLevelDepthSensorSimulator = GDXSimulatedSensorFactory.createL515ImageOnlyNoComms(sensorPoseGizmo.getGizmoFrame());
+            highLevelDepthSensorSimulator = GDXSimulatedSensorFactory.createRealsenseL515(sensorPoseGizmo.getGizmoFrame(), null);
             baseUI.getImGuiPanelManager().addPanel(highLevelDepthSensorSimulator);
-            highLevelDepthSensorSimulator.create();
             highLevelDepthSensorSimulator.setSensorEnabled(true);
             highLevelDepthSensorSimulator.getLowLevelSimulator().setDepthEnabled(false);
             highLevelDepthSensorSimulator.setRenderColorVideoDirectly(true);
-            baseUI.get3DSceneManager().addRenderableProvider(highLevelDepthSensorSimulator, GDXSceneLevel.VIRTUAL);
+            baseUI.getPrimaryScene().addRenderableProvider(highLevelDepthSensorSimulator, GDXSceneLevel.VIRTUAL);
 
             ImGuiPanel panel = new ImGuiPanel("Color Byte Order Debugging", this::renderImGuiWidgets);
             baseUI.getImGuiPanelManager().addPanel(panel);
@@ -121,7 +120,7 @@ public class GDXOpenCVColorByteOrderDemo
                allObject.getRealisticModelInstance().setDiffuseColor(gdxColor);
             }
 
-            highLevelDepthSensorSimulator.render(baseUI.get3DSceneManager());
+            highLevelDepthSensorSimulator.render(baseUI.getPrimaryScene());
 
             openCVImagePanel.draw();
 

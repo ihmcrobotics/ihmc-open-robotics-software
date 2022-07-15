@@ -6,6 +6,7 @@ import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.environment.GDXEnvironmentBuilder;
 import us.ihmc.gdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
+import us.ihmc.gdx.simulation.sensors.GDXSimulatedSensorFactory;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.affordances.GDXInteractableReferenceFrame;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
@@ -35,24 +36,24 @@ public class GDXGPUPlanarRegionExtractionDemo
 
             baseUI.create();
 
-            environmentBuilder = new GDXEnvironmentBuilder(baseUI.get3DSceneManager());
-            environmentBuilder.create(baseUI);
+            environmentBuilder = new GDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
+            environmentBuilder.create();
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
-            baseUI.get3DSceneManager().addRenderableProvider(environmentBuilder::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
-            baseUI.get3DSceneManager().addRenderableProvider(environmentBuilder::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+            baseUI.getPrimaryScene().addRenderableProvider(environmentBuilder::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
+            baseUI.getPrimaryScene().addRenderableProvider(environmentBuilder::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
             environmentBuilder.loadEnvironment("DemoPullDoor.json");
 
             robotInteractableReferenceFrame = new GDXInteractableReferenceFrame();
-            robotInteractableReferenceFrame.create(ReferenceFrame.getWorldFrame(), 0.15, baseUI.get3DSceneManager().getCamera3D());
+            robotInteractableReferenceFrame.create(ReferenceFrame.getWorldFrame(), 0.15, baseUI.getPrimary3DPanel().getCamera3D());
             robotInteractableReferenceFrame.getTransformToParent().getTranslation().add(2.2, 0.0, 1.0);
-            baseUI.addImGui3DViewInputProcessor(robotInteractableReferenceFrame::process3DViewInput);
-            baseUI.get3DSceneManager().addRenderableProvider(robotInteractableReferenceFrame::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(robotInteractableReferenceFrame::process3DViewInput);
+            baseUI.getPrimaryScene().addRenderableProvider(robotInteractableReferenceFrame::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
             l515PoseGizmo = new GDXPose3DGizmo(robotInteractableReferenceFrame.getRepresentativeReferenceFrame());
-            l515PoseGizmo.create(baseUI.get3DSceneManager().getCamera3D());
+            l515PoseGizmo.create(baseUI.getPrimary3DPanel().getCamera3D());
             l515PoseGizmo.setResizeAutomatically(false);
-            baseUI.addImGui3DViewPickCalculator(l515PoseGizmo::calculate3DViewPick);
-            baseUI.addImGui3DViewInputProcessor(l515PoseGizmo::process3DViewInput);
-            baseUI.get3DSceneManager().addRenderableProvider(l515PoseGizmo, GDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(l515PoseGizmo::calculate3DViewPick);
+            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(l515PoseGizmo::process3DViewInput);
+            baseUI.getPrimaryScene().addRenderableProvider(l515PoseGizmo, GDXSceneLevel.VIRTUAL);
             l515PoseGizmo.getTransformToParent().appendPitchRotation(Math.toRadians(60.0));
          }
 
@@ -63,32 +64,8 @@ public class GDXGPUPlanarRegionExtractionDemo
             {
                if (nativesLoadedActivator.isNewlyActivated())
                {
-                  double publishRateHz = 5.0;
-                  double verticalFOV = 55.0;
-                  int imageWidth = 1024;
-                  int imageHeight = 768;
-                  double minRange = 0.105;
-                  double maxRange = 5.0;
-                  l515 = new GDXHighLevelDepthSensorSimulator("Stepping L515",
-                                                              null,
-                                                              null,
-                                                              null,
-                                                              null,
-                                                              null,
-                                                              null,
-                                                              null,
-                                                              null,
-                                                              l515PoseGizmo.getGizmoFrame(),
-                                                              () -> 0L,
-                                                              verticalFOV,
-                                                              imageWidth,
-                                                              imageHeight,
-                                                              minRange,
-                                                              maxRange,
-                                                              publishRateHz,
-                                                              false);
+                  l515 = GDXSimulatedSensorFactory.createRealsenseL515(l515PoseGizmo.getGizmoFrame(), () -> 0L);
                   baseUI.getImGuiPanelManager().addPanel(l515);
-                  l515.create();
                   l515.setSensorEnabled(true);
                   l515.setPublishPointCloudROS2(false);
                   l515.setRenderPointCloudDirectly(false);
@@ -99,11 +76,11 @@ public class GDXGPUPlanarRegionExtractionDemo
                   l515.setPublishColorImageROS1(false);
                   l515.setPublishColorImageROS2(false);
                   CameraPinholeBrown cameraIntrinsics = l515.getDepthCameraIntrinsics();
-                  baseUI.get3DSceneManager().addRenderableProvider(l515, GDXSceneLevel.VIRTUAL);
+                  baseUI.getPrimaryScene().addRenderableProvider(l515, GDXSceneLevel.VIRTUAL);
 
                   gpuPlanarRegionExtraction = new GDXGPUPlanarRegionExtractionUI();
-                  gpuPlanarRegionExtraction.create(imageWidth,
-                                                   imageHeight,
+                  gpuPlanarRegionExtraction.create(l515.getLowLevelSimulator().getImageWidth(),
+                                                   l515.getLowLevelSimulator().getImageHeight(),
                                                    l515.getLowLevelSimulator().getMetersDepthFloatBuffer(),
                                                    cameraIntrinsics.getFx(),
                                                    cameraIntrinsics.getFy(),
@@ -111,12 +88,12 @@ public class GDXGPUPlanarRegionExtractionDemo
                                                    cameraIntrinsics.getCy());
                   gpuPlanarRegionExtraction.getEnabled().set(true);
                   baseUI.getImGuiPanelManager().addPanel(gpuPlanarRegionExtraction.getPanel());
-                  baseUI.get3DSceneManager().addRenderableProvider(gpuPlanarRegionExtraction::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+                  baseUI.getPrimaryScene().addRenderableProvider(gpuPlanarRegionExtraction::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
 
                   baseUI.getPerspectiveManager().reloadPerspective();
                }
 
-               l515.render(baseUI.get3DSceneManager());
+               l515.render(baseUI.getPrimaryScene());
                gpuPlanarRegionExtraction.extractPlanarRegions(l515PoseGizmo.getGizmoFrame());
             }
 

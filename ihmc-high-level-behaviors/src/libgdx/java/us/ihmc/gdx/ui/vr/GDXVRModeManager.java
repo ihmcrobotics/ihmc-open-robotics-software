@@ -9,7 +9,7 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.gdx.GDXSingleContext3DSituatedImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.gdx.sceneManager.GDX3DSceneBasics;
+import us.ihmc.gdx.sceneManager.GDX3DScene;
 import us.ihmc.gdx.vr.GDXVRContext;
 import us.ihmc.gdx.vr.GDXVRTeleporter;
 
@@ -27,7 +27,7 @@ public class GDXVRModeManager
    private ImGuiPanel panel = new ImGuiPanel("VR Manager", this::renderImGuiWidgets);
 
    public void create(GDXVRContext vrContext,
-                      GDX3DSceneBasics sceneBasics,
+                      GDX3DScene scene,
                       DRCRobotModel robotModel,
                       Map<String, Double> initialConfiguration,
                       ROS2ControllerHelper controllerHelper,
@@ -50,7 +50,7 @@ public class GDXVRModeManager
          {
             transform.getTranslation().set(1.0f, 0.0f, 1.0f);
          });
-         sceneBasics.addRenderableProvider(imGuiPanel);
+         scene.addRenderableProvider(imGuiPanel);
       }
    }
 

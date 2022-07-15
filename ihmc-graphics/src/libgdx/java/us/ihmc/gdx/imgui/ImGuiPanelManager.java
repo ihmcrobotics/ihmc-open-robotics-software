@@ -22,7 +22,7 @@ public class ImGuiPanelManager
       panels.add(new ImGuiPanel(windowName, render));
    }
 
-   public void addPrimaryPanel(String windowName)
+   public void addSelfManagedPanel(String windowName)
    {
       panels.add(new ImGuiPanel(windowName));
    }

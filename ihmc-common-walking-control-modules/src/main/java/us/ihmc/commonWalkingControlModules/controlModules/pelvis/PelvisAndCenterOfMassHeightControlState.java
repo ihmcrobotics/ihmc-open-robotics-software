@@ -36,6 +36,11 @@ public interface PelvisAndCenterOfMassHeightControlState extends State
 
    FeedbackControlCommand<?> getHeightControlCommand();
 
+   default FeedbackControlCommand<?> createFeedbackControlTemplate()
+   {
+      return getFeedbackControlCommand();
+   }
+
    boolean getControlHeightWithMomentum();
 
    /**
@@ -56,7 +61,6 @@ public interface PelvisAndCenterOfMassHeightControlState extends State
    void computeCoMHeightCommand(FrameVector2DReadOnly desiredICPVelocity,
                                 FrameVector2DReadOnly desiredCoMVelocity,
                                 boolean isInDoubleSupport,
-                                RobotSide supportSide,
                                 double omega0,
                                 FeetManager feetManager);
 
@@ -64,6 +68,4 @@ public interface PelvisAndCenterOfMassHeightControlState extends State
    {
       return null;
    }
-
-   default void setControlHeightWithMomentum(boolean flag) {}
 }

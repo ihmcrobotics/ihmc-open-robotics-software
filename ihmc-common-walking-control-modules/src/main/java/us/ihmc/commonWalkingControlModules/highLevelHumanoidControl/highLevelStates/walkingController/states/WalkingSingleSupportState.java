@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import org.apache.commons.math3.util.Precision;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.HeightManager;
+import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
@@ -52,7 +52,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
-   private final HeightManager comHeightManager;
+   private final CenterOfMassHeightManager comHeightManager;
    private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;
 
@@ -287,7 +287,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       actualFootPoseInWorld.setToZero(fullRobotModel.getSoleFrame(swingSide));
       actualFootPoseInWorld.changeFrame(worldFrame);
-      walkingMessageHandler.reportFootstepStarted(swingSide, desiredFootPoseInWorld, actualFootPoseInWorld, swingTime);
+      walkingMessageHandler.reportFootstepStarted(swingSide, desiredFootPoseInWorld, actualFootPoseInWorld, swingTime, nextFootstep.getSequenceID());
    }
 
    @Override
@@ -302,7 +302,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       touchdownErrorCompensator.registerDesiredFootstepPosition(swingSide, desiredFootPoseInWorld.getPosition());
 
-      walkingMessageHandler.reportFootstepCompleted(swingSide, desiredFootPoseInWorld, actualFootPoseInWorld, swingTime);
+      walkingMessageHandler.reportFootstepCompleted(swingSide, desiredFootPoseInWorld, actualFootPoseInWorld, swingTime, nextFootstep.getSequenceID());
       walkingMessageHandler.registerCompletedDesiredFootstep(nextFootstep);
 
       MovingReferenceFrame soleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(nextFootstep.getRobotSide());
@@ -344,37 +344,31 @@ public class WalkingSingleSupportState extends SingleSupportState
 
    public void switchToToeOffIfPossible(RobotSide supportSide)
    {
-      boolean shouldComputeToeLineContact = feetManager.shouldComputeToeLineContact();
-      boolean shouldComputeToePointContact = feetManager.shouldComputeToePointContact();
+      currentICP.setIncludingFrame(balanceManager.getCapturePoint());
 
-      if (shouldComputeToeLineContact || shouldComputeToePointContact)
-      {
-         currentICP.setIncludingFrame(balanceManager.getCapturePoint());
+      controllerToolbox.getDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(supportSide), desiredCoP);
+      controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(supportSide), filteredDesiredCoP);
 
-         controllerToolbox.getDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(supportSide), desiredCoP);
-         controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(supportSide), filteredDesiredCoP);
+      FramePoint3DReadOnly supportFootExitCMP = balanceManager.getFirstExitCMPForToeOff(false);
 
-         FramePoint3DReadOnly supportFootExitCMP = balanceManager.getFirstExitCMPForToeOff(false);
+      Footstep nextNextFootstep = null;
+      if (walkingMessageHandler.getCurrentNumberOfFootsteps() > 0)
+         nextNextFootstep = this.nextNextFootstep;
+      feetManager.updateToeOffStatusSingleSupport(nextFootstep,
+                                                  nextNextFootstep,
+                                                  supportFootExitCMP,
+                                                  balanceManager.getDesiredCMP(),
+                                                  desiredCoP,
+                                                  balanceManager.getDesiredICP(),
+                                                  currentICP,
+                                                  balanceManager.getFinalDesiredICP());
 
-         Footstep nextNextFootstep = null;
-         if (walkingMessageHandler.getCurrentNumberOfFootsteps() > 0)
-            nextNextFootstep = this.nextNextFootstep;
-         feetManager.updateToeOffStatusSingleSupport(nextFootstep,
-                                                     nextNextFootstep,
-                                                     supportFootExitCMP,
-                                                     balanceManager.getDesiredCMP(),
-                                                     desiredCoP,
-                                                     balanceManager.getDesiredICP(),
-                                                     currentICP,
-                                                     balanceManager.getFinalDesiredICP());
+      if (feetManager.okForPointToeOff(true))
+         feetManager.requestPointToeOff(supportSide, supportFootExitCMP, filteredDesiredCoP);
+      else if (feetManager.okForLineToeOff(true))
+         feetManager.requestLineToeOff(supportSide, supportFootExitCMP, filteredDesiredCoP);
 
-         if (feetManager.okForPointToeOff() && shouldComputeToePointContact)
-            feetManager.requestPointToeOff(supportSide, supportFootExitCMP, filteredDesiredCoP);
-         else if (feetManager.okForLineToeOff() && shouldComputeToeLineContact)
-            feetManager.requestLineToeOff(supportSide, supportFootExitCMP, filteredDesiredCoP);
-
-         //         updateHeightManager();
-      }
+//         updateHeightManager();
    }
 
    /**
@@ -422,8 +416,8 @@ public class WalkingSingleSupportState extends SingleSupportState
                                                                                                                                                 swingSide);
       transferToAndNextFootstepsData.setComAtEndOfState(balanceManager.getFinalDesiredCoMPosition());
       double extraToeOffHeight = 0.0;
-      if (feetManager.canDoSingleSupportToeOff(nextFootstep.getFootstepPose(), swingSide) && feetManager.getToeOffManager().isSteppingUp())
-         extraToeOffHeight = feetManager.getToeOffManager().getExtraCoMMaxHeightWithToes();
+      if (feetManager.canDoSingleSupportToeOff(nextFootstep.getFootstepPose(), swingSide) && feetManager.isSteppingUp())
+         extraToeOffHeight = feetManager.getExtraCoMMaxHeightWithToes();
       comHeightManager.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
    }
 

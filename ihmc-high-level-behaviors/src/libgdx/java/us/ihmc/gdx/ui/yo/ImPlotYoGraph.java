@@ -20,7 +20,7 @@ public class ImPlotYoGraph
 
    private final AtomicInteger currentIndex;
    private final ArrayList<YoDoubleClientHelper> variables = new ArrayList<>();
-   private final ArrayList<Double[]> variableValueBuffers = new ArrayList<>();
+   private final ArrayList<double[]> variableValueBuffers = new ArrayList<>();
    private final YoVariableClientHelper helper;
    private final int bufferSize;
 
@@ -36,7 +36,7 @@ public class ImPlotYoGraph
       currentIndex = new AtomicInteger(0);
    }
 
-   public ImPlotYoGraph(YoDoubleClientHelper variable, YoVariableClientHelper helper, Double[] variableValueBuffer, int bufferSize)
+   public ImPlotYoGraph(YoDoubleClientHelper variable, YoVariableClientHelper helper, double[] variableValueBuffer, int bufferSize)
    {
       this.helper = helper;
       this.variables.add(variable);
@@ -66,7 +66,7 @@ public class ImPlotYoGraph
    {
       YoDoubleClientHelper variable = helper.subscribeToYoDouble(variableName);
       variables.add(variable);
-      variableValueBuffers.add(ImPlotTools.newNaNFilledDoubleBuffer(bufferSize));
+      variableValueBuffers.add(ImPlotTools.newNaNFilledBuffer(bufferSize));
       requestAddVariable = false;
    }
 
@@ -92,17 +92,17 @@ public class ImPlotYoGraph
          ImPlot.setLegendLocation(ImPlotLocation.SouthWest, ImPlotOrientation.Horizontal, true);
 
          Iterator<YoDoubleClientHelper> variableIterator = variables.iterator();
-         Iterator<Double[]> variableValueBufferIterator = variableValueBuffers.iterator();
+         Iterator<double[]> variableValueBufferIterator = variableValueBuffers.iterator();
          boolean showingLegendPopup = false;
          while (variableIterator.hasNext())
          {
             YoDoubleClientHelper variable = variableIterator.next();
-            Double[] variableValueBuffer = variableValueBufferIterator.next();
+            double[] variableValueBuffer = variableValueBufferIterator.next();
             double variableValue = variable.get();
             variableValueBuffer[currentValueIndex] = variableValue;
 
             String labelID = variable.getName() + " " + variableValue + "###" + variable.getName();
-            ImPlot.plotLine(labelID, ImPlotTools.createIndex(variableValueBuffer), variableValueBuffer);
+            ImPlot.plotLine(labelID, ImPlotTools.createIndex(variableValueBuffer.length), variableValueBuffer, variableValueBuffer.length, 0);
             if (ImPlot.beginLegendPopup(labelID))
             {
                showingLegendPopup = true;
@@ -144,7 +144,7 @@ public class ImPlotYoGraph
             {
                YoDoubleClientHelper yoDoubleHelper = helper.subscribeToYoDouble(payload);
                variables.add(yoDoubleHelper);
-               variableValueBuffers.add(ImPlotTools.newNaNFilledDoubleBuffer(bufferSize));
+               variableValueBuffers.add(ImPlotTools.newNaNFilledBuffer(bufferSize));
             }
          }
          ImPlot.endPlot();

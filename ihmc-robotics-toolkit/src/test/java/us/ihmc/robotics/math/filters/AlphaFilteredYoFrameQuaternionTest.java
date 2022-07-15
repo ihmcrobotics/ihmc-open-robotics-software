@@ -43,7 +43,7 @@ public class AlphaFilteredYoFrameQuaternionTest
       Quaternion qFiltered = new Quaternion(q);
 
       // verify measurement equals filtered
-      EuclidCoreTestTools.assertQuaternionEquals(qMeasured, qFiltered, 1e-12);
+      EuclidCoreTestTools.assertEquals(qMeasured, qFiltered, 1e-12);
    }
 
 	@Test
@@ -66,7 +66,7 @@ public class AlphaFilteredYoFrameQuaternionTest
 
       Quaternion qFiltered = new Quaternion(q);
 
-      EuclidCoreTestTools.assertQuaternionGeometricallyEquals(qInitial, qFiltered, 1e-12);
+      EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(qInitial, qFiltered, 1e-12);
    }
 
 	@Test
@@ -89,7 +89,7 @@ public class AlphaFilteredYoFrameQuaternionTest
 
       Quaternion qFiltered = new Quaternion(q);
 
-      EuclidCoreTestTools.assertQuaternionGeometricallyEquals(qFinal, qFiltered, 1e-12);
+      EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(qFinal, qFiltered, 1e-12);
    }
 
 	@Test

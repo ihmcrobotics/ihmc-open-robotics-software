@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.states;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.HeightManager;
+import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
@@ -24,7 +24,7 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
-   private final HeightManager comHeightManager;
+   private final CenterOfMassHeightManager comHeightManager;
    private final PushRecoveryBalanceManager balanceManager;
    private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;
@@ -167,7 +167,7 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
 
       double extraToeOffHeight = 0.0;
       if (feetManager.getCurrentConstraintType(supportingSide.getOppositeSide()) == FootControlModule.ConstraintType.TOES)
-         extraToeOffHeight = feetManager.getToeOffManager().getExtraCoMMaxHeightWithToes();
+         extraToeOffHeight = feetManager.getExtraCoMMaxHeightWithToes();
 
       TransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport = walkingMessageHandler
             .createTransferToAndNextFootstepDataForDoubleSupport(supportingSide);

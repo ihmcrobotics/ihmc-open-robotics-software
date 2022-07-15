@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
-import us.ihmc.commonWalkingControlModules.capturePoint.HeightManager;
+import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
@@ -31,7 +31,7 @@ public abstract class TransferState extends WalkingState
    protected final HighLevelHumanoidControllerToolbox controllerToolbox;
    protected final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
-   protected final HeightManager comHeightManager;
+   protected final CenterOfMassHeightManager comHeightManager;
    protected final BalanceManager balanceManager;
    protected final PelvisOrientationManager pelvisOrientationManager;
    protected final FeetManager feetManager;
@@ -181,12 +181,12 @@ public abstract class TransferState extends WalkingState
                                                      balanceManager.getFinalDesiredICP(),
                                                      balanceManager.getPerfectCoP());
 
-         if (feetManager.okForPointToeOff())
+         if (feetManager.okForPointToeOff(false))
          {
             feetManager.requestPointToeOff(trailingLeg, trailingFootExitCMP, filteredDesiredCoP);
             return true;
          }
-         else if (feetManager.okForLineToeOff())
+         else if (feetManager.okForLineToeOff(false))
          {
             feetManager.requestLineToeOff(trailingLeg, trailingFootExitCMP, filteredDesiredCoP);
             return true;
@@ -219,8 +219,9 @@ public abstract class TransferState extends WalkingState
       }
 
       double extraToeOffHeight = 0.0;
-      if (feetManager.canDoDoubleSupportToeOff(null, transferToSide)) // FIXME should this be swing side?
-         extraToeOffHeight = feetManager.getToeOffManager().getExtraCoMMaxHeightWithToes();
+
+      if (feetManager.canDoDoubleSupportToeOff(transferToSide)) // FIXME should this be swing side?
+         extraToeOffHeight = feetManager.getExtraCoMMaxHeightWithToes();
 
       TransferToAndNextFootstepsData transferToAndNextFootstepsData = walkingMessageHandler.createTransferToAndNextFootstepDataForDoubleSupport(transferToSide);
       transferToAndNextFootstepsData.setComAtEndOfState(balanceManager.getFinalDesiredCoMPosition());

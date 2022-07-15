@@ -24,7 +24,7 @@ public class ControllerTask extends HumanoidRobotControlTask
    private final List<Runnable> taskThreadRunnables = new ArrayList<>();
    private final List<Runnable> schedulerThreadRunnables = new ArrayList<>();
 
-   public ControllerTask(AvatarControllerThreadInterface controllerThread, long divisor, double schedulerDt, FullHumanoidRobotModel masterFullRobotModel)
+   public ControllerTask(String prefix, AvatarControllerThreadInterface controllerThread, long divisor, double schedulerDt, FullHumanoidRobotModel masterFullRobotModel)
    {
       super(divisor);
       this.divisor = divisor;
@@ -33,7 +33,7 @@ public class ControllerTask extends HumanoidRobotControlTask
       controllerResolver = new CrossRobotCommandResolver(controllerThread.getFullRobotModel());
       masterResolver = new CrossRobotCommandResolver(masterFullRobotModel);
 
-      String prefix = "Controller";
+//      String prefix = "Controller";
       timer = new ThreadTimer(prefix, schedulerDt * divisor, controllerThread.getYoVariableRegistry());
       ticksBehindScheduled = new YoLong(prefix + "TicksBehindScheduled", controllerThread.getYoVariableRegistry());
    }

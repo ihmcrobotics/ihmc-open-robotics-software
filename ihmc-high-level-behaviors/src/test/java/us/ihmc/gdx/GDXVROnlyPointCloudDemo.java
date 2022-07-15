@@ -8,7 +8,6 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.ui.graphics.live.GDXROS2PointCloudVisualizer;
 import us.ihmc.gdx.vr.GDXVRApplication;
-import us.ihmc.gdx.vr.GDXVRBaseStation;
 import us.ihmc.gdx.vr.GDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
@@ -28,9 +27,9 @@ public class GDXVROnlyPointCloudDemo
          @Override
          public void create()
          {
-            vrApplication.getSceneBasics().addDefaultLighting();
-            vrApplication.getSceneBasics().addCoordinateFrame(1.0);
-            vrApplication.getSceneBasics().addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+            vrApplication.getScene().addDefaultLighting();
+            vrApplication.getScene().addCoordinateFrame(1.0);
+            vrApplication.getScene().addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
             vrApplication.getVRContext().addVRInputProcessor(this::processVRInput);
 
             ros2Node = ROS2Tools.createROS2Node(FAST_RTPS, "vr_viewer");

@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
-import us.ihmc.commonWalkingControlModules.capturePoint.HeightManager;
+import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
@@ -83,7 +83,7 @@ public class PushRecoveryControlManagerFactory
       return balanceManager;
    }
 
-   public HeightManager getOrCreateCenterOfMassHeightManager()
+   public CenterOfMassHeightManager getOrCreateCenterOfMassHeightManager()
    {
       return controlManagerFactory.getOrCreateCenterOfMassHeightManager();
    }

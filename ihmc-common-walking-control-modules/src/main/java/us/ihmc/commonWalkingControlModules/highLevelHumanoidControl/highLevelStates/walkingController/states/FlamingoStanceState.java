@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.capturePoint.HeightManager;
+import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
@@ -31,7 +31,7 @@ public class FlamingoStanceState extends SingleSupportState
    private final BipedSupportPolygons bipedSupportPolygons;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
-   private final HeightManager comHeightManager;
+   private final CenterOfMassHeightManager comHeightManager;
    private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;
 

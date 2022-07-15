@@ -7,7 +7,6 @@ import java.util.Map;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
-import us.ihmc.commonWalkingControlModules.capturePoint.HeightManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.DefaultSplitFractionCalculatorParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.HumanoidRobotNaturalPosture;
@@ -60,7 +59,7 @@ public class HighLevelControlManagerFactory
    private final YoRegistry comHeightGainRegistry = new YoRegistry(comHeightGainRegistryName);
 
    private BalanceManager balanceManager;
-   private HeightManager centerOfMassHeightManager;
+   private CenterOfMassHeightManager centerOfMassHeightManager;
    private FeetManager feetManager;
    private PelvisOrientationManager pelvisOrientationManager;
    private NaturalPostureManager naturalPostureManager;
@@ -170,7 +169,7 @@ public class HighLevelControlManagerFactory
       return balanceManager;
    }
 
-   public HeightManager getOrCreateCenterOfMassHeightManager()
+   public CenterOfMassHeightManager getOrCreateCenterOfMassHeightManager()
    {
       if (centerOfMassHeightManager != null)
          return centerOfMassHeightManager;

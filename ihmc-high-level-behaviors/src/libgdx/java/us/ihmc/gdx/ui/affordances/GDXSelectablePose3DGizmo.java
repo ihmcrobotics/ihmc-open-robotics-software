@@ -5,6 +5,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
+import imgui.type.ImBoolean;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.GDXFocusBasedCamera;
@@ -15,7 +16,7 @@ import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 public class GDXSelectablePose3DGizmo
 {
    private final GDXPose3DGizmo poseGizmo;
-   private boolean selected = false;
+   private final ImBoolean selected = new ImBoolean(false);
 
    public GDXSelectablePose3DGizmo()
    {
@@ -39,10 +40,15 @@ public class GDXSelectablePose3DGizmo
 
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      if (selected)
+      if (selected.get())
       {
          poseGizmo.calculate3DViewPick(input);
       }
+   }
+
+   public void process3DViewInput(ImGui3DViewInput input)
+   {
+      process3DViewInput(input, selected.get());
    }
 
    public void process3DViewInput(ImGui3DViewInput input, boolean isPickSelected)
@@ -56,15 +62,15 @@ public class GDXSelectablePose3DGizmo
       // Determine selectedness
       if (isClickedOn)
       {
-         selected = true;
+         selected.set(true);
       }
       if (somethingElseIsClickedOn || deselectionKeyPressed)
       {
-         selected = false;
+         selected.set(false);
       }
 
       // Act
-      if (selected)
+      if (selected.get())
       {
          poseGizmo.process3DViewInput(input);
       }
@@ -76,7 +82,7 @@ public class GDXSelectablePose3DGizmo
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (selected)
+      if (selected.get())
       {
          poseGizmo.getRenderables(renderables, pool);
       }
@@ -88,6 +94,11 @@ public class GDXSelectablePose3DGizmo
    }
 
    public boolean isSelected()
+   {
+      return selected.get();
+   }
+
+   public ImBoolean getSelected()
    {
       return selected;
    }

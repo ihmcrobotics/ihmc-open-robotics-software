@@ -35,11 +35,8 @@ mainDependencies {
    api("org.boofcv:boofcv-calibration:0.36")
    api("org.ddogleg:ddogleg:0.18")
 
-   api("us.ihmc:euclid:0.17.2")
-   api("us.ihmc:ihmc-yovariables:0.9.12")
-   api("us.ihmc:simulation-construction-set:0.21.16")
-   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.8")
-   api("us.ihmc:ihmc-graphics-description:0.19.4")
+   api("us.ihmc:euclid:0.18.1")
+   api("us.ihmc:simulation-construction-set:0.22.5")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-ros-tools:source")
@@ -63,6 +60,7 @@ bytedecoDependencies {
    apiBytedecoNatives("opencl", "3.0-")
    apiBytedecoNatives("librealsense2", "2.50.0-")
    apiBytedecoNatives("spinnaker", "2.4.0.143-")
+   apiBytedecoNatives("ffmpeg", "5.0-")
 }
 
 javacvDependencies {
@@ -73,6 +71,7 @@ javacvDependencies {
    apiBytedecoNatives("opencl", "3.0-")
    apiBytedecoNatives("librealsense2", "2.50.0-")
    apiBytedecoNatives("spinnaker", "2.4.0.143-")
+   apiBytedecoNatives("ffmpeg", "5.0-")
 }
 
 fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, versionPrefix: String = "")
@@ -94,9 +93,19 @@ fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoSelective(dependencyNotat
 }
 
 testDependencies {
-   api("us.ihmc:ihmc-commons-testing:0.30.5")
-   api("us.ihmc:simulation-construction-set:0.21.16")
+   api("us.ihmc:ihmc-commons-testing:0.31.0")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")
 }
+
+visualizersDependencies {
+   api(ihmc.sourceSetProject("main"))
+
+   api("us.ihmc:simulation-construction-set:0.22.5")
+
+   api("us.ihmc:simulation-construction-set-tools:source")
+   api("us.ihmc:simulation-construction-set-tools-test:source")
+}
+
+

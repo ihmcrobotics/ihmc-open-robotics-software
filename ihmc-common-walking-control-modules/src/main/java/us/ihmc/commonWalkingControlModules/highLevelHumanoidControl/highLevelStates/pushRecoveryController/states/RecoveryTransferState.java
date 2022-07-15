@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.states;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.HeightManager;
+import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
@@ -31,7 +31,7 @@ public class RecoveryTransferState extends PushRecoveryState
    protected final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
    private final PushRecoveryControllerParameters pushRecoveryParameters;
-   protected final HeightManager comHeightManager;
+   protected final CenterOfMassHeightManager comHeightManager;
    protected final PushRecoveryBalanceManager balanceManager;
    protected final PelvisOrientationManager pelvisOrientationManager;
    protected final FeetManager feetManager;
@@ -178,12 +178,12 @@ public class RecoveryTransferState extends PushRecoveryState
                                                      balanceManager.getFinalDesiredICP(),
                                                      balanceManager.getLinearMomentumRateControlModuleInput().getPerfectCoP());
 
-         if (feetManager.okForPointToeOff())
+         if (feetManager.okForPointToeOff(false))
          {
             feetManager.requestPointToeOff(trailingLeg, trailingFootExitCMP, filteredDesiredCoP);
             return true;
          }
-         else if (feetManager.okForLineToeOff())
+         else if (feetManager.okForLineToeOff(false))
          {
             feetManager.requestLineToeOff(trailingLeg, trailingFootExitCMP, filteredDesiredCoP);
             return true;

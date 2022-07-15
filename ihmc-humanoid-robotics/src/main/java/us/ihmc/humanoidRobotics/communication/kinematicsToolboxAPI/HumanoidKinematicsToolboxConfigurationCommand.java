@@ -10,6 +10,7 @@ public class HumanoidKinematicsToolboxConfigurationCommand
    private boolean holdCurrentCenterOfMassXYPosition = true;
    private boolean enableAutoSupportPolygon = true;
    private boolean holdSupportRigidBodies = true;
+   private boolean enableMultiContactSupportRegionSolver = false;
 
    @Override
    public void clear()
@@ -18,6 +19,7 @@ public class HumanoidKinematicsToolboxConfigurationCommand
       holdCurrentCenterOfMassXYPosition = true;
       enableAutoSupportPolygon = true;
       holdSupportRigidBodies = true;
+      enableMultiContactSupportRegionSolver = false;
    }
 
    @Override
@@ -27,6 +29,7 @@ public class HumanoidKinematicsToolboxConfigurationCommand
       holdCurrentCenterOfMassXYPosition = other.holdCurrentCenterOfMassXYPosition;
       enableAutoSupportPolygon = other.enableAutoSupportPolygon;
       holdSupportRigidBodies = other.holdSupportRigidBodies;
+      enableMultiContactSupportRegionSolver = other.enableMultiContactSupportRegionSolver;
    }
 
    @Override
@@ -36,6 +39,7 @@ public class HumanoidKinematicsToolboxConfigurationCommand
       holdCurrentCenterOfMassXYPosition = message.getHoldCurrentCenterOfMassXyPosition();
       enableAutoSupportPolygon = message.getEnableAutoSupportPolygon();
       holdSupportRigidBodies = message.getHoldSupportRigidBodies();
+      enableMultiContactSupportRegionSolver = message.getEnableMultiContactSupportRegionSolver();
    }
 
    public boolean holdCurrentCenterOfMassXYPosition()
@@ -51,6 +55,11 @@ public class HumanoidKinematicsToolboxConfigurationCommand
    public boolean holdSupportRigidBodies()
    {
       return holdSupportRigidBodies;
+   }
+
+   public boolean enableMultiContactSupportRegionSolver()
+   {
+      return enableMultiContactSupportRegionSolver;
    }
 
    @Override

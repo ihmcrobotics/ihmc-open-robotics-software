@@ -43,7 +43,7 @@ public class GDXBulletPhysicsInteractionForcesDemo
    private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
                                                               "ihmc-open-robotics-software",
                                                               "ihmc-high-level-behaviors/src/test/resources");
-   private final GDXEnvironmentBuilder environmentBuilder = new GDXEnvironmentBuilder(baseUI.get3DSceneManager());
+   private final GDXEnvironmentBuilder environmentBuilder = new GDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
    private final ImFloat blockTransparency = new ImFloat(0.2f);
 
    public GDXBulletPhysicsInteractionForcesDemo()
@@ -121,16 +121,16 @@ public class GDXBulletPhysicsInteractionForcesDemo
          public void create()
          {
             baseUI.create();
-            baseUI.get3DSceneManager().addCoordinateFrame(0.3);
+            baseUI.getPrimaryScene().addCoordinateFrame(0.3);
 
-            environmentBuilder.create(baseUI);
+            environmentBuilder.create();
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder);
 
             labFloorObject = new GDXLabFloorObject();
             environmentBuilder.addObject(labFloorObject);
             labFloorObject.copyThisTransformToBulletMultiBody();
 
-            baseUI.get3DSceneManager().addRenderableProvider(this::getRenderables);
+            baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables);
 
             recreateAndPlace();
 
@@ -296,7 +296,7 @@ public class GDXBulletPhysicsInteractionForcesDemo
             });
             baseUI.getImGuiPanelManager().addPanel(experimentPanel);
 
-            baseUI.get3DSceneManager().getCamera3D().changeCameraPosition(2.0, 1.0, 1.0);
+            baseUI.getPrimary3DPanel().getCamera3D().changeCameraPosition(2.0, 1.0, 1.0);
             environmentBuilder.getBulletPhysicsManager().getSimulationRate().set(0.1f);
          }
 

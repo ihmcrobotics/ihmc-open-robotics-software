@@ -1,6 +1,7 @@
 package us.ihmc.robotics;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.Random;
 
@@ -40,10 +41,10 @@ public class EuclidCoreMissingToolsTest
       Vector3D roundedVector = new Vector3D(preciseVector);
 
       EuclidCoreMissingTools.floorToGivenPrecision(roundedVector, 1e-7);
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(0.1234567, 100.1234567, 1000.1234567), roundedVector, 1e-12);
+      EuclidCoreTestTools.assertEquals(new Vector3D(0.1234567, 100.1234567, 1000.1234567), roundedVector, 1e-12);
 
       EuclidCoreMissingTools.floorToGivenPrecision(roundedVector, 1e-3);
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(0.123, 100.123, 1000.123), roundedVector, 1e-14);
+      EuclidCoreTestTools.assertEquals(new Vector3D(0.123, 100.123, 1000.123), roundedVector, 1e-14);
    }
 
    @Test
@@ -68,7 +69,7 @@ public class EuclidCoreMissingToolsTest
          // From the combined rotation and the original axis back out the rotation around the original axis.
          fullRotation.multiply(orthogonalRotation, expectedRotation);
          EuclidCoreMissingTools.projectRotationOnAxis(fullRotation, axis, actualRotation);
-         EuclidCoreTestTools.assertQuaternionGeometricallyEquals(expectedRotation, actualRotation, 1.0e-10);
+         EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(expectedRotation, actualRotation, 1.0e-10);
       }
    }
 
@@ -89,7 +90,7 @@ public class EuclidCoreMissingToolsTest
          EuclidCoreMissingTools.rotationMatrix3DFromFirstToSecondVector3D(firstVector, secondVector, actualRotationMatrix);
          actualAxisAngle.set(actualRotationMatrix);
          EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(firstVector, secondVector, expectedAxisAngle);
-         EuclidCoreTestTools.assertAxisAngleGeometricallyEquals(expectedAxisAngle, actualAxisAngle, 1.0e-7);
+         EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(expectedAxisAngle, actualAxisAngle, 1.0e-7);
       }
    }
 
@@ -305,12 +306,12 @@ public class EuclidCoreMissingToolsTest
 
          Vector3D actualNormalPart = new Vector3D();
          EuclidCoreMissingTools.extractNormalPart(input, normalAxis, actualNormalPart);
-         EuclidCoreTestTools.assertTuple3DEquals(normalPart, actualNormalPart, EPSILON);
+         EuclidCoreTestTools.assertEquals(normalPart, actualNormalPart, EPSILON);
 
          // Randomize the axis
          normalAxis.scale(EuclidCoreRandomTools.nextDouble(random, 0.0, 10.0));
          EuclidCoreMissingTools.extractNormalPart(input, normalAxis, actualNormalPart);
-         EuclidCoreTestTools.assertTuple3DEquals(normalPart, actualNormalPart, EPSILON);
+         EuclidCoreTestTools.assertEquals(normalPart, actualNormalPart, EPSILON);
       }
    }
 
@@ -337,7 +338,7 @@ public class EuclidCoreMissingToolsTest
 
          Vector3D actualTangentialPart = new Vector3D();
          EuclidCoreMissingTools.extractTangentialPart(input, normalAxis, actualTangentialPart);
-         EuclidCoreTestTools.assertTuple3DEquals("Iteration: " + i, tangentialPart, actualTangentialPart, EPSILON);
+         EuclidCoreTestTools.assertEquals("Iteration: " + i, tangentialPart, actualTangentialPart, EPSILON);
       }
 
       for (int i = 0; i < iters; i++)
@@ -357,14 +358,37 @@ public class EuclidCoreMissingToolsTest
 
          Vector3D actualTangentialPart = new Vector3D();
          EuclidCoreMissingTools.extractTangentialPart(input, normalAxis, actualTangentialPart);
-         EuclidCoreTestTools.assertTuple3DEquals(tangentialPart, actualTangentialPart, EPSILON);
+         EuclidCoreTestTools.assertEquals(tangentialPart, actualTangentialPart, EPSILON);
 
          // Randomize the axis
          normalAxis.scale(EuclidCoreRandomTools.nextDouble(random, 0.0, 10.0));
          EuclidCoreMissingTools.extractTangentialPart(input, normalAxis, actualTangentialPart);
-         EuclidCoreTestTools.assertTuple3DEquals(tangentialPart, actualTangentialPart, EPSILON);
+         EuclidCoreTestTools.assertEquals(tangentialPart, actualTangentialPart, EPSILON);
       }
    }
+
+   @Test
+   public void testIntersectionBetweenRay2DAndLine2D()
+   {
+      Point2D rayOrigin = new Point2D(8.689, 0.5687);
+      Point2D pointOnRay = new Point2D(8.6432, 0.4951);
+      Vector2D rayDirection = new Vector2D();
+      rayDirection.sub(pointOnRay, rayOrigin);
+
+      Point2D lineStart = new Point2D(8.4521, 0.4323);
+      Point2D lineEnd = new Point2D(8.776, 0.5267);
+      Vector2D lineDirection = new Vector2D();
+      lineDirection.sub(lineEnd, lineStart);
+
+      Point2D intersectionToPac = new Point2D();
+      assertTrue(EuclidCoreMissingTools.intersectionBetweenRay2DAndLine2D(rayOrigin, rayDirection, lineStart, lineDirection, intersectionToPac));
+
+      Point2D intersectionExpected = new Point2D();
+      EuclidGeometryTools.intersectionBetweenLine2DAndLineSegment2D(rayOrigin, rayDirection, lineStart, lineEnd, intersectionExpected);
+
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(intersectionExpected, intersectionToPac, 1e-5);
+   }
+
 
    @Test
    public void testSetNormalPart()
@@ -393,7 +417,7 @@ public class EuclidCoreMissingToolsTest
          expected.add(normalPart, tangentialPart);
 
          EuclidCoreMissingTools.setNormalPart(input, normalAxis, tupleToModify);
-         EuclidCoreTestTools.assertTuple3DEquals(expected, tupleToModify, EPSILON);
+         EuclidCoreTestTools.assertEquals(expected, tupleToModify, EPSILON);
       }
 
       for (int i = 0; i < iters; i++)
@@ -417,12 +441,12 @@ public class EuclidCoreMissingToolsTest
          expected.add(normalPart, tangentialPart);
 
          EuclidCoreMissingTools.setNormalPart(input, normalAxis, tupleToModify);
-         EuclidCoreTestTools.assertTuple3DEquals(expected, tupleToModify, EPSILON);
+         EuclidCoreTestTools.assertEquals(expected, tupleToModify, EPSILON);
 
          // Randomize the axis
          normalAxis.scale(EuclidCoreRandomTools.nextDouble(random, 0.0, 10.0));
          EuclidCoreMissingTools.setNormalPart(input, normalAxis, tupleToModify);
-         EuclidCoreTestTools.assertTuple3DEquals(expected, tupleToModify, EPSILON);
+         EuclidCoreTestTools.assertEquals(expected, tupleToModify, EPSILON);
       }
    }
 

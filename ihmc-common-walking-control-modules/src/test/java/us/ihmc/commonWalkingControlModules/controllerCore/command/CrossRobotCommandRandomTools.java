@@ -53,7 +53,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand.JointVelocityLimitMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand.ActivationState;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.LinearMomentumConvexConstraint2DCommand;
@@ -800,7 +800,7 @@ public class CrossRobotCommandRandomTools
       next.setCommandId(random.nextInt());
       next.setJointVelocityWeight(random.nextDouble());
       next.setJointAccelerationWeight(random.nextDouble());
-      next.setJointVelocityLimitMode(nextElementIn(random, JointVelocityLimitMode.values()));
+      next.setJointVelocityLimitMode(nextElementIn(random, ActivationState.values()));
       return next;
    }
 
@@ -1620,6 +1620,7 @@ public class CrossRobotCommandRandomTools
       next.setSchedulerTick(random.nextLong());
       next.setControllerRan(random.nextBoolean());
       next.setEstimatorRan(random.nextBoolean());
+      next.setPerceptionRan(random.nextBoolean());
       return next;
    }
 
@@ -1656,6 +1657,7 @@ public class CrossRobotCommandRandomTools
       next.setSchedulerTick(random.nextLong());
       next.setControllerRan(random.nextBoolean());
       next.setEstimatorRan(random.nextBoolean());
+      next.setPerceptionRan(random.nextBoolean());
       return next;
    }
 
@@ -1850,6 +1852,7 @@ public class CrossRobotCommandRandomTools
       next.setCenterOfMassHeightControlCommand(nextCenterOfMassFeedbackControlCommand(random, rootBody, possibleFrames));
       next.setPelvisHeightControlCommand(nextPointFeedbackControlCommand(random, rootBody, possibleFrames));
       next.setUsePelvisHeightCommand(random.nextBoolean());
+      next.setHasHeightCommand(random.nextBoolean());
       next.setControlHeightWithMomentum(random.nextBoolean());
       next.setUseMomentumRecoveryMode(random.nextBoolean());
       next.setDesiredCapturePoint(nextFramePoint2D(random, possibleFrames));

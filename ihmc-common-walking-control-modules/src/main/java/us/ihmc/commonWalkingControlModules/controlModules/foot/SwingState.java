@@ -57,7 +57,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class SwingState extends AbstractFootControlState
 {
-   private static final boolean visualizeAdjustedSwing = true;
+   private static final boolean visualizeAdjustedSwing = false;
    private static final boolean USE_ALL_LEG_JOINT_SWING_CORRECTOR = false;
 
    private final YoBoolean replanTrajectory;
@@ -467,7 +467,7 @@ public class SwingState extends AbstractFootControlState
       else
       {
          currentTimeWithSwingSpeedUp.add(swingTimeSpeedUpFactor.getDoubleValue() * controlDT);
-         time = currentTimeWithSwingSpeedUp.getDoubleValue();
+         time = Math.max(currentTime.getValue(), currentTimeWithSwingSpeedUp.getDoubleValue());
       }
 
       FixedFramePoseTrajectoryGenerator activeTrajectory;

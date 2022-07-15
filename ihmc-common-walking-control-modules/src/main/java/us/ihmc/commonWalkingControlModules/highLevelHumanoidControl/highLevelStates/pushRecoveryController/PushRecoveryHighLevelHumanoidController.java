@@ -9,7 +9,7 @@ import java.util.Set;
 
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.capturePoint.HeightManager;
+import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleInput;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleOutput;
 import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryControlModule;
@@ -75,7 +75,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
    private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;
    private final PushRecoveryBalanceManager balanceManager;
-   private final HeightManager comHeightManager;
+   private final CenterOfMassHeightManager comHeightManager;
 
    private final ArrayList<RigidBodyControlManager> bodyManagers = new ArrayList<>();
    private final Map<String, RigidBodyControlManager> bodyManagerByJointName = new HashMap<>();
@@ -446,7 +446,6 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
       comHeightManager.compute(balanceManager.getDesiredICPVelocity(),
                                desiredCoMVelocityAsFrameVector,
                                isInDoubleSupport,
-                               currentState.getSupportSide(),
                                omega0,
                                feetManager);
       FeedbackControlCommand<?> heightControlCommand = comHeightManager.getHeightControlCommand();

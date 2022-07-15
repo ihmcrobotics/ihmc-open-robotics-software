@@ -107,7 +107,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
 
       // TODO: Fix low level stuff so that we are truly controlling pelvis height and not CoM height.
       controlPelvisHeightInsteadOfCoMHeight.set(walkingControllerParameters.controlPelvisHeightInsteadOfCoMHeight());
-      controlHeightWithMomentum.set(false); //walkingControllerParameters.controlHeightWithMomentum());
+      controlHeightWithMomentum.set(walkingControllerParameters.controlHeightWithMomentum());
 
       double controlDT = controllerToolbox.getControlDT();
       comHeightTimeDerivativesSmoother = new CoMHeightTimeDerivativesSmoother(controlDT, registry);
@@ -279,7 +279,6 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    public void computeCoMHeightCommand(FrameVector2DReadOnly desiredICPVelocity,
                                        FrameVector2DReadOnly desiredCoMVelocity,
                                        boolean isInDoubleSupport,
-                                       RobotSide supportSide,
                                        double omega0,
                                        FeetManager feetManager)
    {
@@ -344,7 +343,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       desiredCoMHeightAfterSmoothing.set(desiredCenterOfMassHeightPoint.getZ());
       desiredCoMHeightVelocityAfterSmoothing.set(comHeightDataAfterSmoothing.getComHeightVelocity());
       desiredCoMHeightAccelerationAfterSmoothing.set(comHeightDataAfterSmoothing.getComHeightAcceleration());
-      desiredCoMHeightJerkAfterSmoothing.set(comHeightDataBeforeSmoothing.getComHeightJerk());
+      desiredCoMHeightJerkAfterSmoothing.set(comHeightDataAfterSmoothing.getComHeightJerk());
 
       if (feetManager != null)
       {

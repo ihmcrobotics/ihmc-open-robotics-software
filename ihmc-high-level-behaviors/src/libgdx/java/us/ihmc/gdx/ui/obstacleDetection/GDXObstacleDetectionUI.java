@@ -54,7 +54,7 @@ public class GDXObstacleDetectionUI
          public void create()
          {
             baseUI.create();
-            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelBuilder.createCoordinateFrame(0.3)));
+            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(GDXModelBuilder.createCoordinateFrame(0.3)));
 
 
             ros1PointCloudVisualizer.create();
@@ -65,13 +65,13 @@ public class GDXObstacleDetectionUI
             //            ros1BoxVisualizer.create();
 //            ros1BoxVisualizer.setEnabled(true);
 
-            baseUI.get3DSceneManager().addRenderableProvider(ros1PointCloudVisualizer);
-            baseUI.get3DSceneManager().addRenderableProvider(ros1PointCloudVisualizer2);
-//            baseUI.getSceneManager().addRenderableProvider(ros1BoxVisualizer);
+            baseUI.getPrimaryScene().addRenderableProvider(ros1PointCloudVisualizer);
+            baseUI.getPrimaryScene().addRenderableProvider(ros1PointCloudVisualizer2);
+//            baseUI.getPrimaryScene().addRenderableProvider(ros1BoxVisualizer);
 
-            baseUI.get3DSceneManager().addRenderableProvider(boxVisualizer);
+            baseUI.getPrimaryScene().addRenderableProvider(boxVisualizer);
 
-//            baseUI.getSceneManager().addRenderableProvider(ros1BoxVisualizer);
+//            baseUI.getPrimaryScene().addRenderableProvider(ros1BoxVisualizer);
 
             ros1Node.execute();
          }

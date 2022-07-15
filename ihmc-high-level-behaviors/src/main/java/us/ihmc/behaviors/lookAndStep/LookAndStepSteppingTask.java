@@ -7,6 +7,7 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -113,6 +114,12 @@ public class LookAndStepSteppingTask
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
       footstepDataListMessage.setOffsetFootstepsHeightWithExecutionError(true);
       FootstepDataMessageConverter.appendPlanToMessage(footstepPlan, footstepDataListMessage);
+
+      for (int i = 0; i < footstepDataListMessage.getFootstepDataList().size(); i++)
+      {
+         footstepDataListMessage.getFootstepDataList().get(i).setShouldCheckForReachability(true);
+      }
+
       // TODO: Add combo to look and step UI to chose which steps to visualize
       uiPublisher.publishToUI(LastCommandedFootsteps, MinimalFootstep.convertFootstepDataListMessage(footstepDataListMessage, "Look and Step Last Commanded"));
 
@@ -125,7 +132,7 @@ public class LookAndStepSteppingTask
       {
          executionMode = previousStepMessageId == 0L ? ExecutionMode.OVERRIDE : ExecutionMode.QUEUE;
       }
-      imminentStanceTracker.addCommandedFootsteps(footstepPlan, executionMode);
+      imminentStanceTracker.addCommandedFootsteps(footstepPlan);
 
       footstepDataListMessage.getQueueingProperties().setExecutionMode(executionMode.toByte());
       long messageId = UUID.randomUUID().getLeastSignificantBits();
@@ -158,11 +165,10 @@ public class LookAndStepSteppingTask
       while (true)
       {
          double moreRobustRobotTime = getMoreRobustRobotTime(estimatedRobotTimeWhenPlanWasSent);
-         // FIXME: What if the queue size was larger? Need to know when the step we sent is started
-         boolean stepHasStarted = imminentStanceTracker.getStepsStartedSinceCommanded() > 0;
+         boolean stepHasStarted = imminentStanceTracker.getFirstCommandedStepHasStarted();
          boolean haveWaitedMaxDuration = moreRobustRobotTime >= robotTimeToStopWaitingRegardless;
          boolean robotIsNotWalkingAnymoreForSomeReason = !controllerStatusTracker.isWalking();
-         boolean stepCompletedEarly = imminentStanceTracker.getStepsCompletedSinceCommanded() > 0;
+         boolean stepCompletedEarly = imminentStanceTracker.getFirstCommandedStepHasCompleted();
 
          // Part 1: Wait for the step to start with a timeout
          if (haveWaitedMaxDuration)
@@ -190,12 +196,18 @@ public class LookAndStepSteppingTask
             }
             else if (stepCompletedEarly)
             {
-               statusLogger.info("Step completed {} s early. Done waiting.", robotTimeToStopWaiting - moreRobustRobotTime);
+               statusLogger.info("Step completed {} s early. Done waiting.",
+                                 FormattingTools.getFormattedDecimal3D(robotTimeToStopWaiting - moreRobustRobotTime));
                break;
             }
             else if (moreRobustRobotTime >= robotTimeToStopWaiting)
             {
-               statusLogger.info("{} % of swing complete! Done waiting.", (moreRobustRobotTime - estimatedRobotTimeWhenPlanWasSent) / swingDuration);
+               double durationSinceSwingStarted = moreRobustRobotTime - robotTimeInWhichStepStarted;
+               double durationWaited = moreRobustRobotTime - estimatedRobotTimeWhenPlanWasSent;
+               statusLogger.info("{} % of swing complete! Done waiting. We waited for {} s since step started. ({} s total)",
+                                 FormattingTools.getFormattedDecimal3D(durationSinceSwingStarted / swingDuration * 100.0),
+                                 FormattingTools.getFormattedDecimal3D(durationSinceSwingStarted),
+                                 FormattingTools.getFormattedDecimal3D(durationWaited));
                break;
             }
          }

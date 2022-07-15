@@ -1,10 +1,5 @@
 package us.ihmc.communication;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.util.function.Consumer;
-import java.util.function.Function;
-
 import controller_msgs.msg.dds.*;
 import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Float64;
@@ -16,6 +11,11 @@ import us.ihmc.ros2.*;
 import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
 import us.ihmc.util.PeriodicThreadSchedulerFactory;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class ROS2Tools
 {
@@ -113,12 +113,17 @@ public class ROS2Tools
          = REA.withInput().withType(PolygonizerParametersStringMessage.class).withSuffix("polygonizer_parameters");
 
    public static final ROS2Topic<VideoPacket> VIDEO = IHMC_ROOT.withTypeName(VideoPacket.class);
+   public static final ROS2Topic<BigVideoPacket> BIG_VIDEO = IHMC_ROOT.withTypeName(BigVideoPacket.class);
    public static final ROS2Topic<VideoPacket> D435_VIDEO = IHMC_ROOT.withModule(D435_NAME).withType(VideoPacket.class).withSuffix("video");
    public static final ROS2Topic<VideoPacket> L515_VIDEO = IHMC_ROOT.withModule(L515_NAME).withType(VideoPacket.class).withSuffix("video");
-   public static final ROS2Topic<VideoPacket> L515_DEPTH = IHMC_ROOT.withModule(L515_NAME).withType(VideoPacket.class).withSuffix("depth");
-   public static final SideDependentList<ROS2Topic<VideoPacket>> BLACKFLY_VIDEO
-         = new SideDependentList<>(IHMC_ROOT.withModule(BLACKFLY_NAME + "left").withType(VideoPacket.class).withSuffix("video"),
-                                   IHMC_ROOT.withModule(BLACKFLY_NAME + "right").withType(VideoPacket.class).withSuffix("video"));
+   public static final ROS2Topic<BigVideoPacket> L515_DEPTH = IHMC_ROOT.withModule(L515_NAME).withType(BigVideoPacket.class).withSuffix("depth");
+   public static final ROS2Topic<BigVideoPacket> L515_DEBUG_EXTRACTION
+         = IHMC_ROOT.withModule(L515_NAME).withType(BigVideoPacket.class).withSuffix("debug_extraction");
+   public static final SideDependentList<ROS2Topic<BigVideoPacket>> BLACKFLY_VIDEO
+         = new SideDependentList<>(IHMC_ROOT.withModule(BLACKFLY_NAME + "left").withType(BigVideoPacket.class).withSuffix("video"),
+                                   IHMC_ROOT.withModule(BLACKFLY_NAME + "right").withType(BigVideoPacket.class).withSuffix("video"));
+   public static final ROS2Topic<BigVideoPacket> OUSTER_LIDAR = IHMC_ROOT.withModule("ouster").withType(BigVideoPacket.class).withSuffix("depth");
+   public static final ROS2Topic<BigVideoPacket> BIG_VIDEO_TEST = IHMC_ROOT.withModule(BLACKFLY_NAME).withType(BigVideoPacket.class).withSuffix("test");
 
    public static final ROS2Topic<LidarScanMessage> MULTISENSE_LIDAR_SCAN = IHMC_ROOT.withTypeName(LidarScanMessage.class);
    public static final ROS2Topic<FusedSensorHeadPointCloudMessage> FUSED_SENSOR_HEAD_POINT_CLOUD = IHMC_ROOT.withTypeName(FusedSensorHeadPointCloudMessage.class);
@@ -154,6 +159,8 @@ public class ROS2Tools
    private static final ROS2Topic<HandJointAnglePacket> HAND_JOINT_ANGLES = HUMANOID_CONTROLLER.withOutput().withTypeName(HandJointAnglePacket.class);
    private static final ROS2Topic<BipedalSupportPlanarRegionParametersMessage> BIPEDAL_SUPPORT_REGION_PARAMETERS
          = BIPED_SUPPORT_REGION_PUBLISHER.withInput().withType(BipedalSupportPlanarRegionParametersMessage.class);
+
+   public static final ROS2Topic<Float64> BOX_MASS = IHMC_ROOT.withSuffix("box_mass").withType(Float64.class);
 
    public static final Function<String, String> NAMED_BY_TYPE = typeName -> typeName;
 
@@ -422,6 +429,14 @@ public class ROS2Tools
    }
 
    public static <T> void createCallbackSubscription(RealtimeROS2Node realtimeROS2Node,
+                                                     ROS2Topic<T> topic,
+                                                     ROS2QosProfile qosProfile,
+                                                     NewMessageListener<T> newMessageListener)
+   {
+      createCallbackSubscription(realtimeROS2Node, topic.getType(), topic.getName(), newMessageListener, qosProfile, RUNTIME_EXCEPTION);
+   }
+
+   public static <T> void createCallbackSubscription(RealtimeROS2Node realtimeROS2Node,
                                                      Class<T> messageType,
                                                      ROS2Topic<?> topicName,
                                                      NewMessageListener<T> newMessageListener)
@@ -536,14 +551,30 @@ public class ROS2Tools
    }
 
    public static <T> IHMCRealtimeROS2Publisher<T> createPublisher(RealtimeROS2Node realtimeROS2Node,
+                                                                  ROS2Topic<T> topic,
+                                                                  ROS2QosProfile qosProfile)
+   {
+      return createPublisher(realtimeROS2Node, topic.getType(), topic.getName(), qosProfile, RUNTIME_EXCEPTION);
+   }
+
+   public static <T> IHMCRealtimeROS2Publisher<T> createPublisher(RealtimeROS2Node realtimeROS2Node,
                                                                   Class<T> messageType,
                                                                   String topicName,
+                                                                  ExceptionHandler exceptionHandler)
+   {
+      return createPublisher(realtimeROS2Node, messageType, topicName, ROS2QosProfile.DEFAULT(), exceptionHandler);
+   }
+
+   public static <T> IHMCRealtimeROS2Publisher<T> createPublisher(RealtimeROS2Node realtimeROS2Node,
+                                                                  Class<T> messageType,
+                                                                  String topicName,
+                                                                  ROS2QosProfile qosProfile,
                                                                   ExceptionHandler exceptionHandler)
    {
       try
       {
          TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
-         return new IHMCRealtimeROS2Publisher<T>(realtimeROS2Node.createPublisher(topicDataType, topicName, ROS2QosProfile.DEFAULT(), 10));
+         return new IHMCRealtimeROS2Publisher<T>(realtimeROS2Node.createPublisher(topicDataType, topicName, qosProfile, 10));
       }
       catch (IOException e)
       {

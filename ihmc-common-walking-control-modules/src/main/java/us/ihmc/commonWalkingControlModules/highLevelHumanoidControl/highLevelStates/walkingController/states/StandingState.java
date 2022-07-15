@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
-import us.ihmc.commonWalkingControlModules.capturePoint.HeightManager;
+import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
@@ -30,7 +30,7 @@ public class StandingState extends WalkingState
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
    private final TouchdownErrorCompensator touchdownErrorCompensator;
 
-   private final HeightManager comHeightManager;
+   private final CenterOfMassHeightManager comHeightManager;
    private final BalanceManager balanceManager;
    private final PelvisOrientationManager pelvisOrientationManager;
    private final RigidBodyControlManager chestManager;
@@ -133,10 +133,9 @@ public class StandingState extends WalkingState
          chestManager.prepareForLocomotion();
 
       if (pelvisOrientationManager != null)
-      {
          pelvisOrientationManager.prepareForLocomotion(walkingMessageHandler.getNextStepTime());
+      if (comHeightManager != null)
          comHeightManager.prepareForLocomotion();
-      }
 
       balanceManager.disablePelvisXYControl();
       controllerToolbox.reportChangeOfRobotMotionStatus(RobotMotionStatus.IN_MOTION);

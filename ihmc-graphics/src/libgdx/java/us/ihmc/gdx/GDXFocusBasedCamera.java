@@ -35,6 +35,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 public class GDXFocusBasedCamera extends Camera
 {
+   private boolean inputEnabled = true;
    private final FramePose3D cameraPose = new FramePose3D();
    private final RigidBodyTransform transformToParent = new RigidBodyTransform();
    private final ReferenceFrame cameraFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
@@ -46,14 +47,13 @@ public class GDXFocusBasedCamera extends Camera
    private final AxisAngle latitudeAxisAngle = new AxisAngle();
    private final AxisAngle focusPointAxisAngle = new AxisAngle();
 
-   private final float verticalFieldOfView;
-
    private final double zoomSpeedFactor = 0.1;
    private final double latitudeSpeed = 0.005;
    private final double longitudeSpeed = 0.005;
    private final double translateSpeedFactor = 0.5;
 
    private final FramePose3D focusPointPose;
+   private float verticalFieldOfView;
    private double latitude = 0.0;
    private double longitude = 0.0;
    private double zoom = 10.0;
@@ -242,44 +242,47 @@ public class GDXFocusBasedCamera extends Camera
    @Override
    public void update()
    {
-      float tpf = Gdx.app.getGraphics().getDeltaTime();
+      if (inputEnabled)
+      {
+         float tpf = Gdx.app.getGraphics().getDeltaTime();
 
-      if (libGDXInputMode)
-      {
-         isWPressed = Gdx.input.isKeyPressed(Input.Keys.W);
-         isSPressed = Gdx.input.isKeyPressed(Input.Keys.S);
-         isAPressed = Gdx.input.isKeyPressed(Input.Keys.A);
-         isDPressed = Gdx.input.isKeyPressed(Input.Keys.D);
-         isQPressed = Gdx.input.isKeyPressed(Input.Keys.Q);
-         isZPressed = Gdx.input.isKeyPressed(Input.Keys.Z);
-      }
+         if (libGDXInputMode)
+         {
+            isWPressed = Gdx.input.isKeyPressed(Input.Keys.W);
+            isSPressed = Gdx.input.isKeyPressed(Input.Keys.S);
+            isAPressed = Gdx.input.isKeyPressed(Input.Keys.A);
+            isDPressed = Gdx.input.isKeyPressed(Input.Keys.D);
+            isQPressed = Gdx.input.isKeyPressed(Input.Keys.Q);
+            isZPressed = Gdx.input.isKeyPressed(Input.Keys.Z);
+         }
 
-      if (isWPressed)
-      {
-         focusPointPose.appendTranslation(getTranslateSpeedFactor() * tpf, 0.0, 0.0);
-      }
-      if (isSPressed)
-      {
-         focusPointPose.appendTranslation(-getTranslateSpeedFactor() * tpf, 0.0, 0.0);
-      }
-      if (isAPressed)
-      {
-         focusPointPose.appendTranslation(0.0, getTranslateSpeedFactor() * tpf, 0.0);
-      }
-      if (isDPressed)
-      {
-         focusPointPose.appendTranslation(0.0, -getTranslateSpeedFactor() * tpf, 0.0);
-      }
-      if (isQPressed)
-      {
-         focusPointPose.appendTranslation(0.0, 0.0, getTranslateSpeedFactor() * tpf);
-      }
-      if (isZPressed)
-      {
-         focusPointPose.appendTranslation(0.0, 0.0, -getTranslateSpeedFactor() * tpf);
-      }
+         if (isWPressed)
+         {
+            focusPointPose.appendTranslation(getTranslateSpeedFactor() * tpf, 0.0, 0.0);
+         }
+         if (isSPressed)
+         {
+            focusPointPose.appendTranslation(-getTranslateSpeedFactor() * tpf, 0.0, 0.0);
+         }
+         if (isAPressed)
+         {
+            focusPointPose.appendTranslation(0.0, getTranslateSpeedFactor() * tpf, 0.0);
+         }
+         if (isDPressed)
+         {
+            focusPointPose.appendTranslation(0.0, -getTranslateSpeedFactor() * tpf, 0.0);
+         }
+         if (isQPressed)
+         {
+            focusPointPose.appendTranslation(0.0, 0.0, getTranslateSpeedFactor() * tpf);
+         }
+         if (isZPressed)
+         {
+            focusPointPose.appendTranslation(0.0, 0.0, -getTranslateSpeedFactor() * tpf);
+         }
 
-      updateCameraPose();
+         updateCameraPose();
+      }
 
       update(true);
    }
@@ -305,6 +308,23 @@ public class GDXFocusBasedCamera extends Camera
       }
    }
 
+   public void setPose(RigidBodyTransform transformToWorld)
+   {
+      cameraPose.set(transformToWorld);
+
+      euclidDirection.setIncludingFrame(ReferenceFrame.getWorldFrame(), Axis3D.X);
+      cameraPose.getOrientation().transform(euclidDirection);
+      euclidUp.setIncludingFrame(ReferenceFrame.getWorldFrame(), Axis3D.Z);
+      cameraPose.getOrientation().transform(euclidUp);
+
+      GDXTools.toGDX(cameraPose.getPosition(), position);
+      GDXTools.toGDX(euclidDirection, direction);
+      GDXTools.toGDX(euclidUp, up);
+
+      cameraPose.get(transformToParent);
+      cameraFrame.update();
+   }
+
    public void dispose()
    {
       focusPointModel.dispose();
@@ -328,5 +348,15 @@ public class GDXFocusBasedCamera extends Camera
    public FramePose3DReadOnly getFocusPointPose()
    {
       return focusPointPose;
+   }
+
+   public void setInputEnabled(boolean inputEnabled)
+   {
+      this.inputEnabled = inputEnabled;
+   }
+
+   public void setVerticalFieldOfView(double verticalFieldOfView)
+   {
+      this.verticalFieldOfView = (float) verticalFieldOfView;
    }
 }

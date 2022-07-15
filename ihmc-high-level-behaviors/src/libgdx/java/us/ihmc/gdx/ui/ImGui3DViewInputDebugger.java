@@ -12,9 +12,9 @@ public class ImGui3DViewInputDebugger
    private ImGuiPlot deltaYPlot;
    private ImGuiPlot scrolledYPlot;
 
-   public void create(GDXImGuiBasedUI baseUI)
+   public void create(GDX3DPanel panel3D)
    {
-      baseUI.addImGui3DViewInputProcessor(input ->
+      panel3D.addImGui3DViewInputProcessor(input ->
       {
          if (input.isWindowHovered())
          {

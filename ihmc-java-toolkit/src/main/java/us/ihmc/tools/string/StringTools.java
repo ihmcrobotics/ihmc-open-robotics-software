@@ -122,4 +122,9 @@ public class StringTools
          return FormattingTools.getFormattedToSignificantFigures(number, 3);
       }
    }
+
+   public static String titleToSnakeCase(String titleCase)
+   {
+      return titleCase.trim().replaceAll(" ", "_").toLowerCase();
+   }
 }

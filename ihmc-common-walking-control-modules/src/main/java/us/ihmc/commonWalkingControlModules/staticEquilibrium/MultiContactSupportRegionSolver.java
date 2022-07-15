@@ -6,9 +6,15 @@ import us.ihmc.convexOptimization.linearProgram.LinearProgramSolver;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
+import us.ihmc.euclid.shape.convexPolytope.Face3D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
@@ -30,14 +36,16 @@ import static us.ihmc.commonWalkingControlModules.staticEquilibrium.ContactPoint
  * This is an implementation of "Testing Static Equilibrium for Legged Robots", Bretl et al, 2008
  * {@see http://lall.stanford.edu/papers/bretl_eqmcut_ieee_tro_projection_2008_08_01_01/pubdata/entry.pdf}
  *
- * It solves for the (convex) region of feasible CoM XY positions, modelling the robot as a point mass
- * and imposing friction constraints.
+ * It solves for the convex region of feasible CoM XY positions, modelling the robot as a point mass and imposing friction constraints.
  */
 public class MultiContactSupportRegionSolver
 {
-   static final int numberOfDirectionsToOptimize = 32;
-   static final double rhoMax = 2.0;
-   static final double mass = 1.0;
+   private static final double optimizedCoMGraphicScale = 0.03;
+
+   private static final int defaultNumberOfDirectionsToOptimize = 16;
+   private static final int centerOfMassDimensions = 2;
+   private static final int staticEquilibriumConstraints = 6;
+   static final double mg = 1.0;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
@@ -65,51 +73,57 @@ public class MultiContactSupportRegionSolver
    private final DMatrixRMaj costVectorC = new DMatrixRMaj(0);
    private final DMatrixRMaj solution = new DMatrixRMaj(0);
 
+   private final Point3D actuationConstraintCentroid = new Point3D();
+
    private final ConvexPolygon2D supportRegion = new ConvexPolygon2D();
    private final RecyclingArrayList<FramePoint3D> supportRegionVertices = new RecyclingArrayList<>(30, FramePoint3D::new);
 
    private final YoFramePoint3D averageContactPointPosition = new YoFramePoint3D("averageContactPointPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D directionToOptimize = new YoFrameVector3D("directionToOptimize", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D optimizedCoM = new YoFramePoint3D("optimizedCoM", ReferenceFrame.getWorldFrame(), registry);
-
-   private static final List<Vector2D> directionsToOptimize = new ArrayList<>();
-
-   static
-   {
-      double dTheta = 2.0 * Math.PI / numberOfDirectionsToOptimize;
-      for (int i = 0; i < numberOfDirectionsToOptimize; i++)
-      {
-         directionsToOptimize.add(new Vector2D(Math.cos(i * dTheta), Math.sin(i * dTheta)));
-      }
-   }
+   private final List<Vector2D> directionsToOptimize = new ArrayList<>();
 
    public MultiContactSupportRegionSolver()
+   {
+      this(defaultNumberOfDirectionsToOptimize);
+   }
+
+   public MultiContactSupportRegionSolver(int numberOfDirectionsToOptimize)
    {
       for (int i = 0; i < MultiContactSupportRegionSolverInput.maxContactPoints; i++)
       {
          contactPoints.add(new ContactPoint(i, registry, graphicsListRegistry));
       }
 
+      setNumberOfDirectionsToOptimize(numberOfDirectionsToOptimize);
+
       YoGraphicVector directionToOptimizeGraphic = new YoGraphicVector("directionToOptimizeGraphic", averageContactPointPosition, directionToOptimize, 0.5);
       graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), directionToOptimizeGraphic);
 
-      YoGraphicPosition optimizedCoMGraphic = new YoGraphicPosition("optimizedCoMGraphic", optimizedCoM, 0.03, YoAppearance.DarkRed());
+      YoGraphicPosition optimizedCoMGraphic = new YoGraphicPosition("optimizedCoMGraphic", optimizedCoM, optimizedCoMGraphicScale, YoAppearance.DarkRed());
       graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), optimizedCoMGraphic);
    }
 
    public void initialize(MultiContactSupportRegionSolverInput input)
    {
+      clear();
+
       this.input = input;
 
       int rhoSize = basisVectorsPerContactPoint * input.getNumberOfContacts();
-      nominalDecisionVariables = rhoSize + 2;
-      nonNegativeDecisionVariables = nominalDecisionVariables + 2;
+      nominalDecisionVariables = rhoSize + centerOfMassDimensions;
+      nonNegativeDecisionVariables = nominalDecisionVariables + centerOfMassDimensions;
+      int actuationConstraints = 0;
+      for (int i = 0; i < input.getNumberOfContacts(); i++)
+      {
+         actuationConstraints += input.getActuationConstraints().get(i).getNumberOfConstraints();
+      }
 
-      Aeq.reshape(6, nominalDecisionVariables);
-      beq.reshape(6, 1);
-      APosEq.reshape(6, nonNegativeDecisionVariables);
-      Ain.reshape(12 + rhoSize, nonNegativeDecisionVariables);
-      bin.reshape(12 + rhoSize, 1);
+      Aeq.reshape(staticEquilibriumConstraints, nominalDecisionVariables);
+      beq.reshape(staticEquilibriumConstraints, 1);
+      APosEq.reshape(staticEquilibriumConstraints, nonNegativeDecisionVariables);
+      Ain.reshape(2 * staticEquilibriumConstraints + actuationConstraints, nonNegativeDecisionVariables);
+      bin.reshape(2 * staticEquilibriumConstraints + actuationConstraints, 1);
       costVectorC.reshape(nonNegativeDecisionVariables, 1);
 
       for (int i = 0; i < contactPoints.size(); i++)
@@ -147,9 +161,9 @@ public class MultiContactSupportRegionSolver
          }
       }
 
-      Aeq.set(3, nominalDecisionVariables - 1, - mass * input.getGravityMagnitude());
-      Aeq.set(4, nominalDecisionVariables - 2, mass * input.getGravityMagnitude());
-      beq.set(2, 0, mass * input.getGravityMagnitude());
+      Aeq.set(3, nominalDecisionVariables - 1, -mg);
+      Aeq.set(4, nominalDecisionVariables - 2, mg);
+      beq.set(2, 0, mg);
 
       MatrixTools.setMatrixBlock(APosEq, 0, 0, Aeq, 0, 0, Aeq.getNumRows(), Aeq.getNumCols(), 1.0);
       MatrixTools.setMatrixBlock(APosEq, 0, Aeq.getNumCols(), Aeq, 0, Aeq.getNumCols() - 2, Aeq.getNumRows(), 2, -1.0);
@@ -157,28 +171,85 @@ public class MultiContactSupportRegionSolver
       Arrays.fill(Ain.getData(), 0.0);
       Arrays.fill(bin.getData(), 0.0);
 
-      MatrixTools.setMatrixBlock(Ain, 0, 0, APosEq, 0, 0, 6, APosEq.getNumCols(), 1.0);
-      MatrixTools.setMatrixBlock(Ain, 6, 0, APosEq, 0, 0, 6, APosEq.getNumCols(), -1.0);
-      MatrixTools.setMatrixBlock(bin, 0, 0, beq, 0, 0, 6, beq.getNumCols(), 1.0);
-      MatrixTools.setMatrixBlock(bin, 6, 0, beq, 0, 0, 6, beq.getNumCols(), -1.0);
+      MatrixTools.setMatrixBlock(Ain, 0, 0, APosEq, 0, 0, APosEq.getNumRows(), APosEq.getNumCols(), 1.0);
+      MatrixTools.setMatrixBlock(Ain, APosEq.getNumRows(), 0, APosEq, 0, 0, APosEq.getNumRows(), APosEq.getNumCols(), -1.0);
+      MatrixTools.setMatrixBlock(bin, 0, 0, beq, 0, 0, APosEq.getNumRows(), beq.getNumCols(), 1.0);
+      MatrixTools.setMatrixBlock(bin, APosEq.getNumRows(), 0, beq, 0, 0, APosEq.getNumRows(), beq.getNumCols(), -1.0);
 
-      for (int i = 0; i < rhoSize; i++)
+      // Add actuation constraints
+      int actuationConstraintIndex = 0;
+      for (int i = 0; i < input.getNumberOfContacts(); i++)
       {
-         Ain.set(12 + i, i, 1.0);
-         bin.set(12 + i, 0, rhoMax);
+         ContactPointActuationConstraint actuationConstraint = input.getActuationConstraints().get(i);
+         FrameVector3D contactNormal = input.getSurfaceNormals().get(i);
+
+         if (actuationConstraint.isMaxNormalForceConstraint())
+         {
+            actuationConstraintCentroid.set(contactNormal);
+            actuationConstraintCentroid.scale(actuationConstraint.getMaxNormalForce());
+            addActuationConstraint(i, actuationConstraintIndex, actuationConstraintCentroid, contactNormal);
+            actuationConstraintIndex++;
+         }
+         else
+         {
+            ConvexPolytope3D polytopeConstraint = actuationConstraint.getPolytopeConstraint();
+            for (int j = 0; j < polytopeConstraint.getNumberOfFaces(); j++)
+            {
+               Face3D polytopeConstraintFace = polytopeConstraint.getFaces().get(j);
+               addActuationConstraint(i, actuationConstraintIndex, polytopeConstraintFace.getCentroid(), polytopeConstraintFace.getNormal());
+               actuationConstraintIndex++;
+            }
+         }
       }
 
-      if (tickAndUpdatable == null)
+      if (tickAndUpdatable != null)
+      {
+         averageContactPointPosition.setToZero();
+         for (int i = 0; i < input.getNumberOfContacts(); i++)
+         {
+            averageContactPointPosition.add(input.getContactPointPositions().get(i));
+         }
+         averageContactPointPosition.scale(1.0 / input.getNumberOfContacts());
+      }
+   }
+
+   private void addActuationConstraint(int contactPointIndex,
+                                       int actuationConstraintIndex,
+                                       Tuple3DReadOnly constraintPlanePoint,
+                                       Tuple3DReadOnly constraintPlaneNormal)
+   {
+      int constraintRow = 2 * staticEquilibriumConstraints + actuationConstraintIndex;
+
+      for (int i = 0; i < basisVectorsPerContactPoint; i++)
+      {
+         ContactPoint contactPoint = contactPoints.get(contactPointIndex);
+         YoFrameVector3D basisVector = contactPoint.getBasisVector(i);
+         double dot = dot(basisVector, constraintPlaneNormal);
+         Ain.set(constraintRow, basisVectorsPerContactPoint * contactPointIndex + i, dot);
+      }
+
+      double dot0 = dot(constraintPlanePoint, constraintPlaneNormal);
+      bin.set(constraintRow, 0, dot0);
+   }
+
+   private static double dot(Tuple3DReadOnly t1, Tuple3DReadOnly t2)
+   {
+      return t1.getX() * t2.getX() + t1.getY() * t2.getY() + t1.getZ() * t2.getZ();
+   }
+
+   public void setNumberOfDirectionsToOptimize(int numberOfDirectionsToOptimize)
+   {
+      if (numberOfDirectionsToOptimize == directionsToOptimize.size())
       {
          return;
       }
 
-      averageContactPointPosition.setToZero();
-      for (int i = 0; i < input.getNumberOfContacts(); i++)
+      directionsToOptimize.clear();
+      double deltaAngle = 2.0 * Math.PI / numberOfDirectionsToOptimize;
+      for (int i = 0; i < numberOfDirectionsToOptimize; i++)
       {
-         averageContactPointPosition.add(input.getContactPointPositions().get(i));
+         directionsToOptimize.add(new Vector2D(Math.cos(i * deltaAngle), Math.sin(i * deltaAngle)));
       }
-      averageContactPointPosition.scale(1.0 / input.getNumberOfContacts());
    }
 
    public boolean solve()
@@ -240,6 +311,17 @@ public class MultiContactSupportRegionSolver
       this.optimizedCoM.setZ(averageContactPointPosition.getZ());
 
       tickAndUpdatable.tickAndUpdate();
+   }
+
+   private void clear()
+   {
+      Aeq.zero();
+      beq.zero();
+      APosEq.zero();
+      Ain.zero();
+      bin.zero();
+      costVectorC.zero();
+      solution.zero();
    }
 
    //////////////////////////////////////////////////////////////////////////////////////////

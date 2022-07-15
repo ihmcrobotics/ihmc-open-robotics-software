@@ -300,24 +300,15 @@ public class StoredPropertySet implements StoredPropertySetBasics
    {
       ExceptionTools.handle(() ->
       {
-         Properties properties = new Properties()
-         {
-            @Override
-            public synchronized Enumeration<Object> keys() {
-               TreeSet<Object> tree = new TreeSet<>(Comparator.comparingInt(o -> indexOfCamelCaseName(o))); // sort by index
-               tree.addAll(super.keySet());
-               return Collections.enumeration(tree);
-            }
-         };
-
+         ArrayList<String> lines = new ArrayList<>();
          for (StoredPropertyKey<?> key : keys.keys())
          {
-            properties.setProperty(key.getCamelCasedName(), serializeValue(values[key.getIndex()]));
+            lines.add(key.getCamelCasedName() + "=" + serializeValue(values[key.getIndex()]));
          }
 
          Path fileForSaving = findFileForSaving();
          LogTools.info("Saving parameters to {}", fileForSaving.getFileName());
-         properties.store(new PrintWriter(fileForSaving.toFile()), LocalDateTime.now().format(DateTimeFormatter.BASIC_ISO_DATE));
+         FileTools.writeAllLines(lines, fileForSaving, WriteOption.TRUNCATE, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
 
          convertLineEndingsToUnix(fileForSaving);
       }, DefaultExceptionHandler.PRINT_STACKTRACE);
@@ -361,6 +352,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
       {
          if (key.getCamelCasedName().equals(camelCaseName))
          {
+            LogTools.info("Index of camel case name {}: {}", camelCaseName, key.getIndex());
             return key.getIndex();
          }
       }

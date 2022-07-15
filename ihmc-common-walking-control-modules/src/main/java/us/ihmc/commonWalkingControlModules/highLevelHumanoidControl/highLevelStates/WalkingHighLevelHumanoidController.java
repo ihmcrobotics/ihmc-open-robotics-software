@@ -15,7 +15,6 @@ import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
-import us.ihmc.commonWalkingControlModules.capturePoint.HeightManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleInput;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleOutput;
 import us.ihmc.commonWalkingControlModules.configurations.HumanoidRobotNaturalPosture;
@@ -80,6 +79,7 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -107,7 +107,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final NaturalPostureManager naturalPostureManager;
    private final FeetManager feetManager;
    private final BalanceManager balanceManager;
-   private final HeightManager comHeightManager;
+   private final CenterOfMassHeightManager comHeightManager;
 
    private final TouchdownErrorCompensator touchdownErrorCompensator;
 
@@ -154,6 +154,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    private final ParameterizedControllerCoreOptimizationSettings controllerCoreOptimizationSettings;
 
+   private final ExecutionTimer walkingStateTimer = new ExecutionTimer("walkingStateTimer", registry);
+   private final ExecutionTimer managerUpdateTimer = new ExecutionTimer("managerUpdateTimer", registry);
    private final YoBoolean enableHeightFeedbackControl = new YoBoolean("enableHeightFeedbackControl", registry);
 
    private boolean firstTick = true;
@@ -809,16 +811,20 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       updateFailureDetection();
 
+      walkingStateTimer.startMeasurement();
       // Do transitions will request ICP planner updates.
       if (!firstTick) // this avoids doing two transitions in a single tick if the initialize reset the state machine.
          stateMachine.doTransitions();
       // Do action is relying on the ICP plan being valid.
       stateMachine.doAction();
+      walkingStateTimer.stopMeasurement();
 
       currentState = stateMachine.getCurrentState();
 
+      managerUpdateTimer.startMeasurement();
       updateManagers(currentState);
       reportStatusMessages();
+      managerUpdateTimer.stopMeasurement();
 
       handleChangeInContactState();
 
@@ -927,7 +933,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       comHeightManager.compute(balanceManager.getDesiredICPVelocity(),
                                desiredCoMVelocityAsFrameVector,
                                isInDoubleSupport,
-                               currentState.getSupportSide(),
                                omega0,
                                feetManager);
 
@@ -1043,7 +1048,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          usePelvisPrivilegedPoseCommand.set(true);
          usePelvisOrientationCommand.set(false);
          useBodyManagerCommands.set(false);
-         comHeightManager.setControlHeightWithMomentum(false);
+//         comHeightManager.setControlHeightWithMomentum(false);  //TODO(GMN): Why is this here?
       }
       
       planeContactStateCommandPool.clear();

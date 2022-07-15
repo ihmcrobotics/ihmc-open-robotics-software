@@ -108,6 +108,7 @@ public class ControllerAPIDefinition
       statusMessages.add(TaskspaceTrajectoryStatusMessage.class);
       statusMessages.add(JointDesiredOutputMessage.class);
       statusMessages.add(RobotDesiredConfigurationData.class);
+      statusMessages.add(MultiContactBalanceStatus.class);
 
       /** Statuses supported by multi-contact controller, not in this repo */
       statusMessages.add(MultiContactBalanceStatus.class);

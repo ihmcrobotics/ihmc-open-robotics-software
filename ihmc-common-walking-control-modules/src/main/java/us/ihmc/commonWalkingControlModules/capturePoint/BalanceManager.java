@@ -197,6 +197,7 @@ public class BalanceManager
    private final CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
    private final ExecutionTimer plannerTimer = new ExecutionTimer("icpPlannerTimer", registry);
+   private final ExecutionTimer amPlanningTimerTimer = new ExecutionTimer("amPlanningTimerTimer", registry);
 
    private boolean initializeOnStateChange = false;
    private boolean minimizeAngularMomentumRateZ = false;
@@ -504,32 +505,19 @@ public class BalanceManager
          contactState.getPlaneContactStateCommand(contactStateCommands.get(robotSide));
       }
 
-
-
-      if (heightControlCommand.getCommandType() == ControllerCoreCommandType.COMMAND_LIST)
+      if (heightControlCommand == null)
       {
-         FeedbackControlCommandList heightControlCommandList = (FeedbackControlCommandList) heightControlCommand;
-         
-         for (int i=0; i<heightControlCommandList.getNumberOfCommands(); i++)
-         {
-            FeedbackControlCommand<?> command = heightControlCommandList.getCommand(i);
-            if ((command.getCommandType() == ControllerCoreCommandType.POINT) || (command.getCommandType() == ControllerCoreCommandType.MOMENTUM))
-            {
-               heightControlCommand = command;
-               break;
-            }
-            
-            throw new IllegalArgumentException("Need a Valid Height Control Command!");
-         }
+         linearMomentumRateControlModuleInput.setHasHeightCommand(false);
       }
-      
-      if (heightControlCommand.getCommandType() == ControllerCoreCommandType.POINT)
+      else if (heightControlCommand.getCommandType() == ControllerCoreCommandType.POINT)
       {
+         linearMomentumRateControlModuleInput.setHasHeightCommand(true);
          linearMomentumRateControlModuleInput.setUsePelvisHeightCommand(true);
          linearMomentumRateControlModuleInput.setPelvisHeightControlCommand((PointFeedbackControlCommand) heightControlCommand);
       }
       else if (heightControlCommand.getCommandType() == ControllerCoreCommandType.MOMENTUM)
       {
+         linearMomentumRateControlModuleInput.setHasHeightCommand(true);
          linearMomentumRateControlModuleInput.setUsePelvisHeightCommand(false);
          linearMomentumRateControlModuleInput.setCenterOfMassHeightControlCommand((CenterOfMassFeedbackControlCommand) heightControlCommand);
       }
@@ -605,6 +593,7 @@ public class BalanceManager
       copTrajectory.compute(copTrajectoryState);
 
       List<SettableContactStateProvider> contactStateProviders = copTrajectory.getContactStateProviders();
+      amPlanningTimerTimer.startMeasurement();
       if (computeAngularMomentumOffset.getValue())
       {
          if (comTrajectoryPlanner.hasTrajectories())
@@ -625,6 +614,7 @@ public class BalanceManager
       {
          comTrajectoryPlanner.reset();
       }
+      amPlanningTimerTimer.stopMeasurement();
 
       comTrajectoryPlanner.solveForTrajectory(contactStateProviders);
 

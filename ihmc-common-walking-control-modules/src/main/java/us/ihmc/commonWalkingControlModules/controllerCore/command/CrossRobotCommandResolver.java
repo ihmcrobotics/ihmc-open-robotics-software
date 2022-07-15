@@ -231,6 +231,15 @@ public class CrossRobotCommandResolver
       out.setControllerRan(in.getControllerRan());
    }
 
+   
+   /**
+    * Resolves only the part of the context data that is updated by the perception thread.
+    */
+   public void resolveHumanoidRobotContextDataPerception(HumanoidRobotContextData in, HumanoidRobotContextData out)
+   {
+      out.setPerceptionRan(in.getPerceptionRan());
+   }
+
    /**
     * Resolves only the part of the context data that is updated by the estimator thread.
     */
@@ -861,6 +870,7 @@ public class CrossRobotCommandResolver
       resolveFrameTuple2D(in.getPerfectCoP(), out.getPerfectCoP());
       out.setControlHeightWithMomentum(in.getControlHeightWithMomentum());
       out.setUsePelvisHeightCommand(in.getUsePelvisHeightCommand());
+      out.setHasHeightCommand(in.getHasHeightCommand());
       resolvePointFeedbackControlCommand(in.getPelvisHeightControlCommand(), out.getPelvisHeightControlCommand());
       resolveCenterOfMassFeedbackControlCommand(in.getCenterOfMassHeightControlCommand(), out.getCenterOfMassHeightControlCommand());
       out.setInitializeOnStateChange(in.getInitializeOnStateChange());
