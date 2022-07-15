@@ -96,7 +96,7 @@ public class GDXGPUPlanarRegionExtractionUI
    private final Stopwatch depthFirstSearchDurationStopwatch = new Stopwatch();
    private final Stopwatch planarRegionsSegmentationDurationStopwatch = new Stopwatch();
    private final Stopwatch gpuHeightMapStopwatch = new Stopwatch();
-   private final DurationStatisticPrinter wholeAlgorithmAverageDurationPrinter = new DurationStatisticPrinter(null, 10000, 100.0, getClass().getSimpleName());
+   private final DurationStatisticPrinter wholeAlgorithmAverageDurationPrinter = new DurationStatisticPrinter(null, 200, 100.0, 20.0, getClass().getSimpleName());
    private ImGuiPanel imguiPanel;
    private GDXCVImagePanel blurredDepthPanel;
    private GDXCVImagePanel filteredDepthPanel;
