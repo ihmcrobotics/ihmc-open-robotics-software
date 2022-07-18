@@ -32,6 +32,7 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -44,9 +45,13 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.humanoidRobotics.model.MomentumStateProvider;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
+import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
+import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
@@ -472,6 +477,41 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
          }
       };
 
+      CenterOfMassReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", ReferenceFrame.getWorldFrame(), fullRobotModel.getElevator());
+      centerOfMassFrame.update();
+      MomentumStateProvider momentumStateProvider = new MomentumStateProvider()
+      {
+         private final CenterOfMassJacobian jacobian = new CenterOfMassJacobian(fullRobotModel.getElevator(), worldFrame);
+         private final CentroidalMomentumCalculator centroidalMomentumCalculator = new CentroidalMomentumCalculator(fullRobotModel.getElevator(), centerOfMassFrame);
+         private final double desiredHeight = 9.81 / walkingControllerParameters.getOmega0() / walkingControllerParameters.getOmega0();
+
+         @Override
+         public void updateState()
+         {
+            jacobian.reset();
+            centroidalMomentumCalculator.reset();
+         }
+
+         @Override
+         public FramePoint3DReadOnly getCenterOfMassPosition()
+         {
+            return jacobian.getCenterOfMass();
+         }
+
+         @Override
+         public FrameVector3DReadOnly getModifiedCenterOfMassVelocity()
+         {  
+            FrameVector3DReadOnly comVel = jacobian.getCenterOfMassVelocity();
+            MomentumReadOnly centroidalMomentum = centroidalMomentumCalculator.getMomentum();
+
+            double modifiedComVelX = (centroidalMomentum.getLinearPart().getX() + centroidalMomentum.getAngularPart().getY() / desiredHeight) / centroidalMomentumCalculator.getTotalMass();
+            double modifiedComVelY = (centroidalMomentum.getLinearPart().getY() - centroidalMomentum.getAngularPart().getX() / desiredHeight) / centroidalMomentumCalculator.getTotalMass();
+            double modifiedComVelZ = comVel.getZ();
+            
+            return new FrameVector3D(worldFrame, modifiedComVelX, modifiedComVelY, modifiedComVelZ);
+         }
+      };
+
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel, centerOfMassStateProvider, null);
 
       contactableBodiesFactory.setFullRobotModel(fullRobotModel);
@@ -497,6 +537,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       double omega0 = walkingControllerParameters.getOmega0();
       controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel,
                                                                  centerOfMassStateProvider,
+                                                                 momentumStateProvider,
                                                                  referenceFrames,
                                                                  footSwitches,
                                                                  wristForceSensors,

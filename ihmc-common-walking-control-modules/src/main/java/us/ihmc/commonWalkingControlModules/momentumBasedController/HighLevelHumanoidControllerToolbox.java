@@ -38,6 +38,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
+import us.ihmc.humanoidRobotics.model.MomentumStateProvider;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -85,7 +86,9 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
    private final ReferenceFrame centerOfMassFrame;
    private final CenterOfMassStateProvider centerOfMassStateProvider;
-   private final CapturePointCalculator capturePointCalculator;
+   private final MomentumStateProvider momentumStateProvider;
+//   private final CapturePointCalculator capturePointCalculator;
+   private final ModifiedCapturePointCalculator capturePointCalculator;
 
    private final CommonHumanoidReferenceFrames referenceFrames;
    private final CommonHumanoidReferenceFramesVisualizer referenceFramesVisualizer;
@@ -170,6 +173,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
    public HighLevelHumanoidControllerToolbox(FullHumanoidRobotModel fullRobotModel,
                                              CenterOfMassStateProvider centerOfMassStateProvider,
+                                             MomentumStateProvider momentumStateProvider,
                                              CommonHumanoidReferenceFrames referenceFrames,
                                              SideDependentList<? extends FootSwitchInterface> footSwitches,
                                              SideDependentList<ForceSensorDataReadOnly> wristForceSensors,
@@ -184,6 +188,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
                                              JointBasics... jointsToIgnore)
    {
       this.centerOfMassStateProvider = centerOfMassStateProvider;
+      this.momentumStateProvider = momentumStateProvider;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
@@ -197,7 +202,9 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver(fullRobotModel, referenceFrames);
       referenceFrameHashCodeResolver.put(walkingTrajectoryPath.getWalkingTrajectoryPathFrame());
 
-      capturePointCalculator = new CapturePointCalculator(centerOfMassStateProvider);
+//      capturePointCalculator = new CapturePointCalculator(centerOfMassStateProvider);
+      capturePointCalculator = new ModifiedCapturePointCalculator(momentumStateProvider);
+      
 
       MathTools.checkIntervalContains(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
@@ -440,6 +447,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    public void update()
    {
       centerOfMassStateProvider.updateState(); // Needs to be updated before the frames, as it is need to update the CoM frame.
+      momentumStateProvider.updateState();
       referenceFrames.updateFrames();
 
       if (referenceFramesVisualizer != null)
