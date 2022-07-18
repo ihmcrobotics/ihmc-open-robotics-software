@@ -152,7 +152,7 @@ public class L515OnRobotProcess
                   framePoint.setY(-(x - depthCameraIntrinsics.getCx()) / l515.getFocalLengthPixelsX() * eyeDepth);
                   framePoint.setZ(-(y - depthCameraIntrinsics.getCy()) / l515.getFocalLengthPixelsY() * eyeDepth);
                   framePoint.changeFrame(ReferenceFrame.getWorldFrame());
-                  Point3D point = points[y * x + x];
+                  Point3D point = points[y * depthWidth + x];
                   point.set(framePoint);
                }
             }
