@@ -14,6 +14,7 @@ import net.jpountz.lz4.LZ4Factory;
 import net.jpountz.lz4.LZ4FastDecompressor;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
+import us.ihmc.communication.packets.StereoPointCloudCompression;
 import us.ihmc.gdx.GDXPointCloudRenderer;
 import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
@@ -44,8 +45,9 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
    private final ByteBuffer decompressionInputDirectBuffer;
    private final ByteBuffer decompressionOutputDirectBuffer;
    private final int inputBytesPerPoint = 4 * Integer.BYTES;
-   private final AtomicReference<LidarScanMessage> latestLidarScanMessageReference = new AtomicReference<>(null);
    private final AtomicReference<FusedSensorHeadPointCloudMessage> latestFusedSensorHeadPointCloudMessageReference = new AtomicReference<>(null);
+   private final AtomicReference<LidarScanMessage> latestLidarScanMessageReference = new AtomicReference<>(null);
+   private final AtomicReference<StereoVisionPointCloudMessage> latestStereoVisionMessageReference = new AtomicReference<>(null);
    private final Color color = new Color();
    private int latestSegmentIndex = -1;
 
@@ -85,14 +87,9 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
    private void queueRenderStereoVisionPointCloud(StereoVisionPointCloudMessage message)
    {
       frequencyPlot.recordEvent();
-      if (isActive())
-      {
-         threadQueue.clearQueueAndExecute(() ->
-         {
-//            points = StereoPointCloudCompression.decompressPointCloudToArray32(message);
-            //         int[] colors = PointCloudCompression.decompressColorsToIntArray(message);
-         });
-      }
+      // TODO: Possibly decompress on a thread here
+      // TODO: threadQueue.clearQueueAndExecute(() ->
+      latestStereoVisionMessageReference.set(message);
    }
 
    private void queueRenderLidarScan(LidarScanMessage message)
@@ -120,25 +117,25 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
       super.update();
       if (isActive())
       {
-         FusedSensorHeadPointCloudMessage message = latestFusedSensorHeadPointCloudMessageReference.getAndSet(null);
-
-         if (message != null)
+         FusedSensorHeadPointCloudMessage fusedMessage = latestFusedSensorHeadPointCloudMessageReference.getAndSet(null);
+         if (fusedMessage != null)
          {
             decompressionInputDirectBuffer.rewind();
-            int numberOfBytes = message.getScan().size();
+            int numberOfBytes = fusedMessage.getScan().size();
             decompressionInputDirectBuffer.limit(numberOfBytes);
             for (int i = 0; i < numberOfBytes; i++)
             {
-               decompressionInputDirectBuffer.put(message.getScan().get(i));
+               decompressionInputDirectBuffer.put(fusedMessage.getScan().get(i));
             }
             decompressionInputDirectBuffer.flip();
             decompressionOutputDirectBuffer.clear();
             lz4Decompressor.decompress(decompressionInputDirectBuffer, decompressionOutputDirectBuffer);
             decompressionOutputDirectBuffer.rewind();
 
-            latestSegmentIndex = (int) message.getSegmentIndex();
+            latestSegmentIndex = (int) fusedMessage.getSegmentIndex();
             pointCloudRenderer.updateMeshFastest(xyzRGBASizeFloatBuffer ->
             {
+               float size = pointSize.get();
                for (int i = 0; i < pointsPerSegment; i++)
                {
                   float x = decompressionOutputDirectBuffer.getInt() * 0.003f;
@@ -149,7 +146,6 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
 //                  float g = 1.0f;
 //                  float b = 1.0f;
 //                  float a = 1.0f;
-                  float size = pointSize.get();
                   xyzRGBASizeFloatBuffer.put(x);
                   xyzRGBASizeFloatBuffer.put(y);
                   xyzRGBASizeFloatBuffer.put(z);
@@ -164,15 +160,14 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
          }
 
          LidarScanMessage latestLidarScanMessage = latestLidarScanMessageReference.getAndSet(null);
-
          if (latestLidarScanMessage != null)
          {
             int numberOfScanPoints = latestLidarScanMessage.getNumberOfPoints();
             pointCloudRenderer.updateMeshFastest(xyzRGBASizeFloatBuffer ->
             {
+               float size = pointSize.get();
                LidarPointCloudCompression.decompressPointCloud(latestLidarScanMessage.getScan(), numberOfScanPoints, (i, x, y, z) ->
                {
-                  float size = pointSize.get();
                   xyzRGBASizeFloatBuffer.put((float) x);
                   xyzRGBASizeFloatBuffer.put((float) y);
                   xyzRGBASizeFloatBuffer.put((float) z);
@@ -184,6 +179,28 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
                });
 
                return numberOfScanPoints;
+            });
+         }
+
+         StereoVisionPointCloudMessage latestStereoVisionMessage = latestStereoVisionMessageReference.getAndSet(null);
+         if (latestStereoVisionMessage != null)
+         {
+            float size = pointSize.get();
+            pointCloudRenderer.updateMeshFastest(xyzRGBASizeFloatBuffer ->
+            {
+               StereoPointCloudCompression.decompressPointCloud(latestStereoVisionMessage, (x, y, z) ->
+               {
+                  xyzRGBASizeFloatBuffer.put((float) x);
+                  xyzRGBASizeFloatBuffer.put((float) y);
+                  xyzRGBASizeFloatBuffer.put((float) z);
+                  xyzRGBASizeFloatBuffer.put(color.r);
+                  xyzRGBASizeFloatBuffer.put(color.g);
+                  xyzRGBASizeFloatBuffer.put(color.b);
+                  xyzRGBASizeFloatBuffer.put(color.a);
+                  xyzRGBASizeFloatBuffer.put(size);
+               });
+
+               return latestStereoVisionMessage.getNumberOfPoints();
             });
          }
       }
