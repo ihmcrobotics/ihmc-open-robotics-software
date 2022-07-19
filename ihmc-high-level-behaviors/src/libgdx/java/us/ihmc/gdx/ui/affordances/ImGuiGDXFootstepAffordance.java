@@ -62,7 +62,6 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
       this.placedPoseConsumer = placedPoseConsumer;
       float sphereRadius = 0.03f;
       sphere = GDXModelBuilder.createSphere(sphereRadius, color);
-      arrow = GDXModelBuilder.createArrow(sphereRadius * 6.0, color);
 
       placeGoalActionMap = new GDXUIActionMap(startAction ->
                                               {
@@ -99,12 +98,14 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
                   if (pickPoint == null)
                   {
                      pickPoint = intersection;
+                     System.out.println("pickPoint " + pickPoint.toString());
                   }
                   else
                   {
                      if (intersection.distance(pickRayInWorld.getPoint()) < pickPoint.distance(pickRayInWorld.getPoint()))
                      {
                         pickPoint = intersection;
+                        System.out.println("pickPoint " + pickPoint.toString());
                      }
                   }
                   lastObjectIntersection = pickPoint;
@@ -131,6 +132,7 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
 
             sphere.transform.setTranslation(pickPoint.getX32(), pickPoint.getY32(), (float) z);
 
+            // when left button clicked and released.
             if (input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
                placeGoalActionMap.triggerAction(GDXUITrigger.POSITION_LEFT_CLICK);
