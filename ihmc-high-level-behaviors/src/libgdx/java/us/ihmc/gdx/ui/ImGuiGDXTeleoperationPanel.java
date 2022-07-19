@@ -42,6 +42,7 @@ import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.gdx.imgui.ImGuiMovingPlot;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.gdx.ui.affordances.ImGuiGDXFootstepAffordance;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -90,6 +91,7 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final FootstepPlanningModule footstepPlanner;
    private final ImGuiGDXPoseGoalAffordance footstepGoal = new ImGuiGDXPoseGoalAffordance();
+   private final ImGuiGDXFootstepAffordance footstepAffordance = new ImGuiGDXFootstepAffordance();
    private final ImGuiStoredPropertySetTuner footstepPlanningParametersTuner = new ImGuiStoredPropertySetTuner("Footstep Planner Parameters (Teleoperation)");
    private FootstepPlannerOutput footstepPlannerOutput;
    private final ROS2SyncedRobotModel syncedRobotForFootstepPlanning;
@@ -99,6 +101,9 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
    private final String[] handConfigurationNames = new String[HandConfiguration.values.length];
    private final IHMCROS2Input<PlanarRegionsListMessage> lidarREARegions;
    private final ImBoolean showGraphics = new ImBoolean(true);
+
+   public enum FootstepSide {LEFT, RIGHT, NONE};
+   FootstepSide footstepSide = FootstepSide.NONE;
 
    public ImGuiGDXTeleoperationPanel(CommunicationHelper communicationHelper)
    {
@@ -436,6 +441,19 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       ImGui.sameLine();
       footstepGoal.renderPlaceGoalButton();
 
+
+      ImGui.text("Place footstep:");
+      ImGui.sameLine();
+      if(ImGui.button("Left"))
+      {
+         footstepSide = FootstepSide.LEFT;
+      }
+      if(ImGui.button("Right"))
+      {
+         footstepSide = FootstepSide.LEFT;
+      }
+
+
       for (RobotSide side : RobotSide.values)
       {
          ImGui.text(side.getPascalCaseName() + " hand:");
@@ -519,5 +537,10 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
    {
       footstepPlanGraphic.destroy();
       throttledRobotStateCallback.destroy();
+   }
+
+   public FootstepSide getFootstepSide()
+   {
+      return footstepSide;
    }
 }
