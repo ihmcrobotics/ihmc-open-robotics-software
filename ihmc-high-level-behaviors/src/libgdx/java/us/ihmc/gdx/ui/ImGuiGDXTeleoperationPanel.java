@@ -52,7 +52,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.tools.string.StringTools;
 
@@ -91,7 +90,7 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final FootstepPlanningModule footstepPlanner;
    private final ImGuiGDXPoseGoalAffordance footstepGoal = new ImGuiGDXPoseGoalAffordance();
-   private final ImGuiGDXFootstepAffordance footstepAffordance = new ImGuiGDXFootstepAffordance();
+   private final ImGuiGDXFootstepAffordance singleFootstepAffordance = new ImGuiGDXFootstepAffordance();
    private final ImGuiStoredPropertySetTuner footstepPlanningParametersTuner = new ImGuiStoredPropertySetTuner("Footstep Planner Parameters (Teleoperation)");
    private FootstepPlannerOutput footstepPlannerOutput;
    private final ROS2SyncedRobotModel syncedRobotForFootstepPlanning;
@@ -193,8 +192,8 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
                                              FootstepPlannerParameterKeys.keys,
                                              this::queueFootstepPlanning);
 
-      footstepAffordance.create(baseUI, goal -> {}, Color.YELLOW);
-      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(footstepAffordance::processImGui3DViewInput);
+      singleFootstepAffordance.create(baseUI, goal -> {}, Color.YELLOW);
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(singleFootstepAffordance::processImGui3DViewInput);
 //      footstepPlanningParametersTuner.create(footstepPlannerParameters,
 //              FootstepPlannerParameterKeys.keys,
 //              this::queueFootstepPlanning);
@@ -445,7 +444,7 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
          }
       }
       ImGui.sameLine();
-      footstepGoal.renderPlaceGoalButton();
+
 
 
       ImGui.text("Place footstep:");
@@ -453,12 +452,15 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       if(ImGui.button("Left"))
       {
          footstepSide = FootstepSide.LEFT;
+         singleFootstepAffordance.setPlacingGoal(true);
       }
       ImGui.sameLine();
       if(ImGui.button("Right"))
       {
          footstepSide = FootstepSide.LEFT;
+         singleFootstepAffordance.setPlacingGoal(true);
       }
+      singleFootstepAffordance.renderPlaceGoalButton();
 
       for (RobotSide side : RobotSide.values)
       {
@@ -508,7 +510,7 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       {
          footstepPlanGraphic.clear();
          footstepGoal.clear();
-         footstepAffordance.clear();
+         singleFootstepAffordance.clear();
       }
    }
 
@@ -532,7 +534,7 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       {
          footstepPlanGraphic.getRenderables(renderables, pool);
          footstepGoal.getRenderables(renderables, pool);
-         footstepAffordance.getRenderables(renderables, pool);
+         singleFootstepAffordance.getRenderables(renderables, pool);
       }
    }
 

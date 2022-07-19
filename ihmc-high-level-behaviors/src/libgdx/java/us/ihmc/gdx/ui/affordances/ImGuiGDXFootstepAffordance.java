@@ -18,7 +18,9 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -28,7 +30,10 @@ import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.input.editor.GDXUIActionMap;
 import us.ihmc.gdx.input.editor.GDXUITrigger;
+import us.ihmc.gdx.sceneManager.GDXSceneLevel;
+import us.ihmc.gdx.simulation.environment.GDXModelInstance;
 import us.ihmc.gdx.tools.GDXModelBuilder;
+import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.vr.GDXVRManager;
@@ -43,8 +48,8 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
 {
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private final ImFloat goalZOffset = new ImFloat(0.0f);
-   private ModelInstance sphere;
-   private ModelInstance arrow;
+   //private ModelInstance footstepModel;
+
    private GDXUIActionMap placeGoalActionMap;
    private boolean placingGoal = false;
    private boolean placingPosition = true;
@@ -53,15 +58,30 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
    private final Point3D32 tempSpherePosition = new Point3D32();
    private final Vector3D32 tempRotationVector = new Vector3D32();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-   private final RotationMatrix arrowRotationMatrix = new RotationMatrix();
    private PlanarRegionsList latestRegions;
    private Consumer<Pose3D> placedPoseConsumer;
 
+   ReferenceFrame referenceFrameFootstep;
+   FramePose3D footTextPose;
+   private GDXModelInstance footstepModel;
+   private float textheight = 12;
+
    public void create(GDXImGuiBasedUI baseUI, Consumer<Pose3D> placedPoseConsumer, Color color)
    {
+      footstepModel = new GDXModelInstance(GDXModelLoader.load("models/footsteps/footstep_left.g3dj"));
+      baseUI.getPrimaryScene().addModelInstance(footstepModel, GDXSceneLevel.VIRTUAL);
+      Pose3D pose = new Pose3D();
+      RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
+      referenceFrameFootstep = ReferenceFrameTools.constructFrameWithChangingTransformToParent("footstep frame",
+                                                                                               ReferenceFrame.getWorldFrame(), rigidBodyTransform);
+
+      pose.get(rigidBodyTransform);
+
+      referenceFrameFootstep.update();
+
       this.placedPoseConsumer = placedPoseConsumer;
       float sphereRadius = 0.03f;
-      sphere = GDXModelBuilder.createSphere(sphereRadius, color);
+      //footstepModel = GDXModelBuilder.createSphere(sphereRadius, color);
 
       placeGoalActionMap = new GDXUIActionMap(startAction ->
                                               {
@@ -130,12 +150,14 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
                goalZOffset.set(goalZOffset.get() - (input.getMouseWheelDelta() / 30.0f));
             }
 
-            sphere.transform.setTranslation(pickPoint.getX32(), pickPoint.getY32(), (float) z);
+            footstepModel.transform.setTranslation(pickPoint.getX32(), pickPoint.getY32(), (float) z);
 
             // when left button clicked and released.
             if (input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
                placeGoalActionMap.triggerAction(GDXUITrigger.POSITION_LEFT_CLICK);
+               placingGoal = false;
+               placingPosition = true;
             }
          }
 
@@ -161,8 +183,8 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
             placedPoseConsumer.accept(goalPoseForReading);
          }
 
-         controller.getTransformZUpToWorld(sphere.transform);
-         controller.getTransformZUpToWorld(arrow.transform);
+         controller.getTransformZUpToWorld(footstepModel.transform);
+
       });
    }
 
@@ -211,27 +233,32 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
    {
       if (isPlaced())
       {
-         sphere.getRenderables(renderables, pool);
-         arrow.getRenderables(renderables, pool);
+         footstepModel.getRenderables(renderables, pool);
+
       }
    }
 
    public boolean isPlaced()
    {
-      return !Float.isNaN(sphere.transform.val[Matrix4.M03]);
+      return !Float.isNaN(footstepModel.transform.val[Matrix4.M03]);
    }
 
-   public boolean isPlacingGoal()
+   public boolean getPlacingGoal()
    {
       return placingGoal;
+   }
+
+   public void setPlacingGoal(boolean placingGoal)
+   {
+      this.placingGoal = placingGoal;
    }
 
    public void clear()
    {
       placingGoal = false;
       placingPosition = true;
-      if (sphere != null)
-         sphere.transform.val[Matrix4.M03] = Float.NaN;
+      if (footstepModel != null)
+         footstepModel.transform.val[Matrix4.M03] = Float.NaN;
       goalZOffset.set(0.0f);
    }
 
@@ -259,10 +286,11 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
       }
       else
       {
-         GDXTools.toGDX(pose.getPosition(), sphere.transform);
+         GDXTools.toGDX(pose.getPosition(), footstepModel.transform);
          goalZOffset.set((float) pose.getZ());
-         GDXTools.toGDX(pose, tempTransform, arrow.transform);
       }
       goalPoseForReading.set(pose);
    }
+
+
 }
