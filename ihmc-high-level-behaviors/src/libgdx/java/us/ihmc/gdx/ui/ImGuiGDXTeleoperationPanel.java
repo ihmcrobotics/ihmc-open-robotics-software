@@ -192,6 +192,12 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       footstepPlanningParametersTuner.create(footstepPlannerParameters,
                                              FootstepPlannerParameterKeys.keys,
                                              this::queueFootstepPlanning);
+
+      footstepAffordance.create(baseUI, goal -> {}, Color.YELLOW);
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(footstepAffordance::processImGui3DViewInput);
+//      footstepPlanningParametersTuner.create(footstepPlannerParameters,
+//              FootstepPlannerParameterKeys.keys,
+//              this::queueFootstepPlanning);
    }
 
    private void queueFootstepPlanning()
@@ -448,11 +454,11 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       {
          footstepSide = FootstepSide.LEFT;
       }
+      ImGui.sameLine();
       if(ImGui.button("Right"))
       {
          footstepSide = FootstepSide.LEFT;
       }
-
 
       for (RobotSide side : RobotSide.values)
       {
@@ -502,6 +508,7 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       {
          footstepPlanGraphic.clear();
          footstepGoal.clear();
+         footstepAffordance.clear();
       }
    }
 
@@ -525,6 +532,7 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       {
          footstepPlanGraphic.getRenderables(renderables, pool);
          footstepGoal.getRenderables(renderables, pool);
+         footstepAffordance.getRenderables(renderables, pool);
       }
    }
 
