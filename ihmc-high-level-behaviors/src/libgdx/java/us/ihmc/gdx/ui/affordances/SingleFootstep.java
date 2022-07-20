@@ -8,6 +8,7 @@ import us.ihmc.gdx.sceneManager.GDX3DScene;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.environment.GDXModelInstance;
 import us.ihmc.gdx.tools.GDXModelLoader;
+import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class SingleFootstep
@@ -19,7 +20,7 @@ public class SingleFootstep
 
    public Pose3D footPose;
 
-   public SingleFootstep(GDX3DScene primaryScene, RobotSide footstepSide)
+   public SingleFootstep(GDXImGuiBasedUI baseUI, RobotSide footstepSide)
    {
       this.footstepSide = footstepSide;
       if (footstepSide.equals(RobotSide.LEFT))
@@ -31,8 +32,10 @@ public class SingleFootstep
          footstepModelInstance = new GDXModelInstance(GDXModelLoader.load("models/footsteps/footstep_right.g3dj"));
       }
 
-      primaryScene.addModelInstance(footstepModelInstance, GDXSceneLevel.VIRTUAL);
-      Pose3D pose = new Pose3D();
+      baseUI.getPrimaryScene().addModelInstance(footstepModelInstance, GDXSceneLevel.VIRTUAL);
+
+
+            Pose3D pose = new Pose3D();
       RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
       referenceFrameFootstep = ReferenceFrameTools.constructFrameWithChangingTransformToParent("footstep frame",
                                                                                                ReferenceFrame.getWorldFrame(), rigidBodyTransform);
@@ -40,6 +43,8 @@ public class SingleFootstep
       pose.get(rigidBodyTransform);
 
       footPose = pose;
+
+
 
       referenceFrameFootstep.update();
    }
@@ -50,6 +55,11 @@ public class SingleFootstep
       this.footPose.setY(y);
       this.footPose.setZ(z);
 
+   }
+
+   public void setFootstepModelInstance(GDXModelInstance footstepModelInstance)
+   {
+      this.footstepModelInstance = footstepModelInstance;
    }
 
    public RobotSide getFootstepSide()
