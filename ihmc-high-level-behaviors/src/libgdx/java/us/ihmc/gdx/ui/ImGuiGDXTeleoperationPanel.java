@@ -277,6 +277,27 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       footstepPlannerOutput = null;
    }
 
+   private FootstepDataMessage generateFootStepDataMessage(SingleFootstep step)
+   {
+      FootstepDataMessage footstepDataMessage = new FootstepDataMessage();
+      footstepDataMessage.setRobotSide(step.getFootstepSide() == SingleFootstep.FootstepSide.LEFT ? FootstepDataMessage.ROBOT_SIDE_LEFT : FootstepDataMessage.ROBOT_SIDE_RIGHT);
+      footstepDataMessage.location_ = new Point3D(step.footPose.getPosition());
+      footstepDataMessage.swing_duration_ = 1.2;
+      footstepDataMessage.transfer_duration_ = 0.8;
+
+      return footstepDataMessage;
+   }
+
+   private void walkFromSteps()
+   {
+      ArrayList<SingleFootstep> steps = singleFootstepAffordance.getFootstepArrayList();
+      for (SingleFootstep step : steps)
+      {
+         FootstepDataMessage msg = generateFootStepDataMessage(step);
+         communicationHelper.publishToController(msg);
+      }
+   }
+
    public void renderImGuiWidgets()
    {
       if (ImGui.button("Home Pose"))
@@ -461,7 +482,17 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
          footstepSide = SingleFootstep.FootstepSide.RIGHT;
          singleFootstepAffordance.setPlacingGoal(true);
       }
-      //singleFootstepAffordance.renderPlaceGoalButton();
+
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("walk")))
+      {
+         if(singleFootstepAffordance.getFootstepArrayList().size()>0)
+         {
+            walkFromSteps();
+         }
+      }
+
+      singleFootstepAffordance.renderFootStepModeButton();
 
 
       for (RobotSide side : RobotSide.values)

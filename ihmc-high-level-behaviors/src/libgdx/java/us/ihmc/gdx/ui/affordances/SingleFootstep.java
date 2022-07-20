@@ -14,22 +14,21 @@ public class SingleFootstep
    private GDXModelInstance footstepModelInstance;
 
    public enum FootstepSide {LEFT, RIGHT, NONE};
-   private FootstepSide footstepSide = FootstepSide.NONE;
-   private GDX3DScene primaryScene;
+   FootstepSide footstepSide;
    ReferenceFrame referenceFrameFootstep;
+
+   public Pose3D footPose;
 
    public SingleFootstep(GDX3DScene primaryScene, FootstepSide footstepSide)
    {
       this.footstepSide = footstepSide;
-      this.primaryScene = primaryScene;
-
       if (footstepSide.equals(FootstepSide.LEFT))
       {
          footstepModelInstance = new GDXModelInstance(GDXModelLoader.load("models/footsteps/footstep_left.g3dj"));
       }
-      else if (footstepSide.equals(FootstepSide.LEFT))
+      else if (footstepSide.equals(FootstepSide.RIGHT))
       {
-
+         footstepModelInstance = new GDXModelInstance(GDXModelLoader.load("models/footsteps/footstep_right.g3dj"));
       }
 
       primaryScene.addModelInstance(footstepModelInstance, GDXSceneLevel.VIRTUAL);
@@ -40,6 +39,13 @@ public class SingleFootstep
 
       pose.get(rigidBodyTransform);
 
+      footPose.set(pose);
+
       referenceFrameFootstep.update();
+   }
+
+   public FootstepSide getFootstepSide()
+   {
+      return footstepSide;
    }
 }

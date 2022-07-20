@@ -1,7 +1,6 @@
 package us.ihmc.gdx.ui.affordances;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.math.Matrix4;
@@ -20,7 +19,6 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -30,10 +28,7 @@ import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.input.editor.GDXUIActionMap;
 import us.ihmc.gdx.input.editor.GDXUITrigger;
-import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.environment.GDXModelInstance;
-import us.ihmc.gdx.tools.GDXModelBuilder;
-import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.vr.GDXVRManager;
@@ -66,11 +61,13 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
    FramePose3D footTextPose;
    private GDXModelInstance footstepModel;
    private float textheight = 12;
-   ArrayList<SingleFootstep> footstepArrayList = new ArrayList<SingleFootstep>();
 
+   public ArrayList<SingleFootstep> getFootstepArrayList()
+   {
+      return footstepArrayList;
+   }
 
-
-
+   ArrayList<SingleFootstep> footstepArrayList = new ArrayList<>();
 
    public void create(GDXImGuiBasedUI baseUI, Consumer<Pose3D> placedPoseConsumer, Color color)
    {
@@ -186,7 +183,7 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
       });
    }
 
-   public void renderPlaceGoalButton()
+   public void renderFootStepModeButton()
    {
       boolean pushedFlags = false;
       if (placingGoal)
@@ -224,6 +221,8 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
          ImGui.dragFloat("Goal Z Offset", goalZOffset.getData(), 0.01f);
          ImGui.popItemWidth();
       }
+
+
    }
 
    @Override
@@ -292,7 +291,7 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
 
    private void createNewFootStep(GDXImGuiBasedUI baseUI, SingleFootstep.FootstepSide footstepSide)
    {
-      footstepArrayList.add(new SingleFootstep(baseUI.getPrimaryScene(), ))
+      footstepArrayList.add(new SingleFootstep(baseUI.getPrimaryScene(),footstepSide));
    }
 
 }
