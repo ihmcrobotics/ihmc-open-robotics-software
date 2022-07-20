@@ -502,13 +502,13 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       SimpleMatrix C = new SimpleMatrix(CommonOps_DDRM.identity(4));
       SimpleMatrix Q = new SimpleMatrix(CommonOps_DDRM.diag(0.001, 0.001, 0.01, 0.01));
       SimpleMatrix R = new SimpleMatrix(CommonOps_DDRM.diag(0.0001, 0.0001, 0.01, 0.01));
+//      SimpleMatrix R = new SimpleMatrix(CommonOps_DDRM.diag(10, 10, 1000, 1000));
       AlipKalmanFilter filter = new AlipKalmanFilter(A, B, C, Q, R, controlDT);
       
       CenterOfMassReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", ReferenceFrame.getWorldFrame(), fullRobotModel.getElevator());
       centerOfMassFrame.update();
       MomentumStateProvider momentumStateProvider = new MomentumStateProvider(fullRobotModel.getElevator(), worldFrame, centerOfMassFrame, filter, desiredHeight, totalMass);
       registry.addChild(momentumStateProvider.getRegistry());
-      controllerToolbox.attachControllerStateChangedListener(momentumStateProvider);
       
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel, centerOfMassStateProvider, null);
 
@@ -543,6 +543,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                  contactablePlaneBodies,
                                                                  yoGraphicsListRegistry,
                                                                  jointsToIgnore);
+      controllerToolbox.attachControllerStateChangedListener(momentumStateProvider);
       controllerToolbox.attachControllerStateChangedListeners(controllerStateChangedListenersToAttach);
       attachControllerFailureListeners(controllerFailureListenersToAttach);
       if (createQueuedControllerCommandGenerator)
