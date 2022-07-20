@@ -172,8 +172,8 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
          if (input.mouseReleasedWithoutDrag(ImGuiMouseButton.Right))
          {
             placeGoalActionMap.triggerAction(GDXUITrigger.RIGHT_CLICK);
-            //footstepArrayList.remove(footstepIndex).getFootstepModelInstance().re;
-            //footstepIndex--;
+            baseUI.getPrimaryScene().removeRenderableProvider((footstepArrayList.remove(footstepIndex).getFootstepModelInstance()), GDXSceneLevel.VIRTUAL);
+            footstepIndex--;
          }
       }
    }
@@ -279,8 +279,15 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
       if (footstepArrayList.size() > 0 && footstepArrayList.get(footstepIndex).getFootstepModelInstance() != null)
          footstepArrayList.get(footstepIndex).getFootstepModelInstance().transform.val[Matrix4.M03] = Float.NaN;
       goalZOffset.set(0.0f);
+
+      for(int i =0; i<= footstepIndex; i++)
+      {
+         baseUI.getPrimaryScene().removeRenderableProvider((footstepArrayList.remove(0).getFootstepModelInstance()), GDXSceneLevel.VIRTUAL);
+      }
+
       footstepArrayList.clear();
       footstepIndex=-1;
+
    }
 
    public void setLatestRegions(PlanarRegionsList latestRegions)
@@ -320,7 +327,7 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
 
    public void createNewFootStep(RobotSide footstepSide)
    {
-      footstepArrayList.add(new SingleFootstep(baseUI.getPrimaryScene(), footstepSide));
+      footstepArrayList.add(new SingleFootstep(baseUI, footstepSide));
       footstepIndex++;
       footstepCreated = true;
       currentFootStepSide = footstepSide;
