@@ -9,6 +9,9 @@ import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.environment.GDXModelInstance;
 import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.gdx.ui.gizmo.GDXPathControlRingGizmo;
+import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class SingleFootstep
@@ -33,9 +36,7 @@ public class SingleFootstep
       }
 
       baseUI.getPrimaryScene().addModelInstance(footstepModelInstance, GDXSceneLevel.VIRTUAL);
-
-
-            Pose3D pose = new Pose3D();
+      Pose3D pose = new Pose3D();
       RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
       referenceFrameFootstep = ReferenceFrameTools.constructFrameWithChangingTransformToParent("footstep frame",
                                                                                                ReferenceFrame.getWorldFrame(), rigidBodyTransform);
@@ -43,7 +44,6 @@ public class SingleFootstep
       pose.get(rigidBodyTransform);
 
       footPose = pose;
-
 
 
       referenceFrameFootstep.update();
