@@ -105,7 +105,7 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
    private FootstepDataListMessage messageList;
 
 
-    SingleFootstep.FootstepSide footstepSide = SingleFootstep.FootstepSide.NONE;
+    RobotSide footstepSide;
 
    public ImGuiGDXTeleoperationPanel(CommunicationHelper communicationHelper)
    {
@@ -283,7 +283,7 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
    {
 
       FootstepDataMessage stepMessage = messageList.getFootstepDataList().add();
-      stepMessage.setRobotSide(step.getFootstepSide() == SingleFootstep.FootstepSide.LEFT ? FootstepDataMessage.ROBOT_SIDE_LEFT : FootstepDataMessage.ROBOT_SIDE_RIGHT);
+      stepMessage.setRobotSide(step.getFootstepSide() == RobotSide.LEFT ? FootstepDataMessage.ROBOT_SIDE_LEFT : FootstepDataMessage.ROBOT_SIDE_RIGHT);
       stepMessage.getLocation().set(new Point3D(step.footPose.getPosition()));
       stepMessage.setSwingDuration(1.2);
       stepMessage.setTransferDuration(0.8);
@@ -480,16 +480,16 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       ImGui.sameLine();
       if(ImGui.button("Left"))
       {
-         footstepSide = SingleFootstep.FootstepSide.LEFT;
+         footstepSide = RobotSide.LEFT;
          singleFootstepAffordance.setPlacingGoal(true);
-         singleFootstepAffordance.createNewFootStep(SingleFootstep.FootstepSide.LEFT);
+         singleFootstepAffordance.createNewFootStep(RobotSide.LEFT);
       }
       ImGui.sameLine();
       if(ImGui.button("Right"))
       {
-         footstepSide = SingleFootstep.FootstepSide.RIGHT;
+         footstepSide = RobotSide.RIGHT;
          singleFootstepAffordance.setPlacingGoal(true);
-         singleFootstepAffordance.createNewFootStep(SingleFootstep.FootstepSide.RIGHT);
+         singleFootstepAffordance.createNewFootStep(RobotSide.RIGHT);
       }
 
       ImGui.sameLine();

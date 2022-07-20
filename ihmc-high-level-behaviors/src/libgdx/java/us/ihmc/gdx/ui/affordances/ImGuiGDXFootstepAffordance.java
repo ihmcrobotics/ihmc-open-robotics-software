@@ -37,6 +37,7 @@ import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.vr.GDXVRManager;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -64,12 +65,14 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
 
    ReferenceFrame referenceFrameFootstep;
    FramePose3D footTextPose;
+   boolean footstepCreated = false;
 
    private float textheight = 12;
 
    ArrayList<SingleFootstep> footstepArrayList = new ArrayList<SingleFootstep>();
    int footstepIndex = -1;
    GDXImGuiBasedUI baseUI;
+   RobotSide currentFootStepSide;
 
 
    public void create(GDXImGuiBasedUI baseUI, Consumer<Pose3D> placedPoseConsumer, Color color)
@@ -93,11 +96,6 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
       });
 
       clear();
-   }
-
-   public void addFootStep(SingleFootstep.FootstepSide Side)
-   {
-
    }
 
    public void processImGui3DViewInput(ImGui3DViewInput input)
@@ -156,14 +154,21 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
             if (input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
                placeGoalActionMap.triggerAction(GDXUITrigger.POSITION_LEFT_CLICK);
-               placingGoal = false;
+               placingGoal = true;
                placingPosition = true;
+               footstepCreated = false;
+
+               //Switch sides
+               currentFootStepSide = currentFootStepSide.getOppositeSide();
+               createNewFootStep(currentFootStepSide);
             }
          }
 
          if (input.mouseReleasedWithoutDrag(ImGuiMouseButton.Right))
          {
             placeGoalActionMap.triggerAction(GDXUITrigger.RIGHT_CLICK);
+            //footstepArrayList.remove(footstepIndex).getFootstepModelInstance().re;
+            //footstepIndex--;
          }
       }
    }
@@ -306,10 +311,13 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
       return footstepArrayList;
    }
 
-   public void createNewFootStep(SingleFootstep.FootstepSide footstepSide)
+   public void createNewFootStep(RobotSide footstepSide)
    {
       footstepArrayList.add(new SingleFootstep(baseUI.getPrimaryScene(), footstepSide));
       footstepIndex++;
+      footstepCreated = true;
+      currentFootStepSide = footstepSide;
+
    }
 
 
