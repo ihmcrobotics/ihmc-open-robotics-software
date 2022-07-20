@@ -42,6 +42,7 @@ import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
+import java.util.ArrayList;
 import java.util.function.Consumer;
 
 public class ImGuiGDXFootstepAffordance implements RenderableProvider
@@ -65,23 +66,15 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
    FramePose3D footTextPose;
    private GDXModelInstance footstepModel;
    private float textheight = 12;
+   ArrayList<SingleFootstep> footstepArrayList = new ArrayList<SingleFootstep>();
+
+
+
+
 
    public void create(GDXImGuiBasedUI baseUI, Consumer<Pose3D> placedPoseConsumer, Color color)
    {
-      footstepModel = new GDXModelInstance(GDXModelLoader.load("models/footsteps/footstep_left.g3dj"));
-      baseUI.getPrimaryScene().addModelInstance(footstepModel, GDXSceneLevel.VIRTUAL);
-      Pose3D pose = new Pose3D();
-      RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
-      referenceFrameFootstep = ReferenceFrameTools.constructFrameWithChangingTransformToParent("footstep frame",
-                                                                                               ReferenceFrame.getWorldFrame(), rigidBodyTransform);
-
-      pose.get(rigidBodyTransform);
-
-      referenceFrameFootstep.update();
-
       this.placedPoseConsumer = placedPoseConsumer;
-      float sphereRadius = 0.03f;
-      //footstepModel = GDXModelBuilder.createSphere(sphereRadius, color);
 
       placeGoalActionMap = new GDXUIActionMap(startAction ->
                                               {
@@ -99,6 +92,11 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
       });
 
       clear();
+   }
+
+   public void addFootStep(SingleFootstep.FootstepSide Side)
+   {
+
    }
 
    public void processImGui3DViewInput(ImGui3DViewInput input)
@@ -292,5 +290,9 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
       goalPoseForReading.set(pose);
    }
 
+   private void createNewFootStep(GDXImGuiBasedUI baseUI, SingleFootstep.FootstepSide footstepSide)
+   {
+      footstepArrayList.add(new SingleFootstep(baseUI.getPrimaryScene(), ))
+   }
 
 }

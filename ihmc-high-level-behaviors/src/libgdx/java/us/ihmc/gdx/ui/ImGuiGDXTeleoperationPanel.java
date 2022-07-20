@@ -44,6 +44,7 @@ import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXFootstepAffordance;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
+import us.ihmc.gdx.ui.affordances.SingleFootstep;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
@@ -101,8 +102,8 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
    private final IHMCROS2Input<PlanarRegionsListMessage> lidarREARegions;
    private final ImBoolean showGraphics = new ImBoolean(true);
 
-   public enum FootstepSide {LEFT, RIGHT, NONE};
-   FootstepSide footstepSide = FootstepSide.NONE;
+
+    SingleFootstep.FootstepSide footstepSide = SingleFootstep.FootstepSide.NONE;
 
    public ImGuiGDXTeleoperationPanel(CommunicationHelper communicationHelper)
    {
@@ -444,23 +445,24 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
          }
       }
       ImGui.sameLine();
-
+      footstepGoal.renderPlaceGoalButton();
 
 
       ImGui.text("Place footstep:");
       ImGui.sameLine();
       if(ImGui.button("Left"))
       {
-         footstepSide = FootstepSide.LEFT;
+         footstepSide = SingleFootstep.FootstepSide.LEFT;
          singleFootstepAffordance.setPlacingGoal(true);
       }
       ImGui.sameLine();
       if(ImGui.button("Right"))
       {
-         footstepSide = FootstepSide.LEFT;
+         footstepSide = SingleFootstep.FootstepSide.LEFT;
          singleFootstepAffordance.setPlacingGoal(true);
       }
-      singleFootstepAffordance.renderPlaceGoalButton();
+      //singleFootstepAffordance.renderPlaceGoalButton();
+
 
       for (RobotSide side : RobotSide.values)
       {
@@ -549,8 +551,4 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       throttledRobotStateCallback.destroy();
    }
 
-   public FootstepSide getFootstepSide()
-   {
-      return footstepSide;
-   }
 }
