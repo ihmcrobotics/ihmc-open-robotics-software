@@ -67,6 +67,11 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
    FramePose3D footTextPose;
    boolean footstepCreated = false;
 
+   public void setFootstepIndex(int footstepIndex)
+   {
+      this.footstepIndex = footstepIndex;
+   }
+
    private float textheight = 12;
 
    ArrayList<SingleFootstep> footstepArrayList = new ArrayList<SingleFootstep>();
@@ -274,6 +279,8 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
       if (footstepArrayList.size() > 0 && footstepArrayList.get(footstepIndex).getFootstepModelInstance() != null)
          footstepArrayList.get(footstepIndex).getFootstepModelInstance().transform.val[Matrix4.M03] = Float.NaN;
       goalZOffset.set(0.0f);
+      footstepArrayList.clear();
+      footstepIndex=-1;
    }
 
    public void setLatestRegions(PlanarRegionsList latestRegions)
@@ -319,6 +326,4 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
       currentFootStepSide = footstepSide;
 
    }
-
-
 }

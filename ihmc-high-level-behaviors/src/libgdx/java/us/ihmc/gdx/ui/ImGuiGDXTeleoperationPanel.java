@@ -294,6 +294,7 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
    {
       ArrayList<SingleFootstep> steps = singleFootstepAffordance.getFootstepArrayList();
 
+      System.out.println("steps size: " +steps.size());
 //      FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.
      messageList = new FootstepDataListMessage();
       for (SingleFootstep step : steps)
@@ -301,8 +302,14 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
          generateFootStepDataMessage(step);
          messageList.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
          messageList.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
-         communicationHelper.publishToController(messageList);
       }
+      communicationHelper.publishToController(messageList);
+//      messageList = new FootstepDataListMessage();
+
+      // done walking >> delete steps in singleFootStepAffordance.
+      singleFootstepAffordance.getFootstepArrayList().clear();
+      singleFootstepAffordance.setFootstepIndex(-1);
+
    }
 
    public void renderImGuiWidgets()
@@ -501,7 +508,13 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
          }
       }
 
-      singleFootstepAffordance.renderFootStepModeButton();
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("clear")))
+      {
+         singleFootstepAffordance.clear();
+      }
+
+//      singleFootstepAffordance.renderFootStepModeButton();
 
 
       for (RobotSide side : RobotSide.values)
