@@ -14,7 +14,7 @@ public class SingleFootstep
    private GDXModelInstance footstepModelInstance;
 
    public enum FootstepSide {LEFT, RIGHT, NONE};
-   FootstepSide footstepSide;
+   private FootstepSide footstepSide = FootstepSide.NONE;
    ReferenceFrame referenceFrameFootstep;
 
    public Pose3D footPose;
@@ -44,8 +44,13 @@ public class SingleFootstep
       referenceFrameFootstep.update();
    }
 
+   
    public FootstepSide getFootstepSide()
    {
       return footstepSide;
+   }
+   public GDXModelInstance getFootstepModelInstance()
+   {
+      return footstepModelInstance;
    }
 }
