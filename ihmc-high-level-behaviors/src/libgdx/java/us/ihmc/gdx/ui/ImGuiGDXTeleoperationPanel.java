@@ -102,6 +102,8 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
    private final IHMCROS2Input<PlanarRegionsListMessage> lidarREARegions;
    private final ImBoolean showGraphics = new ImBoolean(true);
 
+   private FootstepDataListMessage messageList;
+
 
     SingleFootstep.FootstepSide footstepSide = SingleFootstep.FootstepSide.NONE;
 
@@ -277,24 +279,29 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       footstepPlannerOutput = null;
    }
 
-   private FootstepDataMessage generateFootStepDataMessage(SingleFootstep step)
+   private void generateFootStepDataMessage(SingleFootstep step)
    {
-      FootstepDataMessage footstepDataMessage = new FootstepDataMessage();
-      footstepDataMessage.setRobotSide(step.getFootstepSide() == SingleFootstep.FootstepSide.LEFT ? FootstepDataMessage.ROBOT_SIDE_LEFT : FootstepDataMessage.ROBOT_SIDE_RIGHT);
-      footstepDataMessage.location_ = new Point3D(step.footPose.getPosition());
-      footstepDataMessage.swing_duration_ = 1.2;
-      footstepDataMessage.transfer_duration_ = 0.8;
 
-      return footstepDataMessage;
+      FootstepDataMessage stepMessage = messageList.getFootstepDataList().add();
+      stepMessage.setRobotSide(step.getFootstepSide() == SingleFootstep.FootstepSide.LEFT ? FootstepDataMessage.ROBOT_SIDE_LEFT : FootstepDataMessage.ROBOT_SIDE_RIGHT);
+      stepMessage.getLocation().set(new Point3D(step.footPose.getPosition()));
+      stepMessage.setSwingDuration(1.2);
+      stepMessage.setTransferDuration(0.8);
+
    }
 
    private void walkFromSteps()
    {
       ArrayList<SingleFootstep> steps = singleFootstepAffordance.getFootstepArrayList();
+
+//      FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.
+     messageList = new FootstepDataListMessage();
       for (SingleFootstep step : steps)
       {
-         FootstepDataMessage msg = generateFootStepDataMessage(step);
-         communicationHelper.publishToController(msg);
+         generateFootStepDataMessage(step);
+         messageList.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
+         messageList.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
+         communicationHelper.publishToController(messageList);
       }
    }
 
