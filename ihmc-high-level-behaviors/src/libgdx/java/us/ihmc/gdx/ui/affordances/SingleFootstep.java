@@ -39,7 +39,7 @@ public class SingleFootstep
 
       pose.get(rigidBodyTransform);
 
-      footPose.set(pose);
+      footPose = pose;
 
       referenceFrameFootstep.update();
    }

@@ -72,13 +72,6 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
    GDXImGuiBasedUI baseUI;
 
 
-   public ArrayList<SingleFootstep> getFootstepArrayList()
-   {
-      return footstepArrayList;
-   }
-
-   ArrayList<SingleFootstep> footstepArrayList = new ArrayList<>();
-
    public void create(GDXImGuiBasedUI baseUI, Consumer<Pose3D> placedPoseConsumer, Color color)
    {
       this.placedPoseConsumer = placedPoseConsumer;
@@ -307,10 +300,16 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
       goalPoseForReading.set(pose);
    }
 
+   public ArrayList<SingleFootstep> getFootstepArrayList()
+   {
+      return footstepArrayList;
+   }
+
    public void createNewFootStep(SingleFootstep.FootstepSide footstepSide)
    {
       footstepArrayList.add(new SingleFootstep(baseUI.getPrimaryScene(), footstepSide));
       footstepIndex++;
    }
+
 
 }
