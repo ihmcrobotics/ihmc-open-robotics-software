@@ -458,7 +458,7 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       ImGui.sameLine();
       if(ImGui.button("Right"))
       {
-         footstepSide = SingleFootstep.FootstepSide.LEFT;
+         footstepSide = SingleFootstep.FootstepSide.RIGHT;
          singleFootstepAffordance.setPlacingGoal(true);
       }
       //singleFootstepAffordance.renderPlaceGoalButton();
