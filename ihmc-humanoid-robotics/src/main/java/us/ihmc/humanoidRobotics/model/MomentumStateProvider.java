@@ -19,6 +19,10 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class MomentumStateProvider implements ControllerStateChangedListener
 {
+   // Flag for debugging
+   private final Boolean useAlip = true;
+
+   // Class members
    private final CenterOfMassJacobian jacobian;
    private final CentroidalMomentumCalculator centroidalMomentumCalculator;
    private final ReferenceFrame worldFrame;
@@ -30,7 +34,7 @@ public class MomentumStateProvider implements ControllerStateChangedListener
    private FramePoint2D prevCMP;
 
    private Boolean modeSwitch = false;
-   
+
    // Registry
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
@@ -45,10 +49,14 @@ public class MomentumStateProvider implements ControllerStateChangedListener
    private final YoDouble yoestimatedAlipY = new YoDouble("estimatedAlipY", registry);
    private final YoDouble yoestimatedAlipLx = new YoDouble("estimatedAlipLx", registry);
    private final YoDouble yoestimatedAlipLy = new YoDouble("estimatedAlipLy", registry);
-   
+   private final YoDouble yocentroidalLinearPartX = new YoDouble("centroidalLinearPartX", registry);
+   private final YoDouble yocentroidalLinearPartY = new YoDouble("centroidalLinearPartY", registry);
+   private final YoDouble yocentroidalAngularPartX = new YoDouble("centroidalAngularPartX", registry);
+   private final YoDouble yocentroidalAngularPartY = new YoDouble("centroidalAngularPartY", registry);
+
    // I need to move the class file around so that I can use WalkingStateEnum here. (The reason is that I most likely have circular dependency now)
    //   private final YoEnum<WalkingStateEnum> walkingCurrentState = new YoEnum("walkingControllerState", registry, WalkingStateEnum.class);
-   // private final YoEnum<?> walkingCurrentState = new YoEnum("walkingControllerState", registry, null);
+   //   private final YoEnum<?> walkingCurrentState = new YoEnum("walkingControllerState", registry, null);
    private final YoInteger walkingCurrentState = new YoInteger("walkingControllerState", registry);
 
    public MomentumStateProvider(RigidBodyReadOnly elevator,
@@ -89,6 +97,7 @@ public class MomentumStateProvider implements ControllerStateChangedListener
 
    public FrameVector3DReadOnly getModifiedCenterOfMassVelocity()
    {
+      centroidalMomentumCalculator.getReferenceFrame().update();  // Need to update the COM frame
       MomentumReadOnly centroidalMomentum = centroidalMomentumCalculator.getMomentum();
 
       // Filter centroidal angular momentum
@@ -119,15 +128,15 @@ public class MomentumStateProvider implements ControllerStateChangedListener
 
       double modifiedComVelX = estimatedAlip.get(3) / totalMass / desiredHeight;
       double modifiedComVelY = -estimatedAlip.get(2) / totalMass / desiredHeight;
-      
+
       // For testing ///////////
       yoModifiedComVelX.set(modifiedComVelX);
       yoModifiedComVelY.set(modifiedComVelY);
 
       double modifiedComVelWithoutFilteringX = (centroidalMomentum.getLinearPart().getX() + centroidalMomentum.getAngularPart().getY() / desiredHeight)
-            / centroidalMomentumCalculator.getTotalMass();
+            / totalMass;
       double modifiedComVelWithoutFilteringY = (centroidalMomentum.getLinearPart().getY() - centroidalMomentum.getAngularPart().getX() / desiredHeight)
-            / centroidalMomentumCalculator.getTotalMass();
+            / totalMass;
       yoModifiedComVelWithoutFilteringX.set(modifiedComVelWithoutFilteringX);
       yoModifiedComVelWithoutFilteringY.set(modifiedComVelWithoutFilteringY);
 
@@ -138,10 +147,25 @@ public class MomentumStateProvider implements ControllerStateChangedListener
       yoestimatedAlipY.set(estimatedAlip.get(1));
       yoestimatedAlipLx.set(estimatedAlip.get(2));
       yoestimatedAlipLy.set(estimatedAlip.get(3));
+
+      yocentroidalLinearPartX.set(centroidalMomentum.getLinearPart().getX());
+      yocentroidalLinearPartY.set(centroidalMomentum.getLinearPart().getY());
+      yocentroidalAngularPartX.set(centroidalMomentum.getAngularPart().getX());
+      yocentroidalAngularPartY.set(centroidalMomentum.getAngularPart().getY());
       //////////////////////////
-      
-      return new FrameVector3D(worldFrame, jacobian.getCenterOfMassVelocity().getX(), jacobian.getCenterOfMassVelocity().getY(), jacobian.getCenterOfMassVelocity().getZ());
-//      return new FrameVector3D(worldFrame, modifiedComVelX, modifiedComVelY, jacobian.getCenterOfMassVelocity().getZ());
+
+      if (useAlip)
+      {
+         return new FrameVector3D(worldFrame, modifiedComVelX, modifiedComVelY, jacobian.getCenterOfMassVelocity().getZ());
+      }
+      else
+      {
+         return new FrameVector3D(worldFrame,
+                                  jacobian.getCenterOfMassVelocity().getX(),
+                                  jacobian.getCenterOfMassVelocity().getY(),
+                                  jacobian.getCenterOfMassVelocity().getZ());
+      }
+
    }
 
    @Override
@@ -150,7 +174,8 @@ public class MomentumStateProvider implements ControllerStateChangedListener
       // TODO Auto-generated method stub
       //      walkingCurrentState.setEnum(newState);
       walkingCurrentState.set(newState.ordinal());
-      if (newState.ordinal() == 4 || newState.ordinal() == 5) {
+      if (newState.ordinal() == 4 || newState.ordinal() == 5)
+      {
          modeSwitch = true;
       }
       System.out.println("hi");

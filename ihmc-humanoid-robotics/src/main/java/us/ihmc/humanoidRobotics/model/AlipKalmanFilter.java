@@ -47,7 +47,7 @@ public class AlipKalmanFilter
 
       MatrixExponentialCalculator expCalculator = new MatrixExponentialCalculator(nx);
       DMatrixRMaj result = new DMatrixRMaj(nx, nx);
-      expCalculator.compute(result, A.getDDRM());
+      expCalculator.compute(result, A.scale(dt).getDDRM());
       this.A = new SimpleMatrix(result);
 
       //      this.A = Ix.plus(A.scale(dt));
