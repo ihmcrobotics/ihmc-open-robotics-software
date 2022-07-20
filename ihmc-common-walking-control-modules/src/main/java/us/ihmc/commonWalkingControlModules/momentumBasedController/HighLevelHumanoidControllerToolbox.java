@@ -170,7 +170,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    private WalkingTrajectoryPath walkingTrajectoryPath;
 
    private final YoBoolean controllerFailed = new YoBoolean("controllerFailed", registry);
-
+   
    public HighLevelHumanoidControllerToolbox(FullHumanoidRobotModel fullRobotModel,
                                              CenterOfMassStateProvider centerOfMassStateProvider,
                                              MomentumStateProvider momentumStateProvider,
@@ -447,14 +447,16 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    public void update()
    {
       centerOfMassStateProvider.updateState(); // Needs to be updated before the frames, as it is need to update the CoM frame.
-      momentumStateProvider.updateState();
       referenceFrames.updateFrames();
 
       if (referenceFramesVisualizer != null)
          referenceFramesVisualizer.update();
 
       computeCop();
+
+      momentumStateProvider.updateState(centerOfPressure);  // The input should be CMP, but I'm using COP for now
       computeCapturePoint();
+      
       updateBipedSupportPolygons();
       readWristSensorData();
 

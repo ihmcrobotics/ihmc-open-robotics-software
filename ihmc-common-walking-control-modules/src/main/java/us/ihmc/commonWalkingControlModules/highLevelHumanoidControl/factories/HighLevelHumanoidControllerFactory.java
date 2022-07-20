@@ -6,6 +6,9 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.simple.SimpleMatrix;
+
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.DefaultSplitFractionCalculatorParameters;
@@ -32,6 +35,7 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -46,11 +50,14 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.humanoidRobotics.model.MomentumStateProvider;
+import us.ihmc.humanoidRobotics.model.AlipKalmanFilter;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -477,41 +484,32 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
          }
       };
 
+      double gravityZ = Math.abs(gravity);
+      double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
+      double totalRobotWeight = totalMass * gravityZ;
+      double omega0 = walkingControllerParameters.getOmega0();
+      double desiredHeight = gravityZ / omega0 / omega0;
+      
+      // Create ALIP kalman filter and MomentumStateProvider for the new capture point
+      SimpleMatrix A = new SimpleMatrix(4, 4);  // automatically initialized to zeros
+      A.set(0, 3, 1 / totalMass / desiredHeight);
+      A.set(1, 2, -1 / totalMass / desiredHeight);
+      A.set(2, 1, -totalMass * gravityZ);
+      A.set(3, 0, totalMass * gravityZ);
+      SimpleMatrix B = new SimpleMatrix(4, 2);
+      B.set(0, 0, -1);
+      B.set(1, 1, -1);
+      SimpleMatrix C = new SimpleMatrix(CommonOps_DDRM.identity(4));
+      SimpleMatrix Q = new SimpleMatrix(CommonOps_DDRM.diag(0.001, 0.001, 0.01, 0.01));
+      SimpleMatrix R = new SimpleMatrix(CommonOps_DDRM.diag(0.0001, 0.0001, 0.01, 0.01));
+      AlipKalmanFilter filter = new AlipKalmanFilter(A, B, C, Q, R, controlDT);
+      
       CenterOfMassReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", ReferenceFrame.getWorldFrame(), fullRobotModel.getElevator());
       centerOfMassFrame.update();
-      MomentumStateProvider momentumStateProvider = new MomentumStateProvider()
-      {
-         private final CenterOfMassJacobian jacobian = new CenterOfMassJacobian(fullRobotModel.getElevator(), worldFrame);
-         private final CentroidalMomentumCalculator centroidalMomentumCalculator = new CentroidalMomentumCalculator(fullRobotModel.getElevator(), centerOfMassFrame);
-         private final double desiredHeight = 9.81 / walkingControllerParameters.getOmega0() / walkingControllerParameters.getOmega0();
-
-         @Override
-         public void updateState()
-         {
-            jacobian.reset();
-            centroidalMomentumCalculator.reset();
-         }
-
-         @Override
-         public FramePoint3DReadOnly getCenterOfMassPosition()
-         {
-            return jacobian.getCenterOfMass();
-         }
-
-         @Override
-         public FrameVector3DReadOnly getModifiedCenterOfMassVelocity()
-         {  
-            FrameVector3DReadOnly comVel = jacobian.getCenterOfMassVelocity();
-            MomentumReadOnly centroidalMomentum = centroidalMomentumCalculator.getMomentum();
-
-            double modifiedComVelX = (centroidalMomentum.getLinearPart().getX() + centroidalMomentum.getAngularPart().getY() / desiredHeight) / centroidalMomentumCalculator.getTotalMass();
-            double modifiedComVelY = (centroidalMomentum.getLinearPart().getY() - centroidalMomentum.getAngularPart().getX() / desiredHeight) / centroidalMomentumCalculator.getTotalMass();
-            double modifiedComVelZ = comVel.getZ();
-            
-            return new FrameVector3D(worldFrame, modifiedComVelX, modifiedComVelY, modifiedComVelZ);
-         }
-      };
-
+      MomentumStateProvider momentumStateProvider = new MomentumStateProvider(fullRobotModel.getElevator(), worldFrame, centerOfMassFrame, filter, desiredHeight, totalMass);
+      registry.addChild(momentumStateProvider.getRegistry());
+      controllerToolbox.attachControllerStateChangedListener(momentumStateProvider);
+      
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel, centerOfMassStateProvider, null);
 
       contactableBodiesFactory.setFullRobotModel(fullRobotModel);
@@ -525,16 +523,11 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
          contactablePlaneBodies.add(feet.get(robotSide));
       contactablePlaneBodies.addAll(additionalContacts);
 
-      double gravityZ = Math.abs(gravity);
-      double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
-      double totalRobotWeight = totalMass * gravityZ;
-
       SideDependentList<FootSwitchInterface> footSwitches = createFootSwitches(feet, forceSensorDataHolder, totalRobotWeight, yoGraphicsListRegistry, registry);
       SideDependentList<ForceSensorDataReadOnly> wristForceSensors = createWristForceSensors(forceSensorDataHolder);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the HighLevelHumanoidControllerToolbox /////////////////////////////////////////////
-      double omega0 = walkingControllerParameters.getOmega0();
       controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel,
                                                                  centerOfMassStateProvider,
                                                                  momentumStateProvider,
