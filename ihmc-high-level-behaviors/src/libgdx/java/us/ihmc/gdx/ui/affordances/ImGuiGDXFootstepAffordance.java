@@ -150,6 +150,7 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
             }
 
             footstepArrayList.get(footstepIndex).getFootstepModelInstance().transform.setTranslation(pickPoint.getX32(), pickPoint.getY32(), (float) z);
+            footstepArrayList.get(footstepIndex).setFootPose(pickPoint.getX(), pickPoint.getY(), z);
 
             // when left button clicked and released.
             if (input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))

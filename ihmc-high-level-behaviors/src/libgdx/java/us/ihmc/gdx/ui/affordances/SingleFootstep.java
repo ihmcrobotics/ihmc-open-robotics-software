@@ -44,7 +44,14 @@ public class SingleFootstep
       referenceFrameFootstep.update();
    }
 
-   
+   public void setFootPose(double x, double y, double z)
+   {
+      this.footPose.setX(x);
+      this.footPose.setY(y);
+      this.footPose.setZ(z);
+
+   }
+
    public FootstepSide getFootstepSide()
    {
       return footstepSide;
