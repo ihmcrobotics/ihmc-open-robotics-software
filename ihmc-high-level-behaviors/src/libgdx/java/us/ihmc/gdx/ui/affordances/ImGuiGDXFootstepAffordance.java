@@ -37,6 +37,7 @@ import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPathControlRingGizmo;
+import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.gdx.vr.GDXVRManager;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -79,6 +80,8 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
    int footstepIndex = -1;
    GDXImGuiBasedUI baseUI;
    RobotSide currentFootStepSide;
+
+   GDXPose3DGizmo gizmo;
 
 
    public void create(GDXImGuiBasedUI baseUI, Consumer<Pose3D> placedPoseConsumer, Color color)
@@ -334,17 +337,35 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
 
    }
 
-   public void modify(int index)
+   public void createGizmo(int index)
    {
       SingleFootstep step = footstepArrayList.get(index);
-      RigidBodyTransform transform = step.referenceFrameFootstep.getTransformToParent();
+      ReferenceFrame referenceFrame = step.getReferenceFrameFootstep();
+      RigidBodyTransform transform = referenceFrame.getTransformToParent();
       GDXInteractableReferenceFrame interactableReferenceFrame = new GDXInteractableReferenceFrame();
-      interactableReferenceFrame.create(step.referenceFrameFootstep, transform, 1.0, baseUI.getPrimary3DPanel().getCamera3D());
+      interactableReferenceFrame.create(referenceFrame, transform, 1.0, baseUI.getPrimary3DPanel().getCamera3D());
       GDXPathControlRingGizmo footstepRingGizmo
               = new GDXPathControlRingGizmo(interactableReferenceFrame.getSelectablePose3DGizmo().getPoseGizmo().getGizmoFrame());
+//               = new GDXPathControlRingGizmo(interactableReferenceFrame.getSelectablePose3DGizmo().getPoseGizmo().getGizmoFrame()
+//      gizmo = new GDXPose3DGizmo(referenceFrame, transform);
       footstepRingGizmo.create(baseUI.getPrimary3DPanel().getCamera3D());
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(footstepRingGizmo::calculate3DViewPick);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(footstepRingGizmo::process3DViewInput);
       baseUI.getPrimaryScene().addRenderableProvider(footstepRingGizmo);
+
+
+
+      GDXPose3DGizmo poseGizmo = new GDXPose3DGizmo(interactableReferenceFrame.getSelectablePose3DGizmo().getPoseGizmo().getGizmoFrame());
+      poseGizmo.create(baseUI.getPrimary3DPanel().getCamera3D());
+      baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(poseGizmo::calculate3DViewPick);
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(poseGizmo::process3DViewInput);
+      baseUI.getPrimaryScene().addRenderableProvider(poseGizmo);
+//      baseUI.getImGuiPanelManager().addPanel(poseGizmo.createTunerPanel(GDXFrameGizmoDemo.class.getSimpleName()));
+      poseGizmo.getTransformToParent().getTranslation().add(1, 1, -2);
+   }
+
+   public void modify(int index)
+   {
+
    }
 }
