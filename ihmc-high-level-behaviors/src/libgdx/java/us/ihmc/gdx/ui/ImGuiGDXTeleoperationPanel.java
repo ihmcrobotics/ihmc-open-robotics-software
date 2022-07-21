@@ -42,7 +42,9 @@ import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.gdx.imgui.ImGuiMovingPlot;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.gdx.ui.affordances.ImGuiGDXFootstepAffordance;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
+import us.ihmc.gdx.ui.affordances.SingleFootstep;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
@@ -51,7 +53,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.tools.string.StringTools;
 
@@ -90,6 +91,7 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final FootstepPlanningModule footstepPlanner;
    private final ImGuiGDXPoseGoalAffordance footstepGoal = new ImGuiGDXPoseGoalAffordance();
+   private final ImGuiGDXFootstepAffordance singleFootstepAffordance = new ImGuiGDXFootstepAffordance();
    private final ImGuiStoredPropertySetTuner footstepPlanningParametersTuner = new ImGuiStoredPropertySetTuner("Footstep Planner Parameters (Teleoperation)");
    private FootstepPlannerOutput footstepPlannerOutput;
    private final ROS2SyncedRobotModel syncedRobotForFootstepPlanning;
@@ -99,6 +101,14 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
    private final String[] handConfigurationNames = new String[HandConfiguration.values.length];
    private final IHMCROS2Input<PlanarRegionsListMessage> lidarREARegions;
    private final ImBoolean showGraphics = new ImBoolean(true);
+
+   private FootstepDataListMessage messageList;
+
+
+   RobotSide footstepSide;
+
+   private boolean useGizmo = false;
+   private boolean hasGizmo = false;
 
    public ImGuiGDXTeleoperationPanel(CommunicationHelper communicationHelper)
    {
@@ -187,6 +197,12 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       footstepPlanningParametersTuner.create(footstepPlannerParameters,
                                              FootstepPlannerParameterKeys.keys,
                                              this::queueFootstepPlanning);
+
+      singleFootstepAffordance.create(baseUI, goal -> {}, Color.YELLOW);
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(singleFootstepAffordance::processImGui3DViewInput);
+//      footstepPlanningParametersTuner.create(footstepPlannerParameters,
+//              FootstepPlannerParameterKeys.keys,
+//              this::queueFootstepPlanning);
    }
 
    private void queueFootstepPlanning()
@@ -264,6 +280,32 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
       communicationHelper.publishToController(footstepDataListMessage);
       footstepPlannerOutput = null;
+   }
+
+   private void generateFootStepDataMessage(SingleFootstep step)
+   {
+      FootstepDataMessage stepMessage = messageList.getFootstepDataList().add();
+      stepMessage.setRobotSide(step.getFootstepSide() == RobotSide.LEFT ? FootstepDataMessage.ROBOT_SIDE_LEFT : FootstepDataMessage.ROBOT_SIDE_RIGHT);
+      stepMessage.getLocation().set(new Point3D(step.footPose.getPosition()));
+      stepMessage.setSwingDuration(1.2);
+      stepMessage.setTransferDuration(0.8);
+   }
+
+   private void walkFromSteps()
+   {
+      ArrayList<SingleFootstep> steps = singleFootstepAffordance.getFootstepArrayList();
+
+      messageList = new FootstepDataListMessage();
+      for (SingleFootstep step : steps)
+      {
+         generateFootStepDataMessage(step);
+         messageList.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
+         messageList.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
+      }
+      communicationHelper.publishToController(messageList);
+
+      // done walking >> delete steps in singleFootStepAffordance.
+      singleFootstepAffordance.clear();
    }
 
    public void renderImGuiWidgets()
@@ -436,6 +478,48 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       ImGui.sameLine();
       footstepGoal.renderPlaceGoalButton();
 
+
+      ImGui.text("Place footstep:");
+      ImGui.sameLine();
+      if(ImGui.button("Left"))
+      {
+         footstepSide = RobotSide.LEFT;
+         singleFootstepAffordance.setPlacingGoal(true);
+         singleFootstepAffordance.createNewFootStep(RobotSide.LEFT);
+      }
+      ImGui.sameLine();
+      if(ImGui.button("Right"))
+      {
+         footstepSide = RobotSide.RIGHT;
+         singleFootstepAffordance.setPlacingGoal(true);
+         singleFootstepAffordance.createNewFootStep(RobotSide.RIGHT);
+      }
+
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("walk")))
+      {
+         if(singleFootstepAffordance.getFootstepArrayList().size()>0)
+         {
+            walkFromSteps();
+         }
+      }
+
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("clear")))
+      {
+         singleFootstepAffordance.clear();
+      }
+      ImInt imInputIndex = new ImInt();
+      if (ImGui.inputInt("step index", imInputIndex))
+      {
+         int idx = imInputIndex.get();
+      }
+
+      if (ImGui.button("modify"))
+      {
+         useGizmo = !useGizmo;
+      }
+
       for (RobotSide side : RobotSide.values)
       {
          ImGui.text(side.getPascalCaseName() + " hand:");
@@ -484,12 +568,19 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       {
          footstepPlanGraphic.clear();
          footstepGoal.clear();
+         singleFootstepAffordance.clear();
       }
    }
 
    public void update()
    {
       footstepPlanGraphic.update();
+      if (useGizmo && !hasGizmo)
+      {
+         singleFootstepAffordance.createGizmo(0);
+         hasGizmo = true;
+      }
+
    }
 
    private boolean imGuiSlider(String label, float[] value)
@@ -507,6 +598,7 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       {
          footstepPlanGraphic.getRenderables(renderables, pool);
          footstepGoal.getRenderables(renderables, pool);
+         singleFootstepAffordance.getRenderables(renderables, pool);
       }
    }
 
@@ -520,4 +612,5 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       footstepPlanGraphic.destroy();
       throttledRobotStateCallback.destroy();
    }
+
 }
