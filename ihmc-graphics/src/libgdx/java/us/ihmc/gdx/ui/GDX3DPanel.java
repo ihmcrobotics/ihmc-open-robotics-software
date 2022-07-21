@@ -144,16 +144,28 @@ public class GDX3DPanel
          int frameBufferWidth = frameBuffer.getWidth();
          int frameBufferHeight = frameBuffer.getHeight();
 
-         frameBuffer.begin();
-         renderScene();
+         // We do this render to get the Z buffer from just the real stuff
+         if (scene.getSceneLevelsToRender().contains(GDXSceneLevel.REAL_ENVIRONMENT))
+         {
+            frameBuffer.begin();
+            renderScene(true);
 
-         normalizedDeviceCoordinateDepthDirectByteBuffer.rewind(); // SIGSEV otherwise
-         GL41.glReadBuffer(GL41.GL_COLOR_ATTACHMENT1);
-         GL41.glPixelStorei(GL41.GL_UNPACK_ALIGNMENT, 4); // to read floats
-         GL41.glReadPixels(0, 0, frameBufferWidth, frameBufferHeight, GL41.GL_RED, GL41.GL_FLOAT, normalizedDeviceCoordinateDepthDirectByteBuffer);
-         GL41.glPixelStorei(GL41.GL_UNPACK_ALIGNMENT, 1); // undo what we did
+            normalizedDeviceCoordinateDepthDirectByteBuffer.rewind(); // SIGSEV otherwise
+            GL41.glReadBuffer(GL41.GL_COLOR_ATTACHMENT1);
+            GL41.glPixelStorei(GL41.GL_UNPACK_ALIGNMENT, 4); // to read floats
+            GL41.glReadPixels(0, 0, (int) renderSizeX, (int) renderSizeY, GL41.GL_RED, GL41.GL_FLOAT, normalizedDeviceCoordinateDepthDirectByteBuffer);
+            GL41.glPixelStorei(GL41.GL_UNPACK_ALIGNMENT, 1); // undo what we did
 
-         frameBuffer.end();
+            frameBuffer.end();
+         }
+
+         // The scene will render twice if both real and virtual environments are showing
+         if (scene.getSceneLevelsToRender().contains(GDXSceneLevel.VIRTUAL))
+         {
+            frameBuffer.begin();
+            renderScene(false);
+            frameBuffer.end();
+         }
 
          float percentOfFramebufferUsedX = renderSizeX / frameBufferWidth;
          float percentOfFramebufferUsedY = renderSizeY / frameBufferHeight;
@@ -184,20 +196,23 @@ public class GDX3DPanel
       scene.renderShadowMap(camera3D, x, y);
    }
 
-   private void renderScene()
+   private void renderScene(boolean realOnly)
    {
       preRender();
 
       if (backgroundRenderer != null)
          backgroundRenderer.run();
 
-
-
-//      shadowsDisabledModelBatch.end();
-
-//      scene.render();
-//      scene.postRender(camera3D, GDXSceneLevel.VIRTUAL);
-
+      if (realOnly)
+      {
+         scene.render(GDXSceneLevel.REAL_ENVIRONMENT);
+         scene.postRender(camera3D, GDXSceneLevel.REAL_ENVIRONMENT);
+      }
+      else
+      {
+         scene.render();
+         scene.postRender(camera3D, GDXSceneLevel.VIRTUAL);
+      }
 
       if (GDXTools.ENABLE_OPENGL_DEBUGGER)
          glProfiler.reset();
