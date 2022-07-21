@@ -18,6 +18,8 @@ public class SingleFootstep
    private FramePose3D tempFramePose = new FramePose3D();
 
 
+   public GDXSelectablePose3DGizmo gizmo = new GDXSelectablePose3DGizmo();
+
    public SingleFootstep(GDXImGuiBasedUI baseUI, RobotSide footstepSide)
    {
       this.footstepSide = footstepSide;

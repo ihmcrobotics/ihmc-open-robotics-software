@@ -108,6 +108,7 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
    RobotSide footstepSide;
 
    private boolean useGizmo = false;
+   private boolean hasGizmo = false;
 
    public ImGuiGDXTeleoperationPanel(CommunicationHelper communicationHelper)
    {
@@ -574,9 +575,10 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
    public void update()
    {
       footstepPlanGraphic.update();
-      if (useGizmo)
+      if (useGizmo && !hasGizmo)
       {
-         singleFootstepAffordance.modify(0);
+         singleFootstepAffordance.createGizmo(0);
+         hasGizmo = true;
       }
 
    }
