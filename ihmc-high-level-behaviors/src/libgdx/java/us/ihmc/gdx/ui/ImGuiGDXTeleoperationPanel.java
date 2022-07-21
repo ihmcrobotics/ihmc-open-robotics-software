@@ -200,6 +200,7 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
 
       singleFootstepAffordance.create(baseUI, goal -> {}, Color.YELLOW);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(singleFootstepAffordance::processImGui3DViewInput);
+      baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(singleFootstepAffordance::calculate3DViewPick);
 //      footstepPlanningParametersTuner.create(footstepPlannerParameters,
 //              FootstepPlannerParameterKeys.keys,
 //              this::queueFootstepPlanning);
@@ -286,7 +287,7 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
    {
       FootstepDataMessage stepMessage = messageList.getFootstepDataList().add();
       stepMessage.setRobotSide(step.getFootstepSide() == RobotSide.LEFT ? FootstepDataMessage.ROBOT_SIDE_LEFT : FootstepDataMessage.ROBOT_SIDE_RIGHT);
-      stepMessage.getLocation().set(new Point3D(step.footPose.getPosition()));
+      stepMessage.getLocation().set(new Point3D(step.getSelectablePose3DGizmo().getPoseGizmo().getPose().getPosition()));
       stepMessage.setSwingDuration(1.2);
       stepMessage.setTransferDuration(0.8);
    }
@@ -577,8 +578,8 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       footstepPlanGraphic.update();
       if (useGizmo && !hasGizmo)
       {
-         singleFootstepAffordance.createGizmo(0);
-         hasGizmo = true;
+         //singleFootstepAffordance.createGizmo(0);
+         //hasGizmo = true;
       }
 
    }
