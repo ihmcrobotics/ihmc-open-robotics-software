@@ -53,9 +53,7 @@ public class SingleFootstep
 
       baseUI.getPrimaryScene().addModelInstance(footstepModelInstance, GDXSceneLevel.VIRTUAL);
 
-
       selectablePose3DGizmo = new GDXSelectablePose3DGizmo();
-
       selectablePose3DGizmo.create(baseUI.getPrimary3DPanel().getCamera3D());
 
 
