@@ -1,7 +1,6 @@
 package us.ihmc.gdx.ui.affordances;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.math.Matrix4;
@@ -20,7 +19,6 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -31,15 +29,10 @@ import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.input.editor.GDXUIActionMap;
 import us.ihmc.gdx.input.editor.GDXUITrigger;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
-import us.ihmc.gdx.simulation.environment.GDXModelInstance;
-import us.ihmc.gdx.tools.GDXModelBuilder;
-import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.gdx.ui.gizmo.GDXPathControlRingGizmo;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.gdx.vr.GDXVRManager;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -48,7 +41,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
-public class ImGuiGDXFootstepAffordance implements RenderableProvider
+public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
 {
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private final ImFloat goalZOffset = new ImFloat(0.0f);
@@ -62,7 +55,6 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
    private final Vector3D32 tempRotationVector = new Vector3D32();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private PlanarRegionsList latestRegions;
-   private Consumer<Pose3D> placedPoseConsumer;
 
    ReferenceFrame referenceFrameFootstep;
    FramePose3D footTextPose;
@@ -83,9 +75,8 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
 
    GDXPose3DGizmo gizmo;
 
-   public void create(GDXImGuiBasedUI baseUI, Consumer<Pose3D> placedPoseConsumer, Color color)
+   public void create(GDXImGuiBasedUI baseUI)
    {
-      this.placedPoseConsumer = placedPoseConsumer;
       this.baseUI = baseUI;
 
       placeGoalActionMap = new GDXUIActionMap(startAction ->
@@ -206,7 +197,6 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
          if (triggerClick.bChanged() && !triggerClick.bState())
          {
             placingGoal = false;
-            placedPoseConsumer.accept(goalPoseForReading);
          }
 
          controller.getTransformZUpToWorld(footstepArrayList.get(footstepIndex).getFootstepModelInstance().transform);
@@ -316,7 +306,6 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
    public void setGoalPoseAndPassOn(Pose3DReadOnly pose)
    {
       setGoalPoseNoCallbacks(pose);
-      placedPoseConsumer.accept(goalPoseForReading);
    }
 
    public void setGoalPoseNoCallbacks(Pose3DReadOnly pose)
