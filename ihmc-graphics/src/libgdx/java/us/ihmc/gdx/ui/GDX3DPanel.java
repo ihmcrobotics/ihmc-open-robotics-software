@@ -81,7 +81,7 @@ public class GDX3DPanel
 
          inputMultiplexer.addProcessor(camera3D.setInputForLibGDX());
       }
-      inputCalculator = new ImGui3DViewInput(camera3D, this::getViewportSizeX, this::getViewportSizeY);
+      inputCalculator = new ImGui3DViewInput(this);
       imgui3DViewInputProcessors.add(camera3D::processImGuiInput);
 
       if (addFocusSphere)
@@ -133,7 +133,7 @@ public class GDX3DPanel
             frameBufferBuilder.addColorTextureAttachment(GL41.GL_R32F, GL41.GL_RED, GL41.GL_FLOAT);
             frameBuffer = frameBufferBuilder.build();
 
-            int bytesPerPixel = 4;
+            int bytesPerPixel = Float.BYTES;
             normalizedDeviceCoordinateDepthDirectByteBuffer = ByteBuffer.allocateDirect(newWidth * newHeight * bytesPerPixel);
             normalizedDeviceCoordinateDepthDirectByteBuffer.order(ByteOrder.nativeOrder());
          }
@@ -153,6 +153,7 @@ public class GDX3DPanel
             normalizedDeviceCoordinateDepthDirectByteBuffer.rewind(); // SIGSEV otherwise
             GL41.glReadBuffer(GL41.GL_COLOR_ATTACHMENT1);
             GL41.glPixelStorei(GL41.GL_UNPACK_ALIGNMENT, 4); // to read floats
+            // Note: This line has significant performance impact
             GL41.glReadPixels(0, 0, (int) renderSizeX, (int) renderSizeY, GL41.GL_RED, GL41.GL_FLOAT, normalizedDeviceCoordinateDepthDirectByteBuffer);
             GL41.glPixelStorei(GL41.GL_UNPACK_ALIGNMENT, 1); // undo what we did
 

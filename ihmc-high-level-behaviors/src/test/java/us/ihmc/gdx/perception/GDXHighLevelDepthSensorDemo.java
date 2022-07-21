@@ -4,8 +4,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import imgui.ImGui;
 import org.bytedeco.opencv.global.opencv_core;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.environment.GDXEnvironmentBuilder;
@@ -32,9 +30,9 @@ public class GDXHighLevelDepthSensorDemo
    private ModelInstance mousePickSphere;
    private int mousePosX;
    private int mousePosY;
-   private FramePoint3D pickPoint = new FramePoint3D();
    private GDXFrustumVisualizer frustumVisualizer;
    private GDXCVImagePanel mainViewDepthPanel;
+   private BytedecoImage image;
 
    public GDXHighLevelDepthSensorDemo()
    {
@@ -100,12 +98,13 @@ public class GDXHighLevelDepthSensorDemo
             {
                mousePosX = (int) input.getMousePosX();
                mousePosY = (int) input.getMousePosY();
+
+               GDXTools.toGDX(input.getPickPointInWorld(), mousePickSphere.transform);
             });
 
             baseUI.getImGuiPanelManager().addPanel("Mouse Picking", () ->
             {
                ImGui.text("Mouse x: " + mousePosX + " y: " + mousePosY);
-               ImGui.text("Pick point: " + pickPoint);
             });
 
             GDX3DPanel panel3D = new GDX3DPanel("3D View 2", 2, true);
@@ -115,16 +114,12 @@ public class GDXHighLevelDepthSensorDemo
             baseUI.getPrimaryScene().addRenderableProvider(frustumVisualizer::getRenderables, GDXSceneLevel.VIRTUAL);
          }
 
-         FramePoint3D cameraPose = new FramePoint3D();
-         BytedecoImage image;
 
          @Override
          public void render()
          {
             highLevelDepthSensorSimulator.render(baseUI.getPrimaryScene());
 
-            float viewportWidth = baseUI.getPrimary3DPanel().getCamera3D().viewportWidth;
-            float viewportHeight = baseUI.getPrimary3DPanel().getCamera3D().viewportHeight;
             int aliasedRenderedAreaWidth = (int) baseUI.getPrimary3DPanel().getRenderSizeX();
             int aliasedRenderedAreaHeight = (int) baseUI.getPrimary3DPanel().getRenderSizeY();
 
@@ -148,44 +143,6 @@ public class GDXHighLevelDepthSensorDemo
                image.resize(aliasedRenderedAreaWidth, aliasedRenderedAreaHeight, null, depthBuffer);
                mainViewDepthPanel.resize(aliasedRenderedAreaWidth, aliasedRenderedAreaHeight, null);
                mainViewDepthPanel.drawFloatImage(image.getBytedecoOpenCVMat());
-
-               int aliasedMouseY = mousePosY * baseUI.getPrimary3DPanel().getAntiAliasing();
-               int aliasedMouseX = mousePosX * baseUI.getPrimary3DPanel().getAntiAliasing();
-               int aliasedFlippedMouseY = aliasedRenderedAreaHeight - aliasedMouseY;
-
-               if (aliasedMouseX >= 0.0f && aliasedMouseX < viewportWidth && aliasedMouseY >= 0.0f && aliasedMouseY < viewportHeight)
-               {
-                  float normalizedDeviceCoordinateZ = depthBuffer.getFloat(aliasedFlippedMouseY * (int) baseUI.getPrimary3DPanel().getRenderSizeX() * Float.BYTES + aliasedMouseX * Float.BYTES);
-
-                  if (normalizedDeviceCoordinateZ != 0.0f)
-                  {
-                     float cameraNear = baseUI.getPrimary3DPanel().getCamera3D().near;
-                     float cameraFar = baseUI.getPrimary3DPanel().getCamera3D().far;
-                     float twoXCameraFarNear = 2.0f * cameraNear * cameraFar;
-                     float farPlusNear = cameraFar + cameraNear;
-                     float farMinusNear = cameraFar - cameraNear;
-                     float eyeDepth = (twoXCameraFarNear / (farPlusNear - normalizedDeviceCoordinateZ * farMinusNear));
-
-                     float principalOffsetXPixels = viewportWidth / 2.0f;
-                     float principalOffsetYPixels = viewportHeight / 2.0f;
-                     float fieldOfViewY = baseUI.getPrimary3DPanel().getCamera3D().getVerticalFieldOfView();
-                     float focalLengthPixels = (float) ((viewportHeight / 2.0) / Math.tan(Math.toRadians((fieldOfViewY / 2.0))));
-                     float zUp3DX = eyeDepth;
-                     float zUp3DY = -(aliasedMouseX - principalOffsetXPixels) / focalLengthPixels * eyeDepth;
-                     float zUp3DZ = -(aliasedMouseY - principalOffsetYPixels) / focalLengthPixels * eyeDepth;
-
-                     cameraPose.setToZero(baseUI.getPrimary3DPanel().getCamera3D().getCameraFrame());
-                     cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
-
-                     pickPoint.setIncludingFrame(baseUI.getPrimary3DPanel().getCamera3D().getCameraFrame(), zUp3DX, zUp3DY, zUp3DZ);
-                     pickPoint.changeFrame(ReferenceFrame.getWorldFrame());
-                     GDXTools.toGDX(pickPoint, mousePickSphere.transform);
-                  }
-                  else
-                  {
-                     // TODO: Snap to XY plane.
-                  }
-               }
             }
 
             frustumVisualizer.generateMeshAsync(baseUI.getPrimary3DPanel().getCamera3D().frustum);
