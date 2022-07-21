@@ -347,7 +347,7 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
    }
 
    public void createGizmo(int index)
-   {
+   {    /*
       SingleFootstep step = footstepArrayList.get(index);
       ReferenceFrame referenceFrame = step.getReferenceFrameFootstep();
       RigidBodyTransform transform = referenceFrame.getTransformToParent();
@@ -370,7 +370,7 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(poseGizmo::process3DViewInput);
       baseUI.getPrimaryScene().addRenderableProvider(poseGizmo);
 //      baseUI.getImGuiPanelManager().addPanel(poseGizmo.createTunerPanel(GDXFrameGizmoDemo.class.getSimpleName()));
-      poseGizmo.getTransformToParent().getTranslation().add(1, 1, -2);
+      poseGizmo.getTransformToParent().getTranslation().add(1, 1, -2); */
    }
 
    public void modify(int index)
