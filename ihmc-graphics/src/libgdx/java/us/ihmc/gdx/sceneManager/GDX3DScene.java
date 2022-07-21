@@ -10,12 +10,15 @@ import com.badlogic.gdx.graphics.g3d.attributes.DirectionalLightsAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.PointLightsAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.gdx.lighting.GDXDirectionalLight;
 import us.ihmc.gdx.lighting.GDXPointLight;
 import us.ihmc.gdx.lighting.GDXShadowManager;
+import us.ihmc.gdx.simulation.DepthSensorShaderProvider;
 import us.ihmc.gdx.tools.GDXModelBuilder;
+import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 
 import java.util.*;
@@ -50,7 +53,10 @@ public class GDX3DScene
       renderables.put(GDXSceneLevel.REAL_ENVIRONMENT, new ArrayList<>());
       renderables.put(GDXSceneLevel.VIRTUAL, new ArrayList<>());
 
-      shadowsDisabledModelBatch = new ModelBatch();
+      Pair<String, String> shaderStrings = GDXTools.loadCombinedShader(getClass().getName().replace(".", "/") + ".glsl");
+      String vertexShader = shaderStrings.getLeft();
+      String fragmentShader = shaderStrings.getRight();
+      shadowsDisabledModelBatch = new ModelBatch(null, new DepthSensorShaderProvider(vertexShader, fragmentShader), null);
       shadowsDisabledEnvironment = new Environment();
       shadowsDisabledEnvironment.set(ColorAttribute.createAmbientLight(ambientLight, ambientLight, ambientLight, 1.0f));
       shadowsDisabledEnvironment.set(shadowsDisabledPointLights);
@@ -81,6 +87,11 @@ public class GDX3DScene
       {
          renderInternal(shadowsDisabledModelBatch, sceneLevelsToRender);
       }
+   }
+
+   public void render(GDXSceneLevel exclusiveSceneLevel)
+   {
+      renderInternal(shadowsDisabledModelBatch, renderables.get(exclusiveSceneLevel));
    }
 
    // For testing shadows in particular

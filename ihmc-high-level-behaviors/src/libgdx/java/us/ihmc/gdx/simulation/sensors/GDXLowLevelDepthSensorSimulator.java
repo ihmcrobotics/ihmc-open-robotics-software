@@ -234,6 +234,7 @@ public class GDXLowLevelDepthSensorSimulator
       frameBuffer.end();
 
       // libGDX renders this stuff upside down, so let's flip them right side up.
+      // TODO: Does it really? Sneaking suspicion that it doesn't and we end up flipping things again later on.
       opencv_core.flip(rgba8888ColorImage.getBytedecoOpenCVMat(), rgba8888ColorImage.getBytedecoOpenCVMat(), BytedecoOpenCVTools.FLIP_Y);
       opencv_core.flip(normalizedDeviceCoordinateDepthImage.getBytedecoOpenCVMat(),
                        normalizedDeviceCoordinateDepthImage.getBytedecoOpenCVMat(),

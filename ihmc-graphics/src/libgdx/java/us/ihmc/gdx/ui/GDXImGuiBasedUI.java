@@ -198,7 +198,7 @@ public class GDXImGuiBasedUI
       if (ImGui.beginMenu("Settings"))
       {
          ImGui.pushItemWidth(80.0f);
-         if (ImGui.inputInt(labels.get("Foreground FPS"), foregroundFPS, 1))
+         if (ImGuiTools.volatileInputInt(labels.get("Foreground FPS Limit"), foregroundFPS, 1))
          {
             Gdx.graphics.setForegroundFPS(foregroundFPS.get());
          }
@@ -210,11 +210,11 @@ public class GDXImGuiBasedUI
          {
             primaryScene.setShadowsEnabled(shadows.get());
          }
-         if (ImGui.inputInt(labels.get("libGDX log level"), libGDXLogLevel, 1))
+         if (ImGuiTools.volatileInputInt(labels.get("libGDX log level"), libGDXLogLevel, 1))
          {
             Gdx.app.setLogLevel(libGDXLogLevel.get());
          }
-         if (ImGui.inputFloat(labels.get("Font Size"), imguiFontScale, 0.1f))
+         if (ImGuiTools.volatileInputFloat(labels.get("Font Size"), imguiFontScale, 0.1f))
          {
             ImGui.getIO().setFontGlobalScale(imguiFontScale.get());
          }
