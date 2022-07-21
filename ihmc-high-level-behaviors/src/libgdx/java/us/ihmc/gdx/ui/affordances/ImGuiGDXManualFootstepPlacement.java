@@ -13,14 +13,10 @@ import imgui.type.ImFloat;
 import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
@@ -35,9 +31,6 @@ import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.gdx.vr.GDXVRManager;
-import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionTools;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
@@ -56,7 +49,6 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
    private final Point3D32 tempSpherePosition = new Point3D32();
    private final Vector3D32 tempRotationVector = new Vector3D32();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-   private PlanarRegionsList latestRegions;
 
    ReferenceFrame referenceFrameFootstep;
    FramePose3D footTextPose;
@@ -113,42 +105,6 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
 
       if (placingGoal && input.isWindowHovered())
       {
-         Line3DReadOnly pickRayInWorld = input.getPickRayInWorld();
-         PlanarRegionsList latestRegions = this.latestRegions;
-         Point3D pickPoint = null;
-         if (latestRegions != null)
-         {
-            for (PlanarRegion planarRegion : latestRegions.getPlanarRegionsAsList())
-            {
-               Point3D intersection = PlanarRegionTools.intersectRegionWithRay(planarRegion, pickRayInWorld.getPoint(), pickRayInWorld.getDirection());
-               if (intersection != null)
-               {
-                  if (pickPoint == null)
-                  {
-                     pickPoint = intersection;
-                     System.out.println("pickPoint " + pickPoint);
-                  }
-                  else
-                  {
-                     if (intersection.distance(pickRayInWorld.getPoint()) < pickPoint.distance(pickRayInWorld.getPoint()))
-                     {
-                        pickPoint = intersection;
-                        System.out.println("pickPoint " + pickPoint);
-                     }
-                  }
-                  lastObjectIntersection = pickPoint;
-               }
-            }
-         }
-
-         if (pickPoint == null)
-         {
-            pickPoint = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(lastObjectIntersection != null ? lastObjectIntersection : EuclidCoreTools.origin3D,
-                                                                                Axis3D.Z,
-                                                                                pickRayInWorld.getPoint(),
-                                                                                pickRayInWorld.getDirection());
-         }
-
          Point3DReadOnly pickPointInWorld = input.getPickPointInWorld();
 
          double z = (lastObjectIntersection != null ? lastObjectIntersection.getZ() : 0.0) + goalZOffset.get();
@@ -293,11 +249,6 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       stepMessage.getLocation().set(new Point3D(step.getSelectablePose3DGizmo().getPoseGizmo().getPose().getPosition()));
       stepMessage.setSwingDuration(1.2);
       stepMessage.setTransferDuration(0.8);
-   }
-
-   public void setLatestRegions(PlanarRegionsList latestRegions)
-   {
-      this.latestRegions = latestRegions;
    }
 
    public Pose3DReadOnly getGoalPose()
