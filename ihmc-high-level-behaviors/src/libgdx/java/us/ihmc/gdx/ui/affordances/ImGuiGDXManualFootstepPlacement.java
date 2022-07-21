@@ -1,17 +1,18 @@
 package us.ihmc.gdx.ui.affordances;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import imgui.flag.ImGuiMouseButton;
-import imgui.flag.ImGuiStyleVar;
 import imgui.internal.ImGui;
-import imgui.internal.flag.ImGuiItemFlags;
 import imgui.type.ImFloat;
 import org.lwjgl.openvr.InputDigitalActionData;
+import us.ihmc.behaviors.tools.CommunicationHelper;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
@@ -24,8 +25,9 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
-import us.ihmc.gdx.input.ImGui3DViewInput;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
+import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.input.editor.GDXUIActionMap;
 import us.ihmc.gdx.input.editor.GDXUITrigger;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
@@ -39,7 +41,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
-import java.util.function.Consumer;
+import java.util.UUID;
 
 public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
 {
@@ -60,24 +62,20 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
    FramePose3D footTextPose;
    boolean footstepCreated = false;
 
-   public void setFootstepIndex(int footstepIndex)
-   {
-      this.footstepIndex = footstepIndex;
-   }
-
    private float textheight = 12;
 
    ArrayList<SingleFootstep> footstepArrayList = new ArrayList<SingleFootstep>();
    int footstepIndex = -1;
    GDXImGuiBasedUI baseUI;
+   private CommunicationHelper communicationHelper;
    RobotSide currentFootStepSide;
-
 
    GDXPose3DGizmo gizmo;
 
-   public void create(GDXImGuiBasedUI baseUI)
+   public void create(GDXImGuiBasedUI baseUI, CommunicationHelper communicationHelper)
    {
       this.baseUI = baseUI;
+      this.communicationHelper = communicationHelper;
 
       placeGoalActionMap = new GDXUIActionMap(startAction ->
                                               {
@@ -128,14 +126,14 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
                   if (pickPoint == null)
                   {
                      pickPoint = intersection;
-                     System.out.println("pickPoint " + pickPoint.toString());
+                     System.out.println("pickPoint " + pickPoint);
                   }
                   else
                   {
                      if (intersection.distance(pickRayInWorld.getPoint()) < pickPoint.distance(pickRayInWorld.getPoint()))
                      {
                         pickPoint = intersection;
-                        System.out.println("pickPoint " + pickPoint.toString());
+                        System.out.println("pickPoint " + pickPoint);
                      }
                   }
                   lastObjectIntersection = pickPoint;
@@ -151,6 +149,8 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
                                                                                 pickRayInWorld.getDirection());
          }
 
+         Point3DReadOnly pickPointInWorld = input.getPickPointInWorld();
+
          double z = (lastObjectIntersection != null ? lastObjectIntersection.getZ() : 0.0) + goalZOffset.get();
          if (placingPosition && footstepArrayList.size() > 0)
          {
@@ -159,8 +159,10 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
                goalZOffset.set(goalZOffset.get() - (input.getMouseWheelDelta() / 30.0f));
             }
 
-            footstepArrayList.get(footstepIndex).getFootstepModelInstance().transform.setTranslation(pickPoint.getX32(), pickPoint.getY32(), (float) z);
-            footstepArrayList.get(footstepIndex).setFootPose(pickPoint.getX(), pickPoint.getY(), z);
+            footstepArrayList.get(footstepIndex).getFootstepModelInstance().transform.setTranslation(pickPointInWorld.getX32(),
+                                                                                                     pickPointInWorld.getY32(),
+                                                                                                     pickPointInWorld.getZ32());
+            footstepArrayList.get(footstepIndex).setFootPose(pickPointInWorld.getX(), pickPointInWorld.getY(), pickPointInWorld.getZ());
 
             // when left button clicked and released.
             if (input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
@@ -185,6 +187,30 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       }
    }
 
+   public void renderImGuiWidgets()
+   {
+      ImGui.text("Place footstep:");
+      ImGui.sameLine();
+      if(ImGui.button(labels.get("Left")))
+      {
+         createNewFootStep(RobotSide.LEFT);
+      }
+      ImGui.sameLine();
+      if(ImGui.button(labels.get("Right")))
+      {
+         createNewFootStep(RobotSide.RIGHT);
+      }
+
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Walk")))
+      {
+         if(getFootstepArrayList().size() > 0)
+         {
+            walkFromSteps();
+         }
+      }
+   }
+
    public void handleVREvents(GDXVRManager vrManager)
    {
       vrManager.getContext().getController(RobotSide.LEFT).runIfConnected(controller ->
@@ -202,46 +228,6 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
          controller.getTransformZUpToWorld(footstepArrayList.get(footstepIndex).getFootstepModelInstance().transform);
 
       });
-   }
-
-   public void renderFootStepModeButton()
-   {
-      boolean pushedFlags = false;
-      if (placingGoal)
-      {
-         ImGui.pushItemFlag(ImGuiItemFlags.Disabled, true);
-         ImGui.pushStyleVar(ImGuiStyleVar.Alpha, 0.6f);
-         pushedFlags = true;
-      }
-      if (ImGui.button(labels.get(pushedFlags ? "Placing" : "Place goal")))
-      {
-         placeGoalActionMap.start();
-      }
-      if (pushedFlags)
-      {
-         ImGui.popItemFlag();
-         ImGui.popStyleVar();
-      }
-      if (ImGui.isItemHovered())
-      {
-         ImGui.setTooltip("Hold Ctrl and scroll the mouse wheel while placing to adjust Z.");
-      }
-      ImGui.sameLine();
-      if (!isPlaced())
-      {
-         ImGui.text("Not placed.");
-      }
-      else
-      {
-         if (ImGui.button(labels.get("Clear")))
-         {
-            clear();
-         }
-         ImGui.sameLine();
-         ImGui.pushItemWidth(50.0f);
-         ImGui.dragFloat("Goal Z Offset", goalZOffset.getData(), 0.01f);
-         ImGui.popItemWidth();
-      }
    }
 
    @Override
@@ -266,16 +252,6 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       }
    }
 
-   public boolean getPlacingGoal()
-   {
-      return placingGoal;
-   }
-
-   public void setPlacingGoal(boolean placingGoal)
-   {
-      this.placingGoal = placingGoal;
-   }
-
    public void clear()
    {
       placingGoal = false;
@@ -291,6 +267,32 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
 
       footstepArrayList.clear();
       footstepIndex = -1;
+   }
+
+   private void walkFromSteps()
+   {
+      ArrayList<SingleFootstep> steps = footstepArrayList;
+
+      FootstepDataListMessage messageList = new FootstepDataListMessage();
+      for (SingleFootstep step : steps)
+      {
+         generateFootStepDataMessage(messageList, step);
+         messageList.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
+         messageList.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
+      }
+      communicationHelper.publishToController(messageList);
+
+      // done walking >> delete steps in singleFootStepAffordance.
+      clear();
+   }
+
+   private void generateFootStepDataMessage(FootstepDataListMessage messageList, SingleFootstep step)
+   {
+      FootstepDataMessage stepMessage = messageList.getFootstepDataList().add();
+      stepMessage.setRobotSide(step.getFootstepSide().toByte());
+      stepMessage.getLocation().set(new Point3D(step.getSelectablePose3DGizmo().getPoseGizmo().getPose().getPosition()));
+      stepMessage.setSwingDuration(1.2);
+      stepMessage.setTransferDuration(0.8);
    }
 
    public void setLatestRegions(PlanarRegionsList latestRegions)
@@ -329,6 +331,7 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
 
    public void createNewFootStep(RobotSide footstepSide)
    {
+      placingGoal = true;
       footstepArrayList.add(new SingleFootstep(baseUI, footstepSide));
       footstepIndex++;
       footstepCreated = true;
@@ -362,8 +365,13 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       poseGizmo.getTransformToParent().getTranslation().add(1, 1, -2); */
    }
 
-   public void modify(int index)
+   public void setPlacingGoal(boolean placingGoal)
    {
+      this.placingGoal = placingGoal;
+   }
 
+   public void setFootstepIndex(int footstepIndex)
+   {
+      this.footstepIndex = footstepIndex;
    }
 }

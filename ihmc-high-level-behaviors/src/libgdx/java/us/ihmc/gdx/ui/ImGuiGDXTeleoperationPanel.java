@@ -190,7 +190,7 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
                                              FootstepPlannerParameterKeys.keys,
                                              this::queueFootstepPlanning);
 
-      manualFootstepPlacement.create(baseUI);
+      manualFootstepPlacement.create(baseUI, communicationHelper);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(manualFootstepPlacement::processImGui3DViewInput);
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(manualFootstepPlacement::calculate3DViewPick);
 //      footstepPlanningParametersTuner.create(footstepPlannerParameters,
@@ -273,32 +273,6 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
       communicationHelper.publishToController(footstepDataListMessage);
       footstepPlannerOutput = null;
-   }
-
-   private void walkFromSteps()
-   {
-      ArrayList<SingleFootstep> steps = manualFootstepPlacement.getFootstepArrayList();
-
-      FootstepDataListMessage messageList = new FootstepDataListMessage();
-      for (SingleFootstep step : steps)
-      {
-         generateFootStepDataMessage(messageList, step);
-         messageList.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
-         messageList.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
-      }
-      communicationHelper.publishToController(messageList);
-
-      // done walking >> delete steps in singleFootStepAffordance.
-      manualFootstepPlacement.clear();
-   }
-
-   private void generateFootStepDataMessage(FootstepDataListMessage messageList, SingleFootstep step)
-   {
-      FootstepDataMessage stepMessage = messageList.getFootstepDataList().add();
-      stepMessage.setRobotSide(step.getFootstepSide().toByte());
-      stepMessage.getLocation().set(new Point3D(step.getSelectablePose3DGizmo().getPoseGizmo().getPose().getPosition()));
-      stepMessage.setSwingDuration(1.2);
-      stepMessage.setTransferDuration(0.8);
    }
 
    public void renderImGuiWidgets()
@@ -471,29 +445,7 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       ImGui.sameLine();
       footstepGoal.renderPlaceGoalButton();
 
-
-      ImGui.text("Place footstep:");
-      ImGui.sameLine();
-      if(ImGui.button("Left"))
-      {
-         manualFootstepPlacement.setPlacingGoal(true);
-         manualFootstepPlacement.createNewFootStep(RobotSide.LEFT);
-      }
-      ImGui.sameLine();
-      if(ImGui.button("Right"))
-      {
-         manualFootstepPlacement.setPlacingGoal(true);
-         manualFootstepPlacement.createNewFootStep(RobotSide.RIGHT);
-      }
-
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Walk")))
-      {
-         if(manualFootstepPlacement.getFootstepArrayList().size() > 0)
-         {
-            walkFromSteps();
-         }
-      }
+      manualFootstepPlacement.renderImGuiWidgets();
 
       ImGui.sameLine();
       if (ImGui.button(labels.get("Clear")))
