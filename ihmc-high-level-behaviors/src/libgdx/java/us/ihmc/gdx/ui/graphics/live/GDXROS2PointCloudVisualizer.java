@@ -26,6 +26,7 @@ import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -142,10 +143,10 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
                   float y = decompressionOutputDirectBuffer.getInt() * 0.003f;
                   float z = decompressionOutputDirectBuffer.getInt() * 0.003f;
                   color.set(decompressionOutputDirectBuffer.getInt());
-//                  float r = 1.0f;
-//                  float g = 1.0f;
-//                  float b = 1.0f;
-//                  float a = 1.0f;
+                  // float r = 1.0f;
+                  // float g = 1.0f;
+                  // float b = 1.0f;
+                  // float a = 1.0f;
                   xyzRGBASizeFloatBuffer.put(x);
                   xyzRGBASizeFloatBuffer.put(y);
                   xyzRGBASizeFloatBuffer.put(z);
@@ -190,14 +191,21 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
             {
                StereoPointCloudCompression.decompressPointCloud(latestStereoVisionMessage, (x, y, z) ->
                {
-                  xyzRGBASizeFloatBuffer.put((float) x);
-                  xyzRGBASizeFloatBuffer.put((float) y);
-                  xyzRGBASizeFloatBuffer.put((float) z);
-                  xyzRGBASizeFloatBuffer.put(color.r);
-                  xyzRGBASizeFloatBuffer.put(color.g);
-                  xyzRGBASizeFloatBuffer.put(color.b);
-                  xyzRGBASizeFloatBuffer.put(color.a);
-                  xyzRGBASizeFloatBuffer.put(size);
+                  try
+                  {
+                     xyzRGBASizeFloatBuffer.put((float) x);
+                     xyzRGBASizeFloatBuffer.put((float) y);
+                     xyzRGBASizeFloatBuffer.put((float) z);
+                     xyzRGBASizeFloatBuffer.put(color.r);
+                     xyzRGBASizeFloatBuffer.put(color.g);
+                     xyzRGBASizeFloatBuffer.put(color.b);
+                     xyzRGBASizeFloatBuffer.put(color.a);
+                     xyzRGBASizeFloatBuffer.put(size);
+                  }
+                  catch (BufferOverflowException e)
+                  {
+                     e.printStackTrace();
+                  }
                });
 
                return latestStereoVisionMessage.getNumberOfPoints();
