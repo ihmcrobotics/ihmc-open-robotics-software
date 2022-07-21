@@ -42,7 +42,8 @@ import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.gdx.imgui.ImGuiMovingPlot;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.gdx.ui.affordances.ImGuiGDXManualFootstepPlacement;
+import us.ihmc.gdx.sceneManager.GDXSceneLevel;
+import us.ihmc.gdx.ui.affordances.ImGuiGDXFootstepAffordance;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
 import us.ihmc.gdx.ui.affordances.SingleFootstep;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
@@ -273,6 +274,32 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
       communicationHelper.publishToController(footstepDataListMessage);
       footstepPlannerOutput = null;
+   }
+
+   private void generateFootStepDataMessage(SingleFootstep step)
+   {
+      FootstepDataMessage stepMessage = messageList.getFootstepDataList().add();
+      stepMessage.setRobotSide(step.getFootstepSide() == RobotSide.LEFT ? FootstepDataMessage.ROBOT_SIDE_LEFT : FootstepDataMessage.ROBOT_SIDE_RIGHT);
+      stepMessage.getLocation().set(new Point3D(step.getPointInWorld()));
+      stepMessage.setSwingDuration(1.2);
+      stepMessage.setTransferDuration(0.8);
+   }
+
+   private void walkFromSteps()
+   {
+      ArrayList<SingleFootstep> steps = singleFootstepAffordance.getFootstepArrayList();
+
+      messageList = new FootstepDataListMessage();
+      for (SingleFootstep step : steps)
+      {
+         generateFootStepDataMessage(step);
+         messageList.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
+         messageList.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
+      }
+      communicationHelper.publishToController(messageList);
+
+      // done walking >> delete steps in singleFootStepAffordance.
+      singleFootstepAffordance.clear();
    }
 
    public void renderImGuiWidgets()
