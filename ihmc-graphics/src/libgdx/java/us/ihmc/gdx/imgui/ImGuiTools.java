@@ -79,6 +79,13 @@ public class ImGuiTools
       return ImGui.inputFloat(label, imFloat, 0, 0, "%.3f", inputTextFlags);
    }
 
+   public static boolean volatileInputFloat(String label, ImFloat imFloat, float step)
+   {
+      int inputTextFlags = ImGuiInputTextFlags.None;
+      inputTextFlags += ImGuiInputTextFlags.EnterReturnsTrue;
+      return ImGui.inputFloat(label, imFloat, step, 0, "%.3f", inputTextFlags);
+   }
+
    public static boolean volatileInputDouble(String label, ImDouble imDouble)
    {
       return volatileInputDouble(label, imDouble, 0, 0);

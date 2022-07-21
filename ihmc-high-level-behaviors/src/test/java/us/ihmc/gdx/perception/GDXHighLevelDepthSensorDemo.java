@@ -1,11 +1,22 @@
 package us.ihmc.gdx.perception;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import imgui.ImGui;
+import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.environment.GDXEnvironmentBuilder;
 import us.ihmc.gdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
+import us.ihmc.gdx.tools.GDXModelBuilder;
+import us.ihmc.gdx.tools.GDXTools;
+import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
+import us.ihmc.gdx.visualizers.GDXFrustumVisualizer;
+import us.ihmc.perception.BytedecoImage;
+
+import java.nio.ByteBuffer;
 
 public class GDXHighLevelDepthSensorDemo
 {
@@ -16,6 +27,12 @@ public class GDXHighLevelDepthSensorDemo
    private GDXHighLevelDepthSensorSimulator highLevelDepthSensorSimulator;
    private final GDXPose3DGizmo sensorPoseGizmo = new GDXPose3DGizmo();
    private GDXEnvironmentBuilder environmentBuilder;
+   private ModelInstance mousePickSphere;
+   private int mousePosX;
+   private int mousePosY;
+   private GDXFrustumVisualizer frustumVisualizer;
+   private GDXCVImagePanel mainViewDepthPanel;
+   private BytedecoImage image;
 
    public GDXHighLevelDepthSensorDemo()
    {
@@ -73,12 +90,63 @@ public class GDXHighLevelDepthSensorDemo
             highLevelDepthSensorSimulator.setPublishColorImageROS1(false);
             highLevelDepthSensorSimulator.setPublishColorImageROS2(false);
             baseUI.getPrimaryScene().addRenderableProvider(highLevelDepthSensorSimulator, GDXSceneLevel.VIRTUAL);
+
+            mousePickSphere = GDXModelBuilder.createSphere(0.03f, Color.RED);
+            baseUI.getPrimaryScene().addRenderableProvider(mousePickSphere, GDXSceneLevel.VIRTUAL);
+
+            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(input ->
+            {
+               mousePosX = (int) input.getMousePosX();
+               mousePosY = (int) input.getMousePosY();
+
+               GDXTools.toGDX(input.getPickPointInWorld(), mousePickSphere.transform);
+            });
+
+            baseUI.getImGuiPanelManager().addPanel("Mouse Picking", () ->
+            {
+               ImGui.text("Mouse x: " + mousePosX + " y: " + mousePosY);
+            });
+
+            GDX3DPanel panel3D = new GDX3DPanel("3D View 2", 2, true);
+            baseUI.add3DPanel(panel3D);
+
+            frustumVisualizer = new GDXFrustumVisualizer();
+            baseUI.getPrimaryScene().addRenderableProvider(frustumVisualizer::getRenderables, GDXSceneLevel.VIRTUAL);
          }
+
 
          @Override
          public void render()
          {
             highLevelDepthSensorSimulator.render(baseUI.getPrimaryScene());
+
+            int aliasedRenderedAreaWidth = (int) baseUI.getPrimary3DPanel().getRenderSizeX();
+            int aliasedRenderedAreaHeight = (int) baseUI.getPrimary3DPanel().getRenderSizeY();
+
+            ByteBuffer depthBuffer = baseUI.getPrimary3DPanel().getNormalizedDeviceCoordinateDepthDirectByteBuffer();
+            if (depthBuffer != null)
+            {
+               if (image == null)
+               {
+                  image = new BytedecoImage((int) baseUI.getPrimary3DPanel().getRenderSizeX(),
+                                            (int) baseUI.getPrimary3DPanel().getRenderSizeY(),
+                                            opencv_core.CV_32FC1,
+                                            depthBuffer);
+                  mainViewDepthPanel = new GDXCVImagePanel("Main view depth", (int) baseUI.getPrimary3DPanel().getRenderSizeX(),
+                                                                              (int) baseUI.getPrimary3DPanel().getRenderSizeY(),
+                                                           true);
+                  baseUI.getImGuiPanelManager().addPanel(mainViewDepthPanel.getVideoPanel());
+
+                  baseUI.getPerspectiveManager().reloadPerspective();
+               }
+
+               image.resize(aliasedRenderedAreaWidth, aliasedRenderedAreaHeight, null, depthBuffer);
+               mainViewDepthPanel.resize(aliasedRenderedAreaWidth, aliasedRenderedAreaHeight, null);
+               mainViewDepthPanel.drawFloatImage(image.getBytedecoOpenCVMat());
+            }
+
+            frustumVisualizer.generateMeshAsync(baseUI.getPrimary3DPanel().getCamera3D().frustum);
+            frustumVisualizer.update();
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();

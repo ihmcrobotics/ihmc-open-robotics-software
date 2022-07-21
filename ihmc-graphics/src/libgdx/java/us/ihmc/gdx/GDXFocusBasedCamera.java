@@ -359,4 +359,9 @@ public class GDXFocusBasedCamera extends Camera
    {
       this.verticalFieldOfView = (float) verticalFieldOfView;
    }
+
+   public float getVerticalFieldOfView()
+   {
+      return verticalFieldOfView;
+   }
 }
