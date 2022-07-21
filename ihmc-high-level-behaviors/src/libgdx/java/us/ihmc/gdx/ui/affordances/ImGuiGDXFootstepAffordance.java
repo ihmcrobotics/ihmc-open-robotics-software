@@ -53,7 +53,6 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private final ImFloat goalZOffset = new ImFloat(0.0f);
 
-
    private GDXUIActionMap placeGoalActionMap;
    private boolean placingGoal = false;
    private boolean placingPosition = true;
@@ -81,8 +80,8 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
    GDXImGuiBasedUI baseUI;
    RobotSide currentFootStepSide;
 
-   GDXPose3DGizmo gizmo;
 
+   GDXPose3DGizmo gizmo;
 
    public void create(GDXImGuiBasedUI baseUI, Consumer<Pose3D> placedPoseConsumer, Color color)
    {
@@ -107,8 +106,22 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
       clear();
    }
 
+   public void calculate3DViewPick(ImGui3DViewInput input)
+   {
+      for(int i = 0; i < footstepArrayList.size(); i++)
+      {
+         footstepArrayList.get(i).calculate3DViewPick(input);
+      }
+
+   }
+
    public void processImGui3DViewInput(ImGui3DViewInput input)
    {
+      for(int i = 0; i < footstepArrayList.size(); i++)
+      {
+         footstepArrayList.get(i).process3DViewInput(input);
+      }
+
       if (placingGoal && input.isWindowHovered())
       {
          Line3DReadOnly pickRayInWorld = input.getPickRayInWorld();
@@ -141,8 +154,7 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
 
          if (pickPoint == null)
          {
-            pickPoint = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(lastObjectIntersection != null
-                                                                                      ? lastObjectIntersection : EuclidCoreTools.origin3D,
+            pickPoint = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(lastObjectIntersection != null ? lastObjectIntersection : EuclidCoreTools.origin3D,
                                                                                 Axis3D.Z,
                                                                                 pickRayInWorld.getPoint(),
                                                                                 pickRayInWorld.getDirection());
@@ -240,8 +252,6 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
          ImGui.dragFloat("Goal Z Offset", goalZOffset.getData(), 0.01f);
          ImGui.popItemWidth();
       }
-
-
    }
 
    @Override
@@ -250,13 +260,13 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
       if (isPlaced())
       {
          footstepArrayList.get(footstepIndex).getFootstepModelInstance().getRenderables(renderables, pool);
-
+         footstepArrayList.get(footstepIndex).getVirtualRenderables(renderables, pool);
       }
    }
 
    public boolean isPlaced()
    {
-      if(footstepArrayList.size() <= 0)
+      if (footstepArrayList.size() <= 0)
       {
          return false;
       }
@@ -284,13 +294,13 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
          footstepArrayList.get(footstepIndex).getFootstepModelInstance().transform.val[Matrix4.M03] = Float.NaN;
       goalZOffset.set(0.0f);
 
-      for(int i =0; i<= footstepIndex; i++)
+      for (int i = 0; i <= footstepIndex; i++)
       {
          baseUI.getPrimaryScene().removeRenderableProvider((footstepArrayList.remove(0).getFootstepModelInstance()), GDXSceneLevel.VIRTUAL);
       }
 
       footstepArrayList.clear();
-      footstepIndex=-1;
+      footstepIndex = -1;
    }
 
    public void setLatestRegions(PlanarRegionsList latestRegions)
@@ -334,7 +344,6 @@ public class ImGuiGDXFootstepAffordance implements RenderableProvider
       footstepIndex++;
       footstepCreated = true;
       currentFootStepSide = footstepSide;
-
    }
 
    public void createGizmo(int index)
