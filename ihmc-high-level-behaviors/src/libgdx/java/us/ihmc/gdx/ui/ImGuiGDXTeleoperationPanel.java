@@ -190,7 +190,7 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
                                              FootstepPlannerParameterKeys.keys,
                                              this::queueFootstepPlanning);
 
-      manualFootstepPlacement.create(baseUI, communicationHelper);
+      manualFootstepPlacement.create(baseUI, communicationHelper, syncedRobot);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(manualFootstepPlacement::processImGui3DViewInput);
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(manualFootstepPlacement::calculate3DViewPick);
 //      footstepPlanningParametersTuner.create(footstepPlannerParameters,
