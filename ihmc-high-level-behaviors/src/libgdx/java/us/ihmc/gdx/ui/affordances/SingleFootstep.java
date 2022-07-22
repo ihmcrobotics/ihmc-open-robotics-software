@@ -17,37 +17,48 @@ import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.shape.primitives.interfaces.Shape3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.gdx.GDX3DSituatedText;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.environment.GDXModelInstance;
 import us.ihmc.gdx.tools.GDXModelLoader;
+import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.StepCheckIsPointInsideAlgorithm;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
+import java.util.ArrayList;
 import java.util.function.Function;
 
 public class SingleFootstep
 {
+   private final GDX3DSituatedText footstepIndexText;
    private GDXModelInstance footstepModelInstance;
    private RobotSide footstepSide;
 
    private GDXSelectablePose3DGizmo selectablePose3DGizmo;
    private FramePose3D tempFramePose = new FramePose3D();
+   private RigidBodyTransform tempTransform = new RigidBodyTransform();
    public boolean pickSelected;
    GDXImGuiBasedUI baseUI;
 
    public Sphere3D boundingSphere = new Sphere3D(0.1);
    private boolean isClickedOn;
+   private int index;
+   private final FramePose3D textFramePose = new FramePose3D();
+   private final ArrayList<GDX3DSituatedText> textRenderables = new ArrayList<>();
 
+   private volatile Runnable buildMeshAndCreateModelInstance = null;
    //public GDXSelectablePose3DGizmo gizmo = new GDXSelectablePose3DGizmo();
 
-   public SingleFootstep(GDXImGuiBasedUI baseUI, RobotSide footstepSide)
+   public SingleFootstep(GDXImGuiBasedUI baseUI, RobotSide footstepSide, int index)
    {
       this.footstepSide = footstepSide;
       this.baseUI = baseUI;
+      this.index = index;
+
       if (footstepSide.equals(RobotSide.LEFT))
       {
          footstepModelInstance = new GDXModelInstance(GDXModelLoader.load("models/footsteps/footstep_left.g3dj"));
@@ -59,14 +70,11 @@ public class SingleFootstep
 
       baseUI.getPrimaryScene().addModelInstance(footstepModelInstance, GDXSceneLevel.VIRTUAL);
 
-
       selectablePose3DGizmo = new GDXSelectablePose3DGizmo();
 
       selectablePose3DGizmo.create(baseUI.getPrimary3DPanel().getCamera3D());
 
-
-
-
+      footstepIndexText = new GDX3DSituatedText("" + index);
    }
 
    public void setFootPose(double x, double y, double z)
@@ -117,7 +125,7 @@ public class SingleFootstep
       pickSelected = !Double.isNaN(stepCheckIsPointInsideAlgorithm.intersect(input.getPickRayInWorld(), 100, isPointInside));
       isClickedOn = pickSelected && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
       boolean executeMotionKeyPressed = ImGui.isKeyReleased(ImGuiTools.getSpaceKey());
-      LogTools.info(footstepSide.getSideNameFirstLetter()+ " "+ pickSelected);
+
 
       if(pickSelected)
       {
@@ -135,11 +143,7 @@ public class SingleFootstep
       }
 
       selectablePose3DGizmo.process3DViewInput(input, pickSelected);
-      LogTools.info(selectablePose3DGizmo.getPoseGizmo().getPose().getOrientation().toString());
-      //  tempFramePose.getReferenceFrame().getTransformToWorldFrame().setToZero();
-      //tempFramePose.set(ReferenceFrame.getWorldFrame(),  selectablePose3DGizmo.getPoseGizmo().getPose());
-      //setFootPose(selectablePose3DGizmo.getPoseGizmo().getPose().getPosition().getX(), selectablePose3DGizmo.getPoseGizmo().getPose().getPosition().getY(), selectablePose3DGizmo.getPoseGizmo().getPose().getPosition().getZ());
-      LogTools.info(tempFramePose.getPosition());
+
       footstepModelInstance.transform.setToRotationRad(selectablePose3DGizmo.getPoseGizmo().getPose().getOrientation().getX32(),
                                                        selectablePose3DGizmo.getPoseGizmo().getPose().getOrientation().getY32(),
                                                        selectablePose3DGizmo.getPoseGizmo().getPose().getOrientation().getZ32(),
@@ -151,7 +155,7 @@ public class SingleFootstep
                                        selectablePose3DGizmo.getPoseGizmo().getPose().getPosition().getY32(),
                                        selectablePose3DGizmo.getPoseGizmo().getPose().getPosition().getZ32());
 
-      LogTools.info(footstepSide.getSideNameFirstLetter()+ " Selected?  "+ selectablePose3DGizmo.isSelected());
+
       /*
       if (unmodifiedButHovered)
       {
@@ -218,7 +222,39 @@ public class SingleFootstep
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       selectablePose3DGizmo.getVirtualRenderables(renderables, pool);
+
+      for (GDX3DSituatedText textRenderable : textRenderables)
+      {
+         textRenderable.getRenderables(renderables, pool);
+      }
    }
+
+   public void update()
+   {
+      /*if (buildMeshAndCreateModelInstance != null)
+      {
+         LogTools.info("Not null");
+         buildMeshAndCreateModelInstance.run();
+         buildMeshAndCreateModelInstance = null;
+      }*/
+
+
+      selectablePose3DGizmo.getPoseGizmo().getPose().get(tempTransform);
+      double textHeight = 0.08;
+      selectablePose3DGizmo.getPoseGizmo().getPose().getReferenceFrame().update();
+      textFramePose.setToZero(selectablePose3DGizmo.getPoseGizmo().getPose().getReferenceFrame());
+      textFramePose.set(selectablePose3DGizmo.getPoseGizmo().getPose());
+      textFramePose.getOrientation().prependYawRotation(-Math.PI / 2.0);
+      textFramePose.getPosition().addZ(0.03);
+      textFramePose.getPosition().addY(textHeight / 4.0);
+      textFramePose.getPosition().addX(-textHeight / 2.0);
+      textFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+      GDXTools.toGDX(textFramePose, tempTransform, footstepIndexText.getModelInstance().transform);
+      footstepIndexText.scale((float) textHeight);
+      textRenderables.add(footstepIndexText);
+      LogTools.info(textFramePose.getPosition());
+   }
+
 
    public Pose3DReadOnly getPose()
    {
@@ -229,4 +265,5 @@ public class SingleFootstep
    {
       return isClickedOn;
    }
+
 }

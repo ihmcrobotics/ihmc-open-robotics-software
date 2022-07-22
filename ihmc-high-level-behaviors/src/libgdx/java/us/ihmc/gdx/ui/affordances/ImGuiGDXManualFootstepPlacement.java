@@ -263,6 +263,14 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       }
    }
 
+   public void update()
+   {
+      for (int i =0; i<footstepArrayList.size(); i++)
+      {
+         footstepArrayList.get(i).update();
+      }
+   }
+
    public void clear()
    {
       placingGoal = false;
@@ -337,8 +345,8 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
    public void createNewFootStep(RobotSide footstepSide)
    {
       placingGoal = true;
-      footstepArrayList.add(new SingleFootstep(baseUI, footstepSide));
       footstepIndex++;
+      footstepArrayList.add(new SingleFootstep(baseUI, footstepSide, footstepIndex));
       footstepCreated = true;
       currentFootStepSide = footstepSide;
    }

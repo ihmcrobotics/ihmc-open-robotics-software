@@ -508,6 +508,7 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
    public void update()
    {
       footstepPlanGraphic.update();
+      manualFootstepPlacement.update();
    }
 
    private boolean imGuiSlider(String label, float[] value)
