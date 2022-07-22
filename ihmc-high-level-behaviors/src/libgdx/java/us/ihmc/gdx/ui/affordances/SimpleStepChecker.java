@@ -90,7 +90,7 @@ public class SimpleStepChecker
         if (placingGoal && this.latestInput!=null && renderTooltip && text!=null)
         {
             float offsetX = 10.0f;
-            float offsetY = 10.0f;
+            float offsetY = 31.0f;
             float mousePosX = latestInput.getMousePosX();
             float mousePosY = latestInput.getMousePosY();
             float drawStartX = primary3DPanel.getWindowDrawMinX() + mousePosX + offsetX;
