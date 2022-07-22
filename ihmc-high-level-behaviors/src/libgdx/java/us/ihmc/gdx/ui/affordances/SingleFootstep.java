@@ -1,6 +1,8 @@
 package us.ihmc.gdx.ui.affordances;
 
+import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
@@ -9,7 +11,9 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.shape.primitives.Box3D;
+import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.shape.primitives.interfaces.Shape3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -20,6 +24,7 @@ import us.ihmc.gdx.simulation.environment.GDXModelInstance;
 import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.StepCheckIsPointInsideAlgorithm;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.function.Function;
@@ -31,12 +36,13 @@ public class SingleFootstep
 
    private GDXSelectablePose3DGizmo selectablePose3DGizmo;
    private FramePose3D tempFramePose = new FramePose3D();
-   private boolean pickSelected;
+   public boolean pickSelected;
    GDXImGuiBasedUI baseUI;
 
+   public Sphere3D boundingSphere = new Sphere3D(0.1);
+   private boolean isClickedOn;
 
-
-   public GDXSelectablePose3DGizmo gizmo = new GDXSelectablePose3DGizmo();
+   //public GDXSelectablePose3DGizmo gizmo = new GDXSelectablePose3DGizmo();
 
    public SingleFootstep(GDXImGuiBasedUI baseUI, RobotSide footstepSide)
    {
@@ -70,6 +76,14 @@ public class SingleFootstep
       tempFramePose.get(selectablePose3DGizmo.getPoseGizmo().getTransformToParent());
    }
 
+   public void setFootPose(FramePose3DReadOnly pose)
+   {
+      tempFramePose.setToZero(ReferenceFrame.getWorldFrame());
+      tempFramePose.set(pose);
+      tempFramePose.get(selectablePose3DGizmo.getPoseGizmo().getTransformToParent());
+   }
+
+
    public void setFootstepModelInstance(GDXModelInstance footstepModelInstance)
    {
       this.footstepModelInstance = footstepModelInstance;
@@ -97,16 +111,48 @@ public class SingleFootstep
    public void process3DViewInput(ImGui3DViewInput input)
    {
       StepCheckIsPointInsideAlgorithm stepCheckIsPointInsideAlgorithm = new StepCheckIsPointInsideAlgorithm();
-      Box3D box = new Box3D();
-      Function<Point3DReadOnly, Boolean> isPointInside = box::isPointInside;
-      pickSelected = !Double.isNaN(stepCheckIsPointInsideAlgorithm.intersect(input.getPickRayInWorld(), 100, isPointInside));
-      boolean isClickedOn = pickSelected && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
-      boolean executeMotionKeyPressed = ImGui.isKeyReleased(ImGuiTools.getSpaceKey());
+      stepCheckIsPointInsideAlgorithm.setup(boundingSphere.getRadius(), boundingSphere.getPosition());
 
+      Function<Point3DReadOnly, Boolean> isPointInside = boundingSphere::isPointInside;
+      pickSelected = !Double.isNaN(stepCheckIsPointInsideAlgorithm.intersect(input.getPickRayInWorld(), 100, isPointInside));
+      isClickedOn = pickSelected && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
+      boolean executeMotionKeyPressed = ImGui.isKeyReleased(ImGuiTools.getSpaceKey());
+      LogTools.info(footstepSide.getSideNameFirstLetter()+ " "+ pickSelected);
+
+      if(pickSelected)
+      {
+         if(footstepSide == RobotSide.LEFT)
+            footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 1.0f,0.0f,0.0f, 0.0f));
+         else
+            footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.0f,1.0f,0.0f, 0.0f));
+      }
+      else
+      {
+         if(footstepSide == RobotSide.LEFT)
+            footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.5f,0.0f,0.0f, 0.0f));
+         else
+            footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.0f,0.5f,0.0f, 0.0f));
+      }
 
       selectablePose3DGizmo.process3DViewInput(input, pickSelected);
+      LogTools.info(selectablePose3DGizmo.getPoseGizmo().getPose().getOrientation().toString());
+      //  tempFramePose.getReferenceFrame().getTransformToWorldFrame().setToZero();
+      //tempFramePose.set(ReferenceFrame.getWorldFrame(),  selectablePose3DGizmo.getPoseGizmo().getPose());
+      //setFootPose(selectablePose3DGizmo.getPoseGizmo().getPose().getPosition().getX(), selectablePose3DGizmo.getPoseGizmo().getPose().getPosition().getY(), selectablePose3DGizmo.getPoseGizmo().getPose().getPosition().getZ());
+      LogTools.info(tempFramePose.getPosition());
+      footstepModelInstance.transform.setToRotationRad(selectablePose3DGizmo.getPoseGizmo().getPose().getOrientation().getX32(),
+                                                       selectablePose3DGizmo.getPoseGizmo().getPose().getOrientation().getY32(),
+                                                       selectablePose3DGizmo.getPoseGizmo().getPose().getOrientation().getZ32(),
+                                                       (float) selectablePose3DGizmo.getPoseGizmo().getPose().getOrientation().angle());
+      footstepModelInstance.transform.setTranslation(selectablePose3DGizmo.getPoseGizmo().getPose().getPosition().getX32(),
+                                                     selectablePose3DGizmo.getPoseGizmo().getPose().getPosition().getY32(),
+                                                     selectablePose3DGizmo.getPoseGizmo().getPose().getPosition().getZ32());
+      boundingSphere.getPosition().set(selectablePose3DGizmo.getPoseGizmo().getPose().getPosition().getX32(),
+                                       selectablePose3DGizmo.getPoseGizmo().getPose().getPosition().getY32(),
+                                       selectablePose3DGizmo.getPoseGizmo().getPose().getPosition().getZ32());
 
-     /*
+      LogTools.info(footstepSide.getSideNameFirstLetter()+ " Selected?  "+ selectablePose3DGizmo.isSelected());
+      /*
       if (unmodifiedButHovered)
       {
          if (hasMultipleFrames && controlToGraphicTransform == null) // we just need to do this once
@@ -179,4 +225,8 @@ public class SingleFootstep
       return selectablePose3DGizmo.getPoseGizmo().getPose();
    }
 
+   public boolean isClickedOn()
+   {
+      return isClickedOn;
+   }
 }
