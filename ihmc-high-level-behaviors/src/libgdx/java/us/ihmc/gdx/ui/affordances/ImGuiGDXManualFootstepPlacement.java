@@ -36,6 +36,7 @@ import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.gdx.vr.GDXVRManager;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
@@ -141,6 +142,7 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
                                                                                                      pickPointInWorld.getY32(),
                                                                                                      pickPointInWorld.getZ32());
             footstepArrayList.get(footstepIndex).setFootPose(pickPointInWorld.getX(), pickPointInWorld.getY(), pickPointInWorld.getZ());
+            footstepArrayList.get(footstepIndex).boundingSphere.getPosition().set(pickPointInWorld.getX(), pickPointInWorld.getY(), pickPointInWorld.getZ());
 
             // when left button clicked and released.
             if (input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
@@ -241,8 +243,11 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
    {
       if (isPlaced())
       {
-         footstepArrayList.get(footstepIndex).getFootstepModelInstance().getRenderables(renderables, pool);
-         footstepArrayList.get(footstepIndex).getVirtualRenderables(renderables, pool);
+         for (int i = 0; i < footstepArrayList.size(); i++)
+         {
+            footstepArrayList.get(i).getFootstepModelInstance().getRenderables(renderables, pool);
+            footstepArrayList.get(i).getVirtualRenderables(renderables, pool);
+         }
       }
    }
 
