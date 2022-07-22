@@ -45,6 +45,7 @@ public class GDX3DPanel
    private ImGui3DViewInput inputCalculator;
    private final ArrayList<Consumer<ImGui3DViewInput>> imgui3DViewPickCalculators = new ArrayList<>();
    private final ArrayList<Consumer<ImGui3DViewInput>> imgui3DViewInputProcessors = new ArrayList<>();
+   private final ArrayList<Runnable> windowDrawListAdditions = new ArrayList<>();
    private InputMultiplexer inputMultiplexer;
    private GDXFocusBasedCamera camera3D;
    private ScreenViewport viewport;
@@ -58,6 +59,10 @@ public class GDX3DPanel
    private ByteBuffer normalizedDeviceCoordinateDepthDirectByteBuffer;
    private float renderSizeX;
    private float renderSizeY;
+   private float windowDrawMinX;
+   private float windowDrawMinY;
+   private float windowDrawMaxX;
+   private float windowDrawMaxY;
 
    public GDX3DPanel(String panelName, int antiAliasing, boolean addFocusSphere)
    {
@@ -171,16 +176,21 @@ public class GDX3DPanel
          float percentOfFramebufferUsedX = renderSizeX / frameBufferWidth;
          float percentOfFramebufferUsedY = renderSizeY / frameBufferHeight;
          int textureID = frameBuffer.getColorBufferTexture().getTextureObjectHandle();
-         float pMinX = posX;
-         float pMinY = posY;
-         float pMaxX = posX + sizeX;
-         float pMaxY = posY + sizeY;
+         windowDrawMinX = posX;
+         windowDrawMinY = posY;
+         windowDrawMaxX = posX + sizeX;
+         windowDrawMaxY = posY + sizeY;
          float uvMinX = 0.0f;
          float uvMinY = percentOfFramebufferUsedY; // flip Y
          float uvMaxX = percentOfFramebufferUsedX;
          float uvMaxY = 0.0f;
 
-         ImGui.getWindowDrawList().addImage(textureID, pMinX, pMinY, pMaxX, pMaxY, uvMinX, uvMinY, uvMaxX, uvMaxY);
+         ImGui.getWindowDrawList().addImage(textureID, windowDrawMinX, windowDrawMinY, windowDrawMaxX, windowDrawMaxY, uvMinX, uvMinY, uvMaxX, uvMaxY);
+
+         for (Runnable windowDrawListAddition : windowDrawListAdditions)
+         {
+            windowDrawListAddition.run();
+         }
 
          ImGui.end();
          ImGui.popStyleVar();
@@ -319,7 +329,10 @@ public class GDX3DPanel
    {
       imgui3DViewInputProcessors.add(processImGuiInput);
    }
-
+   public void addWindowDrawListAddition(Runnable windowDrawListAddition)
+   {
+      windowDrawListAdditions.add(windowDrawListAddition);
+   }
    public GDX3DScene getScene()
    {
       return scene;
@@ -353,5 +366,25 @@ public class GDX3DPanel
    public float getRenderSizeY()
    {
       return renderSizeY;
+   }
+
+   public float getWindowDrawMinX()
+   {
+      return windowDrawMinX;
+   }
+
+   public float getWindowDrawMinY()
+   {
+      return windowDrawMinY;
+   }
+
+   public float getWindowDrawMaxX()
+   {
+      return windowDrawMaxX;
+   }
+
+   public float getWindowDrawMaxY()
+   {
+      return windowDrawMaxY;
    }
 }
