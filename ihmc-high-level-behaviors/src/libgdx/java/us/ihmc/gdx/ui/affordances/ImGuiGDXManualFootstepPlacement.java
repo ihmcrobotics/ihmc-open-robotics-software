@@ -1,5 +1,6 @@
 package us.ihmc.gdx.ui.affordances;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.math.Matrix4;
@@ -23,11 +24,13 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
+import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.input.editor.GDXUIActionMap;
 import us.ihmc.gdx.input.editor.GDXUITrigger;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.tools.GDXTools;
+import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.gdx.vr.GDXVRManager;
@@ -63,11 +66,15 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
    RobotSide currentFootStepSide;
 
    GDXPose3DGizmo gizmo;
+   private ImGui3DViewInput latestInput;
+   private GDX3DPanel primary3DPanel;
 
    public void create(GDXImGuiBasedUI baseUI, CommunicationHelper communicationHelper)
    {
       this.baseUI = baseUI;
       this.communicationHelper = communicationHelper;
+      primary3DPanel = baseUI.getPrimary3DPanel();
+      primary3DPanel.addWindowDrawListAddition(this::renderTooltips);
 
       placeGoalActionMap = new GDXUIActionMap(startAction ->
                                               {
@@ -89,6 +96,8 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
 
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
+      renderTooltip = false;
+
       for(int i = 0; i < footstepArrayList.size(); i++)
       {
          footstepArrayList.get(i).calculate3DViewPick(input);
@@ -96,8 +105,12 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
 
    }
 
+   boolean renderTooltip = false;
+
    public void processImGui3DViewInput(ImGui3DViewInput input)
    {
+      latestInput = input;
+
       for(int i = 0; i < footstepArrayList.size(); i++)
       {
          footstepArrayList.get(i).process3DViewInput(input);
@@ -106,6 +119,7 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       if (placingGoal && input.isWindowHovered())
       {
          Point3DReadOnly pickPointInWorld = input.getPickPointInWorld();
+         renderTooltip = true;
 
          double z = (lastObjectIntersection != null ? lastObjectIntersection.getZ() : 0.0) + goalZOffset.get();
          if (placingPosition && footstepArrayList.size() > 0)
@@ -164,6 +178,28 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
          {
             walkFromSteps();
          }
+      }
+   }
+
+   private void renderTooltips()
+   {
+      if (renderTooltip)
+      {
+         float offsetX = 10.0f;
+         float offsetY = 10.0f;
+         float mousePosX = latestInput.getMousePosX();
+         float mousePosY = latestInput.getMousePosY();
+         float drawStartX = primary3DPanel.getWindowDrawMinX() + mousePosX + offsetX;
+         float drawStartY = primary3DPanel.getWindowDrawMinY() + mousePosY + offsetY;
+
+         ImGui.getWindowDrawList().addRectFilled(drawStartX , drawStartY, drawStartX + 150.0f, drawStartY + 21.0f, new Color(0.2f, 0.2f, 0.2f, 0.7f).toIntBits());
+         ImGui.getWindowDrawList()
+              .addText(ImGuiTools.getSmallFont(),
+                       ImGuiTools.getSmallFont().getFontSize(),
+                       drawStartX + 5.0f,
+                       drawStartY + 2.0f,
+                       Color.WHITE.toIntBits(),
+                       "Right click to exit");
       }
    }
 

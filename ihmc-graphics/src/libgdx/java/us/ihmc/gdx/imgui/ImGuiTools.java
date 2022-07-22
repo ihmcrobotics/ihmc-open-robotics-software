@@ -36,6 +36,7 @@ public class ImGuiTools
    public static final float FLOAT_MAX = 3.40282346638528859811704183484516925e+38F / 2.0f;
 
    private static ImFont consoleFont;
+   private static ImFont smallFont;
    private static ImFont mediumFont;
    private static ImFont bigFont;
    private static ImFont nodeFont;
@@ -161,7 +162,6 @@ public class ImGuiTools
       bigFontConfig.setFontBuilderFlags(fontsFlags);
       nodeFontConfig.setFontBuilderFlags(fontsFlags);
 
-      ImFont smallFont;
 //      fontToReturn = fontAtlas.addFontDefault(); // Add a default font, which is 'ProggyClean.ttf, 13px'
 //      fontToReturn = fontAtlas.addFontFromMemoryTTF(loadFromResources("basis33.ttf"), 16, fontConfig);
       String fontDir;
@@ -252,6 +252,11 @@ public class ImGuiTools
    public static ImFont getMediumFont()
    {
       return mediumFont;
+   }
+
+   public static ImFont getSmallFont()
+   {
+      return smallFont;
    }
 
    public static ImFont getNodeFont() {
