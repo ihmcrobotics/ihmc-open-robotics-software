@@ -37,8 +37,6 @@ public class GDXDoorHandleDetectionDemo
             environmentBuilder = new GDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
             environmentBuilder.create();
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
-            baseUI.getPrimaryScene().addRenderableProvider(environmentBuilder::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
-            baseUI.getPrimaryScene().addRenderableProvider(environmentBuilder::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
             environmentBuilder.loadEnvironment("DoorHandleDetectionDemo.json");
 
             sensorPoseGizmo.create(baseUI.getPrimary3DPanel().getCamera3D());
@@ -76,7 +74,7 @@ public class GDXDoorHandleDetectionDemo
                   cameraSensor.setSensorEnabled(true);
                   cameraSensor.setRenderColorVideoDirectly(true);
                   baseUI.getImGuiPanelManager().addPanel(cameraSensor);
-                  baseUI.getPrimaryScene().addRenderableProvider(cameraSensor, GDXSceneLevel.VIRTUAL);
+                  baseUI.getPrimaryScene().addRenderableProvider(cameraSensor::getRenderables);
 
                   doorHandleDetectionUI = new GDXOpenCVOpticalFlowTrackingUI();
                   doorHandleDetectionUI.create(cameraSensor.getLowLevelSimulator().getRGBA8888ColorImage());

@@ -82,8 +82,6 @@ public class GDXGPUHeightMapBodyPathPlanningDemo
             environmentBuilder = new GDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
             environmentBuilder.create();
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
-            baseUI.getPrimaryScene().addRenderableProvider(environmentBuilder::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
-            baseUI.getPrimaryScene().addRenderableProvider(environmentBuilder::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
             environmentBuilder.loadEnvironment("CurvingBlockPathForBodyPath.json");
 
             robotInteractableReferenceFrame = new GDXInteractableReferenceFrame();
@@ -114,7 +112,7 @@ public class GDXGPUHeightMapBodyPathPlanningDemo
                   ouster.setSensorEnabled(true);
                   ouster.setRenderPointCloudDirectly(true);
 //                  ouster.setPublishPointCloudROS1(true);
-                  baseUI.getPrimaryScene().addRenderableProvider(ouster, GDXSceneLevel.VIRTUAL);
+                  baseUI.getPrimaryScene().addRenderableProvider(ouster::getRenderables);
 
                   heightMapPoseGizmo = new GDXSelectablePose3DGizmo();
                   heightMapPoseGizmo.create(baseUI.getPrimary3DPanel().getCamera3D());

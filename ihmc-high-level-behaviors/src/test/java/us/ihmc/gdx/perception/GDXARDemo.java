@@ -52,9 +52,7 @@ public class GDXARDemo
             environmentBuilder = new GDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
             environmentBuilder.create();
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
-            baseUI.getPrimaryScene().addRenderableProvider(environmentBuilder::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
-            baseUI.getPrimaryScene().addRenderableProvider(environmentBuilder::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
-            baseUI.getPrimaryScene().getSceneLevelsToRender().remove(GDXSceneLevel.REAL_ENVIRONMENT);
+            baseUI.getPrimaryScene().getSceneLevelsToRender().remove(GDXSceneLevel.MODEL);
             environmentBuilder.loadEnvironment("LookAndStepHard.json");
 
             sensorPoseGizmo.create(baseUI.getPrimary3DPanel().getCamera3D());
@@ -103,7 +101,7 @@ public class GDXARDemo
             highLevelDepthSensorSimulator.setPublishColorImageROS1(false);
             highLevelDepthSensorSimulator.setPublishColorImageROS2(true);
             highLevelDepthSensorSimulator.setUseSensorColor(true);
-            baseUI.getPrimaryScene().addRenderableProvider(highLevelDepthSensorSimulator, GDXSceneLevel.VIRTUAL);
+            baseUI.getPrimaryScene().addRenderableProvider(highLevelDepthSensorSimulator::getRenderables);
 
             highLevelDepthSensorSimulator.getLowLevelSimulator().getCamera().update();
 

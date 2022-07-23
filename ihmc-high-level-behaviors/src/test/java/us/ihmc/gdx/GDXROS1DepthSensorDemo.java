@@ -80,7 +80,7 @@ public class GDXROS1DepthSensorDemo
             l515.setRenderDepthVideoDirectly(true);
             l515.setPublishColorImageROS1(true);
 
-            baseUI.getPrimaryScene().addRenderableProvider(l515, GDXSceneLevel.VIRTUAL);
+            baseUI.getPrimaryScene().addRenderableProvider(l515::getRenderables);
             globalVisualizersUI.create();
 
             ros1Node.execute();

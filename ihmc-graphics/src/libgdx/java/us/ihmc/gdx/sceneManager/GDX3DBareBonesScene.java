@@ -36,7 +36,7 @@ public class GDX3DBareBonesScene
 
    public void create()
    {
-      create(GDXInputMode.libGDX, GDXSceneLevel.REAL_ENVIRONMENT, GDXSceneLevel.VIRTUAL);
+      create(GDXInputMode.libGDX, GDXSceneLevel.MODEL, GDXSceneLevel.VIRTUAL);
    }
 
    public void create(GDXInputMode inputMode, GDXSceneLevel... sceneLevels)
@@ -81,7 +81,7 @@ public class GDX3DBareBonesScene
    {
       preRender();
       scene.render();
-      scene.postRender(camera3D, GDXSceneLevel.VIRTUAL);
+      scene.postRender(camera3D, GDXSceneLevel.VIRTUAL.SINGLETON_SET);
 
       if (GDXTools.ENABLE_OPENGL_DEBUGGER)
          glProfiler.reset();

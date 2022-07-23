@@ -3,6 +3,7 @@ package us.ihmc.gdx.simulation.scs2;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.bullet.GDXBulletPhysicsAsyncDebugger;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
@@ -12,6 +13,8 @@ import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
 import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngine;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.tools.UnitConversions;
+
+import java.util.Set;
 
 public class GDXSCS2BulletSimulationSession extends GDXSCS2Session
 {
@@ -69,12 +72,15 @@ public class GDXSCS2BulletSimulationSession extends GDXSCS2Session
    }
 
    @Override
-   public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<GDXSceneLevel> sceneLevels)
    {
-      super.getVirtualRenderables(renderables, pool);
+      super.getRenderables(renderables, pool, sceneLevels);
 
-      if (physicsEngine instanceof BulletPhysicsEngine)
-         bulletPhysicsDebugger.getVirtualRenderables(renderables, pool);
+      if (sceneLevels.contains(GDXSceneLevel.VIRTUAL))
+      {
+         if (physicsEngine instanceof BulletPhysicsEngine)
+            bulletPhysicsDebugger.getVirtualRenderables(renderables, pool);
+      }
    }
 
    public void renderImGuiWidgets()
