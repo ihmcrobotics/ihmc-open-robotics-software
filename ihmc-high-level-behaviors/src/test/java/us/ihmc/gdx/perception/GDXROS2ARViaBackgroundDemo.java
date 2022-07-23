@@ -48,9 +48,7 @@ public class GDXROS2ARViaBackgroundDemo
             environmentBuilder = new GDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
             environmentBuilder.create();
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
-            baseUI.getPrimaryScene().addRenderableProvider(environmentBuilder::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
-            baseUI.getPrimaryScene().addRenderableProvider(environmentBuilder::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
-            baseUI.getPrimaryScene().getSceneLevelsToRender().remove(GDXSceneLevel.REAL_ENVIRONMENT);
+            baseUI.getPrimaryScene().getSceneLevelsToRender().remove(GDXSceneLevel.MODEL);
             environmentBuilder.loadEnvironment("LookAndStepHard.json");
 
             sensorPoseGizmo.create(baseUI.getPrimary3DPanel().getCamera3D());
@@ -102,7 +100,7 @@ public class GDXROS2ARViaBackgroundDemo
             highLevelDepthSensorSimulator.setPublishColorImageROS1(false);
             highLevelDepthSensorSimulator.setPublishColorImageROS2(true);
             highLevelDepthSensorSimulator.setUseSensorColor(true);
-            baseUI.getPrimaryScene().addRenderableProvider(highLevelDepthSensorSimulator, GDXSceneLevel.VIRTUAL);
+            baseUI.getPrimaryScene().addRenderableProvider(highLevelDepthSensorSimulator::getRenderables);
 
             sensorPoseGizmo.getTransformToParent().getTranslation().set(0.2, 0.0, 1.0);
             sensorPoseGizmo.getTransformToParent().getRotation().setToPitchOrientation(Math.toRadians(45.0));

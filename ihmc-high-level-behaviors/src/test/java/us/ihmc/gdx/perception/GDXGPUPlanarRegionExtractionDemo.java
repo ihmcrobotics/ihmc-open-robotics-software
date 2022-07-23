@@ -39,8 +39,6 @@ public class GDXGPUPlanarRegionExtractionDemo
             environmentBuilder = new GDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
             environmentBuilder.create();
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
-            baseUI.getPrimaryScene().addRenderableProvider(environmentBuilder::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
-            baseUI.getPrimaryScene().addRenderableProvider(environmentBuilder::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
             environmentBuilder.loadEnvironment("DemoPullDoor.json");
 
             robotInteractableReferenceFrame = new GDXInteractableReferenceFrame();
@@ -76,7 +74,7 @@ public class GDXGPUPlanarRegionExtractionDemo
                   l515.setPublishColorImageROS1(false);
                   l515.setPublishColorImageROS2(false);
                   CameraPinholeBrown cameraIntrinsics = l515.getDepthCameraIntrinsics();
-                  baseUI.getPrimaryScene().addRenderableProvider(l515, GDXSceneLevel.VIRTUAL);
+                  baseUI.getPrimaryScene().addRenderableProvider(l515::getRenderables);
 
                   gpuPlanarRegionExtraction = new GDXGPUPlanarRegionExtractionUI();
                   gpuPlanarRegionExtraction.create(l515.getLowLevelSimulator().getImageWidth(),

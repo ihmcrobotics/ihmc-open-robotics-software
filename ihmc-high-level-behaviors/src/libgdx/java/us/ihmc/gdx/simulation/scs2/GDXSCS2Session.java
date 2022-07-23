@@ -1,7 +1,6 @@
 package us.ihmc.gdx.simulation.scs2;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
@@ -13,6 +12,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.gdx.sceneManager.GDXRenderableAdapter;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.log.LogTools;
@@ -29,6 +29,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 
 public class GDXSCS2Session
 {
@@ -55,9 +56,8 @@ public class GDXSCS2Session
    private final ArrayList<GDXSimulatedTerrainObject> terrainObjects = new ArrayList<>();
    private final SCS2YoImPlotManager plotManager = new SCS2YoImPlotManager();
    private boolean sessionStartedHandled = false;
-   private final RenderableProvider getRealRenderables = this::getRealRenderables;
-   private final RenderableProvider getVirtualRenderables = this::getVirtualRenderables;
-   private ArrayList<Runnable> onSessionStartedRunnables = new ArrayList<>();
+   private final GDXRenderableAdapter renderables = new GDXRenderableAdapter(this::getRenderables);
+   private final ArrayList<Runnable> onSessionStartedRunnables = new ArrayList<>();
 
    public GDXSCS2Session(Session session)
    {
@@ -105,8 +105,7 @@ public class GDXSCS2Session
 
       session.startSessionThread(); // TODO: Need start/stop controls?
 
-      baseUI.getPrimaryScene().addRenderableProvider(getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
-      baseUI.getPrimaryScene().addRenderableProvider(getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+      baseUI.getPrimaryScene().addRenderableAdapter(renderables);
 
       plotManager.create(baseUI.getPerspectiveManager(), yoManager, panel);
    }
@@ -137,35 +136,37 @@ public class GDXSCS2Session
       }
    }
 
-   public void getRealRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<GDXSceneLevel> sceneLevels)
    {
-      for (GDXSimulatedRobot robot : robots)
-      {
-         if (showRobotMap.get(robot.getRobotDefinition().getName()).get())
-         {
-            robot.getRealRenderables(renderables, pool);
-         }
-      }
-      if (showTerrain.get())
-      {
-         for (GDXSimulatedTerrainObject terrainObject : terrainObjects)
-         {
-            terrainObject.getRealRenderables(renderables, pool);
-         }
-      }
-   }
-
-   public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
-   {
-      if (showCollisionMeshes.get())
+      if (sceneLevels.contains(GDXSceneLevel.GROUND_TRUTH))
       {
          for (GDXSimulatedRobot robot : robots)
          {
-            robot.getCollisionMeshRenderables(renderables, pool);
+            if (showRobotMap.get(robot.getRobotDefinition().getName()).get())
+            {
+               robot.getRealRenderables(renderables, pool);
+            }
          }
-         for (GDXSimulatedTerrainObject terrainObject : terrainObjects)
+         if (showTerrain.get())
          {
-            terrainObject.getCollisionRenderables(renderables, pool);
+            for (GDXSimulatedTerrainObject terrainObject : terrainObjects)
+            {
+               terrainObject.getRealRenderables(renderables, pool);
+            }
+         }
+      }
+      if (sceneLevels.contains(GDXSceneLevel.VIRTUAL))
+      {
+         if (showCollisionMeshes.get())
+         {
+            for (GDXSimulatedRobot robot : robots)
+            {
+               robot.getCollisionMeshRenderables(renderables, pool);
+            }
+            for (GDXSimulatedTerrainObject terrainObject : terrainObjects)
+            {
+               terrainObject.getCollisionRenderables(renderables, pool);
+            }
          }
       }
    }
@@ -304,8 +305,7 @@ public class GDXSCS2Session
 
    public void destroy(GDXImGuiBasedUI baseUI)
    {
-      baseUI.getPrimaryScene().removeRenderableProvider(getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
-      baseUI.getPrimaryScene().removeRenderableProvider(getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+      baseUI.getPrimaryScene().removeRenderableAdapter(renderables);
 
       plotManager.destroy();
 

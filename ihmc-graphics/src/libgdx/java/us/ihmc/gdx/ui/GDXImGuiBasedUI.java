@@ -135,7 +135,7 @@ public class GDXImGuiBasedUI
 
    public void create()
    {
-      create(GDXSceneLevel.REAL_ENVIRONMENT, GDXSceneLevel.VIRTUAL);
+      create(GDXSceneLevel.MODEL, GDXSceneLevel.VIRTUAL);
    }
 
    public void create(GDXSceneLevel... sceneLevels)
@@ -219,13 +219,21 @@ public class GDXImGuiBasedUI
             ImGui.getIO().setFontGlobalScale(imguiFontScale.get());
          }
          ImGui.separator();
-         boolean renderingRealEnvironment = primaryScene.getSceneLevelsToRender().contains(GDXSceneLevel.REAL_ENVIRONMENT);
-         if (ImGui.checkbox(labels.get("Render Real Environment"), renderingRealEnvironment))
+         boolean renderingGroundTruthEnvironment = primaryScene.getSceneLevelsToRender().contains(GDXSceneLevel.GROUND_TRUTH);
+         if (ImGui.checkbox(labels.get("Render Ground Truth Environment"), renderingGroundTruthEnvironment))
          {
-            if (renderingRealEnvironment)
-               primaryScene.getSceneLevelsToRender().remove(GDXSceneLevel.REAL_ENVIRONMENT);
+            if (renderingGroundTruthEnvironment)
+               primaryScene.getSceneLevelsToRender().remove(GDXSceneLevel.GROUND_TRUTH);
             else
-               primaryScene.getSceneLevelsToRender().add(GDXSceneLevel.REAL_ENVIRONMENT);
+               primaryScene.getSceneLevelsToRender().add(GDXSceneLevel.GROUND_TRUTH);
+         }
+         boolean renderingModelEnvironment = primaryScene.getSceneLevelsToRender().contains(GDXSceneLevel.MODEL);
+         if (ImGui.checkbox(labels.get("Render Model Environment"), renderingModelEnvironment))
+         {
+            if (renderingModelEnvironment)
+               primaryScene.getSceneLevelsToRender().remove(GDXSceneLevel.MODEL);
+            else
+               primaryScene.getSceneLevelsToRender().add(GDXSceneLevel.MODEL);
          }
          boolean renderingVirtualEnvironment = primaryScene.getSceneLevelsToRender().contains(GDXSceneLevel.VIRTUAL);
          if (ImGui.checkbox(labels.get("Render Virtual Environment"), renderingVirtualEnvironment))

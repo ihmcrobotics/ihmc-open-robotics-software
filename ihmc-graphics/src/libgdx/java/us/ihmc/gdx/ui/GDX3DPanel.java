@@ -28,6 +28,7 @@ import us.ihmc.log.LogTools;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.Set;
 import java.util.function.Consumer;
 
 public class GDX3DPanel
@@ -148,11 +149,11 @@ public class GDX3DPanel
          int frameBufferWidth = frameBuffer.getWidth();
          int frameBufferHeight = frameBuffer.getHeight();
 
-         // We do this render to get the Z buffer from just the real stuff
-         if (scene.getSceneLevelsToRender().contains(GDXSceneLevel.REAL_ENVIRONMENT))
+         // We do this render to get the Z buffer from just the model
+         if (scene.getSceneLevelsToRender().contains(GDXSceneLevel.MODEL))
          {
             frameBuffer.begin();
-            renderScene(true);
+            renderScene(GDXSceneLevel.MODEL.SINGLETON_SET);
 
             normalizedDeviceCoordinateDepthDirectByteBuffer.rewind(); // SIGSEV otherwise
             GL41.glReadBuffer(GL41.GL_COLOR_ATTACHMENT1);
@@ -165,12 +166,9 @@ public class GDX3DPanel
          }
 
          // The scene will render twice if both real and virtual environments are showing
-         if (scene.getSceneLevelsToRender().contains(GDXSceneLevel.VIRTUAL))
-         {
-            frameBuffer.begin();
-            renderScene(false);
-            frameBuffer.end();
-         }
+         frameBuffer.begin();
+         renderScene(scene.getSceneLevelsToRender());
+         frameBuffer.end();
 
          float percentOfFramebufferUsedX = renderSizeX / frameBufferWidth;
          float percentOfFramebufferUsedY = renderSizeY / frameBufferHeight;
@@ -206,23 +204,15 @@ public class GDX3DPanel
       scene.renderShadowMap(camera3D, x, y);
    }
 
-   private void renderScene(boolean realOnly)
+   private void renderScene(Set<GDXSceneLevel> sceneLevels)
    {
       preRender();
 
       if (backgroundRenderer != null)
          backgroundRenderer.run();
 
-      if (realOnly)
-      {
-         scene.render(GDXSceneLevel.REAL_ENVIRONMENT);
-         scene.postRender(camera3D, GDXSceneLevel.REAL_ENVIRONMENT);
-      }
-      else
-      {
-         scene.render();
-         scene.postRender(camera3D, GDXSceneLevel.VIRTUAL);
-      }
+      scene.render(sceneLevels);
+      scene.postRender(camera3D, sceneLevels);
 
       if (GDXTools.ENABLE_OPENGL_DEBUGGER)
          glProfiler.reset();
