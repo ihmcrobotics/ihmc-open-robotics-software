@@ -36,7 +36,6 @@ import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.gdx.vr.GDXVRManager;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
@@ -167,7 +166,7 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
          if (input.mouseReleasedWithoutDrag(ImGuiMouseButton.Right))
          {
             placeGoalActionMap.triggerAction(GDXUITrigger.RIGHT_CLICK);
-            baseUI.getPrimaryScene().removeRenderableProvider((footstepArrayList.remove(footstepIndex).getFootstepModelInstance()), GDXSceneLevel.VIRTUAL);
+//            baseUI.getPrimaryScene().removeRenderableAdapter((footstepArrayList.remove(footstepIndex).getFootstepModelInstance()), GDXSceneLevel.VIRTUAL);
             footstepIndex--;
          }
       }
@@ -279,10 +278,10 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
          footstepArrayList.get(footstepIndex).getFootstepModelInstance().transform.val[Matrix4.M03] = Float.NaN;
       goalZOffset.set(0.0f);
 
-      for (int i = 0; i <= footstepIndex; i++)
-      {
-         baseUI.getPrimaryScene().removeRenderableProvider((footstepArrayList.remove(0).getFootstepModelInstance()), GDXSceneLevel.VIRTUAL);
-      }
+//      for (int i = 0; i <= footstepIndex; i++)
+//      {
+//         baseUI.getPrimaryScene().removeRenderableAdapter((footstepArrayList.remove(0).getFootstepModelInstance()), GDXSceneLevel.VIRTUAL);
+//      }
 
       footstepArrayList.clear();
       footstepIndex = -1;
