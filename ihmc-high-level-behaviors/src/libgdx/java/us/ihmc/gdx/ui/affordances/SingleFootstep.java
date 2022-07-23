@@ -252,7 +252,7 @@ public class SingleFootstep
       GDXTools.toGDX(textFramePose, tempTransform, footstepIndexText.getModelInstance().transform);
       footstepIndexText.scale((float) textHeight);
       textRenderables.add(footstepIndexText);
-      LogTools.info(textFramePose.getPosition());
+//      LogTools.info(textFramePose.getPosition());
    }
 
 
