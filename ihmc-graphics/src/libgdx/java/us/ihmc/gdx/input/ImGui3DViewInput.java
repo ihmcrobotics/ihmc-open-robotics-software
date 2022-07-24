@@ -43,6 +43,7 @@ public class ImGui3DViewInput
    private ImGui3DViewPickResult closestPick = null;
    private final FramePoint3D tempCameraPose = new FramePoint3D();
    private final FramePoint3D pickPoint = new FramePoint3D();
+   private double lastZCollision;
 
    public ImGui3DViewInput(GDX3DPanel panel)
    {
@@ -98,7 +99,7 @@ public class ImGui3DViewInput
 
    public Point3DReadOnly getPickPointInWorld()
    {
-      return getPickPointInWorld(0.0);
+      return getPickPointInWorld(Double.NaN);
    }
 
    public Point3DReadOnly getPickPointInWorld(double fallbackXYPlaneIntersectionHeight)
@@ -154,19 +155,17 @@ public class ImGui3DViewInput
 
                pickPoint.setIncludingFrame(panel.getCamera3D().getCameraFrame(), zUp3DX, zUp3DY, zUp3DZ);
                pickPoint.changeFrame(ReferenceFrame.getWorldFrame());
+               lastZCollision = pickPoint.getZ();
             }
          }
 
          if (fallbackToXYPlaneIntersection)
          {
+            double xyZHeight = Double.isNaN(fallbackXYPlaneIntersectionHeight) ? lastZCollision : fallbackXYPlaneIntersectionHeight;
             pickPoint.setIncludingFrame(ReferenceFrame.getWorldFrame(), EuclidCoreTools.origin3D);
-            pickPoint.setZ(fallbackXYPlaneIntersectionHeight);
+            pickPoint.setZ(xyZHeight);
             getPickRayInWorld();
-            EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pickPoint,
-                                                                    Axis3D.Z,
-                                                                    pickRayInWorld.getPoint(),
-                                                                    pickRayInWorld.getDirection(),
-                                                                    pickPoint);
+            EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pickPoint, Axis3D.Z, pickRayInWorld.getPoint(), pickRayInWorld.getDirection(), pickPoint);
          }
       }
 
