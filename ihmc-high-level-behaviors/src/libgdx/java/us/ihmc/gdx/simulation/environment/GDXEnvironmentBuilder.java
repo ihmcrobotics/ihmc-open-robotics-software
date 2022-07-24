@@ -434,7 +434,7 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
 
    private void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<GDXSceneLevel> sceneLevels)
    {
-      if (sceneLevels.contains(GDXSceneLevel.GROUND_TRUTH) || sceneLevels.contains(GDXSceneLevel.MODEL))
+      if (sceneLevels.contains(GDXSceneLevel.GROUND_TRUTH))
       {
          for (GDXEnvironmentObject object : allObjects)
          {
