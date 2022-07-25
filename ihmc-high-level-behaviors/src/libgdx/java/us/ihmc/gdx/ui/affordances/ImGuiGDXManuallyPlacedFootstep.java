@@ -89,14 +89,6 @@ public class ImGuiGDXManuallyPlacedFootstep
       tempFramePose.get(selectablePose3DGizmo.getPoseGizmo().getTransformToParent());
    }
 
-   public void setFootPose(FramePose3DReadOnly pose)
-   {
-      tempFramePose.setToZero(ReferenceFrame.getWorldFrame());
-      tempFramePose.set(pose);
-      tempFramePose.get(selectablePose3DGizmo.getPoseGizmo().getTransformToParent());
-   }
-
-
    public void setFootstepModelInstance(GDXModelInstance footstepModelInstance)
    {
       this.footstepModelInstance = footstepModelInstance;
@@ -238,18 +230,18 @@ public class ImGuiGDXManuallyPlacedFootstep
    public void update()
    {
 
-      selectablePose3DGizmo.getPoseGizmo().getPose().getReferenceFrame().update();
+
       selectablePose3DGizmo.getPoseGizmo().getPose().get(tempTransform);
       double textHeight = 0.08;
       textFramePose.setToZero(selectablePose3DGizmo.getPoseGizmo().getPose().getReferenceFrame());
       textFramePose.set(selectablePose3DGizmo.getPoseGizmo().getPose());
-      textFramePose.getOrientation().prependYawRotation(-Math.PI / 2.0);
-      textFramePose.getPosition().addZ(0.03);
-      textFramePose.getPosition().addY(textHeight / 4.0);
-      textFramePose.getPosition().addX(-textHeight / 2.0);
+
+      textFramePose.appendYawRotation(-Math.PI / 2.0);
+      textFramePose.appendTranslation(0.0,0.0,0.035); //Make text higher in z direction, so it's not inside the foot
       textFramePose.changeFrame(ReferenceFrame.getWorldFrame());
       GDXTools.toGDX(textFramePose, tempTransform, footstepIndexText.getModelInstance().transform);
       footstepIndexText.scale((float) textHeight);
+
 
    }
 
