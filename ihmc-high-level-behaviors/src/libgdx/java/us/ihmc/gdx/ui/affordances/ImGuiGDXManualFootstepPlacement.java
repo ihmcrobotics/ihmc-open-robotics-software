@@ -25,14 +25,10 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewInput;
-import us.ihmc.gdx.input.editor.GDXUIActionMap;
-import us.ihmc.gdx.input.editor.GDXUITrigger;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
@@ -127,8 +123,9 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
                goalZOffset.set(goalZOffset.get() - (input.getMouseWheelDelta() / 30.0f));
             }
 
+            //Set position of modelInstance, selectablePose3DGizmo, and the sphere used in stepCheckIsPointInsideAlgorithm all to the pointInWorld that the cursor is at
             GDXTools.toGDX(pickPointInWorld, footstepArrayList.get(footstepIndex).getFootstepModelInstance().transform);
-            footstepArrayList.get(footstepIndex).setFootPose(pickPointInWorld.getX(), pickPointInWorld.getY(), pickPointInWorld.getZ());
+            footstepArrayList.get(footstepIndex).setGizmoPose(pickPointInWorld.getX(), pickPointInWorld.getY(), pickPointInWorld.getZ());
             footstepArrayList.get(footstepIndex).getBoundingSphere().getPosition().set(pickPointInWorld.getX(), pickPointInWorld.getY(), pickPointInWorld.getZ());
 
             // when left button clicked and released.
@@ -149,44 +146,7 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
             stepChecker.getInput(input, placingGoal);
 
 			//If out of bounds, flash colors
-            if(stepChecker.getReason() == null)
-            {
-               if(footstepArrayList.get(footstepIndex).getFootstepSide() == RobotSide.LEFT)
-               {
-                  setColor(footstepIndex,1.0f,0.0f,0.0f,0.0f);
-               }
-               else
-               {
-                  setColor(footstepIndex,0.0f,1.0f,0.0f,0.0f);
-               }
-            }
-            else
-            {
-               if(!timerFlashingFootsteps.hasBeenSet())
-               {
-                  timerFlashingFootsteps.reset();
-                  flashingFootStepsColorHigh = false;
-               }
-               if(timerFlashingFootsteps.isExpired(0.1))
-               {
-                  flashingFootStepsColorHigh = !flashingFootStepsColorHigh;
-                  timerFlashingFootsteps.reset();
-               }
-               if(footstepArrayList.get(footstepIndex).getFootstepSide() == RobotSide.LEFT)
-               {
-                  if(flashingFootStepsColorHigh)
-                     setColor(footstepIndex,1.0f,0.0f,0.0f,0.0f);
-                  else
-                     setColor(footstepIndex,0.5f,0.0f,0.0f,0.0f);
-               }
-               else
-               {
-                  if(flashingFootStepsColorHigh)
-                     setColor(footstepIndex,0.0f,1.0f,0.0f,0.0f);
-                  else
-                     setColor(footstepIndex,0.0f,0.5f,0.0f,0.0f);
-               }
-            }
+            footstepArrayList.get(footstepIndex).flashFootstepsWhenBadPlacement(stepChecker, timerFlashingFootsteps, flashingFootStepsColorHigh);
          }
 
          if (input.mouseReleasedWithoutDrag(ImGuiMouseButton.Right))
@@ -204,13 +164,14 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
          // TODO: (need yaw here?)
          stepChecker.getInput(input, placingGoal);
          stepChecker.checkValidStep(footstepArrayList, new DiscreteFootstep(pickPointInWorld.getX(), pickPointInWorld.getY(), 0, currentFootStepSide) , placingGoal);
+         for(int i =0; i<footstepArrayList.size(); i++)
+         {
+            if (!placingGoal && footstepArrayList.get(i).isPickSelected() && footstepArrayList.size() > 0)
+            {
+               footstepArrayList.get(i).flashFootstepsWhenBadPlacement(stepChecker, timerFlashingFootsteps, flashingFootStepsColorHigh);
+            }
+         }
       }
-   }
-
-   // sets color of the corresponding footstep in the list
-   public void setColor(int index, float r, float g, float b, float a)
-   {
-      footstepArrayList.get(index).getFootstepModelInstance().materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, r, g, b, a));
    }
 
    public void renderImGuiWidgets()
@@ -286,10 +247,8 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       {
          for (int i = 0; i < footstepArrayList.size(); i++)
          {
-
             footstepArrayList.get(i).getVirtualRenderables(renderables, pool);
             footstepArrayList.get(i).getFootstepModelInstance().getRenderables(renderables, pool);
-
          }
       }
    }
@@ -402,4 +361,6 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       footstepIndex--;
 
    }
+
+
 }

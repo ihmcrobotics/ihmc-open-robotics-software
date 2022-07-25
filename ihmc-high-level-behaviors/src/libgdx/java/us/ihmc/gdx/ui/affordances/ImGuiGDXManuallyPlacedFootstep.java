@@ -1,22 +1,17 @@
 package us.ihmc.gdx.ui.affordances;
 
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
-import imgui.internal.ImGui;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.gdx.GDX3DSituatedText;
-import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.sceneManager.GDXRenderableAdapter;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
@@ -26,6 +21,7 @@ import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.StepCheckIsPointInsideAlgorithm;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.Timer;
 
 import java.util.ArrayList;
 import java.util.function.Function;
@@ -74,7 +70,7 @@ public class ImGuiGDXManuallyPlacedFootstep
 
       selectablePose3DGizmo.create(baseUI.getPrimary3DPanel().getCamera3D());
 
-      footstepIndexText = new GDX3DSituatedText("" + index);
+      footstepIndexText = new GDX3DSituatedText("" + footstepSide.getSideNameFirstLetter() + index);
 
       renderableAdapter = new GDXRenderableAdapter(footstepModelInstance::getRenderables, GDXSceneLevel.VIRTUAL);
 
@@ -82,7 +78,7 @@ public class ImGuiGDXManuallyPlacedFootstep
 
    }
 
-   public void setFootPose(double x, double y, double z)
+   public void setGizmoPose(double x, double y, double z)
    {
       tempFramePose.setToZero(ReferenceFrame.getWorldFrame());
       tempFramePose.getPosition().set(x, y, z);
@@ -121,7 +117,6 @@ public class ImGuiGDXManuallyPlacedFootstep
       Function<Point3DReadOnly, Boolean> isPointInside = boundingSphere::isPointInside;
       pickSelected = !Double.isNaN(stepCheckIsPointInsideAlgorithm.intersect(input.getPickRayInWorld(), 100, isPointInside));
       isClickedOn = pickSelected && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
-      boolean executeMotionKeyPressed = ImGui.isKeyReleased(ImGuiTools.getSpaceKey());
 
 
       // TODO: mouse hovering on the footstep. (get foot validity warning text when this happens)
@@ -237,7 +232,7 @@ public class ImGuiGDXManuallyPlacedFootstep
       textFramePose.set(selectablePose3DGizmo.getPoseGizmo().getPose());
 
       textFramePose.appendYawRotation(-Math.PI / 2.0);
-      textFramePose.appendTranslation(0.0,0.0,0.035); //Make text higher in z direction, so it's not inside the foot
+      textFramePose.appendTranslation(-0.03,0.0,0.035); //Make text higher in z direction, so it's not inside the foot
       textFramePose.changeFrame(ReferenceFrame.getWorldFrame());
       GDXTools.toGDX(textFramePose, tempTransform, footstepIndexText.getModelInstance().transform);
       footstepIndexText.scale((float) textHeight);
@@ -274,5 +269,53 @@ public class ImGuiGDXManuallyPlacedFootstep
    public double getYaw()
    {
       return tempFramePose.getYaw();
+   }
+
+   // sets color of the corresponding footstep in the list
+   public void setColor(float r, float g, float b, float a)
+   {
+      getFootstepModelInstance().materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, r, g, b, a));
+   }
+
+   public void flashFootstepsWhenBadPlacement(ImGuiGDXManuallyPlacedFootstepChecker stepChecker, Timer timer, boolean flashingFootStepsColorHigh)
+   {
+      if(stepChecker.getReason() == null)
+      {
+         if(getFootstepSide() == RobotSide.LEFT)
+         {
+            setColor(1.0f,0.0f,0.0f,0.0f);
+         }
+         else
+         {
+            setColor(0.0f,1.0f,0.0f,0.0f);
+         }
+      }
+      else
+      {
+         if(!timer.hasBeenSet())
+         {
+            timer.reset();
+            flashingFootStepsColorHigh = false;
+         }
+         if(timer.isExpired(0.1))
+         {
+            flashingFootStepsColorHigh = !flashingFootStepsColorHigh;
+            timer.reset();
+         }
+         if(getFootstepSide() == RobotSide.LEFT)
+         {
+            if(flashingFootStepsColorHigh)
+               setColor(1.0f,0.0f,0.0f,0.0f);
+            else
+               setColor(0.5f,0.0f,0.0f,0.0f);
+         }
+         else
+         {
+            if(flashingFootStepsColorHigh)
+               setColor(0.0f,1.0f,0.0f,0.0f);
+            else
+               setColor(0.0f,0.5f,0.0f,0.0f);
+         }
+      }
    }
 }
