@@ -87,8 +87,8 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    private final ReferenceFrame centerOfMassFrame;
    private final CenterOfMassStateProvider centerOfMassStateProvider;
    private final MomentumStateProvider momentumStateProvider;
-//   private final CapturePointCalculator capturePointCalculator;
-   private final ModifiedCapturePointCalculator capturePointCalculator;
+   private final CapturePointCalculator capturePointCalculator;
+   private final ModifiedCapturePointCalculator newCapturePointCalculator;
 
    private final CommonHumanoidReferenceFrames referenceFrames;
    private final CommonHumanoidReferenceFramesVisualizer referenceFramesVisualizer;
@@ -152,6 +152,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    private final SideDependentList<FrameTuple2dArrayList<FramePoint2D>> previousFootContactPoints = new SideDependentList<>(createFramePoint2dArrayList(),
                                                                                                                             createFramePoint2dArrayList());
 
+   protected final YoFramePoint3D yoOldCapturePoint = new YoFramePoint3D("oldCapturePoint", worldFrame, registry);
    protected final YoFramePoint3D yoCapturePoint = new YoFramePoint3D("capturePoint", worldFrame, registry);
 
    private final YoDouble omega0 = new YoDouble("omega0", registry);
@@ -202,8 +203,8 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver(fullRobotModel, referenceFrames);
       referenceFrameHashCodeResolver.put(walkingTrajectoryPath.getWalkingTrajectoryPathFrame());
 
-//      capturePointCalculator = new CapturePointCalculator(centerOfMassStateProvider);
-      capturePointCalculator = new ModifiedCapturePointCalculator(momentumStateProvider);
+      capturePointCalculator = new CapturePointCalculator(centerOfMassStateProvider);
+      newCapturePointCalculator = new ModifiedCapturePointCalculator(momentumStateProvider);
       
 
       MathTools.checkIntervalContains(gravityZ, 0.0, Double.POSITIVE_INFINITY);
@@ -504,6 +505,9 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    private void computeCapturePoint()
    {
       capturePointCalculator.compute(capturePoint2d, omega0.getValue());
+      capturePoint2d.changeFrame(yoOldCapturePoint.getReferenceFrame());
+      yoOldCapturePoint.set(capturePoint2d, 0.0);
+      newCapturePointCalculator.compute(capturePoint2d, omega0.getValue());
       capturePoint2d.changeFrame(yoCapturePoint.getReferenceFrame());
       yoCapturePoint.set(capturePoint2d, 0.0);
    }
@@ -560,6 +564,11 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    public void getCapturePoint(FixedFramePoint2DBasics capturePointToPack)
    {
       capturePointToPack.set(yoCapturePoint);
+   }
+
+   public FramePoint3DReadOnly getOldCapturePoint()
+   {
+      return yoOldCapturePoint;
    }
 
    public FramePoint3DReadOnly getCapturePoint()

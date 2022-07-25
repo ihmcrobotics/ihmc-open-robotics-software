@@ -20,6 +20,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.ModifiedCapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumControlCore.CoMHeightController;
 import us.ihmc.commonWalkingControlModules.momentumControlCore.HeightController;
@@ -34,12 +35,14 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
+import us.ihmc.humanoidRobotics.model.MomentumStateProvider;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
@@ -97,9 +100,11 @@ public class LinearMomentumRateControlModule
    private final FramePoint3D centerOfMass;
    private final FramePoint2D centerOfMass2d = new FramePoint2D();
 
+   private final FramePoint2D oldCapturePoint = new FramePoint2D();
    private final FramePoint2D capturePoint = new FramePoint2D();
    private final CapturePointCalculator capturePointCalculator;
-
+   private final HighLevelHumanoidControllerToolbox controllerToolbox;
+   
    private final FixedFramePoint2DBasics desiredCapturePoint = new FramePoint2D();
    private final FixedFrameVector2DBasics desiredCapturePointVelocity = new FrameVector2D();
    private final FixedFramePoint2DBasics desiredCapturePointAtEndOfState = new FramePoint2D();
@@ -135,6 +140,7 @@ public class LinearMomentumRateControlModule
    private final YoFramePoint2D yoDesiredCMP = new YoFramePoint2D("desiredCMP", worldFrame, registry);
    private final YoFramePoint2D yoAchievedCMP = new YoFramePoint2D("achievedCMP", worldFrame, registry);
    private final YoFramePoint3D yoCenterOfMass = new YoFramePoint3D("centerOfMass", worldFrame, registry);
+   private final YoFramePoint2D yoOldCapturePoint = new YoFramePoint2D("oldCapturePoint", worldFrame, registry);
    private final YoFramePoint2D yoCapturePoint = new YoFramePoint2D("capturePoint", worldFrame, registry);
 
    private final FilteredVelocityYoFrameVector2d capturePointVelocity;
@@ -157,6 +163,7 @@ public class LinearMomentumRateControlModule
                                           YoRegistry parentRegistry)
    {
       this(controllerToolbox,
+           controllerToolbox,
            controllerToolbox.getReferenceFrames(),
            controllerToolbox.getContactableFeet(),
            controllerToolbox.getFullRobotModel().getElevator(),
@@ -168,6 +175,7 @@ public class LinearMomentumRateControlModule
    }
 
    public LinearMomentumRateControlModule(CenterOfMassStateProvider centerOfMassStateProvider,
+                                          HighLevelHumanoidControllerToolbox controllerToolbox,
                                           CommonHumanoidReferenceFrames referenceFrames,
                                           SideDependentList<ContactableFoot> contactableFeet,
                                           RigidBodyBasics elevator,
@@ -177,6 +185,8 @@ public class LinearMomentumRateControlModule
                                           YoRegistry parentRegistry,
                                           YoGraphicsListRegistry yoGraphicsListRegistry)
    {
+      this.controllerToolbox = controllerToolbox;
+      
       this.totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
       this.gravityZ = gravityZ;
 
@@ -218,15 +228,18 @@ public class LinearMomentumRateControlModule
          YoGraphicPosition desiredCMPViz = new YoGraphicPosition("Desired CMP", yoDesiredCMP, 0.012, Purple(), GraphicType.BALL_WITH_CROSS);
          YoGraphicPosition achievedCMPViz = new YoGraphicPosition("Achieved CMP", yoAchievedCMP, 0.005, DarkRed(), GraphicType.BALL_WITH_CROSS);
          YoGraphicPosition centerOfMassViz = new YoGraphicPosition("Center Of Mass", yoCenterOfMass, 0.006, Black(), GraphicType.BALL_WITH_CROSS);
+         YoGraphicPosition oldCapturePointViz = new YoGraphicPosition("Old capture Point", yoOldCapturePoint, 0.01, Black(), GraphicType.BALL_WITH_ROTATED_CROSS);
          YoGraphicPosition capturePointViz = new YoGraphicPosition("Capture Point", yoCapturePoint, 0.01, Blue(), GraphicType.BALL_WITH_ROTATED_CROSS);
          yoGraphicsListRegistry.registerArtifact("LinearMomentum", desiredCMPViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact("LinearMomentum", achievedCMPViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact("LinearMomentum", centerOfMassViz.createArtifact());
+         yoGraphicsListRegistry.registerArtifact("LinearMomentum", oldCapturePointViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact("LinearMomentum", capturePointViz.createArtifact());
       }
       yoDesiredCMP.setToNaN();
       yoAchievedCMP.setToNaN();
       yoCenterOfMass.setToNaN();
+      yoOldCapturePoint.setToNaN();
       yoCapturePoint.setToNaN();
 
       icpControlPlane = new ICPControlPlane(centerOfMassFrame, gravityZ, registry);
@@ -265,6 +278,7 @@ public class LinearMomentumRateControlModule
       yoDesiredCMP.setToNaN();
       yoAchievedCMP.setToNaN();
       yoCenterOfMass.setToNaN();
+      yoOldCapturePoint.setToNaN();
       yoCapturePoint.setToNaN();
    }
 
@@ -358,7 +372,12 @@ public class LinearMomentumRateControlModule
     */
    public boolean computeControllerCoreCommands()
    {
-      capturePointCalculator.compute(capturePoint, omega0);
+      FramePoint3DReadOnly oldCapturePoint3D = controllerToolbox.getOldCapturePoint();
+      oldCapturePoint.set(oldCapturePoint3D.getX(), oldCapturePoint3D.getY());
+      FramePoint3DReadOnly capturePoint3D = controllerToolbox.getCapturePoint();
+      capturePoint.set(capturePoint3D.getX(), capturePoint3D.getY());
+      //      capturePointCalculator.compute(capturePoint, omega0);
+      
       capturePointVelocity.update(capturePoint);
 
       boolean success = checkInputs(capturePoint, desiredCapturePoint, desiredCapturePointVelocity, perfectCoP, perfectCMP);
@@ -377,6 +396,7 @@ public class LinearMomentumRateControlModule
 
       yoDesiredCMP.set(desiredCMP);
       yoCenterOfMass.setFromReferenceFrame(centerOfMassFrame);
+      yoOldCapturePoint.set(oldCapturePoint);
       yoCapturePoint.set(capturePoint);
 
       success = success && computeDesiredLinearMomentumRateOfChange();
