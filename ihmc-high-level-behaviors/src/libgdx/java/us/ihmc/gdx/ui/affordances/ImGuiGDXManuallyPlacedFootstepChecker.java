@@ -40,6 +40,7 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
 
     private BipedalFootstepPlannerNodeRejectionReason prevReason = null;
     private BipedalFootstepPlannerNodeRejectionReason reason = null;
+    private BipedalFootstepPlannerNodeRejectionReason reasonFromHover = null;
     private ArrayList<BipedalFootstepPlannerNodeRejectionReason> reasons = new ArrayList<>();
 
 //    private ArrayList<BipedalFootstepPlannerNodeRejectionReason> reasons = new ArrayList<>();
@@ -169,8 +170,14 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
                 reason = stepChecker.checkStepValidity(candidate,convertToDiscrete(stepList.get(i-1)), convertToDiscrete(stepList.get(i-2)));
             }
 
-            if(displayReasonForHoveringStep) break;
+            if(displayReasonForHoveringStep)
+            {
+                reasonFromHover = reason;
+            }
+
+            reasons.add(reason);
         }
+        if(displayReasonForHoveringStep) reason = reasonFromHover;
         renderTooltip = placingGoal;
         makeWarnings();
     }
@@ -209,6 +216,7 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
     // Should call this in walkFromSteps before clearing the stepList.
     public void clear(ArrayList<ImGuiGDXManuallyPlacedFootstep> stepList)
     {
+        reasons.clear();
         if (stepList.size()==1)
         {
             DiscreteFootstep lastStep = convertToDiscrete(stepList.get(0));
@@ -227,5 +235,10 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
             stance = convertToDiscrete(stepList.get(s-1));
             swing  = convertToDiscrete(stepList.get(s-2));
         }
+    }
+
+    public ArrayList<BipedalFootstepPlannerNodeRejectionReason> getReasons()
+    {
+        return reasons;
     }
 }
