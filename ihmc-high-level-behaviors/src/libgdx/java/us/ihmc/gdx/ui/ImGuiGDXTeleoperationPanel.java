@@ -452,6 +452,13 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
          manualFootstepPlacement.clear();
       }
 
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Delete Last")))
+      {
+         manualFootstepPlacement.removeFootStep();
+      }
+
+
       for (RobotSide side : RobotSide.values)
       {
          ImGui.text(side.getPascalCaseName() + " hand:");
