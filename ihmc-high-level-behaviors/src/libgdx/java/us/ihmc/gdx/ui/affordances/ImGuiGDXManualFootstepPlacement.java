@@ -134,11 +134,9 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
                goalZOffset.set(goalZOffset.get() - (input.getMouseWheelDelta() / 30.0f));
             }
 
-            footstepArrayList.get(footstepIndex).getFootstepModelInstance().transform.setTranslation(pickPointInWorld.getX32(),
-                                                                                                     pickPointInWorld.getY32(),
-                                                                                                     pickPointInWorld.getZ32());
+            GDXTools.toGDX(pickPointInWorld, footstepArrayList.get(footstepIndex).getFootstepModelInstance().transform);
             footstepArrayList.get(footstepIndex).setFootPose(pickPointInWorld.getX(), pickPointInWorld.getY(), pickPointInWorld.getZ());
-            footstepArrayList.get(footstepIndex).boundingSphere.getPosition().set(pickPointInWorld.getX(), pickPointInWorld.getY(), pickPointInWorld.getZ());
+            footstepArrayList.get(footstepIndex).getBoundingSphere().getPosition().set(pickPointInWorld.getX(), pickPointInWorld.getY(), pickPointInWorld.getZ());
 
             // when left button clicked and released.
             if (input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))

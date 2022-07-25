@@ -39,7 +39,7 @@ public class ImGuiGDXManuallyPlacedFootstep
    public boolean pickSelected;
    GDXImGuiBasedUI baseUI;
 
-   public Sphere3D boundingSphere = new Sphere3D(0.1);
+   private Sphere3D boundingSphere = new Sphere3D(0.1);
    private boolean isClickedOn;
    private int index;
    private final FramePose3D textFramePose = new FramePose3D();
@@ -261,4 +261,8 @@ public class ImGuiGDXManuallyPlacedFootstep
       return isClickedOn;
    }
 
+   public Sphere3D getBoundingSphere()
+   {
+      return boundingSphere;
+   }
 }
