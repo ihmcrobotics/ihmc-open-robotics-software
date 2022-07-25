@@ -91,7 +91,6 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
       helper.subscribeViaCallback(OperatorReviewEnabledToUI, operatorReview::set);
       helper.subscribeViaCallback(PlanarRegionsForUI, regions ->
       {
-         goalAffordance.setLatestRegions(regions);
          ++numberOfSteppingRegionsReceived;
          if (regions != null)
             planarRegionsGraphic.generateMeshesAsync(regions.copy());

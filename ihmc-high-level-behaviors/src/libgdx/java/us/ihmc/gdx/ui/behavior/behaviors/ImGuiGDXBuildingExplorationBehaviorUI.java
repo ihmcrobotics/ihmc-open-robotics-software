@@ -52,7 +52,6 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends ImGuiGDXBehaviorUIInt
       helper.subscribeViaCallback(Mode, mode -> this.mode = mode);
       helper.subscribeToPlanarRegionsViaCallback(ROS2Tools.LIDAR_REA_REGIONS, regions ->
       {
-         goalAffordance.setLatestRegions(regions);
          if (regions != null)
             planarRegionsGraphic.generateMeshesAsync(regions);
       });

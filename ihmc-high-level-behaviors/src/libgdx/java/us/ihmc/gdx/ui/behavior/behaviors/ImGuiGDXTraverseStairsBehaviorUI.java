@@ -84,7 +84,6 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends ImGuiGDXBehaviorUIInterfac
       });
       helper.subscribeViaCallback(PlanarRegionsForUI, regions ->
       {
-         goalAffordance.setLatestRegions(regions);
          if (regions != null)
             planarRegionsGraphic.generateMeshesAsync(regions);
       });

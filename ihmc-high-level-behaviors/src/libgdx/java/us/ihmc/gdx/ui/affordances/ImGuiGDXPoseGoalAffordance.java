@@ -13,17 +13,13 @@ import imgui.internal.ImGui;
 import imgui.internal.flag.ImGuiItemFlags;
 import imgui.type.ImFloat;
 import org.lwjgl.openvr.InputDigitalActionData;
-import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.input.editor.GDXUIActionMap;
@@ -32,9 +28,6 @@ import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.vr.GDXVRManager;
-import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionTools;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.function.Consumer;
@@ -48,13 +41,11 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
    private GDXUIActionMap placeGoalActionMap;
    private boolean placingGoal = false;
    private boolean placingPosition = true;
-   private Point3D lastObjectIntersection;
    private final Pose3D goalPoseForReading = new Pose3D();
    private final Point3D32 tempSpherePosition = new Point3D32();
    private final Vector3D32 tempRotationVector = new Vector3D32();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final RotationMatrix arrowRotationMatrix = new RotationMatrix();
-   private PlanarRegionsList latestRegions;
    private Consumer<Pose3D> placedPoseConsumer;
 
    public void create(GDXImGuiBasedUI baseUI, Consumer<Pose3D> placedPoseConsumer, Color color)
@@ -91,42 +82,8 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
    {
       if (placingGoal && input.isWindowHovered())
       {
-         Line3DReadOnly pickRayInWorld = input.getPickRayInWorld();
-         PlanarRegionsList latestRegions = this.latestRegions;
-         Point3D pickPoint = null;
-         if (latestRegions != null)
-         {
-            for (PlanarRegion planarRegion : latestRegions.getPlanarRegionsAsList())
-            {
-               Point3D intersection = PlanarRegionTools.intersectRegionWithRay(planarRegion, pickRayInWorld.getPoint(), pickRayInWorld.getDirection());
-               if (intersection != null)
-               {
-                  if (pickPoint == null)
-                  {
-                     pickPoint = intersection;
-                  }
-                  else
-                  {
-                     if (intersection.distance(pickRayInWorld.getPoint()) < pickPoint.distance(pickRayInWorld.getPoint()))
-                     {
-                        pickPoint = intersection;
-                     }
-                  }
-                  lastObjectIntersection = pickPoint;
-               }
-            }
-         }
+         Point3DReadOnly pickPointInWorld = input.getPickPointInWorld();
 
-         if (pickPoint == null)
-         {
-            pickPoint = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(lastObjectIntersection != null
-                                                                                      ? lastObjectIntersection : EuclidCoreTools.origin3D,
-                                                                                Axis3D.Z,
-                                                                                pickRayInWorld.getPoint(),
-                                                                                pickRayInWorld.getDirection());
-         }
-
-         double z = (lastObjectIntersection != null ? lastObjectIntersection.getZ() : 0.0) + goalZOffset.get();
          if (placingPosition)
          {
             if (ImGui.getIO().getKeyCtrl())
@@ -134,7 +91,8 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
                goalZOffset.set(goalZOffset.get() - (input.getMouseWheelDelta() / 30.0f));
             }
 
-            sphere.transform.setTranslation(pickPoint.getX32(), pickPoint.getY32(), (float) z);
+            double z = pickPointInWorld.getZ() + goalZOffset.get();
+            sphere.transform.setTranslation(pickPointInWorld.getX32(), pickPointInWorld.getY32(), (float) z);
 
             if (input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
@@ -144,10 +102,9 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
          else // placing orientation
          {
             GDXTools.toEuclid(sphere.transform, tempSpherePosition);
-            tempSpherePosition.setZ(z);
             GDXTools.toGDX(tempSpherePosition, arrow.transform);
 
-            tempRotationVector.set(pickPoint);
+            tempRotationVector.set(pickPointInWorld);
             tempRotationVector.sub(tempSpherePosition);
 
             double yaw = Math.atan2(tempRotationVector.getY(), tempRotationVector.getX());
@@ -256,11 +213,6 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
       if (sphere != null)
          sphere.transform.val[Matrix4.M03] = Float.NaN;
       goalZOffset.set(0.0f);
-   }
-
-   public void setLatestRegions(PlanarRegionsList latestRegions)
-   {
-      this.latestRegions = latestRegions;
    }
 
    public Pose3DReadOnly getGoalPose()
