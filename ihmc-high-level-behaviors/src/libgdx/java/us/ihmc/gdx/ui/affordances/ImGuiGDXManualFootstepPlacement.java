@@ -30,7 +30,6 @@ import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.input.editor.GDXUIActionMap;
 import us.ihmc.gdx.input.editor.GDXUITrigger;
-import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
@@ -56,26 +55,24 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
    private final Vector3D32 tempRotationVector = new Vector3D32();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
-   ReferenceFrame referenceFrameFootstep;
-   FramePose3D footTextPose;
+   private ReferenceFrame referenceFrameFootstep;
+   private FramePose3D footTextPose;
    boolean footstepCreated = false;
 
-   private float textheight = 12;
+   private float textHeight = 12;
 
-   ArrayList<SingleFootstep> footstepArrayList = new ArrayList<SingleFootstep>();
-   int footstepIndex = -1;
-   GDXImGuiBasedUI baseUI;
+   private final ArrayList<ImGuiGDXManuallyPlacedFootstep> footstepArrayList = new ArrayList<>();
+   private int footstepIndex = -1;
+   private GDXImGuiBasedUI baseUI;
    private CommunicationHelper communicationHelper;
-   RobotSide currentFootStepSide;
+   private RobotSide currentFootStepSide;
    private ROS2SyncedRobotModel syncedRobot;
 
-   private SimpleStepChecker stepChecker;
+   private ImGuiGDXManuallyPlacedFootstepChecker stepChecker;
 
-   GDXPose3DGizmo gizmo;
+   private GDXPose3DGizmo gizmo;
    private ImGui3DViewInput latestInput;
    private GDX3DPanel primary3DPanel;
-
-
 
    public void create(GDXImGuiBasedUI baseUI, CommunicationHelper communicationHelper, ROS2SyncedRobotModel syncedRobotModel)
    {
@@ -99,7 +96,7 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       {
          placingGoal = false;
       });
-      stepChecker = new SimpleStepChecker(baseUI, communicationHelper, syncedRobot);
+      stepChecker = new ImGuiGDXManuallyPlacedFootstepChecker(baseUI, communicationHelper, syncedRobot);
       clear();
    }
 
@@ -107,7 +104,7 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
    {
       renderTooltip = false;
 
-      for (SingleFootstep singleFootstep : footstepArrayList)
+      for (ImGuiGDXManuallyPlacedFootstep singleFootstep : footstepArrayList)
       {
          singleFootstep.calculate3DViewPick(input);
       }
@@ -119,7 +116,7 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
    {
       latestInput = input;
 
-      for (SingleFootstep singleFootstep : footstepArrayList)
+      for (ImGuiGDXManuallyPlacedFootstep singleFootstep : footstepArrayList)
       {
          singleFootstep.process3DViewInput(input);
       }
@@ -289,10 +286,10 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
 
    private void walkFromSteps()
    {
-      ArrayList<SingleFootstep> steps = footstepArrayList;
+      ArrayList<ImGuiGDXManuallyPlacedFootstep> steps = footstepArrayList;
 
       FootstepDataListMessage messageList = new FootstepDataListMessage();
-      for (SingleFootstep step : steps)
+      for (ImGuiGDXManuallyPlacedFootstep step : steps)
       {
          generateFootStepDataMessage(messageList, step);
          messageList.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
@@ -303,7 +300,7 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       clear();
    }
 
-   private void generateFootStepDataMessage(FootstepDataListMessage messageList, SingleFootstep step)
+   private void generateFootStepDataMessage(FootstepDataListMessage messageList, ImGuiGDXManuallyPlacedFootstep step)
    {
       FootstepDataMessage stepMessage = messageList.getFootstepDataList().add();
       stepMessage.setRobotSide(step.getFootstepSide().toByte());
@@ -336,7 +333,7 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       goalPoseForReading.set(pose);
    }
 
-   public ArrayList<SingleFootstep> getFootstepArrayList()
+   public ArrayList<ImGuiGDXManuallyPlacedFootstep> getFootstepArrayList()
    {
       return footstepArrayList;
    }
@@ -345,7 +342,7 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
    {
       placingGoal = true;
       footstepIndex++;
-      footstepArrayList.add(new SingleFootstep(baseUI, footstepSide, footstepIndex));
+      footstepArrayList.add(new ImGuiGDXManuallyPlacedFootstep(baseUI, footstepSide, footstepIndex));
       footstepCreated = true;
       currentFootStepSide = footstepSide;
    }

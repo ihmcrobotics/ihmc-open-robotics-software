@@ -7,7 +7,6 @@ import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
@@ -27,7 +26,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
 
-public class SimpleStepChecker
+public class ImGuiGDXManuallyPlacedFootstepChecker
 {
     private CommunicationHelper communicationHelper;
 
@@ -59,7 +58,7 @@ public class SimpleStepChecker
     private boolean placingGoal = false;
 
     // CONSTRUCTOR
-    public SimpleStepChecker(GDXImGuiBasedUI baseUI, CommunicationHelper communicationHelper, ROS2SyncedRobotModel syncedRobot)
+    public ImGuiGDXManuallyPlacedFootstepChecker(GDXImGuiBasedUI baseUI, CommunicationHelper communicationHelper, ROS2SyncedRobotModel syncedRobot)
     {
         this.baseUI = baseUI;
         footstepPlannerParameters = communicationHelper.getRobotModel().getFootstepPlannerParameters();
@@ -110,7 +109,7 @@ public class SimpleStepChecker
     }
 
     // This should update candidate, stance, and swing in the ImGuiGDXManualFootstepPlacement.
-    public void update(ArrayList<SingleFootstep> stepList, DiscreteFootstep candidate, boolean placingGoal)
+    public void update(ArrayList<ImGuiGDXManuallyPlacedFootstep> stepList, DiscreteFootstep candidate, boolean placingGoal)
     {
         this.candidate = candidate;
         int size = stepList.size();
@@ -143,7 +142,7 @@ public class SimpleStepChecker
         stance = swing;
         swing = temp;
     }
-    public DiscreteFootstep convertToDiscrete(SingleFootstep step)
+    public DiscreteFootstep convertToDiscrete(ImGuiGDXManuallyPlacedFootstep step)
     {
         Pose3DReadOnly pose = step.getPose();
         Point3DReadOnly position = pose.getPosition();

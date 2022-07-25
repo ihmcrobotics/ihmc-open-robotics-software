@@ -1,20 +1,16 @@
 package us.ihmc.gdx.ui.affordances;
 
-import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
-import us.ihmc.euclid.shape.primitives.interfaces.Shape3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.gdx.GDX3DSituatedText;
@@ -26,13 +22,12 @@ import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.StepCheckIsPointInsideAlgorithm;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
 import java.util.function.Function;
 
-public class SingleFootstep
+public class ImGuiGDXManuallyPlacedFootstep
 {
    private final GDX3DSituatedText footstepIndexText;
    private GDXModelInstance footstepModelInstance;
@@ -53,7 +48,7 @@ public class SingleFootstep
    private volatile Runnable buildMeshAndCreateModelInstance = null;
    //public GDXSelectablePose3DGizmo gizmo = new GDXSelectablePose3DGizmo();
 
-   public SingleFootstep(GDXImGuiBasedUI baseUI, RobotSide footstepSide, int index)
+   public ImGuiGDXManuallyPlacedFootstep(GDXImGuiBasedUI baseUI, RobotSide footstepSide, int index)
    {
       this.footstepSide = footstepSide;
       this.baseUI = baseUI;
