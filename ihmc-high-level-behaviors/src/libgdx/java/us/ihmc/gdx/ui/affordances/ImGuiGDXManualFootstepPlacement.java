@@ -159,8 +159,8 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
 
             // hovering.
             // TODO: (need yaw here?)
-            stepChecker.update(footstepArrayList, new DiscreteFootstep(pickPointInWorld.getX(), pickPointInWorld.getY(), 0, currentFootStepSide) , placingGoal);
-            stepChecker.checkValidStep();
+            stepChecker.checkValidStep(footstepArrayList, new DiscreteFootstep(pickPointInWorld.getX(), pickPointInWorld.getY(), 0, currentFootStepSide) , placingGoal);
+
             stepChecker.getInput(input, placingGoal);
 
 			//If out of bounds, flash colors
@@ -168,11 +168,11 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
             {
                if(footstepArrayList.get(footstepIndex).getFootstepSide() == RobotSide.LEFT)
                {
-                  footstepArrayList.get(footstepIndex).getFootstepModelInstance().materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 1.0f, 0.0f, 0.0f, 0.0f));
+                  setColor(footstepIndex,1.0f,0.0f,0.0f,0.0f);
                }
                else
                {
-                  footstepArrayList.get(footstepIndex).getFootstepModelInstance().materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.0f, 1.0f, 0.0f, 0.0f));
+                  setColor(footstepIndex,0.0f,1.0f,0.0f,0.0f);
                }
             }
             else
@@ -190,16 +190,16 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
                if(footstepArrayList.get(footstepIndex).getFootstepSide() == RobotSide.LEFT)
                {
                   if(flashingFootStepsColorHigh)
-                     footstepArrayList.get(footstepIndex).getFootstepModelInstance().materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 1.0f, 0.0f, 0.0f, 0.0f));
+                     setColor(footstepIndex,1.0f,0.0f,0.0f,0.0f);
                   else
-                     footstepArrayList.get(footstepIndex).getFootstepModelInstance().materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.5f, 0.0f, 0.0f, 0.0f));
+                     setColor(footstepIndex,0.5f,0.0f,0.0f,0.0f);
                }
                else
                {
                   if(flashingFootStepsColorHigh)
-                     footstepArrayList.get(footstepIndex).getFootstepModelInstance().materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.0f, 1.0f, 0.0f, 0.0f));
+                     setColor(footstepIndex,0.0f,1.0f,0.0f,0.0f);
                   else
-                     footstepArrayList.get(footstepIndex).getFootstepModelInstance().materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.0f, 0.5f, 0.0f, 0.0f));
+                     setColor(footstepIndex,0.0f,0.5f,0.0f,0.0f);
                }
             }
          }
@@ -220,6 +220,12 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
          stepChecker.getInput(input, placingGoal);
          stepChecker.checkValidStep(footstepArrayList, new DiscreteFootstep(pickPointInWorld.getX(), pickPointInWorld.getY(), 0, currentFootStepSide) , placingGoal);
       }
+   }
+
+   // sets color of the corresponding footstep in the list
+   public void setColor(int index, float r, float g, float b, float a)
+   {
+      footstepArrayList.get(index).getFootstepModelInstance().materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, r, g, b, a));
    }
 
    public void renderImGuiWidgets()

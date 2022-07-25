@@ -3,6 +3,7 @@ package us.ihmc.gdx.ui.affordances;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
@@ -50,6 +51,7 @@ public class ImGuiGDXManuallyPlacedFootstep
 
    private volatile Runnable buildMeshAndCreateModelInstance = null;
    //public GDXSelectablePose3DGizmo gizmo = new GDXSelectablePose3DGizmo();
+
 
    public ImGuiGDXManuallyPlacedFootstep(GDXImGuiBasedUI baseUI, RobotSide footstepSide, int index)
    {
@@ -272,5 +274,13 @@ public class ImGuiGDXManuallyPlacedFootstep
       return renderableAdapter;
    }
 
+   public boolean isPickSelected()
+   {
+      return pickSelected;
+   }
 
+   public double getYaw()
+   {
+      return tempFramePose.getYaw();
+   }
 }
