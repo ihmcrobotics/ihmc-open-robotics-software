@@ -37,7 +37,7 @@ public class ValkyrieInitialSetupFactories
       initialSetup.setLegJointQs(0.0, 0.0, -0.3, 1.9, 0.8, 0.0);
       initialSetup.setArmJointQs(0.7, -1.2, 0.0, -1.7);
       initialSetup.setSpineJointQs(0.0, 0.0, 0.0);
-      initialSetup.setRootJointPose(0.0, 0.0, 0.74, 0.0, 0.0, 0.0);
+      initialSetup.setRootJointPose(0.0, 0.0, 0.76, 0.0, 0.0, 0.0);
 
       return initialSetup;
    }
