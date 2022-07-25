@@ -211,6 +211,15 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
             removeFootStep();
          }
       }
+      if (input.isWindowHovered())
+      {
+         Point3DReadOnly pickPointInWorld = input.getPickPointInWorld();
+         renderTooltip = true;
+         // hovering.
+         // TODO: (need yaw here?)
+         stepChecker.getInput(input, placingGoal);
+         stepChecker.checkValidStep(footstepArrayList, new DiscreteFootstep(pickPointInWorld.getX(), pickPointInWorld.getY(), 0, currentFootStepSide) , placingGoal);
+      }
    }
 
    public void renderImGuiWidgets()
@@ -330,17 +339,18 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
 
    private void walkFromSteps()
    {
-      ArrayList<ImGuiGDXManuallyPlacedFootstep> steps = footstepArrayList;
-
       FootstepDataListMessage messageList = new FootstepDataListMessage();
-      for (ImGuiGDXManuallyPlacedFootstep step : steps)
+      for (ImGuiGDXManuallyPlacedFootstep step : footstepArrayList)
       {
          generateFootStepDataMessage(messageList, step);
          messageList.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
          messageList.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
       }
       communicationHelper.publishToController(messageList);
-      // done walking >> delete steps in singleFootStepAffordance.
+      // done walking >>
+      // set stance and swing as last two steps of the footstepArrayList (if this list is not empty)
+      // delete steps in singleFootStepAffordance.
+      stepChecker.clear(footstepArrayList);
       clear();
    }
 
