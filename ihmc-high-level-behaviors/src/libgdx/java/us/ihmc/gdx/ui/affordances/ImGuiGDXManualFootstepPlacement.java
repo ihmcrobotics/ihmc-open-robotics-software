@@ -49,9 +49,8 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private final ImFloat goalZOffset = new ImFloat(0.0f);
 
-   private GDXUIActionMap placeGoalActionMap;
+   //private GDXUIActionMap placeGoalActionMap;
    private boolean placingGoal = false;
-   private boolean placingPosition = true;
    private Point3D lastObjectIntersection;
    private final Pose3D goalPoseForReading = new Pose3D();
    private final Point3D32 tempSpherePosition = new Point3D32();
@@ -88,20 +87,7 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       primary3DPanel = baseUI.getPrimary3DPanel();
       primary3DPanel.addWindowDrawListAddition(this::renderTooltips);
 
-      placeGoalActionMap = new GDXUIActionMap(startAction ->
-                                              {
-                                                 placingGoal = true;
-                                                 placingPosition = true;
-                                              });
-      placeGoalActionMap.mapAction(GDXUITrigger.POSITION_LEFT_CLICK, trigger ->
-      {
-         placingPosition = false;
-      });
 
-      placeGoalActionMap.mapAction(GDXUITrigger.RIGHT_CLICK, trigger ->
-      {
-         placingGoal = false;
-      });
       stepChecker = new ImGuiGDXManuallyPlacedFootstepChecker(baseUI, communicationHelper, syncedRobot);
       clear();
    }
@@ -133,7 +119,7 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
          renderTooltip = true;
 
          double z = (lastObjectIntersection != null ? lastObjectIntersection.getZ() : 0.0) + goalZOffset.get();
-         if (placingPosition && footstepArrayList.size() > 0)
+         if (footstepArrayList.size() > 0)
          {
             if (ImGui.getIO().getKeyCtrl())
             {
@@ -147,9 +133,7 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
             // when left button clicked and released.
             if (input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
-               placeGoalActionMap.triggerAction(GDXUITrigger.POSITION_LEFT_CLICK);
                placingGoal = true;
-               placingPosition = true;
                footstepCreated = false;
 
                //Switch sides
@@ -206,7 +190,7 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
 
          if (input.mouseReleasedWithoutDrag(ImGuiMouseButton.Right))
          {
-            placeGoalActionMap.triggerAction(GDXUITrigger.RIGHT_CLICK);
+            placingGoal = false;
 
             removeFootStep();
          }
@@ -332,7 +316,6 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
    public void clear()
    {
       placingGoal = false;
-      placingPosition = true;
 
       while(footstepArrayList.size() >0)
       {
