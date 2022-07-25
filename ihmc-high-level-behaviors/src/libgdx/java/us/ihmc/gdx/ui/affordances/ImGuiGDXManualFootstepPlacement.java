@@ -25,6 +25,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
@@ -348,6 +349,7 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       FootstepDataMessage stepMessage = messageList.getFootstepDataList().add();
       stepMessage.setRobotSide(step.getFootstepSide().toByte());
       stepMessage.getLocation().set(new Point3D(step.getSelectablePose3DGizmo().getPoseGizmo().getPose().getPosition()));
+      stepMessage.getOrientation().set(step.getPose().getOrientation());
       stepMessage.setSwingDuration(1.2);
       stepMessage.setTransferDuration(0.8);
    }
