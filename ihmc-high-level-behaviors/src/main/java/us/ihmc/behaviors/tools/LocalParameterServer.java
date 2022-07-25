@@ -5,7 +5,7 @@ import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
-import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
+import us.ihmc.commons.thread.ExceptionHandlingThreadScheduler;
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
 import us.ihmc.yoVariables.registry.YoRegistry;
 

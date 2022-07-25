@@ -37,7 +37,7 @@ import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
-import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
+import us.ihmc.commons.thread.ExceptionHandlingThreadScheduler;
 
 public class ManualStepTabController extends Group
 {

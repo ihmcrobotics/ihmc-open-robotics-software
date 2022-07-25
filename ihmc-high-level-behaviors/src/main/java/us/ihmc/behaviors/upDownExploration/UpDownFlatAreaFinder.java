@@ -33,7 +33,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
+import us.ihmc.commons.thread.ExceptionHandlingThreadScheduler;
 import us.ihmc.commons.thread.TypedNotification;
 
 public class UpDownFlatAreaFinder

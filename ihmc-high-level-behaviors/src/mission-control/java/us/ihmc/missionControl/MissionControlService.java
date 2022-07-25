@@ -7,7 +7,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.kryo.KryoMessager;
 import us.ihmc.tools.processManagement.ProcessTools;
-import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
+import us.ihmc.commons.thread.ExceptionHandlingThreadScheduler;
 
 import java.util.ArrayList;
 import java.util.TreeSet;

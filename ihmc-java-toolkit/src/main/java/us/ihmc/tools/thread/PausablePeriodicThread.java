@@ -1,5 +1,7 @@
 package us.ihmc.tools.thread;
 
+import us.ihmc.commons.thread.ExceptionHandlingThreadScheduler;
+
 import java.util.concurrent.ScheduledFuture;
 
 public class PausablePeriodicThread

@@ -2,7 +2,7 @@ package us.ihmc.behaviors.tools;
 
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.kryo.MessagerUpdateThread;
-import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
+import us.ihmc.commons.thread.ExceptionHandlingThreadScheduler;
 
 import java.util.concurrent.TimeUnit;
 

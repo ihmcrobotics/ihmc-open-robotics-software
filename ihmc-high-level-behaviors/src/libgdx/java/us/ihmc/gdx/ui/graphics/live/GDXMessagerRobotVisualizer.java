@@ -8,7 +8,7 @@ import us.ihmc.gdx.ui.graphics.GDXRobotModelGraphic;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
+import us.ihmc.commons.thread.ExceptionHandlingThreadScheduler;
 
 public class GDXMessagerRobotVisualizer extends GDXRobotModelGraphic
 {

@@ -2,7 +2,7 @@ package us.ihmc.missionControl;
 
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
+import us.ihmc.commons.thread.ExceptionHandlingThreadScheduler;
 
 import java.util.Random;
 

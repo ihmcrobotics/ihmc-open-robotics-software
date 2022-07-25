@@ -33,7 +33,7 @@ import us.ihmc.robotEnvironmentAwareness.fusion.objectDetection.ObjectType;
 import us.ihmc.robotEnvironmentAwareness.fusion.tools.ImageVisualizationHelper;
 import us.ihmc.robotEnvironmentAwareness.updaters.REAModuleStateReporter;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
+import us.ihmc.commons.thread.ExceptionHandlingThreadScheduler;
 
 import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.*;
 
