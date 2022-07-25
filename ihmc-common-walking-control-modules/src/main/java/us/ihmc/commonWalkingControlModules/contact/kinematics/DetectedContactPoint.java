@@ -30,8 +30,8 @@ public class DetectedContactPoint
       {
          YoGraphicPosition contactPointGraphic = new YoGraphicPosition("contactPositionGraphic_" + nameSuffix, contactPointPosition, radius, color);
          YoGraphicVector contactNormalGraphic = new YoGraphicVector("contactNormalGraphic" + nameSuffix, contactPointPosition, contactPointNormal, arrowScale, color);
-         graphicsListRegistry.registerYoGraphic("Kinematic-Detected Contact Points", contactPointGraphic);
-         graphicsListRegistry.registerYoGraphic("Kinematic-Detected Contact Points", contactNormalGraphic);
+         graphicsListRegistry.registerYoGraphic(MeshBasedContactDetector.graphicListRegistryName, contactPointGraphic);
+         graphicsListRegistry.registerYoGraphic(MeshBasedContactDetector.graphicListRegistryName, contactNormalGraphic);
       }
    }
 
