@@ -40,7 +40,7 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
 
     private BipedalFootstepPlannerNodeRejectionReason prevReason = null;
     private BipedalFootstepPlannerNodeRejectionReason reason = null;
-    private BipedalFootstepPlannerNodeRejectionReason reasonForHover = null;
+    private ArrayList<BipedalFootstepPlannerNodeRejectionReason> reasons = new ArrayList<>();
 
 //    private ArrayList<BipedalFootstepPlannerNodeRejectionReason> reasons = new ArrayList<>();
 
@@ -126,6 +126,7 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
     {
         plannedSteps = stepList;
         textWarnings.clear();
+        reasons.clear();
         setInitialFeet();
 
         boolean displayReasonForHoveringStep = false;
