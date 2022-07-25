@@ -42,7 +42,7 @@ public class ImGuiGDXManuallyPlacedFootstep
    public boolean pickSelected;
    GDXImGuiBasedUI baseUI;
 
-   private Sphere3D boundingSphere = new Sphere3D(0.1);
+   public Sphere3D boundingSphere = new Sphere3D(0.1);
    private boolean isClickedOn;
    private int index;
    private final FramePose3D textFramePose = new FramePose3D();
@@ -130,6 +130,7 @@ public class ImGuiGDXManuallyPlacedFootstep
       boolean executeMotionKeyPressed = ImGui.isKeyReleased(ImGuiTools.getSpaceKey());
 
 
+      // TODO: mouse hovering on the footstep. (get foot validity warning text when this happens)
       if(pickSelected)
       {
          if(footstepSide == RobotSide.LEFT)
