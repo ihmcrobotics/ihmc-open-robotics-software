@@ -60,10 +60,13 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
 
     private ArrayList<ImGuiGDXManuallyPlacedFootstep> plannedSteps;
 
+    private ROS2SyncedRobotModel syncedRobot;
+
 
     // CONSTRUCTOR
     public ImGuiGDXManuallyPlacedFootstepChecker(GDXImGuiBasedUI baseUI, CommunicationHelper communicationHelper, ROS2SyncedRobotModel syncedRobot)
     {
+        this.syncedRobot = syncedRobot;
         this.baseUI = baseUI;
         footstepPlannerParameters = communicationHelper.getRobotModel().getFootstepPlannerParameters();
         snapper = new FootstepSnapAndWiggler(footPolygons, footstepPlannerParameters);
@@ -121,6 +124,16 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
 //        {
             plannedSteps = stepList;
             textWarnings.clear();
+
+        // Set initial feet.
+        RigidBodyTransform initialRightFootTransform = syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame();
+        RigidBodyTransform initialLeftFootTransform = syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame();
+
+        Vector3DBasics initialRightFoot =  initialRightFootTransform.getTranslation();
+        Vector3DBasics initialLeftFoot =  initialLeftFootTransform.getTranslation();
+
+        swing = new DiscreteFootstep(initialLeftFoot.getX(), initialLeftFoot.getY(), initialLeftFootTransform.getRotation().getYaw(), RobotSide.LEFT);
+        stance = new DiscreteFootstep(initialRightFoot.getX(), initialRightFoot.getY(), initialRightFootTransform.getRotation().getYaw(), RobotSide.RIGHT);
 //            reasons.clear();
 
             DiscreteFootstep candidate;
