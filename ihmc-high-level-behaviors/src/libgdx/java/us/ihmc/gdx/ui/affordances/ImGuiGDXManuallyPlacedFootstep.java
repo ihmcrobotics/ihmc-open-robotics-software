@@ -11,6 +11,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.gdx.GDX3DSituatedText;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.sceneManager.GDXRenderableAdapter;
@@ -277,9 +278,9 @@ public class ImGuiGDXManuallyPlacedFootstep
       getFootstepModelInstance().materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, r, g, b, a));
    }
 
-   public void flashFootstepsWhenBadPlacement(ImGuiGDXManuallyPlacedFootstepChecker stepChecker, Timer timer, boolean flashingFootStepsColorHigh)
+   public void flashFootstepsWhenBadPlacement(BipedalFootstepPlannerNodeRejectionReason reason, ImGuiGDXManuallyPlacedFootstepChecker stepChecker, Timer timer, boolean flashingFootStepsColorHigh)
    {
-      if(stepChecker.getReason() == null)
+      if(reason == null)
       {
          if(getFootstepSide() == RobotSide.LEFT)
          {

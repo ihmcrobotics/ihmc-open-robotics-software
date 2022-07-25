@@ -26,6 +26,7 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewInput;
@@ -146,7 +147,7 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
             stepChecker.getInput(input, placingGoal);
 
 			//If out of bounds, flash colors
-            footstepArrayList.get(footstepIndex).flashFootstepsWhenBadPlacement(stepChecker, timerFlashingFootsteps, flashingFootStepsColorHigh);
+           // footstepArrayList.get(footstepIndex).flashFootstepsWhenBadPlacement(stepChecker, timerFlashingFootsteps, flashingFootStepsColorHigh);
          }
 
          if (input.mouseReleasedWithoutDrag(ImGuiMouseButton.Right))
@@ -164,12 +165,11 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
          // TODO: (need yaw here?)
          stepChecker.getInput(input, placingGoal);
          stepChecker.checkValidStep(footstepArrayList, new DiscreteFootstep(pickPointInWorld.getX(), pickPointInWorld.getY(), 0, currentFootStepSide) , placingGoal);
-         for(int i =0; i<footstepArrayList.size(); i++)
+         ArrayList<BipedalFootstepPlannerNodeRejectionReason> temporaryReasons = stepChecker.getReasons();
+         for(int i =0; i<temporaryReasons.size(); i++)
          {
-            if (!placingGoal && footstepArrayList.get(i).isPickSelected() && footstepArrayList.size() > 0)
-            {
-               footstepArrayList.get(i).flashFootstepsWhenBadPlacement(stepChecker, timerFlashingFootsteps, flashingFootStepsColorHigh);
-            }
+            footstepArrayList.get(i).flashFootstepsWhenBadPlacement(temporaryReasons.get(i), stepChecker, timerFlashingFootsteps, flashingFootStepsColorHigh);
+
          }
       }
    }
