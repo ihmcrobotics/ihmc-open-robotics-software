@@ -165,4 +165,6 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
             text = new String(" Warning! " + reason.name());
         }
     }
+
+
 }

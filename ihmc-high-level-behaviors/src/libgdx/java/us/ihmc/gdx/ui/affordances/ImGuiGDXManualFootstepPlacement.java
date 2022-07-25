@@ -3,6 +3,7 @@ package us.ihmc.gdx.ui.affordances;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -25,6 +26,7 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewInput;
@@ -36,6 +38,7 @@ import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.gdx.vr.GDXVRManager;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.Timer;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -73,6 +76,9 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
    private GDXPose3DGizmo gizmo;
    private ImGui3DViewInput latestInput;
    private GDX3DPanel primary3DPanel;
+
+   private Timer timerFlashingFootsteps = new Timer();
+   private boolean flashingFootStepsColorHigh;
 
    public void create(GDXImGuiBasedUI baseUI, CommunicationHelper communicationHelper, ROS2SyncedRobotModel syncedRobotModel)
    {
@@ -156,13 +162,53 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
             stepChecker.update(footstepArrayList, new DiscreteFootstep(pickPointInWorld.getX(), pickPointInWorld.getY(), 0, currentFootStepSide) , placingGoal);
             stepChecker.checkValidStep();
             stepChecker.getInput(input, placingGoal);
+
+			//If out of bounds, flash colors
+            if(stepChecker.getReason() == null)
+            {
+               if(footstepArrayList.get(footstepIndex).getFootstepSide() == RobotSide.LEFT)
+               {
+                  footstepArrayList.get(footstepIndex).getFootstepModelInstance().materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 1.0f, 0.0f, 0.0f, 0.0f));
+               }
+               else
+               {
+                  footstepArrayList.get(footstepIndex).getFootstepModelInstance().materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.0f, 1.0f, 0.0f, 0.0f));
+               }
+            }
+            else
+            {
+               if(!timerFlashingFootsteps.hasBeenSet())
+               {
+                  timerFlashingFootsteps.reset();
+                  flashingFootStepsColorHigh = false;
+               }
+               if(timerFlashingFootsteps.isExpired(0.1))
+               {
+                  flashingFootStepsColorHigh = !flashingFootStepsColorHigh;
+                  timerFlashingFootsteps.reset();
+               }
+               if(footstepArrayList.get(footstepIndex).getFootstepSide() == RobotSide.LEFT)
+               {
+                  if(flashingFootStepsColorHigh)
+                     footstepArrayList.get(footstepIndex).getFootstepModelInstance().materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 1.0f, 0.0f, 0.0f, 0.0f));
+                  else
+                     footstepArrayList.get(footstepIndex).getFootstepModelInstance().materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.5f, 0.0f, 0.0f, 0.0f));
+               }
+               else
+               {
+                  if(flashingFootStepsColorHigh)
+                     footstepArrayList.get(footstepIndex).getFootstepModelInstance().materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.0f, 1.0f, 0.0f, 0.0f));
+                  else
+                     footstepArrayList.get(footstepIndex).getFootstepModelInstance().materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.0f, 0.5f, 0.0f, 0.0f));
+               }
+            }
          }
 
          if (input.mouseReleasedWithoutDrag(ImGuiMouseButton.Right))
          {
             placeGoalActionMap.triggerAction(GDXUITrigger.RIGHT_CLICK);
-//            baseUI.getPrimaryScene().removeRenderableAdapter((footstepArrayList.remove(footstepIndex).getFootstepModelInstance()), GDXSceneLevel.VIRTUAL);
-            footstepIndex--;
+
+            removeFootStep();
          }
       }
    }
@@ -235,12 +281,15 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
+     
       if (isPlaced())
       {
          for (int i = 0; i < footstepArrayList.size(); i++)
          {
-            footstepArrayList.get(i).getFootstepModelInstance().getRenderables(renderables, pool);
+
             footstepArrayList.get(i).getVirtualRenderables(renderables, pool);
+            footstepArrayList.get(i).getFootstepModelInstance().getRenderables(renderables, pool);
+
          }
       }
    }
@@ -269,14 +318,11 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
    {
       placingGoal = false;
       placingPosition = true;
-      if (footstepArrayList.size() > 0 && footstepArrayList.get(footstepIndex).getFootstepModelInstance() != null)
-         footstepArrayList.get(footstepIndex).getFootstepModelInstance().transform.val[Matrix4.M03] = Float.NaN;
-      goalZOffset.set(0.0f);
 
-//      for (int i = 0; i <= footstepIndex; i++)
-//      {
-//         baseUI.getPrimaryScene().removeRenderableAdapter((footstepArrayList.remove(0).getFootstepModelInstance()), GDXSceneLevel.VIRTUAL);
-//      }
+      while(footstepArrayList.size() >0)
+      {
+         removeFootStep();
+      }
 
       footstepArrayList.clear();
       footstepIndex = -1;
@@ -343,5 +389,16 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       footstepArrayList.add(new ImGuiGDXManuallyPlacedFootstep(baseUI, footstepSide, footstepIndex));
       footstepCreated = true;
       currentFootStepSide = footstepSide;
+   }
+
+   public void removeFootStep()
+   {
+      if (footstepArrayList.size() > 0 && footstepArrayList.get(footstepIndex).getFootstepModelInstance() != null)
+         footstepArrayList.get(footstepIndex).getFootstepModelInstance().transform.val[Matrix4.M03] = Float.NaN;
+      goalZOffset.set(0.0f);
+
+      baseUI.getPrimaryScene().removeRenderableAdapter((footstepArrayList.remove(footstepIndex).getRenderableAdapter()));
+      footstepIndex--;
+
    }
 }

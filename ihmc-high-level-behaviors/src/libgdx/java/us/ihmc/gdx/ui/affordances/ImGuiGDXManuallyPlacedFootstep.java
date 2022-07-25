@@ -1,5 +1,6 @@
 package us.ihmc.gdx.ui.affordances;
 
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.utils.Array;
@@ -16,6 +17,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.gdx.GDX3DSituatedText;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewInput;
+import us.ihmc.gdx.sceneManager.GDXRenderableAdapter;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.environment.GDXModelInstance;
 import us.ihmc.gdx.tools.GDXModelLoader;
@@ -30,6 +32,7 @@ import java.util.function.Function;
 public class ImGuiGDXManuallyPlacedFootstep
 {
    private final GDX3DSituatedText footstepIndexText;
+   private final GDXRenderableAdapter renderableAdapter;
    private GDXModelInstance footstepModelInstance;
    private RobotSide footstepSide;
 
@@ -70,6 +73,11 @@ public class ImGuiGDXManuallyPlacedFootstep
       selectablePose3DGizmo.create(baseUI.getPrimary3DPanel().getCamera3D());
 
       footstepIndexText = new GDX3DSituatedText("" + index);
+
+      renderableAdapter = new GDXRenderableAdapter(footstepModelInstance::getRenderables, GDXSceneLevel.VIRTUAL);
+
+      textRenderables.add(footstepIndexText);
+
    }
 
    public void setFootPose(double x, double y, double z)
@@ -226,17 +234,10 @@ public class ImGuiGDXManuallyPlacedFootstep
 
    public void update()
    {
-      /*if (buildMeshAndCreateModelInstance != null)
-      {
-         LogTools.info("Not null");
-         buildMeshAndCreateModelInstance.run();
-         buildMeshAndCreateModelInstance = null;
-      }*/
 
-
+      selectablePose3DGizmo.getPoseGizmo().getPose().getReferenceFrame().update();
       selectablePose3DGizmo.getPoseGizmo().getPose().get(tempTransform);
       double textHeight = 0.08;
-      selectablePose3DGizmo.getPoseGizmo().getPose().getReferenceFrame().update();
       textFramePose.setToZero(selectablePose3DGizmo.getPoseGizmo().getPose().getReferenceFrame());
       textFramePose.set(selectablePose3DGizmo.getPoseGizmo().getPose());
       textFramePose.getOrientation().prependYawRotation(-Math.PI / 2.0);
@@ -246,8 +247,7 @@ public class ImGuiGDXManuallyPlacedFootstep
       textFramePose.changeFrame(ReferenceFrame.getWorldFrame());
       GDXTools.toGDX(textFramePose, tempTransform, footstepIndexText.getModelInstance().transform);
       footstepIndexText.scale((float) textHeight);
-      textRenderables.add(footstepIndexText);
-//      LogTools.info(textFramePose.getPosition());
+
    }
 
 
@@ -265,4 +265,11 @@ public class ImGuiGDXManuallyPlacedFootstep
    {
       return boundingSphere;
    }
+
+   public GDXRenderableAdapter getRenderableAdapter()
+   {
+      return renderableAdapter;
+   }
+
+
 }
