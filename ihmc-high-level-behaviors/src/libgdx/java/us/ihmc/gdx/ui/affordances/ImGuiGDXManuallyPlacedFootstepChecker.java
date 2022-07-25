@@ -40,6 +40,8 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
 
     private BipedalFootstepPlannerNodeRejectionReason prevReason = null;
     private BipedalFootstepPlannerNodeRejectionReason reason = null;
+    private BipedalFootstepPlannerNodeRejectionReason reasonForHover = null;
+
 //    private ArrayList<BipedalFootstepPlannerNodeRejectionReason> reasons = new ArrayList<>();
 
 
@@ -126,6 +128,9 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
         textWarnings.clear();
         setInitialFeet();
 
+        boolean displayReasonForHoveringStep = false;
+
+
         DiscreteFootstep candidate;
         // iterate through the list ( + current initial stance and swing) and check validity for all.
         for (int i = 0; i < stepList.size(); ++i)
@@ -135,6 +140,7 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
             if (currentStep.isPickSelected())
             {
                 candidate = convertToDiscrete(currentStep);
+                displayReasonForHoveringStep = true;
             }
             // otherwise, check validity for the futureStep
             else
@@ -161,6 +167,8 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
             {
                 reason = stepChecker.checkStepValidity(candidate,convertToDiscrete(stepList.get(i-1)), convertToDiscrete(stepList.get(i-2)));
             }
+
+            if(displayReasonForHoveringStep) break;
         }
         renderTooltip = placingGoal;
         makeWarnings();
@@ -177,7 +185,7 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
     {
         Pose3DReadOnly pose = step.getPose();
         Point3DReadOnly position = pose.getPosition();
-        return new DiscreteFootstep(position.getX(), position.getY(), pose.getYaw(), step.getFootstepSide());
+        return new DiscreteFootstep(position.getX(), position.getY(), step.getPose().getOrientation().getYaw(), step.getFootstepSide());
     }
 
     public BipedalFootstepPlannerNodeRejectionReason getReason()
