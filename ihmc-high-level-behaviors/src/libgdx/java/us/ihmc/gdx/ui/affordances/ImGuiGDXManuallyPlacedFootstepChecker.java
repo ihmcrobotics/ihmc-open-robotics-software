@@ -130,7 +130,10 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
         reasons.clear();
         setInitialFeet();
 
+        
+
         boolean displayReasonForHoveringStep = false;
+
 
 
         DiscreteFootstep candidate;
@@ -148,6 +151,7 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
             else
             {
                 candidate = futureStep;
+                displayReasonForHoveringStep = false;
             }
             // use current stance, swing
             if (i==0)
@@ -177,7 +181,10 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
 
             reasons.add(reason);
         }
-        if(displayReasonForHoveringStep) reason = reasonFromHover;
+        if(displayReasonForHoveringStep)
+        {
+            reason = reasonFromHover;
+        }
         renderTooltip = placingGoal;
         makeWarnings();
     }
