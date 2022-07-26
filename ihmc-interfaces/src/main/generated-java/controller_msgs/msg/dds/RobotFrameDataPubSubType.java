@@ -46,10 +46,7 @@ public class RobotFrameDataPubSubType implements us.ihmc.pubsub.TopicDataType<co
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 2056; ++i0)
-      {
-        current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
-      }
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
 
       return current_alignment - initial_alignment;
    }
@@ -71,11 +68,8 @@ public class RobotFrameDataPubSubType implements us.ihmc.pubsub.TopicDataType<co
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getFramePoseInWorld(), current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getFrameName().size(); ++i0)
-      {
-          current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getFrameName().get(i0).length() + 1;
-      }
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getFrameName().length() + 1;
+
 
       return current_alignment - initial_alignment;
    }
@@ -87,8 +81,8 @@ public class RobotFrameDataPubSubType implements us.ihmc.pubsub.TopicDataType<co
       cdr.write_type_2(data.getFrameNameHash());
 
       geometry_msgs.msg.dds.PosePubSubType.write(data.getFramePoseInWorld(), cdr);
-      if(data.getFrameName().size() <= 2056)
-      cdr.write_type_e(data.getFrameName());else
+      if(data.getFrameName().length() <= 255)
+      cdr.write_type_d(data.getFrameName());else
           throw new RuntimeException("frame_name field exceeds the maximum length");
 
    }
@@ -100,7 +94,7 @@ public class RobotFrameDataPubSubType implements us.ihmc.pubsub.TopicDataType<co
       data.setFrameNameHash(cdr.read_type_2());
       	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getFramePoseInWorld(), cdr);	
-      cdr.read_type_e(data.getFrameName());	
+      cdr.read_type_d(data.getFrameName());	
 
    }
 
@@ -111,7 +105,7 @@ public class RobotFrameDataPubSubType implements us.ihmc.pubsub.TopicDataType<co
       ser.write_type_2("frame_name_hash", data.getFrameNameHash());
       ser.write_type_a("frame_pose_in_world", new geometry_msgs.msg.dds.PosePubSubType(), data.getFramePoseInWorld());
 
-      ser.write_type_e("frame_name", data.getFrameName());
+      ser.write_type_d("frame_name", data.getFrameName());
    }
 
    @Override
@@ -121,7 +115,7 @@ public class RobotFrameDataPubSubType implements us.ihmc.pubsub.TopicDataType<co
       data.setFrameNameHash(ser.read_type_2("frame_name_hash"));
       ser.read_type_a("frame_pose_in_world", new geometry_msgs.msg.dds.PosePubSubType(), data.getFramePoseInWorld());
 
-      ser.read_type_e("frame_name", data.getFrameName());
+      ser.read_type_d("frame_name", data.getFrameName());
    }
 
    public static void staticCopy(controller_msgs.msg.dds.RobotFrameData src, controller_msgs.msg.dds.RobotFrameData dest)
