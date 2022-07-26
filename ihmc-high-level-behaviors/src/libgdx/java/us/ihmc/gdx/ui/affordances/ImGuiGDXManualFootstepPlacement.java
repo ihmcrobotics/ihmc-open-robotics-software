@@ -173,6 +173,10 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
 
          }
       }
+      Point3DReadOnly pickPointInWorld = input.getPickPointInWorld();
+      stepChecker.checkValidStep(footstepArrayList, new DiscreteFootstep(pickPointInWorld.getX(), pickPointInWorld.getY(), 0, currentFootStepSide) , placingGoal);
+      stepChecker.getInput(input, placingGoal);
+
 
       for (int i = 0 ; i < footstepArrayList.size(); ++i)
       {
@@ -184,6 +188,17 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
          }
       }
       stepChecker.makeWarnings();
+
+//      // TODO: (DELETE THIS LATER) checking all the reasons for DEBUGGING
+//
+//      for (BipedalFootstepPlannerNodeRejectionReason r : stepChecker.getReasons())
+//      {
+//         if(r!=null)
+//         {
+//            System.out.println(r.name());
+//         }
+//      }
+
    }
 
    public void renderImGuiWidgets()

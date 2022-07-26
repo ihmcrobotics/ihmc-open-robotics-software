@@ -131,22 +131,11 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
         reasons.clear();
         setInitialFeet();
         boolean displayReasonForHoveringStep = false;
-        DiscreteFootstep candidate;
+//        DiscreteFootstep candidate;
         // iterate through the list ( + current initial stance and swing) and check validity for all.
         for (int i = 0; i < stepList.size(); ++i)
         {
-            ImGuiGDXManuallyPlacedFootstep currentStep = stepList.get(i);
-            // if mouse hovering on one of the planned footsteps, check validity and display warning message accordingly.
-            if (currentStep.isPickSelected())
-            {
-                candidate = convertToDiscrete(currentStep);
-                displayReasonForHoveringStep = true;
-            }
-            // otherwise, check validity for the futureStep
-            else
-            {
-                candidate = futureStep;
-            }
+            DiscreteFootstep candidate = convertToDiscrete(stepList.get(i));
             // use current stance, swing
             if (i == 0)
             {
@@ -176,6 +165,30 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
             reasons.add(reason);
 
         }
+
+        int size = stepList.size();
+
+        if (stepList.size()>2)
+        {
+            DiscreteFootstep tempStance = convertToDiscrete(stepList.get(size-1));
+            DiscreteFootstep tempSwing = convertToDiscrete(stepList.get(size-2));
+            if (tempSwing.getRobotSide()!=futureStep.getRobotSide())
+            {
+                // swap
+                DiscreteFootstep temp = tempStance;
+                tempStance = tempSwing;
+                tempSwing = temp;
+            }
+
+            reason = stepChecker.checkStepValidity(futureStep, tempStance, tempSwing);
+        }
+
+
+
+
+//        System.out.println("reasons size: "+ reasons.size());
+
+
 
         renderTooltip = placingGoal;
 //        makeWarnings();
