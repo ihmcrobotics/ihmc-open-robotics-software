@@ -41,6 +41,7 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
     private BipedalFootstepPlannerNodeRejectionReason prevReason = null;
     private BipedalFootstepPlannerNodeRejectionReason reason = null;
     private BipedalFootstepPlannerNodeRejectionReason reasonFromHover = null;
+    private BipedalFootstepPlannerNodeRejectionReason reasonToDisplay = null;
     private ArrayList<BipedalFootstepPlannerNodeRejectionReason> reasons = new ArrayList<>();
 
 //    private ArrayList<BipedalFootstepPlannerNodeRejectionReason> reasons = new ArrayList<>();
@@ -129,13 +130,7 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
         textWarnings.clear();
         reasons.clear();
         setInitialFeet();
-
-        
-
         boolean displayReasonForHoveringStep = false;
-
-
-
         DiscreteFootstep candidate;
         // iterate through the list ( + current initial stance and swing) and check validity for all.
         for (int i = 0; i < stepList.size(); ++i)
@@ -151,42 +146,39 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
             else
             {
                 candidate = futureStep;
-                displayReasonForHoveringStep = false;
             }
             // use current stance, swing
-            if (i==0)
+            if (i == 0)
             {
                 // if futureStep has different footSide than current swing, swap current swing and stance.
-                if (candidate.getRobotSide()!=swing.getRobotSide())
+                if (candidate.getRobotSide() != swing.getRobotSide())
                 {
                     swapSteps();
                 }
-                reason = stepChecker.checkStepValidity(candidate,stance,swing);
+                reason = stepChecker.checkStepValidity(candidate, stance, swing);
             }
             // 0th element will be stance, previous stance will be swing
-            else if (i==1)
+            else if (i == 1)
             {
                 DiscreteFootstep temp = convertToDiscrete(stepList.get(0));
-                reason = stepChecker.checkStepValidity(candidate, temp, stance );
+                reason = stepChecker.checkStepValidity(candidate, temp, stance);
             }
             else
             {
-                reason = stepChecker.checkStepValidity(candidate,convertToDiscrete(stepList.get(i-1)), convertToDiscrete(stepList.get(i-2)));
+                reason = stepChecker.checkStepValidity(candidate, convertToDiscrete(stepList.get(i - 1)), convertToDiscrete(stepList.get(i - 2)));
             }
 
-            if(displayReasonForHoveringStep)
-            {
-                reasonFromHover = reason;
-            }
-
+            // cache the reason from hovered foot
+//            if (displayReasonForHoveringStep)
+//            {
+//                break;
+//            }
             reasons.add(reason);
+
         }
-        if(displayReasonForHoveringStep)
-        {
-            reason = reasonFromHover;
-        }
+
         renderTooltip = placingGoal;
-        makeWarnings();
+//        makeWarnings();
     }
 
     // TODO: This should be used when first step of the manual step cycle has different RobotSide than current swing.
@@ -224,24 +216,29 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
     public void clear(ArrayList<ImGuiGDXManuallyPlacedFootstep> stepList)
     {
         reasons.clear();
-        if (stepList.size()==1)
-        {
-            DiscreteFootstep lastStep = convertToDiscrete(stepList.get(0));
-            if(swing.getRobotSide() == lastStep.getRobotSide())
-            {
-                swing = lastStep;
-            }
-            else
-            {
-                stance = lastStep;
-            }
-        }
-        else
-        {
-            int s = stepList.size();
-            stance = convertToDiscrete(stepList.get(s-1));
-            swing  = convertToDiscrete(stepList.get(s-2));
-        }
+//        if (stepList.size()==1)
+//        {
+//            DiscreteFootstep lastStep = convertToDiscrete(stepList.get(0));
+//            if(swing.getRobotSide() == lastStep.getRobotSide())
+//            {
+//                swing = lastStep;
+//            }
+//            else
+//            {
+//                stance = lastStep;
+//            }
+//        }
+//        else
+//        {
+//            int s = stepList.size();
+//            stance = convertToDiscrete(stepList.get(s-1));
+//            swing  = convertToDiscrete(stepList.get(s-2));
+//        }
+    }
+
+    public void setReasonFrom(int i)
+    {
+        reason = reasons.get(i);
     }
 
     public ArrayList<BipedalFootstepPlannerNodeRejectionReason> getReasons()
