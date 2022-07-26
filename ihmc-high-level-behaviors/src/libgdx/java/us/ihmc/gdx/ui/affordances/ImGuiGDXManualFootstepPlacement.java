@@ -173,8 +173,8 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
          }
       }
       Point3DReadOnly pickPointInWorld = input.getPickPointInWorld();
-      stepChecker.checkValidStep(footstepArrayList, new DiscreteFootstep(pickPointInWorld.getX(), pickPointInWorld.getY(), 0, currentFootStepSide) , placingGoal);
-      stepChecker.getInput(input, placingGoal);
+//      stepChecker.checkValidStep(footstepArrayList, new DiscreteFootstep(pickPointInWorld.getX(), pickPointInWorld.getY(), 0, currentFootStepSide) , placingGoal);
+//      stepChecker.getInput(input, placingGoal);
 
       for (int i = 0 ; i < footstepArrayList.size(); ++i)
       {
