@@ -75,8 +75,7 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
    private ImGui3DViewInput latestInput;
    private GDX3DPanel primary3DPanel;
 
-   private Timer timerFlashingFootsteps = new Timer();
-   private boolean flashingFootStepsColorHigh;
+
 
    public void create(GDXImGuiBasedUI baseUI, CommunicationHelper communicationHelper, ROS2SyncedRobotModel syncedRobotModel)
    {
@@ -169,7 +168,7 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
          ArrayList<BipedalFootstepPlannerNodeRejectionReason> temporaryReasons = stepChecker.getReasons();
          for(int i =0; i<temporaryReasons.size(); i++)
          {
-            footstepArrayList.get(i).flashFootstepsWhenBadPlacement(temporaryReasons.get(i), stepChecker, timerFlashingFootsteps, flashingFootStepsColorHigh);
+            footstepArrayList.get(i).flashFootstepsWhenBadPlacement(temporaryReasons.get(i), stepChecker);
 
          }
       }

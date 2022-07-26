@@ -48,6 +48,8 @@ public class ImGuiGDXManuallyPlacedFootstep
 
    private volatile Runnable buildMeshAndCreateModelInstance = null;
    //public GDXSelectablePose3DGizmo gizmo = new GDXSelectablePose3DGizmo();
+   Timer timerFlashingFootsteps = new Timer();
+   boolean flashingFootStepsColorHigh = false;
 
 
    public ImGuiGDXManuallyPlacedFootstep(GDXImGuiBasedUI baseUI, RobotSide footstepSide, int index)
@@ -278,30 +280,36 @@ public class ImGuiGDXManuallyPlacedFootstep
       getFootstepModelInstance().materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, r, g, b, a));
    }
 
-   public void flashFootstepsWhenBadPlacement(BipedalFootstepPlannerNodeRejectionReason reason, ImGuiGDXManuallyPlacedFootstepChecker stepChecker, Timer timer, boolean flashingFootStepsColorHigh)
+   public void flashFootstepsWhenBadPlacement(BipedalFootstepPlannerNodeRejectionReason reason, ImGuiGDXManuallyPlacedFootstepChecker stepChecker)
    {
       if(reason == null)
       {
          if(getFootstepSide() == RobotSide.LEFT)
          {
-            setColor(1.0f,0.0f,0.0f,0.0f);
+            if(isPickSelected())
+               setColor(1.0f,0.0f,0.0f,0.0f);
+            else
+               setColor(0.5f,0.0f,0.0f,0.0f);
          }
          else
          {
-            setColor(0.0f,1.0f,0.0f,0.0f);
+            if(isPickSelected())
+               setColor(0.0f,1.0f,0.0f,0.0f);
+            else
+               setColor(0.0f,0.5f,0.0f,0.0f);
          }
       }
       else
       {
-         if(!timer.hasBeenSet())
+         if(!timerFlashingFootsteps.hasBeenSet())
          {
-            timer.reset();
+            timerFlashingFootsteps.reset();
             flashingFootStepsColorHigh = false;
          }
-         if(timer.isExpired(0.1))
+         if(timerFlashingFootsteps.isExpired(0.1))
          {
             flashingFootStepsColorHigh = !flashingFootStepsColorHigh;
-            timer.reset();
+            timerFlashingFootsteps.reset();
          }
          if(getFootstepSide() == RobotSide.LEFT)
          {
