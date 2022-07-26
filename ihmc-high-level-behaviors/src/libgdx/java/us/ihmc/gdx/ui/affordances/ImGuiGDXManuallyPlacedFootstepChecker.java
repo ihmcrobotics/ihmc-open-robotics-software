@@ -130,8 +130,6 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
         textWarnings.clear();
         reasons.clear();
         setInitialFeet();
-        boolean displayReasonForHoveringStep = false;
-//        DiscreteFootstep candidate;
         // iterate through the list ( + current initial stance and swing) and check validity for all.
         for (int i = 0; i < stepList.size(); ++i)
         {
@@ -157,21 +155,33 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
                 reason = stepChecker.checkStepValidity(candidate, convertToDiscrete(stepList.get(i - 1)), convertToDiscrete(stepList.get(i - 2)));
             }
 
-            // cache the reason from hovered foot
-//            if (displayReasonForHoveringStep)
-//            {
-//                break;
-//            }
             reasons.add(reason);
 
         }
 
-        int size = stepList.size();
-
-        if (stepList.size()>2)
+        if (placingGoal)
         {
-            DiscreteFootstep tempStance = convertToDiscrete(stepList.get(size-1));
-            DiscreteFootstep tempSwing = convertToDiscrete(stepList.get(size-2));
+            int size = stepList.size();
+            DiscreteFootstep tempStance = null;
+            DiscreteFootstep tempSwing  = null;
+            if (stepList.size()>=2)
+            {
+                tempStance = convertToDiscrete(stepList.get(size-1));
+                tempSwing  = convertToDiscrete(stepList.get(size-2));
+
+            }
+            else if (stepList.size()==1)
+            {
+                DiscreteFootstep lastStep = convertToDiscrete(stepList.get(0));
+                tempStance = lastStep;
+                tempSwing = stance;
+            }
+            else
+            {
+                tempStance = stance;
+                tempSwing = swing;
+            }
+
             if (tempSwing.getRobotSide()!=futureStep.getRobotSide())
             {
                 // swap
@@ -179,19 +189,9 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
                 tempStance = tempSwing;
                 tempSwing = temp;
             }
-
             reason = stepChecker.checkStepValidity(futureStep, tempStance, tempSwing);
         }
-
-
-
-
-//        System.out.println("reasons size: "+ reasons.size());
-
-
-
         renderTooltip = placingGoal;
-//        makeWarnings();
     }
 
     // TODO: This should be used when first step of the manual step cycle has different RobotSide than current swing.

@@ -177,27 +177,15 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       stepChecker.checkValidStep(footstepArrayList, new DiscreteFootstep(pickPointInWorld.getX(), pickPointInWorld.getY(), 0, currentFootStepSide) , placingGoal);
       stepChecker.getInput(input, placingGoal);
 
-
       for (int i = 0 ; i < footstepArrayList.size(); ++i)
       {
          if (footstepArrayList.get(i).isPickSelected())
          {
-            LogTools.info("{}th step is on hover", i);
             stepChecker.setReasonFrom(i);
             break;
          }
       }
       stepChecker.makeWarnings();
-
-//      // TODO: (DELETE THIS LATER) checking all the reasons for DEBUGGING
-//
-//      for (BipedalFootstepPlannerNodeRejectionReason r : stepChecker.getReasons())
-//      {
-//         if(r!=null)
-//         {
-//            System.out.println(r.name());
-//         }
-//      }
 
    }
 
