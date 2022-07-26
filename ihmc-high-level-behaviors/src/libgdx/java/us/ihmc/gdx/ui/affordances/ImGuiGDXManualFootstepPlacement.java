@@ -35,6 +35,7 @@ import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.gdx.vr.GDXVRManager;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.Timer;
 
@@ -172,6 +173,17 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
 
          }
       }
+
+      for (int i = 0 ; i < footstepArrayList.size(); ++i)
+      {
+         if (footstepArrayList.get(i).isPickSelected())
+         {
+            LogTools.info("{}th step is on hover", i);
+            stepChecker.setReasonFrom(i);
+            break;
+         }
+      }
+      stepChecker.makeWarnings();
    }
 
    public void renderImGuiWidgets()
