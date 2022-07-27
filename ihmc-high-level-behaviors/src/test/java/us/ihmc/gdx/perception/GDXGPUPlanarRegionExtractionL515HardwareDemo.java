@@ -82,10 +82,10 @@ public class GDXGPUPlanarRegionExtractionL515HardwareDemo
                      gpuPlanarRegionExtraction.create(l515.getDepthWidth(),
                                                       l515.getDepthHeight(),
                                                       depth32FC1Image.getBackingDirectByteBuffer(),
-                                                      l515.getIntrinsicParameters().fx(),
-                                                      l515.getIntrinsicParameters().fy(),
-                                                      l515.getIntrinsicParameters().ppx(),
-                                                      l515.getIntrinsicParameters().ppy());
+                                                      l515.getDepthIntrinsicParameters().fx(),
+                                                      l515.getDepthIntrinsicParameters().fy(),
+                                                      l515.getDepthIntrinsicParameters().ppx(),
+                                                      l515.getDepthIntrinsicParameters().ppy());
                      gpuPlanarRegionExtraction.getEnabled().set(true);
                      baseUI.getImGuiPanelManager().addPanel(gpuPlanarRegionExtraction.getPanel());
                      baseUI.getPrimaryScene().addRenderableProvider(gpuPlanarRegionExtraction::getVirtualRenderables, GDXSceneLevel.VIRTUAL);

@@ -120,15 +120,15 @@ public class GDXRealsenseL515UI
                {
                   if (digitalGain.get() == 0)
                   {
-                     l515.setDigitalGail(realsense2.RS2_DIGITAL_GAIN_AUTO);
+                     l515.setDigitalGain(realsense2.RS2_DIGITAL_GAIN_AUTO);
                   }
                   else if (digitalGain.get() == 1)
                   {
-                     l515.setDigitalGail(realsense2.RS2_DIGITAL_GAIN_LOW);
+                     l515.setDigitalGain(realsense2.RS2_DIGITAL_GAIN_LOW);
                   }
                   else
                   {
-                     l515.setDigitalGail(realsense2.RS2_DIGITAL_GAIN_HIGH);
+                     l515.setDigitalGain(realsense2.RS2_DIGITAL_GAIN_HIGH);
                   }
 
                }

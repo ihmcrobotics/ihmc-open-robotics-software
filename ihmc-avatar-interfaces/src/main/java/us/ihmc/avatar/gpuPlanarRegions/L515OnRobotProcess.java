@@ -125,11 +125,11 @@ public class L515OnRobotProcess
                depthU16C1Image = new Mat(depthHeight, depthWidth, opencv_core.CV_16UC1, depthFrameData);
                depth32FC1Image = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_32FC1);
 
-               depthCameraIntrinsics.setFx(l515.getFocalLengthPixelsX());
-               depthCameraIntrinsics.setFy(l515.getFocalLengthPixelsY());
+               depthCameraIntrinsics.setFx(l515.getDepthFocalLengthPixelsX());
+               depthCameraIntrinsics.setFy(l515.getDepthFocalLengthPixelsY());
                depthCameraIntrinsics.setSkew(0.0);
-               depthCameraIntrinsics.setCx(l515.getPrincipalOffsetXPixels());
-               depthCameraIntrinsics.setCy(l515.getPrincipalOffsetYPixels());
+               depthCameraIntrinsics.setCx(l515.getDepthPrincipalOffsetXPixels());
+               depthCameraIntrinsics.setCy(l515.getDepthPrincipalOffsetYPixels());
             }
 
             depthU16C1Image.convertTo(depth32FC1Image.getBytedecoOpenCVMat(), opencv_core.CV_32FC1, l515.getDepthToMeterConversion(), 0.0);
@@ -153,8 +153,8 @@ public class L515OnRobotProcess
                   float eyeDepth = depth32FC1Image.getFloat(x, y);
                   framePoint.setToZero(cameraFrame);
                   framePoint.setX(eyeDepth);
-                  framePoint.setY(-(x - depthCameraIntrinsics.getCx()) / l515.getFocalLengthPixelsX() * eyeDepth);
-                  framePoint.setZ(-(y - depthCameraIntrinsics.getCy()) / l515.getFocalLengthPixelsY() * eyeDepth);
+                  framePoint.setY(-(x - depthCameraIntrinsics.getCx()) / l515.getDepthFocalLengthPixelsX() * eyeDepth);
+                  framePoint.setZ(-(y - depthCameraIntrinsics.getCy()) / l515.getDepthFocalLengthPixelsY() * eyeDepth);
                   framePoint.changeFrame(ReferenceFrame.getWorldFrame());
                   Point3D point = points[y * depthWidth + x];
                   point.set(framePoint);
