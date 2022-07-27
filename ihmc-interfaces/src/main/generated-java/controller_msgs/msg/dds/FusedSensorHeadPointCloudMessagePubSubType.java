@@ -42,7 +42,7 @@ public class FusedSensorHeadPointCloudMessagePubSubType implements us.ihmc.pubsu
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (355520 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (7000000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       return current_alignment - initial_alignment;
@@ -72,7 +72,7 @@ public class FusedSensorHeadPointCloudMessagePubSubType implements us.ihmc.pubsu
    {
       cdr.write_type_4(data.getSegmentIndex());
 
-      if(data.getScan().size() <= 355520)
+      if(data.getScan().size() <= 7000000)
       cdr.write_type_e(data.getScan());else
           throw new RuntimeException("scan field exceeds the maximum length");
 

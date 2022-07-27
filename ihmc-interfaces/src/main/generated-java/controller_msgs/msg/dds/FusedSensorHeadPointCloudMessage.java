@@ -21,7 +21,7 @@ public class FusedSensorHeadPointCloudMessage extends Packet<FusedSensorHeadPoin
 
    public FusedSensorHeadPointCloudMessage()
    {
-      scan_ = new us.ihmc.idl.IDLSequence.Byte (355520, "type_9");
+      scan_ = new us.ihmc.idl.IDLSequence.Byte (7000000, "type_9");
 
    }
 
