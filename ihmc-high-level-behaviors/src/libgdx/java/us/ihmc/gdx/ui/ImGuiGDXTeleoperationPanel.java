@@ -194,81 +194,11 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(manualFootstepPlacement::calculate3DViewPick);
    }
 
-   private void queueFootstepPlanning()
+   public void update()
    {
-      Pose3DReadOnly goalPose = footstepGoal.getGoalPose();
-      syncedRobotForFootstepPlanning.update();
-      for (RobotSide side : RobotSide.values)
-      {
-         startFootPoses.get(side).set(syncedRobotForFootstepPlanning.getFramePoseReadOnly(referenceFrames -> referenceFrames.getSoleFrame(side)));
-      }
-
-      RobotSide stanceSide;
-      if (startFootPoses.get(RobotSide.LEFT ).getPosition().distance(goalPose.getPosition())
-       <= startFootPoses.get(RobotSide.RIGHT).getPosition().distance(goalPose.getPosition()))
-      {
-         stanceSide = RobotSide.LEFT;
-      }
-      else
-      {
-         stanceSide = RobotSide.RIGHT;
-      }
-
-      FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
-      footstepPlannerRequest.setPlanBodyPath(false);
-      footstepPlannerRequest.setRequestedInitialStanceSide(stanceSide);
-      footstepPlannerRequest.setStartFootPoses(startFootPoses.get(RobotSide.LEFT), startFootPoses.get(RobotSide.RIGHT));
-      // TODO: Set start footholds!!
-      footstepPlannerRequest.setGoalFootPoses(footstepPlannerParameters.getIdealFootstepWidth(), goalPose);
-//      footstepPlannerRequest.setPlanarRegionsList(...);
-      footstepPlannerRequest.setAssumeFlatGround(true); // FIXME Assuming flat ground
-//      footstepPlannerRequest.setTimeout(lookAndStepParameters.getFootstepPlannerTimeoutWhileStopped());
-//      footstepPlannerRequest.setSwingPlannerType(swingPlannerType);
-//      footstepPlannerRequest.setSnapGoalSteps(true);
-
-      footstepPlanner.getFootstepPlannerParameters().set(footstepPlannerParameters);
-      LogTools.info("Stance side: {}", stanceSide.name());
-      LogTools.info("Planning footsteps...");
-      FootstepPlannerOutput footstepPlannerOutput = footstepPlanner.handleRequest(footstepPlannerRequest);
-      LogTools.info("Footstep planner completed with {}, {} step(s)",
-                        footstepPlannerOutput.getFootstepPlanningResult(),
-                        footstepPlannerOutput.getFootstepPlan().getNumberOfSteps());
-
-      FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanner);
-      footstepPlannerLogger.logSession();
-      ThreadTools.startAThread(() -> FootstepPlannerLogger.deleteOldLogs(50), "FootstepPlanLogDeletion");
-
-      if (footstepPlannerOutput.getFootstepPlan().getNumberOfSteps() < 1) // failed
-      {
-         FootstepPlannerRejectionReasonReport rejectionReasonReport = new FootstepPlannerRejectionReasonReport(footstepPlanner);
-         rejectionReasonReport.update();
-         ArrayList<Pair<Integer, Double>> rejectionReasonsMessage = new ArrayList<>();
-         for (BipedalFootstepPlannerNodeRejectionReason reason : rejectionReasonReport.getSortedReasons())
-         {
-            double rejectionPercentage = rejectionReasonReport.getRejectionReasonPercentage(reason);
-            LogTools.info("Rejection {}%: {}", FormattingTools.getFormattedToSignificantFigures(rejectionPercentage, 3), reason);
-            rejectionReasonsMessage.add(MutablePair.of(reason.ordinal(), MathTools.roundToSignificantFigures(rejectionPercentage, 3)));
-         }
-         LogTools.info("Footstep planning failure...");
-      }
-      else
-      {
-         footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlannerOutput.getFootstepPlan(),
-                                                                                                 "Teleoperation Panel Planned"));
-         this.footstepPlannerOutput = footstepPlannerOutput;
-      }
-   }
-
-   private void walk()
-   {
-      double swingDuration = 1.2;
-      double transferDuration = 0.8;
-      FootstepDataListMessage footstepDataListMessage
-            = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlannerOutput.getFootstepPlan(), swingDuration, transferDuration);
-      footstepDataListMessage.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
-      footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
-      communicationHelper.publishToController(footstepDataListMessage);
-      footstepPlannerOutput = null;
+      syncedRobot.update();
+      footstepPlanGraphic.update();
+      manualFootstepPlacement.update();
    }
 
    public void renderImGuiWidgets()
@@ -342,7 +272,6 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       {
          if (syncedRobot.getDataReceptionTimerSnapshot().isRunning(ROBOT_DATA_EXPIRATION))
          {
-            syncedRobot.update();
             double sliderValue = stanceHeightSliderValue[0];
             double pelvisZ = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getPelvisZUpFrame).getZ();
             double midFeetZ = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame).getZ();
@@ -370,7 +299,6 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       {
          if (syncedRobot.getDataReceptionTimerSnapshot().isRunning(ROBOT_DATA_EXPIRATION))
          {
-            syncedRobot.update();
             double sliderValue = 100.0 - leanForwardSliderValue[0];
             double desiredChestPitch = MIN_CHEST_PITCH + CHEST_PITCH_RANGE * sliderValue / SLIDER_RANGE;
 
@@ -397,7 +325,6 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       {
          if (syncedRobot.getDataReceptionTimerSnapshot().isRunning(ROBOT_DATA_EXPIRATION))
          {
-            syncedRobot.update();
             double sliderValue = 100.0 - yawTorsoSliderValue[0];
             double desiredYawTorso = MIN_YAW_TORSO + YAW_TORSO_RANGE * sliderValue / SLIDER_RANGE;
 
@@ -455,7 +382,6 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
          manualFootstepPlacement.removeFootStep();
       }
 
-
       for (RobotSide side : RobotSide.values)
       {
          ImGui.text(side.getPascalCaseName() + " hand:");
@@ -508,12 +434,6 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       }
    }
 
-   public void update()
-   {
-      footstepPlanGraphic.update();
-      manualFootstepPlacement.update();
-   }
-
    private boolean imGuiSlider(String label, float[] value)
    {
       float previousValue = value[0];
@@ -533,6 +453,83 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       }
    }
 
+   private void queueFootstepPlanning()
+   {
+      Pose3DReadOnly goalPose = footstepGoal.getGoalPose();
+      syncedRobotForFootstepPlanning.update();
+      for (RobotSide side : RobotSide.values)
+      {
+         startFootPoses.get(side).set(syncedRobotForFootstepPlanning.getFramePoseReadOnly(referenceFrames -> referenceFrames.getSoleFrame(side)));
+      }
+
+      RobotSide stanceSide;
+      if (startFootPoses.get(RobotSide.LEFT ).getPosition().distance(goalPose.getPosition())
+          <= startFootPoses.get(RobotSide.RIGHT).getPosition().distance(goalPose.getPosition()))
+      {
+         stanceSide = RobotSide.LEFT;
+      }
+      else
+      {
+         stanceSide = RobotSide.RIGHT;
+      }
+
+      FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
+      footstepPlannerRequest.setPlanBodyPath(false);
+      footstepPlannerRequest.setRequestedInitialStanceSide(stanceSide);
+      footstepPlannerRequest.setStartFootPoses(startFootPoses.get(RobotSide.LEFT), startFootPoses.get(RobotSide.RIGHT));
+      // TODO: Set start footholds!!
+      footstepPlannerRequest.setGoalFootPoses(footstepPlannerParameters.getIdealFootstepWidth(), goalPose);
+      //      footstepPlannerRequest.setPlanarRegionsList(...);
+      footstepPlannerRequest.setAssumeFlatGround(true); // FIXME Assuming flat ground
+      //      footstepPlannerRequest.setTimeout(lookAndStepParameters.getFootstepPlannerTimeoutWhileStopped());
+      //      footstepPlannerRequest.setSwingPlannerType(swingPlannerType);
+      //      footstepPlannerRequest.setSnapGoalSteps(true);
+
+      footstepPlanner.getFootstepPlannerParameters().set(footstepPlannerParameters);
+      LogTools.info("Stance side: {}", stanceSide.name());
+      LogTools.info("Planning footsteps...");
+      FootstepPlannerOutput footstepPlannerOutput = footstepPlanner.handleRequest(footstepPlannerRequest);
+      LogTools.info("Footstep planner completed with {}, {} step(s)",
+                    footstepPlannerOutput.getFootstepPlanningResult(),
+                    footstepPlannerOutput.getFootstepPlan().getNumberOfSteps());
+
+      FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanner);
+      footstepPlannerLogger.logSession();
+      ThreadTools.startAThread(() -> FootstepPlannerLogger.deleteOldLogs(50), "FootstepPlanLogDeletion");
+
+      if (footstepPlannerOutput.getFootstepPlan().getNumberOfSteps() < 1) // failed
+      {
+         FootstepPlannerRejectionReasonReport rejectionReasonReport = new FootstepPlannerRejectionReasonReport(footstepPlanner);
+         rejectionReasonReport.update();
+         ArrayList<Pair<Integer, Double>> rejectionReasonsMessage = new ArrayList<>();
+         for (BipedalFootstepPlannerNodeRejectionReason reason : rejectionReasonReport.getSortedReasons())
+         {
+            double rejectionPercentage = rejectionReasonReport.getRejectionReasonPercentage(reason);
+            LogTools.info("Rejection {}%: {}", FormattingTools.getFormattedToSignificantFigures(rejectionPercentage, 3), reason);
+            rejectionReasonsMessage.add(MutablePair.of(reason.ordinal(), MathTools.roundToSignificantFigures(rejectionPercentage, 3)));
+         }
+         LogTools.info("Footstep planning failure...");
+      }
+      else
+      {
+         footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlannerOutput.getFootstepPlan(),
+                                                                                                 "Teleoperation Panel Planned"));
+         this.footstepPlannerOutput = footstepPlannerOutput;
+      }
+   }
+
+   private void walk()
+   {
+      double swingDuration = 1.2;
+      double transferDuration = 0.8;
+      FootstepDataListMessage footstepDataListMessage
+            = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlannerOutput.getFootstepPlan(), swingDuration, transferDuration);
+      footstepDataListMessage.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
+      footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
+      communicationHelper.publishToController(footstepDataListMessage);
+      footstepPlannerOutput = null;
+   }
+
    private void sendPSIRequest()
    {
       robotLowLevelMessenger.setHydraulicPumpPSI(Integer.parseInt(psiValues[pumpPSI.get()]));
@@ -543,5 +540,4 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       footstepPlanGraphic.destroy();
       throttledRobotStateCallback.destroy();
    }
-
 }
