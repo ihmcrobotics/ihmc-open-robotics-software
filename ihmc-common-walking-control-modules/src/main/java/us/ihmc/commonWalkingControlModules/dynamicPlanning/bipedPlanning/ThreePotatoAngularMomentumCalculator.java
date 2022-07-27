@@ -77,9 +77,8 @@ public class ThreePotatoAngularMomentumCalculator
    private final YoFrameVector3D predictedLeftFootVelocity = new YoFrameVector3D("predictedLeftFootVelocity", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D predictedRightFootPosition = new YoFramePoint3D("predictedRightFootPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D predictedRightFootVelocity = new YoFrameVector3D("predictedRightFootVelocity", ReferenceFrame.getWorldFrame(), registry);
-
-   private final YoFramePoint3D centerOfMassPosition = new YoFramePoint3D("centerOfMassPosition", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector3D centerOfMassVelocity = new YoFrameVector3D("centerOfMassVelocity", ReferenceFrame.getWorldFrame(), registry);
+   private final FramePoint3D centerOfMassPosition = new FramePoint3D();
+   private final FrameVector3D centerOfMassVelocity = new FrameVector3D();
    private final FramePoint3D potatoPosition = new FramePoint3D();
    private final FrameVector3D potatoVelocity = new FrameVector3D();
    private final FrameVector3D relativePotatoPosition = new FrameVector3D();
