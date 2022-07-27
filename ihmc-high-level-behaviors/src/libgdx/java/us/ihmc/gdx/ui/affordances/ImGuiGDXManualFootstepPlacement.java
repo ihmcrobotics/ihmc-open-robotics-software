@@ -48,9 +48,8 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
    private GDX3DPanel primary3DPanel;
    private boolean renderTooltip = false;
 
-   public void create(GDXImGuiBasedUI baseUI, CommunicationHelper communicationHelper, ROS2SyncedRobotModel syncedRobotModel)
+   public void create(GDXImGuiBasedUI baseUI, CommunicationHelper communicationHelper, ROS2SyncedRobotModel syncedRobot)
    {
-      this.syncedRobot = syncedRobotModel;
       this.baseUI = baseUI;
       this.communicationHelper = communicationHelper;
       primary3DPanel = baseUI.getPrimary3DPanel();
