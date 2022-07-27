@@ -48,14 +48,14 @@ public class ThreePotatoAngularMomentumCalculator
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final boolean debug = false;
-   private static final boolean visualize = true;
+   private static final boolean visualize = false;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoDouble potatoMass = new YoDouble("PotatoMass", registry);
    private final DoubleProvider potatoMassFraction;
    private final double totalMass;
 
-   private final BooleanProvider useHeightScaledAngularMomentum = new BooleanParameter("useHeightScaledAngularMomentum", registry, false);
+   private final BooleanProvider useHeightScaledAngularMomentum = new BooleanParameter("useHeightScaledAngularMomentum", registry, true);
    private final DoubleProvider idealAngularMomentumSampleDt = new DoubleParameter("idealAngularMomentumSampleDt", registry, 0.05);
    private final IntegerProvider maxAngularMomentumSamplesPerSegment = new IntegerParameter("maxAngularMomentumSamplesPerSegment", registry, 8);
    private final IntegerProvider minAngularMomentumSamplesPerSegment = new IntegerParameter("minAngularMomentumSamplesPerSegment", registry, 5);
