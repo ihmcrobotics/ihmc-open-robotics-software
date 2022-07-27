@@ -1,21 +1,25 @@
 package us.ihmc.perception.realsense;
 
-import org.bytedeco.librealsense2.global.realsense2;
-import org.bytedeco.librealsense2.*;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.MutableBytePointer;
+import org.bytedeco.javacpp.Pointer;
+import org.bytedeco.librealsense2.*;
+import org.bytedeco.librealsense2.global.realsense2;
+import us.ihmc.log.LogTools;
 import us.ihmc.tools.string.StringTools;
 
 import java.util.function.Supplier;
 
 import static org.bytedeco.librealsense2.global.realsense2.rs2_release_frame;
 
-public class BytedecoRealsenseD435
+public class BytedecoRealsense
 {
-   protected final int width = 1280;
-   protected final int height = 720;
-   protected final int fps = 30;
-   protected final int ANY_STREAM_INDEX = -1;
+   private static final int RS2_FRAME_POINTER_SIZE = Pointer.sizeof(rs2_frame.class);
+
+   protected final int width;
+   protected final int height;
+   protected final int fps;
+   protected final int DEPTH_STREAM_INDEX = -1;
+   protected final int COLOR_STREAM_INDEX = -1;
 
    protected final rs2_device device; // The device (a device contains sensors like cameras and IMUS)
    private final String serialNumber;
@@ -43,14 +47,17 @@ public class BytedecoRealsenseD435
    private boolean colorEnabled = false;
    private long colorFrameAddress;
 
-   public BytedecoRealsenseD435(rs2_context context, rs2_device device, String serialNumber)
+   public BytedecoRealsense(rs2_context context, rs2_device device, String serialNumber, int width, int height, int fps)
    {
       this.device = device;
       this.serialNumber = serialNumber;
+      this.width = width;
+      this.height = height;
+      this.fps = fps;
       pipeline = realsense2.rs2_create_pipeline(context, error);
       config = realsense2.rs2_create_config(error);
 
-      realsense2.rs2_config_enable_stream(config, realsense2.RS2_STREAM_DEPTH, ANY_STREAM_INDEX, width, height, realsense2.RS2_FORMAT_Z16, fps, error);
+      realsense2.rs2_config_enable_stream(config, realsense2.RS2_STREAM_DEPTH, DEPTH_STREAM_INDEX, width, height, realsense2.RS2_FORMAT_Z16, fps, error);
       checkError(true, "Failed to enable stream.");
 
       rs2_sensor_list sensorList = realsense2.rs2_query_sensors(device, error);
@@ -58,12 +65,12 @@ public class BytedecoRealsenseD435
 
       depthToMeterConversion = realsense2.rs2_get_depth_scale(sensor, error);
 
-      LogTools.info("Configured Depth Stream of D435 Device. Serial number: {}", serialNumber);
+      LogTools.info("Configured Depth Stream of L515 Device. Serial number: {}", serialNumber);
    }
 
    public void enableColor(int width, int height, int fps)
    {
-      realsense2.rs2_config_enable_stream(config, realsense2.RS2_STREAM_COLOR, ANY_STREAM_INDEX, width, height, realsense2.RS2_FORMAT_RGB8, fps, error);
+      realsense2.rs2_config_enable_stream(config, realsense2.RS2_STREAM_COLOR, COLOR_STREAM_INDEX, width, height, realsense2.RS2_FORMAT_RGB8, fps, error);
       checkError(true, "Failed to enable stream.");
 
       colorAlignProcessingBlock = realsense2.rs2_create_align(realsense2.RS2_STREAM_COLOR, error);
@@ -71,6 +78,17 @@ public class BytedecoRealsenseD435
 
       colorFrameQueue = realsense2.rs2_create_frame_queue(1, error);
       checkError(true, "");
+   }
+
+   /**
+    * Call this method if you plan on trigger the laser from an external signal See
+    * https://dev.intelrealsense.com/docs/lidar-camera-l515-multi-camera-setup for more information
+    */
+   public void enableInterCamSyncMode()
+   {
+      rs2_options options = new rs2_options(sensor);
+      realsense2.rs2_set_option(options, realsense2.RS2_OPTION_INTER_CAM_SYNC_MODE, 1.0f, error);
+      checkError(true, "Failed to set sync mode.");
    }
 
    public void initialize()
@@ -94,11 +112,51 @@ public class BytedecoRealsenseD435
 
       if (frameAvailable)
       {
+//         depthFrame.address(syncedFrames.address());
+//         rs2_frame pointer = syncedFrames.getPointer(1);
+//         long address = pointer.address();
+//         System.out.println(address);
+//         colorFrame.address(syncedFrames.address() + RS2_FRAME_POINTER_SIZE);
+//
          rs2_frame extractedColorFrame = null;
          if (colorEnabled)
          {
             extractedColorFrame = realsense2.rs2_extract_frame(syncedFrames, 1, error);
          }
+
+//
+//         BytePointer bytePointer = new BytePointer(pointer);
+//         long mightBeAddress = bytePointer.getLong();
+//         System.out.println(mightBeAddress);
+//         new Pointer
+//         BytePointer bytePointer = new BytePointer(pointer);
+//         long mightBeAddress = bytePointer.getLong();
+//         System.out.println(mightBeAddress);
+         //         syncedFrames.
+
+//         new rs2_frame
+//         checkError(false, "");
+//
+//
+//         int numberOfFrames = realsense2.rs2_embedded_frames_count(syncedFrames, error);
+//         checkError(false, "");
+
+//         System.out.println(numberOfFrames);
+//         colorFrameAddress = colorFrame.address();
+
+         //         depthFrame.set(syncedFrames.address(), 0, rs2_frame.totalBytes(), rs2_frame.totalBytes());
+
+//            depthFrame = realsense2.rs2_extract_frame(syncedFrames, 0, error);
+//            checkError(true, "");
+
+
+
+//            if (colorEnabled)
+//            {
+////               colorFrame = realsense2.rs2_extract_frame(syncedFrames, 1, error);
+//               checkError(true, "");
+//            }
+//         realsense2.rs2_extract_frame()
 
          depthFrameDataSize = realsense2.rs2_get_frame_data_size(syncedFrames, error);
          checkError(false, "");
@@ -147,6 +205,7 @@ public class BytedecoRealsenseD435
             dataWasRead = true;
          }
 
+//         rs2_release_frame(depthFrame);
          rs2_release_frame(syncedFrames);
 
          if (colorEnabled)
@@ -168,6 +227,20 @@ public class BytedecoRealsenseD435
          if (colorFrameDataAddress > 0)
             colorFrameData.setAddress(colorFrameDataAddress);
       }
+   }
+
+   public void setLaserPower(float laserPower)
+   {
+      rs2_options options = new rs2_options(sensor);
+      realsense2.rs2_set_option(options, realsense2.RS2_OPTION_LASER_POWER, laserPower, error);
+      checkError(true, "Failed to set laser power.");
+   }
+
+   public void setDigitalGail(int digitalGain)
+   {
+      rs2_options options = new rs2_options(sensor);
+      realsense2.rs2_set_option(options, realsense2.RS2_OPTION_DIGITAL_GAIN, digitalGain, error);
+      checkError(true, "");
    }
 
    public void deleteDevice()
