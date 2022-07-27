@@ -58,7 +58,6 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
 
     public void setInitialFeet()
     {
-        syncedRobot.update(); // TODO: Why does this need called again? It already gets called in the UI's render loop
         RigidBodyTransform initialRightFootTransform = syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame();
         RigidBodyTransform initialLeftFootTransform = syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame();
 
