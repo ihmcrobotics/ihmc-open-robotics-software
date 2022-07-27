@@ -497,11 +497,6 @@ public class WorkspaceLimiterControlModule
                                                 maxPercentOfLegLengthForSingularityAvoidanceInSwingForFoot.getValue(),
                                                 percentOfLegLengthMarginToEnableSingularityAvoidanceForFoot.getValue());
 
-      if (alphaSwingSingularityAvoidanceForFoot.getValue() < 1.0)
-      {
-         LogTools.info("oops");
-      }
-
       double desiredFootPositionInAxisFrame = -Math.min(desiredLegLength.getDoubleValue(),
                                                         maxPercentOfLegLengthForSingularityAvoidanceInSwingForFoot.getValue()
                                                         * maximumLegLength.getDoubleValue());
