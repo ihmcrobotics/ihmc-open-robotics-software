@@ -20,7 +20,7 @@ module controller_msgs
          * Sized specifically for our current primary sensor head streaming
          * 22220 * 4 * 4
          */
-        sequence<octet, 355520> scan;
+        sequence<octet, 7000000> scan;
       };
     };
   };
