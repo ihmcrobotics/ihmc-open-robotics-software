@@ -32,6 +32,10 @@ import us.ihmc.tools.thread.PausablePeriodicThread;
 
 import java.time.Instant;
 
+/**
+ * This class is designed to just publish Realsense L515 data without doing any extra perception processing,
+ * such as planar regions or SLAM.
+ */
 public class L515OnRobotProcess
 {
    private static final String SERIAL_NUMBER = System.getProperty("l515.serial.number", "F0000000");

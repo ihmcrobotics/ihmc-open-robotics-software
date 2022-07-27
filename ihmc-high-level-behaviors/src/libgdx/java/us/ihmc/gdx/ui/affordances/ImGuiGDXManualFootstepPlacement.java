@@ -32,6 +32,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import java.util.ArrayList;
 import java.util.UUID;
 
+/**
+ * Manages and assists with the operator placement of footsteps.
+ */
 public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
 {
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
