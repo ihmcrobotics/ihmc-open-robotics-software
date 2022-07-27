@@ -34,7 +34,7 @@ public class RealsenseL515ROSNode
    private final ROS1Helper ros1Helper;
    private final ROS2Helper ros2Helper;
    private RealSenseHardwareManager realSenseHardwareManager;
-   private BytedecoRealsenseL515 l515;
+   private BytedecoRealsense l515;
    private RosImagePublisher ros1DepthPublisher;
    private RosCameraInfoPublisher ros1DepthCameraInfoPublisher;
    private ChannelBuffer ros1DepthChannelBuffer;

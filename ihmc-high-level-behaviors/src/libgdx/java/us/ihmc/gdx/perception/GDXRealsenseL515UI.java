@@ -15,7 +15,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.MutableBytePointer;
-import us.ihmc.perception.realsense.BytedecoRealsenseL515;
+import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
 import us.ihmc.tools.thread.Activator;
 import us.ihmc.tools.time.FrequencyCalculator;
@@ -33,7 +33,7 @@ public class GDXRealsenseL515UI
    private YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
    private YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private RealSenseHardwareManager realSenseHardwareManager;
-   private BytedecoRealsenseL515 l515;
+   private BytedecoRealsense l515;
    private GDXCVImagePanel depthImagePanel;
    private Mat depthU16C1Image;
    private BytedecoImage depth32FC1Image;

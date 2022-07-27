@@ -19,7 +19,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.MutableBytePointer;
-import us.ihmc.perception.realsense.BytedecoRealsenseL515;
+import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
@@ -47,7 +47,7 @@ public class L515OnRobotProcess
    private final FramePoint3D framePoint = new FramePoint3D();
    private final ROS2Topic<StereoVisionPointCloudMessage> pointCloudTopic;
    private RealSenseHardwareManager realSenseHardwareManager;
-   private BytedecoRealsenseL515 l515;
+   private BytedecoRealsense l515;
    private Mat depthU16C1Image;
    private BytedecoImage depth32FC1Image;
    private int depthWidth;

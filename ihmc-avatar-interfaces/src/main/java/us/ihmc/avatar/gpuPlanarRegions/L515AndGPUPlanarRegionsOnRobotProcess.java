@@ -27,7 +27,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.MutableBytePointer;
-import us.ihmc.perception.realsense.BytedecoRealsenseL515;
+import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -44,7 +44,6 @@ import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.publisher.RosCameraInfoPublisher;
 import us.ihmc.utilities.ros.publisher.RosImagePublisher;
 
-import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.util.function.Consumer;
 
@@ -74,7 +73,7 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
    private final TypedNotification<StoredPropertySetMessage> concaveHullFactoryNotification = new TypedNotification<>();
    private final TypedNotification<Empty> reconnectROS1Notification = new TypedNotification<>();
    private RealSenseHardwareManager realSenseHardwareManager;
-   private BytedecoRealsenseL515 l515;
+   private BytedecoRealsense l515;
    private Mat depthU16C1Image;
    private BytedecoImage depth32FC1Image;
    private int depthWidth;

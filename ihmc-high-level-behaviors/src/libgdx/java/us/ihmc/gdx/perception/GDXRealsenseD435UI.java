@@ -1,9 +1,6 @@
 package us.ihmc.gdx.perception;
 
 import imgui.ImGui;
-import imgui.type.ImFloat;
-import imgui.type.ImInt;
-import org.bytedeco.librealsense2.global.realsense2;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
@@ -15,7 +12,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.MutableBytePointer;
-import us.ihmc.perception.realsense.BytedecoRealsenseD435;
+import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
 import us.ihmc.tools.thread.Activator;
 import us.ihmc.tools.time.FrequencyCalculator;
@@ -33,7 +30,7 @@ public class GDXRealsenseD435UI
    private YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
    private YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private RealSenseHardwareManager realSenseHardwareManager;
-   private BytedecoRealsenseD435 d435;
+   private BytedecoRealsense d435;
    private GDXCVImagePanel depthImagePanel;
    private Mat depthU16C1Image;
    private BytedecoImage depth32FC1Image;
