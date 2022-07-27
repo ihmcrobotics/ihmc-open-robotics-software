@@ -236,7 +236,7 @@ public class BytedecoRealsense
       checkError(true, "Failed to set laser power.");
    }
 
-   public void setDigitalGail(int digitalGain)
+   public void setDigitalGain(int digitalGain)
    {
       rs2_options options = new rs2_options(sensor);
       realsense2.rs2_set_option(options, realsense2.RS2_OPTION_DIGITAL_GAIN, digitalGain, error);
@@ -281,6 +281,11 @@ public class BytedecoRealsense
       return depthFrameData;
    }
 
+   public MutableBytePointer getColorFrameData()
+   {
+      return colorFrameData;
+   }
+
    public int getDepthFrameDataSize()
    {
       return depthFrameDataSize;
@@ -291,29 +296,54 @@ public class BytedecoRealsense
       return depthToMeterConversion;
    }
 
-   public rs2_intrinsics getIntrinsicParameters()
+   public rs2_intrinsics getDepthIntrinsicParameters()
    {
       return depthStreamIntrinsics;
    }
 
-   public double getFocalLengthPixelsX()
+   public double getDepthFocalLengthPixelsX()
    {
       return depthStreamIntrinsics.fx();
    }
 
-   public double getFocalLengthPixelsY()
+   public double getDepthFocalLengthPixelsY()
    {
       return depthStreamIntrinsics.fy();
    }
 
-   public double getPrincipalOffsetXPixels()
+   public double getDepthPrincipalOffsetXPixels()
    {
       return depthStreamIntrinsics.ppx();
    }
 
-   public double getPrincipalOffsetYPixels()
+   public double getDepthPrincipalOffsetYPixels()
    {
       return depthStreamIntrinsics.ppy();
+   }
+
+   public rs2_intrinsics getColorIntrinsicParameters()
+   {
+      return colorStreamIntrinsics;
+   }
+
+   public double getColorFocalLengthPixelsX()
+   {
+      return colorStreamIntrinsics.fx();
+   }
+
+   public double getColorFocalLengthPixelsY()
+   {
+      return colorStreamIntrinsics.fy();
+   }
+
+   public double getColorPrincipalOffsetXPixels()
+   {
+      return colorStreamIntrinsics.ppx();
+   }
+
+   public double getColorPrincipalOffsetYPixels()
+   {
+      return colorStreamIntrinsics.ppy();
    }
 
    public int getDepthWidth()

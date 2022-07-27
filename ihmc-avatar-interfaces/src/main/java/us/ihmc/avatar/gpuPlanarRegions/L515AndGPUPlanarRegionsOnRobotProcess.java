@@ -169,11 +169,11 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
                depthU16C1Image = new Mat(depthHeight, depthWidth, opencv_core.CV_16UC1, depthFrameData);
                depth32FC1Image = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_32FC1);
 
-               depthCameraIntrinsics.setFx(l515.getFocalLengthPixelsX());
-               depthCameraIntrinsics.setFy(l515.getFocalLengthPixelsY());
+               depthCameraIntrinsics.setFx(l515.getDepthFocalLengthPixelsX());
+               depthCameraIntrinsics.setFy(l515.getDepthFocalLengthPixelsY());
                depthCameraIntrinsics.setSkew(0.0);
-               depthCameraIntrinsics.setCx(l515.getPrincipalOffsetXPixels());
-               depthCameraIntrinsics.setCy(l515.getPrincipalOffsetYPixels());
+               depthCameraIntrinsics.setCx(l515.getDepthPrincipalOffsetXPixels());
+               depthCameraIntrinsics.setCy(l515.getDepthPrincipalOffsetYPixels());
 
                gpuPlanarRegionExtraction = new GPUPlanarRegionExtraction();
                gpuPlanarRegionExtraction.create(depthWidth,

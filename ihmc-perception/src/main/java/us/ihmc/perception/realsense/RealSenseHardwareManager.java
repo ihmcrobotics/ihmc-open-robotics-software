@@ -64,7 +64,7 @@ public class RealSenseHardwareManager
    public BytedecoRealsense createFullFeaturedL515(String serialNumberToFind)
    {
       String sanitizedSerialNumberToFind = serialNumberToFind.toLowerCase();
-      return new BytedecoRealsense(context, createDevice(sanitizedSerialNumberToFind), sanitizedSerialNumberToFind,1024, 768, 30);
+      return new BytedecoRealsense(context, createDevice(sanitizedSerialNumberToFind), sanitizedSerialNumberToFind, 1024, 768, 30);
    }
 
    public BytedecoRealsense createD435(String serialNumberToFind)
