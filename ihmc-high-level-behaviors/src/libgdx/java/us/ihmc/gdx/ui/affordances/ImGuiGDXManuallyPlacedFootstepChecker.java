@@ -25,6 +25,12 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
 
+/**
+ * Helps the operator confirm that manually placed footsteps are feasible in realtime.
+ *
+ * FIXME: This doesn't include checks like "step is too high" or "step is too low".
+ * TODO: Figure out how the footstep planner does that and use that.
+ */
 public class ImGuiGDXManuallyPlacedFootstepChecker
 {
    private final GDX3DPanel primary3DPanel;
