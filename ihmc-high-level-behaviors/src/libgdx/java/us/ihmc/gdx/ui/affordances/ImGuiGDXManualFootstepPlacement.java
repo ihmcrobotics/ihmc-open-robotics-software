@@ -3,7 +3,6 @@ package us.ihmc.gdx.ui.affordances;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -11,19 +10,13 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
-import imgui.type.ImFloat;
 import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
@@ -33,49 +26,27 @@ import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.gdx.vr.GDXVRManager;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.Timer;
 
 import java.util.ArrayList;
 import java.util.UUID;
 
 public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
 {
-   private boolean isFirstStep = false;
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
-   private final ImFloat goalZOffset = new ImFloat(0.0f);
-
-   //private GDXUIActionMap placeGoalActionMap;
    private boolean placingGoal = false;
-   private Point3D lastObjectIntersection;
    private final Pose3D goalPoseForReading = new Pose3D();
-   private final Point3D32 tempSpherePosition = new Point3D32();
-   private final Vector3D32 tempRotationVector = new Vector3D32();
-   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-
-   private ReferenceFrame referenceFrameFootstep;
-   private FramePose3D footTextPose;
-   boolean footstepCreated = false;
-
-   private float textHeight = 12;
-
    private final ArrayList<ImGuiGDXManuallyPlacedFootstep> footstepArrayList = new ArrayList<>();
    private int footstepIndex = -1;
    private GDXImGuiBasedUI baseUI;
    private CommunicationHelper communicationHelper;
    private RobotSide currentFootStepSide;
    private ROS2SyncedRobotModel syncedRobot;
-
    private ImGuiGDXManuallyPlacedFootstepChecker stepChecker;
-
-   private GDXPose3DGizmo gizmo;
    private ImGui3DViewInput latestInput;
    private GDX3DPanel primary3DPanel;
-
-
+   private boolean renderTooltip = false;
 
    public void create(GDXImGuiBasedUI baseUI, CommunicationHelper communicationHelper, ROS2SyncedRobotModel syncedRobotModel)
    {
@@ -84,7 +55,6 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       this.communicationHelper = communicationHelper;
       primary3DPanel = baseUI.getPrimary3DPanel();
       primary3DPanel.addWindowDrawListAddition(this::renderTooltips);
-
 
       stepChecker = new ImGuiGDXManuallyPlacedFootstepChecker(baseUI, communicationHelper, syncedRobot);
       clear();
@@ -100,8 +70,6 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       }
    }
 
-   boolean renderTooltip = false;
-
    public void processImGui3DViewInput(ImGui3DViewInput input)
    {
       latestInput = input;
@@ -116,24 +84,20 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
          Point3DReadOnly pickPointInWorld = input.getPickPointInWorld();
          renderTooltip = true;
 
-         double z = (lastObjectIntersection != null ? lastObjectIntersection.getZ() : 0.0) + goalZOffset.get();
          if (footstepArrayList.size() > 0)
          {
-            if (ImGui.getIO().getKeyCtrl())
-            {
-               goalZOffset.set(goalZOffset.get() - (input.getMouseWheelDelta() / 30.0f));
-            }
-
             //Set position of modelInstance, selectablePose3DGizmo, and the sphere used in stepCheckIsPointInsideAlgorithm all to the pointInWorld that the cursor is at
             GDXTools.toGDX(pickPointInWorld, footstepArrayList.get(footstepIndex).getFootstepModelInstance().transform);
             footstepArrayList.get(footstepIndex).setGizmoPose(pickPointInWorld.getX(), pickPointInWorld.getY(), pickPointInWorld.getZ());
-            footstepArrayList.get(footstepIndex).getBoundingSphere().getPosition().set(pickPointInWorld.getX(), pickPointInWorld.getY(), pickPointInWorld.getZ());
+            footstepArrayList.get(footstepIndex)
+                             .getBoundingSphere()
+                             .getPosition()
+                             .set(pickPointInWorld.getX(), pickPointInWorld.getY(), pickPointInWorld.getZ());
 
             // when left button clicked and released.
             if (input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
                placingGoal = true;
-               footstepCreated = false;
 
                //Switch sides
                currentFootStepSide = currentFootStepSide.getOppositeSide();
@@ -142,12 +106,11 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
 
             // hovering.
             // TODO: (need yaw here?)
-            stepChecker.checkValidStep(footstepArrayList, new DiscreteFootstep(pickPointInWorld.getX(), pickPointInWorld.getY(), 0, currentFootStepSide) , placingGoal);
+            stepChecker.checkValidStep(footstepArrayList,
+                                       new DiscreteFootstep(pickPointInWorld.getX(), pickPointInWorld.getY(), 0, currentFootStepSide),
+                                       placingGoal);
 
-            stepChecker.getInput(input, placingGoal);
-
-			//If out of bounds, flash colors
-           // footstepArrayList.get(footstepIndex).flashFootstepsWhenBadPlacement(stepChecker, timerFlashingFootsteps, flashingFootStepsColorHigh);
+            stepChecker.getInput(input);
          }
 
          if (input.mouseReleasedWithoutDrag(ImGuiMouseButton.Right))
@@ -161,22 +124,21 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       {
          Point3DReadOnly pickPointInWorld = input.getPickPointInWorld();
          renderTooltip = true;
+
          // hovering.
          // TODO: (need yaw here?)
-         stepChecker.getInput(input, placingGoal);
-         stepChecker.checkValidStep(footstepArrayList, new DiscreteFootstep(pickPointInWorld.getX(), pickPointInWorld.getY(), 0, currentFootStepSide) , placingGoal);
+         stepChecker.getInput(input);
+         stepChecker.checkValidStep(footstepArrayList,
+                                    new DiscreteFootstep(pickPointInWorld.getX(), pickPointInWorld.getY(), 0, currentFootStepSide),
+                                    placingGoal);
          ArrayList<BipedalFootstepPlannerNodeRejectionReason> temporaryReasons = stepChecker.getReasons();
-         for(int i =0; i<temporaryReasons.size(); i++)
+         for (int i = 0; i < temporaryReasons.size(); i++)
          {
-            footstepArrayList.get(i).flashFootstepsWhenBadPlacement(temporaryReasons.get(i), stepChecker);
-
+            footstepArrayList.get(i).flashFootstepsWhenBadPlacement(temporaryReasons.get(i));
          }
       }
-      Point3DReadOnly pickPointInWorld = input.getPickPointInWorld();
-//      stepChecker.checkValidStep(footstepArrayList, new DiscreteFootstep(pickPointInWorld.getX(), pickPointInWorld.getY(), 0, currentFootStepSide) , placingGoal);
-//      stepChecker.getInput(input, placingGoal);
 
-      for (int i = 0 ; i < footstepArrayList.size(); ++i)
+      for (int i = 0; i < footstepArrayList.size(); ++i)
       {
          if (footstepArrayList.get(i).isPickSelected())
          {
@@ -185,19 +147,18 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
          }
       }
       stepChecker.makeWarnings();
-
    }
 
    public void renderImGuiWidgets()
    {
       ImGui.text("Place footstep:");
       ImGui.sameLine();
-      if(ImGui.button(labels.get("Left")))
+      if (ImGui.button(labels.get("Left")))
       {
          createNewFootStep(RobotSide.LEFT);
       }
       ImGui.sameLine();
-      if(ImGui.button(labels.get("Right")))
+      if (ImGui.button(labels.get("Right")))
       {
          createNewFootStep(RobotSide.RIGHT);
       }
@@ -205,7 +166,7 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       ImGui.sameLine();
       if (ImGui.button(labels.get("Walk")))
       {
-         if(getFootstepArrayList().size() > 0)
+         if (getFootstepArrayList().size() > 0)
          {
             walkFromSteps();
          }
@@ -223,7 +184,8 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
          float drawStartX = primary3DPanel.getWindowDrawMinX() + mousePosX + offsetX;
          float drawStartY = primary3DPanel.getWindowDrawMinY() + mousePosY + offsetY;
 
-         ImGui.getWindowDrawList().addRectFilled(drawStartX , drawStartY, drawStartX + 150.0f, drawStartY + 21.0f, new Color(0.2f, 0.2f, 0.2f, 0.7f).toIntBits());
+         ImGui.getWindowDrawList()
+              .addRectFilled(drawStartX, drawStartY, drawStartX + 150.0f, drawStartY + 21.0f, new Color(0.2f, 0.2f, 0.2f, 0.7f).toIntBits());
          ImGui.getWindowDrawList()
               .addText(ImGuiTools.getSmallFont(),
                        ImGuiTools.getSmallFont().getFontSize(),
@@ -248,15 +210,15 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
             placingGoal = false;
          }
 
-         controller.getTransformZUpToWorld(footstepArrayList.get(footstepIndex).getFootstepModelInstance().transform);
-
+         controller.getTransformZUpToWorld(footstepArrayList.get(footstepIndex)
+                                                            .getFootstepModelInstance().transform);
       });
    }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-     
+
       if (isPlaced())
       {
          for (int i = 0; i < footstepArrayList.size(); i++)
@@ -281,7 +243,7 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
 
    public void update()
    {
-      for (int i =0; i<footstepArrayList.size(); i++)
+      for (int i = 0; i < footstepArrayList.size(); i++)
       {
          footstepArrayList.get(i).update();
       }
@@ -291,7 +253,7 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
    {
       placingGoal = false;
 
-      while(footstepArrayList.size() >0)
+      while (footstepArrayList.size() > 0)
       {
          removeFootStep();
       }
@@ -346,7 +308,6 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       else
       {
          GDXTools.toGDX(pose.getPosition(), footstepArrayList.get(footstepIndex).getFootstepModelInstance().transform);
-         goalZOffset.set((float) pose.getZ());
       }
       goalPoseForReading.set(pose);
    }
@@ -361,7 +322,6 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       placingGoal = true;
       footstepIndex++;
       footstepArrayList.add(new ImGuiGDXManuallyPlacedFootstep(baseUI, footstepSide, footstepIndex));
-      footstepCreated = true;
       currentFootStepSide = footstepSide;
    }
 
@@ -369,12 +329,8 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
    {
       if (footstepArrayList.size() > 0 && footstepArrayList.get(footstepIndex).getFootstepModelInstance() != null)
          footstepArrayList.get(footstepIndex).getFootstepModelInstance().transform.val[Matrix4.M03] = Float.NaN;
-      goalZOffset.set(0.0f);
 
       baseUI.getPrimaryScene().removeRenderableAdapter((footstepArrayList.remove(footstepIndex).getRenderableAdapter()));
       footstepIndex--;
-
    }
-
-
 }

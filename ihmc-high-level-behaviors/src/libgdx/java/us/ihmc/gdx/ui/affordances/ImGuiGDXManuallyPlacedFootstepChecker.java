@@ -12,7 +12,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepPoseHeuristicChecker;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
@@ -28,87 +27,34 @@ import java.util.ArrayList;
 
 public class ImGuiGDXManuallyPlacedFootstepChecker
 {
-    private CommunicationHelper communicationHelper;
+   private final GDX3DPanel primary3DPanel;
+   private final ROS2SyncedRobotModel syncedRobot;
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   private final FootstepPlannerParametersBasics footstepPlannerParameters;
+   private final SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
+   private final FootstepSnapAndWiggler snapper;
+   private final FootstepPoseHeuristicChecker stepChecker;
+   private BipedalFootstepPlannerNodeRejectionReason reason = null;
+   private final ArrayList<BipedalFootstepPlannerNodeRejectionReason> reasons = new ArrayList<>();
 
-    // TODO: need to pass in FootstepPlannerParametersReadOnly , FootstepSnapAndWiggler, YoRegistry (parent)
-    private final double reachabilityThreshold = 2.2;
-    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-    private final SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
-    private final DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-    private final FootstepSnapAndWiggler snapper;
-    private final FootstepPoseHeuristicChecker stepChecker;
+   // TODO: swap stance and swing if candidate step for the very first step of the footsteparraylist is going to be on different side compared to swing's side.
+   private DiscreteFootstep stance = new DiscreteFootstep(0, 0, 0, RobotSide.RIGHT);
+   private DiscreteFootstep swing = new DiscreteFootstep(0, 0, 0, RobotSide.LEFT);
+   private String text = null;
+   private ImGui3DViewInput latestInput;
+   boolean renderTooltip = false;
+   private ArrayList<ImGuiGDXManuallyPlacedFootstep> plannedSteps;
 
-    private BipedalFootstepPlannerNodeRejectionReason prevReason = null;
-    private BipedalFootstepPlannerNodeRejectionReason reason = null;
-    private BipedalFootstepPlannerNodeRejectionReason reasonFromHover = null;
-    private BipedalFootstepPlannerNodeRejectionReason reasonToDisplay = null;
-    private ArrayList<BipedalFootstepPlannerNodeRejectionReason> reasons = new ArrayList<>();
-
-//    private ArrayList<BipedalFootstepPlannerNodeRejectionReason> reasons = new ArrayList<>();
-
-
-    // TODO: swap stance and swing if candidate step for the very first step of the footsteparraylist is going to be on different side compared to swing's side.
-    private DiscreteFootstep stance = new DiscreteFootstep(0,0,0, RobotSide.RIGHT);
-    private DiscreteFootstep swing = new DiscreteFootstep(0,0,0,RobotSide.LEFT);
-    private FootstepPlannerParametersBasics footstepPlannerParameters;
-
-    private String text = null;
-    private ArrayList<String> textWarnings = new ArrayList<>();
-
-    GDXImGuiBasedUI baseUI;
-    private ImGui3DViewInput latestInput;
-    private GDX3DPanel primary3DPanel;
-    boolean renderTooltip = false;
-    private boolean isFirstStep = false;
-    private boolean placingGoal = false;
-
-    private ArrayList<ImGuiGDXManuallyPlacedFootstep> plannedSteps;
-
-    private ROS2SyncedRobotModel syncedRobot;
-
-
-    // CONSTRUCTOR
-    public ImGuiGDXManuallyPlacedFootstepChecker(GDXImGuiBasedUI baseUI, CommunicationHelper communicationHelper, ROS2SyncedRobotModel syncedRobot)
-    {
-        this.syncedRobot = syncedRobot;
-        this.baseUI = baseUI;
-        footstepPlannerParameters = communicationHelper.getRobotModel().getFootstepPlannerParameters();
-        snapper = new FootstepSnapAndWiggler(footPolygons, footstepPlannerParameters);
-        stepChecker = new FootstepPoseHeuristicChecker(footstepPlannerParameters, snapper, registry);
-        primary3DPanel = baseUI.getPrimary3DPanel();
-        primary3DPanel.addWindowDrawListAddition(this::renderTooltips);
-        setInitialFeet();
-    }
-
-    public void getInput(ImGui3DViewInput input , boolean placingGoal)
-    {
-        latestInput = input;
-        this.placingGoal = placingGoal;
-    }
-
-    private void renderTooltips()
-    {
-        if (this.latestInput!=null && plannedSteps.size()>0)
-        {
-            float offsetX = 10.0f;
-            float offsetY = 31.0f;
-            float mousePosX = latestInput.getMousePosX();
-            float mousePosY = latestInput.getMousePosY();
-            float drawStartX = primary3DPanel.getWindowDrawMinX() + mousePosX + offsetX;
-            float drawStartY = primary3DPanel.getWindowDrawMinY() + mousePosY + offsetY;
-
-            ImGui.getWindowDrawList().addRectFilled(drawStartX , drawStartY, drawStartX + 120.0f, drawStartY + 21.0f, new Color(0.2f, 0.2f, 0.2f, 0.7f).toIntBits());
-
-            ImGui.getWindowDrawList()
-                    .addText(ImGuiTools.getSmallFont(),
-                            ImGuiTools.getSmallFont().getFontSize(),
-                            drawStartX + 5.0f,
-                            drawStartY + 2.0f,
-                            Color.WHITE.toIntBits(),
-                            text);
-
-        }
-    }
+   public ImGuiGDXManuallyPlacedFootstepChecker(GDXImGuiBasedUI baseUI, CommunicationHelper communicationHelper, ROS2SyncedRobotModel syncedRobot)
+   {
+      this.syncedRobot = syncedRobot;
+      primary3DPanel = baseUI.getPrimary3DPanel();
+      primary3DPanel.addWindowDrawListAddition(this::renderTooltips);
+      footstepPlannerParameters = communicationHelper.getRobotModel().getFootstepPlannerParameters();
+      snapper = new FootstepSnapAndWiggler(footPolygons, footstepPlannerParameters);
+      stepChecker = new FootstepPoseHeuristicChecker(footstepPlannerParameters, snapper, registry);
+      setInitialFeet();
+   }
 
     public void setInitialFeet()
     {
@@ -116,147 +62,151 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
         RigidBodyTransform initialRightFootTransform = syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame();
         RigidBodyTransform initialLeftFootTransform = syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame();
 
-        Vector3DBasics initialRightFoot =  initialRightFootTransform.getTranslation();
-        Vector3DBasics initialLeftFoot =  initialLeftFootTransform.getTranslation();
+        Vector3DBasics initialRightFoot = initialRightFootTransform.getTranslation();
+        Vector3DBasics initialLeftFoot = initialLeftFootTransform.getTranslation();
 
         swing = new DiscreteFootstep(initialLeftFoot.getX(), initialLeftFoot.getY(), initialLeftFootTransform.getRotation().getYaw(), RobotSide.LEFT);
         stance = new DiscreteFootstep(initialRightFoot.getX(), initialRightFoot.getY(), initialRightFootTransform.getRotation().getYaw(), RobotSide.RIGHT);
     }
 
-    // TODO: This should update candidate, stance, and swing in the ImGuiGDXManualFootstepPlacement,
-    //  updates RejectionReason, and generate warning message in the UI screen.
-    public void checkValidStep(ArrayList<ImGuiGDXManuallyPlacedFootstep> stepList, DiscreteFootstep futureStep, boolean placingGoal)
-    {
-        plannedSteps = stepList;
-        textWarnings.clear();
-        reasons.clear();
-        setInitialFeet();
-        // iterate through the list ( + current initial stance and swing) and check validity for all.
-        for (int i = 0; i < stepList.size(); ++i)
-        {
-            DiscreteFootstep candidate = convertToDiscrete(stepList.get(i));
-            // use current stance, swing
-            if (i == 0)
-            {
-                // if futureStep has different footSide than current swing, swap current swing and stance.
-                if (candidate.getRobotSide() != swing.getRobotSide())
-                {
-                    swapSteps();
-                }
-                reason = stepChecker.checkStepValidity(candidate, stance, swing);
-            }
-            // 0th element will be stance, previous stance will be swing
-            else if (i == 1)
-            {
-                DiscreteFootstep temp = convertToDiscrete(stepList.get(0));
-                reason = stepChecker.checkStepValidity(candidate, temp, stance);
-            }
-            else
-            {
-                reason = stepChecker.checkStepValidity(candidate, convertToDiscrete(stepList.get(i - 1)), convertToDiscrete(stepList.get(i - 2)));
-            }
+   public void getInput(ImGui3DViewInput input)
+   {
+      latestInput = input;
+   }
 
-            reasons.add(reason);
+   private void renderTooltips()
+   {
+      if (this.latestInput != null && plannedSteps.size() > 0)
+      {
+         float offsetX = 10.0f;
+         float offsetY = 31.0f;
+         float mousePosX = latestInput.getMousePosX();
+         float mousePosY = latestInput.getMousePosY();
+         float drawStartX = primary3DPanel.getWindowDrawMinX() + mousePosX + offsetX;
+         float drawStartY = primary3DPanel.getWindowDrawMinY() + mousePosY + offsetY;
 
-        }
+         ImGui.getWindowDrawList()
+              .addRectFilled(drawStartX, drawStartY, drawStartX + 120.0f, drawStartY + 21.0f, new Color(0.2f, 0.2f, 0.2f, 0.7f).toIntBits());
 
-        if (placingGoal)
-        {
-            int size = stepList.size();
-            DiscreteFootstep tempStance = null;
-            DiscreteFootstep tempSwing  = null;
-            if (stepList.size()>=2)
+         ImGui.getWindowDrawList()
+              .addText(ImGuiTools.getSmallFont(), ImGuiTools.getSmallFont().getFontSize(), drawStartX + 5.0f, drawStartY + 2.0f, Color.WHITE.toIntBits(), text);
+      }
+   }
+
+   // TODO: This should update candidate, stance, and swing in the ImGuiGDXManualFootstepPlacement,
+   //  updates RejectionReason, and generate warning message in the UI screen.
+   public void checkValidStep(ArrayList<ImGuiGDXManuallyPlacedFootstep> stepList, DiscreteFootstep futureStep, boolean placingGoal)
+   {
+      plannedSteps = stepList;
+      reasons.clear();
+      setInitialFeet();
+      // iterate through the list ( + current initial stance and swing) and check validity for all.
+      for (int i = 0; i < stepList.size(); ++i)
+      {
+         DiscreteFootstep candidate = convertToDiscrete(stepList.get(i));
+         // use current stance, swing
+         if (i == 0)
+         {
+            // if futureStep has different footSide than current swing, swap current swing and stance.
+            if (candidate.getRobotSide() != swing.getRobotSide())
             {
-                tempStance = convertToDiscrete(stepList.get(size-1));
-                tempSwing  = convertToDiscrete(stepList.get(size-2));
+               swapSteps();
+            }
+            reason = stepChecker.checkStepValidity(candidate, stance, swing);
+         }
+         // 0th element will be stance, previous stance will be swing
+         else if (i == 1)
+         {
+            DiscreteFootstep temp = convertToDiscrete(stepList.get(0));
+            reason = stepChecker.checkStepValidity(candidate, temp, stance);
+         }
+         else
+         {
+            reason = stepChecker.checkStepValidity(candidate, convertToDiscrete(stepList.get(i - 1)), convertToDiscrete(stepList.get(i - 2)));
+         }
 
-            }
-            else if (stepList.size()==1)
-            {
-                DiscreteFootstep lastStep = convertToDiscrete(stepList.get(0));
-                tempStance = lastStep;
-                tempSwing = stance;
-            }
-            else
-            {
-                tempStance = stance;
-                tempSwing = swing;
-            }
+         reasons.add(reason);
+      }
 
-            if (tempSwing.getRobotSide()!=futureStep.getRobotSide())
-            {
-                // swap
-                DiscreteFootstep temp = tempStance;
-                tempStance = tempSwing;
-                tempSwing = temp;
-            }
-            reason = stepChecker.checkStepValidity(futureStep, tempStance, tempSwing);
-        }
-        renderTooltip = placingGoal;
-    }
+      if (placingGoal)
+      {
+         int size = stepList.size();
+         DiscreteFootstep tempStance = null;
+         DiscreteFootstep tempSwing = null;
+         if (stepList.size() >= 2)
+         {
+            tempStance = convertToDiscrete(stepList.get(size - 1));
+            tempSwing = convertToDiscrete(stepList.get(size - 2));
+         }
+         else if (stepList.size() == 1)
+         {
+            DiscreteFootstep lastStep = convertToDiscrete(stepList.get(0));
+            tempStance = lastStep;
+            tempSwing = stance;
+         }
+         else
+         {
+            tempStance = stance;
+            tempSwing = swing;
+         }
 
-    // TODO: This should be used when first step of the manual step cycle has different RobotSide than current swing.
-    public void swapSteps()
-    {
-        DiscreteFootstep temp = stance;
-        stance = swing;
-        swing = temp;
-    }
-    public DiscreteFootstep convertToDiscrete(ImGuiGDXManuallyPlacedFootstep step)
-    {
-        Pose3DReadOnly pose = step.getPose();
-        Point3DReadOnly position = pose.getPosition();
-        return new DiscreteFootstep(position.getX(), position.getY(), step.getPose().getOrientation().getYaw(), step.getFootstepSide());
-    }
+         if (tempSwing.getRobotSide() != futureStep.getRobotSide())
+         {
+            // swap
+            DiscreteFootstep temp = tempStance;
+            tempStance = tempSwing;
+            tempSwing = temp;
+         }
+         reason = stepChecker.checkStepValidity(futureStep, tempStance, tempSwing);
+      }
+      renderTooltip = placingGoal;
+   }
+
+   // TODO: This should be used when first step of the manual step cycle has different RobotSide than current swing.
+   public void swapSteps()
+   {
+      DiscreteFootstep temp = stance;
+      stance = swing;
+      swing = temp;
+   }
+
+   public DiscreteFootstep convertToDiscrete(ImGuiGDXManuallyPlacedFootstep step)
+   {
+      Pose3DReadOnly pose = step.getPose();
+      Point3DReadOnly position = pose.getPosition();
+      return new DiscreteFootstep(position.getX(), position.getY(), step.getPose().getOrientation().getYaw(), step.getFootstepSide());
+   }
+
+   public void makeWarnings()
+   {
+      if (reason != null)
+      {
+         text = " Warning ! : " + reason.name();
+      }
+      else
+      {
+         text = "Looks Good !";
+      }
+   }
+
+   // Should call this in walkFromSteps before clearing the stepList.
+   public void clear(ArrayList<ImGuiGDXManuallyPlacedFootstep> stepList)
+   {
+      reasons.clear();
+   }
+
+   public void setReasonFrom(int i)
+   {
+      reason = reasons.get(i);
+   }
+
+   public ArrayList<BipedalFootstepPlannerNodeRejectionReason> getReasons()
+   {
+      return reasons;
+   }
 
     public BipedalFootstepPlannerNodeRejectionReason getReason()
     {
         return reason;
-    }
-
-    public void makeWarnings()
-    {
-        if (reason!=null)
-        {
-            text = new String(" Warning ! : " + reason.name());
-        }
-        else
-        {
-            text = new String("Looks Good !");
-        }
-    }
-
-    // Should call this in walkFromSteps before clearing the stepList.
-    public void clear(ArrayList<ImGuiGDXManuallyPlacedFootstep> stepList)
-    {
-        reasons.clear();
-//        if (stepList.size()==1)
-//        {
-//            DiscreteFootstep lastStep = convertToDiscrete(stepList.get(0));
-//            if(swing.getRobotSide() == lastStep.getRobotSide())
-//            {
-//                swing = lastStep;
-//            }
-//            else
-//            {
-//                stance = lastStep;
-//            }
-//        }
-//        else
-//        {
-//            int s = stepList.size();
-//            stance = convertToDiscrete(stepList.get(s-1));
-//            swing  = convertToDiscrete(stepList.get(s-2));
-//        }
-    }
-
-    public void setReasonFrom(int i)
-    {
-        reason = reasons.get(i);
-    }
-
-    public ArrayList<BipedalFootstepPlannerNodeRejectionReason> getReasons()
-    {
-        return reasons;
     }
 }
