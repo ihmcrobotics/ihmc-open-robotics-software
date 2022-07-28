@@ -92,7 +92,7 @@ public class ThreePotatoAngularMomentumCalculator
    private final SideDependentList<YoFrameVector3D> potatoRelativeVelocities = new SideDependentList<>();
 
    private final NeuralNetwork threePotatoResidualModel;
-   private final double threePotatoResidualModelMassFraction;
+   private final YoDouble threePotatoResidualModelMassFraction = new YoDouble("threePotatoResidualModelMassFraction", registry);
    private final BooleanParameter useThreePotatoResidualModel = new BooleanParameter("useThreePotatoResidualModel", registry, false);
    private final YoFrameVector3D threePotatoResidualPredicted =  new YoFrameVector3D("threePotatoResidualPredicted", ReferenceFrame.getWorldFrame(), registry);
 
@@ -149,7 +149,7 @@ public class ThreePotatoAngularMomentumCalculator
       }
 
       threePotatoResidualModel = walkingControllerParameters.getThreePotatoResidualModel();
-      threePotatoResidualModelMassFraction = walkingControllerParameters.getThreePotatoResidualModelMassFraction();
+      threePotatoResidualModelMassFraction.set(walkingControllerParameters.getThreePotatoResidualModelMassFraction());
 
       angularMomentumTrajectory = new MultipleSegmentPositionTrajectoryGenerator<>("angularMomentum",
                                                                                    50,
@@ -248,13 +248,18 @@ public class ThreePotatoAngularMomentumCalculator
             potatoRelativePositions.get(robotSide).sub(centerOfMassPosition, potatoPositions.get(robotSide));
             potatoRelativeVelocities.get(robotSide).sub(centerOfMassVelocity, potatoVelocities.get(robotSide));
          }
-         
-         observeAngularMomentumResidual(centerOfMassPosition, centerOfMassVelocity,
-                                        potatoRelativePositions.get(RobotSide.LEFT), potatoRelativeVelocities.get(RobotSide.LEFT),
-                                        potatoRelativePositions.get(RobotSide.RIGHT), potatoRelativeVelocities.get(RobotSide.RIGHT),
-                                        threePotatoResidualPredicted);
-         threePotatoResidualPredicted.scale(threePotatoResidualModelMassFraction);
-         threePotatoResidualPredicted.scale(1 / potatoMassFraction.getValue());
+
+//         observeAngularMomentumResidual(centerOfMassPosition, centerOfMassVelocity,
+//                                        potatoRelativePositions.get(RobotSide.LEFT), potatoRelativeVelocities.get(RobotSide.LEFT),
+//                                        potatoRelativePositions.get(RobotSide.RIGHT), potatoRelativeVelocities.get(RobotSide.RIGHT),
+//                                        threePotatoResidualPredicted);
+//         threePotatoResidualPredicted.scale(threePotatoResidualModelMassFraction.getValue());
+//         threePotatoResidualPredicted.scale(1 / potatoMassFraction.getValue());
+         observeScaledAngularMomentumResidual(centerOfMassPosition, centerOfMassVelocity,
+                                              potatoRelativePositions.get(RobotSide.LEFT), potatoRelativeVelocities.get(RobotSide.LEFT),
+                                              potatoRelativePositions.get(RobotSide.RIGHT), potatoRelativeVelocities.get(RobotSide.RIGHT),
+                                              potatoMassFraction.getValue(), threePotatoResidualModelMassFraction.getValue(),
+                                              threePotatoResidualPredicted);
          totalAngularMomentum.add(threePotatoResidualPredicted);
 
          actualModelAngularMomentum.set(totalAngularMomentum);
@@ -291,12 +296,17 @@ public class ThreePotatoAngularMomentumCalculator
       totalAngularMomentum.add(angularMomentum);
       totalTorque.add(torque);
 
-      observeAngularMomentumResidual(centerOfMassPosition, centerOfMassVelocity,
-                                     potatoRelativePositions.get(RobotSide.LEFT), potatoRelativeVelocities.get(RobotSide.LEFT),
-                                     potatoRelativePositions.get(RobotSide.RIGHT), potatoRelativeVelocities.get(RobotSide.RIGHT),
-                                     threePotatoResidualPredicted);
-      threePotatoResidualPredicted.scale(threePotatoResidualModelMassFraction);
-      threePotatoResidualPredicted.scale(1 / potatoMassFraction.getValue());
+//      observeAngularMomentumResidual(centerOfMassPosition, centerOfMassVelocity,
+//                                     potatoRelativePositions.get(RobotSide.LEFT), potatoRelativeVelocities.get(RobotSide.LEFT),
+//                                     potatoRelativePositions.get(RobotSide.RIGHT), potatoRelativeVelocities.get(RobotSide.RIGHT),
+//                                     threePotatoResidualPredicted);
+//      threePotatoResidualPredicted.scale(threePotatoResidualModelMassFraction.getValue());
+//      threePotatoResidualPredicted.scale(1 / potatoMassFraction.getValue());
+      observeScaledAngularMomentumResidual(centerOfMassPosition, centerOfMassVelocity,
+                                           potatoRelativePositions.get(RobotSide.LEFT), potatoRelativeVelocities.get(RobotSide.LEFT),
+                                           potatoRelativePositions.get(RobotSide.RIGHT), potatoRelativeVelocities.get(RobotSide.RIGHT),
+                                           potatoMassFraction.getValue(), threePotatoResidualModelMassFraction.getValue(),
+                                           threePotatoResidualPredicted);
       totalAngularMomentum.add(threePotatoResidualPredicted);
 
       predictedCoMPosition.set(predictedCoMTrajectory.getPosition());
@@ -379,12 +389,17 @@ public class ThreePotatoAngularMomentumCalculator
                totalTorque.add(torque);
             }
 
-            observeAngularMomentumResidual(centerOfMassPosition, centerOfMassVelocity,
-                                           potatoRelativePositions.get(RobotSide.LEFT), potatoRelativeVelocities.get(RobotSide.LEFT),
-                                           potatoRelativePositions.get(RobotSide.RIGHT), potatoRelativeVelocities.get(RobotSide.RIGHT),
-                                           threePotatoResidualPredicted);
-            threePotatoResidualPredicted.scale(threePotatoResidualModelMassFraction);
-            threePotatoResidualPredicted.scale(1 / potatoMassFraction.getValue());
+//            observeAngularMomentumResidual(centerOfMassPosition, centerOfMassVelocity,
+//                                           potatoRelativePositions.get(RobotSide.LEFT), potatoRelativeVelocities.get(RobotSide.LEFT),
+//                                           potatoRelativePositions.get(RobotSide.RIGHT), potatoRelativeVelocities.get(RobotSide.RIGHT),
+//                                           threePotatoResidualPredicted);
+//            threePotatoResidualPredicted.scale(threePotatoResidualModelMassFraction.getValue());
+//            threePotatoResidualPredicted.scale(1 / potatoMassFraction.getValue());
+            observeScaledAngularMomentumResidual(centerOfMassPosition, centerOfMassVelocity,
+                                                 potatoRelativePositions.get(RobotSide.LEFT), potatoRelativeVelocities.get(RobotSide.LEFT),
+                                                 potatoRelativePositions.get(RobotSide.RIGHT), potatoRelativeVelocities.get(RobotSide.RIGHT),
+                                                 potatoMassFraction.getValue(), threePotatoResidualModelMassFraction.getValue(),
+                                                 threePotatoResidualPredicted);
             totalAngularMomentum.add(threePotatoResidualPredicted);
 
             if (debug && totalAngularMomentum.containsNaN() || Double.isInfinite(totalAngularMomentum.length()))
@@ -560,5 +575,23 @@ public class ThreePotatoAngularMomentumCalculator
       threePotatoResidualModel.setInput(neuralNetworkInput);
       threePotatoResidualModel.compute(neuralNetworkOutput);
       threePotatoResidualPredictionToPack.set(neuralNetworkOutput);
+   }
+
+   private void observeScaledAngularMomentumResidual(Point3DReadOnly centerOfMassPosition,
+                                                     Vector3DReadOnly centerOfMassVelocity,
+                                                     Point3DReadOnly leftPotatoRelativePosition,
+                                                     Vector3DReadOnly leftPotatoRelativeVelocity,
+                                                     Point3DReadOnly rightPotatoRelativePosition,
+                                                     Vector3DReadOnly rightPotatoRelativeVelocity,
+                                                     double potatoMassFraction,
+                                                     double threePotatoResidualModelMassFraction,
+                                                     Vector3DBasics threePotatoResidualPredictionToPack)
+   {
+      observeAngularMomentumResidual(centerOfMassPosition, centerOfMassVelocity,
+                                     leftPotatoRelativePosition, leftPotatoRelativeVelocity,
+                                     rightPotatoRelativePosition, rightPotatoRelativeVelocity,
+                                     threePotatoResidualPredictionToPack);
+      threePotatoResidualPredictionToPack.scale(threePotatoResidualModelMassFraction);
+      threePotatoResidualPredictionToPack.scale(1 / potatoMassFraction);
    }
 }
