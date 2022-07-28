@@ -1,5 +1,6 @@
 package us.ihmc.gdx.perception;
 
+import boofcv.struct.calib.CameraPinholeBrown;
 import imgui.ImGui;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
@@ -7,18 +8,17 @@ import org.bytedeco.librealsense2.global.realsense2;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.Point;
-import org.bytedeco.opencv.opencv_core.Scalar;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.gdx.GDXPointCloudRenderer;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.BytedecoOpenCVTools;
-import us.ihmc.perception.BytedecoTools;
-import us.ihmc.perception.MutableBytePointer;
+import us.ihmc.perception.*;
 import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
 import us.ihmc.tools.thread.Activator;
@@ -34,7 +34,7 @@ public class GDXRealsenseL515UI
                                                               "ihmc-open-robotics-software",
                                                               "ihmc-high-level-behaviors/src/main/resources");
    private final Activator nativesLoadedActivator;
-   private final GDXPose3DGizmo sensorPoseGizmo = new GDXPose3DGizmo();
+   private final GDXPose3DGizmo cameraPoseGizmo = new GDXPose3DGizmo();
    private YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
    private YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private RealSenseHardwareManager realSenseHardwareManager;
@@ -50,6 +50,9 @@ public class GDXRealsenseL515UI
    private final ImFloat receiverSensitivity = new ImFloat(0.5f);
    private final ImInt digitalGain = new ImInt(realsense2.RS2_DIGITAL_GAIN_LOW);
    private final String[] digitalGains = new String[] { "AUTO", "LOW", "HIGH" };
+   private GDXPointCloudRenderer pointCloudRenderer;
+   private final OpenCLManager openCLManager = new OpenCLManager();
+   private final FramePoint3D framePoint = new FramePoint3D();
 
    public GDXRealsenseL515UI()
    {
@@ -64,6 +67,12 @@ public class GDXRealsenseL515UI
 
             ImGuiPanel panel = new ImGuiPanel("L515", this::renderImGuiWidgets);
             baseUI.getImGuiPanelManager().addPanel(panel);
+
+            cameraPoseGizmo.create(baseUI.getPrimary3DPanel().getCamera3D());
+            cameraPoseGizmo.setResizeAutomatically(true);
+            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(cameraPoseGizmo::calculate3DViewPick);
+            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(cameraPoseGizmo::process3DViewInput);
+            baseUI.getPrimaryScene().addRenderableProvider(cameraPoseGizmo, GDXSceneLevel.VIRTUAL);
          }
 
          @Override
@@ -78,6 +87,9 @@ public class GDXRealsenseL515UI
                   l515 = realSenseHardwareManager.createFullFeaturedL515(SERIAL_NUMBER);
                   l515.enableColor(1280, 720, 30);
                   l515.initialize();
+
+                  openCLManager.create();
+                  pointCloudRenderer = new GDXPointCloudRenderer();
                }
 
                if (l515.readFrameData())
@@ -99,6 +111,9 @@ public class GDXRealsenseL515UI
                      baseUI.getImGuiPanelManager().addPanel(colorImagePanel.getVideoPanel());
 
                      baseUI.getPerspectiveManager().reloadPerspective();
+
+                     pointCloudRenderer.create(l515.getDepthWidth() * l515.getDepthHeight());
+                     baseUI.getPrimaryScene().addRenderableProvider(pointCloudRenderer, GDXSceneLevel.MODEL);
                   }
 
                   frameReadFrequency.ping();
@@ -108,6 +123,29 @@ public class GDXRealsenseL515UI
 
                   opencv_imgproc.cvtColor(color8UC3Image, colorImagePanel.getBytedecoImage().getBytedecoOpenCVMat(), opencv_imgproc.COLOR_RGB2RGBA);
                   colorImagePanel.draw();
+
+                  pointCloudRenderer.prepareVertexBufferForAddingPoints();
+                  CameraPinholeBrown depthCameraIntrinsics = l515.getDepthCameraIntrinsics();
+
+                  // TODO: Put in OpenCL
+                  for (int x = 0; x < l515.getDepthWidth(); x++)
+                  {
+                     for (int y = 0; y < l515.getDepthHeight(); y++)
+                     {
+                        float eyeDepth = depth32FC1Image.getFloat(x, y);
+
+                        framePoint.setToZero(cameraPoseGizmo.getGizmoFrame());
+                        framePoint.setX(eyeDepth);
+                        framePoint.setY(-(x - depthCameraIntrinsics.getCx()) / depthCameraIntrinsics.getFx() * eyeDepth);
+                        framePoint.setZ(-(y - depthCameraIntrinsics.getCy()) / depthCameraIntrinsics.getFy() * eyeDepth);
+
+                        framePoint.changeFrame(ReferenceFrame.getWorldFrame());
+
+                        pointCloudRenderer.putVertex(framePoint);
+                     }
+                  }
+
+                  pointCloudRenderer.updateMeshFastest();
                }
             }
 

@@ -1,5 +1,6 @@
 package us.ihmc.perception.realsense;
 
+import boofcv.struct.calib.CameraPinholeBrown;
 import us.ihmc.perception.MutableBytePointer;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.librealsense2.*;
@@ -48,6 +49,8 @@ public class BytedecoRealsense
    private long colorFrameAddress;
    private int colorWidth;
    private int colorHeight;
+   private CameraPinholeBrown depthCameraIntrinsics;
+   private CameraPinholeBrown colorCameraIntrinsics;
 
    public BytedecoRealsense(rs2_context context, rs2_device device, String serialNumber, int depthWidth, int depthHeight, int fps)
    {
@@ -349,6 +352,34 @@ public class BytedecoRealsense
    public double getColorPrincipalOffsetYPixels()
    {
       return colorStreamIntrinsics.ppy();
+   }
+
+   public CameraPinholeBrown getDepthCameraIntrinsics()
+   {
+      if (depthCameraIntrinsics == null)
+      {
+         depthCameraIntrinsics = new CameraPinholeBrown();
+         depthCameraIntrinsics.setFx(getDepthFocalLengthPixelsX());
+         depthCameraIntrinsics.setFy(getDepthFocalLengthPixelsY());
+         depthCameraIntrinsics.setSkew(0.0);
+         depthCameraIntrinsics.setCx(getDepthPrincipalOffsetXPixels());
+         depthCameraIntrinsics.setCy(getDepthPrincipalOffsetYPixels());
+      }
+      return depthCameraIntrinsics;
+   }
+
+   public CameraPinholeBrown getColorCameraIntrinsics()
+   {
+      if (colorCameraIntrinsics == null)
+      {
+         colorCameraIntrinsics = new CameraPinholeBrown();
+         colorCameraIntrinsics.setFx(getColorFocalLengthPixelsX());
+         colorCameraIntrinsics.setFy(getColorFocalLengthPixelsY());
+         colorCameraIntrinsics.setSkew(0.0);
+         colorCameraIntrinsics.setCx(getColorPrincipalOffsetXPixels());
+         colorCameraIntrinsics.setCy(getColorPrincipalOffsetYPixels());
+      }
+      return colorCameraIntrinsics;
    }
 
    public int getDepthWidth()
