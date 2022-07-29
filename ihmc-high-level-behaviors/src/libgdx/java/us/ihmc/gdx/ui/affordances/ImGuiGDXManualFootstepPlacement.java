@@ -16,6 +16,8 @@ import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
@@ -50,6 +52,8 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
    private ImGui3DViewInput latestInput;
    private GDX3DPanel primary3DPanel;
    private boolean renderTooltip = false;
+
+   private double prevYaw = 0;
 
    public void create(GDXImGuiBasedUI baseUI, CommunicationHelper communicationHelper, ROS2SyncedRobotModel syncedRobot)
    {
@@ -90,6 +94,8 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
          {
             //Set position of modelInstance, selectablePose3DGizmo, and the sphere used in stepCheckIsPointInsideAlgorithm all to the pointInWorld that the cursor is at
             GDXTools.toGDX(pickPointInWorld, footstepArrayList.get(footstepIndex).getFootstepModelInstance().transform);
+
+
             footstepArrayList.get(footstepIndex).setGizmoPose(pickPointInWorld.getX(), pickPointInWorld.getY(), pickPointInWorld.getZ());
             footstepArrayList.get(footstepIndex)
                              .getBoundingSphere()
@@ -105,6 +111,8 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
                currentFootStepSide = currentFootStepSide.getOppositeSide();
                createNewFootStep(currentFootStepSide);
             }
+
+
 
             // hovering.
             // TODO: (need yaw here?)
@@ -140,14 +148,18 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
          }
       }
 
-      for (int i = 0; i < footstepArrayList.size(); ++i)
+      if (footstepArrayList.size()>0)
       {
-         if (footstepArrayList.get(i).isPickSelected())
+         for (int i = 0; i < footstepArrayList.size(); ++i)
          {
-            stepChecker.setReasonFrom(i);
-            break;
+            if (footstepArrayList.get(i).isPickSelected())
+            {
+               stepChecker.setReasonFrom(i);
+               break;
+            }
          }
       }
+
       stepChecker.makeWarnings();
    }
 
@@ -172,6 +184,19 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
          {
             walkFromSteps();
          }
+      }
+
+      if (ImGui.isKeyPressed(ImGuiTools.getSpaceKey()))
+      {
+         if (getFootstepArrayList().size() > 0)
+         {
+            walkFromSteps();
+         }
+      }
+
+      if (ImGui.isKeyPressed(ImGuiTools.getDeleteKey()))
+      {
+         removeFootStep();
       }
    }
 
@@ -323,6 +348,15 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
    {
       placingGoal = true;
       footstepIndex++;
+
+      if (footstepIndex-1 >=0)
+      {
+         FramePose3DReadOnly prevPose = footstepArrayList.get(footstepIndex-1).getSelectablePose3DGizmo().getPoseGizmo().getPose();
+      }
+
+      ImGuiGDXManuallyPlacedFootstep newStep = new ImGuiGDXManuallyPlacedFootstep(baseUI, footstepSide, footstepIndex);
+
+
       footstepArrayList.add(new ImGuiGDXManuallyPlacedFootstep(baseUI, footstepSide, footstepIndex));
       currentFootStepSide = footstepSide;
    }

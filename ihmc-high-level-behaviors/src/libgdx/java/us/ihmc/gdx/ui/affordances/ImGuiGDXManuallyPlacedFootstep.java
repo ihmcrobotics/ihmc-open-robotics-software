@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -13,6 +14,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.gdx.GDX3DSituatedText;
+import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.sceneManager.GDXRenderableAdapter;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
@@ -113,6 +115,7 @@ public class ImGuiGDXManuallyPlacedFootstep
 
       selectablePose3DGizmo.process3DViewInput(input, pickSelected);
 
+
       footstepModelInstance.transform.setToRotationRad(selectablePose3DGizmo.getPoseGizmo().getPose().getOrientation().getX32(),
                                                        selectablePose3DGizmo.getPoseGizmo().getPose().getOrientation().getY32(),
                                                        selectablePose3DGizmo.getPoseGizmo().getPose().getOrientation().getZ32(),
@@ -124,6 +127,8 @@ public class ImGuiGDXManuallyPlacedFootstep
                     .set(selectablePose3DGizmo.getPoseGizmo().getPose().getPosition().getX32(),
                          selectablePose3DGizmo.getPoseGizmo().getPose().getPosition().getY32(),
                          selectablePose3DGizmo.getPoseGizmo().getPose().getPosition().getZ32());
+
+
    }
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
@@ -139,6 +144,7 @@ public class ImGuiGDXManuallyPlacedFootstep
    public void setGizmoPose(double x, double y, double z)
    {
       tempFramePose.setToZero(ReferenceFrame.getWorldFrame());
+
       tempFramePose.getPosition().set(x, y, z);
       tempFramePose.get(selectablePose3DGizmo.getPoseGizmo().getTransformToParent());
    }
