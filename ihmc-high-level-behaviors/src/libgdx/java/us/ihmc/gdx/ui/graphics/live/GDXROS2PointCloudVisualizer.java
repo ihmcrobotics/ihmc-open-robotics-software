@@ -28,6 +28,7 @@ import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements RenderableProvider
@@ -66,7 +67,9 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
       this.numberOfSegments = numberOfSegments;
       threadQueue = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
       decompressionInputDirectBuffer = ByteBuffer.allocateDirect(pointsPerSegment * inputBytesPerPoint);
+      decompressionInputDirectBuffer.order(ByteOrder.nativeOrder());
       decompressionOutputDirectBuffer = ByteBuffer.allocateDirect(pointsPerSegment * inputBytesPerPoint);
+      decompressionOutputDirectBuffer.order(ByteOrder.nativeOrder());
 
       if (topic.getType().equals(LidarScanMessage.class))
       {
@@ -134,6 +137,7 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
             decompressionOutputDirectBuffer.rewind();
 
             latestSegmentIndex = (int) fusedMessage.getSegmentIndex();
+            // TODO: Move to OpenCL
             pointCloudRenderer.updateMeshFastest(xyzRGBASizeFloatBuffer ->
             {
                float size = pointSize.get();
