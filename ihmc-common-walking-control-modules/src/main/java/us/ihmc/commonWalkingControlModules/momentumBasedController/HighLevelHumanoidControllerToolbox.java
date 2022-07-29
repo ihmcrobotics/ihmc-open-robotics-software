@@ -39,6 +39,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
 import us.ihmc.humanoidRobotics.model.MomentumStateProvider;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -455,7 +456,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
       computeCop();
 
-      momentumStateProvider.updateState(centerOfPressure);  // The input should be CMP, but I'm using COP for now
+      momentumStateProvider.updateState(centerOfPressure);  // The input should be CMP, but I'm using COP for . NO. IT SHOULD NOT BE THE CMP
       computeCapturePoint();
       
       updateBipedSupportPolygons();
@@ -510,6 +511,12 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       newCapturePointCalculator.compute(capturePoint2d, omega0.getValue());
       capturePoint2d.changeFrame(yoCapturePoint.getReferenceFrame());
       yoCapturePoint.set(capturePoint2d, 0.0);
+      
+      if (yoCapturePoint.containsNaN())
+      {
+         LogTools.error("The capture point measurement contains NaN. Reverting to the old measurement way");
+         yoCapturePoint.set(yoOldCapturePoint);
+      }
    }
 
    @Override

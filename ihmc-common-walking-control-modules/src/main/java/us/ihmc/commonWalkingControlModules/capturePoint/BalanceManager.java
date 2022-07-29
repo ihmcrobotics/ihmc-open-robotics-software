@@ -86,6 +86,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class BalanceManager
 {
+   private final Boolean yumingHeuristicTurnOffAngularMomentum = true;
+   
    private static final boolean USE_ERROR_BASED_STEP_ADJUSTMENT = true;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean viewCoPHistory = false;
@@ -174,7 +176,7 @@ public class BalanceManager
    private final BooleanProvider useAngularMomentumOffset = new BooleanParameter("useAngularMomentumOffset", registry, false);
    private final BooleanProvider useAngularMomentumOffsetInStanding = new BooleanParameter("useAngularMomentumOffsetInStanding", registry, true);
    private final YoBoolean computeAngularMomentumOffset = new YoBoolean("computeAngularMomentumOffset", registry);
-
+   
    /**
     * Duration parameter used to linearly decrease the desired ICP velocity once the current state is
     * done.
@@ -343,6 +345,7 @@ public class BalanceManager
 //         copTrajectory.setWaypointViewer(new CoPPointViewer(registry, yoGraphicsListRegistry));
 
          YoGraphicPosition desiredCapturePointViz = new YoGraphicPosition("Desired Capture Point", yoDesiredCapturePoint, 0.01, Yellow(), GraphicType.BALL_WITH_ROTATED_CROSS);
+
          YoGraphicPosition finalDesiredCapturePointViz = new YoGraphicPosition("Final Desired Capture Point", yoFinalDesiredICP, 0.01, Beige(), GraphicType.BALL_WITH_ROTATED_CROSS);
          YoGraphicPosition finalDesiredCoMViz = new YoGraphicPosition("Final Desired CoM", yoFinalDesiredCoM, 0.01, Black(), GraphicType.BALL_WITH_ROTATED_CROSS);
          YoGraphicPosition perfectCMPViz = new YoGraphicPosition("Perfect CMP", yoPerfectCMP, 0.002, BlueViolet());
@@ -493,6 +496,8 @@ public class BalanceManager
       CapturePointTools.computeCentroidalMomentumPivot(yoDesiredCapturePoint, yoDesiredICPVelocity, omega0, perfectCMP2d);
       yoPerfectCMP.set(perfectCMP2d, comTrajectoryPlanner.getDesiredECMPPosition().getZ());
 
+      if (yumingHeuristicTurnOffAngularMomentum)
+         computeAngularMomentumOffset.set(false);
       if (computeAngularMomentumOffset.getValue())
          angularMomentumHandler.computeCoPPosition(yoPerfectCMP, yoPerfectCoP);
       else
@@ -575,6 +580,8 @@ public class BalanceManager
    public void computeFlamingoStateICPPlan()
    {
       computeAngularMomentumOffset.set(useAngularMomentumOffset.getValue() && useAngularMomentumOffsetInStanding.getValue());
+      if (yumingHeuristicTurnOffAngularMomentum)
+         computeAngularMomentumOffset.set(false);
       computeICPPlanInternal(flamingoCopTrajectory);
    }
 
@@ -592,6 +599,8 @@ public class BalanceManager
       copTrajectory.compute(copTrajectoryState);
 
       List<SettableContactStateProvider> contactStateProviders = copTrajectory.getContactStateProviders();
+      if (yumingHeuristicTurnOffAngularMomentum)
+         computeAngularMomentumOffset.set(false);
       if (computeAngularMomentumOffset.getValue())
       {
          if (comTrajectoryPlanner.hasTrajectories())
@@ -801,7 +810,15 @@ public class BalanceManager
       yoPerfectCoP.setMatchingFrame(bipedSupportPolygons.getSupportPolygonInMidFeetZUp().getCentroid(), 0.0);
       copTrajectoryState.setInitialCoP(yoPerfectCoP);
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
-      comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
+
+      //      comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
+      
+      centerOfMassPosition.setFromReferenceFrame(centerOfMassFrame);
+      FrameVector3D fakeCoMVelocity = new FrameVector3D();
+      fakeCoMVelocity.sub( controllerToolbox.getCapturePoint(), centerOfMassPosition);
+      fakeCoMVelocity.scale(controllerToolbox.getOmega0());
+      comTrajectoryPlanner.setInitialCenterOfMassState(centerOfMassPosition, fakeCoMVelocity);
+
 
       contactStateManager.initialize();
 
@@ -816,6 +833,8 @@ public class BalanceManager
    public void initializeICPPlanForSingleSupport()
    {
       computeAngularMomentumOffset.set(useAngularMomentumOffset.getValue());
+      if (yumingHeuristicTurnOffAngularMomentum)
+         computeAngularMomentumOffset.set(false);
       currentFootstep.set(footsteps.get(0));
 
       double swingTime = footstepTimings.get(0).getSwingTime();
@@ -846,12 +865,25 @@ public class BalanceManager
          holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
       }
       computeAngularMomentumOffset.set(useAngularMomentumOffset.getValue() && useAngularMomentumOffsetInStanding.getValue());
+      if (yumingHeuristicTurnOffAngularMomentum)
+         computeAngularMomentumOffset.set(false);
 
       angularMomentumHandler.clearSwingFootTrajectory();
 
       copTrajectoryState.setInitialCoP(yoPerfectCoP);
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
-      comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
+      
+      
+      
+      
+//      comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
+      centerOfMassPosition.setFromReferenceFrame(centerOfMassFrame);
+      FrameVector3D fakeCoMVelocity = new FrameVector3D();
+      fakeCoMVelocity.sub( controllerToolbox.getCapturePoint(), centerOfMassPosition);
+      fakeCoMVelocity.scale(controllerToolbox.getOmega0());
+      comTrajectoryPlanner.setInitialCenterOfMassState(centerOfMassPosition, fakeCoMVelocity);
+      
+      
       comTrajectoryPlanner.initializeTrajectory(yoDesiredCoMPosition, Double.POSITIVE_INFINITY);
       swingSpeedUpForStepAdjustment.setToNaN();
 
@@ -864,6 +896,8 @@ public class BalanceManager
    {
       comTrajectoryPlanner.removeCompletedSegments(contactStateManager.getTotalStateDuration());
       computeAngularMomentumOffset.set(useAngularMomentumOffset.getValue());
+      if (yumingHeuristicTurnOffAngularMomentum)
+         computeAngularMomentumOffset.set(false);
 
       if (holdICPToCurrentCoMLocationInNextDoubleSupport.getBooleanValue())
       {
@@ -872,7 +906,14 @@ public class BalanceManager
       }
       copTrajectoryState.setInitialCoP(yoPerfectCoP);
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
-      comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
+//      comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
+      
+      centerOfMassPosition.setFromReferenceFrame(centerOfMassFrame);
+      FrameVector3D fakeCoMVelocity = new FrameVector3D();
+      fakeCoMVelocity.sub( controllerToolbox.getCapturePoint(), centerOfMassPosition);
+      fakeCoMVelocity.scale(controllerToolbox.getOmega0());
+      comTrajectoryPlanner.setInitialCenterOfMassState(centerOfMassPosition, fakeCoMVelocity);
+      
       swingSpeedUpForStepAdjustment.setToNaN();
 
 
@@ -886,6 +927,9 @@ public class BalanceManager
    public void initializeICPPlanForTransfer()
    {
       computeAngularMomentumOffset.set(useAngularMomentumOffset.getValue());
+      if (yumingHeuristicTurnOffAngularMomentum)
+         computeAngularMomentumOffset.set(false);
+
       if (holdICPToCurrentCoMLocationInNextDoubleSupport.getBooleanValue())
       {
          requestICPPlannerToHoldCurrentCoM();
@@ -898,7 +942,12 @@ public class BalanceManager
 
       copTrajectoryState.setInitialCoP(yoPerfectCoP);
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
-      comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
+//      comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
+      centerOfMassPosition.setFromReferenceFrame(centerOfMassFrame);
+      FrameVector3D fakeCoMVelocity = new FrameVector3D();
+      fakeCoMVelocity.sub( controllerToolbox.getCapturePoint(), centerOfMassPosition);
+      fakeCoMVelocity.scale(controllerToolbox.getOmega0());
+      comTrajectoryPlanner.setInitialCenterOfMassState(centerOfMassPosition, fakeCoMVelocity);
 
       contactStateManager.initializeForTransfer(footstepTimings.get(0).getTransferTime(), footstepTimings.get(0).getSwingTime());
       swingSpeedUpForStepAdjustment.setToNaN();

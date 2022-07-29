@@ -48,7 +48,7 @@ public class WorkspaceLimiterControlModule
    private boolean visualize = true;
    private boolean moreVisualizers = true;
 
-   private static final boolean USE_UNREACHABLE_FOOTSTEP_CORRECTION = true; // Lower the CoM if a footstep is unreachable
+   private static final boolean USE_UNREACHABLE_FOOTSTEP_CORRECTION = false; // Lower the CoM if a footstep is unreachable
 
    private final BooleanParameter useSingularityAvoidanceInSwing;
 

@@ -41,13 +41,13 @@ public class CoPTrajectoryParameters extends YoSaveableModuleState
    private static final double defaultSwingDurationShiftFraction = 0.85;
    private static final double defaultTransferWeightDistribution = 0.5;
 
-   private static final Vector2DReadOnly defaultEntryCMPOffset = new Vector2D(0.0, -0.005);
-   private static final Vector2DReadOnly defaultBallCMPOffset = new Vector2D(0.0, 0.01);
-   private static final Vector2DReadOnly defaultExitCMPOffset = new Vector2D(0.0, 0.025);
+   private static final Vector2DReadOnly defaultEntryCMPOffset = new Vector2D(0.0, 0.0);
+   private static final Vector2DReadOnly defaultBallCMPOffset = new Vector2D(0.0, 0.0);
+   private static final Vector2DReadOnly defaultExitCMPOffset = new Vector2D(0.0, 0.0);
 
-   private static final double defaultEntryCMPLengthOffsetFactor = 1.0 / 3.0;
-   private static final double defaultBallCMPLengthOffsetFactor = 1.0 / 8.0;
-   private static final double defaultExitCMPLengthOffsetFactor = 1.0 / 3.0;
+   private static final double defaultEntryCMPLengthOffsetFactor = 0.0;
+   private static final double defaultBallCMPLengthOffsetFactor = 0.0;
+   private static final double defaultExitCMPLengthOffsetFactor = 0.0;
 
    private static final double defaultStepDownLengthOffsetScaleFactor = 2;
 

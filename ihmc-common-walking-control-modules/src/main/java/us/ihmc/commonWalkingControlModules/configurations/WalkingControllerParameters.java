@@ -744,7 +744,7 @@ public abstract class WalkingControllerParameters
     */
    public boolean enableLegSingularityAndKneeCollapseAvoidanceModule()
    {
-      return true;
+      return false;
    }
 
    /**

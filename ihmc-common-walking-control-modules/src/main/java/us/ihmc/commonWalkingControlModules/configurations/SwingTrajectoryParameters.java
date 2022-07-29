@@ -129,7 +129,7 @@ public abstract class SwingTrajectoryParameters
     */
    public boolean useSingularityAvoidanceInSwing()
    {
-      return true;
+      return false;
    }
 
    /**
@@ -137,6 +137,6 @@ public abstract class SwingTrajectoryParameters
     */
    public boolean useSingularityAvoidanceInSupport()
    {
-      return true;
+      return false;
    }
 }

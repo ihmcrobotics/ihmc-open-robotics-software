@@ -189,7 +189,8 @@ public class ContinuousStepGenerator implements Updatable
       footstepDataListMessage.setDefaultTransferDuration(parameters.getTransferDuration());
       footstepDataListMessage.setFinalTransferDuration(parameters.getTransferDuration());
       footstepDataListMessage.setAreFootstepsAdjustable(parameters.getStepsAreAdjustable());
-      footstepDataListMessage.setOffsetFootstepsWithExecutionError(parameters.getShiftUpcomingStepsWithTouchdown());
+      footstepDataListMessage.setOffsetFootstepsWithExecutionError(false);
+      footstepDataListMessage.setTrustHeightOfFootsteps(true);;
 
       if (walkInputProvider != null)
          walk.set(walkInputProvider.getValue());

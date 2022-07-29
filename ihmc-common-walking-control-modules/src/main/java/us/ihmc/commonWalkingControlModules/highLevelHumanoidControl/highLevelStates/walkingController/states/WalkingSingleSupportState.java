@@ -207,12 +207,13 @@ public class WalkingSingleSupportState extends SingleSupportState
    @Override
    public boolean isDone(double timeInState)
    {
-      if (super.isDone(timeInState))
-      {
-         return true;
-      }
+      return timeInState >= footstepTiming.getSwingTime();
+//      if (super.isDone(timeInState))
+//      {
+//         return true;
+//      }
 
-      return finishSingleSupportWhenICPPlannerIsDone.getBooleanValue() && balanceManager.isICPPlanDone();
+//      return finishSingleSupportWhenICPPlannerIsDone.getBooleanValue() && balanceManager.isICPPlanDone();
    }
 
    @Override

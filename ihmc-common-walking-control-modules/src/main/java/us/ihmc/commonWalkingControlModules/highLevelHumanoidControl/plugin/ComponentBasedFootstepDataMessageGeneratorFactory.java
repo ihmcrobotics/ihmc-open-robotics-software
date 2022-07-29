@@ -166,8 +166,16 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
                                                                                             timeProvider,
                                                                                             headingAndVelocityEvaluationScriptParametersField.get(),
                                                                                             registryField.get());
-         continuousStepGenerator.setDesiredTurningVelocityProvider(script.getDesiredTurningVelocityProvider());
-         continuousStepGenerator.setDesiredVelocityProvider(script.getDesiredVelocityProvider());
+//         continuousStepGenerator.setDesiredTurningVelocityProvider(script.getDesiredTurningVelocityProvider());
+         continuousStepGenerator.setDesiredVelocityProvider(new DesiredVelocityProvider()
+                                                            {
+            @Override
+            public Vector2DReadOnly getDesiredVelocity()
+            {
+               return new Vector2D(0.4, 0.0);
+            }
+            
+                                                            });
          updatables.add(script);
       }
       else

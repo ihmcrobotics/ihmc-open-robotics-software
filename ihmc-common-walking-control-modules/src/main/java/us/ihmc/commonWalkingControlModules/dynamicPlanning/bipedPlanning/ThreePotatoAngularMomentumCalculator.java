@@ -43,6 +43,8 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ThreePotatoAngularMomentumCalculator
 {
+   private final Boolean yumingHeuristicTurnOffAngularMomentum = true;
+   
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final boolean debug = false;
@@ -393,21 +395,29 @@ public class ThreePotatoAngularMomentumCalculator
 
    public FrameVector3DReadOnly getDesiredAngularMomentum()
    {
+      if (yumingHeuristicTurnOffAngularMomentum)
+         desiredAngularMomentum.setToZero();
       return desiredAngularMomentum;
    }
 
    public FrameVector3DReadOnly getDesiredHeightScaledAngularMomentum()
    {
+      if (yumingHeuristicTurnOffAngularMomentum)
+         desiredScaledAngularMomentum.setToZero();
       return desiredScaledAngularMomentum;
    }
 
    public FrameVector3DReadOnly getDesiredAngularMomentumRate()
    {
+      if (yumingHeuristicTurnOffAngularMomentum)
+         desiredAngularMomentumRate.setToZero();
       return desiredAngularMomentumRate;
    }
 
    public FrameVector3DReadOnly getDesiredHeightScaledAngularMomentumRate()
    {
+      if (yumingHeuristicTurnOffAngularMomentum)
+         desiredScaledAngularMomentumRate.setToZero();
       return desiredScaledAngularMomentumRate;
    }
 
