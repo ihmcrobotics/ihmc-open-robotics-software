@@ -18,6 +18,10 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
@@ -52,8 +56,9 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
    private ImGui3DViewInput latestInput;
    private GDX3DPanel primary3DPanel;
    private boolean renderTooltip = false;
+   FramePose3D tempFramePose = new FramePose3D();
 
-   private double prevYaw = 0;
+
 
    public void create(GDXImGuiBasedUI baseUI, CommunicationHelper communicationHelper, ROS2SyncedRobotModel syncedRobot)
    {
@@ -95,8 +100,9 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
             //Set position of modelInstance, selectablePose3DGizmo, and the sphere used in stepCheckIsPointInsideAlgorithm all to the pointInWorld that the cursor is at
             GDXTools.toGDX(pickPointInWorld, footstepArrayList.get(footstepIndex).getFootstepModelInstance().transform);
 
+            footstepArrayList.get(footstepIndex).setGizmoPose(pickPointInWorld.getX(), pickPointInWorld.getY(), pickPointInWorld.getZ(),
+                                                              footstepArrayList.get(footstepIndex).getSelectablePose3DGizmo().getPoseGizmo().getTransformToParent());
 
-            footstepArrayList.get(footstepIndex).setGizmoPose(pickPointInWorld.getX(), pickPointInWorld.getY(), pickPointInWorld.getZ());
             footstepArrayList.get(footstepIndex)
                              .getBoundingSphere()
                              .getPosition()
@@ -359,6 +365,19 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
 
       footstepArrayList.add(new ImGuiGDXManuallyPlacedFootstep(baseUI, footstepSide, footstepIndex));
       currentFootStepSide = footstepSide;
+      if(footstepIndex - 1 > -1)
+      {
+         //footstepArrayList.get(footstepIndex).getSelectablePose3DGizmo().getPoseGizmo().
+         tempFramePose.setToZero(ReferenceFrame.getWorldFrame());
+         RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
+         GDXTools.toEuclid(footstepArrayList.get(footstepIndex - 1).getFootstepModelInstance().transform, rigidBodyTransform);
+         tempFramePose.set(rigidBodyTransform);
+         tempFramePose.getOrientation().set(new RotationMatrix(rigidBodyTransform.getRotation().getYaw(), 0.0, 0.0));
+         tempFramePose.get(footstepArrayList.get(footstepIndex).getSelectablePose3DGizmo().getPoseGizmo().getTransformToParent());
+         footstepArrayList.get(footstepIndex).getSelectablePose3DGizmo().getPoseGizmo().updateTransforms();
+         //footstepArrayList.get(footstepIndex).getFootstepModelInstance().transform.setToRotationRad(tempFramePose.getOrientation().getX32(), tempFramePose.getOrientation().getY32(), tempFramePose.getOrientation().getZ32(), (float) tempFramePose.getOrientation().angle());
+
+      }
    }
 
    public void removeFootStep()
