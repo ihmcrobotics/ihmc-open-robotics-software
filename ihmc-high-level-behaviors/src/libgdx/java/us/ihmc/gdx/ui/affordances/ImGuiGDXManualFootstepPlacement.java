@@ -64,6 +64,7 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
    {
       this.baseUI = baseUI;
       this.communicationHelper = communicationHelper;
+      this.syncedRobot = syncedRobot;
       primary3DPanel = baseUI.getPrimary3DPanel();
       primary3DPanel.addWindowDrawListAddition(this::renderTooltips);
 
@@ -352,32 +353,22 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
 
    public void createNewFootStep(RobotSide footstepSide)
    {
+      RigidBodyTransform latestFootstepTransform = getLatestFootstepTransform(footstepSide.getOppositeSide());
+      double latestFootstepYaw = latestFootstepTransform.getRotation().getYaw();
       placingGoal = true;
       footstepIndex++;
-
-      if (footstepIndex-1 >=0)
-      {
-         FramePose3DReadOnly prevPose = footstepArrayList.get(footstepIndex-1).getSelectablePose3DGizmo().getPoseGizmo().getPose();
-      }
-
-      ImGuiGDXManuallyPlacedFootstep newStep = new ImGuiGDXManuallyPlacedFootstep(baseUI, footstepSide, footstepIndex);
-
-
       footstepArrayList.add(new ImGuiGDXManuallyPlacedFootstep(baseUI, footstepSide, footstepIndex));
       currentFootStepSide = footstepSide;
-      if(footstepIndex - 1 > -1)
-      {
-         //footstepArrayList.get(footstepIndex).getSelectablePose3DGizmo().getPoseGizmo().
-         tempFramePose.setToZero(ReferenceFrame.getWorldFrame());
-         RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
-         GDXTools.toEuclid(footstepArrayList.get(footstepIndex - 1).getFootstepModelInstance().transform, rigidBodyTransform);
-         tempFramePose.set(rigidBodyTransform);
-         tempFramePose.getOrientation().set(new RotationMatrix(rigidBodyTransform.getRotation().getYaw(), 0.0, 0.0));
-         tempFramePose.get(footstepArrayList.get(footstepIndex).getSelectablePose3DGizmo().getPoseGizmo().getTransformToParent());
-         footstepArrayList.get(footstepIndex).getSelectablePose3DGizmo().getPoseGizmo().updateTransforms();
-         //footstepArrayList.get(footstepIndex).getFootstepModelInstance().transform.setToRotationRad(tempFramePose.getOrientation().getX32(), tempFramePose.getOrientation().getY32(), tempFramePose.getOrientation().getZ32(), (float) tempFramePose.getOrientation().angle());
 
-      }
+      tempFramePose.setToZero(ReferenceFrame.getWorldFrame());
+      RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
+      GDXTools.toEuclid(new Matrix4(), rigidBodyTransform);
+      tempFramePose.set(rigidBodyTransform);
+      tempFramePose.getOrientation().set(new RotationMatrix(latestFootstepYaw, 0.0, 0.0));
+      tempFramePose.get(footstepArrayList.get(footstepIndex).getSelectablePose3DGizmo().getPoseGizmo().getTransformToParent());
+      footstepArrayList.get(footstepIndex).getSelectablePose3DGizmo().getPoseGizmo().updateTransforms();
+
+
    }
 
    public void removeFootStep()
@@ -387,5 +378,18 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
 
       baseUI.getPrimaryScene().removeRenderableAdapter((footstepArrayList.remove(footstepIndex).getRenderableAdapter()));
       footstepIndex--;
+   }
+
+   public RigidBodyTransform getLatestFootstepTransform(RobotSide robotSide)
+   {
+      if(footstepArrayList.size()>0)
+      {
+         return footstepArrayList.get(footstepIndex).getSelectablePose3DGizmo().getPoseGizmo().getTransformToParent();
+      }
+      else
+      {
+         return syncedRobot.getReferenceFrames().getSoleFrame(robotSide).getTransformToWorldFrame();
+      }
+
    }
 }
