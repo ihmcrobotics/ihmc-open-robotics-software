@@ -319,8 +319,8 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       stepMessage.setRobotSide(step.getFootstepSide().toByte());
       stepMessage.getLocation().set(new Point3D(step.getSelectablePose3DGizmo().getPoseGizmo().getPose().getPosition()));
       stepMessage.getOrientation().set(step.getPose().getOrientation());
-      stepMessage.setSwingDuration(1.2);
-      stepMessage.setTransferDuration(0.8);
+      stepMessage.setSwingDuration(0.7);
+      stepMessage.setTransferDuration(0.25);
    }
 
    public Pose3DReadOnly getGoalPose()
