@@ -115,11 +115,10 @@ public class ImGuiGDXManuallyPlacedFootstep
 
       selectablePose3DGizmo.process3DViewInput(input, pickSelected);
 
-
-      footstepModelInstance.transform.setToRotationRad(selectablePose3DGizmo.getPoseGizmo().getPose().getOrientation().getX32(),
-                                                       selectablePose3DGizmo.getPoseGizmo().getPose().getOrientation().getY32(),
-                                                       selectablePose3DGizmo.getPoseGizmo().getPose().getOrientation().getZ32(),
-                                                       (float) selectablePose3DGizmo.getPoseGizmo().getPose().getOrientation().angle());
+      footstepModelInstance.transform.setToRotationRad(selectablePose3DGizmo.getPoseGizmo().getPose().getRotation().getX32(),
+                                                       selectablePose3DGizmo.getPoseGizmo().getPose().getRotation().getY32(),
+                                                       selectablePose3DGizmo.getPoseGizmo().getPose().getRotation().getZ32(),
+                                                       (float) selectablePose3DGizmo.getPoseGizmo().getPose().getRotation().angle());
       footstepModelInstance.transform.setTranslation(selectablePose3DGizmo.getPoseGizmo().getPose().getPosition().getX32(),
                                                      selectablePose3DGizmo.getPoseGizmo().getPose().getPosition().getY32(),
                                                      selectablePose3DGizmo.getPoseGizmo().getPose().getPosition().getZ32());
@@ -141,13 +140,15 @@ public class ImGuiGDXManuallyPlacedFootstep
       }
    }
 
-   public void setGizmoPose(double x, double y, double z)
+   //Sets the gizmo's position and rotation
+   public void setGizmoPose(double x, double y, double z, RigidBodyTransform transform)
    {
       tempFramePose.setToZero(ReferenceFrame.getWorldFrame());
-
       tempFramePose.getPosition().set(x, y, z);
+      tempFramePose.getRotation().set(transform.getRotation());
       tempFramePose.get(selectablePose3DGizmo.getPoseGizmo().getTransformToParent());
    }
+
 
    public void flashFootstepsWhenBadPlacement(BipedalFootstepPlannerNodeRejectionReason reason)
    {
