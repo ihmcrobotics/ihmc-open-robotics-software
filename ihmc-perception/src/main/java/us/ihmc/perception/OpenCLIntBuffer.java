@@ -86,6 +86,11 @@ public class OpenCLIntBuffer
       openCLManager.enqueueReadBuffer(openCLBufferObject, numberOfIntegers * Integer.BYTES, bytedecoIntBufferPointer);
    }
 
+   public ByteBuffer getBackingDirectByteBuffer()
+   {
+      return backingDirectByteBuffer;
+   }
+
    public IntBuffer getBackingDirectIntBuffer()
    {
       return backingDirectIntBuffer;
