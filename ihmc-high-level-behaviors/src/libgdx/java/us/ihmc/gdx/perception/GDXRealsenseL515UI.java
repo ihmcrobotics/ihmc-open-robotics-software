@@ -67,7 +67,6 @@ public class GDXRealsenseL515UI
    private _cl_kernel createPointCloudKernel;
    private OpenCLFloatBuffer pointCloudRenderingBuffer;
    private int numberOfDepthPoints;
-   private boolean firstRun = true;
 
    public GDXRealsenseL515UI()
    {
@@ -140,6 +139,11 @@ public class GDXRealsenseL515UI
                      baseUI.getPrimaryScene().addRenderableProvider(pointCloudRenderer, GDXSceneLevel.MODEL);
 
                      pointCloudRenderingBuffer = new OpenCLFloatBuffer(numberOfDepthPoints * 8, pointCloudRenderer.getVertexBuffer());
+                     depth32FC1Image.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
+                     //                     colorRGBImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
+                     colorImagePanel.getBytedecoImage().createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
+                     pointCloudRenderingBuffer.createOpenCLBufferObject(openCLManager);
+                     parametersBuffer.createOpenCLBufferObject(openCLManager);
                   }
 
                   frameReadFrequency.ping();
@@ -198,22 +202,10 @@ public class GDXRealsenseL515UI
                   parametersBuffer.getBytedecoFloatBufferPointer().put(21, (float) l515.getColorWidth());
                   parametersBuffer.getBytedecoFloatBufferPointer().put(22, (float) l515.getColorHeight());
 
-                  if (firstRun)
-                  {
-                     firstRun = false;
-                     depth32FC1Image.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
-//                     colorRGBImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
-                     colorImagePanel.getBytedecoImage().createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
-                     pointCloudRenderingBuffer.createOpenCLBufferObject(openCLManager);
-                     parametersBuffer.createOpenCLBufferObject(openCLManager);
-                  }
-                  else
-                  {
-                     depth32FC1Image.writeOpenCLImage(openCLManager);
+                  depth32FC1Image.writeOpenCLImage(openCLManager);
 //                     colorRGBImage.writeOpenCLImage(openCLManager);
-                     colorImagePanel.getBytedecoImage().writeOpenCLImage(openCLManager);
-                     parametersBuffer.writeOpenCLBufferObject(openCLManager);
-                  }
+                  colorImagePanel.getBytedecoImage().writeOpenCLImage(openCLManager);
+                  parametersBuffer.writeOpenCLBufferObject(openCLManager);
 
                   openCLManager.setKernelArgument(createPointCloudKernel, 0, depth32FC1Image.getOpenCLImageObject());
                   openCLManager.setKernelArgument(createPointCloudKernel, 1, colorImagePanel.getBytedecoImage().getOpenCLImageObject());
