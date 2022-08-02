@@ -332,13 +332,15 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       ControllerCoreOptimizationSettings defaultControllerCoreOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       controllerCoreOptimizationSettings = new ParameterizedControllerCoreOptimizationSettings(defaultControllerCoreOptimizationSettings, registry);
 
-      this.naturalPosture = walkingControllerParameters.getNaturalPosture(fullRobotModel, registry, controllerToolbox.getYoGraphicsListRegistry());
+      // Why do we create another NP object here? Can we just use the one in the NPmanager?
+//      this.naturalPosture = walkingControllerParameters.getNaturalPosture(fullRobotModel, registry, controllerToolbox.getYoGraphicsListRegistry());
+      this.naturalPosture = this.naturalPostureManager.getRobotNaturalPosture();
       if (naturalPosture != null)
          naturalPosture.initialize();
 
+      // privileged configuration 
       pPoseSpineRoll.set(0.0);
       pPoseSpineYaw.set(0.0);
-      
       pPoseShoulderPitch.set(0.1);
       pPoseShoulderRoll.set(-1.3);
       pPoseShoulderYaw.set(-0.3);
