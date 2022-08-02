@@ -45,7 +45,7 @@ public class GDX3DPanel
    private ImGui3DViewInput inputCalculator;
    private final ArrayList<Consumer<ImGui3DViewInput>> imgui3DViewPickCalculators = new ArrayList<>();
    private final ArrayList<Consumer<ImGui3DViewInput>> imgui3DViewInputProcessors = new ArrayList<>();
-   private final ArrayList<Runnable> windowDrawListAdditions = new ArrayList<>();
+   private final ArrayList<Runnable> imGuiOverlayAdditions = new ArrayList<>();
    private InputMultiplexer inputMultiplexer;
    private GDXFocusBasedCamera camera3D;
    private ScreenViewport viewport;
@@ -183,14 +183,14 @@ public class GDX3DPanel
          float uvMaxY = 0.0f;
 
          ImGui.getWindowDrawList().addImage(textureID, windowDrawMinX, windowDrawMinY, windowDrawMaxX, windowDrawMaxY, uvMinX, uvMinY, uvMaxX, uvMaxY);
+         ImGui.popStyleVar();
 
-         for (Runnable windowDrawListAddition : windowDrawListAdditions)
+         for (Runnable imguiOverlayAddition : imGuiOverlayAdditions)
          {
-            windowDrawListAddition.run();
+            imguiOverlayAddition.run();
          }
 
          ImGui.end();
-         ImGui.popStyleVar();
       }
    }
 
@@ -319,9 +319,9 @@ public class GDX3DPanel
       imgui3DViewInputProcessors.add(processImGuiInput);
    }
 
-   public void addWindowDrawListAddition(Runnable windowDrawListAddition)
+   public void addImGuiOverlayAddition(Runnable imGuiOverlayAddition)
    {
-      windowDrawListAdditions.add(windowDrawListAddition);
+      imGuiOverlayAdditions.add(imGuiOverlayAddition);
    }
 
    public GDX3DScene getScene()

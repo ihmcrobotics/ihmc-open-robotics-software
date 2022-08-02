@@ -1,7 +1,9 @@
 package us.ihmc.gdx;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
+import imgui.type.ImBoolean;
 import org.apache.logging.log4j.Level;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.gdx.imgui.ImGuiMovingPlot;
@@ -25,6 +27,7 @@ public class GDXImGuiBasedUIDemo
    private final ImGuiMovingPlot renderPlot = new ImGuiMovingPlot("render count", 1000, 300, 30);
    private final ImGuiLogWidget logWidget = new ImGuiLogWidget("Log");
    private long renderCount = 0;
+   private ImBoolean option = new ImBoolean();
 
    public GDXImGuiBasedUIDemo()
    {
@@ -41,6 +44,22 @@ public class GDXImGuiBasedUIDemo
             baseUI.getImGuiPanelManager().addPanel("Window 1", GDXImGuiBasedUIDemo.this::renderWindow1);
             baseUI.getImGuiPanelManager().addPanel("Window 2", GDXImGuiBasedUIDemo.this::renderWindow2);
             baseUI.getImGuiPanelManager().addPanel("Window 3", GDXImGuiBasedUIDemo.this::renderWindow3);
+
+            baseUI.getPrimary3DPanel().addImGuiOverlayAddition(() ->
+            {
+               if (ImGui.isWindowHovered() && ImGui.isMouseClicked(ImGuiMouseButton.Right))
+               {
+                  ImGui.openPopup("Popup");
+               }
+               if (ImGui.beginPopup("Popup"))
+               {
+                  ImGui.menuItem("Button");
+                  ImGui.menuItem("Option", null, option);
+                  if (ImGui.menuItem("Cancel"))
+                     ImGui.closeCurrentPopup();
+                  ImGui.endPopup();
+               }
+            });
 
             GDX3DPanel second3DPanel = new GDX3DPanel("Second 3D View", 2, true);
             baseUI.add3DPanel(second3DPanel);
