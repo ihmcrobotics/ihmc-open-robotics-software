@@ -8,12 +8,15 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.*;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -27,11 +30,13 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 
 public class PlanarRegionToolsTest
 {
@@ -63,6 +68,204 @@ public class PlanarRegionToolsTest
 
          EuclidCoreTestTools.assertPoint3DGeometricallyEquals(expectedProjectedPoint, projectedRandomPoint, 1e-8);
       }
+   }
+
+   @Test
+   public void testWithLShapedPlanarRegionWithIdentityTransform()
+   {
+      // polygons forming a L-shaped region.
+      List<ConvexPolygon2D> regionConvexPolygons = new ArrayList<>();
+      ConvexPolygon2D polygon1 = new ConvexPolygon2D();
+      polygon1.addVertex(1.0, 1.0);
+      polygon1.addVertex(1.0, -1.0);
+      polygon1.addVertex(-1.0, -1.0);
+      polygon1.addVertex(-1.0, 1.0);
+      ConvexPolygon2D polygon2 = new ConvexPolygon2D();
+      polygon2.addVertex(3.0, 1.0);
+      polygon2.addVertex(3.0, -1.0);
+      polygon2.addVertex(1.0, -1.0);
+      polygon2.addVertex(1.0, 1.0);
+      ConvexPolygon2D polygon3 = new ConvexPolygon2D();
+      polygon3.addVertex(1.0, 3.0);
+      polygon3.addVertex(1.0, 1.0);
+      polygon3.addVertex(-1.0, 1.0);
+      polygon3.addVertex(-1.0, 3.0);
+
+      regionConvexPolygons.add(polygon1);
+      regionConvexPolygons.add(polygon2);
+      regionConvexPolygons.add(polygon3);
+      for (ConvexPolygon2D convexPolygon : regionConvexPolygons)
+         convexPolygon.update();
+
+      RigidBodyTransform regionTransform = new RigidBodyTransform();
+      PlanarRegion planarRegion = new PlanarRegion(regionTransform, regionConvexPolygons);
+
+      Assertions.assertEquals(3, planarRegion.getNumberOfConvexPolygons(), "Wrong number of convex polygons in the region.");
+      for (int i = 0; i < 3; i++)
+         Assertions.assertTrue(regionConvexPolygons.get(i).epsilonEquals(planarRegion.getConvexPolygon(i), 1.0e-10), "Unexpected region polygon.");
+
+      Vector3D actualNormal = new Vector3D();
+      planarRegion.getNormal(actualNormal);
+      EuclidCoreTestTools.assertVector3DGeometricallyEquals("Wrong region normal.", new Vector3D(0.0, 0.0, 1.0), actualNormal, 1.0e-10);
+      Point3D actualOrigin = new Point3D();
+      planarRegion.getPointInRegion(actualOrigin);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Wrong region origin.", new Point3D(), actualOrigin, 1.0e-10);
+      RigidBodyTransform actualTransform = new RigidBodyTransform();
+      planarRegion.getTransformToWorld(actualTransform);
+      Assertions.assertTrue(regionTransform.epsilonEquals(actualTransform, 1.0e-10), "Wrong region transform to world.");
+
+      Point2D point2d = new Point2D();
+
+      // Do a bunch of trivial queries with isPointInside(Point2d) method.
+      point2d.set(0.0, 0.0);
+      Assertions.assertTrue(planarRegion.isPointInside(point2d));
+      point2d.set(2.0, 0.0);
+      Assertions.assertTrue(planarRegion.isPointInside(point2d));
+      point2d.set(0.0, 2.0);
+      Assertions.assertTrue(planarRegion.isPointInside(point2d));
+      point2d.set(2.0, 2.0);
+      Assertions.assertFalse(planarRegion.isPointInside(point2d));
+
+      Point3D point3d = new Point3D();
+      double maximumOrthogonalDistance = 1.0e-3;
+      // Do a bunch of trivial queries with isPointInside(Point3D, double) method. Point in plane
+      point3d.set(0.0, 0.0, 0.0);
+      Assertions.assertTrue(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
+      point3d.set(2.0, 0.0, 0.0);
+      Assertions.assertTrue(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
+      point3d.set(0.0, 2.0, 0.0);
+      Assertions.assertTrue(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
+      point3d.set(2.0, 2.0, 0.0);
+      Assertions.assertFalse(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
+      // Do a bunch of trivial queries with isPointInside(Point3D, double) method. Point below plane
+      point3d.set(0.0, 0.0, -0.5 * maximumOrthogonalDistance);
+      Assertions.assertTrue(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
+      point3d.set(2.0, 0.0, -0.5 * maximumOrthogonalDistance);
+      Assertions.assertTrue(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
+      point3d.set(0.0, 2.0, -0.5 * maximumOrthogonalDistance);
+      Assertions.assertTrue(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
+      point3d.set(0.0, 0.0, -1.5 * maximumOrthogonalDistance);
+      Assertions.assertFalse(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
+      point3d.set(2.0, 0.0, -1.5 * maximumOrthogonalDistance);
+      Assertions.assertFalse(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
+      point3d.set(0.0, 2.0, -1.5 * maximumOrthogonalDistance);
+      Assertions.assertFalse(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
+      // Do a bunch of trivial queries with isPointInside(Point3D, double) method. Point above plane
+      point3d.set(0.0, 0.0, 0.5 * maximumOrthogonalDistance);
+      Assertions.assertTrue(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
+      point3d.set(2.0, 0.0, 0.5 * maximumOrthogonalDistance);
+      Assertions.assertTrue(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
+      point3d.set(0.0, 2.0, 0.5 * maximumOrthogonalDistance);
+      Assertions.assertTrue(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
+      point3d.set(0.0, 0.0, 1.5 * maximumOrthogonalDistance);
+      Assertions.assertFalse(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
+      point3d.set(2.0, 0.0, 1.5 * maximumOrthogonalDistance);
+      Assertions.assertFalse(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
+      point3d.set(0.0, 2.0, 1.5 * maximumOrthogonalDistance);
+      Assertions.assertFalse(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
+
+      // Do a bunch of trivial queries with isPointInsideByProjectionOntoXYPlane(double, double) method.
+      Assertions.assertTrue(planarRegion.isPointInsideByProjectionOntoXYPlane(0.0, 0.0));
+      Assertions.assertTrue(planarRegion.isPointInsideByProjectionOntoXYPlane(2.0, 0.0));
+      Assertions.assertTrue(planarRegion.isPointInsideByProjectionOntoXYPlane(0.0, 2.0));
+      Assertions.assertFalse(planarRegion.isPointInsideByProjectionOntoXYPlane(2.0, 2.0));
+
+      // Do a bunch of trivial queries with isPointInsideByProjectionOntoXYPlane(Point2d) method.
+      point2d.set(0.0, 0.0);
+      Assertions.assertTrue(planarRegion.isPointInsideByProjectionOntoXYPlane(point2d));
+      point2d.set(2.0, 0.0);
+      Assertions.assertTrue(planarRegion.isPointInsideByProjectionOntoXYPlane(point2d));
+      point2d.set(0.0, 2.0);
+      Assertions.assertTrue(planarRegion.isPointInsideByProjectionOntoXYPlane(point2d));
+      point2d.set(2.0, 2.0);
+      Assertions.assertFalse(planarRegion.isPointInsideByProjectionOntoXYPlane(point2d));
+
+      // Do a bunch of trivial queries with isPointInsideByProjectionOntoXYPlane(Point3D) method.
+      point3d.set(0.0, 0.0, Double.POSITIVE_INFINITY);
+      Assertions.assertTrue(planarRegion.isPointInsideByProjectionOntoXYPlane(point3d));
+      point3d.set(2.0, 0.0, Double.POSITIVE_INFINITY);
+      Assertions.assertTrue(planarRegion.isPointInsideByProjectionOntoXYPlane(point3d));
+      point3d.set(0.0, 2.0, Double.POSITIVE_INFINITY);
+      Assertions.assertTrue(planarRegion.isPointInsideByProjectionOntoXYPlane(point3d));
+      point3d.set(2.0, 2.0, Double.POSITIVE_INFINITY);
+      Assertions.assertFalse(planarRegion.isPointInsideByProjectionOntoXYPlane(point3d));
+
+      // Do a bunch of trivial queries with isLineSegmentIntersecting(LineSegment2d) method.
+      LineSegment2D lineSegment = new LineSegment2D(0.0, 0.0, 2.0, 2.0);
+      Assertions.assertTrue(planarRegion.isLineSegmentIntersecting(lineSegment));
+      List<Point2DBasics[]> intersectionsInPlaneFrame = new ArrayList<>();
+      planarRegion.getLineSegmentIntersectionsWhenProjectedVertically(lineSegment, intersectionsInPlaneFrame);
+      Assertions.assertEquals(3, intersectionsInPlaneFrame.size());
+
+      lineSegment = new LineSegment2D(0.0, 0.0, 0.5, 0.5);
+      Assertions.assertFalse(planarRegion.isLineSegmentIntersecting(lineSegment), "Not intersecting if fully inside a single polygon");
+      intersectionsInPlaneFrame.clear();
+      planarRegion.getLineSegmentIntersectionsWhenProjectedVertically(lineSegment, intersectionsInPlaneFrame);
+      Assertions.assertEquals(0, intersectionsInPlaneFrame.size());
+
+      lineSegment = new LineSegment2D(0.0, 0.0, 0.0, 1.5);
+      Assertions.assertTrue(planarRegion.isLineSegmentIntersecting(lineSegment), "Intersecting if fully inside but cross two polygons");
+      intersectionsInPlaneFrame.clear();
+      planarRegion.getLineSegmentIntersectionsWhenProjectedVertically(lineSegment, intersectionsInPlaneFrame);
+      Assertions.assertEquals(2, intersectionsInPlaneFrame.size());
+      Point2DBasics[] points = intersectionsInPlaneFrame.get(0);
+      Assertions.assertEquals(1, points.length);
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(0.0, 1.0), points[0], 1e-7);
+      points = intersectionsInPlaneFrame.get(1);
+      Assertions.assertEquals(1, points.length);
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(0.0, 1.0), points[0], 1e-7);
+
+      lineSegment = new LineSegment2D(2.5, 0.5, 3.0, 9.0);
+      Assertions.assertTrue(planarRegion.isLineSegmentIntersecting(lineSegment));
+      lineSegment = new LineSegment2D(2.5, 4.5, 3.0, 9.0);
+      Assertions.assertFalse(planarRegion.isLineSegmentIntersecting(lineSegment), "Not intersecting if fully outside");
+
+      lineSegment = new LineSegment2D(2.0, -2.0, 2.0, 2.0);
+      Assertions.assertTrue(planarRegion.isLineSegmentIntersecting(lineSegment));
+      intersectionsInPlaneFrame.clear();
+      planarRegion.getLineSegmentIntersectionsWhenProjectedVertically(lineSegment, intersectionsInPlaneFrame);
+      Assertions.assertEquals(1, intersectionsInPlaneFrame.size());
+      points = intersectionsInPlaneFrame.get(0);
+      Assertions.assertEquals(2, points.length);
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(2.0, 1.0), points[0], 1e-7);
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(2.0, -1.0), points[1], 1e-7);
+
+      ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
+      convexPolygon.addVertex(0.2, 0.2);
+      convexPolygon.addVertex(0.2, -0.2);
+      convexPolygon.addVertex(-0.2, -0.2);
+      convexPolygon.addVertex(-0.2, 0.2);
+      convexPolygon.update();
+
+      // Do a bunch of trivial queries with isPolygonIntersecting(ConvexPolygon2d) method.
+      Assertions.assertTrue(planarRegion.isPolygonIntersecting(convexPolygon));
+      Assertions.assertTrue(planarRegion.isPolygonIntersecting(translateConvexPolygon(2.0, 0.0, convexPolygon)));
+      Assertions.assertTrue(planarRegion.isPolygonIntersecting(translateConvexPolygon(0.0, 2.0, convexPolygon)));
+      Assertions.assertFalse(planarRegion.isPolygonIntersecting(translateConvexPolygon(2.0, 2.0, convexPolygon)));
+      Assertions.assertFalse(planarRegion.isPolygonIntersecting(translateConvexPolygon(1.21, 1.21, convexPolygon)));
+      Assertions.assertTrue(planarRegion.isPolygonIntersecting(translateConvexPolygon(1.09, 1.09, convexPolygon)));
+      Assertions.assertTrue(planarRegion.isPolygonIntersecting(translateConvexPolygon(1.21, 1.09, convexPolygon)));
+      Assertions.assertTrue(planarRegion.isPolygonIntersecting(translateConvexPolygon(1.09, 1.21, convexPolygon)));
+
+      List<Point2DReadOnly> intersections = new ArrayList<>();
+
+      intersections = PlanarRegionTools.getPolygonIntersectionsWhenProjectedVertically(planarRegion, convexPolygon);
+      Assertions.assertEquals(1, intersections.size());
+
+      intersections = PlanarRegionTools.getPolygonIntersectionsWhenProjectedVertically(planarRegion, translateConvexPolygon(2.0, 0.0, convexPolygon));
+      Assertions.assertEquals(1, intersections.size());
+
+      intersections = PlanarRegionTools.getPolygonIntersectionsWhenProjectedVertically(planarRegion, translateConvexPolygon(0.0, 2.0, convexPolygon));
+      Assertions.assertEquals(1, intersections.size());
+
+      intersections = PlanarRegionTools.getPolygonIntersectionsWhenProjectedVertically(planarRegion, translateConvexPolygon(2.0, 2.0, convexPolygon));
+      Assertions.assertEquals(0, intersections.size());
+
+      intersections = PlanarRegionTools.getPolygonIntersectionsWhenProjectedVertically(planarRegion, translateConvexPolygon(1.21, 1.21, convexPolygon));
+      Assertions.assertEquals(0, intersections.size());
+
+      intersections = PlanarRegionTools.getPolygonIntersectionsWhenProjectedVertically(planarRegion, translateConvexPolygon(1.09, 1.09, convexPolygon));
+      Assertions.assertEquals(3, intersections.size());
    }
 
    @Test
@@ -1036,6 +1239,38 @@ public class PlanarRegionToolsTest
 
    }
 
+
+   @Test
+   public void testSimpleVerticalAndRotatedSnap()
+   {
+      ConvexPolygon2D polygonToSnap = createRectanglePolygon(0.5, 0.25);
+
+
+      RigidBodyTransform planarRegionTransform = new RigidBodyTransform();
+      planarRegionTransform.setRotationEulerAndZeroTranslation(0.1, 0.2, 0.3);
+
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.setTransform(planarRegionTransform);
+
+      generator.addCubeReferencedAtBottomMiddle(1.0, 0.5, 0.7);
+      PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
+
+      PlanarRegion planarRegion = new PlanarRegion();
+      assertEquals(3, PlanarRegionTools.findPlanarRegionsIntersectingPolygon(polygonToSnap, planarRegionsList).size());
+
+   }
+
+
+   public static ConvexPolygon2D createRectanglePolygon(double lengthX, double widthY)
+   {
+      ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
+      convexPolygon.addVertex(lengthX / 2.0, widthY / 2.0);
+      convexPolygon.addVertex(-lengthX / 2.0, widthY / 2.0);
+      convexPolygon.addVertex(-lengthX / 2.0, -widthY / 2.0);
+      convexPolygon.addVertex(lengthX / 2.0, -widthY / 2.0);
+      convexPolygon.update();
+      return convexPolygon;
+   }
 
    @Test
    public void testIsPointInsideConcaveHull()
