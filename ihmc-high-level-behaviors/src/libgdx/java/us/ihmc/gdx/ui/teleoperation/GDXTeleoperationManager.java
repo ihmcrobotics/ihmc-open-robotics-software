@@ -51,11 +51,13 @@ import us.ihmc.gdx.ui.affordances.GDXRobotWholeBodyInteractable;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXManualFootstepPlacement;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
+import us.ihmc.gdx.ui.interactable.GDXChestOrientationSlider;
 import us.ihmc.gdx.ui.teleoperation.GDXTeleoperationParameters;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.geometry.YawPitchRollAxis;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -115,6 +117,8 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
    private final String[] handConfigurationNames = new String[HandConfiguration.values.length];
    private final IHMCROS2Input<PlanarRegionsListMessage> lidarREARegions;
    private final ImBoolean showGraphics = new ImBoolean(true);
+   private GDXChestOrientationSlider chestPitchSlider;
+   private GDXChestOrientationSlider chestYawSlider;
 
    public GDXTeleoperationManager(String robotRepoName,
                                   String robotSubsequentPathToResourceFolder,
@@ -168,30 +172,11 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
          double heightInRange = midFeetToPelvis - MIN_PELVIS_HEIGHT;
          double newHeightSliderValue = SLIDER_RANGE * heightInRange / PELVIS_HEIGHT_RANGE;
          stanceHeightSliderValue[0] = (float) newHeightSliderValue;
-
-         FrameYawPitchRoll chestFrame = new FrameYawPitchRoll(syncedRobot.getReferenceFrames().getChestFrame());
-         chestFrame.changeFrame(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
-         double leanForwardValue = chestFrame.getPitch();
-         double pitchInRange = leanForwardValue - MIN_CHEST_PITCH;
-         double newChestSliderValue = SLIDER_RANGE * pitchInRange / CHEST_PITCH_RANGE;
-         double flippedChestSliderValue = 100.0 - newChestSliderValue;
-         pitchTorsoSliderValue[0] = (float) flippedChestSliderValue;
-
-         double yawTorsoValue = chestFrame.getYaw();
-         double yawTorsoInRange = yawTorsoValue - MIN_YAW_TORSO;
-         double newYawTorsoValue = SLIDER_RANGE * yawTorsoInRange / YAW_TORSO_RANGE;
-         double flippedYawTorsoSliderValue = 100.0 - newYawTorsoValue;
-         yawTorsoSliderValue[0] = (float) flippedYawTorsoSliderValue;
-
-//         if (neckJoint != null)
-//         {
-//            double neckAngle = syncedRobot.getFullRobotModel().getNeckJoint(NeckJointName.PROXIMAL_NECK_PITCH).getQ();
-//            double angleInRange = neckAngle - neckJointJointLimitLower;
-//            double newNeckSliderValue = SLIDER_RANGE * angleInRange / neckJointRange;
-//            double flippedNeckSliderValue = 100.0 - newNeckSliderValue;
-//            neckPitchSliderValue[0] = (float) flippedNeckSliderValue;
-//         }
       });
+
+      ROS2ControllerHelper chestSlidersROS2ControllerHelper = new ROS2ControllerHelper(ros2Node, robotModel);
+      chestPitchSlider = new GDXChestOrientationSlider(syncedRobot, YawPitchRollAxis.PITCH, chestSlidersROS2ControllerHelper, teleoperationParameters);
+      chestYawSlider = new GDXChestOrientationSlider(syncedRobot, YawPitchRollAxis.YAW, chestSlidersROS2ControllerHelper, teleoperationParameters);
 
       footstepPlanGraphic = new GDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
       communicationHelper.subscribeToControllerViaCallback(FootstepDataListMessage.class, footsteps ->
@@ -353,58 +338,8 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
             communicationHelper.publishToController(message);
          }
       }
-      if (imGuiSlider("Pitch Torso", pitchTorsoSliderValue))
-      {
-         if (syncedRobot.getDataReceptionTimerSnapshot().isRunning(ROBOT_DATA_EXPIRATION))
-         {
-            double sliderValue = 100.0 - pitchTorsoSliderValue[0];
-            double desiredChestPitch = MIN_CHEST_PITCH + CHEST_PITCH_RANGE * sliderValue / SLIDER_RANGE;
-
-            FrameYawPitchRoll frameChestYawPitchRoll = new FrameYawPitchRoll(syncedRobot.getReferenceFrames().getChestFrame());
-            frameChestYawPitchRoll.changeFrame(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
-            frameChestYawPitchRoll.setPitch(desiredChestPitch);
-            frameChestYawPitchRoll.changeFrame(ReferenceFrame.getWorldFrame());
-
-            LogTools.info(StringTools.format3D("Commanding chest pitch. slider: {} pitch: {}", sliderValue, desiredChestPitch));
-
-            ChestTrajectoryMessage message = new ChestTrajectoryMessage();
-            message.getSo3Trajectory()
-                   .set(HumanoidMessageTools.createSO3TrajectoryMessage(2.0,
-                                                                        frameChestYawPitchRoll,
-                                                                        EuclidCoreTools.zeroVector3D,
-                                                                        syncedRobot.getReferenceFrames().getPelvisZUpFrame()));
-            long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
-            message.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
-
-            communicationHelper.publishToController(message);
-         }
-      }
-      if (imGuiSlider("Yaw Torso", yawTorsoSliderValue))
-      {
-         if (syncedRobot.getDataReceptionTimerSnapshot().isRunning(ROBOT_DATA_EXPIRATION))
-         {
-            double sliderValue = 100.0 - yawTorsoSliderValue[0];
-            double desiredYawTorso = MIN_YAW_TORSO + YAW_TORSO_RANGE * sliderValue / SLIDER_RANGE;
-
-            FrameYawPitchRoll frameChestYawPitchRoll = new FrameYawPitchRoll(syncedRobot.getReferenceFrames().getChestFrame());
-            frameChestYawPitchRoll.changeFrame(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
-            frameChestYawPitchRoll.setYaw(desiredYawTorso);
-            frameChestYawPitchRoll.changeFrame(ReferenceFrame.getWorldFrame());
-
-            LogTools.info(StringTools.format3D("Commanding torso yaw. slider: {} yaw: {}", sliderValue, desiredYawTorso));
-
-            ChestTrajectoryMessage message = new ChestTrajectoryMessage();
-            message.getSo3Trajectory()
-                   .set(HumanoidMessageTools.createSO3TrajectoryMessage(2.0,
-                                                                        frameChestYawPitchRoll,
-                                                                        EuclidCoreTools.zeroVector3D,
-                                                                        syncedRobot.getReferenceFrames().getPelvisZUpFrame()));
-            long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
-            message.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
-
-            communicationHelper.publishToController(message);
-         }
-      }
+      chestPitchSlider.renderImGuiWidgets();
+      chestYawSlider.renderImGuiWidgets();
 //      if (neckJoint != null && imGuiSlider("Neck Pitch", neckPitchSliderValue))
 //      {
 //         double percent = neckPitchSliderValue[0] / 100.0;
