@@ -26,6 +26,10 @@ public class NaturalPostureManager
 //   private final StateMachine<NaturalPostureControlMode, NaturalPostureControlState> stateMachine;
 //   private final YoEnum<NaturalPostureControlMode> requestedState;
    
+   public HumanoidRobotNaturalPosture getRobotNaturalPosture() {
+      return robotNaturalPosture;
+   }
+   
    public NaturalPostureManager(HumanoidRobotNaturalPosture naturalPostureMeasurement,
                                 PID3DGainsReadOnly gains,
                                 HighLevelHumanoidControllerToolbox controllerToolbox,
