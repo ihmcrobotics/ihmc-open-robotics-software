@@ -37,6 +37,7 @@ import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class DRCFlatGroundWalkingTrack
 {
@@ -136,8 +137,6 @@ public class DRCFlatGroundWalkingTrack
          heightMapForFootstepZ = scsInitialSetup.getHeightMap();
       }
 
-      controllerFactory.createComponentBasedFootstepDataMessageGenerator(useVelocityAndHeadingScript, heightMapForFootstepZ, walkingScriptParameters);
-
       AvatarSimulationFactory avatarSimulationFactory = new AvatarSimulationFactory();
       avatarSimulationFactory.setRobotModel(model);
       avatarSimulationFactory.setShapeCollisionSettings(model.getShapeCollisionSettings());
@@ -148,6 +147,8 @@ public class DRCFlatGroundWalkingTrack
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
       avatarSimulationFactory.setRealtimeROS2Node(realtimeROS2Node);
       avatarSimulationFactory.setCreateYoVariableServer(createYoVariableServer);
+      avatarSimulationFactory.setComponentBasedFootstepDataMessageGeneratorParameters(useVelocityAndHeadingScript, heightMapForFootstepZ, walkingScriptParameters);
+
       if (externalPelvisCorrectorSubscriber != null)
          avatarSimulationFactory.setExternalPelvisCorrectorSubscriber(externalPelvisCorrectorSubscriber);
 
@@ -160,6 +161,8 @@ public class DRCFlatGroundWalkingTrack
          resetButton.addActionListener(e -> avatarSimulation.resetRobot());
          avatarSimulation.getSimulationConstructionSet().addButton(resetButton);
       }
+
+      ((YoBoolean) avatarSimulation.getSimulationConstructionSet().getRootRegistry().findVariable("ignoreWalkInputProviderCSG")).set(true);
 
       avatarSimulation.start();
    }

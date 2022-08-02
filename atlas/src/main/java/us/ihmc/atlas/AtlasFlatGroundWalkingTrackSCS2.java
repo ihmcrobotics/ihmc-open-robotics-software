@@ -20,7 +20,7 @@ public class AtlasFlatGroundWalkingTrackSCS2
 {
    private static final boolean USE_FEET_PERTURBER = false;
    private static final boolean USE_STAND_PREP = false;
-   private static final boolean USE_IMPULSE_BASE_PHYSICS_ENGINE = true;
+   private static final boolean USE_IMPULSE_BASE_PHYSICS_ENGINE = false;
 
    private static boolean createYoVariableServer = System.getProperty("create.yovariable.server") != null
          && Boolean.parseBoolean(System.getProperty("create.yovariable.server"));
