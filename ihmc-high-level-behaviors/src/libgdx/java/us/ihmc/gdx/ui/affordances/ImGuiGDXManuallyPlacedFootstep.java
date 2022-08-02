@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -14,7 +13,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.gdx.GDX3DSituatedText;
-import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.sceneManager.GDXRenderableAdapter;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
@@ -63,7 +61,7 @@ public class ImGuiGDXManuallyPlacedFootstep
       selectablePose3DGizmo = new GDXSelectablePose3DGizmo();
       selectablePose3DGizmo.create(baseUI.getPrimary3DPanel().getCamera3D());
 
-      footstepIndexText = new GDX3DSituatedText("" + footstepSide.getSideNameFirstLetter() + index);
+      footstepIndexText = new GDX3DSituatedText("" + footstepSide.getSideNameFirstLetter() + (index + 1));
       renderableAdapter = new GDXRenderableAdapter(footstepModelInstance, GDXSceneLevel.VIRTUAL);
 
       textRenderables.add(footstepIndexText);
@@ -150,7 +148,7 @@ public class ImGuiGDXManuallyPlacedFootstep
    }
 
 
-   public void flashFootstepsWhenBadPlacement(BipedalFootstepPlannerNodeRejectionReason reason)
+   public void flashFootstepWhenBadPlacement(BipedalFootstepPlannerNodeRejectionReason reason)
    {
       if (reason == null)
       {
