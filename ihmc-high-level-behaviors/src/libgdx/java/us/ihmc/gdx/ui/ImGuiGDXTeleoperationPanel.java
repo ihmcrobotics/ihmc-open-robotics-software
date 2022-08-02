@@ -219,7 +219,9 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
                                                                robotModel,
                                                                syncedRobot,
                                                                ros2Helper,
-                                                               yoVariableClientHelper);
+                                                               yoVariableClientHelper,
+                                                               teleoperationParameters,
+                                                               teleoperationParametersTuner);
       }
    }
 

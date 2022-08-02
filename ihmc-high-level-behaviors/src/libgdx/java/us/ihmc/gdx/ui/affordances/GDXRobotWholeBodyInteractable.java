@@ -6,7 +6,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
-import imgui.type.ImFloat;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -18,9 +17,10 @@ import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.gdx.ui.collidables.GDXRobotCollisionModel;
 import us.ihmc.gdx.ui.graphics.GDXSpatialVectorArrows;
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.gdx.ui.teleoperation.GDXTeleoperationParameters;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -41,13 +41,14 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
    private final ROS2SyncedRobotModel syncedRobot;
    private final ROS2ControllerHelper ros2Helper;
    private final YoVariableClientHelper yoVariableClientHelper;
+   private GDXTeleoperationParameters teleoperationParameters;
+   private ImGuiStoredPropertySetTuner teleoperationParametersTuner;
 
    private final ImGuiPanel panel = new ImGuiPanel("Whole Body Interactable", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean showSelfCollisionMeshes = new ImBoolean();
    private final ImBoolean showEnvironmentCollisionMeshes = new ImBoolean();
    private final ImBoolean interactablesEnabled = new ImBoolean(false);
-   private final ImFloat trajectoryTime = new ImFloat(1.2f);
 
    private final SideDependentList<GDXLiveRobotPartInteractable> footInteractables = new SideDependentList<>();
    private final SideDependentList<GDXLiveRobotPartInteractable> handInteractables = new SideDependentList<>();
@@ -60,7 +61,9 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
                                         DRCRobotModel robotModel,
                                         ROS2SyncedRobotModel syncedRobot,
                                         ROS2ControllerHelper ros2Helper,
-                                        YoVariableClientHelper yoVariableClientHelper)
+                                        YoVariableClientHelper yoVariableClientHelper,
+                                        GDXTeleoperationParameters teleoperationParameters,
+                                        ImGuiStoredPropertySetTuner teleoperationParametersTuner)
    {
       selfCollisionModel = new GDXRobotCollisionModel(robotSelfCollisionModel);
       environmentCollisionModel = new GDXRobotCollisionModel(robotEnvironmentCollisionModel);
@@ -68,6 +71,8 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
       this.syncedRobot = syncedRobot;
       this.ros2Helper = ros2Helper;
       this.yoVariableClientHelper = yoVariableClientHelper;
+      this.teleoperationParameters = teleoperationParameters;
+      this.teleoperationParametersTuner = teleoperationParametersTuner;
    }
 
    public void create(GDXImGuiBasedUI baseUI)
@@ -88,7 +93,8 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
                                       baseUI.getPrimary3DPanel().getCamera3D());
             pelvisInteractable.setOnSpacePressed(() ->
             {
-               ros2Helper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(trajectoryTime.get(), pelvisInteractable.getPose()));
+               ros2Helper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(teleoperationParameters.getTrajectoryTime(),
+                                                                                                 pelvisInteractable.getPose()));
             });
          }
          for (RobotSide side : RobotSide.values)
@@ -105,7 +111,9 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
                                        baseUI.getPrimary3DPanel().getCamera3D());
                interactableFoot.setOnSpacePressed(() ->
                {
-                  ros2Helper.publishToController(HumanoidMessageTools.createFootTrajectoryMessage(side, trajectoryTime.get(), interactableFoot.getPose()));
+                  ros2Helper.publishToController(HumanoidMessageTools.createFootTrajectoryMessage(side,
+                                                                                                  teleoperationParameters.getTrajectoryTime(),
+                                                                                                  interactableFoot.getPose()));
                });
                footInteractables.put(side, interactableFoot);
             }
@@ -128,7 +136,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
                interactableHand.setOnSpacePressed(() ->
                {
                   ros2Helper.publishToController(HumanoidMessageTools.createHandTrajectoryMessage(side,
-                                                                                                  trajectoryTime.get(),
+                                                                                                  teleoperationParameters.getTrajectoryTime(),
                                                                                                   interactableHand.getPose(),
                                                                                                   ReferenceFrame.getWorldFrame()));
                });
@@ -242,19 +250,12 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
       ImGui.sameLine();
       if (ImGui.button(labels.get("Clear graphics")))
          walkPathControlRing.clearGraphics();
-      ImGui.text("Trajectory time:");
-      ImGui.sameLine();
-      ImGui.pushItemWidth(100.0f);
-      if (ImGui.inputFloat(labels.get("s", "Trajectory time"), trajectoryTime, 0.1f))
-      {
-         trajectoryTime.set((float) MathTools.clamp(trajectoryTime.get(), 0.0, 30.0));
-      }
-      ImGui.popItemWidth();
+      teleoperationParametersTuner.renderADoublePropertyTuner(GDXTeleoperationParameters.trajectoryTime, 0.1, 0.5, 0.0, 30.0, true, "s", "%.2f");
       ImGui.text("Walk path control ring:");
       walkPathControlRing.renderImGuiWidgets();
       ImGui.checkbox("Show self collision meshes", showSelfCollisionMeshes);
       ImGui.checkbox("Show environment collision meshes", showEnvironmentCollisionMeshes);
-      
+
       // TODO: Add transparency sliders
       // TODO: Add context menus
       // TODO: Add ghost robot
