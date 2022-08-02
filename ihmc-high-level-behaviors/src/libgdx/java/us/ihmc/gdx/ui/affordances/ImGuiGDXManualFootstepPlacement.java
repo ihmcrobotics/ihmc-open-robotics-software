@@ -10,7 +10,6 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
-import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -30,7 +29,6 @@ import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.gdx.vr.GDXVRManager;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
@@ -42,9 +40,9 @@ import java.util.UUID;
 public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
 {
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
-   private boolean placingGoal = false;
    private final Pose3D goalPoseForReading = new Pose3D();
    private final ArrayList<ImGuiGDXManuallyPlacedFootstep> footstepArrayList = new ArrayList<>();
+   private ImGuiGDXManuallyPlacedFootstep footstepBeingPlaced;
    private int footstepIndex = -1;
    private GDXImGuiBasedUI baseUI;
    private CommunicationHelper communicationHelper;
@@ -55,8 +53,6 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
    private GDX3DPanel primary3DPanel;
    private boolean renderTooltip = false;
    FramePose3D tempFramePose = new FramePose3D();
-
-
 
    public void create(GDXImGuiBasedUI baseUI, CommunicationHelper communicationHelper, ROS2SyncedRobotModel syncedRobot)
    {
@@ -78,94 +74,112 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       {
          singleFootstep.calculate3DViewPick(input);
       }
+      if (footstepBeingPlaced != null)
+         footstepBeingPlaced.calculate3DViewPick(input);
    }
 
    public void processImGui3DViewInput(ImGui3DViewInput input)
    {
       latestInput = input;
+      boolean anyFootstepIsSelected = false;
 
       for (ImGuiGDXManuallyPlacedFootstep singleFootstep : footstepArrayList)
       {
          singleFootstep.process3DViewInput(input);
       }
+      if (footstepBeingPlaced != null)
+         footstepBeingPlaced.process3DViewInput(input);
 
-      if (placingGoal && input.isWindowHovered())
+      if (footstepBeingPlaced != null || footstepArrayList.size() > 0)
       {
-         Point3DReadOnly pickPointInWorld = input.getPickPointInWorld();
-         renderTooltip = true;
-
-         if (footstepArrayList.size() > 0)
+         if (isCurrentlyPlacingFootstep())
          {
+            stepChecker.getInput(input);
+            Point3DReadOnly pickPointInWorld = input.getPickPointInWorld();
+            renderTooltip = true;
+
             //Set position of modelInstance, selectablePose3DGizmo, and the sphere used in stepCheckIsPointInsideAlgorithm all to the pointInWorld that the cursor is at
-            GDXTools.toGDX(pickPointInWorld, footstepArrayList.get(footstepIndex).getFootstepModelInstance().transform);
+            GDXTools.toGDX(pickPointInWorld, footstepBeingPlaced.getFootstepModelInstance().transform);
 
-            footstepArrayList.get(footstepIndex).setGizmoPose(pickPointInWorld.getX(), pickPointInWorld.getY(), pickPointInWorld.getZ(),
-                                                              footstepArrayList.get(footstepIndex).getSelectablePose3DGizmo().getPoseGizmo().getTransformToParent());
+            footstepBeingPlaced.setGizmoPose(pickPointInWorld.getX(),
+                                             pickPointInWorld.getY(),
+                                             pickPointInWorld.getZ(),
+                                             footstepBeingPlaced.getSelectablePose3DGizmo().getPoseGizmo().getTransformToParent());
 
-            footstepArrayList.get(footstepIndex)
-                             .getBoundingSphere()
-                             .getPosition()
-                             .set(pickPointInWorld.getX(), pickPointInWorld.getY(), pickPointInWorld.getZ());
+            footstepBeingPlaced.getBoundingSphere().getPosition().set(pickPointInWorld.getX(), pickPointInWorld.getY(), pickPointInWorld.getZ());
 
             // when left button clicked and released.
-            if (input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
+            if (input.isWindowHovered() & input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
-               placingGoal = true;
+               footstepIndex++;
+               footstepArrayList.add(footstepBeingPlaced);
 
                //Switch sides
                currentFootStepSide = currentFootStepSide.getOppositeSide();
                createNewFootStep(currentFootStepSide);
             }
 
-
-
-            // hovering.
-            // TODO: (need yaw here?)
-            stepChecker.checkValidStep(footstepArrayList,
-                                       new DiscreteFootstep(pickPointInWorld.getX(), pickPointInWorld.getY(), 0, currentFootStepSide),
-                                       placingGoal);
-
-            stepChecker.getInput(input);
-         }
-
-         if (input.mouseReleasedWithoutDrag(ImGuiMouseButton.Right))
-         {
-            placingGoal = false;
-
-            removeFootStep();
-         }
-      }
-      if (input.isWindowHovered())
-      {
-         Point3DReadOnly pickPointInWorld = input.getPickPointInWorld();
-         renderTooltip = true;
-
-         // hovering.
-         // TODO: (need yaw here?)
-         stepChecker.getInput(input);
-         stepChecker.checkValidStep(footstepArrayList,
-                                    new DiscreteFootstep(pickPointInWorld.getX(), pickPointInWorld.getY(), 0, currentFootStepSide),
-                                    placingGoal);
-         ArrayList<BipedalFootstepPlannerNodeRejectionReason> temporaryReasons = stepChecker.getReasons();
-         for (int i = 0; i < temporaryReasons.size(); i++)
-         {
-            footstepArrayList.get(i).flashFootstepsWhenBadPlacement(temporaryReasons.get(i));
-         }
-      }
-
-      if (footstepArrayList.size()>0)
-      {
-         for (int i = 0; i < footstepArrayList.size(); ++i)
-         {
-            if (footstepArrayList.get(i).isPickSelected())
+            if (input.isWindowHovered() && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Right))
             {
-               stepChecker.setReasonFrom(i);
-               break;
+               removeFootStep();
             }
          }
-      }
 
-      stepChecker.makeWarnings();
+         Point3DReadOnly pickPointInWorld = input.getPickPointInWorld();
+
+         // hovering.
+
+         stepChecker.checkValidStepList(footstepArrayList);
+         if (isCurrentlyPlacingFootstep())
+         {
+            stepChecker.checkValidSingleStep(footstepArrayList,
+                                             new DiscreteFootstep(pickPointInWorld.getX(),
+                                                                  pickPointInWorld.getY(),
+                                                                  getFootstepBeingPlacedOrLastFootstepPlaced().getYaw(),
+                                                                  currentFootStepSide));
+         }
+
+         ArrayList<BipedalFootstepPlannerNodeRejectionReason> temporaryReasons = stepChecker.getReasons();
+         if (temporaryReasons.size() > 0)
+         {
+            for (int i = 0; i < temporaryReasons.size(); i++)
+            {
+               if (footstepArrayList.size() > i)
+                  footstepArrayList.get(i).flashFootstepWhenBadPlacement(temporaryReasons.get(i));
+            }
+            if (footstepBeingPlaced != null)
+               footstepBeingPlaced.flashFootstepWhenBadPlacement(temporaryReasons.get(temporaryReasons.size() - 1));
+         }
+
+         if (footstepBeingPlaced == null)
+         {
+            if (footstepArrayList.size() > 0)
+            {
+               for (int i = 0; i < footstepArrayList.size(); ++i)
+               {
+                  if (footstepArrayList.get(i).isPickSelected())
+                  {
+                     stepChecker.setReasonFrom(i);
+                     anyFootstepIsSelected = true;
+                     break;
+                  }
+               }
+            }
+         }
+         else
+         {
+            anyFootstepIsSelected = true;
+         }
+      }
+      if (anyFootstepIsSelected)
+      {
+         renderTooltip = true;
+         stepChecker.setRenderToolTip(true);
+         stepChecker.makeWarnings();
+      }
+      else {
+         stepChecker.setRenderToolTip(false);
+      }
    }
 
    public void renderImGuiWidgets()
@@ -228,36 +242,19 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       }
    }
 
-   public void handleVREvents(GDXVRManager vrManager)
-   {
-      vrManager.getContext().getController(RobotSide.LEFT).runIfConnected(controller ->
-      {
-         InputDigitalActionData triggerClick = controller.getClickTriggerActionData();
-         if (triggerClick.bChanged() && triggerClick.bState())
-         {
-            placingGoal = true;
-         }
-         if (triggerClick.bChanged() && !triggerClick.bState())
-         {
-            placingGoal = false;
-         }
-
-         controller.getTransformZUpToWorld(footstepArrayList.get(footstepIndex)
-                                                            .getFootstepModelInstance().transform);
-      });
-   }
-
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
 
-      if (isPlaced())
+      for (int i = 0; i < footstepArrayList.size(); i++)
       {
-         for (int i = 0; i < footstepArrayList.size(); i++)
-         {
-            footstepArrayList.get(i).getVirtualRenderables(renderables, pool);
-            footstepArrayList.get(i).getFootstepModelInstance().getRenderables(renderables, pool);
-         }
+         footstepArrayList.get(i).getVirtualRenderables(renderables, pool);
+         footstepArrayList.get(i).getFootstepModelInstance().getRenderables(renderables, pool);
+      }
+      if (footstepBeingPlaced != null)
+      {
+         footstepBeingPlaced.getVirtualRenderables(renderables, pool);
+         footstepBeingPlaced.getFootstepModelInstance().getRenderables(renderables, pool);
       }
    }
 
@@ -267,10 +264,12 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       {
          return false;
       }
-      else
+      else if (footstepBeingPlaced == null)
       {
-         return !Float.isNaN(footstepArrayList.get(footstepIndex).getFootstepModelInstance().transform.val[Matrix4.M03]);
+         return false;
       }
+
+      return true;
    }
 
    public void update()
@@ -279,13 +278,14 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       {
          footstepArrayList.get(i).update();
       }
+      if (footstepBeingPlaced != null)
+         footstepBeingPlaced.update();
    }
 
    public void clear()
    {
-      placingGoal = false;
 
-      while (footstepArrayList.size() > 0)
+      while (footstepArrayList.size() > 0 || footstepBeingPlaced != null)
       {
          removeFootStep();
       }
@@ -351,11 +351,9 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
 
    public void createNewFootStep(RobotSide footstepSide)
    {
-      RigidBodyTransform latestFootstepTransform = getLatestFootstepTransform(footstepSide.getOppositeSide());
+      RigidBodyTransform latestFootstepTransform = getLatestPlacedFootstepTransform(footstepSide.getOppositeSide());
       double latestFootstepYaw = latestFootstepTransform.getRotation().getYaw();
-      placingGoal = true;
-      footstepIndex++;
-      footstepArrayList.add(new ImGuiGDXManuallyPlacedFootstep(baseUI, footstepSide, footstepIndex));
+      footstepBeingPlaced = new ImGuiGDXManuallyPlacedFootstep(baseUI, footstepSide, footstepIndex);
       currentFootStepSide = footstepSide;
 
       tempFramePose.setToZero(ReferenceFrame.getWorldFrame());
@@ -363,24 +361,35 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       GDXTools.toEuclid(new Matrix4(), rigidBodyTransform);
       tempFramePose.set(rigidBodyTransform);
       tempFramePose.getOrientation().set(new RotationMatrix(latestFootstepYaw, 0.0, 0.0));
-      tempFramePose.get(footstepArrayList.get(footstepIndex).getSelectablePose3DGizmo().getPoseGizmo().getTransformToParent());
-      footstepArrayList.get(footstepIndex).getSelectablePose3DGizmo().getPoseGizmo().updateTransforms();
-
-
+      tempFramePose.get(footstepBeingPlaced.getSelectablePose3DGizmo().getPoseGizmo().getTransformToParent());
+      footstepBeingPlaced.getSelectablePose3DGizmo().getPoseGizmo().updateTransforms();
    }
 
    public void removeFootStep()
    {
-      if (footstepArrayList.size() > 0 && footstepArrayList.get(footstepIndex).getFootstepModelInstance() != null)
-         footstepArrayList.get(footstepIndex).getFootstepModelInstance().transform.val[Matrix4.M03] = Float.NaN;
+      if(footstepBeingPlaced != null || footstepArrayList.size() > 0)
+      {
+         if (getFootstepBeingPlacedOrLastFootstepPlaced() != null && getFootstepBeingPlacedOrLastFootstepPlaced().getFootstepModelInstance() != null)
+         {
+            getFootstepBeingPlacedOrLastFootstepPlaced().getFootstepModelInstance().transform.val[Matrix4.M03] = Float.NaN;
+         }
+         baseUI.getPrimaryScene().removeRenderableAdapter((getFootstepBeingPlacedOrLastFootstepPlaced().getRenderableAdapter()));
 
-      baseUI.getPrimaryScene().removeRenderableAdapter((footstepArrayList.remove(footstepIndex).getRenderableAdapter()));
-      footstepIndex--;
+         if (footstepBeingPlaced == null)
+         {
+            footstepIndex--;
+            footstepArrayList.remove(footstepArrayList.size() - 1);
+         }
+         else
+         {
+            footstepBeingPlaced = null;
+         }
+      }
    }
 
-   public RigidBodyTransform getLatestFootstepTransform(RobotSide robotSide)
+   public RigidBodyTransform getLatestPlacedFootstepTransform(RobotSide robotSide)
    {
-      if(footstepArrayList.size()>0)
+      if (footstepArrayList.size() > 0)
       {
          return footstepArrayList.get(footstepIndex).getSelectablePose3DGizmo().getPoseGizmo().getTransformToParent();
       }
@@ -388,6 +397,34 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       {
          return syncedRobot.getReferenceFrames().getSoleFrame(robotSide).getTransformToWorldFrame();
       }
+   }
 
+   /*
+   Returns future footstep currently being placed. If you are not placing a footstep currently, it will return last footstep from list.
+   Does NOT return footsteps that you already walked on
+    */
+   public ImGuiGDXManuallyPlacedFootstep getFootstepBeingPlacedOrLastFootstepPlaced()
+   {
+      if (footstepBeingPlaced != null)
+      {
+         return footstepBeingPlaced;
+      }
+      else if (footstepArrayList.size() > 0)
+      {
+         return footstepArrayList.get(footstepArrayList.size() - 1);
+      }
+      return null;
+   }
+
+   public boolean isCurrentlyPlacingFootstep()
+   {
+      if (footstepBeingPlaced == null)
+      {
+         return false;
+      }
+      else
+      {
+         return true;
+      }
    }
 }
