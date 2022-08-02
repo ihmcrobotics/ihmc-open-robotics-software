@@ -94,9 +94,14 @@ public class ImGuiTools
 
    public static boolean volatileInputDouble(String label, ImDouble imDouble, double step, double stepFast)
    {
+      return volatileInputDouble(label, imDouble, step, stepFast, "%.6f");
+   }
+
+   public static boolean volatileInputDouble(String label, ImDouble imDouble, double step, double stepFast, String format)
+   {
       int inputTextFlags = ImGuiInputTextFlags.None;
       inputTextFlags += ImGuiInputTextFlags.EnterReturnsTrue;
-      return ImGui.inputDouble(label, imDouble, step, stepFast, "%.6f", inputTextFlags);
+      return ImGui.inputDouble(label, imDouble, step, stepFast, format, inputTextFlags);
    }
 
    public static boolean inputText(String label, ImString text)
