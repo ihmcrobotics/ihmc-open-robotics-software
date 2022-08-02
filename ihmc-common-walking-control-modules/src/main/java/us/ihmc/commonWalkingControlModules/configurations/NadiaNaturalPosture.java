@@ -132,21 +132,21 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
    {
       this.fullRobotModel = robotModel;
 
-      yoQuaternionNPrtWorld = new YoFrameQuaternion("naturalPostureInWorld", ReferenceFrame.getWorldFrame(), registry);
-      yoQuaternionIdent = new YoFrameQuaternion("pelvisFrameViz", ReferenceFrame.getWorldFrame(), registry);
+      yoQuaternionNPrtWorld = new YoFrameQuaternion("NadiaNaturalPostureInWorld", ReferenceFrame.getWorldFrame(), registry);
+      yoQuaternionIdent = new YoFrameQuaternion("NadiaPelvisFrameViz", ReferenceFrame.getWorldFrame(), registry);
       //      yoQuaternionNPrtBase = new YoFrameQuaternion("naturalPostureInBase", robotModel.getRootBody().getBodyFixedFrame(), registry);
 
       if (yoGraphicsListRegistry != null)
       {
          doGraphics = true;
 
-         originNPpelvis = new YoFramePoint3D("originNPpelvis", ReferenceFrame.getWorldFrame(), registry);
-         naturalPostureVizPelvis = new YoGraphicCoordinateSystem("NaturalPostureP", originNPpelvis, yoQuaternionNPrtWorld, 0.5);
-         yoGraphicsListRegistry.registerYoGraphic("NaturalPostureP", naturalPostureVizPelvis);
+         originNPpelvis = new YoFramePoint3D("NadiaOriginNPpelvis", ReferenceFrame.getWorldFrame(), registry);
+         naturalPostureVizPelvis = new YoGraphicCoordinateSystem("NadiaNaturalPostureP", originNPpelvis, yoQuaternionNPrtWorld, 0.5);
+         yoGraphicsListRegistry.registerYoGraphic("NadiaNaturalPostureP", naturalPostureVizPelvis);
 
-         originPelvis = new YoFramePoint3D("originPelvis", ReferenceFrame.getWorldFrame(), registry);
-         vizPelvis = new YoGraphicCoordinateSystem("Pelvisframe", originPelvis, yoQuaternionIdent, 0.4);
-         yoGraphicsListRegistry.registerYoGraphic("Pelvisframe", vizPelvis);
+         originPelvis = new YoFramePoint3D("NadiaOriginPelvis", ReferenceFrame.getWorldFrame(), registry);
+         vizPelvis = new YoGraphicCoordinateSystem("NadiaPelvisframe", originPelvis, yoQuaternionIdent, 0.4);
+         yoGraphicsListRegistry.registerYoGraphic("NadiaPelvisframe", vizPelvis);
       }
       else
       {
