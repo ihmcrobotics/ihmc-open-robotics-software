@@ -1,5 +1,9 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Arrays;
 
 import org.ejml.data.DMatrixRMaj;
@@ -49,31 +53,40 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
 {
-   private final int NumDoFs = 28;
+   private final int NumDoFs = 29;  // excluding floating base joint
 
-   // joint indices from URDF: 
-   private int i0; // (joint_torsoRoll)
-   private int i1; // (joint_torsoYaw)
+   private static String folderPath = "C:\\Users\\yumin\\OneDrive\\Documents\\workspace\\exported_data\\";
 
-   private int i2; // (joint_hipRollLeft)
-   private int i3; // (joint_hipYawLeft)
-   private int i4; // (joint_hipPitchPivotLeft)
-   private int i5; // (joint_kneePitchPivotLeft)
-
-   private int i8; // (joint_shoulderPitchLeft)
-   private int i9; // (joint_shoulderRollLeft)
-   private int i10; // (joint_shoulderYawLeft)
-   private int i11; // (joint_elbowPitchPivotLeft)
-
-   private int i16; // (joint_hipRollRight)
-   private int i17; // (joint_hipYawRight)
-   private int i18; // (joint_hipPitchPivotRight)
-   private int i19; // (joint_kneePitchPivotRight)
-
-   private int i22; // (joint_shoulderPitchRight)
-   private int i23; // (joint_shoulderRollRight)
-   private int i24; // (joint_shoulderYawRight)
-   private int i25; // (joint_elbowPitchPivotRight)
+   // joint indices (the order of joint list from MultiBodySystemTools.collectSubtreeJoints(fullRobotModel.getPelvis()))
+   private int i0; // LEFT_HIP_Z
+   private int i1; // RIGHT_HIP_Z
+   private int i2; // SPINE_Z
+   private int i3; // LEFT_HIP_X
+   private int i4; // RIGHT_HIP_X
+   private int i5; // SPINE_X
+   private int i6; // LEFT_HIP_Y
+   private int i7; // RIGHT_HIP_Y
+   private int i8; // SPINE_Y
+   private int i9; // LEFT_KNEE_Y
+   private int i10; // RIGHT_KNEE_Y
+   private int i11; // LEFT_SHOULDER_Y
+   private int i12; // RIGHT_SHOULDER_Y
+   private int i13; // LEFT_ANKLE_Y
+   private int i14; // RIGHT_ANKLE_Y
+   private int i15; // LEFT_SHOULDER_X
+   private int i16; // RIGHT_SHOULDER_X
+   private int i17; // LEFT_ANKLE_X
+   private int i18; // RIGHT_ANKLE_X
+   private int i19; // LEFT_SHOULDER_Z
+   private int i20; // RIGHT_SHOULDER_Z
+   private int i21; // LEFT_ELBOW_Y
+   private int i22; // RIGHT_ELBOW_Y
+   private int i23; // LEFT_WRIST_Z
+   private int i24; // RIGHT_WRIST_Z
+   private int i25; // LEFT_WRIST_X
+   private int i26; // RIGHT_WRIST_X
+   private int i27; // LEFT_WRIST_Y
+   private int i28; // RIGHT_WRIST_Y
 
    private final Quaternion npQoffset = new Quaternion(0, 0, 0, 1);
 
@@ -101,17 +114,15 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
 
    // A nominal standing pose; stored in this class for convenience; upon calling 'initialize()' will create a nominal Qoffset, which has a getter:
    // TODO pull from the "initialConfiguration" class
-   // Gabe saidt his should include all actuated joints
-   double[] qNomStandingURDF = new double[] {0.000000e+00, 0.000000e+00, 0.000000e+00, 0.000000e+00, 0.000000e+00, 0.000000e+00, 0.000000e+00, 0.000000e+00,
-         0.000000e+00, -1.570796e+00, 0.000000e+00, -7.853982e-01, 0.000000e+00, 0.000000e+00, 0.000000e+00, 0.000000e+00, 0.000000e+00, 0.000000e+00,
-         0.000000e+00, 0.000000e+00, 0.000000e+00, 0.000000e+00, 0.000000e+00, 1.570796e+00, 0.000000e+00, 7.853982e-01, 0.000000e+00, 0.000000e+00};
-   double[] qNomStanding = new double[qNomStandingURDF.length];
+   // Gabe said this should include all actuated joints
+   double[] qNomStandingURDF = new double[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+   double[] qNomStanding = new double[NumDoFs];
    private final Quaternion QbaseNomStanding = new Quaternion(0, 0, 0, 1);
    private final Quaternion npNomQoffset = new Quaternion(0, 0, 0, 1);
 
    private FullHumanoidRobotModel fullRobotModel = null;
 
-   private final int[] jointIndexArray = new int[18];
+   private int[] jointIndexArray = null;
    private final double[] jointPositionArray = new double[NumDoFs];
 
    public NadiaNaturalPosture(FullHumanoidRobotModel robotModel,
@@ -155,33 +166,40 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
       {
          jointMatrixIndexProvider = null;
       }
-      
+
       useURDFJointNumbering = true;
       if (useURDFJointNumbering) // Mostly for testing
       {
          // Note: Currently, some joints are not used (allowed to vary) in the NP estimation - e.g. hands, ankles, neck
          i0 = 0;
          i1 = 1;
-
          i2 = 2;
          i3 = 3;
          i4 = 4;
          i5 = 5;
-
+         i6 = 6;
+         i7 = 7;
          i8 = 8;
          i9 = 9;
          i10 = 10;
          i11 = 11;
-
+         i12 = 12;
+         i13 = 13;
+         i14 = 14;
+         i15 = 15;
          i16 = 16;
          i17 = 17;
          i18 = 18;
          i19 = 19;
-
+         i20 = 20;
+         i21 = 21;
          i22 = 22;
          i23 = 23;
          i24 = 24;
          i25 = 25;
+         i26 = 26;
+         i27 = 27;
+         i28 = 28;
 
          qNomStanding = qNomStandingURDF;
       }
@@ -191,51 +209,65 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
          int iBase = 6; // GMN: offset for pelvis DoF
 
          // Look up and set joint indices:
-         i0 = getJointIndices("spineRoll")[0] - iBase;
-         i1 = getJointIndices("spineYaw")[0] - iBase;
+         i0 = getJointIndices("LEFT_HIP_Z")[0] - iBase;
+         i1 = getJointIndices("RIGHT_HIP_Z")[0] - iBase;
+         i2 = getJointIndices("SPINE_Z")[0] - iBase;
+         i3 = getJointIndices("LEFT_HIP_X")[0] - iBase;
+         i4 = getJointIndices("RIGHT_HIP_X")[0] - iBase;
+         i5 = getJointIndices("SPINE_X")[0] - iBase;
+         i6 = getJointIndices("LEFT_HIP_Y")[0] - iBase;
+         i7 = getJointIndices("RIGHT_HIP_Y")[0] - iBase;
+         i8 = getJointIndices("SPINE_Y")[0] - iBase;
+         i9 = getJointIndices("LEFT_KNEE_Y")[0] - iBase;
+         i10 = getJointIndices("RIGHT_KNEE_Y")[0] - iBase;
+         i11 = getJointIndices("LEFT_SHOULDER_Y")[0] - iBase;
+         i12 = getJointIndices("RIGHT_SHOULDER_Y")[0] - iBase;
+         i13 = getJointIndices("LEFT_ANKLE_Y")[0] - iBase;
+         i14 = getJointIndices("RIGHT_ANKLE_Y")[0] - iBase;
+         i15 = getJointIndices("LEFT_SHOULDER_X")[0] - iBase;
+         i16 = getJointIndices("RIGHT_SHOULDER_X")[0] - iBase;
+         i17 = getJointIndices("LEFT_ANKLE_X")[0] - iBase;
+         i18 = getJointIndices("RIGHT_ANKLE_X")[0] - iBase;
+         i19 = getJointIndices("LEFT_SHOULDER_Z")[0] - iBase;
+         i20 = getJointIndices("RIGHT_SHOULDER_Z")[0] - iBase;
+         i21 = getJointIndices("LEFT_ELBOW_Y")[0] - iBase;
+         i22 = getJointIndices("RIGHT_ELBOW_Y")[0] - iBase;
+         i23 = getJointIndices("LEFT_WRIST_Z")[0] - iBase;
+         i24 = getJointIndices("RIGHT_WRIST_Z")[0] - iBase;
+         i25 = getJointIndices("LEFT_WRIST_X")[0] - iBase;
+         i26 = getJointIndices("RIGHT_WRIST_X")[0] - iBase;
+         i27 = getJointIndices("LEFT_WRIST_Y")[0] - iBase;
+         i28 = getJointIndices("RIGHT_WRIST_Y")[0] - iBase;
 
-         i2 = getJointIndices("leftHipRoll")[0] - iBase;
-         i3 = getJointIndices("leftHipYaw")[0] - iBase;
-         i4 = getJointIndices("leftHipPitch")[0] - iBase;
-         i5 = getJointIndices("leftKneePitch")[0] - iBase;
-
-         i8 = getJointIndices("leftShoulderPitch")[0] - iBase;
-         i9 = getJointIndices("leftShoulderRoll")[0] - iBase;
-         i10 = getJointIndices("leftShoulderYaw")[0] - iBase;
-         i11 = getJointIndices("leftElbowPitch")[0] - iBase;
-
-         i16 = getJointIndices("rightHipRoll")[0] - iBase;
-         i17 = getJointIndices("rightHipYaw")[0] - iBase;
-         i18 = getJointIndices("rightHipPitch")[0] - iBase;
-         i19 = getJointIndices("rightKneePitch")[0] - iBase;
-
-         i22 = getJointIndices("rightShoulderPitch")[0] - iBase;
-         i23 = getJointIndices("rightShoulderRoll")[0] - iBase;
-         i24 = getJointIndices("rightShoulderYaw")[0] - iBase;
-         i25 = getJointIndices("rightElbowPitch")[0] - iBase;
-
-         jointMap.put(i0, fullRobotModel.getOneDoFJointByName("spineRoll"));
-         jointMap.put(i1, fullRobotModel.getOneDoFJointByName("spineYaw"));
-
-         jointMap.put(i2, fullRobotModel.getOneDoFJointByName("leftHipRoll"));
-         jointMap.put(i3, fullRobotModel.getOneDoFJointByName("leftHipYaw"));
-         jointMap.put(i4, fullRobotModel.getOneDoFJointByName("leftHipPitch"));
-         jointMap.put(i5, fullRobotModel.getOneDoFJointByName("leftKneePitch"));
-
-         jointMap.put(i8, fullRobotModel.getOneDoFJointByName("leftShoulderPitch"));
-         jointMap.put(i9, fullRobotModel.getOneDoFJointByName("leftShoulderRoll"));
-         jointMap.put(i10, fullRobotModel.getOneDoFJointByName("leftShoulderYaw"));
-         jointMap.put(i11, fullRobotModel.getOneDoFJointByName("leftElbowPitch"));
-
-         jointMap.put(i16, fullRobotModel.getOneDoFJointByName("rightHipRoll"));
-         jointMap.put(i17, fullRobotModel.getOneDoFJointByName("rightHipYaw"));
-         jointMap.put(i18, fullRobotModel.getOneDoFJointByName("rightHipPitch"));
-         jointMap.put(i19, fullRobotModel.getOneDoFJointByName("rightKneePitch"));
-
-         jointMap.put(i22, fullRobotModel.getOneDoFJointByName("rightShoulderPitch"));
-         jointMap.put(i23, fullRobotModel.getOneDoFJointByName("rightShoulderRoll"));
-         jointMap.put(i24, fullRobotModel.getOneDoFJointByName("rightShoulderYaw"));
-         jointMap.put(i25, fullRobotModel.getOneDoFJointByName("rightElbowPitch"));
+         jointMap.put(i0, fullRobotModel.getOneDoFJointByName("LEFT_HIP_Z"));
+         jointMap.put(i1, fullRobotModel.getOneDoFJointByName("RIGHT_HIP_Z"));
+         jointMap.put(i2, fullRobotModel.getOneDoFJointByName("SPINE_Z"));
+         jointMap.put(i3, fullRobotModel.getOneDoFJointByName("LEFT_HIP_X"));
+         jointMap.put(i4, fullRobotModel.getOneDoFJointByName("RIGHT_HIP_X"));
+         jointMap.put(i5, fullRobotModel.getOneDoFJointByName("SPINE_X"));
+         jointMap.put(i6, fullRobotModel.getOneDoFJointByName("LEFT_HIP_Y"));
+         jointMap.put(i7, fullRobotModel.getOneDoFJointByName("RIGHT_HIP_Y"));
+         jointMap.put(i8, fullRobotModel.getOneDoFJointByName("SPINE_Y"));
+         jointMap.put(i9, fullRobotModel.getOneDoFJointByName("LEFT_KNEE_Y"));
+         jointMap.put(i10, fullRobotModel.getOneDoFJointByName("RIGHT_KNEE_Y"));
+         jointMap.put(i11, fullRobotModel.getOneDoFJointByName("LEFT_SHOULDER_Y"));
+         jointMap.put(i12, fullRobotModel.getOneDoFJointByName("RIGHT_SHOULDER_Y"));
+         jointMap.put(i13, fullRobotModel.getOneDoFJointByName("LEFT_ANKLE_Y"));
+         jointMap.put(i14, fullRobotModel.getOneDoFJointByName("RIGHT_ANKLE_Y"));
+         jointMap.put(i15, fullRobotModel.getOneDoFJointByName("LEFT_SHOULDER_X"));
+         jointMap.put(i16, fullRobotModel.getOneDoFJointByName("RIGHT_SHOULDER_X"));
+         jointMap.put(i17, fullRobotModel.getOneDoFJointByName("LEFT_ANKLE_X"));
+         jointMap.put(i18, fullRobotModel.getOneDoFJointByName("RIGHT_ANKLE_X"));
+         jointMap.put(i19, fullRobotModel.getOneDoFJointByName("LEFT_SHOULDER_Z"));
+         jointMap.put(i20, fullRobotModel.getOneDoFJointByName("RIGHT_SHOULDER_Z"));
+         jointMap.put(i21, fullRobotModel.getOneDoFJointByName("LEFT_ELBOW_Y"));
+         jointMap.put(i22, fullRobotModel.getOneDoFJointByName("RIGHT_ELBOW_Y"));
+         jointMap.put(i23, fullRobotModel.getOneDoFJointByName("LEFT_WRIST_Z"));
+         jointMap.put(i24, fullRobotModel.getOneDoFJointByName("RIGHT_WRIST_Z"));
+         jointMap.put(i25, fullRobotModel.getOneDoFJointByName("LEFT_WRIST_X"));
+         jointMap.put(i26, fullRobotModel.getOneDoFJointByName("RIGHT_WRIST_X"));
+         jointMap.put(i27, fullRobotModel.getOneDoFJointByName("LEFT_WRIST_Y"));
+         jointMap.put(i28, fullRobotModel.getOneDoFJointByName("RIGHT_WRIST_Y"));
 
          //      LogTools.info("-------------------------NP------------------------------------");
          //      LogTools.info("-------------------------NP------------------------------------");
@@ -251,42 +283,37 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
          qNomStanding[i3] = qNomStandingURDF[3];
          qNomStanding[i4] = qNomStandingURDF[4];
          qNomStanding[i5] = qNomStandingURDF[5];
+         qNomStanding[i6] = qNomStandingURDF[6];
+         qNomStanding[i7] = qNomStandingURDF[7];
          qNomStanding[i8] = qNomStandingURDF[8];
          qNomStanding[i9] = qNomStandingURDF[9];
          qNomStanding[i10] = qNomStandingURDF[10];
          qNomStanding[i11] = qNomStandingURDF[11];
+         qNomStanding[i12] = qNomStandingURDF[12];
+         qNomStanding[i13] = qNomStandingURDF[13];
+         qNomStanding[i14] = qNomStandingURDF[14];
+         qNomStanding[i15] = qNomStandingURDF[15];
          qNomStanding[i16] = qNomStandingURDF[16];
          qNomStanding[i17] = qNomStandingURDF[17];
          qNomStanding[i18] = qNomStandingURDF[18];
          qNomStanding[i19] = qNomStandingURDF[19];
+         qNomStanding[i20] = qNomStandingURDF[20];
+         qNomStanding[i21] = qNomStandingURDF[21];
          qNomStanding[i22] = qNomStandingURDF[22];
          qNomStanding[i23] = qNomStandingURDF[23];
          qNomStanding[i24] = qNomStandingURDF[24];
          qNomStanding[i25] = qNomStandingURDF[25];
+         qNomStanding[i26] = qNomStandingURDF[26];
+         qNomStanding[i27] = qNomStandingURDF[27];
+         qNomStanding[i28] = qNomStandingURDF[28];
       }
 
-      jointIndexArray[0] = i0;
-      jointIndexArray[1] = i1;
-
-      jointIndexArray[2] = i2;
-      jointIndexArray[3] = i3;
-      jointIndexArray[4] = i4;
-      jointIndexArray[5] = i5;
-
-      jointIndexArray[6] = i8;
-      jointIndexArray[7] = i9;
-      jointIndexArray[8] = i10;
-      jointIndexArray[9] = i11;
-
-      jointIndexArray[10] = i16;
-      jointIndexArray[11] = i17;
-      jointIndexArray[12] = i18;
-      jointIndexArray[13] = i19;
-
-      jointIndexArray[14] = i22;
-      jointIndexArray[15] = i23;
-      jointIndexArray[16] = i24;
-      jointIndexArray[17] = i25;
+      Integer[] jointsToFit = read1DIntCsvToIntArray(folderPath + "joints_to_fit.csv");
+      jointIndexArray = new int[jointsToFit.length];
+      for (int i = 0; i < jointsToFit.length; i++)
+      {
+         jointIndexArray[i] = jointsToFit[i];
+      }
    }
 
    int[] getJointIndices(String jointName)
@@ -451,6 +478,131 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
             jacobianToPack.set(i, j + 6, 2.0 * this.jacobianOmegaNPrtBase.get(i + 1, j)); // for omega NP rt & ewrt NP-frame
    }
 
+   //==== CSV utils ====
+
+   private static int getNumRowsOfCsvFile(String filePath)
+   {
+      // Ref: https://stackoverflow.com/questions/18009416/how-to-count-total-rows-in-csv-using-java
+      int count = 0;
+      try
+      {
+         BufferedReader bufferedReader;
+         bufferedReader = new BufferedReader(new FileReader(filePath));
+         String input;
+         try
+         {
+            while ((input = bufferedReader.readLine()) != null)
+            {
+               count++;
+            }
+         }
+         catch (IOException e)
+         {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+         }
+
+         System.out.println("Number of lines: " + count);
+
+      }
+      catch (FileNotFoundException e)
+      {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
+      return count;
+   }
+
+   private static int getNumColsOfCsvFile(String filePath)
+   {
+      String[] split = null;
+      try (BufferedReader br = new BufferedReader(new FileReader(filePath)))
+      {
+         String line;
+         while ((line = br.readLine()) != null)
+         {
+            split = line.split(",");
+            //use the data here
+         }
+      }
+      catch (FileNotFoundException e)
+      {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
+      catch (IOException e)
+      {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
+
+      System.out.println("Number of columns: " + split.length);
+
+      //      for (int i = 0; i < split.length ; i++) {
+      //         System.out.println(split[i]);
+      //      }
+
+      return split.length;
+   }
+
+   private static Integer[] read1DIntCsvToIntArray(String filePath)
+   {
+      int numRows = getNumRowsOfCsvFile(filePath);
+      int numCols = getNumColsOfCsvFile(filePath);
+
+      //      String delimiter = (numRows == 1) ? "," : "\n";
+      return read1DIntCsvToIntArray(filePath, numRows * numCols, numRows == 1);
+   }
+
+   private static Integer[] read1DIntCsvToIntArray(String filePath, int numElement, Boolean isRowVector)
+   {
+
+      Integer[] intArray = new Integer[numElement];
+      int i = 0;
+
+      String[] split = null;
+      try (BufferedReader br = new BufferedReader(new FileReader(filePath)))
+      {
+         String line;
+         while ((line = br.readLine()) != null)
+         {
+            if (isRowVector)
+            {
+               split = line.split(",");
+
+               if (numElement != split.length)
+               {
+                  System.out.println("there is a bug somewhere! The vector length is not consisent");
+               }
+
+               for (int j = 0; j < numElement; j++)
+               {
+                  intArray[j] = Integer.parseInt(split[j]);
+               }
+            }
+            else
+            {
+               if (numElement == i)
+               {
+                  System.out.println("there is a bug somewhere! The vector length is not consisent");
+               }
+               intArray[i] = Integer.parseInt(line);
+               i++;
+            }
+         }
+      }
+      catch (FileNotFoundException e)
+      {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
+      catch (IOException e)
+      {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
+      return intArray;
+   }
 
    //==========================================================================================================================================
 
@@ -5142,5 +5294,5 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
             + (-1.290174e-04) * (q[i16] * q[i19]) + (4.165926e-04) * (q[i16] * q[i20]) + (-1.806560e-04) * (q[i16] * q[i21])
             + (-1.018229e-04) * (q[i19] * q[i20]) + (-1.219829e-04) * (q[i19] * q[i21]) + (1.231277e-04) * (q[i20] * q[i21]);
    }
-   
+
 }
