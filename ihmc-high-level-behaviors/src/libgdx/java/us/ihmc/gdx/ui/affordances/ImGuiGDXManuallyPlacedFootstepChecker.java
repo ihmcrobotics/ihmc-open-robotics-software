@@ -48,7 +48,7 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
    private DiscreteFootstep swing = new DiscreteFootstep(0, 0, 0, RobotSide.LEFT);
    private String text = null;
    private ImGui3DViewInput latestInput;
-   private boolean renderToolTip = false;
+   private boolean renderTooltip = false;
    private ArrayList<ImGuiGDXManuallyPlacedFootstep> plannedSteps;
 
    public ImGuiGDXManuallyPlacedFootstepChecker(GDXImGuiBasedUI baseUI, CommunicationHelper communicationHelper, ROS2SyncedRobotModel syncedRobot)
@@ -81,7 +81,7 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
 
    private void renderTooltips()
    {
-      if (this.latestInput != null && renderToolTip)
+      if (this.latestInput != null && renderTooltip)
       {
          float offsetX = 10.0f;
          float offsetY = 31.0f;
@@ -108,40 +108,16 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
       // iterate through the list ( + current initial stance and swing) and check validity for all.
       for (int i = 0; i < stepList.size(); ++i)
       {
-         DiscreteFootstep candidate = convertToDiscrete(stepList.get(i));
-         // use current stance, swing
-         if (i == 0)
-         {
-            // if futureStep has different footSide than current swing, swap current swing and stance.
-            if (candidate.getRobotSide() != swing.getRobotSide())
-            {
-               swapSteps();
-            }
-            reason = stepChecker.checkStepValidity(candidate, stance, swing);
-         }
-         // 0th element will be stance, previous stance will be swing
-         else if (i == 1)
-         {
-            DiscreteFootstep temp = convertToDiscrete(stepList.get(0));
-            reason = stepChecker.checkStepValidity(candidate, temp, stance);
-         }
-         else
-         {
-            reason = stepChecker.checkStepValidity(candidate, convertToDiscrete(stepList.get(i - 1)), convertToDiscrete(stepList.get(i - 2)));
-         }
-
-         reasons.add(reason);
+         checkValidSingleStep(stepList, convertToDiscrete(stepList.get(i)), i);
       }
-
-
    }
 
-   // just for the step about to be placed
-   public void checkValidSingleStep(ArrayList<ImGuiGDXManuallyPlacedFootstep> stepList, DiscreteFootstep candidate)
+   // Check validity of 1 step
+   public void checkValidSingleStep(ArrayList<ImGuiGDXManuallyPlacedFootstep> stepList, DiscreteFootstep candidate, int indexOfFootBeingChecked /* list.size() if not placed yet*/)
    {
-      int indexLastStep = stepList.size() - 1;
+
       // use current stance, swing
-      if (stepList.size() == 0)
+      if (indexOfFootBeingChecked == 0)
       {
          // if futureStep has different footSide than current swing, swap current swing and stance.
          if (candidate.getRobotSide() != swing.getRobotSide())
@@ -151,32 +127,19 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
          reason = stepChecker.checkStepValidity(candidate, stance, swing);
       }
       // 0th element will be stance, previous stance will be swing
-      else if (stepList.size() == 1)
+      else if (indexOfFootBeingChecked == 1)
       {
          DiscreteFootstep temp = convertToDiscrete(stepList.get(0));
          reason = stepChecker.checkStepValidity(candidate, temp, stance);
       }
       else
       {
-         reason = stepChecker.checkStepValidity(candidate, convertToDiscrete(stepList.get(indexLastStep)), convertToDiscrete(stepList.get(indexLastStep - 1)));
+         reason = stepChecker.checkStepValidity(candidate, convertToDiscrete(stepList.get(indexOfFootBeingChecked-1)), convertToDiscrete(stepList.get(indexOfFootBeingChecked - 2)));
       }
 
       reasons.add(reason);
-
-
    }
 
-//   public void checkValidStepList(ArrayList<ImGuiGDXManuallyPlacedFootstep> stepList, boolean placingGoal)
-//   {
-//      setInitialFeet();
-//      reasons.clear();
-//      for(int index =0; index < stepList.size(); index++)
-//      {
-//         DiscreteFootstep futureStep = convertToDiscrete(stepList.get(index));
-//         checkValidSingleStep(stepList, futureStep, placingGoal);
-//
-//      }
-//   }
 
    // TODO: This should be used when first step of the manual step cycle has different RobotSide than current swing.
    public void swapSteps()
@@ -226,8 +189,8 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
         return reason;
     }
 
-   public void setRenderToolTip(boolean renderToolTip)
+   public void setRenderTooltip(boolean renderTooltip)
    {
-      this.renderToolTip = renderToolTip;
+      this.renderTooltip = renderTooltip;
    }
 }
