@@ -236,7 +236,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
       }
    }
 
-   private void renderImGuiWidgets()
+   public void renderImGuiWidgets()
    {
       ImGui.checkbox("Interactables enabled", interactablesEnabled);
       ImGui.sameLine();
@@ -254,10 +254,10 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
       walkPathControlRing.renderImGuiWidgets();
       ImGui.checkbox("Show self collision meshes", showSelfCollisionMeshes);
       ImGui.checkbox("Show environment collision meshes", showEnvironmentCollisionMeshes);
-      ImGui.text("TODO:");
-      ImGui.text("- Add transparency sliders");
-      ImGui.text("- Add context menus");
-      ImGui.text("- Add ghost robot");
+      
+      // TODO: Add transparency sliders
+      // TODO: Add context menus
+      // TODO: Add ghost robot
    }
 
    @Override

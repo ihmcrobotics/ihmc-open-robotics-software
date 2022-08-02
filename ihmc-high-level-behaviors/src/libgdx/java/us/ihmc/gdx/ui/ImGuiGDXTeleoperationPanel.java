@@ -13,9 +13,11 @@ import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.ThrottledRobotStateCallback;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
+import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -42,6 +44,8 @@ import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.gdx.imgui.ImGuiMovingPlot;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.gdx.sceneManager.GDXSceneLevel;
+import us.ihmc.gdx.ui.affordances.GDXRobotWholeBodyInteractable;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXManualFootstepPlacement;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
@@ -50,7 +54,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2NodeInterface;
@@ -59,6 +63,11 @@ import us.ihmc.tools.string.StringTools;
 import java.util.ArrayList;
 import java.util.UUID;
 
+/**
+ * Rename GDXTeleoperationManager.
+ *
+ * Possibly extract simple controller controls to a smaller panel class, like remote safety controls or something.
+ */
 public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements RenderableProvider
 {
    private static final String WINDOW_NAME = "Teleoperation";
@@ -91,10 +100,13 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final FootstepPlanningModule footstepPlanner;
    private final ImGuiGDXPoseGoalAffordance footstepGoal = new ImGuiGDXPoseGoalAffordance();
+   private GDXRobotWholeBodyInteractable interactableRobot;
    private final ImGuiGDXManualFootstepPlacement manualFootstepPlacement = new ImGuiGDXManualFootstepPlacement();
    private final ImGuiStoredPropertySetTuner teleoperationParametersTuner = new ImGuiStoredPropertySetTuner("Teleoperation Parameters");
    private final ImGuiStoredPropertySetTuner footstepPlanningParametersTuner = new ImGuiStoredPropertySetTuner("Footstep Planner Parameters (Teleoperation)");
    private final GDXTeleoperationParameters teleoperationParameters;
+   private final DRCRobotModel robotModel;
+   private final ROS2NodeInterface ros2Node;
    private FootstepPlannerOutput footstepPlannerOutput;
    private final ROS2SyncedRobotModel syncedRobotForFootstepPlanning;
    private final SideDependentList<FramePose3D> startFootPoses = new SideDependentList<>();
@@ -104,7 +116,19 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
    private final IHMCROS2Input<PlanarRegionsListMessage> lidarREARegions;
    private final ImBoolean showGraphics = new ImBoolean(true);
 
-   public ImGuiGDXTeleoperationPanel(String robotRepoName, String robotSubsequentPathToResourceFolder, CommunicationHelper communicationHelper)
+   public ImGuiGDXTeleoperationPanel(String robotRepoName,
+                                     String robotSubsequentPathToResourceFolder,
+                                     CommunicationHelper communicationHelper)
+   {
+      this(robotRepoName, robotSubsequentPathToResourceFolder, communicationHelper, null, null, null);
+   }
+
+   public ImGuiGDXTeleoperationPanel(String robotRepoName,
+                                     String robotSubsequentPathToResourceFolder,
+                                     CommunicationHelper communicationHelper,
+                                     RobotCollisionModel robotSelfCollisionModel,
+                                     RobotCollisionModel robotEnvironmentCollisionModel,
+                                     YoVariableClientHelper yoVariableClientHelper)
    {
       super("Teleoperation");
 
@@ -113,16 +137,14 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       addChild(footstepPlanningParametersTuner);
       this.communicationHelper = communicationHelper;
       String robotName = communicationHelper.getRobotModel().getSimpleRobotName();
-      ROS2NodeInterface ros2Node = communicationHelper.getROS2Node();
-      DRCRobotModel robotModel = communicationHelper.getRobotModel();
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      ros2Node = communicationHelper.getROS2Node();
+      robotModel = communicationHelper.getRobotModel();
 
       teleoperationParameters = new GDXTeleoperationParameters(robotRepoName, robotSubsequentPathToResourceFolder, robotModel.getSimpleRobotName());
       teleoperationParameters.loadUnsafe();
       teleoperationParameters.save();
 
       syncedRobot = communicationHelper.newSyncedRobot();
-
       robotLowLevelMessenger = communicationHelper.newRobotLowLevelMessenger();
 
       if (robotLowLevelMessenger == null)
@@ -188,10 +210,22 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       {
          handConfigurationNames[i] = values[i].name();
       }
+
+      if (robotSelfCollisionModel != null)
+      {
+         ROS2ControllerHelper ros2Helper = new ROS2ControllerHelper(ros2Node, robotModel);
+         interactableRobot = new GDXRobotWholeBodyInteractable(robotSelfCollisionModel,
+                                                               robotEnvironmentCollisionModel,
+                                                               robotModel,
+                                                               syncedRobot,
+                                                               ros2Helper,
+                                                               yoVariableClientHelper);
+      }
    }
 
    public void create(GDXImGuiBasedUI baseUI)
    {
+      // TODO: Remove this stuff and use the path control ring for this
       footstepGoal.create(baseUI, goal -> queueFootstepPlanning(), Color.YELLOW);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(footstepGoal::processImGui3DViewInput);
       footstepPlanningParametersTuner.create(footstepPlannerParameters,
@@ -202,12 +236,24 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       manualFootstepPlacement.create(baseUI, communicationHelper, syncedRobot);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(manualFootstepPlacement::processImGui3DViewInput);
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(manualFootstepPlacement::calculate3DViewPick);
+
+      if (interactableRobot != null)
+      {
+         interactableRobot.create(baseUI);
+         baseUI.getPrimaryScene().addRenderableProvider(interactableRobot, GDXSceneLevel.VIRTUAL);
+         baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(interactableRobot::calculate3DViewPick);
+         baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(interactableRobot::process3DViewInput);
+         interactableRobot.setInteractablesEnabled(true);
+         baseUI.getPrimaryScene().addRenderableProvider(interactableRobot);
+      }
    }
 
    public void update()
    {
       syncedRobot.update();
       footstepPlanGraphic.update();
+      if (interactableRobot != null)
+         interactableRobot.update();
       manualFootstepPlacement.update();
    }
 
@@ -444,6 +490,8 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
          footstepGoal.clear();
          manualFootstepPlacement.clear();
       }
+
+      interactableRobot.renderImGuiWidgets();
    }
 
    private boolean imGuiSlider(String label, float[] value)
@@ -549,6 +597,8 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
 
    public void destroy()
    {
+      if (interactableRobot != null)
+         interactableRobot.destroy();
       footstepPlanGraphic.destroy();
       throttledRobotStateCallback.destroy();
    }
