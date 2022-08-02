@@ -45,6 +45,7 @@ import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXManualFootstepPlacement;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
+import us.ihmc.gdx.ui.teleoperation.GDXTeleoperationParameters;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -92,6 +93,7 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
    private final ImGuiGDXPoseGoalAffordance footstepGoal = new ImGuiGDXPoseGoalAffordance();
    private final ImGuiGDXManualFootstepPlacement manualFootstepPlacement = new ImGuiGDXManualFootstepPlacement();
    private final ImGuiStoredPropertySetTuner footstepPlanningParametersTuner = new ImGuiStoredPropertySetTuner("Footstep Planner Parameters (Teleoperation)");
+   private final GDXTeleoperationParameters teleoperationParameters;
    private FootstepPlannerOutput footstepPlannerOutput;
    private final ROS2SyncedRobotModel syncedRobotForFootstepPlanning;
    private final SideDependentList<FramePose3D> startFootPoses = new SideDependentList<>();
@@ -101,9 +103,10 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
    private final IHMCROS2Input<PlanarRegionsListMessage> lidarREARegions;
    private final ImBoolean showGraphics = new ImBoolean(true);
 
-   public ImGuiGDXTeleoperationPanel(CommunicationHelper communicationHelper)
+   public ImGuiGDXTeleoperationPanel(String robotRepoName, String robotSubsequentPathToResourceFolder, CommunicationHelper communicationHelper)
    {
       super("Teleoperation");
+
       setRenderMethod(this::renderImGuiWidgets);
       addChild(footstepPlanningParametersTuner);
       this.communicationHelper = communicationHelper;
@@ -111,6 +114,8 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       ROS2NodeInterface ros2Node = communicationHelper.getROS2Node();
       DRCRobotModel robotModel = communicationHelper.getRobotModel();
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+
+      teleoperationParameters = new GDXTeleoperationParameters(robotRepoName, robotSubsequentPathToResourceFolder, robotModel.getSimpleRobotName());
 
       syncedRobot = communicationHelper.newSyncedRobot();
 
