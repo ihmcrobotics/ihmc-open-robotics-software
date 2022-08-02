@@ -1,4 +1,4 @@
-package us.ihmc.gdx.ui;
+package us.ihmc.gdx.ui.teleoperation;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
@@ -45,6 +45,8 @@ import us.ihmc.gdx.imgui.ImGuiMovingPlot;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
+import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.gdx.ui.affordances.GDXRobotWholeBodyInteractable;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXManualFootstepPlacement;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
@@ -64,11 +66,9 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 /**
- * Rename GDXTeleoperationManager.
- *
- * Possibly extract simple controller controls to a smaller panel class, like remote safety controls or something.
+ *  Possibly extract simple controller controls to a smaller panel class, like remote safety controls or something.
  */
-public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements RenderableProvider
+public class GDXTeleoperationManager extends ImGuiPanel implements RenderableProvider
 {
    private static final String WINDOW_NAME = "Teleoperation";
    private static final double MIN_PELVIS_HEIGHT = 0.52;
@@ -116,19 +116,19 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
    private final IHMCROS2Input<PlanarRegionsListMessage> lidarREARegions;
    private final ImBoolean showGraphics = new ImBoolean(true);
 
-   public ImGuiGDXTeleoperationPanel(String robotRepoName,
-                                     String robotSubsequentPathToResourceFolder,
-                                     CommunicationHelper communicationHelper)
+   public GDXTeleoperationManager(String robotRepoName,
+                                  String robotSubsequentPathToResourceFolder,
+                                  CommunicationHelper communicationHelper)
    {
       this(robotRepoName, robotSubsequentPathToResourceFolder, communicationHelper, null, null, null);
    }
 
-   public ImGuiGDXTeleoperationPanel(String robotRepoName,
-                                     String robotSubsequentPathToResourceFolder,
-                                     CommunicationHelper communicationHelper,
-                                     RobotCollisionModel robotSelfCollisionModel,
-                                     RobotCollisionModel robotEnvironmentCollisionModel,
-                                     YoVariableClientHelper yoVariableClientHelper)
+   public GDXTeleoperationManager(String robotRepoName,
+                                  String robotSubsequentPathToResourceFolder,
+                                  CommunicationHelper communicationHelper,
+                                  RobotCollisionModel robotSelfCollisionModel,
+                                  RobotCollisionModel robotEnvironmentCollisionModel,
+                                  YoVariableClientHelper yoVariableClientHelper)
    {
       super("Teleoperation");
 
