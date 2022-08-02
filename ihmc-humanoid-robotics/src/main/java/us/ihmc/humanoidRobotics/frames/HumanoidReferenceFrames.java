@@ -7,9 +7,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
-import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
+import us.ihmc.mecano.frames.MovingCenterOfMassReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -68,19 +69,25 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
 
    public HumanoidReferenceFrames(FullHumanoidRobotModel fullRobotModel, HumanoidRobotSensorInformation sensorInformation)
    {
-      this(fullRobotModel, new CenterOfMassReferenceFrame("centerOfMass", worldFrame, fullRobotModel.getElevator()), sensorInformation);
+      this(fullRobotModel, new MovingCenterOfMassReferenceFrame("centerOfMass", worldFrame, fullRobotModel.getElevator()), sensorInformation);
    }
 
    public HumanoidReferenceFrames(FullHumanoidRobotModel fullRobotModel,
                                   CenterOfMassStateProvider centerOfMassStateProvider,
                                   HumanoidRobotSensorInformation sensorInformation)
    {
-      this(fullRobotModel, new ReferenceFrame("centerOfMassFrame", worldFrame)
+      this(fullRobotModel, new MovingReferenceFrame("centerOfMassFrame", worldFrame, true)
       {
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
             transformToParent.getTranslation().set(centerOfMassStateProvider.getCenterOfMassPosition());
+         }
+
+         @Override
+         protected void updateTwistRelativeToParent(Twist twistRelativeToParentToPack)
+         {
+            twistRelativeToParentToPack.getLinearPart().setMatchingFrame(centerOfMassStateProvider.getCenterOfMassVelocity());
          }
       }, sensorInformation);
    }
