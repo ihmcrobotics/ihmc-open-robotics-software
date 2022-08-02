@@ -372,6 +372,7 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       }
       ImGui.sameLine();
       footstepGoal.renderPlaceGoalButton();
+      ImGui.checkbox(labels.get("Show footstep planner parameter tuner"), footstepPlanningParametersTuner.getIsShowing());
 
       manualFootstepPlacement.renderImGuiWidgets();
 

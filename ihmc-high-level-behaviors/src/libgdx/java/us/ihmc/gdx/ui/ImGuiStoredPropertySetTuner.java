@@ -51,6 +51,12 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
          }
          return FileVisitResult.CONTINUE;
       });
+      String currentWorkingVersion = versions.first();
+      if (!storedPropertySet.getCurrentVersionSuffix().equals(currentWorkingVersion))
+      {
+         storedPropertySet.updateBackingSaveFile(currentWorkingVersion);
+         storedPropertySet.load();
+      }
 
       for (StoredPropertyKey<?> propertyKey : keys.keys())
       {
@@ -79,13 +85,22 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
 
    public void renderImGuiWidgets()
    {
-      for (String version : versions)
+      ImGui.text("Version:");
+      if (versions.size() > 1)
       {
-         if (ImGui.radioButton(version.isEmpty() ? "Primary" : version, storedPropertySet.getCurrentVersionSuffix().equals(version)))
+         for (String version : versions)
          {
-            storedPropertySet.updateBackingSaveFile(version);
-            load();
+            if (ImGui.radioButton(version.isEmpty() ? "Primary" : version, storedPropertySet.getCurrentVersionSuffix().equals(version)))
+            {
+               storedPropertySet.updateBackingSaveFile(version);
+               load();
+            }
          }
+      }
+      else
+      {
+         ImGui.sameLine();
+         ImGui.text(storedPropertySet.getCurrentVersionSuffix());
       }
 
       //      ImGuiInputTextFlags. // TODO: Mess with various flags
