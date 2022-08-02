@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
 import java.util.ArrayList;
 import java.util.List;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -140,11 +141,13 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
       continuousStepGenerator.setStopWalkingMessenger(new StopWalkingMessenger()
       {
          PauseWalkingMessage message = HumanoidMessageTools.createPauseWalkingMessage(true);
+         FootstepDataListMessage emptyFootstepMessage = new FootstepDataListMessage();
 
          @Override
          public void submitStopWalkingRequest()
          {
             walkingCommandInputManager.submitMessage(message);
+            walkingCommandInputManager.submitMessage(emptyFootstepMessage);
          }
       });
       continuousStepGenerator.setFootstepMessenger(walkingCommandInputManager::submitMessage);
