@@ -33,6 +33,11 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
       setRenderMethod(this::renderImGuiWidgets);
    }
 
+   public void create(StoredPropertySetBasics storedPropertySet, StoredPropertyKeyList keys)
+   {
+      create(storedPropertySet, keys, () -> { });
+   }
+
    public void create(StoredPropertySetBasics storedPropertySet, StoredPropertyKeyList keys, Runnable onParametersUpdatedCallback)
    {
       this.storedPropertySet = storedPropertySet;
