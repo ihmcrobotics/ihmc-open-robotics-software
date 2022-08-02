@@ -55,7 +55,7 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
    {
       this.syncedRobot = syncedRobot;
       primary3DPanel = baseUI.getPrimary3DPanel();
-      primary3DPanel.addWindowDrawListAddition(this::renderTooltips);
+      primary3DPanel.addImGuiOverlayAddition(this::renderTooltips);
       footstepPlannerParameters = communicationHelper.getRobotModel().getFootstepPlannerParameters();
       snapper = new FootstepSnapAndWiggler(footPolygons, footstepPlannerParameters);
       stepChecker = new FootstepPoseHeuristicChecker(footstepPlannerParameters, snapper, registry);

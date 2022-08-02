@@ -17,9 +17,7 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -66,7 +64,7 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       this.communicationHelper = communicationHelper;
       this.syncedRobot = syncedRobot;
       primary3DPanel = baseUI.getPrimary3DPanel();
-      primary3DPanel.addWindowDrawListAddition(this::renderTooltips);
+      primary3DPanel.addImGuiOverlayAddition(this::renderTooltips);
 
       stepChecker = new ImGuiGDXManuallyPlacedFootstepChecker(baseUI, communicationHelper, syncedRobot);
       clear();
