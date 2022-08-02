@@ -79,7 +79,7 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
    private final GDXFootstepPlanGraphic footstepPlanGraphic;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final float[] stanceHeightSliderValue = new float[1];
-   private final float[] leanForwardSliderValue = new float[1];
+   private final float[] pitchTorsoSliderValue = new float[1];
    private final float[] yawTorsoSliderValue = new float[1];
    private final float[] neckPitchSliderValue = new float[1];
    private final ImInt pumpPSI = new ImInt(1);
@@ -144,7 +144,7 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
          double pitchInRange = leanForwardValue - MIN_CHEST_PITCH;
          double newChestSliderValue = SLIDER_RANGE * pitchInRange / CHEST_PITCH_RANGE;
          double flippedChestSliderValue = 100.0 - newChestSliderValue;
-         leanForwardSliderValue[0] = (float) flippedChestSliderValue;
+         pitchTorsoSliderValue[0] = (float) flippedChestSliderValue;
 
          double yawTorsoValue = chestFrame.getYaw();
          double yawTorsoInRange = yawTorsoValue - MIN_YAW_TORSO;
@@ -295,11 +295,11 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
             communicationHelper.publishToController(message);
          }
       }
-      if (imGuiSlider("Lean Forward", leanForwardSliderValue))
+      if (imGuiSlider("Pitch Torso", pitchTorsoSliderValue))
       {
          if (syncedRobot.getDataReceptionTimerSnapshot().isRunning(ROBOT_DATA_EXPIRATION))
          {
-            double sliderValue = 100.0 - leanForwardSliderValue[0];
+            double sliderValue = 100.0 - pitchTorsoSliderValue[0];
             double desiredChestPitch = MIN_CHEST_PITCH + CHEST_PITCH_RANGE * sliderValue / SLIDER_RANGE;
 
             FrameYawPitchRoll frameChestYawPitchRoll = new FrameYawPitchRoll(syncedRobot.getReferenceFrames().getChestFrame());
