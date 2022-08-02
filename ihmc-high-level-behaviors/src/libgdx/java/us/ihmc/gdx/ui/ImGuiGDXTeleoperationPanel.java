@@ -14,6 +14,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.CommunicationHelper;
+import us.ihmc.behaviors.tools.ThrottledRobotStateCallback;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.MathTools;
@@ -29,7 +30,6 @@ import us.ihmc.euclid.referenceFrame.FrameYawPitchRoll;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.behaviors.tools.ThrottledRobotStateCallback;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
@@ -92,6 +92,7 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
    private final FootstepPlanningModule footstepPlanner;
    private final ImGuiGDXPoseGoalAffordance footstepGoal = new ImGuiGDXPoseGoalAffordance();
    private final ImGuiGDXManualFootstepPlacement manualFootstepPlacement = new ImGuiGDXManualFootstepPlacement();
+   private final ImGuiStoredPropertySetTuner teleoperationParametersTuner = new ImGuiStoredPropertySetTuner("Teleoperation Parameters");
    private final ImGuiStoredPropertySetTuner footstepPlanningParametersTuner = new ImGuiStoredPropertySetTuner("Footstep Planner Parameters (Teleoperation)");
    private final GDXTeleoperationParameters teleoperationParameters;
    private FootstepPlannerOutput footstepPlannerOutput;
@@ -108,6 +109,7 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       super("Teleoperation");
 
       setRenderMethod(this::renderImGuiWidgets);
+      addChild(teleoperationParametersTuner);
       addChild(footstepPlanningParametersTuner);
       this.communicationHelper = communicationHelper;
       String robotName = communicationHelper.getRobotModel().getSimpleRobotName();
@@ -116,6 +118,8 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
 
       teleoperationParameters = new GDXTeleoperationParameters(robotRepoName, robotSubsequentPathToResourceFolder, robotModel.getSimpleRobotName());
+      teleoperationParameters.loadUnsafe();
+      teleoperationParameters.save();
 
       syncedRobot = communicationHelper.newSyncedRobot();
 
@@ -193,6 +197,7 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       footstepPlanningParametersTuner.create(footstepPlannerParameters,
                                              FootstepPlannerParameterKeys.keys,
                                              this::queueFootstepPlanning);
+      teleoperationParametersTuner.create(teleoperationParameters, GDXTeleoperationParameters.keys);
 
       manualFootstepPlacement.create(baseUI, communicationHelper, syncedRobot);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(manualFootstepPlacement::processImGui3DViewInput);
@@ -373,6 +378,7 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       ImGui.sameLine();
       footstepGoal.renderPlaceGoalButton();
       ImGui.checkbox(labels.get("Show footstep planner parameter tuner"), footstepPlanningParametersTuner.getIsShowing());
+      ImGui.checkbox(labels.get("Show teleoperation parameter tuner"), teleoperationParametersTuner.getIsShowing());
 
       manualFootstepPlacement.renderImGuiWidgets();
 
@@ -526,10 +532,10 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
 
    private void walk()
    {
-      double swingDuration = 1.2;
-      double transferDuration = 0.8;
       FootstepDataListMessage footstepDataListMessage
-            = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlannerOutput.getFootstepPlan(), swingDuration, transferDuration);
+            = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlannerOutput.getFootstepPlan(),
+                                                                          teleoperationParameters.getSwingTime(),
+                                                                          teleoperationParameters.getTransferTime());
       footstepDataListMessage.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
       footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
       communicationHelper.publishToController(footstepDataListMessage);

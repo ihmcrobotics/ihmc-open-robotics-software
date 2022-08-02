@@ -17,4 +17,19 @@ public class GDXTeleoperationParameters extends StoredPropertySet
    {
       super(keys, GDXTeleoperationParameters.class, robotRepoName, robotSubsequentPathToResourceFolder, StringUtils.capitalize(robotName));
    }
+
+   public double getTrajectoryTime()
+   {
+      return get(trajectoryTime);
+   }
+
+   public double getSwingTime()
+   {
+      return get(swingTime);
+   }
+
+   public double getTransferTime()
+   {
+      return get(transferTime);
+   }
 }
