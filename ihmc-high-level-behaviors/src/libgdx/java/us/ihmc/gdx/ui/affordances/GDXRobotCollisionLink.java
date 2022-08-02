@@ -25,6 +25,8 @@ import us.ihmc.gdx.ui.gizmo.CapsuleRayIntersection;
 import us.ihmc.gdx.ui.gizmo.SphereRayIntersection;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.robotics.geometry.shapes.STPCylinder3D;
+import us.ihmc.robotics.geometry.shapes.interfaces.STPCylinder3DReadOnly;
 import us.ihmc.robotics.physics.Collidable;
 
 public class GDXRobotCollisionLink implements RenderableProvider
@@ -197,6 +199,14 @@ public class GDXRobotCollisionLink implements RenderableProvider
       else if (shape instanceof PointShape3DReadOnly)
       {
          PointShape3DReadOnly pointShape = (PointShape3DReadOnly) shape;
+      }
+      else if (shape instanceof STPCylinder3DReadOnly)
+      {
+         STPCylinder3DReadOnly stpCylinder = (STPCylinder3DReadOnly) shape;
+      }
+      else if (shape instanceof Ellipsoid3DReadOnly)
+      {
+         Ellipsoid3DReadOnly ellipsoid = (Ellipsoid3DReadOnly) shape;
       }
       else
       {
