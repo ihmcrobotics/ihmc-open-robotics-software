@@ -8,6 +8,7 @@ import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.affordances.GDXRobotCollisionLink;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 
@@ -27,7 +28,12 @@ public class GDXRobotCollisionModel
 
    public void create(ROS2SyncedRobotModel syncedRobot, AppearanceDefinition color)
    {
-      collidables = robotCollisionModel.getRobotCollidables(syncedRobot.getFullRobotModel().getElevator());
+      create(syncedRobot.getFullRobotModel().getElevator(), color);
+   }
+
+   public void create(RigidBodyBasics rootBody, AppearanceDefinition color)
+   {
+      collidables = robotCollisionModel.getRobotCollidables(rootBody);
       for (Collidable collidable : collidables)
       {
          GDXRobotCollisionLink collisionLink = new GDXRobotCollisionLink(collidable, GDXTools.toGDX(color));
