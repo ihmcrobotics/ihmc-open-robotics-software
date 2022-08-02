@@ -36,6 +36,7 @@ public class GDXRobotCollisionLink implements RenderableProvider
    private final RigidBodyTransform boxCenterToWorldTransform = new RigidBodyTransform();
    private final Shape3DReadOnly shape;
    private final MovingReferenceFrame frameAfterJoint;
+   private String rigidBodyName;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
    private SphereRayIntersection sphereRayIntersection;
    private CapsuleRayIntersection capsuleIntersection;
@@ -73,6 +74,7 @@ public class GDXRobotCollisionLink implements RenderableProvider
    {
       this.shape = shape;
       this.frameAfterJoint = frameAfterJoint;
+      this.rigidBodyName = rigidBodyName;
       // TODO update every frame
       transformToJoint = new RigidBodyTransform(shapeFrame.getTransformToDesiredFrame(frameAfterJoint));
       collisionMeshFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("collisionMeshFrame" + rigidBodyName,
@@ -227,5 +229,10 @@ public class GDXRobotCollisionLink implements RenderableProvider
    public boolean getPickSelected()
    {
       return pickSelected;
+   }
+
+   public String getRigidBodyName()
+   {
+      return rigidBodyName;
    }
 }
