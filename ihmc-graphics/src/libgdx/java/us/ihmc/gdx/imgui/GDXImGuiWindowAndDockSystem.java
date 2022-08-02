@@ -22,6 +22,7 @@ import us.ihmc.tools.io.HybridFile;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.resources.ResourceTools;
 
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -204,7 +205,12 @@ public class GDXImGuiWindowAndDockSystem
       if (imGuiSettingsFile.isInputStreamAvailable())
       {
          LogTools.info("Loading ImGui settings from {}", imGuiSettingsFile.getLocationOfResourceForReading());
-         String iniContentsAsString = ResourceTools.readResourceToString(imGuiSettingsFile.getClasspathResourceAsStream());
+         InputStream classpathResourceAsStream = imGuiSettingsFile.getClasspathResourceAsStream();
+         if (classpathResourceAsStream == null)
+         {
+            throw new RuntimeException("Classpath resource stream is null!");
+         }
+         String iniContentsAsString = ResourceTools.readResourceToString(classpathResourceAsStream);
          ImGui.loadIniSettingsFromMemory(iniContentsAsString);
          success = true;
 

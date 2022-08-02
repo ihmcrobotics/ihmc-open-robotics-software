@@ -31,6 +31,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
+import us.ihmc.tools.gui.YoAppearanceTools;
 
 public class GDXRobotWholeBodyInteractable implements RenderableProvider
 {
@@ -71,12 +72,8 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
 
    public void create(GDXImGuiBasedUI baseUI)
    {
-      AppearanceDefinition green = YoAppearance.DarkGreen();
-      green.setTransparency(0.4);
-      selfCollisionModel.create(syncedRobot, green);
-      AppearanceDefinition red = YoAppearance.DarkRed();
-      red.setTransparency(0.4);
-      environmentCollisionModel.create(syncedRobot, red);
+      selfCollisionModel.create(syncedRobot, YoAppearanceTools.makeTransparent(YoAppearance.DarkGreen(), 0.4));
+      environmentCollisionModel.create(syncedRobot, YoAppearanceTools.makeTransparent(YoAppearance.DarkRed(), 0.4));
       for (GDXRobotCollisionLink collisionLink : environmentCollisionModel.getCollisionLinks())
       {
          RobotDefinition robotDefinition = robotModel.getRobotDefinition();
