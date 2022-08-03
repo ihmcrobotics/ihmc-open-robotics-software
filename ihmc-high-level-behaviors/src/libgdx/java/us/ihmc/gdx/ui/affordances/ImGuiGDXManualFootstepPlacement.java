@@ -14,7 +14,6 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -29,6 +28,7 @@ import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.gdx.ui.teleoperation.GDXTeleoperationParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
@@ -51,13 +51,18 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
    private ImGuiGDXManuallyPlacedFootstepChecker stepChecker;
    private ImGui3DViewInput latestInput;
    private GDX3DPanel primary3DPanel;
+   private GDXTeleoperationParameters teleoperationParameters;
    private boolean renderTooltip = false;
    FramePose3D tempFramePose = new FramePose3D();
 
-   public void create(GDXImGuiBasedUI baseUI, CommunicationHelper communicationHelper, ROS2SyncedRobotModel syncedRobot)
+   public void create(GDXImGuiBasedUI baseUI,
+                      CommunicationHelper communicationHelper,
+                      ROS2SyncedRobotModel syncedRobot,
+                      GDXTeleoperationParameters teleoperationParameters)
    {
       this.baseUI = baseUI;
       this.communicationHelper = communicationHelper;
+      this.teleoperationParameters = teleoperationParameters;
       this.syncedRobot = syncedRobot;
       primary3DPanel = baseUI.getPrimary3DPanel();
       primary3DPanel.addImGuiOverlayAddition(this::renderTooltips);
@@ -321,8 +326,8 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       stepMessage.setRobotSide(step.getFootstepSide().toByte());
       stepMessage.getLocation().set(new Point3D(step.getSelectablePose3DGizmo().getPoseGizmo().getPose().getPosition()));
       stepMessage.getOrientation().set(step.getPose().getOrientation());
-      stepMessage.setSwingDuration(0.7);
-      stepMessage.setTransferDuration(0.25);
+      stepMessage.setSwingDuration(teleoperationParameters.getSwingTime());
+      stepMessage.setTransferDuration(teleoperationParameters.getTransferTime());
    }
 
    public ArrayList<ImGuiGDXManuallyPlacedFootstep> getFootstepArrayList()
