@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
 import java.util.ArrayList;
 import java.util.List;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -24,6 +25,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.contactable.ContactableBody;
@@ -90,29 +92,37 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
       return csgCommandInputManager;
    }
 
+   public CSGCommandInputManager getCSGCommandInputManager()
+   {
+      if (csgCommandInputManagerField.hasValue())
+         return csgCommandInputManagerField.get();
+      else
+         return setCSGCommandInputManager();
+   }
+
    @Override
    public ComponentBasedFootstepDataMessageGenerator buildPlugin(HighLevelControllerFactoryHelper controllerFactoryHelper)
    {
       HighLevelHumanoidControllerToolbox controllerToolbox = controllerFactoryHelper.getHighLevelHumanoidControllerToolbox();
 
       return buildPlugin(controllerToolbox.getReferenceFrames(),
+                         controllerToolbox.getControlDT(),
                          controllerFactoryHelper.getWalkingControllerParameters(),
                          controllerFactoryHelper.getStatusMessageOutputManager(),
                          controllerFactoryHelper.getCommandInputManager(),
+                         controllerToolbox.getYoGraphicsListRegistry(),
                          controllerToolbox.getContactableFeet(),
-                         controllerToolbox.getYoTime(),
-                         controllerToolbox.getControlDT(),
-                         controllerToolbox.getYoGraphicsListRegistry());
+                         controllerToolbox.getYoTime() );
    }
 
    public ComponentBasedFootstepDataMessageGenerator buildPlugin(CommonHumanoidReferenceFrames referenceFrames,
-                                                                 WalkingControllerParameters walkingControllerParameters,
-                                                                 StatusMessageOutputManager statusMessageOutputManager,
-                                                                 CommandInputManager commandInputManager,
-                                                                 SideDependentList<? extends ContactableBody> contactableFeet,
-                                                                 DoubleProvider timeProvider,
                                                                  double updateDT,
-                                                                 YoGraphicsListRegistry yoGraphicsListRegistry)
+                                                                 WalkingControllerParameters walkingControllerParameters,
+                                                                 StatusMessageOutputManager walkingStatusMessageOutputManager,
+                                                                 CommandInputManager walkingCommandInputManager,
+                                                                 YoGraphicsListRegistry yoGraphicsListRegistry,
+                                                                 SideDependentList<? extends ContactableBody> contactableFeet,
+                                                                 DoubleProvider timeProvider)
    {
       if (!registryField.hasValue())
          setRegistry();
@@ -125,42 +135,31 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
          continuousStepGenerator.setSupportFootBasedFootstepAdjustment(adjustPitchAndRoll.hasValue() && adjustPitchAndRoll.get());
       if (secondaryFootstepAdjusterField.hasValue())
          continuousStepGenerator.addFootstepAdjustment(secondaryFootstepAdjusterField.get());
-      continuousStepGenerator.setFootstepStatusListener(statusMessageOutputManager);
+      continuousStepGenerator.setFootstepStatusListener(walkingStatusMessageOutputManager);
       continuousStepGenerator.setFrameBasedFootPoseProvider(referenceFrames.getSoleZUpFrames());
       continuousStepGenerator.configureWith(walkingControllerParameters);
       continuousStepGenerator.setStopWalkingMessenger(new StopWalkingMessenger()
       {
          PauseWalkingMessage message = HumanoidMessageTools.createPauseWalkingMessage(true);
+         FootstepDataListMessage emptyFootstepMessage = new FootstepDataListMessage();
 
          @Override
          public void submitStopWalkingRequest()
          {
-            commandInputManager.submitMessage(message);
+            walkingCommandInputManager.submitMessage(message);
+            walkingCommandInputManager.submitMessage(emptyFootstepMessage);
          }
       });
-      continuousStepGenerator.setFootstepMessenger(commandInputManager::submitMessage);
+      continuousStepGenerator.setFootstepMessenger(walkingCommandInputManager::submitMessage);
 
       List<Updatable> updatables = new ArrayList<>();
 
-      if (yoGraphicsListRegistry != null)
+      if (yoGraphicsListRegistry != null && contactableFeet != null)
          continuousStepGenerator.setupVisualization(contactableFeet, yoGraphicsListRegistry);
       if (heightMapField.hasValue() && heightMapField.get() != null)
          continuousStepGenerator.setHeightMapBasedFootstepAdjustment(heightMapField.get());
 
-      if (csgCommandInputManagerField.hasValue())
-      {
-         continuousStepGenerator.setDesiredVelocityProvider(csgCommandInputManagerField.get().createDesiredVelocityProvider());
-         continuousStepGenerator.setDesiredTurningVelocityProvider(csgCommandInputManagerField.get().createDesiredTurningVelocityProvider());
-         continuousStepGenerator.setWalkInputProvider(csgCommandInputManagerField.get().createWalkInputProvider());
-         statusMessageOutputManager.attachStatusMessageListener(HighLevelStateChangeStatusMessage.class,
-                                                                csgCommandInputManagerField.get()::setHighLevelStateChangeStatusMessage);
-         updatables.add(csgCommandInputManagerField.get());
-
-         //this is probably not the way the class was intended to be modified.
-         csgCommandInputManagerField.get().setCSG(continuousStepGenerator);
-
-      }
-      else if (useHeadingAndVelocityScriptField.get())
+      if (useHeadingAndVelocityScriptField.get())
       {
          HeadingAndVelocityEvaluationScript script = new HeadingAndVelocityEvaluationScript(updateDT,
                                                                                             timeProvider,
@@ -169,6 +168,19 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
          continuousStepGenerator.setDesiredTurningVelocityProvider(script.getDesiredTurningVelocityProvider());
          continuousStepGenerator.setDesiredVelocityProvider(script.getDesiredVelocityProvider());
          updatables.add(script);
+      }
+      else if (csgCommandInputManagerField.hasValue())
+      {
+         continuousStepGenerator.setDesiredVelocityProvider(csgCommandInputManagerField.get().createDesiredVelocityProvider());
+         continuousStepGenerator.setDesiredTurningVelocityProvider(csgCommandInputManagerField.get().createDesiredTurningVelocityProvider());
+         continuousStepGenerator.setWalkInputProvider(csgCommandInputManagerField.get().createWalkInputProvider());
+         walkingStatusMessageOutputManager.attachStatusMessageListener(HighLevelStateChangeStatusMessage.class,
+                                                                csgCommandInputManagerField.get()::setHighLevelStateChangeStatusMessage);
+         updatables.add(csgCommandInputManagerField.get());
+
+         //this is probably not the way the class was intended to be modified.
+         csgCommandInputManagerField.get().setCSG(continuousStepGenerator);
+
       }
       else
       {
@@ -214,6 +226,7 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
          List<Class<? extends Command<?, ?>>> commands = new ArrayList<>();
          commands.add(ContinuousStepGeneratorParametersCommand.class);
          commands.add(ContinuousStepGeneratorInputCommand.class);
+         commands.add(PlanarRegionsListCommand.class);
          return commands;
       }
 
