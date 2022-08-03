@@ -34,7 +34,7 @@ public class RealsenseL515ROSNode
    private final ROS1Helper ros1Helper;
    private final ROS2Helper ros2Helper;
    private RealSenseHardwareManager realSenseHardwareManager;
-   private BytedecoRealsenseL515 l515;
+   private BytedecoRealsense l515;
    private RosImagePublisher ros1DepthPublisher;
    private RosCameraInfoPublisher ros1DepthCameraInfoPublisher;
    private ChannelBuffer ros1DepthChannelBuffer;
@@ -102,11 +102,11 @@ public class RealsenseL515ROSNode
                depthU16C1Image = new Mat(l515.getDepthHeight(), l515.getDepthWidth(), opencv_core.CV_16UC1, depthFrameData);
                depth32FC1Image = new BytedecoImage(l515.getDepthWidth(), l515.getDepthHeight(), opencv_core.CV_32FC1);
 
-               depthCameraIntrinsics.setFx(l515.getFocalLengthPixelsX());
-               depthCameraIntrinsics.setFy(l515.getFocalLengthPixelsY());
+               depthCameraIntrinsics.setFx(l515.getDepthFocalLengthPixelsX());
+               depthCameraIntrinsics.setFy(l515.getDepthFocalLengthPixelsY());
                depthCameraIntrinsics.setSkew(0.0);
-               depthCameraIntrinsics.setCx(l515.getPrincipalOffsetXPixels());
-               depthCameraIntrinsics.setCy(l515.getPrincipalOffsetYPixels());
+               depthCameraIntrinsics.setCx(l515.getDepthPrincipalOffsetXPixels());
+               depthCameraIntrinsics.setCy(l515.getDepthPrincipalOffsetYPixels());
             }
 
             VideoPacket videoPacket = new VideoPacket();
