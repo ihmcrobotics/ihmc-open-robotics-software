@@ -24,6 +24,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DBasics;
 import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DReadOnly;
+import us.ihmc.tools.lists.ListSorter;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -116,11 +117,19 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
 
    private final YoFramePoint3D currentCoMPosition = new YoFramePoint3D("currentCoMPosition", worldFrame, registry);
    private final YoFrameVector3D currentCoMVelocity = new YoFrameVector3D("currentCoMVelocity", worldFrame, registry);
+   
+   private final YoFramePoint3D hackDCMPosition = new YoFramePoint3D("hackDCMPosition", worldFrame, registry);
+
 
    private final RecyclingArrayList<FramePoint3D> dcmCornerPoints = new RecyclingArrayList<>(FramePoint3D::new);
    private final RecyclingArrayList<FramePoint3D> comCornerPoints = new RecyclingArrayList<>(FramePoint3D::new);
 
    private final RecyclingArrayList<LineSegment3D> vrpSegments = new RecyclingArrayList<>(LineSegment3D::new);
+   
+   private final RecyclingArrayList<FramePoint3D> hackReverseDCMCornerPoints = new RecyclingArrayList<>(FramePoint3D::new);
+   private final RecyclingArrayList<FramePoint3D> hackDCMCornerPoints = new RecyclingArrayList<>(FramePoint3D::new);
+   private final RecyclingArrayList<FramePoint3D> hackVRPCornerPoints = new RecyclingArrayList<>(FramePoint3D::new);
+
 
    private int numberOfConstraints = 0;
    private final YoBoolean maintainInitialCoMVelocityContinuity = new YoBoolean("maintainInitialComVelocityContinuity", registry);
@@ -286,6 +295,10 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
 
    private void solveForCoefficientConstraintMatrix(List<? extends ContactStateProvider> contactSequence)
    {
+      hackDCMCornerPoints.clear();
+      hackReverseDCMCornerPoints.clear();
+      hackVRPCornerPoints.clear();
+      
       int numberOfPhases = contactSequence.size();
       int numberOfTransitions = numberOfPhases - 1;
 
@@ -327,6 +340,24 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       sparseSolver.solve(xEquivalents, xCoefficientVector);
       sparseSolver.solve(yEquivalents, yCoefficientVector);
       sparseSolver.solve(zEquivalents, zCoefficientVector);
+      
+      hackReverseDCMCornerPoints.add().set(finalDCMPosition);
+      
+      for (int segment = contactSequence.size() - 1; segment >= 0; segment--)
+      {
+         FramePoint3D nextCornerPoint = hackReverseDCMCornerPoints.getLast();
+         FramePoint3D cornerPoint = hackReverseDCMCornerPoints.add();
+         ContactStateProvider contact = contactSequence.get(segment);
+         
+         double exponential = Math.exp(omega.getValue() *contact.getTimeInterval().getDuration());
+         cornerPoint.interpolate( startVRPPositions.get(segment), nextCornerPoint, 1.0 / exponential);
+      }
+
+      for (int pointIdx = hackReverseDCMCornerPoints.size() - 1; pointIdx >= 0; pointIdx--)
+      {
+         hackDCMCornerPoints.add().set(hackReverseDCMCornerPoints.get(pointIdx));
+      }
+
    }
 
    private final FramePoint3D comPositionToThrowAway = new FramePoint3D();
@@ -424,6 +455,11 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
 
       ecmpPositionToPack.set(vrpPositionToPack);
       ecmpPositionToPack.subZ(comHeight.getDoubleValue());
+      
+      double exponential = Math.exp(timeInPhase * omega.getValue());
+      hackDCMPosition.interpolate(startVRPPositions.get(segmentId), hackDCMCornerPoints.get(segmentId), exponential);
+     
+     
    }
 
    /**
@@ -741,6 +777,8 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
          constrainCoMAccelerationToGravity(sequenceId, duration);
          constrainCoMJerkToZero(sequenceId, duration);
       }
+      
+      
    }
 
    /**

@@ -397,6 +397,8 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
    }
 
 
+   private static final boolean useConstantCMPInTransfer = false;
+   
    private void computeCoPPointsForFootstepTransfer(double duration,
                                                     double splitFraction,
                                                     double weightDistribution,
@@ -422,14 +424,20 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       if (setupForContinuityMaintaining)
          firstSegmentDuration = Math.min(firstSegmentDuration, parameters.getDurationForContinuityMaintenanceSegment());
       previousContactState.setDuration(firstSegmentDuration);
-      previousContactState.setEndECMPPosition(midfootCoP);
+      if (useConstantCMPInTransfer)
+          previousContactState.setEndECMPPosition(previousContactState.getECMPStartPosition());
+      else
+         previousContactState.setEndECMPPosition(midfootCoP);
       previousContactState.setLinearECMPVelocity();
 
       double secondSegmentDuration = duration - firstSegmentDuration;
       SettableContactStateProvider contactStateProvider = contactStateProviders.add();
       contactStateProvider.setStartFromEnd(previousContactState);
       contactStateProvider.setDuration(secondSegmentDuration);
-      contactStateProvider.setEndECMPPosition(tempPointForCoPCalculation);
+      if (useConstantCMPInTransfer)
+         contactStateProvider.setEndECMPPosition(previousContactState.getECMPStartPosition());
+      else
+         contactStateProvider.setEndECMPPosition(tempPointForCoPCalculation);
       contactStateProvider.setLinearECMPVelocity();
    }
 
