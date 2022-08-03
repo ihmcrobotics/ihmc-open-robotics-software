@@ -27,7 +27,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.MutableBytePointer;
-import us.ihmc.perception.realsense.BytedecoRealsenseL515;
+import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -74,7 +74,7 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
    private final TypedNotification<StoredPropertySetMessage> concaveHullFactoryNotification = new TypedNotification<>();
    private final TypedNotification<Empty> reconnectROS1Notification = new TypedNotification<>();
    private RealSenseHardwareManager realSenseHardwareManager;
-   private BytedecoRealsenseL515 l515;
+   private BytedecoRealsense l515;
    private Mat depthU16C1Image;
    private BytedecoImage depth32FC1Image;
    private int depthWidth;
@@ -170,11 +170,11 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
                depthU16C1Image = new Mat(depthHeight, depthWidth, opencv_core.CV_16UC1, depthFrameData);
                depth32FC1Image = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_32FC1);
 
-               depthCameraIntrinsics.setFx(l515.getFocalLengthPixelsX());
-               depthCameraIntrinsics.setFy(l515.getFocalLengthPixelsY());
+               depthCameraIntrinsics.setFx(l515.getDepthFocalLengthPixelsX());
+               depthCameraIntrinsics.setFy(l515.getDepthFocalLengthPixelsY());
                depthCameraIntrinsics.setSkew(0.0);
-               depthCameraIntrinsics.setCx(l515.getPrincipalOffsetXPixels());
-               depthCameraIntrinsics.setCy(l515.getPrincipalOffsetYPixels());
+               depthCameraIntrinsics.setCx(l515.getDepthPrincipalOffsetXPixels());
+               depthCameraIntrinsics.setCy(l515.getDepthPrincipalOffsetYPixels());
 
                gpuPlanarRegionExtraction = new GPUPlanarRegionExtraction();
                gpuPlanarRegionExtraction.create(depthWidth,

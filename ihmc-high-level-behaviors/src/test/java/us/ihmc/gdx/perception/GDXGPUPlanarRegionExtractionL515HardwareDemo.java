@@ -11,7 +11,7 @@ import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.MutableBytePointer;
-import us.ihmc.perception.realsense.BytedecoRealsenseL515;
+import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
 import us.ihmc.tools.thread.Activator;
 
@@ -23,7 +23,7 @@ public class GDXGPUPlanarRegionExtractionL515HardwareDemo
    private Activator nativesLoadedActivator;
    private GDXInteractableReferenceFrame robotInteractableReferenceFrame;
    private RealSenseHardwareManager realSenseHardwareManager;
-   private BytedecoRealsenseL515 l515;
+   private BytedecoRealsense l515;
    private Mat depthU16C1Image;
    private BytedecoImage depth32FC1Image;
    private GDXPose3DGizmo l515PoseGizmo = new GDXPose3DGizmo();
@@ -82,10 +82,10 @@ public class GDXGPUPlanarRegionExtractionL515HardwareDemo
                      gpuPlanarRegionExtraction.create(l515.getDepthWidth(),
                                                       l515.getDepthHeight(),
                                                       depth32FC1Image.getBackingDirectByteBuffer(),
-                                                      l515.getIntrinsicParameters().fx(),
-                                                      l515.getIntrinsicParameters().fy(),
-                                                      l515.getIntrinsicParameters().ppx(),
-                                                      l515.getIntrinsicParameters().ppy());
+                                                      l515.getDepthCameraIntrinsics().fx,
+                                                      l515.getDepthCameraIntrinsics().fy,
+                                                      l515.getDepthCameraIntrinsics().cx,
+                                                      l515.getDepthCameraIntrinsics().cy);
                      gpuPlanarRegionExtraction.getEnabled().set(true);
                      baseUI.getImGuiPanelManager().addPanel(gpuPlanarRegionExtraction.getPanel());
                      baseUI.getPrimaryScene().addRenderableProvider(gpuPlanarRegionExtraction::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
