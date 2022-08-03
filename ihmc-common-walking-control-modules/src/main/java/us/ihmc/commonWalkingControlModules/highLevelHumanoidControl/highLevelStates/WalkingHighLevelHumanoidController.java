@@ -337,9 +337,9 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       if (naturalPosture != null)
          naturalPosture.initialize();
 
+      // privileged configuration 
       pPoseSpineRoll.set(0.0);
       pPoseSpineYaw.set(0.0);
-      
       pPoseShoulderPitch.set(0.1);
       pPoseShoulderRoll.set(-1.3);
       pPoseShoulderYaw.set(-0.3);

@@ -115,7 +115,7 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
    // A nominal standing pose; stored in this class for convenience; upon calling 'initialize()' will create a nominal Qoffset, which has a getter:
    // TODO pull from the "initialConfiguration" class
    // Gabe said this should include all actuated joints
-   double[] qNomStandingURDF = new double[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+   double[] qNomStandingURDF = new double[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
    double[] qNomStanding = new double[NumDoFs];
    private final Quaternion QbaseNomStanding = new Quaternion(0, 0, 0, 1);
    private final Quaternion npNomQoffset = new Quaternion(0, 0, 0, 1);
@@ -167,7 +167,6 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
          jointMatrixIndexProvider = null;
       }
 
-      useURDFJointNumbering = true;
       if (useURDFJointNumbering) // Mostly for testing
       {
          // Note: Currently, some joints are not used (allowed to vary) in the NP estimation - e.g. hands, ankles, neck
