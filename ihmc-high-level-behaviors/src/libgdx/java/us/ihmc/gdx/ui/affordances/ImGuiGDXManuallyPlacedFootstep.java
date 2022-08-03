@@ -14,6 +14,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.gdx.GDX3DSituatedText;
 import us.ihmc.gdx.input.ImGui3DViewInput;
+import us.ihmc.gdx.input.ImGui3DViewPickResult;
 import us.ihmc.gdx.sceneManager.GDXRenderableAdapter;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.environment.GDXModelInstance;
@@ -43,6 +44,7 @@ public class ImGuiGDXManuallyPlacedFootstep
    private final ArrayList<GDX3DSituatedText> textRenderables = new ArrayList<>();
    private final Timer timerFlashingFootsteps = new Timer();
    private boolean flashingFootStepsColorHigh = false;
+   private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
 
    public ImGuiGDXManuallyPlacedFootstep(GDXImGuiBasedUI baseUI, RobotSide footstepSide, int index)
    {
@@ -84,15 +86,23 @@ public class ImGuiGDXManuallyPlacedFootstep
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
       selectablePose3DGizmo.calculate3DViewPick(input);
-   }
 
-   public void process3DViewInput(ImGui3DViewInput input)
-   {
       StepCheckIsPointInsideAlgorithm stepCheckIsPointInsideAlgorithm = new StepCheckIsPointInsideAlgorithm();
       stepCheckIsPointInsideAlgorithm.setup(boundingSphere.getRadius(), boundingSphere.getPosition());
 
       Function<Point3DReadOnly, Boolean> isPointInside = boundingSphere::isPointInside;
-      pickSelected = !Double.isNaN(stepCheckIsPointInsideAlgorithm.intersect(input.getPickRayInWorld(), 100, isPointInside));
+      boolean pickIntersected = !Double.isNaN(stepCheckIsPointInsideAlgorithm.intersect(input.getPickRayInWorld(), 100, isPointInside));
+      if (pickIntersected)
+      {
+         pickResult.setPickIntersects(true);
+         pickResult.setDistanceToCamera(stepCheckIsPointInsideAlgorithm.getClosestIntersection().distance(input.getPickRayInWorld().getPoint()));
+         input.addPickResult(pickResult);
+      }
+   }
+
+   public void process3DViewInput(ImGui3DViewInput input)
+   {
+      pickSelected = pickResult == input.getClosestPick();
       isClickedOn = pickSelected && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
 
       // TODO: mouse hovering on the footstep. (get foot validity warning text when this happens)
