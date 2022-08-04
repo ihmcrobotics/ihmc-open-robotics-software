@@ -224,17 +224,10 @@ public class MultiContactSupportRegionSolver
       {
          ContactPoint contactPoint = contactPoints.get(contactPointIndex);
          YoFrameVector3D basisVector = contactPoint.getBasisVector(i);
-         double dot = dot(basisVector, constraintPlaneNormal);
-         Ain.set(constraintRow, basisVectorsPerContactPoint * contactPointIndex + i, dot);
+         Ain.set(constraintRow, basisVectorsPerContactPoint * contactPointIndex + i, basisVector.dot(constraintPlaneNormal));
       }
 
-      double dot0 = dot(constraintPlanePoint, constraintPlaneNormal);
-      bin.set(constraintRow, 0, dot0);
-   }
-
-   private static double dot(Tuple3DReadOnly t1, Tuple3DReadOnly t2)
-   {
-      return t1.getX() * t2.getX() + t1.getY() * t2.getY() + t1.getZ() * t2.getZ();
+      bin.set(constraintRow, 0, constraintPlanePoint.dot(constraintPlaneNormal));
    }
 
    public void setNumberOfDirectionsToOptimize(int numberOfDirectionsToOptimize)
