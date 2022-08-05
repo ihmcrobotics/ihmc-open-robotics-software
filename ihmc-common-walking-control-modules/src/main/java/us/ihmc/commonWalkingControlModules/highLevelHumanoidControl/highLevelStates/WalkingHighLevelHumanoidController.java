@@ -162,7 +162,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    private HumanoidRobotNaturalPosture naturalPosture;
 
-   private boolean useSpinePitchPrivilegedCommand = false;
+   private boolean useSpinePitchPrivilegedCommand;
    
    private final YoDouble pPoseSpineRoll = new YoDouble("pPoseSpineRoll", registry);
    private final YoDouble pPoseSpinePitch = new YoDouble("pPoseSpinePitch", registry);
@@ -343,7 +343,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          naturalPosture.initialize();
 
       // privileged configuration for upper body
-      useSpinePitchPrivilegedCommand = false;
+      useSpinePitchPrivilegedCommand = true;
       
       pPoseSpineRoll.set(0.0);
       pPoseSpinePitch.set(0.0);
@@ -707,7 +707,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
                                                                                                            double pgain,
                                                                                                            double dgain)
    {
-      OneDoFJointBasics armJoint = fullRobotModel.getArmJoint(robotSide, armJointName);            
+      OneDoFJointBasics armJoint = fullRobotModel.getArmJoint(robotSide, armJointName); 
+      System.out.println(armJoint);
 
       OneDoFJointPrivilegedConfigurationParameters jointParameters = new OneDoFJointPrivilegedConfigurationParameters();
       jointParameters.setConfigurationGain(pgain);
@@ -1187,11 +1188,11 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
                                                          pPoseShoulderPitchKp.getDoubleValue(), 
                                                          pPoseShoulderPitchKdFactor.getDoubleValue()*pPoseShoulderPitchKp.getDoubleValue());
       createAndAddJointPrivilegedConfigurationParameters(side, ArmJointName.SHOULDER_ROLL, 
-                                                         -pPoseShoulderRoll.getDoubleValue(), 
+                                                         pPoseShoulderRoll.getDoubleValue(), 
                                                          pPoseShoulderRollKp.getDoubleValue(), 
                                                          pPoseShoulderRollKdFactor.getDoubleValue()*pPoseShoulderRollKp.getDoubleValue());
       createAndAddJointPrivilegedConfigurationParameters(side, ArmJointName.SHOULDER_YAW, 
-                                                         -pPoseShoulderYaw.getDoubleValue(), 
+                                                         pPoseShoulderYaw.getDoubleValue(), 
                                                          pPoseShoulderYawKp.getDoubleValue(), 
                                                          pPoseShoulderYawKdFactor.getDoubleValue()*pPoseShoulderYawKp.getDoubleValue());
       createAndAddJointPrivilegedConfigurationParameters(side, ArmJointName.ELBOW_PITCH, 
