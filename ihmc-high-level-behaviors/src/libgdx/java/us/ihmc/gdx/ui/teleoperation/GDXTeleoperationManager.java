@@ -220,7 +220,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
                                              this::queueFootstepPlanning);
       teleoperationParametersTuner.create(teleoperationParameters, GDXTeleoperationParameters.keys);
 
-      manualFootstepPlacement.create(baseUI, communicationHelper, syncedRobot, teleoperationParameters);
+      manualFootstepPlacement.create(baseUI, communicationHelper, syncedRobot, teleoperationParameters, footstepPlannerParameters);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(manualFootstepPlacement::processImGui3DViewInput);
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(manualFootstepPlacement::calculate3DViewPick);
 

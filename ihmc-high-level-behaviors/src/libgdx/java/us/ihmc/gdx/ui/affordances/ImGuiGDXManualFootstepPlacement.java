@@ -20,8 +20,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewInput;
@@ -58,7 +58,7 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
    public void create(GDXImGuiBasedUI baseUI,
                       CommunicationHelper communicationHelper,
                       ROS2SyncedRobotModel syncedRobot,
-                      GDXTeleoperationParameters teleoperationParameters)
+                      GDXTeleoperationParameters teleoperationParameters, FootstepPlannerParametersBasics footstepPlannerParameters)
    {
       this.baseUI = baseUI;
       this.communicationHelper = communicationHelper;
@@ -67,7 +67,7 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       primary3DPanel = baseUI.getPrimary3DPanel();
       primary3DPanel.addImGuiOverlayAddition(this::renderTooltips);
 
-      stepChecker = new ImGuiGDXManuallyPlacedFootstepChecker(baseUI, communicationHelper, syncedRobot);
+      stepChecker = new ImGuiGDXManuallyPlacedFootstepChecker(baseUI, communicationHelper, syncedRobot, footstepPlannerParameters);
       clear();
    }
 
@@ -134,11 +134,13 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
          stepChecker.checkValidStepList(footstepArrayList);
          if (isCurrentlyPlacingFootstep())
          {
+            RigidBodyTransform candidateStepTransform = new RigidBodyTransform();
+            candidateStepTransform.getTranslation().set(pickPointInWorld);
+            candidateStepTransform.getRotation().setToYawOrientation(getFootstepBeingPlacedOrLastFootstepPlaced().getYaw());
+
             stepChecker.checkValidSingleStep(footstepArrayList,
-                                             new DiscreteFootstep(pickPointInWorld.getX(),
-                                                                  pickPointInWorld.getY(),
-                                                                  getFootstepBeingPlacedOrLastFootstepPlaced().getYaw(),
-                                                                  currentFootStepSide),
+                                             candidateStepTransform,
+                                             currentFootStepSide,
                                              footstepArrayList.size());
          }
 
@@ -316,6 +318,20 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       // done walking >>
       // set stance and swing as last two steps of the footstepArrayList (if this list is not empty)
       // delete steps in singleFootStepAffordance.
+
+      if(footstepArrayList.size()==1)
+      {
+         stepChecker.setStanceStepTransform(footstepArrayList.get(0).getFootTransformInWorld());
+         stepChecker.setStanceSide(footstepArrayList.get(0).getFootstepSide());
+      }
+      else if(footstepArrayList.size()>1)
+      {
+         int size = footstepArrayList.size();
+         stepChecker.setStanceStepTransform(footstepArrayList.get(size-1).getFootTransformInWorld());
+         stepChecker.setStanceSide(footstepArrayList.get(size-1).getFootstepSide());
+         stepChecker.setSwingStepTransform(footstepArrayList.get(size-2).getFootTransformInWorld());
+         stepChecker.setSwingSide(footstepArrayList.get(size-2).getFootstepSide());
+      }
       stepChecker.clear(footstepArrayList);
       clear();
    }
