@@ -91,8 +91,8 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
    private final Quaternion npQoffset = new Quaternion(0, 0, 0, 1);
 
    // Various Natural Posture results available via getters:
-   private final Quaternion quaternionNPrtBase = new Quaternion(0, 0, 0, 1); // Natural Posture rt the pelvis
-   private final Quaternion quaternionNPrtWorld = new Quaternion(0, 0, 0, 1); // Natural Posture rt the world
+   private final Quaternion Q_Base_NP = new Quaternion(0, 0, 0, 1); // Natural Posture rt the pelvis
+   private final Quaternion Q_World_NP = new Quaternion(0, 0, 0, 1); // Natural Posture rt the world
    private final DMatrixRMaj jacobianNP = new DMatrixRMaj(3, 6 + NumDoFs);
 
    // For internal use:
@@ -392,19 +392,20 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
    @Override
    public void setNaturalPostureOffset(QuaternionReadOnly Qoffset)
    {
+      // System.out.println(Qoffset);
       this.npQoffset.set(Qoffset);
    }
 
    @Override
    public Quaternion getNaturalPostureQuaternion()
    {
-      return this.quaternionNPrtWorld;
+      return this.Q_World_NP;
    }
 
    @Override
    public Quaternion getNaturalPostureQuaternionrtBase()
    {
-      return this.quaternionNPrtBase;
+      return this.Q_Base_NP;
    }
 
    @Override
@@ -414,36 +415,36 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
    }
 
    @Override
-   public void compute(double[] q, Orientation3DReadOnly Qbase)
+   public void compute(double[] q, Orientation3DReadOnly Q_world_base)
    {
-      computeNaturalPosture(q, Qbase);
+      computeNaturalPosture(q, Q_world_base);
    }
-
-   public void computeNaturalPosture(double[] q, Orientation3DReadOnly Qbase)
+   
+   public void computeNaturalPosture(double[] q, Orientation3DReadOnly Q_world_base)
    {
       // Get the NP quaternion r.t. the base(pelvis) frame:
-      computeQuaternionNPrtBase(q, this.quaternionNPrtBase);
+      computeQuaternionNPrtBase(q, this.Q_Base_NP);
 
       // Express the NP quaternion in the world-frame:
-      this.quaternionNPrtWorld.set(Qbase);
-      this.quaternionNPrtWorld.multiply(this.quaternionNPrtBase);
+      this.Q_World_NP.set(Q_world_base);
+      this.Q_World_NP.multiply(this.Q_Base_NP);
 
       // Get the NP quaternion jacobian r.t. the base(pelvis) frame:
       // + We need 'q' because, like quaternionNPrtBase, this jacobian is also an explicit function of q.
       // + We need 'quaternionNPrtBase` to deduce the 1st row of this jacobian from the unit-sphere constraint. 
-      computeJacobianQuaternionNPrtBase(q, this.quaternionNPrtBase, this.jacobianQuaternionNPrtBase);
+      computeJacobianQuaternionNPrtBase(q, this.Q_Base_NP, this.jacobianQuaternionNPrtBase);
       // Convert the NP jacobian to map to NP omega r.t. world ewrt NP-frame:
       // + We need 'quaternionNPrtBase' to get two transforms: E (bring Qdot -> omega) & C_NP_Base (bring omega_ewrt_Base -> omega_ewrt_NP)
       // + We need 'jacobiandQuaternionNPrtBase' as once transformed, it forms all the joint-based portion of the jacobianNP.
-      computeJacobianNP(this.quaternionNPrtBase, this.jacobianQuaternionNPrtBase, this.jacobianNP);
+      computeJacobianNP(this.Q_Base_NP, this.jacobianQuaternionNPrtBase, this.jacobianNP);
 
       if (doGraphics == true)
       {
          FramePoint3D originPose = new FramePoint3D(this.fullRobotModel.getRootBody().getBodyFixedFrame());
          originPose.changeFrame(ReferenceFrame.getWorldFrame());
-         yoQuaternionNPrtWorld.set(quaternionNPrtWorld);
+         yoQuaternionNPrtWorld.set(Q_World_NP);
          originNPpelvis.set(originPose);
-         yoQuaternionIdent.set(Qbase);
+         yoQuaternionIdent.set(Q_world_base);
          originPelvis.set(originPose);
       }
    }
@@ -508,7 +509,7 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
             jacobianToPack.set(i, j + 6, 2.0 * this.jacobianOmegaNPrtBase.get(i + 1, j)); // for omega NP rt & ewrt NP-frame
    }
 
-   //==== CSV utils ====
+   //==== CSV utils ===========================================================================================================================
 
    private static int getNumRowsOfCsvFile(String filePath)
    {
