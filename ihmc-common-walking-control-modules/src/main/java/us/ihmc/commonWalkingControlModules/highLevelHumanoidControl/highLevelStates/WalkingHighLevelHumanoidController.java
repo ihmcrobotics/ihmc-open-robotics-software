@@ -161,11 +161,16 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private boolean firstTick = true;
 
    private HumanoidRobotNaturalPosture naturalPosture;
+
+   private boolean useSpinePitchPrivilegedCommand = false;
    
    private final YoDouble pPoseSpineRoll = new YoDouble("pPoseSpineRoll", registry);
+   private final YoDouble pPoseSpinePitch = new YoDouble("pPoseSpinePitch", registry);
    private final YoDouble pPoseSpineYaw = new YoDouble("pPoseSpineYaw", registry);
    private final YoDouble pPoseSpineRollKp = new YoDouble("pPoseSpineRollKp", registry);
    private final YoDouble pPoseSpineRollKdFactor = new YoDouble("pPoseSpineRollKdFactor", registry);
+   private final YoDouble pPoseSpinePitchKp = new YoDouble("pPoseSpinePitchKp", registry);
+   private final YoDouble pPoseSpinePitchKdFactor = new YoDouble("pPoseSpinePitchKdFactor", registry);
    private final YoDouble pPoseSpineYawKp = new YoDouble("pPoseSpineYawKp", registry);
    private final YoDouble pPoseSpineYawKdFactor = new YoDouble("pPoseSpineYawKdFactor", registry);
    private final YoDouble pPoseShoulderPitch = new YoDouble("pPoseShoulderPitch",registry);
@@ -201,8 +206,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
                                              WalkingControllerParameters walkingControllerParameters,
                                              HighLevelHumanoidControllerToolbox controllerToolbox)
    {
-      turnOnNaturalPostureControl.set(false);
-      useNaturalPostureCommand.set(false);
+      turnOnNaturalPostureControl.set(true);
+      useNaturalPostureCommand.set(true);
       usePelvisPrivilegedPoseCommand.set(false);
       useBodyManagerCommands.set(true);
       usePelvisOrientationCommand.set(true);
@@ -337,28 +342,34 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       if (naturalPosture != null)
          naturalPosture.initialize();
 
-      // privileged configuration 
+      // privileged configuration for upper body
+      useSpinePitchPrivilegedCommand = false;
+      
       pPoseSpineRoll.set(0.0);
+      pPoseSpinePitch.set(0.0);
       pPoseSpineYaw.set(0.0);
-      pPoseShoulderPitch.set(0.1);
-      pPoseShoulderRoll.set(-1.3);
-      pPoseShoulderYaw.set(-0.3);
-      pPoseElbow.set(-1.0);
+      pPoseShoulderPitch.set(0.0);
+      pPoseShoulderRoll.set(0);
+      pPoseShoulderYaw.set(0);
+      pPoseElbow.set(0);
 
       pPoseSpineRollKp.set(50.0);
+      pPoseSpinePitchKp.set(50.0);
       pPoseSpineYawKp.set(300.0);
       pPoseShoulderPitchKp.set(80.0);
       pPoseShoulderRollKp.set(80.0);
       pPoseShoulderYawKp.set(80.0);
       pPoseElbowKp.set(30.0);
-      
+
       pPoseSpineRollKdFactor.set(0.15);
+      pPoseSpinePitchKdFactor.set(0.15);
       pPoseSpineYawKdFactor.set(0.15);
       pPoseShoulderPitchKdFactor.set(0.15);
       pPoseShoulderRollKdFactor.set(0.15);
       pPoseShoulderYawKdFactor.set(0.15);
       pPoseElbowKdFactor.set(0.15);
 
+      // privileged configuration for lower body
       pPoseHipPitchKp.set(100);
       pPoseHipPitchKdFactor.set(0.2);
       pPoseHipRollKp.set(100);
@@ -638,6 +649,22 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       jointParameters.setPrivilegedConfiguration(pPoseSpineRoll.getDoubleValue());
 
       privilegedConfigurationCommand.addJoint(spineRoll, jointParameters);
+
+      return jointParameters;
+   }
+   private OneDoFJointPrivilegedConfigurationParameters spinePitchPrivilegedConfigurationParameters()
+   {
+      OneDoFJointBasics spinePitch = fullRobotModel.getOneDoFJointByName("spinePitch");            
+
+      OneDoFJointPrivilegedConfigurationParameters jointParameters = new OneDoFJointPrivilegedConfigurationParameters();
+      jointParameters.setConfigurationGain(pPoseSpinePitchKp.getValue());
+      jointParameters.setVelocityGain(pPoseSpinePitchKdFactor.getValue()*pPoseSpinePitchKp.getValue());
+      jointParameters.setWeight(1);
+      jointParameters.setMaxAcceleration(Double.POSITIVE_INFINITY);
+      jointParameters.setPrivilegedConfigurationOption(null);
+      jointParameters.setPrivilegedConfiguration(pPoseSpinePitch.getDoubleValue());
+
+      privilegedConfigurationCommand.addJoint(spinePitch, jointParameters);
 
       return jointParameters;
    }
@@ -1132,6 +1159,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       //TODO: This is hardcoded here. It should be moved to a parameter setting instead. This is not the long term place for it.
       spineRollPrivilegedConfigurationParameters();
+      if (useSpinePitchPrivilegedCommand)
+         spinePitchPrivilegedConfigurationParameters();
       spineYawPrivilegedConfigurationParameters();
       
       RobotSide side = RobotSide.LEFT;
