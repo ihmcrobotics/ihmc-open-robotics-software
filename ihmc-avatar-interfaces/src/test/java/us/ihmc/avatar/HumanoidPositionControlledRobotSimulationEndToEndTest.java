@@ -323,7 +323,7 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
                                                          commandInputManager,
                                                          statusOutputManager,
                                                          controlledJoints,
-                                                         controllerToolbox,
+                                                         controllerToolbox.getYoTime(),
                                                          highLevelControllerParameters,
                                                          highLevelControllerOutput);
          }
