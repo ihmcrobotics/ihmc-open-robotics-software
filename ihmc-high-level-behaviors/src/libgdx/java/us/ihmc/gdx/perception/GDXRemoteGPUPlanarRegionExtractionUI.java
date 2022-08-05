@@ -284,6 +284,7 @@ public class GDXRemoteGPUPlanarRegionExtractionUI
       concaveHullFactoryParameters.setAllowSplittingConcaveHull(allowSplittingConcaveHullChecked.get());
    }
 
+   // TODO: checkpoint 1
    public void setGPUImGuiWidgetsFromParameters()
    {
       mergeDistanceThreshold.set((float) gpuRegionParameters.getMergeDistanceThreshold());
