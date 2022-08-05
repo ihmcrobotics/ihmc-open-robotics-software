@@ -261,4 +261,15 @@ public class ImGuiGDXManuallyPlacedFootstep
    {
       return tempFramePose.getYaw();
    }
+
+   public RigidBodyTransform getFootTransformInWorld()
+   {
+
+      return getSelectablePose3DGizmo().getPoseGizmo().getTransformToParent();
+   }
+
+   public void setFootTransform(RigidBodyTransform rigidBodyTransform)
+   {
+      getSelectablePose3DGizmo().getPoseGizmo().getTransformToParent().set(rigidBodyTransform);
+   }
 }

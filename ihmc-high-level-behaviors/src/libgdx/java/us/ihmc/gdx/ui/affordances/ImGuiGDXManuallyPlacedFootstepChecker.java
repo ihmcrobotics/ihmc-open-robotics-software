@@ -8,7 +8,6 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
@@ -44,34 +43,47 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
    private final ArrayList<BipedalFootstepPlannerNodeRejectionReason> reasons = new ArrayList<>();
 
    // TODO: swap stance and swing if candidate step for the very first step of the footsteparraylist is going to be on different side compared to swing's side.
-   private DiscreteFootstep stance = new DiscreteFootstep(0, 0, 0, RobotSide.RIGHT);
-   private DiscreteFootstep swing = new DiscreteFootstep(0, 0, 0, RobotSide.LEFT);
+   private RigidBodyTransform stanceStepTransform;
+   private RobotSide stanceSide;
+   private RigidBodyTransform swingStepTransform;
+   private RobotSide swingSide;
+
+
+
    private String text = null;
    private ImGui3DViewInput latestInput;
    private boolean renderTooltip = false;
    private ArrayList<ImGuiGDXManuallyPlacedFootstep> plannedSteps;
 
-   public ImGuiGDXManuallyPlacedFootstepChecker(GDXImGuiBasedUI baseUI, CommunicationHelper communicationHelper, ROS2SyncedRobotModel syncedRobot)
+   public ImGuiGDXManuallyPlacedFootstepChecker(GDXImGuiBasedUI baseUI, CommunicationHelper communicationHelper, ROS2SyncedRobotModel syncedRobot, FootstepPlannerParametersBasics footstepPlannerParameters)
    {
       this.syncedRobot = syncedRobot;
       primary3DPanel = baseUI.getPrimary3DPanel();
       primary3DPanel.addImGuiOverlayAddition(this::renderTooltips);
-      footstepPlannerParameters = communicationHelper.getRobotModel().getFootstepPlannerParameters();
-      snapper = new FootstepSnapAndWiggler(footPolygons, footstepPlannerParameters);
-      stepChecker = new FootstepPoseHeuristicChecker(footstepPlannerParameters, snapper, registry);
+      this.footstepPlannerParameters = footstepPlannerParameters;
+      snapper = new FootstepSnapAndWiggler(footPolygons, this.footstepPlannerParameters);
+      stepChecker = new FootstepPoseHeuristicChecker(this.footstepPlannerParameters, snapper, registry);
       setInitialFeet();
    }
 
     public void setInitialFeet()
     {
-        RigidBodyTransform initialRightFootTransform = syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame();
-        RigidBodyTransform initialLeftFootTransform = syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame();
+      swingStepTransform   = syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame();
+      swingSide = RobotSide.RIGHT;
+      stanceStepTransform  = syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame();
+      stanceSide = RobotSide.LEFT;
 
-        Vector3DBasics initialRightFoot = initialRightFootTransform.getTranslation();
-        Vector3DBasics initialLeftFoot = initialLeftFootTransform.getTranslation();
+//        Vector3DBasics initialRightFoot = initialRightFootTransform.getTranslation();
+//        Vector3DBasics initialLeftFoot = initialLeftFootTransform.getTranslation();
+//
+//       stanceStepTransform = new ImGuiGDXManuallyPlacedFootstep()
+//       swingStepTransform = new DiscreteFootstep(initialRightFoot.getX(), initialRightFoot.getY(), initialRightFootTransform.getRotation().getYaw(), RobotSide.RIGHT);
+    }
 
-        swing = new DiscreteFootstep(initialLeftFoot.getX(), initialLeftFoot.getY(), initialLeftFootTransform.getRotation().getYaw(), RobotSide.LEFT);
-        stance = new DiscreteFootstep(initialRightFoot.getX(), initialRightFoot.getY(), initialRightFootTransform.getRotation().getYaw(), RobotSide.RIGHT);
+    public void swapSides()
+    {
+       swingSide  = swingSide.getOppositeSide();
+       stanceSide = stanceSide.getOppositeSide();
     }
 
    public void getInput(ImGui3DViewInput input)
@@ -108,46 +120,51 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
       // iterate through the list ( + current initial stance and swing) and check validity for all.
       for (int i = 0; i < stepList.size(); ++i)
       {
-         checkValidSingleStep(stepList, convertToDiscrete(stepList.get(i)), i);
+         checkValidSingleStep(stepList, stepList.get(i).getFootTransformInWorld(), stepList.get(i).getFootstepSide(),i);
       }
    }
 
    // Check validity of 1 step
-   public void checkValidSingleStep(ArrayList<ImGuiGDXManuallyPlacedFootstep> stepList, DiscreteFootstep candidate, int indexOfFootBeingChecked /* list.size() if not placed yet*/)
+   public void checkValidSingleStep(ArrayList<ImGuiGDXManuallyPlacedFootstep> stepList,
+                                    RigidBodyTransform candidateStepTransform,
+                                    RobotSide candidateStepSide,
+                                    int indexOfFootBeingChecked /* list.size() if not placed yet*/)
    {
-
       // use current stance, swing
       if (indexOfFootBeingChecked == 0)
       {
          // if futureStep has different footSide than current swing, swap current swing and stance.
-         if (candidate.getRobotSide() != swing.getRobotSide())
+         if (candidateStepSide != swingSide)
          {
-            swapSteps();
+            swapSides();
          }
-         reason = stepChecker.checkStepValidity(candidate, stance, swing);
+         reason = stepChecker.checkValidity(candidateStepSide, candidateStepTransform, stanceStepTransform, swingStepTransform);
       }
       // 0th element will be stance, previous stance will be swing
       else if (indexOfFootBeingChecked == 1)
       {
-         DiscreteFootstep temp = convertToDiscrete(stepList.get(0));
-         reason = stepChecker.checkStepValidity(candidate, temp, stance);
+         ImGuiGDXManuallyPlacedFootstep tempStance = stepList.get(0);
+         RigidBodyTransform tempStanceTransform = tempStance.getFootTransformInWorld();
+         reason = stepChecker.checkValidity(candidateStepSide,candidateStepTransform, tempStanceTransform, stanceStepTransform);
       }
       else
       {
-         reason = stepChecker.checkStepValidity(candidate, convertToDiscrete(stepList.get(indexOfFootBeingChecked-1)), convertToDiscrete(stepList.get(indexOfFootBeingChecked - 2)));
+         reason = stepChecker.checkValidity(candidateStepSide,
+                                            candidateStepTransform,
+                           stepList.get(indexOfFootBeingChecked-1).getFootTransformInWorld(),
+                          stepList.get(indexOfFootBeingChecked - 2).getFootTransformInWorld());
       }
-
       reasons.add(reason);
    }
 
 
    // TODO: This should be used when first step of the manual step cycle has different RobotSide than current swing.
-   public void swapSteps()
-   {
-      DiscreteFootstep temp = stance;
-      stance = swing;
-      swing = temp;
-   }
+//   public void swapSteps()
+//   {
+//      DiscreteFootstep temp = stance;
+//      stance = swing;
+//      swing = temp;
+//   }
 
    public DiscreteFootstep convertToDiscrete(ImGuiGDXManuallyPlacedFootstep step)
    {
@@ -192,5 +209,51 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
    public void setRenderTooltip(boolean renderTooltip)
    {
       this.renderTooltip = renderTooltip;
+   }
+
+
+   public GDX3DPanel getPrimary3DPanel()
+   {
+      return primary3DPanel;
+   }
+
+   public RigidBodyTransform getStanceStepTransform()
+   {
+      return stanceStepTransform;
+   }
+
+   public void setStanceStepTransform(RigidBodyTransform stanceStepTransform)
+   {
+      this.stanceStepTransform = stanceStepTransform;
+   }
+
+   public RobotSide getStanceSide()
+   {
+      return stanceSide;
+   }
+
+   public void setStanceSide(RobotSide stanceSide)
+   {
+      this.stanceSide = stanceSide;
+   }
+
+   public RigidBodyTransform getSwingStepTransform()
+   {
+      return swingStepTransform;
+   }
+
+   public void setSwingStepTransform(RigidBodyTransform swingStepTransform)
+   {
+      this.swingStepTransform = swingStepTransform;
+   }
+
+   public RobotSide getSwingSide()
+   {
+      return swingSide;
+   }
+
+   public void setSwingSide(RobotSide swingSide)
+   {
+      this.swingSide = swingSide;
    }
 }
