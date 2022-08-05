@@ -320,6 +320,8 @@ public class LinearMomentumRateControlModuleInput
             return false;
          if (minimizeAngularMomentumRateZ ^ other.minimizeAngularMomentumRateZ)
             return false;
+         if (hasHeightCommand ^ other.hasHeightCommand)
+            return false;
          if (usePelvisHeightCommand ^ other.usePelvisHeightCommand)
             return false;
          if (!pelvisHeightControlCommand.equals(other.pelvisHeightControlCommand))

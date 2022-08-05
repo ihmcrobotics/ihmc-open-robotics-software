@@ -207,10 +207,6 @@ public class FootstepPathCalculatorModule
          // broadcast log data
          messager.submitMessage(FootstepPlannerMessagerAPI.GraphData,
                                 Triple.of(planningModule.getEdgeDataMap(), planningModule.getIterationData(), planningModule.getFootstepPlanVariableDescriptors()));
-         messager.submitMessage(FootstepPlannerMessagerAPI.StartVisibilityMap, planningModule.getVisibilityGraphPlanner().getSolution().getStartMap());
-         messager.submitMessage(FootstepPlannerMessagerAPI.GoalVisibilityMap, planningModule.getVisibilityGraphPlanner().getSolution().getGoalMap());
-         messager.submitMessage(FootstepPlannerMessagerAPI.InterRegionVisibilityMap, planningModule.getVisibilityGraphPlanner().getSolution().getInterRegionVisibilityMap());
-         messager.submitMessage(FootstepPlannerMessagerAPI.VisibilityMapWithNavigableRegionData, planningModule.getVisibilityGraphPlanner().getSolution().getVisibilityMapsWithNavigableRegions());
       }
       catch (Exception e)
       {

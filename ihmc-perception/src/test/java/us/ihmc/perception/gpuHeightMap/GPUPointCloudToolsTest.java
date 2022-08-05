@@ -1,5 +1,6 @@
 package us.ihmc.perception.gpuHeightMap;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.time.Stopwatch;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 
 public class GPUPointCloudToolsTest
 {
+   @Disabled
    @Test
    public void testTransformPoints()
    {

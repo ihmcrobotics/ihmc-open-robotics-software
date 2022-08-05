@@ -5,9 +5,7 @@ import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityLa
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnappingTools;
@@ -204,7 +202,7 @@ public class StepReachabilityVisualizer
 
       snapper.addSnapData(candidateStep, candidateSnapData);
 
-      BipedalFootstepPlannerNodeRejectionReason rejectionReason = checker.checkStepValidity(candidateStep, stanceStep, null);
+      BipedalFootstepPlannerNodeRejectionReason rejectionReason = checker.snapAndCheckValidity(candidateStep, stanceStep, null);
       return rejectionReason;
    }
 }
