@@ -1,10 +1,18 @@
 package us.ihmc.gdx;
 
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import org.apache.logging.log4j.Level;
+import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgcodecs;
+import org.bytedeco.opencv.global.opencv_imgproc;
+import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.gdx.imgui.ImGuiMovingPlot;
 import us.ihmc.gdx.tools.BoxesDemoModel;
@@ -12,8 +20,12 @@ import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.tools.ImGuiLogWidget;
+import us.ihmc.log.LogTools;
+import us.ihmc.tools.io.WorkspaceDirectory;
+import us.ihmc.tools.io.WorkspaceFile;
 import us.ihmc.tools.string.StringTools;
 
+import java.nio.file.Files;
 import java.time.LocalDateTime;
 
 public class GDXImGuiBasedUIDemo
@@ -28,6 +40,8 @@ public class GDXImGuiBasedUIDemo
    private final ImGuiLogWidget logWidget = new ImGuiLogWidget("Log");
    private long renderCount = 0;
    private ImBoolean option = new ImBoolean();
+   private Texture iconTexture;
+   private int pressCount = 0;
 
    public GDXImGuiBasedUIDemo()
    {
@@ -60,6 +74,16 @@ public class GDXImGuiBasedUIDemo
                   ImGui.endPopup();
                }
             });
+
+            WorkspaceFile testImageFile = new WorkspaceFile(new WorkspaceDirectory("ihmc-open-robotics-software",
+                                                                                   "ihmc-high-level-behaviors/src/test/resources"),
+                                                            "leftFoot_depress.png");
+            Mat readImage = opencv_imgcodecs.imread(testImageFile.getFilePath().toString());
+            Pixmap pixmap = new Pixmap(readImage.cols(), readImage.rows(), Pixmap.Format.RGBA8888);
+            BytePointer rgba8888BytePointer = new BytePointer(pixmap.getPixels());
+            Mat rgba8Mat = new Mat(readImage.rows(), readImage.cols(), opencv_core.CV_8UC4, rgba8888BytePointer);
+            opencv_imgproc.cvtColor(readImage, rgba8Mat, opencv_imgproc.COLOR_RGB2RGBA);
+            iconTexture = new Texture(new PixmapTextureData(pixmap, null, false, false));
 
             GDX3DPanel second3DPanel = new GDX3DPanel("Second 3D View", 2, true);
             baseUI.add3DPanel(second3DPanel);
@@ -108,6 +132,12 @@ public class GDXImGuiBasedUIDemo
       renderPlot.calculate(renderCount++);
 
       logWidget.renderImGuiWidgets();
+
+      if (ImGui.imageButton(iconTexture.getTextureObjectHandle(), 20.0f, 20.0f))
+      {
+         pressCount++;
+      }
+      ImGui.text("Press count: " + pressCount);
    }
 
    private void renderWindow2()
