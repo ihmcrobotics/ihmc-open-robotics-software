@@ -353,6 +353,11 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
 
    public void createNewFootStep(RobotSide footstepSide)
    {
+      if(footstepBeingPlaced != null)
+      {
+         removeFootStep();
+      }
+
       RigidBodyTransform latestFootstepTransform = getLatestPlacedFootstepTransform(footstepSide.getOppositeSide());
       double latestFootstepYaw = latestFootstepTransform.getRotation().getYaw();
       footstepBeingPlaced = new ImGuiGDXManuallyPlacedFootstep(baseUI, footstepSide, footstepIndex);
