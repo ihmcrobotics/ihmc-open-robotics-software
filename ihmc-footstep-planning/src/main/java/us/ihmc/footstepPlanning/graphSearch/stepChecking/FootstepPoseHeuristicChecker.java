@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
@@ -122,6 +123,14 @@ public class FootstepPoseHeuristicChecker
       stepHeight.set(candidateFootPose.getZ());
       double maximumStepZ = parameters.getMaxStepZ();
 
+      Vector3D zAxis = new Vector3D(Axis3D.Z);
+      candidateStepTransform.transform(zAxis);
+      double minimumSurfaceNormalZ = Math.cos(parameters.getMinimumSurfaceInclineRadians());
+      if (zAxis.getZ() < minimumSurfaceNormalZ)
+      {
+         return BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP;
+      }
+
       if (stepWidth.getValue() < parameters.getMinimumStepWidth())
       {
          return BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_WIDE_ENOUGH;
@@ -197,7 +206,7 @@ public class FootstepPoseHeuristicChecker
                                                            maxInterpolationFactor);
       double minYaw = InterpolationTools.linearInterpolate(parameters.getMinimumStepYaw(), (1.0 - parameters.getStepYawReductionFactorAtMaxReach()) * parameters.getMinimumStepYaw(),
                                                            maxInterpolationFactor);
-      double yawDelta = AngleTools.computeAngleDifferenceMinusPiToPi(candidateFootPose.getYaw(), stanceFootPose.getYaw());
+      double yawDelta = AngleTools.computeAngleDifferenceMinusPiToPi(candidateStepTransform.getRotation().getYaw(), stanceFootPose.getRotation().getYaw());
       if (!MathTools.intervalContains(stepSide.negateIfRightSide(yawDelta), minYaw, maxYaw))
       {
          return BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH;

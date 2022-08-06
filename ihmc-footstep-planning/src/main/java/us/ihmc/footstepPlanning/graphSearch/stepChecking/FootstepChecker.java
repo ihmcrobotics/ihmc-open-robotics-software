@@ -188,15 +188,6 @@ public class FootstepChecker implements FootstepCheckerInterface
          }
       }
 
-      // Check incline
-      RigidBodyTransform snappedSoleTransform = candidateStepSnapData.getSnappedStepTransform(candidateStep);
-      double minimumSurfaceNormalZ = Math.cos(parameters.getMinimumSurfaceInclineRadians());
-      if (snappedSoleTransform.getM22() < minimumSurfaceNormalZ)
-      {
-         rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP);
-         return false;
-      }
-
       // Check snap area
       ConvexPolygon2D footholdAfterSnap = candidateStepSnapData.getCroppedFoothold();
       double croppedFootArea = footholdAfterSnap.getArea();
