@@ -198,7 +198,10 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 //   private final YoDouble pPoseKnee = new YoDouble("pPoseKnee", registry);
    private final YoDouble pPoseKneeKp = new YoDouble("pPoseKneeKp", registry);
    private final YoDouble pPoseKneeKdFactor = new YoDouble("pPoseKneeKdFactor", registry);
-   
+
+   private final String spineRollJointName = "SPINE_X";
+   private final String spinePitchJointName = "SPINE_Y";
+   private final String spineYawJointName = "SPINE_Z";
 
    public WalkingHighLevelHumanoidController(CommandInputManager commandInputManager,
                                              StatusMessageOutputManager statusOutputManager,
@@ -348,10 +351,10 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       pPoseSpineRoll.set(0.0);
       pPoseSpinePitch.set(0.0);
       pPoseSpineYaw.set(0.0);
-      pPoseShoulderPitch.set(0.0);
+      pPoseShoulderPitch.set(0.2);
       pPoseShoulderRoll.set(0);
       pPoseShoulderYaw.set(0);
-      pPoseElbow.set(0);
+      pPoseElbow.set(-1);
 
       pPoseSpineRollKp.set(50.0);
       pPoseSpinePitchKp.set(50.0);
@@ -638,7 +641,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    
    private OneDoFJointPrivilegedConfigurationParameters spineRollPrivilegedConfigurationParameters()
    {
-      OneDoFJointBasics spineRoll = fullRobotModel.getOneDoFJointByName("spineRoll");            
+      OneDoFJointBasics spineRoll = fullRobotModel.getOneDoFJointByName(spineRollJointName);    
+//      System.out.println(spineRoll);
 
       OneDoFJointPrivilegedConfigurationParameters jointParameters = new OneDoFJointPrivilegedConfigurationParameters();
       jointParameters.setConfigurationGain(pPoseSpineRollKp.getValue());
@@ -654,7 +658,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    }
    private OneDoFJointPrivilegedConfigurationParameters spinePitchPrivilegedConfigurationParameters()
    {
-      OneDoFJointBasics spinePitch = fullRobotModel.getOneDoFJointByName("spinePitch");            
+      OneDoFJointBasics spinePitch = fullRobotModel.getOneDoFJointByName(spinePitchJointName);            
 
       OneDoFJointPrivilegedConfigurationParameters jointParameters = new OneDoFJointPrivilegedConfigurationParameters();
       jointParameters.setConfigurationGain(pPoseSpinePitchKp.getValue());
@@ -670,7 +674,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    }
    private OneDoFJointPrivilegedConfigurationParameters spineYawPrivilegedConfigurationParameters()
    {
-      OneDoFJointBasics spineYaw = fullRobotModel.getOneDoFJointByName("spineYaw");            
+      OneDoFJointBasics spineYaw = fullRobotModel.getOneDoFJointByName(spineYawJointName);            
 
       OneDoFJointPrivilegedConfigurationParameters jointParameters = new OneDoFJointPrivilegedConfigurationParameters();
       jointParameters.setConfigurationGain(pPoseSpineYawKp.getValue());
@@ -708,7 +712,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
                                                                                                            double dgain)
    {
       OneDoFJointBasics armJoint = fullRobotModel.getArmJoint(robotSide, armJointName); 
-      System.out.println(armJoint);
+      // System.out.println(armJoint);
 
       OneDoFJointPrivilegedConfigurationParameters jointParameters = new OneDoFJointPrivilegedConfigurationParameters();
       jointParameters.setConfigurationGain(pgain);
@@ -858,6 +862,17 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       handleChangeInContactState();
 
+      if (naturalPosture != null)
+      {
+         if (firstTick)
+         {
+            // use the built-in pose:
+            naturalPosture.setNaturalPostureOffset(naturalPosture.getNominalStandingPoseQoffset());
+         }
+
+         naturalPosture.compute(fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToWorldFrame().getRotation());
+      }
+      
       submitControllerCoreCommands();
 
       for (RobotSide robotSide : RobotSide.values)
@@ -879,14 +894,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       if (naturalPosture != null)
       {
-         if (firstTick)
-         {
-            // use the built-in pose:
-            naturalPosture.setNaturalPostureOffset(naturalPosture.getNominalStandingPoseQoffset());
-         }
-
-         naturalPosture.compute(fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToWorldFrame().getRotation());
-
          firstTick = false;
       }
    }
@@ -1150,6 +1157,9 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       if (ENABLE_LEG_ELASTICITY_DEBUGGATOR)
          controllerCoreCommand.addInverseDynamicsCommand(legElasticityDebuggator.getInverseDynamicsCommand());
+      
+//      System.out.println(controllerCoreCommand);
+//      System.out.println("");
    }
 
    private void updatePrivilegedConfigurationCommand()
@@ -1163,6 +1173,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       if (useSpinePitchPrivilegedCommand)
          spinePitchPrivilegedConfigurationParameters();
       spineYawPrivilegedConfigurationParameters();
+//      System.out.println(privilegedConfigurationCommand);
       
       RobotSide side = RobotSide.LEFT;
       createAndAddJointPrivilegedConfigurationParameters(side, ArmJointName.SHOULDER_PITCH, 

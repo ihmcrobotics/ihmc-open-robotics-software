@@ -25,6 +25,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.EuclidCoreMissingTools;
+import us.ihmc.robotics.linearAlgebra.NullspaceCalculator;
+import us.ihmc.robotics.linearAlgebra.SVDNullspaceCalculator;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -437,7 +439,12 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
       // + We need 'quaternionNPrtBase' to get two transforms: E (bring Qdot -> omega) & C_NP_Base (bring omega_ewrt_Base -> omega_ewrt_NP)
       // + We need 'jacobiandQuaternionNPrtBase' as once transformed, it forms all the joint-based portion of the jacobianNP.
       computeJacobianNP(this.Q_Base_NP, this.jacobianQuaternionNPrtBase, this.jacobianNP);
-
+      
+//      SVDNullspaceCalculator nullspacecalculator = new SVDNullspaceCalculator(this.jacobianNP.numCols, true /*makeLargestComponentPositive*/);
+//      DMatrixRMaj nullspaceProjectorToPack = new DMatrixRMaj(this.jacobianNP.numCols, this.jacobianNP.numCols);
+//      nullspacecalculator.computeNullspaceProjector(this.jacobianNP, nullspaceProjectorToPack);
+//      System.out.println(nullspaceProjectorToPack);
+      
       if (doGraphics == true)
       {
          FramePoint3D originPose = new FramePoint3D(this.fullRobotModel.getRootBody().getBodyFixedFrame());

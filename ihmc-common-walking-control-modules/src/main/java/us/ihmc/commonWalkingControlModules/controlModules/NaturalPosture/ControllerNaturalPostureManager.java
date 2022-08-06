@@ -118,7 +118,8 @@ public class ControllerNaturalPostureManager
       npQPselectionMatrix.reshape(3, 3);
       CommonOps_DDRM.setIdentity(npQPselectionMatrix);
       
-      npPitchDesired.set(0.02);
+      // Desired NP values (wrt world)
+      npPitchDesired.set(-0.03);
 
       npQPWeightX.set(5.0);
       npQPWeightY.set(5.0);
