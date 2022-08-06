@@ -514,6 +514,13 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
       for (int i = 0; i < 3; i++)
          for (int j = 0; j < NumDoFs; j++)
             jacobianToPack.set(i, j + 6, 2.0 * this.jacobianOmegaNPrtBase.get(i + 1, j)); // for omega NP rt & ewrt NP-frame
+      
+//      // [Testing] not use the x y of NP.
+//      for (int i = 0; i < 2; i++)
+//         for (int j = 0; j < 3 + NumDoFs; j++)
+//         {
+//            jacobianToPack.set(i, j, 0.0);
+//         }
    }
 
    //==== CSV utils ===========================================================================================================================
