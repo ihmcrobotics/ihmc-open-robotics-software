@@ -72,9 +72,13 @@ kernel void createPointCloud(read_only image2d_t depthImageMeters,
    float angleXFromCenter = xFromCenter * (float) depthImageWidth / horizontalFieldOfView;
    float angleYFromCenter = yFromCenter * (float) depthImageHeight / verticalFieldOfView;
 
-   float zUp3DX = eyeDepth * sin(angleXFromCenter);
-   float zUp3DY = eyeDepth * sin(angleYFromCenter);
-   float zUp3DZ = eyeDepth * cos(angleXFromCenter);
+//   float zUp3DX = eyeDepth * sin(angleXFromCenter);
+//   float zUp3DY = eyeDepth * sin(angleYFromCenter);
+//   float zUp3DZ = eyeDepth * cos(angleXFromCenter);
+
+   float zUp3DX = eyeDepth * cos(angleXFromCenter) * cos(angleYFromCenter);
+   float zUp3DY = eyeDepth * sin(angleXFromCenter) * cos(angleYFromCenter);
+   float zUp3DZ = eyeDepth * sin(angleYFromCenter);
 
 //   float zUp3DX = eyeDepth;
 //   float zUp3DY = -(x - principalOffsetXPixels) / focalLengthPixelsX * eyeDepth;
