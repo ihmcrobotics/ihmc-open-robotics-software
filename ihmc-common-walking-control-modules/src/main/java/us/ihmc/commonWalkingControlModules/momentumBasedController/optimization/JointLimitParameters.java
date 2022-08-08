@@ -113,6 +113,8 @@ public class JointLimitParameters
       velocityControlGain = other.velocityControlGain;
       setRangeOfMotionMarginFraction(other.getRangeOfMotionMarginFraction());
       setVelocityDeadbandSize(other.getVelocityDeadbandSize());
+      setJointLowerLimit(other.getJointLowerLimit());
+      setJointUpperLimit(other.getJointUpperLimit());
    }
 
    @Override
@@ -137,6 +139,10 @@ public class JointLimitParameters
          if (rangeOfMotionMarginFraction != other.rangeOfMotionMarginFraction)
             return false;
          if (velocityDeadbandSize != other.velocityDeadbandSize)
+            return false;
+         if (jointLowerLimit != other.jointLowerLimit)
+            return false;
+         if (jointUpperLimit != other.jointUpperLimit)
             return false;
          return true;
       }
