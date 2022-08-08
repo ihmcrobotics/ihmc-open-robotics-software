@@ -120,10 +120,11 @@ public class ControllerNaturalPostureManager
       
       // Desired NP values (wrt world)
       npPitchDesired.set(-0.03);
-
-      npQPWeightX.set(5.0);
-      npQPWeightY.set(5.0);
-      npQPWeightZ.set(5.0);
+      
+      double qpWeight = 5.0;  //5.0;
+      npQPWeightX.set(qpWeight);
+      npQPWeightY.set(qpWeight);
+      npQPWeightZ.set(qpWeight);
 
       npKpYaw.set(150.0);
       npKpPitch.set(50.0);
