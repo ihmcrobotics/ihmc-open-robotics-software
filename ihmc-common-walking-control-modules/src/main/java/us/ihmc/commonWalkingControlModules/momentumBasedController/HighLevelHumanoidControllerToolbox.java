@@ -361,7 +361,6 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       linearMomentumAlpha.set(0.95); // switch to break frequency and move to walking parameters
       filteredYoAngularMomentum = new AlphaFilteredYoFrameVector("filteredAngularMomentum", "", registry, angularMomentumAlpha, yoAngularMomentum);
       filteredYoLinearMomentum = new AlphaFilteredYoFrameVector("filteredLinearMomentum", "", registry, linearMomentumAlpha, yoLinearMomentum);
-      momentumGain.set(0.0);
 
       failureDetectionControlModule = new WalkingFailureDetectionControlModule(getContactableFeet(), registry);
 
@@ -490,24 +489,6 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
       yoLinearMomentumRate.update();
       yoAngularMomentumRate.update();
-   }
-
-   private final FramePoint2D localDesiredCapturePoint = new FramePoint2D();
-   private final YoDouble momentumGain = new YoDouble("MomentumGain", registry);
-
-   public void getAdjustedDesiredCapturePoint(FramePoint2DReadOnly desiredCapturePoint, FramePoint2DBasics adjustedDesiredCapturePointToPack)
-   {
-      angularMomentum.setIncludingFrame(filteredYoAngularMomentum);
-      ReferenceFrame comFrame = angularMomentum.getReferenceFrame();
-      localDesiredCapturePoint.setIncludingFrame(desiredCapturePoint);
-      localDesiredCapturePoint.changeFrameAndProjectToXYPlane(comFrame);
-
-      double scaleFactor = momentumGain.getDoubleValue() * omega0.getDoubleValue() / (totalMass.getDoubleValue() * gravity);
-
-      adjustedDesiredCapturePointToPack.setIncludingFrame(comFrame, -angularMomentum.getY(), angularMomentum.getX());
-      adjustedDesiredCapturePointToPack.scale(scaleFactor);
-      adjustedDesiredCapturePointToPack.add(localDesiredCapturePoint);
-      adjustedDesiredCapturePointToPack.changeFrameAndProjectToXYPlane(desiredCapturePoint.getReferenceFrame());
    }
 
    public void getCapturePoint(FixedFramePoint2DBasics capturePointToPack)
