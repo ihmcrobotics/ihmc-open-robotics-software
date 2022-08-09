@@ -98,8 +98,6 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    private final ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver;
 
    protected final LinkedHashMap<ContactablePlaneBody, YoFramePoint2D> footDesiredCenterOfPressures = new LinkedHashMap<>();
-   private final YoDouble desiredCoPAlpha;
-   private final LinkedHashMap<ContactablePlaneBody, AlphaFilteredYoFramePoint2d> filteredFootDesiredCenterOfPressures = new LinkedHashMap<>();
 
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
    private final YoDouble yoTime;
@@ -220,18 +218,13 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       RigidBodyBasics elevator = fullRobotModel.getElevator();
       double totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
 
-      desiredCoPAlpha = new YoDouble("desiredCoPAlpha", registry);
-      desiredCoPAlpha.set(0.9);
       for (RobotSide robotSide : RobotSide.values)
       {
          ContactableFoot contactableFoot = feet.get(robotSide);
          ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
          String namePrefix = soleFrame.getName() + "DesiredCoP";
          YoFramePoint2D yoDesiredCenterOfPressure = new YoFramePoint2D(namePrefix, soleFrame, registry);
-         AlphaFilteredYoFramePoint2d yoFilteredDesiredCenterOfPressure = new AlphaFilteredYoFramePoint2d("filtered"
-               + namePrefix, "", registry, desiredCoPAlpha, yoDesiredCenterOfPressure);
          footDesiredCenterOfPressures.put(contactableFoot, yoDesiredCenterOfPressure);
-         filteredFootDesiredCenterOfPressures.put(contactableFoot, yoFilteredDesiredCenterOfPressure);
       }
 
       if (updatables != null)
@@ -667,22 +660,12 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       if (cop != null)
       {
          cop.set(desiredCoP);
-
-         if (!cop.containsNaN())
-            filteredFootDesiredCenterOfPressures.get(contactablePlaneBody).update();
-         else
-            filteredFootDesiredCenterOfPressures.get(contactablePlaneBody).reset();
       }
    }
 
    public void getDesiredCenterOfPressure(ContactablePlaneBody contactablePlaneBody, FramePoint2D desiredCoPToPack)
    {
       desiredCoPToPack.setIncludingFrame(footDesiredCenterOfPressures.get(contactablePlaneBody));
-   }
-
-   public void getFilteredDesiredCenterOfPressure(ContactablePlaneBody contactablePlaneBody, FramePoint2D desiredCoPToPack)
-   {
-      desiredCoPToPack.setIncludingFrame(filteredFootDesiredCenterOfPressures.get(contactablePlaneBody));
    }
 
    public void updateContactPointsForUpcomingFootstep(Footstep nextFootstep)
