@@ -194,7 +194,9 @@ public class ContinuousStepGenerator implements Updatable
       if (walkInputProvider != null)
          walk.set(walkInputProvider.getValue());
 
-      walk.set(true);  // always walk. TODO: remove this before merging
+      if (time > 1) {
+         walk.set(true);  // always walk. TODO: remove this before merging
+      }
       
       if (!walk.getValue())
       {

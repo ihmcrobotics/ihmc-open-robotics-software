@@ -1081,6 +1081,10 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    {
       if (turnOnNaturalPostureControl.getValue())
       {
+//         if (stateMachine.getCurrentState().isDoubleSupportState())
+//            useNaturalPostureCommand.set(false);
+//         else
+//            useNaturalPostureCommand.set(true);
          useNaturalPostureCommand.set(true);
          usePelvisPrivilegedPoseCommand.set(true);
          usePelvisOrientationCommand.set(false);
