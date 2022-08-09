@@ -94,7 +94,6 @@ public class ImGuiGDXManuallyPlacedFootstep
       boolean pickIntersected = !Double.isNaN(stepCheckIsPointInsideAlgorithm.intersect(input.getPickRayInWorld(), 100, isPointInside));
       if (pickIntersected)
       {
-         pickResult.setPickIntersects(true);
          pickResult.setDistanceToCamera(stepCheckIsPointInsideAlgorithm.getClosestIntersection().distance(input.getPickRayInWorld().getPoint()));
          input.addPickResult(pickResult);
       }

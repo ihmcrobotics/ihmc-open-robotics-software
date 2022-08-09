@@ -213,7 +213,10 @@ public class GDXRobotCollisionLink implements RenderableProvider
          LogTools.warn("Shape not handled: {}", shape);
       }
 
-      input.addPickResult(pickResult);
+      if (pickResult.getPickCollisionWasAddedSinceReset())
+      {
+         input.addPickResult(pickResult);
+      }
    }
 
    // Happens after update

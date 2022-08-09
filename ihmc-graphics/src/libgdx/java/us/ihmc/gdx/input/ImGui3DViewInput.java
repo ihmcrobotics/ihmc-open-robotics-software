@@ -174,10 +174,7 @@ public class ImGui3DViewInput
 
    public void addPickResult(ImGui3DViewPickResult pickResult)
    {
-      if (pickResult.getPickIntersects())
-      {
-         pickResults.add(pickResult);
-      }
+      pickResults.add(pickResult);
    }
 
    public void calculateClosestPick()
@@ -185,16 +182,13 @@ public class ImGui3DViewInput
       closestPick = null;
       for (ImGui3DViewPickResult pickResult : pickResults)
       {
-         if (pickResult.getPickIntersects())
+         if (closestPick == null)
          {
-            if (closestPick == null)
-            {
-               closestPick = pickResult;
-            }
-            else if (pickResult.getDistanceToCamera() < closestPick.getDistanceToCamera())
-            {
-               closestPick = pickResult;
-            }
+            closestPick = pickResult;
+         }
+         else if (pickResult.getDistanceToCamera() < closestPick.getDistanceToCamera())
+         {
+            closestPick = pickResult;
          }
       }
    }
