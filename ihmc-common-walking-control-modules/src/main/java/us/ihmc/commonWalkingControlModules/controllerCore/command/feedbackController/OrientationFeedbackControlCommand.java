@@ -10,7 +10,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
@@ -412,7 +412,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     *
     * @param angular the weights to use for the angular part of this command. Not modified.
     */
-   public void setWeightsForSolver(Vector3DReadOnly angular)
+   public void setWeightsForSolver(Tuple3DReadOnly angular)
    {
       spatialAccelerationCommand.setAngularWeights(angular);
       spatialAccelerationCommand.setLinearWeightsToZero();
