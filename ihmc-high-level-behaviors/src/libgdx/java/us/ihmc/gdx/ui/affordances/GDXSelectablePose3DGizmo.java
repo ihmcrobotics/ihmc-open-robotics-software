@@ -13,6 +13,10 @@ import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 
+/**
+ * Adds "selectedness" to a pose 3D gizmo. It's not included in the base class because
+ * there's a few different ways to do it.
+ */
 public class GDXSelectablePose3DGizmo
 {
    private final GDXPose3DGizmo poseGizmo;
