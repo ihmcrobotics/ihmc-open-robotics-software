@@ -287,6 +287,13 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       firstTick.set(true);
       humanoidRobotContextData.setControllerRan(false);
       humanoidRobotContextData.setEstimatorRan(false);
+
+      LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList = humanoidRobotContextData.getJointDesiredOutputList();
+
+      for (int i = 0; i < jointDesiredOutputList.getNumberOfJointsWithDesiredOutput(); i++)
+      {
+         jointDesiredOutputList.getJointDesiredOutput(i).clear();
+      }
    }
 
    @Override
