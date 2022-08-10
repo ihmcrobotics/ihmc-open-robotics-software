@@ -160,6 +160,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    private boolean firstTick = true;
 
+   private boolean useSpinePrivilegedCommand;
    private boolean useSpinePitchPrivilegedCommand;
 
    private final YoDouble pPoseSpineRoll = new YoDouble("pPoseSpineRoll", registry);
@@ -338,7 +339,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       controllerCoreOptimizationSettings = new ParameterizedControllerCoreOptimizationSettings(defaultControllerCoreOptimizationSettings, registry);
 
       // privileged configuration for upper body
-      useSpinePitchPrivilegedCommand = false;
+      useSpinePrivilegedCommand = false;
+      useSpinePitchPrivilegedCommand = true;
 
       pPoseSpineRoll.set(0.0);
       pPoseSpinePitch.set(0.0);
@@ -1072,7 +1074,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          usePelvisPrivilegedPoseCommand.set(true);
          usePelvisOrientationCommand.set(false);
          useBodyManagerCommands.set(false);
-         //         comHeightManager.setControlHeightWithMomentum(false);  //TODO(GMN): Why is this here?
       }
 
       planeContactStateCommandPool.clear();
@@ -1156,11 +1157,13 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_ZERO);
 
       //TODO: This is hardcoded here. It should be moved to a parameter setting instead. This is not the long term place for it.
-      spineRollPrivilegedConfigurationParameters();
-      if (useSpinePitchPrivilegedCommand)
-         spinePitchPrivilegedConfigurationParameters();
-      spineYawPrivilegedConfigurationParameters();
-      //      System.out.println(privilegedConfigurationCommand);
+      if (useSpinePrivilegedCommand)
+      {
+         spineRollPrivilegedConfigurationParameters();
+         if (useSpinePitchPrivilegedCommand)
+            spinePitchPrivilegedConfigurationParameters();
+         spineYawPrivilegedConfigurationParameters();
+      }
 
       RobotSide side = RobotSide.LEFT;
       createAndAddJointPrivilegedConfigurationParameters(side,
