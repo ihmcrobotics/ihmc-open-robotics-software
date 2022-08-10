@@ -39,7 +39,7 @@ public class GDXNettyOusterUI
    private OpenCLFloatBuffer pointCloudRenderingBuffer;
    private GDXPointCloudRenderer pointCloudRenderer;
    private final ImFloat verticalFieldOfView = new ImFloat((float) Math.toRadians(90.0));
-   private final ImFloat horizontalFieldOfView = new ImFloat((float) Math.toRadians(270.0));
+   private final ImFloat horizontalFieldOfView = new ImFloat((float) Math.toRadians(360.0));
 
    public GDXNettyOusterUI()
    {
