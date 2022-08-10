@@ -127,6 +127,9 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
    private int[] jointIndexArray = null;
    private final double[] jointPositionArray = new double[NumDoFs];
 
+   // Testing
+   private Integer[] legJointIndicesInVelVectorIncludingFloatingBaseJoint = null;
+
    public NadiaNaturalPosture(FullHumanoidRobotModel robotModel,
                               boolean useURDFJointNumbering,
                               YoRegistry registry,
@@ -169,176 +172,107 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
          jointMatrixIndexProvider = null;
       }
 
-      if (useURDFJointNumbering) // Mostly for testing
-      {
-         // Note: Currently, some joints are not used (allowed to vary) in the NP estimation - e.g. hands, ankles, neck
-         i0 = 0;
-         i1 = 1;
-         i2 = 2;
-         i3 = 3;
-         i4 = 4;
-         i5 = 5;
-         i6 = 6;
-         i7 = 7;
-         i8 = 8;
-         i9 = 9;
-         i10 = 10;
-         i11 = 11;
-         i12 = 12;
-         i13 = 13;
-         i14 = 14;
-         i15 = 15;
-         i16 = 16;
-         i17 = 17;
-         i18 = 18;
-         i19 = 19;
-         i20 = 20;
-         i21 = 21;
-         i22 = 22;
-         i23 = 23;
-         i24 = 24;
-         i25 = 25;
-         i26 = 26;
-         i27 = 27;
-         i28 = 28;
+      // Set joint indices for auto-generated NP function:
+      String[] jointNameInOrder = read1DString(folderPath + "joint_names_in_order.csv");
+      int iBase = 6; // GMN: offset for pelvis DoF
 
-         qNomStanding = qNomStandingURDF;
-      }
-      else
-      {
+      i0 = getJointIndices(jointNameInOrder[0])[0] - iBase;
+      i1 = getJointIndices(jointNameInOrder[1])[0] - iBase;
+      i2 = getJointIndices(jointNameInOrder[2])[0] - iBase;
+      i3 = getJointIndices(jointNameInOrder[3])[0] - iBase;
+      i4 = getJointIndices(jointNameInOrder[4])[0] - iBase;
+      i5 = getJointIndices(jointNameInOrder[5])[0] - iBase;
+      i6 = getJointIndices(jointNameInOrder[6])[0] - iBase;
+      i7 = getJointIndices(jointNameInOrder[7])[0] - iBase;
+      i8 = getJointIndices(jointNameInOrder[8])[0] - iBase;
+      i9 = getJointIndices(jointNameInOrder[9])[0] - iBase;
+      i10 = getJointIndices(jointNameInOrder[10])[0] - iBase;
+      i11 = getJointIndices(jointNameInOrder[11])[0] - iBase;
+      i12 = getJointIndices(jointNameInOrder[12])[0] - iBase;
+      i13 = getJointIndices(jointNameInOrder[13])[0] - iBase;
+      i14 = getJointIndices(jointNameInOrder[14])[0] - iBase;
+      i15 = getJointIndices(jointNameInOrder[15])[0] - iBase;
+      i16 = getJointIndices(jointNameInOrder[16])[0] - iBase;
+      i17 = getJointIndices(jointNameInOrder[17])[0] - iBase;
+      i18 = getJointIndices(jointNameInOrder[18])[0] - iBase;
+      i19 = getJointIndices(jointNameInOrder[19])[0] - iBase;
+      i20 = getJointIndices(jointNameInOrder[20])[0] - iBase;
+      i21 = getJointIndices(jointNameInOrder[21])[0] - iBase;
+      i22 = getJointIndices(jointNameInOrder[22])[0] - iBase;
+      i23 = getJointIndices(jointNameInOrder[23])[0] - iBase;
+      i24 = getJointIndices(jointNameInOrder[24])[0] - iBase;
+      i25 = getJointIndices(jointNameInOrder[25])[0] - iBase;
+      i26 = getJointIndices(jointNameInOrder[26])[0] - iBase;
+      i27 = getJointIndices(jointNameInOrder[27])[0] - iBase;
+      i28 = getJointIndices(jointNameInOrder[28])[0] - iBase;
 
-         int iBase = 6; // GMN: offset for pelvis DoF
+      jointMap.put(i0, fullRobotModel.getOneDoFJointByName(jointNameInOrder[0]));
+      jointMap.put(i1, fullRobotModel.getOneDoFJointByName(jointNameInOrder[1]));
+      jointMap.put(i2, fullRobotModel.getOneDoFJointByName(jointNameInOrder[2]));
+      jointMap.put(i3, fullRobotModel.getOneDoFJointByName(jointNameInOrder[3]));
+      jointMap.put(i4, fullRobotModel.getOneDoFJointByName(jointNameInOrder[4]));
+      jointMap.put(i5, fullRobotModel.getOneDoFJointByName(jointNameInOrder[5]));
+      jointMap.put(i6, fullRobotModel.getOneDoFJointByName(jointNameInOrder[6]));
+      jointMap.put(i7, fullRobotModel.getOneDoFJointByName(jointNameInOrder[7]));
+      jointMap.put(i8, fullRobotModel.getOneDoFJointByName(jointNameInOrder[8]));
+      jointMap.put(i9, fullRobotModel.getOneDoFJointByName(jointNameInOrder[9]));
+      jointMap.put(i10, fullRobotModel.getOneDoFJointByName(jointNameInOrder[10]));
+      jointMap.put(i11, fullRobotModel.getOneDoFJointByName(jointNameInOrder[11]));
+      jointMap.put(i12, fullRobotModel.getOneDoFJointByName(jointNameInOrder[12]));
+      jointMap.put(i13, fullRobotModel.getOneDoFJointByName(jointNameInOrder[13]));
+      jointMap.put(i14, fullRobotModel.getOneDoFJointByName(jointNameInOrder[14]));
+      jointMap.put(i15, fullRobotModel.getOneDoFJointByName(jointNameInOrder[15]));
+      jointMap.put(i16, fullRobotModel.getOneDoFJointByName(jointNameInOrder[16]));
+      jointMap.put(i17, fullRobotModel.getOneDoFJointByName(jointNameInOrder[17]));
+      jointMap.put(i18, fullRobotModel.getOneDoFJointByName(jointNameInOrder[18]));
+      jointMap.put(i19, fullRobotModel.getOneDoFJointByName(jointNameInOrder[19]));
+      jointMap.put(i20, fullRobotModel.getOneDoFJointByName(jointNameInOrder[20]));
+      jointMap.put(i21, fullRobotModel.getOneDoFJointByName(jointNameInOrder[21]));
+      jointMap.put(i22, fullRobotModel.getOneDoFJointByName(jointNameInOrder[22]));
+      jointMap.put(i23, fullRobotModel.getOneDoFJointByName(jointNameInOrder[23]));
+      jointMap.put(i24, fullRobotModel.getOneDoFJointByName(jointNameInOrder[24]));
+      jointMap.put(i25, fullRobotModel.getOneDoFJointByName(jointNameInOrder[25]));
+      jointMap.put(i26, fullRobotModel.getOneDoFJointByName(jointNameInOrder[26]));
+      jointMap.put(i27, fullRobotModel.getOneDoFJointByName(jointNameInOrder[27]));
+      jointMap.put(i28, fullRobotModel.getOneDoFJointByName(jointNameInOrder[28]));
 
-         // Look up and set joint indices:
-         i0 = getJointIndices("LEFT_HIP_Z")[0] - iBase;
-         i1 = getJointIndices("RIGHT_HIP_Z")[0] - iBase;
-         i2 = getJointIndices("SPINE_Z")[0] - iBase;
-         i3 = getJointIndices("LEFT_HIP_X")[0] - iBase;
-         i4 = getJointIndices("RIGHT_HIP_X")[0] - iBase;
-         i5 = getJointIndices("SPINE_X")[0] - iBase;
-         i6 = getJointIndices("LEFT_HIP_Y")[0] - iBase;
-         i7 = getJointIndices("RIGHT_HIP_Y")[0] - iBase;
-         i8 = getJointIndices("SPINE_Y")[0] - iBase;
-         i9 = getJointIndices("LEFT_KNEE_Y")[0] - iBase;
-         i10 = getJointIndices("RIGHT_KNEE_Y")[0] - iBase;
-         i11 = getJointIndices("LEFT_SHOULDER_Y")[0] - iBase;
-         i12 = getJointIndices("RIGHT_SHOULDER_Y")[0] - iBase;
-         i13 = getJointIndices("LEFT_ANKLE_Y")[0] - iBase;
-         i14 = getJointIndices("RIGHT_ANKLE_Y")[0] - iBase;
-         i15 = getJointIndices("LEFT_SHOULDER_X")[0] - iBase;
-         i16 = getJointIndices("RIGHT_SHOULDER_X")[0] - iBase;
-         i17 = getJointIndices("LEFT_ANKLE_X")[0] - iBase;
-         i18 = getJointIndices("RIGHT_ANKLE_X")[0] - iBase;
-         i19 = getJointIndices("LEFT_SHOULDER_Z")[0] - iBase;
-         i20 = getJointIndices("RIGHT_SHOULDER_Z")[0] - iBase;
-         i21 = getJointIndices("LEFT_ELBOW_Y")[0] - iBase;
-         i22 = getJointIndices("RIGHT_ELBOW_Y")[0] - iBase;
-         i23 = getJointIndices("LEFT_WRIST_Z")[0] - iBase;
-         i24 = getJointIndices("RIGHT_WRIST_Z")[0] - iBase;
-         i25 = getJointIndices("LEFT_WRIST_X")[0] - iBase;
-         i26 = getJointIndices("RIGHT_WRIST_X")[0] - iBase;
-         i27 = getJointIndices("LEFT_WRIST_Y")[0] - iBase;
-         i28 = getJointIndices("RIGHT_WRIST_Y")[0] - iBase;
+      //      LogTools.info("-------------------------NP------------------------------------");
+      //      LogTools.info("-------------------------NP------------------------------------");
+      //      LogTools.info(EuclidCoreIOTools.getCollectionString(", ", indexProvider.getIndexedJointsInOrder(), j -> j.getName()));
+      //      LogTools.info("-------------------------NP------------------------------------");
+      //      LogTools.info("-------------------------NP------------------------------------");
+      //      LogTools.info("-------------------------NP------------------------------------");
 
-         // Test the method
-         System.out.println(i0);
-         System.out.println(i1);
-         System.out.println(i2);
-         System.out.println(i3);
-         System.out.println(i4);
-         System.out.println(i5);
-         System.out.println(i6);
-         System.out.println(i7);
-         System.out.println(i8);
-         System.out.println(i9);
-         System.out.println(i10);
-         System.out.println(i11);
-         System.out.println(i12);
-         System.out.println(i13);
-         System.out.println(i14);
-         System.out.println(i15);
-         System.out.println(i16);
-         System.out.println(i17);
-         System.out.println(i18);
-         System.out.println(i19);
-         System.out.println(i20);
-         System.out.println(i21);
-         System.out.println(i22);
-         System.out.println(i23);
-         System.out.println(i24);
-         System.out.println(i25);
-         System.out.println(i26);
-         System.out.println(i27);
-         System.out.println(i28);
-
-         jointMap.put(i0, fullRobotModel.getOneDoFJointByName("LEFT_HIP_Z"));
-         jointMap.put(i1, fullRobotModel.getOneDoFJointByName("RIGHT_HIP_Z"));
-         jointMap.put(i2, fullRobotModel.getOneDoFJointByName("SPINE_Z"));
-         jointMap.put(i3, fullRobotModel.getOneDoFJointByName("LEFT_HIP_X"));
-         jointMap.put(i4, fullRobotModel.getOneDoFJointByName("RIGHT_HIP_X"));
-         jointMap.put(i5, fullRobotModel.getOneDoFJointByName("SPINE_X"));
-         jointMap.put(i6, fullRobotModel.getOneDoFJointByName("LEFT_HIP_Y"));
-         jointMap.put(i7, fullRobotModel.getOneDoFJointByName("RIGHT_HIP_Y"));
-         jointMap.put(i8, fullRobotModel.getOneDoFJointByName("SPINE_Y"));
-         jointMap.put(i9, fullRobotModel.getOneDoFJointByName("LEFT_KNEE_Y"));
-         jointMap.put(i10, fullRobotModel.getOneDoFJointByName("RIGHT_KNEE_Y"));
-         jointMap.put(i11, fullRobotModel.getOneDoFJointByName("LEFT_SHOULDER_Y"));
-         jointMap.put(i12, fullRobotModel.getOneDoFJointByName("RIGHT_SHOULDER_Y"));
-         jointMap.put(i13, fullRobotModel.getOneDoFJointByName("LEFT_ANKLE_Y"));
-         jointMap.put(i14, fullRobotModel.getOneDoFJointByName("RIGHT_ANKLE_Y"));
-         jointMap.put(i15, fullRobotModel.getOneDoFJointByName("LEFT_SHOULDER_X"));
-         jointMap.put(i16, fullRobotModel.getOneDoFJointByName("RIGHT_SHOULDER_X"));
-         jointMap.put(i17, fullRobotModel.getOneDoFJointByName("LEFT_ANKLE_X"));
-         jointMap.put(i18, fullRobotModel.getOneDoFJointByName("RIGHT_ANKLE_X"));
-         jointMap.put(i19, fullRobotModel.getOneDoFJointByName("LEFT_SHOULDER_Z"));
-         jointMap.put(i20, fullRobotModel.getOneDoFJointByName("RIGHT_SHOULDER_Z"));
-         jointMap.put(i21, fullRobotModel.getOneDoFJointByName("LEFT_ELBOW_Y"));
-         jointMap.put(i22, fullRobotModel.getOneDoFJointByName("RIGHT_ELBOW_Y"));
-         jointMap.put(i23, fullRobotModel.getOneDoFJointByName("LEFT_WRIST_Z"));
-         jointMap.put(i24, fullRobotModel.getOneDoFJointByName("RIGHT_WRIST_Z"));
-         jointMap.put(i25, fullRobotModel.getOneDoFJointByName("LEFT_WRIST_X"));
-         jointMap.put(i26, fullRobotModel.getOneDoFJointByName("RIGHT_WRIST_X"));
-         jointMap.put(i27, fullRobotModel.getOneDoFJointByName("LEFT_WRIST_Y"));
-         jointMap.put(i28, fullRobotModel.getOneDoFJointByName("RIGHT_WRIST_Y"));
-
-         //      LogTools.info("-------------------------NP------------------------------------");
-         //      LogTools.info("-------------------------NP------------------------------------");
-         //      LogTools.info(EuclidCoreIOTools.getCollectionString(", ", indexProvider.getIndexedJointsInOrder(), j -> j.getName()));
-         //      LogTools.info("-------------------------NP------------------------------------");
-         //      LogTools.info("-------------------------NP------------------------------------");
-         //      LogTools.info("-------------------------NP------------------------------------");
-
-         // reorder qNomStanding based on joint ordering above:
-         qNomStanding[i0] = qNomStandingURDF[0];
-         qNomStanding[i1] = qNomStandingURDF[1];
-         qNomStanding[i2] = qNomStandingURDF[2];
-         qNomStanding[i3] = qNomStandingURDF[3];
-         qNomStanding[i4] = qNomStandingURDF[4];
-         qNomStanding[i5] = qNomStandingURDF[5];
-         qNomStanding[i6] = qNomStandingURDF[6];
-         qNomStanding[i7] = qNomStandingURDF[7];
-         qNomStanding[i8] = qNomStandingURDF[8];
-         qNomStanding[i9] = qNomStandingURDF[9];
-         qNomStanding[i10] = qNomStandingURDF[10];
-         qNomStanding[i11] = qNomStandingURDF[11];
-         qNomStanding[i12] = qNomStandingURDF[12];
-         qNomStanding[i13] = qNomStandingURDF[13];
-         qNomStanding[i14] = qNomStandingURDF[14];
-         qNomStanding[i15] = qNomStandingURDF[15];
-         qNomStanding[i16] = qNomStandingURDF[16];
-         qNomStanding[i17] = qNomStandingURDF[17];
-         qNomStanding[i18] = qNomStandingURDF[18];
-         qNomStanding[i19] = qNomStandingURDF[19];
-         qNomStanding[i20] = qNomStandingURDF[20];
-         qNomStanding[i21] = qNomStandingURDF[21];
-         qNomStanding[i22] = qNomStandingURDF[22];
-         qNomStanding[i23] = qNomStandingURDF[23];
-         qNomStanding[i24] = qNomStandingURDF[24];
-         qNomStanding[i25] = qNomStandingURDF[25];
-         qNomStanding[i26] = qNomStandingURDF[26];
-         qNomStanding[i27] = qNomStandingURDF[27];
-         qNomStanding[i28] = qNomStandingURDF[28];
-      }
+      // reorder qNomStanding based on joint ordering above:
+      qNomStanding[i0] = qNomStandingURDF[0];
+      qNomStanding[i1] = qNomStandingURDF[1];
+      qNomStanding[i2] = qNomStandingURDF[2];
+      qNomStanding[i3] = qNomStandingURDF[3];
+      qNomStanding[i4] = qNomStandingURDF[4];
+      qNomStanding[i5] = qNomStandingURDF[5];
+      qNomStanding[i6] = qNomStandingURDF[6];
+      qNomStanding[i7] = qNomStandingURDF[7];
+      qNomStanding[i8] = qNomStandingURDF[8];
+      qNomStanding[i9] = qNomStandingURDF[9];
+      qNomStanding[i10] = qNomStandingURDF[10];
+      qNomStanding[i11] = qNomStandingURDF[11];
+      qNomStanding[i12] = qNomStandingURDF[12];
+      qNomStanding[i13] = qNomStandingURDF[13];
+      qNomStanding[i14] = qNomStandingURDF[14];
+      qNomStanding[i15] = qNomStandingURDF[15];
+      qNomStanding[i16] = qNomStandingURDF[16];
+      qNomStanding[i17] = qNomStandingURDF[17];
+      qNomStanding[i18] = qNomStandingURDF[18];
+      qNomStanding[i19] = qNomStandingURDF[19];
+      qNomStanding[i20] = qNomStandingURDF[20];
+      qNomStanding[i21] = qNomStandingURDF[21];
+      qNomStanding[i22] = qNomStandingURDF[22];
+      qNomStanding[i23] = qNomStandingURDF[23];
+      qNomStanding[i24] = qNomStandingURDF[24];
+      qNomStanding[i25] = qNomStandingURDF[25];
+      qNomStanding[i26] = qNomStandingURDF[26];
+      qNomStanding[i27] = qNomStandingURDF[27];
+      qNomStanding[i28] = qNomStandingURDF[28];
 
       Integer[] jointsToFit = read1DIntCsvToIntArray(folderPath + "joints_to_fit.csv");
       jointIndexArray = new int[jointsToFit.length];
@@ -346,6 +280,21 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
       {
          jointIndexArray[i] = jointsToFit[i];
       }
+
+      // Testing
+      legJointIndicesInVelVectorIncludingFloatingBaseJoint = new Integer[12];
+      legJointIndicesInVelVectorIncludingFloatingBaseJoint[0] = getJointIndices("LEFT_HIP_Z")[0];
+      legJointIndicesInVelVectorIncludingFloatingBaseJoint[1] = getJointIndices("RIGHT_HIP_Z")[0];
+      legJointIndicesInVelVectorIncludingFloatingBaseJoint[2] = getJointIndices("LEFT_HIP_X")[0];
+      legJointIndicesInVelVectorIncludingFloatingBaseJoint[3] = getJointIndices("RIGHT_HIP_X")[0];
+      legJointIndicesInVelVectorIncludingFloatingBaseJoint[4] = getJointIndices("LEFT_HIP_Y")[0];
+      legJointIndicesInVelVectorIncludingFloatingBaseJoint[5] = getJointIndices("RIGHT_HIP_Y")[0];
+      legJointIndicesInVelVectorIncludingFloatingBaseJoint[6] = getJointIndices("LEFT_KNEE_Y")[0];
+      legJointIndicesInVelVectorIncludingFloatingBaseJoint[7] = getJointIndices("RIGHT_KNEE_Y")[0];
+      legJointIndicesInVelVectorIncludingFloatingBaseJoint[8] = getJointIndices("LEFT_ANKLE_Y")[0];
+      legJointIndicesInVelVectorIncludingFloatingBaseJoint[9] = getJointIndices("RIGHT_ANKLE_Y")[0];
+      legJointIndicesInVelVectorIncludingFloatingBaseJoint[10] = getJointIndices("LEFT_ANKLE_X")[0];
+      legJointIndicesInVelVectorIncludingFloatingBaseJoint[11] = getJointIndices("RIGHT_ANKLE_X")[0];
    }
 
    int[] getJointIndices(String jointName)
@@ -421,7 +370,7 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
    {
       computeNaturalPosture(q, Q_world_base);
    }
-   
+
    public void computeNaturalPosture(double[] q, Orientation3DReadOnly Q_world_base)
    {
       // Get the NP quaternion r.t. the base(pelvis) frame:
@@ -439,12 +388,12 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
       // + We need 'quaternionNPrtBase' to get two transforms: E (bring Qdot -> omega) & C_NP_Base (bring omega_ewrt_Base -> omega_ewrt_NP)
       // + We need 'jacobiandQuaternionNPrtBase' as once transformed, it forms all the joint-based portion of the jacobianNP.
       computeJacobianNP(this.Q_Base_NP, this.jacobianQuaternionNPrtBase, this.jacobianNP);
-      
-//      SVDNullspaceCalculator nullspacecalculator = new SVDNullspaceCalculator(this.jacobianNP.numCols, true /*makeLargestComponentPositive*/);
-//      DMatrixRMaj nullspaceProjectorToPack = new DMatrixRMaj(this.jacobianNP.numCols, this.jacobianNP.numCols);
-//      nullspacecalculator.computeNullspaceProjector(this.jacobianNP, nullspaceProjectorToPack);
-//      System.out.println(nullspaceProjectorToPack);
-      
+
+      //      SVDNullspaceCalculator nullspacecalculator = new SVDNullspaceCalculator(this.jacobianNP.numCols, true /*makeLargestComponentPositive*/);
+      //      DMatrixRMaj nullspaceProjectorToPack = new DMatrixRMaj(this.jacobianNP.numCols, this.jacobianNP.numCols);
+      //      nullspacecalculator.computeNullspaceProjector(this.jacobianNP, nullspaceProjectorToPack);
+      //      System.out.println(nullspaceProjectorToPack);
+
       if (doGraphics == true)
       {
          FramePoint3D originPose = new FramePoint3D(this.fullRobotModel.getRootBody().getBodyFixedFrame());
@@ -514,16 +463,54 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
       for (int i = 0; i < 3; i++)
          for (int j = 0; j < NumDoFs; j++)
             jacobianToPack.set(i, j + 6, 2.0 * this.jacobianOmegaNPrtBase.get(i + 1, j)); // for omega NP rt & ewrt NP-frame
-      
-//      // [Testing] not use the x y of NP.
-//      for (int i = 0; i < 2; i++)
-//         for (int j = 0; j < 3 + NumDoFs; j++)
-//         {
-//            jacobianToPack.set(i, j, 0.0);
-//         }
+
+      //      // [Testing] not use the x y of NP.
+      //      for (int i = 0; i < 2; i++)
+      //         for (int j = 0; j < 6 + NumDoFs; j++)
+      //         {
+      //            jacobianToPack.set(i, j, 0.0);
+      //         }
+
+      // [Testing] not use the leg joints
+      //    for (int i = 0; i < 3; i++)
+      //       for (int j = 0; j < legJointIndicesInVelVectorIncludingFloatingBaseJoint.length; j++)
+      //       {
+      //          jacobianToPack.set(i, legJointIndicesInVelVectorIncludingFloatingBaseJoint[j], 0.0);
+      //       }
+
    }
 
    //==== CSV utils ===========================================================================================================================
+
+   private static String[] read1DString(String filePath)
+   {
+      try
+      {
+         BufferedReader csvReader = new BufferedReader(new FileReader(filePath));
+         String row;
+         try
+         {
+            while ((row = csvReader.readLine()) != null)
+            {
+               String[] data = row.split(",");
+               return data;
+               // do something with the data
+            }
+            csvReader.close();
+         }
+         catch (IOException e)
+         {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+         }
+      }
+      catch (FileNotFoundException e)
+      {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
+      return new String[0];
+   }
 
    private static int getNumRowsOfCsvFile(String filePath)
    {
