@@ -65,7 +65,7 @@ public class ImGui3DViewInput
       mouseWheelDelta = -ImGui.getIO().getMouseWheel();
 
       for (ImGuiMouseDragData mouseDragDatum : mouseDragData)
-         mouseDragDatum.update(isWindowHovered);
+         mouseDragDatum.update();
 
       pickResults.clear();
    }
@@ -206,19 +206,9 @@ public class ImGui3DViewInput
       return isWindowHovered;
    }
 
-   public boolean isDragging(int imGuiMouseButton)
+   public ImGuiMouseDragData getMouseDragData(int imGuiMouseButton)
    {
-      return mouseDragData[imGuiMouseButton].isDragging();
-   }
-
-   public float getMouseDraggedX(int imGuiMouseButton)
-   {
-      return mouseDragData[imGuiMouseButton].getMouseDraggedX();
-   }
-
-   public float getMouseDraggedY(int imGuiMouseButton)
-   {
-      return mouseDragData[imGuiMouseButton].getMouseDraggedY();
+      return mouseDragData[imGuiMouseButton];
    }
 
    public float getMousePosX()

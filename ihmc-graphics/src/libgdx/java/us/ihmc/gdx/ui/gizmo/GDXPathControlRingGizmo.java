@@ -191,8 +191,8 @@ public class GDXPathControlRingGizmo implements RenderableProvider
    {
       updateTransforms();
 
-      boolean rightMouseDragging = input.isDragging(ImGuiMouseButton.Right);
-      boolean middleMouseDragging = input.isDragging(ImGuiMouseButton.Middle);
+      boolean rightMouseDragging = input.getMouseDragData(ImGuiMouseButton.Right).isDragging();
+      boolean middleMouseDragging = input.getMouseDragData(ImGuiMouseButton.Middle).isDragging();
       boolean isWindowHovered = ImGui.isWindowHovered();
 
       if (isWindowHovered && !rightMouseDragging && !middleMouseDragging)
@@ -210,8 +210,8 @@ public class GDXPathControlRingGizmo implements RenderableProvider
 
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      boolean rightMouseDragging = input.isDragging(ImGuiMouseButton.Right);
-      boolean middleMouseDragging = input.isDragging(ImGuiMouseButton.Middle);
+      boolean rightMouseDragging = input.getMouseDragData(ImGuiMouseButton.Right).isDragging();
+      boolean middleMouseDragging = input.getMouseDragData(ImGuiMouseButton.Middle).isDragging();
       boolean middleMouseDown = ImGui.getIO().getMouseDown(ImGuiMouseButton.Middle);
       boolean isWindowHovered = ImGui.isWindowHovered();
       isBeingDragged = false;
