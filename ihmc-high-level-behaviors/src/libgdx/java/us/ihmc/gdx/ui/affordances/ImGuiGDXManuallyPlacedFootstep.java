@@ -61,7 +61,7 @@ public class ImGuiGDXManuallyPlacedFootstep
       baseUI.getPrimaryScene().addModelInstance(footstepModelInstance, GDXSceneLevel.VIRTUAL);
 
       selectablePose3DGizmo = new GDXSelectablePose3DGizmo();
-      selectablePose3DGizmo.create(baseUI.getPrimary3DPanel().getCamera3D());
+      selectablePose3DGizmo.create(baseUI.getPrimary3DPanel());
 
       footstepIndexText = new GDX3DSituatedText("" + footstepSide.getSideNameFirstLetter() + (index + 1));
       renderableAdapter = new GDXRenderableAdapter(footstepModelInstance, GDXSceneLevel.VIRTUAL);

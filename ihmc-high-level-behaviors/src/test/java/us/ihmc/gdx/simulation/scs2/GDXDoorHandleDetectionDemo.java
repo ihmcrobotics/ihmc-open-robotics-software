@@ -39,7 +39,7 @@ public class GDXDoorHandleDetectionDemo
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
             environmentBuilder.loadEnvironment("DoorHandleDetectionDemo.json");
 
-            sensorPoseGizmo.create(baseUI.getPrimary3DPanel().getCamera3D());
+            sensorPoseGizmo.create(baseUI.getPrimary3DPanel());
             sensorPoseGizmo.setResizeAutomatically(true);
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(input ->
             {

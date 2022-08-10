@@ -55,7 +55,7 @@ public class GDXNettyOusterUI
             ImGuiPanel panel = new ImGuiPanel("Ouster", this::renderImGuiWidgets);
             baseUI.getImGuiPanelManager().addPanel(panel);
 
-            cameraPoseGizmo.create(baseUI.getPrimary3DPanel().getCamera3D());
+            cameraPoseGizmo.create(baseUI.getPrimary3DPanel());
             cameraPoseGizmo.setResizeAutomatically(true);
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(cameraPoseGizmo::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(cameraPoseGizmo::process3DViewInput);

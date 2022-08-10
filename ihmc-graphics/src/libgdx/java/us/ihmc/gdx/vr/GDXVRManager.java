@@ -112,7 +112,7 @@ public class GDXVRManager
                baseUI.setForegroundFPS(350); // TODO: Do something better with this
             }
             baseUI.setVsync(false); // important to disable vsync for VR
-            scenePoseGizmo.create(baseUI.getPrimary3DPanel().getCamera3D());
+            scenePoseGizmo.create(baseUI.getPrimary3DPanel());
             contextInitialized = true;
             waitGetPosesThreadRunning = true;
             ThreadTools.startAsDaemon(this::waitOnPoses, getClass().getSimpleName() + "WaitOnPosesThread");

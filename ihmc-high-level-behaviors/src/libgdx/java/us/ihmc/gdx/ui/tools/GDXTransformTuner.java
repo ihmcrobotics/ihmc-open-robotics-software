@@ -7,9 +7,9 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
+import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 
 public class GDXTransformTuner
@@ -30,9 +30,9 @@ public class GDXTransformTuner
       this.transformToTune = transformToTune;
    }
 
-   public void create(GDXFocusBasedCamera camera3D)
+   public void create(GDX3DPanel panel3D)
    {
-      poseGizmo.create(camera3D);
+      poseGizmo.create(panel3D);
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)

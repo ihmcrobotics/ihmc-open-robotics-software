@@ -55,7 +55,7 @@ public class GDXARDemo
             baseUI.getPrimaryScene().getSceneLevelsToRender().remove(GDXSceneLevel.MODEL);
             environmentBuilder.loadEnvironment("LookAndStepHard.json");
 
-            sensorPoseGizmo.create(baseUI.getPrimary3DPanel().getCamera3D());
+            sensorPoseGizmo.create(baseUI.getPrimary3DPanel());
             sensorPoseGizmo.setResizeAutomatically(true);
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(sensorPoseGizmo::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(sensorPoseGizmo::process3DViewInput);

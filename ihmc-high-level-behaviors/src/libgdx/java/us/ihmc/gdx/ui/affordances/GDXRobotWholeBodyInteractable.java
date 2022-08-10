@@ -90,7 +90,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
             pelvisInteractable.create(collisionLink,
                                       syncedRobot.getReferenceFrames().getPelvisFrame(),
                                       modelFileName,
-                                      baseUI.getPrimary3DPanel().getCamera3D());
+                                      baseUI.getPrimary3DPanel());
             pelvisInteractable.setOnSpacePressed(() ->
             {
                ros2Helper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(teleoperationParameters.getTrajectoryTime(),
@@ -108,7 +108,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
                interactableFoot.create(collisionLink,
                                        syncedRobot.getFullRobotModel().getFrameAfterLegJoint(side, LegJointName.ANKLE_ROLL),
                                        modelFileName,
-                                       baseUI.getPrimary3DPanel().getCamera3D());
+                                       baseUI.getPrimary3DPanel());
                interactableFoot.setOnSpacePressed(() ->
                {
                   ros2Helper.publishToController(HumanoidMessageTools.createFootTrajectoryMessage(side,
@@ -132,7 +132,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
                                        collisionFrame,
                                        handControlFrame,
                                        modelFileName,
-                                       baseUI.getPrimary3DPanel().getCamera3D());
+                                       baseUI.getPrimary3DPanel());
                interactableHand.setOnSpacePressed(() ->
                {
                   ros2Helper.publishToController(HumanoidMessageTools.createHandTrajectoryMessage(side,
