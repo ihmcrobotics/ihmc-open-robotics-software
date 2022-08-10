@@ -26,6 +26,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.imgui.ImGuiPanel;
+import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewPickResult;
@@ -45,6 +46,7 @@ import static us.ihmc.gdx.ui.gizmo.GDXGizmoTools.AXIS_SELECTED_COLORS;
 
 public class GDXPose3DGizmo implements RenderableProvider
 {
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImFloat torusRadius = new ImFloat(0.5f);
    private final ImFloat torusCameraSize = new ImFloat(0.067f);
    private final ImFloat torusTubeRadiusRatio = new ImFloat(0.074f);
@@ -92,6 +94,7 @@ public class GDXPose3DGizmo implements RenderableProvider
    private double distanceToCamera;
    private double lastDistanceToCamera = -1.0;
    private final double translateSpeedFactor = 0.5;
+   private boolean queuePopupToOpen = false;
 
    public GDXPose3DGizmo()
    {
@@ -186,6 +189,11 @@ public class GDXPose3DGizmo implements RenderableProvider
       ImGuiMouseDragData manipulationDragData = input.getMouseDragData(ImGuiMouseButton.Left);
 
       isGizmoHovered = pickResult == input.getClosestPick();
+
+      if (isGizmoHovered && ImGui.getMouseClickedCount(ImGuiMouseButton.Right) == 1)
+      {
+         queuePopupToOpen = true;
+      }
 
       updateMaterialHighlighting();
 
@@ -328,7 +336,20 @@ public class GDXPose3DGizmo implements RenderableProvider
 
    private void renderTooltipAndContextMenu()
    {
+      if (queuePopupToOpen)
+      {
+         queuePopupToOpen = false;
 
+         ImGui.openPopup(labels.get("Popup"));
+      }
+
+      if (ImGui.beginPopup(labels.get("Popup")))
+      {
+         renderImGuiTuner();
+         if (ImGui.menuItem("Cancel"))
+            ImGui.closeCurrentPopup();
+         ImGui.endPopup();
+      }
    }
 
    /** Call this instead of process3DViewInput if the gizmo is deactivated. */
@@ -429,7 +450,7 @@ public class GDXPose3DGizmo implements RenderableProvider
 
    public void renderImGuiTuner()
    {
-      ImGui.text("Use the right mouse button to manipulate the widget.");
+      ImGui.text("Drag using the left mouse button to manipulate the gizmo.");
 
       if (ImGui.button("Reset"))
       {
@@ -439,13 +460,13 @@ public class GDXPose3DGizmo implements RenderableProvider
       ImGui.checkbox("Resize based on camera distance", resizeAutomatically);
       ImGui.pushItemWidth(100.00f);
       boolean proportionsChanged = false;
-      proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Torus radius"), torusRadius.getData(), 0.001f, 0.0f, 1000.0f);
-      proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Torus camera size"), torusCameraSize.getData(), 0.001f, 0.0f, 1.0f);
-      proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Torus tube radius ratio"), torusTubeRadiusRatio.getData(), 0.001f, 0.0f, 1000.0f);
-      proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Arrow length ratio"), arrowLengthRatio.getData(), 0.001f, 0.0f, 1.0f);
-      proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Arrow head body length ratio"), arrowHeadBodyLengthRatio.getData(), 0.001f, 0.0f, 1.0f);
-      proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Arrow head body radius ratio"), arrowHeadBodyRadiusRatio.getData(), 0.001f, 0.0f, 3.0f);
-      proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Arrow spacing factor"), arrowSpacingFactor.getData(), 0.001f, 0.0f, 1000.0f);
+//      proportionsChanged |= ImGui.inputFloat(labels.get("Torus radius"), torusRadius, 0.001f);
+      proportionsChanged |= ImGui.inputFloat(labels.get("Torus camera size"), torusCameraSize, 0.05f);
+      proportionsChanged |= ImGui.inputFloat(labels.get("Torus tube radius ratio"), torusTubeRadiusRatio, 0.001f);
+      proportionsChanged |= ImGui.inputFloat(labels.get("Arrow length ratio"), arrowLengthRatio, 0.05f);
+      proportionsChanged |= ImGui.inputFloat(labels.get("Arrow head body length ratio"), arrowHeadBodyLengthRatio, 0.05f);
+      proportionsChanged |= ImGui.inputFloat(labels.get("Arrow head body radius ratio"), arrowHeadBodyRadiusRatio, 0.05f);
+      proportionsChanged |= ImGui.inputFloat(labels.get("Arrow spacing factor"), arrowSpacingFactor, 0.05f);
       ImGui.popItemWidth();
 
       if (proportionsChanged)
