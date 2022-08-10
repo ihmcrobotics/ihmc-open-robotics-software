@@ -29,6 +29,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.gdx.input.ImGui3DViewInput;
+import us.ihmc.gdx.input.ImGuiMouseDragData;
 import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
@@ -215,9 +216,16 @@ public class GDXFocusBasedCamera extends Camera
       isQPressed = input.isWindowHovered() && ImGui.isKeyDown('Q');
       isZPressed = input.isWindowHovered() && ImGui.isKeyDown('Z');
 
-      if (input.isDragging(ImGuiMouseButton.Left))
+      ImGuiMouseDragData orbitDragData = input.getMouseDragData(ImGuiMouseButton.Left);
+
+      if (orbitDragData.getDragJustStarted() && input.getClosestPick() == null)
       {
-         mouseDragged(input.getMouseDraggedX(ImGuiMouseButton.Left), input.getMouseDraggedY(ImGuiMouseButton.Left));
+         orbitDragData.setObjectBeingDragged(this);
+      }
+
+      if (orbitDragData.isDragging() && orbitDragData.getObjectBeingDragged() == this)
+      {
+         mouseDragged(orbitDragData.getMouseDraggedX(), orbitDragData.getMouseDraggedY());
       }
 
       if (input.isWindowHovered() && !ImGui.getIO().getKeyCtrl())

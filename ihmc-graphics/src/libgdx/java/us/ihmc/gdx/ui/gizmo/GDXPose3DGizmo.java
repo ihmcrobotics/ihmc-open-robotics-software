@@ -29,6 +29,7 @@ import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewPickResult;
+import us.ihmc.gdx.input.ImGuiMouseDragData;
 import us.ihmc.gdx.mesh.GDXMeshBuilder;
 import us.ihmc.gdx.mesh.GDXMeshDataInterpreter;
 import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
@@ -67,7 +68,8 @@ public class GDXPose3DGizmo implements RenderableProvider
    private SixDoFSelection closestCollisionSelection;
    private double closestCollisionDistance;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
-   private boolean isMousePickSelected = false;
+   private boolean isGizmoHovered = false;
+   private boolean isBeingManipulated = false;
    private final SphereRayIntersection boundingSphereIntersection = new SphereRayIntersection();
    private final DiscreteTorusRayIntersection torusIntersection = new DiscreteTorusRayIntersection();
    private final DiscreteArrowRayIntersection arrowIntersection = new DiscreteArrowRayIntersection();
@@ -156,37 +158,43 @@ public class GDXPose3DGizmo implements RenderableProvider
    {
       updateTransforms();
 
-      boolean rightMouseDragging = input.isDragging(ImGuiMouseButton.Right);
-      boolean middleMouseDragging = input.isDragging(ImGuiMouseButton.Middle);
-      boolean rightMouseDown = ImGui.getIO().getMouseDown(ImGuiMouseButton.Right);
       boolean isWindowHovered = ImGui.isWindowHovered();
+      ImGuiMouseDragData manipulationDragData = input.getMouseDragData(ImGuiMouseButton.Left);
 
-      if (isWindowHovered && !rightMouseDragging && !middleMouseDragging)
+      // Here we are trying to avoid unecessary computation in collision calculation by filtering out
+      // some common scenarios where we don't need to calculate the pick, which can be expensive
+      if (isWindowHovered && (!manipulationDragData.isDragging() || manipulationDragData.getDragJustStarted()))
       {
+         // This part is happening when the user could presumably start a drag
+         // on this gizmo at any time
+
          Line3DReadOnly pickRay = input.getPickRayInWorld();
          determineCurrentSelectionFromPickRay(pickRay);
 
-         if (rightMouseDown && closestCollisionSelection != null)
+         if (closestCollisionSelection != null)
          {
-            clockFaceDragAlgorithm.reset();
+            pickResult.setDistanceToCamera(closestCollisionDistance);
+            input.addPickResult(pickResult);
          }
-      }
-
-      if (closestCollisionSelection != null)
-      {
-         pickResult.setDistanceToCamera(closestCollisionDistance);
-         input.addPickResult(pickResult);
       }
    }
 
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      boolean rightMouseDragging = input.isDragging(ImGuiMouseButton.Right);
-      isMousePickSelected = pickResult == input.getClosestPick();
+      ImGuiMouseDragData manipulationDragData = input.getMouseDragData(ImGuiMouseButton.Left);
+
+      isGizmoHovered = pickResult == input.getClosestPick();
 
       updateMaterialHighlighting();
 
-      if (isMousePickSelected && rightMouseDragging)
+      if (isGizmoHovered && manipulationDragData.getDragJustStarted())
+      {
+         clockFaceDragAlgorithm.reset();
+         manipulationDragData.setObjectBeingDragged(this);
+      }
+
+      isBeingManipulated = manipulationDragData.getObjectBeingDragged() == this;
+      if (isBeingManipulated)
       {
          Line3DReadOnly pickRay = input.getPickRayInWorld();
 
@@ -383,7 +391,7 @@ public class GDXPose3DGizmo implements RenderableProvider
 
    private void updateMaterialHighlighting()
    {
-      boolean prior = isMousePickSelected && closestCollisionSelection != null;
+      boolean prior = (isGizmoHovered || isBeingManipulated) && closestCollisionSelection != null;
       // could only do this when selection changed
       for (Axis3D axis : Axis3D.values)
       {
@@ -548,10 +556,5 @@ public class GDXPose3DGizmo implements RenderableProvider
    ClockFaceRotation3DMouseDragAlgorithm getClockFaceDragAlgorithm()
    {
       return clockFaceDragAlgorithm;
-   }
-
-   public boolean getMousePickSelected()
-   {
-      return isMousePickSelected;
    }
 }
