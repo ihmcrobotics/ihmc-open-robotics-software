@@ -55,51 +55,82 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
 {
-   private final int NumDoFs = 29; // excluding floating base joint
-
    private static String folderPath = "C:\\Users\\yumin\\OneDrive\\Documents\\workspace\\exported_data\\";
 
-   // joint indices (the order of joint list from MultiBodySystemTools.collectSubtreeJoints(fullRobotModel.getPelvis()))
-   private int i0; // LEFT_HIP_Z
-   private int i1; // RIGHT_HIP_Z
-   private int i2; // SPINE_Z
-   private int i3; // LEFT_HIP_X
-   private int i4; // RIGHT_HIP_X
-   private int i5; // SPINE_X
-   private int i6; // LEFT_HIP_Y
-   private int i7; // RIGHT_HIP_Y
-   private int i8; // SPINE_Y
-   private int i9; // LEFT_KNEE_Y
-   private int i10; // RIGHT_KNEE_Y
-   private int i11; // LEFT_SHOULDER_Y
-   private int i12; // RIGHT_SHOULDER_Y
-   private int i13; // LEFT_ANKLE_Y
-   private int i14; // RIGHT_ANKLE_Y
-   private int i15; // LEFT_SHOULDER_X
-   private int i16; // RIGHT_SHOULDER_X
-   private int i17; // LEFT_ANKLE_X
-   private int i18; // RIGHT_ANKLE_X
-   private int i19; // LEFT_SHOULDER_Z
-   private int i20; // RIGHT_SHOULDER_Z
-   private int i21; // LEFT_ELBOW_Y
-   private int i22; // RIGHT_ELBOW_Y
-   private int i23; // LEFT_WRIST_Z
-   private int i24; // RIGHT_WRIST_Z
-   private int i25; // LEFT_WRIST_X
-   private int i26; // RIGHT_WRIST_X
-   private int i27; // LEFT_WRIST_Y
-   private int i28; // RIGHT_WRIST_Y
+   private int NumDoFs; // excluding floating base joint
 
+   // Joint ordering as of 20220810 (just for reference; the order of joint list from MultiBodySystemTools.collectSubtreeJoints(fullRobotModel.getPelvis()) ):
+   // LEFT_HIP_Z
+   // RIGHT_HIP_Z
+   // SPINE_Z
+   // LEFT_HIP_X
+   // RIGHT_HIP_X
+   // SPINE_X
+   // LEFT_HIP_Y
+   // RIGHT_HIP_Y
+   // SPINE_Y
+   // LEFT_KNEE_Y
+   // RIGHT_KNEE_Y
+   // LEFT_SHOULDER_Y
+   // RIGHT_SHOULDER_Y
+   // LEFT_ANKLE_Y
+   // RIGHT_ANKLE_Y
+   // LEFT_SHOULDER_X
+   // RIGHT_SHOULDER_X
+   // LEFT_ANKLE_X
+   // RIGHT_ANKLE_X
+   // LEFT_SHOULDER_Z
+   // RIGHT_SHOULDER_Z
+   // LEFT_ELBOW_Y
+   // RIGHT_ELBOW_Y
+   // LEFT_WRIST_Z
+   // RIGHT_WRIST_Z
+   // LEFT_WRIST_X
+   // RIGHT_WRIST_X
+   // LEFT_WRIST_Y
+   // RIGHT_WRIST_Y
+   
+   // Joint indices 
+   private int i0;
+   private int i1;
+   private int i2;
+   private int i3;
+   private int i4;
+   private int i5;
+   private int i6;
+   private int i7;
+   private int i8;
+   private int i9;
+   private int i10;
+   private int i11;
+   private int i12;
+   private int i13;
+   private int i14;
+   private int i15;
+   private int i16;
+   private int i17;
+   private int i18;
+   private int i19;
+   private int i20;
+   private int i21;
+   private int i22;
+   private int i23;
+   private int i24;
+   private int i25;
+   private int i26;
+   private int i27;
+   private int i28;
+   
    private final Quaternion npQoffset = new Quaternion(0, 0, 0, 1);
 
    // Various Natural Posture results available via getters:
    private final Quaternion Q_Base_NP = new Quaternion(0, 0, 0, 1); // Natural Posture rt the pelvis
    private final Quaternion Q_World_NP = new Quaternion(0, 0, 0, 1); // Natural Posture rt the world
-   private final DMatrixRMaj jacobianNP = new DMatrixRMaj(3, 6 + NumDoFs);
+   private DMatrixRMaj jacobianNP = null;
 
    // For internal use:
-   private final DMatrixRMaj jacobianQuaternionNPrtBase = new DMatrixRMaj(4, NumDoFs);
-   private final DMatrixRMaj jacobianOmegaNPrtBase = new DMatrixRMaj(4, NumDoFs); // GMN: Would need 2.0* if used externally.
+   private DMatrixRMaj jacobianQuaternionNPrtBase = null;
+   private DMatrixRMaj jacobianOmegaNPrtBase = null; // GMN: Would need 2.0* if used externally.
 
    private final YoFrameQuaternion yoQuaternionNPrtWorld; //, yoQuaternionNPrtBase;
    private final YoFrameQuaternion yoQuaternionIdent;
@@ -116,16 +147,15 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
 
    // A nominal standing pose; stored in this class for convenience; upon calling 'initialize()' will create a nominal Qoffset, which has a getter:
    // TODO pull from the "initialConfiguration" class
-   // Gabe said this should include all actuated joints
-   double[] qNomStandingURDF = new double[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-   double[] qNomStanding = new double[NumDoFs];
+   // This should include all actuated joints
+   double[] qNomStanding = new double[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
    private final Quaternion QbaseNomStanding = new Quaternion(0, 0, 0, 1);
    private final Quaternion npNomQoffset = new Quaternion(0, 0, 0, 1);
 
    private FullHumanoidRobotModel fullRobotModel = null;
 
    private int[] jointIndexArray = null;
-   private final double[] jointPositionArray = new double[NumDoFs];
+   private double[] jointPositionArray = null;
 
    // Testing
    private Integer[] legJointIndicesInVelVectorIncludingFloatingBaseJoint = null;
@@ -172,8 +202,15 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
          jointMatrixIndexProvider = null;
       }
 
+      // Initialize the size of a few matices
+      String[] jointNameInOrder = read1DString(folderPath + "all_joint_names_in_order.csv");
+      NumDoFs = jointNameInOrder.length;
+      jacobianNP = new DMatrixRMaj(3, 6 + NumDoFs);
+      jacobianQuaternionNPrtBase = new DMatrixRMaj(4, NumDoFs);
+      jacobianOmegaNPrtBase = new DMatrixRMaj(4, NumDoFs);
+      jointPositionArray = new double[NumDoFs];
+      
       // Set joint indices for auto-generated NP function:
-      String[] jointNameInOrder = read1DString(folderPath + "joint_names_in_order.csv");
       int iBase = 6; // GMN: offset for pelvis DoF
 
       i0 = getJointIndices(jointNameInOrder[0])[0] - iBase;
@@ -242,37 +279,6 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
       //      LogTools.info("-------------------------NP------------------------------------");
       //      LogTools.info("-------------------------NP------------------------------------");
       //      LogTools.info("-------------------------NP------------------------------------");
-
-      // reorder qNomStanding based on joint ordering above:
-      qNomStanding[i0] = qNomStandingURDF[0];
-      qNomStanding[i1] = qNomStandingURDF[1];
-      qNomStanding[i2] = qNomStandingURDF[2];
-      qNomStanding[i3] = qNomStandingURDF[3];
-      qNomStanding[i4] = qNomStandingURDF[4];
-      qNomStanding[i5] = qNomStandingURDF[5];
-      qNomStanding[i6] = qNomStandingURDF[6];
-      qNomStanding[i7] = qNomStandingURDF[7];
-      qNomStanding[i8] = qNomStandingURDF[8];
-      qNomStanding[i9] = qNomStandingURDF[9];
-      qNomStanding[i10] = qNomStandingURDF[10];
-      qNomStanding[i11] = qNomStandingURDF[11];
-      qNomStanding[i12] = qNomStandingURDF[12];
-      qNomStanding[i13] = qNomStandingURDF[13];
-      qNomStanding[i14] = qNomStandingURDF[14];
-      qNomStanding[i15] = qNomStandingURDF[15];
-      qNomStanding[i16] = qNomStandingURDF[16];
-      qNomStanding[i17] = qNomStandingURDF[17];
-      qNomStanding[i18] = qNomStandingURDF[18];
-      qNomStanding[i19] = qNomStandingURDF[19];
-      qNomStanding[i20] = qNomStandingURDF[20];
-      qNomStanding[i21] = qNomStandingURDF[21];
-      qNomStanding[i22] = qNomStandingURDF[22];
-      qNomStanding[i23] = qNomStandingURDF[23];
-      qNomStanding[i24] = qNomStandingURDF[24];
-      qNomStanding[i25] = qNomStandingURDF[25];
-      qNomStanding[i26] = qNomStandingURDF[26];
-      qNomStanding[i27] = qNomStandingURDF[27];
-      qNomStanding[i28] = qNomStandingURDF[28];
 
       Integer[] jointsToFit = read1DIntCsvToIntArray(folderPath + "joints_to_fit.csv");
       jointIndexArray = new int[jointsToFit.length];
