@@ -169,6 +169,9 @@ public class ControllerNaturalPostureManager
 //   public void doAction(double timeInState)
    public void compute()
    {
+      // Update NP values
+      robotNaturalPosture.compute(fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToWorldFrame().getRotation());     
+      
       // Set QP objective for pelvis privileged pose:
       pelvisPrivilegedPoseQPObjectiveCommand();
       

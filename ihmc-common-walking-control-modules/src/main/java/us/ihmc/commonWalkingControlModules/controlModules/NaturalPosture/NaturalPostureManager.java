@@ -89,6 +89,7 @@ public class NaturalPostureManager
    public void initialize()
    {
 //      requestState(NaturalPostureControlMode.WALKING_CONTROLLER);
+      robotNaturalPosture.initialize();
    }
    
 //   private void requestState(NaturalPostureControlMode state)
