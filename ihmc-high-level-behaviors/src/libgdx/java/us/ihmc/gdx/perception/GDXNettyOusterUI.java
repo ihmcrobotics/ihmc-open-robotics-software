@@ -5,14 +5,18 @@ import imgui.type.ImFloat;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.GDXPointCloudRenderer;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
+import us.ihmc.gdx.simulation.environment.GDXModelInstance;
+import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
+import us.ihmc.gdx.ui.affordances.GDXInteractableFrameModel;
+import us.ihmc.gdx.ui.gizmo.CylinderRayIntersection;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
@@ -26,7 +30,6 @@ public class GDXNettyOusterUI
 {
    private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/main/resources");
    private final Activator nativesLoadedActivator;
-   private final GDXPose3DGizmo cameraPoseGizmo = new GDXPose3DGizmo();
    private NettyOuster ouster;
    private GDXCVImagePanel imagePanel;
    private final FrequencyCalculator frameReadFrequency = new FrequencyCalculator();
@@ -40,6 +43,7 @@ public class GDXNettyOusterUI
    private GDXPointCloudRenderer pointCloudRenderer;
    private final ImFloat verticalFieldOfView = new ImFloat((float) Math.toRadians(90.0));
    private final ImFloat horizontalFieldOfView = new ImFloat((float) Math.toRadians(360.0));
+   private GDXInteractableFrameModel ousterInteractable;
 
    public GDXNettyOusterUI()
    {
@@ -55,11 +59,17 @@ public class GDXNettyOusterUI
             ImGuiPanel panel = new ImGuiPanel("Ouster", this::renderImGuiWidgets);
             baseUI.getImGuiPanelManager().addPanel(panel);
 
-            cameraPoseGizmo.create(baseUI.getPrimary3DPanel());
-            cameraPoseGizmo.setResizeAutomatically(true);
-            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(cameraPoseGizmo::calculate3DViewPick);
-            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(cameraPoseGizmo::process3DViewInput);
-            baseUI.getPrimaryScene().addRenderableProvider(cameraPoseGizmo, GDXSceneLevel.VIRTUAL);
+            GDXModelInstance ousterSensorModel = new GDXModelInstance(GDXModelLoader.load("environmentObjects/ousterSensor/Ouster.g3dj"));
+            CylinderRayIntersection cylinderIntersection = new CylinderRayIntersection();
+            ousterInteractable = new GDXInteractableFrameModel();
+            ousterInteractable.create(ReferenceFrame.getWorldFrame(),
+                                      baseUI.getPrimary3DPanel(),
+                                      ousterSensorModel,
+                                      pickRay ->
+            {
+               cylinderIntersection.setup(0.0734, 0.04, -0.0372, ousterInteractable.getReferenceFrame().getTransformToWorldFrame());
+               return cylinderIntersection.intersect(pickRay);
+            });
          }
 
          @Override
@@ -104,7 +114,7 @@ public class GDXNettyOusterUI
                   frameReadFrequency.ping();
                   imagePanel.drawFloatImage(ouster.getDepthImageMeters().getBytedecoOpenCVMat());
 
-                  RigidBodyTransform transformToWorldFrame = cameraPoseGizmo.getGizmoFrame().getTransformToWorldFrame();
+                  RigidBodyTransform transformToWorldFrame = ousterInteractable.getReferenceFrame().getTransformToWorldFrame();
 
                   parametersBuffer.getBytedecoFloatBufferPointer().put(0, horizontalFieldOfView.get());
                   parametersBuffer.getBytedecoFloatBufferPointer().put(1, verticalFieldOfView.get());
