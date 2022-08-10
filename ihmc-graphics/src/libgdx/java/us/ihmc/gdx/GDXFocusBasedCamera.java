@@ -175,6 +175,11 @@ public class GDXFocusBasedCamera extends Camera
       focusPointPose.getPosition().add(translation);
    }
 
+   public void setCameraFocusPoint(Tuple3DReadOnly translation)
+   {
+      focusPointPose.getPosition().set(translation);
+   }
+
    private void updateCameraPose()
    {
       zoom = MathTools.clamp(zoom, 0.1, 100.0);
