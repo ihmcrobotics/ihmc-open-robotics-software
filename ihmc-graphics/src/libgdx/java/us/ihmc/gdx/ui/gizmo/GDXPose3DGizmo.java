@@ -34,6 +34,7 @@ import us.ihmc.gdx.mesh.GDXMeshBuilder;
 import us.ihmc.gdx.mesh.GDXMeshDataInterpreter;
 import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
 import us.ihmc.gdx.tools.GDXTools;
+import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
@@ -124,9 +125,10 @@ public class GDXPose3DGizmo implements RenderableProvider
       gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentReferenceFrame, transformToParent);
    }
 
-   public void create(GDXFocusBasedCamera camera3D)
+   public void create(GDX3DPanel panel3D)
    {
-      this.camera3D = camera3D;
+      camera3D = panel3D.getCamera3D();
+      panel3D.addImGuiOverlayAddition(this::renderTooltipAndContextMenu);
 
       for (Axis3D axis : Axis3D.values)
       {
@@ -322,6 +324,11 @@ public class GDXPose3DGizmo implements RenderableProvider
             updateTransforms();
          }
       }
+   }
+
+   private void renderTooltipAndContextMenu()
+   {
+
    }
 
    /** Call this instead of process3DViewInput if the gizmo is deactivated. */

@@ -8,9 +8,9 @@ import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewInput;
+import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 
 /**
@@ -37,9 +37,9 @@ public class GDXSelectablePose3DGizmo
       poseGizmo = new GDXPose3DGizmo(gizmoFrame, gizmoTransformToParentFrameToModify);
    }
 
-   public void create(GDXFocusBasedCamera camera3D)
+   public void create(GDX3DPanel panel3D)
    {
-      poseGizmo.create(camera3D);
+      poseGizmo.create(panel3D);
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)

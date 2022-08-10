@@ -9,9 +9,9 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewInput;
+import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.graphics.GDXReferenceFrameGraphic;
 
 public class GDXLiveRobotPartInteractable
@@ -34,9 +34,9 @@ public class GDXLiveRobotPartInteractable
    private GDXReferenceFrameGraphic controlReferenceFrameGraphic;
    private boolean pickSelected;
 
-   public void create(GDXRobotCollisionLink collisionLink, ReferenceFrame controlFrame, String graphicFileName, GDXFocusBasedCamera camera3D)
+   public void create(GDXRobotCollisionLink collisionLink, ReferenceFrame controlFrame, String graphicFileName, GDX3DPanel panel3D)
    {
-      create(collisionLink, controlFrame, controlFrame, controlFrame, graphicFileName, camera3D);
+      create(collisionLink, controlFrame, controlFrame, controlFrame, graphicFileName, panel3D);
    }
 
    public void create(GDXRobotCollisionLink collisionLink,
@@ -44,7 +44,7 @@ public class GDXLiveRobotPartInteractable
                       ReferenceFrame collisionFrame,
                       ReferenceFrame controlFrame,
                       String modelFileName,
-                      GDXFocusBasedCamera camera3D)
+                      GDX3DPanel panel3D)
    {
       this.collisionLink = collisionLink;
       this.graphicFrame = graphicFrame;
@@ -52,7 +52,7 @@ public class GDXLiveRobotPartInteractable
       this.controlFrame = controlFrame;
       hasMultipleFrames = !(graphicFrame == collisionFrame && collisionFrame == controlFrame);
       highlightModel = new GDXInteractableHighlightModel(modelFileName);
-      selectablePose3DGizmo.create(camera3D);
+      selectablePose3DGizmo.create(panel3D);
       graphicReferenceFrameGraphic = new GDXReferenceFrameGraphic(0.2);
       controlReferenceFrameGraphic = new GDXReferenceFrameGraphic(0.2);
    }

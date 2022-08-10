@@ -39,7 +39,7 @@ public class GDXGizmoDemo
             clockCenter = new ModelInstance(GDXModelBuilder.createSphere(0.1f, Color.BLUE));
             baseUI.getPrimaryScene().addModelInstance(clockCenter);
 
-            poseGizmo.create(focusBasedCamera);
+            poseGizmo.create(baseUI.getPrimary3DPanel());
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(poseGizmo::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(poseGizmo::process3DViewInput);
             baseUI.getPrimaryScene().addRenderableProvider(poseGizmo);

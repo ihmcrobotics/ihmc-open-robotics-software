@@ -21,6 +21,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
+import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.affordances.GDXInteractableHighlightModel;
 import us.ihmc.gdx.ui.affordances.GDXInteractableTools;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
@@ -47,7 +48,7 @@ public class GDXHandPoseAction implements GDXBehaviorAction
    private final ImDouble trajectoryTime = new ImDouble(4.0);
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
-   public void create(GDXFocusBasedCamera camera3D,
+   public void create(GDX3DPanel panel3D,
                       DRCRobotModel robotModel,
                       ROS2SyncedRobotModel syncedRobot,
                       FullHumanoidRobotModel fullRobotModel,
@@ -59,7 +60,7 @@ public class GDXHandPoseAction implements GDXBehaviorAction
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
       referenceFrameLibraryCombo = new ImGuiReferenceFrameLibraryCombo(referenceFrameLibrary);
-      poseGizmo.create(camera3D);
+      poseGizmo.create(panel3D);
    }
 
    public void setSide(RobotSide side, boolean authoring, GDXHandPoseAction possiblyNullPreviousAction)

@@ -80,7 +80,7 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
 
       panel3D.getScene().addRenderableProvider(this::getRenderables);
 
-      pose3DGizmo.create(panel3D.getCamera3D());
+      pose3DGizmo.create(panel3D);
       panel3D.addImGui3DViewPickCalculator(this::calculate3DViewPick);
       panel3D.addImGui3DViewInputProcessor(this::process3DViewInput);
    }
