@@ -7,9 +7,10 @@ import com.badlogic.gdx.graphics.glutils.SensorFrameBuffer;
 import com.badlogic.gdx.graphics.glutils.SensorFrameBufferBuilder;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import imgui.flag.ImGuiMouseButton;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
-import imgui.internal.ImGui;
+import imgui.ImGui;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
@@ -188,6 +189,11 @@ public class GDX3DPanel
          for (Runnable imguiOverlayAddition : imGuiOverlayAdditions)
          {
             imguiOverlayAddition.run();
+         }
+
+         if (ImGui.isMouseDoubleClicked(ImGuiMouseButton.Right))
+         {
+            camera3D.setCameraFocusPoint(inputCalculator.getPickPointInWorld());
          }
 
          ImGui.end();
