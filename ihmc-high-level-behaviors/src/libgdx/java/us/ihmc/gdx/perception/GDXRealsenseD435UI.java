@@ -3,11 +3,15 @@ package us.ihmc.gdx.perception;
 import imgui.ImGui;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.gdx.simulation.environment.GDXModelInstance;
+import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
+import us.ihmc.gdx.ui.affordances.GDXInteractableFrameModel;
+import us.ihmc.gdx.ui.gizmo.BoxRayIntersection;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoTools;
@@ -26,7 +30,7 @@ public class GDXRealsenseD435UI
                                                               "ihmc-open-robotics-software",
                                                               "ihmc-high-level-behaviors/src/main/resources");
    private final Activator nativesLoadedActivator;
-   private final GDXPose3DGizmo sensorPoseGizmo = new GDXPose3DGizmo();
+   private GDXInteractableFrameModel d435Interactable;
    private YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
    private YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private RealSenseHardwareManager realSenseHardwareManager;
@@ -50,6 +54,24 @@ public class GDXRealsenseD435UI
 
             ImGuiPanel panel = new ImGuiPanel("D435", this::renderImGuiWidgets);
             baseUI.getImGuiPanelManager().addPanel(panel);
+
+            GDXModelInstance d435SensorModel = new GDXModelInstance(GDXModelLoader.load("environmentObjects/d435Sensor/D435.g3dj"));
+            BoxRayIntersection boxRayIntersection = new BoxRayIntersection();
+            d435Interactable = new GDXInteractableFrameModel();
+            d435Interactable.create(ReferenceFrame.getWorldFrame(),
+                                    baseUI.getPrimary3DPanel(),
+                                    d435SensorModel,
+                                    pickRay ->
+            {
+               if (boxRayIntersection.intersect(0.025, 0.09, 0.025, d435Interactable.getReferenceFrame().getTransformToWorldFrame(), pickRay))
+               {
+                  return pickRay.getPoint().distance(boxRayIntersection.getFirstIntersectionToPack());
+               }
+               else
+               {
+                  return Double.NaN;
+               }
+            });
          }
 
          @Override
