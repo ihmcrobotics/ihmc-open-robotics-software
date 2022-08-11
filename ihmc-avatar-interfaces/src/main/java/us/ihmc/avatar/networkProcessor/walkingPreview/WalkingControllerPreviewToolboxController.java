@@ -179,6 +179,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       RigidBodyBasics elevator = fullRobotModel.getElevator();
       SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
       linearMomentumRateControlModule = new LinearMomentumRateControlModule(centerOfMassStateProvider,
+                                                                            () -> controllerToolbox.getCentroidalAngularMomentum(),
                                                                             referenceFrames,
                                                                             contactableFeet,
                                                                             elevator,

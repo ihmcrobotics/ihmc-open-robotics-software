@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.function.Supplier;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointVisualizer;
@@ -1057,6 +1058,11 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    public void getAngularMomentum(FrameVector3D upperBodyAngularMomentumToPack)
    {
       upperBodyAngularMomentumToPack.setIncludingFrame(angularMomentum);
+   }
+
+   public FrameVector3DReadOnly getCentroidalAngularMomentum()
+   {
+      return angularMomentum;
    }
 
    public WalkingTrajectoryPath getWalkingTrajectoryPath()

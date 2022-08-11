@@ -30,10 +30,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -53,6 +50,7 @@ import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
@@ -60,6 +58,8 @@ import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+
+import java.util.function.Supplier;
 
 public class LinearMomentumRateControlModule
 {
@@ -99,6 +99,7 @@ public class LinearMomentumRateControlModule
 
    private final FramePoint2D capturePoint = new FramePoint2D();
    private final CapturePointCalculator capturePointCalculator;
+   private final Supplier<FrameVector3DReadOnly> centroidalAngularMomentumProvider;
 
    private final FixedFramePoint2DBasics desiredCapturePoint = new FramePoint2D();
    private final FixedFrameVector2DBasics desiredCapturePointVelocity = new FrameVector2D();
@@ -130,12 +131,15 @@ public class LinearMomentumRateControlModule
    private final BipedSupportPolygons bipedSupportPolygons;
    private final ICPControlPolygons icpControlPolygons;
 
+   private final ALIPController alipController;
+
    private final FixedFrameVector2DBasics perfectCMPDelta = new FrameVector2D();
 
    private final YoFramePoint2D yoDesiredCMP = new YoFramePoint2D("desiredCMP", worldFrame, registry);
    private final YoFramePoint2D yoAchievedCMP = new YoFramePoint2D("achievedCMP", worldFrame, registry);
    private final YoFramePoint3D yoCenterOfMass = new YoFramePoint3D("centerOfMass", worldFrame, registry);
    private final YoFramePoint2D yoCapturePoint = new YoFramePoint2D("capturePoint", worldFrame, registry);
+
 
    private final FilteredVelocityYoFrameVector2d capturePointVelocity;
    private final DoubleProvider capturePointVelocityBreakFrequency = new DoubleParameter("capturePointVelocityBreakFrequency", registry, 26.5);
@@ -157,6 +161,7 @@ public class LinearMomentumRateControlModule
                                           YoRegistry parentRegistry)
    {
       this(controllerToolbox,
+           () -> controllerToolbox.getCentroidalAngularMomentum(),
            controllerToolbox.getReferenceFrames(),
            controllerToolbox.getContactableFeet(),
            controllerToolbox.getFullRobotModel().getElevator(),
@@ -168,6 +173,7 @@ public class LinearMomentumRateControlModule
    }
 
    public LinearMomentumRateControlModule(CenterOfMassStateProvider centerOfMassStateProvider,
+                                          Supplier<FrameVector3DReadOnly> centroidalAngularMomentumProvider,
                                           CommonHumanoidReferenceFrames referenceFrames,
                                           SideDependentList<ContactableFoot> contactableFeet,
                                           RigidBodyBasics elevator,
@@ -179,6 +185,7 @@ public class LinearMomentumRateControlModule
    {
       this.totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
       this.gravityZ = gravityZ;
+      this.centroidalAngularMomentumProvider = centroidalAngularMomentumProvider;
 
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       linearMomentumRateWeight = new ParameterVector3D("LinearMomentumRateWeight", momentumOptimizationSettings.getLinearMomentumWeight(), registry);
@@ -208,6 +215,8 @@ public class LinearMomentumRateControlModule
 
       pelvisHeightController = new PelvisHeightController(referenceFrames.getPelvisFrame(), elevator.getBodyFixedFrame(), registry);
       comHeightController = new CoMHeightController(centerOfMassStateProvider, registry);
+
+      alipController = new ALIPController(gravityZ, totalMass, registry);
 
       DoubleProvider capturePointVelocityAlpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(capturePointVelocityBreakFrequency.getValue(),
                                                                                                                        controlDT);
@@ -291,6 +300,8 @@ public class LinearMomentumRateControlModule
       this.desiredCapturePoint.setMatchingFrame(input.getDesiredCapturePoint());
       this.desiredCapturePointVelocity.setMatchingFrame(input.getDesiredCapturePointVelocity());
       this.desiredCapturePointAtEndOfState.setMatchingFrame(input.getDesiredCapturePointAtEndOfState());
+      this.desiredCoMPosition.set(input.getDesiredCenterOfMass());
+      this.desiredCoMVelocity.set(input.getDesiredCenterOfMassVelocity());
       this.minimizingAngularMomentumRateZ.set(input.getMinimizeAngularMomentumRateZ());
       this.perfectCMP.setMatchingFrame(input.getPerfectCMP());
       this.perfectCoP.setMatchingFrame(input.getPerfectCoP());
@@ -346,6 +357,8 @@ public class LinearMomentumRateControlModule
       return centerOfPressureCommand;
    }
 
+   private final FrameVector3D centroidalAngularMomentum = new FrameVector3D();
+
    /**
     * Computes the {@link MomentumRateCommand} and the {@link CenterOfPressureCommand} for the
     * controller core.
@@ -360,13 +373,15 @@ public class LinearMomentumRateControlModule
    {
       capturePointCalculator.compute(capturePoint, omega0);
       capturePointVelocity.update(capturePoint);
+      centroidalAngularMomentum.setMatchingFrame(centroidalAngularMomentumProvider.get());
 
       boolean success = checkInputs(capturePoint, desiredCapturePoint, desiredCapturePointVelocity, perfectCoP, perfectCMP);
 
       updatePolygons();
       updateHeightController();
       updateICPControllerState();
-      computeICPController();
+//      computeICPController();
+      computeALIPController();
 
       checkAndPackOutputs();
 
@@ -381,9 +396,9 @@ public class LinearMomentumRateControlModule
 
       success = success && computeDesiredLinearMomentumRateOfChange();
 
-      selectionMatrix.setToLinearSelectionOnly();
+      selectionMatrix.clearSelection();
       selectionMatrix.selectLinearZ(controlHeightWithMomentum);
-      selectionMatrix.selectAngularZ(minimizingAngularMomentumRateZ.getValue());
+//      selectionMatrix.selectAngularZ(minimizingAngularMomentumRateZ.getValue());
       momentumRateCommand.setLinearMomentumRate(linearMomentumRateOfChange);
       momentumRateCommand.setSelectionMatrix(selectionMatrix);
       momentumRateCommand.setWeights(angularMomentumRateWeight, desiredLinearMomentumRateWeight);
@@ -484,7 +499,23 @@ public class LinearMomentumRateControlModule
 
       icpController.getDesiredCMP(desiredCMP);
       icpController.getDesiredCoP(desiredCoP);
-      
+   }
+
+   private final FramePoint3D desiredCoMPosition = new FramePoint3D();
+   private final FrameVector3D desiredCoMVelocity = new FrameVector3D();
+
+   private void computeALIPController()
+   {
+      alipController.compute(capturePointCalculator.getCenterOfMassPosition(),
+                             capturePointCalculator.getCenterOfMassVelocity(),
+                             centroidalAngularMomentum,
+                             desiredCoMPosition,
+                             desiredCoMVelocity,
+                             perfectCoP,
+                             omega0);
+
+      desiredCMP.set(alipController.getDesiredCoP());
+      desiredCoP.set(alipController.getDesiredCoP());
    }
 
    private void checkAndPackOutputs()

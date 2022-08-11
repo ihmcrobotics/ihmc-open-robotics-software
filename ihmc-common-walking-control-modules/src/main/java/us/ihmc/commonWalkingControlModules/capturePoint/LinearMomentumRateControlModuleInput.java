@@ -5,9 +5,13 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -30,6 +34,8 @@ public class LinearMomentumRateControlModuleInput
     */
    private boolean useMomentumRecoveryMode;
 
+   private final FramePoint3D desiredCenterOfMass = new FramePoint3D();
+   private final FrameVector3D desiredCenterOfMassVelocity = new FrameVector3D();
    /**
     * The desired capture point that the ICP controller should track.
     */
@@ -127,6 +133,26 @@ public class LinearMomentumRateControlModuleInput
    public void setDesiredCapturePoint(FramePoint2DReadOnly desiredCapturePoint)
    {
       this.desiredCapturePoint.setIncludingFrame(desiredCapturePoint);
+   }
+
+   public FramePoint3D getDesiredCenterOfMass()
+   {
+      return desiredCenterOfMass;
+   }
+
+   public void setDesiredCenterOfMass(FramePoint3DReadOnly desiredCenterOfMass)
+   {
+      this.desiredCenterOfMass.set(desiredCenterOfMass);
+   }
+
+   public FrameVector3D getDesiredCenterOfMassVelocity()
+   {
+      return desiredCenterOfMassVelocity;
+   }
+
+   public void setDesiredCenterOfMassVelocity(FrameVector3DReadOnly desiredCenterOfMassVelocity)
+   {
+      this.desiredCenterOfMassVelocity.set(desiredCenterOfMassVelocity);
    }
 
    public FramePoint2D getDesiredCapturePoint()
@@ -271,6 +297,8 @@ public class LinearMomentumRateControlModuleInput
    {
       omega0 = other.omega0;
       useMomentumRecoveryMode = other.useMomentumRecoveryMode;
+      desiredCenterOfMass.setIncludingFrame(other.desiredCenterOfMass);
+      desiredCenterOfMassVelocity.setIncludingFrame(other.desiredCenterOfMassVelocity);
       desiredCapturePoint.setIncludingFrame(other.desiredCapturePoint);
       desiredCapturePointVelocity.setIncludingFrame(other.desiredCapturePointVelocity);
       desiredCapturePointAtEndOfState.setIncludingFrame(other.desiredCapturePointAtEndOfState);

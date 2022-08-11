@@ -140,6 +140,7 @@ public class WholeBodyControllerCoreFactory
       SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
 
       linearMomentumRateControlModule = new LinearMomentumRateControlModule(centerOfMassStateProvider,
+                                                                            () -> controllerToolbox.getCentroidalAngularMomentum(),
                                                                             referenceFrames,
                                                                             contactableFeet,
                                                                             elevator,
