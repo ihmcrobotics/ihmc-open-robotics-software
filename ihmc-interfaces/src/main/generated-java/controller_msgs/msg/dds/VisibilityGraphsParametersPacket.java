@@ -4,6 +4,8 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+
+import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
@@ -411,59 +413,171 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
+      {
+         LogTools.error("");
+         return false;
+      }
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.max_inter_region_connection_length_, other.max_inter_region_connection_length_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.max_inter_region_connection_length_, other.max_inter_region_connection_length_, epsilon))
+      {
+         LogTools.error("");
+         return false;
+      }
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.normal_z_threshold_for_accessible_regions_, other.normal_z_threshold_for_accessible_regions_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.normal_z_threshold_for_accessible_regions_,
+                                                       other.normal_z_threshold_for_accessible_regions_,
+                                                       epsilon))
+      {
+         LogTools.error("");
+         return false;
+      }
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.navigable_extrusion_distance_, other.navigable_extrusion_distance_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.navigable_extrusion_distance_, other.navigable_extrusion_distance_, epsilon))
+      {
+         LogTools.error("");
+         return false;
+      }
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.obstacle_extrusion_distance_, other.obstacle_extrusion_distance_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.obstacle_extrusion_distance_, other.obstacle_extrusion_distance_, epsilon))
+      {
+         LogTools.error("");
+         return false;
+      }
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.obstacle_extrusion_distance_if_not_too_high_to_step_, other.obstacle_extrusion_distance_if_not_too_high_to_step_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.obstacle_extrusion_distance_if_not_too_high_to_step_,
+                                                       other.obstacle_extrusion_distance_if_not_too_high_to_step_,
+                                                       epsilon))
+      {
+         LogTools.error("");
+         return false;
+      }
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.too_high_to_step_distance_, other.too_high_to_step_distance_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.too_high_to_step_distance_, other.too_high_to_step_distance_, epsilon))
+      {
+         LogTools.error("");
+         return false;
+      }
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.height_for_max_avoidance_, other.height_for_max_avoidance_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.height_for_max_avoidance_, other.height_for_max_avoidance_, epsilon))
+      {
+         LogTools.error("");
+         return false;
+      }
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cluster_resolution_, other.cluster_resolution_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cluster_resolution_, other.cluster_resolution_, epsilon))
+      {
+         LogTools.error("");
+         return false;
+      }
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.exploration_distance_from_start_goal_, other.exploration_distance_from_start_goal_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.exploration_distance_from_start_goal_, other.exploration_distance_from_start_goal_, epsilon))
+      {
+         LogTools.error("");
+         return false;
+      }
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.planar_region_min_area_, other.planar_region_min_area_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.planar_region_min_area_, other.planar_region_min_area_, epsilon))
+      {
+         LogTools.error("");
+         return false;
+      }
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.planar_region_min_size_, other.planar_region_min_size_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.planar_region_min_size_, other.planar_region_min_size_, epsilon))
+      {
+         LogTools.error("");
+         return false;
+      }
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.region_orthogonal_angle_, other.region_orthogonal_angle_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.region_orthogonal_angle_, other.region_orthogonal_angle_, epsilon))
+      {
+         LogTools.error("");
+         return false;
+      }
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.search_host_region_epsilon_, other.search_host_region_epsilon_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.search_host_region_epsilon_, other.search_host_region_epsilon_, epsilon))
+      {
+         LogTools.error("");
+         return false;
+      }
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.can_duck_under_height_, other.can_duck_under_height_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.can_duck_under_height_, other.can_duck_under_height_, epsilon))
+      {
+         LogTools.error("");
+         return false;
+      }
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.can_easily_step_over_height_, other.can_easily_step_over_height_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.can_easily_step_over_height_, other.can_easily_step_over_height_, epsilon))
+      {
+         LogTools.error("");
+         return false;
+      }
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.length_for_long_inter_region_edge_, other.length_for_long_inter_region_edge_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.length_for_long_inter_region_edge_, other.length_for_long_inter_region_edge_, epsilon))
+      {
+         LogTools.error("");
+         return false;
+      }
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.perform_post_processing_node_shifting_, other.perform_post_processing_node_shifting_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.perform_post_processing_node_shifting_, other.perform_post_processing_node_shifting_, epsilon))
+      {
+         LogTools.error("");
+         return false;
+      }
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.introduce_midpoints_in_post_processing_, other.introduce_midpoints_in_post_processing_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.introduce_midpoints_in_post_processing_, other.introduce_midpoints_in_post_processing_, epsilon))
+      {
+         LogTools.error("");
+         return false;
+      }
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.compute_orientations_to_avoid_obstacles_, other.compute_orientations_to_avoid_obstacles_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.compute_orientations_to_avoid_obstacles_, other.compute_orientations_to_avoid_obstacles_, epsilon))
+      {
+         LogTools.error("");
+         return false;
+      }
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.heuristic_weight_, other.heuristic_weight_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.heuristic_weight_, other.heuristic_weight_, epsilon))
+      {
+         LogTools.error("");
+         return false;
+      }
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.distance_weight_, other.distance_weight_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.distance_weight_, other.distance_weight_, epsilon))
+      {
+         LogTools.error("");
+         return false;
+      }
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.elevation_weight_, other.elevation_weight_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.elevation_weight_, other.elevation_weight_, epsilon))
+      {
+         LogTools.error("");
+         return false;
+      }
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.occluded_goal_edge_weight_, other.occluded_goal_edge_weight_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.occluded_goal_edge_weight_, other.occluded_goal_edge_weight_, epsilon))
+      {
+         LogTools.error("");
+         return false;
+      }
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.weight_for_inter_region_edge_, other.weight_for_inter_region_edge_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.weight_for_inter_region_edge_, other.weight_for_inter_region_edge_, epsilon))
+      {
+         LogTools.error("");
+         return false;
+      }
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.return_best_effort_solution_, other.return_best_effort_solution_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.return_best_effort_solution_, other.return_best_effort_solution_, epsilon))
+      {
+         LogTools.error("");
+         return false;
+      }
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.optimize_for_narrow_passage_, other.optimize_for_narrow_passage_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.optimize_for_narrow_passage_, other.optimize_for_narrow_passage_, epsilon))
+      {
+         LogTools.error("");
+         return false;
+      }
 
 
       return true;

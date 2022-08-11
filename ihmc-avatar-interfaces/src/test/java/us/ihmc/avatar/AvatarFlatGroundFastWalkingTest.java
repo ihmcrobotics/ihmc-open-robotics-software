@@ -20,6 +20,7 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class AvatarFlatGroundFastWalkingTest implements MultiRobotTestInterface
 {
@@ -66,6 +67,8 @@ public abstract class AvatarFlatGroundFastWalkingTest implements MultiRobotTestI
       setupSim(getRobotModel(), false, false, null);
       assertTrue(simulationTestHelper.simulateNow(2.0));
 
+      ((YoDouble) simulationTestHelper.findVariable("icpDistanceFromFootPolygonThreshold")).set(0.10);
+
       CommonHumanoidReferenceFrames referenceFrames = simulationTestHelper.getControllerReferenceFrames();
       MovingReferenceFrame midFootZUpGroundFrame = referenceFrames.getMidFootZUpGroundFrame();
       FramePose3D startPose = new FramePose3D(midFootZUpGroundFrame);
@@ -103,15 +106,17 @@ public abstract class AvatarFlatGroundFastWalkingTest implements MultiRobotTestI
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
                                                                                                                                              flatGround,
                                                                                                                                              simulationTestingParameters);
-      simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+
       if (cheatWithGroundHeightAtForFootstep)
-         simulationTestHelper.getHighLevelHumanoidControllerFactory().createComponentBasedFootstepDataMessageGenerator(useVelocityAndHeadingScript,
-                                                                                                                       walkingScriptParameters);
+         simulationTestHelperFactory.setComponentBasedFootstepDataMessageGeneratorParameters(useVelocityAndHeadingScript,
+                                                                                             walkingScriptParameters);
       else
-         simulationTestHelper.getHighLevelHumanoidControllerFactory().createComponentBasedFootstepDataMessageGenerator(useVelocityAndHeadingScript,
-                                                                                                                       flatGround.getTerrainObject3D()
-                                                                                                                                 .getHeightMapIfAvailable(),
-                                                                                                                       walkingScriptParameters);
+         simulationTestHelperFactory.setComponentBasedFootstepDataMessageGeneratorParameters(useVelocityAndHeadingScript,
+                                                                                             flatGround.getTerrainObject3D().getHeightMapIfAvailable(),
+                                                                                             walkingScriptParameters);
+
+      simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+
       simulationTestHelper.start();
    }
 }

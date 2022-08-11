@@ -11,14 +11,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -336,7 +329,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * @param feedForwardAngularVelocity the feed-forward angular velocity of {@code controlFrame} with
     *                                   respect to the {@code base}. Not modified.
     */
-   public void setInverseKinematics(FrameQuaternionReadOnly desiredOrientation, FrameVector3DReadOnly feedForwardAngularVelocity)
+   public void setInverseKinematics(FrameOrientation3DReadOnly desiredOrientation, FrameVector3DReadOnly feedForwardAngularVelocity)
    {
       setControlMode(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
       ReferenceFrame trajectoryFrame = desiredOrientation.getReferenceFrame();
@@ -393,7 +386,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * @param feedForwardLinearVelocity  the feed-forward linear velocity of the {@code controlFrame}'s
     *                                   origin with respect to the {@code base}. Not modified.
     */
-   public void setInverseKinematics(FrameQuaternionReadOnly desiredOrientation, FramePoint3DReadOnly desiredPosition,
+   public void setInverseKinematics(FrameOrientation3DReadOnly desiredOrientation, FramePoint3DReadOnly desiredPosition,
                                     FrameVector3DReadOnly feedForwardAngularVelocity, FrameVector3DReadOnly feedForwardLinearVelocity)
    {
       setInverseKinematics(desiredOrientation, feedForwardAngularVelocity);
@@ -438,7 +431,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     *                                       {@code controlFrame} with respect to the {@code base}. Not
     *                                       modified.
     */
-   public void setInverseDynamics(FrameQuaternionReadOnly desiredOrientation, FrameVector3DReadOnly desiredAngularVelocity,
+   public void setInverseDynamics(FrameOrientation3DReadOnly desiredOrientation, FrameVector3DReadOnly desiredAngularVelocity,
                                   FrameVector3DReadOnly feedForwardAngularAcceleration)
    {
       setControlMode(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
@@ -507,7 +500,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     *                                       {@code controlFrame}'s origin with respect to the
     *                                       {@code base}. Not modified.
     */
-   public void setInverseDynamics(FrameQuaternionReadOnly desiredOrientation, FramePoint3DReadOnly desiredPosition,
+   public void setInverseDynamics(FrameOrientation3DReadOnly desiredOrientation, FramePoint3DReadOnly desiredPosition,
                                   FrameVector3DReadOnly desiredAngularVelocity, FrameVector3DReadOnly desiredLinearVelocity,
                                   FrameVector3DReadOnly feedForwardAngularAcceleration, FrameVector3DReadOnly feedForwardLinearAcceleration)
    {
@@ -555,7 +548,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * @param feedForwardTorque      the feed-forward torque to exert at {@code controlFrame}. Not
     *                               modified.
     */
-   public void setVirtualModelControl(FrameQuaternionReadOnly desiredOrientation, FrameVector3DReadOnly desiredAngularVelocity,
+   public void setVirtualModelControl(FrameOrientation3DReadOnly desiredOrientation, FrameVector3DReadOnly desiredAngularVelocity,
                                       FrameVector3DReadOnly feedForwardTorque)
    {
       setControlMode(WholeBodyControllerCoreMode.VIRTUAL_MODEL);
@@ -620,7 +613,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * @param feedForwardForce       the feed-forward force to exert at {@code controlFrame}. Not
     *                               modified.
     */
-   public void setVirtualModelControl(FrameQuaternionReadOnly desiredOrientation, FramePoint3DReadOnly desiredPosition,
+   public void setVirtualModelControl(FrameOrientation3DReadOnly desiredOrientation, FramePoint3DReadOnly desiredPosition,
                                       FrameVector3DReadOnly desiredAngularVelocity, FrameVector3DReadOnly desiredLinearVelocity,
                                       FrameVector3DReadOnly feedForwardTorque, FrameVector3DReadOnly feedForwardForce)
    {
@@ -695,7 +688,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * @throws ReferenceFrameMismatchException if any of the two arguments is not expressed in
     *                                         {@code endEffector.getBodyFixedFrame()}.
     */
-   public void setControlFrameFixedInEndEffector(FramePoint3DReadOnly position, FrameQuaternionReadOnly orientation)
+   public void setControlFrameFixedInEndEffector(FramePoint3DReadOnly position, FrameOrientation3DReadOnly orientation)
    {
       RigidBodyBasics endEffector = spatialAccelerationCommand.getEndEffector();
       position.checkReferenceFrameMatch(endEffector.getBodyFixedFrame());
