@@ -223,7 +223,7 @@ public class GDXFocusBasedCamera extends Camera
 
       ImGuiMouseDragData orbitDragData = input.getMouseDragData(ImGuiMouseButton.Left);
 
-      if (orbitDragData.getDragJustStarted() && input.getClosestPick() == null)
+      if (ImGui.isWindowHovered() && orbitDragData.getDragJustStarted() && input.getClosestPick() == null)
       {
          orbitDragData.setObjectBeingDragged(this);
       }
