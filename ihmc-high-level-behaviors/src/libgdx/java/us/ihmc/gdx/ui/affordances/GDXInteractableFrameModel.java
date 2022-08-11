@@ -3,10 +3,15 @@ package us.ihmc.gdx.ui.affordances;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import imgui.flag.ImGuiInputTextFlags;
+import imgui.flag.ImGuiMouseButton;
+import imgui.internal.ImGui;
+import imgui.type.ImString;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.input.ImGui3DViewPickResult;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
@@ -17,6 +22,8 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 public class GDXInteractableFrameModel
 {
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ImString transformText = new ImString(1000);
    private ReferenceFrame representativeReferenceFrame;
    private final FramePose3D tempFramePose = new FramePose3D();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
@@ -27,6 +34,7 @@ public class GDXInteractableFrameModel
    private boolean isMouseHovering;
    private GDXSelectablePose3DGizmo selectablePose3DGizmo;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
+   private boolean queuePopupToOpen = false;
 
    public void create(ReferenceFrame parentFrame,
                       GDX3DPanel panel3D,
@@ -56,6 +64,7 @@ public class GDXInteractableFrameModel
       panel3D.addImGui3DViewInputProcessor(this::process3DViewInput);
       panel3D.getScene().addRenderableProvider(this::getModelRenderables, GDXSceneLevel.MODEL);
       panel3D.getScene().addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+      panel3D.addImGuiOverlayAddition(this::renderTooltipsAndContextMenu);
    }
 
    private void calculate3DViewPick(ImGui3DViewInput input)
@@ -63,7 +72,7 @@ public class GDXInteractableFrameModel
       selectablePose3DGizmo.calculate3DViewPick(input);
 
       Line3DReadOnly pickRay = input.getPickRayInWorld();
-      double closestCollisionDistance = collisionCalculator.calculateClosestCollition(pickRay);
+      double closestCollisionDistance = collisionCalculator.calculateClosestCollision(pickRay);
       if (!Double.isNaN(closestCollisionDistance))
       {
          pickResult.setDistanceToCamera(closestCollisionDistance);
@@ -75,6 +84,11 @@ public class GDXInteractableFrameModel
    {
       isMouseHovering = pickResult == input.getClosestPick();
 
+      if (isMouseHovering && ImGui.getMouseClickedCount(ImGuiMouseButton.Right) == 1)
+      {
+         queuePopupToOpen = true;
+      }
+
       selectablePose3DGizmo.process3DViewInput(input, isMouseHovering);
       tempFramePose.setToZero(representativeReferenceFrame);
       tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -82,6 +96,26 @@ public class GDXInteractableFrameModel
 
       GDXTools.toGDX(tempTransform, modelInstance.transform);
       highlightModelInstance.setPose(tempTransform);
+   }
+
+   private void renderTooltipsAndContextMenu()
+   {
+      if (queuePopupToOpen)
+      {
+         queuePopupToOpen = false;
+
+         ImGui.openPopup(labels.get("Popup"));
+      }
+
+      if (ImGui.beginPopup(labels.get("Popup")))
+      {
+         ImGui.text("Transform to parent:");
+         transformText.set(transformToParent.toString());
+         ImGui.inputTextMultiline(labels.getHidden("transformToParent"), transformText, ImGuiInputTextFlags.ReadOnly);
+         if (ImGui.menuItem("Close"))
+            ImGui.closeCurrentPopup();
+         ImGui.endPopup();
+      }
    }
 
    private void getModelRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
