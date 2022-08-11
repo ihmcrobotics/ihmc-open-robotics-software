@@ -916,10 +916,9 @@ public class ValkyrieInitialSetupFactories
       return initialSetup;
    }
 
-   public static ValkyrieMutableInitialSetup newStand(RobotDefinition robotDefinition, HumanoidJointNameMap jointMap)
+   public static ValkyrieMutableInitialSetup newStand(HumanoidJointNameMap jointMap)
    {
       ValkyrieMutableInitialSetup initialSetup = new ValkyrieMutableInitialSetup(jointMap);
-
       for (RobotSide robotSide : RobotSide.values)
       {
          initialSetup.setJoint(robotSide, LegJointName.HIP_ROLL, 0.0);
@@ -934,7 +933,7 @@ public class ValkyrieInitialSetupFactories
          initialSetup.setJoint(robotSide, ArmJointName.ELBOW_ROLL, 1.3);
       }
 
-      initialSetup.setRootJointHeightSuchThatLowestSoleIsAtZero(robotDefinition);
+      initialSetup.getRootJointPosition().setZ(0.98);
       return initialSetup;
    }
 }
