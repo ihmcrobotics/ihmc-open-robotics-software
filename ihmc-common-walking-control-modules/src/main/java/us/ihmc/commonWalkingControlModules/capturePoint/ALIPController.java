@@ -24,6 +24,8 @@ public class ALIPController
 
    private final YoFrameVector2D alipError = new YoFrameVector2D("alipError", worldFrame, registry);
    private final YoFrameVector2D alipFeedback = new YoFrameVector2D("alipFeedback", worldFrame, registry);
+   private final YoFrameVector2D icpError = new YoFrameVector2D("icpError", worldFrame, registry);
+
 
    private final YoFramePoint2D alipFeedbackCoP = new YoFramePoint2D("alipFeedbackCoP", worldFrame, registry);
 
@@ -39,10 +41,13 @@ public class ALIPController
       this.gravityZ = Math.abs(gravityZ);
       this.mass = mass;
 
-      alipGain.set(1.5);
+      alipGain.set(3.0);
 
       parentRegistry.addChild(registry);
    }
+
+   private final FramePoint3D capturePoint = new FramePoint3D();
+   private final FramePoint3D desiredCapturePoint = new FramePoint3D();
 
    public void compute(FramePoint3DReadOnly centerOfMassPosition,
                        FrameVector3DReadOnly centerOfMassVelocity,
@@ -83,6 +88,18 @@ public class ALIPController
       alipFeedbackCoP.set(tempPoint.getY(), -tempPoint.getX());
       alipFeedbackCoP.scale(-1.0 / weight);
       alipFeedbackCoP.add(centerOfMassPosition.getX(), centerOfMassPosition.getY());
+
+      CapturePointTools.computeCapturePointPosition(centerOfMassPosition, centerOfMassVelocity, omega, capturePoint);
+      CapturePointTools.computeCapturePointPosition(desiredCenterOfMassPosition, desiredCenterOfMassVelocity, omega, desiredCapturePoint);
+
+      icpError.set(desiredCapturePoint);
+      icpError.sub(capturePoint.getX(), capturePoint.getY());
+      icpError.negate();
+
+      alipFeedbackCoP.set(centroidalAngularMomentum.getY(), -centroidalAngularMomentum.getX());
+      alipFeedbackCoP.scale(alipGain.getDoubleValue() / (omega * weight));
+      alipFeedbackCoP.scaleAdd(alipGain.getDoubleValue(), icpError, alipFeedbackCoP);
+      alipFeedbackCoP.add(desiredCenterOfPressurePosition);
    }
 
    public FramePoint2DReadOnly getDesiredCoP()
