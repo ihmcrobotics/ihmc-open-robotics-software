@@ -135,7 +135,7 @@ public class FootstepChecker implements FootstepCheckerInterface
          }
 
          // Check snapped footstep placement
-         BipedalFootstepPlannerNodeRejectionReason poseRejectionReason = heuristicPoseChecker.checkStepValidity(candidateStep, stanceStep, startOfSwing);
+         BipedalFootstepPlannerNodeRejectionReason poseRejectionReason = heuristicPoseChecker.snapAndCheckValidity(candidateStep, stanceStep, startOfSwing);
          rejectionReason.set(poseRejectionReason);
 
          return;
@@ -235,7 +235,7 @@ public class FootstepChecker implements FootstepCheckerInterface
       }
       else
       {
-         poseRejectionReason = heuristicPoseChecker.checkStepValidity(candidateStep, stanceStep, startOfSwing);
+         poseRejectionReason = heuristicPoseChecker.snapAndCheckValidity(candidateStep, stanceStep, startOfSwing);
       }
       if (poseRejectionReason != null)
       {

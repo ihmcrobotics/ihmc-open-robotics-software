@@ -528,14 +528,14 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
       controllerFactory.createUserDesiredControllerCommandGenerator();
 
-      if (addFootstepMessageGenerator && cheatWithGroundHeightAtForFootstep)
-         controllerFactory.createComponentBasedFootstepDataMessageGenerator(useHeadingAndVelocityScript,
-                                                                            scsInitialSetup.getHeightMap(),
-                                                                            walkingScriptParameters);
-      else if (addFootstepMessageGenerator)
-         controllerFactory.createComponentBasedFootstepDataMessageGenerator(useHeadingAndVelocityScript, walkingScriptParameters);
-
       AvatarSimulationFactory avatarSimulationFactory = new AvatarSimulationFactory();
+      if (addFootstepMessageGenerator && cheatWithGroundHeightAtForFootstep)
+         avatarSimulationFactory.setComponentBasedFootstepDataMessageGeneratorParameters(useHeadingAndVelocityScript,
+                                                                                         scsInitialSetup.getHeightMap(),
+                                                                                         walkingScriptParameters);
+      else if (addFootstepMessageGenerator)
+         avatarSimulationFactory.setComponentBasedFootstepDataMessageGeneratorParameters(useHeadingAndVelocityScript, walkingScriptParameters);
+
       avatarSimulationFactory.setRobotModel(robotModel);
       avatarSimulationFactory.setShapeCollisionSettings(robotModel.getShapeCollisionSettings());
       avatarSimulationFactory.setHighLevelHumanoidControllerFactory(controllerFactory);
@@ -546,6 +546,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       avatarSimulationFactory.setRealtimeROS2Node(realtimeROS2Node);
       avatarSimulationFactory.setCreateYoVariableServer(createYoVariableServer);
       avatarSimulationFactory.setLogToFile(logToFile);
+
       if (externalPelvisCorrectorSubscriber != null)
          avatarSimulationFactory.setExternalPelvisCorrectorSubscriber(externalPelvisCorrectorSubscriber);
       AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();

@@ -9,10 +9,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -234,7 +231,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     * @param feedForwardAngularVelocity the feed-forward angular velocity of
     *           {@code endEffector.getBodyFixedFrame()} with respect to the {@code base}. Not modified.
     */
-   public void setInverseKinematics(FrameQuaternionReadOnly desiredOrientation, FrameVector3DReadOnly feedForwardAngularVelocity)
+   public void setInverseKinematics(FrameOrientation3DReadOnly desiredOrientation, FrameVector3DReadOnly feedForwardAngularVelocity)
    {
       setControlMode(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
       ReferenceFrame trajectoryFrame = desiredOrientation.getReferenceFrame();
@@ -259,7 +256,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     * @param feedForwardAngularAcceleration the feed-forward angular acceleration of
     *           {@code endEffector.getBodyFixedFrame()} with respect to the {@code base}. Not modified.
     */
-   public void setInverseDynamics(FrameQuaternionReadOnly desiredOrientation, FrameVector3DReadOnly desiredAngularVelocity,
+   public void setInverseDynamics(FrameOrientation3DReadOnly desiredOrientation, FrameVector3DReadOnly desiredAngularVelocity,
                                   FrameVector3DReadOnly feedForwardAngularAcceleration)
    {
       setControlMode(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
@@ -286,7 +283,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     * @param feedForwardTorque the feed-forward torque to exert at
     *           {@code endEffector.getBodyFixedFrame()}. Not modified.
     */
-   public void setVirtualModelControl(FrameQuaternionReadOnly desiredOrientation, FrameVector3DReadOnly desiredAngularVelocity,
+   public void setVirtualModelControl(FrameOrientation3DReadOnly desiredOrientation, FrameVector3DReadOnly desiredAngularVelocity,
                                       FrameVector3DReadOnly feedForwardTorque)
    {
       setControlMode(WholeBodyControllerCoreMode.VIRTUAL_MODEL);
@@ -322,7 +319,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     * @throws ReferenceFrameMismatchException if any the argument is not expressed in
     *            {@code endEffector.getBodyFixedFrame()}.
     */
-   public void setBodyFixedOrientationToControl(FrameQuaternionReadOnly bodyFixedOrientationInEndEffectorFrame)
+   public void setBodyFixedOrientationToControl(FrameOrientation3DReadOnly bodyFixedOrientationInEndEffectorFrame)
    {
       bodyFixedOrientationInEndEffectorFrame.checkReferenceFrameMatch(getEndEffector().getBodyFixedFrame());
       this.bodyFixedOrientationInEndEffectorFrame.set(bodyFixedOrientationInEndEffectorFrame);

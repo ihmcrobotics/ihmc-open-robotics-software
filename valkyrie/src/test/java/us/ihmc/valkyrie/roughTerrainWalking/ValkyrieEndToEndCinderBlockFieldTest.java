@@ -48,6 +48,12 @@ public class ValkyrieEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFie
    }
 
    @Override
+   public double getSwingHeight()
+   {
+      return 0.15;
+   }
+
+   @Override
    public double getStepHeightOffset()
    {
       return 0.0;
