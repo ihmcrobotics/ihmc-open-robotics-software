@@ -72,12 +72,6 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
       swingSide = RobotSide.RIGHT;
       stanceStepTransform  = syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame();
       stanceSide = RobotSide.LEFT;
-
-//        Vector3DBasics initialRightFoot = initialRightFootTransform.getTranslation();
-//        Vector3DBasics initialLeftFoot = initialLeftFootTransform.getTranslation();
-//
-//       stanceStepTransform = new ImGuiGDXManuallyPlacedFootstep()
-//       swingStepTransform = new DiscreteFootstep(initialRightFoot.getX(), initialRightFoot.getY(), initialRightFootTransform.getRotation().getYaw(), RobotSide.RIGHT);
     }
 
     public void swapSides()
@@ -103,7 +97,7 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
          float drawStartY = primary3DPanel.getWindowDrawMinY() + mousePosY + offsetY;
 
          ImGui.getWindowDrawList()
-              .addRectFilled(drawStartX, drawStartY, drawStartX + 120.0f, drawStartY + 21.0f, new Color(0.2f, 0.2f, 0.2f, 0.7f).toIntBits());
+              .addRectFilled(drawStartX, drawStartY, drawStartX + text.length()*7.2f, drawStartY + 21.0f, new Color(0.2f, 0.2f, 0.2f, 0.7f).toIntBits());
 
          ImGui.getWindowDrawList()
               .addText(ImGuiTools.getSmallFont(), ImGuiTools.getSmallFont().getFontSize(), drawStartX + 5.0f, drawStartY + 2.0f, Color.WHITE.toIntBits(), text);
@@ -137,8 +131,12 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
          if (candidateStepSide != swingSide)
          {
             swapSides();
+            reason = stepChecker.checkValidity(candidateStepSide, candidateStepTransform, swingStepTransform, stanceStepTransform);
          }
-         reason = stepChecker.checkValidity(candidateStepSide, candidateStepTransform, stanceStepTransform, swingStepTransform);
+         else
+         {
+            reason = stepChecker.checkValidity(candidateStepSide, candidateStepTransform, stanceStepTransform, swingStepTransform);
+         }
       }
       // 0th element will be stance, previous stance will be swing
       else if (indexOfFootBeingChecked == 1)
