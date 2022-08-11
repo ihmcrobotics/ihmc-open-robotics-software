@@ -12,21 +12,15 @@ import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
-import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.gdx.GDXPointCloudRenderer;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
-import us.ihmc.gdx.simulation.environment.GDXModelInstance;
-import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.gdx.ui.affordances.GDXInteractableFrameModel;
-import us.ihmc.gdx.ui.gizmo.CylinderRayIntersection;
+import us.ihmc.gdx.ui.interactable.GDXInteractableRealsenseL515;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.perception.*;
 import us.ihmc.perception.realsense.BytedecoRealsense;
@@ -34,7 +28,6 @@ import us.ihmc.perception.realsense.RealSenseHardwareManager;
 import us.ihmc.tools.thread.Activator;
 import us.ihmc.tools.time.FrequencyCalculator;
 import us.ihmc.yoVariables.registry.YoRegistry;
-
 import java.nio.ByteOrder;
 
 public class GDXRealsenseL515UI
@@ -44,7 +37,7 @@ public class GDXRealsenseL515UI
                                                               "ihmc-open-robotics-software",
                                                               "ihmc-high-level-behaviors/src/main/resources");
    private final Activator nativesLoadedActivator;
-   private GDXInteractableFrameModel l515Interactable;
+   private GDXInteractableRealsenseL515 l515Interactable;
    private YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
    private YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private RealSenseHardwareManager realSenseHardwareManager;
@@ -88,18 +81,7 @@ public class GDXRealsenseL515UI
             ImGuiPanel panel = new ImGuiPanel("L515", this::renderImGuiWidgets);
             baseUI.getImGuiPanelManager().addPanel(panel);
 
-            GDXModelInstance l515SensorModel = new GDXModelInstance(GDXModelLoader.load("environmentObjects/l515Sensor/L515Sensor.g3dj"));
-            CylinderRayIntersection cylinderIntersection = new CylinderRayIntersection();
-            Point3D offset = new Point3D();
-            l515Interactable = new GDXInteractableFrameModel();
-            l515Interactable.create(ReferenceFrame.getWorldFrame(),
-                                    baseUI.getPrimary3DPanel(),
-                                    l515SensorModel,
-                                      pickRay ->
-            {
-               cylinderIntersection.setup(0.028, 0.031, offset, Axis3D.X, l515Interactable.getReferenceFrame());
-               return cylinderIntersection.intersect(pickRay);
-            });
+            l515Interactable = new GDXInteractableRealsenseL515(baseUI.getPrimary3DPanel());
          }
 
          @Override
@@ -189,7 +171,7 @@ public class GDXRealsenseL515UI
                   double cmosToPixelsX = l515.getColorWidth() / cmosWidthLocal;
                   double cmosToPixelsY = l515.getColorHeight() / cmosHeightLocal;
 
-                  RigidBodyTransform transformToWorldFrame = l515Interactable.getReferenceFrame().getTransformToWorldFrame();
+                  RigidBodyTransform transformToWorldFrame = l515Interactable.getInteractableFrameModel().getReferenceFrame().getTransformToWorldFrame();
 
                   parametersBuffer.getBytedecoFloatBufferPointer().put(0, focalLength.get());
                   parametersBuffer.getBytedecoFloatBufferPointer().put(1, cmosWidth.get());

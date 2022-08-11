@@ -10,5 +10,5 @@ public interface GDXMousePickRayCollisionCalculator
     * @param mousePickRay
     * @return The closest intersection point or NaN if no collision.
     */
-   public double calculateClosestCollition(Line3DReadOnly mousePickRay);
+   public double calculateClosestCollision(Line3DReadOnly mousePickRay);
 }
