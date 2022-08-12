@@ -11,9 +11,18 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
-import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
@@ -327,15 +336,25 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * @param desiredOrientation         the orientation the {@code controlFrame} should reach. Not
     *                                   modified.
     * @param feedForwardAngularVelocity the feed-forward angular velocity of {@code controlFrame} with
-    *                                   respect to the {@code base}. Not modified.
+    *                                   respect to the {@code base}. Not modified. Can be {@code null},
+    *                                   in such case the velocity is assumed to be zero.
     */
    public void setInverseKinematics(FrameOrientation3DReadOnly desiredOrientation, FrameVector3DReadOnly feedForwardAngularVelocity)
    {
       setControlMode(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
       ReferenceFrame trajectoryFrame = desiredOrientation.getReferenceFrame();
       referenceOrientation.setIncludingFrame(desiredOrientation);
-      referenceAngularVelocity.setIncludingFrame(feedForwardAngularVelocity);
-      referenceAngularVelocity.checkReferenceFrameMatch(trajectoryFrame);
+
+      if (feedForwardAngularVelocity != null)
+      {
+         referenceAngularVelocity.setIncludingFrame(feedForwardAngularVelocity);
+         referenceAngularVelocity.checkReferenceFrameMatch(trajectoryFrame);
+      }
+      else
+      {
+         referenceAngularVelocity.setToZero(trajectoryFrame);
+      }
+
       referenceAngularAcceleration.setToZero(trajectoryFrame);
       referenceTorque.setToZero(trajectoryFrame);
    }
@@ -353,15 +372,25 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * @param desiredPosition           the position the {@code controlFrame} should reach. Not
     *                                  modified.
     * @param feedForwardLinearVelocity the feed-forward linear velocity of the {@code controlFrame}'s
-    *                                  origin with respect to the {@code base}. Not modified.
+    *                                  origin with respect to the {@code base}. Not modified. Can be
+    *                                  {@code null}, in such case the velocity is assumed to be zero.
     */
    public void setInverseKinematics(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly feedForwardLinearVelocity)
    {
       setControlMode(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
       ReferenceFrame trajectoryFrame = desiredPosition.getReferenceFrame();
       referencePosition.setIncludingFrame(desiredPosition);
-      referenceLinearVelocity.setIncludingFrame(feedForwardLinearVelocity);
-      referenceLinearVelocity.checkReferenceFrameMatch(trajectoryFrame);
+
+      if (feedForwardLinearVelocity != null)
+      {
+         referenceLinearVelocity.setIncludingFrame(feedForwardLinearVelocity);
+         referenceLinearVelocity.checkReferenceFrameMatch(trajectoryFrame);
+      }
+      else
+      {
+         referenceLinearVelocity.setToZero(trajectoryFrame);
+      }
+
       referenceLinearAcceleration.setToZero(trajectoryFrame);
       referenceForce.setToZero(trajectoryFrame);
    }
@@ -382,9 +411,11 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     *                                   modified.
     * @param feedForwardAngularVelocity the feed-forward angular velocity of {@code controlFrame} with
     *                                   respect to the {@code base}. This term is used to improve
-    *                                   tracking performance. Not modified.
+    *                                   tracking performance. Not modified. Can be {@code null}, in
+    *                                   such case the velocity is assumed to be zero.
     * @param feedForwardLinearVelocity  the feed-forward linear velocity of the {@code controlFrame}'s
-    *                                   origin with respect to the {@code base}. Not modified.
+    *                                   origin with respect to the {@code base}. Not modified. Can be
+    *                                   {@code null}, in such case the velocity is assumed to be zero.
     */
    public void setInverseKinematics(FrameOrientation3DReadOnly desiredOrientation,
                                     FramePoint3DReadOnly desiredPosition,
@@ -407,12 +438,21 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     *
     * @param desiredPose         the pose the {@code controlFrame} should reach. Not modified.
     * @param feedForwardVelocity the feed-forward angular & linear velocity of {@code controlFrame}
-    *                            with respect to the {@code base}. Not modified.
+    *                            with respect to the {@code base}. Not modified. Can be {@code null},
+    *                            in such case the velocity is assumed to be zero.
     */
    public void setInverseKinematics(FramePose3DReadOnly desiredPose, SpatialVectorReadOnly feedForwardVelocity)
    {
-      setInverseKinematics(desiredPose.getOrientation(), feedForwardVelocity.getAngularPart());
-      setInverseKinematics(desiredPose.getPosition(), feedForwardVelocity.getLinearPart());
+      if (feedForwardVelocity != null)
+      {
+         setInverseKinematics(desiredPose.getOrientation(), feedForwardVelocity.getAngularPart());
+         setInverseKinematics(desiredPose.getPosition(), feedForwardVelocity.getLinearPart());
+      }
+      else
+      {
+         setInverseKinematics(desiredPose.getOrientation(), null);
+         setInverseKinematics(desiredPose.getPosition(), null);
+      }
    }
 
    /**
@@ -428,10 +468,13 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * @param desiredOrientation             the orientation the {@code controlFrame} should reach. Not
     *                                       modified.
     * @param desiredAngularVelocity         the desired angular velocity of {@code controlFrame} with
-    *                                       respect to the {@code base}. Not modified.
+    *                                       respect to the {@code base}. Not modified. Can be
+    *                                       {@code null}, in such case the velocity is assumed to be
+    *                                       zero.
     * @param feedForwardAngularAcceleration the feed-forward angular acceleration of
     *                                       {@code controlFrame} with respect to the {@code base}. Not
-    *                                       modified.
+    *                                       modified. Can be {@code null}, in such case the
+    *                                       acceleration is assumed to be zero.
     */
    public void setInverseDynamics(FrameOrientation3DReadOnly desiredOrientation,
                                   FrameVector3DReadOnly desiredAngularVelocity,
@@ -477,10 +520,13 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * @param desiredPosition               the position that the {@code controlFrame} should reach. Not
     *                                      modified.
     * @param desiredLinearVelocity         the desired linear velocity of the {@code controlFrame}'s
-    *                                      origin with respect to the {@code base}. Not modified.
+    *                                      origin with respect to the {@code base}. Not modified. Can
+    *                                      be {@code null}, in such case the velocity is assumed to be
+    *                                      zero.
     * @param feedForwardLinearAcceleration the feed-forward linear acceleration of the
     *                                      {@code controlFrame}'s origin with respect to the
-    *                                      {@code base}. Not modified.
+    *                                      {@code base}. Not modified. Can be {@code null}, in such
+    *                                      case the acceleration is assumed to be zero.
     */
    public void setInverseDynamics(FramePoint3DReadOnly desiredPosition,
                                   FrameVector3DReadOnly desiredLinearVelocity,
@@ -528,15 +574,21 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * @param desiredPosition                the position that the {@code controlFrame} should reach.
     *                                       Not modified.
     * @param desiredAngularVelocity         the desired angular velocity of {@code controlFrame} with
-    *                                       respect to the {@code base}. Not modified.
+    *                                       respect to the {@code base}. Not modified. Can be
+    *                                       {@code null}, in such case the velocity is assumed to be
+    *                                       zero.
     * @param desiredLinearVelocity          the desired linear velocity of the {@code controlFrame}'s
-    *                                       origin with respect to the {@code base}. Not modified.
+    *                                       origin with respect to the {@code base}. Not modified. Can
+    *                                       be {@code null}, in such case the velocity is assumed to be
+    *                                       zero.
     * @param feedForwardAngularAcceleration the feed-forward angular acceleration of
     *                                       {@code controlFrame} with respect to the {@code base}. Not
-    *                                       modified.
+    *                                       modified. Can be {@code null}, in such case the
+    *                                       acceleration is assumed to be zero.
     * @param feedForwardLinearAcceleration  the feed-forward linear acceleration of the
     *                                       {@code controlFrame}'s origin with respect to the
-    *                                       {@code base}. Not modified.
+    *                                       {@code base}. Not modified. Can be {@code null}, in such
+    *                                       case the acceleration is assumed to be zero.
     */
    public void setInverseDynamics(FrameOrientation3DReadOnly desiredOrientation,
                                   FramePoint3DReadOnly desiredPosition,
@@ -561,10 +613,12 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * 
     * @param desiredPose             the pose that the {@code controlFrame} should reach. Not modified.
     * @param desiredVelocity         the desired angular & linear velocity of {@code controlFrame} with
-    *                                respect to the {@code base}. Not modified.
+    *                                respect to the {@code base}. Not modified. Can be {@code null}, in
+    *                                such case the velocity is assumed to be zero.
     * @param feedForwardAcceleration the feed-forward angular & linear acceleration of
     *                                {@code controlFrame} with respect to the {@code base}. Not
-    *                                modified.
+    *                                modified. Can be {@code null}, in such case the acceleration is
+    *                                assumed to be zero.
     */
    public void setInverseDynamics(FramePose3DReadOnly desiredPose, SpatialVectorReadOnly desiredVelocity, SpatialVectorReadOnly feedForwardAcceleration)
    {
@@ -606,9 +660,11 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * @param desiredOrientation     the orientation the {@code controlFrame} should reach. Not
     *                               modified.
     * @param desiredAngularVelocity the desired angular velocity of {@code controlFrame} with respect
-    *                               to the {@code base}. Not modified.
+    *                               to the {@code base}. Not modified. Can be {@code null}, in such
+    *                               case the velocity is assumed to be zero.
     * @param feedForwardTorque      the feed-forward torque to exert at {@code controlFrame}. Not
-    *                               modified.
+    *                               modified. Can be {@code null}, in such case the torque is assumed
+    *                               to be zero.
     */
    public void setVirtualModelControl(FrameOrientation3DReadOnly desiredOrientation,
                                       FrameVector3DReadOnly desiredAngularVelocity,
@@ -617,10 +673,27 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
       setControlMode(WholeBodyControllerCoreMode.VIRTUAL_MODEL);
       ReferenceFrame trajectoryFrame = desiredOrientation.getReferenceFrame();
       referenceOrientation.setIncludingFrame(desiredOrientation);
-      referenceAngularVelocity.setIncludingFrame(desiredAngularVelocity);
-      referenceAngularVelocity.checkReferenceFrameMatch(trajectoryFrame);
-      referenceTorque.setIncludingFrame(feedForwardTorque);
-      referenceTorque.checkReferenceFrameMatch(trajectoryFrame);
+
+      if (desiredAngularVelocity != null)
+      {
+         referenceAngularVelocity.setIncludingFrame(desiredAngularVelocity);
+         referenceAngularVelocity.checkReferenceFrameMatch(trajectoryFrame);
+      }
+      else
+      {
+         referenceAngularVelocity.setToZero(trajectoryFrame);
+      }
+
+      if (feedForwardTorque != null)
+      {
+         referenceTorque.setIncludingFrame(feedForwardTorque);
+         referenceTorque.checkReferenceFrameMatch(trajectoryFrame);
+      }
+      else
+      {
+         referenceTorque.setToZero(trajectoryFrame);
+      }
+
       referenceAngularAcceleration.setToZero(trajectoryFrame);
    }
 
@@ -637,19 +710,38 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * @param desiredPosition       the position that the {@code controlFrame} should reach. Not
     *                              modified.
     * @param desiredLinearVelocity the desired linear velocity of the {@code controlFrame}'s origin
-    *                              with respect to the {@code base}. Not modified.
+    *                              with respect to the {@code base}. Not modified. Can be {@code null},
+    *                              in such case the velocity is assumed to be zero.
     * @param feedForwardForce      the feed-forward force to exert at {@code controlFrame}. Not
-    *                              modified.
+    *                              modified. Can be {@code null}, in such case the force is assumed to
+    *                              be zero.
     */
    public void setVirtualModelControl(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly desiredLinearVelocity, FrameVector3DReadOnly feedForwardForce)
    {
       setControlMode(WholeBodyControllerCoreMode.VIRTUAL_MODEL);
       ReferenceFrame trajectoryFrame = desiredPosition.getReferenceFrame();
       referencePosition.setIncludingFrame(desiredPosition);
-      referenceLinearVelocity.setIncludingFrame(desiredLinearVelocity);
-      referenceLinearVelocity.checkReferenceFrameMatch(trajectoryFrame);
-      referenceForce.setIncludingFrame(feedForwardForce);
-      referenceForce.checkReferenceFrameMatch(trajectoryFrame);
+
+      if (desiredLinearVelocity != null)
+      {
+         referenceLinearVelocity.setIncludingFrame(desiredLinearVelocity);
+         referenceLinearVelocity.checkReferenceFrameMatch(trajectoryFrame);
+      }
+      else
+      {
+         referenceLinearVelocity.setToZero(trajectoryFrame);
+      }
+
+      if (feedForwardForce != null)
+      {
+         referenceForce.setIncludingFrame(feedForwardForce);
+         referenceForce.checkReferenceFrameMatch(trajectoryFrame);
+      }
+      else
+      {
+         referenceForce.setToZero(trajectoryFrame);
+      }
+
       referenceLinearAcceleration.setToZero(trajectoryFrame);
    }
 
@@ -668,13 +760,17 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * @param desiredPosition        the position that the {@code controlFrame} should reach. Not
     *                               modified.
     * @param desiredAngularVelocity the desired angular velocity of {@code controlFrame} with respect
-    *                               to the {@code base}. Not modified.
+    *                               to the {@code base}. Not modified. Can be {@code null}, in such
+    *                               case the velocity is assumed to be zero.
     * @param desiredLinearVelocity  the desired linear velocity of the {@code controlFrame}'s origin
-    *                               with respect to the {@code base}. Not modified.
+    *                               with respect to the {@code base}. Not modified. Can be
+    *                               {@code null}, in such case the velocity is assumed to be zero.
     * @param feedForwardTorque      the feed-forward torque to exert at {@code controlFrame}. Not
-    *                               modified.
+    *                               modified. Can be {@code null}, in such case the torque is assumed
+    *                               to be zero.
     * @param feedForwardForce       the feed-forward force to exert at {@code controlFrame}. Not
-    *                               modified.
+    *                               modified. Can be {@code null}, in such case the force is assumed to
+    *                               be zero.
     */
    public void setVirtualModelControl(FrameOrientation3DReadOnly desiredOrientation,
                                       FramePoint3DReadOnly desiredPosition,
@@ -699,14 +795,35 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     *
     * @param desiredPose       the pose that the {@code controlFrame} should reach. Not modified.
     * @param desiredVelocity   the desired angular & linear velocity of {@code controlFrame} with
-    *                          respect to the {@code base}. Not modified.
+    *                          respect to the {@code base}. Not modified. Can be {@code null}, in such
+    *                          case the velocity is assumed to be zero.
     * @param feedForwardEffort the feed-forward torque & force to exert at {@code controlFrame}. Not
-    *                          modified.
+    *                          modified. Can be {@code null}, in such case the effort is assumed to be
+    *                          zero.
     */
    public void setVirtualModelControl(FramePose3DReadOnly desiredPose, SpatialVectorReadOnly desiredVelocity, SpatialVectorReadOnly feedForwardEffort)
    {
-      setVirtualModelControl(desiredPose.getOrientation(), desiredVelocity.getAngularPart(), feedForwardEffort.getAngularPart());
-      setVirtualModelControl(desiredPose.getPosition(), desiredVelocity.getLinearPart(), feedForwardEffort.getLinearPart());
+      FrameQuaternionReadOnly desiredOrientation = desiredPose.getOrientation();
+      FramePoint3DReadOnly desiredPosition = desiredPose.getPosition();
+      FrameVector3DReadOnly desiredAngularVelocity = null;
+      FrameVector3DReadOnly desiredLinearVelocity = null;
+      FrameVector3DReadOnly feedForwardTorque = null;
+      FrameVector3DReadOnly feedForwardForce = null;
+
+      if (desiredVelocity != null)
+      {
+         desiredAngularVelocity = desiredVelocity.getAngularPart();
+         desiredLinearVelocity = desiredVelocity.getLinearPart();
+      }
+
+      if (feedForwardEffort != null)
+      {
+         feedForwardTorque = feedForwardEffort.getAngularPart();
+         feedForwardForce = feedForwardEffort.getLinearPart();
+      }
+
+      setVirtualModelControl(desiredOrientation, desiredAngularVelocity, feedForwardTorque);
+      setVirtualModelControl(desiredPosition, desiredLinearVelocity, feedForwardForce);
    }
 
    /**
@@ -936,7 +1053,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * @param angular the weights to use for the angular part of this command. Not modified.
     * @param linear  the weights to use for the linear part of this command. Not modified.
     */
-   public void setWeightsForSolver(Vector3DReadOnly angular, Vector3DReadOnly linear)
+   public void setWeightsForSolver(Tuple3DReadOnly angular, Tuple3DReadOnly linear)
    {
       spatialAccelerationCommand.setWeights(angular, linear);
    }
@@ -951,7 +1068,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     *
     * @param linear the weights to use for the linear part of this command. Not modified.
     */
-   public void setLinearWeightsForSolver(Vector3DReadOnly linear)
+   public void setLinearWeightsForSolver(Tuple3DReadOnly linear)
    {
       spatialAccelerationCommand.setLinearWeights(linear);
    }
@@ -967,7 +1084,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     *
     * @param angular the weights to use for the linear part of this command. Not modified.
     */
-   public void setAngularWeightsForSolver(Vector3DReadOnly angular)
+   public void setAngularWeightsForSolver(Tuple3DReadOnly angular)
    {
       spatialAccelerationCommand.setAngularWeights(angular);
    }
@@ -977,7 +1094,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
       return controlFramePoseInEndEffectorFrame;
    }
 
-   public void getControlFramePoseIncludingFrame(FramePoint3DBasics position, FrameQuaternionBasics orientation)
+   public void getControlFramePoseIncludingFrame(FramePoint3DBasics position, FrameOrientation3DBasics orientation)
    {
       position.setIncludingFrame(controlFramePoseInEndEffectorFrame.getPosition());
       orientation.setIncludingFrame(controlFramePoseInEndEffectorFrame.getOrientation());
