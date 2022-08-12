@@ -65,6 +65,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -86,7 +87,9 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class BalanceManager
 {
+   // Flag for debugging
    private final Boolean yumingHeuristicTurnOffAngularMomentum = true;
+   private final Boolean useAlip = true;  // another flag in MomentumStateProvider
    
    private static final boolean USE_ERROR_BASED_STEP_ADJUSTMENT = true;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -811,14 +814,15 @@ public class BalanceManager
       copTrajectoryState.setInitialCoP(yoPerfectCoP);
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
 
-      //      comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
-      
-      centerOfMassPosition.setFromReferenceFrame(centerOfMassFrame);
-      FrameVector3D fakeCoMVelocity = new FrameVector3D();
-      fakeCoMVelocity.sub( controllerToolbox.getCapturePoint(), centerOfMassPosition);
-      fakeCoMVelocity.scale(controllerToolbox.getOmega0());
-      comTrajectoryPlanner.setInitialCenterOfMassState(centerOfMassPosition, fakeCoMVelocity);
-
+      if (useAlip) {
+         centerOfMassPosition.setFromReferenceFrame(centerOfMassFrame);
+         FrameVector3D fakeCoMVelocity = new FrameVector3D();
+         fakeCoMVelocity.sub( controllerToolbox.getCapturePoint(), centerOfMassPosition);
+         fakeCoMVelocity.scale(controllerToolbox.getOmega0());
+         comTrajectoryPlanner.setInitialCenterOfMassState(centerOfMassPosition, fakeCoMVelocity);         
+      } else {
+         comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
+      }
 
       contactStateManager.initialize();
 
@@ -873,16 +877,15 @@ public class BalanceManager
       copTrajectoryState.setInitialCoP(yoPerfectCoP);
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
       
-      
-      
-      
-//      comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
-      centerOfMassPosition.setFromReferenceFrame(centerOfMassFrame);
-      FrameVector3D fakeCoMVelocity = new FrameVector3D();
-      fakeCoMVelocity.sub( controllerToolbox.getCapturePoint(), centerOfMassPosition);
-      fakeCoMVelocity.scale(controllerToolbox.getOmega0());
-      comTrajectoryPlanner.setInitialCenterOfMassState(centerOfMassPosition, fakeCoMVelocity);
-      
+      if (useAlip) {
+         centerOfMassPosition.setFromReferenceFrame(centerOfMassFrame);
+         FrameVector3D fakeCoMVelocity = new FrameVector3D();
+         fakeCoMVelocity.sub( controllerToolbox.getCapturePoint(), centerOfMassPosition);
+         fakeCoMVelocity.scale(controllerToolbox.getOmega0());
+         comTrajectoryPlanner.setInitialCenterOfMassState(centerOfMassPosition, fakeCoMVelocity);
+      } else {
+         comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
+      }      
       
       comTrajectoryPlanner.initializeTrajectory(yoDesiredCoMPosition, Double.POSITIVE_INFINITY);
       swingSpeedUpForStepAdjustment.setToNaN();
@@ -906,13 +909,16 @@ public class BalanceManager
       }
       copTrajectoryState.setInitialCoP(yoPerfectCoP);
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
-//      comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
-      
-      centerOfMassPosition.setFromReferenceFrame(centerOfMassFrame);
-      FrameVector3D fakeCoMVelocity = new FrameVector3D();
-      fakeCoMVelocity.sub( controllerToolbox.getCapturePoint(), centerOfMassPosition);
-      fakeCoMVelocity.scale(controllerToolbox.getOmega0());
-      comTrajectoryPlanner.setInitialCenterOfMassState(centerOfMassPosition, fakeCoMVelocity);
+
+      if (useAlip) {
+         centerOfMassPosition.setFromReferenceFrame(centerOfMassFrame);
+         FrameVector3D fakeCoMVelocity = new FrameVector3D();
+         fakeCoMVelocity.sub( controllerToolbox.getCapturePoint(), centerOfMassPosition);
+         fakeCoMVelocity.scale(controllerToolbox.getOmega0());
+         comTrajectoryPlanner.setInitialCenterOfMassState(centerOfMassPosition, fakeCoMVelocity);
+      } else {
+         comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
+      }
       
       swingSpeedUpForStepAdjustment.setToNaN();
 
