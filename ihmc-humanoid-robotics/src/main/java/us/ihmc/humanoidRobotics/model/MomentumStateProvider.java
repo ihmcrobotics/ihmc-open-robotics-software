@@ -20,7 +20,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class MomentumStateProvider implements ControllerStateChangedListener
 {
    // Flag for debugging
-   private final Boolean useAlip = true;
+   private final Boolean useAlip = true;  // another flag in BalanceManager
 
    // Class members
    private final CenterOfMassJacobian jacobian;
@@ -30,8 +30,8 @@ public class MomentumStateProvider implements ControllerStateChangedListener
    private final double totalMass;
 
    private AlipKalmanFilter alipFilter;
-   private FramePoint2D CMP;
-   private FramePoint2D prevCMP;
+   private FramePoint2D COP;
+   private FramePoint2D prevCOP;
 
    private Boolean modeSwitch = false;
 
@@ -73,8 +73,8 @@ public class MomentumStateProvider implements ControllerStateChangedListener
       this.totalMass = totalMass;
 
       this.alipFilter = filter;
-      CMP = new FramePoint2D();
-      prevCMP = new FramePoint2D();
+      COP = new FramePoint2D();
+      prevCOP = new FramePoint2D();
 
    }
 
@@ -83,11 +83,11 @@ public class MomentumStateProvider implements ControllerStateChangedListener
       return registry;
    }
 
-   public void updateState(FramePoint2D CMP)
+   public void updateState(FramePoint2D COP)
    {
       jacobian.reset();
       centroidalMomentumCalculator.reset();
-      this.CMP.set(CMP);
+      this.COP.set(COP);
    }
 
    public FramePoint3DReadOnly getCenterOfMassPosition()
@@ -111,15 +111,15 @@ public class MomentumStateProvider implements ControllerStateChangedListener
          SimpleMatrix u = new SimpleMatrix(2, 1);
          if (modeSwitch)
          {
-            u.set(0, 0, CMP.getX() - prevCMP.getX());
-            u.set(1, 0, CMP.getY() - prevCMP.getY());
-            prevCMP.set(CMP);
+            u.set(0, 0, COP.getX() - prevCOP.getX());
+            u.set(1, 0, COP.getY() - prevCOP.getY());
+            prevCOP.set(COP);
             modeSwitch = false;
          }
 
          SimpleMatrix y = new SimpleMatrix(4, 1);
-         y.set(0, 0, jacobian.getCenterOfMass().getX() - CMP.getX());
-         y.set(1, 0, jacobian.getCenterOfMass().getY() - CMP.getY());
+         y.set(0, 0, jacobian.getCenterOfMass().getX() - COP.getX());
+         y.set(1, 0, jacobian.getCenterOfMass().getY() - COP.getY());
          y.set(2, 0, -desiredHeight * centroidalMomentum.getLinearPart().getY() + centroidalMomentum.getAngularPart().getX());
          y.set(3, 0, desiredHeight * centroidalMomentum.getLinearPart().getX() + centroidalMomentum.getAngularPart().getY());
          alipFilter.Update(u, y);
