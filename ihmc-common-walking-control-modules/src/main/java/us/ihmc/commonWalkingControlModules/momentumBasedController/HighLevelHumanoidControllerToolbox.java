@@ -456,7 +456,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
       computeCop();
 
-      momentumStateProvider.updateState(centerOfPressure);  // The input should be CMP, but I'm using COP for . NO. IT SHOULD NOT BE THE CMP
+      momentumStateProvider.updateState(centerOfPressure);  // The input should be COP! Not CMP.
       computeCapturePoint();
       
       updateBipedSupportPolygons();
