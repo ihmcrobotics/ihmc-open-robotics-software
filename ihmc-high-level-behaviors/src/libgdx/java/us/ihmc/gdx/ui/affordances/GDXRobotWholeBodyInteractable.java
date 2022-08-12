@@ -158,7 +158,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
          }
       }
 
-      walkPathControlRing.create(baseUI.getPrimary3DPanel().getCamera3D(), robotModel, syncedRobot, ros2Helper);
+      walkPathControlRing.create(baseUI.getPrimary3DPanel().getCamera3D(), robotModel, syncedRobot, ros2Helper, teleoperationParameters);
    }
 
    public void update()
