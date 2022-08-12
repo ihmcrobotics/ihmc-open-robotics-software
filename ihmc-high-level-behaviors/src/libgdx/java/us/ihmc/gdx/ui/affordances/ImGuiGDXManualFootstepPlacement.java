@@ -1,15 +1,24 @@
 package us.ihmc.gdx.ui.affordances;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
+import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
+import imgui.flag.ImGuiKey;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
+import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgcodecs;
+import org.bytedeco.opencv.global.opencv_imgproc;
+import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -30,8 +39,12 @@ import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.teleoperation.GDXTeleoperationParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.io.WorkspaceDirectory;
+import us.ihmc.tools.io.WorkspaceFile;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -53,7 +66,17 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
    private GDX3DPanel primary3DPanel;
    private GDXTeleoperationParameters teleoperationParameters;
    private boolean renderTooltip = false;
+   private boolean walkExecuted = false;
+
    FramePose3D tempFramePose = new FramePose3D();
+
+   // FOR ICONS (NON-BUTTON)
+   private final WorkspaceDirectory iconDirectory = new WorkspaceDirectory("ihmc-open-robotics-software",
+           "ihmc-high-level-behaviors/src/libgdx/resources/icons");
+   private final String iconFileNames[] = new String[] {"feet.png"};
+   private final String fileNameStringKeys[] = new String[] {"feet"};
+   private Map<String, Texture> iconTexturesMap = new HashMap<String, Texture>();
+
 
    public void create(GDXImGuiBasedUI baseUI,
                       CommunicationHelper communicationHelper,
@@ -69,6 +92,18 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
 
       stepChecker = new ImGuiGDXManuallyPlacedFootstepChecker(baseUI, communicationHelper, syncedRobot, footstepPlannerParameters);
       clear();
+
+      // get icon textures
+      for (int i = 0; i < iconFileNames.length; ++i)
+      {
+         WorkspaceFile imageFile = new WorkspaceFile(iconDirectory,iconFileNames[i]);
+         Mat readImage = opencv_imgcodecs.imread(imageFile.getFilePath().toString());
+         Pixmap pixmap = new Pixmap(readImage.cols(), readImage.rows(), Pixmap.Format.RGBA8888);
+         BytePointer rgba8888BytePointer = new BytePointer(pixmap.getPixels());
+         Mat rgba8Mat = new Mat(readImage.rows(), readImage.cols(), opencv_core.CV_8UC4, rgba8888BytePointer);
+         opencv_imgproc.cvtColor(readImage, rgba8Mat, opencv_imgproc.COLOR_RGB2RGBA);
+         iconTexturesMap.put(fileNameStringKeys[i], new Texture(new PixmapTextureData(pixmap, null, false, false)));
+      }
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)
@@ -126,6 +161,21 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
             {
                removeFootStep();
             }
+
+            // changing yaw while placing the step (not yet placed)
+            if (ImGui.isKeyPressed(ImGuiTools.getLeftArrowKey()))
+            {
+//               footstepBeingPlaced.get
+               RigidBodyTransform latestFootstepTransform = footstepBeingPlaced.getFootTransformInWorld();
+               double latestFootstepYaw = latestFootstepTransform.getRotation().getYaw();
+               tempFramePose.setToZero(ReferenceFrame.getWorldFrame());
+               RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
+               GDXTools.toEuclid(new Matrix4(), rigidBodyTransform);
+               tempFramePose.set(rigidBodyTransform);
+               tempFramePose.getOrientation().set(new RotationMatrix(latestFootstepYaw + 5/180 * Math.PI, 0.0, 0.0));
+               tempFramePose.get(footstepBeingPlaced.getSelectablePose3DGizmo().getPoseGizmo().getTransformToParent());
+               footstepBeingPlaced.getSelectablePose3DGizmo().getPoseGizmo().updateTransforms();
+            }
          }
 
          Point3DReadOnly pickPointInWorld = input.getPickPointInWorld();
@@ -165,7 +215,8 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
          stepChecker.setRenderTooltip(true);
          stepChecker.makeWarnings();
       }
-      else {
+      else
+      {
          stepChecker.setRenderTooltip(false);
       }
    }
@@ -206,34 +257,41 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       createNewFootStep(currentFootStepSide);
    }
 
-   public void renderImGuiWidgets()
+   public void renderImGuiWidgets(GDXPastFootSteps pastFootSteps)
    {
-      ImGui.text("Place footstep:");
+//      ImGui.text("Place footstep:");
+
+      ImGui.image(iconTexturesMap.get("feet").getTextureObjectHandle(), 35.0f, 35.0f);
       ImGui.sameLine();
+      ImGui.pushFont(ImGuiTools.getMediumFont());
       if (ImGui.button(labels.get("Left")))
       {
          createNewFootStep(RobotSide.LEFT);
       }
+      ImGui.popFont();
       ImGui.sameLine();
+      ImGui.pushFont(ImGuiTools.getMediumFont());
       if (ImGui.button(labels.get("Right")))
       {
          createNewFootStep(RobotSide.RIGHT);
       }
-
+      ImGui.popFont();
       ImGui.sameLine();
+      ImGui.pushFont(ImGuiTools.getMediumFont());
       if (ImGui.button(labels.get("Walk")))
       {
          if (getFootstepArrayList().size() > 0)
          {
-            walkFromSteps();
+            walkFromSteps(pastFootSteps);
          }
       }
+      ImGui.popFont();
 
       if (ImGui.isKeyPressed(ImGuiTools.getSpaceKey()))
       {
          if (getFootstepArrayList().size() > 0)
          {
-            walkFromSteps();
+            walkFromSteps(pastFootSteps);
          }
       }
 
@@ -267,7 +325,7 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
    }
 
    @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void  getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
 
       for (int i = 0; i < footstepArrayList.size(); i++)
@@ -305,7 +363,7 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       footstepIndex = -1;
    }
 
-   private void walkFromSteps()
+   private void walkFromSteps(GDXPastFootSteps pastFootSteps)
    {
       FootstepDataListMessage messageList = new FootstepDataListMessage();
       for (ImGuiGDXManuallyPlacedFootstep step : footstepArrayList)
@@ -316,6 +374,8 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       }
       communicationHelper.publishToController(messageList);
       // done walking >>
+      pastFootSteps.logStepsTaken(footstepArrayList);
+
       // set stance and swing as last two steps of the footstepArrayList (if this list is not empty)
       // delete steps in singleFootStepAffordance.
 

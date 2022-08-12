@@ -46,8 +46,10 @@ public class GDXFootstepPlanGraphic implements RenderableProvider
    }
    private final SideDependentList<ConvexPolygon2D> defaultContactPoints = new SideDependentList<>();
    private volatile Runnable buildMeshAndCreateModelInstance = null;
+
    private ModelInstance modelInstance;
    private Model lastModel;
+
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
    private final ArrayList<GDX3DSituatedText> textRenderables = new ArrayList<>();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
