@@ -55,8 +55,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
 {
-   private static String folderPath = "C:\\Users\\yumin\\OneDrive\\Documents\\workspace\\exported_data\\";
-
    private int NumDoFs; // excluding floating base joint
 
    // Joint ordering as of 20220810 (just for reference; the order of joint list from MultiBodySystemTools.collectSubtreeJoints(fullRobotModel.getPelvis()) ):
@@ -202,8 +200,8 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
          jointMatrixIndexProvider = null;
       }
 
-      // Initialize the size of a few matices
-      String[] jointNameInOrder = read1DString(folderPath + "all_joint_names_in_order.csv");
+      // Initialize the size of a few matrices
+      //      String[] jointNameInOrder = read1DString(folderPath + "all_joint_names_in_order.csv");
       NumDoFs = jointNameInOrder.length;
       jacobianNP = new DMatrixRMaj(3, 6 + NumDoFs);
       jacobianQuaternionNPrtBase = new DMatrixRMaj(4, NumDoFs);
@@ -280,7 +278,7 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
       //      LogTools.info("-------------------------NP------------------------------------");
       //      LogTools.info("-------------------------NP------------------------------------");
 
-      Integer[] jointsToFit = read1DIntCsvToIntArray(folderPath + "joints_to_fit.csv");
+      //      Integer[] jointsToFit = read1DIntCsvToIntArray(folderPath + "joints_to_fit.csv");
       jointIndexArray = new int[jointsToFit.length];
       for (int i = 0; i < jointsToFit.length; i++)
       {
@@ -643,6 +641,13 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
    }
 
    //==========================================================================================================================================
+   private String[] jointNameInOrder = new String[] {"LEFT_HIP_Z", "RIGHT_HIP_Z", "SPINE_Z", "LEFT_HIP_X", "RIGHT_HIP_X", "SPINE_X", "LEFT_HIP_Y",
+         "RIGHT_HIP_Y", "SPINE_Y", "LEFT_KNEE_Y", "RIGHT_KNEE_Y", "LEFT_SHOULDER_Y", "RIGHT_SHOULDER_Y", "LEFT_ANKLE_Y", "RIGHT_ANKLE_Y", "LEFT_SHOULDER_X",
+         "RIGHT_SHOULDER_X", "LEFT_ANKLE_X", "RIGHT_ANKLE_X", "LEFT_SHOULDER_Z", "RIGHT_SHOULDER_Z", "LEFT_ELBOW_Y", "RIGHT_ELBOW_Y", "LEFT_WRIST_Z",
+         "RIGHT_WRIST_Z", "LEFT_WRIST_X", "RIGHT_WRIST_X", "LEFT_WRIST_Y", "RIGHT_WRIST_Y"};
+
+   private Integer[] jointsToFit = new Integer[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 16, 17, 20, 21, 22, 23};
+
    public double getQx(double[] q)
    {
       double Qx;
