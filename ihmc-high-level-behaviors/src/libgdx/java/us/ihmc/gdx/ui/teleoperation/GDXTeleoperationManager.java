@@ -145,7 +145,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       robotModel = communicationHelper.getRobotModel();
 
       teleoperationParameters = new GDXTeleoperationParameters(robotRepoName, robotSubsequentPathToResourceFolder, robotModel.getSimpleRobotName());
-      teleoperationParameters.loadUnsafe();
+      teleoperationParameters.load();
       teleoperationParameters.save();
 
       syncedRobot = communicationHelper.newSyncedRobot();
