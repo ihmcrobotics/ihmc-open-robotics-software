@@ -20,7 +20,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class MomentumStateProvider implements ControllerStateChangedListener
 {
    // Flag for debugging
-   private final Boolean useAlip = true;  // another flag in BalanceManager
+   private final Boolean useAlip = true;
 
    // Class members
    private final CenterOfMassJacobian jacobian;

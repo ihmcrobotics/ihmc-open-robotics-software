@@ -228,9 +228,9 @@ public class TransferToWalkingSingleSupportState extends TransferState
    @Override
    public boolean isDone(double timeInState)
    {
-      return timeInState >= footstepTimings[0].getTransferTime();
+//      return timeInState >= footstepTimings[0].getTransferTime();
 
-//      return super.isDone(timeInState) || feetManager.isFootToeingOffSlipping(transferToSide.getOppositeSide());
+      return super.isDone(timeInState) || feetManager.isFootToeingOffSlipping(transferToSide.getOppositeSide());
    }
 
    @Override

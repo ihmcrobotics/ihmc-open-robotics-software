@@ -89,7 +89,7 @@ public class BalanceManager
 {
    // Flag for debugging
    private final Boolean yumingHeuristicTurnOffAngularMomentum = true;
-   private final Boolean useAlip = true;  // another flag in MomentumStateProvider
+   private final Boolean setInitConstraintFromFeedbackInPlannedTrajForAlip = false;
    
    private static final boolean USE_ERROR_BASED_STEP_ADJUSTMENT = true;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -814,7 +814,7 @@ public class BalanceManager
       copTrajectoryState.setInitialCoP(yoPerfectCoP);
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
 
-      if (useAlip) {
+      if (setInitConstraintFromFeedbackInPlannedTrajForAlip) {
          centerOfMassPosition.setFromReferenceFrame(centerOfMassFrame);
          FrameVector3D fakeCoMVelocity = new FrameVector3D();
          fakeCoMVelocity.sub( controllerToolbox.getCapturePoint(), centerOfMassPosition);
@@ -877,7 +877,7 @@ public class BalanceManager
       copTrajectoryState.setInitialCoP(yoPerfectCoP);
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
       
-      if (useAlip) {
+      if (setInitConstraintFromFeedbackInPlannedTrajForAlip) {
          centerOfMassPosition.setFromReferenceFrame(centerOfMassFrame);
          FrameVector3D fakeCoMVelocity = new FrameVector3D();
          fakeCoMVelocity.sub( controllerToolbox.getCapturePoint(), centerOfMassPosition);
@@ -910,7 +910,7 @@ public class BalanceManager
       copTrajectoryState.setInitialCoP(yoPerfectCoP);
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
 
-      if (useAlip) {
+      if (setInitConstraintFromFeedbackInPlannedTrajForAlip) {
          centerOfMassPosition.setFromReferenceFrame(centerOfMassFrame);
          FrameVector3D fakeCoMVelocity = new FrameVector3D();
          fakeCoMVelocity.sub( controllerToolbox.getCapturePoint(), centerOfMassPosition);
