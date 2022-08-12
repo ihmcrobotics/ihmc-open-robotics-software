@@ -26,6 +26,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.nadia.parameters.MomentumOptimizationSettingslinearMomentumWeight;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -58,7 +59,10 @@ public class WalkingControllerState extends HighLevelControllerState
    private boolean requestIntegratorReset = false;
    private final YoBoolean yoRequestingIntegratorReset = new YoBoolean("RequestingIntegratorReset", registry);
 
-   private final BooleanParameter useCoPObjective = new BooleanParameter("UseCenterOfPressureObjectiveFromPlanner", registry, false);
+   private final BooleanParameter useCoPObjective = new BooleanParameter("UseCenterOfPressureObjectiveFromPlanner", registry, true);
+   // When setting this to true, you should also 
+   //   1. set the x y component of linearMomentumWeight to 0 (e.g. in NadiaMomentumOptimizationSettings) 
+   //   2. set centerOfPressureWeight in LinearMomentumRateControlModule
 
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
