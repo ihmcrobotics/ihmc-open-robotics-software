@@ -12,14 +12,17 @@ import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningMo
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.BehaviorTools;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -31,6 +34,11 @@ import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.ui.gizmo.GDXPathControlRingGizmo;
 import us.ihmc.gdx.ui.graphics.GDXFootstepGraphic;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
+import us.ihmc.gdx.ui.teleoperation.GDXTeleoperationParameters;
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.PathTypeStepParameters;
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.SimplePathParameters;
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TurnStraightTurnFootstepGenerator;
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.TurnStraightTurnOverheadPath;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
@@ -42,7 +50,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class GDXWalkPathControlRing
+public class GDXWalkPathControlRing implements PathTypeStepParameters
 {
    private final GDXPathControlRingGizmo footstepPlannerGoalGizmo = new GDXPathControlRingGizmo();
    private boolean selected = false;
@@ -50,6 +58,7 @@ public class GDXWalkPathControlRing
    private boolean mouseRingPickSelected;
    private ROS2SyncedRobotModel syncedRobot;
    private ROS2ControllerHelper ros2Helper;
+   private GDXTeleoperationParameters teleoperationParameters;
    private MovingReferenceFrame midFeetZUpFrame;
    private ResettableExceptionHandlingExecutorService footstepPlanningThread;
    private FootstepPlannerParametersBasics footstepPlannerParameters;
@@ -74,14 +83,23 @@ public class GDXWalkPathControlRing
    private volatile FootstepPlan footstepPlanToGenerateMeshes;
    private final AxisAngle walkFacingDirection = new AxisAngle();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private boolean useAStarPlanner = false;
+   private int plannerToUse = 0;
    private TurnWalkTurnPlanner turnWalkTurnPlanner;
    private final FootstepPlannerGoal turnWalkTurnGoal = new FootstepPlannerGoal();
+   private TurnStraightTurnFootstepGenerator turnStraightTurnFootstepGenerator;
+   private SimplePathParameters turnStraightTurnParameters;
+   private SteppingParameters steppingParameters;
+   private GDXWalkPathType walkPathType = GDXWalkPathType.STRAIGHT;
 
-   public void create(GDXFocusBasedCamera camera3D, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot, ROS2ControllerHelper ros2Helper)
+   public void create(GDXFocusBasedCamera camera3D,
+                      DRCRobotModel robotModel,
+                      ROS2SyncedRobotModel syncedRobot,
+                      ROS2ControllerHelper ros2Helper,
+                      GDXTeleoperationParameters teleoperationParameters)
    {
       this.syncedRobot = syncedRobot;
       this.ros2Helper = ros2Helper;
+      this.teleoperationParameters = teleoperationParameters;
       footstepPlannerGoalGizmo.create(camera3D);
       midFeetZUpFrame = syncedRobot.getReferenceFrames().getMidFeetZUpFrame();
       footFrames = syncedRobot.getReferenceFrames().getSoleFrames();
@@ -90,6 +108,7 @@ public class GDXWalkPathControlRing
       footstepPlanningThread = MissingThreadTools.newSingleThreadExecutor("WalkPathControlPlanning", true, 1);
 
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
+      steppingParameters = robotModel.getWalkingControllerParameters().getSteppingParameters();
       SegmentDependentList<RobotSide, ArrayList<Point2D>> contactPoints = robotModel.getContactPointParameters().getControllerFootGroundContactPoints();
       leftStanceFootstepGraphic = new GDXFootstepGraphic(contactPoints, RobotSide.LEFT);
       rightStanceFootstepGraphic = new GDXFootstepGraphic(contactPoints, RobotSide.RIGHT);
@@ -114,6 +133,12 @@ public class GDXWalkPathControlRing
       rightStanceFootPose.getPosition().subY(halfIdealFootstepWidth);
       leftStanceFootstepGraphic.setPose(leftStanceFootPose);
       rightStanceFootstepGraphic.setPose(rightStanceFootPose);
+
+      SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>(syncedRobot.getReferenceFrames().getSoleFrames());
+      turnStraightTurnFootstepGenerator = new TurnStraightTurnFootstepGenerator(new SideDependentList<>(null, null),
+                                                                                soleFrames,
+                                                                                new FramePose2D(),
+                                                                                this);
    }
 
    public void update()
@@ -170,18 +195,22 @@ public class GDXWalkPathControlRing
       {
          if (footstepPlannerGoalGizmo.getPositiveXArrowPickSelected())
          {
+            walkPathType = GDXWalkPathType.STRAIGHT;
             walkFacingDirection.set(Axis3D.Z, 0.0);
          }
          else if (footstepPlannerGoalGizmo.getPositiveYArrowPickSelected())
          {
+            walkPathType = GDXWalkPathType.LEFT_SHUFFLE;
             walkFacingDirection.set(Axis3D.Z, Math.PI / 2.0);
          }
          else if (footstepPlannerGoalGizmo.getNegativeXArrowPickSelected())
          {
+            walkPathType = GDXWalkPathType.REVERSE;
             walkFacingDirection.set(Axis3D.Z, Math.PI);
          }
          else if (footstepPlannerGoalGizmo.getNegativeYArrowPickSelected())
          {
+            walkPathType = GDXWalkPathType.RIGHT_SHUFFLE;
             walkFacingDirection.set(Axis3D.Z, -Math.PI / 2.0);
          }
          if (footstepPlannerGoalGizmo.getAnyArrowPickSelected())
@@ -227,16 +256,20 @@ public class GDXWalkPathControlRing
    {
       footstepPlanningThread.clearQueueAndExecute(() ->
       {
-         if (useAStarPlanner)
+         if (plannerToUse == 0)
          {
             planFoostepsUsingAStarPlanner(new Pose3D(leftStanceFootPose),
                                           new Pose3D(rightStanceFootPose),
                                           new Pose3D(leftGoalFootPose),
                                           new Pose3D(rightGoalFootPose));
          }
-         else
+         else if (plannerToUse == 1)
          {
             planFootstepsUsingTurnWalkTurnPlanner();
+         }
+         else
+         {
+            planFootstepsUsingTurnStraightTurnFootstepGenerator();
          }
       });
    }
@@ -281,6 +314,14 @@ public class GDXWalkPathControlRing
       footstepPlan = footstepPlanToGenerateMeshes = turnWalkTurnPlanner.getPlan();
    }
 
+   public void planFootstepsUsingTurnStraightTurnFootstepGenerator()
+   {
+      turnStraightTurnFootstepGenerator.setStanceStartPreference(RobotSide.LEFT);
+      // TODO:
+//      turnStraightTurnFootstepGenerator.setFootstepPath(new TurnStraightTurnOverheadPath());
+
+   }
+
    private void planFoostepsUsingAStarPlanner(Pose3DReadOnly leftStanceFootPose,
                                               Pose3DReadOnly rightStanceFootPose,
                                               Pose3DReadOnly leftGoalFootPose,
@@ -301,13 +342,17 @@ public class GDXWalkPathControlRing
 
    public void renderImGuiWidgets()
    {
-      if (ImGui.radioButton(labels.get("Turn Walk Turn"), !useAStarPlanner))
+      if (ImGui.radioButton(labels.get("A* Planner"), plannerToUse == 0))
       {
-         useAStarPlanner = false;
+         plannerToUse = 0;
       }
-      if (ImGui.radioButton(labels.get("A* Planner"), useAStarPlanner))
+      if (ImGui.radioButton(labels.get("Turn Walk Turn"), plannerToUse == 1))
       {
-         useAStarPlanner = true;
+         plannerToUse = 1;
+      }
+      if (ImGui.radioButton(labels.get("Turn Straight Turn"), plannerToUse == 2))
+      {
+         plannerToUse = 2;
       }
    }
 
@@ -340,5 +385,62 @@ public class GDXWalkPathControlRing
    {
       footstepPlanningThread.destroy();
       foostepPlanGraphic.destroy();
+   }
+
+   @Override
+   public double getAngle()
+   {
+      return switch (walkPathType)
+      {
+         case STRAIGHT -> 0.0;
+         case LEFT_SHUFFLE -> -Math.PI / 2.0;
+         case RIGHT_SHUFFLE -> Math.PI / 2.0;
+         case REVERSE -> Math.PI;
+      };
+   }
+
+   @Override
+   public double getStepWidth()
+   {
+      return switch (walkPathType)
+      {
+         case STRAIGHT -> teleoperationParameters.getStraightStepWidth();
+         case LEFT_SHUFFLE, RIGHT_SHUFFLE -> teleoperationParameters.getShuffleStepWidth();
+         case REVERSE -> teleoperationParameters.getReverseStepWidth();
+      };
+   }
+
+   @Override
+   public double getStepLength()
+   {
+      return switch (walkPathType)
+      {
+         case STRAIGHT -> teleoperationParameters.getFootstepLengthMultiplier() * teleoperationParameters.getStraightStepLength();
+         case LEFT_SHUFFLE, RIGHT_SHUFFLE -> teleoperationParameters.getFootstepLengthMultiplier() * teleoperationParameters.getShuffleStepLength();
+         case REVERSE -> teleoperationParameters.getFootstepLengthMultiplier() * teleoperationParameters.getReverseStepLength();
+      };
+   }
+
+   @Override
+   public double getTurningOpenStepAngle()
+   {
+      double minimumHipOpeningAngle = Math.toRadians(10.0);
+      double hipOpeningAngle = EuclidCoreTools.interpolate(minimumHipOpeningAngle,
+                                                           steppingParameters.getMaxAngleTurnOutwards(),
+                                                           teleoperationParameters.getTurnAggressiveness());
+      return hipOpeningAngle;
+   }
+
+   @Override
+   public double getTurningCloseStepAngle()
+   {
+      double hipClosingAngle = -teleoperationParameters.getTurnAggressiveness() * steppingParameters.getMaxAngleTurnInwards();
+      return hipClosingAngle;
+   }
+
+   @Override
+   public double getTurningStepWidth()
+   {
+      return steppingParameters.getTurningStepWidth();
    }
 }

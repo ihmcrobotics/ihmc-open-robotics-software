@@ -17,6 +17,15 @@ public class GDXTeleoperationParameters extends StoredPropertySet
    public static final DoubleStoredPropertyKey chestMaximumPitch = keys.addDoubleKey("Chest maximum pitch");
    public static final DoubleStoredPropertyKey chestMinimumYaw = keys.addDoubleKey("Chest minimum yaw");
    public static final DoubleStoredPropertyKey chestMaximumYaw = keys.addDoubleKey("Chest maximum yaw");
+   public static final DoubleStoredPropertyKey turnAggressiveness = keys.addDoubleKey("Turn aggressiveness");
+   public static final DoubleStoredPropertyKey straightStepLength = keys.addDoubleKey("Straight step length");
+   public static final DoubleStoredPropertyKey straightStepWidth = keys.addDoubleKey("Straight step width");
+   public static final DoubleStoredPropertyKey reverseStepLength = keys.addDoubleKey("Reverse step length");
+   public static final DoubleStoredPropertyKey reverseStepWidth = keys.addDoubleKey("Reverse step width");
+   public static final DoubleStoredPropertyKey shuffleStepLength = keys.addDoubleKey("Shuffle step length");
+   public static final DoubleStoredPropertyKey shuffleStepWidth = keys.addDoubleKey("Shuffle step width");
+   public static final DoubleStoredPropertyKey turningStepWidth = keys.addDoubleKey("Turning step width");
+   public static final DoubleStoredPropertyKey footstepLengthMultiplier = keys.addDoubleKey("Footstep length multiplier");
 
    public GDXTeleoperationParameters(String robotRepoName, String robotSubsequentPathToResourceFolder, String robotName)
    {
@@ -61,5 +70,50 @@ public class GDXTeleoperationParameters extends StoredPropertySet
    public double getChestMaximumYaw()
    {
       return get(chestMaximumYaw);
+   }
+
+   public double getTurnAggressiveness()
+   {
+      return get(turnAggressiveness);
+   }
+
+   public double getStraightStepLength()
+   {
+      return get(straightStepLength);
+   }
+
+   public double getStraightStepWidth()
+   {
+      return get(straightStepWidth);
+   }
+
+   public double getReverseStepLength()
+   {
+      return get(reverseStepLength);
+   }
+
+   public double getReverseStepWidth()
+   {
+      return get(reverseStepWidth);
+   }
+
+   public double getShuffleStepLength()
+   {
+      return get(shuffleStepLength);
+   }
+
+   public double getShuffleStepWidth()
+   {
+      return get(shuffleStepWidth);
+   }
+
+   public double getTurningStepWidth()
+   {
+      return get(turningStepWidth);
+   }
+
+   public double getFootstepLengthMultiplier()
+   {
+      return get(footstepLengthMultiplier);
    }
 }
