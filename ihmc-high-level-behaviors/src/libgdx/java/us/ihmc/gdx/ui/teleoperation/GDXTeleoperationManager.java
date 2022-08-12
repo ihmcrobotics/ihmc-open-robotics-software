@@ -1,8 +1,11 @@
 package us.ihmc.gdx.ui.teleoperation;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
+import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.*;
@@ -11,6 +14,11 @@ import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgcodecs;
+import org.bytedeco.opencv.global.opencv_imgproc;
+import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -43,10 +51,12 @@ import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.gdx.imgui.ImGuiMovingPlot;
 import us.ihmc.gdx.imgui.ImGuiPanel;
+import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
+import us.ihmc.gdx.ui.affordances.GDXPastFootSteps;
 import us.ihmc.gdx.ui.affordances.GDXRobotWholeBodyInteractable;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXManualFootstepPlacement;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
@@ -62,9 +72,13 @@ import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.tools.io.WorkspaceDirectory;
+import us.ihmc.tools.io.WorkspaceFile;
 import us.ihmc.tools.string.StringTools;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -120,11 +134,37 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
    private GDXChestOrientationSlider chestPitchSlider;
    private GDXChestOrientationSlider chestYawSlider;
 
+   // FOR ICONS (NON-BUTTON)
+   private final WorkspaceDirectory iconDirectory = new WorkspaceDirectory("ihmc-open-robotics-software",
+                                                                           "ihmc-high-level-behaviors/src/libgdx/resources/icons");
+   private final String iconFileNames[] = new String[] {"leftHand.png", "rightHand.png"};
+   private final String fileNameStringKeys[] = new String[] {"leftHand", "rightHand"};
+   private Map<String, Texture> iconTexturesMap = new HashMap<String, Texture>();
+   private int textureID = 0;
+
+   // FOR LOGGING STEPS TAKEN
+   private GDXPastFootSteps pastFootSteps;
+
    public GDXTeleoperationManager(String robotRepoName,
                                   String robotSubsequentPathToResourceFolder,
                                   CommunicationHelper communicationHelper)
    {
       this(robotRepoName, robotSubsequentPathToResourceFolder, communicationHelper, null, null, null);
+
+   }
+
+   public void mapTextureID()
+   {
+      for (int i = 0; i < iconFileNames.length; ++i)
+      {
+         WorkspaceFile imageFile = new WorkspaceFile(iconDirectory,iconFileNames[i]);
+         Mat readImage = opencv_imgcodecs.imread(imageFile.getFilePath().toString());
+         Pixmap pixmap = new Pixmap(readImage.cols(), readImage.rows(), Pixmap.Format.RGBA8888);
+         BytePointer rgba8888BytePointer = new BytePointer(pixmap.getPixels());
+         Mat rgba8Mat = new Mat(readImage.rows(), readImage.cols(), opencv_core.CV_8UC4, rgba8888BytePointer);
+         opencv_imgproc.cvtColor(readImage, rgba8Mat, opencv_imgproc.COLOR_RGB2RGBA);
+         iconTexturesMap.put(fileNameStringKeys[i],new Texture(new PixmapTextureData(pixmap, null, false, false)));
+      }
    }
 
    public GDXTeleoperationManager(String robotRepoName,
@@ -212,6 +252,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
 
    public void create(GDXImGuiBasedUI baseUI)
    {
+      if(iconTexturesMap.size()==0) mapTextureID();
       // TODO: Remove this stuff and use the path control ring for this
       footstepGoal.create(baseUI, goal -> queueFootstepPlanning(), Color.YELLOW);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(footstepGoal::processImGui3DViewInput);
@@ -224,6 +265,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(manualFootstepPlacement::processImGui3DViewInput);
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(manualFootstepPlacement::calculate3DViewPick);
 
+
       if (interactableRobot != null)
       {
          interactableRobot.create(baseUI);
@@ -233,6 +275,8 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
          interactableRobot.setInteractablesEnabled(true);
          baseUI.getPrimaryScene().addRenderableProvider(interactableRobot);
       }
+      pastFootSteps = new GDXPastFootSteps(baseUI);
+      baseUI.getPrimaryScene().addRenderableProvider(pastFootSteps);
    }
 
    public void update()
@@ -363,23 +407,36 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       ImGui.checkbox(labels.get("Show footstep planner parameter tuner"), footstepPlanningParametersTuner.getIsShowing());
       ImGui.checkbox(labels.get("Show teleoperation parameter tuner"), teleoperationParametersTuner.getIsShowing());
 
-      manualFootstepPlacement.renderImGuiWidgets();
+      manualFootstepPlacement.renderImGuiWidgets(pastFootSteps);
 
       ImGui.sameLine();
+      ImGui.pushFont(ImGuiTools.getMediumFont());
       if (ImGui.button(labels.get("Clear")))
       {
          manualFootstepPlacement.clear();
       }
+      ImGui.popFont();
 
       ImGui.sameLine();
+      ImGui.pushFont(ImGuiTools.getMediumFont());
       if (ImGui.button(labels.get("Delete Last")))
       {
          manualFootstepPlacement.removeFootStep();
       }
+      ImGui.popFont();
 
       for (RobotSide side : RobotSide.values)
       {
-         ImGui.text(side.getPascalCaseName() + " hand:");
+         if (side == RobotSide.LEFT)
+         {
+            textureID = iconTexturesMap.get("leftHand").getTextureObjectHandle();
+         }
+         else if (side == RobotSide.RIGHT)
+         {
+            textureID = iconTexturesMap.get("rightHand").getTextureObjectHandle();
+         }
+//         ImGui.text(side.getPascalCaseName() + " hand:");
+         ImGui.image(textureID, 35.0f,35.0f);
          ImGui.sameLine();
          if (ImGui.button(labels.get("Calibrate", side.getCamelCaseName())))
          {
@@ -426,6 +483,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
          footstepPlanGraphic.clear();
          footstepGoal.clear();
          manualFootstepPlacement.clear();
+         pastFootSteps.clear();
       }
 
       interactableRobot.renderImGuiWidgets();
@@ -447,7 +505,9 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
          footstepPlanGraphic.getRenderables(renderables, pool);
          footstepGoal.getRenderables(renderables, pool);
          manualFootstepPlacement.getRenderables(renderables, pool);
+         pastFootSteps.getRenderables(renderables,pool);
       }
+
    }
 
    private void queueFootstepPlanning()

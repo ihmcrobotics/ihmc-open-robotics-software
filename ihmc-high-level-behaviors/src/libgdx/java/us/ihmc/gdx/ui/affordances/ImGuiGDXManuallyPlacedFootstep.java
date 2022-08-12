@@ -263,7 +263,6 @@ public class ImGuiGDXManuallyPlacedFootstep
 
    public RigidBodyTransform getFootTransformInWorld()
    {
-
       return getSelectablePose3DGizmo().getPoseGizmo().getTransformToParent();
    }
 
