@@ -4,7 +4,7 @@ public class HeadingAndVelocityEvaluationScriptParameters
 {
    private double acceleration = 0.25;
    private double maxVelocity = 1.0; //1.0; //1.5; //1.0;
-   private double cruiseVelocity = 0.6; //0.6; //1.2; //0.6;
+   private double cruiseVelocity = 0.4; //0.6; //1.2; //0.6;
    private double headingDot = 0.0; //0.5;
    private double sideStepVelocity = 0.4;
    private double maxHeadingDot = 0.0; //0.1;
