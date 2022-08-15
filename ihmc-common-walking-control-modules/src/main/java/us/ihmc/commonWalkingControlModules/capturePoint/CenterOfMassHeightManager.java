@@ -53,7 +53,7 @@ public class CenterOfMassHeightManager
    private final YoBoolean enableUserPelvisControlDuringWalking = new YoBoolean("centerOfMassHeightManagerEnableUserPelvisControlDuringWalking", registry);
    private final YoBoolean doPrepareForLocomotion = new YoBoolean("doPrepareCenterOfMassHeightForLocomotion", registry);
 
-   private final BooleanParameter controlKneesInLocomotion = new BooleanParameter("controlKneesInLocomotion", registry, false);
+   private final BooleanParameter controlKneesInLocomotion = new BooleanParameter("controlKneesInLocomotion", registry, true);
 
    public CenterOfMassHeightManager(HighLevelHumanoidControllerToolbox controllerToolbox,
                                     WalkingControllerParameters walkingControllerParameters,
