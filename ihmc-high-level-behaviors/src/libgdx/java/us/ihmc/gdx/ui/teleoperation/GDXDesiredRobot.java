@@ -4,10 +4,14 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.gdx.ui.graphics.GDXMultiBodyGraphic;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJointStateCopier;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
@@ -19,15 +23,19 @@ import us.ihmc.scs2.definition.visual.MaterialDefinition;
   */
 public class GDXDesiredRobot extends GDXMultiBodyGraphic
 {
+   private final ROS2SyncedRobotModel syncedRobotModel;
    private final DRCRobotModel robotModel;
    private final FullHumanoidRobotModel desiredFullRobotModel;
 
-   public GDXDesiredRobot(DRCRobotModel robotModel)
+   public GDXDesiredRobot(DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobotModel)
    {
       super(robotModel.getSimpleRobotName() + "Desired Robot Visualizer");
 
       this.robotModel = robotModel;
+      this.syncedRobotModel = syncedRobotModel;
       desiredFullRobotModel = robotModel.createFullRobotModel();
+
+      super.setActive(true);
    }
 
    public FullHumanoidRobotModel getDesiredFullRobotModel()
@@ -71,4 +79,10 @@ public class GDXDesiredRobot extends GDXMultiBodyGraphic
       super.destroy();
    }
 
+   public void setDesiredToCurrent()
+   {
+      desiredFullRobotModel.getRootJoint().setJointConfiguration(syncedRobotModel.getFullRobotModel().getRootJoint());
+      for (OneDoFJointBasics joint : syncedRobotModel.getFullRobotModel().getOneDoFJoints())
+         desiredFullRobotModel.getOneDoFJointByName(joint.getName()).setJointConfiguration(joint);
+   }
 }

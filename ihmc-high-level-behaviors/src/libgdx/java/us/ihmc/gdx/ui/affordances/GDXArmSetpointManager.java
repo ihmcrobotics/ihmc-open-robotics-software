@@ -8,8 +8,10 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.teleoperation.GDXTeleoperationParameters;
@@ -26,6 +28,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 public class GDXArmSetpointManager
@@ -97,6 +100,7 @@ public class GDXArmSetpointManager
       desiredRobot.getRootJoint().setJointConfiguration(syncedRobot.getFullRobotModel().getRootJoint().getJointPose());
 
       // TODO Update the spine joints
+      desiredRobot.getRootJoint().updateFramesRecursively();
    }
 
    public Consumer<FramePose3DReadOnly> getPoseHasBeenUpdatedCallback(RobotSide robotSide)
@@ -143,12 +147,18 @@ public class GDXArmSetpointManager
             else
             {
                System.err.println("Attempting to send hand pose data type that isn't supported : " + handPoseDataTypeToSend);
-               return;
             }
          }
       };
 
       return runnable;
+   }
+
+   public void setDesiredToCurrent()
+   {
+      lastDesiredControlHandTransformInChestFrame.clear();
+      for (RobotSide robotSide : RobotSide.values)
+         copyOneDofJoints(actualArmJacobians.get(robotSide).getJointsInOrder(), desiredArmJacobians.get(robotSide).getJointsInOrder());
    }
 
    // returned as output
@@ -160,6 +170,7 @@ public class GDXArmSetpointManager
 
    private static final int INVERSE_KINEMATICS_CALCULATIONS_PER_UPDATE = 5;
    private int maxIterations = 500;
+
    private final SideDependentList<FramePose3DReadOnly> lastDesiredControlHandTransformInChestFrame = new SideDependentList<>();
    private SideDependentList<Boolean> ikFoundASolution = new SideDependentList<>();
    private SideDependentList<InverseKinematicsCalculator> inverseKinematicsCalculators = new SideDependentList<>();
@@ -170,14 +181,16 @@ public class GDXArmSetpointManager
 
       if (getDesiredControlHandPoseHasChangedSinceLastUpdate(robotSide, desiredHandSetpoint))
       {
-         lastDesiredControlHandTransformInChestFrame.put(robotSide, desiredHandSetpoint);
+         FramePose3D setpointCopy = new FramePose3D(desiredHandSetpoint);
+         setpointCopy.changeFrame(desiredRobot.getChest().getBodyFixedFrame());
+         lastDesiredControlHandTransformInChestFrame.put(robotSide, setpointCopy);
 
          copyOneDofJoints(actualArmJacobians.get(robotSide).getJointsInOrder(), workArmJacobians.get(robotSide).getJointsInOrder());
          ikFoundASolution.put(robotSide, false);
          for (int i = 0; i < INVERSE_KINEMATICS_CALCULATIONS_PER_UPDATE && !ikFoundASolution.get(robotSide); i++)
          {
             InverseKinematicsCalculator inverseKinematicsCalculator = inverseKinematicsCalculators.get(robotSide);
-            boolean foundASolution = inverseKinematicsCalculator.solve(desiredHandSetpoint);
+            boolean foundASolution = inverseKinematicsCalculator.solve(setpointCopy);
             ikFoundASolution.put(robotSide, foundASolution);
          }
       }
