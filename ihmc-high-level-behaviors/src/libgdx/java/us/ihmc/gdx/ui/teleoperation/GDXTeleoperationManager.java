@@ -249,6 +249,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
                                                                robotEnvironmentCollisionModel,
                                                                robotModel,
                                                                syncedRobot,
+                                                               desiredRobot,
                                                                ros2Helper,
                                                                yoVariableClientHelper,
                                                                teleoperationParameters,
