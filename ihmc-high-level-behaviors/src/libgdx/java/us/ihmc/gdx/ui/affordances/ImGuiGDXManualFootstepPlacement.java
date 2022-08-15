@@ -9,9 +9,11 @@ import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import com.esotericsoftware.minlog.Log;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import imgui.flag.ImGuiKey;
+import imgui.flag.ImGuiKeyModFlags;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import org.bytedeco.javacpp.BytePointer;
@@ -38,6 +40,7 @@ import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.teleoperation.GDXTeleoperationParameters;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.tools.io.WorkspaceFile;
@@ -162,21 +165,36 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
                removeFootStep();
             }
 
-            // changing yaw while placing the step (not yet placed)
-            if (ImGui.isKeyPressed(ImGuiTools.getLeftArrowKey()))
+            // changing yaw while placing the step (not yet placed) engaged when control held and scrolling the mouse wheel.
+            double dYaw = 0.0;
+            boolean ctrlHeld = ImGui.getIO().getKeyCtrl();
+            if (ctrlHeld)
             {
-//               footstepBeingPlaced.get
-               RigidBodyTransform latestFootstepTransform = footstepBeingPlaced.getFootTransformInWorld();
-               double latestFootstepYaw = latestFootstepTransform.getRotation().getYaw();
-               tempFramePose.setToZero(ReferenceFrame.getWorldFrame());
-               RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
-               GDXTools.toEuclid(new Matrix4(), rigidBodyTransform);
-               tempFramePose.set(rigidBodyTransform);
-               tempFramePose.getOrientation().set(new RotationMatrix(latestFootstepYaw + 5/180 * Math.PI, 0.0, 0.0));
-               tempFramePose.get(footstepBeingPlaced.getSelectablePose3DGizmo().getPoseGizmo().getTransformToParent());
-               footstepBeingPlaced.getSelectablePose3DGizmo().getPoseGizmo().updateTransforms();
+               float dScroll = input.getMouseWheelDelta();
+               if (dScroll>0.0)
+               {
+                  dYaw = 0.02 * Math.PI;
+               }
+               else if(dScroll<0.0)
+               {
+                  dYaw = -0.02 * Math.PI;
+               }
+               else dYaw = 0.0;
+               if(dYaw!=0.0)
+               {
+                  RigidBodyTransform latestFootstepTransform = footstepBeingPlaced.getFootTransformInWorld();
+                  double latestFootstepYaw = latestFootstepTransform.getRotation().getYaw();
+                  tempFramePose.setToZero(ReferenceFrame.getWorldFrame());
+                  RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
+                  GDXTools.toEuclid(new Matrix4(), rigidBodyTransform);
+                  tempFramePose.set(rigidBodyTransform);
+                  tempFramePose.getOrientation().set(new RotationMatrix(latestFootstepYaw + dYaw, 0.0, 0.0));
+                  tempFramePose.get(footstepBeingPlaced.getSelectablePose3DGizmo().getPoseGizmo().getTransformToParent());
+                  footstepBeingPlaced.getSelectablePose3DGizmo().getPoseGizmo().updateTransforms();
+               }
             }
          }
+
 
          Point3DReadOnly pickPointInWorld = input.getPickPointInWorld();
 
