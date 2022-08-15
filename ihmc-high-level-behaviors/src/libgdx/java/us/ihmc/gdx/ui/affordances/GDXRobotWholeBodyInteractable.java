@@ -39,7 +39,6 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
    private final GDXRobotCollisionModel environmentCollisionModel;
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
-   // This is the common operating picture desired robot that should be maintained by everything.
    private final ROS2ControllerHelper ros2Helper;
    private final GDXArmSetpointManager armSetpointManager;
    private final YoVariableClientHelper yoVariableClientHelper;
