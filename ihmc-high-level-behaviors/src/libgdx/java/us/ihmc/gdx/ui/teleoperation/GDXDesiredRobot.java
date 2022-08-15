@@ -13,6 +13,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJointStateCopier;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 
@@ -49,7 +50,8 @@ public class GDXDesiredRobot extends GDXMultiBodyGraphic
       super.create();
 
       RobotDefinition robotDefinition = robotModel.getRobotDefinition();
-      MaterialDefinition material = new MaterialDefinition(ColorDefinitions.Black());
+      ColorDefinition ghostColor = ColorDefinitions.parse("0x4B61D1").derive(0.0, 1.0, 1.0, 0.5);
+      MaterialDefinition material = new MaterialDefinition(ghostColor);
       for (RobotSide robotSide : RobotSide.values)
       {
          String handName = robotModel.getJointMap().getHandName(robotSide);

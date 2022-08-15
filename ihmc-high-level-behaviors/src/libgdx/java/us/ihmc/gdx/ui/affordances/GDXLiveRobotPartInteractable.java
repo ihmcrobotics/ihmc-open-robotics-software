@@ -139,7 +139,7 @@ public class GDXLiveRobotPartInteractable
             tempTransform.set(controlToCollisionTransform);
             selectablePose3DGizmo.getPoseGizmo().getTransformToParent().transform(tempTransform);
             collisionLink.setOverrideTransform(true).set(tempTransform);
-            highlightModel.setPose(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(), tempTransform);
+            highlightModel.setPose(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(), controlToGraphicTransform);
          }
          else
          {
