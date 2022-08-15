@@ -36,7 +36,7 @@ mainDependencies {
    api("org.ddogleg:ddogleg:0.18")
 
    api("us.ihmc:euclid:0.18.1")
-   api("us.ihmc:simulation-construction-set:0.22.5")
+   api("us.ihmc:simulation-construction-set:0.22.6")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-ros-tools:source")
@@ -102,7 +102,7 @@ testDependencies {
 visualizersDependencies {
    api(ihmc.sourceSetProject("main"))
 
-   api("us.ihmc:simulation-construction-set:0.22.5")
+   api("us.ihmc:simulation-construction-set:0.22.6")
 
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")
