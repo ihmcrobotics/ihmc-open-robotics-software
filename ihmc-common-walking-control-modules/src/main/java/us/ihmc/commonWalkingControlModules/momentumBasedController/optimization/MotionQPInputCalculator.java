@@ -442,6 +442,9 @@ public class MotionQPInputCalculator
                                                       nullspaceProjectionAlpha.getValue());
          
          projectedTaskJacobian.get(qpInputToPack.taskJacobian);
+
+         // Testing
+//         recordTaskJacobian(qpInputToPack.taskJacobian);
       }
       else
       {
