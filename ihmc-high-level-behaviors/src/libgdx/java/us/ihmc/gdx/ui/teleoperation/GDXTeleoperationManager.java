@@ -134,6 +134,8 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
    private GDXChestOrientationSlider chestPitchSlider;
    private GDXChestOrientationSlider chestYawSlider;
 
+   private GDXDesiredRobot desiredRobot;
+
    // FOR ICONS (NON-BUTTON)
    private final WorkspaceDirectory iconDirectory = new WorkspaceDirectory("ihmc-open-robotics-software",
                                                                            "ihmc-high-level-behaviors/src/libgdx/resources/icons");
@@ -214,8 +216,12 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
          stanceHeightSliderValue[0] = (float) newHeightSliderValue;
       });
 
+      desiredRobot = new GDXDesiredRobot(robotModel);
+
       ROS2ControllerHelper chestSlidersROS2ControllerHelper = new ROS2ControllerHelper(ros2Node, robotModel);
+      // TODO this should update the GDX desired Robot
       chestPitchSlider = new GDXChestOrientationSlider(syncedRobot, YawPitchRollAxis.PITCH, chestSlidersROS2ControllerHelper, teleoperationParameters);
+      // TODO this should update the GDX desired robot.
       chestYawSlider = new GDXChestOrientationSlider(syncedRobot, YawPitchRollAxis.YAW, chestSlidersROS2ControllerHelper, teleoperationParameters);
 
       footstepPlanGraphic = new GDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
@@ -253,6 +259,9 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
    public void create(GDXImGuiBasedUI baseUI)
    {
       if(iconTexturesMap.size()==0) mapTextureID();
+
+      desiredRobot.create();
+
       // TODO: Remove this stuff and use the path control ring for this
       footstepGoal.create(baseUI, goal -> queueFootstepPlanning(), Color.YELLOW);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(footstepGoal::processImGui3DViewInput);
@@ -282,6 +291,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
    public void update()
    {
       syncedRobot.update();
+      desiredRobot.update();
       footstepPlanGraphic.update();
       if (interactableRobot != null)
          interactableRobot.update();
@@ -354,6 +364,8 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       {
          sendPSIRequest();
       }
+
+      desiredRobot.renderImGuiWidgets();
 
       if (imGuiSlider("Height", stanceHeightSliderValue))
       {
@@ -500,6 +512,8 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
+      desiredRobot.getRenderables(renderables, pool);
+
       if (showGraphics.get())
       {
          footstepPlanGraphic.getRenderables(renderables, pool);
@@ -594,6 +608,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
 
    public void destroy()
    {
+      desiredRobot.destroy();
       if (interactableRobot != null)
          interactableRobot.destroy();
       footstepPlanGraphic.destroy();
