@@ -208,7 +208,6 @@ public class InverseDynamicsOptimizationControlModule
       qpSolver.setActiveRhos(wrenchMatrixCalculator.getActiveRhoMatrix());
 
       setupWrenchesEquilibriumConstraint();
-      computePrivilegedJointAccelerations();
 
       for (int i = 0; i < nullspaceQPObjectiveCommands.size(); i++)
       {
@@ -216,6 +215,8 @@ public class InverseDynamicsOptimizationControlModule
          submitQPObjectiveCommandNow(command);
       }
       nullspaceQPObjectiveCommands.clear();
+
+      computePrivilegedJointAccelerations();
 
       if (SETUP_JOINT_LIMIT_CONSTRAINTS)
       {
