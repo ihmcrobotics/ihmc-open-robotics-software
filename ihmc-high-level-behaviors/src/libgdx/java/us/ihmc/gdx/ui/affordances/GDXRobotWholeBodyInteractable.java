@@ -325,4 +325,9 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
    {
       return panel;
    }
+
+   public void setDesiredToCurrent()
+   {
+      armSetpointManager.setDesiredToCurrent();
+   }
 }
