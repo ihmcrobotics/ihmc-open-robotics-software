@@ -8,11 +8,16 @@ import imgui.internal.ImGui;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.graphics.GDXReferenceFrameGraphic;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 public class GDXLiveRobotPartInteractable
 {
@@ -20,11 +25,10 @@ public class GDXLiveRobotPartInteractable
    private GDXRobotCollisionLink collisionLink;
    private ReferenceFrame graphicFrame;
    private ReferenceFrame collisionFrame;
-   private ReferenceFrame controlFrame;
+   private ReferenceFrame linkEstimateFrame;
    private boolean hasMultipleFrames;
-   private RigidBodyTransform controlToGraphicTransform;
-   private RigidBodyTransform controlToCollisionTransform;
-   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+   private RigidBodyTransform estimateToGraphicTransform;
+   private RigidBodyTransform estimateToCollisionTransform;
    private final FramePose3D tempFramePose = new FramePose3D();
    private GDXInteractableHighlightModel highlightModel;
    private boolean modified = false;
@@ -34,27 +38,34 @@ public class GDXLiveRobotPartInteractable
    private GDXReferenceFrameGraphic controlReferenceFrameGraphic;
    private boolean pickSelected;
 
-   public void create(GDXRobotCollisionLink collisionLink, ReferenceFrame controlFrame, String graphicFileName, GDX3DPanel panel3D)
+   private final List<Consumer<FramePose3DReadOnly>> poseHasUpdatedCallbacks = new ArrayList<>();
+
+   public void create(GDXRobotCollisionLink collisionLink, ReferenceFrame linkEstimateFrame, String graphicFileName, GDX3DPanel panel3D)
    {
-      create(collisionLink, controlFrame, controlFrame, controlFrame, graphicFileName, panel3D);
+      create(collisionLink, linkEstimateFrame, linkEstimateFrame, linkEstimateFrame, graphicFileName, panel3D);
    }
 
    public void create(GDXRobotCollisionLink collisionLink,
                       ReferenceFrame graphicFrame,
                       ReferenceFrame collisionFrame,
-                      ReferenceFrame controlFrame,
+                      ReferenceFrame linkEstimateFrame,
                       String modelFileName,
                       GDX3DPanel panel3D)
    {
       this.collisionLink = collisionLink;
       this.graphicFrame = graphicFrame;
       this.collisionFrame = collisionFrame;
-      this.controlFrame = controlFrame;
-      hasMultipleFrames = !(graphicFrame == collisionFrame && collisionFrame == controlFrame);
+      this.linkEstimateFrame = linkEstimateFrame;
+      hasMultipleFrames = !(graphicFrame == collisionFrame && collisionFrame == linkEstimateFrame);
       highlightModel = new GDXInteractableHighlightModel(modelFileName);
       selectablePose3DGizmo.create(panel3D);
       graphicReferenceFrameGraphic = new GDXReferenceFrameGraphic(0.2);
       controlReferenceFrameGraphic = new GDXReferenceFrameGraphic(0.2);
+   }
+
+   public void addPoseHasUpdatedCallback(Consumer<FramePose3DReadOnly> poseHasUpdatedCallback)
+   {
+      this.poseHasUpdatedCallbacks.add(poseHasUpdatedCallback);
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)
@@ -82,25 +93,25 @@ public class GDXLiveRobotPartInteractable
 
       if (unmodifiedButHovered)
       {
-         if (hasMultipleFrames && controlToGraphicTransform == null) // we just need to do this once
+         if (hasMultipleFrames && estimateToGraphicTransform == null) // we just need to do this once
          {
-            controlToGraphicTransform = new RigidBodyTransform();
+            estimateToGraphicTransform = new RigidBodyTransform();
             tempFramePose.setToZero(graphicFrame);
-            tempFramePose.changeFrame(controlFrame);
-            tempFramePose.get(controlToGraphicTransform);
-            controlToCollisionTransform = new RigidBodyTransform();
+            tempFramePose.changeFrame(linkEstimateFrame);
+            tempFramePose.get(estimateToGraphicTransform);
+            estimateToCollisionTransform = new RigidBodyTransform();
             tempFramePose.setToZero(collisionFrame);
-            tempFramePose.changeFrame(controlFrame);
-            tempFramePose.get(controlToCollisionTransform);
+            tempFramePose.changeFrame(linkEstimateFrame);
+            tempFramePose.get(estimateToCollisionTransform);
          }
 
          if (hasMultipleFrames)
          {
-            highlightModel.setPose(controlFrame.getTransformToWorldFrame(), controlToGraphicTransform);
+            highlightModel.setPose(linkEstimateFrame.getTransformToWorldFrame(), estimateToGraphicTransform);
          }
          else
          {
-            highlightModel.setPose(controlFrame.getTransformToWorldFrame());
+            highlightModel.setPose(linkEstimateFrame.getTransformToWorldFrame());
          }
       }
 
@@ -108,7 +119,7 @@ public class GDXLiveRobotPartInteractable
       {
          modified = true;
          collisionLink.setOverrideTransform(true);
-         selectablePose3DGizmo.getPoseGizmo().getTransformToParent().set(controlFrame.getTransformToWorldFrame());
+         selectablePose3DGizmo.getPoseGizmo().getTransformToParent().set(linkEstimateFrame.getTransformToWorldFrame());
       }
 
       if (modifiedButNotSelectedHovered)
@@ -124,16 +135,17 @@ public class GDXLiveRobotPartInteractable
       {
          if (hasMultipleFrames)
          {
-            tempTransform.set(controlToCollisionTransform);
-            selectablePose3DGizmo.getPoseGizmo().getTransformToParent().transform(tempTransform);
-            collisionLink.setOverrideTransform(true).set(tempTransform);
-            highlightModel.setPose(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(), controlToGraphicTransform);
+            selectablePose3DGizmo.getPoseGizmo().getTransformToParent().transform(estimateToCollisionTransform);
+            collisionLink.setOverrideTransform(true).set(estimateToCollisionTransform);
+            highlightModel.setPose(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(), estimateToGraphicTransform);
          }
          else
          {
             collisionLink.setOverrideTransform(true).set(selectablePose3DGizmo.getPoseGizmo().getTransformToParent());
             highlightModel.setPose(selectablePose3DGizmo.getPoseGizmo().getTransformToParent());
          }
+
+         processPoseHasUpdatedCallbacks();
       }
 
       if (selectablePose3DGizmo.isSelected() && executeMotionKeyPressed)
@@ -151,7 +163,7 @@ public class GDXLiveRobotPartInteractable
             graphicReferenceFrameGraphic.setToReferenceFrame(graphicFrame);
             graphicReferenceFrameGraphic.getRenderables(renderables, pool);
          }
-         controlReferenceFrameGraphic.setToReferenceFrame(controlFrame);
+         controlReferenceFrameGraphic.setToReferenceFrame(linkEstimateFrame);
          controlReferenceFrameGraphic.getRenderables(renderables, pool);
       }
 
@@ -180,5 +192,11 @@ public class GDXLiveRobotPartInteractable
    public void setOnSpacePressed(Runnable onSpacePressed)
    {
       this.onSpacePressed = onSpacePressed;
+   }
+
+   private void processPoseHasUpdatedCallbacks()
+   {
+      for (Consumer<FramePose3DReadOnly> callback : poseHasUpdatedCallbacks)
+         callback.accept(selectablePose3DGizmo.getPoseGizmo().getPose());
    }
 }

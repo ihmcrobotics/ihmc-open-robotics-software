@@ -10,7 +10,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.gdx.imgui.ImGuiPanel;
@@ -20,6 +19,7 @@ import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.gdx.ui.collidables.GDXRobotCollisionModel;
 import us.ihmc.gdx.ui.graphics.GDXSpatialVectorArrows;
+import us.ihmc.gdx.ui.teleoperation.GDXDesiredRobot;
 import us.ihmc.gdx.ui.teleoperation.GDXTeleoperationParameters;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -39,7 +39,9 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
    private final GDXRobotCollisionModel environmentCollisionModel;
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
+   // This is the common operating picture desired robot that should be maintained by everything.
    private final ROS2ControllerHelper ros2Helper;
+   private final GDXArmSetpointManager armSetpointManager;
    private final YoVariableClientHelper yoVariableClientHelper;
    private GDXTeleoperationParameters teleoperationParameters;
    private ImGuiStoredPropertySetTuner teleoperationParametersTuner;
@@ -60,6 +62,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
                                         RobotCollisionModel robotEnvironmentCollisionModel,
                                         DRCRobotModel robotModel,
                                         ROS2SyncedRobotModel syncedRobot,
+                                        GDXDesiredRobot desiredRobot,
                                         ROS2ControllerHelper ros2Helper,
                                         YoVariableClientHelper yoVariableClientHelper,
                                         GDXTeleoperationParameters teleoperationParameters,
@@ -73,12 +76,18 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
       this.yoVariableClientHelper = yoVariableClientHelper;
       this.teleoperationParameters = teleoperationParameters;
       this.teleoperationParametersTuner = teleoperationParametersTuner;
+
+      this.armSetpointManager = new GDXArmSetpointManager(robotModel, syncedRobot, desiredRobot.getDesiredFullRobotModel(), ros2Helper, teleoperationParameters);
    }
 
    public void create(GDXImGuiBasedUI baseUI)
    {
       selfCollisionModel.create(syncedRobot, YoAppearanceTools.makeTransparent(YoAppearance.DarkGreen(), 0.4));
       environmentCollisionModel.create(syncedRobot, YoAppearanceTools.makeTransparent(YoAppearance.DarkRed(), 0.4));
+
+      // create the manager for the desired arm setpoints
+      armSetpointManager.create(baseUI);
+
       for (GDXRobotCollisionLink collisionLink : environmentCollisionModel.getCollisionLinks())
       {
          RobotDefinition robotDefinition = robotModel.getRobotDefinition();
@@ -133,13 +142,13 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
                                        handControlFrame,
                                        modelFileName,
                                        baseUI.getPrimary3DPanel());
-               interactableHand.setOnSpacePressed(() ->
-               {
-                  ros2Helper.publishToController(HumanoidMessageTools.createHandTrajectoryMessage(side,
-                                                                                                  teleoperationParameters.getTrajectoryTime(),
-                                                                                                  interactableHand.getPose(),
-                                                                                                  ReferenceFrame.getWorldFrame()));
-               });
+               // This adds a callback function that consumes a desired pose, and updates the arm kinematics to achieve that desired pose
+               interactableHand.addPoseHasUpdatedCallback(armSetpointManager.getPoseHasBeenUpdatedCallback(side));
+               // TODO this should probably not handle the space event!
+               // This packs the desired arm joints into a message that is sent to the controller.
+               interactableHand.setOnSpacePressed(armSetpointManager.getSubmitDesiredArmSetpointsCallback(side));
+
+
                handInteractables.put(side, interactableHand);
                HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
                SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
@@ -163,6 +172,9 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
 
    public void update()
    {
+      // update the desired arm setpoints
+      armSetpointManager.update();
+
       if (interactablesEnabled.get())
       {
          selfCollisionModel.update();
