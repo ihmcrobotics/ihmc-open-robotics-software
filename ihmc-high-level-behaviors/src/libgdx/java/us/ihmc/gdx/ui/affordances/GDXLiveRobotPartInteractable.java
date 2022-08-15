@@ -137,9 +137,9 @@ public class GDXLiveRobotPartInteractable
          if (hasMultipleFrames)
          {
             tempTransform.set(controlToCollisionTransform);
-            selectablePose3DGizmo.getPoseGizmo().getTransformToParent().transform(controlToCollisionTransform);
-            collisionLink.setOverrideTransform(true).set(controlToCollisionTransform);
-            highlightModel.setPose(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(), controlToCollisionTransform);
+            selectablePose3DGizmo.getPoseGizmo().getTransformToParent().transform(tempTransform);
+            collisionLink.setOverrideTransform(true).set(tempTransform);
+            highlightModel.setPose(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(), tempTransform);
          }
          else
          {
