@@ -29,12 +29,6 @@ public class GDXPastFootSteps implements RenderableProvider
             pastSteps.add(step);
             baseUI.getPrimaryScene().addModelInstance(step.getFootstepModelInstance(), GDXSceneLevel.VIRTUAL);
         }
-
-        if(pastSteps.size()>0)
-        {
-            LogTools.info("current pastSteps list size: " + pastSteps.size());
-        }
-
     }
 
     @Override
