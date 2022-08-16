@@ -26,7 +26,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 
-import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class GDXArmSetpointManager
 {
@@ -50,6 +50,7 @@ public class GDXArmSetpointManager
    private static final int INVERSE_KINEMATICS_CALCULATIONS_PER_UPDATE = 5;
    private int maxIterations = 500;
 
+   private final SideDependentList<Supplier<FramePose3DReadOnly>> desiredHandControlPoseSuppliers = new SideDependentList<>();
    private final SideDependentList<FramePose3DReadOnly> lastDesiredControlHandTransformInChestFrame = new SideDependentList<>();
    private final SideDependentList<Boolean> ikFoundASolution = new SideDependentList<>();
    private final SideDependentList<InverseKinematicsCalculator> inverseKinematicsCalculators = new SideDependentList<>();
@@ -112,60 +113,55 @@ public class GDXArmSetpointManager
    // TODO this update should be moved into the control ring, and should use the control ring pose.
    public void update()
    {
+      for (RobotSide side : desiredHandControlPoseSuppliers.sides())
+      {
+         updateArmSetpoints(side, desiredHandControlPoseSuppliers.get(side).get());
+      }
+
       desiredRobot.getRootJoint().setJointConfiguration(syncedRobot.getFullRobotModel().getRootJoint().getJointPose());
 
       // TODO Update the spine joints
       desiredRobot.getRootJoint().updateFramesRecursively();
    }
 
-   public Consumer<FramePose3DReadOnly> getPoseHasBeenUpdatedCallback(RobotSide robotSide)
-   {
-      return (desiredPose) -> updateArmSetpoints(robotSide, desiredPose);
-   }
-
    public Runnable getSubmitDesiredArmSetpointsCallback(RobotSide robotSide)
    {
-      Runnable runnable = new Runnable()
+      Runnable runnable = () ->
       {
-         @Override
-         public void run()
+         if (handPoseDataTypeToSend == HandDataType.JOINT_ANGLES)
          {
-            if (handPoseDataTypeToSend == HandDataType.JOINT_ANGLES)
+            double[] jointAngles = new double[armJointNames.length];
+            int i = -1;
+            for (ArmJointName armJoint : armJointNames)
             {
-               double[] jointAngles = new double[armJointNames.length];
-               int i = -1;
-               for (ArmJointName armJoint : armJointNames)
-               {
-                  jointAngles[++i] = desiredRobot.getArmJoint(robotSide, armJoint).getQ();
-               }
+               jointAngles[++i] = desiredRobot.getArmJoint(robotSide, armJoint).getQ();
+            }
 
-               LogTools.info("Sending ArmTrajectoryMessage");
-               ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, teleoperationParameters.getTrajectoryTime(), jointAngles);
-               ros2Helper.publishToController(armTrajectoryMessage);
-            }
-            else if (handPoseDataTypeToSend == HandDataType.POSE)
+            LogTools.info("Sending ArmTrajectoryMessage");
+            ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, teleoperationParameters.getTrajectoryTime(), jointAngles);
+            ros2Helper.publishToController(armTrajectoryMessage);
+         }
+         else if (handPoseDataTypeToSend == HandDataType.POSE)
+         {
+            if (lastDesiredControlHandTransformInChestFrame.get(robotSide) == null)
             {
-               if (lastDesiredControlHandTransformInChestFrame.get(robotSide) == null)
-               {
-                  LogTools.info("No Hand pose to send.");
-                  return;
-               }
-               LogTools.info("Sending HandTrajectoryMessage");
+               LogTools.info("No Hand pose to send.");
+               return;
+            }
+            LogTools.info("Sending HandTrajectoryMessage");
 
-               HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(robotSide,
-                                                                                                              teleoperationParameters.getTrajectoryTime(),
-                                                                                                              lastDesiredControlHandTransformInChestFrame.get(robotSide),
-                                                                                                              ReferenceFrame.getWorldFrame());
-               handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
-               ros2Helper.publishToController(handTrajectoryMessage);
-            }
-            else
-            {
-               System.err.println("Attempting to send hand pose data type that isn't supported : " + handPoseDataTypeToSend);
-            }
+            HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(robotSide,
+                                                                                                           teleoperationParameters.getTrajectoryTime(),
+                                                                                                           lastDesiredControlHandTransformInChestFrame.get(robotSide),
+                                                                                                           ReferenceFrame.getWorldFrame());
+            handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
+            ros2Helper.publishToController(handTrajectoryMessage);
+         }
+         else
+         {
+            System.err.println("Attempting to send hand pose data type that isn't supported : " + handPoseDataTypeToSend);
          }
       };
-
       return runnable;
    }
 
@@ -235,5 +231,10 @@ public class GDXArmSetpointManager
          return true;
 
       return !lastDesiredControlHandTransformInChestFrame.get(side).epsilonEquals(desiredPose, 0.00001);
+   }
+
+   public SideDependentList<Supplier<FramePose3DReadOnly>> getDesiredHandControlPoseSuppliers()
+   {
+      return desiredHandControlPoseSuppliers;
    }
 }
