@@ -4,7 +4,6 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
 import imgui.type.ImInt;
-import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.PathTools;
@@ -28,15 +27,7 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
    private Runnable onParametersUpdatedCallback;
    private final TreeSet<String> versions = new TreeSet<>();
 
-   private class ValueRange
-   {
-      public final float min,max;
-      public ValueRange(float min, float max)
-      {
-         this.min = min;
-         this.max = max;
-      }
-   }
+   private record ValueRange(float min, float max) { }
 
    private final HashMap<DoubleStoredPropertyKey, ImDouble> doubleValues = new HashMap<>();
    private final HashMap<IntegerStoredPropertyKey, ImInt> integerValues = new HashMap<>();
@@ -112,7 +103,7 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
          if (Objects.equals(key.getTitleCasedName(), titleCasedName))
          {
             sliderValues.put( (DoubleStoredPropertyKey) key, new float[] {(float) getDoubleValueFromKey(key)} );
-            sliderMinMaxMap.put((DoubleStoredPropertyKey) key, new ValueRange(min,max));
+            sliderMinMaxMap.put((DoubleStoredPropertyKey) key, new ValueRange(min, max));
             break;
          }
       }
@@ -278,11 +269,14 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
    {
       for (DoubleStoredPropertyKey key : sliderValues.keySet())
       {
-         renderADoublePropertySlider(key, 0.01, 0.5, (double) sliderMinMaxMap.get(key).min,
-                                                                    (double) sliderMinMaxMap.get(key).max,
-                                                                     false,
-                                                                        key.getTitleCasedName(),
-                                                                        "%.6f");
+         renderADoublePropertySlider(key,
+                                    0.01,
+                                    0.5,
+                                    sliderMinMaxMap.get(key).min,
+                                    sliderMinMaxMap.get(key).max,
+                                    false,
+                                    key.getTitleCasedName(),
+                                    "%.6f");
       }
    }
 
