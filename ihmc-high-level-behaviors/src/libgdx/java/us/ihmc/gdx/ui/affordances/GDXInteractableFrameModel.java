@@ -111,7 +111,7 @@ public class GDXInteractableFrameModel
       {
          ImGui.text("Transform to parent:");
          transformText.set(transformToParent.toString());
-         ImGui.inputTextMultiline(labels.getHidden("transformToParent"), transformText, ImGuiInputTextFlags.ReadOnly);
+         ImGui.inputTextMultiline(labels.getHidden("transformToParent"), transformText, 0, 60, ImGuiInputTextFlags.ReadOnly);
          if (ImGui.menuItem("Close"))
             ImGui.closeCurrentPopup();
          ImGui.endPopup();
