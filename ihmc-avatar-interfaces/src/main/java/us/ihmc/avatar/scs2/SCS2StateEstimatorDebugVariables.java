@@ -3,11 +3,13 @@ package us.ihmc.avatar.scs2;
 import java.util.concurrent.TimeUnit;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
 import us.ihmc.mecano.algorithms.CentroidalMomentumRateCalculator;
-import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
-import us.ihmc.robotics.screwTheory.TotalMassCalculator;
+import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
+import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.scs2.definition.controller.ControllerInput;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
+import us.ihmc.scs2.session.YoFixedReferenceFrameUsingYawPitchRoll;
 import us.ihmc.scs2.session.YoTimer;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
@@ -20,6 +22,7 @@ public class SCS2StateEstimatorDebugVariables implements Controller
 
    private final YoTimer timer = new YoTimer(getClass().getSimpleName(), TimeUnit.MILLISECONDS, registry);
 
+   private final CenterOfMassCalculator centerOfMassCalculator;
    private final YoFramePoint3D centerOfMassPosition;
    private final YoFrameVector3D centerOfMassVelocity;
    private final YoFrameVector3D centerOfMassAcceleration;
@@ -32,7 +35,7 @@ public class SCS2StateEstimatorDebugVariables implements Controller
 
    private final YoFrameVector2D centroidalMomentPivot;
 
-   private final CenterOfMassReferenceFrame centerOfMassFrame;
+   private final YoFixedReferenceFrameUsingYawPitchRoll centerOfMassFrame;
    private final CentroidalMomentumRateCalculator centroidalMomentumRateCalculator;
 
    private final double mass;
@@ -42,11 +45,12 @@ public class SCS2StateEstimatorDebugVariables implements Controller
    {
       this.gravity = gravity;
 
-      mass = TotalMassCalculator.computeSubTreeMass(controllerInput.getInput().getRootBody());
-      centerOfMassFrame = new CenterOfMassReferenceFrame("actualCenterOfMassFrame", inertialFrame, controllerInput.getInput().getRootBody());
+      centerOfMassCalculator = new CenterOfMassCalculator(controllerInput.getInput().getRootBody(), inertialFrame);
+      mass = centerOfMassCalculator.getTotalMass();
+      centerOfMassFrame = new YoFixedReferenceFrameUsingYawPitchRoll("centerOfMassFrame", "actualCenterOfMass", inertialFrame, registry);
       centroidalMomentumRateCalculator = new CentroidalMomentumRateCalculator(controllerInput.getInput(), centerOfMassFrame);
 
-      centerOfMassPosition = new YoFramePoint3D("actualCenterOfMassPosition", inertialFrame, registry);
+      centerOfMassPosition = centerOfMassFrame.getOffset().getPosition();
       centerOfMassVelocity = new YoFrameVector3D("actualCenterOfMassVelocity", inertialFrame, registry);
       centerOfMassAcceleration = new YoFrameVector3D("actualCenterOfMassAcceleration", inertialFrame, registry);
 
@@ -63,18 +67,21 @@ public class SCS2StateEstimatorDebugVariables implements Controller
    public void doControl()
    {
       timer.start();
+      centerOfMassCalculator.reset();
+      centerOfMassPosition.set(centerOfMassCalculator.getCenterOfMass());
       centerOfMassFrame.update();
       centroidalMomentumRateCalculator.reset();
 
-      centerOfMassPosition.setFromReferenceFrame(centerOfMassFrame);
 
-      linearMomentum.setMatchingFrame(centroidalMomentumRateCalculator.getMomentum().getLinearPart());
-      angularMomentum.setMatchingFrame(centroidalMomentumRateCalculator.getMomentum().getAngularPart());
+      MomentumReadOnly momentum = centroidalMomentumRateCalculator.getMomentum();
+      linearMomentum.setMatchingFrame(momentum.getLinearPart());
+      angularMomentum.setMatchingFrame(momentum.getAngularPart());
 
       centerOfMassVelocity.setAndScale(1.0 / mass, linearMomentum);
 
-      linearMomentumRate.setMatchingFrame(centroidalMomentumRateCalculator.getMomentumRate().getLinearPart());
-      angularMomentumRate.setMatchingFrame(centroidalMomentumRateCalculator.getMomentumRate().getAngularPart());
+      SpatialForceReadOnly momentumRate = centroidalMomentumRateCalculator.getMomentumRate();
+      linearMomentumRate.setMatchingFrame(momentumRate.getLinearPart());
+      angularMomentumRate.setMatchingFrame(momentumRate.getAngularPart());
 
       centerOfMassAcceleration.setAndScale(1.0 / mass, linearMomentumRate);
 
