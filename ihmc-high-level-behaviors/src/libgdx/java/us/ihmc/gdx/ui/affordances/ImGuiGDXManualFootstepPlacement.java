@@ -173,11 +173,11 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
                float dScroll = input.getMouseWheelDelta();
                if (dScroll>0.0)
                {
-                  dYaw = 0.0056 * Math.PI;
+                  dYaw = 0.015 * Math.PI;
                }
                else if(dScroll<0.0)
                {
-                  dYaw = -0.0056 * Math.PI;
+                  dYaw = -0.015 * Math.PI;
                }
                else dYaw = 0.0;
                if(dYaw!=0.0)
