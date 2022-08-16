@@ -140,12 +140,6 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
    private Map<String, Texture> iconTexturesMap = new HashMap<String, Texture>();
    private int textureID = 0;
 
-   // FOR teleop parameter tuning sliders
-   private float[] swingTimeSliderValue = new float[1];
-   private float[] transferTimeSliderValue = new float[1];
-   private float[] turnAgressiveSliderValue = new float[1];
-
-
    // FOR LOGGING STEPS TAKEN
    private GDXPastFootSteps pastFootSteps;
 
@@ -374,6 +368,9 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
 
       desiredRobot.renderImGuiWidgets();
 
+      ImGui.pushFont(ImGuiTools.getMediumFont());
+      ImGui.text(" - - Stance - -");
+      ImGui.popFont();
       if (imGuiSlider("Height", stanceHeightSliderValue))
       {
          if (syncedRobot.getDataReceptionTimerSnapshot().isRunning(ROBOT_DATA_EXPIRATION))
@@ -401,6 +398,9 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
             communicationHelper.publishToController(message);
          }
       }
+      ImGui.pushFont(ImGuiTools.getMediumFont());
+      ImGui.text(" - - Chest  - -");
+      ImGui.popFont();
       chestPitchSlider.renderImGuiWidgets();
       chestYawSlider.renderImGuiWidgets();
 //      if (neckJoint != null && imGuiSlider("Neck Pitch", neckPitchSliderValue))
@@ -415,6 +415,9 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
 
       // TODO: sliders for footstep parameters here . . .
       // 2nd
+      ImGui.pushFont(ImGuiTools.getMediumFont());
+      ImGui.text(" - - Step - -");
+      ImGui.popFont();
       teleoperationParametersTuner.renderDoublePropertySliders();
 
       ImGui.text("Footstep plan:");
@@ -516,6 +519,15 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       }
 
       interactableRobot.renderImGuiWidgets();
+
+      // TODO: footstepPlanGraphic should clear properly when user clears the plannerOutput.
+      /*
+      if (footstepPlannerOutput==null)
+      {
+         footstepPlanGraphic.clear();
+      }
+      */
+
    }
 
    private boolean imGuiSlider(String label, float[] value)
