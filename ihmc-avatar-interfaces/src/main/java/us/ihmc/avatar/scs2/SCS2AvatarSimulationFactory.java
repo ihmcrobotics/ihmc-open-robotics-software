@@ -271,9 +271,10 @@ public class SCS2AvatarSimulationFactory
          simulationConstructionSet.addTerrainObject(terrainObjectDefinition);
       }
       robot = simulationConstructionSet.addRobot(robotDefinition);
-      robot.addController(new SCS2StateEstimatorDebugVariables(simulationConstructionSet.getInertialFrame(),
-                                                               gravity.get(),
-                                                               robot.getControllerManager().getControllerInput()));
+      robot.addThrottledController(new SCS2StateEstimatorDebugVariables(simulationConstructionSet.getInertialFrame(),
+                                                                        gravity.get(),
+                                                                        robot.getControllerManager().getControllerInput()),
+                                   robotModel.getEstimatorDT());
 
       for (Robot secondaryRobot : secondaryRobots.get())
          simulationConstructionSet.addRobot(secondaryRobot);
