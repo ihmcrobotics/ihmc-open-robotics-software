@@ -24,7 +24,7 @@ public class ROS2SyncedRobotModel extends CommunicationsSyncedRobotModel
 
    public ROS2SyncedRobotModel(DRCRobotModel robotModel, ROS2NodeInterface ros2Node, FullHumanoidRobotModel fullRobotModel)
    {
-      super(fullRobotModel, robotModel.getHandModels(), robotModel.getSensorInformation());
+      super(robotModel, fullRobotModel, robotModel.getHandModels(), robotModel.getSensorInformation());
 
       robotConfigurationDataInput = new ROS2Input<>(ros2Node,
                                                     RobotConfigurationData.class,
