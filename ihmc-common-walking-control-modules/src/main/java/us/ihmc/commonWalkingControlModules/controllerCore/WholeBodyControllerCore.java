@@ -171,6 +171,10 @@ public class WholeBodyControllerCore
       jointDesiredOutputList.clear();
    }
 
+   /**
+    * @deprecated Use {@link #compute(ControllerCoreCommandInterface)} instead, note that it also makes
+    *             {@link #compute()} obsolete.
+    */
    public void submitControllerCoreCommand(ControllerCoreCommandInterface controllerCoreCommand)
    {
       reset();
@@ -204,6 +208,10 @@ public class WholeBodyControllerCore
       throw new RuntimeException("The controller core mode: " + currentMode.getEnumValue() + " is not handled.");
    }
 
+   /**
+    * @deprecated Use {@link #compute(ControllerCoreCommandInterface)} instead, note that it also makes
+    *             {@link #submitControllerCoreCommand(ControllerCoreCommandInterface)} obsolete.
+    */
    public void compute()
    {
       controllerCoreComputeTimer.startMeasurement();
@@ -230,6 +238,13 @@ public class WholeBodyControllerCore
          controllerCoreOutput.setRootJointDesiredConfigurationData(rootJointDesiredConfigurationData);
       controllerCoreOutput.setLowLevelOneDoFJointDesiredDataHolder(jointDesiredOutputList);
       controllerCoreComputeTimer.stopMeasurement();
+   }
+
+   // TODO Clean me up once compute() and submitControllerCoreCommand(ControllerCoreCommandInterface) have been removed.
+   public void compute(ControllerCoreCommandInterface controllerCoreCommand)
+   {
+      submitControllerCoreCommand(controllerCoreCommand);
+      compute();
    }
 
    private void computeFeedbackControllers()
