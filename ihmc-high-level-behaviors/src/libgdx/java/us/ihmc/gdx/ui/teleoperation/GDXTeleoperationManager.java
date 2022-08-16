@@ -297,7 +297,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       if (interactableRobot != null)
          interactableRobot.update();
       manualFootstepPlacement.update();
-      if (manualFootstepPlacement.getFootstepArrayList().size()>0)
+      if (manualFootstepPlacement.getFootstepArrayList().size() > 0)
       {
          footstepPlannerOutput = null;
          footstepPlanGraphic.clear();
@@ -433,7 +433,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
          {
             walk();
          }
-         if (ImGui.isKeyPressed(ImGuiTools.getSpaceKey()) && manualFootstepPlacement.getFootstepArrayList().size()==0)
+         if (ImGui.isKeyPressed(ImGuiTools.getSpaceKey()) && manualFootstepPlacement.getFootstepArrayList().size() == 0)
          {
             walk();
          }

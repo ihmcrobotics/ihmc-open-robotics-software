@@ -280,33 +280,19 @@ public class GDXFocusBasedCamera extends Camera
          }
 
          boolean ctrlHeld = ImGui.getIO().getKeyCtrl();
-
          if(ctrlHeld)
          {
-            if(isEPressed)
-            {
-               zoom-=0.05;
-            }
-            if(isCPressed)
-            {
-               zoom+=0.05;
-            }
-            if(isAPressed)
-            {
-               longitude += longitudeSpeed * 2.0;
-            }
-            if(isDPressed)
-            {
-               longitude -= longitudeSpeed * 2.0;
-            }
-            if(isWPressed)
-            {
-               latitude -= latitudeSpeed * 2.0;
-            }
-            if(isSPressed)
-            {
-               latitude += latitudeSpeed * 2.0;
-            }
+            if (isEPressed) zoom -= 0.05;
+
+            if (isCPressed) zoom += 0.05;
+
+            if (isAPressed) longitude += longitudeSpeed * 2.0;
+
+            if (isDPressed) longitude -= longitudeSpeed * 2.0;
+
+            if (isSPressed) latitude  += latitudeSpeed * 2.0;
+
+            if (isWPressed) latitude  -= latitudeSpeed * 2.0;
          }
          else
          {
