@@ -20,7 +20,9 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -172,7 +174,7 @@ public class FrameSE3TrajectoryPointTest
    @Test
    public void testSetters()
    {
-      double epsilon = 1.0e-20;
+      double epsilon = 1.0e-15;
       Random random = new Random(21651016L);
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       ReferenceFrame aFrame = EuclidFrameRandomTools.nextReferenceFrame("aFrame", random, worldFrame);
@@ -391,10 +393,10 @@ public class FrameSE3TrajectoryPointTest
    {
       assertTrue(expectedFrame == testedFrameSE3TrajectoryPoint.getReferenceFrame());
       assertEquals(expectedTime, testedFrameSE3TrajectoryPoint.getTime(), epsilon);
-      assertTrue(expectedPosition.epsilonEquals(testedFrameSE3TrajectoryPoint.getPosition(), epsilon));
-      assertTrue(expectedOrientation.geometricallyEquals(testedFrameSE3TrajectoryPoint.getOrientation(), epsilon));
-      assertTrue(expectedLinearVelocity.epsilonEquals(testedFrameSE3TrajectoryPoint.getLinearVelocity(), epsilon));
-      assertTrue(expectedAngularVelocity.epsilonEquals(testedFrameSE3TrajectoryPoint.getAngularVelocity(), epsilon));
+      EuclidFrameTestTools.assertEquals(expectedPosition, testedFrameSE3TrajectoryPoint.getPosition(), epsilon);
+      EuclidFrameTestTools.assertEquals(expectedOrientation, testedFrameSE3TrajectoryPoint.getOrientation(), epsilon);
+      EuclidFrameTestTools.assertEquals(expectedLinearVelocity, testedFrameSE3TrajectoryPoint.getLinearVelocity(), epsilon);
+      EuclidFrameTestTools.assertEquals(expectedAngularVelocity, testedFrameSE3TrajectoryPoint.getAngularVelocity(), epsilon);
 
       Point3D actualPosition = new Point3D();
       Quaternion actualOrientation = new Quaternion();
@@ -406,10 +408,10 @@ public class FrameSE3TrajectoryPointTest
       testedFrameSE3TrajectoryPoint.getLinearVelocity(actualLinearVelocity);
       testedFrameSE3TrajectoryPoint.getAngularVelocity(actualAngularVelocity);
 
-      assertTrue(expectedPosition.epsilonEquals(actualPosition, epsilon));
-      assertTrue(expectedOrientation.geometricallyEquals(actualOrientation, epsilon));
-      assertTrue(expectedLinearVelocity.epsilonEquals(actualLinearVelocity, epsilon));
-      assertTrue(expectedAngularVelocity.epsilonEquals(actualAngularVelocity, epsilon));
+      EuclidCoreTestTools.assertEquals(expectedPosition, actualPosition, epsilon);
+      EuclidCoreTestTools.assertEquals(expectedOrientation, actualOrientation, epsilon);
+      EuclidCoreTestTools.assertEquals(expectedLinearVelocity, actualLinearVelocity, epsilon);
+      EuclidCoreTestTools.assertEquals(expectedAngularVelocity, actualAngularVelocity, epsilon);
 
       FramePoint3D actualFramePosition = new FramePoint3D();
       FrameQuaternion actualFrameOrientation = new FrameQuaternion();
@@ -421,10 +423,10 @@ public class FrameSE3TrajectoryPointTest
       testedFrameSE3TrajectoryPoint.getLinearVelocityIncludingFrame(actualFrameLinearVelocity);
       testedFrameSE3TrajectoryPoint.getAngularVelocityIncludingFrame(actualFrameAngularVelocity);
 
-      assertTrue(expectedPosition.epsilonEquals(actualFramePosition, epsilon));
-      assertTrue(expectedOrientation.geometricallyEquals(actualFrameOrientation, epsilon));
-      assertTrue(expectedLinearVelocity.epsilonEquals(actualFrameLinearVelocity, epsilon));
-      assertTrue(expectedAngularVelocity.epsilonEquals(actualFrameAngularVelocity, epsilon));
+      EuclidFrameTestTools.assertEquals(expectedPosition, actualFramePosition, epsilon);
+      EuclidFrameTestTools.assertEquals(expectedOrientation, actualFrameOrientation, epsilon);
+      EuclidFrameTestTools.assertEquals(expectedLinearVelocity, actualFrameLinearVelocity, epsilon);
+      EuclidFrameTestTools.assertEquals(expectedAngularVelocity, actualFrameAngularVelocity, epsilon);
 
       actualFramePosition = new FramePoint3D(expectedFrame);
       actualFrameOrientation = new FrameQuaternion(expectedFrame);
@@ -436,10 +438,10 @@ public class FrameSE3TrajectoryPointTest
       testedFrameSE3TrajectoryPoint.getLinearVelocity(actualFrameLinearVelocity);
       testedFrameSE3TrajectoryPoint.getAngularVelocity(actualFrameAngularVelocity);
 
-      assertTrue(expectedPosition.epsilonEquals(actualFramePosition, epsilon));
-      assertTrue(expectedOrientation.geometricallyEquals(actualFrameOrientation, epsilon));
-      assertTrue(expectedLinearVelocity.epsilonEquals(actualFrameLinearVelocity, epsilon));
-      assertTrue(expectedAngularVelocity.epsilonEquals(actualFrameAngularVelocity, epsilon));
+      EuclidFrameTestTools.assertEquals(expectedPosition, actualFramePosition, epsilon);
+      EuclidFrameTestTools.assertEquals(expectedOrientation, actualFrameOrientation, epsilon);
+      EuclidFrameTestTools.assertEquals(expectedLinearVelocity, actualFrameLinearVelocity, epsilon);
+      EuclidFrameTestTools.assertEquals(expectedAngularVelocity, actualFrameAngularVelocity, epsilon);
    }
 
    @Test

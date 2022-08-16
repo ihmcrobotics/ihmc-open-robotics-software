@@ -800,7 +800,9 @@ public class CrossRobotCommandRandomTools
       next.setCommandId(random.nextInt());
       next.setJointVelocityWeight(random.nextDouble());
       next.setJointAccelerationWeight(random.nextDouble());
+      next.setJointTorqueWeight(random.nextDouble());
       next.setJointVelocityLimitMode(nextElementIn(random, ActivationState.values()));
+      next.setComputeJointTorques(nextElementIn(random, ActivationState.values()));
       return next;
    }
 

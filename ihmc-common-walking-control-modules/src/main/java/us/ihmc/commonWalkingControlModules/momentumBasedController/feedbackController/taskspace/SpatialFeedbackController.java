@@ -7,7 +7,17 @@ import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData6
 import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData6D.FORCE;
 import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData6D.POSE;
 import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData6D.VELOCITY;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.*;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ACHIEVED;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.CURRENT;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.DESIRED;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.D_FEEDBACK;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ERROR;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ERROR_CUMULATED;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ERROR_INTEGRATED;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.FEEDBACK;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.FEEDFORWARD;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.I_FEEDBACK;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.P_FEEDBACK;
 
 import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerException;
@@ -400,17 +410,32 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
        * other controller.
        */
       if (rateLimitedFeedbackAcceleration != null)
+      {
+         rateLimitedFeedbackAcceleration.setToZero(worldFrame);
          rateLimitedFeedbackAcceleration.reset();
+      }
       if (rateLimitedFeedbackVelocity != null)
+      {
+         rateLimitedFeedbackVelocity.setToZero(worldFrame);
          rateLimitedFeedbackVelocity.reset();
+      }
       if (yoFilteredErrorVelocity != null)
+      {
+         yoFilteredErrorVelocity.setToZero(worldFrame);
          yoFilteredErrorVelocity.reset();
+      }
       if (yoErrorPositionIntegrated != null)
+      {
          yoErrorPositionIntegrated.setToZero(worldFrame);
+      }
       if (yoErrorOrientationCumulated != null)
+      {
          yoErrorOrientationCumulated.setToZero(worldFrame);
+      }
       if (yoErrorRotationVectorIntegrated != null)
+      {
          yoErrorRotationVectorIntegrated.setToZero(worldFrame);
+      }
    }
 
    protected final FrameVector3D linearProportionalFeedback = new FrameVector3D();

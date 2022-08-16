@@ -615,6 +615,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       managerFactory.initializeManagers();
 
       commandInputManager.clearAllCommands();
+      commandConsumer.clearAllCommands();
       walkingMessageHandler.clearFootsteps();
       walkingMessageHandler.clearFootTrajectory();
 

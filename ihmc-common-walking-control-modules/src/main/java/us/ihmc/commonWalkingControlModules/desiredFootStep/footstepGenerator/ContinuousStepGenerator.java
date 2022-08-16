@@ -119,6 +119,7 @@ public class ContinuousStepGenerator implements Updatable
    private final String variableNameSuffix = "CSG";
 
    private BooleanProvider walkInputProvider;
+   private final YoBoolean ignoreWalkInputProvider = new YoBoolean("ignoreWalkInputProvider" + variableNameSuffix, registry);
    private final YoBoolean walk = new YoBoolean("walk" + variableNameSuffix, registry);
    private final YoBoolean walkPreviousValue = new YoBoolean("walkPreviousValue" + variableNameSuffix, registry);
 
@@ -191,7 +192,7 @@ public class ContinuousStepGenerator implements Updatable
       footstepDataListMessage.setAreFootstepsAdjustable(parameters.getStepsAreAdjustable());
       footstepDataListMessage.setOffsetFootstepsWithExecutionError(parameters.getShiftUpcomingStepsWithTouchdown());
 
-      if (walkInputProvider != null)
+      if (!ignoreWalkInputProvider.getBooleanValue() && walkInputProvider != null)
          walk.set(walkInputProvider.getValue());
 
       if (time > 1) {
@@ -346,7 +347,7 @@ public class ContinuousStepGenerator implements Updatable
          previousFootstepPose.set(nextFootstepPose3D);
       }
 
-      if (footstepMessenger != null)
+      if (walk.getValue() && footstepMessenger != null)
       {
          if (counter >= numberOfTicksBeforeSubmittingFootsteps.getValue())
          {

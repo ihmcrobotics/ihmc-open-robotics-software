@@ -347,7 +347,6 @@ public class WalkingSingleSupportState extends SingleSupportState
       currentICP.setIncludingFrame(balanceManager.getCapturePoint());
 
       controllerToolbox.getDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(supportSide), desiredCoP);
-      controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(supportSide), filteredDesiredCoP);
 
       FramePoint3DReadOnly supportFootExitCMP = balanceManager.getFirstExitCMPForToeOff(false);
 
@@ -364,9 +363,9 @@ public class WalkingSingleSupportState extends SingleSupportState
                                                   balanceManager.getFinalDesiredICP());
 
       if (feetManager.okForPointToeOff(true))
-         feetManager.requestPointToeOff(supportSide, supportFootExitCMP, filteredDesiredCoP);
+         feetManager.requestPointToeOff(supportSide, supportFootExitCMP, desiredCoP);
       else if (feetManager.okForLineToeOff(true))
-         feetManager.requestLineToeOff(supportSide, supportFootExitCMP, filteredDesiredCoP);
+         feetManager.requestLineToeOff(supportSide, supportFootExitCMP, desiredCoP);
 
 //         updateHeightManager();
    }

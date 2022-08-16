@@ -1,5 +1,6 @@
 package us.ihmc.perception.realsense;
 
+import boofcv.struct.calib.CameraPinholeBrown;
 import us.ihmc.perception.MutableBytePointer;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.librealsense2.*;
@@ -11,13 +12,13 @@ import java.util.function.Supplier;
 
 import static org.bytedeco.librealsense2.global.realsense2.rs2_release_frame;
 
-public class BytedecoRealsenseL515
+public class BytedecoRealsense
 {
    private static final int RS2_FRAME_POINTER_SIZE = Pointer.sizeof(rs2_frame.class);
 
-   protected final int width = 1024;
-   protected final int height = 768;
-   protected final int fps = 30;
+   protected final int depthWidth;
+   protected final int depthHeight;
+   protected final int fps;
    protected final int DEPTH_STREAM_INDEX = -1;
    protected final int COLOR_STREAM_INDEX = -1;
 
@@ -46,15 +47,22 @@ public class BytedecoRealsenseL515
    private long colorFrameDataAddress;
    private boolean colorEnabled = false;
    private long colorFrameAddress;
+   private int colorWidth;
+   private int colorHeight;
+   private CameraPinholeBrown depthCameraIntrinsics;
+   private CameraPinholeBrown colorCameraIntrinsics;
 
-   public BytedecoRealsenseL515(rs2_context context, rs2_device device, String serialNumber)
+   public BytedecoRealsense(rs2_context context, rs2_device device, String serialNumber, int depthWidth, int depthHeight, int fps)
    {
       this.device = device;
       this.serialNumber = serialNumber;
+      this.depthWidth = depthWidth;
+      this.depthHeight = depthHeight;
+      this.fps = fps;
       pipeline = realsense2.rs2_create_pipeline(context, error);
       config = realsense2.rs2_create_config(error);
 
-      realsense2.rs2_config_enable_stream(config, realsense2.RS2_STREAM_DEPTH, DEPTH_STREAM_INDEX, width, height, realsense2.RS2_FORMAT_Z16, fps, error);
+      realsense2.rs2_config_enable_stream(config, realsense2.RS2_STREAM_DEPTH, DEPTH_STREAM_INDEX, depthWidth, depthHeight, realsense2.RS2_FORMAT_Z16, fps, error);
       checkError(true, "Failed to enable stream.");
 
       rs2_sensor_list sensorList = realsense2.rs2_query_sensors(device, error);
@@ -65,9 +73,12 @@ public class BytedecoRealsenseL515
       LogTools.info("Configured Depth Stream of L515 Device. Serial number: {}", serialNumber);
    }
 
-   public void enableColor(int width, int height, int fps)
+   public void enableColor(int colorWidth, int colorHeight, int fps)
    {
-      realsense2.rs2_config_enable_stream(config, realsense2.RS2_STREAM_COLOR, COLOR_STREAM_INDEX, width, height, realsense2.RS2_FORMAT_RGB8, fps, error);
+      this.colorWidth = colorWidth;
+      this.colorHeight = colorHeight;
+
+      realsense2.rs2_config_enable_stream(config, realsense2.RS2_STREAM_COLOR, COLOR_STREAM_INDEX, colorWidth, colorHeight, realsense2.RS2_FORMAT_RGB8, fps, error);
       checkError(true, "Failed to enable stream.");
 
       colorAlignProcessingBlock = realsense2.rs2_create_align(realsense2.RS2_STREAM_COLOR, error);
@@ -233,7 +244,7 @@ public class BytedecoRealsenseL515
       checkError(true, "Failed to set laser power.");
    }
 
-   public void setDigitalGail(int digitalGain)
+   public void setDigitalGain(int digitalGain)
    {
       rs2_options options = new rs2_options(sensor);
       realsense2.rs2_set_option(options, realsense2.RS2_OPTION_DIGITAL_GAIN, digitalGain, error);
@@ -278,6 +289,11 @@ public class BytedecoRealsenseL515
       return depthFrameData;
    }
 
+   public MutableBytePointer getColorFrameData()
+   {
+      return colorFrameData;
+   }
+
    public int getDepthFrameDataSize()
    {
       return depthFrameDataSize;
@@ -288,39 +304,102 @@ public class BytedecoRealsenseL515
       return depthToMeterConversion;
    }
 
-   public rs2_intrinsics getIntrinsicParameters()
+   public rs2_intrinsics getDepthIntrinsicParameters()
    {
       return depthStreamIntrinsics;
    }
 
-   public double getFocalLengthPixelsX()
+   public double getDepthFocalLengthPixelsX()
    {
       return depthStreamIntrinsics.fx();
    }
 
-   public double getFocalLengthPixelsY()
+   public double getDepthFocalLengthPixelsY()
    {
       return depthStreamIntrinsics.fy();
    }
 
-   public double getPrincipalOffsetXPixels()
+   public double getDepthPrincipalOffsetXPixels()
    {
       return depthStreamIntrinsics.ppx();
    }
 
-   public double getPrincipalOffsetYPixels()
+   public double getDepthPrincipalOffsetYPixels()
    {
       return depthStreamIntrinsics.ppy();
    }
 
+   public rs2_intrinsics getColorIntrinsicParameters()
+   {
+      return colorStreamIntrinsics;
+   }
+
+   public double getColorFocalLengthPixelsX()
+   {
+      return colorStreamIntrinsics.fx();
+   }
+
+   public double getColorFocalLengthPixelsY()
+   {
+      return colorStreamIntrinsics.fy();
+   }
+
+   public double getColorPrincipalOffsetXPixels()
+   {
+      return colorStreamIntrinsics.ppx();
+   }
+
+   public double getColorPrincipalOffsetYPixels()
+   {
+      return colorStreamIntrinsics.ppy();
+   }
+
+   public CameraPinholeBrown getDepthCameraIntrinsics()
+   {
+      if (depthCameraIntrinsics == null)
+      {
+         depthCameraIntrinsics = new CameraPinholeBrown();
+         depthCameraIntrinsics.setFx(getDepthFocalLengthPixelsX());
+         depthCameraIntrinsics.setFy(getDepthFocalLengthPixelsY());
+         depthCameraIntrinsics.setSkew(0.0);
+         depthCameraIntrinsics.setCx(getDepthPrincipalOffsetXPixels());
+         depthCameraIntrinsics.setCy(getDepthPrincipalOffsetYPixels());
+      }
+      return depthCameraIntrinsics;
+   }
+
+   public CameraPinholeBrown getColorCameraIntrinsics()
+   {
+      if (colorCameraIntrinsics == null)
+      {
+         colorCameraIntrinsics = new CameraPinholeBrown();
+         colorCameraIntrinsics.setFx(getColorFocalLengthPixelsX());
+         colorCameraIntrinsics.setFy(getColorFocalLengthPixelsY());
+         colorCameraIntrinsics.setSkew(0.0);
+         colorCameraIntrinsics.setCx(getColorPrincipalOffsetXPixels());
+         colorCameraIntrinsics.setCy(getColorPrincipalOffsetYPixels());
+      }
+      return colorCameraIntrinsics;
+   }
+
    public int getDepthWidth()
    {
-      return width;
+      return depthWidth;
    }
 
    public int getDepthHeight()
    {
-      return height;
+      return depthHeight;
+   }
+
+   public int getColorWidth()
+   {
+      return colorWidth;
+   }
+
+   public int getColorHeight()
+   {
+      return colorHeight;
    }
 
    public rs2_device getDevice()

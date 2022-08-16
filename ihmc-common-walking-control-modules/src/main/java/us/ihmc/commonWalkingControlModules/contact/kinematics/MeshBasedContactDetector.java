@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
  */
 public class MeshBasedContactDetector
 {
+   public static String graphicListRegistryName = "Kinematic-Detected Contact Points";
    private static final double defaultContactThreshold = 0.03;
    private static final double coefficientOfFriction = 0.7;
 
@@ -151,6 +152,11 @@ public class MeshBasedContactDetector
          updateBalanceStatus(multiContactBalanceStatus);
          statusOutputManager.reportStatusMessage(multiContactBalanceStatus);
       }
+   }
+
+   public List<RigidBodyBasics> getContactableRigidBodies()
+   {
+      return contactableRigidBodies;
    }
 
    public void updatePlaneContactState(List<YoPlaneContactState> contactStatesToUpdate)
