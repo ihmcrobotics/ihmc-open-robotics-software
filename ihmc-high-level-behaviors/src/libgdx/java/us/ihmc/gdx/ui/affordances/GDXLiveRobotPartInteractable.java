@@ -8,11 +8,16 @@ import imgui.internal.ImGui;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.graphics.GDXReferenceFrameGraphic;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 public class GDXLiveRobotPartInteractable
 {
@@ -33,6 +38,7 @@ public class GDXLiveRobotPartInteractable
    private GDXReferenceFrameGraphic graphicReferenceFrameGraphic;
    private GDXReferenceFrameGraphic controlReferenceFrameGraphic;
    private boolean pickSelected;
+   private final List<Consumer<FramePose3DReadOnly>> poseHasUpdatedCallbacks = new ArrayList<>();
 
    public void create(GDXRobotCollisionLink collisionLink, ReferenceFrame controlFrame, String graphicFileName, GDX3DPanel panel3D)
    {
@@ -55,6 +61,11 @@ public class GDXLiveRobotPartInteractable
       selectablePose3DGizmo.create(panel3D);
       graphicReferenceFrameGraphic = new GDXReferenceFrameGraphic(0.2);
       controlReferenceFrameGraphic = new GDXReferenceFrameGraphic(0.2);
+   }
+
+   public void addPoseHasUpdatedCallback(Consumer<FramePose3DReadOnly> poseHasUpdatedCallback)
+   {
+      this.poseHasUpdatedCallbacks.add(poseHasUpdatedCallback);
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)
@@ -133,6 +144,11 @@ public class GDXLiveRobotPartInteractable
          {
             collisionLink.setOverrideTransform(true).set(selectablePose3DGizmo.getPoseGizmo().getTransformToParent());
             highlightModel.setPose(selectablePose3DGizmo.getPoseGizmo().getTransformToParent());
+         }
+
+         for (Consumer<FramePose3DReadOnly> callback : poseHasUpdatedCallbacks)
+         {
+            callback.accept(selectablePose3DGizmo.getPoseGizmo().getPose());
          }
       }
 

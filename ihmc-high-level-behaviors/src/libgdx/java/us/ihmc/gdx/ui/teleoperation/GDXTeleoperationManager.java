@@ -36,9 +36,7 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameYawPitchRoll;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
@@ -62,7 +60,7 @@ import us.ihmc.gdx.ui.affordances.ImGuiGDXManualFootstepPlacement;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.gdx.ui.interactable.GDXChestOrientationSlider;
-import us.ihmc.gdx.ui.teleoperation.GDXTeleoperationParameters;
+import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -130,8 +128,9 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
    private final String[] handConfigurationNames = new String[HandConfiguration.values.length];
    private final IHMCROS2Input<PlanarRegionsListMessage> lidarREARegions;
    private final ImBoolean showGraphics = new ImBoolean(true);
-   private GDXChestOrientationSlider chestPitchSlider;
-   private GDXChestOrientationSlider chestYawSlider;
+   private final GDXChestOrientationSlider chestPitchSlider;
+   private final GDXChestOrientationSlider chestYawSlider;
+   private final GDXDesiredRobot desiredRobot;
 
    // FOR ICONS (NON-BUTTON)
    private final WorkspaceDirectory iconDirectory = new WorkspaceDirectory("ihmc-open-robotics-software",
@@ -219,8 +218,12 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
          stanceHeightSliderValue[0] = (float) newHeightSliderValue;
       });
 
+      desiredRobot = new GDXDesiredRobot(robotModel, syncedRobot);
+
       ROS2ControllerHelper chestSlidersROS2ControllerHelper = new ROS2ControllerHelper(ros2Node, robotModel);
+      // TODO this should update the GDX desired Robot
       chestPitchSlider = new GDXChestOrientationSlider(syncedRobot, YawPitchRollAxis.PITCH, chestSlidersROS2ControllerHelper, teleoperationParameters);
+      // TODO this should update the GDX desired robot.
       chestYawSlider = new GDXChestOrientationSlider(syncedRobot, YawPitchRollAxis.YAW, chestSlidersROS2ControllerHelper, teleoperationParameters);
 
       footstepPlanGraphic = new GDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
@@ -248,6 +251,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
                                                                robotEnvironmentCollisionModel,
                                                                robotModel,
                                                                syncedRobot,
+                                                               desiredRobot,
                                                                ros2Helper,
                                                                yoVariableClientHelper,
                                                                teleoperationParameters,
@@ -258,6 +262,9 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
    public void create(GDXImGuiBasedUI baseUI)
    {
       if(iconTexturesMap.size()==0) mapTextureID();
+
+      desiredRobot.create();
+
       // TODO: Remove this stuff and use the path control ring for this
       footstepGoal.create(baseUI, goal -> queueFootstepPlanning(), Color.YELLOW);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(footstepGoal::processImGui3DViewInput);
@@ -287,6 +294,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
    public void update()
    {
       syncedRobot.update();
+      desiredRobot.update();
       footstepPlanGraphic.update();
       if (interactableRobot != null)
          interactableRobot.update();
@@ -359,6 +367,8 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       {
          sendPSIRequest();
       }
+
+      desiredRobot.renderImGuiWidgets();
 
       if (imGuiSlider("Height", stanceHeightSliderValue))
       {
@@ -520,6 +530,12 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
          pastFootSteps.clear();
       }
 
+      if (ImGui.button(labels.get("Set Desired To Current")))
+      {
+         interactableRobot.setDesiredToCurrent();
+         desiredRobot.setDesiredToCurrent();
+      }
+
       interactableRobot.renderImGuiWidgets();
    }
 
@@ -534,6 +550,8 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
+      desiredRobot.getRenderables(renderables, pool);
+
       if (showGraphics.get())
       {
          footstepPlanGraphic.getRenderables(renderables, pool);
@@ -628,9 +646,19 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
 
    public void destroy()
    {
+      desiredRobot.destroy();
       if (interactableRobot != null)
          interactableRobot.destroy();
       footstepPlanGraphic.destroy();
       throttledRobotStateCallback.destroy();
+   }
+
+   public List<ImGuiGDXVisualizer> getVisualizers()
+   {
+      List<ImGuiGDXVisualizer> visualizers = new ArrayList<>();
+      visualizers.add(desiredRobot);
+      desiredRobot.setActive(true);
+
+      return visualizers;
    }
 }
