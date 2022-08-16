@@ -272,6 +272,10 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
                                              FootstepPlannerParameterKeys.keys,
                                              this::queueFootstepPlanning);
       teleoperationParametersTuner.create(teleoperationParameters, GDXTeleoperationParameters.keys);
+      // TODO: create (register) sliders here
+      teleoperationParametersTuner.registerSlider("Swing time", 0.3f, 2.5f);
+      teleoperationParametersTuner.registerSlider("Transfer time", 0.3f, 2.5f);
+      teleoperationParametersTuner.registerSlider("Turn aggressiveness", 0.0f, 10.0f);
 
       manualFootstepPlacement.create(baseUI, communicationHelper, syncedRobot, teleoperationParameters, footstepPlannerParameters);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(manualFootstepPlacement::processImGui3DViewInput);
@@ -410,33 +414,8 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
 //      }
 
       // TODO: sliders for footstep parameters here . . .
-      StoredPropertyKey<?> swingKey = teleoperationParametersTuner.getKeyFromName("Swing time");
-      StoredPropertyKey<?> transferKey = teleoperationParametersTuner.getKeyFromName("Transfer time");
-      StoredPropertyKey<?> turnKey = teleoperationParametersTuner.getKeyFromName("Turn aggressiveness");
-      if (swingKey!=null)
-      {
-         swingTimeSliderValue[0] = (float) teleoperationParametersTuner.getDoubleValueFromKey(swingKey);
-         if(ImGui.sliderFloat(labels.get("Swing time"), swingTimeSliderValue, (float) 0.3, (float) 2.5))
-         {
-            teleoperationParametersTuner.changeParameter((DoubleStoredPropertyKey) swingKey,(double) swingTimeSliderValue[0]);
-         }
-      }
-      if (transferKey!=null)
-      {
-         transferTimeSliderValue[0] = (float) teleoperationParametersTuner.getDoubleValueFromKey(transferKey);
-         if(ImGui.sliderFloat(labels.get("Transfer time"), transferTimeSliderValue, (float) 0, (float) 10))
-         {
-            teleoperationParametersTuner.changeParameter((DoubleStoredPropertyKey) transferKey,(double) transferTimeSliderValue[0]);
-         }
-      }
-      if (turnKey!=null)
-      {
-         turnAgressiveSliderValue[0] = (float) teleoperationParametersTuner.getDoubleValueFromKey(turnKey);
-         if(ImGui.sliderFloat(labels.get("Turn aggressiveness"), turnAgressiveSliderValue, (float) 0, (float) 10))
-         {
-            teleoperationParametersTuner.changeParameter((DoubleStoredPropertyKey) turnKey,(double) turnAgressiveSliderValue[0]);
-         }
-      }
+      // 2nd
+      teleoperationParametersTuner.renderDoublePropertySliders();
 
       ImGui.text("Footstep plan:");
       if (footstepPlannerOutput != null)

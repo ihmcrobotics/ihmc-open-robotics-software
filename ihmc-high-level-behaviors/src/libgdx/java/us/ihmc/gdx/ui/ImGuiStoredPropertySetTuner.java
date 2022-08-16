@@ -4,6 +4,7 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
 import imgui.type.ImInt;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.PathTools;
@@ -27,9 +28,21 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
    private Runnable onParametersUpdatedCallback;
    private final TreeSet<String> versions = new TreeSet<>();
 
+   private class ValueRange
+   {
+      public final float min,max;
+      public ValueRange(float min, float max)
+      {
+         this.min = min;
+         this.max = max;
+      }
+   }
+
    private final HashMap<DoubleStoredPropertyKey, ImDouble> doubleValues = new HashMap<>();
    private final HashMap<IntegerStoredPropertyKey, ImInt> integerValues = new HashMap<>();
    private final HashMap<BooleanStoredPropertyKey, ImBoolean> booleanValues = new HashMap<>();
+   private final HashMap<DoubleStoredPropertyKey, float[]> sliderValues = new HashMap<>();
+   private final HashMap<DoubleStoredPropertyKey, ValueRange> sliderMinMaxMap = new HashMap<>();
 
    public ImGuiStoredPropertySetTuner(String name)
    {
@@ -88,6 +101,19 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
          else
          {
             throw new RuntimeException("Please implement spinner for type: " + propertyKey.getType());
+         }
+      }
+   }
+
+   public void registerSlider(String titleCasedName, float min, float max)
+   {
+      for (StoredPropertyKey<?> key : getKeyList().keys())
+      {
+         if (Objects.equals(key.getTitleCasedName(), titleCasedName))
+         {
+            sliderValues.put( (DoubleStoredPropertyKey) key, new float[] {(float) getDoubleValueFromKey(key)} );
+            sliderMinMaxMap.put((DoubleStoredPropertyKey) key, new ValueRange(min,max));
+            break;
          }
       }
    }
@@ -172,17 +198,6 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
          ImGui.pushItemWidth(100.0f);
       }
 
-      // TODO: Implement this in teleop panel for quick access
-//      if (Objects.equals(propertyKey.getTitleCasedName(), "Swing time"))
-//      {
-//         float[] sliderValue = new float[1];
-//         sliderValue[0] = (float) doubleValues.get(propertyKey).get();
-//         imgui.ImGui.sliderFloat(labels.get("Swing time"), sliderValue, (float) 0, (float) 10);
-//         DoubleStoredPropertyKey key = (DoubleStoredPropertyKey) propertyKey;
-//         storedPropertySet.set(key, doubleValues.get(key).get());
-//         onParametersUpdatedCallback.run();
-//      }
-
       if (ImGuiTools.volatileInputDouble(label, doubleValues.get(propertyKey), step, stepFast, format))
       {
          DoubleStoredPropertyKey key = (DoubleStoredPropertyKey) propertyKey;
@@ -257,5 +272,49 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
    {
       DoubleStoredPropertyKey key = (DoubleStoredPropertyKey) inputKey;
       return doubleValues.get(key).get();
+   }
+
+   public void renderDoublePropertySliders()
+   {
+      for (DoubleStoredPropertyKey key : sliderValues.keySet())
+      {
+         renderADoublePropertySlider(key, 0.01, 0.5, (double) sliderMinMaxMap.get(key).min,
+                                                                    (double) sliderMinMaxMap.get(key).max,
+                                                                     false,
+                                                                        key.getTitleCasedName(),
+                                                                        "%.6f");
+      }
+   }
+
+   public void renderADoublePropertySlider(StoredPropertyKey<?> propertyKey,
+                                          double step,
+                                          double stepFast,
+                                          double min,
+                                          double max,
+                                          boolean fancyLabel,
+                                          String titleCasedName,
+                                          String format)
+   {
+      String label = fancyLabel ? labels.get(titleCasedName, propertyKey.getTitleCasedName()) : propertyKey.getTitleCasedName();
+      if (fancyLabel)
+      {
+         ImGui.text(propertyKey.getTitleCasedName() + ":");
+         ImGui.sameLine();
+         ImGui.pushItemWidth(100.0f);
+      }
+      // TODO: Implement this in teleop panel for quick access
+      DoubleStoredPropertyKey key = (DoubleStoredPropertyKey) propertyKey;
+      if (ImGui.sliderFloat(labels.get(label), sliderValues.get(key), (float) min, (float) max))
+      {
+         doubleValues.get(key).set(sliderValues.get(key)[0]);
+         if (!Double.isNaN(min))
+            doubleValues.get(key).set(MathTools.clamp(doubleValues.get(key).get(), min, max));
+         storedPropertySet.set(key, sliderValues.get(key)[0]);
+         onParametersUpdatedCallback.run();
+      }
+      if (fancyLabel)
+      {
+         ImGui.popItemWidth();
+      }
    }
 }
