@@ -129,7 +129,7 @@ public class ControllerNaturalPostureManager
       double qpWeight = 5.0; //5.0;
       npQPWeightX.set(qpWeight);
       npQPWeightY.set(qpWeight);
-      npQPWeightZ.set(1);
+      npQPWeightZ.set(5);
 
       npKpYaw.set(150.0);
       npKpPitch.set(50.0);
