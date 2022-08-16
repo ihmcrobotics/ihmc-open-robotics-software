@@ -124,7 +124,7 @@ public class GDXFootstepPlanGraphic implements RenderableProvider
          Color regionColor = footstepColors.get(minimalFootstep.getSide());
 
          minimalFootstep.getSolePoseInWorld().get(transformToWorld);
-         transformToWorld.appendTranslation(0.0, 0.0, 0.001);
+         transformToWorld.appendTranslation(0.0, 0.0, 0.01);
 
          if (minimalFootstep.getFoothold() != null && !minimalFootstep.getFoothold().isEmpty())
          {

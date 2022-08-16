@@ -16,6 +16,7 @@ import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeSet;
 
 public class ImGuiStoredPropertySetTuner extends ImGuiPanel
@@ -170,6 +171,18 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
          ImGui.sameLine();
          ImGui.pushItemWidth(100.0f);
       }
+
+      // TODO: Implement this in teleop panel for quick access
+//      if (Objects.equals(propertyKey.getTitleCasedName(), "Swing time"))
+//      {
+//         float[] sliderValue = new float[1];
+//         sliderValue[0] = (float) doubleValues.get(propertyKey).get();
+//         imgui.ImGui.sliderFloat(labels.get("Swing time"), sliderValue, (float) 0, (float) 10);
+//         DoubleStoredPropertyKey key = (DoubleStoredPropertyKey) propertyKey;
+//         storedPropertySet.set(key, doubleValues.get(key).get());
+//         onParametersUpdatedCallback.run();
+//      }
+
       if (ImGuiTools.volatileInputDouble(label, doubleValues.get(propertyKey), step, stepFast, format))
       {
          DoubleStoredPropertyKey key = (DoubleStoredPropertyKey) propertyKey;
@@ -216,11 +229,33 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
    public <T> void changeParameter(StoredPropertyKey<T> key, T value)
    {
       storedPropertySet.set(key, value);
+      // TODO: experimental . . .
+      doubleValues.get((DoubleStoredPropertyKey) key).set((double)value);
       onParametersUpdatedCallback.run();
    }
 
    public StoredPropertySetReadOnly getParameters()
    {
       return storedPropertySet;
+   }
+
+   public StoredPropertyKeyList getKeyList() {return keys;}
+
+   public StoredPropertyKey<?> getKeyFromName(String titleCasedName)
+   {
+      for (StoredPropertyKey<?> key : getKeyList().keys())
+      {
+         if (Objects.equals(key.getTitleCasedName(), titleCasedName))
+         {
+            return key;
+         }
+      }
+      return null;
+   }
+
+   public double getDoubleValueFromKey(StoredPropertyKey<?> inputKey)
+   {
+      DoubleStoredPropertyKey key = (DoubleStoredPropertyKey) inputKey;
+      return doubleValues.get(key).get();
    }
 }

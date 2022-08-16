@@ -259,6 +259,13 @@ public class ImGuiTools
       return mediumFont;
    }
 
+   // TODO: get custom size fonts
+   public static ImFont getCustomFont(float fontSize)
+   {
+//      return io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), fontSize, customFontConfig);
+      return null;
+   }
+
    public static ImFont getSmallFont()
    {
       return smallFont;
