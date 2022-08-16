@@ -128,10 +128,9 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
    private final String[] handConfigurationNames = new String[HandConfiguration.values.length];
    private final IHMCROS2Input<PlanarRegionsListMessage> lidarREARegions;
    private final ImBoolean showGraphics = new ImBoolean(true);
-   private GDXChestOrientationSlider chestPitchSlider;
-   private GDXChestOrientationSlider chestYawSlider;
-
-   private GDXDesiredRobot desiredRobot;
+   private final GDXChestOrientationSlider chestPitchSlider;
+   private final GDXChestOrientationSlider chestYawSlider;
+   private final GDXDesiredRobot desiredRobot;
 
    // FOR ICONS (NON-BUTTON)
    private final WorkspaceDirectory iconDirectory = new WorkspaceDirectory("ihmc-open-robotics-software",

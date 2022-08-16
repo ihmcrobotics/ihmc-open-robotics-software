@@ -38,7 +38,6 @@ public class GDXLiveRobotPartInteractable
    private GDXReferenceFrameGraphic graphicReferenceFrameGraphic;
    private GDXReferenceFrameGraphic controlReferenceFrameGraphic;
    private boolean pickSelected;
-
    private final List<Consumer<FramePose3DReadOnly>> poseHasUpdatedCallbacks = new ArrayList<>();
 
    public void create(GDXRobotCollisionLink collisionLink, ReferenceFrame controlFrame, String graphicFileName, GDX3DPanel panel3D)
@@ -147,7 +146,10 @@ public class GDXLiveRobotPartInteractable
             highlightModel.setPose(selectablePose3DGizmo.getPoseGizmo().getTransformToParent());
          }
 
-         processPoseHasUpdatedCallbacks();
+         for (Consumer<FramePose3DReadOnly> callback : poseHasUpdatedCallbacks)
+         {
+            callback.accept(selectablePose3DGizmo.getPoseGizmo().getPose());
+         }
       }
 
       if (selectablePose3DGizmo.isSelected() && executeMotionKeyPressed)
@@ -194,11 +196,5 @@ public class GDXLiveRobotPartInteractable
    public void setOnSpacePressed(Runnable onSpacePressed)
    {
       this.onSpacePressed = onSpacePressed;
-   }
-
-   private void processPoseHasUpdatedCallbacks()
-   {
-      for (Consumer<FramePose3DReadOnly> callback : poseHasUpdatedCallbacks)
-         callback.accept(selectablePose3DGizmo.getPoseGizmo().getPose());
    }
 }
