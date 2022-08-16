@@ -75,8 +75,11 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
       this.yoVariableClientHelper = yoVariableClientHelper;
       this.teleoperationParameters = teleoperationParameters;
       this.teleoperationParametersTuner = teleoperationParametersTuner;
-
-      this.armSetpointManager = new GDXArmSetpointManager(robotModel, syncedRobot, desiredRobot.getDesiredFullRobotModel(), ros2Helper, teleoperationParameters);
+      this.armSetpointManager = new GDXArmSetpointManager(robotModel,
+                                                          syncedRobot,
+                                                          desiredRobot.getDesiredFullRobotModel(),
+                                                          ros2Helper,
+                                                          teleoperationParameters);
    }
 
    public void create(GDXImGuiBasedUI baseUI)
@@ -141,10 +144,9 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
                                        handControlFrame,
                                        modelFileName,
                                        baseUI.getPrimary3DPanel());
-               // This adds a callback function that consumes a desired pose, and updates the arm kinematics to achieve that desired pose
-               interactableHand.addPoseHasUpdatedCallback(armSetpointManager.getPoseHasBeenUpdatedCallback(side));
+               armSetpointManager.getDesiredHandControlPoseSuppliers().put(side, interactableHand::getPose);
                // TODO this should probably not handle the space event!
-               // This packs the desired arm joints into a message that is sent to the controller.
+               // This sends a command to the controller.
                interactableHand.setOnSpacePressed(armSetpointManager.getSubmitDesiredArmSetpointsCallback(side));
 
 
