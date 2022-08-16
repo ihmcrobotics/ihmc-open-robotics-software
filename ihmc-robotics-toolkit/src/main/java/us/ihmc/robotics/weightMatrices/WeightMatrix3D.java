@@ -122,6 +122,16 @@ public class WeightMatrix3D implements Tuple3DReadOnly
    }
 
    /**
+    * Sets the weights to the same value.
+    * 
+    * @param weightsValue the value for all 3 axes.
+    */
+   public void setWeights(double weightsValue)
+   {
+      setWeights(weightsValue, weightsValue, weightsValue);
+   }
+
+   /**
     * Sets the weights.
     * <p>
     * Note that it is preferable to also set weight frame to which this weight matrix is referring to.
@@ -498,7 +508,7 @@ public class WeightMatrix3D implements Tuple3DReadOnly
          return true;
       }
    }
-   
+
    @Override
    public boolean geometricallyEquals(EuclidGeometry geometry, double epsilon)
    {

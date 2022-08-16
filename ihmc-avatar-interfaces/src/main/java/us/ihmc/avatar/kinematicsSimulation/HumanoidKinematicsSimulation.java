@@ -479,8 +479,7 @@ public class HumanoidKinematicsSimulation
       controllerCoreCommand.addInverseDynamicsCommand(linearMomentumRateControlModule.getMomentumRateCommand());
       controllerCoreCommand.addInverseDynamicsCommand(inverseDynamicsContactHolderCommandList);
 
-      controllerCore.submitControllerCoreCommand(controllerCoreCommand);
-      controllerCore.compute();
+      controllerCore.compute(controllerCoreCommand);
 
       linearMomentumRateControlModule.setInputFromControllerCore(controllerCore.getControllerCoreOutput());
       linearMomentumRateControlModule.computeAchievedCMP();
