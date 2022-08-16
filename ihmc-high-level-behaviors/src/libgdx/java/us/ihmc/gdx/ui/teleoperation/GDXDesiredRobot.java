@@ -1,17 +1,10 @@
 package us.ihmc.gdx.ui.teleoperation;
 
-import com.badlogic.gdx.graphics.g3d.RenderableProvider;
-import imgui.ImGui;
-import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.gdx.ui.graphics.GDXMultiBodyGraphic;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJointStateCopier;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
@@ -49,15 +42,11 @@ public class GDXDesiredRobot extends GDXMultiBodyGraphic
    {
       super.create();
 
-      RobotDefinition robotDefinition = robotModel.getRobotDefinition();
+      RobotDefinition robotDefinition = new RobotDefinition(robotModel.getRobotDefinition());
       ColorDefinition ghostColor = ColorDefinitions.parse("0x4B61D1").derive(0.0, 1.0, 1.0, 0.5);
       MaterialDefinition material = new MaterialDefinition(ghostColor);
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         String handName = robotModel.getJointMap().getHandName(robotSide);
-         RobotDefinition.forEachRigidBodyDefinition(robotDefinition.getRigidBodyDefinition(handName),
-                                                    body -> body.getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material)));
-      }
+      RobotDefinition.forEachRigidBodyDefinition(robotDefinition.getRootBodyDefinition(),
+                                                 body -> body.getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material)));
       loadRobotModelAndGraphics(robotDefinition, desiredFullRobotModel.getElevator());
    }
 
