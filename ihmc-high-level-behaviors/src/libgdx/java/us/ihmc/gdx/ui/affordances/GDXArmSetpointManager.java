@@ -21,6 +21,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.kinematics.DdoglegInverseKinematicsCalculator;
 import us.ihmc.robotics.kinematics.InverseKinematicsCalculator;
 import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
@@ -53,6 +54,7 @@ public class GDXArmSetpointManager
    private final SideDependentList<Boolean> ikFoundASolution = new SideDependentList<>();
    private final SideDependentList<InverseKinematicsCalculator> inverseKinematicsCalculators = new SideDependentList<>();
    private final SideDependentList<RigidBodyTransform> controlToWristTransforms = new SideDependentList<>();
+   private final ModifiableReferenceFrame temporaryFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
 
    private enum HandDataType
    {
@@ -180,18 +182,28 @@ public class GDXArmSetpointManager
 
       if (getDesiredControlHandPoseHasChangedSinceLastUpdate(robotSide, desiredHandSetpoint))
       {
-         FramePose3D setpointCopy = new FramePose3D(desiredHandSetpoint);
-         setpointCopy.changeFrame(desiredRobot.getChest().getBodyFixedFrame());
-         lastDesiredControlHandTransformInChestFrame.put(robotSide, setpointCopy);
+         FramePose3D setpointCopyControlFrame = new FramePose3D(desiredHandSetpoint);
+         setpointCopyControlFrame.changeFrame(desiredRobot.getChest().getBodyFixedFrame());
+         lastDesiredControlHandTransformInChestFrame.put(robotSide, setpointCopyControlFrame);
 
-//         setpointCopy.changeFrame();
+         FramePose3D setpointCopyHandFrame = new FramePose3D(desiredHandSetpoint);
+         setpointCopyHandFrame.changeFrame(ReferenceFrame.getWorldFrame());
+         setpointCopyHandFrame.get(temporaryFrame.getTransformToParent());
+         temporaryFrame.getReferenceFrame().update();
+         setpointCopyHandFrame.setToZero(temporaryFrame.getReferenceFrame());
+         setpointCopyHandFrame.set(controlToWristTransforms.get(robotSide));
+         // IDK where these come from; I tuned using JRebel
+         setpointCopyHandFrame.getTranslation().subZ(.045);
+         setpointCopyHandFrame.getTranslation().subX(.007);
+         setpointCopyHandFrame.getTranslation().subY(robotSide.negateIfLeftSide(.0015));
+         setpointCopyHandFrame.changeFrame(desiredRobot.getChest().getBodyFixedFrame());
 
          copyOneDofJoints(actualArmJacobians.get(robotSide).getJointsInOrder(), workArmJacobians.get(robotSide).getJointsInOrder());
          ikFoundASolution.put(robotSide, false);
          for (int i = 0; i < INVERSE_KINEMATICS_CALCULATIONS_PER_UPDATE && !ikFoundASolution.get(robotSide); i++)
          {
             InverseKinematicsCalculator inverseKinematicsCalculator = inverseKinematicsCalculators.get(robotSide);
-            boolean foundASolution = inverseKinematicsCalculator.solve(setpointCopy);
+            boolean foundASolution = inverseKinematicsCalculator.solve(setpointCopyHandFrame);
             ikFoundASolution.put(robotSide, foundASolution);
          }
       }
