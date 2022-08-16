@@ -33,11 +33,24 @@ public class GDXArmSetpointManager
    private final FullHumanoidRobotModel desiredRobot;
    private FullHumanoidRobotModel workingRobot;
    private final ROS2ControllerHelper ros2Helper;
-   private GDXTeleoperationParameters teleoperationParameters;
+   private final GDXTeleoperationParameters teleoperationParameters;
 
    private final ArmJointName[] armJointNames;
-
    private static final HandDataType handPoseDataTypeToSend = HandDataType.JOINT_ANGLES;
+
+   // returned as output
+   private final SideDependentList<GeometricJacobian> desiredArmJacobians = new SideDependentList<>();
+
+   // passed to IK solvers
+   private final SideDependentList<GeometricJacobian> workArmJacobians = new SideDependentList<>();
+   private final SideDependentList<GeometricJacobian> actualArmJacobians = new SideDependentList<>();
+
+   private static final int INVERSE_KINEMATICS_CALCULATIONS_PER_UPDATE = 5;
+   private int maxIterations = 500;
+
+   private final SideDependentList<FramePose3DReadOnly> lastDesiredControlHandTransformInChestFrame = new SideDependentList<>();
+   private final SideDependentList<Boolean> ikFoundASolution = new SideDependentList<>();
+   private final SideDependentList<InverseKinematicsCalculator> inverseKinematicsCalculators = new SideDependentList<>();
 
    private enum HandDataType
    {
@@ -155,20 +168,6 @@ public class GDXArmSetpointManager
       for (RobotSide robotSide : RobotSide.values)
          copyOneDofJoints(actualArmJacobians.get(robotSide).getJointsInOrder(), desiredArmJacobians.get(robotSide).getJointsInOrder());
    }
-
-   // returned as output
-   private SideDependentList<GeometricJacobian> desiredArmJacobians = new SideDependentList<GeometricJacobian>();
-
-   // passed to IK solvers
-   private final SideDependentList<GeometricJacobian> workArmJacobians = new SideDependentList<GeometricJacobian>();
-   private final SideDependentList<GeometricJacobian> actualArmJacobians = new SideDependentList<GeometricJacobian>();
-
-   private static final int INVERSE_KINEMATICS_CALCULATIONS_PER_UPDATE = 5;
-   private int maxIterations = 500;
-
-   private final SideDependentList<FramePose3DReadOnly> lastDesiredControlHandTransformInChestFrame = new SideDependentList<>();
-   private SideDependentList<Boolean> ikFoundASolution = new SideDependentList<>();
-   private SideDependentList<InverseKinematicsCalculator> inverseKinematicsCalculators = new SideDependentList<>();
 
    private void updateArmSetpoints(RobotSide robotSide, FramePose3DReadOnly desiredHandSetpoint)
    {
