@@ -65,6 +65,10 @@ public class ControllerNaturalPostureManager
 
    private final QPObjectiveCommand pelvisQPObjectiveCommand = new QPObjectiveCommand();
 
+   private final YoDouble pelvisQPWeightX = new YoDouble("pelvisQPWeightX", registry);
+   private final YoDouble pelvisQPWeightY = new YoDouble("pelvisQPWeightY", registry);
+   private final YoDouble pelvisQPWeightZ = new YoDouble("pelvisQPWeightZ", registry);
+   
    private final YoDouble pPosePelvisYaw = new YoDouble("pPosePelvisYaw", registry);
    private final YoDouble pPosePelvisPitch = new YoDouble("pPosePelvisPitch", registry);
    private final YoDouble pPosePelvisRoll = new YoDouble("pPosePelvisRoll", registry);
@@ -89,7 +93,7 @@ public class ControllerNaturalPostureManager
    private final YoDouble pelvisYawAcceleration = new YoDouble("pelvisYawAcceleration", registry);
    private final YoDouble pelvisPitchAcceleration = new YoDouble("pelvisPitchAcceleration", registry);
    private final YoDouble pelvisRollAcceleration = new YoDouble("pelvisRollAcceleration", registry);
-   
+
    private final YoBoolean doNullSpaceProjectionForNaturalPosture = new YoBoolean("doNullSpaceProjectionForNaturalPosture", registry);
    private final YoBoolean doNullSpaceProjectionForPelvis = new YoBoolean("doNullSpaceProjectionForPelvis", registry);
 
@@ -122,14 +126,14 @@ public class ControllerNaturalPostureManager
       // switches 
       doNullSpaceProjectionForNaturalPosture.set(false);
       doNullSpaceProjectionForPelvis.set(true);
-      
+
       // Desired NP values (wrt world)
       npPitchDesired.set(-0.03);
 
       double qpWeight = 5.0; //5.0;
-      npQPWeightX.set(5);  //1
-      npQPWeightY.set(5);  //1
-      npQPWeightZ.set(3);
+      npQPWeightX.set(1); //1
+      npQPWeightY.set(1); //1
+      npQPWeightZ.set(1);
 
       npKpYaw.set(150.0);
       npKpPitch.set(50.0);
@@ -141,17 +145,26 @@ public class ControllerNaturalPostureManager
 
       npVelocityAlpha.set(0.01);
 
+      // Pelvis privileged pose
+      double scale1 = 1;//100;
+      double scale2 = 1;//0.1;
+
       pelvisQPobjective.reshape(3, 1);
       pelvisQPjacobian.reshape(3, 6 + fullRobotModel.getOneDoFJoints().length);
       pelvisQPweightMatrix.reshape(3, 3);
       pelvisQPselectionMatrix.reshape(3, 3);
       CommonOps_DDRM.setIdentity(pelvisQPselectionMatrix);
+      
+      pelvisQPWeightX.set(1.0 * scale1);
+      pelvisQPWeightY.set(1.0 * scale1);
+      pelvisQPWeightZ.set(1.0 * scale1);
+      
       pPosePelvisYaw.set(0.0);
       pPosePelvisPitch.set(0.02);
       pPosePelvisRoll.set(0.0);
-      pPosePelvisYawKp.set(1000.0);
-      pPosePelvisPitchKp.set(3000);
-      pPosePelvisRollKp.set(1500.0);
+      pPosePelvisYawKp.set(1000.0 * scale2);
+      pPosePelvisPitchKp.set(3000 * scale2);
+      pPosePelvisRollKp.set(1500.0 * scale2);
       pPosePelvisYawKdFactor.set(0.15);
       pPosePelvisPitchKdFactor.set(0.15);
       pPosePelvisRollKdFactor.set(0.15);
@@ -257,12 +270,9 @@ public class ControllerNaturalPostureManager
    // pose of the pelvis (via task null-space projection)
    private void pelvisPrivilegedPoseQPObjectiveCommand()
    {
-      //      pelvisQPweightMatrix.set(0, 0, pelvisQPWeightX.getValue());
-      //      pelvisQPweightMatrix.set(1, 1, pelvisQPWeightY.getValue());
-      //      pelvisQPweightMatrix.set(2, 2, pelvisQPWeightZ.getValue());
-      pelvisQPweightMatrix.set(0, 0, 1.0);
-      pelvisQPweightMatrix.set(1, 1, 1.0);
-      pelvisQPweightMatrix.set(2, 2, 1.0);
+      pelvisQPweightMatrix.set(0, 0, pelvisQPWeightX.getValue());
+      pelvisQPweightMatrix.set(1, 1, pelvisQPWeightY.getValue());
+      pelvisQPweightMatrix.set(2, 2, pelvisQPWeightZ.getValue());
 
       // Get current pelvis YPR and omega:
       pelvisYPR.set(fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToWorldFrame().getRotation());

@@ -187,6 +187,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final YoDouble pPoseElbowKdFactor = new YoDouble("pPoseElbowKdFactor", registry);
 
    private final YoDouble pPoseSpineYawWeight = new YoDouble("pPoseSpineYawWeight", registry);
+   private final YoDouble pPoseShoulderYawWeight = new YoDouble("pPoseShoulderYawWeight", registry);
    
    //   private final YoDouble pPoseHipPitch = new YoDouble("pPoseHipPitch", registry);
    private final YoDouble pPoseHipPitchKp = new YoDouble("pPoseHipPitchKp", registry);
@@ -349,12 +350,14 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       pPoseSpinePitch.set(0.0);
       pPoseSpineYaw.set(0.0);
       double delta = 0.0;
-      pPoseShoulderPitch.set(0.2 + delta);  //0.1 //0.2   // the bigger, the further away the arm is from the body 
+      pPoseShoulderPitch.set(0 + delta);  //0.1 //0.2   // the bigger, the further away the arm is from the body 
       pPoseShoulderRoll.set(0 - delta);   // the smaller, the further away the arm is from the body
       pPoseShoulderYaw.set(0);
       pPoseElbow.set(-0.4);  //-0.5 //-1   // the smaller, the more bent the elbow is 
 
       pPoseSpineYawWeight.set(3.0);  // weight used to complete with other privileged joint position. Other joint default weights are 1
+      pPoseShoulderYawWeight.set(1.0);   // this weight doesn't matter much
+      
       
       pPoseSpineRollKp.set(50.0);
       pPoseSpinePitchKp.set(50.0);
@@ -708,9 +711,11 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       return jointParameters;
    }
 
+
    private OneDoFJointPrivilegedConfigurationParameters createAndAddJointPrivilegedConfigurationParameters(RobotSide robotSide,
                                                                                                            ArmJointName armJointName,
                                                                                                            double privilegedAngle,
+                                                                                                           double weight,
                                                                                                            double pgain,
                                                                                                            double dgain)
    {
@@ -720,7 +725,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       OneDoFJointPrivilegedConfigurationParameters jointParameters = new OneDoFJointPrivilegedConfigurationParameters();
       jointParameters.setConfigurationGain(pgain);
       jointParameters.setVelocityGain(dgain);
-      jointParameters.setWeight(1.0);
+      jointParameters.setWeight(weight);
       jointParameters.setMaxAcceleration(Double.POSITIVE_INFINITY);
       jointParameters.setPrivilegedConfigurationOption(null);
       jointParameters.setPrivilegedConfiguration(privilegedAngle);
@@ -728,6 +733,15 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       privilegedConfigurationCommand.addJoint(armJoint, jointParameters);
 
       return jointParameters;
+   }
+   
+   private OneDoFJointPrivilegedConfigurationParameters createAndAddJointPrivilegedConfigurationParameters(RobotSide robotSide,
+                                                                                                           ArmJointName armJointName,
+                                                                                                           double privilegedAngle,
+                                                                                                           double pgain,
+                                                                                                           double dgain)
+   {
+      return createAndAddJointPrivilegedConfigurationParameters(robotSide, armJointName, privilegedAngle, 1.0, pgain, dgain);
    }
 
    private OneDoFJointPrivilegedConfigurationParameters createAndAddJointPrivilegedConfigurationParameters(RobotSide robotSide,
@@ -1187,6 +1201,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       createAndAddJointPrivilegedConfigurationParameters(side,
                                                          ArmJointName.SHOULDER_YAW,
                                                          pPoseShoulderYaw.getDoubleValue(),
+                                                         pPoseShoulderYawWeight.getDoubleValue(),
                                                          pPoseShoulderYawKp.getDoubleValue(),
                                                          pPoseShoulderYawKdFactor.getDoubleValue() * pPoseShoulderYawKp.getDoubleValue());
       createAndAddJointPrivilegedConfigurationParameters(side,
@@ -1209,6 +1224,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       createAndAddJointPrivilegedConfigurationParameters(side,
                                                          ArmJointName.SHOULDER_YAW,
                                                          pPoseShoulderYaw.getDoubleValue(),
+                                                         pPoseShoulderYawWeight.getDoubleValue(),
                                                          pPoseShoulderYawKp.getDoubleValue(),
                                                          pPoseShoulderYawKdFactor.getDoubleValue() * pPoseShoulderYawKp.getDoubleValue());
       createAndAddJointPrivilegedConfigurationParameters(side,
