@@ -933,7 +933,7 @@ public class ValkyrieInitialSetupFactories
          initialSetup.setJoint(robotSide, ArmJointName.ELBOW_ROLL, 1.3);
       }
 
-      initialSetup.getRootJointPosition().setZ(0.98);
+      initialSetup.getRootJointPosition().setZ(0.995);
       return initialSetup;
    }
 }
