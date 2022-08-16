@@ -9,6 +9,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.teleoperation.GDXTeleoperationParameters;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -51,6 +52,7 @@ public class GDXArmSetpointManager
    private final SideDependentList<FramePose3DReadOnly> lastDesiredControlHandTransformInChestFrame = new SideDependentList<>();
    private final SideDependentList<Boolean> ikFoundASolution = new SideDependentList<>();
    private final SideDependentList<InverseKinematicsCalculator> inverseKinematicsCalculators = new SideDependentList<>();
+   private final SideDependentList<RigidBodyTransform> controlToWristTransforms = new SideDependentList<>();
 
    private enum HandDataType
    {
@@ -99,6 +101,9 @@ public class GDXArmSetpointManager
                                                                                  0.02,
                                                                                  parameterChangePenalty));
 
+         RigidBodyTransform wristToControlTransform = new RigidBodyTransform(robotModel.getJointMap().getHandControlFrameToWristTransform(side));
+         wristToControlTransform.invert();
+         controlToWristTransforms.put(side, wristToControlTransform);
       }
    }
 
@@ -178,6 +183,8 @@ public class GDXArmSetpointManager
          FramePose3D setpointCopy = new FramePose3D(desiredHandSetpoint);
          setpointCopy.changeFrame(desiredRobot.getChest().getBodyFixedFrame());
          lastDesiredControlHandTransformInChestFrame.put(robotSide, setpointCopy);
+
+//         setpointCopy.changeFrame();
 
          copyOneDofJoints(actualArmJacobians.get(robotSide).getJointsInOrder(), workArmJacobians.get(robotSide).getJointsInOrder());
          ikFoundASolution.put(robotSide, false);
