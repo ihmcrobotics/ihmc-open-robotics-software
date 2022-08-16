@@ -72,6 +72,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.tools.io.WorkspaceFile;
+import us.ihmc.tools.property.DoubleStoredPropertyKey;
+import us.ihmc.tools.property.StoredPropertyKey;
 import us.ihmc.tools.string.StringTools;
 
 import java.util.*;
@@ -138,6 +140,12 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
    private final String fileNameStringKeys[] = new String[] {"leftHand", "rightHand"};
    private Map<String, Texture> iconTexturesMap = new HashMap<String, Texture>();
    private int textureID = 0;
+
+   // FOR teleop parameter tuning sliders
+   private float[] swingTimeSliderValue = new float[1];
+   private float[] transferTimeSliderValue = new float[1];
+   private float[] turnAgressiveSliderValue = new float[1];
+
 
    // FOR LOGGING STEPS TAKEN
    private GDXPastFootSteps pastFootSteps;
@@ -401,6 +409,36 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
 //         LogTools.info("Commanding neck trajectory: slider: {} angle: {}", neckPitchSliderValue[0], jointAngle);
 //         communicationHelper.publishToController(HumanoidMessageTools.createNeckTrajectoryMessage(3.0, new double[] {jointAngle}));
 //      }
+
+      // TODO: sliders for footstep parameters here . . .
+      StoredPropertyKey<?> swingKey = teleoperationParametersTuner.getKeyFromName("Swing time");
+      StoredPropertyKey<?> transferKey = teleoperationParametersTuner.getKeyFromName("Transfer time");
+      StoredPropertyKey<?> turnKey = teleoperationParametersTuner.getKeyFromName("Turn aggressiveness");
+      if (swingKey!=null)
+      {
+         swingTimeSliderValue[0] = (float) teleoperationParametersTuner.getDoubleValueFromKey(swingKey);
+         if(ImGui.sliderFloat(labels.get("Swing time"), swingTimeSliderValue, (float) 0.3, (float) 2.5))
+         {
+            teleoperationParametersTuner.changeParameter((DoubleStoredPropertyKey) swingKey,(double) swingTimeSliderValue[0]);
+         }
+      }
+      if (transferKey!=null)
+      {
+         transferTimeSliderValue[0] = (float) teleoperationParametersTuner.getDoubleValueFromKey(transferKey);
+         if(ImGui.sliderFloat(labels.get("Transfer time"), transferTimeSliderValue, (float) 0, (float) 10))
+         {
+            teleoperationParametersTuner.changeParameter((DoubleStoredPropertyKey) transferKey,(double) transferTimeSliderValue[0]);
+         }
+      }
+      if (turnKey!=null)
+      {
+         turnAgressiveSliderValue[0] = (float) teleoperationParametersTuner.getDoubleValueFromKey(turnKey);
+         if(ImGui.sliderFloat(labels.get("Turn aggressiveness"), turnAgressiveSliderValue, (float) 0, (float) 10))
+         {
+            teleoperationParametersTuner.changeParameter((DoubleStoredPropertyKey) turnKey,(double) turnAgressiveSliderValue[0]);
+         }
+      }
+
       ImGui.text("Footstep plan:");
       if (footstepPlannerOutput != null)
       {
@@ -423,15 +461,13 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       {
          manualFootstepPlacement.clear();
       }
-      ImGui.popFont();
 
       ImGui.sameLine();
-      ImGui.pushFont(ImGuiTools.getMediumFont());
       if (ImGui.button(labels.get("Delete Last")))
       {
          manualFootstepPlacement.removeFootStep();
       }
-      ImGui.popFont();
+
 
       for (RobotSide side : RobotSide.values)
       {
@@ -475,6 +511,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
             communicationHelper.publish(ROS2Tools::getHandConfigurationTopic, message);
          }
       }
+      ImGui.popFont();
 
       ImGui.text("Lidar REA:");
       ImGui.sameLine();

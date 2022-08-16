@@ -46,8 +46,8 @@ testDependencies {
 
 visualizersDependencies {
    api(ihmc.sourceSetProject("main"))
-   api("us.ihmc:simulation-construction-set:0.22.5")
-   api("us.ihmc:scs2-simulation-construction-set:17-0.8.5-bullet-alpha-6")
+   api("us.ihmc:simulation-construction-set:0.22.6")
+   api("us.ihmc:scs2-simulation-construction-set:17-0.9.3")
 
    var javaFXVersion = "17.0.2"
    api(ihmc.javaFXModule("base", javaFXVersion))

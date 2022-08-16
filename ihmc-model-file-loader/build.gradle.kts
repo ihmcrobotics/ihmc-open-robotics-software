@@ -23,7 +23,7 @@ mainDependencies {
    api("us.ihmc:euclid:0.18.1")
    api("us.ihmc:ihmc-robot-description:0.21.5")
    api("us.ihmc:ihmc-javafx-toolkit:17-0.21.2")
-   api("us.ihmc:scs2-definition:17-0.9.1")
+   api("us.ihmc:scs2-definition:17-0.9.3")
    api("us.ihmc:ihmc-robotics-toolkit:source")
 }
 
