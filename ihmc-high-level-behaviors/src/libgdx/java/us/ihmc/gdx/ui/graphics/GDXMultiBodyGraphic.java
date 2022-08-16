@@ -19,7 +19,7 @@ import us.ihmc.tools.thread.Activator;
 
 public class GDXMultiBodyGraphic extends ImGuiGDXVisualizer implements RenderableProvider
 {
-   private GDXRigidBody multiBody;
+   protected GDXRigidBody multiBody;
    private final Activator robotLoadedActivator = new Activator();
 
    public GDXMultiBodyGraphic(String title)
