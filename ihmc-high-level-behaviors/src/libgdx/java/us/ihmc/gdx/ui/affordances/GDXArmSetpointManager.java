@@ -1,9 +1,7 @@
 package us.ihmc.gdx.ui.affordances;
 
-import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
-import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -11,8 +9,6 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.teleoperation.GDXTeleoperationParameters;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -28,7 +24,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 public class GDXArmSetpointManager
@@ -47,7 +42,7 @@ public class GDXArmSetpointManager
    private enum HandDataType
    {
       JOINT_ANGLES, POSE
-   };
+   }
 
    public GDXArmSetpointManager(DRCRobotModel robotModel,
                                 ROS2SyncedRobotModel syncedRobot,
@@ -223,5 +218,4 @@ public class GDXArmSetpointManager
 
       return !lastDesiredControlHandTransformInChestFrame.get(side).epsilonEquals(desiredPose, 0.00001);
    }
-
 }
