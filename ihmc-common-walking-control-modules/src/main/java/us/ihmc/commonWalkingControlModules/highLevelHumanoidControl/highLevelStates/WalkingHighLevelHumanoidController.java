@@ -185,6 +185,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final YoDouble pPoseShoulderYawKdFactor = new YoDouble("pPoseShoulderYawKdFactor", registry);
    private final YoDouble pPoseElbowKdFactor = new YoDouble("pPoseElbowKdFactor", registry);
 
+   private final YoDouble pPoseSpineYawWeight = new YoDouble("pPoseSpineYawWeight", registry);
+   
    //   private final YoDouble pPoseHipPitch = new YoDouble("pPoseHipPitch", registry);
    private final YoDouble pPoseHipPitchKp = new YoDouble("pPoseHipPitchKp", registry);
    private final YoDouble pPoseHipPitchKdFactor = new YoDouble("pPoseHipPitchKdFactor", registry);
@@ -339,7 +341,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       controllerCoreOptimizationSettings = new ParameterizedControllerCoreOptimizationSettings(defaultControllerCoreOptimizationSettings, registry);
 
       // privileged configuration for upper body
-      useSpinePrivilegedCommand = false;
+      useSpinePrivilegedCommand = true;
       useSpinePitchPrivilegedCommand = true;
 
       pPoseSpineRoll.set(0.0);
@@ -351,6 +353,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       pPoseShoulderYaw.set(0);
       pPoseElbow.set(-0.4);  //-0.5 //-1   // the smaller, the more bent the elbow is 
 
+      pPoseSpineYawWeight.set(3.0);  // weight used to complete with other privileged joint position. Other joint default weights are 1
+      
       pPoseSpineRollKp.set(50.0);
       pPoseSpinePitchKp.set(50.0);
       pPoseSpineYawKp.set(300.0);
@@ -673,7 +677,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       OneDoFJointPrivilegedConfigurationParameters jointParameters = new OneDoFJointPrivilegedConfigurationParameters();
       jointParameters.setConfigurationGain(pPoseSpineYawKp.getValue());
       jointParameters.setVelocityGain(pPoseSpineYawKdFactor.getValue() * pPoseSpineYawKp.getValue());
-      jointParameters.setWeight(1);
+      jointParameters.setWeight(pPoseSpineYawWeight.getDoubleValue());
       jointParameters.setMaxAcceleration(Double.POSITIVE_INFINITY);
       jointParameters.setPrivilegedConfigurationOption(null);
       jointParameters.setPrivilegedConfiguration(pPoseSpineYaw.getDoubleValue());
