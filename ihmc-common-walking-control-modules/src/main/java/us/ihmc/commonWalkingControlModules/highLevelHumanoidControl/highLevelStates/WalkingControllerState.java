@@ -158,7 +158,7 @@ public class WalkingControllerState extends HighLevelControllerState
       walkingController.setLinearMomentumRateControlModuleOutput(linearMomentumRateControlModule.getOutputForWalkingStateMachine());
 
       ControllerCoreCommand controllerCoreCommand = walkingController.getControllerCoreCommand();
-//      controllerCoreCommand.addInverseDynamicsCommand(linearMomentumRateControlModule.getMomentumRateCommand());
+      controllerCoreCommand.addInverseDynamicsCommand(linearMomentumRateControlModule.getMomentumRateCommand());
       if (useCoPObjective.getValue())
       {
          controllerCoreCommand.addInverseDynamicsCommand(linearMomentumRateControlModule.getCenterOfPressureCommand());

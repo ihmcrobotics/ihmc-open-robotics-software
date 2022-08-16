@@ -381,7 +381,9 @@ public class LinearMomentumRateControlModule
 
       success = success && computeDesiredLinearMomentumRateOfChange();
 
-      selectionMatrix.setToLinearSelectionOnly();
+//      selectionMatrix.setToLinearSelectionOnly();
+      selectionMatrix.setAngularAxisSelection(false, false, false);
+      selectionMatrix.setLinearAxisSelection(false, false, true);
       selectionMatrix.selectLinearZ(controlHeightWithMomentum);
       selectionMatrix.selectAngularZ(minimizingAngularMomentumRateZ.getValue());
       momentumRateCommand.setLinearMomentumRate(linearMomentumRateOfChange);
