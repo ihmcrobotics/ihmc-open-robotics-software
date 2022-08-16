@@ -198,15 +198,15 @@ public class SwingState extends AbstractFootControlState
       anklePoseInFoot.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
       changeControlFrame(anklePoseInFoot);
 
-      // GMN: I don't see a getter for the selection matrix of spatialFeedbackControlCommand, so I'm doing this hack:
-      SelectionMatrix6D noXRotation = new SelectionMatrix6D();
-      noXRotation.selectAngularX(true);  // GMN: try to turn off x-rotation control for swing feet
-      noXRotation.selectAngularY(true);  // GMN: another experiment
-      noXRotation.selectAngularZ(true);
-      noXRotation.selectLinearX(true);
-      noXRotation.selectLinearY(true);
-      noXRotation.selectLinearZ(true);
-      spatialFeedbackControlCommand.setSelectionMatrix(noXRotation);
+//      // GMN: I don't see a getter for the selection matrix of spatialFeedbackControlCommand, so I'm doing this hack:
+//      SelectionMatrix6D noXRotation = new SelectionMatrix6D();
+//      noXRotation.selectAngularX(true);  // GMN: try to turn off x-rotation control for swing feet
+//      noXRotation.selectAngularY(true);  // GMN: another experiment
+//      noXRotation.selectAngularZ(true);
+//      noXRotation.selectLinearX(true);
+//      noXRotation.selectLinearY(true);
+//      noXRotation.selectLinearZ(true);
+//      spatialFeedbackControlCommand.setSelectionMatrix(noXRotation);
 
       liftOffKneeAcceleration = new YoDouble(namePrefix + "LiftOffKneeAcceleration", registry);
       FullHumanoidRobotModel fullRobotModel = footControlHelper.getHighLevelHumanoidControllerToolbox().getFullRobotModel();
