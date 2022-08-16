@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewInput;
+import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 
@@ -40,6 +41,14 @@ public class GDXSelectablePose3DGizmo
    public void create(GDX3DPanel panel3D)
    {
       poseGizmo.create(panel3D);
+   }
+
+   public void createAndSetupDefault(GDX3DPanel panel3D)
+   {
+      create(panel3D);
+      panel3D.addImGui3DViewPickCalculator(poseGizmo::calculate3DViewPick);
+      panel3D.addImGui3DViewInputProcessor(poseGizmo::process3DViewInput);
+      panel3D.getScene().addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)

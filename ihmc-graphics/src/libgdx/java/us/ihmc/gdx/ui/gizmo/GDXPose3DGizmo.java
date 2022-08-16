@@ -34,6 +34,7 @@ import us.ihmc.gdx.input.ImGuiMouseDragData;
 import us.ihmc.gdx.mesh.GDXMeshBuilder;
 import us.ihmc.gdx.mesh.GDXMeshDataInterpreter;
 import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
+import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
@@ -126,6 +127,14 @@ public class GDXPose3DGizmo implements RenderableProvider
    {
       this.parentReferenceFrame = parentReferenceFrame;
       gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentReferenceFrame, transformToParent);
+   }
+
+   public void createAndSetupDefault(GDX3DPanel panel3D)
+   {
+      create(panel3D);
+      panel3D.addImGui3DViewPickCalculator(this::calculate3DViewPick);
+      panel3D.addImGui3DViewInputProcessor(this::process3DViewInput);
+      panel3D.getScene().addRenderableProvider(this, GDXSceneLevel.VIRTUAL);
    }
 
    public void create(GDX3DPanel panel3D)
