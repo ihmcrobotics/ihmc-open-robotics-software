@@ -28,6 +28,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.input.ImGuiMouseDragData;
 import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
@@ -71,6 +72,9 @@ public class GDXFocusBasedCamera extends Camera
    private boolean isDPressed = false;
    private boolean isQPressed = false;
    private boolean isZPressed = false;
+   private boolean isCPressed = false;
+   private boolean isEPressed = false;
+   private boolean isXPressed = false;
 
    public GDXFocusBasedCamera()
    {
@@ -220,6 +224,10 @@ public class GDXFocusBasedCamera extends Camera
       isDPressed = input.isWindowHovered() && ImGui.isKeyDown('D');
       isQPressed = input.isWindowHovered() && ImGui.isKeyDown('Q');
       isZPressed = input.isWindowHovered() && ImGui.isKeyDown('Z');
+      isCPressed = input.isWindowHovered() && ImGui.isKeyDown('C');
+      isEPressed = input.isWindowHovered() && ImGui.isKeyDown('E');
+      isXPressed = input.isWindowHovered() && ImGui.isKeyDown('X');
+
 
       ImGuiMouseDragData orbitDragData = input.getMouseDragData(ImGuiMouseButton.Left);
 
@@ -267,33 +275,66 @@ public class GDXFocusBasedCamera extends Camera
             isDPressed = Gdx.input.isKeyPressed(Input.Keys.D);
             isQPressed = Gdx.input.isKeyPressed(Input.Keys.Q);
             isZPressed = Gdx.input.isKeyPressed(Input.Keys.Z);
+            isCPressed = Gdx.input.isKeyPressed(Input.Keys.C);
+            isEPressed = Gdx.input.isKeyPressed(Input.Keys.E);
          }
 
-         if (isWPressed)
-         {
-            focusPointPose.appendTranslation(getTranslateSpeedFactor() * tpf, 0.0, 0.0);
-         }
-         if (isSPressed)
-         {
-            focusPointPose.appendTranslation(-getTranslateSpeedFactor() * tpf, 0.0, 0.0);
-         }
-         if (isAPressed)
-         {
-            focusPointPose.appendTranslation(0.0, getTranslateSpeedFactor() * tpf, 0.0);
-         }
-         if (isDPressed)
-         {
-            focusPointPose.appendTranslation(0.0, -getTranslateSpeedFactor() * tpf, 0.0);
-         }
-         if (isQPressed)
-         {
-            focusPointPose.appendTranslation(0.0, 0.0, getTranslateSpeedFactor() * tpf);
-         }
-         if (isZPressed)
-         {
-            focusPointPose.appendTranslation(0.0, 0.0, -getTranslateSpeedFactor() * tpf);
-         }
+         boolean ctrlHeld = ImGui.getIO().getKeyCtrl();
 
+         if(ctrlHeld)
+         {
+            if(isEPressed)
+            {
+               zoom-=0.05;
+            }
+            if(isCPressed)
+            {
+               zoom+=0.05;
+            }
+            if(isAPressed)
+            {
+               longitude += longitudeSpeed * 2.0;
+            }
+            if(isDPressed)
+            {
+               longitude -= longitudeSpeed * 2.0;
+            }
+            if(isWPressed)
+            {
+               latitude -= latitudeSpeed * 2.0;
+            }
+            if(isSPressed)
+            {
+               latitude += latitudeSpeed * 2.0;
+            }
+         }
+         else
+         {
+            if (isWPressed)
+            {
+               focusPointPose.appendTranslation(getTranslateSpeedFactor() * tpf, 0.0, 0.0);
+            }
+            if (isSPressed)
+            {
+               focusPointPose.appendTranslation(-getTranslateSpeedFactor() * tpf, 0.0, 0.0);
+            }
+            if (isAPressed)
+            {
+               focusPointPose.appendTranslation(0.0, getTranslateSpeedFactor() * tpf, 0.0);
+            }
+            if (isDPressed)
+            {
+               focusPointPose.appendTranslation(0.0, -getTranslateSpeedFactor() * tpf, 0.0);
+            }
+            if (isQPressed)
+            {
+               focusPointPose.appendTranslation(0.0, 0.0, getTranslateSpeedFactor() * tpf);
+            }
+            if (isZPressed)
+            {
+               focusPointPose.appendTranslation(0.0, 0.0, -getTranslateSpeedFactor() * tpf);
+            }
+         }
          updateCameraPose();
       }
 
