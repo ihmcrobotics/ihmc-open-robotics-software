@@ -100,7 +100,7 @@ public class CenterOfPressureResolver
          normalTorqueAtCenterOfPressure = torqueAtZeroInPlaneFrame.getZ();
       }
 
-      // TODO Implement FixedFramePoint3DBasics
+      // TODO Implement FixedFramePoint3DBasics.setMatchingFrame(ReferenceFrame, double, double, double)
       centerOfPressureToPack.set(vector12x, vector12y, 0.0);
       centerOfPressurePlaneFrame.transformFromThisToDesiredFrame(centerOfPressureToPack.getReferenceFrame(), centerOfPressureToPack);
       return normalTorqueAtCenterOfPressure;
