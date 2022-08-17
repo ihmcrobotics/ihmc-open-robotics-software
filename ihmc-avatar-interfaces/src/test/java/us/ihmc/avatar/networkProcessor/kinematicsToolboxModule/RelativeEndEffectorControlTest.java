@@ -237,8 +237,7 @@ public class RelativeEndEffectorControlTest
          controllerCoreCommand.addFeedbackControlCommand(leftHandCommand);
          controllerCoreCommand.addFeedbackControlCommand(rightHandCommand);
          controllerCoreCommand.addInverseKinematicsCommand(privilegedConfigurationCommand);
-         controllerCore.submitControllerCoreCommand(controllerCoreCommand);
-         controllerCore.compute();
+         controllerCore.compute(controllerCoreCommand);
          KinematicsToolboxHelper.setRobotStateFromControllerCoreOutput(controllerCore.getControllerCoreOutput(),
                                                                        desiredFullRobotModel.getLeft(),
                                                                        desiredFullRobotModel.getRight());
@@ -369,8 +368,7 @@ public class RelativeEndEffectorControlTest
          }
 
          controllerCoreCommand.addInverseKinematicsCommand(privilegedConfigurationCommand);
-         controllerCore.submitControllerCoreCommand(controllerCoreCommand);
-         controllerCore.compute();
+         controllerCore.compute(controllerCoreCommand);
          KinematicsToolboxHelper.setRobotStateFromControllerCoreOutput(controllerCore.getControllerCoreOutput(),
                                                                        desiredFullRobotModel.getLeft(),
                                                                        desiredFullRobotModel.getRight());

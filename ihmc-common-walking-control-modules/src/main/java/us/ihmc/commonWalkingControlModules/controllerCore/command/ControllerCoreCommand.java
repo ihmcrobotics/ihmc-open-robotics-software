@@ -209,15 +209,15 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
     * 
     * @param other other controller core command to overwrite the current command.
     */
-   public void set(ControllerCoreCommand other)
+   public void set(ControllerCoreCommandInterface other)
    {
-      controllerCoreMode = other.controllerCoreMode;
-      inverseDynamicsCommandList.set(other.inverseDynamicsCommandList);
-      feedbackControlCommandList.set(other.feedbackControlCommandList);
-      inverseKinematicsCommandList.set(other.inverseKinematicsCommandList);
-      virtualModelControlCommandList.set(other.virtualModelControlCommandList);
-      lowLevelOneDoFJointDesiredDataHolder.set(other.lowLevelOneDoFJointDesiredDataHolder);
-      reinitialize = other.reinitialize;
+      controllerCoreMode = other.getControllerCoreMode();
+      inverseDynamicsCommandList.set(other.getInverseDynamicsCommandList());
+      feedbackControlCommandList.set(other.getFeedbackControlCommandList());
+      inverseKinematicsCommandList.set(other.getInverseKinematicsCommandList());
+      virtualModelControlCommandList.set(other.getVirtualModelControlCommandList());
+      lowLevelOneDoFJointDesiredDataHolder.overwriteWith(other.getLowLevelOneDoFJointDesiredDataHolder());
+      reinitialize = other.isReinitializationRequested();
    }
 
    /**

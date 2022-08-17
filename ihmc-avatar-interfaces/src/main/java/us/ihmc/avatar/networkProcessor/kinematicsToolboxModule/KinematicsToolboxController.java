@@ -813,9 +813,7 @@ public class KinematicsToolboxController extends ToolboxController
        * Submitting and requesting the controller core to run the feedback controllers, formulate and
        * solve the optimization problem for this control tick.
        */
-      controllerCore.reset();
-      controllerCore.submitControllerCoreCommand(controllerCoreCommand);
-      controllerCore.compute();
+      controllerCore.compute(controllerCoreCommand);
 
       // Calculating the solution quality based on sum of all the active feedback controllers' output velocity.
       solutionQuality.set(solutionQualityCalculator.calculateSolutionQuality(feedbackControllerDataHolder, totalRobotMass, 1.0 / GLOBAL_PROPORTIONAL_GAIN));
