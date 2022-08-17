@@ -228,10 +228,9 @@ public class GDXFocusBasedCamera extends Camera
       isEPressed = input.isWindowHovered() && ImGui.isKeyDown('E');
       isXPressed = input.isWindowHovered() && ImGui.isKeyDown('X');
 
+      ImGuiMouseDragData orbitDragData = input.getMouseDragData(ImGuiMouseButton.Middle);
 
-      ImGuiMouseDragData orbitDragData = input.getMouseDragData(ImGuiMouseButton.Left);
-
-      if (ImGui.isWindowHovered() && orbitDragData.getDragJustStarted() && input.getClosestPick() == null)
+      if (ImGui.isWindowHovered() && orbitDragData.getDragJustStarted())
       {
          orbitDragData.setObjectBeingDragged(this);
       }
