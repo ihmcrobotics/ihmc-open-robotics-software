@@ -13,7 +13,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
@@ -231,15 +231,25 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     * @param desiredPosition           the position the {@code bodyFixedPoint} should reach. Not
     *                                  modified.
     * @param feedForwardLinearVelocity the feed-forward linear velocity of the {@code bodyFixedPoint}
-    *                                  with respect to the {@code base}. Not modified.
+    *                                  with respect to the {@code base}. Not modified. Can be
+    *                                  {@code null}, in such case the velocity is assumed to be zero.
     */
    public void setInverseKinematics(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly feedForwardLinearVelocity)
    {
       setControlMode(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
       ReferenceFrame trajectoryFrame = desiredPosition.getReferenceFrame();
       referencePosition.setIncludingFrame(desiredPosition);
-      referenceLinearVelocity.setIncludingFrame(feedForwardLinearVelocity);
-      referenceLinearVelocity.checkReferenceFrameMatch(trajectoryFrame);
+
+      if (feedForwardLinearVelocity != null)
+      {
+         referenceLinearVelocity.setIncludingFrame(feedForwardLinearVelocity);
+         referenceLinearVelocity.checkReferenceFrameMatch(trajectoryFrame);
+      }
+      else
+      {
+         referenceLinearVelocity.setToZero(trajectoryFrame);
+      }
+
       referenceLinearAcceleration.setToZero(trajectoryFrame);
       referenceForce.setToZero(trajectoryFrame);
    }
@@ -257,21 +267,42 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     * @param desiredPosition               the position that the {@code bodyFixedPoint} should reach.
     *                                      Not modified.
     * @param desiredLinearVelocity         the desired linear velocity of the {@code bodyFixedPoint}
-    *                                      with respect to the {@code base}. Not modified.
+    *                                      with respect to the {@code base}. Not modified. Can be
+    *                                      {@code null}, in such case the velocity is assumed to be
+    *                                      zero.
     * @param feedForwardLinearAcceleration the feed-forward linear acceleration of the
     *                                      {@code bodyFixedPoint} with respect to the {@code base}. Not
-    *                                      modified.
+    *                                      modified. Can be {@code null}, in such case the acceleration
+    *                                      is assumed to be zero.
     */
-   public void setInverseDynamics(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly desiredLinearVelocity,
+   public void setInverseDynamics(FramePoint3DReadOnly desiredPosition,
+                                  FrameVector3DReadOnly desiredLinearVelocity,
                                   FrameVector3DReadOnly feedForwardLinearAcceleration)
    {
       setControlMode(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
       ReferenceFrame trajectoryFrame = desiredPosition.getReferenceFrame();
       referencePosition.setIncludingFrame(desiredPosition);
-      referenceLinearVelocity.setIncludingFrame(desiredLinearVelocity);
-      referenceLinearVelocity.checkReferenceFrameMatch(trajectoryFrame);
-      referenceLinearAcceleration.setIncludingFrame(feedForwardLinearAcceleration);
-      referenceLinearAcceleration.checkReferenceFrameMatch(trajectoryFrame);
+
+      if (desiredLinearVelocity != null)
+      {
+         referenceLinearVelocity.setIncludingFrame(desiredLinearVelocity);
+         referenceLinearVelocity.checkReferenceFrameMatch(trajectoryFrame);
+      }
+      else
+      {
+         referenceLinearVelocity.setToZero(trajectoryFrame);
+      }
+
+      if (feedForwardLinearAcceleration != null)
+      {
+         referenceLinearAcceleration.setIncludingFrame(feedForwardLinearAcceleration);
+         referenceLinearAcceleration.checkReferenceFrameMatch(trajectoryFrame);
+      }
+      else
+      {
+         referenceLinearAcceleration.setToZero(trajectoryFrame);
+      }
+
       referenceForce.setToZero(trajectoryFrame);
    }
 
@@ -288,19 +319,38 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     * @param desiredPosition       the position that the {@code bodyFixedPoint} should reach. Not
     *                              modified.
     * @param desiredLinearVelocity the desired linear velocity of the {@code bodyFixedPoint} with
-    *                              respect to the {@code base}. Not modified.
+    *                              respect to the {@code base}. Not modified. Can be {@code null}, in
+    *                              such case the velocity is assumed to be zero.
     * @param feedForwardForce      the feed-forward force to exert at {@code bodyFixedPoint}. Not
-    *                              modified.
+    *                              modified. Can be {@code null}, in such case the force is assumed to
+    *                              be zero.
     */
    public void setVirtualModelControl(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly desiredLinearVelocity, FrameVector3DReadOnly feedForwardForce)
    {
       setControlMode(WholeBodyControllerCoreMode.VIRTUAL_MODEL);
       ReferenceFrame trajectoryFrame = desiredPosition.getReferenceFrame();
       referencePosition.setIncludingFrame(desiredPosition);
-      referenceLinearVelocity.setIncludingFrame(desiredLinearVelocity);
-      referenceLinearVelocity.checkReferenceFrameMatch(trajectoryFrame);
-      referenceForce.setIncludingFrame(feedForwardForce);
-      referenceForce.checkReferenceFrameMatch(trajectoryFrame);
+
+      if (desiredLinearVelocity != null)
+      {
+         referenceLinearVelocity.setIncludingFrame(desiredLinearVelocity);
+         referenceLinearVelocity.checkReferenceFrameMatch(trajectoryFrame);
+      }
+      else
+      {
+         referenceLinearVelocity.setToZero(trajectoryFrame);
+      }
+
+      if (feedForwardForce != null)
+      {
+         referenceForce.setIncludingFrame(feedForwardForce);
+         referenceForce.checkReferenceFrameMatch(trajectoryFrame);
+      }
+      else
+      {
+         referenceForce.setToZero(trajectoryFrame);
+      }
+
       referenceLinearAcceleration.setToZero(trajectoryFrame);
    }
 
@@ -402,7 +452,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     *
     * @param weight the weight to use for each direction. Not modified.
     */
-   public void setWeightsForSolver(Vector3DReadOnly weight)
+   public void setWeightsForSolver(Tuple3DReadOnly weight)
    {
       spatialAccelerationCommand.setLinearWeights(weight);
       spatialAccelerationCommand.setAngularWeightsToZero();
