@@ -76,19 +76,12 @@ import java.util.*;
  */
 public class GDXTeleoperationManager extends ImGuiPanel implements RenderableProvider
 {
-   private static final String WINDOW_NAME = "Teleoperation";
-   private static final double ROBOT_DATA_EXPIRATION = 1.0;
    private final CommunicationHelper communicationHelper;
    private final RobotLowLevelMessenger robotLowLevelMessenger;
    private final ROS2SyncedRobotModel syncedRobot;
    private final GDXFootstepPlanGraphic footstepPlanGraphic;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final float[] neckPitchSliderValue = new float[1];
-   private final ImInt pumpPSI = new ImInt(1);
-   private final String[] psiValues = new String[] {"1500", "2300", "2500", "2800"};
-//   private final OneDoFJointBasics neckJoint;
-//   private double neckJointJointLimitLower;
-//   private double neckJointRange;
+   private GDXPSIAdjustment psiAdjustment;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final FootstepPlanningModule footstepPlanner;
    private final ImGuiGDXPoseGoalAffordance footstepGoal = new ImGuiGDXPoseGoalAffordance();
@@ -173,6 +166,9 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       {
          throw new RuntimeException("Please add implementation of RobotLowLevelMessenger for " + robotName);
       }
+
+      if (teleoperationParameters.getPSIAdjustable())
+         psiAdjustment = new GDXPSIAdjustment(robotLowLevelMessenger);
 
       desiredRobot = new GDXDesiredRobot(robotModel, syncedRobot);
 
@@ -325,15 +321,8 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       {
          robotLowLevelMessenger.sendShutdownRequest();
       }
-      if (ImGui.combo("PSI", pumpPSI, psiValues, psiValues.length))
-      {
-         sendPSIRequest();
-      }
-      ImGui.sameLine();
-      if (ImGui.button("Resend PSI"))
-      {
-         sendPSIRequest();
-      }
+      if (teleoperationParameters.getPSIAdjustable())
+         psiAdjustment.renderImGuiWidgets();
 
       pelvisHeightSlider.renderImGuiWidgets();
       chestPitchSlider.renderImGuiWidgets();
@@ -543,11 +532,6 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
       communicationHelper.publishToController(footstepDataListMessage);
       footstepPlannerOutput = null;
-   }
-
-   private void sendPSIRequest()
-   {
-      robotLowLevelMessenger.setHydraulicPumpPSI(Integer.parseInt(psiValues[pumpPSI.get()]));
    }
 
    public void destroy()

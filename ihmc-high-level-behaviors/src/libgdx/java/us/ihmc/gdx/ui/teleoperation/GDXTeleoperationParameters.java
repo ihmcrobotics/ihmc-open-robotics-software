@@ -1,6 +1,7 @@
 package us.ihmc.gdx.ui.teleoperation;
 
 import org.apache.commons.lang3.StringUtils;
+import us.ihmc.tools.property.BooleanStoredPropertyKey;
 import us.ihmc.tools.property.DoubleStoredPropertyKey;
 import us.ihmc.tools.property.StoredPropertyKeyList;
 import us.ihmc.tools.property.StoredPropertySet;
@@ -29,6 +30,7 @@ public class GDXTeleoperationParameters extends StoredPropertySet
    public static final DoubleStoredPropertyKey shuffleStepWidth = keys.addDoubleKey("Shuffle step width");
    public static final DoubleStoredPropertyKey turningStepWidth = keys.addDoubleKey("Turning step width");
    public static final DoubleStoredPropertyKey footstepLengthMultiplier = keys.addDoubleKey("Footstep length multiplier");
+   public static final BooleanStoredPropertyKey isPSIAdjustable = keys.addBooleanKey("Is PSI adjustable");
 
    public GDXTeleoperationParameters(String robotRepoName, String robotSubsequentPathToResourceFolder, String robotName)
    {
@@ -133,5 +135,10 @@ public class GDXTeleoperationParameters extends StoredPropertySet
    public double getFootstepLengthMultiplier()
    {
       return get(footstepLengthMultiplier);
+   }
+
+   public boolean getPSIAdjustable()
+   {
+      return get(isPSIAdjustable);
    }
 }
