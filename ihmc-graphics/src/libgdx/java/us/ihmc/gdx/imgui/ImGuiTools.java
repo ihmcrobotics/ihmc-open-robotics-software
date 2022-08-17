@@ -111,6 +111,14 @@ public class ImGuiTools
       return ImGui.inputText(label, text, flags);
    }
 
+   public static void previousWidgetTooltip(String tooltipText)
+   {
+      if (ImGui.isItemHovered())
+      {
+         ImGui.setTooltip(tooltipText);
+      }
+   }
+
    public static String uniqueLabel(String label)
    {
       return label + "###GlobalWidgetIndex:" + nextWidgetIndex() + ":" + label;

@@ -9,7 +9,7 @@ import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.*;
-import imgui.internal.ImGui;
+import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -335,8 +335,6 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
          sendPSIRequest();
       }
 
-      desiredRobot.renderImGuiWidgets();
-
       pelvisHeightSlider.renderImGuiWidgets();
       chestPitchSlider.renderImGuiWidgets();
       chestYawSlider.renderImGuiWidgets();
@@ -363,21 +361,11 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       ImGui.checkbox(labels.get("Show footstep planner parameter tuner"), footstepPlanningParametersTuner.getIsShowing());
       ImGui.checkbox(labels.get("Show teleoperation parameter tuner"), teleoperationParametersTuner.getIsShowing());
 
+      ImGui.separator();
+
       manualFootstepPlacement.renderImGuiWidgets(pastFootSteps);
 
-      ImGui.sameLine();
-      ImGui.pushFont(ImGuiTools.getMediumFont());
-      if (ImGui.button(labels.get("Clear")))
-      {
-         manualFootstepPlacement.clear();
-      }
-
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Delete Last")))
-      {
-         manualFootstepPlacement.removeFootStep();
-      }
-
+      ImGui.separator();
 
       for (RobotSide side : RobotSide.values)
       {
@@ -390,7 +378,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
             textureID = iconTexturesMap.get("rightHand").getTextureObjectHandle();
          }
 //         ImGui.text(side.getPascalCaseName() + " hand:");
-         ImGui.image(textureID, 35.0f,35.0f);
+         ImGui.image(textureID, 22.0f,22.0f);
          ImGui.sameLine();
          if (ImGui.button(labels.get("Calibrate", side.getCamelCaseName())))
          {
@@ -421,7 +409,6 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
             communicationHelper.publish(ROS2Tools::getHandConfigurationTopic, message);
          }
       }
-      ImGui.popFont();
 
       ImGui.text("Lidar REA:");
       ImGui.sameLine();
@@ -441,6 +428,9 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
          pastFootSteps.clear();
       }
 
+      ImGui.separator();
+
+      desiredRobot.renderImGuiWidgets();
       if (ImGui.button(labels.get("Set Desired To Current")))
       {
          interactableRobot.setDesiredToCurrent();

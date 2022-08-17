@@ -23,7 +23,7 @@ public class GDXDesiredRobot extends GDXMultiBodyGraphic
 
    public GDXDesiredRobot(DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobotModel)
    {
-      super(robotModel.getSimpleRobotName() + "Desired Robot Visualizer");
+      super(robotModel.getSimpleRobotName() + " Desired Robot Visualizer");
 
       this.robotModel = robotModel;
       this.syncedRobotModel = syncedRobotModel;
