@@ -235,16 +235,19 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
          footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
          ros2Helper.publishToController(footstepDataListMessage);
       }
-
+      
       if (modified && selected && ImGui.isKeyReleased(ImGuiTools.getDeleteKey()))
       {
          selected = false;
          modified = false;
          foostepPlanGraphic.clear();
       }
+      // TODO: delete and escape key to clear control ring seems redundant. what was the original purpose of escape key just setting 'selected' to false?
       if (selected && ImGui.isKeyReleased(ImGuiTools.getEscapeKey()))
       {
          selected = false;
+         modified = false;
+         foostepPlanGraphic.clear();
       }
 
       footstepPlannerGoalGizmo.setShowArrows(selected);
