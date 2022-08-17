@@ -5,6 +5,7 @@ import controller_msgs.msg.dds.HandTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -25,6 +26,7 @@ import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
+import us.ihmc.tools.thread.MissingThreadTools;
 
 import java.util.function.Supplier;
 
@@ -51,11 +53,13 @@ public class GDXArmSetpointManager
    private int maxIterations = 500;
 
    private final SideDependentList<Supplier<FramePose3DReadOnly>> desiredHandControlPoseSuppliers = new SideDependentList<>();
-   private final SideDependentList<FramePose3DReadOnly> lastDesiredControlHandTransformInChestFrame = new SideDependentList<>();
+   private final SideDependentList<FramePose3D> lastDesiredControlHandTransformInChestFrame = new SideDependentList<>();
    private final SideDependentList<Boolean> ikFoundASolution = new SideDependentList<>();
    private final SideDependentList<InverseKinematicsCalculator> inverseKinematicsCalculators = new SideDependentList<>();
    private final SideDependentList<RigidBodyTransform> controlToWristTransforms = new SideDependentList<>();
    private final ModifiableReferenceFrame temporaryFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
+   private volatile boolean readyToSolve = true;
+   private volatile boolean readyToCopySolution = false;
 
    private enum HandDataType
    {
@@ -113,9 +117,80 @@ public class GDXArmSetpointManager
    // TODO this update should be moved into the control ring, and should use the control ring pose.
    public void update()
    {
+      boolean desiredHandsChanged = false;
       for (RobotSide side : desiredHandControlPoseSuppliers.sides())
       {
-         updateArmSetpoints(side, desiredHandControlPoseSuppliers.get(side).get());
+         computeArmJacobians(side);
+
+         FramePose3DReadOnly desiredHandSetpoint = desiredHandControlPoseSuppliers.get(side).get();
+         FramePose3D setpointCopyControlFrame = new FramePose3D(desiredHandSetpoint);
+         setpointCopyControlFrame.changeFrame(desiredRobot.getChest().getBodyFixedFrame());
+
+         if (lastDesiredControlHandTransformInChestFrame.containsKey(side))
+         {
+            // We only want to evaluate this when we are going to take action on it
+            // Otherwise, we will not notice the desired changed while the solver was still solving
+            if (readyToSolve)
+            {
+               desiredHandsChanged |= !lastDesiredControlHandTransformInChestFrame.get(side).geometricallyEquals(setpointCopyControlFrame, 0.0001);
+               lastDesiredControlHandTransformInChestFrame.get(side).setIncludingFrame(setpointCopyControlFrame);
+            }
+         }
+         else
+         {
+            lastDesiredControlHandTransformInChestFrame.put(side, new FramePose3D());
+         }
+      }
+
+      // The following puts the solver on a thread as to not slow down the UI
+      if (readyToSolve && desiredHandsChanged)
+      {
+         readyToSolve = false;
+         for (RobotSide side : desiredHandControlPoseSuppliers.sides())
+         {
+            copyOneDofJoints(actualArmJacobians.get(side).getJointsInOrder(), workArmJacobians.get(side).getJointsInOrder());
+         }
+
+         MissingThreadTools.startAThread("IKSolver", DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, () ->
+         {
+            for (RobotSide side : desiredHandControlPoseSuppliers.sides())
+            {
+               FramePose3DReadOnly desiredHandSetpoint = desiredHandControlPoseSuppliers.get(side).get();
+
+               FramePose3D setpointCopyHandFrame = new FramePose3D(desiredHandSetpoint);
+               setpointCopyHandFrame.changeFrame(ReferenceFrame.getWorldFrame());
+               setpointCopyHandFrame.get(temporaryFrame.getTransformToParent());
+               temporaryFrame.getReferenceFrame().update();
+               setpointCopyHandFrame.setToZero(temporaryFrame.getReferenceFrame());
+               setpointCopyHandFrame.set(controlToWristTransforms.get(side));
+               // IDK where these come from; I tuned using JRebel
+               setpointCopyHandFrame.getTranslation().subZ(.045);
+               setpointCopyHandFrame.getTranslation().subX(.007);
+               setpointCopyHandFrame.getTranslation().subY(side.negateIfLeftSide(.0015));
+               setpointCopyHandFrame.changeFrame(desiredRobot.getChest().getBodyFixedFrame());
+
+               workArmJacobians.get(side).compute();
+               ikFoundASolution.put(side, false);
+               for (int i = 0; i < INVERSE_KINEMATICS_CALCULATIONS_PER_UPDATE && !ikFoundASolution.get(side); i++)
+               {
+                  InverseKinematicsCalculator inverseKinematicsCalculator = inverseKinematicsCalculators.get(side);
+                  boolean foundASolution = inverseKinematicsCalculator.solve(setpointCopyHandFrame);
+                  ikFoundASolution.put(side, foundASolution);
+               }
+            }
+
+            readyToCopySolution = true;
+         });
+      }
+      if (readyToCopySolution)
+      {
+         readyToCopySolution = false;
+         for (RobotSide side : desiredHandControlPoseSuppliers.sides())
+         {
+            copyOneDofJoints(workArmJacobians.get(side).getJointsInOrder(), desiredArmJacobians.get(side).getJointsInOrder());
+         }
+
+         readyToSolve = true;
       }
 
       desiredRobot.getRootJoint().setJointConfiguration(syncedRobot.getFullRobotModel().getRootJoint().getJointPose());
@@ -172,46 +247,10 @@ public class GDXArmSetpointManager
          copyOneDofJoints(actualArmJacobians.get(robotSide).getJointsInOrder(), desiredArmJacobians.get(robotSide).getJointsInOrder());
    }
 
-   private void updateArmSetpoints(RobotSide robotSide, FramePose3DReadOnly desiredHandSetpoint)
-   {
-      computeArmJacobians(robotSide);
-
-      if (getDesiredControlHandPoseHasChangedSinceLastUpdate(robotSide, desiredHandSetpoint))
-      {
-         FramePose3D setpointCopyControlFrame = new FramePose3D(desiredHandSetpoint);
-         setpointCopyControlFrame.changeFrame(desiredRobot.getChest().getBodyFixedFrame());
-         lastDesiredControlHandTransformInChestFrame.put(robotSide, setpointCopyControlFrame);
-
-         FramePose3D setpointCopyHandFrame = new FramePose3D(desiredHandSetpoint);
-         setpointCopyHandFrame.changeFrame(ReferenceFrame.getWorldFrame());
-         setpointCopyHandFrame.get(temporaryFrame.getTransformToParent());
-         temporaryFrame.getReferenceFrame().update();
-         setpointCopyHandFrame.setToZero(temporaryFrame.getReferenceFrame());
-         setpointCopyHandFrame.set(controlToWristTransforms.get(robotSide));
-         // IDK where these come from; I tuned using JRebel
-         setpointCopyHandFrame.getTranslation().subZ(.045);
-         setpointCopyHandFrame.getTranslation().subX(.007);
-         setpointCopyHandFrame.getTranslation().subY(robotSide.negateIfLeftSide(.0015));
-         setpointCopyHandFrame.changeFrame(desiredRobot.getChest().getBodyFixedFrame());
-
-         copyOneDofJoints(actualArmJacobians.get(robotSide).getJointsInOrder(), workArmJacobians.get(robotSide).getJointsInOrder());
-         ikFoundASolution.put(robotSide, false);
-         for (int i = 0; i < INVERSE_KINEMATICS_CALCULATIONS_PER_UPDATE && !ikFoundASolution.get(robotSide); i++)
-         {
-            InverseKinematicsCalculator inverseKinematicsCalculator = inverseKinematicsCalculators.get(robotSide);
-            boolean foundASolution = inverseKinematicsCalculator.solve(setpointCopyHandFrame);
-            ikFoundASolution.put(robotSide, foundASolution);
-         }
-      }
-
-      copyOneDofJoints(workArmJacobians.get(robotSide).getJointsInOrder(), desiredArmJacobians.get(robotSide).getJointsInOrder());
-   }
-
    private void computeArmJacobians(RobotSide currentlyUpdatingSide)
    {
       desiredArmJacobians.get(currentlyUpdatingSide).compute();
       actualArmJacobians.get(currentlyUpdatingSide).compute();
-      workArmJacobians.get(currentlyUpdatingSide).compute();
    }
 
    private static void copyOneDofJoints(JointBasics[] inverseDynamicsJoints1, JointBasics[] inverseDynamicsJoints2)
@@ -223,14 +262,6 @@ public class GDXArmSetpointManager
       {
          oneDofJoints2[i].setQ(oneDofJoints1[i].getQ());
       }
-   }
-
-   private boolean getDesiredControlHandPoseHasChangedSinceLastUpdate(RobotSide side, FramePose3DReadOnly desiredPose)
-   {
-      if (lastDesiredControlHandTransformInChestFrame.get(side) == null)
-         return true;
-
-      return !lastDesiredControlHandTransformInChestFrame.get(side).epsilonEquals(desiredPose, 0.00001);
    }
 
    public SideDependentList<Supplier<FramePose3DReadOnly>> getDesiredHandControlPoseSuppliers()
