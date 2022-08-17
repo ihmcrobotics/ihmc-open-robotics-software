@@ -81,7 +81,7 @@ public class GDXChestOrientationSlider
 
                double change = Math.abs(desiredAngle - valueFromRobot);
                double trajectoryTime = change * teleoperationParameters.getChestOrientationVelocity() * sendPeriod;
-               trajectoryTime = MathTools.clamp(trajectoryTime, 0.05, 1000.0); // Safety
+               trajectoryTime = MathTools.clamp(trajectoryTime, 0.5, 1000.0); // Safety
 
                message.getSo3Trajectory()
                       .set(HumanoidMessageTools.createSO3TrajectoryMessage(trajectoryTime,

@@ -23,7 +23,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.CommunicationHelper;
-import us.ihmc.behaviors.tools.ThrottledRobotStateCallback;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.FormattingTools;
@@ -33,11 +32,8 @@ import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
@@ -60,10 +56,10 @@ import us.ihmc.gdx.ui.affordances.ImGuiGDXManualFootstepPlacement;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.gdx.ui.interactable.GDXChestOrientationSlider;
+import us.ihmc.gdx.ui.interactable.GDXPelvisHeightSlider;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.YawPitchRollAxis;
 import us.ihmc.robotics.physics.RobotCollisionModel;
@@ -72,9 +68,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.tools.io.WorkspaceFile;
-import us.ihmc.tools.property.DoubleStoredPropertyKey;
-import us.ihmc.tools.property.StoredPropertyKey;
-import us.ihmc.tools.string.StringTools;
 
 import java.util.*;
 
@@ -84,26 +77,12 @@ import java.util.*;
 public class GDXTeleoperationManager extends ImGuiPanel implements RenderableProvider
 {
    private static final String WINDOW_NAME = "Teleoperation";
-   private static final double MIN_PELVIS_HEIGHT = 0.52;
-   private static final double MAX_PELVIS_HEIGHT = 0.90;
-   private static final double PELVIS_HEIGHT_RANGE = MAX_PELVIS_HEIGHT - MIN_PELVIS_HEIGHT;
-   private static final double MIN_CHEST_PITCH = Math.toRadians(-15.0);
-   private static final double MAX_CHEST_PITCH = Math.toRadians(50.0);
-   private static final double CHEST_PITCH_RANGE = MAX_CHEST_PITCH - MIN_CHEST_PITCH;
-   private static final double MIN_YAW_TORSO = Math.toRadians(-45.0);
-   private static final double MAX_YAW_TORSO = Math.toRadians(45.0);
-   private static final double YAW_TORSO_RANGE = MAX_YAW_TORSO - MIN_YAW_TORSO;
-   private static final double SLIDER_RANGE = 100.0;
    private static final double ROBOT_DATA_EXPIRATION = 1.0;
    private final CommunicationHelper communicationHelper;
-   private final ThrottledRobotStateCallback throttledRobotStateCallback;
    private final RobotLowLevelMessenger robotLowLevelMessenger;
    private final ROS2SyncedRobotModel syncedRobot;
    private final GDXFootstepPlanGraphic footstepPlanGraphic;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final float[] stanceHeightSliderValue = new float[1];
-   private final float[] pitchTorsoSliderValue = new float[1];
-   private final float[] yawTorsoSliderValue = new float[1];
    private final float[] neckPitchSliderValue = new float[1];
    private final ImInt pumpPSI = new ImInt(1);
    private final String[] psiValues = new String[] {"1500", "2300", "2500", "2800"};
@@ -128,6 +107,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
    private final String[] handConfigurationNames = new String[HandConfiguration.values.length];
    private final IHMCROS2Input<PlanarRegionsListMessage> lidarREARegions;
    private final ImBoolean showGraphics = new ImBoolean(true);
+   private final GDXPelvisHeightSlider pelvisHeightSlider;
    private final GDXChestOrientationSlider chestPitchSlider;
    private final GDXChestOrientationSlider chestYawSlider;
    private final GDXDesiredRobot desiredRobot;
@@ -137,7 +117,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
                                                                            "ihmc-high-level-behaviors/src/libgdx/resources/icons");
    private final String iconFileNames[] = new String[] {"leftHand.png", "rightHand.png"};
    private final String fileNameStringKeys[] = new String[] {"leftHand", "rightHand"};
-   private Map<String, Texture> iconTexturesMap = new HashMap<String, Texture>();
+   private final Map<String, Texture> iconTexturesMap = new HashMap<>();
    private int textureID = 0;
 
    // FOR LOGGING STEPS TAKEN
@@ -194,31 +174,14 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
          throw new RuntimeException("Please add implementation of RobotLowLevelMessenger for " + robotName);
       }
 
-//      neckJoint = fullRobotModel.getNeckJoint(NeckJointName.PROXIMAL_NECK_PITCH);
-//      if (neckJoint != null)
-//      {
-//         double neckJointLimitUpper = neckJoint.getJointLimitUpper();
-//         neckJointJointLimitLower = neckJoint.getJointLimitLower();
-//         neckJointRange = neckJointLimitUpper - neckJointJointLimitLower;
-//      }
-
-      throttledRobotStateCallback = new ThrottledRobotStateCallback(ros2Node, robotModel, 5.0, syncedRobot ->
-      {
-         double pelvisZ = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getPelvisZUpFrame).getZ();
-         double midFeetZ = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame).getZ();
-         double midFeetToPelvis = pelvisZ - midFeetZ;
-         double heightInRange = midFeetToPelvis - MIN_PELVIS_HEIGHT;
-         double newHeightSliderValue = SLIDER_RANGE * heightInRange / PELVIS_HEIGHT_RANGE;
-         stanceHeightSliderValue[0] = (float) newHeightSliderValue;
-      });
-
       desiredRobot = new GDXDesiredRobot(robotModel, syncedRobot);
 
-      ROS2ControllerHelper chestSlidersROS2ControllerHelper = new ROS2ControllerHelper(ros2Node, robotModel);
+      ROS2ControllerHelper slidersROS2ControllerHelper = new ROS2ControllerHelper(ros2Node, robotModel);
+      pelvisHeightSlider = new GDXPelvisHeightSlider(syncedRobot, slidersROS2ControllerHelper, teleoperationParameters);
       // TODO this should update the GDX desired Robot
-      chestPitchSlider = new GDXChestOrientationSlider(syncedRobot, YawPitchRollAxis.PITCH, chestSlidersROS2ControllerHelper, teleoperationParameters);
+      chestPitchSlider = new GDXChestOrientationSlider(syncedRobot, YawPitchRollAxis.PITCH, slidersROS2ControllerHelper, teleoperationParameters);
       // TODO this should update the GDX desired robot.
-      chestYawSlider = new GDXChestOrientationSlider(syncedRobot, YawPitchRollAxis.YAW, chestSlidersROS2ControllerHelper, teleoperationParameters);
+      chestYawSlider = new GDXChestOrientationSlider(syncedRobot, YawPitchRollAxis.YAW, slidersROS2ControllerHelper, teleoperationParameters);
 
       footstepPlanGraphic = new GDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
       communicationHelper.subscribeToControllerViaCallback(FootstepDataListMessage.class, footsteps ->
@@ -255,7 +218,8 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
 
    public void create(GDXImGuiBasedUI baseUI)
    {
-      if(iconTexturesMap.size()==0) mapTextureID();
+      if (iconTexturesMap.size() == 0)
+         mapTextureID();
 
       desiredRobot.create();
 
@@ -373,56 +337,12 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
 
       desiredRobot.renderImGuiWidgets();
 
-      ImGui.pushFont(ImGuiTools.getMediumFont());
-      ImGui.text(" - - Stance - -");
-      ImGui.popFont();
-      if (imGuiSlider("Height", stanceHeightSliderValue))
-      {
-         if (syncedRobot.getDataReceptionTimerSnapshot().isRunning(ROBOT_DATA_EXPIRATION))
-         {
-            double sliderValue = stanceHeightSliderValue[0];
-            double pelvisZ = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getPelvisZUpFrame).getZ();
-            double midFeetZ = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame).getZ();
-            double desiredHeight = MIN_PELVIS_HEIGHT + PELVIS_HEIGHT_RANGE * sliderValue / SLIDER_RANGE;
-            double desiredHeightInWorld = desiredHeight + midFeetZ;
-            LogTools.info(StringTools.format3D("Commanding height trajectory. slider: {} desired: {} (pelvis - midFeetZ): {} in world: {}",
-                                               sliderValue,
-                                               desiredHeight,
-                                               pelvisZ - midFeetZ,
-                                               desiredHeightInWorld));
-            PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage();
-            message.getEuclideanTrajectory()
-                   .set(HumanoidMessageTools.createEuclideanTrajectoryMessage(2.0,
-                                                                              new Point3D(0.0, 0.0, desiredHeightInWorld),
-                                                                              ReferenceFrame.getWorldFrame()));
-            long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
-            message.getEuclideanTrajectory().getFrameInformation().setDataReferenceFrameId(frameId);
-            message.getEuclideanTrajectory().getSelectionMatrix().setXSelected(false);
-            message.getEuclideanTrajectory().getSelectionMatrix().setYSelected(false);
-            message.getEuclideanTrajectory().getSelectionMatrix().setZSelected(true);
-            communicationHelper.publishToController(message);
-         }
-      }
-      ImGui.pushFont(ImGuiTools.getMediumFont());
-      ImGui.text(" - - Chest  - -");
-      ImGui.popFont();
+      pelvisHeightSlider.renderImGuiWidgets();
       chestPitchSlider.renderImGuiWidgets();
       chestYawSlider.renderImGuiWidgets();
-//      if (neckJoint != null && imGuiSlider("Neck Pitch", neckPitchSliderValue))
-//      {
-//         double percent = neckPitchSliderValue[0] / 100.0;
-//         percent = 1.0 - percent;
-//         MathTools.checkIntervalContains(percent, 0.0, 1.0);
-//         double jointAngle = neckJointJointLimitLower + percent * neckJointRange;
-//         LogTools.info("Commanding neck trajectory: slider: {} angle: {}", neckPitchSliderValue[0], jointAngle);
-//         communicationHelper.publishToController(HumanoidMessageTools.createNeckTrajectoryMessage(3.0, new double[] {jointAngle}));
-//      }
 
       // TODO: sliders for footstep parameters here . . .
       // 2nd
-      ImGui.pushFont(ImGuiTools.getMediumFont());
-      ImGui.text(" - - Step - -");
-      ImGui.popFont();
       teleoperationParametersTuner.renderDoublePropertySliders();
 
       ImGui.text("Footstep plan:");
@@ -530,13 +450,10 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       interactableRobot.renderImGuiWidgets();
 
       // TODO: footstepPlanGraphic should clear properly when user clears the plannerOutput.
-      /*
-      if (footstepPlannerOutput==null)
-      {
-         footstepPlanGraphic.clear();
-      }
-      */
-
+//      if (footstepPlannerOutput==null)
+//      {
+//         footstepPlanGraphic.clear();
+//      }
    }
 
    private boolean imGuiSlider(String label, float[] value)
@@ -559,7 +476,6 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
          manualFootstepPlacement.getRenderables(renderables, pool);
          pastFootSteps.getRenderables(renderables,pool);
       }
-
    }
 
    private void queueFootstepPlanning()
@@ -573,7 +489,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
 
       RobotSide stanceSide;
       if (startFootPoses.get(RobotSide.LEFT ).getPosition().distance(goalPose.getPosition())
-          <= startFootPoses.get(RobotSide.RIGHT).getPosition().distance(goalPose.getPosition()))
+       <= startFootPoses.get(RobotSide.RIGHT).getPosition().distance(goalPose.getPosition()))
       {
          stanceSide = RobotSide.LEFT;
       }
@@ -650,7 +566,6 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       if (interactableRobot != null)
          interactableRobot.destroy();
       footstepPlanGraphic.destroy();
-      throttledRobotStateCallback.destroy();
    }
 
    public List<ImGuiGDXVisualizer> getVisualizers()

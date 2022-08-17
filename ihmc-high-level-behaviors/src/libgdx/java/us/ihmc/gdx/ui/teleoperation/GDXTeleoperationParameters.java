@@ -10,9 +10,12 @@ public class GDXTeleoperationParameters extends StoredPropertySet
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
    public static final DoubleStoredPropertyKey trajectoryTime = keys.addDoubleKey("Trajectory time");
+   public static final DoubleStoredPropertyKey pelvisHeightChangeVelocity = keys.addDoubleKey("Pelvis height change velocity");
    public static final DoubleStoredPropertyKey chestOrientationVelocity = keys.addDoubleKey("Chest orientation velocity");
    public static final DoubleStoredPropertyKey swingTime = keys.addDoubleKey("Swing time");
    public static final DoubleStoredPropertyKey transferTime = keys.addDoubleKey("Transfer time");
+   public static final DoubleStoredPropertyKey pelvisMinimumHeight = keys.addDoubleKey("Pelvis minimum height");
+   public static final DoubleStoredPropertyKey pelvisMaximumHeight = keys.addDoubleKey("Pelvis maximum height");
    public static final DoubleStoredPropertyKey chestMinimumPitch = keys.addDoubleKey("Chest minimum pitch");
    public static final DoubleStoredPropertyKey chestMaximumPitch = keys.addDoubleKey("Chest maximum pitch");
    public static final DoubleStoredPropertyKey chestMinimumYaw = keys.addDoubleKey("Chest minimum yaw");
@@ -37,6 +40,11 @@ public class GDXTeleoperationParameters extends StoredPropertySet
       return get(trajectoryTime);
    }
 
+   public double getPelvisHeightChangeVelocity()
+   {
+      return get(pelvisHeightChangeVelocity);
+   }
+
    public double getChestOrientationVelocity()
    {
       return get(chestOrientationVelocity);
@@ -50,6 +58,16 @@ public class GDXTeleoperationParameters extends StoredPropertySet
    public double getTransferTime()
    {
       return get(transferTime);
+   }
+
+   public double getPelvisMinimumHeight()
+   {
+      return get(pelvisMinimumHeight);
+   }
+
+   public double getPelvisMaximumHeight()
+   {
+      return get(pelvisMaximumHeight);
    }
 
    public double getChestMinimumPitch()
