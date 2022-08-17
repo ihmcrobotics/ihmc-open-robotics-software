@@ -277,41 +277,40 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
 
    public void renderImGuiWidgets(GDXPastFootSteps pastFootSteps)
    {
-//      ImGui.text("Place footstep:");
+//      ImGui.text("Manual footstep placement:");
 
-      ImGui.image(iconTexturesMap.get("feet").getTextureObjectHandle(), 35.0f, 35.0f);
+      ImGui.image(iconTexturesMap.get("feet").getTextureObjectHandle(), 22.0f, 22.0f);
       ImGui.sameLine();
-      ImGui.pushFont(ImGuiTools.getMediumFont());
-      if (ImGui.button(labels.get("Left")))
+      if (ImGui.button(labels.get("Left")) || ImGui.isKeyPressed('R'))
       {
          createNewFootStep(RobotSide.LEFT);
       }
+      ImGuiTools.previousWidgetTooltip("Keybind: R");
       ImGui.sameLine();
-      if (ImGui.button(labels.get("Right")))
+      if (ImGui.button(labels.get("Right")) || ImGui.isKeyPressed('T'))
       {
          createNewFootStep(RobotSide.RIGHT);
       }
+      ImGuiTools.previousWidgetTooltip("Keybind: T");
       ImGui.sameLine();
-      if (ImGui.button(labels.get("Walk")))
+      if (ImGui.button(labels.get("Walk")) || ImGui.isKeyPressed(ImGuiTools.getSpaceKey()))
       {
          if (getFootstepArrayList().size() > 0)
          {
             walkFromSteps(pastFootSteps);
          }
       }
-      ImGui.popFont();
-
-      if (ImGui.isKeyPressed(ImGuiTools.getSpaceKey()))
-      {
-         if (getFootstepArrayList().size() > 0)
-         {
-            walkFromSteps(pastFootSteps);
-         }
-      }
-
-      if (ImGui.isKeyPressed(ImGuiTools.getDeleteKey()))
+      ImGuiTools.previousWidgetTooltip("Keybind: Space");
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Delete Last")) || ImGui.isKeyPressed(ImGuiTools.getDeleteKey()))
       {
          removeFootStep();
+      }
+      ImGuiTools.previousWidgetTooltip("Keybind: Delete");
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Delete All")))
+      {
+         clear();
       }
    }
 
