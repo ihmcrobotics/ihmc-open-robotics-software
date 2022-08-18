@@ -461,9 +461,16 @@ public class GDXPose3DGizmo implements RenderableProvider
 
    public void renderImGuiTuner()
    {
-      ImGui.text("Drag using the left mouse button to manipulate the gizmo.");
-
       ImGui.checkbox("Resize based on camera distance", resizeAutomatically);
+
+      boolean proportionsChanged = false;
+      ImGui.pushItemWidth(100.00f);
+      if (resizeAutomatically.get())
+         proportionsChanged |= ImGui.dragFloat(labels.get("Torus camera size"), torusCameraSize.getData(), 0.001f);
+      else
+         proportionsChanged |= ImGui.dragFloat(labels.get("Torus radius"), torusRadius.getData(), 0.001f);
+      ImGui.popItemWidth();
+
       if (ImGui.collapsingHeader(labels.get("Advanced")))
       {
          if (ImGui.button("Set to zero in parent frame"))
@@ -472,29 +479,31 @@ public class GDXPose3DGizmo implements RenderableProvider
          }
 
          ImGui.pushItemWidth(100.00f);
-         boolean proportionsChanged = false;
-         //      proportionsChanged |= ImGui.inputFloat(labels.get("Torus radius"), torusRadius, 0.001f);
-         proportionsChanged |= ImGui.inputFloat(labels.get("Torus camera size"), torusCameraSize, 0.05f);
-         proportionsChanged |= ImGui.inputFloat(labels.get("Torus tube radius ratio"), torusTubeRadiusRatio, 0.001f);
-         proportionsChanged |= ImGui.inputFloat(labels.get("Arrow length ratio"), arrowLengthRatio, 0.05f);
-         proportionsChanged |= ImGui.inputFloat(labels.get("Arrow head body length ratio"), arrowHeadBodyLengthRatio, 0.05f);
-         proportionsChanged |= ImGui.inputFloat(labels.get("Arrow head body radius ratio"), arrowHeadBodyRadiusRatio, 0.05f);
-         proportionsChanged |= ImGui.inputFloat(labels.get("Arrow spacing factor"), arrowSpacingFactor, 0.05f);
+         proportionsChanged |= ImGui.dragFloat(labels.get("Torus tube radius ratio"), torusTubeRadiusRatio.getData(), 0.001f);
+         proportionsChanged |= ImGui.dragFloat(labels.get("Arrow length ratio"), arrowLengthRatio.getData(), 0.05f);
+         proportionsChanged |= ImGui.dragFloat(labels.get("Arrow head body length ratio"), arrowHeadBodyLengthRatio.getData(), 0.05f);
+         proportionsChanged |= ImGui.dragFloat(labels.get("Arrow head body radius ratio"), arrowHeadBodyRadiusRatio.getData(), 0.05f);
+         proportionsChanged |= ImGui.dragFloat(labels.get("Arrow spacing factor"), arrowSpacingFactor.getData(), 0.05f);
          ImGui.popItemWidth();
-
-         if (proportionsChanged)
-            recreateGraphics();
       }
+
+      if (proportionsChanged)
+         recreateGraphics();
+
+      ImGui.text("Drag using the left mouse button to manipulate the gizmo.");
 
       updateTransforms();
    }
 
    private void recreateGraphics()
    {
-      if (lastDistanceToCamera > 0.0)
-         torusRadius.set(torusCameraSize.get() * (float) lastDistanceToCamera);
-      else
-         torusRadius.set(torusCameraSize.get());
+      if (resizeAutomatically.get())
+      {
+         if (lastDistanceToCamera > 0.0)
+            torusRadius.set(torusCameraSize.get() * (float) lastDistanceToCamera);
+         else
+            torusRadius.set(torusCameraSize.get());
+      }
       arrowBodyRadius = (float) torusTubeRadiusRatio.get() * torusRadius.get();
       arrowLength = arrowLengthRatio.get() * torusRadius.get();
       arrowBodyLength = (1.0 - arrowHeadBodyLengthRatio.get()) * arrowLength;
