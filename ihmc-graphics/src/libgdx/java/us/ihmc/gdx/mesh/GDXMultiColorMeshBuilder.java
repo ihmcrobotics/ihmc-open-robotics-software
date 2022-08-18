@@ -748,6 +748,15 @@ public class GDXMultiColorMeshBuilder
       addMesh(MeshDataGenerator.Sphere(radius, DEFAULT_RES, DEFAULT_RES), offset, color);
    }
 
+   public void addEllipsoid(double xRadius, double yRadius, double zRadius, Tuple3DReadOnly offset, Color color)
+   {
+      addMesh(MeshDataGenerator.Ellipsoid(xRadius, yRadius, zRadius, DEFAULT_RES, DEFAULT_RES), offset, color);
+   }
+
+   public void addHemiEllipsoid(double xRadius, double yRadius, double zRadius, Tuple3DReadOnly offset, Color color)
+   {
+      addMesh(MeshDataGenerator.HemiEllipsoid(xRadius, yRadius, zRadius, DEFAULT_RES, DEFAULT_RES), offset, color);
+   }
    /**
     * Add a regular tetrahedron to this builder.
     *
