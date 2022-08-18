@@ -323,6 +323,15 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
       {
          removeFootStep();
       }
+
+      // TODO: experimental (interactable footsteps from control ring paths)
+      if (imgui.ImGui.isKeyPressed('O'))
+      {
+         if (getFootstepArrayList().size() > 0)
+         {
+            walkFromSteps();
+         }
+      }
    }
 
    private void renderTooltips()
