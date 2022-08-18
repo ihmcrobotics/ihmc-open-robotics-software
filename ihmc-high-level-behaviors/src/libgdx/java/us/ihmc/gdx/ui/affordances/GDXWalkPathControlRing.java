@@ -483,4 +483,9 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
    {
       return steppingParameters.getTurningStepWidth();
    }
+
+   public FootstepPlan getFootstepPlan()
+   {
+      return footstepPlan;
+   }
 }

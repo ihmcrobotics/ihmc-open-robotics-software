@@ -34,10 +34,7 @@ import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
-import us.ihmc.footstepPlanning.FootstepPlannerOutput;
-import us.ihmc.footstepPlanning.FootstepPlannerRequest;
-import us.ihmc.footstepPlanning.FootstepPlanningModule;
+import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -460,6 +457,16 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
 //      {
 //         footstepPlanGraphic.clear();
 //      }
+
+      // TODO : EXPERIMENTAL (making steps from path control ring interactable)
+      if (ImGui.isKeyPressed('P'))
+      {
+         FootstepPlan plan = interactableRobot.getWalkPathControlRing().getFootstepPlan();
+         if (plan!=null)
+         {
+            plannedFootstepPlacement.createFootStepFromPlan(plan);
+         }
+      }
    }
 
    private boolean imGuiSlider(String label, float[] value)
