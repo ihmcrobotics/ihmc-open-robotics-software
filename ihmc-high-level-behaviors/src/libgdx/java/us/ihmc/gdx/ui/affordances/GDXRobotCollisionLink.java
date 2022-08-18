@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.shape.primitives.interfaces.*;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -126,6 +127,26 @@ public class GDXRobotCollisionLink implements RenderableProvider
          {
             PointShape3DReadOnly pointShape = (PointShape3DReadOnly) shape;
             meshBuilder.addSphere((float) 0.01, pointShape, color);
+         }
+         else if (shape instanceof Cylinder3DReadOnly)
+         {
+            Cylinder3DReadOnly cylinder = (Cylinder3DReadOnly) shape;
+            Quaternion orientation = new Quaternion();
+            transformToJoint.appendTranslation(cylinder.getPosition());
+            EuclidGeometryTools.orientation3DFromZUpToVector3D(cylinder.getAxis(), orientation);
+            transformToJoint.appendOrientation(orientation);
+            meshBuilder.addCylinder(cylinder.getLength(), cylinder.getRadius(), new Point3D(0.0, 0.0, -cylinder.getHalfLength()), color);
+         }
+         else if (shape instanceof Ellipsoid3DReadOnly)
+         {
+            Ellipsoid3DReadOnly ellipsoid = (Ellipsoid3DReadOnly) shape;
+            transformToJoint.appendTranslation(ellipsoid.getPosition());
+            transformToJoint.appendOrientation(ellipsoid.getOrientation());
+            meshBuilder.addEllipsoid(ellipsoid.getRadiusX(),
+                                     ellipsoid.getRadiusY(),
+                                     ellipsoid.getRadiusZ(),
+                                     new Point3D(),
+                                     color);
          }
          else
          {
