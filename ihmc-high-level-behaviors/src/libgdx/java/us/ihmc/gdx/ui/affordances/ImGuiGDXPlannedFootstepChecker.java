@@ -1,6 +1,7 @@
 package us.ihmc.gdx.ui.affordances;
 
 import com.badlogic.gdx.graphics.Color;
+import com.esotericsoftware.minlog.Log;
 import imgui.internal.ImGui;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.CommunicationHelper;
@@ -18,6 +19,7 @@ import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -27,8 +29,6 @@ import java.util.ArrayList;
 /**
  * Helps the operator confirm that manually placed footsteps are feasible in realtime.
  *
- * FIXME: This doesn't include checks like "step is too high" or "step is too low".
- * TODO: Figure out how the footstep planner does that and use that.
  */
 public class ImGuiGDXPlannedFootstepChecker
 {
@@ -48,12 +48,10 @@ public class ImGuiGDXPlannedFootstepChecker
    private RigidBodyTransform swingStepTransform;
    private RobotSide swingSide;
 
-
-
    private String text = null;
    private ImGui3DViewInput latestInput;
    private boolean renderTooltip = false;
-   private ArrayList<ImGuiGDXManuallyPlacedFootstep> plannedSteps;
+   private ArrayList<ImGuiGDXPlannedFootstep> footstepArrayList;
 
    public ImGuiGDXPlannedFootstepChecker(GDXImGuiBasedUI baseUI, CommunicationHelper communicationHelper, ROS2SyncedRobotModel syncedRobot, FootstepPlannerParametersBasics footstepPlannerParameters)
    {
@@ -87,7 +85,7 @@ public class ImGuiGDXPlannedFootstepChecker
 
    private void renderTooltips()
    {
-      if (this.latestInput != null && renderTooltip)
+      if (latestInput!=null && renderTooltip)
       {
          float offsetX = 10.0f;
          float offsetY = 31.0f;
@@ -106,9 +104,8 @@ public class ImGuiGDXPlannedFootstepChecker
 
    // TODO: This should update candidate, stance, and swing in the ImGuiGDXManualFootstepPlacement,
    //  updates RejectionReason, and generate warning message in the UI screen.
-   public void checkValidStepList(ArrayList<ImGuiGDXManuallyPlacedFootstep> stepList)
+   public void checkValidStepList(ArrayList<ImGuiGDXPlannedFootstep> stepList)
    {
-      plannedSteps = stepList;
       reasons.clear();
       setInitialFeet();
       // iterate through the list ( + current initial stance and swing) and check validity for all.
@@ -119,7 +116,7 @@ public class ImGuiGDXPlannedFootstepChecker
    }
 
    // Check validity of 1 step
-   public void checkValidSingleStep(ArrayList<ImGuiGDXManuallyPlacedFootstep> stepList,
+   public void checkValidSingleStep(ArrayList<ImGuiGDXPlannedFootstep> stepList,
                                     RigidBodyTransform candidateStepTransform,
                                     RobotSide candidateStepSide,
                                     int indexOfFootBeingChecked /* list.size() if not placed yet*/)
@@ -141,7 +138,7 @@ public class ImGuiGDXPlannedFootstepChecker
       // 0th element will be stance, previous stance will be swing
       else if (indexOfFootBeingChecked == 1)
       {
-         ImGuiGDXManuallyPlacedFootstep tempStance = stepList.get(0);
+         ImGuiGDXPlannedFootstep tempStance = stepList.get(0);
          RigidBodyTransform tempStanceTransform = tempStance.getFootTransformInWorld();
          reason = stepChecker.checkValidity(candidateStepSide,candidateStepTransform, tempStanceTransform, stanceStepTransform);
       }
@@ -173,6 +170,7 @@ public class ImGuiGDXPlannedFootstepChecker
 
    public void makeWarnings()
    {
+//      checkValidStepList(footstepArrayList);
       if (reason != null)
       {
          text = " Warning ! : " + reason.name();
@@ -184,7 +182,7 @@ public class ImGuiGDXPlannedFootstepChecker
    }
 
    // Should call this in walkFromSteps before clearing the stepList.
-   public void clear(ArrayList<ImGuiGDXManuallyPlacedFootstep> stepList)
+   public void clear(ArrayList<ImGuiGDXPlannedFootstep> stepList)
    {
       reasons.clear();
    }
@@ -199,10 +197,10 @@ public class ImGuiGDXPlannedFootstepChecker
       return reasons;
    }
 
-    public BipedalFootstepPlannerNodeRejectionReason getReason()
+   public BipedalFootstepPlannerNodeRejectionReason getReason()
     {
         return reason;
-    }
+ }
 
    public void setRenderTooltip(boolean renderTooltip)
    {
@@ -253,5 +251,11 @@ public class ImGuiGDXPlannedFootstepChecker
    public void setSwingSide(RobotSide swingSide)
    {
       this.swingSide = swingSide;
+   }
+
+   public void update(ArrayList<ImGuiGDXPlannedFootstep> footstepArrayList)
+   {
+      this.footstepArrayList = footstepArrayList;
+      checkValidStepList(footstepArrayList);
    }
 }

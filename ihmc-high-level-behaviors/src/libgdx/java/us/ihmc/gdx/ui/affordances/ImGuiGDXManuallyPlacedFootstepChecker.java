@@ -48,8 +48,6 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
    private RigidBodyTransform swingStepTransform;
    private RobotSide swingSide;
 
-
-
    private String text = null;
    private ImGui3DViewInput latestInput;
    private boolean renderTooltip = false;

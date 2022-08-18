@@ -338,7 +338,7 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
    }
 
    @Override
-   public void  getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
 
       for (int i = 0; i < footstepArrayList.size(); i++)
@@ -372,7 +372,6 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       {
          removeFootStep();
       }
-      footstepArrayList.clear();
       footstepIndex = -1;
    }
 
