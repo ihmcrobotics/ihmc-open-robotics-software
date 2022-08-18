@@ -21,13 +21,9 @@ import us.ihmc.gdx.input.ImGui3DViewPickResult;
 import us.ihmc.gdx.simulation.environment.GDXModelInstance;
 import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
-import us.ihmc.gdx.ui.gizmo.BoxRayIntersection;
-import us.ihmc.gdx.ui.gizmo.CapsuleRayIntersection;
-import us.ihmc.gdx.ui.gizmo.SphereRayIntersection;
+import us.ihmc.gdx.ui.gizmo.*;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.robotics.geometry.shapes.STPCylinder3D;
-import us.ihmc.robotics.geometry.shapes.interfaces.STPCylinder3DReadOnly;
 import us.ihmc.robotics.physics.Collidable;
 
 public class GDXRobotCollisionLink implements RenderableProvider
@@ -43,6 +39,8 @@ public class GDXRobotCollisionLink implements RenderableProvider
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
    private SphereRayIntersection sphereRayIntersection;
    private CapsuleRayIntersection capsuleIntersection;
+   private CylinderRayIntersection cylinderRayIntersection;
+   private EllipsoidRayIntersection ellipsoidRayIntersection;
    private BoxRayIntersection boxRayIntersection;
    private GDXModelInstance coordinateFrame;
    private boolean useOverrideTransform = false;
@@ -136,6 +134,7 @@ public class GDXRobotCollisionLink implements RenderableProvider
             EuclidGeometryTools.orientation3DFromZUpToVector3D(cylinder.getAxis(), orientation);
             transformToJoint.appendOrientation(orientation);
             meshBuilder.addCylinder(cylinder.getLength(), cylinder.getRadius(), new Point3D(0.0, 0.0, -cylinder.getHalfLength()), color);
+            cylinderRayIntersection = new CylinderRayIntersection();
          }
          else if (shape instanceof Ellipsoid3DReadOnly)
          {
@@ -147,6 +146,7 @@ public class GDXRobotCollisionLink implements RenderableProvider
                                      ellipsoid.getRadiusZ(),
                                      new Point3D(),
                                      color);
+            ellipsoidRayIntersection = new EllipsoidRayIntersection();
          }
          else
          {
@@ -180,15 +180,16 @@ public class GDXRobotCollisionLink implements RenderableProvider
       Line3DReadOnly pickRayInWorld = input.getPickRayInWorld();
       ReferenceFrame frameAfterJointToUse = useOverrideTransform ? overrideMeshFrame : frameAfterJoint;
       pickResult.reset();
-      if (shape instanceof Sphere3DReadOnly)
+      if (shape instanceof Sphere3DReadOnly sphere)
       {
-         Sphere3DReadOnly sphere = (Sphere3DReadOnly) shape;
-         Point3DReadOnly position = sphere.getPosition();
-         // TODO: Implement
+         sphereRayIntersection.setup(sphere.getRadius(), sphere.getPosition());
+         if (sphereRayIntersection.intersect(input.getPickRayInWorld()))
+         {
+            pickResult.addPickCollision(input.getPickRayInWorld().getPoint().distance(sphereRayIntersection.getFirstIntersectionToPack()));
+         }
       }
-      else if (shape instanceof Capsule3DReadOnly)
+      else if (shape instanceof Capsule3DReadOnly capsule)
       {
-         Capsule3DReadOnly capsule = (Capsule3DReadOnly) shape;
          UnitVector3DReadOnly axis = capsule.getAxis();
          Point3DReadOnly position = capsule.getPosition();
          double length = capsule.getLength();
@@ -199,35 +200,43 @@ public class GDXRobotCollisionLink implements RenderableProvider
             pickResult.addPickCollision(capsuleIntersection.getDistanceToCollision(input.getPickRayInWorld()));
          }
       }
-      else if (shape instanceof Box3DReadOnly)
+      else if (shape instanceof Box3DReadOnly box)
       {
-         Box3DReadOnly box = (Box3DReadOnly) shape;
          boxPose.setToZero(frameAfterJointToUse);
          if (!useOverrideTransform)
             boxPose.set(box.getPose());
          boxPose.changeFrame(ReferenceFrame.getWorldFrame());
          boxPose.get(boxCenterToWorldTransform);
-         double sizeX = box.getSizeX();
-         double sizeY = box.getSizeY();
-         double sizeZ = box.getSizeZ();
-         if (boxRayIntersection.intersect(sizeX, sizeY, sizeZ, boxCenterToWorldTransform, pickRayInWorld))
+         if (boxRayIntersection.intersect(box.getSizeX(), box.getSizeY(), box.getSizeZ(), boxCenterToWorldTransform, pickRayInWorld))
          {
-            Point3DReadOnly boxIntersection = boxRayIntersection.getFirstIntersectionToPack();
-            Point3DReadOnly cameraPosition = input.getPickRayInWorld().getPoint();
-            pickResult.addPickCollision(boxIntersection.distance(cameraPosition));
+            pickResult.addPickCollision(boxRayIntersection.getFirstIntersectionToPack().distance(input.getPickRayInWorld().getPoint()));
          }
       }
-      else if (shape instanceof PointShape3DReadOnly)
+      else if (shape instanceof PointShape3DReadOnly pointShape)
       {
-         PointShape3DReadOnly pointShape = (PointShape3DReadOnly) shape;
+         // We're not colliding with points as they have no volume
       }
-      else if (shape instanceof STPCylinder3DReadOnly)
+      else if (shape instanceof Cylinder3DReadOnly cylinder)
       {
-         STPCylinder3DReadOnly stpCylinder = (STPCylinder3DReadOnly) shape;
+         cylinderRayIntersection.setup(cylinder.getLength(), cylinder.getRadius(), cylinder.getPosition(), cylinder.getAxis(), frameAfterJointToUse);
+         double intersection = cylinderRayIntersection.intersect(input.getPickRayInWorld());
+         if (!Double.isNaN(intersection))
+         {
+            pickResult.addPickCollision(intersection);
+         }
       }
-      else if (shape instanceof Ellipsoid3DReadOnly)
+      else if (shape instanceof Ellipsoid3DReadOnly ellipsoid)
       {
-         Ellipsoid3DReadOnly ellipsoid = (Ellipsoid3DReadOnly) shape;
+         ellipsoidRayIntersection.setup(ellipsoid.getRadiusX(),
+                                        ellipsoid.getRadiusY(),
+                                        ellipsoid.getRadiusZ(),
+                                        ellipsoid.getPosition(),
+                                        ellipsoid.getOrientation(),
+                                        frameAfterJointToUse);
+         if (ellipsoidRayIntersection.intersect(input.getPickRayInWorld()))
+         {
+            pickResult.addPickCollision(ellipsoidRayIntersection.getFirstIntersectionToPack().distance(input.getPickRayInWorld().getPoint()));
+         }
       }
       else
       {

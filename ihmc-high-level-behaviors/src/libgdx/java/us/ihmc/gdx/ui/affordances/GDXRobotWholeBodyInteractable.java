@@ -97,16 +97,23 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
 
          if (collisionLink.getRigidBodyName().equals(syncedRobot.getFullRobotModel().getPelvis().getName()))
          {
-            pelvisInteractable = new GDXLiveRobotPartInteractable();
-            pelvisInteractable.create(collisionLink,
-                                      syncedRobot.getReferenceFrames().getPelvisFrame(),
-                                      modelFileName,
-                                      baseUI.getPrimary3DPanel());
-            pelvisInteractable.setOnSpacePressed(() ->
+            if (pelvisInteractable == null)
             {
-               ros2Helper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(teleoperationParameters.getTrajectoryTime(),
-                                                                                                 pelvisInteractable.getPose()));
-            });
+               pelvisInteractable = new GDXLiveRobotPartInteractable();
+               pelvisInteractable.create(collisionLink,
+                                         syncedRobot.getReferenceFrames().getPelvisFrame(),
+                                         modelFileName,
+                                         baseUI.getPrimary3DPanel());
+               pelvisInteractable.setOnSpacePressed(() ->
+               {
+                  ros2Helper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(teleoperationParameters.getTrajectoryTime(),
+                                                                                                    pelvisInteractable.getPose()));
+               });
+            }
+            else
+            {
+               pelvisInteractable.addAdditionalCollisionLink(collisionLink);
+            }
          }
          for (RobotSide side : RobotSide.values)
          {
@@ -114,55 +121,65 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
             String footName = syncedRobot.getFullRobotModel().getFoot(side).getName();
             if (collisionLink.getRigidBodyName().equals(footName))
             {
-               GDXLiveRobotPartInteractable interactableFoot = new GDXLiveRobotPartInteractable();
-//               String modelFileName = robotSidePrefix + "foot.g3dj";
-               interactableFoot.create(collisionLink,
-                                       syncedRobot.getFullRobotModel().getFrameAfterLegJoint(side, LegJointName.ANKLE_ROLL),
-                                       modelFileName,
-                                       baseUI.getPrimary3DPanel());
-               interactableFoot.setOnSpacePressed(() ->
+               if (!footInteractables.containsKey(side))
                {
-                  ros2Helper.publishToController(HumanoidMessageTools.createFootTrajectoryMessage(side,
-                                                                                                  teleoperationParameters.getTrajectoryTime(),
-                                                                                                  interactableFoot.getPose()));
-               });
-               footInteractables.put(side, interactableFoot);
+                  GDXLiveRobotPartInteractable interactableFoot = new GDXLiveRobotPartInteractable();
+   //               String modelFileName = robotSidePrefix + "foot.g3dj";
+                  interactableFoot.create(collisionLink,
+                                          syncedRobot.getFullRobotModel().getFrameAfterLegJoint(side, LegJointName.ANKLE_ROLL),
+                                          modelFileName,
+                                          baseUI.getPrimary3DPanel());
+                  interactableFoot.setOnSpacePressed(() ->
+                  {
+                     ros2Helper.publishToController(HumanoidMessageTools.createFootTrajectoryMessage(side,
+                                                                                                     teleoperationParameters.getTrajectoryTime(),
+                                                                                                     interactableFoot.getPose()));
+                  });
+                  footInteractables.put(side, interactableFoot);
+               }
+               else
+               {
+                  footInteractables.get(side).addAdditionalCollisionLink(collisionLink);
+               }
             }
             if (collisionLink.getRigidBodyName().equals(syncedRobot.getFullRobotModel().getHand(side).getName()))
             {
-               ReferenceFrame handFrame = syncedRobot.getFullRobotModel().getEndEffectorFrame(side, LimbName.ARM);
-               ReferenceFrame collisionFrame = handFrame;
-               GDXLiveRobotPartInteractable interactableHand = new GDXLiveRobotPartInteractable();
-               ReferenceFrame handControlFrame = syncedRobot.getFullRobotModel().getHandControlFrame(side);
-               ReferenceFrame handGraphicFrame
-                     = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(robotSidePrefix + "graphicFrame",
-                                                                                         handFrame,
-                                                                                         robotModel.getUIParameters().getHandGraphicToHandFrameTransform(side));
-               interactableHand.create(collisionLink,
-                                       handGraphicFrame,
-                                       collisionFrame,
-                                       handControlFrame,
-                                       modelFileName,
-                                       baseUI.getPrimary3DPanel());
-               armSetpointManager.getDesiredHandControlPoseSuppliers().put(side, interactableHand::getPose);
-               // TODO this should probably not handle the space event!
-               // This sends a command to the controller.
-               interactableHand.setOnSpacePressed(armSetpointManager.getSubmitDesiredArmSetpointsCallback(side));
-
-
-               handInteractables.put(side, interactableHand);
-               HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
-               SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
-               ForceSensorDefinition[] forceSensorDefinitions = syncedRobot.getFullRobotModel().getForceSensorDefinitions();
-               for (int i = 0; i < forceSensorDefinitions.length; i++)
+               if (!handInteractables.containsKey(side))
                {
-                  if (wristForceSensorNames.containsKey(side) && wristForceSensorNames.get(side).equals(forceSensorDefinitions[i].getSensorName()))
+                  ReferenceFrame handFrame = syncedRobot.getFullRobotModel().getEndEffectorFrame(side, LimbName.ARM);
+                  ReferenceFrame collisionFrame = handFrame;
+                  GDXLiveRobotPartInteractable interactableHand = new GDXLiveRobotPartInteractable();
+                  ReferenceFrame handControlFrame = syncedRobot.getFullRobotModel().getHandControlFrame(side);
+                  ReferenceFrame handGraphicFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(robotSidePrefix + "graphicFrame",
+                                                                                                                      handFrame,
+                                                                                                                      robotModel.getUIParameters()
+                                                                                                                                .getHandGraphicToHandFrameTransform(
+                                                                                                                                      side));
+                  interactableHand.create(collisionLink, handGraphicFrame, collisionFrame, handControlFrame, modelFileName, baseUI.getPrimary3DPanel());
+                  armSetpointManager.getDesiredHandControlPoseSuppliers().put(side, interactableHand::getPose);
+                  // TODO this should probably not handle the space event!
+                  // This sends a command to the controller.
+                  interactableHand.setOnSpacePressed(armSetpointManager.getSubmitDesiredArmSetpointsCallback(side));
+
+                  handInteractables.put(side, interactableHand);
+                  HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
+                  SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
+                  ForceSensorDefinition[] forceSensorDefinitions = syncedRobot.getFullRobotModel().getForceSensorDefinitions();
+                  for (int i = 0; i < forceSensorDefinitions.length; i++)
                   {
-//                     wristWrenchArrows.put(side, new GDXSpatialVectorArrows(forceSensorDefinitions[i].getSensorFrame(), i));
-                     wristWrenchArrows.put(side, new GDXSpatialVectorArrows(forceSensorDefinitions[i].getSensorFrame(),
-                                                                            yoVariableClientHelper,
-                                                                            side.getLowerCaseName() + "WristSensor"));
+                     if (wristForceSensorNames.containsKey(side) && wristForceSensorNames.get(side).equals(forceSensorDefinitions[i].getSensorName()))
+                     {
+                        //                     wristWrenchArrows.put(side, new GDXSpatialVectorArrows(forceSensorDefinitions[i].getSensorFrame(), i));
+                        wristWrenchArrows.put(side,
+                                              new GDXSpatialVectorArrows(forceSensorDefinitions[i].getSensorFrame(),
+                                                                         yoVariableClientHelper,
+                                                                         side.getLowerCaseName() + "WristSensor"));
+                     }
                   }
+               }
+               else
+               {
+                  handInteractables.get(side).addAdditionalCollisionLink(collisionLink);
                }
             }
          }
