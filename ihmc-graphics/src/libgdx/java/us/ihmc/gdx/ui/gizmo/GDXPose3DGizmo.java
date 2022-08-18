@@ -195,9 +195,11 @@ public class GDXPose3DGizmo implements RenderableProvider
 
    public void process3DViewInput(ImGui3DViewInput input)
    {
+      updateTransforms();
+
       ImGuiMouseDragData manipulationDragData = input.getMouseDragData(ImGuiMouseButton.Left);
 
-      isGizmoHovered = pickResult == input.getClosestPick();
+      isGizmoHovered = input.isWindowHovered() && pickResult == input.getClosestPick();
 
       if (isGizmoHovered && ImGui.getMouseClickedCount(ImGuiMouseButton.Right) == 1)
       {
@@ -461,25 +463,28 @@ public class GDXPose3DGizmo implements RenderableProvider
    {
       ImGui.text("Drag using the left mouse button to manipulate the gizmo.");
 
-      if (ImGui.button("Reset"))
-      {
-         transformToParent.setToZero();
-      }
-
       ImGui.checkbox("Resize based on camera distance", resizeAutomatically);
-      ImGui.pushItemWidth(100.00f);
-      boolean proportionsChanged = false;
-//      proportionsChanged |= ImGui.inputFloat(labels.get("Torus radius"), torusRadius, 0.001f);
-      proportionsChanged |= ImGui.inputFloat(labels.get("Torus camera size"), torusCameraSize, 0.05f);
-      proportionsChanged |= ImGui.inputFloat(labels.get("Torus tube radius ratio"), torusTubeRadiusRatio, 0.001f);
-      proportionsChanged |= ImGui.inputFloat(labels.get("Arrow length ratio"), arrowLengthRatio, 0.05f);
-      proportionsChanged |= ImGui.inputFloat(labels.get("Arrow head body length ratio"), arrowHeadBodyLengthRatio, 0.05f);
-      proportionsChanged |= ImGui.inputFloat(labels.get("Arrow head body radius ratio"), arrowHeadBodyRadiusRatio, 0.05f);
-      proportionsChanged |= ImGui.inputFloat(labels.get("Arrow spacing factor"), arrowSpacingFactor, 0.05f);
-      ImGui.popItemWidth();
+      if (ImGui.collapsingHeader(labels.get("Advanced")))
+      {
+         if (ImGui.button("Set to zero in parent frame"))
+         {
+            transformToParent.setToZero();
+         }
 
-      if (proportionsChanged)
-         recreateGraphics();
+         ImGui.pushItemWidth(100.00f);
+         boolean proportionsChanged = false;
+         //      proportionsChanged |= ImGui.inputFloat(labels.get("Torus radius"), torusRadius, 0.001f);
+         proportionsChanged |= ImGui.inputFloat(labels.get("Torus camera size"), torusCameraSize, 0.05f);
+         proportionsChanged |= ImGui.inputFloat(labels.get("Torus tube radius ratio"), torusTubeRadiusRatio, 0.001f);
+         proportionsChanged |= ImGui.inputFloat(labels.get("Arrow length ratio"), arrowLengthRatio, 0.05f);
+         proportionsChanged |= ImGui.inputFloat(labels.get("Arrow head body length ratio"), arrowHeadBodyLengthRatio, 0.05f);
+         proportionsChanged |= ImGui.inputFloat(labels.get("Arrow head body radius ratio"), arrowHeadBodyRadiusRatio, 0.05f);
+         proportionsChanged |= ImGui.inputFloat(labels.get("Arrow spacing factor"), arrowSpacingFactor, 0.05f);
+         ImGui.popItemWidth();
+
+         if (proportionsChanged)
+            recreateGraphics();
+      }
 
       updateTransforms();
    }

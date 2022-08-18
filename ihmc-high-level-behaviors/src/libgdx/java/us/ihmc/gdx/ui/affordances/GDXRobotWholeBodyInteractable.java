@@ -168,7 +168,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
          }
       }
 
-      walkPathControlRing.create(baseUI.getPrimary3DPanel().getCamera3D(), robotModel, syncedRobot, ros2Helper, teleoperationParameters);
+      walkPathControlRing.create(baseUI.getPrimary3DPanel(), robotModel, syncedRobot, ros2Helper, teleoperationParameters);
    }
 
    public void update()
@@ -201,17 +201,9 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
       if (interactablesEnabled.get())
       {
          walkPathControlRing.calculate3DViewPick(input);
-//         if (showSelfCollisionMeshes.get())
-//         {
-//            for (GDXRobotCollisionLink collisionLink : selfCollisionLinks)
-//            {
-//               collisionLink.calculatePick(input);
-//            }
-//         }
-//         if (showEnvironmentCollisionMeshes.get())
-//         {
+
+         if (input.isWindowHovered())
             environmentCollisionModel.calculate3DViewPick(input);
-//         }
 
          pelvisInteractable.calculate3DViewPick(input);
          for (GDXLiveRobotPartInteractable footInteractable : footInteractables)
@@ -263,9 +255,6 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
       ImGui.sameLine();
       if (ImGui.button(labels.get("Clear graphics")))
          walkPathControlRing.clearGraphics();
-      teleoperationParametersTuner.renderADoublePropertyTuner(GDXTeleoperationParameters.trajectoryTime, 0.1, 0.5, 0.0, 30.0, true, "s", "%.2f");
-      ImGui.text("Walk path control ring:");
-      walkPathControlRing.renderImGuiWidgets();
       ImGui.checkbox("Show self collision meshes", showSelfCollisionMeshes);
       ImGui.checkbox("Show environment collision meshes", showEnvironmentCollisionMeshes);
 
@@ -330,5 +319,10 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
    public void setDesiredToCurrent()
    {
       armSetpointManager.setDesiredToCurrent();
+   }
+
+   public GDXWalkPathControlRing getWalkPathControlRing()
+   {
+      return walkPathControlRing;
    }
 }

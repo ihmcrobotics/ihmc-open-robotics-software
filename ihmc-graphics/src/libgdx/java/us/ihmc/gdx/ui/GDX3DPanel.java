@@ -114,11 +114,14 @@ public class GDX3DPanel
          renderSizeY = sizeY * antiAliasing;
 
          inputCalculator.compute();
-         for (Consumer<ImGui3DViewInput> imgui3DViewPickCalculator : imgui3DViewPickCalculators)
+         if (inputCalculator.isWindowHovered()) // If the window is not hovered, we should not be computing picks
          {
-            imgui3DViewPickCalculator.accept(inputCalculator);
+            for (Consumer<ImGui3DViewInput> imgui3DViewPickCalculator : imgui3DViewPickCalculators)
+            {
+               imgui3DViewPickCalculator.accept(inputCalculator);
+            }
+            inputCalculator.calculateClosestPick();
          }
-         inputCalculator.calculateClosestPick();
          for (Consumer<ImGui3DViewInput> imGuiInputProcessor : imgui3DViewInputProcessors)
          {
             imGuiInputProcessor.accept(inputCalculator);
