@@ -28,7 +28,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.input.ImGuiMouseDragData;
 import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
@@ -38,6 +37,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 public class GDXFocusBasedCamera extends Camera
 {
    private boolean inputEnabled = true;
+   private boolean useMiddleClickViewOrbit = false;
    private final FramePose3D cameraPose = new FramePose3D();
    private final RigidBodyTransform transformToParent = new RigidBodyTransform();
    private final ReferenceFrame cameraFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
@@ -228,9 +228,13 @@ public class GDXFocusBasedCamera extends Camera
       isEPressed = input.isWindowHovered() && ImGui.isKeyDown('E');
       isXPressed = input.isWindowHovered() && ImGui.isKeyDown('X');
 
-      ImGuiMouseDragData orbitDragData = input.getMouseDragData(ImGuiMouseButton.Middle);
+      int orbitMouseButton = useMiddleClickViewOrbit ? ImGuiMouseButton.Middle : ImGuiMouseButton.Left;
+      ImGuiMouseDragData orbitDragData = input.getMouseDragData(orbitMouseButton);
 
-      if (ImGui.isWindowHovered() && orbitDragData.getDragJustStarted())
+      boolean dragJustStarted = ImGui.isWindowHovered() && orbitDragData.getDragJustStarted();
+      if (!useMiddleClickViewOrbit)
+         dragJustStarted &= input.getClosestPick() == null;
+      if (dragJustStarted)
       {
          orbitDragData.setObjectBeingDragged(this);
       }
@@ -402,5 +406,10 @@ public class GDXFocusBasedCamera extends Camera
    public float getVerticalFieldOfView()
    {
       return verticalFieldOfView;
+   }
+
+   public void setUseMiddleClickViewOrbit(boolean useMiddleClickViewOrbit)
+   {
+      this.useMiddleClickViewOrbit = useMiddleClickViewOrbit;
    }
 }
