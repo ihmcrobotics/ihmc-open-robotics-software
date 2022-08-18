@@ -58,6 +58,7 @@ public class GDXImGuiBasedUI
    private final ImInt foregroundFPS = new ImInt(240);
    private final ImBoolean vsync = new ImBoolean(false);
    private final ImBoolean shadows = new ImBoolean(false);
+   private final ImBoolean middleClickOrbit = new ImBoolean(false);
    private final ImInt libGDXLogLevel = new ImInt(GDXTools.toGDX(LogTools.getLevel()));
    private final ImFloat imguiFontScale = new ImFloat(1.0f);
    private final GDXImGuiPerspectiveManager perspectiveManager;
@@ -243,6 +244,11 @@ public class GDXImGuiBasedUI
             else
                primaryScene.getSceneLevelsToRender().add(GDXSceneLevel.VIRTUAL);
          }
+         ImGui.separator();
+         if (ImGui.checkbox(labels.get("Middle-click view orbit"), middleClickOrbit))
+         {
+            setUseMiddleClickViewOrbit(middleClickOrbit.get());
+         }
          ImGui.popItemWidth();
          ImGui.endMenu();
       }
@@ -356,5 +362,15 @@ public class GDXImGuiBasedUI
    public long getRenderIndex()
    {
       return renderIndex;
+   }
+
+   public void setUseMiddleClickViewOrbit(boolean useMiddleClickViewOrbit)
+   {
+      this.middleClickOrbit.set(useMiddleClickViewOrbit);
+      primary3DPanel.getCamera3D().setUseMiddleClickViewOrbit(useMiddleClickViewOrbit);
+      for (GDX3DPanel additional3DPanel : additional3DPanels)
+      {
+         additional3DPanel.getCamera3D().setUseMiddleClickViewOrbit(useMiddleClickViewOrbit);
+      }
    }
 }
