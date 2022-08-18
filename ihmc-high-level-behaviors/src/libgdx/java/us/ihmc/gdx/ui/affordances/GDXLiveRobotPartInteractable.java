@@ -4,12 +4,13 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
-import imgui.internal.ImGui;
+import imgui.ImGui;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.graphics.GDXReferenceFrameGraphic;
@@ -20,6 +21,7 @@ public class GDXLiveRobotPartInteractable
 {
    private static final boolean SHOW_DEBUG_FRAMES = false;
    private final ArrayList<GDXRobotCollisionLink> collisionLinks = new ArrayList<>();
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private ReferenceFrame graphicFrame;
    private ReferenceFrame collisionFrame;
    private ReferenceFrame controlFrame;
@@ -34,7 +36,7 @@ public class GDXLiveRobotPartInteractable
    private Runnable onSpacePressed;
    private GDXReferenceFrameGraphic graphicReferenceFrameGraphic;
    private GDXReferenceFrameGraphic controlReferenceFrameGraphic;
-   private boolean pickSelected;
+   private boolean isMouseHovering;
 
    public void create(GDXRobotCollisionLink collisionLink, ReferenceFrame controlFrame, String graphicFileName, GDX3DPanel panel3D)
    {
@@ -66,29 +68,25 @@ public class GDXLiveRobotPartInteractable
 
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      pickSelected = false;
+      isMouseHovering = false;
       for (GDXRobotCollisionLink collisionLink : collisionLinks)
       {
-         pickSelected |= collisionLink.getPickSelected();
+         isMouseHovering |= collisionLink.getPickSelected();
       }
 
-      boolean isClickedOn = pickSelected && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
+      boolean isClickedOn = isMouseHovering && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
       boolean isDeletedThisFrame = modified && selectablePose3DGizmo.isSelected() && ImGui.isKeyReleased(ImGuiTools.getDeleteKey());
-      boolean unmodifiedButHovered = !modified && pickSelected;
+      boolean unmodifiedButHovered = !modified && isMouseHovering;
       boolean becomesModified = unmodifiedButHovered && isClickedOn;
       boolean executeMotionKeyPressed = ImGui.isKeyReleased(ImGuiTools.getSpaceKey());
-      boolean modifiedButNotSelectedHovered = modified && !selectablePose3DGizmo.isSelected() && pickSelected;
+      boolean modifiedButNotSelectedHovered = modified && !selectablePose3DGizmo.isSelected() && isMouseHovering;
 
       if (isDeletedThisFrame)
       {
-         modified = false;
-         for (GDXRobotCollisionLink collisionLink : collisionLinks)
-         {
-            collisionLink.setOverrideTransform(false);
-         }
+         delete();
       }
 
-      selectablePose3DGizmo.process3DViewInput(input, pickSelected);
+      selectablePose3DGizmo.process3DViewInput(input, isMouseHovering);
 
       if (unmodifiedButHovered)
       {
@@ -116,12 +114,7 @@ public class GDXLiveRobotPartInteractable
 
       if (becomesModified)
       {
-         modified = true;
-         for (GDXRobotCollisionLink collisionLink : collisionLinks)
-         {
-            collisionLink.setOverrideTransform(true);
-         }
-         selectablePose3DGizmo.getPoseGizmo().getTransformToParent().set(controlFrame.getTransformToWorldFrame());
+         onBecomesModified();
       }
 
       if (modifiedButNotSelectedHovered)
@@ -161,6 +154,42 @@ public class GDXLiveRobotPartInteractable
       }
    }
 
+   private void onBecomesModified()
+   {
+      modified = true;
+      for (GDXRobotCollisionLink collisionLink : collisionLinks)
+      {
+         collisionLink.setOverrideTransform(true);
+      }
+      selectablePose3DGizmo.getPoseGizmo().getTransformToParent().set(controlFrame.getTransformToWorldFrame());
+   }
+
+   public void renderImGuiWidgets()
+   {
+      if (ImGui.radioButton(labels.get("Deleted"), !selectablePose3DGizmo.getSelected().get() && !modified))
+      {
+         delete();
+      }
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Modified"), !selectablePose3DGizmo.getSelected().get() && modified))
+      {
+         selectablePose3DGizmo.getSelected().set(false);
+         if (!modified)
+         {
+            onBecomesModified();
+         }
+      }
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Selected"), selectablePose3DGizmo.getSelected().get()))
+      {
+         selectablePose3DGizmo.getSelected().set(true);
+         if (!modified)
+         {
+            onBecomesModified();
+         }
+      }
+   }
+
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       if (SHOW_DEBUG_FRAMES)
@@ -174,11 +203,21 @@ public class GDXLiveRobotPartInteractable
          controlReferenceFrameGraphic.getRenderables(renderables, pool);
       }
 
-      if (modified || pickSelected)
+      if (modified || isMouseHovering)
       {
          highlightModel.getRenderables(renderables, pool);
       }
       selectablePose3DGizmo.getVirtualRenderables(renderables, pool);
+   }
+
+   public void delete()
+   {
+      modified = false;
+      selectablePose3DGizmo.getSelected().set(false);
+      for (GDXRobotCollisionLink collisionLink : collisionLinks)
+      {
+         collisionLink.setOverrideTransform(false);
+      }
    }
 
    public void destroy()

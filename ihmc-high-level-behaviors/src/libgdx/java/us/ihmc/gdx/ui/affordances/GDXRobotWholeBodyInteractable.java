@@ -241,17 +241,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
       if (interactablesEnabled.get())
       {
          walkPathControlRing.process3DViewInput(input);
-//         if (showSelfCollisionMeshes.get())
-//         {
-//            for (GDXRobotCollisionLink collisionLink : selfCollisionLinks)
-//            {
-//               collisionLink.process3DViewInput(input);
-//            }
-//         }
-//         if (showEnvironmentCollisionMeshes.get())
-//         {
-            environmentCollisionModel.process3DViewInput(input);
-//         }
+         environmentCollisionModel.process3DViewInput(input);
 
          pelvisInteractable.process3DViewInput(input);
          for (GDXLiveRobotPartInteractable footInteractable : footInteractables)
@@ -270,10 +260,40 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
    {
       ImGui.checkbox("Interactables enabled", interactablesEnabled);
       ImGui.sameLine();
-      if (ImGui.button(labels.get("Clear graphics")))
-         walkPathControlRing.clearGraphics();
-      ImGui.checkbox("Show self collision meshes", showSelfCollisionMeshes);
-      ImGui.checkbox("Show environment collision meshes", showEnvironmentCollisionMeshes);
+      if (ImGui.button(labels.get("Delete all")))
+      {
+         walkPathControlRing.delete();
+         pelvisInteractable.delete();
+         for (RobotSide side : footInteractables.sides())
+            footInteractables.get(side).delete();
+         for (RobotSide side : handInteractables.sides())
+            handInteractables.get(side).delete();
+      }
+
+      ImGui.text("Pelvis:");
+      ImGui.sameLine();
+      pelvisInteractable.renderImGuiWidgets();
+
+      for (RobotSide side : handInteractables.sides())
+      {
+         ImGui.text(side.getPascalCaseName() + " hand:");
+         ImGui.sameLine();
+         handInteractables.get(side).renderImGuiWidgets();
+      }
+      for (RobotSide side : footInteractables.sides())
+      {
+         ImGui.text(side.getPascalCaseName() + " foot:");
+         ImGui.sameLine();
+         footInteractables.get(side).renderImGuiWidgets();
+      }
+
+      ImGui.separator();
+
+      ImGui.text("Show collisions:");
+      ImGui.sameLine();
+      ImGui.checkbox("Contact", showEnvironmentCollisionMeshes);
+      ImGui.sameLine();
+      ImGui.checkbox("Avoidance", showSelfCollisionMeshes);
 
       // TODO: Add transparency sliders
       // TODO: Add context menus
