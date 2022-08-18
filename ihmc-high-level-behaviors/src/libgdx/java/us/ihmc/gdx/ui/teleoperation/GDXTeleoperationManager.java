@@ -50,10 +50,7 @@ import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
-import us.ihmc.gdx.ui.affordances.GDXPastFootSteps;
-import us.ihmc.gdx.ui.affordances.GDXRobotWholeBodyInteractable;
-import us.ihmc.gdx.ui.affordances.ImGuiGDXManualFootstepPlacement;
-import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
+import us.ihmc.gdx.ui.affordances.*;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.gdx.ui.interactable.GDXChestOrientationSlider;
 import us.ihmc.gdx.ui.interactable.GDXPelvisHeightSlider;
@@ -87,6 +84,9 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
    private final ImGuiGDXPoseGoalAffordance footstepGoal = new ImGuiGDXPoseGoalAffordance();
    private GDXRobotWholeBodyInteractable interactableRobot;
    private final ImGuiGDXManualFootstepPlacement manualFootstepPlacement = new ImGuiGDXManualFootstepPlacement();
+   // TODO: for interactable footings from stepPlan >>
+   private final ImGuiGDXPlannedFootstepPlacement plannedFootstepPlacement = new ImGuiGDXPlannedFootstepPlacement();
+   // <<
    private final ImGuiStoredPropertySetTuner teleoperationParametersTuner = new ImGuiStoredPropertySetTuner("Teleoperation Parameters");
    private final ImGuiStoredPropertySetTuner footstepPlanningParametersTuner = new ImGuiStoredPropertySetTuner("Footstep Planner Parameters (Teleoperation)");
    private final GDXTeleoperationParameters teleoperationParameters;
@@ -114,7 +114,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
    private int textureID = 0;
 
    // FOR LOGGING STEPS TAKEN
-   private GDXPastFootSteps pastFootSteps;
+//   private GDXPastFootSteps pastFootSteps;
 
    public GDXTeleoperationManager(String robotRepoName,
                                   String robotSubsequentPathToResourceFolder,
@@ -232,8 +232,15 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       teleoperationParametersTuner.registerSlider("Turn aggressiveness", 0.0f, 10.0f);
 
       manualFootstepPlacement.create(baseUI, communicationHelper, syncedRobot, teleoperationParameters, footstepPlannerParameters);
+
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(manualFootstepPlacement::processImGui3DViewInput);
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(manualFootstepPlacement::calculate3DViewPick);
+
+      // TODO: for interactable footings from stepPlan >>
+      plannedFootstepPlacement.create(baseUI, communicationHelper, syncedRobot, teleoperationParameters, footstepPlannerParameters);
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(plannedFootstepPlacement::processImGui3DViewInput);
+      baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(plannedFootstepPlacement::calculate3DViewPick);
+      // <<
 
 
       if (interactableRobot != null)
@@ -245,8 +252,8 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
          interactableRobot.setInteractablesEnabled(true);
          baseUI.getPrimaryScene().addRenderableProvider(interactableRobot);
       }
-      pastFootSteps = new GDXPastFootSteps(baseUI);
-      baseUI.getPrimaryScene().addRenderableProvider(pastFootSteps);
+//      pastFootSteps = new GDXPastFootSteps(baseUI);
+
    }
 
    public void update()
@@ -262,6 +269,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
          footstepPlannerOutput = null;
          footstepPlanGraphic.clear();
       }
+      plannedFootstepPlacement.update();
    }
 
    public void renderImGuiWidgets()
@@ -346,11 +354,14 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
          ImGui.sameLine();
          if (ImGui.button(labels.get("Walk")))
          {
-            walk();
+//            walk();
+            walkFromPlan();;
          }
+
          if (ImGui.isKeyPressed(ImGuiTools.getSpaceKey()) && manualFootstepPlacement.getFootstepArrayList().size() == 0)
          {
-            walk();
+//            walk();
+            walkFromPlan();;
          }
       }
       ImGui.sameLine();
@@ -368,7 +379,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
          footstepPlanGraphic.clear();
          footstepGoal.clear();
          manualFootstepPlacement.clear();
-         pastFootSteps.clear();
+         plannedFootstepPlacement.clear();
       }
 
       ImGui.separator();
@@ -460,7 +471,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
          footstepPlanGraphic.getRenderables(renderables, pool);
          footstepGoal.getRenderables(renderables, pool);
          manualFootstepPlacement.getRenderables(renderables, pool);
-         pastFootSteps.getRenderables(renderables,pool);
+         plannedFootstepPlacement.getRenderables(renderables, pool);
       }
    }
 
@@ -521,12 +532,20 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
          }
          LogTools.info("Footstep planning failure...");
       }
-      else
+      else  // plan generated.
       {
-         footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlannerOutput.getFootstepPlan(),
-                                                                                                 "Teleoperation Panel Planned"));
+//         footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlannerOutput.getFootstepPlan(),
+//                                                                                                 "Teleoperation Panel Planned"));
+         // TODO: make footsteps from footstepPlan interactable (modifiable)
+         plannedFootstepPlacement.createFootStepFromPlan(footstepPlannerOutput.getFootstepPlan());
+
          this.footstepPlannerOutput = footstepPlannerOutput;
       }
+   }
+
+   private void walkFromPlan()
+   {
+      plannedFootstepPlacement.walkFromSteps();
    }
 
    private void walk()

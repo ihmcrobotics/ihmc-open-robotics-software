@@ -89,4 +89,6 @@ public class FootstepPlan implements FootstepPlanReadOnly
    {
       footsteps.remove(footstepIndex);
    }
+
+   public ArrayList<PlannedFootstep> getFootsteps() { return footsteps; }
 }
