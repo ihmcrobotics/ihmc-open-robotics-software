@@ -53,7 +53,7 @@ public class GDXSelectablePose3DGizmo
 
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      if (selected.get())
+      if (input.isWindowHovered() && selected.get())
       {
          poseGizmo.calculate3DViewPick(input);
       }
@@ -66,20 +66,23 @@ public class GDXSelectablePose3DGizmo
 
    public void process3DViewInput(ImGui3DViewInput input, boolean isPickSelected)
    {
-      // Process input
-      boolean leftMouseReleasedWithoutDrag = input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
-      boolean isClickedOn = isPickSelected && leftMouseReleasedWithoutDrag;
-      boolean somethingElseIsClickedOn = !isPickSelected && leftMouseReleasedWithoutDrag;
-      boolean deselectionKeyPressed = ImGui.isKeyReleased(ImGuiTools.getDeleteKey()) || ImGui.isKeyReleased(ImGuiTools.getEscapeKey());
+      if (input.isWindowHovered())
+      {
+         // Process input
+         boolean leftMouseReleasedWithoutDrag = input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
+         boolean isClickedOn = isPickSelected && leftMouseReleasedWithoutDrag;
+         boolean somethingElseIsClickedOn = !isPickSelected && leftMouseReleasedWithoutDrag;
+         boolean deselectionKeyPressed = ImGui.isKeyReleased(ImGuiTools.getDeleteKey()) || ImGui.isKeyReleased(ImGuiTools.getEscapeKey());
 
-      // Determine selectedness
-      if (isClickedOn)
-      {
-         selected.set(true);
-      }
-      if (somethingElseIsClickedOn || deselectionKeyPressed)
-      {
-         selected.set(false);
+         // Determine selectedness
+         if (isClickedOn)
+         {
+            selected.set(true);
+         }
+         if (somethingElseIsClickedOn || deselectionKeyPressed)
+         {
+            selected.set(false);
+         }
       }
 
       // Act

@@ -331,8 +331,16 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       // TODO: sliders for footstep parameters here . . .
       // 2nd
       teleoperationParametersTuner.renderDoublePropertySliders();
+      teleoperationParametersTuner.renderADoublePropertyTuner(GDXTeleoperationParameters.trajectoryTime, 0.1, 0.5, 0.0, 30.0, true, "s", "%.2f");
 
-      ImGui.text("Footstep plan:");
+      ImGui.checkbox(labels.get("Show footstep planner parameter tuner"), footstepPlanningParametersTuner.getIsShowing());
+      ImGui.checkbox(labels.get("Show teleoperation parameter tuner"), teleoperationParametersTuner.getIsShowing());
+
+      ImGui.separator();
+
+      manualFootstepPlacement.renderImGuiWidgets(pastFootSteps);
+
+      ImGui.text("Ball and arrow planner:");
       if (footstepPlannerOutput != null)
       {
          ImGui.sameLine();
@@ -347,12 +355,21 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       }
       ImGui.sameLine();
       footstepGoal.renderPlaceGoalButton();
-      ImGui.checkbox(labels.get("Show footstep planner parameter tuner"), footstepPlanningParametersTuner.getIsShowing());
-      ImGui.checkbox(labels.get("Show teleoperation parameter tuner"), teleoperationParametersTuner.getIsShowing());
 
-      ImGui.separator();
+      ImGui.text("Walk path control ring planner:");
+      interactableRobot.getWalkPathControlRing().renderImGuiWidgets();
 
-      manualFootstepPlacement.renderImGuiWidgets(pastFootSteps);
+      ImGui.text("Footstep graphics:");
+      ImGui.sameLine();
+      ImGui.checkbox(labels.get("Show"), showGraphics);
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Clear")))
+      {
+         footstepPlanGraphic.clear();
+         footstepGoal.clear();
+         manualFootstepPlacement.clear();
+         pastFootSteps.clear();
+      }
 
       ImGui.separator();
 
@@ -399,27 +416,8 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
          }
       }
 
-      ImGui.text("Lidar REA:");
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Clear")))
-      {
-         REAStateRequestMessage clearMessage = new REAStateRequestMessage();
-         clearMessage.setRequestClear(true);
-         communicationHelper.publish(ROS2Tools.REA_STATE_REQUEST, clearMessage);
-      }
-      ImGui.checkbox(labels.get("Show graphics"), showGraphics);
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Clear graphics")))
-      {
-         footstepPlanGraphic.clear();
-         footstepGoal.clear();
-         manualFootstepPlacement.clear();
-         pastFootSteps.clear();
-      }
-
-      ImGui.separator();
-
       desiredRobot.renderImGuiWidgets();
+      ImGui.sameLine();
       if (ImGui.button(labels.get("Set Desired To Current")))
       {
          interactableRobot.setDesiredToCurrent();
@@ -427,6 +425,15 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       }
 
       interactableRobot.renderImGuiWidgets();
+
+//      ImGui.text("Lidar REA:");
+//      ImGui.sameLine();
+//      if (ImGui.button(labels.get("Clear")))
+//      {
+//         REAStateRequestMessage clearMessage = new REAStateRequestMessage();
+//         clearMessage.setRequestClear(true);
+//         communicationHelper.publish(ROS2Tools.REA_STATE_REQUEST, clearMessage);
+//      }
 
       // TODO: footstepPlanGraphic should clear properly when user clears the plannerOutput.
 //      if (footstepPlannerOutput==null)

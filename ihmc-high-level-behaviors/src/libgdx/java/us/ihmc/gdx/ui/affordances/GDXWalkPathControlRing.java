@@ -1,11 +1,12 @@
 package us.ihmc.gdx.ui.affordances;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
-import imgui.internal.ImGui;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
@@ -27,10 +28,10 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
-import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
+import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.gizmo.GDXPathControlRingGizmo;
 import us.ihmc.gdx.ui.graphics.GDXFootstepGraphic;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
@@ -55,6 +56,7 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
    private boolean selected = false;
    private boolean modified = false;
    private boolean mouseRingPickSelected;
+   private GDX3DPanel panel3D;
    private ROS2SyncedRobotModel syncedRobot;
    private ROS2ControllerHelper ros2Helper;
    private GDXTeleoperationParameters teleoperationParameters;
@@ -89,17 +91,20 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
    private SimplePathParameters turnStraightTurnParameters;
    private SteppingParameters steppingParameters;
    private GDXWalkPathType walkPathType = GDXWalkPathType.STRAIGHT;
+   private ImGui3DViewInput latestInput;
 
-   public void create(GDXFocusBasedCamera camera3D,
+   public void create(GDX3DPanel panel3D,
                       DRCRobotModel robotModel,
                       ROS2SyncedRobotModel syncedRobot,
                       ROS2ControllerHelper ros2Helper,
                       GDXTeleoperationParameters teleoperationParameters)
    {
+      this.panel3D = panel3D;
       this.syncedRobot = syncedRobot;
       this.ros2Helper = ros2Helper;
       this.teleoperationParameters = teleoperationParameters;
-      footstepPlannerGoalGizmo.create(camera3D);
+      footstepPlannerGoalGizmo.create(panel3D.getCamera3D());
+      panel3D.addImGuiOverlayAddition(this::renderTooltips);
       midFeetZUpFrame = syncedRobot.getReferenceFrames().getMidFeetZUpFrame();
       footFrames = syncedRobot.getReferenceFrames().getSoleFrames();
 
@@ -164,9 +169,10 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
    // This happens after update.
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      boolean leftMouseReleasedWithoutDrag = input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
+      latestInput = input;
+      boolean leftMouseReleasedWithoutDrag = input.isWindowHovered() && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
 
-      footstepPlannerGoalGizmo.process3DViewInput(input);
+      footstepPlannerGoalGizmo.process3DViewInput(input, selected);
       mouseRingPickSelected = footstepPlannerGoalGizmo.getHollowCylinderPickSelected();
 
       if (!modified && mouseRingPickSelected && leftMouseReleasedWithoutDrag)
@@ -219,7 +225,7 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
             queueFootstepPlan();
          }
       }
-      if (selected && footstepPlannerGoalGizmo.isBeingDragged())
+      if (selected && footstepPlannerGoalGizmo.isNewlyModified())
       {
          queueFootstepPlan();
       }
@@ -348,13 +354,45 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
       {
          plannerToUse = 0;
       }
+      ImGui.sameLine();
       if (ImGui.radioButton(labels.get("Turn Walk Turn"), plannerToUse == 1))
       {
          plannerToUse = 1;
       }
+      ImGui.sameLine();
       if (ImGui.radioButton(labels.get("Turn Straight Turn"), plannerToUse == 2))
       {
          plannerToUse = 2;
+      }
+   }
+
+   private void renderTooltips()
+   {
+      if (selected && footstepPlannerGoalGizmo.getGizmoHovered())
+      {
+         float offsetX = 10.0f;
+         float offsetY = 10.0f;
+         float mousePosX = latestInput.getMousePosX();
+         float mousePosY = latestInput.getMousePosY();
+         float drawStartX = panel3D.getWindowDrawMinX() + mousePosX + offsetX;
+         float drawStartY = panel3D.getWindowDrawMinY() + mousePosY + offsetY;
+
+         String message = """
+                          Use left mouse drag to translate.
+                          Use right mouse drag to yaw.
+                          Use keyboard arrows to translate. (Hold shift for slow)
+                          Use alt+left and alt+left arrows to yaw. (Hold shift for slow)
+                          """;
+
+         ImGui.getWindowDrawList()
+              .addRectFilled(drawStartX, drawStartY, drawStartX + 62 * 6.7f, drawStartY + 4 * 17.0f, new Color(0.2f, 0.2f, 0.2f, 0.7f).toIntBits());
+         ImGui.getWindowDrawList()
+              .addText(ImGuiTools.getSmallFont(),
+                       ImGuiTools.getSmallFont().getFontSize(),
+                       drawStartX + 5.0f,
+                       drawStartY + 2.0f,
+                       Color.WHITE.toIntBits(),
+                       message);
       }
    }
 
