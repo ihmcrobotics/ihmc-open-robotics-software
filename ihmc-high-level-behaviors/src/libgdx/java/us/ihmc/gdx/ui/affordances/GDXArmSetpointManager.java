@@ -88,25 +88,32 @@ public class GDXArmSetpointManager
       {
          ikFoundASolution.put(side, false);
 
-         desiredArmJacobians.put(side, new GeometricJacobian(desiredRobot.getChest(), desiredRobot.getHand(side), desiredRobot.getHand(side).getBodyFixedFrame()));
-         actualArmJacobians.put(side,
-                                new GeometricJacobian(syncedRobot.getFullRobotModel().getChest(),
-                                                      syncedRobot.getFullRobotModel().getHand(side),
-                                                      syncedRobot.getFullRobotModel().getHand(side).getBodyFixedFrame()));
-         workArmJacobians.put(side, new GeometricJacobian(workingRobot.getChest(), workingRobot.getHand(side), workingRobot.getHand(side).getBodyFixedFrame()));
+         desiredArmJacobians.put(side, new GeometricJacobian(desiredRobot.getChest(),
+                                                             desiredRobot.getHand(side),
+                                                             desiredRobot.getHand(side).getBodyFixedFrame()));
+         actualArmJacobians.put(side, new GeometricJacobian(syncedRobot.getFullRobotModel().getChest(),
+                                                            syncedRobot.getFullRobotModel().getHand(side),
+                                                            syncedRobot.getFullRobotModel().getHand(side).getBodyFixedFrame()));
+         workArmJacobians.put(side, new GeometricJacobian(workingRobot.getChest(),
+                                                          workingRobot.getHand(side),
+                                                          workingRobot.getHand(side).getBodyFixedFrame()));
 
          double convergeTolerance = 4.0e-6; //1e-12;
          double parameterChangePenalty = 0.1;
-         inverseKinematicsCalculators.put(side,
-                                          new DdoglegInverseKinematicsCalculator(workArmJacobians.get(side),
-                                                                                 1.0,
-                                                                                 0.2,
-                                                                                 maxIterations,
-                                                                                 true,
-                                                                                 convergeTolerance,
-                                                                                 0.005,
-                                                                                 0.02,
-                                                                                 parameterChangePenalty));
+         double positionCost = 1.0;
+         double orientationCost = 0.2;
+         boolean solveOrientation = true;
+         double toleranceForPositionError = 0.005;
+         double toleranceForOrientationError = 0.02;
+         inverseKinematicsCalculators.put(side, new DdoglegInverseKinematicsCalculator(workArmJacobians.get(side),
+                                                                                       positionCost,
+                                                                                       orientationCost,
+                                                                                       maxIterations,
+                                                                                       solveOrientation,
+                                                                                       convergeTolerance,
+                                                                                       toleranceForPositionError,
+                                                                                       toleranceForOrientationError,
+                                                                                       parameterChangePenalty));
 
          RigidBodyTransform wristToControlTransform = new RigidBodyTransform(robotModel.getJointMap().getHandControlFrameToWristTransform(side));
          wristToControlTransform.invert();
