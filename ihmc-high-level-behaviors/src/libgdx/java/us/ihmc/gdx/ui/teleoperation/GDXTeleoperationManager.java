@@ -264,12 +264,13 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       if (interactableRobot != null)
          interactableRobot.update();
       manualFootstepPlacement.update();
+      plannedFootstepPlacement.update();
       if (manualFootstepPlacement.getFootstepArrayList().size() > 0)
       {
          footstepPlannerOutput = null;
          footstepPlanGraphic.clear();
       }
-      plannedFootstepPlacement.update();
+
    }
 
    public void renderImGuiWidgets()
@@ -346,22 +347,30 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
 
       ImGui.separator();
 
-      manualFootstepPlacement.renderImGuiWidgets(pastFootSteps);
+      manualFootstepPlacement.renderImGuiWidgets();
+      plannedFootstepPlacement.renderImGuiWidgets();
 
       ImGui.text("Ball and arrow planner:");
       if (footstepPlannerOutput != null)
       {
          ImGui.sameLine();
-         if (ImGui.button(labels.get("Walk")))
+//         if (ImGui.button(labels.get("Walk")))
+//         {
+////            walk();
+//            walkFromPlan();;
+//         }
+//
+//         if (ImGui.isKeyPressed(ImGuiTools.getSpaceKey()) && manualFootstepPlacement.getFootstepArrayList().size() == 0)
+//         {
+////            walk();
+//            walkFromPlan();;
+//         }
+         if (manualFootstepPlacement.getFootstepArrayList().size() == 0)
          {
-//            walk();
-            walkFromPlan();;
-         }
-
-         if (ImGui.isKeyPressed(ImGuiTools.getSpaceKey()) && manualFootstepPlacement.getFootstepArrayList().size() == 0)
-         {
-//            walk();
-            walkFromPlan();;
+            if (ImGui.button(labels.get("Walk")) || ImGui.isKeyPressed(ImGuiTools.getSpaceKey()))
+            {
+               walkFromPlan();
+            }
          }
       }
       ImGui.sameLine();
