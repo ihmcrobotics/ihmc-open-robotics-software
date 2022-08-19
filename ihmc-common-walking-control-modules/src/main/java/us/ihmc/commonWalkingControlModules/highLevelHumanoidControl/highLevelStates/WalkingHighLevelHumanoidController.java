@@ -350,7 +350,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       pPoseSpineYaw.set(0.0);
       double delta = 0.0;
       pPoseShoulderPitch.set(0 + delta);  //0.1 //0.2   // the bigger, the further away the arm is from the body 
-      pPoseShoulderRoll.set(0 - delta);   // the smaller, the further away the arm is from the body
+      pPoseShoulderRoll.set(0 - 1);   // the smaller, the further away the arm is from the body   // start at -1 for hardware experiment to be safe
       pPoseShoulderYaw.set(0);
       pPoseElbow.set(-0.4);  //-0.5 //-1   // the smaller, the more bent the elbow is 
 
