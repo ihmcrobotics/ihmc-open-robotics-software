@@ -26,7 +26,7 @@ public class MomentumCalculator
 
    public MomentumCalculator(MultiBodySystemReadOnly input)
    {
-      rigidBodiesInOrders = input.getAllJoints().stream().map(JointReadOnly::getSuccessor).filter(body -> body.getInertia() != null)
+      rigidBodiesInOrders = input.getJointsToConsider().stream().map(JointReadOnly::getSuccessor).filter(body -> body.getInertia() != null)
                                  .toArray(RigidBodyReadOnly[]::new);
    }
 
