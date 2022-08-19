@@ -39,6 +39,7 @@ import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -89,8 +90,8 @@ public class GDXPose3DGizmo implements RenderableProvider
    private final Line3DMouseDragAlgorithm lineDragAlgorithm = new Line3DMouseDragAlgorithm();
    private final ClockFaceRotation3DMouseDragAlgorithm clockFaceDragAlgorithm = new ClockFaceRotation3DMouseDragAlgorithm();
    private GDXFocusBasedCamera camera3D;
-   private final RigidBodyTransform transformFromKeyboardTransformationToWorld = new RigidBodyTransform();
-   private ReferenceFrame keyboardTransformationFrame;
+   private final FramePose3D keyboardAdjustmentPose3D = new FramePose3D();
+   private ModifiableReferenceFrame keyboardTransformationFrameInWorld;
    private final Point3D cameraPosition = new Point3D();
    private double distanceToCamera;
    private double lastDistanceToCamera = -1.0;
@@ -119,8 +120,7 @@ public class GDXPose3DGizmo implements RenderableProvider
       this.parentReferenceFrame = gizmoFrame.getParent();
       this.transformToParent = gizmoTransformToParentFrameToModify;
       this.gizmoFrame = gizmoFrame;
-      keyboardTransformationFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
-                                                                                                           transformFromKeyboardTransformationToWorld);
+      keyboardTransformationFrameInWorld = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
    }
 
    public void setParentFrame(ReferenceFrame parentReferenceFrame)
@@ -257,6 +257,12 @@ public class GDXPose3DGizmo implements RenderableProvider
       boolean anyArrowHeld = upArrowHeld || downArrowHeld || leftArrowHeld || rightArrowHeld;
       if (anyArrowHeld) // only the arrow keys do the moving
       {
+         keyboardTransformationFrameInWorld.getTransformToParent().setToZero();
+         keyboardTransformationFrameInWorld.getTransformToParent().getRotation().setToYawOrientation(camera3D.getFocusPointPose().getYaw());
+         keyboardTransformationFrameInWorld.getReferenceFrame().update();
+         keyboardAdjustmentPose3D.setToZero(gizmoFrame);
+         keyboardAdjustmentPose3D.changeFrame(keyboardTransformationFrameInWorld.getReferenceFrame());
+
          boolean ctrlHeld = ImGui.getIO().getKeyCtrl();
          boolean altHeld = ImGui.getIO().getKeyAlt();
          boolean shiftHeld = ImGui.getIO().getKeyShift();
@@ -266,67 +272,61 @@ public class GDXPose3DGizmo implements RenderableProvider
             double amount = deltaTime * (shiftHeld ? 0.2 : 1.0);
             if (upArrowHeld) // pitch +
             {
-               transformToParent.getRotation().appendPitchRotation(amount);
+               keyboardAdjustmentPose3D.getOrientation().appendPitchRotation(amount);
             }
             if (downArrowHeld) // pitch -
             {
-               transformToParent.getRotation().appendPitchRotation(-amount);
+               keyboardAdjustmentPose3D.getOrientation().appendPitchRotation(-amount);
             }
             if (rightArrowHeld && !ctrlHeld) // roll +
             {
-               transformToParent.getRotation().appendRollRotation(amount);
+               keyboardAdjustmentPose3D.getOrientation().appendRollRotation(amount);
             }
             if (leftArrowHeld && !ctrlHeld) // roll -
             {
-               transformToParent.getRotation().appendRollRotation(-amount);
+               keyboardAdjustmentPose3D.getOrientation().appendRollRotation(-amount);
             }
             if (leftArrowHeld && ctrlHeld) // yaw +
             {
-               transformToParent.getRotation().appendYawRotation(amount);
+               keyboardAdjustmentPose3D.getOrientation().appendYawRotation(amount);
             }
             if (rightArrowHeld && ctrlHeld) // yaw -
             {
-               transformToParent.getRotation().appendYawRotation(-amount);
+               keyboardAdjustmentPose3D.getOrientation().appendYawRotation(-amount);
             }
          }
          else // translation
          {
-            transformFromKeyboardTransformationToWorld.setToZero();
-            transformFromKeyboardTransformationToWorld.getRotation().setToYawOrientation(camera3D.getFocusPointPose().getYaw());
-            keyboardTransformationFrame.update();
-            tempFramePose3D.setToZero(keyboardTransformationFrame);
-
             double amount = deltaTime * (shiftHeld ? 0.05 : 0.4);
             distanceToCamera = cameraPosition.distance(framePose3D.getPosition());
             if (upArrowHeld && !ctrlHeld) // x +
             {
-               tempFramePose3D.getPosition().addX(getTranslateSpeedFactor() * amount);
+               keyboardAdjustmentPose3D.getPosition().addX(getTranslateSpeedFactor() * amount);
             }
             if (downArrowHeld && !ctrlHeld) // x -
             {
-               tempFramePose3D.getPosition().subX(getTranslateSpeedFactor() * amount);
+               keyboardAdjustmentPose3D.getPosition().subX(getTranslateSpeedFactor() * amount);
             }
             if (leftArrowHeld) // y +
             {
-               tempFramePose3D.getPosition().addY(getTranslateSpeedFactor() * amount);
+               keyboardAdjustmentPose3D.getPosition().addY(getTranslateSpeedFactor() * amount);
             }
             if (rightArrowHeld) // y -
             {
-               tempFramePose3D.getPosition().subY(getTranslateSpeedFactor() * amount);
+               keyboardAdjustmentPose3D.getPosition().subY(getTranslateSpeedFactor() * amount);
             }
             if (upArrowHeld && ctrlHeld) // z +
             {
-               tempFramePose3D.getPosition().addZ(getTranslateSpeedFactor() * amount);
+               keyboardAdjustmentPose3D.getPosition().addZ(getTranslateSpeedFactor() * amount);
             }
             if (downArrowHeld && ctrlHeld) // z -
             {
-               tempFramePose3D.getPosition().subZ(getTranslateSpeedFactor() * amount);
+               keyboardAdjustmentPose3D.getPosition().subZ(getTranslateSpeedFactor() * amount);
             }
-
-            tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
-            tempFramePose3D.get(tempTransform);
-            transformToParent.getTranslation().add(tempTransform.getTranslation());
          }
+
+         keyboardAdjustmentPose3D.changeFrame(parentReferenceFrame);
+         keyboardAdjustmentPose3D.get(transformToParent);
       }
 
       // after things have been modified, update the derivative stuff
@@ -461,6 +461,8 @@ public class GDXPose3DGizmo implements RenderableProvider
 
    public void renderImGuiTuner()
    {
+      ImGui.text("Parent frame: " + parentReferenceFrame.getName());
+
       ImGui.checkbox("Resize based on camera distance", resizeAutomatically);
 
       boolean proportionsChanged = false;
