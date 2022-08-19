@@ -21,9 +21,13 @@ import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.*;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
@@ -1261,5 +1265,41 @@ public class EuclidCoreMissingTools
       }
 
       return areIntersecting;
+   }
+
+   public static void differentiateOrientation(QuaternionReadOnly qStart, QuaternionReadOnly qEnd, double duration, Vector3DBasics angularVelocityToPack)
+   {
+      double q1x = qStart.getX();
+      double q1y = qStart.getY();
+      double q1z = qStart.getZ();
+      double q1s = qStart.getS();
+
+      double q2x = qEnd.getX();
+      double q2y = qEnd.getY();
+      double q2z = qEnd.getZ();
+      double q2s = qEnd.getS();
+
+      double diffx = q1s * q2x - q1x * q2s - q1y * q2z + q1z * q2y;
+      double diffy = q1s * q2y + q1x * q2z - q1y * q2s - q1z * q2x;
+      double diffz = q1s * q2z - q1x * q2y + q1y * q2x - q1z * q2s;
+      double diffs = q1s * q2s + q1x * q2x + q1y * q2y + q1z * q2z;
+
+      if (diffs < 0.0)
+      {
+         diffx = -diffx;
+         diffy = -diffy;
+         diffz = -diffz;
+         diffs = -diffs;
+      }
+
+      double sinHalfTheta = EuclidCoreTools.norm(diffx, diffy, diffz);
+
+      double angle;
+      if (EuclidCoreTools.epsilonEquals(1.0, diffs, 1.0e-12))
+         angle = 2.0 * sinHalfTheta / diffs;
+      else
+         angle = 2.0 * EuclidCoreTools.atan2(sinHalfTheta, diffs);
+      angularVelocityToPack.set(diffx, diffy, diffz);
+      angularVelocityToPack.scale(angle / (sinHalfTheta * duration));
    }
 }
