@@ -90,17 +90,7 @@ public class GDXLiveRobotPartInteractable
 
       if (unmodifiedButHovered)
       {
-         if (hasMultipleFrames && controlToGraphicTransform == null) // we just need to do this once
-         {
-            controlToGraphicTransform = new RigidBodyTransform();
-            tempFramePose.setToZero(graphicFrame);
-            tempFramePose.changeFrame(controlFrame);
-            tempFramePose.get(controlToGraphicTransform);
-            controlToCollisionTransform = new RigidBodyTransform();
-            tempFramePose.setToZero(collisionFrame);
-            tempFramePose.changeFrame(controlFrame);
-            tempFramePose.get(controlToCollisionTransform);
-         }
+         ensureMutlipleFramesAreSetup();
 
          if (hasMultipleFrames)
          {
@@ -130,6 +120,8 @@ public class GDXLiveRobotPartInteractable
       {
          if (hasMultipleFrames)
          {
+            ensureMutlipleFramesAreSetup();
+
             tempTransform.set(controlToCollisionTransform);
             selectablePose3DGizmo.getPoseGizmo().getTransformToParent().transform(tempTransform);
             for (GDXRobotCollisionLink collisionLink : collisionLinks)
@@ -151,6 +143,21 @@ public class GDXLiveRobotPartInteractable
       if (selectablePose3DGizmo.isSelected() && executeMotionKeyPressed)
       {
          onSpacePressed.run();
+      }
+   }
+
+   private void ensureMutlipleFramesAreSetup()
+   {
+      if (hasMultipleFrames && controlToGraphicTransform == null) // we just need to do this once
+      {
+         controlToGraphicTransform = new RigidBodyTransform();
+         tempFramePose.setToZero(graphicFrame);
+         tempFramePose.changeFrame(controlFrame);
+         tempFramePose.get(controlToGraphicTransform);
+         controlToCollisionTransform = new RigidBodyTransform();
+         tempFramePose.setToZero(collisionFrame);
+         tempFramePose.changeFrame(controlFrame);
+         tempFramePose.get(controlToCollisionTransform);
       }
    }
 
