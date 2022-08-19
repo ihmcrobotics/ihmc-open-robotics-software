@@ -2,6 +2,9 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynami
 
 import static us.ihmc.robotics.weightMatrices.SolverWeightLevels.HARD_CONSTRAINT;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.MatrixFeatures_DDRM;
 
@@ -16,6 +19,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.spatial.Momentum;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -67,6 +71,9 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     */
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
+   private boolean considerAllJoints = true;
+   private final List<JointReadOnly> jointSelection = new ArrayList<>();
+
    /**
     * Creates an empty command. It needs to be configured before being submitted to the controller
     * core.
@@ -75,6 +82,8 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
    {
       weightMatrix.setAngularWeights(0.0, 0.0, 0.0);
       weightMatrix.setLinearWeights(0.0, 0.0, 0.0);
+      considerAllJoints = true;
+      jointSelection.clear();
    }
 
    /**
@@ -87,6 +96,10 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
       weightMatrix.set(other.weightMatrix);
       selectionMatrix.set(other.selectionMatrix);
       momentumRateOfChange.set(other.momentumRateOfChange);
+      considerAllJoints = other.considerAllJoints;
+      jointSelection.clear();
+      for (int i = 0; i < other.jointSelection.size(); i++)
+         jointSelection.add(other.jointSelection.get(i));
    }
 
    /**
@@ -435,6 +448,24 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
       weightMatrix.setLinearWeights(0.0, 0.0, 0.0);
    }
 
+   public void setConsiderAllJoints(boolean considerAllJoints)
+   {
+      this.considerAllJoints = considerAllJoints;
+   }
+
+   public void addJointToSelection(JointReadOnly joint)
+   {
+      jointSelection.add(joint);
+   }
+
+   public void addJointsToSelection(JointReadOnly[] joints)
+   {
+      for (int i = 0; i < joints.length; i++)
+      {
+         jointSelection.add(joints[i]);
+      }
+   }
+
    /**
     * Finds if this command is to be considered as a hard constraint during the optimization.
     * <p>
@@ -546,6 +577,16 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
       linearPartToPack.setIncludingFrame(worldFrame, 3, momentumRateOfChange);
    }
 
+   public boolean isConsiderAllJoints()
+   {
+      return considerAllJoints;
+   }
+
+   public List<JointReadOnly> getJointSelection()
+   {
+      return jointSelection;
+   }
+
    /**
     * {@inheritDoc}
     * 
@@ -588,7 +629,10 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
             return false;
          if (!selectionMatrix.equals(other.selectionMatrix))
             return false;
-
+         if (considerAllJoints != other.considerAllJoints)
+            return false;
+         if (!jointSelection.equals(other.jointSelection))
+            return false;
          return true;
       }
       else
