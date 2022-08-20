@@ -1,15 +1,22 @@
 package us.ihmc.gdx.ui;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Matrix4;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import org.lwjgl.opengl.GL;
 import us.ihmc.behaviors.tools.PlanarRegionSLAMMapper;
 import us.ihmc.behaviors.tools.perception.PeriodicPlanarRegionPublisher;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.gdx.GDXPointCloudRenderer;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.gdx.imgui.ImGuiGlfwWindow;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.environment.GDXBuildingConstructor;
 import us.ihmc.gdx.simulation.environment.GDXEnvironmentBuilder;
@@ -21,6 +28,7 @@ import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.graphics.live.*;
 import us.ihmc.gdx.ui.tools.GDXTransformTuner;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXGlobalVisualizersPanel;
+import us.ihmc.perception.BytedecoHDF5Tools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
@@ -30,6 +38,7 @@ import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.RosTools;
 
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 
 public class GDXPerceptionVisualizerUI
 {
@@ -53,10 +62,19 @@ public class GDXPerceptionVisualizerUI
    private GDXL515SensorObject l515Model;
    private GDXOusterSensorObject ousterModel;
 
+   private final GDXPointCloudRenderer pointCloudRenderer = new GDXPointCloudRenderer();
+
    private GDXHighLevelDepthSensorSimulator ousterLidar;
+
+   private ArrayList<Point3D32> points;
+
+   RecyclingArrayList<Point3D32> pointsToRender = new RecyclingArrayList<>();
+
+
 
    public GDXPerceptionVisualizerUI()
    {
+
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
       RosMainNode ros1Node = new RosMainNode(NetworkParameters.getROSURI(), "PerceptionVisualizer");
 
@@ -119,6 +137,9 @@ public class GDXPerceptionVisualizerUI
 
       ros1Node.execute();
 
+      points = BytedecoHDF5Tools.loadPointCloud("/home/quantum/Workspace/Storage/Other/Temp/ISR_Logs/atlas_01.h5");
+      pointsToRender.addAll(points);
+
       baseUI.launchGDXApplication(new Lwjgl3ApplicationAdapter()
       {
          @Override
@@ -147,11 +168,15 @@ public class GDXPerceptionVisualizerUI
             //                l515Model = new GDXL515SensorObject();
             //                environmentBuilderUI.getModelInput().addInstance(l515Model);
 
+            baseUI.getPrimaryScene().addRenderableProvider(pointCloudRenderer);
+            pointCloudRenderer.create(100000);
+
             ousterModel = new GDXOusterSensorObject();
             baseUI.getPrimaryScene().addRenderableProvider(ousterModel::getRealRenderables);
             environmentBuilder.addObject(ousterModel);
 
             //                environmentBuilderUI.getModelInput().addInstance(ousterModel);
+
 
          }
 
@@ -168,6 +193,14 @@ public class GDXPerceptionVisualizerUI
             ousterLidar.render(baseUI.getPrimaryScene());
 
             globalVisualizersUI.update();
+
+
+            pointCloudRenderer.setPointsToRender(pointsToRender, Color.BLUE);
+
+            if (!pointsToRender.isEmpty())
+            {
+               pointCloudRenderer.updateMesh();
+            }
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
