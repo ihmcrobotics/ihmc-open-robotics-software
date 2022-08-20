@@ -54,6 +54,7 @@ openpnpDependencies {
 val javaCPPVersion = "1.5.7"
 
 bytedecoDependencies {
+   api("us.ihmc:euclid:0.18.1")
    apiBytedecoNatives("javacpp")
    apiBytedecoNatives("openblas", "0.3.19-")
    apiBytedecoNatives("opencv", "4.5.5-")
