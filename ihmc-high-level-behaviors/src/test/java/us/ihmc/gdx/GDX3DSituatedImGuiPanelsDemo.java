@@ -6,7 +6,7 @@ import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import imgui.internal.ImGui;
 import us.ihmc.gdx.imgui.GDX3DSituatedImGuiPanel;
-import us.ihmc.gdx.imgui.GDXMultiContext3DSituatedImGuiPanelManager;
+import us.ihmc.gdx.imgui.GDX3DSituatedImGuiPanelManager;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.sceneManager.GDX3DBareBonesScene;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
@@ -18,7 +18,7 @@ public class GDX3DSituatedImGuiPanelsDemo
    private final GDX3DBareBonesScene sceneManager = new GDX3DBareBonesScene();
    private final ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
    private final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
-   private final GDXMultiContext3DSituatedImGuiPanelManager situatedImGuiPanelManager = new GDXMultiContext3DSituatedImGuiPanelManager();
+   private final GDX3DSituatedImGuiPanelManager situatedImGuiPanelManager = new GDX3DSituatedImGuiPanelManager();
 
    public GDX3DSituatedImGuiPanelsDemo()
    {
