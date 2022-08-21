@@ -1,4 +1,4 @@
-package us.ihmc.gdx;
+package us.ihmc.gdx.imgui;
 
 public class GDX3DSituatedImGuiPanel
 {
