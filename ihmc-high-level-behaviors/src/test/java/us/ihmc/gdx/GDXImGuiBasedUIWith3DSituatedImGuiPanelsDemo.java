@@ -2,7 +2,6 @@ package us.ihmc.gdx;
 
 import imgui.ImGui;
 import us.ihmc.gdx.imgui.GDX3DSituatedImGuiPanel;
-import us.ihmc.gdx.imgui.GDX3DSituatedImGuiPanelManager;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 
@@ -12,8 +11,8 @@ public class GDXImGuiBasedUIWith3DSituatedImGuiPanelsDemo
                                                               "ihmc-open-robotics-software",
                                                               "ihmc-high-level-behaviors/src/test/resources",
                                                               "3DSituatedPanelsDemo");
-   private final GDX3DSituatedImGuiPanelManager situatedImGuiPanelManager = new GDX3DSituatedImGuiPanelManager();
    private final GDXPose3DGizmo poseGizmo = new GDXPose3DGizmo();
+   private GDX3DSituatedImGuiPanel situatedImGuiPanel;
 
    public GDXImGuiBasedUIWith3DSituatedImGuiPanelsDemo()
    {
@@ -29,19 +28,17 @@ public class GDXImGuiBasedUIWith3DSituatedImGuiPanelsDemo
 
             poseGizmo.createAndSetupDefault(baseUI.getPrimary3DPanel());
 
-            situatedImGuiPanelManager.create(baseUI.getImGuiWindowAndDockSystem().getImGuiGl3());
-            GDX3DSituatedImGuiPanel panel = new GDX3DSituatedImGuiPanel("Test Panel", this::renderWindow1);
-            situatedImGuiPanelManager.addPanel(panel);
-            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(situatedImGuiPanelManager::processImGuiInput);
-            baseUI.getPrimaryScene().addRenderableProvider(situatedImGuiPanelManager);
+            situatedImGuiPanel = new GDX3DSituatedImGuiPanel("Test Panel", this::renderWindow1);
+            situatedImGuiPanel.create(baseUI.getImGuiWindowAndDockSystem().getImGuiGl3(), 0.3, 0.5);
+//            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(situatedImGuiPanel::processImGuiInput);
+            baseUI.getPrimaryScene().addRenderableProvider(situatedImGuiPanel::getRenderables);
          }
 
          @Override
          public void render()
          {
-            situatedImGuiPanelManager.setTransformToReferenceFrame(poseGizmo.getGizmoFrame());
-
-            situatedImGuiPanelManager.render();
+            situatedImGuiPanel.setTransformToReferenceFrame(poseGizmo.getGizmoFrame());
+            situatedImGuiPanel.update();
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
