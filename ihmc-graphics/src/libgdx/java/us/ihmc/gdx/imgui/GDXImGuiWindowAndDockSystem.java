@@ -2,13 +2,10 @@ package us.ihmc.gdx.imgui;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import imgui.ImFont;
-import imgui.ImGuiIO;
-import imgui.ImGuiStyle;
+import imgui.*;
 import imgui.flag.*;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
-import imgui.ImGui;
 import imgui.type.ImString;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.system.Callback;
@@ -38,6 +35,7 @@ public class GDXImGuiWindowAndDockSystem
    public static final String IMGUI_SETTINGS_INI_FILE_NAME = "ImGuiSettings.ini";
    private final ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
    private final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
+   private long context;
    private String glslVersion; // TODO: ?
    private long windowHandle;
    private int fontSizeLevel = 1;
@@ -91,7 +89,8 @@ public class GDXImGuiWindowAndDockSystem
       // }
       // GL.createCapabilities();
 
-      ImGui.createContext();
+      context = ImGuiTools.createContext();
+      ImGuiTools.setCurrentContext(context);
 
       if (GDXTools.ENABLE_OPENGL_DEBUGGER)
          debugMessageCallback = GDXTools.setupDebugMessageCallback(GL_DEBUG_SEVERITY_HIGH);
@@ -106,8 +105,7 @@ public class GDXImGuiWindowAndDockSystem
       io.setConfigViewportsNoDecoration(false);
       io.setConfigDockingTransparentPayload(false);
 
-      if (!Boolean.parseBoolean(System.getProperty("imgui.dark")))
-         ImGui.styleColorsLight();
+      ImGuiTools.initializeColorStyle();
       imFont = ImGuiTools.setupFonts(io, fontSizeLevel);
 
       // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
@@ -124,6 +122,8 @@ public class GDXImGuiWindowAndDockSystem
 
    public void beforeWindowManagement()
    {
+      ImGuiTools.setCurrentContext(context);
+
       if (isFirstRenderCall)
       {
          loadUserConfigurationWithDefaultFallback();
