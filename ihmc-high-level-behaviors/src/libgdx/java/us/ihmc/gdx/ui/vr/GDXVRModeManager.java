@@ -6,7 +6,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.gdx.GDXSingleContext3DSituatedImGuiPanel;
+import us.ihmc.gdx.imgui.GDXSingleContext3DSituatedImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.sceneManager.GDX3DScene;

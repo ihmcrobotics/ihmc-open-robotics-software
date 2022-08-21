@@ -5,6 +5,8 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import imgui.internal.ImGui;
+import us.ihmc.gdx.imgui.GDX3DSituatedImGuiPanel;
+import us.ihmc.gdx.imgui.GDXMultiContext3DSituatedImGuiPanelManager;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.sceneManager.GDX3DBareBonesScene;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;

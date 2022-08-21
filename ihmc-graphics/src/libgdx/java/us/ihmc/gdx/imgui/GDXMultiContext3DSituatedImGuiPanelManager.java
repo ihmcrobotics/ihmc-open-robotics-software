@@ -1,4 +1,4 @@
-package us.ihmc.gdx;
+package us.ihmc.gdx.imgui;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -22,7 +22,6 @@ import imgui.flag.ImGuiMouseButton;
 import imgui.gl3.ImGuiImplGl3;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.tools.GDXModelInstance;
 

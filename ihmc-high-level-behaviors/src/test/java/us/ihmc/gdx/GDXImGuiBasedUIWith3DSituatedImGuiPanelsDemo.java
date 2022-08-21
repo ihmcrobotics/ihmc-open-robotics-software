@@ -1,6 +1,8 @@
 package us.ihmc.gdx;
 
 import imgui.ImGui;
+import us.ihmc.gdx.imgui.GDX3DSituatedImGuiPanel;
+import us.ihmc.gdx.imgui.GDXMultiContext3DSituatedImGuiPanelManager;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 
