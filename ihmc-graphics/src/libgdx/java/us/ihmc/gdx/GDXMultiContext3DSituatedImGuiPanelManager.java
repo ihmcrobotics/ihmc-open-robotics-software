@@ -20,10 +20,11 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.*;
 import imgui.flag.ImGuiMouseButton;
 import imgui.gl3.ImGuiImplGl3;
-import imgui.internal.ImGuiContext;
 import org.lwjgl.opengl.GL41;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewInput;
+import us.ihmc.gdx.tools.GDXModelInstance;
 
 import java.util.ArrayList;
 
@@ -33,11 +34,9 @@ import static com.badlogic.gdx.graphics.VertexAttributes.Usage.TextureCoordinate
 public class GDXMultiContext3DSituatedImGuiPanelManager implements RenderableProvider
 {
    private final ArrayList<GDX3DSituatedImGuiPanel> panels = new ArrayList<>();
-   private ImFont font = null;
-   private ModelInstance modelInstance = null;
+   private GDXModelInstance modelInstance = null;
    private ImGuiImplGl3 imGuiGl3;
-   private ImGuiContext savedImGuiContext = null;
-   private ImGuiContext virtualImGuiContext = null;
+   private long imGuiContext;
    private int width = 800;
    private int height = 600;
    private FrameBuffer frameBuffer;
@@ -45,20 +44,18 @@ public class GDXMultiContext3DSituatedImGuiPanelManager implements RenderablePro
    private float mousePosY;
    private boolean leftMouseDown;
 
-   public void create(ImGuiImplGl3 imGuiGl3, ImFont font)
+   public void create(ImGuiImplGl3 imGuiGl3)
    {
       this.imGuiGl3 = imGuiGl3;
-      this.font = font;
 
-      savedImGuiContext = ImGui.getCurrentContext();
-      virtualImGuiContext = ImGui.createContext(ImGui.getIO().getFonts());
-      ImGui.setCurrentContext(virtualImGuiContext);
+      imGuiContext = ImGuiTools.createContext(ImGuiTools.getFontAtlas());
+      ImGuiTools.setCurrentContext(imGuiContext);
 
       ImGuiIO io = ImGui.getIO();
       io.setIniFilename(null); // We don't want to save .ini file
       io.setMouseDrawCursor(true);
 
-      ImGui.setCurrentContext(savedImGuiContext);
+      ImGuiTools.initializeColorStyle();
 
       ModelBuilder modelBuilder = new ModelBuilder();
       modelBuilder.begin();
@@ -102,7 +99,7 @@ public class GDXMultiContext3DSituatedImGuiPanelManager implements RenderablePro
       modelBuilder.part(meshPart, material);
 
       Model model = modelBuilder.end();
-      modelInstance = new ModelInstance(model);
+      modelInstance = new GDXModelInstance(model);
       modelInstance.transform.scale(0.005f, 0.005f, 0.005f);
    }
 
@@ -115,8 +112,7 @@ public class GDXMultiContext3DSituatedImGuiPanelManager implements RenderablePro
 
    public void render()
    {
-      savedImGuiContext = ImGui.getCurrentContext();
-      ImGui.setCurrentContext(virtualImGuiContext);
+      ImGuiTools.setCurrentContext(imGuiContext);
 
       ImGuiIO io = ImGui.getIO();
       io.setDisplaySize(width, height);
@@ -125,45 +121,36 @@ public class GDXMultiContext3DSituatedImGuiPanelManager implements RenderablePro
       io.setMouseDown(ImGuiMouseButton.Left, leftMouseDown);
 
       ImGuiPlatformIO platformIO = ImGui.getPlatformIO();
+      // Sets the ImVector of monitors to 0; clearing them
       platformIO.resizeMonitors(0);
+      // Adding a virtual monitor
       platformIO.pushMonitors(0.0f, 0.0f, width, height, 0.0f, 0.0f, width, height, 1.0f);
 
       float deltaTime = Gdx.app.getGraphics().getDeltaTime();
       io.setDeltaTime(deltaTime > 0.0f ? deltaTime : 1.0f / 60.0f);
 
       ImGui.newFrame();
-//      ImGui.pushFont(font);
+      ImGui.pushFont(ImGuiTools.getSmallFont());
 
       ImGui.setNextWindowPos(0.0f, 0.0f);
       ImGui.setNextWindowSize(width, height);
-      ImGui.begin("Meow");
-      ImGui.text("Hi there.");
-      ImGui.button("I'm a Button!");float[] values = new float[100];
-      for (int i = 0; i < 100; i++)
+
+      for (GDX3DSituatedImGuiPanel panel : panels)
       {
-         values[i] = i;
+         if (ImGui.begin(panel.getPanelName()))
+         {
+            panel.renderImGuiWidgets();
+            ImGui.end();
+         }
       }
-      ImGui.plotLines("Histogram", values, 100);
-      ImGui.end();
 
-//      for (GDX3DSituatedImGuiPanel panel : panels)
-//      {
-//         if (ImGui.begin(panel.getPanelName()))
-//         {
-//            panel.renderImGuiWidgets();
-//            ImGui.end();
-//         }
-//      }
-
-//      ImGui.popFont();
+      ImGui.popFont();
       ImGui.render();
 
       frameBuffer.begin();
       ImGuiTools.glClearDarkGray();
       imGuiGl3.renderDrawData(ImGui.getDrawData());
       frameBuffer.end();
-
-      ImGui.setCurrentContext(savedImGuiContext);
    }
 
    public void addPanel(GDX3DSituatedImGuiPanel panel)
@@ -180,5 +167,16 @@ public class GDXMultiContext3DSituatedImGuiPanelManager implements RenderablePro
    public void dispose()
    {
       frameBuffer.dispose();
+   }
+
+   public void setTransformToReferenceFrame(ReferenceFrame referenceFrame)
+   {
+      modelInstance.setTransformToReferenceFrame(referenceFrame);
+      modelInstance.transform.scale(0.005f, 0.005f, 0.005f);
+   }
+
+   public GDXModelInstance getModelInstance()
+   {
+      return modelInstance;
    }
 }

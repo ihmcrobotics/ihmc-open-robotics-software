@@ -5,6 +5,7 @@ import imgui.*;
 import imgui.flag.ImGuiFreeTypeBuilderFlags;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiKey;
+import imgui.internal.ImGuiContext;
 import imgui.type.ImDouble;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
@@ -49,6 +50,35 @@ public class ImGuiTools
    private static int downArrowKey;
    private static int leftArrowKey;
    private static int rightArrowKey;
+   private static ImFontAtlas fontAtlas;
+
+   public static long createContext()
+   {
+      return ImGui.createContext().ptr;
+   }
+
+   public static long createContext(ImFontAtlas fontAtlas)
+   {
+      return ImGui.createContext(fontAtlas).ptr;
+   }
+
+   public static long getCurrentContext()
+   {
+      return ImGui.getCurrentContext().ptr;
+   }
+
+   public static void setCurrentContext(long context)
+   {
+      ImGuiContext contextHolder = ImGui.getCurrentContext();
+      contextHolder.ptr = context;
+      ImGui.setCurrentContext(contextHolder);
+   }
+
+   public static void initializeColorStyle()
+   {
+      if (!Boolean.parseBoolean(System.getProperty("imgui.dark")))
+         ImGui.styleColorsLight();
+   }
 
    public static int nextWidgetIndex()
    {
@@ -242,7 +272,8 @@ public class ImGuiTools
 
       nodeFont.setScale(0.5f);
 
-      ImGui.getIO().getFonts().build();
+      fontAtlas = ImGui.getIO().getFonts();
+      fontAtlas.build();
 
       fontConfig.destroy(); // After all fonts were added we don't need this config more
       consoleFontConfig.destroy();
@@ -286,6 +317,11 @@ public class ImGuiTools
    public static ImFont getConsoleFont()
    {
       return consoleFont;
+   }
+
+   public static ImFontAtlas getFontAtlas()
+   {
+      return fontAtlas;
    }
 
    public static byte[] loadFromResources(final String fileName)
