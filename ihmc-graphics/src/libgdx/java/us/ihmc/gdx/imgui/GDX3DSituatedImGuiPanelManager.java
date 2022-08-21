@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.*;
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.TextureCoordinates;
 
-public class GDXMultiContext3DSituatedImGuiPanelManager implements RenderableProvider
+public class GDX3DSituatedImGuiPanelManager implements RenderableProvider
 {
    private final ArrayList<GDX3DSituatedImGuiPanel> panels = new ArrayList<>();
    private GDXModelInstance modelInstance = null;
