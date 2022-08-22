@@ -160,7 +160,7 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
 
    // Testing -- track local yaw angle
    // Note that the base (pelvis) has to turn in order for the upper body to turn together
-   private Boolean trackingLocalYaw = false;
+   private Boolean trackingLocalYaw = true;
    
    public NadiaNaturalPosture(FullHumanoidRobotModel robotModel,
                               boolean useURDFJointNumbering,

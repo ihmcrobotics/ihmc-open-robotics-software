@@ -358,7 +358,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       pPoseShoulderYaw.set(0);
       pPoseElbow.set(-0.4); //-0.5 //-1   // the smaller, the more bent the elbow is 
 
-      pPoseSpineYawWeight.set(3.0); // weight used to complete with other privileged joint position. Other joint default weights are 1
+      pPoseSpineYawWeight.set(5.0); // weight used to complete with other privileged joint position. Other joint default weights are 1
       pPoseShoulderYawWeight.set(1.0); // this weight doesn't matter much
 
       pPoseSpineRollKp.set(50.0);
@@ -369,7 +369,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       pPoseShoulderYawKp.set(80.0);
       pPoseElbowKp.set(30.0);
 
-      useSpineRollPitchJointCommands.set(false);  // Can turn off joint limit for the spine when this is true.
+      useSpineRollPitchJointCommands.set(true); // Can turn off joint limit for the spine when this is true.
       if (useSpineRollPitchJointCommands.getBooleanValue())
       {
          pPoseSpineRollKp.set(pPoseSpineRollKp.getDoubleValue() * 10);
@@ -1103,6 +1103,12 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          usePelvisPrivilegedPoseCommand.set(true);
          usePelvisOrientationCommand.set(false);
          useBodyManagerCommands.set(false);
+
+      
+         usePelvisPrivilegedPoseCommand.set(false);
+         usePelvisOrientationCommand.set(true);
+
+      
       }
 
       planeContactStateCommandPool.clear();
