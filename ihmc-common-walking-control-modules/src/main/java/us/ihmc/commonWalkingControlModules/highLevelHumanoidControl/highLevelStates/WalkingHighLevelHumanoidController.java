@@ -29,6 +29,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
@@ -204,6 +205,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final String spineRollJointName = "SPINE_X";
    private final String spinePitchJointName = "SPINE_Y";
    private final String spineYawJointName = "SPINE_Z";
+   
+   private final JointspaceAccelerationCommand jointspaceAccelerationCommand = new JointspaceAccelerationCommand();
 
    public WalkingHighLevelHumanoidController(CommandInputManager commandInputManager,
                                              StatusMessageOutputManager statusOutputManager,
@@ -1102,6 +1105,14 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       updatePrivilegedConfigurationCommand();
       controllerCoreCommand.addInverseDynamicsCommand(privilegedConfigurationCommand);
 
+      // Testing -- track spine joint x and y with highest priority
+      //      jointspaceAccelerationCommand.clear();
+      //      OneDoFJointBasics spineRoll = fullRobotModel.getOneDoFJointByName(spineRollJointName);
+      //      OneDoFJointBasics spinePitch = fullRobotModel.getOneDoFJointByName(spinePitchJointName);
+      //      jointspaceAccelerationCommand.addJoint(spineRoll, pPoseSpineRollKp.getValue()*(-spineRoll.getQ()) + pPoseSpineRollKdFactor.getValue() * pPoseSpineRollKp.getValue() * (-spineRoll.getQd()), 1);
+      //      jointspaceAccelerationCommand.addJoint(spinePitch, pPoseSpinePitchKp.getValue()*(-spinePitch.getQ()) + pPoseSpinePitchKdFactor.getValue() * pPoseSpinePitchKp.getValue() * (-spinePitch.getQd()), 1);      
+      //      controllerCoreCommand.addInverseDynamicsCommand(jointspaceAccelerationCommand);
+      
       // Joint limits:
       if (!limitCommandSent.getBooleanValue())
       {
