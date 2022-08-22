@@ -188,7 +188,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    private final YoDouble pPoseSpineYawWeight = new YoDouble("pPoseSpineYawWeight", registry);
    private final YoDouble pPoseShoulderYawWeight = new YoDouble("pPoseShoulderYawWeight", registry);
-   
+
    //   private final YoDouble pPoseHipPitch = new YoDouble("pPoseHipPitch", registry);
    private final YoDouble pPoseHipPitchKp = new YoDouble("pPoseHipPitchKp", registry);
    private final YoDouble pPoseHipPitchKdFactor = new YoDouble("pPoseHipPitchKdFactor", registry);
@@ -205,7 +205,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final String spineRollJointName = "SPINE_X";
    private final String spinePitchJointName = "SPINE_Y";
    private final String spineYawJointName = "SPINE_Z";
-   
+
+   private final YoBoolean useSpineRollPitchJointCommands = new YoBoolean("useSpineRollPitchJointCommands", registry);
    private final JointspaceAccelerationCommand jointspaceAccelerationCommand = new JointspaceAccelerationCommand();
 
    public WalkingHighLevelHumanoidController(CommandInputManager commandInputManager,
@@ -352,15 +353,14 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       pPoseSpinePitch.set(0.0);
       pPoseSpineYaw.set(0.0);
       double delta = 0.0;
-      pPoseShoulderPitch.set(0 + delta);  //0.1 //0.2   // the bigger, the further away the arm is from the body 
-      pPoseShoulderRoll.set(0 - 1);   // the smaller, the further away the arm is from the body   // start at -1 for hardware experiment to be safe
+      pPoseShoulderPitch.set(0 + delta); //0.1 //0.2   // the bigger, the further away the arm is from the body 
+      pPoseShoulderRoll.set(0 - 1); // the smaller, the further away the arm is from the body   // start at -1 for hardware experiment to be safe
       pPoseShoulderYaw.set(0);
-      pPoseElbow.set(-0.4);  //-0.5 //-1   // the smaller, the more bent the elbow is 
+      pPoseElbow.set(-0.4); //-0.5 //-1   // the smaller, the more bent the elbow is 
 
-      pPoseSpineYawWeight.set(3.0);  // weight used to complete with other privileged joint position. Other joint default weights are 1
-      pPoseShoulderYawWeight.set(1.0);   // this weight doesn't matter much
-      
-      
+      pPoseSpineYawWeight.set(3.0); // weight used to complete with other privileged joint position. Other joint default weights are 1
+      pPoseShoulderYawWeight.set(1.0); // this weight doesn't matter much
+
       pPoseSpineRollKp.set(50.0);
       pPoseSpinePitchKp.set(50.0);
       pPoseSpineYawKp.set(300.0);
@@ -368,6 +368,13 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       pPoseShoulderRollKp.set(80.0);
       pPoseShoulderYawKp.set(80.0);
       pPoseElbowKp.set(30.0);
+
+      useSpineRollPitchJointCommands.set(false);  // Can turn off joint limit for the spine when this is true.
+      if (useSpineRollPitchJointCommands.getBooleanValue())
+      {
+         pPoseSpineRollKp.set(pPoseSpineRollKp.getDoubleValue() * 10);
+         pPoseSpineRollKp.set(pPoseSpinePitchKp.getDoubleValue() * 10);
+      }
 
       pPoseSpineRollKdFactor.set(0.15);
       pPoseSpinePitchKdFactor.set(0.15);
@@ -713,7 +720,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       return jointParameters;
    }
 
-
    private OneDoFJointPrivilegedConfigurationParameters createAndAddJointPrivilegedConfigurationParameters(RobotSide robotSide,
                                                                                                            ArmJointName armJointName,
                                                                                                            double privilegedAngle,
@@ -736,7 +742,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       return jointParameters;
    }
-   
+
    private OneDoFJointPrivilegedConfigurationParameters createAndAddJointPrivilegedConfigurationParameters(RobotSide robotSide,
                                                                                                            ArmJointName armJointName,
                                                                                                            double privilegedAngle,
@@ -1106,13 +1112,22 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       controllerCoreCommand.addInverseDynamicsCommand(privilegedConfigurationCommand);
 
       // Testing -- track spine joint x and y with highest priority
-      //      jointspaceAccelerationCommand.clear();
-      //      OneDoFJointBasics spineRoll = fullRobotModel.getOneDoFJointByName(spineRollJointName);
-      //      OneDoFJointBasics spinePitch = fullRobotModel.getOneDoFJointByName(spinePitchJointName);
-      //      jointspaceAccelerationCommand.addJoint(spineRoll, pPoseSpineRollKp.getValue()*(-spineRoll.getQ()) + pPoseSpineRollKdFactor.getValue() * pPoseSpineRollKp.getValue() * (-spineRoll.getQd()), 1);
-      //      jointspaceAccelerationCommand.addJoint(spinePitch, pPoseSpinePitchKp.getValue()*(-spinePitch.getQ()) + pPoseSpinePitchKdFactor.getValue() * pPoseSpinePitchKp.getValue() * (-spinePitch.getQd()), 1);      
-      //      controllerCoreCommand.addInverseDynamicsCommand(jointspaceAccelerationCommand);
-      
+      if (useSpineRollPitchJointCommands.getBooleanValue())
+      {
+         jointspaceAccelerationCommand.clear();
+         OneDoFJointBasics spineRoll = fullRobotModel.getOneDoFJointByName(spineRollJointName);
+         OneDoFJointBasics spinePitch = fullRobotModel.getOneDoFJointByName(spinePitchJointName);
+         jointspaceAccelerationCommand.addJoint(spineRoll,
+                                                pPoseSpineRollKp.getValue() * (-spineRoll.getQ())
+                                                      + pPoseSpineRollKdFactor.getValue() * pPoseSpineRollKp.getValue() * (-spineRoll.getQd()),
+                                                1);
+         jointspaceAccelerationCommand.addJoint(spinePitch,
+                                                pPoseSpinePitchKp.getValue() * (-spinePitch.getQ())
+                                                      + pPoseSpinePitchKdFactor.getValue() * pPoseSpinePitchKp.getValue() * (-spinePitch.getQd()),
+                                                1);
+         controllerCoreCommand.addInverseDynamicsCommand(jointspaceAccelerationCommand);
+      }
+
       // Joint limits:
       if (!limitCommandSent.getBooleanValue())
       {
