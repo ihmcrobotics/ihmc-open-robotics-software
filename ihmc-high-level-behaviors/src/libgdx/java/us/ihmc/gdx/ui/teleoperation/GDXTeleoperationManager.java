@@ -73,7 +73,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
    private final CommunicationHelper communicationHelper;
    private final RobotLowLevelMessenger robotLowLevelMessenger;
    private final ROS2SyncedRobotModel syncedRobot;
-   private final GDXFootstepPlanGraphic footstepPlanGraphic;
+   private final GDXFootstepPlanGraphic footstepsSentToControllerGraphic;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private GDXPSIAdjustment psiAdjustment;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
@@ -105,8 +105,8 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
    // FOR ICONS (NON-BUTTON)
    private final WorkspaceDirectory iconDirectory = new WorkspaceDirectory("ihmc-open-robotics-software",
                                                                            "ihmc-high-level-behaviors/src/libgdx/resources/icons");
-   private final String iconFileNames[] = new String[] {"leftHand.png", "rightHand.png"};
-   private final String fileNameStringKeys[] = new String[] {"leftHand", "rightHand"};
+   private final String iconFileNames[] = new String[] {"leftHand.png", "rightHand.png", "locationPin.png", "locationFlag.png"};
+   private final String fileNameStringKeys[] = new String[] {"leftHand", "rightHand", "locationPin", "locationFlag"};
    private final Map<String, Texture> iconTexturesMap = new HashMap<>();
    private int textureID = 0;
 
@@ -176,10 +176,10 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       // TODO this should update the GDX desired robot.
       chestYawSlider = new GDXChestOrientationSlider(syncedRobot, YawPitchRollAxis.YAW, slidersROS2ControllerHelper, teleoperationParameters);
 
-      footstepPlanGraphic = new GDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
+      footstepsSentToControllerGraphic = new GDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
       communicationHelper.subscribeToControllerViaCallback(FootstepDataListMessage.class, footsteps ->
       {
-         footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps, "Teleoperation Panel Controller Spy"));
+         footstepsSentToControllerGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps, "Teleoperation Panel Controller Spy"));
       });
       footstepPlannerParameters = communicationHelper.getRobotModel().getFootstepPlannerParameters();
       footstepPlanner = communicationHelper.getOrCreateFootstepPlanner();
@@ -249,25 +249,22 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
          interactableRobot.setInteractablesEnabled(true);
          baseUI.getPrimaryScene().addRenderableProvider(interactableRobot);
       }
-//      pastFootSteps = new GDXPastFootSteps(baseUI);
-
    }
 
    public void update()
    {
       syncedRobot.update();
       desiredRobot.update();
-      footstepPlanGraphic.update();
+      footstepsSentToControllerGraphic.update();
       if (interactableRobot != null)
-         interactableRobot.update();
+         interactableRobot.update(plannedFootstepPlacement);
       manualFootstepPlacement.update();
       plannedFootstepPlacement.update();
       if (manualFootstepPlacement.getFootstepArrayList().size() > 0)
       {
          footstepPlannerOutput = null;
-         footstepPlanGraphic.clear();
+         footstepsSentToControllerGraphic.clear();
       }
-
    }
 
    public void renderImGuiWidgets()
@@ -347,21 +344,12 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       manualFootstepPlacement.renderImGuiWidgets();
       plannedFootstepPlacement.renderImGuiWidgets();
 
-      ImGui.text("Ball and arrow planner:");
+      ImGui.image(iconTexturesMap.get("locationFlag").getTextureObjectHandle(), 22.0f, 22.0f);
+//      ImGui.sameLine();
+//      ImGui.text("Ball and arrow planner:");
       if (footstepPlannerOutput != null)
       {
          ImGui.sameLine();
-//         if (ImGui.button(labels.get("Walk")))
-//         {
-////            walk();
-//            walkFromPlan();;
-//         }
-//
-//         if (ImGui.isKeyPressed(ImGuiTools.getSpaceKey()) && manualFootstepPlacement.getFootstepArrayList().size() == 0)
-//         {
-////            walk();
-//            walkFromPlan();;
-//         }
          if (manualFootstepPlacement.getFootstepArrayList().size() == 0)
          {
             if (ImGui.button(labels.get("Walk")) || ImGui.isKeyPressed(ImGuiTools.getSpaceKey()))
@@ -382,7 +370,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       ImGui.sameLine();
       if (ImGui.button(labels.get("Clear")))
       {
-         footstepPlanGraphic.clear();
+         footstepsSentToControllerGraphic.clear();
          footstepGoal.clear();
          manualFootstepPlacement.clear();
          plannedFootstepPlacement.clear();
@@ -459,14 +447,14 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
 //      }
 
       // TODO : EXPERIMENTAL (making steps from path control ring interactable)
-      if (ImGui.isKeyPressed('P'))
-      {
-         FootstepPlan plan = interactableRobot.getWalkPathControlRing().getFootstepPlan();
-         if (plan!=null)
-         {
-            plannedFootstepPlacement.createFootStepFromPlan(plan);
-         }
-      }
+//      if (ImGui.isKeyPressed('P'))
+//      {
+//         FootstepPlan plan = interactableRobot.getWalkPathControlRing().getFootstepPlan();
+//         if (plan!=null)
+//         {
+//            plannedFootstepPlacement.createFootStepFromPlan(plan);
+//         }
+//      }
    }
 
    private boolean imGuiSlider(String label, float[] value)
@@ -484,7 +472,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
 
       if (showGraphics.get())
       {
-         footstepPlanGraphic.getRenderables(renderables, pool);
+         footstepsSentToControllerGraphic.getRenderables(renderables, pool);
          footstepGoal.getRenderables(renderables, pool);
          manualFootstepPlacement.getRenderables(renderables, pool);
          plannedFootstepPlacement.getRenderables(renderables, pool);
@@ -553,9 +541,10 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
 //         footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlannerOutput.getFootstepPlan(),
 //                                                                                                 "Teleoperation Panel Planned"));
          // TODO: make footsteps from footstepPlan interactable (modifiable)
-         plannedFootstepPlacement.createFootStepFromPlan(footstepPlannerOutput.getFootstepPlan());
+         plannedFootstepPlacement.updateFromPlan(footstepPlannerOutput.getFootstepPlan());
+         footstepPlannerOutput.clear();
 
-         this.footstepPlannerOutput = footstepPlannerOutput;
+//         this.footstepPlannerOutput = footstepPlannerOutput;
       }
    }
 
@@ -581,7 +570,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       desiredRobot.destroy();
       if (interactableRobot != null)
          interactableRobot.destroy();
-      footstepPlanGraphic.destroy();
+      footstepsSentToControllerGraphic.destroy();
    }
 
    public List<ImGuiGDXVisualizer> getVisualizers()

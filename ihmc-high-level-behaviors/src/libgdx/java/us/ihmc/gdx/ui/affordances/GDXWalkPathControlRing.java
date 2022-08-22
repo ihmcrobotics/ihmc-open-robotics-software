@@ -145,7 +145,7 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
                                                                                 this);
    }
 
-   public void update()
+   public void update(ImGuiGDXPlannedFootstepPlacement plannedFootstepPlacement)
    {
       if (!modified)
       {
@@ -154,8 +154,9 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
 
       if (footstepPlanToGenerateMeshes != null)
       {
-         foostepPlanGraphic.generateMeshes(MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlanToGenerateMeshes,
-                                                                                           "Walk Path Control Ring Plan"));
+         plannedFootstepPlacement.updateFromPlan(footstepPlan);
+//         foostepPlanGraphic.generateMeshes(MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlanToGenerateMeshes,
+//                                                                                           "Walk Path Control Ring Plan"));
          footstepPlanToGenerateMeshes = null;
       }
       foostepPlanGraphic.update();

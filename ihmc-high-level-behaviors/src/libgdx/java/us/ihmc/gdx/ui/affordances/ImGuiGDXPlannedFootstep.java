@@ -28,15 +28,16 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.Timer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Function;
 
 public class ImGuiGDXPlannedFootstep
 {
-   private final GDX3DSituatedText footstepIndexText;
-   private final GDXRenderableAdapter renderableAdapter;
+   private GDX3DSituatedText footstepIndexText;
    private GDXModelInstance footstepModelInstance;
-   private final RobotSide footstepSide;
-   private final GDXSelectablePose3DGizmo selectablePose3DGizmo;
+   private RobotSide footstepSide;
+   private GDXSelectablePose3DGizmo selectablePose3DGizmo;
    private final FramePose3D tempFramePose = new FramePose3D();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private boolean pickSelected;
@@ -47,6 +48,10 @@ public class ImGuiGDXPlannedFootstep
    private final Timer timerFlashingFootsteps = new Timer();
    private boolean flashingFootStepsColorHigh = false;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
+   private GDX3DSituatedText textRenderable = new GDX3DSituatedText("");
+
+   // map : string - > situated text
+   private static Map<String, GDX3DSituatedText> textRenderablesMap = new HashMap<>();
 
    public ImGuiGDXPlannedFootstep(GDXImGuiBasedUI baseUI, RobotSide footstepSide, int index)
    {
@@ -66,12 +71,15 @@ public class ImGuiGDXPlannedFootstep
       selectablePose3DGizmo.create(baseUI.getPrimary3DPanel());
 
       footstepIndexText = new GDX3DSituatedText("" + footstepSide.getSideNameFirstLetter() + (index + 1));
-      renderableAdapter = new GDXRenderableAdapter(footstepModelInstance, GDXSceneLevel.VIRTUAL);
-
       textRenderables.add(footstepIndexText);
    }
 
    public ImGuiGDXPlannedFootstep(GDXImGuiBasedUI baseUI, PlannedFootstep plannedFootstep, int footstepIndex)
+   {
+      updateFromPlannedStep(baseUI,plannedFootstep,footstepIndex);
+   }
+
+   public void updateFromPlannedStep(GDXImGuiBasedUI baseUI, PlannedFootstep plannedFootstep, int footstepIndex )
    {
       this.footstepSide = plannedFootstep.getRobotSide();
       if (footstepSide.equals(RobotSide.LEFT))
@@ -87,8 +95,19 @@ public class ImGuiGDXPlannedFootstep
       selectablePose3DGizmo = new GDXSelectablePose3DGizmo();
       selectablePose3DGizmo.create(baseUI.getPrimary3DPanel());
       footstepIndexText = new GDX3DSituatedText("" + footstepSide.getSideNameFirstLetter() + (footstepIndex + 1));
-      renderableAdapter = new GDXRenderableAdapter(footstepModelInstance, GDXSceneLevel.VIRTUAL);
       textRenderables.add(footstepIndexText);
+
+      String txt = footstepSide.getSideNameFirstLetter() + (footstepIndex + 1);
+      if (!textRenderablesMap.containsKey(txt))
+      {
+         textRenderable = new GDX3DSituatedText("" + txt);
+         textRenderablesMap.put(txt, textRenderable);
+      }
+      else
+      {
+         textRenderable = textRenderablesMap.get(txt);
+      }
+
       updatePose(plannedFootstep.getFootstepPose());
    }
 
@@ -163,14 +182,15 @@ public class ImGuiGDXPlannedFootstep
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       selectablePose3DGizmo.getVirtualRenderables(renderables, pool);
+      textRenderable.getRenderables(renderables, pool);
 
-      for (GDX3DSituatedText textRenderable : textRenderables)
-      {
-         textRenderable.getRenderables(renderables, pool);
-      }
+//      for (GDX3DSituatedText textRenderable : textRenderables)
+//      {
+//         textRenderable.getRenderables(renderables, pool);
+//      }
    }
 
-   //Sets the gizmo's position and rotation
+   // Sets the gizmo's position and rotation
    public void setGizmoPose(double x, double y, double z, RigidBodyTransform transform)
    {
       tempFramePose.setToZero(ReferenceFrame.getWorldFrame());
@@ -267,11 +287,6 @@ public class ImGuiGDXPlannedFootstep
    public Sphere3D getBoundingSphere()
    {
       return boundingSphere;
-   }
-
-   public GDXRenderableAdapter getRenderableAdapter()
-   {
-      return renderableAdapter;
    }
 
    public boolean isPickSelected()
