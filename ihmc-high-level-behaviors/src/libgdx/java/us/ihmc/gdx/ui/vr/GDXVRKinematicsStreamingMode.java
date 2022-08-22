@@ -106,7 +106,8 @@ public class GDXVRKinematicsStreamingMode
                                       ReferenceFrameMissingTools
                                             .constructFrameWithUnchangingTransformToParent(vrContext.getController(side).getXForwardZUpControllerFrame(),
                                                                                            handControlToControllerTransform));
-         wristJoints.put(side, ghostFullRobotModel.getArmJoint(side, ArmJointName.SECOND_WRIST_PITCH));
+         ArmJointName lastWristJoint = robotModel.getJointMap().getArmJointNames()[robotModel.getJointMap().getArmJointNames().length - 1];
+         wristJoints.put(side, ghostFullRobotModel.getArmJoint(side, lastWristJoint));
          wristJointAnglePlots.put(side, new ImGuiPlot(labels.get(side + " Hand Joint Angle")));
       }
 
