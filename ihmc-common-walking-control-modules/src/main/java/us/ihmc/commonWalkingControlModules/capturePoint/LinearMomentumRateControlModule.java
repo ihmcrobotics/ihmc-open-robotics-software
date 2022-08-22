@@ -111,8 +111,6 @@ public class LinearMomentumRateControlModule
    private final FixedFramePoint2DBasics achievedCMP = new FramePoint2D();
    private final FixedFramePoint2DBasics desiredCoPInMidFeet;
 
-   private boolean controlHeightWithMomentum;
-
    private final FrameVector3D achievedLinearMomentumRate = new FrameVector3D();
    private final FrameVector2D achievedCoMAcceleration2d = new FrameVector2D();
 
@@ -132,12 +130,14 @@ public class LinearMomentumRateControlModule
 
    private final FixedFrameVector2DBasics perfectCMPDelta = new FrameVector2D();
 
+   private final YoBoolean controlHeightWithMomentum = new YoBoolean("controlHeightWithMomentum", registry);
    private final YoFramePoint2D yoDesiredCMP = new YoFramePoint2D("desiredCMP", worldFrame, registry);
    private final YoFramePoint2D yoAchievedCMP = new YoFramePoint2D("achievedCMP", worldFrame, registry);
    private final YoFramePoint3D yoCenterOfMass = new YoFramePoint3D("centerOfMass", worldFrame, registry);
    private final YoFramePoint2D yoCapturePoint = new YoFramePoint2D("capturePoint", worldFrame, registry);
 
    private final FilteredVelocityYoFrameVector2d capturePointVelocity;
+   private final BooleanProvider useCenterOfPressureCommandOnly = new BooleanParameter("useCenterOfPressureCommandOnly", registry, false);
    private final DoubleProvider capturePointVelocityBreakFrequency = new DoubleParameter("capturePointVelocityBreakFrequency", registry, 26.5);
 
    private final DoubleParameter centerOfPressureWeight = new DoubleParameter("CenterOfPressureObjectiveWeight", registry, 0.2);
@@ -294,7 +294,7 @@ public class LinearMomentumRateControlModule
       this.minimizingAngularMomentumRateZ.set(input.getMinimizeAngularMomentumRateZ());
       this.perfectCMP.setMatchingFrame(input.getPerfectCMP());
       this.perfectCoP.setMatchingFrame(input.getPerfectCoP());
-      this.controlHeightWithMomentum = input.getControlHeightWithMomentum();
+      this.controlHeightWithMomentum.set(input.getControlHeightWithMomentum());
       this.initializeOnStateChange = input.getInitializeOnStateChange();
       this.keepCoPInsideSupportPolygon = input.getKeepCoPInsideSupportPolygon();
       for (RobotSide robotSide : RobotSide.values)
@@ -381,10 +381,10 @@ public class LinearMomentumRateControlModule
 
       success = success && computeDesiredLinearMomentumRateOfChange();
 
-//      selectionMatrix.setToLinearSelectionOnly();
-      selectionMatrix.setAngularAxisSelection(false, false, false);
-      selectionMatrix.setLinearAxisSelection(false, false, true);
-      selectionMatrix.selectLinearZ(controlHeightWithMomentum);
+      selectionMatrix.setToLinearSelectionOnly();
+      selectionMatrix.selectLinearX(!useCenterOfPressureCommandOnly.getValue());
+      selectionMatrix.selectLinearY(!useCenterOfPressureCommandOnly.getValue());
+      selectionMatrix.selectLinearZ(controlHeightWithMomentum.getBooleanValue());
       selectionMatrix.selectAngularZ(minimizingAngularMomentumRateZ.getValue());
       momentumRateCommand.setLinearMomentumRate(linearMomentumRateOfChange);
       momentumRateCommand.setSelectionMatrix(selectionMatrix);
