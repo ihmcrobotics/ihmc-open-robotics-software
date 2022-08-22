@@ -36,7 +36,7 @@ public class ImGuiGDXPlannedFootstep
 {
    private GDX3DSituatedText footstepIndexText;
    private GDXModelInstance footstepModelInstance;
-   private RobotSide footstepSide;
+   private RobotSide footstepSide = null;
    private GDXSelectablePose3DGizmo selectablePose3DGizmo;
    private final FramePose3D tempFramePose = new FramePose3D();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
@@ -48,7 +48,7 @@ public class ImGuiGDXPlannedFootstep
    private final Timer timerFlashingFootsteps = new Timer();
    private boolean flashingFootStepsColorHigh = false;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
-   private GDX3DSituatedText textRenderable = new GDX3DSituatedText("");
+   private GDX3DSituatedText textRenderable;
 
    // map : string - > situated text
    private static Map<String, GDX3DSituatedText> textRenderablesMap = new HashMap<>();
@@ -65,13 +65,20 @@ public class ImGuiGDXPlannedFootstep
       {
          footstepModelInstance = new GDXModelInstance(GDXModelLoader.load("models/footsteps/footstep_right.g3dj"));
       }
-      baseUI.getPrimaryScene().addModelInstance(footstepModelInstance, GDXSceneLevel.VIRTUAL);
 
       selectablePose3DGizmo = new GDXSelectablePose3DGizmo();
       selectablePose3DGizmo.create(baseUI.getPrimary3DPanel());
 
-      footstepIndexText = new GDX3DSituatedText("" + footstepSide.getSideNameFirstLetter() + (index + 1));
-      textRenderables.add(footstepIndexText);
+      String txt = footstepSide.getSideNameFirstLetter() + (index + 1);
+      if (!textRenderablesMap.containsKey(txt))
+      {
+         footstepIndexText = new GDX3DSituatedText("" + txt);
+         textRenderablesMap.put(txt, footstepIndexText);
+      }
+      else
+      {
+         footstepIndexText = textRenderablesMap.get(txt);
+      }
    }
 
    public ImGuiGDXPlannedFootstep(GDXImGuiBasedUI baseUI, PlannedFootstep plannedFootstep, int footstepIndex)
@@ -94,18 +101,17 @@ public class ImGuiGDXPlannedFootstep
 
       selectablePose3DGizmo = new GDXSelectablePose3DGizmo();
       selectablePose3DGizmo.create(baseUI.getPrimary3DPanel());
-      footstepIndexText = new GDX3DSituatedText("" + footstepSide.getSideNameFirstLetter() + (footstepIndex + 1));
-      textRenderables.add(footstepIndexText);
+
 
       String txt = footstepSide.getSideNameFirstLetter() + (footstepIndex + 1);
       if (!textRenderablesMap.containsKey(txt))
       {
-         textRenderable = new GDX3DSituatedText("" + txt);
-         textRenderablesMap.put(txt, textRenderable);
+         footstepIndexText = new GDX3DSituatedText("" + txt);
+         textRenderablesMap.put(txt, footstepIndexText);
       }
       else
       {
-         textRenderable = textRenderablesMap.get(txt);
+         footstepIndexText = textRenderablesMap.get(txt);
       }
 
       updatePose(plannedFootstep.getFootstepPose());
@@ -119,7 +125,7 @@ public class ImGuiGDXPlannedFootstep
       textFramePose.set(selectablePose3DGizmo.getPoseGizmo().getPose());
 
       textFramePose.appendYawRotation(-Math.PI / 2.0);
-      textFramePose.appendTranslation(-0.03, 0.0, 0.035); //Make text higher in z direction, so it's not inside the foot
+      textFramePose.appendTranslation(-0.03, 0.0, 0.035); //note: Make text higher in z direction, so it's not inside the foot
       textFramePose.changeFrame(ReferenceFrame.getWorldFrame());
       GDXTools.toGDX(textFramePose, tempTransform, footstepIndexText.getModelInstance().transform);
       footstepIndexText.scale((float) textHeight);
@@ -182,12 +188,7 @@ public class ImGuiGDXPlannedFootstep
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       selectablePose3DGizmo.getVirtualRenderables(renderables, pool);
-      textRenderable.getRenderables(renderables, pool);
-
-//      for (GDX3DSituatedText textRenderable : textRenderables)
-//      {
-//         textRenderable.getRenderables(renderables, pool);
-//      }
+      footstepIndexText.getRenderables(renderables, pool);
    }
 
    // Sets the gizmo's position and rotation

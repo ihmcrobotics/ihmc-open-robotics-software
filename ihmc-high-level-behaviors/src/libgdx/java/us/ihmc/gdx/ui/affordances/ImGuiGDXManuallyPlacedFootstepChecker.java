@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import imgui.internal.ImGui;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.CommunicationHelper;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -51,7 +52,7 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
    private String text = null;
    private ImGui3DViewInput latestInput;
    private boolean renderTooltip = false;
-   private ArrayList<ImGuiGDXManuallyPlacedFootstep> plannedSteps;
+   private RecyclingArrayList<ImGuiGDXManuallyPlacedFootstep> plannedSteps;
 
    public ImGuiGDXManuallyPlacedFootstepChecker(GDXImGuiBasedUI baseUI, CommunicationHelper communicationHelper, ROS2SyncedRobotModel syncedRobot, FootstepPlannerParametersBasics footstepPlannerParameters)
    {
@@ -104,7 +105,7 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
 
    // TODO: This should update candidate, stance, and swing in the ImGuiGDXManualFootstepPlacement,
    //  updates RejectionReason, and generate warning message in the UI screen.
-   public void checkValidStepList(ArrayList<ImGuiGDXManuallyPlacedFootstep> stepList)
+   public void checkValidStepList(RecyclingArrayList<ImGuiGDXManuallyPlacedFootstep> stepList)
    {
       plannedSteps = stepList;
       reasons.clear();
@@ -117,7 +118,7 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
    }
 
    // Check validity of 1 step
-   public void checkValidSingleStep(ArrayList<ImGuiGDXManuallyPlacedFootstep> stepList,
+   public void checkValidSingleStep(RecyclingArrayList<ImGuiGDXManuallyPlacedFootstep> stepList,
                                     RigidBodyTransform candidateStepTransform,
                                     RobotSide candidateStepSide,
                                     int indexOfFootBeingChecked /* list.size() if not placed yet*/)
@@ -182,7 +183,7 @@ public class ImGuiGDXManuallyPlacedFootstepChecker
    }
 
    // Should call this in walkFromSteps before clearing the stepList.
-   public void clear(ArrayList<ImGuiGDXManuallyPlacedFootstep> stepList)
+   public void clear(RecyclingArrayList<ImGuiGDXManuallyPlacedFootstep> stepList)
    {
       reasons.clear();
    }

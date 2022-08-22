@@ -110,9 +110,6 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
    private final Map<String, Texture> iconTexturesMap = new HashMap<>();
    private int textureID = 0;
 
-   // FOR LOGGING STEPS TAKEN
-//   private GDXPastFootSteps pastFootSteps;
-
    public GDXTeleoperationManager(String robotRepoName,
                                   String robotSubsequentPathToResourceFolder,
                                   CommunicationHelper communicationHelper)
@@ -130,7 +127,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
          Pixmap pixmap = new Pixmap(readImage.cols(), readImage.rows(), Pixmap.Format.RGBA8888);
          BytePointer rgba8888BytePointer = new BytePointer(pixmap.getPixels());
          Mat rgba8Mat = new Mat(readImage.rows(), readImage.cols(), opencv_core.CV_8UC4, rgba8888BytePointer);
-         opencv_imgproc.cvtColor(readImage, rgba8Mat, opencv_imgproc.COLOR_RGB2RGBA);
+         opencv_imgproc.cvtColor(readImage, rgba8Mat, opencv_imgproc.COLOR_RGB2BGRA);
          iconTexturesMap.put(fileNameStringKeys[i],new Texture(new PixmapTextureData(pixmap, null, false, false)));
       }
    }
@@ -345,14 +342,13 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       plannedFootstepPlacement.renderImGuiWidgets();
 
       ImGui.image(iconTexturesMap.get("locationFlag").getTextureObjectHandle(), 22.0f, 22.0f);
-//      ImGui.sameLine();
-//      ImGui.text("Ball and arrow planner:");
+
       if (footstepPlannerOutput != null)
       {
          ImGui.sameLine();
          if (manualFootstepPlacement.getFootstepArrayList().size() == 0)
          {
-            if (ImGui.button(labels.get("Walk")) || ImGui.isKeyPressed(ImGuiTools.getSpaceKey()))
+            if (ImGui.button(labels.get("Walk")))
             {
                walkFromPlan();
             }
@@ -388,7 +384,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
          {
             textureID = iconTexturesMap.get("rightHand").getTextureObjectHandle();
          }
-//         ImGui.text(side.getPascalCaseName() + " hand:");
+
          ImGui.image(textureID, 22.0f,22.0f);
          ImGui.sameLine();
          if (ImGui.button(labels.get("Calibrate", side.getCamelCaseName())))
@@ -438,22 +434,6 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
 //         REAStateRequestMessage clearMessage = new REAStateRequestMessage();
 //         clearMessage.setRequestClear(true);
 //         communicationHelper.publish(ROS2Tools.REA_STATE_REQUEST, clearMessage);
-//      }
-
-      // TODO: footstepPlanGraphic should clear properly when user clears the plannerOutput.
-//      if (footstepPlannerOutput==null)
-//      {
-//         footstepPlanGraphic.clear();
-//      }
-
-      // TODO : EXPERIMENTAL (making steps from path control ring interactable)
-//      if (ImGui.isKeyPressed('P'))
-//      {
-//         FootstepPlan plan = interactableRobot.getWalkPathControlRing().getFootstepPlan();
-//         if (plan!=null)
-//         {
-//            plannedFootstepPlacement.createFootStepFromPlan(plan);
-//         }
 //      }
    }
 
@@ -538,13 +518,12 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       }
       else  // plan generated.
       {
-//         footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlannerOutput.getFootstepPlan(),
+//         footstepsSentToControllerGraphic.generateMeshesAsync(MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlannerOutput.getFootstepPlan(),
 //                                                                                                 "Teleoperation Panel Planned"));
          // TODO: make footsteps from footstepPlan interactable (modifiable)
          plannedFootstepPlacement.updateFromPlan(footstepPlannerOutput.getFootstepPlan());
          footstepPlannerOutput.clear();
-
-//         this.footstepPlannerOutput = footstepPlannerOutput;
+         this.footstepPlannerOutput = footstepPlannerOutput;
       }
    }
 

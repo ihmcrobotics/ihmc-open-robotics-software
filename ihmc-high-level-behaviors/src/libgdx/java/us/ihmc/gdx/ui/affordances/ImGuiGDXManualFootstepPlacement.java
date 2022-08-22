@@ -9,11 +9,8 @@ import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import com.esotericsoftware.minlog.Log;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
-import imgui.flag.ImGuiKey;
-import imgui.flag.ImGuiKeyModFlags;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import org.bytedeco.javacpp.BytePointer;
@@ -23,6 +20,7 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.CommunicationHelper;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -40,7 +38,6 @@ import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.teleoperation.GDXTeleoperationParameters;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.tools.io.WorkspaceFile;
@@ -57,7 +54,8 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
 {
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private final Pose3D goalPoseForReading = new Pose3D();
-   private final ArrayList<ImGuiGDXManuallyPlacedFootstep> footstepArrayList = new ArrayList<>();
+//   private final ArrayList<ImGuiGDXManuallyPlacedFootstep> footstepArrayList = new ArrayList<>();
+   private final RecyclingArrayList<ImGuiGDXManuallyPlacedFootstep> footstepArrayList = new RecyclingArrayList<>(this::createManualFootStep);
    private ImGuiGDXManuallyPlacedFootstep footstepBeingPlaced;
    private int footstepIndex = -1;
    private GDXImGuiBasedUI baseUI;
@@ -69,7 +67,6 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
    private GDX3DPanel primary3DPanel;
    private GDXTeleoperationParameters teleoperationParameters;
    private boolean renderTooltip = false;
-   private boolean walkExecuted = false;
 
    FramePose3D tempFramePose = new FramePose3D();
 
@@ -129,15 +126,16 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       //Call each footstep's process3DViewInput
       for (ImGuiGDXManuallyPlacedFootstep singleFootstep : footstepArrayList)
       {
-         singleFootstep.process3DViewInput(input);
+         singleFootstep.process3DViewInput(input, isCurrentlyPlacingFootstep());
       }
       if (footstepBeingPlaced != null)
       {
-         footstepBeingPlaced.process3DViewInput(input);
+         footstepBeingPlaced.process3DViewInput(input, isCurrentlyPlacingFootstep());
       }
 
       if (footstepBeingPlaced != null || footstepArrayList.size() > 0)
       {
+
          if (isCurrentlyPlacingFootstep())
          {
             stepChecker.getInput(input);
@@ -155,6 +153,7 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
             footstepBeingPlaced.getBoundingSphere().getPosition().set(pickPointInWorld.getX(), pickPointInWorld.getY(), pickPointInWorld.getZ());
 
             // when left button clicked and released.
+
             if (input.isWindowHovered() & input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
                placeFootstep();
@@ -163,6 +162,34 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
             if (input.isWindowHovered() && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Right))
             {
                removeFootStep();
+            }
+
+            // NOTE: changing yaw while placing the step (not yet placed) engaged when control held and scrolling the mouse wheel.
+            double dYaw = 0.0;
+            boolean ctrlHeld = ImGui.getIO().getKeyCtrl();
+            if (ctrlHeld)
+            {
+               float dScroll = input.getMouseWheelDelta();
+               if (dScroll>0.0)
+               {
+                  dYaw = 0.03 * Math.PI;
+               }
+               else if(dScroll<0.0)
+               {
+                  dYaw = -0.03 * Math.PI;
+               }
+               if(dYaw!=0.0)
+               {
+                  RigidBodyTransform latestFootstepTransform = footstepBeingPlaced.getFootTransformInWorld();
+                  double latestFootstepYaw = latestFootstepTransform.getRotation().getYaw();
+                  tempFramePose.setToZero(ReferenceFrame.getWorldFrame());
+                  RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
+                  GDXTools.toEuclid(new Matrix4(), rigidBodyTransform);
+                  tempFramePose.set(rigidBodyTransform);
+                  tempFramePose.getOrientation().set(new RotationMatrix(latestFootstepYaw + dYaw, 0.0, 0.0));
+                  tempFramePose.get(footstepBeingPlaced.getSelectablePose3DGizmo().getPoseGizmo().getTransformToParent());
+                  footstepBeingPlaced.getSelectablePose3DGizmo().getPoseGizmo().updateTransforms();
+               }
             }
          }
 
@@ -237,9 +264,17 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
 
    private void placeFootstep()
    {
-      footstepIndex++;
-      footstepArrayList.add(footstepBeingPlaced);
+//      footstepIndex++;
+//      footstepArrayList.add(footstepBeingPlaced);
+//
+//      //Switch sides
+//      currentFootStepSide = currentFootStepSide.getOppositeSide();
+//      createNewFootStep(currentFootStepSide);
 
+      //NOTE: Change above with using recycling arrayList here.
+      footstepIndex++;
+      ImGuiGDXManuallyPlacedFootstep addedStep = footstepArrayList.add();
+      addedStep.copyFrom(baseUI,footstepBeingPlaced);
       //Switch sides
       currentFootStepSide = currentFootStepSide.getOppositeSide();
       createNewFootStep(currentFootStepSide);
@@ -310,11 +345,14 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-
-      for (int i = 0; i < footstepArrayList.size(); i++)
+//      for (int i = 0; i < footstepArrayList.size(); i++)
+//      {
+//         footstepArrayList.get(i).getVirtualRenderables(renderables, pool);
+//         footstepArrayList.get(i).getFootstepModelInstance().getRenderables(renderables, pool);
+//      }
+      for (ImGuiGDXManuallyPlacedFootstep step : footstepArrayList)
       {
-         footstepArrayList.get(i).getVirtualRenderables(renderables, pool);
-         footstepArrayList.get(i).getFootstepModelInstance().getRenderables(renderables, pool);
+         step.getVirtualRenderables(renderables,pool);
       }
       if (footstepBeingPlaced != null)
       {
@@ -355,8 +393,6 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
          messageList.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
       }
       communicationHelper.publishToController(messageList);
-      // done walking >>
-//      pastFootSteps.logStepsTaken(footstepArrayList);
 
       // set stance and swing as last two steps of the footstepArrayList (if this list is not empty)
       // delete steps in singleFootStepAffordance.
@@ -388,7 +424,7 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       stepMessage.setTransferDuration(teleoperationParameters.getTransferTime());
    }
 
-   public ArrayList<ImGuiGDXManuallyPlacedFootstep> getFootstepArrayList()
+   public RecyclingArrayList<ImGuiGDXManuallyPlacedFootstep> getFootstepArrayList()
    {
       return footstepArrayList;
    }
@@ -402,6 +438,7 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
 
       RigidBodyTransform latestFootstepTransform = getLatestPlacedFootstepTransform(footstepSide.getOppositeSide());
       double latestFootstepYaw = latestFootstepTransform.getRotation().getYaw();
+
       footstepBeingPlaced = new ImGuiGDXManuallyPlacedFootstep(baseUI, footstepSide, footstepIndex);
       currentFootStepSide = footstepSide;
 
@@ -423,7 +460,7 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
          {
             getFootstepBeingPlacedOrLastFootstepPlaced().getFootstepModelInstance().transform.val[Matrix4.M03] = Float.NaN;
          }
-         baseUI.getPrimaryScene().removeRenderableAdapter((getFootstepBeingPlacedOrLastFootstepPlaced().getRenderableAdapter()));
+//         baseUI.getPrimaryScene().removeRenderableAdapter((getFootstepBeingPlacedOrLastFootstepPlaced().getRenderableAdapter()));
 
          if (footstepBeingPlaced == null)
          {
@@ -481,4 +518,10 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
          return true;
       }
    }
+
+   private ImGuiGDXManuallyPlacedFootstep createManualFootStep()
+   {
+      return new ImGuiGDXManuallyPlacedFootstep(baseUI, RobotSide.LEFT, 0);
+   }
+
 }

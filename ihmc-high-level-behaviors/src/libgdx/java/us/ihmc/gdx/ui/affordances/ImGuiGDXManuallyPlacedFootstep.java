@@ -2,10 +2,12 @@ package us.ihmc.gdx.ui.affordances;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
@@ -26,25 +28,27 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.Timer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Function;
 
 public class ImGuiGDXManuallyPlacedFootstep
 {
-   private final GDX3DSituatedText footstepIndexText;
-   private final GDXRenderableAdapter renderableAdapter;
+   private GDX3DSituatedText footstepIndexText;
    private GDXModelInstance footstepModelInstance;
-   private final RobotSide footstepSide;
-   private final GDXSelectablePose3DGizmo selectablePose3DGizmo;
-   private final FramePose3D tempFramePose = new FramePose3D();
-   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+   private RobotSide footstepSide;
+   private GDXSelectablePose3DGizmo selectablePose3DGizmo;
+   private FramePose3D tempFramePose = new FramePose3D();
+   private RigidBodyTransform tempTransform = new RigidBodyTransform();
    private boolean pickSelected;
    private final Sphere3D boundingSphere = new Sphere3D(0.1);
    private boolean isClickedOn;
-   private final FramePose3D textFramePose = new FramePose3D();
-   private final ArrayList<GDX3DSituatedText> textRenderables = new ArrayList<>();
-   private final Timer timerFlashingFootsteps = new Timer();
+   private FramePose3D textFramePose = new FramePose3D();
+   private Timer timerFlashingFootsteps = new Timer();
    private boolean flashingFootStepsColorHigh = false;
-   private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
+   private ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
+
+   private static Map<String, GDX3DSituatedText> textRenderablesMap = new HashMap<>();
 
    public ImGuiGDXManuallyPlacedFootstep(GDXImGuiBasedUI baseUI, RobotSide footstepSide, int index)
    {
@@ -58,15 +62,20 @@ public class ImGuiGDXManuallyPlacedFootstep
       {
          footstepModelInstance = new GDXModelInstance(GDXModelLoader.load("models/footsteps/footstep_right.g3dj"));
       }
-      baseUI.getPrimaryScene().addModelInstance(footstepModelInstance, GDXSceneLevel.VIRTUAL);
 
       selectablePose3DGizmo = new GDXSelectablePose3DGizmo();
       selectablePose3DGizmo.create(baseUI.getPrimary3DPanel());
 
-      footstepIndexText = new GDX3DSituatedText("" + footstepSide.getSideNameFirstLetter() + (index + 1));
-      renderableAdapter = new GDXRenderableAdapter(footstepModelInstance, GDXSceneLevel.VIRTUAL);
-
-      textRenderables.add(footstepIndexText);
+      String txt = footstepSide.getSideNameFirstLetter() + (index + 1);
+      if (!textRenderablesMap.containsKey(txt))
+      {
+         footstepIndexText = new GDX3DSituatedText("" + txt);
+         textRenderablesMap.put(txt, footstepIndexText);
+      }
+      else
+      {
+         footstepIndexText = textRenderablesMap.get(txt);
+      }
    }
 
    public void update()
@@ -99,7 +108,7 @@ public class ImGuiGDXManuallyPlacedFootstep
       }
    }
 
-   public void process3DViewInput(ImGui3DViewInput input)
+   public void process3DViewInput(ImGui3DViewInput input, boolean currentlyPlacingFootstep)
    {
       pickSelected = pickResult == input.getClosestPick();
       isClickedOn = pickSelected && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
@@ -120,7 +129,17 @@ public class ImGuiGDXManuallyPlacedFootstep
             footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.0f, 0.5f, 0.0f, 0.0f));
       }
 
-      selectablePose3DGizmo.process3DViewInput(input, pickSelected);
+      if (currentlyPlacingFootstep)
+      {
+         selectablePose3DGizmo.process3DViewInput(input);
+      }
+      else
+      {
+         selectablePose3DGizmo.process3DViewInput(input, pickSelected);
+      }
+
+
+
 
       footstepModelInstance.transform.setToRotationRad(selectablePose3DGizmo.getPoseGizmo().getPose().getRotation().getX32(),
                                                        selectablePose3DGizmo.getPoseGizmo().getPose().getRotation().getY32(),
@@ -140,11 +159,7 @@ public class ImGuiGDXManuallyPlacedFootstep
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       selectablePose3DGizmo.getVirtualRenderables(renderables, pool);
-
-      for (GDX3DSituatedText textRenderable : textRenderables)
-      {
-         textRenderable.getRenderables(renderables, pool);
-      }
+      footstepIndexText.getRenderables(renderables, pool);
    }
 
    //Sets the gizmo's position and rotation
@@ -246,11 +261,6 @@ public class ImGuiGDXManuallyPlacedFootstep
       return boundingSphere;
    }
 
-   public GDXRenderableAdapter getRenderableAdapter()
-   {
-      return renderableAdapter;
-   }
-
    public boolean isPickSelected()
    {
       return pickSelected;
@@ -269,5 +279,22 @@ public class ImGuiGDXManuallyPlacedFootstep
    public void setFootTransform(RigidBodyTransform rigidBodyTransform)
    {
       getSelectablePose3DGizmo().getPoseGizmo().getTransformToParent().set(rigidBodyTransform);
+   }
+
+   public void copyFrom(GDXImGuiBasedUI baseUI, ImGuiGDXManuallyPlacedFootstep manuallyPlacedFootstep)
+   {
+      this.footstepIndexText = manuallyPlacedFootstep.footstepIndexText;
+      this.footstepModelInstance = manuallyPlacedFootstep.footstepModelInstance;
+      this.footstepSide = manuallyPlacedFootstep.getFootstepSide();
+      this.selectablePose3DGizmo = manuallyPlacedFootstep.getSelectablePose3DGizmo();
+      this.tempFramePose = manuallyPlacedFootstep.tempFramePose;
+      this.tempTransform = manuallyPlacedFootstep.tempTransform;
+      this.pickSelected = manuallyPlacedFootstep.pickSelected;
+      this.isClickedOn = manuallyPlacedFootstep.isClickedOn;
+      this.textFramePose = manuallyPlacedFootstep.textFramePose;
+      this.timerFlashingFootsteps = manuallyPlacedFootstep.timerFlashingFootsteps;
+      this.flashingFootStepsColorHigh = manuallyPlacedFootstep.flashingFootStepsColorHigh;
+      this.pickResult = manuallyPlacedFootstep.pickResult;
+      baseUI.getPrimaryScene().addModelInstance(footstepModelInstance, GDXSceneLevel.VIRTUAL);
    }
 }

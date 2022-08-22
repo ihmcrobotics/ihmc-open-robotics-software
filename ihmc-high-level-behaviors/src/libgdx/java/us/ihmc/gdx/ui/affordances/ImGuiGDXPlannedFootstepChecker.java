@@ -153,22 +153,6 @@ public class ImGuiGDXPlannedFootstepChecker
       reasons.add(reason);
    }
 
-
-   // TODO: This should be used when first step of the manual step cycle has different RobotSide than current swing.
-//   public void swapSteps()
-//   {
-//      DiscreteFootstep temp = stance;
-//      stance = swing;
-//      swing = temp;
-//   }
-
-   public DiscreteFootstep convertToDiscrete(ImGuiGDXManuallyPlacedFootstep step)
-   {
-      Pose3DReadOnly pose = step.getPose();
-      Point3DReadOnly position = pose.getPosition();
-      return new DiscreteFootstep(position.getX(), position.getY(), step.getPose().getOrientation().getYaw(), step.getFootstepSide());
-   }
-
    public void makeWarnings()
    {
 //      checkValidStepList(footstepArrayList);
