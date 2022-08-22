@@ -158,6 +158,10 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
    // Testing
    private Integer[] legJointIndicesInVelVectorIncludingFloatingBaseJoint = null;
 
+   // Testing -- track local yaw angle
+   // Note that the base (pelvis) has to turn in order for the upper body to turn together
+   private Boolean trackingLocalYaw = false;
+   
    public NadiaNaturalPosture(FullHumanoidRobotModel robotModel,
                               boolean useURDFJointNumbering,
                               YoRegistry registry,
@@ -377,11 +381,18 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
 
    public void computeNaturalPosture(double[] q, Orientation3DReadOnly Q_world_base)
    {
+	   // Testing -- do local yaw control
+      Quaternion Q_world_base_with_zero_yaw = new Quaternion(Q_world_base);
+      if (trackingLocalYaw) {
+         Q_world_base_with_zero_yaw.setUnsafe(Q_world_base_with_zero_yaw.getX(), Q_world_base_with_zero_yaw.getY(), 0, Q_world_base_with_zero_yaw.getS());
+         Q_world_base_with_zero_yaw.normalize();
+      }
+	   
       // Get the NP quaternion r.t. the base(pelvis) frame:
       computeQuaternionNPrtBase(q, this.Q_Base_NP);
 
       // Express the NP quaternion in the world-frame:
-      this.Q_World_NP.set(Q_world_base);
+      this.Q_World_NP.set(Q_world_base_with_zero_yaw);
       this.Q_World_NP.multiply(this.Q_Base_NP);
 
       // Get the NP quaternion jacobian r.t. the base(pelvis) frame:
@@ -404,7 +415,7 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
          originPose.changeFrame(ReferenceFrame.getWorldFrame());
          yoQuaternionNPrtWorld.set(Q_World_NP);
          originNPpelvis.set(originPose);
-         yoQuaternionIdent.set(Q_world_base);
+         yoQuaternionIdent.set(Q_world_base_with_zero_yaw);
          originPelvis.set(originPose);
       }
    }
@@ -447,6 +458,9 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
    //         omega_NP_rt_world_ewrt_NP = [Jacobian] * [omega_Base_rt_world_ewrt_Base; q_dot]
    private void computeJacobianNP(QuaternionReadOnly quaternionNPrtBase, DMatrixRMaj jacobianQuaternionNPrtBase, DMatrixRMaj jacobianToPack)
    {
+      // YMC: it looks like Gabe is already doing local vel control (since the global base angle doesn't enter the first 6 columns of Jacobian) 
+      // Therefore, there is no need to modify this for the case of trackingLocalYaw = true;
+      
       // Need 3x3 tranform from Base-frame back to NP-frame:
       RotationMatrix CnpBase = new RotationMatrix(quaternionNPrtBase);
       CnpBase.transpose();
@@ -631,7 +645,7 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
       {
          // TODO Auto-generated catch block
          e.printStackTrace();
-      }
+      } 
       catch (IOException e)
       {
          // TODO Auto-generated catch block
@@ -640,7 +654,8 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
       return intArray;
    }
 
-   //==========================================================================================================================================
+   //==== auto-generated functions below ======================================================================================================================================
+   
    private String[] jointNameInOrder = new String[] {"LEFT_HIP_Z", "RIGHT_HIP_Z", "SPINE_Z", "LEFT_HIP_X", "RIGHT_HIP_X", "SPINE_X", "LEFT_HIP_Y",
          "RIGHT_HIP_Y", "SPINE_Y", "LEFT_KNEE_Y", "RIGHT_KNEE_Y", "LEFT_SHOULDER_Y", "RIGHT_SHOULDER_Y", "LEFT_ANKLE_Y", "RIGHT_ANKLE_Y", "LEFT_SHOULDER_X",
          "RIGHT_SHOULDER_X", "LEFT_ANKLE_X", "RIGHT_ANKLE_X", "LEFT_SHOULDER_Z", "RIGHT_SHOULDER_Z", "LEFT_ELBOW_Y", "RIGHT_ELBOW_Y", "LEFT_WRIST_Z",
