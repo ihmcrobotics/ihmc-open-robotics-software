@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
@@ -22,6 +23,8 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.ImGuiIO;
 import imgui.ImGuiPlatformIO;
+import imgui.flag.ImGuiCol;
+import imgui.flag.ImGuiWindowFlags;
 import imgui.gl3.ImGuiImplGl3;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -41,6 +44,8 @@ public class GDX3DSituatedImGuiPanel
    private float pixelsHeight;
    private float metersPerPixel = 0.001f;
    private FrameBuffer frameBuffer;
+   private boolean useTransparentBackground = false;
+   private int backgroundColor;
 
    public GDX3DSituatedImGuiPanel(String name, Runnable renderImGuiWidgets)
    {
@@ -134,19 +139,37 @@ public class GDX3DSituatedImGuiPanel
       ImGui.setNextWindowPos(0.0f, 0.0f);
       ImGui.setNextWindowSize(pixelsWidth, pixelsHeight);
 
-      if (ImGui.begin(name))
+      int windowFlags = ImGuiWindowFlags.None;
+//      windowFlags |= ImGuiWindowFlags.NoBackground;
+
+      if (useTransparentBackground)
+         ImGui.pushStyleColor(ImGuiCol.WindowBg, backgroundColor);
+      if (ImGui.begin(name, windowFlags))
       {
          renderImGuiWidgets.run();
          ImGui.end();
       }
+      if (useTransparentBackground)
+         ImGui.popStyleColor();
 
       ImGui.popFont();
       ImGui.render();
 
       frameBuffer.begin();
-      ImGuiTools.glClearDarkGray();
+      GL41.glClearColor(0.3f, 0.3f, 0.3f, 0.0f);
+      GL41.glClear(GL41.GL_COLOR_BUFFER_BIT);
       imGuiGl3.renderDrawData(ImGui.getDrawData());
       frameBuffer.end();
+   }
+
+   public void setBackgroundTransparency(Color backgroundColor)
+   {
+      useTransparentBackground = true;
+      this.backgroundColor = backgroundColor.toIntBits();
+      for (Material material : modelInstance.materials)
+      {
+         material.set(new BlendingAttribute(true, GL41.GL_SRC_ALPHA, GL41.GL_ONE_MINUS_SRC_ALPHA, 1.0f));
+      }
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)

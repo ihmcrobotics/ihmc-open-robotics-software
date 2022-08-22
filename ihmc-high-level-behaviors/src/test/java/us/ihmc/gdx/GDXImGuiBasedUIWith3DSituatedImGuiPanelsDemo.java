@@ -1,5 +1,6 @@
 package us.ihmc.gdx;
 
+import com.badlogic.gdx.graphics.Color;
 import imgui.ImGui;
 import us.ihmc.gdx.imgui.GDX3DSituatedImGuiPanel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
@@ -30,6 +31,7 @@ public class GDXImGuiBasedUIWith3DSituatedImGuiPanelsDemo
 
             situatedImGuiPanel = new GDX3DSituatedImGuiPanel("Test Panel", this::renderWindow1);
             situatedImGuiPanel.create(baseUI.getImGuiWindowAndDockSystem().getImGuiGl3(), 0.3, 0.5);
+            situatedImGuiPanel.setBackgroundTransparency(new Color(0.3f, 0.3f, 0.3f, 0.75f));
 //            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(situatedImGuiPanel::processImGuiInput);
             baseUI.getPrimaryScene().addRenderableProvider(situatedImGuiPanel::getRenderables);
          }
