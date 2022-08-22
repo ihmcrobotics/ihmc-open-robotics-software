@@ -25,9 +25,6 @@ import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.lwjgl.opengl.GL41.glClear;
-import static org.lwjgl.opengl.GL41.glClearColor;
-
 public class ImGuiTools
 {
    private static final AtomicInteger GLOBAL_WIDGET_INDEX = new AtomicInteger();
@@ -87,8 +84,8 @@ public class ImGuiTools
 
    public static void glClearDarkGray()
    {
-      glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
-      glClear(GL41.GL_COLOR_BUFFER_BIT);
+      GL41.glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+      GL41.glClear(GL41.GL_COLOR_BUFFER_BIT);
    }
 
    public static boolean volatileInputInt(String label, ImInt imInt)
