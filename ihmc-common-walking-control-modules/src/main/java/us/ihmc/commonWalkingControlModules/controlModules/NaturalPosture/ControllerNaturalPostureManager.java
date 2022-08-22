@@ -7,12 +7,19 @@ import us.ihmc.commonWalkingControlModules.configurations.HumanoidRobotNaturalPo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.QPObjectiveCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
+import us.ihmc.robotics.referenceFrames.OrientationFrame;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -27,11 +34,8 @@ public class ControllerNaturalPostureManager
 
    HumanoidRobotNaturalPosture robotNaturalPosture;
    private final DMatrixRMaj npQPobjective = new DMatrixRMaj(1, 1);
-   private final DMatrixRMaj npQPjacobian = new DMatrixRMaj(1, 1);
    private final DMatrixRMaj npQPweightMatrix = new DMatrixRMaj(1, 1);
    private final DMatrixRMaj npQPselectionMatrix = new DMatrixRMaj(1, 1);
-   private final Quaternion currentNPQuat = new Quaternion(0, 0, 0, 1);
-   private final YawPitchRoll npYPR = new YawPitchRoll();
    private final DMatrixRMaj yprDDot = new DMatrixRMaj(3, 1);
    private final DMatrixRMaj Dnp = new DMatrixRMaj(3, 3);
 
@@ -62,6 +66,27 @@ public class ControllerNaturalPostureManager
    private final YoDouble npYawAcceleration = new YoDouble("npYawAcceleration", registry);
    private final YoDouble npPitchAcceleration = new YoDouble("npPitchAcceleration", registry);
    private final YoDouble npRollAcceleration = new YoDouble("npRollAcceleration", registry);
+
+   private final YoFrameQuaternion yoCurrentNaturalPosture = new YoFrameQuaternion("currentNaturalPosture", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameQuaternion yoDesiredNaturalPosture = new YoFrameQuaternion("desiredNaturalPosture", ReferenceFrame.getWorldFrame(), registry);
+   private final FrameQuaternion desiredNaturalPosture = new FrameQuaternion();
+
+   private final YoFrameVector3D errorRotationVector = new YoFrameVector3D("npErrorRotationVector", ReferenceFrame.getWorldFrame(), registry);
+
+   private final YoFrameVector3D yoProportionalFeedback = new YoFrameVector3D("npProportionalFeedback", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D yoDerivativeFeedback = new YoFrameVector3D("npDerivativeFeedback", ReferenceFrame.getWorldFrame(), registry);
+
+   private final YoFrameVector3D feedbackNPAcceleration = new YoFrameVector3D("feedbackNPAcceleration", ReferenceFrame.getWorldFrame(), registry);
+
+   private final YoFrameVector3D yoDirectProportionalFeedback = new YoFrameVector3D("npDirectProportionalFeedback", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D yoDirectDerivativeFeedback = new YoFrameVector3D("npDirectDerivativeFeedback", ReferenceFrame.getWorldFrame(), registry);
+
+
+   private final FrameVector3D proportionalFeedback = new FrameVector3D();
+   private final FrameVector3D derivativeFeedback = new FrameVector3D();
+
+
+   private final OrientationFrame naturalPostureFrame = new OrientationFrame(yoCurrentNaturalPosture);
 
    private final QPObjectiveCommand pelvisQPObjectiveCommand = new QPObjectiveCommand();
 
@@ -100,6 +125,7 @@ public class ControllerNaturalPostureManager
    private final FullHumanoidRobotModel fullRobotModel;
 
    private YoDouble yoTime;
+   private final MovingReferenceFrame midFeetZUpFrame;
 
    public ControllerNaturalPostureManager(HumanoidRobotNaturalPosture robotNaturalPosture,
                                           PID3DGainsReadOnly gains,
@@ -108,6 +134,8 @@ public class ControllerNaturalPostureManager
    {
       yoTime = controllerToolbox.getYoTime();
       controlDT = controllerToolbox.getControlDT();
+
+      midFeetZUpFrame = controllerToolbox.getReferenceFrames().getMidFeetZUpFrame();
 
       npYawVelocity = new FilteredVelocityYoVariable("npYawVelocity", "", npVelocityAlpha, npYaw, controlDT, registry);
       npPitchVelocity = new FilteredVelocityYoVariable("npPitchVelocity", "", npVelocityAlpha, npPitch, controlDT, registry);
@@ -118,7 +146,6 @@ public class ControllerNaturalPostureManager
 
       this.robotNaturalPosture = robotNaturalPosture;
       npQPobjective.reshape(3, 1);
-      npQPjacobian.reshape(3, 6 + fullRobotModel.getOneDoFJoints().length);
       npQPweightMatrix.reshape(3, 3);
       npQPselectionMatrix.reshape(3, 3);
       CommonOps_DDRM.setIdentity(npQPselectionMatrix);
@@ -199,14 +226,18 @@ public class ControllerNaturalPostureManager
       npQPweightMatrix.set(2, 2, npQPWeightZ.getValue());
 
       // Get current NP:   GMN - we're assuming NP compute() is getting called somewhere else?
-      currentNPQuat.set(robotNaturalPosture.getNaturalPostureQuaternion());
+      yoCurrentNaturalPosture.set(robotNaturalPosture.getNaturalPostureQuaternion());
+      yoDesiredNaturalPosture.setYawPitchRoll(npYawDesired.getDoubleValue(), npPitchDesired.getDoubleValue(), npRollDesired.getDoubleValue());
+
+      // Update the measured natural posture frame
+      naturalPostureFrame.setOrientationAndUpdate(yoCurrentNaturalPosture);
 
       // The NP servo:
-      npYPR.setQuaternion(currentNPQuat.getX(), currentNPQuat.getY(), currentNPQuat.getZ(), currentNPQuat.getS());
+      npYaw.set(yoCurrentNaturalPosture.getYaw());
+      npPitch.set(yoCurrentNaturalPosture.getPitch());
+      npRoll.set(yoCurrentNaturalPosture.getRoll());
 
-      npYaw.set(npYPR.getYaw());
-      npPitch.set(npYPR.getPitch());
-      npRoll.set(npYPR.getRoll());
+//      npYawDesired.set(midFeetZUpFrame.getTransformToWorldFrame().getRotation().getYaw());
 
       npYawVelocity.update();
       npPitchVelocity.update();
@@ -232,9 +263,30 @@ public class ControllerNaturalPostureManager
       //      double[] kp = gains.getProportionalGains();
       //      double[] kp = new double[] {100.0, 0.0, 0.0};
 
+      yoDirectProportionalFeedback.set(npRollDesired.getDoubleValue(), npPitchDesired.getDoubleValue(), npYawDesired.getDoubleValue());
+      yoDirectProportionalFeedback.sub(npRoll.getDoubleValue(), npPitch.getDoubleValue(), npYaw.getDoubleValue());
+      yoDirectProportionalFeedback.scale(npKpRoll.getDoubleValue(), npKpPitch.getDoubleValue(), npKpYaw.getDoubleValue());
+
+      yoDirectDerivativeFeedback.set(npRollVelocity.getDoubleValue(), npPitchVelocity.getDoubleValue(), npYawVelocity.getDoubleValue());
+      yoDirectDerivativeFeedback.scale(-npKdRoll.getDoubleValue(), -npKdPitch.getDoubleValue(), -npKdYaw.getDoubleValue());
+
       npYawAcceleration.set(npKpYaw.getValue() * (npYawDesired.getValue() - npYaw.getValue()) - npKdYaw.getValue() * npYawVelocity.getValue());
       npPitchAcceleration.set(npKpPitch.getValue() * (npPitchDesired.getValue() - npPitch.getValue()) - npKdPitch.getValue() * npPitchVelocity.getValue());
       npRollAcceleration.set(npKpRoll.getValue() * (npRollDesired.getValue() - npRoll.getValue()) - npKdRoll.getValue() * npRollVelocity.getValue());
+
+
+      computeProportionalNPFeedback(proportionalFeedback);
+      computeDerivativeNPFeedback(derivativeFeedback);
+
+      yoProportionalFeedback.setMatchingFrame(proportionalFeedback);
+      yoDerivativeFeedback.setMatchingFrame(derivativeFeedback);
+
+      feedbackNPAcceleration.add(yoProportionalFeedback, yoDerivativeFeedback);
+
+      // TODO use these if you want to use the axis angle feedback controller
+//      yprDDot.set(0, 0, feedbackNPAcceleration.getZ());
+//      yprDDot.set(1, 0, feedbackNPAcceleration.getY());
+//      yprDDot.set(2, 0, feedbackNPAcceleration.getX());
 
       yprDDot.set(0, 0, npYawAcceleration.getValue());
       yprDDot.set(1, 0, npPitchAcceleration.getValue());
@@ -244,14 +296,45 @@ public class ControllerNaturalPostureManager
 
       CommonOps_DDRM.mult(Dnp, yprDDot, npQPobjective); // GMN: missing D-dot term (since InvDyn takes accels)
 
-      npQPjacobian.set(robotNaturalPosture.getNaturalPostureJacobian());
-
       // Populate the QPObjectiveCommand:
       naturalPostureControlCommand.setDoNullSpaceProjection(doNullSpaceProjectionForNaturalPosture.getBooleanValue());
       naturalPostureControlCommand.getObjective().set(npQPobjective);
-      naturalPostureControlCommand.getJacobian().set(npQPjacobian);
+      naturalPostureControlCommand.getJacobian().set(robotNaturalPosture.getNaturalPostureJacobian());
       naturalPostureControlCommand.getSelectionMatrix().set(npQPselectionMatrix);
       naturalPostureControlCommand.getWeightMatrix().set(npQPweightMatrix);
+   }
+
+   private final Matrix3D tempGainMatrix = new Matrix3D();
+
+   private void computeProportionalNPFeedback(FrameVector3D feedbackTermToPack)
+   {
+      desiredNaturalPosture.setIncludingFrame(yoDesiredNaturalPosture);
+      desiredNaturalPosture.changeFrame(naturalPostureFrame);
+
+      desiredNaturalPosture.normalizeAndLimitToPi();
+      desiredNaturalPosture.getRotationVector(feedbackTermToPack);
+
+      errorRotationVector.setMatchingFrame(feedbackTermToPack);
+
+      tempGainMatrix.setM00(npKpRoll.getDoubleValue());
+      tempGainMatrix.setM11(npKpPitch.getDoubleValue());
+      tempGainMatrix.setM22(npKpYaw.getDoubleValue());
+
+      tempGainMatrix.transform(feedbackTermToPack);
+      feedbackTermToPack.changeFrame(ReferenceFrame.getWorldFrame());
+   }
+
+   private void computeDerivativeNPFeedback(FrameVector3D feedbackTermToPack)
+   {
+      feedbackTermToPack.set(-npRollVelocity.getDoubleValue(), -npPitchVelocity.getDoubleValue(), -npYawVelocity.getDoubleValue());
+
+      // TODO update the gain matrix
+      tempGainMatrix.setM00(npKdRoll.getDoubleValue());
+      tempGainMatrix.setM11(npKdPitch.getDoubleValue());
+      tempGainMatrix.setM22(npKdYaw.getDoubleValue());
+
+      tempGainMatrix.transform(feedbackTermToPack);
+      feedbackTermToPack.changeFrame(ReferenceFrame.getWorldFrame());
    }
 
    //   @Override
