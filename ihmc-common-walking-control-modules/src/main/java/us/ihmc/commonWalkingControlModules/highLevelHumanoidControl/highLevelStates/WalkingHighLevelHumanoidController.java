@@ -28,6 +28,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
@@ -72,6 +73,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -169,6 +171,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final YoDouble pPoseSpineYaw = new YoDouble("pPoseSpineYaw", registry);
    private final YoDouble pPoseSpineRollKp = new YoDouble("pPoseSpineRollKp", registry);
    private final YoDouble pPoseSpineRollKdFactor = new YoDouble("pPoseSpineRollKdFactor", registry);
+   private final YoPDGains pPoseSpinePitchGains = new YoPDGains("pPoseSpinePitch", registry);
+   private final YoPDGains pPoseSpineRollGains = new YoPDGains("pPoseSpineRoll", registry);
    private final YoDouble pPoseSpinePitchKp = new YoDouble("pPoseSpinePitchKp", registry);
    private final YoDouble pPoseSpinePitchKdFactor = new YoDouble("pPoseSpinePitchKdFactor", registry);
    private final YoDouble pPoseSpineYawKp = new YoDouble("pPoseSpineYawKp", registry);
@@ -180,6 +184,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final YoDouble pPoseShoulderPitchKp = new YoDouble("pPoseShoulderPitchKp", registry);
    private final YoDouble pPoseShoulderRollKp = new YoDouble("pPoseShoulderRollKp", registry);
    private final YoDouble pPoseShoulderYawKp = new YoDouble("pPoseShoulderYawKp", registry);
+   private final YoDouble pPoseElbowWeight = new YoDouble("pPoseElbowWeight", registry);
    private final YoDouble pPoseElbowKp = new YoDouble("pPoseElbowKp", registry);
    private final YoDouble pPoseShoulderPitchKdFactor = new YoDouble("pPoseShoulderPitchKdFactor", registry);
    private final YoDouble pPoseShoulderRollKdFactor = new YoDouble("pPoseShoulderRollKdFactor", registry);
@@ -208,6 +213,9 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    private final YoBoolean useSpineRollPitchJointCommands = new YoBoolean("useSpineRollPitchJointCommands", registry);
    private final JointspaceAccelerationCommand jointspaceAccelerationCommand = new JointspaceAccelerationCommand();
+   private final OneDoFJointFeedbackControlCommand spinePitchCommand = new OneDoFJointFeedbackControlCommand();
+   private final OneDoFJointFeedbackControlCommand spineRollCommand = new OneDoFJointFeedbackControlCommand();
+
 
    public WalkingHighLevelHumanoidController(CommandInputManager commandInputManager,
                                              StatusMessageOutputManager statusOutputManager,
@@ -368,12 +376,17 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       pPoseShoulderRollKp.set(80.0);
       pPoseShoulderYawKp.set(80.0);
       pPoseElbowKp.set(30.0);
+      pPoseElbowWeight.set(10.0);
 
       useSpineRollPitchJointCommands.set(true); // Can turn off joint limit for the spine when this is true.
       if (useSpineRollPitchJointCommands.getBooleanValue())
       {
-         pPoseSpineRollKp.set(pPoseSpineRollKp.getDoubleValue() * 10);
-         pPoseSpineRollKp.set(pPoseSpinePitchKp.getDoubleValue() * 10);
+         pPoseSpinePitchGains.setKp(25.0);
+         pPoseSpineRollGains.setKp(25.0);
+         pPoseSpinePitchGains.setZeta(0.7);
+         pPoseSpineRollGains.setZeta(0.7);
+         pPoseSpinePitchGains.createDerivativeGainUpdater(true);
+         pPoseSpineRollGains.createDerivativeGainUpdater(true);
       }
 
       pPoseSpineRollKdFactor.set(0.15);
@@ -393,6 +406,15 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       pPoseHipYawKdFactor.set(0.2);
       pPoseKneeKp.set(100);
       pPoseKneeKdFactor.set(0.2);
+
+      OneDoFJointBasics spineRoll = fullRobotModel.getOneDoFJointByName(spineRollJointName);
+      OneDoFJointBasics spinePitch = fullRobotModel.getOneDoFJointByName(spinePitchJointName);
+
+      spinePitchCommand.clear();
+      spinePitchCommand.setJoint(spinePitch);
+
+      spineRollCommand.clear();
+      spineRollCommand.setJoint(spineRoll);
    }
 
    private StateMachine<WalkingStateEnum, WalkingState> setupStateMachine()
@@ -1120,18 +1142,18 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       // Testing -- track spine joint x and y with highest priority
       if (useSpineRollPitchJointCommands.getBooleanValue())
       {
-         jointspaceAccelerationCommand.clear();
          OneDoFJointBasics spineRoll = fullRobotModel.getOneDoFJointByName(spineRollJointName);
          OneDoFJointBasics spinePitch = fullRobotModel.getOneDoFJointByName(spinePitchJointName);
-         jointspaceAccelerationCommand.addJoint(spineRoll,
-                                                pPoseSpineRollKp.getValue() * (-spineRoll.getQ())
-                                                      + pPoseSpineRollKdFactor.getValue() * pPoseSpineRollKp.getValue() * (-spineRoll.getQd()),
-                                                1);
-         jointspaceAccelerationCommand.addJoint(spinePitch,
-                                                pPoseSpinePitchKp.getValue() * (-spinePitch.getQ())
-                                                      + pPoseSpinePitchKdFactor.getValue() * pPoseSpinePitchKp.getValue() * (-spinePitch.getQd()),
-                                                1);
-         controllerCoreCommand.addInverseDynamicsCommand(jointspaceAccelerationCommand);
+         spinePitchCommand.setJoint(spinePitch);
+         spinePitchCommand.setInverseDynamics(0.0, 0.0, 0.0);
+         spinePitchCommand.setGains(pPoseSpinePitchGains);
+
+         spineRollCommand.setJoint(spineRoll);
+         spineRollCommand.setInverseDynamics(0.0, 0.0, 0.0);
+         spineRollCommand.setGains(pPoseSpineRollGains);
+
+         controllerCoreCommand.addFeedbackControlCommand(spinePitchCommand);
+         controllerCoreCommand.addFeedbackControlCommand(spineRollCommand);
       }
 
       // Joint limits:
@@ -1211,57 +1233,38 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       //TODO: This is hardcoded here. It should be moved to a parameter setting instead. This is not the long term place for it.
       if (useSpinePrivilegedCommand)
       {
-         spineRollPrivilegedConfigurationParameters();
-         if (useSpinePitchPrivilegedCommand)
-            spinePitchPrivilegedConfigurationParameters();
+         //         spineRollPrivilegedConfigurationParameters();
+         //         if (useSpinePitchPrivilegedCommand)
+         //            spinePitchPrivilegedConfigurationParameters();
          spineYawPrivilegedConfigurationParameters();
       }
 
-      RobotSide side = RobotSide.LEFT;
-      createAndAddJointPrivilegedConfigurationParameters(side,
-                                                         ArmJointName.SHOULDER_PITCH,
-                                                         pPoseShoulderPitch.getDoubleValue(),
-                                                         pPoseShoulderPitchKp.getDoubleValue(),
-                                                         pPoseShoulderPitchKdFactor.getDoubleValue() * pPoseShoulderPitchKp.getDoubleValue());
-      createAndAddJointPrivilegedConfigurationParameters(side,
-                                                         ArmJointName.SHOULDER_ROLL,
-                                                         pPoseShoulderRoll.getDoubleValue(),
-                                                         pPoseShoulderRollKp.getDoubleValue(),
-                                                         pPoseShoulderRollKdFactor.getDoubleValue() * pPoseShoulderRollKp.getDoubleValue());
-      createAndAddJointPrivilegedConfigurationParameters(side,
-                                                         ArmJointName.SHOULDER_YAW,
-                                                         pPoseShoulderYaw.getDoubleValue(),
-                                                         pPoseShoulderYawWeight.getDoubleValue(),
-                                                         pPoseShoulderYawKp.getDoubleValue(),
-                                                         pPoseShoulderYawKdFactor.getDoubleValue() * pPoseShoulderYawKp.getDoubleValue());
-      createAndAddJointPrivilegedConfigurationParameters(side,
-                                                         ArmJointName.ELBOW_PITCH,
-                                                         pPoseElbow.getDoubleValue(),
-                                                         pPoseElbowKp.getDoubleValue(),
-                                                         pPoseElbowKdFactor.getDoubleValue() * pPoseElbowKp.getDoubleValue());
+      for (RobotSide side : RobotSide.values)
+      {
+         createAndAddJointPrivilegedConfigurationParameters(side,
+                                                            ArmJointName.SHOULDER_PITCH,
+                                                            side.negateIfRightSide(pPoseShoulderPitch.getDoubleValue()),
+                                                            pPoseShoulderPitchKp.getDoubleValue(),
+                                                            pPoseShoulderPitchKdFactor.getDoubleValue() * pPoseShoulderPitchKp.getDoubleValue());
+         createAndAddJointPrivilegedConfigurationParameters(side,
+                                                            ArmJointName.SHOULDER_ROLL,
+                                                            pPoseShoulderRoll.getDoubleValue(),
+                                                            pPoseShoulderRollKp.getDoubleValue(),
+                                                            pPoseShoulderRollKdFactor.getDoubleValue() * pPoseShoulderRollKp.getDoubleValue());
+         createAndAddJointPrivilegedConfigurationParameters(side,
+                                                            ArmJointName.SHOULDER_YAW,
+                                                            pPoseShoulderYaw.getDoubleValue(),
+                                                            pPoseShoulderYawWeight.getDoubleValue(),
+                                                            pPoseShoulderYawKp.getDoubleValue(),
+                                                            pPoseShoulderYawKdFactor.getDoubleValue() * pPoseShoulderYawKp.getDoubleValue());
+         createAndAddJointPrivilegedConfigurationParameters(side,
+                                                            ArmJointName.ELBOW_PITCH,
+                                                            side.negateIfRightSide(pPoseElbow.getDoubleValue()),
+                                                            pPoseElbowWeight.getDoubleValue(),
+                                                            pPoseElbowKp.getDoubleValue(),
+                                                            pPoseElbowKdFactor.getDoubleValue() * pPoseElbowKp.getDoubleValue());
+      }
 
-      side = RobotSide.RIGHT;
-      createAndAddJointPrivilegedConfigurationParameters(side,
-                                                         ArmJointName.SHOULDER_PITCH,
-                                                         -pPoseShoulderPitch.getDoubleValue(),
-                                                         pPoseShoulderPitchKp.getDoubleValue(),
-                                                         pPoseShoulderPitchKdFactor.getDoubleValue() * pPoseShoulderPitchKp.getDoubleValue());
-      createAndAddJointPrivilegedConfigurationParameters(side,
-                                                         ArmJointName.SHOULDER_ROLL,
-                                                         pPoseShoulderRoll.getDoubleValue(),
-                                                         pPoseShoulderRollKp.getDoubleValue(),
-                                                         pPoseShoulderRollKdFactor.getDoubleValue() * pPoseShoulderRollKp.getDoubleValue());
-      createAndAddJointPrivilegedConfigurationParameters(side,
-                                                         ArmJointName.SHOULDER_YAW,
-                                                         pPoseShoulderYaw.getDoubleValue(),
-                                                         pPoseShoulderYawWeight.getDoubleValue(),
-                                                         pPoseShoulderYawKp.getDoubleValue(),
-                                                         pPoseShoulderYawKdFactor.getDoubleValue() * pPoseShoulderYawKp.getDoubleValue());
-      createAndAddJointPrivilegedConfigurationParameters(side,
-                                                         ArmJointName.ELBOW_PITCH,
-                                                         -pPoseElbow.getDoubleValue(),
-                                                         pPoseElbowKp.getDoubleValue(),
-                                                         pPoseElbowKdFactor.getDoubleValue() * pPoseElbowKp.getDoubleValue());
 
       createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, ArmJointName.WRIST_YAW, 0.0);
       createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, ArmJointName.WRIST_YAW, 0.0);
