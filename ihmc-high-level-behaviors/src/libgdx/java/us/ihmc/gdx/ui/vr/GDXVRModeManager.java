@@ -11,13 +11,14 @@ import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.sceneManager.GDX3DScene;
 import us.ihmc.gdx.vr.GDXVRContext;
-import us.ihmc.gdx.vr.GDXVRTeleporter;
 
 import java.util.Map;
 
+/**
+ * TODO: Figure out how to incorporate this class with things better.
+ */
 public class GDXVRModeManager
 {
-   private final GDXVRTeleporter teleporter = new GDXVRTeleporter();
    private GDXVRHandPlacedFootstepMode handPlacedFootstepMode;
    private GDXVRKinematicsStreamingMode kinematicsStreamingMode;
    private GDXSingleContext3DSituatedImGuiPanel imGuiPanel;
@@ -34,7 +35,6 @@ public class GDXVRModeManager
                       boolean render3DSituatedImGuiPanel)
    {
       this.render3DSituatedImGuiPanel = render3DSituatedImGuiPanel;
-      teleporter.create();
 
       handPlacedFootstepMode = new GDXVRHandPlacedFootstepMode();
       handPlacedFootstepMode.create(robotModel, controllerHelper);
@@ -58,7 +58,6 @@ public class GDXVRModeManager
    {
       if (render3DSituatedImGuiPanel)
          imGuiPanel.processVRInput(vrContext);
-      teleporter.processVRInput(vrContext);
       if (mode == 0)
       {
          handPlacedFootstepMode.processVRInput(vrContext);
@@ -104,7 +103,6 @@ public class GDXVRModeManager
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      teleporter.getRenderables(renderables, pool);
       handPlacedFootstepMode.getRenderables(renderables, pool);
       kinematicsStreamingMode.getVirtualRenderables(renderables, pool);
       if (render3DSituatedImGuiPanel)
