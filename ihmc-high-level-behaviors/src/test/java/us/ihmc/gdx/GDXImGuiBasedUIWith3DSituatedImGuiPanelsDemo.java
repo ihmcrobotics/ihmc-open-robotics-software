@@ -35,13 +35,13 @@ public class GDXImGuiBasedUIWith3DSituatedImGuiPanelsDemo
             poseGizmo2.getTransformToParent().getTranslation().setZ(0.5);
 
             situatedImGuiPanel = new GDX3DSituatedImGuiPanel("Window 2", this::renderWindow2);
-            situatedImGuiPanel.create(baseUI.getImGuiWindowAndDockSystem().getImGuiGl3(), 0.3, 0.5);
+            situatedImGuiPanel.create(baseUI.getImGuiWindowAndDockSystem().getImGuiGl3(), 0.3, 0.5, 10);
             situatedImGuiPanel.setBackgroundTransparency(new Color(0.3f, 0.3f, 0.3f, 0.75f));
 //            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(situatedImGuiPanel::processImGuiInput);
             baseUI.getPrimaryScene().addRenderableProvider(situatedImGuiPanel::getRenderables);
 
             situatedImGuiPanel2 = new GDX3DSituatedImGuiPanel("Window 3", this::renderWindow3);
-            situatedImGuiPanel2.create(baseUI.getImGuiWindowAndDockSystem().getImGuiGl3(), 0.3, 0.5);
+            situatedImGuiPanel2.create(baseUI.getImGuiWindowAndDockSystem().getImGuiGl3(), 0.3, 0.5, 10);
             situatedImGuiPanel2.setBackgroundTransparency(new Color(0.3f, 0.3f, 0.3f, 0.75f));
             baseUI.getPrimaryScene().addRenderableProvider(situatedImGuiPanel2::getRenderables);
          }

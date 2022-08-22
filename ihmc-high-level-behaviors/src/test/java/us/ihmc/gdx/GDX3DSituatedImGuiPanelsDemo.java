@@ -38,7 +38,7 @@ public class GDX3DSituatedImGuiPanelsDemo
                ImGui.text("This is a 3D situated panel.");
                ImGui.button("Button");
             });
-            situatedImGuiPanel.create(imGuiGl3, 0.3, 0.5);
+            situatedImGuiPanel.create(imGuiGl3, 0.3, 0.5, 10);
             sceneManager.addRenderableProvider(situatedImGuiPanel::getRenderables);
 
             sceneManager.addCoordinateFrame(0.3);

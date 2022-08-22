@@ -1,16 +1,19 @@
 package us.ihmc.gdx.ui.vr;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.gdx.imgui.GDXSingleContext3DSituatedImGuiPanel;
-import us.ihmc.gdx.imgui.ImGuiPanel;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.gdx.imgui.GDX3DSituatedImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.gdx.sceneManager.GDX3DScene;
+import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.vr.GDXVRContext;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.Map;
 
@@ -21,43 +24,41 @@ public class GDXVRModeManager
 {
    private GDXVRHandPlacedFootstepMode handPlacedFootstepMode;
    private GDXVRKinematicsStreamingMode kinematicsStreamingMode;
-   private GDXSingleContext3DSituatedImGuiPanel imGuiPanel;
+   private GDX3DSituatedImGuiPanel leftHandPanel;
+   private final FramePose3D leftHandPanelPose = new FramePose3D();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private int mode = 0;
-   private boolean render3DSituatedImGuiPanel;
-   private ImGuiPanel panel = new ImGuiPanel("VR Manager", this::renderImGuiWidgets);
 
-   public void create(GDXVRContext vrContext,
-                      GDX3DScene scene,
+   public void create(GDXImGuiBasedUI baseUI,
                       DRCRobotModel robotModel,
                       Map<String, Double> initialConfiguration,
-                      ROS2ControllerHelper controllerHelper,
-                      boolean render3DSituatedImGuiPanel)
+                      ROS2ControllerHelper controllerHelper)
    {
-      this.render3DSituatedImGuiPanel = render3DSituatedImGuiPanel;
-
       handPlacedFootstepMode = new GDXVRHandPlacedFootstepMode();
       handPlacedFootstepMode.create(robotModel, controllerHelper);
 
       kinematicsStreamingMode = new GDXVRKinematicsStreamingMode(robotModel, initialConfiguration, controllerHelper);
-      kinematicsStreamingMode.create(vrContext);
+      kinematicsStreamingMode.create(baseUI.getVRManager().getContext());
 
-      if (render3DSituatedImGuiPanel)
-      {
-         imGuiPanel = new GDXSingleContext3DSituatedImGuiPanel();
-         imGuiPanel.create(400, 500, this::renderImGuiWidgets, vrContext);
-         imGuiPanel.updateDesiredPose(transform ->
-         {
-            transform.getTranslation().set(1.0f, 0.0f, 1.0f);
-         });
-         scene.addRenderableProvider(imGuiPanel);
-      }
+      baseUI.getImGuiPanelManager().addPanel("VR Mode Manager", this::renderImGuiWidgets);
+
+      leftHandPanel = new GDX3DSituatedImGuiPanel("VR Mode Manager", this::renderImGuiWidgets);
+      leftHandPanel.create(baseUI.getImGuiWindowAndDockSystem().getImGuiGl3(), 0.3, 0.5, 10);
+      leftHandPanel.setBackgroundTransparency(new Color(0.3f, 0.3f, 0.3f, 0.75f));
    }
 
    public void processVRInput(GDXVRContext vrContext)
    {
-      if (render3DSituatedImGuiPanel)
-         imGuiPanel.processVRInput(vrContext);
+      vrContext.getController(RobotSide.LEFT).runIfConnected(controller ->
+      {
+         leftHandPanelPose.setToZero(controller.getXForwardZUpControllerFrame());
+         leftHandPanelPose.getOrientation().setYawPitchRoll(Math.PI / 2.0, 0.0, Math.PI / 4.0);
+         leftHandPanelPose.getPosition().addY(-0.05);
+         leftHandPanelPose.changeFrame(ReferenceFrame.getWorldFrame());
+         leftHandPanel.updateDesiredPose(leftHandPanelPose::get);
+      });
+
+      leftHandPanel.processVRInput(vrContext);
       if (mode == 0)
       {
          handPlacedFootstepMode.processVRInput(vrContext);
@@ -71,11 +72,10 @@ public class GDXVRModeManager
    public void update()
    {
       kinematicsStreamingMode.update();
-      if (render3DSituatedImGuiPanel)
-         imGuiPanel.render();
+      leftHandPanel.update();
    }
 
-   public void renderImGuiWidgets()
+   private void renderImGuiWidgets()
    {
       if (ImGui.radioButton(labels.get("Rough Terrain"), mode == 0))
       {
@@ -105,14 +105,12 @@ public class GDXVRModeManager
    {
       handPlacedFootstepMode.getRenderables(renderables, pool);
       kinematicsStreamingMode.getVirtualRenderables(renderables, pool);
-      if (render3DSituatedImGuiPanel)
-         imGuiPanel.getRenderables(renderables, pool);
+      leftHandPanel.getRenderables(renderables, pool);
    }
 
    public void destroy()
    {
-      if (render3DSituatedImGuiPanel)
-         imGuiPanel.dispose();
+      leftHandPanel.dispose();
       kinematicsStreamingMode.destroy();
    }
 

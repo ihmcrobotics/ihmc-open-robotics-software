@@ -15,15 +15,14 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.tools.GDXTools;
+import us.ihmc.gdx.ui.affordances.GDXInteractableTools;
 import us.ihmc.gdx.ui.graphics.GDXFootstepGraphic;
 import us.ihmc.gdx.vr.GDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
-import us.ihmc.scs2.definition.geometry.ModelFileGeometryDefinition;
 import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
-import us.ihmc.scs2.definition.visual.VisualDefinition;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -49,21 +48,11 @@ public class GDXVRHandPlacedFootstepMode
       RobotDefinition robotDefinition = robotModel.getRobotDefinition();
       for (RobotSide side : RobotSide.values)
       {
-         RigidBodyDefinition footBody = robotDefinition.getRigidBodyDefinition(side.getSideNameFirstLowerCaseLetter() + "_foot");
-         ModelFileGeometryDefinition modelFileGeometryDefinition = null;
-         for (VisualDefinition visualDefinition : footBody.getVisualDefinitions())
-         {
-            if (visualDefinition.getGeometryDefinition() instanceof ModelFileGeometryDefinition)
-            {
-               modelFileGeometryDefinition = (ModelFileGeometryDefinition) visualDefinition.getGeometryDefinition();
-            }
-         }
-         if (modelFileGeometryDefinition == null)
-         {
-            throw new RuntimeException("Could not find a foot model visual");
-         }
+         String footName = robotModel.getJointMap().getFootName(side);
+         RigidBodyDefinition footBody = robotDefinition.getRigidBodyDefinition(footName);
+         String modelFileName = GDXInteractableTools.getModelFileName(robotDefinition.getRigidBodyDefinition(footBody.getName()));
 
-         footModels.put(side, GDXModelLoader.load(modelFileGeometryDefinition.getFileName()));
+         footModels.put(side, GDXModelLoader.load(modelFileName));
 //         unplacedFadeInFootsteps.set(side, new ModelInstance(footModels.get(side)));
       }
    }

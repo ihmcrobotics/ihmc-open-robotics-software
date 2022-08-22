@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
@@ -24,11 +25,27 @@ import imgui.ImGui;
 import imgui.ImGuiIO;
 import imgui.ImGuiPlatformIO;
 import imgui.flag.ImGuiCol;
+import imgui.flag.ImGuiMouseButton;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.gl3.ImGuiImplGl3;
 import org.lwjgl.opengl.GL41;
+import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.referenceFrame.FrameLine3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXModelInstance;
+import us.ihmc.gdx.tools.GDXTools;
+import us.ihmc.gdx.vr.GDXVRContext;
+import us.ihmc.robotics.robotSide.RobotSide;
+
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.*;
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.TextureCoordinates;
@@ -42,10 +59,37 @@ public class GDX3DSituatedImGuiPanel
    private long imGuiContext;
    private float pixelsWidth;
    private float pixelsHeight;
-   private float metersPerPixel = 0.001f;
+   private float panelWidthInMeters;
+   private float panelHeightInMeters;
+   private float halfPanelWidthInMeters;
+   private float halfPanelHeightInMeters;
+   private float metersToPixels;
+   private float pixelsToMeters;
    private FrameBuffer frameBuffer;
    private boolean useTransparentBackground = false;
    private int backgroundColor;
+   private float mousePosX = -20.0f;
+   private float mousePosY = -20.0f;
+   private boolean leftMouseDown = false;
+   private final AtomicLong INDEX = new AtomicLong(0);
+   private final RigidBodyTransform transform = new RigidBodyTransform();
+   private final RigidBodyTransform graphicsXRightYDownToCenterXThroughZUpTransform = new RigidBodyTransform();
+   private final ReferenceFrame centerXThroughZUpFrame
+      = ReferenceFrameTools.constructFrameWithChangingTransformToParent("centerXThroughZUpFrame" + INDEX.getAndIncrement(),
+                                                                        ReferenceFrame.getWorldFrame(),
+                                                                        transform);
+   private final ReferenceFrame graphicsXRightYDownFrame
+         = ReferenceFrameTools.constructFrameWithChangingTransformToParent("graphicsXRightYDownFrame" + INDEX.getAndIncrement(),
+                                                                           centerXThroughZUpFrame,
+                                                                           graphicsXRightYDownToCenterXThroughZUpTransform);
+   private final FrameLine3D pickRay = new FrameLine3D();
+   private final FramePoint3D pickIntersection = new FramePoint3D();
+   private final Plane3D plane = new Plane3D();
+   private ModelInstance centerFrameCoordinateFrame;
+   private ModelInstance graphicsFrameCoordinateFrame;
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+   private final FramePose3D centerFrameCoordinateFramePose = new FramePose3D();
+   private final FramePose3D graphicsFrameCoordinateFramePose = new FramePose3D();
 
    public GDX3DSituatedImGuiPanel(String name, Runnable renderImGuiWidgets)
    {
@@ -53,12 +97,18 @@ public class GDX3DSituatedImGuiPanel
       this.renderImGuiWidgets = renderImGuiWidgets;
    }
 
-   public void create(ImGuiImplGl3 imGuiGl3, double width, double height)
+   public void create(ImGuiImplGl3 imGuiGl3, double panelWidthInMeters, double panelHeightInMeters, int pixelsPerCentimeter)
    {
       this.imGuiGl3 = imGuiGl3;
+      this.panelWidthInMeters = (float) panelWidthInMeters;
+      this.panelHeightInMeters = (float) panelHeightInMeters;
+      halfPanelWidthInMeters = this.panelWidthInMeters / 2.0f;
+      halfPanelHeightInMeters = this.panelHeightInMeters / 2.0f;
+      metersToPixels = pixelsPerCentimeter * 100;
+      pixelsToMeters = 1.0f / metersToPixels;
 
-      pixelsWidth = Math.round(width / metersPerPixel);
-      pixelsHeight = Math.round(height / metersPerPixel);
+      pixelsWidth = Math.round(panelWidthInMeters * metersToPixels);
+      pixelsHeight = Math.round(panelHeightInMeters * metersToPixels);
 
       imGuiContext = ImGuiTools.createContext(ImGuiTools.getFontAtlas());
       ImGuiTools.setCurrentContext(imGuiContext);
@@ -69,6 +119,23 @@ public class GDX3DSituatedImGuiPanel
 
       ImGuiTools.initializeColorStyle();
 
+      buildModel();
+
+      centerFrameCoordinateFrame = GDXModelBuilder.createCoordinateFrameInstance(0.3);
+      graphicsFrameCoordinateFrame = GDXModelBuilder.createCoordinateFrameInstance(0.3);
+
+      // set up graphicsXRightYDownToCenterXThroughZUpTransform
+      graphicsXRightYDownToCenterXThroughZUpTransform.appendYawRotation(-Math.toRadians(90.0));
+      graphicsXRightYDownToCenterXThroughZUpTransform.appendPitchRotation(Math.toRadians(0.0));
+      graphicsXRightYDownToCenterXThroughZUpTransform.appendRollRotation(-Math.toRadians(90.0));
+      graphicsXRightYDownToCenterXThroughZUpTransform.appendTranslation(-halfPanelWidthInMeters, -halfPanelHeightInMeters, 0.0f);
+      graphicsXRightYDownFrame.update();
+
+      plane.getNormal().set(Axis3D.X);
+   }
+
+   private void buildModel()
+   {
       ModelBuilder modelBuilder = new ModelBuilder();
       modelBuilder.begin();
 
@@ -76,11 +143,10 @@ public class GDX3DSituatedImGuiPanel
       meshBuilder.begin(Position | Normal | ColorUnpacked | TextureCoordinates, GL41.GL_TRIANGLES);
 
       // Counter clockwise order
-      // Draw so thumb faces away and index right
-      Vector3 topLeftPosition = new Vector3(0.0f, 0.0f, 0.0f);
-      Vector3 bottomLeftPosition = new Vector3(0.0f, metersPerPixel * pixelsHeight, 0.0f);
-      Vector3 bottomRightPosition = new Vector3(metersPerPixel * pixelsWidth, metersPerPixel * pixelsHeight, 0.0f);
-      Vector3 topRightPosition = new Vector3(metersPerPixel * pixelsWidth, 0.0f, 0.0f);
+      Vector3 topLeftPosition = new Vector3(0.0f, halfPanelWidthInMeters, halfPanelHeightInMeters);
+      Vector3 bottomLeftPosition = new Vector3(0.0f, halfPanelWidthInMeters, -halfPanelHeightInMeters);
+      Vector3 bottomRightPosition = new Vector3(0.0f, -halfPanelWidthInMeters, -halfPanelHeightInMeters);
+      Vector3 topRightPosition = new Vector3(0.0f, -halfPanelWidthInMeters, halfPanelHeightInMeters);
       Vector3 topLeftNormal = new Vector3(0.0f, 0.0f, 1.0f);
       Vector3 bottomLeftNormal = new Vector3(0.0f, 0.0f, 1.0f);
       Vector3 bottomRightNormal = new Vector3(0.0f, 0.0f, 1.0f);
@@ -114,6 +180,13 @@ public class GDX3DSituatedImGuiPanel
       modelInstance = new GDXModelInstance(model);
    }
 
+   public void setMouseState(float mousePosX, float mousePosY, boolean leftMouseDown)
+   {
+      this.mousePosX = mousePosX;
+      this.mousePosY = mousePosY;
+      this.leftMouseDown = leftMouseDown;
+   }
+
    public void update()
    {
       ImGuiTools.setCurrentContext(imGuiContext);
@@ -121,8 +194,8 @@ public class GDX3DSituatedImGuiPanel
       ImGuiIO io = ImGui.getIO();
       io.setDisplaySize(pixelsWidth, pixelsHeight);
       io.setDisplayFramebufferScale(1.0f, 1.0f);
-//      io.setMousePos(mousePosX, mousePosY);
-//      io.setMouseDown(ImGuiMouseButton.Left, leftMouseDown);
+      io.setMousePos(mousePosX, mousePosY);
+      io.setMouseDown(ImGuiMouseButton.Left, leftMouseDown);
 
       ImGuiPlatformIO platformIO = ImGui.getPlatformIO();
       // Sets the ImVector of monitors to 0; clearing them
@@ -162,6 +235,39 @@ public class GDX3DSituatedImGuiPanel
       frameBuffer.end();
    }
 
+   public void processVRInput(GDXVRContext vrContext)
+   {
+      vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
+      {
+         pickRay.setToZero(controller.getXForwardZUpControllerFrame());
+         pickRay.getDirection().set(Axis3D.X);
+         pickRay.changeFrame(ReferenceFrame.getWorldFrame());
+
+         pickIntersection.setToZero(ReferenceFrame.getWorldFrame());
+         plane.intersectionWith(pickRay, pickIntersection);
+
+         pickIntersection.changeFrame(graphicsXRightYDownFrame);
+
+         float scaledX = Math.round((float) pickIntersection.getX() * metersToPixels);
+         float scaledY = Math.round((float) pickIntersection.getY() * metersToPixels);
+
+         boolean xInBounds = MathTools.intervalContains(scaledX, 0, pixelsWidth, true, false);
+         boolean yInBounds = MathTools.intervalContains(scaledY, 0, pixelsHeight, true, false);
+         if (xInBounds && yInBounds)
+         {
+            mousePosX = scaledX;
+            mousePosY = scaledY;
+            leftMouseDown = controller.getClickTriggerActionData().bState();
+         }
+         else
+         {
+            mousePosX = -20.0f;
+            mousePosY = -20.0f;
+            leftMouseDown = false;
+         }
+      });
+   }
+
    public void setBackgroundTransparency(Color backgroundColor)
    {
       useTransparentBackground = true;
@@ -180,6 +286,25 @@ public class GDX3DSituatedImGuiPanel
    public void dispose()
    {
       frameBuffer.dispose();
+   }
+
+   public void updateDesiredPose(Consumer<RigidBodyTransform> transformUpdater)
+   {
+      updateCurrentPose(transformUpdater);
+   }
+
+   private void updateCurrentPose(Consumer<RigidBodyTransform> transformUpdater)
+   {
+      transform.setToZero();
+      transformUpdater.accept(transform);
+
+      modelInstance.setTransformToWorldFrame(transform);
+
+      plane.setToZero();
+      plane.getNormal().set(Axis3D.X);
+      plane.applyTransform(transform);
+      GDXTools.toGDX(transform, modelInstance.transform);
+      centerXThroughZUpFrame.update();
    }
 
    public void setTransformToReferenceFrame(ReferenceFrame referenceFrame)
