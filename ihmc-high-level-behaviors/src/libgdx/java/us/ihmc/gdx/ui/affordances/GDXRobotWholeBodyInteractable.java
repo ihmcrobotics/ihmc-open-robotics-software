@@ -188,7 +188,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
       walkPathControlRing.create(baseUI.getPrimary3DPanel(), robotModel, syncedRobot, ros2Helper, teleoperationParameters);
    }
 
-   public void update()
+   public void update(ImGuiGDXPlannedFootstepPlacement plannedFootstepPlacement)
    {
       // update the desired arm setpoints
       armSetpointManager.update();
@@ -198,7 +198,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
          selfCollisionModel.update();
          environmentCollisionModel.update();
 
-         walkPathControlRing.update();
+         walkPathControlRing.update(plannedFootstepPlacement);
 
          for (RobotSide side : wristWrenchArrows.sides())
          {

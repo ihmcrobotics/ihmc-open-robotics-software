@@ -164,37 +164,7 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
             {
                removeFootStep();
             }
-
-            // changing yaw while placing the step (not yet placed) engaged when control held and scrolling the mouse wheel.
-            double dYaw = 0.0;
-            boolean ctrlHeld = ImGui.getIO().getKeyCtrl();
-            if (ctrlHeld)
-            {
-               float dScroll = input.getMouseWheelDelta();
-               if (dScroll>0.0)
-               {
-                  dYaw = 0.015 * Math.PI;
-               }
-               else if(dScroll<0.0)
-               {
-                  dYaw = -0.015 * Math.PI;
-               }
-               else dYaw = 0.0;
-               if(dYaw!=0.0)
-               {
-                  RigidBodyTransform latestFootstepTransform = footstepBeingPlaced.getFootTransformInWorld();
-                  double latestFootstepYaw = latestFootstepTransform.getRotation().getYaw();
-                  tempFramePose.setToZero(ReferenceFrame.getWorldFrame());
-                  RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
-                  GDXTools.toEuclid(new Matrix4(), rigidBodyTransform);
-                  tempFramePose.set(rigidBodyTransform);
-                  tempFramePose.getOrientation().set(new RotationMatrix(latestFootstepYaw + dYaw, 0.0, 0.0));
-                  tempFramePose.get(footstepBeingPlaced.getSelectablePose3DGizmo().getPoseGizmo().getTransformToParent());
-                  footstepBeingPlaced.getSelectablePose3DGizmo().getPoseGizmo().updateTransforms();
-               }
-            }
          }
-
 
          Point3DReadOnly pickPointInWorld = input.getPickPointInWorld();
 

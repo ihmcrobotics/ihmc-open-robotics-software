@@ -249,6 +249,17 @@ public class GDXPose3DGizmo implements RenderableProvider
          }
       }
 
+      // TODO (DONE) : yaw scroll
+      if (ImGui.getIO().getKeyCtrl())
+      {
+         float dScroll = input.getMouseWheelDelta();
+         tempFramePose3D.setToZero(gizmoFrame);
+         tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
+         tempFramePose3D.getOrientation().appendYawRotation(Math.signum(dScroll)*0.03*Math.PI);
+         tempFramePose3D.changeFrame(parentReferenceFrame);
+         tempFramePose3D.get(transformToParent);
+      }
+
       // keyboard based controls
       boolean upArrowHeld = ImGui.isKeyDown(ImGuiTools.getUpArrowKey());
       boolean downArrowHeld = ImGui.isKeyDown(ImGuiTools.getDownArrowKey());

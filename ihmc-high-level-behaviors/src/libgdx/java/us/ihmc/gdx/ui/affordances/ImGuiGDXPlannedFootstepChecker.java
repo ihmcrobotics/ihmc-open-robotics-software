@@ -5,6 +5,7 @@ import com.esotericsoftware.minlog.Log;
 import imgui.internal.ImGui;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.CommunicationHelper;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -51,7 +52,7 @@ public class ImGuiGDXPlannedFootstepChecker
    private String text = null;
    private ImGui3DViewInput latestInput;
    private boolean renderTooltip = false;
-   private ArrayList<ImGuiGDXPlannedFootstep> footstepArrayList;
+   private RecyclingArrayList<ImGuiGDXPlannedFootstep> footstepArrayList;
 
    public ImGuiGDXPlannedFootstepChecker(GDXImGuiBasedUI baseUI, CommunicationHelper communicationHelper, ROS2SyncedRobotModel syncedRobot, FootstepPlannerParametersBasics footstepPlannerParameters)
    {
@@ -104,7 +105,7 @@ public class ImGuiGDXPlannedFootstepChecker
 
    // TODO: This should update candidate, stance, and swing in the ImGuiGDXManualFootstepPlacement,
    //  updates RejectionReason, and generate warning message in the UI screen.
-   public void checkValidStepList(ArrayList<ImGuiGDXPlannedFootstep> stepList)
+   public void checkValidStepList(RecyclingArrayList<ImGuiGDXPlannedFootstep> stepList)
    {
       reasons.clear();
       setInitialFeet();
@@ -116,7 +117,7 @@ public class ImGuiGDXPlannedFootstepChecker
    }
 
    // Check validity of 1 step
-   public void checkValidSingleStep(ArrayList<ImGuiGDXPlannedFootstep> stepList,
+   public void checkValidSingleStep(RecyclingArrayList<ImGuiGDXPlannedFootstep> stepList,
                                     RigidBodyTransform candidateStepTransform,
                                     RobotSide candidateStepSide,
                                     int indexOfFootBeingChecked /* list.size() if not placed yet*/)
@@ -182,7 +183,7 @@ public class ImGuiGDXPlannedFootstepChecker
    }
 
    // Should call this in walkFromSteps before clearing the stepList.
-   public void clear(ArrayList<ImGuiGDXPlannedFootstep> stepList)
+   public void clear(RecyclingArrayList<ImGuiGDXPlannedFootstep> stepList)
    {
       reasons.clear();
    }
@@ -253,7 +254,7 @@ public class ImGuiGDXPlannedFootstepChecker
       this.swingSide = swingSide;
    }
 
-   public void update(ArrayList<ImGuiGDXPlannedFootstep> footstepArrayList)
+   public void update(RecyclingArrayList<ImGuiGDXPlannedFootstep> footstepArrayList)
    {
       this.footstepArrayList = footstepArrayList;
       checkValidStepList(footstepArrayList);
