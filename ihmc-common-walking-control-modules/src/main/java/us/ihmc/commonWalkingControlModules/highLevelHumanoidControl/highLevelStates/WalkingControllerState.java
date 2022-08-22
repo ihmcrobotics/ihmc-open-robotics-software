@@ -58,7 +58,7 @@ public class WalkingControllerState extends HighLevelControllerState
    private boolean requestIntegratorReset = false;
    private final YoBoolean yoRequestingIntegratorReset = new YoBoolean("RequestingIntegratorReset", registry);
 
-   private final BooleanParameter useCoPObjective = new BooleanParameter("UseCenterOfPressureObjectiveFromPlanner", registry, true);
+   private final BooleanParameter useCoPObjective = new BooleanParameter("UseCenterOfPressureObjectiveFromPlanner", registry, false);
 
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
