@@ -11,7 +11,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
-import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
@@ -48,7 +47,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 /**
  * Manages and assists with the operator placement of footsteps.
@@ -57,7 +55,6 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
 {
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private final Pose3D goalPoseForReading = new Pose3D();
-//   private final ArrayList<ImGuiGDXPlannedFootstep> footstepArrayList = new ArrayList<>();
    private final RecyclingArrayList<ImGuiGDXPlannedFootstep> footstepArrayList = new RecyclingArrayList<>(this::newPlannedFootstep);
    private ImGuiGDXPlannedFootstep footstepBeingPlaced;
    private int footstepIndex = -1;
@@ -70,7 +67,6 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
    private GDX3DPanel primary3DPanel;
    private GDXTeleoperationParameters teleoperationParameters;
    private boolean renderTooltip = false;
-   private boolean walkExecuted = false;
    private ImGuiGDXPlannedFootstep stepBeingModified = null;
 
    FramePose3D tempFramePose = new FramePose3D();
@@ -137,17 +133,11 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
       for (ImGuiGDXPlannedFootstep singleFootstep : footstepArrayList)
       {
          singleFootstep.process3DViewInput(input);
-
-//         if(singleFootstep.isClickedOn()) footstepBeingPlaced = singleFootstep;
-
       }
       if (footstepBeingPlaced != null)
       {
          footstepBeingPlaced.process3DViewInput(input);
       }
-
-//      if (footstepBeingPlaced != null || footstepArrayList.size() > 0)
-//      {
 
       if (footstepArrayList.size()>0)
       {
@@ -331,23 +321,13 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      for (int i = 0; i < footstepArrayList.size(); i++)
-      {
-         footstepArrayList.get(i).getVirtualRenderables(renderables, pool);
-         footstepArrayList.get(i).getFootstepModelInstance().getRenderables(renderables, pool);
-      }
-      if (footstepBeingPlaced != null)
-      {
-         footstepBeingPlaced.getVirtualRenderables(renderables, pool);
-         footstepBeingPlaced.getFootstepModelInstance().getRenderables(renderables, pool);
-      }
       for (ImGuiGDXPlannedFootstep step : footstepArrayList)
       {
          step.getVirtualRenderables(renderables,pool);
       }
    }
 
-   // TODO: using recycling list to update planned footsteps. Maek sure this only gets called when new plan comes in.
+   // TODO: using recycling list to update planned footsteps. Make sure this only gets called when new plan comes in.
    public void updateFromPlan(FootstepPlan footstepPlan)
    {
       for (ImGuiGDXPlannedFootstep step : footstepArrayList)
@@ -400,8 +380,8 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
       }
       communicationHelper.publishToController(messageList);
 
-      // set stance and swing as last two steps of the footstepArrayList (if this list is not empty)
-      // delete steps in singleFootStepAffordance.
+      // note: set stance and swing as last two steps of the footstepArrayList (if this list is not empty)
+      // note: delete steps in singleFootStepAffordance.
 
       if(footstepArrayList.size()==1)
       {
@@ -447,7 +427,7 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
       footstepBeingPlaced = new ImGuiGDXPlannedFootstep(baseUI, footstepSide, footstepIndex);
       currentFootStepSide = footstepSide;
 
-      //set the yaw of the new footstep to the yaw of the previous footstep
+      //note: set the yaw of the new footstep to the yaw of the previous footstep
       tempFramePose.setToZero(ReferenceFrame.getWorldFrame());
       RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
       GDXTools.toEuclid(new Matrix4(), rigidBodyTransform);
@@ -484,7 +464,6 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
 //         footstepIndex--;
 //         footstepArrayList.remove(footstepArrayList.size() - 1);
 //         lastStep.getFootstepModelInstance().transform.val[Matrix4.M03] = Float.NaN;
-//
 //      }
    }
 
@@ -530,16 +509,6 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
       else
       {
          return true;
-      }
-   }
-
-   public void createFootStepFromPlan(FootstepPlan footstepPlan)
-   {
-      footstepArrayList.clear();
-      for (int i = 0; i < footstepPlan.getFootsteps().size(); ++i)
-      {
-         ImGuiGDXPlannedFootstep plannedFootstep = new ImGuiGDXPlannedFootstep(baseUI, footstepPlan.getFootsteps().get(i), i);
-         footstepArrayList.add(plannedFootstep);
       }
    }
 
