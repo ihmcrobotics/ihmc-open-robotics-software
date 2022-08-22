@@ -15,11 +15,14 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
 import us.ihmc.robotics.referenceFrames.OrientationFrame;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -44,6 +47,7 @@ public class ControllerNaturalPostureManager
    private final YoDouble npRoll = new YoDouble("npRoll", registry);
 
    private final YoDouble npVelocityAlpha = new YoDouble("npVelocityAlpha", registry);
+   private final YoDouble npVelocityBreakFrequency = new YoDouble("npVelocityBreakFrequency", registry);
 
    private final FilteredVelocityYoVariable npYawVelocity, npPitchVelocity, npRollVelocity;
 
@@ -137,6 +141,10 @@ public class ControllerNaturalPostureManager
 
       midFeetZUpFrame = controllerToolbox.getReferenceFrames().getMidFeetZUpFrame();
 
+      npVelocityBreakFrequency.addListener(v -> npVelocityAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(npVelocityBreakFrequency.getDoubleValue(), controlDT), false));
+      npVelocityAlpha.addListener(v -> npVelocityBreakFrequency.set(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(npVelocityAlpha.getDoubleValue(), controlDT), false));
+      npVelocityBreakFrequency.set(50.0);
+
       npYawVelocity = new FilteredVelocityYoVariable("npYawVelocity", "", npVelocityAlpha, npYaw, controlDT, registry);
       npPitchVelocity = new FilteredVelocityYoVariable("npPitchVelocity", "", npVelocityAlpha, npPitch, controlDT, registry);
       npRollVelocity = new FilteredVelocityYoVariable("npRollVelocity", "", npVelocityAlpha, npRoll, controlDT, registry);
@@ -162,15 +170,14 @@ public class ControllerNaturalPostureManager
       npQPWeightY.set(1); //1
       npQPWeightZ.set(1);
 
-      npKpYaw.set(150.0);
-      npKpPitch.set(50.0);
-      npKpRoll.set(150.0);
+      npKpYaw.set(50.0);
+      npKpPitch.set(25.0);
+      npKpRoll.set(50.0);
 
-      npKdYaw.set(40.0);
-      npKdPitch.set(10.0);
-      npKdRoll.set(40.0);
+      npKdYaw.set(3.0);
+      npKdPitch.set(1.0);
+      npKdRoll.set(3.0);
 
-      npVelocityAlpha.set(0.01);
 
       // Pelvis privileged pose
       double scale1 = 1;//100;
