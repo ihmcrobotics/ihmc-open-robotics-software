@@ -50,10 +50,11 @@ public class GDXVRManager
    private volatile int setupEyesCount = 0;
    private final Notification waitOnPosesNotification = new Notification();
    private volatile boolean waitGetPosesThreadRunning = false;
+   private final GDXVRTeleporter teleporter = new GDXVRTeleporter();
 
    public void create()
    {
-
+      teleporter.create(context);
    }
 
    /**
@@ -249,6 +250,7 @@ public class GDXVRManager
    {
       if (vrEnabled.get() && contextInitialized)
       {
+         teleporter.getRenderables(renderables, pool);
          if (!skipHeadset)
          {
             context.getHeadsetRenderable(renderables, pool);
