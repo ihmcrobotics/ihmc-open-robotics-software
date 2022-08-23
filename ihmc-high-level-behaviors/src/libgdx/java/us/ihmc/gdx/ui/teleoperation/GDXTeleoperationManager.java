@@ -8,7 +8,10 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.GoHomeMessage;
+import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
@@ -34,7 +37,10 @@ import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
+import us.ihmc.footstepPlanning.FootstepPlannerOutput;
+import us.ihmc.footstepPlanning.FootstepPlannerRequest;
+import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -42,12 +48,14 @@ import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.gdx.imgui.ImGuiMovingPlot;
 import us.ihmc.gdx.imgui.ImGuiPanel;
-import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
-import us.ihmc.gdx.ui.affordances.*;
+import us.ihmc.gdx.ui.affordances.GDXRobotWholeBodyInteractable;
+import us.ihmc.gdx.ui.affordances.ImGuiGDXManualFootstepPlacement;
+import us.ihmc.gdx.ui.affordances.ImGuiGDXPlannedFootstepPlacement;
+import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.gdx.ui.interactable.GDXChestOrientationSlider;
 import us.ihmc.gdx.ui.interactable.GDXPelvisHeightSlider;
@@ -115,21 +123,6 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
                                   CommunicationHelper communicationHelper)
    {
       this(robotRepoName, robotSubsequentPathToResourceFolder, communicationHelper, null, null, null);
-
-   }
-
-   public void mapTextureID()
-   {
-      for (int i = 0; i < iconFileNames.length; ++i)
-      {
-         WorkspaceFile imageFile = new WorkspaceFile(iconDirectory,iconFileNames[i]);
-         Mat readImage = opencv_imgcodecs.imread(imageFile.getFilePath().toString());
-         Pixmap pixmap = new Pixmap(readImage.cols(), readImage.rows(), Pixmap.Format.RGBA8888);
-         BytePointer rgba8888BytePointer = new BytePointer(pixmap.getPixels());
-         Mat rgba8Mat = new Mat(readImage.rows(), readImage.cols(), opencv_core.CV_8UC4, rgba8888BytePointer);
-         opencv_imgproc.cvtColor(readImage, rgba8Mat, opencv_imgproc.COLOR_RGB2BGRA);
-         iconTexturesMap.put(fileNameStringKeys[i],new Texture(new PixmapTextureData(pixmap, null, false, false)));
-      }
    }
 
    public GDXTeleoperationManager(String robotRepoName,
@@ -209,7 +202,18 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
    public void create(GDXImGuiBasedUI baseUI)
    {
       if (iconTexturesMap.size() == 0)
-         mapTextureID();
+      {
+         for (int i = 0; i < iconFileNames.length; ++i)
+         {
+            WorkspaceFile imageFile = new WorkspaceFile(iconDirectory, iconFileNames[i]);
+            Mat readImage = opencv_imgcodecs.imread(imageFile.getFilePath().toString());
+            Pixmap pixmap = new Pixmap(readImage.cols(), readImage.rows(), Pixmap.Format.RGBA8888);
+            BytePointer rgba8888BytePointer = new BytePointer(pixmap.getPixels());
+            Mat rgba8Mat = new Mat(readImage.rows(), readImage.cols(), opencv_core.CV_8UC4, rgba8888BytePointer);
+            opencv_imgproc.cvtColor(readImage, rgba8Mat, opencv_imgproc.COLOR_RGB2BGRA);
+            iconTexturesMap.put(fileNameStringKeys[i], new Texture(new PixmapTextureData(pixmap, null, false, false)));
+         }
+      }
 
       desiredRobot.create();
 
@@ -235,7 +239,6 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(plannedFootstepPlacement::processImGui3DViewInput);
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(plannedFootstepPlacement::calculate3DViewPick);
       // <<
-
 
       if (interactableRobot != null)
       {
@@ -426,23 +429,6 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       }
 
       interactableRobot.renderImGuiWidgets();
-
-//      ImGui.text("Lidar REA:");
-//      ImGui.sameLine();
-//      if (ImGui.button(labels.get("Clear")))
-//      {
-//         REAStateRequestMessage clearMessage = new REAStateRequestMessage();
-//         clearMessage.setRequestClear(true);
-//         communicationHelper.publish(ROS2Tools.REA_STATE_REQUEST, clearMessage);
-//      }
-   }
-
-   private boolean imGuiSlider(String label, float[] value)
-   {
-      float previousValue = value[0];
-      ImGui.sliderFloat(label, value, 0.0f, 100.0f);
-      float currentValue = value[0];
-      return currentValue != previousValue;
    }
 
    @Override
