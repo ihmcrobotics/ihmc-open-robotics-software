@@ -11,7 +11,6 @@ import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.GoHomeMessage;
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
@@ -31,7 +30,6 @@ import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -101,7 +99,6 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
    private final ImGuiMovingPlot statusReceivedPlot = new ImGuiMovingPlot("Hand", 1000, 230, 15);
    private final SideDependentList<ImInt> handConfigurationIndices = new SideDependentList<>(new ImInt(6), new ImInt(6));
    private final String[] handConfigurationNames = new String[HandConfiguration.values.length];
-   private final IHMCROS2Input<PlanarRegionsListMessage> lidarREARegions;
    private final ImBoolean showGraphics = new ImBoolean(true);
    private final GDXPelvisHeightSlider pelvisHeightSlider;
    private final GDXChestOrientationSlider chestPitchSlider;
@@ -174,7 +171,6 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       syncedRobotForFootstepPlanning = communicationHelper.newSyncedRobot();
       startFootPoses.put(RobotSide.LEFT, new FramePose3D());
       startFootPoses.put(RobotSide.RIGHT, new FramePose3D());
-      lidarREARegions = communicationHelper.subscribe(ROS2Tools.LIDAR_REA_REGIONS);
 
       HandConfiguration[] values = HandConfiguration.values;
       for (int i = 0; i < values.length; i++)
@@ -192,8 +188,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
                                                                desiredRobot,
                                                                ros2Helper,
                                                                yoVariableClientHelper,
-                                                               teleoperationParameters,
-                                                               teleoperationParametersTuner);
+                                                               teleoperationParameters);
       }
    }
 

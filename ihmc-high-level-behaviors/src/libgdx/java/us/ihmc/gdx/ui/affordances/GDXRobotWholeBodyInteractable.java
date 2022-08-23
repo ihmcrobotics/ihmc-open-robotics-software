@@ -43,7 +43,6 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
    private final GDXArmSetpointManager armSetpointManager;
    private final YoVariableClientHelper yoVariableClientHelper;
    private GDXTeleoperationParameters teleoperationParameters;
-   private ImGuiStoredPropertySetTuner teleoperationParametersTuner;
 
    private final ImGuiPanel panel = new ImGuiPanel("Whole Body Interactable", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -64,8 +63,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
                                         GDXDesiredRobot desiredRobot,
                                         ROS2ControllerHelper ros2Helper,
                                         YoVariableClientHelper yoVariableClientHelper,
-                                        GDXTeleoperationParameters teleoperationParameters,
-                                        ImGuiStoredPropertySetTuner teleoperationParametersTuner)
+                                        GDXTeleoperationParameters teleoperationParameters)
    {
       selfCollisionModel = new GDXRobotCollisionModel(robotSelfCollisionModel);
       environmentCollisionModel = new GDXRobotCollisionModel(robotEnvironmentCollisionModel);
@@ -74,7 +72,6 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
       this.ros2Helper = ros2Helper;
       this.yoVariableClientHelper = yoVariableClientHelper;
       this.teleoperationParameters = teleoperationParameters;
-      this.teleoperationParametersTuner = teleoperationParametersTuner;
       this.armSetpointManager = new GDXArmSetpointManager(robotModel,
                                                           syncedRobot,
                                                           desiredRobot.getDesiredFullRobotModel(),
