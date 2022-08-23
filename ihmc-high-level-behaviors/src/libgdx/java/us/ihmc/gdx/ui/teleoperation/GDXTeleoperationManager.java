@@ -1,11 +1,8 @@
 package us.ihmc.gdx.ui.teleoperation;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
-import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -16,11 +13,6 @@ import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.global.opencv_imgcodecs;
-import org.bytedeco.opencv.global.opencv_imgproc;
-import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -55,6 +47,7 @@ import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.gdx.ui.interactable.GDXChestOrientationSlider;
 import us.ihmc.gdx.ui.interactable.GDXPelvisHeightSlider;
+import us.ihmc.gdx.ui.tools.GDXIconTexture;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
@@ -65,9 +58,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.tools.io.WorkspaceDirectory;
-import us.ihmc.tools.io.WorkspaceFile;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *  Possibly extract simple controller controls to a smaller panel class, like remote safety controls or something.
@@ -108,10 +101,8 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
    // FOR ICONS (NON-BUTTON)
    private final WorkspaceDirectory iconDirectory = new WorkspaceDirectory("ihmc-open-robotics-software",
                                                                            "ihmc-high-level-behaviors/src/libgdx/resources/icons");
-   private final String iconFileNames[] = new String[] {"leftHand.png", "rightHand.png", "locationPin.png", "locationFlag.png"};
-   private final String fileNameStringKeys[] = new String[] {"leftHand", "rightHand", "locationPin", "locationFlag"};
-   private final Map<String, Texture> iconTexturesMap = new HashMap<>();
-   private int textureID = 0;
+   private GDXIconTexture locationFlagIcon;
+   private final SideDependentList<GDXIconTexture> handIcons = new SideDependentList<>();
 
    public GDXTeleoperationManager(String robotRepoName,
                                   String robotSubsequentPathToResourceFolder,
@@ -194,19 +185,11 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
 
    public void create(GDXImGuiBasedUI baseUI)
    {
-      if (iconTexturesMap.size() == 0)
+      for (RobotSide side : RobotSide.values)
       {
-         for (int i = 0; i < iconFileNames.length; ++i)
-         {
-            WorkspaceFile imageFile = new WorkspaceFile(iconDirectory, iconFileNames[i]);
-            Mat readImage = opencv_imgcodecs.imread(imageFile.getFilePath().toString());
-            Pixmap pixmap = new Pixmap(readImage.cols(), readImage.rows(), Pixmap.Format.RGBA8888);
-            BytePointer rgba8888BytePointer = new BytePointer(pixmap.getPixels());
-            Mat rgba8Mat = new Mat(readImage.rows(), readImage.cols(), opencv_core.CV_8UC4, rgba8888BytePointer);
-            opencv_imgproc.cvtColor(readImage, rgba8Mat, opencv_imgproc.COLOR_RGB2BGRA);
-            iconTexturesMap.put(fileNameStringKeys[i], new Texture(new PixmapTextureData(pixmap, null, false, false)));
-         }
+         handIcons.put(side, new GDXIconTexture(iconDirectory.file(side.getLowerCaseName() + "Hand.png")));
       }
+      locationFlagIcon = new GDXIconTexture(iconDirectory.file("locationFlag.png"));
 
       desiredRobot.create();
 
@@ -337,7 +320,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       manualFootstepPlacement.renderImGuiWidgets();
       plannedFootstepPlacement.renderImGuiWidgets();
 
-      ImGui.image(iconTexturesMap.get("locationFlag").getTextureObjectHandle(), 22.0f, 22.0f);
+      ImGui.image(locationFlagIcon.getTexture().getTextureObjectHandle(), 22.0f, 22.0f);
 
       if (footstepPlannerOutput != null)
       {
@@ -372,16 +355,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
 
       for (RobotSide side : RobotSide.values)
       {
-         if (side == RobotSide.LEFT)
-         {
-            textureID = iconTexturesMap.get("leftHand").getTextureObjectHandle();
-         }
-         else if (side == RobotSide.RIGHT)
-         {
-            textureID = iconTexturesMap.get("rightHand").getTextureObjectHandle();
-         }
-
-         ImGui.image(textureID, 22.0f,22.0f);
+         ImGui.image(handIcons.get(side).getTexture().getTextureObjectHandle(), 22.0f,22.0f);
          ImGui.sameLine();
          if (ImGui.button(labels.get("Calibrate", side.getCamelCaseName())))
          {
