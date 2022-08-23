@@ -1,4 +1,4 @@
-package us.ihmc.gdx.ui.tools;
+package us.ihmc.gdx.tools;
 
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
