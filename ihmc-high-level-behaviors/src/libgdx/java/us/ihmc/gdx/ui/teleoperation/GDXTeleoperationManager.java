@@ -10,28 +10,14 @@ import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
-import us.ihmc.commons.FormattingTools;
-import us.ihmc.commons.MathTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.footstepPlanning.FootstepPlannerOutput;
-import us.ihmc.footstepPlanning.FootstepPlannerRequest;
-import us.ihmc.footstepPlanning.FootstepPlanningModule;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
-import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.gdx.imgui.ImGuiMovingPlot;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
@@ -42,6 +28,7 @@ import us.ihmc.gdx.ui.affordances.GDXRobotWholeBodyInteractable;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXManualFootstepPlacement;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXPlannedFootstepPlacement;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
+import us.ihmc.gdx.ui.footstepPlanner.GDXFootstepPlanning;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.gdx.ui.interactable.GDXChestOrientationSlider;
 import us.ihmc.gdx.ui.interactable.GDXPelvisHeightSlider;
@@ -49,7 +36,6 @@ import us.ihmc.gdx.tools.GDXIconTexture;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.YawPitchRollAxis;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -70,8 +56,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
    private final GDXFootstepPlanGraphic footstepsSentToControllerGraphic;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final GDXRobotLowLevelMessenger robotLowLevelMessenger;
-   private final FootstepPlannerParametersBasics footstepPlannerParameters;
-   private final FootstepPlanningModule footstepPlanner;
+   private final GDXFootstepPlanning footstepPlanning;
    private final ImGuiGDXPoseGoalAffordance footstepGoal = new ImGuiGDXPoseGoalAffordance();
    private GDXRobotWholeBodyInteractable interactableRobot;
    private final ImGuiGDXManualFootstepPlacement manualFootstepPlacement = new ImGuiGDXManualFootstepPlacement();
@@ -83,9 +68,6 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
    private final GDXTeleoperationParameters teleoperationParameters;
    private final DRCRobotModel robotModel;
    private final ROS2NodeInterface ros2Node;
-   private FootstepPlannerOutput footstepPlannerOutput;
-   private final ROS2SyncedRobotModel syncedRobotForFootstepPlanning;
-   private final SideDependentList<FramePose3D> startFootPoses = new SideDependentList<>();
    private final ImGuiMovingPlot statusReceivedPlot = new ImGuiMovingPlot("Hand", 1000, 230, 15);
    private final SideDependentList<ImInt> handConfigurationIndices = new SideDependentList<>(new ImInt(6), new ImInt(6));
    private final String[] handConfigurationNames = new String[HandConfiguration.values.length];
@@ -146,11 +128,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       {
          footstepsSentToControllerGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps, "Teleoperation Panel Controller Spy"));
       });
-      footstepPlannerParameters = communicationHelper.getRobotModel().getFootstepPlannerParameters();
-      footstepPlanner = communicationHelper.getOrCreateFootstepPlanner();
-      syncedRobotForFootstepPlanning = communicationHelper.newSyncedRobot();
-      startFootPoses.put(RobotSide.LEFT, new FramePose3D());
-      startFootPoses.put(RobotSide.RIGHT, new FramePose3D());
+      footstepPlanning = new GDXFootstepPlanning(robotModel, syncedRobot);
 
       HandConfiguration[] values = HandConfiguration.values;
       for (int i = 0; i < values.length; i++)
@@ -185,7 +163,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       // TODO: Remove this stuff and use the path control ring for this
       footstepGoal.create(baseUI, goal -> queueFootstepPlanning(), Color.YELLOW);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(footstepGoal::processImGui3DViewInput);
-      footstepPlanningParametersTuner.create(footstepPlannerParameters,
+      footstepPlanningParametersTuner.create(footstepPlanning.getFootstepPlannerParameters(),
                                              FootstepPlannerParameterKeys.keys,
                                              this::queueFootstepPlanning);
       teleoperationParametersTuner.create(teleoperationParameters, GDXTeleoperationParameters.keys);
@@ -194,13 +172,13 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       teleoperationParametersTuner.registerSlider("Transfer time", 0.3f, 2.5f);
       teleoperationParametersTuner.registerSlider("Turn aggressiveness", 0.0f, 10.0f);
 
-      manualFootstepPlacement.create(baseUI, communicationHelper, syncedRobot, teleoperationParameters, footstepPlannerParameters);
+      manualFootstepPlacement.create(baseUI, communicationHelper, syncedRobot, teleoperationParameters, footstepPlanning.getFootstepPlannerParameters());
 
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(manualFootstepPlacement::processImGui3DViewInput);
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(manualFootstepPlacement::calculate3DViewPick);
 
       // TODO: for interactable footings from stepPlan >>
-      plannedFootstepPlacement.create(baseUI, communicationHelper, syncedRobot, teleoperationParameters, footstepPlannerParameters);
+      plannedFootstepPlacement.create(baseUI, communicationHelper, syncedRobot, teleoperationParameters, footstepPlanning.getFootstepPlannerParameters());
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(plannedFootstepPlacement::processImGui3DViewInput);
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(plannedFootstepPlacement::calculate3DViewPick);
       // <<
@@ -227,7 +205,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       plannedFootstepPlacement.update();
       if (manualFootstepPlacement.getFootstepArrayList().size() > 0)
       {
-         footstepPlannerOutput = null;
+         footstepPlanning.setReadyToWalk(false);
          footstepsSentToControllerGraphic.clear();
       }
    }
@@ -254,15 +232,12 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
 
       ImGui.image(locationFlagIcon.getTexture().getTextureObjectHandle(), 22.0f, 22.0f);
 
-      if (footstepPlannerOutput != null)
+      if (footstepPlanning.isReadyToWalk() && manualFootstepPlacement.getFootstepArrayList().size() == 0)
       {
          ImGui.sameLine();
-         if (manualFootstepPlacement.getFootstepArrayList().size() == 0)
+         if (ImGui.button(labels.get("Walk")))
          {
-            if (ImGui.button(labels.get("Walk")))
-            {
-               walkFromPlan();
-            }
+            walkFromPlan();
          }
       }
       ImGui.sameLine();
@@ -346,69 +321,16 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
 
    private void queueFootstepPlanning()
    {
-      Pose3DReadOnly goalPose = footstepGoal.getGoalPose();
-      syncedRobotForFootstepPlanning.update();
-      for (RobotSide side : RobotSide.values)
-      {
-         startFootPoses.get(side).set(syncedRobotForFootstepPlanning.getFramePoseReadOnly(referenceFrames -> referenceFrames.getSoleFrame(side)));
-      }
+      footstepPlanning.getMidFeetGoalPose().set(footstepGoal.getGoalPose());
+      footstepPlanning.setGoalFootPosesFromMidFeetPose();
+      footstepPlanning.setStanceSideToClosestToGoal();
+      // TODO: Call planAsync
+      footstepPlanning.plan();
 
-      RobotSide stanceSide;
-      if (startFootPoses.get(RobotSide.LEFT ).getPosition().distance(goalPose.getPosition())
-       <= startFootPoses.get(RobotSide.RIGHT).getPosition().distance(goalPose.getPosition()))
+      // TODO: make footsteps from footstepPlan interactable (modifiable)
+      if (footstepPlanning.isReadyToWalk()) // failed
       {
-         stanceSide = RobotSide.LEFT;
-      }
-      else
-      {
-         stanceSide = RobotSide.RIGHT;
-      }
-
-      FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
-      footstepPlannerRequest.setPlanBodyPath(false);
-      footstepPlannerRequest.setRequestedInitialStanceSide(stanceSide);
-      footstepPlannerRequest.setStartFootPoses(startFootPoses.get(RobotSide.LEFT), startFootPoses.get(RobotSide.RIGHT));
-      // TODO: Set start footholds!!
-      footstepPlannerRequest.setGoalFootPoses(footstepPlannerParameters.getIdealFootstepWidth(), goalPose);
-      //      footstepPlannerRequest.setPlanarRegionsList(...);
-      footstepPlannerRequest.setAssumeFlatGround(true); // FIXME Assuming flat ground
-      //      footstepPlannerRequest.setTimeout(lookAndStepParameters.getFootstepPlannerTimeoutWhileStopped());
-      //      footstepPlannerRequest.setSwingPlannerType(swingPlannerType);
-      //      footstepPlannerRequest.setSnapGoalSteps(true);
-
-      footstepPlanner.getFootstepPlannerParameters().set(footstepPlannerParameters);
-      LogTools.info("Stance side: {}", stanceSide.name());
-      LogTools.info("Planning footsteps...");
-      FootstepPlannerOutput footstepPlannerOutput = footstepPlanner.handleRequest(footstepPlannerRequest);
-      LogTools.info("Footstep planner completed with {}, {} step(s)",
-                    footstepPlannerOutput.getFootstepPlanningResult(),
-                    footstepPlannerOutput.getFootstepPlan().getNumberOfSteps());
-
-      FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanner);
-      footstepPlannerLogger.logSession();
-      ThreadTools.startAThread(() -> FootstepPlannerLogger.deleteOldLogs(50), "FootstepPlanLogDeletion");
-
-      if (footstepPlannerOutput.getFootstepPlan().getNumberOfSteps() < 1) // failed
-      {
-         FootstepPlannerRejectionReasonReport rejectionReasonReport = new FootstepPlannerRejectionReasonReport(footstepPlanner);
-         rejectionReasonReport.update();
-         ArrayList<Pair<Integer, Double>> rejectionReasonsMessage = new ArrayList<>();
-         for (BipedalFootstepPlannerNodeRejectionReason reason : rejectionReasonReport.getSortedReasons())
-         {
-            double rejectionPercentage = rejectionReasonReport.getRejectionReasonPercentage(reason);
-            LogTools.info("Rejection {}%: {}", FormattingTools.getFormattedToSignificantFigures(rejectionPercentage, 3), reason);
-            rejectionReasonsMessage.add(MutablePair.of(reason.ordinal(), MathTools.roundToSignificantFigures(rejectionPercentage, 3)));
-         }
-         LogTools.info("Footstep planning failure...");
-      }
-      else  // plan generated.
-      {
-//         footstepsSentToControllerGraphic.generateMeshesAsync(MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlannerOutput.getFootstepPlan(),
-//                                                                                                 "Teleoperation Panel Planned"));
-         // TODO: make footsteps from footstepPlan interactable (modifiable)
-         plannedFootstepPlacement.updateFromPlan(footstepPlannerOutput.getFootstepPlan());
-         footstepPlannerOutput.clear();
-         this.footstepPlannerOutput = footstepPlannerOutput;
+         plannedFootstepPlacement.updateFromPlan(footstepPlanning.getOutput().getFootstepPlan());
       }
    }
 
