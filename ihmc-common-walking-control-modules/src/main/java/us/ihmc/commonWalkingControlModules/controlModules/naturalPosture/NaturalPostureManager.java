@@ -1,10 +1,9 @@
-package us.ihmc.commonWalkingControlModules.controlModules.NaturalPosture;
+package us.ihmc.commonWalkingControlModules.controlModules.naturalPosture;
 
 import us.ihmc.commonWalkingControlModules.configurations.HumanoidRobotNaturalPosture;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 //import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.QPObjectiveCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 //import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 //import us.ihmc.robotics.stateMachine.core.StateMachine;
