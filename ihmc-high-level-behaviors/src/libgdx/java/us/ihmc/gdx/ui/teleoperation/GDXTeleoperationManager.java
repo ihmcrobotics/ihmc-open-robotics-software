@@ -57,7 +57,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final GDXRobotLowLevelMessenger robotLowLevelMessenger;
    private final GDXFootstepPlanning footstepPlanning;
-   private final GDXBallAndArrowPosePlacement footstepGoal = new GDXBallAndArrowPosePlacement();
+   private final GDXBallAndArrowPosePlacement ballAndArrowMidFeetPosePlacement = new GDXBallAndArrowPosePlacement();
    private GDXRobotWholeBodyInteractable interactableRobot;
    private final ImGuiGDXManualFootstepPlacement manualFootstepPlacement = new ImGuiGDXManualFootstepPlacement();
    // TODO: for interactable footings from stepPlan >>
@@ -161,8 +161,8 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       desiredRobot.create();
 
       // TODO: Remove this stuff and use the path control ring for this
-      footstepGoal.create(goal -> queueFootstepPlanning(), Color.YELLOW);
-      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(footstepGoal::processImGui3DViewInput);
+      ballAndArrowMidFeetPosePlacement.create(goal -> queueFootstepPlanning(), Color.YELLOW);
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(ballAndArrowMidFeetPosePlacement::processImGui3DViewInput);
       footstepPlanningParametersTuner.create(footstepPlanning.getFootstepPlannerParameters(),
                                              FootstepPlannerParameterKeys.keys,
                                              this::queueFootstepPlanning);
@@ -241,7 +241,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
          }
       }
       ImGui.sameLine();
-      footstepGoal.renderPlaceGoalButton();
+      ballAndArrowMidFeetPosePlacement.renderPlaceGoalButton();
 
       ImGui.text("Walk path control ring planner:");
       interactableRobot.getWalkPathControlRing().renderImGuiWidgets();
@@ -253,7 +253,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       if (ImGui.button(labels.get("Clear")))
       {
          footstepsSentToControllerGraphic.clear();
-         footstepGoal.clear();
+         ballAndArrowMidFeetPosePlacement.clear();
          manualFootstepPlacement.clear();
          plannedFootstepPlacement.clear();
       }
@@ -313,7 +313,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       if (showGraphics.get())
       {
          footstepsSentToControllerGraphic.getRenderables(renderables, pool);
-         footstepGoal.getRenderables(renderables, pool);
+         ballAndArrowMidFeetPosePlacement.getRenderables(renderables, pool);
          manualFootstepPlacement.getRenderables(renderables, pool);
          plannedFootstepPlacement.getRenderables(renderables, pool);
       }
@@ -321,7 +321,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
 
    private void queueFootstepPlanning()
    {
-      footstepPlanning.getMidFeetGoalPose().set(footstepGoal.getGoalPose());
+      footstepPlanning.getMidFeetGoalPose().set(ballAndArrowMidFeetPosePlacement.getGoalPose());
       footstepPlanning.setGoalFootPosesFromMidFeetPose();
       footstepPlanning.setStanceSideToClosestToGoal();
       // TODO: Call planAsync
