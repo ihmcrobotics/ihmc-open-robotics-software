@@ -78,7 +78,6 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
    private final String fileNameStringKeys[] = new String[] {"feet"};
    private Map<String, Texture> iconTexturesMap = new HashMap<String, Texture>();
 
-
    public void create(GDXImGuiBasedUI baseUI,
                       CommunicationHelper communicationHelper,
                       ROS2SyncedRobotModel syncedRobot,
@@ -98,7 +97,7 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
       // get icon textures
       for (int i = 0; i < iconFileNames.length; ++i)
       {
-         WorkspaceFile imageFile = new WorkspaceFile(iconDirectory,iconFileNames[i]);
+         WorkspaceFile imageFile = new WorkspaceFile(iconDirectory, iconFileNames[i]);
          Mat readImage = opencv_imgcodecs.imread(imageFile.getFilePath().toString());
          Pixmap pixmap = new Pixmap(readImage.cols(), readImage.rows(), Pixmap.Format.RGBA8888);
          BytePointer rgba8888BytePointer = new BytePointer(pixmap.getPixels());
@@ -140,11 +139,11 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
          footstepBeingPlaced.process3DViewInput(input);
       }
 
-      if (footstepArrayList.size()>0)
+      if (footstepArrayList.size() > 0)
       {
-            stepChecker.getInput(input);
-            Point3DReadOnly pickPointInWorld = input.getPickPointInWorld();
-            renderTooltip = true;
+         stepChecker.getInput(input);
+         Point3DReadOnly pickPointInWorld = input.getPickPointInWorld();
+         renderTooltip = true;
 
             //Set position of modelInstance, selectablePose3DGizmo, and the sphere used in stepCheckIsPointInsideAlgorithm all to the pointInWorld that the cursor is at
 //            GDXTools.toGDX(pickPointInWorld, footstepBeingPlaced.getFootstepModelInstance().transform);
@@ -168,36 +167,33 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
 //            }
       }
 
-         Point3DReadOnly pickPointInWorld = input.getPickPointInWorld();
+      Point3DReadOnly pickPointInWorld = input.getPickPointInWorld();
 
-         //Check validity of footsteps
-         stepChecker.checkValidStepList(footstepArrayList);
-         if (isCurrentlyPlacingFootstep())
+      //Check validity of footsteps
+      stepChecker.checkValidStepList(footstepArrayList);
+      if (isCurrentlyPlacingFootstep())
+      {
+         RigidBodyTransform candidateStepTransform = new RigidBodyTransform();
+         candidateStepTransform.getTranslation().set(pickPointInWorld);
+         candidateStepTransform.getRotation().setToYawOrientation(getFootstepBeingPlacedOrLastFootstepPlaced().getYaw());
+
+         stepChecker.checkValidSingleStep(footstepArrayList, candidateStepTransform, currentFootStepSide, footstepArrayList.size());
+      }
+
+      //Get the warnings and flash if the footstep's placement isn't okay
+      ArrayList<BipedalFootstepPlannerNodeRejectionReason> temporaryReasons = stepChecker.getReasons();
+      if (temporaryReasons.size() > 0)
+      {
+         for (int i = 0; i < temporaryReasons.size(); i++)
          {
-            RigidBodyTransform candidateStepTransform = new RigidBodyTransform();
-            candidateStepTransform.getTranslation().set(pickPointInWorld);
-            candidateStepTransform.getRotation().setToYawOrientation(getFootstepBeingPlacedOrLastFootstepPlaced().getYaw());
-
-            stepChecker.checkValidSingleStep(footstepArrayList,
-                                             candidateStepTransform,
-                                             currentFootStepSide,
-                                             footstepArrayList.size());
+            if (footstepArrayList.size() > i)
+               footstepArrayList.get(i).flashFootstepWhenBadPlacement(temporaryReasons.get(i));
          }
+         if (footstepBeingPlaced != null)
+            footstepBeingPlaced.flashFootstepWhenBadPlacement(temporaryReasons.get(temporaryReasons.size() - 1));
+      }
 
-         //Get the warnings and flash if the footstep's placement isn't okay
-         ArrayList<BipedalFootstepPlannerNodeRejectionReason> temporaryReasons = stepChecker.getReasons();
-         if (temporaryReasons.size() > 0)
-         {
-            for (int i = 0; i < temporaryReasons.size(); i++)
-            {
-               if (footstepArrayList.size() > i)
-                  footstepArrayList.get(i).flashFootstepWhenBadPlacement(temporaryReasons.get(i));
-            }
-            if (footstepBeingPlaced != null)
-               footstepBeingPlaced.flashFootstepWhenBadPlacement(temporaryReasons.get(temporaryReasons.size() - 1));
-         }
-
-         anyFootstepIsSelected = isAnyFootstepSelected();
+      anyFootstepIsSelected = isAnyFootstepSelected();
 
       if (anyFootstepIsSelected)
       {
@@ -324,7 +320,7 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
    {
       for (ImGuiGDXPlannedFootstep step : footstepArrayList)
       {
-         step.getVirtualRenderables(renderables,pool);
+         step.getVirtualRenderables(renderables, pool);
       }
    }
 
@@ -338,7 +334,7 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
       footstepArrayList.clear();
 
       ArrayList<PlannedFootstep> plannedSteps = footstepPlan.getFootsteps();
-      for (int i = 0; i < plannedSteps.size();++i)
+      for (int i = 0; i < plannedSteps.size(); ++i)
       {
          PlannedFootstep plannedStep = plannedSteps.get(i);
          ImGuiGDXPlannedFootstep addedStep = footstepArrayList.add();
@@ -384,18 +380,18 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
       // note: set stance and swing as last two steps of the footstepArrayList (if this list is not empty)
       // note: delete steps in singleFootStepAffordance.
 
-      if(footstepArrayList.size()==1)
+      if (footstepArrayList.size() == 1)
       {
          stepChecker.setStanceStepTransform(footstepArrayList.get(0).getFootTransformInWorld());
          stepChecker.setStanceSide(footstepArrayList.get(0).getFootstepSide());
       }
-      else if(footstepArrayList.size()>1)
+      else if (footstepArrayList.size() > 1)
       {
          int size = footstepArrayList.size();
-         stepChecker.setStanceStepTransform(footstepArrayList.get(size-1).getFootTransformInWorld());
-         stepChecker.setStanceSide(footstepArrayList.get(size-1).getFootstepSide());
-         stepChecker.setSwingStepTransform(footstepArrayList.get(size-2).getFootTransformInWorld());
-         stepChecker.setSwingSide(footstepArrayList.get(size-2).getFootstepSide());
+         stepChecker.setStanceStepTransform(footstepArrayList.get(size - 1).getFootTransformInWorld());
+         stepChecker.setStanceSide(footstepArrayList.get(size - 1).getFootstepSide());
+         stepChecker.setSwingStepTransform(footstepArrayList.get(size - 2).getFootTransformInWorld());
+         stepChecker.setSwingSide(footstepArrayList.get(size - 2).getFootstepSide());
       }
       stepChecker.clear(footstepArrayList);
       clear();
@@ -418,7 +414,7 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
 
    public void createNewFootStep(RobotSide footstepSide)
    {
-      if(footstepBeingPlaced != null)
+      if (footstepBeingPlaced != null)
       {
          removeFootStep();
       }
@@ -440,7 +436,7 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
 
    public void removeFootStep()
    {
-      if(footstepBeingPlaced != null || footstepArrayList.size() > 0)
+      if (footstepBeingPlaced != null || footstepArrayList.size() > 0)
       {
          if (getFootstepBeingPlacedOrLastFootstepPlaced() != null && getFootstepBeingPlacedOrLastFootstepPlaced().getFootstepModelInstance() != null)
          {
