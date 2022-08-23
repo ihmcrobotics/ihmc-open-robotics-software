@@ -1,22 +1,14 @@
 package us.ihmc.gdx.ui.affordances;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
-import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import imgui.internal.ImGui;
-import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.global.opencv_imgcodecs;
-import org.bytedeco.opencv.global.opencv_imgproc;
-import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -35,17 +27,15 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewInput;
+import us.ihmc.gdx.tools.GDXIconTexture;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.teleoperation.GDXTeleoperationParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.WorkspaceDirectory;
-import us.ihmc.tools.io.WorkspaceFile;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -74,9 +64,7 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
    // FOR ICONS (NON-BUTTON)
    private final WorkspaceDirectory iconDirectory = new WorkspaceDirectory("ihmc-open-robotics-software",
                                                                            "ihmc-high-level-behaviors/src/libgdx/resources/icons");
-   private final String iconFileNames[] = new String[] {"feet.png"};
-   private final String fileNameStringKeys[] = new String[] {"feet"};
-   private Map<String, Texture> iconTexturesMap = new HashMap<String, Texture>();
+   private GDXIconTexture feetIcon;
 
    public void create(GDXImGuiBasedUI baseUI,
                       CommunicationHelper communicationHelper,
@@ -94,17 +82,7 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
       stepChecker = new ImGuiGDXPlannedFootstepChecker(baseUI, communicationHelper, syncedRobot, footstepPlannerParameters);
       clear();
 
-      // get icon textures
-      for (int i = 0; i < iconFileNames.length; ++i)
-      {
-         WorkspaceFile imageFile = new WorkspaceFile(iconDirectory, iconFileNames[i]);
-         Mat readImage = opencv_imgcodecs.imread(imageFile.getFilePath().toString());
-         Pixmap pixmap = new Pixmap(readImage.cols(), readImage.rows(), Pixmap.Format.RGBA8888);
-         BytePointer rgba8888BytePointer = new BytePointer(pixmap.getPixels());
-         Mat rgba8Mat = new Mat(readImage.rows(), readImage.cols(), opencv_core.CV_8UC4, rgba8888BytePointer);
-         opencv_imgproc.cvtColor(readImage, rgba8Mat, opencv_imgproc.COLOR_RGB2RGBA);
-         iconTexturesMap.put(fileNameStringKeys[i], new Texture(new PixmapTextureData(pixmap, null, false, false)));
-      }
+      feetIcon = new GDXIconTexture(iconDirectory.file("feet.png"));
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)
