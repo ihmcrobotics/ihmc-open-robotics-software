@@ -37,6 +37,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -328,6 +329,11 @@ public class WholeBodyInverseDynamicsSolver
       }
    }
 
+   public MomentumModuleSolution getMomentumModuleSolution()
+   {
+      return optimizationControlModule.getMomentumModuleSolution();
+   }
+
    public void submitResetIntegratorRequests(JointDesiredOutputListReadOnly jointDesiredOutputList)
    {
       for (int i = 0; i < lowLevelOneDoFJointDesiredDataHolder.getNumberOfJointsWithDesiredOutput(); i++)
@@ -343,22 +349,33 @@ public class WholeBodyInverseDynamicsSolver
 
    public void submitInverseDynamicsCommandList(InverseDynamicsCommandList inverseDynamicsCommandList)
    {
+      System.out.println("\n\n\n\n\n");
+
       for (int i = 0; i < inverseDynamicsCommandList.getNumberOfCommands(); i++)
       {
          InverseDynamicsCommand<?> command = inverseDynamicsCommandList.getCommand(i);
 
+         LogTools.info("Received Command " + command.getCommandType());
+
          switch (command.getCommandType())
          {
             case QP_INPUT:
+               LogTools.info("QP input size = " + ((QPObjectiveCommand) command).getJacobian().getNumRows());
+               LogTools.info("In nullspace = " + ((QPObjectiveCommand) command).isNullspaceProjected());
                optimizationControlModule.submitQPObjectiveCommand((QPObjectiveCommand) command);
                break;
             case TASKSPACE:
+               LogTools.info("Spatial acceleration size = " + ((SpatialAccelerationCommand) command).getSelectionMatrix().getNumberOfSelectedAxes());
+               LogTools.info("Spatial acceleration end effector = " + ((SpatialAccelerationCommand) command).getEndEffector());
+
                optimizationControlModule.submitSpatialAccelerationCommand((SpatialAccelerationCommand) command);
                break;
             case JOINTSPACE:
+               LogTools.info("Joint acceleration size = " + ((JointspaceAccelerationCommand) command).getNumberOfJoints());
                optimizationControlModule.submitJointspaceAccelerationCommand((JointspaceAccelerationCommand) command);
                break;
             case MOMENTUM:
+               LogTools.info("Momentum rate size = " + ((MomentumRateCommand) command).getSelectionMatrix().getNumberOfSelectedAxes());
                optimizationControlModule.submitMomentumRateCommand((MomentumRateCommand) command);
                recordMomentumRate((MomentumRateCommand) command);
                break;
@@ -390,6 +407,7 @@ public class WholeBodyInverseDynamicsSolver
                optimizationControlModule.submitPlaneContactStateCommand((PlaneContactStateCommand) command);
                break;
             case CENTER_OF_PRESSURE:
+               LogTools.info("Center of pressure type = " + ((CenterOfPressureCommand) command).getConstraintType());
                optimizationControlModule.submitCenterOfPressureCommand((CenterOfPressureCommand) command);
                break;
             case JOINT_ACCELERATION_INTEGRATION:

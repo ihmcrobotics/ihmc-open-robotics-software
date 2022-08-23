@@ -23,8 +23,6 @@ public class NaturalPosturePrivilegedConfigurationManager
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private boolean useSpinePitchPrivilegedCommand;
-
    private final YoDouble pPoseSpineRoll = new YoDouble("pPoseSpineRoll", registry);
    private final YoDouble pPoseSpinePitch = new YoDouble("pPoseSpinePitch", registry);
    private final YoDouble pPoseSpineYaw = new YoDouble("pPoseSpineYaw", registry);
@@ -36,8 +34,9 @@ public class NaturalPosturePrivilegedConfigurationManager
 
    private final YoDouble pPoseSpineYawWeight = new YoDouble("pPoseSpineYawWeight", registry);
    private final YoDouble pPoseShoulderYawWeight = new YoDouble("pPoseShoulderYawWeight", registry);
+   private final YoDouble pPoseShoulderPitchWeight = new YoDouble("pPoseShoulderPitchWeight", registry);
    private final YoDouble pPoseElbowWeight = new YoDouble("pPoseElbowWeight", registry);
-      private final YoDouble pPoseDefaultWeight = new YoDouble("pPoseDefaultWeight", registry);
+   private final YoDouble pPoseDefaultWeight = new YoDouble("pPoseDefaultWeight", registry);
 
    private final YoPDGains pPoseSpineRollPitchGains = new YoPDGains("_privPoseRollPitch", registry);
    private final YoPDGains pPoseSpineYawGains = new YoPDGains("_privPoseYaw", registry);
@@ -86,6 +85,7 @@ public class NaturalPosturePrivilegedConfigurationManager
       spineRollCommand.setJoint(spineRoll);
 
       useSpineRollPitchJointCommands.set(true); // Can turn off joint limit for the spine when this is true.
+
       spineRollPitchGains.setKp(25.0);
       spineRollPitchGains.setZeta(0.7);
       spineRollPitchGains.createDerivativeGainUpdater(true);
@@ -94,8 +94,7 @@ public class NaturalPosturePrivilegedConfigurationManager
 
 
       // privileged configuration for upper body
-      useSpineYawPrivilegedCommand.set(true);
-      useSpinePitchPrivilegedCommand = true;
+      useSpineYawPrivilegedCommand.set(false);
 
       pPoseSpineRoll.set(0.0);
       pPoseSpinePitch.set(0.0);
@@ -119,10 +118,11 @@ public class NaturalPosturePrivilegedConfigurationManager
       pPoseSpineYawGains.setZeta(1.2);
       pPoseSpineYawGains.createDerivativeGainUpdater(true);
 
-      pPoseShoulderGains.setKp(80.0);
-      pPoseShoulderGains.setZeta(0.7);
+      pPoseShoulderGains.setKp(50.0);
+      pPoseShoulderGains.setZeta(1.0);
       pPoseShoulderGains.createDerivativeGainUpdater(true);
 
+      pPoseShoulderPitchWeight.set(5.0);
       pPoseElbowWeight.set(10.0);
       pPoseElbowGains.setKp(30.0);
       pPoseElbowGains.setZeta(0.4);
@@ -137,7 +137,7 @@ public class NaturalPosturePrivilegedConfigurationManager
       pPoseHipGains.setZeta(1.0);
       pPoseHipGains.createDerivativeGainUpdater(true);
 
-      pPoseKneeGains.setKp(100.0);
+      pPoseKneeGains.setKp(200.0);
       pPoseKneeGains.setZeta(1.0);
       pPoseKneeGains.createDerivativeGainUpdater(true);
 
@@ -162,8 +162,11 @@ public class NaturalPosturePrivilegedConfigurationManager
       computeSpineControlCommands();
       updatePrivilegedConfigurationCommand();
 
-      feedbackControlCommandList.addCommand(spinePitchCommand);
-      feedbackControlCommandList.addCommand(spineRollCommand);
+      if (useSpineRollPitchJointCommands.getBooleanValue())
+      {
+         feedbackControlCommandList.addCommand(spinePitchCommand);
+         feedbackControlCommandList.addCommand(spineRollCommand);
+      }
 
       inverseDynamicsCommandList.addCommand(privilegedConfigurationCommand);
    }
@@ -217,6 +220,7 @@ public class NaturalPosturePrivilegedConfigurationManager
          createAndAddJointPrivilegedConfigurationParameters(side,
                                                             ArmJointName.SHOULDER_PITCH,
                                                             side.negateIfRightSide(pPoseShoulderPitch.getDoubleValue()),
+                                                            pPoseShoulderPitchWeight.getDoubleValue(),
                                                             pPoseShoulderGains);
          createAndAddJointPrivilegedConfigurationParameters(side,
                                                             ArmJointName.SHOULDER_ROLL,

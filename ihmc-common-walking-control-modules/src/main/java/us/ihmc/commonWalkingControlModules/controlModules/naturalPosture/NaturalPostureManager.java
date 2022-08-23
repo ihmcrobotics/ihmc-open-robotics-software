@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.naturalPosture;
 
+import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.configurations.HumanoidRobotNaturalPosture;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 //import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.QPObjectiveCommand;
@@ -89,6 +90,11 @@ public class NaturalPostureManager
    {
 //      requestState(NaturalPostureControlMode.WALKING_CONTROLLER);
       robotNaturalPosture.initialize();
+   }
+
+   public void computeAchievedAcceleration(DMatrixRMaj jointAccelerations)
+   {
+      walkingManager.computeAchievedAcceleration(jointAccelerations);
    }
    
 //   private void requestState(NaturalPostureControlMode state)

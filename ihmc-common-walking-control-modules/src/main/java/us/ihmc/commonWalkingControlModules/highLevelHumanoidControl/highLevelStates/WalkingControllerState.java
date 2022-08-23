@@ -83,6 +83,7 @@ public class WalkingControllerState extends HighLevelControllerState
 
       deactivateAccelerationIntegrationInWBC = highLevelControllerParameters.deactivateAccelerationIntegrationInTheWBC();
 
+      controllerCore.addSolutionListener(managerFactory.getOrCreateNaturalPostureManager()::computeAchievedAcceleration);
 
 
 //      linearMomentumRateControlModule = new LinearMomentumRateControlModule(controllerToolbox, walkingControllerParameters, registry);

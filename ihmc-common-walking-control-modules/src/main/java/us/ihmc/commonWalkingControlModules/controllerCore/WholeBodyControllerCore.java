@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controllerCore;
 
+import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandInterface;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
@@ -23,6 +24,10 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 public class WholeBodyControllerCore
 {
@@ -283,6 +288,13 @@ public class WholeBodyControllerCore
       controllerCoreFeedbackControlTimer.stopMeasurement();
    }
 
+   private final List<Consumer<DMatrixRMaj>> solutionCallbacks = new ArrayList<>();
+
+   public void addSolutionListener(Consumer<DMatrixRMaj> solutionLister)
+   {
+      solutionCallbacks.add(solutionLister);
+   }
+
    private void doInverseDynamics()
    {
       if (internalCommandInput.isReinitializationRequested())
@@ -292,6 +304,9 @@ public class WholeBodyControllerCore
       inverseDynamicsSolver.submitResetIntegratorRequests(jointDesiredOutputList);
       inverseDynamicsSolver.compute();
       feedbackController.computeAchievedAccelerations();
+
+      for (int i = 0; i < solutionCallbacks.size(); i++)
+         solutionCallbacks.get(i).accept(inverseDynamicsSolver.getMomentumModuleSolution().getJointAccelerations());
 
       jointDesiredOutputList.completeWith(inverseDynamicsSolver.getOutput());
       if (rootJointDesiredConfigurationData != null)

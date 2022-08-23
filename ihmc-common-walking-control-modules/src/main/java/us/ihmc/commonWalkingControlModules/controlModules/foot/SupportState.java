@@ -567,7 +567,8 @@ public class SupportState extends AbstractFootControlState
    @Override
    public SpatialFeedbackControlCommand getFeedbackControlCommand()
    {
-      return spatialFeedbackControlCommand;
+      return null;
+//      return spatialFeedbackControlCommand;
    }
 
    public void setWeights(Vector3DReadOnly angularWeight, Vector3DReadOnly linearWeight)
