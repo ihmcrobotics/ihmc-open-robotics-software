@@ -21,6 +21,8 @@ import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
 import us.ihmc.robotics.referenceFrames.OrientationFrame;
@@ -45,7 +47,6 @@ public class ControllerNaturalPostureManager
 
    HumanoidRobotNaturalPosture robotNaturalPosture;
    private final DMatrixRMaj npQPobjective = new DMatrixRMaj(1, 1);
-   private final DMatrixRMaj tempVector = new DMatrixRMaj(3, 1);
    private final DMatrixRMaj npQPweightMatrix = new DMatrixRMaj(1, 1);
    private final DMatrixRMaj npQPselectionMatrix = new DMatrixRMaj(1, 1);
    private final DMatrixRMaj yprDDot = new DMatrixRMaj(3, 1);
@@ -92,9 +93,6 @@ public class ControllerNaturalPostureManager
    // These are the variables when using the euler angle error based controller
    private final YoFrameVector3D yoDirectEulerProportionalFeedback;
    private final YoFrameVector3D yoDirectEulerDerivativeFeedback;
-
-   private final YoFrameVector3D yoDirectProportionalFeedback;
-   private final YoFrameVector3D yoDirectDerivativeFeedback;
 
    private final YoDouble npYawAcceleration;
    private final YoDouble npPitchAcceleration;
@@ -146,6 +144,7 @@ public class ControllerNaturalPostureManager
    private final FullHumanoidRobotModel fullRobotModel;
    private final ReferenceFrame pelvisZUpFrame;
 
+
    public ControllerNaturalPostureManager(HumanoidRobotNaturalPosture robotNaturalPosture,
                                           PID3DGainsReadOnly gains,
                                           HighLevelHumanoidControllerToolbox controllerToolbox,
@@ -174,45 +173,41 @@ public class ControllerNaturalPostureManager
          yoProportionalFeedback = new YoFrameVector3D("npProportionalFeedback", ReferenceFrame.getWorldFrame(), registry);
          yoDerivativeFeedback = new YoFrameVector3D("npDerivativeFeedback",  ReferenceFrame.getWorldFrame(), registry);
 
-         feedbackNPAcceleration = new YoFrameVector3D("feedbackNPAcceleration", naturalPostureFrame, registry);
+         feedbackNPAcceleration = new YoFrameVector3D("feedbackNPAcceleration", ReferenceFrame.getWorldFrame(), registry);
 
          errorRotationVector = new YoFrameVector3D("npErrorRotationVector", naturalPostureFrame, registry);
          errorAngularVelocity = new YoFrameVector3D("npErrorAngularVelocity", naturalPostureFrame, registry);
       }
+      else
+      {
+         yoProportionalFeedback = null;
+         yoDerivativeFeedback = null;
+
+         feedbackNPAcceleration = null;
+
+         errorRotationVector = null;
+      }
+
       if (!useAxisAngleFeedbackController || createBothFeedbackControllers)
       {
          yoDirectEulerProportionalFeedback = new YoFrameVector3D("npDirectEulerProportionalFeedback", ReferenceFrame.getWorldFrame(), registry);
          yoDirectEulerDerivativeFeedback = new YoFrameVector3D("npDirectEulerDerivativeFeedback", ReferenceFrame.getWorldFrame(), registry);
 
-         yoDirectProportionalFeedback = new YoFrameVector3D("npDirectProportionalFeedback", ReferenceFrame.getWorldFrame(), registry);
-         yoDirectDerivativeFeedback = new YoFrameVector3D("npDirectDerivativeFeedback", ReferenceFrame.getWorldFrame(), registry);
-
          npYawAcceleration = new YoDouble("npYawAcceleration", registry);
          npPitchAcceleration = new YoDouble("npPitchAcceleration", registry);
          npRollAcceleration = new YoDouble("npRollAcceleration", registry);
       }
-      if (!createBothFeedbackControllers)
+      else
       {
-         if (useAxisAngleFeedbackController)
-         {
 
-            yoDirectEulerProportionalFeedback = null;
-            yoDirectEulerDerivativeFeedback = null;
+         yoDirectEulerProportionalFeedback = null;
+         yoDirectEulerDerivativeFeedback = null;
 
-            npYawAcceleration = null;
-            npPitchAcceleration = null;
-            npRollAcceleration = null;
-         }
-         else
-         {
-            yoProportionalFeedback = null;
-            yoDerivativeFeedback = null;
-
-            feedbackNPAcceleration = null;
-
-            errorRotationVector = null;
-         }
+         npYawAcceleration = null;
+         npPitchAcceleration = null;
+         npRollAcceleration = null;
       }
+
       //      this.gains = gains;
       fullRobotModel = controllerToolbox.getFullRobotModel();
 
@@ -329,9 +324,8 @@ public class ControllerNaturalPostureManager
          yoProportionalFeedback.setMatchingFrame(proportionalFeedback);
          yoDerivativeFeedback.setMatchingFrame(derivativeFeedback);
 
-         feedbackNPAcceleration.add(proportionalFeedback, derivativeFeedback);
+         feedbackNPAcceleration.add(yoProportionalFeedback, yoDerivativeFeedback);
 
-         //         yoCurrentNaturalPosture.transform(feedbackNPAcceleration, yoAltNPQPObjective);
          yoAltNPQPObjective.set(feedbackNPAcceleration);
       }
 
@@ -347,8 +341,6 @@ public class ControllerNaturalPostureManager
          npYawAcceleration.set(yoDirectEulerProportionalFeedback.getZ() + yoDirectEulerDerivativeFeedback.getZ());
          npPitchAcceleration.set(yoDirectEulerProportionalFeedback.getY() + yoDirectEulerDerivativeFeedback.getY());
          npRollAcceleration.set(yoDirectEulerProportionalFeedback.getX() + yoDirectEulerDerivativeFeedback.getX());
-
-
 
          double sbe = Math.sin(npPitch.getValue());
          double cbe = Math.cos(npPitch.getValue());
@@ -383,21 +375,6 @@ public class ControllerNaturalPostureManager
          CommonOps_DDRM.mult(Dnp, yprDDot, npQPobjective); // GMN: missing D-dot term (since InvDyn takes accels)
 
          yoNPQPObjective.set(npQPobjective);
-
-         yprDDot.set(0, 0, yoDirectEulerProportionalFeedback.getZ());
-         yprDDot.set(1, 0, yoDirectEulerProportionalFeedback.getY());
-         yprDDot.set(2, 0, yoDirectEulerProportionalFeedback.getX());
-
-         CommonOps_DDRM.mult(Dnp, yprDDot, tempVector);
-         yoDirectProportionalFeedback.set(tempVector);
-
-
-         yprDDot.set(0, 0, yoDirectEulerDerivativeFeedback.getZ());
-         yprDDot.set(1, 0, yoDirectEulerDerivativeFeedback.getY());
-         yprDDot.set(2, 0, yoDirectEulerDerivativeFeedback.getX());
-
-         CommonOps_DDRM.mult(Dnp, yprDDot, tempVector);
-         yoDirectDerivativeFeedback.set(tempVector);
       }
 
 
@@ -444,7 +421,6 @@ public class ControllerNaturalPostureManager
 
       // Change the feedback term back to the natural posture frame, as that's the frame of expression for the task Jacobian
       feedbackTermToPack.changeFrame(naturalPostureFrame);
-
    }
 
    private void computeDerivativeNPFeedback(FrameVector3D feedbackTermToPack)
