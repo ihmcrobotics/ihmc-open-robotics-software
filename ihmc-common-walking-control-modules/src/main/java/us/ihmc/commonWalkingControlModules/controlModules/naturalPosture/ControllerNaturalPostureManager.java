@@ -27,8 +27,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ControllerNaturalPostureManager
 {
-   private static final boolean useAxisAngleFeedbackController = true;
-
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
 
@@ -44,7 +42,6 @@ public class ControllerNaturalPostureManager
    private final DMatrixRMaj Dnp = new DMatrixRMaj(3, 3);
 
    private final YoVector3D yoNPQPObjective = new YoVector3D("npQPObjective", registry);
-   private final YoVector3D yoAltNPQPObjective = new YoVector3D("altNpQPObjective", registry);
 
    private final YoDouble npYaw = new YoDouble("npYaw", registry);
    private final YoDouble npPitch = new YoDouble("npPitch", registry);
@@ -71,19 +68,9 @@ public class ControllerNaturalPostureManager
    private final YoDouble npPitchDesired = new YoDouble("npPitchDesired", registry);
    private final YoDouble npRollDesired = new YoDouble("npRollDesired", registry);
 
-
    private final YoFrameQuaternion yoCurrentNaturalPosture = new YoFrameQuaternion("currentNaturalPosture", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameQuaternion yoDesiredNaturalPosture = new YoFrameQuaternion("desiredNaturalPosture", ReferenceFrame.getWorldFrame(), registry);
    private final FrameQuaternion desiredNaturalPosture = new FrameQuaternion();
-
-
-   // These are the variables used when using the axis angle error based controller;
-   private final YoFrameVector3D yoProportionalFeedback;
-   private final YoFrameVector3D yoDerivativeFeedback;
-
-   private final YoFrameVector3D feedbackNPAcceleration;
-
-   private final YoFrameVector3D errorRotationVector;
 
    // These are the variables when using the euler angle error based controller
    private final YoFrameVector3D yoDirectProportionalFeedback;
@@ -154,38 +141,12 @@ public class ControllerNaturalPostureManager
       npPitchVelocity = new FilteredVelocityYoVariable("npPitchVelocity", "", npVelocityAlpha, npPitch, controlDT, registry);
       npRollVelocity = new FilteredVelocityYoVariable("npRollVelocity", "", npVelocityAlpha, npRoll, controlDT, registry);
 
-      if (useAxisAngleFeedbackController)
-      {
-         yoProportionalFeedback = new YoFrameVector3D("npProportionalFeedback", ReferenceFrame.getWorldFrame(), registry);
-         yoDerivativeFeedback = new YoFrameVector3D("npDerivativeFeedback", ReferenceFrame.getWorldFrame(), registry);
-
-         feedbackNPAcceleration = new YoFrameVector3D("feedbackNPAcceleration", ReferenceFrame.getWorldFrame(), registry);
-
-         errorRotationVector = new YoFrameVector3D("npErrorRotationVector", ReferenceFrame.getWorldFrame(), registry);
-
-         yoDirectProportionalFeedback = null;
-         yoDirectDerivativeFeedback = null;
-
-         npYawAcceleration = null;
-         npPitchAcceleration = null;
-         npRollAcceleration = null;
-      }
-      else
-      {
-         yoProportionalFeedback = null;
-         yoDerivativeFeedback = null;
-
-         feedbackNPAcceleration = null;
-
-         errorRotationVector = null;
-
          yoDirectProportionalFeedback = new YoFrameVector3D("npDirectProportionalFeedback", ReferenceFrame.getWorldFrame(), registry);
          yoDirectDerivativeFeedback = new YoFrameVector3D("npDirectDerivativeFeedback", ReferenceFrame.getWorldFrame(), registry);
 
          npYawAcceleration = new YoDouble("npYawAcceleration", registry);
          npPitchAcceleration = new YoDouble("npPitchAcceleration", registry);
          npRollAcceleration = new YoDouble("npRollAcceleration", registry);
-      }
       //      this.gains = gains;
       fullRobotModel = controllerToolbox.getFullRobotModel();
 
@@ -343,11 +304,8 @@ public class ControllerNaturalPostureManager
       Dnp.set(1,0, cbe*sal); Dnp.set(1,1, cal);  Dnp.set(1,2,0.0);
       Dnp.set(2,0, cbe*cal); Dnp.set(2,1,-sal);  Dnp.set(2,2,0.0);
 
-      // TODO is this correct? I'm not sure.
-      if (useAxisAngleFeedbackController)
-         yoCurrentNaturalPosture.transform(feedbackNPAcceleration, yoAltNPQPObjective);
-      // GMN: derivative terms???
 
+      // GMN: derivative terms???
       CommonOps_DDRM.mult(Dnp, yprDDot, npQPobjective); // GMN: missing D-dot term (since InvDyn takes accels)
 
       yoNPQPObjective.set(npQPobjective);
