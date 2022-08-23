@@ -156,7 +156,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
                                                                                                                                 .getHandGraphicToHandFrameTransform(
                                                                                                                                       side));
                   interactableHand.create(collisionLink, handGraphicFrame, collisionFrame, handControlFrame, modelFileName, baseUI.getPrimary3DPanel());
-                  armSetpointManager.getDesiredHandControlPoseSuppliers().put(side, interactableHand::getPose);
+                  armSetpointManager.getDesiredHandControlFramePoseSuppliers().put(side, interactableHand::getPose);
                   // TODO this should probably not handle the space event!
                   // This sends a command to the controller.
                   interactableHand.setOnSpacePressed(armSetpointManager.getSubmitDesiredArmSetpointsCallback(side));
@@ -258,6 +258,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
 
    public void renderImGuiWidgets()
    {
+      armSetpointManager.renderImGuiWidgets();
       ImGui.checkbox("Interactables enabled", interactablesEnabled);
       ImGui.sameLine();
       if (ImGui.button(labels.get("Delete all")))
