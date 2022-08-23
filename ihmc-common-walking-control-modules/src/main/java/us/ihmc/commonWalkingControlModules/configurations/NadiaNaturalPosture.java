@@ -382,17 +382,17 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
    public void computeNaturalPosture(double[] q, Orientation3DReadOnly Q_world_base)
    {
 	   // Testing -- do local yaw control
-      Quaternion Q_world_base_with_zero_yaw = new Quaternion(Q_world_base);
-      if (trackingLocalYaw) {
-         Q_world_base_with_zero_yaw.setUnsafe(Q_world_base_with_zero_yaw.getX(), Q_world_base_with_zero_yaw.getY(), 0, Q_world_base_with_zero_yaw.getS());
-         Q_world_base_with_zero_yaw.normalize();
-      }
+//      Quaternion Q_world_base_with_zero_yaw = new Quaternion(Q_world_base);
+//      if (trackingLocalYaw) {
+//         Q_world_base_with_zero_yaw.setUnsafe(Q_world_base_with_zero_yaw.getX(), Q_world_base_with_zero_yaw.getY(), 0, Q_world_base_with_zero_yaw.getS());
+//         Q_world_base_with_zero_yaw.normalize();
+//      }
 	   
       // Get the NP quaternion r.t. the base(pelvis) frame:
       computeQuaternionNPrtBase(q, this.Q_Base_NP);
 
       // Express the NP quaternion in the world-frame:
-      this.Q_World_NP.set(Q_world_base_with_zero_yaw);
+      this.Q_World_NP.set(Q_world_base);
       this.Q_World_NP.multiply(this.Q_Base_NP);
 
       // Get the NP quaternion jacobian r.t. the base(pelvis) frame:
@@ -415,7 +415,7 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
          originPose.changeFrame(ReferenceFrame.getWorldFrame());
          yoQuaternionNPrtWorld.set(Q_World_NP);
          originNPpelvis.set(originPose);
-         yoQuaternionIdent.set(Q_world_base_with_zero_yaw);
+         yoQuaternionIdent.set(Q_world_base);
          originPelvis.set(originPose);
       }
    }
@@ -479,8 +479,10 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
       // Transform the quaternion jacobian to omega jacobian, and insert it: 
       CommonOps_DDRM.mult(E, jacobianQuaternionNPrtBase, this.jacobianOmegaNPrtBase);
       for (int i = 0; i < 3; i++)
+      {
          for (int j = 0; j < NumDoFs; j++)
             jacobianToPack.set(i, j + 6, 2.0 * this.jacobianOmegaNPrtBase.get(i + 1, j)); // for omega NP rt & ewrt NP-frame
+      }
 
       //      // [Testing] not use the x y of NP.
       //      for (int i = 0; i < 2; i++)

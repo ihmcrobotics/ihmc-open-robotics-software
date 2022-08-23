@@ -23,9 +23,18 @@ public interface HumanoidRobotNaturalPosture
 
    public abstract void compute(double[] q, Orientation3DReadOnly Qbase);
 
+   /**
+    * This function returns the natural posture quaternion in the world.
+    */
    public abstract Quaternion getNaturalPostureQuaternion();
 
+   /**
+    * This function returns the natural posture quaternion w.r.t the base of the robot (typically the pelvis).
+    */
    public abstract Quaternion getNaturalPostureQuaternionrtBase();
-   
+
+   /**
+    *    This returns [Jacobian] -> omega_NP_rt_world_ewrt_NP = [Jacobian] * [omega_Base_rt_world_ewrt_Base; q_dot]
+    */
    public abstract DMatrixRMaj getNaturalPostureJacobian();
 }
