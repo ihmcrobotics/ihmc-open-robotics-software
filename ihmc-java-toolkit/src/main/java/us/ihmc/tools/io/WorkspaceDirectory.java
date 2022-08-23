@@ -119,4 +119,9 @@ public class WorkspaceDirectory
    {
       return pathNecessaryForResourceExploring;
    }
+
+   public WorkspaceFile file(String subsequentPathToFile)
+   {
+      return new WorkspaceFile(this, subsequentPathToFile);
+   }
 }
