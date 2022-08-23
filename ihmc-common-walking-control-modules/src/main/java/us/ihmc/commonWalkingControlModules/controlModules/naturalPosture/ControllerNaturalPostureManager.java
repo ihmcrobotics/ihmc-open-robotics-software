@@ -18,11 +18,10 @@ import us.ihmc.euclid.rotationConversion.RotationMatrixConversion;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tools.YawPitchRollTools;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
-import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
-import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
 import us.ihmc.robotics.referenceFrames.OrientationFrame;
@@ -54,7 +53,7 @@ public class ControllerNaturalPostureManager
    private final RotationMatrix eulerAngleToBodyAxisTransform = new RotationMatrix();
 
    private final YoVector3D yoNPQPObjective = new YoVector3D("npQPObjective", registry);
-   private final YoVector3D yoAltNPQPObjective = new YoVector3D("altNpQPObjective", registry);
+   private final YoVector3D yoAxisAngleNPQPObjective = new YoVector3D("axisAngleNpQPObjective", registry);
 
    private final YoDouble npYaw = new YoDouble("npYaw", registry);
    private final YoDouble npPitch = new YoDouble("npPitch", registry);
@@ -110,9 +109,9 @@ public class ControllerNaturalPostureManager
    private final YoDouble pelvisQPWeightY = new YoDouble("pelvisQPWeightY", registry);
    private final YoDouble pelvisQPWeightZ = new YoDouble("pelvisQPWeightZ", registry);
 
-   private final YoDouble pPosePelvisYaw = new YoDouble("pPosePelvisYaw", registry);
-   private final YoDouble pPosePelvisPitch = new YoDouble("pPosePelvisPitch", registry);
-   private final YoDouble pPosePelvisRoll = new YoDouble("pPosePelvisRoll", registry);
+   private final YoFrameYawPitchRoll pPosePelvis = new YoFrameYawPitchRoll("pPosePelvis", ReferenceFrame.getWorldFrame(), registry);
+   private final FrameQuaternion desiredPelvisPose = new FrameQuaternion();
+
    private final YoDouble pPosePelvisYawKp = new YoDouble("pPosePelvisYawKp", registry);
    private final YoDouble pPosePelvisPitchKp = new YoDouble("pPosePelvisPitchKp", registry);
    private final YoDouble pPosePelvisRollKp = new YoDouble("pPosePelvisRollKp", registry);
@@ -120,29 +119,19 @@ public class ControllerNaturalPostureManager
    private final YoDouble pPosePelvisPitchKdFactor = new YoDouble("pPosePelvisPitchKdFactor", registry);
    private final YoDouble pPosePelvisRollKdFactor = new YoDouble("pPosePelvisRollKdFactor", registry);
 
+   private final YoVector3D yoPelvisProportionalFeedback = new YoVector3D("pelvisProportionalFeedback", registry);
+   private final YoVector3D yoPelvisDerivativeFeedback = new YoVector3D("pelvisDerivativeFeedback", registry);
    private final YoVector3D yoPelvisQPObjective = new YoVector3D("pelvisQPObjective", registry);
 
-   private final DMatrixRMaj pelvisQPobjective = new DMatrixRMaj(3, 1);
-   private final DMatrixRMaj pelvisQPjacobian = new DMatrixRMaj(1, 1);
-   private final DMatrixRMaj pelvisQPweightMatrix = new DMatrixRMaj(1, 1);
    private final DMatrixRMaj pelvisQPselectionMatrix = new DMatrixRMaj(1, 1);
-   private final YawPitchRoll pelvisYPR = new YawPitchRoll();
-   private final DMatrixRMaj pelvisYPRdot = new DMatrixRMaj(3, 1);
-   private final FrameVector3D pelvisOmegaVec = new FrameVector3D();
-   private final DMatrixRMaj pelvisOmega = new DMatrixRMaj(3, 1);
-   //   private final DMatrixRMaj pelvisAlpha = new DMatrixRMaj(3,1);
-   private final DMatrixRMaj Dpelvis = new DMatrixRMaj(3, 3);
-   private final DMatrixRMaj invDpelvis = new DMatrixRMaj(3, 3);
 
-   private final YoDouble pelvisYawAcceleration = new YoDouble("pelvisYawAcceleration", registry);
-   private final YoDouble pelvisPitchAcceleration = new YoDouble("pelvisPitchAcceleration", registry);
-   private final YoDouble pelvisRollAcceleration = new YoDouble("pelvisRollAcceleration", registry);
+   private final FrameVector3D pelvisProportionalFeedback = new FrameVector3D();
+   private final FrameVector3D pelvisDerivativeFeedback = new FrameVector3D();
 
    private final YoBoolean doNullSpaceProjectionForNaturalPosture = new YoBoolean("doNullSpaceProjectionForNaturalPosture", registry);
    private final YoBoolean doNullSpaceProjectionForPelvis = new YoBoolean("doNullSpaceProjectionForPelvis", registry);
 
    private final FullHumanoidRobotModel fullRobotModel;
-   private final ReferenceFrame pelvisZUpFrame;
 
 
    public ControllerNaturalPostureManager(HumanoidRobotNaturalPosture robotNaturalPosture,
@@ -152,11 +141,11 @@ public class ControllerNaturalPostureManager
    {
       controlDT = controllerToolbox.getControlDT();
 
-      pelvisZUpFrame = controllerToolbox.getPelvisZUpFrame();
+      ReferenceFrame pelvisZUpFrame = controllerToolbox.getPelvisZUpFrame();
       yoCurrentNaturalPosture = new YoFrameQuaternion("currentNaturalPosture", pelvisZUpFrame, registry);
       yoDesiredNaturalPosture = new YoFrameYawPitchRoll("desiredNaturalPosture", pelvisZUpFrame, registry);
 
-      naturalPostureFrame = new OrientationFrame(yoCurrentNaturalPosture);;
+      naturalPostureFrame = new OrientationFrame(yoCurrentNaturalPosture);
 
       npVelocityBreakFrequency.addListener(v -> npVelocityAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(npVelocityBreakFrequency.getDoubleValue(),
                                                                                                                                     controlDT), false));
@@ -229,7 +218,7 @@ public class ControllerNaturalPostureManager
       double qpWeight = 5.0; //5.0;
       npQPWeightX.set(1); //1
       npQPWeightY.set(1); //1
-      npQPWeightZ.set(1);
+      npQPWeightZ.set(0.2);
 
       npKpYaw.set(50.0);
       npKpPitch.set(25.0);
@@ -244,8 +233,6 @@ public class ControllerNaturalPostureManager
       double scale2 = 1;//0.1;
 
       pelvisQPObjectiveCommand.getObjective().reshape(3, 1);
-      pelvisQPjacobian.reshape(3, 6 + fullRobotModel.getOneDoFJoints().length);
-      pelvisQPweightMatrix.reshape(3, 3);
       pelvisQPselectionMatrix.reshape(3, 3);
       CommonOps_DDRM.setIdentity(pelvisQPselectionMatrix);
 
@@ -253,9 +240,8 @@ public class ControllerNaturalPostureManager
       pelvisQPWeightY.set(1.0 * scale1);
       pelvisQPWeightZ.set(1.0 * scale1);
 
-      pPosePelvisYaw.set(0.0);
-      pPosePelvisPitch.set(0.02);
-      pPosePelvisRoll.set(0.0);
+      pPosePelvis.setYawPitchRoll(0.0, 0.02, 0.0);
+
       pPosePelvisYawKp.set(1000.0 * scale2);
       pPosePelvisPitchKp.set(3000 * scale2);
       pPosePelvisRollKp.set(1500.0 * scale2);
@@ -305,14 +291,9 @@ public class ControllerNaturalPostureManager
       npPitch.set(yoCurrentNaturalPosture.getPitch());
       npRoll.set(yoCurrentNaturalPosture.getRoll());
 
-      //      npYawDesired.set(midFeetZUpFrame.getTransformToWorldFrame().getRotation().getYaw());
-
       npYawVelocity.update();
       npPitchVelocity.update();
       npRollVelocity.update();
-
-      //      double[] kp = gains.getProportionalGains();
-      //      double[] kp = new double[] {100.0, 0.0, 0.0};
 
       if (useAxisAngleFeedbackController || createBothFeedbackControllers)
       {
@@ -326,7 +307,7 @@ public class ControllerNaturalPostureManager
 
          feedbackNPAcceleration.add(yoProportionalFeedback, yoDerivativeFeedback);
 
-         yoAltNPQPObjective.set(feedbackNPAcceleration);
+         yoAxisAngleNPQPObjective.set(feedbackNPAcceleration);
       }
 
       if (!useAxisAngleFeedbackController || createBothFeedbackControllers)
@@ -384,7 +365,7 @@ public class ControllerNaturalPostureManager
       naturalPostureControlCommand.setDoNullSpaceProjection(doNullSpaceProjectionForNaturalPosture.getBooleanValue());
       if (useAxisAngleFeedbackController)
       {
-         yoAltNPQPObjective.get(naturalPostureControlCommand.getObjective());
+         yoAxisAngleNPQPObjective.get(naturalPostureControlCommand.getObjective());
       }
       else
       {
@@ -458,62 +439,68 @@ public class ControllerNaturalPostureManager
    //      return naturalPostureControlCommand;
    //   }
 
+
+
    // Implements a YPR servo on the pelvis, which is then used for the privileged
    // pose of the pelvis (via task null-space projection)
    private void pelvisPrivilegedPoseQPObjectiveCommand()
    {
-      pelvisQPweightMatrix.set(0, 0, pelvisQPWeightX.getValue());
-      pelvisQPweightMatrix.set(1, 1, pelvisQPWeightY.getValue());
-      pelvisQPweightMatrix.set(2, 2, pelvisQPWeightZ.getValue());
+      RigidBodyBasics pelvis = fullRobotModel.getPelvis();
 
-      // Get current pelvis YPR and omega:
-      pelvisYPR.set(fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToWorldFrame().getRotation());
-      fullRobotModel.getPelvis().getBodyFixedFrame().getTwistOfFrame().getAngularPart().get(pelvisOmega);
+      //---- Compute the proportional feedback ----//
+      desiredPelvisPose.setIncludingFrame(pPosePelvis);
+      desiredPelvisPose.changeFrame(pelvis.getBodyFixedFrame());
 
-      double sbe = Math.sin(pelvisYPR.getPitch());
-      double cbe = Math.cos(pelvisYPR.getPitch());
-      double sal = Math.sin(pelvisYPR.getRoll());
-      double cal = Math.cos(pelvisYPR.getRoll());
-      Dpelvis.set(0, 0, -sbe);
-      Dpelvis.set(0, 1, 0.0);
-      Dpelvis.set(0, 2, 1.0);
-      Dpelvis.set(1, 0, cbe * sal);
-      Dpelvis.set(1, 1, cal);
-      Dpelvis.set(1, 2, 0.0);
-      Dpelvis.set(2, 0, cbe * cal);
-      Dpelvis.set(2, 1, -sal);
-      Dpelvis.set(2, 2, 0.0);
+      desiredPelvisPose.normalizeAndLimitToPi();
+      desiredPelvisPose.getRotationVector(pelvisProportionalFeedback);
 
-      CommonOps_DDRM.invert(Dpelvis, invDpelvis);
-      CommonOps_DDRM.mult(invDpelvis, pelvisOmega, pelvisYPRdot); // pelvis YPR rates
+      // change to the world frame, as that's the frame of the gains.
+      pelvisProportionalFeedback.changeFrame(ReferenceFrame.getWorldFrame());
 
-      // The pelvis equilibrium pose servo:
-      pelvisYawAcceleration.set(pPosePelvisYawKp.getValue() * (pPosePelvisYaw.getValue() - pelvisYPR.getYaw())
-                                - pPosePelvisYawKdFactor.getValue() * pPosePelvisYawKp.getValue() * pelvisYPRdot.get(0, 0));
-      pelvisPitchAcceleration.set(pPosePelvisPitchKp.getValue() * (pPosePelvisPitch.getValue() - pelvisYPR.getPitch())
-                                  - pPosePelvisPitchKdFactor.getValue() * pPosePelvisPitchKp.getValue() * pelvisYPRdot.get(1, 0));
-      pelvisRollAcceleration.set(pPosePelvisRollKp.getValue() * (pPosePelvisRoll.getValue() - pelvisYPR.getRoll())
-                                 - pPosePelvisRollKdFactor.getValue() * pPosePelvisRollKp.getValue() * pelvisYPRdot.get(2, 0));
+      // These are the roll-pitch-yaw gains expressed in the world
+      tempGainMatrix.setM00(pPosePelvisRollKp.getDoubleValue());
+      tempGainMatrix.setM11(pPosePelvisPitchKp.getDoubleValue());
+      tempGainMatrix.setM22(pPosePelvisYawKp.getDoubleValue());
 
-      yprDDot.set(0, 0, pelvisYawAcceleration.getValue());
-      yprDDot.set(1, 0, pelvisPitchAcceleration.getValue());
-      yprDDot.set(2, 0, pelvisRollAcceleration.getValue());
+      tempGainMatrix.transform(pelvisProportionalFeedback);
 
-      CommonOps_DDRM.mult(Dpelvis, yprDDot, pelvisQPobjective); // GMN: missing D-dot*yprDot term
+      // change feedback back to pelvis frame
+      pelvisProportionalFeedback.changeFrame(pelvis.getBodyFixedFrame());
 
-      yoPelvisQPObjective.set(pelvisQPobjective);
+      //---- Compute the derivative feedback ----//
+      pelvisDerivativeFeedback.setIncludingFrame(fullRobotModel.getPelvis().getBodyFixedFrame().getTwistOfFrame().getAngularPart());
+      pelvisDerivativeFeedback.scale(-1.0);
 
-      pelvisQPjacobian.zero(); // GMN: necessary??
-      pelvisQPjacobian.set(0, 0, 1.0);
-      pelvisQPjacobian.set(1, 1, 1.0);
-      pelvisQPjacobian.set(2, 2, 1.0);
+      pelvisDerivativeFeedback.changeFrame(ReferenceFrame.getWorldFrame());
 
-      // Populate the QPObjectiveCommand:
+      // These are the roll-pitch-yaw gains expressed in the world
+      tempGainMatrix.setM00(pPosePelvisRollKp.getDoubleValue() * pPosePelvisRollKdFactor.getValue());
+      tempGainMatrix.setM11(pPosePelvisPitchKp.getDoubleValue() * pPosePelvisPitchKdFactor.getValue());
+      tempGainMatrix.setM22(pPosePelvisYawKp.getDoubleValue() * pPosePelvisYawKdFactor.getValue());
+
+      tempGainMatrix.transform(pelvisDerivativeFeedback);
+
+      // change feedback back to pelvis frame
+      pelvisDerivativeFeedback.changeFrame(pelvis.getBodyFixedFrame());
+
+      // add the feedback terms in
+      yoPelvisProportionalFeedback.set(pelvisProportionalFeedback);
+      yoPelvisDerivativeFeedback.set(pelvisDerivativeFeedback);
+      yoPelvisQPObjective.add(yoPelvisProportionalFeedback, yoPelvisDerivativeFeedback);
+
+      //---- Populate the QPObjectiveCommand:
       yoPelvisQPObjective.get(pelvisQPObjectiveCommand.getObjective());
       pelvisQPObjectiveCommand.setDoNullSpaceProjection(doNullSpaceProjectionForPelvis.getBooleanValue());
-      pelvisQPObjectiveCommand.getJacobian().set(pelvisQPjacobian);
+
+      pelvisQPObjectiveCommand.getJacobian().reshape(3, 3);
+      CommonOps_DDRM.setIdentity(pelvisQPObjectiveCommand.getJacobian());
+
+      pelvisQPObjectiveCommand.getWeightMatrix().reshape(3, 3);
+      pelvisQPObjectiveCommand.getWeightMatrix().set(0, 0, pelvisQPWeightX.getValue());
+      pelvisQPObjectiveCommand.getWeightMatrix().set(1, 1, pelvisQPWeightY.getValue());
+      pelvisQPObjectiveCommand.getWeightMatrix().set(2, 2, pelvisQPWeightZ.getValue());
+
       pelvisQPObjectiveCommand.getSelectionMatrix().set(pelvisQPselectionMatrix);
-      pelvisQPObjectiveCommand.getWeightMatrix().set(pelvisQPweightMatrix);
    }
 
    public InverseDynamicsCommand<?> getPelvisPrivilegedPoseCommand()
