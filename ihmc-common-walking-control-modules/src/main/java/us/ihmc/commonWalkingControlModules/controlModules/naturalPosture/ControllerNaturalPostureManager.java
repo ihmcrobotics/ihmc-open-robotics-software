@@ -18,6 +18,7 @@ import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
 import us.ihmc.robotics.referenceFrames.OrientationFrame;
+import us.ihmc.yoVariables.euclid.YoVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -26,7 +27,10 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ControllerNaturalPostureManager
 {
+   private static final boolean useAxisAngleFeedbackController = true;
+
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+
 
    private final double controlDT;
 
@@ -38,6 +42,9 @@ public class ControllerNaturalPostureManager
    private final DMatrixRMaj npQPselectionMatrix = new DMatrixRMaj(1, 1);
    private final DMatrixRMaj yprDDot = new DMatrixRMaj(3, 1);
    private final DMatrixRMaj Dnp = new DMatrixRMaj(3, 3);
+
+   private final YoVector3D yoNPQPObjective = new YoVector3D("npQPObjective", registry);
+   private final YoVector3D yoAltNPQPObjective = new YoVector3D("altNpQPObjective", registry);
 
    private final YoDouble npYaw = new YoDouble("npYaw", registry);
    private final YoDouble npPitch = new YoDouble("npPitch", registry);
@@ -64,25 +71,29 @@ public class ControllerNaturalPostureManager
    private final YoDouble npPitchDesired = new YoDouble("npPitchDesired", registry);
    private final YoDouble npRollDesired = new YoDouble("npRollDesired", registry);
 
-   private final YoDouble npYawAcceleration = new YoDouble("npYawAcceleration", registry);
-   private final YoDouble npPitchAcceleration = new YoDouble("npPitchAcceleration", registry);
-   private final YoDouble npRollAcceleration = new YoDouble("npRollAcceleration", registry);
 
    private final YoFrameQuaternion yoCurrentNaturalPosture = new YoFrameQuaternion("currentNaturalPosture", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameQuaternion yoDesiredNaturalPosture = new YoFrameQuaternion("desiredNaturalPosture", ReferenceFrame.getWorldFrame(), registry);
    private final FrameQuaternion desiredNaturalPosture = new FrameQuaternion();
 
-   private final YoFrameVector3D errorRotationVector = new YoFrameVector3D("npErrorRotationVector", ReferenceFrame.getWorldFrame(), registry);
 
-   private final YoFrameVector3D yoProportionalFeedback = new YoFrameVector3D("npProportionalFeedback", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector3D yoDerivativeFeedback = new YoFrameVector3D("npDerivativeFeedback", ReferenceFrame.getWorldFrame(), registry);
+   // These are the variables used when using the axis angle error based controller;
+   private final YoFrameVector3D yoProportionalFeedback;
+   private final YoFrameVector3D yoDerivativeFeedback;
 
-   private final YoFrameVector3D feedbackNPAcceleration = new YoFrameVector3D("feedbackNPAcceleration", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D feedbackNPAcceleration;
 
-   private final YoFrameVector3D yoDirectProportionalFeedback = new YoFrameVector3D("npDirectProportionalFeedback", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector3D yoDirectDerivativeFeedback = new YoFrameVector3D("npDirectDerivativeFeedback", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D errorRotationVector;
 
+   // These are the variables when using the euler angle error based controller
+   private final YoFrameVector3D yoDirectProportionalFeedback;
+   private final YoFrameVector3D yoDirectDerivativeFeedback;
 
+   private final YoDouble npYawAcceleration;
+   private final YoDouble npPitchAcceleration;
+   private final YoDouble npRollAcceleration;
+
+   // Temp variales
    private final FrameVector3D proportionalFeedback = new FrameVector3D();
    private final FrameVector3D derivativeFeedback = new FrameVector3D();
 
@@ -104,7 +115,10 @@ public class ControllerNaturalPostureManager
    private final YoDouble pPosePelvisYawKdFactor = new YoDouble("pPosePelvisYawKdFactor", registry);
    private final YoDouble pPosePelvisPitchKdFactor = new YoDouble("pPosePelvisPitchKdFactor", registry);
    private final YoDouble pPosePelvisRollKdFactor = new YoDouble("pPosePelvisRollKdFactor", registry);
-   private final DMatrixRMaj pelvisQPobjective = new DMatrixRMaj(1, 1);
+
+   private final YoVector3D yoPelvisQPObjective = new YoVector3D("pelvisQPObjective", registry);
+
+   private final DMatrixRMaj pelvisQPobjective = new DMatrixRMaj(3, 1);
    private final DMatrixRMaj pelvisQPjacobian = new DMatrixRMaj(1, 1);
    private final DMatrixRMaj pelvisQPweightMatrix = new DMatrixRMaj(1, 1);
    private final DMatrixRMaj pelvisQPselectionMatrix = new DMatrixRMaj(1, 1);
@@ -125,18 +139,12 @@ public class ControllerNaturalPostureManager
 
    private final FullHumanoidRobotModel fullRobotModel;
 
-   private YoDouble yoTime;
-   private final MovingReferenceFrame midFeetZUpFrame;
-
    public ControllerNaturalPostureManager(HumanoidRobotNaturalPosture robotNaturalPosture,
                                           PID3DGainsReadOnly gains,
                                           HighLevelHumanoidControllerToolbox controllerToolbox,
                                           YoRegistry parentRegistry)
    {
-      yoTime = controllerToolbox.getYoTime();
       controlDT = controllerToolbox.getControlDT();
-
-      midFeetZUpFrame = controllerToolbox.getReferenceFrames().getMidFeetZUpFrame();
 
       npVelocityBreakFrequency.addListener(v -> npVelocityAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(npVelocityBreakFrequency.getDoubleValue(), controlDT), false));
       npVelocityAlpha.addListener(v -> npVelocityBreakFrequency.set(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(npVelocityAlpha.getDoubleValue(), controlDT), false));
@@ -146,10 +154,44 @@ public class ControllerNaturalPostureManager
       npPitchVelocity = new FilteredVelocityYoVariable("npPitchVelocity", "", npVelocityAlpha, npPitch, controlDT, registry);
       npRollVelocity = new FilteredVelocityYoVariable("npRollVelocity", "", npVelocityAlpha, npRoll, controlDT, registry);
 
+      if (useAxisAngleFeedbackController)
+      {
+         yoProportionalFeedback = new YoFrameVector3D("npProportionalFeedback", ReferenceFrame.getWorldFrame(), registry);
+         yoDerivativeFeedback = new YoFrameVector3D("npDerivativeFeedback", ReferenceFrame.getWorldFrame(), registry);
+
+         feedbackNPAcceleration = new YoFrameVector3D("feedbackNPAcceleration", ReferenceFrame.getWorldFrame(), registry);
+
+         errorRotationVector = new YoFrameVector3D("npErrorRotationVector", ReferenceFrame.getWorldFrame(), registry);
+
+         yoDirectProportionalFeedback = null;
+         yoDirectDerivativeFeedback = null;
+
+         npYawAcceleration = null;
+         npPitchAcceleration = null;
+         npRollAcceleration = null;
+      }
+      else
+      {
+         yoProportionalFeedback = null;
+         yoDerivativeFeedback = null;
+
+         feedbackNPAcceleration = null;
+
+         errorRotationVector = null;
+
+         yoDirectProportionalFeedback = new YoFrameVector3D("npDirectProportionalFeedback", ReferenceFrame.getWorldFrame(), registry);
+         yoDirectDerivativeFeedback = new YoFrameVector3D("npDirectDerivativeFeedback", ReferenceFrame.getWorldFrame(), registry);
+
+         npYawAcceleration = new YoDouble("npYawAcceleration", registry);
+         npPitchAcceleration = new YoDouble("npPitchAcceleration", registry);
+         npRollAcceleration = new YoDouble("npRollAcceleration", registry);
+      }
       //      this.gains = gains;
       fullRobotModel = controllerToolbox.getFullRobotModel();
 
       this.robotNaturalPosture = robotNaturalPosture;
+      naturalPostureControlCommand.getObjective().reshape(3, 1);
+
       npQPobjective.reshape(3, 1);
       npQPweightMatrix.reshape(3, 3);
       npQPselectionMatrix.reshape(3, 3);
@@ -180,7 +222,7 @@ public class ControllerNaturalPostureManager
       double scale1 = 1;//100;
       double scale2 = 1;//0.1;
 
-      pelvisQPobjective.reshape(3, 1);
+      pelvisQPObjectiveCommand.getObjective().reshape(3, 1);
       pelvisQPjacobian.reshape(3, 6 + fullRobotModel.getOneDoFJoints().length);
       pelvisQPweightMatrix.reshape(3, 3);
       pelvisQPselectionMatrix.reshape(3, 3);
@@ -247,6 +289,43 @@ public class ControllerNaturalPostureManager
       npPitchVelocity.update();
       npRollVelocity.update();
 
+
+
+      //      double[] kp = gains.getProportionalGains();
+      //      double[] kp = new double[] {100.0, 0.0, 0.0};
+
+      if (useAxisAngleFeedbackController)
+      {
+         computeProportionalNPFeedback(proportionalFeedback);
+         computeDerivativeNPFeedback(derivativeFeedback);
+
+         yoProportionalFeedback.setMatchingFrame(proportionalFeedback);
+         yoDerivativeFeedback.setMatchingFrame(derivativeFeedback);
+
+         feedbackNPAcceleration.add(yoProportionalFeedback, yoDerivativeFeedback);
+
+         yprDDot.set(0, 0, feedbackNPAcceleration.getZ());
+         yprDDot.set(1, 0, feedbackNPAcceleration.getY());
+         yprDDot.set(2, 0, feedbackNPAcceleration.getX());
+      }
+      else
+      {
+         yoDirectProportionalFeedback.set(npRollDesired.getDoubleValue(), npPitchDesired.getDoubleValue(), npYawDesired.getDoubleValue());
+         yoDirectProportionalFeedback.sub(npRoll.getDoubleValue(), npPitch.getDoubleValue(), npYaw.getDoubleValue());
+         yoDirectProportionalFeedback.scale(npKpRoll.getDoubleValue(), npKpPitch.getDoubleValue(), npKpYaw.getDoubleValue());
+
+         yoDirectDerivativeFeedback.set(npRollVelocity.getDoubleValue(), npPitchVelocity.getDoubleValue(), npYawVelocity.getDoubleValue());
+         yoDirectDerivativeFeedback.scale(-npKdRoll.getDoubleValue(), -npKdPitch.getDoubleValue(), -npKdYaw.getDoubleValue());
+
+         npYawAcceleration.set(yoDirectProportionalFeedback.getZ() + yoDirectDerivativeFeedback.getZ());
+         npPitchAcceleration.set(yoDirectProportionalFeedback.getY() + yoDirectDerivativeFeedback.getY());
+         npRollAcceleration.set(yoDirectProportionalFeedback.getX() + yoDirectDerivativeFeedback.getX());
+
+         yprDDot.set(0, 0, npYawAcceleration.getValue());
+         yprDDot.set(1, 0, npPitchAcceleration.getValue());
+         yprDDot.set(2, 0, npRollAcceleration.getValue());
+      }
+
       double sbe = Math.sin(npPitch.getValue());
       double cbe = Math.cos(npPitch.getValue());
       double sal = Math.sin(npRoll.getValue());
@@ -264,45 +343,19 @@ public class ControllerNaturalPostureManager
       Dnp.set(1,0, cbe*sal); Dnp.set(1,1, cal);  Dnp.set(1,2,0.0);
       Dnp.set(2,0, cbe*cal); Dnp.set(2,1,-sal);  Dnp.set(2,2,0.0);
 
-      //      double[] kp = gains.getProportionalGains();
-      //      double[] kp = new double[] {100.0, 0.0, 0.0};
-
-      yoDirectProportionalFeedback.set(npRollDesired.getDoubleValue(), npPitchDesired.getDoubleValue(), npYawDesired.getDoubleValue());
-      yoDirectProportionalFeedback.sub(npRoll.getDoubleValue(), npPitch.getDoubleValue(), npYaw.getDoubleValue());
-      yoDirectProportionalFeedback.scale(npKpRoll.getDoubleValue(), npKpPitch.getDoubleValue(), npKpYaw.getDoubleValue());
-
-      yoDirectDerivativeFeedback.set(npRollVelocity.getDoubleValue(), npPitchVelocity.getDoubleValue(), npYawVelocity.getDoubleValue());
-      yoDirectDerivativeFeedback.scale(-npKdRoll.getDoubleValue(), -npKdPitch.getDoubleValue(), -npKdYaw.getDoubleValue());
-
-      npYawAcceleration.set(npKpYaw.getValue() * (npYawDesired.getValue() - npYaw.getValue()) - npKdYaw.getValue() * npYawVelocity.getValue());
-      npPitchAcceleration.set(npKpPitch.getValue() * (npPitchDesired.getValue() - npPitch.getValue()) - npKdPitch.getValue() * npPitchVelocity.getValue());
-      npRollAcceleration.set(npKpRoll.getValue() * (npRollDesired.getValue() - npRoll.getValue()) - npKdRoll.getValue() * npRollVelocity.getValue());
-
-
-      computeProportionalNPFeedback(proportionalFeedback);
-      computeDerivativeNPFeedback(derivativeFeedback);
-
-      yoProportionalFeedback.setMatchingFrame(proportionalFeedback);
-      yoDerivativeFeedback.setMatchingFrame(derivativeFeedback);
-
-      feedbackNPAcceleration.add(yoProportionalFeedback, yoDerivativeFeedback);
-
-      // TODO use these if you want to use the axis angle feedback controller
-//      yprDDot.set(0, 0, feedbackNPAcceleration.getZ());
-//      yprDDot.set(1, 0, feedbackNPAcceleration.getY());
-//      yprDDot.set(2, 0, feedbackNPAcceleration.getX());
-
-      yprDDot.set(0, 0, npYawAcceleration.getValue());
-      yprDDot.set(1, 0, npPitchAcceleration.getValue());
-      yprDDot.set(2, 0, npRollAcceleration.getValue());
-
+      // TODO is this correct? I'm not sure.
+      if (useAxisAngleFeedbackController)
+         yoCurrentNaturalPosture.transform(feedbackNPAcceleration, yoAltNPQPObjective);
       // GMN: derivative terms???
 
       CommonOps_DDRM.mult(Dnp, yprDDot, npQPobjective); // GMN: missing D-dot term (since InvDyn takes accels)
 
+      yoNPQPObjective.set(npQPobjective);
+
       // Populate the QPObjectiveCommand:
       naturalPostureControlCommand.setDoNullSpaceProjection(doNullSpaceProjectionForNaturalPosture.getBooleanValue());
-      naturalPostureControlCommand.getObjective().set(npQPobjective);
+      yoNPQPObjective.get(naturalPostureControlCommand.getObjective());
+//      naturalPostureControlCommand.getObjective().set(npQPobjective);
       naturalPostureControlCommand.getJacobian().set(robotNaturalPosture.getNaturalPostureJacobian());
       naturalPostureControlCommand.getSelectionMatrix().set(npQPselectionMatrix);
       naturalPostureControlCommand.getWeightMatrix().set(npQPweightMatrix);
@@ -363,18 +416,13 @@ public class ControllerNaturalPostureManager
 
       // Get current pelvis YPR and omega:
       pelvisYPR.set(fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToWorldFrame().getRotation());
-      pelvisOmegaVec.setIncludingFrame(fullRobotModel.getPelvis().getBodyFixedFrame().getTwistOfFrame().getAngularPart());
-      // Ugh...
-      pelvisOmega.set(0, 0, pelvisOmegaVec.getX());
-      pelvisOmega.set(1, 0, pelvisOmegaVec.getY());
-      pelvisOmega.set(2, 0, pelvisOmegaVec.getZ());
+      fullRobotModel.getPelvis().getBodyFixedFrame().getTwistOfFrame().getAngularPart().get(pelvisOmega);
 
       double sbe = Math.sin(pelvisYPR.getPitch());
       double cbe = Math.cos(pelvisYPR.getPitch());
       double sal = Math.sin(pelvisYPR.getRoll());
       double cal = Math.cos(pelvisYPR.getRoll());
-      Dpelvis.set(0, 0, -sbe);
-      Dpelvis.set(0, 1, 0.0);
+      Dpelvis.set(0, 0, -sbe); Dpelvis.set(0, 1, 0.0);
       Dpelvis.set(0, 2, 1.0);
       Dpelvis.set(1, 0, cbe * sal);
       Dpelvis.set(1, 1, cal);
@@ -400,14 +448,16 @@ public class ControllerNaturalPostureManager
 
       CommonOps_DDRM.mult(Dpelvis, yprDDot, pelvisQPobjective); // GMN: missing D-dot*yprDot term
 
+      yoPelvisQPObjective.set(pelvisQPobjective);
+
       pelvisQPjacobian.zero(); // GMN: necessary??
       pelvisQPjacobian.set(0, 0, 1.0);
       pelvisQPjacobian.set(1, 1, 1.0);
       pelvisQPjacobian.set(2, 2, 1.0);
 
       // Populate the QPObjectiveCommand:
+      yoPelvisQPObjective.get(pelvisQPObjectiveCommand.getObjective());
       pelvisQPObjectiveCommand.setDoNullSpaceProjection(doNullSpaceProjectionForPelvis.getBooleanValue());
-      pelvisQPObjectiveCommand.getObjective().set(pelvisQPobjective);
       pelvisQPObjectiveCommand.getJacobian().set(pelvisQPjacobian);
       pelvisQPObjectiveCommand.getSelectionMatrix().set(pelvisQPselectionMatrix);
       pelvisQPObjectiveCommand.getWeightMatrix().set(pelvisQPweightMatrix);
