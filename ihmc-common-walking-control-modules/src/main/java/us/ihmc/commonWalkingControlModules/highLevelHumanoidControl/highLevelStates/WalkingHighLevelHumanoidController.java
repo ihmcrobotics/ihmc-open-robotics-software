@@ -21,6 +21,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.naturalPosture.NaturalPostureManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
+import us.ihmc.commonWalkingControlModules.controlModules.naturalPosture.NaturalPosturePrivilegedConfigurationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
@@ -107,6 +108,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    private final PelvisOrientationManager pelvisOrientationManager;
    private final NaturalPostureManager naturalPostureManager;
+   private final NaturalPosturePrivilegedConfigurationManager naturalPosturePrivilegedConfigurationManager;
    private final FeetManager feetManager;
    private final BalanceManager balanceManager;
    private final CenterOfMassHeightManager comHeightManager;
@@ -170,8 +172,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final YoDouble pPoseSpineYaw = new YoDouble("pPoseSpineYaw", registry);
    private final YoDouble pPoseSpineRollKp = new YoDouble("pPoseSpineRollKp", registry);
    private final YoDouble pPoseSpineRollKdFactor = new YoDouble("pPoseSpineRollKdFactor", registry);
-   private final YoPDGains pPoseSpinePitchGains = new YoPDGains("pPoseSpinePitch", registry);
-   private final YoPDGains pPoseSpineRollGains = new YoPDGains("pPoseSpineRoll", registry);
+
    private final YoDouble pPoseSpinePitchKp = new YoDouble("pPoseSpinePitchKp", registry);
    private final YoDouble pPoseSpinePitchKdFactor = new YoDouble("pPoseSpinePitchKdFactor", registry);
    private final YoDouble pPoseSpineYawKp = new YoDouble("pPoseSpineYawKp", registry);
@@ -210,10 +211,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final String spinePitchJointName = "SPINE_Y";
    private final String spineYawJointName = "SPINE_Z";
 
-   private final YoBoolean useSpineRollPitchJointCommands = new YoBoolean("useSpineRollPitchJointCommands", registry);
-   private final JointspaceAccelerationCommand jointspaceAccelerationCommand = new JointspaceAccelerationCommand();
-   private final OneDoFJointFeedbackControlCommand spinePitchCommand = new OneDoFJointFeedbackControlCommand();
-   private final OneDoFJointFeedbackControlCommand spineRollCommand = new OneDoFJointFeedbackControlCommand();
+
 
 
    public WalkingHighLevelHumanoidController(CommandInputManager commandInputManager,
@@ -241,6 +239,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       this.pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       this.naturalPostureManager = managerFactory.getOrCreateNaturalPostureManager();
+      naturalPosturePrivilegedConfigurationManager = new NaturalPosturePrivilegedConfigurationManager(fullRobotModel, registry);
       this.feetManager = managerFactory.getOrCreateFeetManager();
 
       RigidBodyBasics head = fullRobotModel.getHead();
@@ -377,16 +376,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       pPoseElbowKp.set(30.0);
       pPoseElbowWeight.set(10.0);
 
-      useSpineRollPitchJointCommands.set(true); // Can turn off joint limit for the spine when this is true.
-      if (useSpineRollPitchJointCommands.getBooleanValue())
-      {
-         pPoseSpinePitchGains.setKp(25.0);
-         pPoseSpineRollGains.setKp(25.0);
-         pPoseSpinePitchGains.setZeta(0.7);
-         pPoseSpineRollGains.setZeta(0.7);
-         pPoseSpinePitchGains.createDerivativeGainUpdater(true);
-         pPoseSpineRollGains.createDerivativeGainUpdater(true);
-      }
 
       pPoseSpineRollKdFactor.set(0.15);
       pPoseSpinePitchKdFactor.set(0.15);
@@ -405,15 +394,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       pPoseHipYawKdFactor.set(0.2);
       pPoseKneeKp.set(100);
       pPoseKneeKdFactor.set(0.2);
-
-      OneDoFJointBasics spineRoll = fullRobotModel.getOneDoFJointByName(spineRollJointName);
-      OneDoFJointBasics spinePitch = fullRobotModel.getOneDoFJointByName(spinePitchJointName);
-
-      spinePitchCommand.clear();
-      spinePitchCommand.setJoint(spinePitch);
-
-      spineRollCommand.clear();
-      spineRollCommand.setJoint(spineRoll);
    }
 
    private StateMachine<WalkingStateEnum, WalkingState> setupStateMachine()
@@ -812,6 +792,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       if (turnOnNaturalPostureControl.getValue())
       {
          naturalPostureManager.initialize();
+         naturalPosturePrivilegedConfigurationManager.initialize();
       }
       //      balanceManager.initialize();  // already initialized, so don't run it again, or else the state machine gets reset.
       feetManager.initialize();
@@ -1004,7 +985,10 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       pelvisOrientationManager.compute();
       if (turnOnNaturalPostureControl.getValue())
+      {
          naturalPostureManager.compute();
+         naturalPosturePrivilegedConfigurationManager.compute();
+      }
 
       comHeightManager.compute(balanceManager.getDesiredICPVelocity(), desiredCoMVelocityAsFrameVector, isInDoubleSupport, omega0, feetManager);
 
@@ -1136,24 +1120,19 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       // Privileged configuration:
       updatePrivilegedConfigurationCommand();
+
+      if (turnOnNaturalPostureControl.getValue())
+      {
+         controllerCoreCommand.addFeedbackControlCommand(naturalPosturePrivilegedConfigurationManager.getFeedbackControlCommand());
+         controllerCoreCommand.addInverseDynamicsCommand(naturalPosturePrivilegedConfigurationManager.getInverseDynamicsCommand());
+      }
+      else
+      {
+
+      }
+      // FIXME remove
       controllerCoreCommand.addInverseDynamicsCommand(privilegedConfigurationCommand);
 
-      // Testing -- track spine joint x and y with highest priority
-      if (useSpineRollPitchJointCommands.getBooleanValue())
-      {
-         OneDoFJointBasics spineRoll = fullRobotModel.getOneDoFJointByName(spineRollJointName);
-         OneDoFJointBasics spinePitch = fullRobotModel.getOneDoFJointByName(spinePitchJointName);
-         spinePitchCommand.setJoint(spinePitch);
-         spinePitchCommand.setInverseDynamics(0.0, 0.0, 0.0);
-         spinePitchCommand.setGains(pPoseSpinePitchGains);
-
-         spineRollCommand.setJoint(spineRoll);
-         spineRollCommand.setInverseDynamics(0.0, 0.0, 0.0);
-         spineRollCommand.setGains(pPoseSpineRollGains);
-
-         controllerCoreCommand.addFeedbackControlCommand(spinePitchCommand);
-         controllerCoreCommand.addFeedbackControlCommand(spineRollCommand);
-      }
 
       // Joint limits:
       if (!limitCommandSent.getBooleanValue())
