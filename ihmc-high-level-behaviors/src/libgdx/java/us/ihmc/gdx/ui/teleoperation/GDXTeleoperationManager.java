@@ -27,7 +27,7 @@ import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.gdx.ui.affordances.GDXRobotWholeBodyInteractable;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXManualFootstepPlacement;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXPlannedFootstepPlacement;
-import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
+import us.ihmc.gdx.ui.affordances.GDXBallAndArrowPosePlacement;
 import us.ihmc.gdx.ui.footstepPlanner.GDXFootstepPlanning;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.gdx.ui.interactable.GDXChestOrientationSlider;
@@ -57,7 +57,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final GDXRobotLowLevelMessenger robotLowLevelMessenger;
    private final GDXFootstepPlanning footstepPlanning;
-   private final ImGuiGDXPoseGoalAffordance footstepGoal = new ImGuiGDXPoseGoalAffordance();
+   private final GDXBallAndArrowPosePlacement footstepGoal = new GDXBallAndArrowPosePlacement();
    private GDXRobotWholeBodyInteractable interactableRobot;
    private final ImGuiGDXManualFootstepPlacement manualFootstepPlacement = new ImGuiGDXManualFootstepPlacement();
    // TODO: for interactable footings from stepPlan >>
@@ -161,7 +161,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       desiredRobot.create();
 
       // TODO: Remove this stuff and use the path control ring for this
-      footstepGoal.create(baseUI, goal -> queueFootstepPlanning(), Color.YELLOW);
+      footstepGoal.create(goal -> queueFootstepPlanning(), Color.YELLOW);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(footstepGoal::processImGui3DViewInput);
       footstepPlanningParametersTuner.create(footstepPlanning.getFootstepPlannerParameters(),
                                              FootstepPlannerParameterKeys.keys,

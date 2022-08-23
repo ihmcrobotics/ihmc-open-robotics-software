@@ -26,13 +26,12 @@ import us.ihmc.gdx.input.editor.GDXUIActionMap;
 import us.ihmc.gdx.input.editor.GDXUITrigger;
 import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
-import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.vr.GDXVRManager;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.function.Consumer;
 
-public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
+public class GDXBallAndArrowPosePlacement implements RenderableProvider
 {
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private final ImFloat goalZOffset = new ImFloat(0.0f);
@@ -48,7 +47,7 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
    private final RotationMatrix arrowRotationMatrix = new RotationMatrix();
    private Consumer<Pose3D> placedPoseConsumer;
 
-   public void create(GDXImGuiBasedUI baseUI, Consumer<Pose3D> placedPoseConsumer, Color color)
+   public void create(Consumer<Pose3D> placedPoseConsumer, Color color)
    {
       this.placedPoseConsumer = placedPoseConsumer;
       float sphereRadius = 0.03f;
