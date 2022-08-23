@@ -23,7 +23,6 @@ public class NaturalPosturePrivilegedConfigurationManager
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private boolean useSpinePrivilegedCommand;
    private boolean useSpinePitchPrivilegedCommand;
 
    private final YoDouble pPoseSpineRoll = new YoDouble("pPoseSpineRoll", registry);
@@ -34,10 +33,11 @@ public class NaturalPosturePrivilegedConfigurationManager
    private final YoDouble pPoseShoulderRoll = new YoDouble("pPoseShoulderRoll", registry);
    private final YoDouble pPoseShoulderYaw = new YoDouble("pPoseShoulderYaw", registry);
    private final YoDouble pPoseElbow = new YoDouble("pPoseElbow", registry);
-   private final YoDouble pPoseElbowWeight = new YoDouble("pPoseElbowWeight", registry);
 
    private final YoDouble pPoseSpineYawWeight = new YoDouble("pPoseSpineYawWeight", registry);
    private final YoDouble pPoseShoulderYawWeight = new YoDouble("pPoseShoulderYawWeight", registry);
+   private final YoDouble pPoseElbowWeight = new YoDouble("pPoseElbowWeight", registry);
+      private final YoDouble pPoseDefaultWeight = new YoDouble("pPoseDefaultWeight", registry);
 
    private final YoPDGains pPoseSpineRollPitchGains = new YoPDGains("_privPoseRollPitch", registry);
    private final YoPDGains pPoseSpineYawGains = new YoPDGains("_privPoseYaw", registry);
@@ -56,10 +56,11 @@ public class NaturalPosturePrivilegedConfigurationManager
 
 
    // These are the gains for the direct joint control. TODO Name them better.
-   private final YoPDGains pPoseSpinePitchGains = new YoPDGains("pPoseSpinePitch", registry);
-   private final YoPDGains pPoseSpineRollGains = new YoPDGains("pPoseSpineRoll", registry);
+   private final YoPDGains spineRollPitchGains = new YoPDGains("_SpineRollPitchGains", registry);
+   private final YoDouble spineRollPitchWeight = new YoDouble("SpineRollPitchWeight", registry);
 
    private final YoBoolean useSpineRollPitchJointCommands = new YoBoolean("useSpineRollPitchJointCommands", registry);
+   private final YoBoolean useSpineYawPrivilegedCommand = new YoBoolean("useSpineYawPrivilegedCommand", registry);
 
    private final FeedbackControlCommandList feedbackControlCommandList = new FeedbackControlCommandList();
    private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
@@ -85,19 +86,15 @@ public class NaturalPosturePrivilegedConfigurationManager
       spineRollCommand.setJoint(spineRoll);
 
       useSpineRollPitchJointCommands.set(true); // Can turn off joint limit for the spine when this is true.
-      if (useSpineRollPitchJointCommands.getBooleanValue())
-      {
-         pPoseSpinePitchGains.setKp(25.0);
-         pPoseSpineRollGains.setKp(25.0);
-         pPoseSpinePitchGains.setZeta(0.7);
-         pPoseSpineRollGains.setZeta(0.7);
-         pPoseSpinePitchGains.createDerivativeGainUpdater(true);
-         pPoseSpineRollGains.createDerivativeGainUpdater(true);
-      }
+      spineRollPitchGains.setKp(25.0);
+      spineRollPitchGains.setZeta(0.7);
+      spineRollPitchGains.createDerivativeGainUpdater(true);
+
+      spineRollPitchWeight.set(100.0);
 
 
       // privileged configuration for upper body
-      useSpinePrivilegedCommand = true;
+      useSpineYawPrivilegedCommand.set(true);
       useSpinePitchPrivilegedCommand = true;
 
       pPoseSpineRoll.set(0.0);
@@ -111,6 +108,8 @@ public class NaturalPosturePrivilegedConfigurationManager
 
       pPoseSpineYawWeight.set(5.0); // weight used to complete with other privileged joint position. Other joint default weights are 1
       pPoseShoulderYawWeight.set(1.0); // this weight doesn't matter much
+
+      pPoseDefaultWeight.set(1.0);
 
       pPoseSpineRollPitchGains.setKp(50.0);
       pPoseSpineRollPitchGains.setZeta(0.5);
@@ -184,17 +183,18 @@ public class NaturalPosturePrivilegedConfigurationManager
       // Testing -- track spine joint x and y with highest priority
       if (useSpineRollPitchJointCommands.getBooleanValue())
       {
-         // FIXME I need a weight here
          OneDoFJointBasics spineRoll = fullRobotModel.getSpineJoint(SpineJointName.SPINE_ROLL);
          OneDoFJointBasics spinePitch = fullRobotModel.getSpineJoint(SpineJointName.SPINE_PITCH);
+
          spinePitchCommand.setJoint(spinePitch);
          spinePitchCommand.setInverseDynamics(0.0, 0.0, 0.0);
-
-         spinePitchCommand.setGains(pPoseSpinePitchGains);
+         spinePitchCommand.setGains(spineRollPitchGains);
+         spinePitchCommand.setWeightForSolver(spineRollPitchWeight.getDoubleValue());
 
          spineRollCommand.setJoint(spineRoll);
          spineRollCommand.setInverseDynamics(0.0, 0.0, 0.0);
-         spineRollCommand.setGains(pPoseSpineRollGains);
+         spineRollCommand.setGains(spineRollPitchGains);
+         spineRollCommand.setWeightForSolver(spineRollPitchWeight.getDoubleValue());
       }
    }
 
@@ -204,14 +204,13 @@ public class NaturalPosturePrivilegedConfigurationManager
       privilegedConfigurationCommand.enable();
       privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationCommand.PrivilegedConfigurationOption.AT_ZERO);
 
-      //TODO: This is hardcoded here. It should be moved to a parameter setting instead. This is not the long term place for it.
-      if (useSpinePrivilegedCommand)
+      if (!useSpineRollPitchJointCommands.getValue())
       {
-         //         spineRollPrivilegedConfigurationParameters();
-         //         if (useSpinePitchPrivilegedCommand)
-         //            spinePitchPrivilegedConfigurationParameters();
-         spineYawPrivilegedConfigurationParameters();
+         spineRollPrivilegedConfigurationParameters();
+         spinePitchPrivilegedConfigurationParameters();
       }
+      if (useSpineYawPrivilegedCommand.getValue())
+         spineYawPrivilegedConfigurationParameters();
 
       for (RobotSide side : RobotSide.values)
       {
@@ -234,6 +233,7 @@ public class NaturalPosturePrivilegedConfigurationManager
                                                             pPoseElbowWeight.getDoubleValue(),
                                                             pPoseElbowGains);
 
+         // FIXME remove the hard-coded values
          createAndAddJointPrivilegedConfigurationParameters(side, ArmJointName.WRIST_YAW, 0.0, pPoseWristGains);
          createAndAddJointPrivilegedConfigurationParameters(side, ArmJointName.WRIST_ROLL, 0.0, pPoseWristGains);
          createAndAddJointPrivilegedConfigurationParameters(side, ArmJointName.FIRST_WRIST_PITCH, 0.0, pPoseWristGains);
@@ -254,7 +254,7 @@ public class NaturalPosturePrivilegedConfigurationManager
    {
       return createAndAddJointPrivilegedConfigurationParameters(fullRobotModel.getSpineJoint(SpineJointName.SPINE_ROLL),
                                                                 pPoseSpineRoll.getDoubleValue(),
-                                                                1.0,
+                                                                pPoseDefaultWeight.getDoubleValue(),
                                                                 pPoseSpineRollPitchGains);
    }
 
@@ -262,7 +262,7 @@ public class NaturalPosturePrivilegedConfigurationManager
    {
       return createAndAddJointPrivilegedConfigurationParameters(fullRobotModel.getSpineJoint(SpineJointName.SPINE_PITCH),
                                                                 pPoseSpinePitch.getDoubleValue(),
-                                                                1.0,
+                                                                pPoseDefaultWeight.getDoubleValue(),
                                                                 pPoseSpineRollPitchGains);
    }
 
@@ -279,7 +279,7 @@ public class NaturalPosturePrivilegedConfigurationManager
                                                                                                            double privilegedAngle,
                                                                                                            PDGainsReadOnly gains)
    {
-      return createAndAddJointPrivilegedConfigurationParameters(robotSide, armJointName, privilegedAngle, 1.0, gains);
+      return createAndAddJointPrivilegedConfigurationParameters(robotSide, armJointName, privilegedAngle, pPoseDefaultWeight.getDoubleValue(), gains);
    }
 
    private OneDoFJointPrivilegedConfigurationParameters createAndAddJointPrivilegedConfigurationParameters(RobotSide robotSide,
@@ -311,7 +311,7 @@ public class NaturalPosturePrivilegedConfigurationManager
                                                                                                            double privilegedAngle,
                                                                                                            PDGainsReadOnly gains)
    {
-      return createAndAddJointPrivilegedConfigurationParameters(robotSide, legJointName, privilegedAngle, 1.0, gains);
+      return createAndAddJointPrivilegedConfigurationParameters(robotSide, legJointName, privilegedAngle, pPoseDefaultWeight.getDoubleValue(), gains);
 
    }
 
