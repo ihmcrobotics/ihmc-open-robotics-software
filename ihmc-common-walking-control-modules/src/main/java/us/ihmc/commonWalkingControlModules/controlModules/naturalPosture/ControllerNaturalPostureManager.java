@@ -255,22 +255,6 @@ public class ControllerNaturalPostureManager
       //      double[] kp = gains.getProportionalGains();
       //      double[] kp = new double[] {100.0, 0.0, 0.0};
 
-      if (useAxisAngleFeedbackController)
-      {
-         computeProportionalNPFeedback(proportionalFeedback);
-         computeDerivativeNPFeedback(derivativeFeedback);
-
-         yoProportionalFeedback.setMatchingFrame(proportionalFeedback);
-         yoDerivativeFeedback.setMatchingFrame(derivativeFeedback);
-
-         feedbackNPAcceleration.add(yoProportionalFeedback, yoDerivativeFeedback);
-
-         yprDDot.set(0, 0, feedbackNPAcceleration.getZ());
-         yprDDot.set(1, 0, feedbackNPAcceleration.getY());
-         yprDDot.set(2, 0, feedbackNPAcceleration.getX());
-      }
-      else
-      {
          yoDirectProportionalFeedback.set(npRollDesired.getDoubleValue(), npPitchDesired.getDoubleValue(), npYawDesired.getDoubleValue());
          yoDirectProportionalFeedback.sub(npRoll.getDoubleValue(), npPitch.getDoubleValue(), npYaw.getDoubleValue());
          yoDirectProportionalFeedback.scale(npKpRoll.getDoubleValue(), npKpPitch.getDoubleValue(), npKpYaw.getDoubleValue());
@@ -285,7 +269,6 @@ public class ControllerNaturalPostureManager
          yprDDot.set(0, 0, npYawAcceleration.getValue());
          yprDDot.set(1, 0, npPitchAcceleration.getValue());
          yprDDot.set(2, 0, npRollAcceleration.getValue());
-      }
 
       double sbe = Math.sin(npPitch.getValue());
       double cbe = Math.cos(npPitch.getValue());
@@ -319,38 +302,6 @@ public class ControllerNaturalPostureManager
       naturalPostureControlCommand.getWeightMatrix().set(npQPweightMatrix);
    }
 
-   private final Matrix3D tempGainMatrix = new Matrix3D();
-
-   private void computeProportionalNPFeedback(FrameVector3D feedbackTermToPack)
-   {
-      desiredNaturalPosture.setIncludingFrame(yoDesiredNaturalPosture);
-      desiredNaturalPosture.changeFrame(naturalPostureFrame);
-
-      desiredNaturalPosture.normalizeAndLimitToPi();
-      desiredNaturalPosture.getRotationVector(feedbackTermToPack);
-
-      errorRotationVector.setMatchingFrame(feedbackTermToPack);
-
-      tempGainMatrix.setM00(npKpRoll.getDoubleValue());
-      tempGainMatrix.setM11(npKpPitch.getDoubleValue());
-      tempGainMatrix.setM22(npKpYaw.getDoubleValue());
-
-      tempGainMatrix.transform(feedbackTermToPack);
-      feedbackTermToPack.changeFrame(ReferenceFrame.getWorldFrame());
-   }
-
-   private void computeDerivativeNPFeedback(FrameVector3D feedbackTermToPack)
-   {
-      feedbackTermToPack.set(-npRollVelocity.getDoubleValue(), -npPitchVelocity.getDoubleValue(), -npYawVelocity.getDoubleValue());
-
-      // TODO update the gain matrix
-      tempGainMatrix.setM00(npKdRoll.getDoubleValue());
-      tempGainMatrix.setM11(npKdPitch.getDoubleValue());
-      tempGainMatrix.setM22(npKdYaw.getDoubleValue());
-
-      tempGainMatrix.transform(feedbackTermToPack);
-      feedbackTermToPack.changeFrame(ReferenceFrame.getWorldFrame());
-   }
 
    //   @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
