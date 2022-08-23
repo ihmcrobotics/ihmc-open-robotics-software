@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.GoHomeMessage;
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
@@ -23,7 +22,6 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
@@ -68,11 +66,10 @@ import java.util.List;
 public class GDXTeleoperationManager extends ImGuiPanel implements RenderableProvider
 {
    private final CommunicationHelper communicationHelper;
-   private final RobotLowLevelMessenger robotLowLevelMessenger;
    private final ROS2SyncedRobotModel syncedRobot;
    private final GDXFootstepPlanGraphic footstepsSentToControllerGraphic;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private GDXPSIAdjustment psiAdjustment;
+   private final GDXRobotLowLevelMessenger robotLowLevelMessenger;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final FootstepPlanningModule footstepPlanner;
    private final ImGuiGDXPoseGoalAffordance footstepGoal = new ImGuiGDXPoseGoalAffordance();
@@ -124,7 +121,6 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       addChild(teleoperationParametersTuner);
       addChild(footstepPlanningParametersTuner);
       this.communicationHelper = communicationHelper;
-      String robotName = communicationHelper.getRobotModel().getSimpleRobotName();
       ros2Node = communicationHelper.getROS2Node();
       robotModel = communicationHelper.getRobotModel();
 
@@ -133,15 +129,8 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       teleoperationParameters.save();
 
       syncedRobot = communicationHelper.newSyncedRobot();
-      robotLowLevelMessenger = communicationHelper.newRobotLowLevelMessenger();
 
-      if (robotLowLevelMessenger == null)
-      {
-         throw new RuntimeException("Please add implementation of RobotLowLevelMessenger for " + robotName);
-      }
-
-      if (teleoperationParameters.getPSIAdjustable())
-         psiAdjustment = new GDXPSIAdjustment(robotLowLevelMessenger);
+      robotLowLevelMessenger = new GDXRobotLowLevelMessenger(communicationHelper, teleoperationParameters);
 
       desiredRobot = new GDXDesiredRobot(robotModel, syncedRobot);
 
@@ -245,64 +234,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
 
    public void renderImGuiWidgets()
    {
-      if (ImGui.button("Home Pose"))
-      {
-         double trajectoryTime = 3.5;
-
-         GoHomeMessage homeLeftArm = new GoHomeMessage();
-         homeLeftArm.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_ARM);
-         homeLeftArm.setRobotSide(GoHomeMessage.ROBOT_SIDE_LEFT);
-         homeLeftArm.setTrajectoryTime(trajectoryTime);
-         communicationHelper.publishToController(homeLeftArm);
-
-         GoHomeMessage homeRightArm = new GoHomeMessage();
-         homeRightArm.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_ARM);
-         homeRightArm.setRobotSide(GoHomeMessage.ROBOT_SIDE_RIGHT);
-         homeRightArm.setTrajectoryTime(trajectoryTime);
-         communicationHelper.publishToController(homeRightArm);
-
-         GoHomeMessage homePelvis = new GoHomeMessage();
-         homePelvis.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_PELVIS);
-         homePelvis.setTrajectoryTime(trajectoryTime);
-         communicationHelper.publishToController(homePelvis);
-
-         GoHomeMessage homeChest = new GoHomeMessage();
-         homeChest.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_CHEST);
-         homeChest.setTrajectoryTime(trajectoryTime);
-         communicationHelper.publishToController(homeChest);
-      }
-      ImGui.sameLine();
-      if (ImGui.button("Stand prep"))
-      {
-         robotLowLevelMessenger.sendStandRequest();
-      }
-      ImGui.sameLine();
-      if (ImGui.button("Abort"))
-      {
-         robotLowLevelMessenger.sendAbortWalkingRequest();
-      }
-      ImGui.sameLine();
-      if (ImGui.button("Pause"))
-      {
-         robotLowLevelMessenger.sendPauseWalkingRequest();
-      }
-      ImGui.sameLine();
-      if (ImGui.button("Continue"))
-      {
-         robotLowLevelMessenger.sendContinueWalkingRequest();
-      }
-      if (ImGui.button("Freeze"))
-      {
-         robotLowLevelMessenger.sendFreezeRequest();
-      }
-      ImGui.sameLine();
-      if (ImGui.button("Shutdown"))
-      {
-         robotLowLevelMessenger.sendShutdownRequest();
-      }
-      if (teleoperationParameters.getPSIAdjustable())
-         psiAdjustment.renderImGuiWidgets();
-
+      robotLowLevelMessenger.renderImGuiWidgets();
       pelvisHeightSlider.renderImGuiWidgets();
       chestPitchSlider.renderImGuiWidgets();
       chestYawSlider.renderImGuiWidgets();
