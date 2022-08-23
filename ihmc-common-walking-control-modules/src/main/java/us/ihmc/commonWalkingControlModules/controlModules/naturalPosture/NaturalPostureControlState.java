@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.controlModules.NaturalPosture;
+package us.ihmc.commonWalkingControlModules.controlModules.naturalPosture;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.robotics.stateMachine.core.State;
