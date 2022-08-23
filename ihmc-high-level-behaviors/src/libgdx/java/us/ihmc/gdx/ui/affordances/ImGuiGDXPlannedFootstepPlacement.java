@@ -82,7 +82,8 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
    public void create(GDXImGuiBasedUI baseUI,
                       CommunicationHelper communicationHelper,
                       ROS2SyncedRobotModel syncedRobot,
-                      GDXTeleoperationParameters teleoperationParameters, FootstepPlannerParametersBasics footstepPlannerParameters)
+                      GDXTeleoperationParameters teleoperationParameters,
+                      FootstepPlannerParametersBasics footstepPlannerParameters)
    {
       this.baseUI = baseUI;
       this.communicationHelper = communicationHelper;

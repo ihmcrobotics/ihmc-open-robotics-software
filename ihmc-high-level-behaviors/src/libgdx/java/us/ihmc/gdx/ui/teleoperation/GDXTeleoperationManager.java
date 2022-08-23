@@ -518,18 +518,6 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       plannedFootstepPlacement.walkFromSteps();
    }
 
-   private void walk()
-   {
-      FootstepDataListMessage footstepDataListMessage
-            = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlannerOutput.getFootstepPlan(),
-                                                                          teleoperationParameters.getSwingTime(),
-                                                                          teleoperationParameters.getTransferTime());
-      footstepDataListMessage.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
-      footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
-      communicationHelper.publishToController(footstepDataListMessage);
-      footstepPlannerOutput = null;
-   }
-
    public void destroy()
    {
       desiredRobot.destroy();
