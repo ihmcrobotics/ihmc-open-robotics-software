@@ -11,6 +11,7 @@ import imgui.flag.ImGuiMouseButton;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.ImGui;
+import imgui.type.ImBoolean;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
@@ -23,8 +24,10 @@ import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.sceneManager.GDX3DScene;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
+import us.ihmc.gdx.tools.GDXIconTexture;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.io.WorkspaceDirectory;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -34,6 +37,28 @@ import java.util.function.Consumer;
 
 public class GDX3DPanel
 {
+   private class Pair<F,S>
+   {
+      private final F first;
+      private final S second;
+
+      public Pair(F first, S second)
+      {
+         this.first  = first;
+         this.second = second;
+      }
+
+      public F getFirst()
+      {
+         return first;
+      }
+
+      public S getSecond()
+      {
+         return second;
+      }
+   }
+
    private final ImGuiPanelSizeHandler view3DPanelSizeHandler = new ImGuiPanelSizeHandler();
    private final String panelName;
    private final int antiAliasing;
@@ -65,6 +90,22 @@ public class GDX3DPanel
    private float windowDrawMaxX;
    private float windowDrawMaxY;
 
+
+   // NOTE: FOR ICONS (NON-BUTTON)
+   private final WorkspaceDirectory iconDirectory = new WorkspaceDirectory("ihmc-open-robotics-software",
+                                                                           "ihmc-high-level-behaviors/src/libgdx/resources/icons");
+   private float iconSize = 40.0f;
+   // NOTE: ICON TEXTURES
+   private GDXIconTexture homePoseIcon;
+   private GDXIconTexture standPrepIcon;
+   private GDXIconTexture abortIcon;
+   private GDXIconTexture pauseIcon;
+   private GDXIconTexture continueIcon;
+   private GDXIconTexture shutdownIcon;
+   private final boolean hotButtonTesting = false;
+   private ArrayList<Pair<GDXIconTexture,Runnable>> buttonPairList = new ArrayList<>();
+   private ArrayList<GDXIconTexture> iconTextures;
+
    public GDX3DPanel(String panelName, int antiAliasing, boolean addFocusSphere)
    {
       this.panelName = panelName;
@@ -94,10 +135,55 @@ public class GDX3DPanel
          scene.addModelInstance(camera3D.getFocusPointSphere(), GDXSceneLevel.VIRTUAL);
       viewport = new ScreenViewport(camera3D);
       viewport.setUnitsPerPixel(1.0f); // TODO: Is this relevant for high DPI displays?
+
+      homePoseIcon   = new GDXIconTexture(iconDirectory.file("homePose.png"));
+      standPrepIcon  = new GDXIconTexture(iconDirectory.file("standPrep.png"));
+      abortIcon      = new GDXIconTexture(iconDirectory.file("abort.png"));
+      pauseIcon      = new GDXIconTexture(iconDirectory.file("pause.png"));
+      continueIcon   = new GDXIconTexture(iconDirectory.file("continue.png"));
+      shutdownIcon   = new GDXIconTexture(iconDirectory.file("shutdown.png"));
+
+      if (hotButtonTesting)
+      {
+         addHotButton("homePose", "homePose.png", () ->
+         {
+            // note: the action to do when button clicked.
+            iconSize += 1.0f;
+            // do something
+         });
+         addHotButton("standPrep", "standPrep.png", () ->
+         {
+            // note: the action to do when button clicked.
+            // do something
+         });
+         addHotButton("abort", "abort.png", () ->
+         {
+            // note: the action to do when button clicked.
+            // do something
+         });
+         addHotButton("pause", "pause.png", () ->
+         {
+            // note: the action to do when button clicked.
+            // do something
+         });
+         addHotButton("continue", "continue.png", () ->
+         {
+            // note: the action to do when button clicked.
+            // do something
+         });
+         addHotButton("shutdown", "shutdown.png", () ->
+         {
+            // note: the action to do when button clicked.
+            // do something
+         });
+      }
+
    }
 
    public void render()
    {
+      // NOTE: show panel(window) here
+      ImBoolean isShowing = imGuiPanel.getIsShowing();
       if (imGuiPanel.getIsShowing().get())
       {
          view3DPanelSizeHandler.handleSizeBeforeBegin();
@@ -200,6 +286,38 @@ public class GDX3DPanel
          }
 
          ImGui.end();
+
+
+         // NOTE: Make Hot key button panel here.
+         if (hotButtonTesting)
+         {
+
+            float panelWid = sizeX * 0.7f;
+            float panelHei = iconSize*3.0f;
+            float startX = posX + sizeX / 2 - panelWid / 2;
+
+            int windowFlags = ImGuiWindowFlags.None;
+            ImGui.setNextWindowPos(startX, posY + 15.0f);
+            ImGui.setNextWindowSize(panelWid, panelHei);
+            ImGui.begin("Hot Button Testing Title", isShowing, windowFlags);
+
+            for (Pair<GDXIconTexture,Runnable> buttonPair : buttonPairList)
+            {
+               float nextPosX = ImGui.getCursorPosX() + iconSize;
+               //               if (nextPosX < panelWid - iconSize)
+               //               {
+               ImGui.setCursorPosX(nextPosX);
+               ImGui.sameLine();
+               //               }
+               if (ImGui.imageButton(buttonPair.getFirst().getTexture().getTextureObjectHandle(), iconSize, iconSize ))
+               {
+                  buttonPair.getSecond().run();
+               }
+            }
+            ImGui.end();
+         }
+
+
       }
    }
 
@@ -296,6 +414,13 @@ public class GDX3DPanel
       {
          LogTools.error(1, "libGDX is not being used for input!");
       }
+   }
+
+   // NOTE: hot button add feature from anywhere in other classes where baseUI (GDXImGuiBasedUI) is accessible.
+   public void addHotButton(String buttonName, String fileName, Runnable onClicked)
+   {
+      GDXIconTexture gdxIconTexture = new GDXIconTexture(iconDirectory.file(fileName));
+      buttonPairList.add(new Pair<>(gdxIconTexture, onClicked));
    }
 
    public void setAddFocusSphere(boolean addFocusSphere)
