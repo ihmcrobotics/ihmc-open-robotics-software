@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -16,6 +17,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.HashMap;
 
 public class NaturalPosturePrivilegedManager
 {
@@ -60,6 +63,8 @@ public class NaturalPosturePrivilegedManager
    private final YoDouble pPoseKneeKdFactor = new YoDouble("pPoseKneeKdFactor", registry);
 
    private final YoBoolean useSpineRollPitchJointCommands = new YoBoolean("useSpineRollPitchJointCommands", registry);
+
+   private final HashMap<OneDoFJointBasics, OneDoFJointPrivilegedConfigurationParameters> privilegedConfigurationMap = new HashMap<>();
 
    private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    private final FeedbackControlCommandList feedbackControlCommandList = new FeedbackControlCommandList();
@@ -136,6 +141,7 @@ public class NaturalPosturePrivilegedManager
 
    public void initialize()
    {
+
       updatePrivilegedConfigurationCommand();
    }
 
@@ -311,7 +317,13 @@ public class NaturalPosturePrivilegedManager
                                                                                                            double pgain,
                                                                                                            double dgain)
    {
-      OneDoFJointPrivilegedConfigurationParameters jointParameters = new OneDoFJointPrivilegedConfigurationParameters();
+      OneDoFJointPrivilegedConfigurationParameters jointParameters = privilegedConfigurationMap.get(joint);
+      if (jointParameters == null)
+      {
+         jointParameters = new OneDoFJointPrivilegedConfigurationParameters();
+         privilegedConfigurationMap.put(joint, jointParameters);
+      }
+
       jointParameters.setConfigurationGain(pgain);
       jointParameters.setVelocityGain(dgain);
       jointParameters.setWeight(weight);
