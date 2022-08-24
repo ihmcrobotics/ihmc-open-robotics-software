@@ -33,8 +33,6 @@ public class NaturalPosturePrivilegedManager
    private final YoPDGains pPoseSpinePitchGains = new YoPDGains("pPoseSpinePitch", registry);
    private final YoPDGains pPoseSpineRollGains = new YoPDGains("pPoseSpineRoll", registry);
 
-
-
    private final YoDouble pPoseShoulderPitch = new YoDouble("pPoseShoulderPitch", registry);
    private final YoDouble pPoseShoulderRoll = new YoDouble("pPoseShoulderRoll", registry);
    private final YoDouble pPoseShoulderYaw = new YoDouble("pPoseShoulderYaw", registry);
@@ -54,7 +52,6 @@ public class NaturalPosturePrivilegedManager
    private final YoDouble pPoseSpineYawKp = new YoDouble("pPoseSpineYawKp", registry);
    private final YoDouble pPoseSpineYawKdFactor = new YoDouble("pPoseSpineYawKdFactor", registry);
    private final YoDouble pPoseSpineYawWeight = new YoDouble("pPoseSpineYawWeight", registry);
-
 
    private final YoDouble pPoseHipKp = new YoDouble("pPoseHipKp", registry);
    private final YoDouble pPoseHipKdFactor = new YoDouble("pPoseHipKdFactor", registry);
@@ -93,8 +90,6 @@ public class NaturalPosturePrivilegedManager
 
       pPoseSpineYawWeight.set(5.0); // weight used to complete with other privileged joint position. Other joint default weights are 1
       pPoseShoulderYawWeight.set(1.0); // this weight doesn't matter much
-
-
 
       useSpineRollPitchJointCommands.set(true); // Can turn off joint limit for the spine when this is true.
       if (useSpineRollPitchJointCommands.getBooleanValue())
@@ -223,26 +218,26 @@ public class NaturalPosturePrivilegedManager
          createAndAddJointPrivilegedConfigurationParameters(side, ArmJointName.WRIST_ROLL, 0.0);
          createAndAddJointPrivilegedConfigurationParameters(side, ArmJointName.FIRST_WRIST_PITCH, 0.0);
 
-         createAndAddJointPrivilegedConfigurationParameters(side,
-                                                            LegJointName.HIP_PITCH,
-                                                            -0.25,
-                                                            pPoseHipKp.getDoubleValue(),
-                                                            pPoseHipKdFactor.getDoubleValue() * pPoseHipKp.getDoubleValue());
-         createAndAddJointPrivilegedConfigurationParameters(side,
-                                                            LegJointName.HIP_ROLL,
-                                                            0.0,
-                                                            pPoseHipKp.getDoubleValue(),
-                                                            pPoseHipKdFactor.getDoubleValue() * pPoseHipKp.getDoubleValue());
-         createAndAddJointPrivilegedConfigurationParameters(side,
-                                                            LegJointName.HIP_YAW,
-                                                            0.0,
-                                                            pPoseHipKp.getDoubleValue(),
-                                                            pPoseHipKdFactor.getDoubleValue() * pPoseHipKp.getDoubleValue());
-         createAndAddJointPrivilegedConfigurationParameters(side,
-                                                            LegJointName.KNEE_PITCH,
-                                                            0.5,
-                                                            pPoseKneeKp.getDoubleValue(),
-                                                            pPoseKneeKdFactor.getDoubleValue() * pPoseKneeKp.getDoubleValue());
+         //         createAndAddJointPrivilegedConfigurationParameters(side,
+         //                                                            LegJointName.HIP_PITCH,
+         //                                                            -0.25,
+         //                                                            pPoseHipKp.getDoubleValue(),
+         //                                                            pPoseHipKdFactor.getDoubleValue() * pPoseHipKp.getDoubleValue());
+         //         createAndAddJointPrivilegedConfigurationParameters(side,
+         //                                                            LegJointName.HIP_ROLL,
+         //                                                            0.0,
+         //                                                            pPoseHipKp.getDoubleValue(),
+         //                                                            pPoseHipKdFactor.getDoubleValue() * pPoseHipKp.getDoubleValue());
+         //         createAndAddJointPrivilegedConfigurationParameters(side,
+         //                                                            LegJointName.HIP_YAW,
+         //                                                            0.0,
+         //                                                            pPoseHipKp.getDoubleValue(),
+         //                                                            pPoseHipKdFactor.getDoubleValue() * pPoseHipKp.getDoubleValue());
+         //         createAndAddJointPrivilegedConfigurationParameters(side,
+         //                                                            LegJointName.KNEE_PITCH,
+         //                                                            0.5,
+         //                                                            pPoseKneeKp.getDoubleValue(),
+         //                                                            pPoseKneeKdFactor.getDoubleValue() * pPoseKneeKp.getDoubleValue());
          createAndAddJointPrivilegedConfigurationParameters(side, LegJointName.ANKLE_ROLL, 0.0, 4.0, 0.6);
          createAndAddJointPrivilegedConfigurationParameters(side, LegJointName.ANKLE_PITCH, 0.0, 4.0, 0.6);
       }
@@ -335,6 +330,5 @@ public class NaturalPosturePrivilegedManager
 
       return jointParameters;
    }
-
 
 }
