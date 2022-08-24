@@ -40,7 +40,7 @@ import java.util.UUID;
 /**
  * Manages and assists with the operator placement of footsteps.
  */
-public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
+public class GDXInteractableFootstepPlan implements RenderableProvider
 {
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private final Pose3D goalPoseForReading = new Pose3D();
