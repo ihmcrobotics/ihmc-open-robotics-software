@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import controller_msgs.msg.dds.FootstepDataListMessage;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -13,7 +12,6 @@ import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningMo
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.BehaviorTools;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
-import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -46,7 +44,6 @@ import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.ArrayList;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class GDXWalkPathControlRing implements PathTypeStepParameters
@@ -56,8 +53,6 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
    private boolean modified = false;
    private boolean mouseRingPickSelected;
    private GDX3DPanel panel3D;
-   private ROS2SyncedRobotModel syncedRobot;
-   private ROS2ControllerHelper ros2Helper;
    private GDXTeleoperationParameters teleoperationParameters;
    private MovingReferenceFrame midFeetZUpFrame;
    private ResettableExceptionHandlingExecutorService footstepPlanningThread;
@@ -95,12 +90,9 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
    public void create(GDX3DPanel panel3D,
                       DRCRobotModel robotModel,
                       ROS2SyncedRobotModel syncedRobot,
-                      ROS2ControllerHelper ros2Helper,
                       GDXTeleoperationParameters teleoperationParameters)
    {
       this.panel3D = panel3D;
-      this.syncedRobot = syncedRobot;
-      this.ros2Helper = ros2Helper;
       this.teleoperationParameters = teleoperationParameters;
       footstepPlannerGoalGizmo.create(panel3D.getCamera3D());
       panel3D.addImGuiOverlayAddition(this::renderTooltips);
@@ -229,19 +221,7 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
       {
          queueFootstepPlan();
       }
-      if (selected && ImGui.isKeyReleased(ImGuiTools.getSpaceKey()))
-      {
-         // Send footsteps to robot
-         double swingDuration = 1.2;
-         double transferDuration = 0.8;
-         FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan,
-                                                                                                                       swingDuration,
-                                                                                                                       transferDuration);
-         footstepDataListMessage.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
-         footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
-         ros2Helper.publishToController(footstepDataListMessage);
-      }
-      
+
       if (modified && selected && ImGui.isKeyReleased(ImGuiTools.getDeleteKey()))
       {
          delete();
