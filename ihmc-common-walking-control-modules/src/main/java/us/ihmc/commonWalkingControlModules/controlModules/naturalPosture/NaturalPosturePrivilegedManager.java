@@ -40,9 +40,13 @@ public class NaturalPosturePrivilegedManager
 
    private final YoDouble pPoseShoulderKp = new YoDouble("pPoseShoulderKp", registry);
    private final YoDouble pPoseShoulderKdFactor = new YoDouble("pPoseShoulderKdFactor", registry);
-   private final YoDouble pPoseShoulderYawWeight = new YoDouble("pPoseShoulderYawWeight", registry);
 
+   private final YoDouble pPoseShoulderRollWeight = new YoDouble("pPoseShoulderRollWeight", registry);
+   private final YoDouble pPoseShoulderPitchWeight = new YoDouble("pPoseShoulderPitchWeight", registry);
+   private final YoDouble pPoseShoulderYawWeight = new YoDouble("pPoseShoulderYawWeight", registry);
    private final YoDouble pPoseElbowWeight = new YoDouble("pPoseElbowWeight", registry);
+   private final YoDouble pPoseSpineYawWeight = new YoDouble("pPoseSpineYawWeight", registry);
+
    private final YoDouble pPoseElbowKp = new YoDouble("pPoseElbowKp", registry);
    private final YoDouble pPoseElbowKdFactor = new YoDouble("pPoseElbowKdFactor", registry);
 
@@ -51,7 +55,6 @@ public class NaturalPosturePrivilegedManager
 
    private final YoDouble pPoseSpineYawKp = new YoDouble("pPoseSpineYawKp", registry);
    private final YoDouble pPoseSpineYawKdFactor = new YoDouble("pPoseSpineYawKdFactor", registry);
-   private final YoDouble pPoseSpineYawWeight = new YoDouble("pPoseSpineYawWeight", registry);
 
    private final YoDouble pPoseHipKp = new YoDouble("pPoseHipKp", registry);
    private final YoDouble pPoseHipKdFactor = new YoDouble("pPoseHipKdFactor", registry);
@@ -83,13 +86,16 @@ public class NaturalPosturePrivilegedManager
       pPoseSpinePitch.set(0.0);
       pPoseSpineYaw.set(0.0);
       double delta = 0.0;
-      pPoseShoulderPitch.set(0 + delta); //0.1 //0.2   // the bigger, the further away the arm is from the body
-      pPoseShoulderRoll.set(0 - 1); // the smaller, the further away the arm is from the body   // start at -1 for hardware experiment to be safe
+      pPoseShoulderPitch.set(0.4 + delta); //0.1 //0.2   // This is the first joint from the body. The more negative this number is, the more forward the left arm is
+      pPoseShoulderRoll.set(0 - delta); // the smaller, the further away the arm is from the body   // start at -1 for hardware experiment to be safe
       pPoseShoulderYaw.set(0);
       pPoseElbow.set(-0.4); //-0.5 //-1   // the smaller, the more bent the elbow is
 
-      pPoseSpineYawWeight.set(5.0); // weight used to complete with other privileged joint position. Other joint default weights are 1
+      pPoseSpineYawWeight.set(1.0); // weight used to complete with other privileged joint position. Other joint default weights are 1
+      pPoseShoulderRollWeight.set(1.0);
+      pPoseShoulderPitchWeight.set(1.0);
       pPoseShoulderYawWeight.set(1.0); // this weight doesn't matter much
+      pPoseElbowWeight.set(1.0);
 
       useSpineRollPitchJointCommands.set(true); // Can turn off joint limit for the spine when this is true.
       if (useSpineRollPitchJointCommands.getBooleanValue())
@@ -112,7 +118,6 @@ public class NaturalPosturePrivilegedManager
       pPoseShoulderKdFactor.set(0.15);
 
       pPoseElbowKp.set(30.0);
-      pPoseElbowWeight.set(10.0);
       pPoseElbowKdFactor.set(0.15);
 
       // privileged configuration for lower body
@@ -194,11 +199,13 @@ public class NaturalPosturePrivilegedManager
          createAndAddJointPrivilegedConfigurationParameters(side,
                                                             ArmJointName.SHOULDER_PITCH,
                                                             side.negateIfRightSide(pPoseShoulderPitch.getDoubleValue()),
+                                                            pPoseShoulderPitchWeight.getDoubleValue(),
                                                             pPoseShoulderKp.getDoubleValue(),
                                                             pPoseShoulderKdFactor.getDoubleValue() * pPoseShoulderKp.getDoubleValue());
          createAndAddJointPrivilegedConfigurationParameters(side,
                                                             ArmJointName.SHOULDER_ROLL,
                                                             pPoseShoulderRoll.getDoubleValue(),
+                                                            pPoseShoulderRollWeight.getDoubleValue(),
                                                             pPoseShoulderKp.getDoubleValue(),
                                                             pPoseShoulderKdFactor.getDoubleValue() * pPoseShoulderKp.getDoubleValue());
          createAndAddJointPrivilegedConfigurationParameters(side,
