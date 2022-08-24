@@ -530,14 +530,14 @@ public class WalkingCommandConsumer
          walkingMessageHandler.handleFootTrajectoryCommand(commandConsumerWithDelayBuffers.pollNewCommands(FootTrajectoryCommand.class));
       }
 
-      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(PauseWalkingCommand.class))
-      {
-         walkingMessageHandler.handlePauseWalkingCommand(commandConsumerWithDelayBuffers.pollNewestCommand(PauseWalkingCommand.class));
-      }
-
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(FootstepDataListCommand.class))
       {
          walkingMessageHandler.handleFootstepDataListCommand(commandConsumerWithDelayBuffers.pollNewestCommand(FootstepDataListCommand.class));
+      }
+
+      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(PauseWalkingCommand.class))
+      {
+         walkingMessageHandler.handlePauseWalkingCommand(commandConsumerWithDelayBuffers.pollNewestCommand(PauseWalkingCommand.class));
       }
 
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(AdjustFootstepCommand.class))
