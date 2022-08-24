@@ -43,7 +43,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.tools.io.WorkspaceDirectory;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -79,7 +78,6 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
    private final GDXChestOrientationSlider chestYawSlider;
    private final GDXDesiredRobot desiredRobot;
 
-   // FOR ICONS (NON-BUTTON)
    private final WorkspaceDirectory iconDirectory = new WorkspaceDirectory("ihmc-open-robotics-software",
                                                                            "ihmc-high-level-behaviors/src/libgdx/resources/icons");
    private GDXIconTexture locationFlagIcon;
@@ -253,18 +251,16 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       interactableRobot.getWalkPathControlRing().renderImGuiWidgets();
 
       interactableFootstepPlan.renderImGuiWidgets();
-
-      ImGui.text("Footstep graphics:");
       ImGui.sameLine();
-      ImGui.checkbox(labels.get("Show"), showGraphics);
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Clear")))
+      if (ImGui.button(labels.get("Delete All")))
       {
          footstepsSentToControllerGraphic.clear();
          ballAndArrowMidFeetPosePlacement.clear();
          manualFootstepPlacement.exitPlacement();
          interactableFootstepPlan.clear();
+         interactableRobot.getWalkPathControlRing().delete();
       }
+      ImGui.checkbox(labels.get("Show footstep related graphics"), showGraphics);
 
       ImGui.separator();
 

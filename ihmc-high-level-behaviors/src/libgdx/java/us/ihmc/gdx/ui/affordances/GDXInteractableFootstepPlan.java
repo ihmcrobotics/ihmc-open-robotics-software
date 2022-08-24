@@ -132,11 +132,6 @@ public class GDXInteractableFootstepPlan implements RenderableProvider
          removeLastStep();
       }
       ImGuiTools.previousWidgetTooltip("Keybind: Delete");
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Delete All")))
-      {
-         clear();
-      }
    }
 
    @Override
