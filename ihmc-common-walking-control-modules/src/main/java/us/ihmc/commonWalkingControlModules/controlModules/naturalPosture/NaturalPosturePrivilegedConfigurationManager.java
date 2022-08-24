@@ -322,6 +322,7 @@ public class NaturalPosturePrivilegedConfigurationManager
                                                                                                            double weight,
                                                                                                            PDGainsReadOnly gains)
    {
+      // FIXME garbage
       OneDoFJointPrivilegedConfigurationParameters jointParameters = new OneDoFJointPrivilegedConfigurationParameters();
       jointParameters.setConfigurationGain(gains.getKp());
       jointParameters.setVelocityGain(gains.getKp());
