@@ -4,7 +4,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -27,47 +26,38 @@ public class NaturalPosturePrivilegedManager
    private final YoDouble pPoseSpineRoll = new YoDouble("pPoseSpineRoll", registry);
    private final YoDouble pPoseSpinePitch = new YoDouble("pPoseSpinePitch", registry);
    private final YoDouble pPoseSpineYaw = new YoDouble("pPoseSpineYaw", registry);
-   private final YoDouble pPoseSpineRollKp = new YoDouble("pPoseSpineRollKp", registry);
-   private final YoDouble pPoseSpineRollKdFactor = new YoDouble("pPoseSpineRollKdFactor", registry);
+
    private final YoPDGains pPoseSpinePitchGains = new YoPDGains("pPoseSpinePitch", registry);
    private final YoPDGains pPoseSpineRollGains = new YoPDGains("pPoseSpineRoll", registry);
-   private final YoDouble pPoseSpinePitchKp = new YoDouble("pPoseSpinePitchKp", registry);
-   private final YoDouble pPoseSpinePitchKdFactor = new YoDouble("pPoseSpinePitchKdFactor", registry);
-   private final YoDouble pPoseSpineYawKp = new YoDouble("pPoseSpineYawKp", registry);
-   private final YoDouble pPoseSpineYawKdFactor = new YoDouble("pPoseSpineYawKdFactor", registry);
+
+
+
    private final YoDouble pPoseShoulderPitch = new YoDouble("pPoseShoulderPitch", registry);
    private final YoDouble pPoseShoulderRoll = new YoDouble("pPoseShoulderRoll", registry);
    private final YoDouble pPoseShoulderYaw = new YoDouble("pPoseShoulderYaw", registry);
    private final YoDouble pPoseElbow = new YoDouble("pPoseElbow", registry);
-   private final YoDouble pPoseShoulderPitchKp = new YoDouble("pPoseShoulderPitchKp", registry);
-   private final YoDouble pPoseShoulderRollKp = new YoDouble("pPoseShoulderRollKp", registry);
-   private final YoDouble pPoseShoulderYawKp = new YoDouble("pPoseShoulderYawKp", registry);
-   private final YoDouble pPoseElbowWeight = new YoDouble("pPoseElbowWeight", registry);
-   private final YoDouble pPoseElbowKp = new YoDouble("pPoseElbowKp", registry);
-   private final YoDouble pPoseShoulderPitchKdFactor = new YoDouble("pPoseShoulderPitchKdFactor", registry);
-   private final YoDouble pPoseShoulderRollKdFactor = new YoDouble("pPoseShoulderRollKdFactor", registry);
-   private final YoDouble pPoseShoulderYawKdFactor = new YoDouble("pPoseShoulderYawKdFactor", registry);
-   private final YoDouble pPoseElbowKdFactor = new YoDouble("pPoseElbowKdFactor", registry);
 
-   private final YoDouble pPoseSpineYawWeight = new YoDouble("pPoseSpineYawWeight", registry);
+   private final YoDouble pPoseShoulderKp = new YoDouble("pPoseShoulderKp", registry);
+   private final YoDouble pPoseShoulderKdFactor = new YoDouble("pPoseShoulderKdFactor", registry);
    private final YoDouble pPoseShoulderYawWeight = new YoDouble("pPoseShoulderYawWeight", registry);
 
-   //   private final YoDouble pPoseHipPitch = new YoDouble("pPoseHipPitch", registry);
-   private final YoDouble pPoseHipPitchKp = new YoDouble("pPoseHipPitchKp", registry);
-   private final YoDouble pPoseHipPitchKdFactor = new YoDouble("pPoseHipPitchKdFactor", registry);
-   //   private final YoDouble pPoseHipRoll = new YoDouble("pPoseHipRoll", registry);
-   private final YoDouble pPoseHipRollKp = new YoDouble("pPoseHipRollKp", registry);
-   private final YoDouble pPoseHipRollKdFactor = new YoDouble("pPoseHipRollKdFactor", registry);
-   //   private final YoDouble pPoseHipYaw = new YoDouble("pPoseHipYaw", registry);
-   private final YoDouble pPoseHipYawKp = new YoDouble("pPoseHipYawKp", registry);
-   private final YoDouble pPoseHipYawKdFactor = new YoDouble("pPoseHipYawKdFactor", registry);
-   //   private final YoDouble pPoseKnee = new YoDouble("pPoseKnee", registry);
+   private final YoDouble pPoseElbowWeight = new YoDouble("pPoseElbowWeight", registry);
+   private final YoDouble pPoseElbowKp = new YoDouble("pPoseElbowKp", registry);
+   private final YoDouble pPoseElbowKdFactor = new YoDouble("pPoseElbowKdFactor", registry);
+
+   private final YoDouble pPoseSpineRollPitchKp = new YoDouble("pPoseSpineRollPitchKp", registry);
+   private final YoDouble pPoseSpineRollPitchKdFactor = new YoDouble("pPoseSpineRollPitchKdFactor", registry);
+
+   private final YoDouble pPoseSpineYawKp = new YoDouble("pPoseSpineYawKp", registry);
+   private final YoDouble pPoseSpineYawKdFactor = new YoDouble("pPoseSpineYawKdFactor", registry);
+   private final YoDouble pPoseSpineYawWeight = new YoDouble("pPoseSpineYawWeight", registry);
+
+
+   private final YoDouble pPoseHipKp = new YoDouble("pPoseHipKp", registry);
+   private final YoDouble pPoseHipKdFactor = new YoDouble("pPoseHipKdFactor", registry);
+
    private final YoDouble pPoseKneeKp = new YoDouble("pPoseKneeKp", registry);
    private final YoDouble pPoseKneeKdFactor = new YoDouble("pPoseKneeKdFactor", registry);
-
-   private final String spineRollJointName = "SPINE_X";
-   private final String spinePitchJointName = "SPINE_Y";
-   private final String spineYawJointName = "SPINE_Z";
 
    private final YoBoolean useSpineRollPitchJointCommands = new YoBoolean("useSpineRollPitchJointCommands", registry);
 
@@ -99,14 +89,7 @@ public class NaturalPosturePrivilegedManager
       pPoseSpineYawWeight.set(5.0); // weight used to complete with other privileged joint position. Other joint default weights are 1
       pPoseShoulderYawWeight.set(1.0); // this weight doesn't matter much
 
-      pPoseSpineRollKp.set(50.0);
-      pPoseSpinePitchKp.set(50.0);
-      pPoseSpineYawKp.set(300.0);
-      pPoseShoulderPitchKp.set(80.0);
-      pPoseShoulderRollKp.set(80.0);
-      pPoseShoulderYawKp.set(80.0);
-      pPoseElbowKp.set(30.0);
-      pPoseElbowWeight.set(10.0);
+
 
       useSpineRollPitchJointCommands.set(true); // Can turn off joint limit for the spine when this is true.
       if (useSpineRollPitchJointCommands.getBooleanValue())
@@ -119,21 +102,23 @@ public class NaturalPosturePrivilegedManager
          pPoseSpineRollGains.createDerivativeGainUpdater(true);
       }
 
-      pPoseSpineRollKdFactor.set(0.15);
-      pPoseSpinePitchKdFactor.set(0.15);
+      pPoseSpineRollPitchKp.set(50.0);
+      pPoseSpineYawKp.set(300.0);
+
+      pPoseSpineRollPitchKdFactor.set(0.15);
       pPoseSpineYawKdFactor.set(0.15);
-      pPoseShoulderPitchKdFactor.set(0.15);
-      pPoseShoulderRollKdFactor.set(0.15);
-      pPoseShoulderYawKdFactor.set(0.15);
+
+      pPoseShoulderKp.set(80.0);
+      pPoseShoulderKdFactor.set(0.15);
+
+      pPoseElbowKp.set(30.0);
+      pPoseElbowWeight.set(10.0);
       pPoseElbowKdFactor.set(0.15);
 
       // privileged configuration for lower body
-      pPoseHipPitchKp.set(100);
-      pPoseHipPitchKdFactor.set(0.2);
-      pPoseHipRollKp.set(100);
-      pPoseHipRollKdFactor.set(0.2);
-      pPoseHipYawKp.set(100);
-      pPoseHipYawKdFactor.set(0.2);
+      pPoseHipKp.set(100);
+      pPoseHipKdFactor.set(0.2);
+
       pPoseKneeKp.set(100);
       pPoseKneeKdFactor.set(0.2);
 
@@ -161,8 +146,8 @@ public class NaturalPosturePrivilegedManager
       // Testing -- track spine joint x and y with highest priority
       if (useSpineRollPitchJointCommands.getBooleanValue())
       {
-         OneDoFJointBasics spineRoll = fullRobotModel.getOneDoFJointByName(spineRollJointName);
-         OneDoFJointBasics spinePitch = fullRobotModel.getOneDoFJointByName(spinePitchJointName);
+         OneDoFJointBasics spineRoll = fullRobotModel.getSpineJoint(SpineJointName.SPINE_ROLL);
+         OneDoFJointBasics spinePitch = fullRobotModel.getSpineJoint(SpineJointName.SPINE_PITCH);
          spinePitchCommand.setJoint(spinePitch);
          spinePitchCommand.setInverseDynamics(0.0, 0.0, 0.0);
          spinePitchCommand.setGains(pPoseSpinePitchGains);
@@ -208,19 +193,19 @@ public class NaturalPosturePrivilegedManager
          createAndAddJointPrivilegedConfigurationParameters(side,
                                                             ArmJointName.SHOULDER_PITCH,
                                                             side.negateIfRightSide(pPoseShoulderPitch.getDoubleValue()),
-                                                            pPoseShoulderPitchKp.getDoubleValue(),
-                                                            pPoseShoulderPitchKdFactor.getDoubleValue() * pPoseShoulderPitchKp.getDoubleValue());
+                                                            pPoseShoulderKp.getDoubleValue(),
+                                                            pPoseShoulderKdFactor.getDoubleValue() * pPoseShoulderKp.getDoubleValue());
          createAndAddJointPrivilegedConfigurationParameters(side,
                                                             ArmJointName.SHOULDER_ROLL,
                                                             pPoseShoulderRoll.getDoubleValue(),
-                                                            pPoseShoulderRollKp.getDoubleValue(),
-                                                            pPoseShoulderRollKdFactor.getDoubleValue() * pPoseShoulderRollKp.getDoubleValue());
+                                                            pPoseShoulderKp.getDoubleValue(),
+                                                            pPoseShoulderKdFactor.getDoubleValue() * pPoseShoulderKp.getDoubleValue());
          createAndAddJointPrivilegedConfigurationParameters(side,
                                                             ArmJointName.SHOULDER_YAW,
                                                             pPoseShoulderYaw.getDoubleValue(),
                                                             pPoseShoulderYawWeight.getDoubleValue(),
-                                                            pPoseShoulderYawKp.getDoubleValue(),
-                                                            pPoseShoulderYawKdFactor.getDoubleValue() * pPoseShoulderYawKp.getDoubleValue());
+                                                            pPoseShoulderKp.getDoubleValue(),
+                                                            pPoseShoulderKdFactor.getDoubleValue() * pPoseShoulderKp.getDoubleValue());
          createAndAddJointPrivilegedConfigurationParameters(side,
                                                             ArmJointName.ELBOW_PITCH,
                                                             side.negateIfRightSide(pPoseElbow.getDoubleValue()),
@@ -235,18 +220,18 @@ public class NaturalPosturePrivilegedManager
          createAndAddJointPrivilegedConfigurationParameters(side,
                                                             LegJointName.HIP_PITCH,
                                                             -0.25,
-                                                            pPoseHipPitchKp.getDoubleValue(),
-                                                            pPoseHipPitchKdFactor.getDoubleValue() * pPoseHipPitchKp.getDoubleValue());
+                                                            pPoseHipKp.getDoubleValue(),
+                                                            pPoseHipKdFactor.getDoubleValue() * pPoseHipKp.getDoubleValue());
          createAndAddJointPrivilegedConfigurationParameters(side,
                                                             LegJointName.HIP_ROLL,
                                                             0.0,
-                                                            pPoseHipRollKp.getDoubleValue(),
-                                                            pPoseHipRollKdFactor.getDoubleValue() * pPoseHipRollKp.getDoubleValue());
+                                                            pPoseHipKp.getDoubleValue(),
+                                                            pPoseHipKdFactor.getDoubleValue() * pPoseHipKp.getDoubleValue());
          createAndAddJointPrivilegedConfigurationParameters(side,
                                                             LegJointName.HIP_YAW,
                                                             0.0,
-                                                            pPoseHipYawKp.getDoubleValue(),
-                                                            pPoseHipYawKdFactor.getDoubleValue() * pPoseHipYawKp.getDoubleValue());
+                                                            pPoseHipKp.getDoubleValue(),
+                                                            pPoseHipKdFactor.getDoubleValue() * pPoseHipKp.getDoubleValue());
          createAndAddJointPrivilegedConfigurationParameters(side,
                                                             LegJointName.KNEE_PITCH,
                                                             0.5,
@@ -259,12 +244,12 @@ public class NaturalPosturePrivilegedManager
 
    private OneDoFJointPrivilegedConfigurationParameters spineRollPrivilegedConfigurationParameters()
    {
-      OneDoFJointBasics spineRoll = fullRobotModel.getOneDoFJointByName(spineRollJointName);
+      OneDoFJointBasics spineRoll = fullRobotModel.getSpineJoint(SpineJointName.SPINE_ROLL);
       //      System.out.println(spineRoll);
 
       OneDoFJointPrivilegedConfigurationParameters jointParameters = new OneDoFJointPrivilegedConfigurationParameters();
-      jointParameters.setConfigurationGain(pPoseSpineRollKp.getValue());
-      jointParameters.setVelocityGain(pPoseSpineRollKdFactor.getValue() * pPoseSpineRollKp.getValue());
+      jointParameters.setConfigurationGain(pPoseSpineRollPitchKp.getValue());
+      jointParameters.setVelocityGain(pPoseSpineRollPitchKdFactor.getValue() * pPoseSpineRollPitchKp.getValue());
       jointParameters.setWeight(1);
       jointParameters.setMaxAcceleration(Double.POSITIVE_INFINITY);
       jointParameters.setPrivilegedConfigurationOption(null);
@@ -277,11 +262,11 @@ public class NaturalPosturePrivilegedManager
 
    private OneDoFJointPrivilegedConfigurationParameters spinePitchPrivilegedConfigurationParameters()
    {
-      OneDoFJointBasics spinePitch = fullRobotModel.getOneDoFJointByName(spinePitchJointName);
+      OneDoFJointBasics spinePitch = fullRobotModel.getSpineJoint(SpineJointName.SPINE_PITCH);
 
       OneDoFJointPrivilegedConfigurationParameters jointParameters = new OneDoFJointPrivilegedConfigurationParameters();
-      jointParameters.setConfigurationGain(pPoseSpinePitchKp.getValue());
-      jointParameters.setVelocityGain(pPoseSpinePitchKdFactor.getValue() * pPoseSpinePitchKp.getValue());
+      jointParameters.setConfigurationGain(pPoseSpineRollPitchKp.getValue());
+      jointParameters.setVelocityGain(pPoseSpineRollPitchKdFactor.getValue() * pPoseSpineRollPitchKp.getValue());
       jointParameters.setWeight(1);
       jointParameters.setMaxAcceleration(Double.POSITIVE_INFINITY);
       jointParameters.setPrivilegedConfigurationOption(null);
@@ -294,7 +279,7 @@ public class NaturalPosturePrivilegedManager
 
    private OneDoFJointPrivilegedConfigurationParameters spineYawPrivilegedConfigurationParameters()
    {
-      OneDoFJointBasics spineYaw = fullRobotModel.getOneDoFJointByName(spineYawJointName);
+      OneDoFJointBasics spineYaw = fullRobotModel.getSpineJoint(SpineJointName.SPINE_YAW);
 
       OneDoFJointPrivilegedConfigurationParameters jointParameters = new OneDoFJointPrivilegedConfigurationParameters();
       jointParameters.setConfigurationGain(pPoseSpineYawKp.getValue());
