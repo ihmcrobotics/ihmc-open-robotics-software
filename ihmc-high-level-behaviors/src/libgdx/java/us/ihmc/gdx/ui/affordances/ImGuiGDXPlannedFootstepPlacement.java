@@ -61,7 +61,6 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
 
    FramePose3D tempFramePose = new FramePose3D();
 
-   // FOR ICONS (NON-BUTTON)
    private final WorkspaceDirectory iconDirectory = new WorkspaceDirectory("ihmc-open-robotics-software",
                                                                            "ihmc-high-level-behaviors/src/libgdx/resources/icons");
    private GDXIconTexture feetIcon;
@@ -107,7 +106,7 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
       latestInput = input;
       boolean anyFootstepIsSelected = false;
 
-      //Call each footstep's process3DViewInput
+      // Call each footstep's process3DViewInput
       for (ImGuiGDXPlannedFootstep singleFootstep : footstepArrayList)
       {
          singleFootstep.process3DViewInput(input);
@@ -147,7 +146,7 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
 
       Point3DReadOnly pickPointInWorld = input.getPickPointInWorld();
 
-      //Check validity of footsteps
+      // Check validity of footsteps
       stepChecker.checkValidStepList(footstepArrayList);
       if (isCurrentlyPlacingFootstep())
       {
@@ -158,7 +157,7 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
          stepChecker.checkValidSingleStep(footstepArrayList, candidateStepTransform, currentFootStepSide, footstepArrayList.size());
       }
 
-      //Get the warnings and flash if the footstep's placement isn't okay
+      // Get the warnings and flash if the footstep's placement isn't okay
       ArrayList<BipedalFootstepPlannerNodeRejectionReason> temporaryReasons = stepChecker.getReasons();
       if (temporaryReasons.size() > 0)
       {
@@ -187,7 +186,7 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
 
    private boolean isAnyFootstepSelected()
    {
-      //Generate the warning messages on the tooltips
+      // Generate the warning messages on the tooltips
       boolean anyFootstepIsSelected = false;
       if (footstepBeingPlaced == null)
       {
@@ -322,7 +321,7 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
 
    public void update()
    {
-      //Update footsteps in the list, and the one being placed
+      // Update footsteps in the list, and the one being placed
       for (int i = 0; i < footstepArrayList.size(); i++)
       {
          footstepArrayList.get(i).update();
@@ -335,7 +334,7 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
 
    public void clear()
    {
-      //Remove all footsteps
+      // Remove all footsteps
       while (footstepArrayList.size() > 0)
       {
          removeFootStep();
@@ -355,8 +354,8 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
       }
       communicationHelper.publishToController(messageList);
 
-      // note: set stance and swing as last two steps of the footstepArrayList (if this list is not empty)
-      // note: delete steps in singleFootStepAffordance.
+      // Note: set stance and swing as last two steps of the footstepArrayList (if this list is not empty)
+      // Note: delete steps in singleFootStepAffordance.
 
       if (footstepArrayList.size() == 1)
       {
@@ -402,7 +401,7 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
       footstepBeingPlaced = new ImGuiGDXPlannedFootstep(baseUI, footstepSide, footstepIndex);
       currentFootStepSide = footstepSide;
 
-      //note: set the yaw of the new footstep to the yaw of the previous footstep
+      // Note: set the yaw of the new footstep to the yaw of the previous footstep
       tempFramePose.setToZero(ReferenceFrame.getWorldFrame());
       RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
       GDXTools.toEuclid(new Matrix4(), rigidBodyTransform);
@@ -442,9 +441,9 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
 //      }
    }
 
-   /*
-   Gets the transform either from the footstep list, or from the synced robot.
-   Never gets the transform from the footstep currently being placed.
+   /**
+    * Gets the transform either from the footstep list, or from the synced robot.
+    * Never gets the transform from the footstep currently being placed.
     */
    public RigidBodyTransform getLatestPlacedFootstepTransform(RobotSide robotSide)
    {
@@ -458,9 +457,9 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
       }
    }
 
-   /*
-   Returns future footstep currently being placed. If you are not placing a footstep currently, it will return last footstep from list.
-   Does NOT return footsteps that you already walked on
+   /**
+    * Returns future footstep currently being placed. If you are not placing a footstep currently, it will return last footstep from list.
+    * Does NOT return footsteps that you already walked on
     */
    public ImGuiGDXPlannedFootstep getFootstepBeingPlacedOrLastFootstepPlaced()
    {
