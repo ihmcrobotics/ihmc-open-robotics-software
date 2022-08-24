@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -112,37 +113,37 @@ public class NaturalPosturePrivilegedConfigurationManager
       pPoseDefaultWeight.set(1.0);
 
       pPoseSpineRollPitchGains.setKp(50.0);
-      pPoseSpineRollPitchGains.setZeta(0.5);
+      pPoseSpineRollPitchGains.setZeta(GainCalculator.computeDampingRatio(50.0, 0.15 * 50.0));
       pPoseSpineRollPitchGains.createDerivativeGainUpdater(true);
 
       pPoseSpineYawGains.setKp(300.0);
-      pPoseSpineYawGains.setZeta(1.2);
+      pPoseSpineYawGains.setZeta(GainCalculator.computeDampingRatio(300.0, 0.15 * 300.0));
       pPoseSpineYawGains.createDerivativeGainUpdater(true);
 
       pPoseShoulderGains.setKp(80.0);
-      pPoseShoulderGains.setZeta(0.7);
+      pPoseShoulderGains.setZeta(GainCalculator.computeDampingRatio(80.0, 0.15 * 80.0));
       pPoseShoulderGains.createDerivativeGainUpdater(true);
 
       pPoseElbowWeight.set(10.0);
       pPoseElbowGains.setKp(30.0);
-      pPoseElbowGains.setZeta(0.4);
+      pPoseElbowGains.setZeta(GainCalculator.computeDampingRatio(30.0, 0.15 * 30.0));
       pPoseElbowGains.createDerivativeGainUpdater(true);
 
       pPoseWristGains.setKp(40.0);
-      pPoseWristGains.setZeta(0.5);
+      pPoseWristGains.setZeta(GainCalculator.computeDampingRatio(40.0, 6.0));
       pPoseWristGains.createDerivativeGainUpdater(true);
 
       // privileged configuration for lower body
       pPoseHipGains.setKp(100.0);
-      pPoseHipGains.setZeta(1.0);
+      pPoseHipGains.setZeta(GainCalculator.computeDampingRatio(100.0, 0.2 * 100.0));
       pPoseHipGains.createDerivativeGainUpdater(true);
 
       pPoseKneeGains.setKp(100.0);
-      pPoseKneeGains.setZeta(1.0);
+      pPoseKneeGains.setZeta(GainCalculator.computeDampingRatio(100.0, 0.2 * 100.0));
       pPoseKneeGains.createDerivativeGainUpdater(true);
 
       pPoseAnkleGains.setKp(4.0);
-      pPoseAnkleGains.setZeta(0.25);
+      pPoseAnkleGains.setZeta(GainCalculator.computeDampingRatio(4.0, 0.6));
       pPoseAnkleGains.createDerivativeGainUpdater(true);
 
 
