@@ -161,7 +161,7 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
    // Testing -- track local yaw angle
    // Note that the base (pelvis) has to turn in order for the upper body to turn together
    private Boolean trackingLocalYaw = true;
-   
+
    public NadiaNaturalPosture(FullHumanoidRobotModel robotModel,
                               boolean useURDFJointNumbering,
                               YoRegistry registry,
@@ -381,13 +381,14 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
 
    public void computeNaturalPosture(double[] q, Orientation3DReadOnly Q_world_base)
    {
-	   // Testing -- do local yaw control
+      // Testing -- do local yaw control
       Quaternion Q_world_base_with_zero_yaw = new Quaternion(Q_world_base);
-      if (trackingLocalYaw) {
+      if (trackingLocalYaw)
+      {
          Q_world_base_with_zero_yaw.setUnsafe(Q_world_base_with_zero_yaw.getX(), Q_world_base_with_zero_yaw.getY(), 0, Q_world_base_with_zero_yaw.getS());
          Q_world_base_with_zero_yaw.normalize();
       }
-	   
+
       // Get the NP quaternion r.t. the base(pelvis) frame:
       computeQuaternionNPrtBase(q, this.Q_Base_NP);
 
@@ -458,9 +459,6 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
    //         omega_NP_rt_world_ewrt_NP = [Jacobian] * [omega_Base_rt_world_ewrt_Base; q_dot]
    private void computeJacobianNP(QuaternionReadOnly quaternionNPrtBase, DMatrixRMaj jacobianQuaternionNPrtBase, DMatrixRMaj jacobianToPack)
    {
-      // YMC: it looks like Gabe is already doing local vel control (since the global base angle doesn't enter the first 6 columns of Jacobian) 
-      // Therefore, there is no need to modify this for the case of trackingLocalYaw = true;
-      
       // Need 3x3 tranform from Base-frame back to NP-frame:
       RotationMatrix CnpBase = new RotationMatrix(quaternionNPrtBase);
       CnpBase.transpose();
@@ -469,7 +467,15 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
       for (int i = 0; i < 3; i++)
          for (int j = 0; j < 3; j++)
          {
-            jacobianToPack.set(i, j, CnpBase.getElement(i, j)); // GMN: Need to see if we have submatrix operators...
+            if (trackingLocalYaw && (i == 2))
+            {
+               // Testing -- do local yaw control (zero out the third row of R^T because it corresponds to the term of angular vel of pelvis rt world 
+               jacobianToPack.set(i, j, 0.0);
+            }
+            else
+            {
+               jacobianToPack.set(i, j, CnpBase.getElement(i, j)); // GMN: Need to see if we have submatrix operators...
+            }
             jacobianToPack.set(i, j + 3, 0.0);
          }
 
@@ -645,7 +651,7 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
       {
          // TODO Auto-generated catch block
          e.printStackTrace();
-      } 
+      }
       catch (IOException e)
       {
          // TODO Auto-generated catch block
