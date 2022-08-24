@@ -1,6 +1,5 @@
 package us.ihmc.gdx.ui.affordances;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.math.Matrix4;
@@ -56,7 +55,6 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
    private ImGui3DViewInput latestInput;
    private GDX3DPanel primary3DPanel;
    private GDXTeleoperationParameters teleoperationParameters;
-   private boolean renderTooltip = false;
    private ImGuiGDXPlannedFootstep stepBeingModified = null;
 
    FramePose3D tempFramePose = new FramePose3D();
@@ -76,7 +74,6 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
       this.teleoperationParameters = teleoperationParameters;
       this.syncedRobot = syncedRobot;
       primary3DPanel = baseUI.getPrimary3DPanel();
-      primary3DPanel.addImGuiOverlayAddition(this::renderTooltips);
 
       stepChecker = new ImGuiGDXPlannedFootstepChecker(baseUI, communicationHelper, syncedRobot, footstepPlannerParameters);
       clear();
@@ -86,8 +83,6 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
 
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      renderTooltip = false;
-
       for (ImGuiGDXPlannedFootstep singleFootstep : footstepArrayList)
       {
          singleFootstep.calculate3DViewPick(input);
@@ -119,29 +114,6 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
       if (footstepArrayList.size() > 0)
       {
          stepChecker.getInput(input);
-         Point3DReadOnly pickPointInWorld = input.getPickPointInWorld();
-         renderTooltip = true;
-
-            //Set position of modelInstance, selectablePose3DGizmo, and the sphere used in stepCheckIsPointInsideAlgorithm all to the pointInWorld that the cursor is at
-//            GDXTools.toGDX(pickPointInWorld, footstepBeingPlaced.getFootstepModelInstance().transform);
-//
-//            footstepBeingPlaced.setGizmoPose(pickPointInWorld.getX(),
-//                                             pickPointInWorld.getY(),
-//                                             pickPointInWorld.getZ(),
-//                                             footstepBeingPlaced.getSelectablePose3DGizmo().getPoseGizmo().getTransformToParent());
-//
-//            footstepBeingPlaced.getBoundingSphere().getPosition().set(pickPointInWorld.getX(), pickPointInWorld.getY(), pickPointInWorld.getZ());
-
-            // when left button clicked and released.
-//            if (input.isWindowHovered() & input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
-//            {
-//               placeFootstep();
-//            }
-//
-//            if (input.isWindowHovered() && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Right))
-//            {
-//               removeFootStep();
-//            }
       }
 
       Point3DReadOnly pickPointInWorld = input.getPickPointInWorld();
@@ -174,7 +146,6 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
 
       if (anyFootstepIsSelected)
       {
-         renderTooltip = true;
          stepChecker.setRenderTooltip(true);
          stepChecker.makeWarnings();
       }
@@ -222,30 +193,6 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
 
    public void renderImGuiWidgets()
    {
-//      ImGui.text("Place footstep:");
-
-//      ImGui.image(iconTexturesMap.get("feet").getTextureObjectHandle(), 35.0f, 35.0f);
-//      ImGui.sameLine();
-//      ImGui.pushFont(ImGuiTools.getMediumFont());
-//      if (ImGui.button(labels.get("Left")))
-//      {
-//         createNewFootStep(RobotSide.LEFT);
-//      }
-//      ImGui.sameLine();
-//      if (ImGui.button(labels.get("Right")))
-//      {
-//         createNewFootStep(RobotSide.RIGHT);
-//      }
-//      ImGui.sameLine();
-//      if (ImGui.button(labels.get("Walk")))
-//      {
-//         if (getFootstepArrayList().size() > 0)
-//         {
-//            walkFromSteps();
-//         }
-//      }
-//      ImGui.popFont();
-
       if (ImGui.isKeyPressed(ImGuiTools.getSpaceKey()))
       {
          if (getFootstepArrayList().size() > 0)
@@ -266,29 +213,6 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
          {
             walkFromSteps();
          }
-      }
-   }
-
-   private void renderTooltips()
-   {
-      if (renderTooltip)
-      {
-         float offsetX = 10.0f;
-         float offsetY = 10.0f;
-         float mousePosX = latestInput.getMousePosX();
-         float mousePosY = latestInput.getMousePosY();
-         float drawStartX = primary3DPanel.getWindowDrawMinX() + mousePosX + offsetX;
-         float drawStartY = primary3DPanel.getWindowDrawMinY() + mousePosY + offsetY;
-
-         ImGui.getWindowDrawList()
-              .addRectFilled(drawStartX, drawStartY, drawStartX + 150.0f, drawStartY + 21.0f, new Color(0.2f, 0.2f, 0.2f, 0.7f).toIntBits());
-         ImGui.getWindowDrawList()
-              .addText(ImGuiTools.getSmallFont(),
-                       ImGuiTools.getSmallFont().getFontSize(),
-                       drawStartX + 5.0f,
-                       drawStartY + 2.0f,
-                       Color.WHITE.toIntBits(),
-                       "Right click to exit");
       }
    }
 
@@ -430,15 +354,6 @@ public class ImGuiGDXPlannedFootstepPlacement implements RenderableProvider
             footstepBeingPlaced = null;
          }
       }
-
-//      if(footstepArrayList.size()>0)
-//      {
-//         ImGuiGDXPlannedFootstep lastStep =  footstepArrayList.get(footstepArrayList.size()-1);
-////         baseUI.getPrimaryScene().removeRenderableAdapter((lastStep.getRenderableAdapter()));
-//         footstepIndex--;
-//         footstepArrayList.remove(footstepArrayList.size() - 1);
-//         lastStep.getFootstepModelInstance().transform.val[Matrix4.M03] = Float.NaN;
-//      }
    }
 
    /**
