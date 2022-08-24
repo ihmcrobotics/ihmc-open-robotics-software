@@ -57,6 +57,16 @@ public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
       primary3DPanel.addImGuiOverlayAddition(this::renderTooltips);
       stepChecker = footstepPlan.getStepChecker();
       feetIcon = new GDXIconTexture(iconDirectory.file("feet.png"));
+
+      //NOTE: adding hot button for left and right foot
+      baseUI.getPrimary3DPanel().addHotButton("leftFoot_depress.png", () ->
+      {
+         createNewFootStep(RobotSide.LEFT);
+      });
+      baseUI.getPrimary3DPanel().addHotButton("rightFoot_depress.png", () ->
+      {
+         createNewFootStep(RobotSide.RIGHT);
+      });
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)
