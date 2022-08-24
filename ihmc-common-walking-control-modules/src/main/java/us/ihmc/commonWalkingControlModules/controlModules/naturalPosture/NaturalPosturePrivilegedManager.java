@@ -227,88 +227,34 @@ public class NaturalPosturePrivilegedManager
                                                             pPoseElbowWeight.getDoubleValue(),
                                                             pPoseElbowKp.getDoubleValue(),
                                                             pPoseElbowKdFactor.getDoubleValue() * pPoseElbowKp.getDoubleValue());
-      }
 
+         createAndAddJointPrivilegedConfigurationParameters(side, ArmJointName.WRIST_YAW, 0.0);
+         createAndAddJointPrivilegedConfigurationParameters(side, ArmJointName.WRIST_ROLL, 0.0);
+         createAndAddJointPrivilegedConfigurationParameters(side, ArmJointName.FIRST_WRIST_PITCH, 0.0);
 
-      createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, ArmJointName.WRIST_YAW, 0.0);
-      createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, ArmJointName.WRIST_YAW, 0.0);
-      createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, ArmJointName.WRIST_ROLL, 0.0);
-      createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, ArmJointName.WRIST_ROLL, 0.0);
-      createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, ArmJointName.FIRST_WRIST_PITCH, 0.0);
-      createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, ArmJointName.FIRST_WRIST_PITCH, 0.0);
-
-      // GMN: Probably should have privileged configuration set for entire robot
-      //      for (RobotSide robotSide : RobotSide.values)
-      //      {
-      //         OneDoFJointBasics kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH);
-      //
-      //         privilegedConfigurationCommand.addJoint(kneeJoint, walkingControllerParameters.getKneePrivilegedConfigurationParameters());
-      //      }
-
-      //      side = RobotSide.LEFT;
-      //      createAndAddJointPrivilegedConfigurationParameters(side, LegJointName.HIP_PITCH,
-      //                                                         pPoseHipPitch.getDoubleValue(),
-      //                                                         pPoseHipPitchKp.getDoubleValue(),
-      //                                                         pPoseHipPitchKdFactor.getDoubleValue()*pPoseHipPitchKp.getDoubleValue());
-      //      createAndAddJointPrivilegedConfigurationParameters(side, LegJointName.HIP_ROLL,
-      //                                                         pPoseHipRoll.getDoubleValue(),
-      //                                                         pPoseHipRollKp.getDoubleValue(),
-      //                                                         pPoseHipRollKdFactor.getDoubleValue()*pPoseHipRollKp.getDoubleValue());
-      //      createAndAddJointPrivilegedConfigurationParameters(side, LegJointName.HIP_YAW,
-      //                                                         pPoseHipYaw.getDoubleValue(),
-      //                                                         pPoseHipYawKp.getDoubleValue(),
-      //                                                         pPoseHipYawKdFactor.getDoubleValue()*pPoseHipYawKp.getDoubleValue());
-      //      createAndAddJointPrivilegedConfigurationParameters(side, LegJointName.KNEE_PITCH,
-      //                                                         pPoseKnee.getDoubleValue(),
-      //                                                         pPoseKneeKp.getDoubleValue(),
-      //                                                         pPoseKneeKdFactor.getDoubleValue()*pPoseKneeKp.getDoubleValue());
-      //
-      //      side = RobotSide.RIGHT;
-      //      createAndAddJointPrivilegedConfigurationParameters(side, LegJointName.HIP_PITCH,
-      //                                                         -pPoseHipPitch.getDoubleValue(),
-      //                                                         pPoseHipPitchKp.getDoubleValue(),
-      //                                                         pPoseHipPitchKdFactor.getDoubleValue()*pPoseHipPitchKp.getDoubleValue());
-      //      createAndAddJointPrivilegedConfigurationParameters(side, LegJointName.HIP_ROLL,
-      //                                                         -pPoseHipRoll.getDoubleValue(),
-      //                                                         pPoseHipRollKp.getDoubleValue(),
-      //                                                         pPoseHipRollKdFactor.getDoubleValue()*pPoseHipRollKp.getDoubleValue());
-      //      createAndAddJointPrivilegedConfigurationParameters(side, LegJointName.HIP_YAW,
-      //                                                         -pPoseHipYaw.getDoubleValue(),
-      //                                                         pPoseHipYawKp.getDoubleValue(),
-      //                                                         pPoseHipYawKdFactor.getDoubleValue()*pPoseHipYawKp.getDoubleValue());
-      //      createAndAddJointPrivilegedConfigurationParameters(side, LegJointName.KNEE_PITCH,
-      //                                                         -pPoseKnee.getDoubleValue(),
-      //                                                         pPoseKneeKp.getDoubleValue(),
-      //                                                         pPoseKneeKdFactor.getDoubleValue()*pPoseKneeKp.getDoubleValue());
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         createAndAddJointPrivilegedConfigurationParameters(robotSide,
+         createAndAddJointPrivilegedConfigurationParameters(side,
                                                             LegJointName.HIP_PITCH,
                                                             -0.25,
                                                             pPoseHipPitchKp.getDoubleValue(),
                                                             pPoseHipPitchKdFactor.getDoubleValue() * pPoseHipPitchKp.getDoubleValue());
-         createAndAddJointPrivilegedConfigurationParameters(robotSide,
+         createAndAddJointPrivilegedConfigurationParameters(side,
                                                             LegJointName.HIP_ROLL,
                                                             0.0,
                                                             pPoseHipRollKp.getDoubleValue(),
                                                             pPoseHipRollKdFactor.getDoubleValue() * pPoseHipRollKp.getDoubleValue());
-         createAndAddJointPrivilegedConfigurationParameters(robotSide,
+         createAndAddJointPrivilegedConfigurationParameters(side,
                                                             LegJointName.HIP_YAW,
                                                             0.0,
                                                             pPoseHipYawKp.getDoubleValue(),
                                                             pPoseHipYawKdFactor.getDoubleValue() * pPoseHipYawKp.getDoubleValue());
-         createAndAddJointPrivilegedConfigurationParameters(robotSide,
+         createAndAddJointPrivilegedConfigurationParameters(side,
                                                             LegJointName.KNEE_PITCH,
                                                             0.5,
                                                             pPoseKneeKp.getDoubleValue(),
                                                             pPoseKneeKdFactor.getDoubleValue() * pPoseKneeKp.getDoubleValue());
+         createAndAddJointPrivilegedConfigurationParameters(side, LegJointName.ANKLE_ROLL, 0.0, 4.0, 0.6);
+         createAndAddJointPrivilegedConfigurationParameters(side, LegJointName.ANKLE_PITCH, 0.0, 4.0, 0.6);
       }
-
-      createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, LegJointName.ANKLE_ROLL, 0.0, 4.0, 0.6);
-      createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, LegJointName.ANKLE_ROLL, 0.0, 4.0, 0.6);
-      createAndAddJointPrivilegedConfigurationParameters(RobotSide.LEFT, LegJointName.ANKLE_PITCH, 0.0, 4.0, 0.6);
-      createAndAddJointPrivilegedConfigurationParameters(RobotSide.RIGHT, LegJointName.ANKLE_PITCH, 0.0, 4.0, 0.6);
    }
 
    private OneDoFJointPrivilegedConfigurationParameters spineRollPrivilegedConfigurationParameters()
