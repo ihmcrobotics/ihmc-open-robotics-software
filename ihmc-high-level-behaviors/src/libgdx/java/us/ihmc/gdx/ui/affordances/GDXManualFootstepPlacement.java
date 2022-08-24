@@ -30,7 +30,7 @@ import java.util.ArrayList;
 /**
  * Manages and assists with the operator placement of footsteps.
  */
-public class ImGuiGDXManualFootstepPlacement implements RenderableProvider
+public class GDXManualFootstepPlacement implements RenderableProvider
 {
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private GDXInteractableFootstep footstepBeingPlaced;
