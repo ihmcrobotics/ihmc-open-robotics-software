@@ -26,7 +26,7 @@ import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.gdx.ui.affordances.GDXRobotWholeBodyInteractable;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXManualFootstepPlacement;
-import us.ihmc.gdx.ui.affordances.ImGuiGDXPlannedFootstepPlacement;
+import us.ihmc.gdx.ui.affordances.GDXInteractableFootstepPlan;
 import us.ihmc.gdx.ui.affordances.GDXBallAndArrowPosePlacement;
 import us.ihmc.gdx.ui.footstepPlanner.GDXFootstepPlanning;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
@@ -61,7 +61,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
    private GDXRobotWholeBodyInteractable interactableRobot;
    private final ImGuiGDXManualFootstepPlacement manualFootstepPlacement = new ImGuiGDXManualFootstepPlacement();
    // TODO: for interactable footings from stepPlan >>
-   private final ImGuiGDXPlannedFootstepPlacement plannedFootstepPlacement = new ImGuiGDXPlannedFootstepPlacement();
+   private final GDXInteractableFootstepPlan plannedFootstepPlacement = new GDXInteractableFootstepPlan();
    // <<
    private final ImGuiStoredPropertySetTuner teleoperationParametersTuner = new ImGuiStoredPropertySetTuner("Teleoperation Parameters");
    private final ImGuiStoredPropertySetTuner footstepPlanningParametersTuner = new ImGuiStoredPropertySetTuner("Footstep Planner Parameters (Teleoperation)");

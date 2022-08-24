@@ -12,7 +12,6 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.BehaviorTools;
-import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.Axis3D;
@@ -145,7 +144,7 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
                                                                                 this);
    }
 
-   public void update(ImGuiGDXPlannedFootstepPlacement plannedFootstepPlacement)
+   public void update(GDXInteractableFootstepPlan plannedFootstepPlacement)
    {
       if (!modified)
       {

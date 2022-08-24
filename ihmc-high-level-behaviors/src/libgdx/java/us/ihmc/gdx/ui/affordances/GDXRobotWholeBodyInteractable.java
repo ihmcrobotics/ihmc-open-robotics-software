@@ -16,7 +16,6 @@ import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.gdx.ui.collidables.GDXRobotCollisionModel;
 import us.ihmc.gdx.ui.graphics.GDXSpatialVectorArrows;
 import us.ihmc.gdx.ui.teleoperation.GDXDesiredRobot;
@@ -185,7 +184,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
       walkPathControlRing.create(baseUI.getPrimary3DPanel(), robotModel, syncedRobot, ros2Helper, teleoperationParameters);
    }
 
-   public void update(ImGuiGDXPlannedFootstepPlacement plannedFootstepPlacement)
+   public void update(GDXInteractableFootstepPlan plannedFootstepPlacement)
    {
       // update the desired arm setpoints
       armSetpointManager.update();
