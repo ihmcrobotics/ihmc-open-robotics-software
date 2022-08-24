@@ -13,6 +13,7 @@ import imgui.internal.ImGui;
 import imgui.internal.flag.ImGuiItemFlags;
 import imgui.type.ImFloat;
 import org.lwjgl.openvr.InputDigitalActionData;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -46,6 +47,12 @@ public class GDXBallAndArrowPosePlacement implements RenderableProvider
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final RotationMatrix arrowRotationMatrix = new RotationMatrix();
    private Consumer<Pose3D> placedPoseConsumer;
+   private final Notification placedNotification = new Notification();
+
+   public void create(Color color)
+   {
+      create(null, color);
+   }
 
    public void create(Consumer<Pose3D> placedPoseConsumer, Color color)
    {
@@ -65,7 +72,7 @@ public class GDXBallAndArrowPosePlacement implements RenderableProvider
       });
       placeGoalActionMap.mapAction(GDXUITrigger.ORIENTATION_LEFT_CLICK, trigger ->
       {
-         placedPoseConsumer.accept(goalPoseForReading);
+         onPlaced();
 
          placingGoal = false;
       });
@@ -137,12 +144,20 @@ public class GDXBallAndArrowPosePlacement implements RenderableProvider
          if (triggerClick.bChanged() && !triggerClick.bState())
          {
             placingGoal = false;
-            placedPoseConsumer.accept(goalPoseForReading);
+            onPlaced();
          }
 
          controller.getTransformZUpToWorld(sphere.transform);
          controller.getTransformZUpToWorld(arrow.transform);
       });
+   }
+
+   private void onPlaced()
+   {
+      if (placedPoseConsumer != null)
+         placedPoseConsumer.accept(goalPoseForReading);
+
+      placedNotification.set();
    }
 
    public void renderPlaceGoalButton()
@@ -222,7 +237,7 @@ public class GDXBallAndArrowPosePlacement implements RenderableProvider
    public void setGoalPoseAndPassOn(Pose3DReadOnly pose)
    {
       setGoalPoseNoCallbacks(pose);
-      placedPoseConsumer.accept(goalPoseForReading);
+      onPlaced();
    }
 
    public void setGoalPoseNoCallbacks(Pose3DReadOnly pose)
@@ -238,5 +253,10 @@ public class GDXBallAndArrowPosePlacement implements RenderableProvider
          GDXTools.toGDX(pose, tempTransform, arrow.transform);
       }
       goalPoseForReading.set(pose);
+   }
+
+   public Notification getPlacedNotification()
+   {
+      return placedNotification;
    }
 }

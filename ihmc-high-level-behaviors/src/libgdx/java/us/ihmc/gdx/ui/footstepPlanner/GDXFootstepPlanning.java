@@ -7,6 +7,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -37,6 +38,7 @@ public class GDXFootstepPlanning
    private final ResettableExceptionHandlingExecutorService executor;
    private boolean isReadyToWalk = false;
    private final Throttler throttler = new Throttler();
+   private final Notification plannedNotification = new Notification();
 
    public GDXFootstepPlanning(DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot)
    {
@@ -78,11 +80,14 @@ public class GDXFootstepPlanning
       request.setRequestedInitialStanceSide(stanceSide);
    }
 
-   public void planAsync()
+   private void planAsync()
    {
       executor.clearQueueAndExecute(this::plan);
    }
 
+   /**
+    * TODO: Make this private and get async working
+    */
    public void plan()
    {
       request.getStartFootPoses().forEach((side, pose3D) ->
@@ -125,6 +130,7 @@ public class GDXFootstepPlanning
       }
 
       isReadyToWalk = !plannerFailed;
+      plannedNotification.set();
    }
 
    public FootstepPlannerParametersBasics getFootstepPlannerParameters()
@@ -150,5 +156,10 @@ public class GDXFootstepPlanning
    public void setReadyToWalk(boolean readyToWalk)
    {
       isReadyToWalk = readyToWalk;
+   }
+
+   public Notification getPlannedNotification()
+   {
+      return plannedNotification;
    }
 }

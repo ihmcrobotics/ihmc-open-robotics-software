@@ -22,17 +22,17 @@ import us.ihmc.gdx.imgui.ImGuiMovingPlot;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
+import us.ihmc.gdx.tools.GDXIconTexture;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
+import us.ihmc.gdx.ui.affordances.GDXBallAndArrowPosePlacement;
+import us.ihmc.gdx.ui.affordances.GDXInteractableFootstepPlan;
 import us.ihmc.gdx.ui.affordances.GDXRobotWholeBodyInteractable;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXManualFootstepPlacement;
-import us.ihmc.gdx.ui.affordances.GDXInteractableFootstepPlan;
-import us.ihmc.gdx.ui.affordances.GDXBallAndArrowPosePlacement;
 import us.ihmc.gdx.ui.footstepPlanner.GDXFootstepPlanning;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.gdx.ui.interactable.GDXChestOrientationSlider;
 import us.ihmc.gdx.ui.interactable.GDXPelvisHeightSlider;
-import us.ihmc.gdx.tools.GDXIconTexture;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
@@ -61,7 +61,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
    private GDXRobotWholeBodyInteractable interactableRobot;
    private final ImGuiGDXManualFootstepPlacement manualFootstepPlacement = new ImGuiGDXManualFootstepPlacement();
    // TODO: for interactable footings from stepPlan >>
-   private final GDXInteractableFootstepPlan plannedFootstepPlacement = new GDXInteractableFootstepPlan();
+   private final GDXInteractableFootstepPlan interactableFootstepPlan = new GDXInteractableFootstepPlan();
    // <<
    private final ImGuiStoredPropertySetTuner teleoperationParametersTuner = new ImGuiStoredPropertySetTuner("Teleoperation Parameters");
    private final ImGuiStoredPropertySetTuner footstepPlanningParametersTuner = new ImGuiStoredPropertySetTuner("Footstep Planner Parameters (Teleoperation)");
@@ -160,28 +160,23 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
 
       desiredRobot.create();
 
-      // TODO: Remove this stuff and use the path control ring for this
-      ballAndArrowMidFeetPosePlacement.create(goal -> queueFootstepPlanning(), Color.YELLOW);
+      ballAndArrowMidFeetPosePlacement.create(Color.YELLOW);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(ballAndArrowMidFeetPosePlacement::processImGui3DViewInput);
       footstepPlanningParametersTuner.create(footstepPlanning.getFootstepPlannerParameters(),
                                              FootstepPlannerParameterKeys.keys,
-                                             this::queueFootstepPlanning);
+                                             footstepPlanning::plan);
       teleoperationParametersTuner.create(teleoperationParameters, GDXTeleoperationParameters.keys);
-      // TODO: create (register) sliders here
       teleoperationParametersTuner.registerSlider("Swing time", 0.3f, 2.5f);
       teleoperationParametersTuner.registerSlider("Transfer time", 0.3f, 2.5f);
       teleoperationParametersTuner.registerSlider("Turn aggressiveness", 0.0f, 10.0f);
 
-      manualFootstepPlacement.create(baseUI, communicationHelper, syncedRobot, teleoperationParameters, footstepPlanning.getFootstepPlannerParameters());
+      interactableFootstepPlan.create(baseUI, communicationHelper, syncedRobot, teleoperationParameters, footstepPlanning.getFootstepPlannerParameters());
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(interactableFootstepPlan::processImGui3DViewInput);
+      baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(interactableFootstepPlan::calculate3DViewPick);
 
+      manualFootstepPlacement.create(baseUI, interactableFootstepPlan);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(manualFootstepPlacement::processImGui3DViewInput);
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(manualFootstepPlacement::calculate3DViewPick);
-
-      // TODO: for interactable footings from stepPlan >>
-      plannedFootstepPlacement.create(baseUI, communicationHelper, syncedRobot, teleoperationParameters, footstepPlanning.getFootstepPlannerParameters());
-      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(plannedFootstepPlacement::processImGui3DViewInput);
-      baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(plannedFootstepPlacement::calculate3DViewPick);
-      // <<
 
       if (interactableRobot != null)
       {
@@ -199,11 +194,27 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       syncedRobot.update();
       desiredRobot.update();
       footstepsSentToControllerGraphic.update();
+
+      if (ballAndArrowMidFeetPosePlacement.getPlacedNotification().poll())
+      {
+         footstepPlanning.getMidFeetGoalPose().set(ballAndArrowMidFeetPosePlacement.getGoalPose());
+         footstepPlanning.setGoalFootPosesFromMidFeetPose();
+         footstepPlanning.setStanceSideToClosestToGoal();
+         // TODO: Call planAsync
+         footstepPlanning.plan();
+
+         // TODO: make footsteps from footstepPlan interactable (modifiable)
+         if (footstepPlanning.isReadyToWalk()) // failed
+         {
+            interactableFootstepPlan.updateFromPlan(footstepPlanning.getOutput().getFootstepPlan());
+         }
+      }
+
       if (interactableRobot != null)
-         interactableRobot.update(plannedFootstepPlacement);
+         interactableRobot.update(interactableFootstepPlan);
       manualFootstepPlacement.update();
-      plannedFootstepPlacement.update();
-      if (manualFootstepPlacement.getFootstepArrayList().size() > 0)
+      interactableFootstepPlan.update();
+      if (interactableFootstepPlan.getFootsteps().size() > 0)
       {
          footstepPlanning.setReadyToWalk(false);
          footstepsSentToControllerGraphic.clear();
@@ -228,23 +239,15 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       ImGui.separator();
 
       manualFootstepPlacement.renderImGuiWidgets();
-      plannedFootstepPlacement.renderImGuiWidgets();
 
       ImGui.image(locationFlagIcon.getTexture().getTextureObjectHandle(), 22.0f, 22.0f);
-
-      if (footstepPlanning.isReadyToWalk() && manualFootstepPlacement.getFootstepArrayList().size() == 0)
-      {
-         ImGui.sameLine();
-         if (ImGui.button(labels.get("Walk")))
-         {
-            walkFromPlan();
-         }
-      }
       ImGui.sameLine();
       ballAndArrowMidFeetPosePlacement.renderPlaceGoalButton();
 
       ImGui.text("Walk path control ring planner:");
       interactableRobot.getWalkPathControlRing().renderImGuiWidgets();
+
+      interactableFootstepPlan.renderImGuiWidgets();
 
       ImGui.text("Footstep graphics:");
       ImGui.sameLine();
@@ -254,8 +257,8 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       {
          footstepsSentToControllerGraphic.clear();
          ballAndArrowMidFeetPosePlacement.clear();
-         manualFootstepPlacement.clear();
-         plannedFootstepPlacement.clear();
+         manualFootstepPlacement.exitPlacement();
+         interactableFootstepPlan.clear();
       }
 
       ImGui.separator();
@@ -315,28 +318,8 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
          footstepsSentToControllerGraphic.getRenderables(renderables, pool);
          ballAndArrowMidFeetPosePlacement.getRenderables(renderables, pool);
          manualFootstepPlacement.getRenderables(renderables, pool);
-         plannedFootstepPlacement.getRenderables(renderables, pool);
+         interactableFootstepPlan.getRenderables(renderables, pool);
       }
-   }
-
-   private void queueFootstepPlanning()
-   {
-      footstepPlanning.getMidFeetGoalPose().set(ballAndArrowMidFeetPosePlacement.getGoalPose());
-      footstepPlanning.setGoalFootPosesFromMidFeetPose();
-      footstepPlanning.setStanceSideToClosestToGoal();
-      // TODO: Call planAsync
-      footstepPlanning.plan();
-
-      // TODO: make footsteps from footstepPlan interactable (modifiable)
-      if (footstepPlanning.isReadyToWalk()) // failed
-      {
-         plannedFootstepPlacement.updateFromPlan(footstepPlanning.getOutput().getFootstepPlan());
-      }
-   }
-
-   private void walkFromPlan()
-   {
-      plannedFootstepPlacement.walkFromSteps();
    }
 
    public void destroy()
