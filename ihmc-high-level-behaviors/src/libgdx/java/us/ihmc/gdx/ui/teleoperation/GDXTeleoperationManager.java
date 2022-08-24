@@ -43,8 +43,10 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.tools.io.WorkspaceDirectory;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  *  Possibly extract simple controller controls to a smaller panel class, like remote safety controls or something.
@@ -187,6 +189,9 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
          interactableRobot.setInteractablesEnabled(true);
          baseUI.getPrimaryScene().addRenderableProvider(interactableRobot);
       }
+
+      // Note: hot button for open / close hand
+      
    }
 
    public void update()
@@ -306,6 +311,21 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       }
 
       interactableRobot.renderImGuiWidgets();
+   }
+
+   private void publishHandCommand(RobotSide side, String openOrClose)
+   {
+      if (Objects.equals(openOrClose, "open"))
+      {
+         communicationHelper.publish(ROS2Tools::getHandConfigurationTopic,
+                                     HumanoidMessageTools.createHandDesiredConfigurationMessage(side, HandConfiguration.OPEN));
+      }
+      else if (Objects.equals(openOrClose, "close"))
+      {
+         communicationHelper.publish(ROS2Tools::getHandConfigurationTopic,
+                                     HumanoidMessageTools.createHandDesiredConfigurationMessage(side, HandConfiguration.CLOSE));
+      }
+
    }
 
    @Override

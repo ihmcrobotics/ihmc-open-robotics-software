@@ -94,7 +94,7 @@ public class GDX3DPanel
    // NOTE: FOR ICONS (NON-BUTTON)
    private final WorkspaceDirectory iconDirectory = new WorkspaceDirectory("ihmc-open-robotics-software",
                                                                            "ihmc-high-level-behaviors/src/libgdx/resources/icons");
-   private float iconSize = 40.0f;
+   private final float iconSize = 30.0f;
    // NOTE: ICON TEXTURES
    private GDXIconTexture homePoseIcon;
    private GDXIconTexture standPrepIcon;
@@ -102,7 +102,7 @@ public class GDX3DPanel
    private GDXIconTexture pauseIcon;
    private GDXIconTexture continueIcon;
    private GDXIconTexture shutdownIcon;
-   private final boolean hotButtonTesting = false;
+   private final boolean hotButtonTesting = true;
    private ArrayList<Pair<GDXIconTexture,Runnable>> buttonPairList = new ArrayList<>();
    private ArrayList<GDXIconTexture> iconTextures;
 
@@ -145,37 +145,27 @@ public class GDX3DPanel
 
       if (hotButtonTesting)
       {
-         addHotButton("homePose", "homePose.png", () ->
+         addHotButton("homePose.png", () ->
          {
-            // note: the action to do when button clicked.
-            iconSize += 1.0f;
-            // do something
+//            addHotButton("homePose", "homePose.png", null);
          });
-         addHotButton("standPrep", "standPrep.png", () ->
+         addHotButton("standPrep.png", () ->
          {
-            // note: the action to do when button clicked.
-            // do something
+//            if (buttonPairList.size()>0)
+//               buttonPairList.remove(buttonPairList.size()-1);
          });
-         addHotButton("abort", "abort.png", () ->
+         addHotButton("controlRing.jpg", ()->
          {
-            // note: the action to do when button clicked.
-            // do something
+            // demo
          });
-         addHotButton("pause", "pause.png", () ->
-         {
-            // note: the action to do when button clicked.
-            // do something
-         });
-         addHotButton("continue", "continue.png", () ->
-         {
-            // note: the action to do when button clicked.
-            // do something
-         });
-         addHotButton("shutdown", "shutdown.png", () ->
-         {
-            // note: the action to do when button clicked.
-            // do something
-         });
+//         for (int i = 0; i < 30; ++i)
+//         {
+//            addHotButton("standPrep", "standPrep.png", () ->
+//            {
+//               if (buttonPairList.size()>0)
+//                  buttonPairList.remove(buttonPairList.size()-1);
+//            });
+//         }
       }
 
    }
@@ -289,35 +279,50 @@ public class GDX3DPanel
 
 
          // NOTE: Make Hot key button panel here.
-         if (hotButtonTesting)
+         if (hotButtonTesting && buttonPairList.size()>0)
          {
-
-            float panelWid = sizeX * 0.7f;
-            float panelHei = iconSize*3.0f;
-            float startX = posX + sizeX / 2 - panelWid / 2;
-
-            int windowFlags = ImGuiWindowFlags.None;
-            ImGui.setNextWindowPos(startX, posY + 15.0f);
-            ImGui.setNextWindowSize(panelWid, panelHei);
-            ImGui.begin("Hot Button Testing Title", isShowing, windowFlags);
-
-            for (Pair<GDXIconTexture,Runnable> buttonPair : buttonPairList)
+            int numButtons = buttonPairList.size();
+            float gap = 18.0f;
+            float currentWindowSize = sizeX;
+            float offsetX = sizeX * 0.04476f;
+            float offsetY = 12.0f;
+//            float panelWid = iconSize * numButtons + gap * (numButtons - 1) + 2 * offsetX;
+            float panelWid = iconSize * numButtons + gap * numButtons;
+            float panelHei = iconSize + 2 * offsetY;
+            boolean oneLine = true;
+            float widthLimit = sizeX * 0.9f;
+            if (panelWid > widthLimit)
             {
-               float nextPosX = ImGui.getCursorPosX() + iconSize;
-               //               if (nextPosX < panelWid - iconSize)
-               //               {
-               ImGui.setCursorPosX(nextPosX);
-               ImGui.sameLine();
-               //               }
-               if (ImGui.imageButton(buttonPair.getFirst().getTexture().getTextureObjectHandle(), iconSize, iconSize ))
+               oneLine = false;
+               panelWid = widthLimit;
+               int numLine = (int)(widthLimit / panelWid);
+               panelHei =  (numLine + 1) *  panelHei;
+            }
+
+
+            // with tab bar
+//            int windowFlags = ImGuiWindowFlags.None;
+//            panelHei += ImGuiTools.TAB_BAR_HEIGHT;
+
+            // no tab bar
+            int windowFlags =  ImGuiWindowFlags.NoTitleBar;
+
+            ImGui.setNextWindowSize(panelWid, panelHei);
+            float centerX = posX + sizeX / 2;
+            float startX = centerX - panelWid / 2;
+            ImGui.setNextWindowPos(startX, posY + 15.0f);
+            ImGui.begin("Testing . . .", isShowing, windowFlags);
+
+            for (int i = 0; i < buttonPairList.size(); ++i)
+            {
+               if (ImGui.imageButton(buttonPairList.get(i).getFirst().getTexture().getTextureObjectHandle(), iconSize, iconSize ))
                {
-                  buttonPair.getSecond().run();
+                  buttonPairList.get(i).getSecond().run();
                }
+               ImGui.sameLine();
             }
             ImGui.end();
          }
-
-
       }
    }
 
@@ -417,7 +422,7 @@ public class GDX3DPanel
    }
 
    // NOTE: hot button add feature from anywhere in other classes where baseUI (GDXImGuiBasedUI) is accessible.
-   public void addHotButton(String buttonName, String fileName, Runnable onClicked)
+   public void addHotButton(String fileName, Runnable onClicked)
    {
       GDXIconTexture gdxIconTexture = new GDXIconTexture(iconDirectory.file(fileName));
       buttonPairList.add(new Pair<>(gdxIconTexture, onClicked));
