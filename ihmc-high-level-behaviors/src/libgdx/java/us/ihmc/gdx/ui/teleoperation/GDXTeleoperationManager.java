@@ -28,7 +28,7 @@ import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.gdx.ui.affordances.GDXBallAndArrowPosePlacement;
 import us.ihmc.gdx.ui.affordances.GDXInteractableFootstepPlan;
 import us.ihmc.gdx.ui.affordances.GDXRobotWholeBodyInteractable;
-import us.ihmc.gdx.ui.affordances.ImGuiGDXManualFootstepPlacement;
+import us.ihmc.gdx.ui.affordances.GDXManualFootstepPlacement;
 import us.ihmc.gdx.ui.footstepPlanner.GDXFootstepPlanning;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.gdx.ui.interactable.GDXChestOrientationSlider;
@@ -61,7 +61,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
    private final GDXFootstepPlanning footstepPlanning;
    private final GDXBallAndArrowPosePlacement ballAndArrowMidFeetPosePlacement = new GDXBallAndArrowPosePlacement();
    private GDXRobotWholeBodyInteractable interactableRobot;
-   private final ImGuiGDXManualFootstepPlacement manualFootstepPlacement = new ImGuiGDXManualFootstepPlacement();
+   private final GDXManualFootstepPlacement manualFootstepPlacement = new GDXManualFootstepPlacement();
    // TODO: for interactable footings from stepPlan >>
    private final GDXInteractableFootstepPlan interactableFootstepPlan = new GDXInteractableFootstepPlan();
    // <<
