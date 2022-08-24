@@ -244,73 +244,37 @@ public class NaturalPosturePrivilegedManager
 
    private OneDoFJointPrivilegedConfigurationParameters spineRollPrivilegedConfigurationParameters()
    {
-      OneDoFJointBasics spineRoll = fullRobotModel.getSpineJoint(SpineJointName.SPINE_ROLL);
-      //      System.out.println(spineRoll);
-
-      OneDoFJointPrivilegedConfigurationParameters jointParameters = new OneDoFJointPrivilegedConfigurationParameters();
-      jointParameters.setConfigurationGain(pPoseSpineRollPitchKp.getValue());
-      jointParameters.setVelocityGain(pPoseSpineRollPitchKdFactor.getValue() * pPoseSpineRollPitchKp.getValue());
-      jointParameters.setWeight(1);
-      jointParameters.setMaxAcceleration(Double.POSITIVE_INFINITY);
-      jointParameters.setPrivilegedConfigurationOption(null);
-      jointParameters.setPrivilegedConfiguration(pPoseSpineRoll.getDoubleValue());
-
-      privilegedConfigurationCommand.addJoint(spineRoll, jointParameters);
-
-      return jointParameters;
+      return createAndAddJointPrivilegedConfigurationParameters(fullRobotModel.getSpineJoint(SpineJointName.SPINE_ROLL),
+                                                                pPoseSpineRoll.getDoubleValue(),
+                                                                1.0,
+                                                                pPoseSpineRollPitchKp.getDoubleValue(),
+                                                                pPoseSpineRollPitchKp.getDoubleValue() * pPoseSpineRollPitchKdFactor.getValue());
    }
 
    private OneDoFJointPrivilegedConfigurationParameters spinePitchPrivilegedConfigurationParameters()
    {
-      OneDoFJointBasics spinePitch = fullRobotModel.getSpineJoint(SpineJointName.SPINE_PITCH);
 
-      OneDoFJointPrivilegedConfigurationParameters jointParameters = new OneDoFJointPrivilegedConfigurationParameters();
-      jointParameters.setConfigurationGain(pPoseSpineRollPitchKp.getValue());
-      jointParameters.setVelocityGain(pPoseSpineRollPitchKdFactor.getValue() * pPoseSpineRollPitchKp.getValue());
-      jointParameters.setWeight(1);
-      jointParameters.setMaxAcceleration(Double.POSITIVE_INFINITY);
-      jointParameters.setPrivilegedConfigurationOption(null);
-      jointParameters.setPrivilegedConfiguration(pPoseSpinePitch.getDoubleValue());
-
-      privilegedConfigurationCommand.addJoint(spinePitch, jointParameters);
-
-      return jointParameters;
+      return createAndAddJointPrivilegedConfigurationParameters(fullRobotModel.getSpineJoint(SpineJointName.SPINE_PITCH),
+                                                                pPoseSpinePitch.getDoubleValue(),
+                                                                1.0,
+                                                                pPoseSpineRollPitchKp.getDoubleValue(),
+                                                                pPoseSpineRollPitchKp.getDoubleValue() * pPoseSpineRollPitchKdFactor.getValue());
    }
 
    private OneDoFJointPrivilegedConfigurationParameters spineYawPrivilegedConfigurationParameters()
    {
-      OneDoFJointBasics spineYaw = fullRobotModel.getSpineJoint(SpineJointName.SPINE_YAW);
-
-      OneDoFJointPrivilegedConfigurationParameters jointParameters = new OneDoFJointPrivilegedConfigurationParameters();
-      jointParameters.setConfigurationGain(pPoseSpineYawKp.getValue());
-      jointParameters.setVelocityGain(pPoseSpineYawKdFactor.getValue() * pPoseSpineYawKp.getValue());
-      jointParameters.setWeight(pPoseSpineYawWeight.getDoubleValue());
-      jointParameters.setMaxAcceleration(Double.POSITIVE_INFINITY);
-      jointParameters.setPrivilegedConfigurationOption(null);
-      jointParameters.setPrivilegedConfiguration(pPoseSpineYaw.getDoubleValue());
-
-      privilegedConfigurationCommand.addJoint(spineYaw, jointParameters);
-
-      return jointParameters;
+      return createAndAddJointPrivilegedConfigurationParameters(fullRobotModel.getSpineJoint(SpineJointName.SPINE_YAW),
+                                                                pPoseSpineYaw.getDoubleValue(),
+                                                                pPoseSpineYawWeight.getDoubleValue(),
+                                                                pPoseSpineYawKp.getDoubleValue(),
+                                                                pPoseSpineYawKp.getDoubleValue() * pPoseSpineYawKdFactor.getValue());
    }
 
    private OneDoFJointPrivilegedConfigurationParameters createAndAddJointPrivilegedConfigurationParameters(RobotSide robotSide,
                                                                                                            ArmJointName armJointName,
                                                                                                            double privilegedAngle)
    {
-      OneDoFJointBasics armJoint = fullRobotModel.getArmJoint(robotSide, armJointName);
-
-      OneDoFJointPrivilegedConfigurationParameters jointParameters = new OneDoFJointPrivilegedConfigurationParameters();
-      jointParameters.setConfigurationGain(40.0);//40.0);
-      jointParameters.setVelocityGain(6.0);//6.0);
-      jointParameters.setWeight(1);//5.0);
-      jointParameters.setMaxAcceleration(Double.POSITIVE_INFINITY);
-      jointParameters.setPrivilegedConfigurationOption(null);
-      jointParameters.setPrivilegedConfiguration(privilegedAngle);
-
-      privilegedConfigurationCommand.addJoint(armJoint, jointParameters);
-
-      return jointParameters;
+      return createAndAddJointPrivilegedConfigurationParameters(fullRobotModel.getArmJoint(robotSide, armJointName), privilegedAngle, 1.0, 40.0, 6.0);
    }
 
    private OneDoFJointPrivilegedConfigurationParameters createAndAddJointPrivilegedConfigurationParameters(RobotSide robotSide,
@@ -320,20 +284,7 @@ public class NaturalPosturePrivilegedManager
                                                                                                            double pgain,
                                                                                                            double dgain)
    {
-      OneDoFJointBasics armJoint = fullRobotModel.getArmJoint(robotSide, armJointName);
-      // System.out.println(armJoint);
-
-      OneDoFJointPrivilegedConfigurationParameters jointParameters = new OneDoFJointPrivilegedConfigurationParameters();
-      jointParameters.setConfigurationGain(pgain);
-      jointParameters.setVelocityGain(dgain);
-      jointParameters.setWeight(weight);
-      jointParameters.setMaxAcceleration(Double.POSITIVE_INFINITY);
-      jointParameters.setPrivilegedConfigurationOption(null);
-      jointParameters.setPrivilegedConfiguration(privilegedAngle);
-
-      privilegedConfigurationCommand.addJoint(armJoint, jointParameters);
-
-      return jointParameters;
+      return createAndAddJointPrivilegedConfigurationParameters(fullRobotModel.getArmJoint(robotSide, armJointName), privilegedAngle, weight, pgain, dgain);
    }
 
    private OneDoFJointPrivilegedConfigurationParameters createAndAddJointPrivilegedConfigurationParameters(RobotSide robotSide,
@@ -342,7 +293,7 @@ public class NaturalPosturePrivilegedManager
                                                                                                            double pgain,
                                                                                                            double dgain)
    {
-      return createAndAddJointPrivilegedConfigurationParameters(robotSide, armJointName, privilegedAngle, 1.0, pgain, dgain);
+      return createAndAddJointPrivilegedConfigurationParameters(fullRobotModel.getArmJoint(robotSide, armJointName), privilegedAngle, 1.0, pgain, dgain);
    }
 
    private OneDoFJointPrivilegedConfigurationParameters createAndAddJointPrivilegedConfigurationParameters(RobotSide robotSide,
@@ -351,19 +302,27 @@ public class NaturalPosturePrivilegedManager
                                                                                                            double pgain,
                                                                                                            double dgain)
    {
-      OneDoFJointBasics legJoint = fullRobotModel.getLegJoint(robotSide, legJointName);
+      return createAndAddJointPrivilegedConfigurationParameters(fullRobotModel.getLegJoint(robotSide, legJointName), privilegedAngle, 1.0, pgain, dgain);
+   }
 
+   private OneDoFJointPrivilegedConfigurationParameters createAndAddJointPrivilegedConfigurationParameters(OneDoFJointBasics joint,
+                                                                                                           double privilegedAngle,
+                                                                                                           double weight,
+                                                                                                           double pgain,
+                                                                                                           double dgain)
+   {
       OneDoFJointPrivilegedConfigurationParameters jointParameters = new OneDoFJointPrivilegedConfigurationParameters();
       jointParameters.setConfigurationGain(pgain);
       jointParameters.setVelocityGain(dgain);
-      jointParameters.setWeight(1.0);
+      jointParameters.setWeight(weight);
       jointParameters.setMaxAcceleration(Double.POSITIVE_INFINITY);
       jointParameters.setPrivilegedConfigurationOption(null);
       jointParameters.setPrivilegedConfiguration(privilegedAngle);
 
-      privilegedConfigurationCommand.addJoint(legJoint, jointParameters);
+      privilegedConfigurationCommand.addJoint(joint, jointParameters);
 
       return jointParameters;
    }
+
 
 }
