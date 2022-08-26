@@ -140,7 +140,7 @@ public class GDXInteractableFootstep
       }
    }
 
-   public void process3DViewInput(ImGui3DViewInput input)
+   public void process3DViewInput(ImGui3DViewInput input, boolean currentlyPlacingFootstep)
    {
       isHovered = pickResult == input.getClosestPick();
       isClickedOn = isHovered && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
@@ -161,7 +161,17 @@ public class GDXInteractableFootstep
             footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.0f, 0.5f, 0.0f, 0.0f));
       }
 
-      selectablePose3DGizmo.process3DViewInput(input, isHovered);
+      // FIXME:
+      if (currentlyPlacingFootstep)
+      {
+         selectablePose3DGizmo.process3DViewInput(input);
+      }
+      else
+      {
+         selectablePose3DGizmo.process3DViewInput(input, isHovered);
+      }
+
+//      selectablePose3DGizmo.process3DViewInput(input, isHovered);
 
       footstepModelInstance.transform.setToRotationRad(selectablePose3DGizmo.getPoseGizmo().getPose().getRotation().getX32(),
                                                        selectablePose3DGizmo.getPoseGizmo().getPose().getRotation().getY32(),
