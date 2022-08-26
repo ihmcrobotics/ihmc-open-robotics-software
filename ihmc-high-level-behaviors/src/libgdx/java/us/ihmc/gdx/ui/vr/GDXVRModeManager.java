@@ -27,7 +27,7 @@ public class GDXVRModeManager
    private GDX3DSituatedImGuiPanel leftHandPanel;
    private final FramePose3D leftHandPanelPose = new FramePose3D();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private int mode = 0;
+   private GDXVRMode mode = GDXVRMode.INPUTS_DISABLED;
 
    public void create(GDXImGuiBasedUI baseUI,
                       DRCRobotModel robotModel,
@@ -59,13 +59,11 @@ public class GDXVRModeManager
       });
 
       leftHandPanel.processVRInput(vrContext);
-      if (mode == 0)
+
+      switch (mode)
       {
-         handPlacedFootstepMode.processVRInput(vrContext);
-      }
-      else if (mode == 1)
-      {
-         kinematicsStreamingMode.processVRInput(vrContext);
+         case FOOTSTEP_PLACEMENT -> handPlacedFootstepMode.processVRInput(vrContext);
+         case WHOLE_BODY_IK_STREAMING -> kinematicsStreamingMode.processVRInput(vrContext);
       }
    }
 
@@ -77,13 +75,17 @@ public class GDXVRModeManager
 
    private void renderImGuiWidgets()
    {
-      if (ImGui.radioButton(labels.get("Rough Terrain"), mode == 0))
+      if (ImGui.radioButton(labels.get("Inputs disabled"), mode == GDXVRMode.INPUTS_DISABLED))
       {
-         mode = 0;
+         mode = GDXVRMode.INPUTS_DISABLED;
       }
-      if (ImGui.radioButton(labels.get("Manipulation"), mode == 1))
+      if (ImGui.radioButton(labels.get("Rough Terrain"), mode == GDXVRMode.FOOTSTEP_PLACEMENT))
       {
-         mode = 1;
+         mode = GDXVRMode.FOOTSTEP_PLACEMENT;
+      }
+      if (ImGui.radioButton(labels.get("Manipulation"), mode == GDXVRMode.WHOLE_BODY_IK_STREAMING))
+      {
+         mode = GDXVRMode.WHOLE_BODY_IK_STREAMING;
       }
 //      if (ImGui.radioButton(labels.get("Joystick"), mode == 2))
 //      {
