@@ -3,19 +3,13 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
 import java.util.ArrayList;
 import java.util.List;
 
+import controller_msgs.msg.dds.DirectionalControlInputMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGeneratorParameters;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.DesiredTurningVelocityProvider;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.DesiredVelocityProvider;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScript;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.StopWalkingMessenger;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.*;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -148,6 +142,30 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
          {
             walkingCommandInputManager.submitMessage(message);
             walkingCommandInputManager.submitMessage(emptyFootstepMessage);
+         }
+      });
+      continuousStepGenerator.setStartWalkingMessenger(new StartWalkingMessenger()
+      {
+         PauseWalkingMessage message = HumanoidMessageTools.createPauseWalkingMessage(false);
+
+         @Override
+         public void submitStartWalkingRequest()
+         {
+            walkingCommandInputManager.submitMessage(message);
+         }
+      });
+      continuousStepGenerator.setDirectionalControlMessenger(new DirectionalControlMessenger()
+      {
+         DirectionalControlInputMessage message = new DirectionalControlInputMessage();
+
+         @Override
+         public void submitDirectionalControlRequest(double desiredXVelocity, double desiredYVelocity, double desiredTurningSpeed)
+         {
+            message.setForward(desiredXVelocity);
+            message.setRight(-desiredYVelocity);
+            message.setClockwise(desiredTurningSpeed);
+
+            walkingCommandInputManager.submitMessage(message);
          }
       });
       continuousStepGenerator.setFootstepMessenger(walkingCommandInputManager::submitMessage);
