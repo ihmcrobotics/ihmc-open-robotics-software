@@ -59,72 +59,75 @@ public class GDXVRHandPlacedFootstepMode
 
    public void processVRInput(GDXVRContext vrContext)
    {
-      for (RobotSide side : RobotSide.values)
+      if (vrContext.getSelectedPick() == null)
       {
-         vrContext.getController(side).runIfConnected(controller ->
+         for (RobotSide side : RobotSide.values)
          {
-            double triggerPressedAmount = controller.getTriggerActionData().x(); // 0.0 not pressed -> 1.0 pressed
-            InputDigitalActionData triggerClick = controller.getClickTriggerActionData();
-
-            if (triggerClick.bChanged() && triggerClick.bState())
+            vrContext.getController(side).runIfConnected(controller ->
             {
-               ModelInstance footModelInstance = new ModelInstance(footModels.get(side));
-               GDXTools.setDiffuseColor(footModelInstance, GDXFootstepGraphic.FOOT_COLORS.get(side));
-               feetBeingPlaced.put(side, footModelInstance);
-            }
+               double triggerPressedAmount = controller.getTriggerActionData().x(); // 0.0 not pressed -> 1.0 pressed
+               InputDigitalActionData triggerClick = controller.getClickTriggerActionData();
 
-            if (triggerClick.bChanged() && !triggerClick.bState())
-            {
-               ModelInstance footBeingPlaced = feetBeingPlaced.get(side);
-               feetBeingPlaced.put(side, null);
-               placedFootsteps.add(new GDXVRHandPlacedFootstep(side, footBeingPlaced, robotModel.getJointMap().getSoleToParentFrameTransform(side)));
-            }
-
-            ModelInstance footBeingPlaced = feetBeingPlaced.get(side);
-            if (footBeingPlaced != null)
-            {
-               poseForPlacement.setToZero(controller.getXForwardZUpControllerFrame());
-               poseForPlacement.getPosition().add(0.05, 0.0, 0.0);
-               poseForPlacement.getOrientation().appendPitchRotation(Math.toRadians(-90.0));
-               poseForPlacement.changeFrame(ReferenceFrame.getWorldFrame());
-               poseForPlacement.get(tempTransform);
-
-               GDXTools.toGDX(tempTransform, footBeingPlaced.transform);
-            }
-
-            InputDigitalActionData aButton = controller.getAButtonActionData();
-            if (side == RobotSide.RIGHT && aButton.bChanged() && !aButton.bState())
-            {
-               // send the placed footsteps
-               FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-               footstepDataListMessage.setDefaultSwingDuration(robotModel.getWalkingControllerParameters().getDefaultSwingTime());
-               footstepDataListMessage.setDefaultTransferDuration(robotModel.getWalkingControllerParameters().getDefaultTransferTime());
-               footstepDataListMessage.setOffsetFootstepsHeightWithExecutionError(true);
-               for (GDXVRHandPlacedFootstep placedFootstep : placedFootsteps)
+               if (triggerClick.bChanged() && triggerClick.bState())
                {
-                  FootstepDataMessage footstepDataMessage = footstepDataListMessage.getFootstepDataList().add();
-
-                  footstepDataMessage.setSequenceId(sequenceId++);
-                  footstepDataMessage.setRobotSide(placedFootstep.getSide().toByte());
-                  footstepDataMessage.getLocation().set(placedFootstep.getSolePose().getPosition());
-                  footstepDataMessage.getOrientation().set(placedFootstep.getSolePose().getOrientation());
-                  footstepDataMessage.setTrajectoryType(TrajectoryType.DEFAULT.toByte()); // TODO: Expose option; show preview trajectories, waypoints
-                  // TODO: Support all types of swings
-                  // TODO: Support partial footholds
-
-                  GDXTools.setTransparency(placedFootstep.getModelInstance(), 0.5f);
-                  sentFootsteps.add(placedFootstep);
+                  ModelInstance footModelInstance = new ModelInstance(footModels.get(side));
+                  GDXTools.setDiffuseColor(footModelInstance, GDXFootstepGraphic.FOOT_COLORS.get(side));
+                  feetBeingPlaced.put(side, footModelInstance);
                }
-               placedFootsteps.clear();
-               controllerHelper.publishToController(footstepDataListMessage);
-            }
 
-            InputDigitalActionData bButton = controller.getBButtonActionData();
-            if (side == RobotSide.LEFT && bButton.bChanged() && !bButton.bState())
-            {
-               placedFootsteps.clear();
-            }
-         });
+               if (triggerClick.bChanged() && !triggerClick.bState())
+               {
+                  ModelInstance footBeingPlaced = feetBeingPlaced.get(side);
+                  feetBeingPlaced.put(side, null);
+                  placedFootsteps.add(new GDXVRHandPlacedFootstep(side, footBeingPlaced, robotModel.getJointMap().getSoleToParentFrameTransform(side)));
+               }
+
+               ModelInstance footBeingPlaced = feetBeingPlaced.get(side);
+               if (footBeingPlaced != null)
+               {
+                  poseForPlacement.setToZero(controller.getXForwardZUpControllerFrame());
+                  poseForPlacement.getPosition().add(0.05, 0.0, 0.0);
+                  poseForPlacement.getOrientation().appendPitchRotation(Math.toRadians(-90.0));
+                  poseForPlacement.changeFrame(ReferenceFrame.getWorldFrame());
+                  poseForPlacement.get(tempTransform);
+
+                  GDXTools.toGDX(tempTransform, footBeingPlaced.transform);
+               }
+
+               InputDigitalActionData aButton = controller.getAButtonActionData();
+               if (side == RobotSide.RIGHT && aButton.bChanged() && !aButton.bState())
+               {
+                  // send the placed footsteps
+                  FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
+                  footstepDataListMessage.setDefaultSwingDuration(robotModel.getWalkingControllerParameters().getDefaultSwingTime());
+                  footstepDataListMessage.setDefaultTransferDuration(robotModel.getWalkingControllerParameters().getDefaultTransferTime());
+                  footstepDataListMessage.setOffsetFootstepsHeightWithExecutionError(true);
+                  for (GDXVRHandPlacedFootstep placedFootstep : placedFootsteps)
+                  {
+                     FootstepDataMessage footstepDataMessage = footstepDataListMessage.getFootstepDataList().add();
+
+                     footstepDataMessage.setSequenceId(sequenceId++);
+                     footstepDataMessage.setRobotSide(placedFootstep.getSide().toByte());
+                     footstepDataMessage.getLocation().set(placedFootstep.getSolePose().getPosition());
+                     footstepDataMessage.getOrientation().set(placedFootstep.getSolePose().getOrientation());
+                     footstepDataMessage.setTrajectoryType(TrajectoryType.DEFAULT.toByte()); // TODO: Expose option; show preview trajectories, waypoints
+                     // TODO: Support all types of swings
+                     // TODO: Support partial footholds
+
+                     GDXTools.setTransparency(placedFootstep.getModelInstance(), 0.5f);
+                     sentFootsteps.add(placedFootstep);
+                  }
+                  placedFootsteps.clear();
+                  controllerHelper.publishToController(footstepDataListMessage);
+               }
+
+               InputDigitalActionData bButton = controller.getBButtonActionData();
+               if (side == RobotSide.LEFT && bButton.bChanged() && !bButton.bState())
+               {
+                  placedFootsteps.clear();
+               }
+            });
+         }
       }
    }
 

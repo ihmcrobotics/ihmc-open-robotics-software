@@ -42,6 +42,7 @@ import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXModelInstance;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.vr.GDXVRContext;
+import us.ihmc.gdx.vr.GDXVRPickResult;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.concurrent.atomic.AtomicLong;
@@ -90,6 +91,8 @@ public class GDX3DSituatedImGuiPanel
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final FramePose3D centerFrameCoordinateFramePose = new FramePose3D();
    private final FramePose3D graphicsFrameCoordinateFramePose = new FramePose3D();
+   private boolean controllerRayCollidesPanel;
+   private final GDXVRPickResult pickResult = new GDXVRPickResult();
 
    public GDX3DSituatedImGuiPanel(String name, Runnable renderImGuiWidgets)
    {
@@ -235,8 +238,9 @@ public class GDX3DSituatedImGuiPanel
       frameBuffer.end();
    }
 
-   public void processVRInput(GDXVRContext vrContext)
+   public void calculateVRPick(GDXVRContext vrContext)
    {
+      pickResult.reset();
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
       {
          pickRay.setToZero(controller.getXForwardZUpControllerFrame());
@@ -245,6 +249,7 @@ public class GDX3DSituatedImGuiPanel
 
          pickIntersection.setToZero(ReferenceFrame.getWorldFrame());
          plane.intersectionWith(pickRay, pickIntersection);
+         double distance = pickRay.getPoint().distance(pickIntersection);
 
          pickIntersection.changeFrame(graphicsXRightYDownFrame);
 
@@ -253,10 +258,24 @@ public class GDX3DSituatedImGuiPanel
 
          boolean xInBounds = MathTools.intervalContains(scaledX, 0, pixelsWidth, true, false);
          boolean yInBounds = MathTools.intervalContains(scaledY, 0, pixelsHeight, true, false);
-         if (xInBounds && yInBounds)
+         controllerRayCollidesPanel = xInBounds && yInBounds;
+         if (controllerRayCollidesPanel)
          {
             mousePosX = scaledX;
             mousePosY = scaledY;
+
+            pickResult.setDistanceToCamera(distance);
+            vrContext.addPickResult(pickResult);
+         }
+      });
+   }
+
+   public void processVRInput(GDXVRContext vrContext)
+   {
+      vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
+      {
+         if (vrContext.getSelectedPick() == pickResult)
+         {
             leftMouseDown = controller.getClickTriggerActionData().bState();
          }
          else

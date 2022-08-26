@@ -28,6 +28,7 @@ public class GDXVRModeManager
    private final FramePose3D leftHandPanelPose = new FramePose3D();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private GDXVRMode mode = GDXVRMode.INPUTS_DISABLED;
+   private boolean headsetIsConnected;
 
    public void create(GDXImGuiBasedUI baseUI,
                       DRCRobotModel robotModel,
@@ -45,10 +46,14 @@ public class GDXVRModeManager
       leftHandPanel = new GDX3DSituatedImGuiPanel("VR Mode Manager", this::renderImGuiWidgets);
       leftHandPanel.create(baseUI.getImGuiWindowAndDockSystem().getImGuiGl3(), 0.3, 0.5, 10);
       leftHandPanel.setBackgroundTransparency(new Color(0.3f, 0.3f, 0.3f, 0.75f));
+      baseUI.getVRManager().getContext().addVRPickCalculator(leftHandPanel::calculateVRPick);
+      baseUI.getVRManager().getContext().addVRInputProcessor(leftHandPanel::processVRInput);
    }
 
    public void processVRInput(GDXVRContext vrContext)
    {
+      headsetIsConnected = vrContext.getHeadset().isConnected();
+
       vrContext.getController(RobotSide.LEFT).runIfConnected(controller ->
       {
          leftHandPanelPose.setToZero(controller.getXForwardZUpControllerFrame());
@@ -57,8 +62,6 @@ public class GDXVRModeManager
          leftHandPanelPose.changeFrame(ReferenceFrame.getWorldFrame());
          leftHandPanel.updateDesiredPose(leftHandPanelPose::get);
       });
-
-      leftHandPanel.processVRInput(vrContext);
 
       switch (mode)
       {
@@ -107,7 +110,9 @@ public class GDXVRModeManager
    {
       handPlacedFootstepMode.getRenderables(renderables, pool);
       kinematicsStreamingMode.getVirtualRenderables(renderables, pool);
-      leftHandPanel.getRenderables(renderables, pool);
+
+      if (headsetIsConnected)
+         leftHandPanel.getRenderables(renderables, pool);
    }
 
    public void destroy()
