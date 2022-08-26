@@ -35,6 +35,7 @@ import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.gdx.ui.interactable.GDXChestOrientationSlider;
 import us.ihmc.gdx.ui.interactable.GDXPelvisHeightSlider;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
+import us.ihmc.humanoidBehaviors.behaviors.diagnostic.Run;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.robotics.geometry.YawPitchRollAxis;
@@ -191,8 +192,11 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       }
 
       // Note: hot button for calibrate, open / close hand
-      WorkspaceDirectory iconDirectory = new WorkspaceDirectory("ihmc-open-robotics-software",
-                                                                              "ihmc-high-level-behaviors/src/libgdx/resources/icons");
+      WorkspaceDirectory iconDirectory = new WorkspaceDirectory("ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/libgdx/resources/icons");
+
+      // STAND PREP
+      Runnable standPrepRunnable = robotLowLevelMessenger::sendStandRequest;
+      baseUI.getPrimary3DPanel().addHotButton(new GDXQuickButton("standPrepButton", iconDirectory, "standPrep.png", standPrepRunnable));
 
       // TOGGLING.
       ArrayList<String> fileNames = new ArrayList<>(Arrays.asList("leftToggle.jpg", "rightToggle.jpg"));
