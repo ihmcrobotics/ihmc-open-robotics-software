@@ -23,6 +23,7 @@ import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.tools.GDXIconTexture;
+import us.ihmc.gdx.tools.GDXQuickButton;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.gdx.ui.affordances.GDXBallAndArrowPosePlacement;
@@ -44,6 +45,7 @@ import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.tools.io.WorkspaceDirectory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -188,8 +190,27 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
          baseUI.getPrimaryScene().addRenderableProvider(interactableRobot);
       }
 
-      // Note: hot button for open / close hand
-      
+      // Note: hot button for calibrate, open / close hand
+      WorkspaceDirectory iconDirectory = new WorkspaceDirectory("ihmc-open-robotics-software",
+                                                                              "ihmc-high-level-behaviors/src/libgdx/resources/icons");
+
+      // TOGGLING.
+      ArrayList<String> fileNames = new ArrayList<>(Arrays.asList("leftToggle.jpg", "rightToggle.jpg"));
+      baseUI.getPrimary3DPanel().addHotButton(new GDXQuickButton("leftRightToggleButton", iconDirectory, fileNames, null, true, false));
+
+      // CALIBRATING
+
+      ArrayList<Runnable> calibrateRunnables = new ArrayList<>(Arrays.asList(() -> publishHandCalibrateCommand(RobotSide.LEFT),
+                                                                             () -> publishHandCalibrateCommand(RobotSide.RIGHT)));
+      baseUI.getPrimary3DPanel().addHotButton(new GDXQuickButton("calibrateButton", iconDirectory, "calibrate.png", calibrateRunnables, false, true));
+
+      // OPEN, CLOSE
+      ArrayList<Runnable> openRunnables = new ArrayList<>(Arrays.asList(() -> publishHandCommand(RobotSide.LEFT, HandConfiguration.OPEN),
+                                                                        () -> publishHandCommand(RobotSide.RIGHT, HandConfiguration.OPEN)));
+      ArrayList<Runnable> closeRunnables = new ArrayList<>(Arrays.asList(() -> publishHandCommand(RobotSide.LEFT, HandConfiguration.CLOSE),
+                                                                         () -> publishHandCommand(RobotSide.RIGHT, HandConfiguration.CLOSE)));
+      baseUI.getPrimary3DPanel().addHotButton(new GDXQuickButton("openGripperButton", iconDirectory, "openGripper.jpg", openRunnables, false, true));
+      baseUI.getPrimary3DPanel().addHotButton(new GDXQuickButton("closeGripperButton", iconDirectory, "closeGripper.jpg", closeRunnables, false, true));
    }
 
    public void update()
@@ -309,19 +330,16 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       interactableRobot.renderImGuiWidgets();
    }
 
-   private void publishHandCommand(RobotSide side, String openOrClose)
+   private void publishHandCommand(RobotSide side, HandConfiguration handDesiredConfiguration)
    {
-      if (Objects.equals(openOrClose, "open"))
-      {
-         communicationHelper.publish(ROS2Tools::getHandConfigurationTopic,
-                                     HumanoidMessageTools.createHandDesiredConfigurationMessage(side, HandConfiguration.OPEN));
-      }
-      else if (Objects.equals(openOrClose, "close"))
-      {
-         communicationHelper.publish(ROS2Tools::getHandConfigurationTopic,
-                                     HumanoidMessageTools.createHandDesiredConfigurationMessage(side, HandConfiguration.CLOSE));
-      }
+      communicationHelper.publish(ROS2Tools::getHandConfigurationTopic,
+                                  HumanoidMessageTools.createHandDesiredConfigurationMessage(side, handDesiredConfiguration));
+   }
 
+   private void publishHandCalibrateCommand(RobotSide side)
+   {
+      communicationHelper.publish(ROS2Tools::getHandConfigurationTopic,
+                                  HumanoidMessageTools.createHandDesiredConfigurationMessage(side, HandConfiguration.CALIBRATE));
    }
 
    @Override
